@@ -1,0 +1,12 @@
+{
+  "name": "shared-s3-bucket",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any"],
+  "sourceRoot": "libs/shared/s3-bucket/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

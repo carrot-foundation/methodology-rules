@@ -1,0 +1,12 @@
+{
+  "name": "shared-rule-standard-data-processor",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any"],
+  "sourceRoot": "libs/shared/rule/standard-data-processor/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

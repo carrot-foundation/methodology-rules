@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compileOnSave": false,
+  "compilerOptions": {
+    "rootDir": ".",
+    "baseUrl": ".",
+    "lib": ["es2023"],
+    "module": "esnext",
+    "target": "es2022",
+    "moduleResolution": "node",
+    "strict": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "checkJs": true,
+    "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "exactOptionalPropertyTypes": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "importHelpers": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "resolveJsonModule": true,
+    "skipDefaultLibCheck": true,
+    "skipLibCheck": true,
+    "strictPropertyInitialization": false,
+    "verbatimModuleSyntax": true,
+    "strictNullChecks": true,
+    "paths": {
+      "@carrot-fndn/methodologies/bold/getters": [
+        "libs/methodologies/bold/getters/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/io-helpers": [
+        "libs/methodologies/bold/io-helpers/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/matchers": [
+        "libs/methodologies/bold/matchers/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/predicates": [
+        "libs/methodologies/bold/predicates/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/processors": [
+        "libs/methodologies/bold/processors/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/testing": [
+        "libs/methodologies/bold/testing/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/types": [
+        "libs/methodologies/bold/types/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold/utils": [
+        "libs/methodologies/bold/utils/src/index.ts"
+      ],
+      "@carrot-fndn/shared/app/types": ["libs/shared/app/types/src/index.ts"],
+      "@carrot-fndn/shared/document/loader": [
+        "libs/shared/document/loader/src/index.ts"
+      ],
+      "@carrot-fndn/shared/helpers": ["libs/shared/helpers/src/index.ts"],
+      "@carrot-fndn/shared/lambda/types": [
+        "libs/shared/lambda/types/src/index.ts"
+      ],
+      "@carrot-fndn/shared/lambda/wrapper": [
+        "libs/shared/lambda/wrapper/src/index.ts"
+      ],
+      "@carrot-fndn/shared/rule/result": [
+        "libs/shared/rule/result/src/index.ts"
+      ],
+      "@carrot-fndn/shared/rule/standard-data-processor": [
+        "libs/shared/rule/standard-data-processor/src/index.ts"
+      ],
+      "@carrot-fndn/shared/rule/types": ["libs/shared/rule/types/src/index.ts"],
+      "@carrot-fndn/shared/s3-bucket": ["libs/shared/s3-bucket/src/index.ts"],
+      "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
+      "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"]
+    },
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ]
+  },
+  "exclude": ["node_modules", "tmp", "local", "coverage"]
+}

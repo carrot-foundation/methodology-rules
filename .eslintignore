@@ -1,0 +1,8 @@
+node_modules
+coverage
+dist
+artifacts
+cache
+.eslintrc.js
+coverage.json
+local

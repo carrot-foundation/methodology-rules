@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "files": [],
+  "compilerOptions": {
+    "module": "commonjs",
+    "verbatimModuleSyntax": false,
+    "types": ["jest", "node"]
+  },
+  "include": ["jest.config.ts", "**/*.spec.ts", "**/testing/**/*.ts"]
+}

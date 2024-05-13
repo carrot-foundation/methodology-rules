@@ -1,0 +1,15 @@
+{
+  "name": "methodologies-bold-rule-processors-offer-rewards-distribution",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:app", "app:any", "stack:any", "methodology:bold"],
+  "sourceRoot": "apps/methodologies/bold/rule-processors/offer/rewards-distribution/src",
+  "projectType": "app",
+  "targets": {
+    "build-lambda": {},
+    "lint": {},
+    "package-lambda": {},
+    "upload-lambda": {},
+    "test": {},
+    "ts": {}
+  }
+}

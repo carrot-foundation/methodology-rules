@@ -1,0 +1,11 @@
+{
+  "name": "shared-lambda-types",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any"],
+  "sourceRoot": "libs/shared/lambda/types/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "ts": {}
+  }
+}

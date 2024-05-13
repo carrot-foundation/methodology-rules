@@ -1,0 +1,340 @@
+{
+  "rules": {
+    "bold-mass-pick-up-geolocation-precision": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "814a5ae928145241c72856bbdb4dc127",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/pick-up-geolocation-precision/methodologies-bold-rule-processors-mass-pick-up-geolocation-precision-b778c263e10150061efc739c16a6a25d.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/pick-up-geolocation-precision"
+    },
+    "bold-mass-same-source-and-pick-up-address": {
+      "commit_hash": "990037963ee0e2e5c4f57515a1f8a22d2d3fcf47",
+      "file_checksum": "7858e6a6257fa6253be07746f748302b",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/same-source-and-pick-up-address/methodologies-bold-rule-processors-mass-same-source-and-pick-up-addresses-7858e6a6257fa6253be07746f748302b.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/same-source-and-pick-up-address"
+    },
+    "bold-mass-same-recycler-and-drop-off-addresses": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "6246b0ccf79749df95fda118cbe9f93d",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/same-recycler-and-drop-off-addresses/methodologies-bold-rule-processors-mass-same-recycler-and-drop-off-addresses-bb30a70f621221aeb6ec4de6ac0d914b.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/same-recycler-and-drop-off-addresses"
+    },
+    "bold-mass-drop-off-geolocation-precision": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "ca92db596e78d4cb70898e9a1772067c",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/drop-off-geolocation-precision/methodologies-bold-rule-processors-mass-drop-off-geolocation-precision-56110a3d75134ff219c351313e8aa430.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/drop-off-geolocation-precision"
+    },
+    "bold-mass-mtr-attachment-verification": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "4bb50c7a6d22765ec9c1e173ddc40fe6",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/mtr-attachment-verification/methodologies-bold-rule-processors-mass-mtr-attachment-verification-05a4de06f4cf6ca50a0537254e75359a.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mtr-attachment-verification"
+    },
+    "bold-mass-primary-participant-address": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "a1eb380fef8bf3be2e2c9a2ee2459676",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/primary-participant-address/methodologies-bold-rule-processors-mass-primary-participant-address-a17fe36dce8dca5ac0f4fef67569f20e.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/primary-participant-address"
+    },
+    "bold-certificate-mass-validation-document-status": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "0a4c21c7421596fb7687862f4fff2cea",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/mass-validation-document-status/methodologies-bold-rule-processors-certificate-mass-validation-document-status-9a6196bb8460953186e6e6be65a5c437.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/mass-validation-document-status"
+    },
+    "bold-mass-document-measurement-unit": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "62b8313dad9f88ecc0186b487f1ee2c2",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/document-measurement-unit/methodologies-bold-rule-processors-mass-document-measurement-unit-3abaaf80eb2da4e0e1802a86a966e6cc.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-measurement-unit"
+    },
+    "bold-mass-net-weight-verification": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "a742bd43ba95063a7f8ffc951d812bfb",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/net-weight-verification/methodologies-bold-rule-processors-mass-net-weight-verification-a742bd43ba95063a7f8ffc951d812bfb.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/net-weight-verification"
+    },
+    "bold-mass-vehicle-license-plate": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "9360d54084754de1a17ec0c33e76cfe7",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/vehicle-license-plate/methodologies-bold-rule-processors-mass-vehicle-license-plate-50109414d0858a8b6b006cf7aa7275a9.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-license-plate"
+    },
+    "bold-mass-waste-origin-identified": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "cc862671083ba261af5c80720e8d6e85",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/waste-origin-identified/methodologies-bold-rule-processors-mass-waste-origin-identified-cc862671083ba261af5c80720e8d6e85.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/waste-origin-identified"
+    },
+    "bold-mass-mtr-attachment-name": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "3dd8d280579e1a4ead151e68ce616733",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/mtr-attachment-name/methodologies-bold-rule-processors-mass-mtr-attachment-name-3dd8d280579e1a4ead151e68ce616733.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mtr-attachment-name"
+    },
+    "bold-certificate-recycler-actor": {
+      "commit_hash": "b653c52225bd24cb511d6577a83059db31e002bb",
+      "file_checksum": "8f49adc3ee9679741e76d20931b56346",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/recycler-actor/methodologies-bold-rule-processors-certificate-recycler-actor-8f49adc3ee9679741e76d20931b56346.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/recycler-actor"
+    },
+    "bold-mass-document-category": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "ccc481eed3615e48d9954dad3854648b",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/document-category/methodologies-bold-rule-processors-mass-document-category-ccc481eed3615e48d9954dad3854648b.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-category"
+    },
+    "bold-mass-driver-internal-id": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "3558716507307f3bb087af8373553ff9",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/driver-internal-id/methodologies-bold-rule-processors-mass-driver-internal-id-3558716507307f3bb087af8373553ff9.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/driver-internal-id"
+    },
+    "bold-mass-cdf-reason-dismissal": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "8b3155ea49e3e53e60dfe0a14b1c78e2",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/cdf-reason-dismissal/methodologies-bold-rule-processors-mass-cdf-reason-dismissal-8b3155ea49e3e53e60dfe0a14b1c78e2.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-reason-dismissal"
+    },
+    "bold-mass-mtr-reason-dismissal": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "8af50b3c419809ec1ce728328bc973e0",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/mtr-reason-dismissal/methodologies-bold-rule-processors-mass-mtr-reason-dismissal-8af50b3c419809ec1ce728328bc973e0.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mtr-reason-dismissal"
+    },
+    "bold-mass-document-subtype": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "a7c23057a2a2a7698060ab08b780779d",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/document-subtype/methodologies-bold-rule-processors-mass-document-subtype-a7c23057a2a2a7698060ab08b780779d.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-subtype"
+    },
+    "bold-mass-maximum-distance": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "90ae4f3819be78c89c376c134cc4d045",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/maximum-distance/methodologies-bold-rule-processors-mass-maximum-distance-e8ffa0ce7ee2ece72471cfa4809aa7d5.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/maximum-distance"
+    },
+    "bold-mass-weighing-fields": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "a4e20eb590dcb849302f732b0350ecfd",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/weighing-fields/methodologies-bold-rule-processors-mass-weighing-fields-a4e20eb590dcb849302f732b0350ecfd.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/weighing-fields"
+    },
+    "bold-mass-events-time-span": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "19488e0014feae8a4edc1ae76a0a6970",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/events-time-span/methodologies-bold-rule-processors-mass-events-time-span-7d05219a85f4dc051a5b2f485131312d.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/events-time-span"
+    },
+    "bold-mass-recycler-actor": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "378ca6bab0118ad88265b144e0884d27",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/recycler-actor/methodologies-bold-rule-processors-mass-recycler-actor-c410efad628485530cdf05f23d22cb4e.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/recycler-actor"
+    },
+    "bold-mass-invoice-fields": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "faac18e1c8262dcd78c1a6edfafd55e0",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/invoice-fields/methodologies-bold-rule-processors-mass-invoice-fields-351249af87c64fb55529458755b7e753.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/invoice-fields"
+    },
+    "bold-mass-document-type": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "64222865b0c55c9e1434d4a205d98722",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/document-type/methodologies-bold-rule-processors-mass-document-type-2f18344f7b6b5e171985b02e1e476e16.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-type"
+    },
+    "bold-mass-drop-off-move": {
+      "commit_hash": "7347fecd785a835665d43a879be8eb4b593afa88",
+      "file_checksum": "82c2ba2d1a36477e9a20a0855f920d93",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/drop-off-move/methodologies-bold-rule-processors-mass-drop-off-move-c752094d62fca0868812e6cc9558eddb.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/drop-off-move"
+    },
+    "bold-mass-cdf-attachment-verification": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "ba11f4822cb895ad0ba1fa5406654620",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/cdf-attachment-verification/methodologies-bold-rule-processors-mass-cdf-attachment-verification-75c0f414684a7ac02f39fc7723f01d84.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-verification"
+    },
+    "bold-certificate-mass-validation-document": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "35dccf188b525b075a372b6f6b7c51f3",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/mass-validation-document/methodologies-bold-rule-processors-certificate-mass-validation-document-ba2967857cd7c7bd38cc453166163e23.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/mass-validation-document"
+    },
+    "bold-mass-vehicle-type": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "0f2c6731f3fcec54b98d8a790003eda9",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/vehicle-type/methodologies-bold-rule-processors-mass-vehicle-type-0f2c6731f3fcec54b98d8a790003eda9.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-type"
+    },
+    "bold-mass-pick-up-move": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "e6b62daa4c14d514b1f6fb6a2e8ea006",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/pick-up-move/methodologies-bold-rule-processors-mass-pick-up-move-e6b62daa4c14d514b1f6fb6a2e8ea006.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/pick-up-move"
+    },
+    "bold-mass-has-mtr": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "133bedd5ffe4c40b16beeb5829db54f4",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/has-mtr/methodologies-bold-rule-processors-mass-has-mtr-c81be62631f67e9a1edd67c507ed49f8.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/has-mtr"
+    },
+    "bold-mass-cdf-address": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "dbec5f1af9fa69a46d7bb6b48d006892",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/cdf-address/methodologies-bold-rule-processors-mass-cdf-address-dbec5f1af9fa69a46d7bb6b48d006892.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-address"
+    },
+    "bold-mass-cdf-fields": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "9312bfbf07dd089df4ddd283f99079bf",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/cdf-fields/methodologies-bold-rule-processors-mass-cdf-fields-ecc9cf096afe8f235b24ec9c3d3d3f58.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-fields"
+    },
+    "bold-mass-numeric-weight-values": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "6502ba862c67fb6c401130c009d6676b",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/numeric-weight-values/methodologies-bold-rule-processors-mass-numeric-weight-values-ad10fb5227e69336de893a5610945651.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/numeric-weight-values"
+    },
+    "bold-mass-vehicle-description": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "52b982b53d69954b97b13cd56b391572",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/vehicle-description/methodologies-bold-rule-processors-mass-vehicle-description-52b982b53d69954b97b13cd56b391572.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-description"
+    },
+    "bold-certificate-mass-document-type": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "34ee449d059743bc9404fe4acdefcfb6",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/mass-document-type/methodologies-bold-rule-processors-certificate-mass-document-type-c4922589ec4f41fe3316ed51e6dc0040.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/mass-document-type"
+    },
+    "bold-mass-cdf-attachment-name": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "5946a169ff5dbeac432bc7a4c1c6e701",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/cdf-attachment-name/methodologies-bold-rule-processors-mass-cdf-attachment-name-f685ba7ac61298fad5c24c11b065d1a1.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-name"
+    },
+    "bold-mass-end-event-value": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "eabb9ad1e7a450e3f19eb318eae01a43",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/end-event-value/methodologies-bold-rule-processors-mass-end-event-value-e9e3cdff57c46d2b4188053d544de2b4.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/end-event-value"
+    },
+    "bold-mass-document-value": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "7c3325dd6e21bea7e478492dd1e6367a",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/document-value/methodologies-bold-rule-processors-mass-document-value-ee23cd04706d02c2103a02bd85354a6c.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-value"
+    },
+    "bold-mass-move-type": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "3f9ac384afe032404170a3289e765778",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/move-type/methodologies-bold-rule-processors-mass-move-type-3f9ac384afe032404170a3289e765778.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/move-type"
+    },
+    "bold-mass-has-cdf": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "51a82cdb3dbb0289ca85124482dcc624",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/has-cdf/methodologies-bold-rule-processors-mass-has-cdf-538b57c076f5bb30c3c5c40dd0268e8a.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/has-cdf"
+    },
+    "bold-mass-source-actor": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "3dbee87260dfea73ebeededb688b7fae",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/source-actor/methodologies-bold-rule-processors-mass-source-actor-cb9192fd60c3a737e959d8c0689d7729.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/source-actor"
+    },
+    "bold-mass-primary-participant": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "30fd8ecd4ea55924ba021936e9b804aa",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/primary-participant/methodologies-bold-rule-processors-mass-primary-participant-30fd8ecd4ea55924ba021936e9b804aa.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/primary-participant"
+    },
+    "bold-mass-same-source-and-pick-up-addresses": {
+      "commit_hash": "ec4115818cb3993221318f17e34d5f2ebbea9ec7",
+      "file_checksum": "7865ead7f0bedcc9babf4a2ae6aa68b7",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/mass/same-source-and-pick-up-addresses/methodologies-bold-rule-processors-mass-same-source-and-pick-up-addresses-7865ead7f0bedcc9babf4a2ae6aa68b7.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/mass/same-source-and-pick-up-addresses"
+    },
+    "bold-certificate-rewards-distribution": {
+      "commit_hash": "2d7a3f198a64b00edeb61889ac2e1c84c96e8122",
+      "file_checksum": "6e5163c482c1bfaf850821f1354d3fd4",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/rewards-distribution/methodologies-bold-rule-processors-certificate-rewards-distribution-de3e0b3ebe8cd94b55bc3ea2a7699548.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/rewards-distribution"
+    },
+    "bold-certificate-mass-recycler-actor": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "0d3d4bd0a8b3cf1794d08fa0122ee25b",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/certificate/mass-recycler-actor/methodologies-bold-rule-processors-certificate-mass-recycler-actor-7588b183beff3eec8327afb7e8d271a4.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/certificate/mass-recycler-actor"
+    },
+    "bold-offer-extract-nft-metadata": {
+      "commit_hash": "37c64ff639a1bc51dcc98c1ba32dfcd3e4e96ef0",
+      "file_checksum": "3a040dbcdc1e4bad459883946e0667fc",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/offer/extract-nft-metadata/methodologies-bold-rule-processors-offer-extract-nft-metadata-3a040dbcdc1e4bad459883946e0667fc.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/offer/extract-nft-metadata"
+    },
+    "bold-offer-rewards-distribution": {
+      "commit_hash": "e710fa91fdcc8cfbeb7e0ba088f40002e22fa7f0",
+      "file_checksum": "d467e79dcdcccdb8ddad9ee9df30dc3e",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/offer/rewards-distribution/methodologies-bold-rule-processors-offer-rewards-distribution-86fc674a793a56b926b648356166dadf.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/offer/rewards-distribution"
+    },
+    "bold-offer-nft-metadata-selection": {
+      "commit_hash": "d4b05a17f16b6efcdd02dee41f321e757ceca06d",
+      "file_checksum": "5d7c0026c38affde76e0fd8e7c47e15b",
+      "s3_bucket": "elrond-development-lambda-artifacts-rules",
+      "s3_key": "bold/offer/nft-metadata-selection/methodologies-bold-rule-processors-offer-nft-metadata-selection-5d7c0026c38affde76e0fd8e7c47e15b.zip",
+      "source_code_url": "https://github.com/carrot-foundation/audit-rules/blob/main/apps/methodologies/bold/rule-processors/offer/nft-metadata-selection"
+    }
+  }
+}

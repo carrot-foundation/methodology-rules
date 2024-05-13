@@ -1,0 +1,190 @@
+{
+  "extends": "nx/presets/npm.json",
+  "$schema": "./node_modules/nx/schemas/nx-schema.json",
+  "targetDefaults": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "cache": true,
+      "inputs": ["test", "^production"],
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.ts",
+        "coverageDirectory": "{workspaceRoot}/coverage/{projectRoot}",
+        "maxWorkers": "50%",
+        "resetMocks": true,
+        "codeCoverage": true
+      },
+      "configurations": {
+        "ci": {
+          "ci": true,
+          "reporters": ["github-actions", "jest-silent-reporter"]
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx/linter:eslint",
+      "cache": true,
+      "inputs": ["lint", "^production"],
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["{projectRoot}/**/*.{ts,tsx,js,jsx,json,yaml}"]
+      }
+    },
+    "ts": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": ["ts", "^production"],
+      "options": {
+        "command": "pnpm tsc -p {projectRoot}/tsconfig.eslint.json --noEmit"
+      }
+    },
+    "build-lambda": {
+      "executor": "@nx/webpack:webpack",
+      "cache": true,
+      "inputs": [
+        "build",
+        "^production",
+        "{workspaceRoot}/.webpack/webpack.nx.config.js"
+      ],
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "compiler": "tsc",
+        "target": "node",
+        "main": "{projectRoot}/src/lambda.ts",
+        "tsConfig": "{projectRoot}/tsconfig.build.json",
+        "webpackConfig": "{workspaceRoot}/.webpack/webpack.nx.config.js",
+        "outputPath": "{workspaceRoot}/dist/.dev/{projectRoot}",
+        "generatePackageJson": true
+      },
+      "configurations": {
+        "production": {
+          "outputPath": "{workspaceRoot}/dist/.prod/{projectRoot}",
+          "optimization": true
+        }
+      }
+    },
+    "package-lambda": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "build",
+        "^production",
+        "{workspaceRoot}/scripts/package-lambda.sh"
+      ],
+      "dependsOn": ["build-lambda"],
+      "outputs": ["{options.zipPath}"],
+      "options": {
+        "command": "{workspaceRoot}/scripts/package-lambda.sh {args.buildPath} {args.zipPath}",
+        "buildPath": "{workspaceRoot}/dist/.prod/{projectRoot}",
+        "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
+      }
+    },
+    "upload-lambda": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "build",
+        "^production",
+        "{workspaceRoot}/scripts/package-lambda.sh",
+        "{workspaceRoot}/scripts/upload-lambda.sh"
+      ],
+      "dependsOn": ["package-lambda"],
+      "options": {
+        "commands": [
+          "{workspaceRoot}/scripts/upload-lambda.sh {projectRoot} {args.zipPath} {args.environment}",
+          "rm -rf {args.zipPath}"
+        ],
+        "parallel": false,
+        "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip",
+        "environment": "development"
+      }
+    },
+    "tf:lint": {
+      "cache": true,
+      "executor": "nx:run-commands",
+      "inputs": ["terraform", "{workspaceRoot}/.tflint.hcl"],
+      "options": { "command": "tflint --chdir={projectRoot}/src" },
+      "configurations": {
+        "lint": { "command": "tflint --chdir={projectRoot}/src --fix" },
+        "lint:ci": { "command": "tflint --chdir={projectRoot}/src -f compact" }
+      }
+    },
+    "tf": {
+      "executor": "nx:run-commands",
+      "inputs": ["terraform"],
+      "options": { "command": "terraform -chdir={projectRoot}/src" },
+      "configurations": {
+        "init": { "command": "terraform -chdir={projectRoot}/src init" },
+        "lock": {
+          "command": "terraform -chdir={projectRoot}/src providers lock -platform=linux_amd64 -platform=windows_amd64 -platform=darwin_amd64"
+        },
+        "refresh": { "command": "terraform -chdir={projectRoot}/src refresh" },
+        "destroy": {
+          "command": "terraform -chdir={projectRoot}/src destroy -auto-approve"
+        },
+        "plan": { "command": "terraform -chdir={projectRoot}/src plan" },
+        "apply": {
+          "command": "terraform -chdir={projectRoot}/src apply -auto-approve"
+        },
+        "validate": {
+          "command": "terraform -chdir={projectRoot}/src validate"
+        },
+        "fmt": {
+          "command": "terraform -chdir={projectRoot}/src fmt -recursive -write=true"
+        },
+        "fmt:ci": {
+          "command": "terraform -chdir={projectRoot}/src fmt -recursive"
+        }
+      }
+    }
+  },
+  "pluginsConfig": { "@nx/js": { "analyzeSourceFiles": true } },
+  "namedInputs": {
+    "node": [{ "runtime": "node --version" }],
+    "src": ["{projectRoot}/src/**/*"],
+    "production": [
+      "src",
+      "!{projectRoot}/**/?(*.)+(spec|test|stubs).[jt]s?(x)?(.snap)",
+      "!{projectRoot}/**/testing/**"
+    ],
+    "ts": [
+      "node",
+      "src",
+      "{projectRoot}/tsconfig.json",
+      "{projectRoot}/tsconfig.eslint.json",
+      "{workspaceRoot}/tsconfig.base.json"
+    ],
+    "lint": [
+      "node",
+      "ts",
+      "{workspaceRoot}/.eslint/eslint.config.js",
+      "{workspaceRoot}/.eslintrc.js",
+      "{workspaceRoot}/.eslintignore"
+    ],
+    "build": [
+      "production",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{projectRoot}/tsconfig?(.build).json"
+    ],
+    "test": [
+      "node",
+      "src",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/.env-files/.env.test",
+      "{workspaceRoot}/.tsconfig/tsconfig.spec.json",
+      "{workspaceRoot}/jest.preset.js",
+      "{workspaceRoot}/jest.config.ts",
+      "{workspaceRoot}/.jest/**/*.ts",
+      "{projectRoot}/jest.config.ts",
+      "{projectRoot}/tsconfig.spec.json"
+    ],
+    "terraform": [
+      "{projectRoot}/src/**/*.+(tf|tfvars|yaml)",
+      "{projectRoot}/src/**/.*.yaml",
+      "{projectRoot}/src/.terraform.lock.hcl",
+      "!{projectRoot}/.terraform/**",
+      { "runtime": "terraform -version" }
+    ]
+  },
+  "nxCloudAccessToken": "MmY3OTg2YjUtMTk3ZS00NGU3LWI4MzEtNzYzMzdmOGE2YzBkfHJlYWQtd3JpdGU="
+}

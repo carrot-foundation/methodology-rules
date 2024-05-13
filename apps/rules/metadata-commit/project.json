@@ -1,0 +1,34 @@
+{
+  "name": "rules-metadata-commit",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:app", "app:any", "stack:any", "methodology:bold"],
+  "sourceRoot": "apps/rules/metadata-commit/src",
+  "projectType": "app",
+  "targets": {
+    "build-lambda": {},
+    "package-lambda": {},
+    "upload-lambda": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "build",
+        "^production",
+        "{workspaceRoot}/scripts/package-lambda.sh",
+        "{workspaceRoot}/scripts/upload-file-to-s3.sh"
+      ],
+      "dependsOn": ["package-lambda"],
+      "options": {
+        "commands": [
+          "{workspaceRoot}/scripts/upload-file-to-s3.sh rules-metadata-commit.zip {args.zipPath} {args.environment}",
+          "rm -rf {args.zipPath}"
+        ],
+        "parallel": false,
+        "zipPath": "{workspaceRoot}/dist/.zip/rules-metadata-commit.zip",
+        "environment": "development"
+      }
+    },
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

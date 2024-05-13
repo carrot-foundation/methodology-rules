@@ -1,0 +1,11 @@
+{
+  "name": "shared-app-types",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any"],
+  "sourceRoot": "libs/shared/app/types/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "ts": {}
+  }
+}

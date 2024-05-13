@@ -1,0 +1,9 @@
+{
+  "extends": "npm-package-json-lint-config-default",
+  "rules": {
+    "prefer-alphabetical-devDependencies": "error",
+    "prefer-alphabetical-dependencies": "error",
+    "prefer-alphabetical-scripts": "error",
+    "name-format": "off"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "methodologies-bold-rule-processors-mass-same-recycler-and-drop-off-addresses",
+  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:app", "methodology:bold"],
+  "sourceRoot": "apps/methodologies/bold/rule-processors/mass/same-recycler-and-drop-off-addresses/src",
+  "projectType": "application",
+  "targets": {
+    "build-lambda": {},
+    "lint": {},
+    "package-lambda": {},
+    "upload-lambda": {},
+    "test": {},
+    "ts": {}
+  }
+}

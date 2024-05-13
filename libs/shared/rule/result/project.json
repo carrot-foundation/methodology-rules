@@ -1,0 +1,12 @@
+{
+  "name": "shared-rule-result",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any"],
+  "sourceRoot": "libs/shared/rule-result/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

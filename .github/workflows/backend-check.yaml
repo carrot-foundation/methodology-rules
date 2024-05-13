@@ -1,0 +1,67 @@
+name: Backend Check
+
+on:
+  workflow_call:
+    inputs:
+      skip:
+        description: Skip backend check
+        required: false
+        type: boolean
+
+jobs:
+  backend-lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.inputs.skip }}
+    steps:
+      - uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0 # required for Nx affected
+      - uses: ./.github/actions/prepare-to-run-nx
+
+      - run: pnpm nx affected --target=lint
+
+      - uses: ./.github/actions/send-slack-message
+        if: ${{ failure() && github.ref_name == 'main' }}
+        with:
+          slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
+          message: "Backend ESLint job failed :suffering_cat:"
+
+  backend-typescript:
+    name: TypeScript
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.inputs.skip }}
+    steps:
+      - uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0 # required for Nx affected
+      - uses: ./.github/actions/prepare-to-run-nx
+
+      - run: pnpm nx affected --target=ts
+
+      - uses: ./.github/actions/send-slack-message
+        if: ${{ failure() && github.ref_name == 'main' }}
+        with:
+          slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
+          message: "Backend TypeScript job failed :suffering_cat:"
+
+  backend-tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    if: ${{ !github.event.inputs.skip }}
+    steps:
+      - uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0 # required for Nx affected
+      - uses: ./.github/actions/prepare-to-run-nx
+
+      - run: pnpm nx affected --target=test --ci --parallel=1 --runInBand --configuration=ci
+        env:
+          GH_OCTOKIT_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+
+      - uses: ./.github/actions/send-slack-message
+        if: ${{ failure() && github.ref_name == 'main' }}
+        with:
+          slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
+          message: "Backend Tests job failed :suffering_cat:"
