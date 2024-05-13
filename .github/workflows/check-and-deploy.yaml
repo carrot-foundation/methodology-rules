@@ -1,0 +1,57 @@
+name: Check and Deploy
+
+on:
+  push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  affected:
+    name: Get affected
+    runs-on: ubuntu-latest
+
+    outputs:
+      backend: ${{ steps.affected.outputs.backend }}
+      upload-lambda: ${{ steps.affected.outputs.upload-lambda }}
+      infra: ${{ steps.affected.outputs.infra }}
+
+    steps:
+      - uses: actions/checkout@v4.1.1
+        with:
+          fetch-depth: 0 # required for Nx affected
+
+      - uses: ./.github/actions/prepare-to-run-nx
+
+      - id: affected
+        run: |
+          echo "backend=$([ $(pnpm nx show projects -t lint ts --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
+          echo "upload-lambda=$([ $(pnpm nx show projects -t upload-lambda --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
+          echo "infra=$([ $(pnpm nx show projects -t tf --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
+
+  backend-check:
+    name: Backend Check
+    needs: affected
+    uses: ./.github/workflows/backend-check.yaml
+    secrets: inherit
+    with:
+      skip: ${{ needs.affected.outputs.backend != 'true' }}
+
+  infra-check:
+    name: Infra Check
+    needs: affected
+    uses: ./.github/workflows/infra-check.yaml
+    with:
+      skip: ${{ needs.affected.outputs.infra != 'true' }}
+
+  deploy:
+    name: Deploy
+    needs: [affected, backend-check]
+    if: ${{ github.ref_name == 'main' && needs.affected.outputs.upload-lambda == 'true' && (needs.backend-check.result == 'success' || needs.backend-check.result == 'skipped') }}
+    uses: ./.github/workflows/deploy.yaml
+    secrets: inherit
