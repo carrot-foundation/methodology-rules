@@ -54,7 +54,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
     EVENT_NOT_FOUND: 'Rule not applicable: The MOVE event was not found',
     HOMOLOGATION_ADDRESS_NOT_FOUND: 'Homologation address was not found',
     HOMOLOGATION_DOCUMENT_NOT_FOUND: 'Homologation document was not found',
-    HOMOLOGATION_EXPIRED: 'Homologation has expired',
+    HOMOLOGATION_EXPIRED: 'Homologation document has expired',
     REJECTED: 'The address geolocation precision is greater than 2',
   };
 
