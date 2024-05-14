@@ -30,7 +30,7 @@ export abstract class RuleStandardDataProcessor<
     if (isNil(document)) {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
         resultComment: this.getDocumentNotFoundResultComment(
-          ruleInput.parentDocumentId as string,
+          String(ruleInput.parentDocumentId),
         ),
       });
     }
