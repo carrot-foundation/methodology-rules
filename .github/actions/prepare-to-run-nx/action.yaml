@@ -1,0 +1,11 @@
+name: Prepare environment to run Nx targets
+description: Runs all required steps to prepare runner to run a Nx target
+
+runs:
+  using: composite
+
+  steps:
+    - name: Derive appropriate SHAs for base and head for `nx affected` commands
+      uses: nrwl/nx-set-shas@v4.0.4
+
+    - uses: ./.github/actions/install-node-dependencies

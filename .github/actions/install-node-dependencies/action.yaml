@@ -1,0 +1,19 @@
+name: Install node dependencies
+description: Install node dependencies with cache
+
+runs:
+  using: composite
+
+  steps:
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v3.0.0
+
+    - name: Set Node version
+      uses: actions/setup-node@v4.0.2
+      with:
+        node-version-file: .nvmrc
+        cache: pnpm
+
+    - name: Install node dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
