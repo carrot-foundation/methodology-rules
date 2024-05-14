@@ -30,8 +30,6 @@ module.exports = {
     '.vscode',
     '.gitignore',
     'cspell.config.js',
-    '*.tfstate',
-    '*.tfstate.backup',
   ],
   allowCompoundWords: true,
   useGitignore: true,
