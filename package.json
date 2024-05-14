@@ -16,12 +16,6 @@
     "test": "nx test",
     "test:affected": "nx affected --target test",
     "test:all": "nx run-many --target test",
-    "tf:fmt:affected": "nx affected --t tf --c fmt",
-    "tf:fmt:all": "nx run-many --t tf --c fmt",
-    "tf:lint:affected": "nx affected --t tf --c lint",
-    "tf:lint:all": "nx run-many --t tf --c lint",
-    "tf:validate:affected": "nx affected --t tf --c validate",
-    "tf:validate:all": "nx run-many --t tf --c validate",
     "ts": "nx ts",
     "ts:affected": "nx affected --target ts",
     "ts:all": "nx run-many --target ts"
@@ -107,7 +101,6 @@
     "bignumber.js": "9.1.2",
     "date-fns": "3.6.0",
     "geolib": "3.3.4",
-    "octokit": "3.2.1",
     "tslib": "2.6.2",
     "type-fest": "4.13.1",
     "typia": "5.5.7"

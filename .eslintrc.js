@@ -81,10 +81,6 @@ module.exports = {
                 sourceTag: 'type:lib',
                 onlyDependOnLibsWithTags: ['type:lib'],
               },
-              {
-                sourceTag: 'stack:terraform',
-                onlyDependOnLibsWithTags: ['stack:terraform', 'stack:any'],
-              },
               ...methodologies.map((methodology) => ({
                 sourceTag: `methodology:${methodology}`,
                 notDependOnLibsWithTags: [

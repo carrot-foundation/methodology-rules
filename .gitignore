@@ -31,19 +31,6 @@ coverage
 .DS_Store
 Thumbs.db
 
-# Terraform
-**/.terraform/*
-*.tfplan
-*.tfvars
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-.terraformrc
-terraform.rc
-*.tfstate.backup
-!apps/infra/terraform-cloud/src/.variables/*.tfvars
-
 # nx
 .nx/cache
 

@@ -30,13 +30,11 @@ module.exports = {
     '.vscode',
     '.gitignore',
     'cspell.config.js',
-    'apps/infra/terraform-cloud/src/aws-iam',
-    '.terraform.lock.hcl',
     '*.tfstate',
     '*.tfstate.backup',
   ],
   allowCompoundWords: true,
   useGitignore: true,
   caseSensitive: true,
-  includeRegExpList: [/^AIza[0-9A-Za-z-_]{35}$/]
+  includeRegExpList: [/^AIza[0-9A-Za-z-_]{35}$/],
 };

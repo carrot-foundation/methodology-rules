@@ -57,7 +57,6 @@ jobs:
 
       - run: pnpm nx affected --target=test --ci --parallel=1 --runInBand --configuration=ci
         env:
-          GH_OCTOKIT_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 
       - uses: ./.github/actions/send-slack-message

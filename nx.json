@@ -98,44 +98,6 @@
         "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip",
         "environment": "development"
       }
-    },
-    "tf:lint": {
-      "cache": true,
-      "executor": "nx:run-commands",
-      "inputs": ["terraform", "{workspaceRoot}/.tflint.hcl"],
-      "options": { "command": "tflint --chdir={projectRoot}/src" },
-      "configurations": {
-        "lint": { "command": "tflint --chdir={projectRoot}/src --fix" },
-        "lint:ci": { "command": "tflint --chdir={projectRoot}/src -f compact" }
-      }
-    },
-    "tf": {
-      "executor": "nx:run-commands",
-      "inputs": ["terraform"],
-      "options": { "command": "terraform -chdir={projectRoot}/src" },
-      "configurations": {
-        "init": { "command": "terraform -chdir={projectRoot}/src init" },
-        "lock": {
-          "command": "terraform -chdir={projectRoot}/src providers lock -platform=linux_amd64 -platform=windows_amd64 -platform=darwin_amd64"
-        },
-        "refresh": { "command": "terraform -chdir={projectRoot}/src refresh" },
-        "destroy": {
-          "command": "terraform -chdir={projectRoot}/src destroy -auto-approve"
-        },
-        "plan": { "command": "terraform -chdir={projectRoot}/src plan" },
-        "apply": {
-          "command": "terraform -chdir={projectRoot}/src apply -auto-approve"
-        },
-        "validate": {
-          "command": "terraform -chdir={projectRoot}/src validate"
-        },
-        "fmt": {
-          "command": "terraform -chdir={projectRoot}/src fmt -recursive -write=true"
-        },
-        "fmt:ci": {
-          "command": "terraform -chdir={projectRoot}/src fmt -recursive"
-        }
-      }
     }
   },
   "pluginsConfig": { "@nx/js": { "analyzeSourceFiles": true } },
@@ -177,13 +139,6 @@
       "{workspaceRoot}/.jest/**/*.ts",
       "{projectRoot}/jest.config.ts",
       "{projectRoot}/tsconfig.spec.json"
-    ],
-    "terraform": [
-      "{projectRoot}/src/**/*.+(tf|tfvars|yaml)",
-      "{projectRoot}/src/**/.*.yaml",
-      "{projectRoot}/src/.terraform.lock.hcl",
-      "!{projectRoot}/.terraform/**",
-      { "runtime": "terraform -version" }
     ]
   },
   "nxCloudAccessToken": "MmY3OTg2YjUtMTk3ZS00NGU3LWI4MzEtNzYzMzdmOGE2YzBkfHJlYWQtd3JpdGU="
