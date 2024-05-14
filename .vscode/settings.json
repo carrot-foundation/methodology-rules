@@ -14,7 +14,7 @@
   "editor.codeActionsOnSave": {
     "source.fixAll": "always"
   },
-  "conventionalCommits.scopes": ["infra", "nx", "rule", "shared"],
+  "conventionalCommits.scopes": ["nx", "rule", "shared"],
   "cSpell.words": [
     "airbnb",
     "commitlint",
