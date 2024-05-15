@@ -7,9 +7,9 @@
 </div>
 
 <div dir="auto">
-  <table>
+  <table style="text-align: left;">
     <thead>
-      <tr style="text-align: left;">
+      <tr>
         <th>📄 Description</th>
       </tr>
     </thead>
