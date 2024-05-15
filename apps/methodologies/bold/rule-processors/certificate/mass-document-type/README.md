@@ -7,10 +7,10 @@
 </div>
 
 <div dir="auto">
-  <table style="text-align: left;">
+  <table>
     <thead>
       <tr>
-        <th>📄 Description</th>
+        <th style="text-align: left;">📄 Description</th>
       </tr>
     </thead>
     <tbody>
