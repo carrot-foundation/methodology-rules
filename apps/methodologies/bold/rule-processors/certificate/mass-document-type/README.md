@@ -6,12 +6,19 @@
 
 </div>
 
-<div style="max-width: 800px; text-align: left;">
-
-| 📄 Description                                                                                          |
-| ------------------------------------------------------------------------------------------------------- |
-| Verify if all masses that make up the certificate have `Organic` declared in the `Document Type` field. |
-
+<div dir="auto">
+  <table>
+    <thead>
+      <tr style="text-align: left;">
+        <th>📄 Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td >Verify if all masses that make up the certificate have <code>Organic</code> declared in the <code>Document Type</code> field.</td>
+      </tr>
+    </tbody>
+  </table>
 </div>
 
 ### 📂 Implementation
