@@ -1,3 +1,4 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
@@ -11,20 +12,21 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { METHODOLOGY_SLUG as METHODOLOGY_SLUG_VALUE } from '@carrot-fndn/methodologies/bold/utils';
+import { random } from 'typia';
 
 const { ACTOR } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE, METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
-export const stubMassValidationDocumentWithBoldMethodology = (
+export const stubMassValidationDocumentWithMethodologySlug = (
+  methodologySlug?: string,
   partialDocument?: PartialDeep<Document>,
 ) =>
   stubDocument({
     ...stubMassValidationDocument(),
     externalEvents: [
       stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
-        [METHODOLOGY_SLUG, METHODOLOGY_SLUG_VALUE],
+        [METHODOLOGY_SLUG, methodologySlug ?? random<NonEmptyString>()],
         [ACTOR_TYPE, AUDITOR],
       ]),
     ],

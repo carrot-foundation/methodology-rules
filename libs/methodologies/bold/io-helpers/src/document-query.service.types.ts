@@ -40,5 +40,6 @@ export interface DocumentIterator<DocumentType> {
 }
 
 export interface DocumentQuery<DocumentType> {
+  document: DocumentType;
   iterator: () => DocumentIterator<DocumentType>;
 }

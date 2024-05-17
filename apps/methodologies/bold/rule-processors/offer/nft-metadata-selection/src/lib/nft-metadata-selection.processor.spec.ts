@@ -2,7 +2,10 @@ import type { RuleInput } from '@carrot-fndn/shared/rule/types';
 import type { UnknownObject } from '@carrot-fndn/shared/types';
 
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { stubDocumentEventWithMetadataAttributes } from '@carrot-fndn/methodologies/bold/testing';
+import {
+  stubDocument,
+  stubDocumentEventWithMetadataAttributes,
+} from '@carrot-fndn/methodologies/bold/testing';
 import {
   DocumentCategory,
   DocumentEventActorType,
@@ -129,7 +132,7 @@ describe('NftMetadataSelection', () => {
       massDocumentStub,
     ];
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await ruleDataProcessor.process({
       ...random<RuleInput>(),
@@ -252,7 +255,7 @@ describe('NftMetadataSelection', () => {
       }),
     );
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       stubMethodologyDefinitionDocument(),
       offerCertificatesDocumentsStub,
       ...certificateAuditsDocumentsStubs,

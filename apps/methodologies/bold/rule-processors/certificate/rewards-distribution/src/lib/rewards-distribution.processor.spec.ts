@@ -6,6 +6,7 @@ import {
 import { isActorEventWithSourceActorType } from '@carrot-fndn/methodologies/bold/predicates';
 import {
   stubAddress,
+  stubDocument,
   stubDocumentEvent,
   stubMassDocument,
   stubMethodologyDefinitionDocument,
@@ -104,7 +105,7 @@ describe('RewardsDistributionProcessor', () => {
   it('should return "REJECTED" when Mass documents is not found', async () => {
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad([]);
+    spyOnDocumentQueryServiceLoad(stubDocument(), []);
 
     const result = await service.process(data);
 
@@ -119,7 +120,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -142,7 +143,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -178,7 +179,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -234,7 +235,7 @@ describe('RewardsDistributionProcessor', () => {
     async ({ document, resultComment }) => {
       const data = random<RuleInput>();
 
-      spyOnDocumentQueryServiceLoad([
+      spyOnDocumentQueryServiceLoad(stubDocument(), [
         document,
         stubMethodologyWithRequiredActors(),
       ]);
@@ -257,7 +258,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       ...massDocuments,
       stubMethodologyWithRequiredActors(),
     ]);
@@ -337,7 +338,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -400,7 +401,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -454,7 +455,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad(documents);
+    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
 
     const result = await service.process(data);
 
@@ -570,7 +571,7 @@ describe('RewardsDistributionProcessor', () => {
 
       const data = random<RuleInput>();
 
-      spyOnDocumentQueryServiceLoad([
+      spyOnDocumentQueryServiceLoad(stubDocument(), [
         massDocument,
         stubMethodologyWithRequiredActors(),
       ]);
@@ -635,7 +636,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       massDocument,
       stubMethodologyWithRequiredActors({
         externalEvents: requiredMethodologyActorsEvents,
@@ -686,7 +687,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       massDocument,
       stubMethodologyWithRequiredActors(),
     ]);
@@ -747,7 +748,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const data = random<RuleInput>();
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       ...massDocuments,
       stubMethodologyWithRequiredActors(),
     ]);

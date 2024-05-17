@@ -48,7 +48,10 @@ describe('MassValidationDocumentStatusProcessor', () => {
       }),
     );
 
-    spyOnDocumentQueryServiceLoad(relatedDocumentsOfParentDocument);
+    spyOnDocumentQueryServiceLoad(
+      stubDocument(),
+      relatedDocumentsOfParentDocument,
+    );
 
     const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -72,6 +75,7 @@ describe('MassValidationDocumentStatusProcessor', () => {
     });
 
     spyOnDocumentQueryServiceLoad(
+      stubDocument(),
       stubArray(() => {
         const document = stubMassValidationDocument();
 
@@ -115,6 +119,7 @@ describe('MassValidationDocumentStatusProcessor', () => {
     });
 
     spyOnDocumentQueryServiceLoad(
+      stubDocument(),
       stubArray(() => {
         const document = stubMassValidationDocument();
 

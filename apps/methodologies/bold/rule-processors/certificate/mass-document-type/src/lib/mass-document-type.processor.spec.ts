@@ -1,6 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
   stubCertificateDocument,
+  stubDocument,
   stubDocumentEvent,
   stubMassDocument,
   stubMassValidationDocument,
@@ -49,7 +50,7 @@ describe('MassDocumentTypeRuleProcessor', () => {
       ),
     });
 
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       certificate,
       ...massValidations,
       ...organicMasses,
@@ -76,7 +77,10 @@ describe('MassDocumentTypeRuleProcessor', () => {
       type: 'NotOrganic',
     });
 
-    spyOnDocumentQueryServiceLoad([organicMass, notOrganicMass]);
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
+      organicMass,
+      notOrganicMass,
+    ]);
 
     const ruleOutputResult =
       await massDocumentTypeRuleProcessor.process(ruleInput);

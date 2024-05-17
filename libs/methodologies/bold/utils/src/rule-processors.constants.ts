@@ -1,5 +1,3 @@
-export const METHODOLOGY_SLUG = 'bold';
-
 export const DOCUMENT_NOT_FOUND_RESULT_COMMENT =
   'The mass document was not found';
 

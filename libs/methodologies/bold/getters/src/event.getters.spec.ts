@@ -10,7 +10,6 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { METHODOLOGY_SLUG as METHODOLOGY_SLUG_VALUE } from '@carrot-fndn/methodologies/bold/utils';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -85,14 +84,16 @@ describe('Event getters', () => {
 
   describe('getEventMethodologySlug', () => {
     it('should return the methodology slug', () => {
+      const methodologySlug = faker.string.sample();
+
       const event = stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
         [ACTOR_TYPE, AUDITOR],
-        [METHODOLOGY_SLUG, METHODOLOGY_SLUG_VALUE],
+        [METHODOLOGY_SLUG, methodologySlug],
       ]);
 
       const result = getEventMethodologySlug(event);
 
-      expect(result).toBe(METHODOLOGY_SLUG_VALUE);
+      expect(result).toBe(methodologySlug);
     });
 
     it('should return undefined if the event does not have methodology slug', () => {

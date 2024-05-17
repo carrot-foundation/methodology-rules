@@ -68,7 +68,6 @@ describe('wrapRuleIntoLambdaHandler', () => {
     expect(setTagsSpy).toHaveBeenCalledWith({
       documentId: ruleEvent.documentId,
       documentKeyPrefix: ruleEvent.documentKeyPrefix,
-      methodologySlug: '',
       requestId: ruleEvent.requestId,
       ruleName: ruleEvent.ruleName,
     });
