@@ -5,11 +5,10 @@ import * as documentHelpers from './document.helpers';
 import { DocumentQueryService } from './document-query.service';
 
 export const spyOnDocumentQueryServiceLoad = (
-  mainDocument: Document,
+  rootDocument: Document,
   documents: Array<Document>,
 ) => {
   jest.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
-    document: mainDocument,
     iterator: () => ({
       each: (callback) =>
         Promise.resolve(
@@ -19,6 +18,7 @@ export const spyOnDocumentQueryServiceLoad = (
       map: (callback) =>
         Promise.resolve(documents.map((document) => callback({ document }))),
     }),
+    rootDocument,
   });
 };
 
