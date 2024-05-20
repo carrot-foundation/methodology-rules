@@ -6,7 +6,6 @@ import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Handler } from 'aws-lambda';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { getMethodologySlug } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
 import { AWSLambda, setTags } from '@sentry/serverless';
 
@@ -27,7 +26,6 @@ const setRuleSentryTags = ({
   setTags({
     documentId,
     documentKeyPrefix,
-    methodologySlug: getMethodologySlug(),
     requestId,
     ruleName,
   });

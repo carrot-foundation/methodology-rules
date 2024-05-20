@@ -75,7 +75,7 @@ describe('RecyclerActorDocumentProcessor', () => {
     async ({ massDocuments, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      spyOnDocumentQueryServiceLoad(massDocuments);
+      spyOnDocumentQueryServiceLoad(stubDocument(), massDocuments);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

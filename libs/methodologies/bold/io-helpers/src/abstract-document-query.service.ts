@@ -35,6 +35,7 @@ export abstract class BaseDocumentQueryService<
     );
 
     return {
+      document,
       iterator: () => ({
         each: async (callback: (document: Visitor<Document>) => void) => {
           await this.loadQueryCriteria({

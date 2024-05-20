@@ -1,6 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
   stubAddress,
+  stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubMassDocument,
@@ -169,7 +170,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
         'should return APPROVED when the homologation address is equal and the geolocation precision is valid',
     },
   ])('$scenario', async ({ documents, resultComment }) => {
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       massValidationDocumentStub,
       methodologyDocumentStub,
       participantHomologationGroupDocumentStub,
@@ -334,7 +335,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
         'should return REJECTED when the homologation address is equal but the distance is greater than 2',
     },
   ])('$scenario', async ({ documents, resultComment }) => {
-    spyOnDocumentQueryServiceLoad([
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
       massDocumentStub,
       massValidationDocumentStub,
       methodologyDocumentStub,

@@ -1,3 +1,4 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
@@ -160,4 +161,27 @@ export const stubParticipantHomologationDocument = (
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
     type: DocumentType.PARTICIPANT_HOMOLOGATION,
+  });
+
+export const stubCertificateAuditWithMethodologySlug = (
+  methodologySlug?: string,
+  partialDocument?: PartialDeep<Document>,
+) =>
+  stubCertificateAuditDocument({
+    externalEvents: [
+      stubDocumentEventWithMetadataAttributes(
+        { name: DocumentEventName.ACTOR },
+        [
+          [
+            DocumentEventAttributeName.ACTOR_TYPE,
+            DocumentEventActorType.AUDITOR,
+          ],
+          [
+            DocumentEventAttributeName.METHODOLOGY_SLUG,
+            methodologySlug ?? random<NonEmptyString>(),
+          ],
+        ],
+      ),
+    ],
+    ...partialDocument,
   });

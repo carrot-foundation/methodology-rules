@@ -1,9 +1,3 @@
-import type {
-  Document,
-  DocumentEventAttributeValue,
-  DocumentReference,
-} from '@carrot-fndn/methodologies/bold/types';
-
 import {
   getAuditorActorEvent,
   getEventMethodologySlug,
@@ -14,9 +8,11 @@ import {
 } from '@carrot-fndn/methodologies/bold/io-helpers';
 import { MASS_VALIDATION } from '@carrot-fndn/methodologies/bold/matchers';
 import {
-  METHODOLOGY_SLUG,
-  mapDocumentReference,
-} from '@carrot-fndn/methodologies/bold/utils';
+  type Document,
+  type DocumentEventAttributeValue,
+  type DocumentReference,
+} from '@carrot-fndn/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -43,9 +39,11 @@ export class MassValidationDocumentProcessor extends RuleDataProcessor {
         methodologySlug: DocumentEventAttributeValue | undefined;
       }
     >,
+    certificateAuditMethodologySlug: DocumentEventAttributeValue | undefined,
   ) {
     const documentsWithoutExpectedSlug = documentReferences.filter(
-      ({ methodologySlug }) => methodologySlug !== METHODOLOGY_SLUG,
+      ({ methodologySlug }) =>
+        methodologySlug !== certificateAuditMethodologySlug,
     );
 
     if (documentsWithoutExpectedSlug.length > 0) {
@@ -84,10 +82,17 @@ export class MassValidationDocumentProcessor extends RuleDataProcessor {
   }
 
   private async getRuleSubject(documentQuery: DocumentQuery<Document>) {
-    return documentQuery.iterator().map(({ document }) => ({
-      ...mapDocumentReference(document),
-      methodologySlug: getEventMethodologySlug(getAuditorActorEvent(document)),
-    }));
+    return {
+      certificateAuditMethodologySlug: getEventMethodologySlug(
+        getAuditorActorEvent(documentQuery.document),
+      ),
+      documents: await documentQuery.iterator().map(({ document }) => ({
+        ...mapDocumentReference(document),
+        methodologySlug: getEventMethodologySlug(
+          getAuditorActorEvent(document),
+        ),
+      })),
+    };
   }
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
@@ -96,8 +101,13 @@ export class MassValidationDocumentProcessor extends RuleDataProcessor {
       ruleInput.documentId,
     );
 
-    const documents = await this.getRuleSubject(documentQuery);
+    const { certificateAuditMethodologySlug, documents } =
+      await this.getRuleSubject(documentQuery);
 
-    return this.evaluateResult(ruleInput, documents);
+    return this.evaluateResult(
+      ruleInput,
+      documents,
+      certificateAuditMethodologySlug,
+    );
   }
 }

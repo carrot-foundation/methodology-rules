@@ -3,6 +3,7 @@ import {
   spyOnLoadParentDocument,
 } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
+  stubDocument,
   stubDocumentEventWithMetadataAttributes,
   stubOfferDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
@@ -91,11 +92,11 @@ describe('RewardsDistributionProcessor', () => {
       spyOnLoadParentDocument(offer);
 
       if (certificateAudits) {
-        spyOnDocumentQueryServiceLoad(certificateAudits);
+        spyOnDocumentQueryServiceLoad(stubDocument(), certificateAudits);
       }
 
       if (masses) {
-        spyOnDocumentQueryServiceLoad(masses);
+        spyOnDocumentQueryServiceLoad(stubDocument(), masses);
       }
 
       await expect(ruleDataProcessor.process(ruleInput)).rejects.toThrow(

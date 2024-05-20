@@ -4,8 +4,12 @@ import type { Document } from '@carrot-fndn/methodologies/bold/types';
 import * as documentHelpers from './document.helpers';
 import { DocumentQueryService } from './document-query.service';
 
-export const spyOnDocumentQueryServiceLoad = (documents: Array<Document>) => {
+export const spyOnDocumentQueryServiceLoad = (
+  mainDocument: Document,
+  documents: Array<Document>,
+) => {
   jest.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
+    document: mainDocument,
     iterator: () => ({
       each: (callback) =>
         Promise.resolve(

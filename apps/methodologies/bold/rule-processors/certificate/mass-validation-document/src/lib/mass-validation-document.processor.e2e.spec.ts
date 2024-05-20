@@ -1,4 +1,5 @@
 import {
+  stubCertificateAuditWithMethodologySlug,
   stubDocument,
   stubDocumentEvent,
 } from '@carrot-fndn/methodologies/bold/testing';
@@ -14,19 +15,23 @@ import {
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
-import { stubMassValidationDocumentWithBoldMethodology } from './mass-validation-document.stubs';
+import { stubMassValidationDocumentWithMethodologySlug } from './mass-validation-document.stubs';
 
 describe('MassValidationDocumentProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
   const certificateId = faker.string.uuid();
+  const methodologySlug = faker.string.uuid();
 
   const massValidationDocuments = stubArray(() =>
-    stubMassValidationDocumentWithBoldMethodology(),
+    stubMassValidationDocumentWithMethodologySlug(methodologySlug),
   );
 
-  const certificateAudit = stubDocument({
-    parentDocumentId: certificateId,
-  });
+  const certificateAudit = stubCertificateAuditWithMethodologySlug(
+    methodologySlug,
+    {
+      parentDocumentId: certificateId,
+    },
+  );
 
   const certificate = stubDocument({
     externalEvents: massValidationDocuments.map((value) =>
