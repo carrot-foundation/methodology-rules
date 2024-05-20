@@ -84,7 +84,7 @@ export class MassValidationDocumentProcessor extends RuleDataProcessor {
   private async getRuleSubject(documentQuery: DocumentQuery<Document>) {
     return {
       certificateAuditMethodologySlug: getEventMethodologySlug(
-        getAuditorActorEvent(documentQuery.document),
+        getAuditorActorEvent(documentQuery.rootDocument),
       ),
       documents: await documentQuery.iterator().map(({ document }) => ({
         ...mapDocumentReference(document),
