@@ -95,6 +95,7 @@
   "dependencies": {
     "@aws-crypto/sha256-js": "5.2.0",
     "@aws-sdk/client-s3": "3.537.0",
+    "@aws-sdk/client-sts": "3.577.0",
     "@aws-sdk/credential-providers": "3.568.0",
     "@sentry/serverless": "7.114.0",
     "@smithy/signature-v4": "2.3.0",

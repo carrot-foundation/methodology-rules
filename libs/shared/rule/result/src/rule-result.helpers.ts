@@ -6,6 +6,11 @@ import type {
 import type { AnyObject } from '@carrot-fndn/shared/types';
 
 import { Sha256 } from '@aws-crypto/sha256-js';
+import {
+  AssumeRoleCommand,
+  type Credentials,
+  STSClient,
+} from '@aws-sdk/client-sts';
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { SignatureV4 } from '@smithy/signature-v4';
 import { assert } from 'typia';
@@ -45,27 +50,64 @@ export const mapToRuleOutput = (
   resultStatus,
 });
 
-export const signRequest = async ({
-  ruleOutput,
-}: {
-  ruleOutput: RuleOutput;
-}): Promise<RequestInit> => {
-  const signer = new SignatureV4({
+export const assumeRoleSmaugCredentials = async (
+  assumeRoleArn: string,
+): Promise<Credentials> => {
+  const assumeRoleCommand = new AssumeRoleCommand({
+    RoleArn: assumeRoleArn,
+    RoleSessionName: 'smaug-document-sync',
+  });
+
+  const stsClient = new STSClient({
     credentials: fromEnv(),
     region: 'us-east-1',
-    service: 'api-gateway',
+  });
+
+  const assumeRoleResponse = await stsClient.send(assumeRoleCommand);
+
+  return assert<Credentials>(assumeRoleResponse.Credentials);
+};
+
+export const signRequest = async ({
+  body,
+  method,
+  query,
+  url,
+}: {
+  body?: unknown;
+  method: string;
+  query?: Record<string, Array<string> | null | string>;
+  url: URL;
+}) => {
+  const smaugApiGatewayAssumeRoleArn = assert<string>(
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'],
+  );
+  const credentials = await assumeRoleSmaugCredentials(
+    smaugApiGatewayAssumeRoleArn,
+  );
+
+  const signer = new SignatureV4({
+    credentials: {
+      accessKeyId: assert<string>(credentials.AccessKeyId),
+      secretAccessKey: assert<string>(credentials.SecretAccessKey),
+      sessionToken: assert<string>(credentials.SessionToken),
+    },
+    region: 'us-east-1',
+    service: 'execute-api',
     sha256: Sha256,
   });
 
   return signer.sign({
-    body: JSON.stringify(mapRuleOutputToPostProcessInput(ruleOutput)),
+    body: body === undefined ? undefined : JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
+      Host: url.host,
     },
-    hostname: '',
-    method: 'POST',
-    path: '',
+    hostname: url.hostname,
+    method,
+    path: url.pathname,
     protocol: 'https',
+    ...(query && { query }),
   });
 };
 
@@ -75,7 +117,14 @@ export const reportRuleResults = async (
   assert<RuleOutput>(ruleOutput);
 
   try {
-    const request = await signRequest({ ruleOutput });
+    const url = new URL(ruleOutput.responseUrl);
+
+    const request = await signRequest({
+      body: mapRuleOutputToPostProcessInput(ruleOutput),
+      method: 'POST',
+      url,
+    });
+
     const response = await fetch(ruleOutput.responseUrl, request);
 
     if (!response.ok) {

@@ -2,6 +2,7 @@ import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Context } from 'aws-lambda';
 
+import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { faker } from '@faker-js/faker';
 import * as Sentry from '@sentry/serverless';
@@ -13,6 +14,7 @@ process.env = {
   ...process.env,
   AWS_ACCESS_KEY_ID: faker.string.uuid(),
   AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
+  SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
 };
 
 describe('wrapRuleIntoLambdaHandler', () => {
@@ -32,6 +34,14 @@ describe('wrapRuleIntoLambdaHandler', () => {
         });
       }
     }
+
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+    } as never);
 
     jest.spyOn(global, 'fetch').mockResolvedValueOnce(new Response());
 
