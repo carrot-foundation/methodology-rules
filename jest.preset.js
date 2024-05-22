@@ -4,5 +4,5 @@ module.exports = {
   ...nxPreset,
   testTimeout: 10_000,
   testEnvironment: 'node',
-  coverageReporters: [['text', { skipFull: true }]],
+  coverageReporters: [['text', 'html', { skipFull: true }]],
 };

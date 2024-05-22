@@ -17,6 +17,12 @@ import { assert } from 'typia';
 
 import type { PostProcessInput } from './rule-result.types';
 
+export const nilSafeRun = <T, R>(
+  value: T | null | undefined,
+  callback: (value: T) => R,
+): R | undefined =>
+  value !== null && value !== undefined ? callback(value) : undefined;
+
 export const mapRuleOutputToPostProcessInput = (
   ruleOutput: RuleOutput,
 ): PostProcessInput => ({
@@ -98,7 +104,7 @@ export const signRequest = async ({
   });
 
   return signer.sign({
-    body: body === undefined ? undefined : JSON.stringify(body),
+    body: nilSafeRun(body, (value) => JSON.stringify(value)),
     headers: {
       'Content-Type': 'application/json',
       Host: url.host,
@@ -107,7 +113,7 @@ export const signRequest = async ({
     method,
     path: url.pathname,
     protocol: 'https',
-    ...(query && { query }),
+    ...nilSafeRun(query, (value) => ({ query: value })),
   });
 };
 

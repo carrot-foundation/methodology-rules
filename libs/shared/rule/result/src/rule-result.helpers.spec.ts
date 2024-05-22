@@ -268,68 +268,21 @@ describe('signRequest', () => {
     });
   });
 
-  it('should return http request object without query field', async () => {
+  it('should throw error when Credentials for the assumed role are not found', async () => {
     const input = random<{
       body: unknown;
-      method: string;
-      url: URL;
-    }>();
-
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
-
-    const result = await signRequest(input);
-
-    expect(result).toEqual({
-      body: JSON.stringify(input.body),
-      headers: expect.objectContaining({
-        'Content-Type': 'application/json',
-        Host: input.url.host,
-        authorization: expect.any(String),
-      }),
-      hostname: input.url.hostname,
-      method: input.method,
-      path: input.url.pathname,
-      protocol: 'https',
-      query: undefined,
-    });
-  });
-
-  it('should return http request object without body field', async () => {
-    const input = random<{
       method: string;
       query: Record<string, Array<string> | null | string>;
       url: URL;
     }>();
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
+      Credentials: undefined,
     } as never);
 
-    const result = await signRequest(input);
-
-    expect(result).toEqual({
-      body: undefined,
-      headers: expect.objectContaining({
-        'Content-Type': 'application/json',
-        Host: input.url.host,
-        authorization: expect.any(String),
-      }),
-      hostname: input.url.hostname,
-      method: input.method,
-      path: input.url.pathname,
-      protocol: 'https',
-      query: input.query,
-    });
+    await expect(signRequest(input)).rejects.toThrow(
+      'Error on typia.assert(): invalid type on $input, expect to be Credentials',
+    );
   });
 
   it.each([
@@ -368,6 +321,21 @@ describe('signRequest', () => {
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials,
     } as never);
+
+    await expect(signRequest(input)).rejects.toThrow(
+      'Error on typia.assert(): invalid type on $input, expect to be string',
+    );
+  });
+
+  it('should throw error when SMAUG_API_GATEWAY_ASSUME_ROLE_ARN is not found', async () => {
+    const input = random<{
+      body: unknown;
+      method: string;
+      query: Record<string, Array<string> | null | string>;
+      url: URL;
+    }>();
+
+    delete process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'];
 
     await expect(signRequest(input)).rejects.toThrow(
       'Error on typia.assert(): invalid type on $input, expect to be string',
