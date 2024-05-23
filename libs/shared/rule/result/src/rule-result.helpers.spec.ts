@@ -4,6 +4,7 @@ import type {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
+import { STSClient } from '@aws-sdk/client-sts';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -104,7 +105,9 @@ describe('reportRuleResults', () => {
     process.env = {
       ...environment,
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
+      AWS_REGION: faker.string.uuid(),
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
     };
   });
 
@@ -118,7 +121,20 @@ describe('reportRuleResults', () => {
 
   it('should send a request to the given responseUrl', async () => {
     const ruleOutput = random<RuleOutput>();
-    const { headers, ...request } = await signRequest({ ruleOutput });
+
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+    } as never);
+
+    const { headers, ...request } = await signRequest({
+      body: mapRuleOutputToPostProcessInput(ruleOutput),
+      method: 'POST',
+      url: new URL(ruleOutput.responseUrl),
+    });
 
     jest.spyOn(global, 'fetch').mockResolvedValueOnce(new Response());
 
@@ -156,6 +172,14 @@ describe('reportRuleResults', () => {
   it('should throw error when response code is not ok', async () => {
     const ruleOutput = random<RuleOutput>();
 
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+    } as never);
+
     jest
       .spyOn(global, 'fetch')
       .mockResolvedValueOnce(new Response(null, { status: 400 }));
@@ -170,6 +194,14 @@ describe('reportRuleResults', () => {
 
     const errorResponse = new Response();
 
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+    } as never);
+
     jest.spyOn(global, 'fetch').mockRejectedValueOnce(errorResponse);
     jest.spyOn(console, 'error').mockImplementationOnce(() => {});
 
@@ -182,4 +214,136 @@ describe('reportRuleResults', () => {
 
     expect(fetch).toHaveBeenCalled();
   });
+});
+
+describe('signRequest', () => {
+  const environment = { ...process.env };
+
+  beforeEach(() => {
+    process.env = {
+      ...environment,
+      AWS_ACCESS_KEY_ID: faker.string.uuid(),
+      AWS_REGION: faker.string.uuid(),
+      AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
+    };
+  });
+
+  afterEach(() => {
+    process.env = environment;
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
+  it('should return http request object with authorization header', async () => {
+    const input = random<{
+      body: unknown;
+      method: string;
+      query: Record<string, Array<string> | null | string>;
+      url: URL;
+    }>();
+
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+    } as never);
+
+    const result = await signRequest(input);
+
+    expect(result).toEqual({
+      body: JSON.stringify(input.body),
+      headers: expect.objectContaining({
+        'Content-Type': 'application/json',
+        Host: input.url.host,
+        authorization: expect.any(String),
+      }),
+      hostname: input.url.hostname,
+      method: input.method,
+      path: input.url.pathname,
+      protocol: 'https',
+      query: input.query,
+    });
+  });
+
+  it('should throw error when Credentials for the assumed role are not found', async () => {
+    const input = random<{
+      body: unknown;
+      method: string;
+      query: Record<string, Array<string> | null | string>;
+      url: URL;
+    }>();
+
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials: undefined,
+    } as never);
+
+    await expect(signRequest(input)).rejects.toThrow(
+      'Error on typia.assert(): invalid type on $input, expect to be Credentials',
+    );
+  });
+
+  it.each([
+    {
+      Credentials: {
+        AccessKeyId: undefined,
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: faker.string.uuid(),
+      },
+      field: 'AccessKeyId',
+    },
+    {
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: undefined,
+        SessionToken: faker.string.uuid(),
+      },
+      field: 'SecretAccessKey',
+    },
+    {
+      Credentials: {
+        AccessKeyId: faker.string.uuid(),
+        SecretAccessKey: faker.string.uuid(),
+        SessionToken: undefined,
+      },
+      field: 'SessionToken',
+    },
+  ])('should throw error when $field is undefined', async ({ Credentials }) => {
+    const input = random<{
+      body: unknown;
+      method: string;
+      query: Record<string, Array<string> | null | string>;
+      url: URL;
+    }>();
+
+    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+      Credentials,
+    } as never);
+
+    await expect(signRequest(input)).rejects.toThrow(
+      'Error on typia.assert(): invalid type on $input, expect to be string',
+    );
+  });
+
+  it.each(['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN', 'AWS_REGION'])(
+    'should throw error when %s is not found',
+    async (value) => {
+      const input = random<{
+        body: unknown;
+        method: string;
+        query: Record<string, Array<string> | null | string>;
+        url: URL;
+      }>();
+
+      delete process.env[value];
+
+      await expect(signRequest(input)).rejects.toThrow(
+        'Error on typia.assert(): invalid type on $input, expect to be string',
+      );
+    },
+  );
 });
