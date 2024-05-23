@@ -541,4 +541,17 @@ describe('DocumenQueryService', () => {
       expect(numberOfIterations).toBe(1);
     });
   });
+
+  describe('getEventRelationship', () => {
+    it('should return undefined', () => {
+      const eventRelationship = loadDocuments['getEventRelationship'](
+        stubDocumentEvent({
+          referencedDocument: undefined,
+          relatedDocument: undefined,
+        }),
+      );
+
+      expect(eventRelationship).toBeUndefined();
+    });
+  });
 });
