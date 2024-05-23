@@ -105,6 +105,7 @@ describe('reportRuleResults', () => {
     process.env = {
       ...environment,
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
+      AWS_REGION: faker.string.uuid(),
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
       SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
     };
@@ -222,6 +223,7 @@ describe('signRequest', () => {
     process.env = {
       ...environment,
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
+      AWS_REGION: faker.string.uuid(),
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
       SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
     };
@@ -327,18 +329,21 @@ describe('signRequest', () => {
     );
   });
 
-  it('should throw error when SMAUG_API_GATEWAY_ASSUME_ROLE_ARN is not found', async () => {
-    const input = random<{
-      body: unknown;
-      method: string;
-      query: Record<string, Array<string> | null | string>;
-      url: URL;
-    }>();
+  it.each(['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN', 'AWS_REGION'])(
+    'should throw error when %s is not found',
+    async (value) => {
+      const input = random<{
+        body: unknown;
+        method: string;
+        query: Record<string, Array<string> | null | string>;
+        url: URL;
+      }>();
 
-    delete process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'];
+      delete process.env[value];
 
-    await expect(signRequest(input)).rejects.toThrow(
-      'Error on typia.assert(): invalid type on $input, expect to be string',
-    );
-  });
+      await expect(signRequest(input)).rejects.toThrow(
+        'Error on typia.assert(): invalid type on $input, expect to be string',
+      );
+    },
+  );
 });

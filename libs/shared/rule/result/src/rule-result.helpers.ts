@@ -56,9 +56,13 @@ export const mapToRuleOutput = (
   resultStatus,
 });
 
-export const assumeRoleSmaugCredentials = async (
-  assumeRoleArn: string,
-): Promise<Credentials> => {
+export const assumeRoleSmaugCredentials = async ({
+  assumeRoleArn,
+  awsRegion,
+}: {
+  assumeRoleArn: string;
+  awsRegion: string;
+}): Promise<Credentials> => {
   const assumeRoleCommand = new AssumeRoleCommand({
     RoleArn: assumeRoleArn,
     RoleSessionName: 'smaug-document-sync',
@@ -66,7 +70,7 @@ export const assumeRoleSmaugCredentials = async (
 
   const stsClient = new STSClient({
     credentials: fromEnv(),
-    region: 'us-east-1',
+    region: awsRegion,
   });
 
   const assumeRoleResponse = await stsClient.send(assumeRoleCommand);
@@ -88,9 +92,12 @@ export const signRequest = async ({
   const smaugApiGatewayAssumeRoleArn = assert<string>(
     process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'],
   );
-  const credentials = await assumeRoleSmaugCredentials(
-    smaugApiGatewayAssumeRoleArn,
-  );
+  const smaugAwsRegion = assert<string>(process.env['AWS_REGION']);
+
+  const credentials = await assumeRoleSmaugCredentials({
+    assumeRoleArn: smaugApiGatewayAssumeRoleArn,
+    awsRegion: smaugAwsRegion,
+  });
 
   const signer = new SignatureV4({
     credentials: {
@@ -98,7 +105,7 @@ export const signRequest = async ({
       secretAccessKey: assert<string>(credentials.SecretAccessKey),
       sessionToken: assert<string>(credentials.SessionToken),
     },
-    region: 'us-east-1',
+    region: smaugAwsRegion,
     service: 'execute-api',
     sha256: Sha256,
   });

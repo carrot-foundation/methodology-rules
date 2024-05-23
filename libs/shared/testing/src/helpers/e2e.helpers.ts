@@ -12,6 +12,7 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
 ) => {
   process.env = {
     ...process.env,
+    AWS_REGION: faker.string.uuid(),
     SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
   };
 
