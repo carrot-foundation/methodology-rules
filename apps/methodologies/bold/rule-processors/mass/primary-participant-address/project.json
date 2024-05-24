@@ -1,6 +1,6 @@
 {
   "name": "methodologies-bold-rule-processors-mass-primary-participant-address",
-  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
   "sourceRoot": "apps/methodologies/bold/rule-processors/mass/primary-participant-address/src",
   "projectType": "application",

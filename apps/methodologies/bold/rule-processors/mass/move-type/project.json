@@ -1,6 +1,6 @@
 {
   "name": "methodologies-bold-rule-processors-mass-move-type",
-  "$schema": "../../../../../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
   "sourceRoot": "apps/methodologies/bold/rule-processors/mass/move-type/src",
   "projectType": "application",
