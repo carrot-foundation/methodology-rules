@@ -542,7 +542,6 @@ export const rejectedMassDocument: Document = {
   initialValue: 0,
   isPublic: true,
   isPubliclySearchable: true,
-  lastProcessedEventDate: lastEventExternalCreatedAt,
   measurementUnit: 'HG',
   permissions: [
     {
