@@ -31,7 +31,6 @@ export interface Document {
   initialValue: number & tags.Minimum<0> & tags.Type<'float'>;
   isPublic?: boolean | undefined;
   isPubliclySearchable: boolean;
-  lastProcessedEventDate: string & tags.Format<'date-time'>;
   measurementUnit: string;
   parentDocumentId?: string | undefined;
   permissions?: Array<UnknownObject> | undefined;

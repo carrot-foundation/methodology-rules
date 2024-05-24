@@ -550,7 +550,6 @@ export const approvedMassDocument: Document = {
   initialValue: 0,
   isPublic: true,
   isPubliclySearchable: true,
-  lastProcessedEventDate: lastEventExternalCreatedAt,
   measurementUnit: 'KG',
   permissions: [
     {
