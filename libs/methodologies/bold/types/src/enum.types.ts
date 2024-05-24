@@ -7,7 +7,7 @@ export enum DocumentCategory {
   METHODOLOGY = 'Methodology',
 }
 
-export enum DocumentEnvironment {
+export enum DataSetName {
   PROD = 'PROD',
   TEST = 'TEST',
 }

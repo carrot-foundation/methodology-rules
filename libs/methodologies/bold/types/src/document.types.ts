@@ -5,8 +5,8 @@ import { tags } from 'typia';
 import type { Address } from './address.types';
 import type { DocumentEvent } from './document-event.types';
 import type {
+  DataSetName,
   DocumentCategory,
-  DocumentEnvironment,
   DocumentSubtype,
   DocumentType,
 } from './enum.types';
@@ -23,7 +23,7 @@ export interface Document {
   category: DocumentCategory | string;
   createdAt: string & tags.Format<'date-time'>;
   currentValue: number & tags.Minimum<0> & tags.Type<'float'>;
-  environment: DocumentEnvironment;
+  dataSetName: DataSetName;
   externalCreatedAt: string & tags.Format<'date-time'>;
   externalEvents?: DocumentEvent[] | undefined;
   externalId?: string | undefined;
