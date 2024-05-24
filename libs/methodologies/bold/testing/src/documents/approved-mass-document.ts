@@ -1,8 +1,8 @@
 /* cSpell:disable */
 import {
+  DataSetName,
   type Document,
   type DocumentAttachment,
-  DocumentEnvironment,
   DocumentEventAttributeName,
   DocumentSubtype,
   DocumentType,
@@ -73,7 +73,7 @@ export const approvedMassDocument: Document = {
   category: 'Mass',
   createdAt: '2023-12-19T13:34:35.785Z',
   currentValue: 109_200,
-  environment: DocumentEnvironment.PROD,
+  dataSetName: DataSetName.PROD,
   externalCreatedAt,
   externalEvents: [
     {

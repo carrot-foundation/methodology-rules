@@ -1,8 +1,8 @@
 /* cSpell:disable */
 import {
+  DataSetName,
   type Document,
   type DocumentAttachment,
-  DocumentEnvironment,
   DocumentEventAttributeName,
 } from '@carrot-fndn/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
@@ -56,7 +56,7 @@ export const rejectedMassDocument: Document = {
   category: 'MAZZ',
   createdAt: '2023-12-19T13:34:35.785Z',
   currentValue: 0,
-  environment: DocumentEnvironment.PROD,
+  dataSetName: DataSetName.PROD,
   externalCreatedAt,
   externalEvents: [
     {

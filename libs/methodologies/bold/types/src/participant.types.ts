@@ -1,4 +1,4 @@
-import type { ParticipantType } from './enum.types';
+import type { DataSetName, ParticipantType } from './enum.types';
 
 export interface Participant {
   countryCode: string;
@@ -10,6 +10,6 @@ export interface Participant {
 
 export interface Author {
   clientId: string;
-  environment: string;
+  dataSetName: DataSetName;
   participantId: string;
 }
