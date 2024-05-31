@@ -4,11 +4,11 @@ export const DOCUMENT_NOT_FOUND_RESULT_COMMENT =
 // TODO: remove when environment variable is implemented
 export const CARROT_PARTICIPANT_BY_ENVIRONMENT = {
   development: {
-    id: '6e8c98d0-6334-44c3-ae2a-e2b08ca65dae',
+    id: 'f5746bcf-8510-46ca-96d8-d4081bda9410',
     name: 'Carrot Foundation',
   },
   production: {
-    id: 'e18326c0-a23c-42f3-8668-d2b0c97a31dd',
+    id: 'aabf119f-6b1e-409a-91fa-521b0f5f0a33',
     name: 'Carrot Foundation',
   },
 };
