@@ -129,7 +129,7 @@ export enum ReportTypeLiteralName {
 }
 
 export enum DocumentEventActorType {
-  APPOINTED_NGO = 'APPOINTED_NGO',
+  APPOINTED_NGO = 'APPOINTED NGO',
   AUDITOR = 'AUDITOR',
   HAULER = 'HAULER',
   INTEGRATOR = 'INTEGRATOR',
