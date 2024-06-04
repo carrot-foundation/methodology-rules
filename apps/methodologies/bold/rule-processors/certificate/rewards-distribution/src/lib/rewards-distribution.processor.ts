@@ -31,7 +31,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { BigNumber } from 'bignumber.js';
-import { assert, is } from 'typia';
+import { is } from 'typia';
 
 import type {
   ActorMassPercentageInputDto,
@@ -70,13 +70,17 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     documentId: string;
     requiredActorTypes: DocumentEventActorType[];
   }) => {
-    const hasRequiredActors = requiredActorTypes.every((requiredActorType) =>
-      actors.some((actor) => actor.type === requiredActorType),
+    const missingRequiredActors = requiredActorTypes.filter(
+      (requiredActorType) =>
+        !actors.some((actor) => actor.type === requiredActorType),
     );
 
-    if (!hasRequiredActors) {
+    if (isNonEmptyArray(missingRequiredActors)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(documentId),
+        this.errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(
+          documentId,
+          missingRequiredActors,
+        ),
       );
     }
   };
@@ -279,11 +283,12 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     );
 
     for (const event of actorEvents) {
-      try {
-        const actorType = assert<RewardsDistributionActorType>(
-          getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE),
-        );
+      const actorType = getEventAttributeValue(
+        event,
+        DocumentEventAttributeName.ACTOR_TYPE,
+      );
 
+      if (is<RewardsDistributionActorType>(actorType)) {
         actors.push({
           participant: {
             id: event.participant.id,
@@ -291,10 +296,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           },
           type: actorType,
         });
-      } catch {
-        throw this.errorProcessor.getKnownError(
-          this.errorProcessor.ERROR_MESSAGE.ACTOR_TYPE_NOT_FOUND,
-        );
       }
     }
 

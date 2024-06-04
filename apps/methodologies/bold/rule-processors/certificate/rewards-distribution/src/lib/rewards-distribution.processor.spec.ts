@@ -54,8 +54,13 @@ const requiredActorEvents = [
     : -1,
 );
 
-const { APPOINTED_NGO, METHODOLOGY_AUTHOR, METHODOLOGY_DEVELOPER, NETWORK } =
-  DocumentEventActorType;
+const {
+  APPOINTED_NGO,
+  METHODOLOGY_AUTHOR,
+  METHODOLOGY_DEVELOPER,
+  NETWORK,
+  SOURCE,
+} = DocumentEventActorType;
 
 const ALL_ACTOR_TYPES = [
   ...REQUIRED_ACTOR_TYPES.MASS,
@@ -186,6 +191,7 @@ describe('RewardsDistributionProcessor', () => {
     expect(result).toMatchObject({
       resultComment: errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(
         documents[1]?.id as string,
+        REQUIRED_ACTOR_TYPES.MASS.filter((actorType) => actorType !== SOURCE),
       ),
       resultStatus: RuleOutputStatus.REJECTED,
     });
@@ -214,13 +220,6 @@ describe('RewardsDistributionProcessor', () => {
           documentId as string,
         ),
       scenario: 'the document does not contain events',
-    },
-    {
-      document: stubMassDocument({
-        externalEvents: [stubDocumentEvent({ name: DocumentEventName.ACTOR })],
-      }),
-      resultComment: () => errorProcessor.ERROR_MESSAGE.ACTOR_TYPE_NOT_FOUND,
-      scenario: 'actor type is not found in ACTOR event',
     },
     {
       document: stubMassDocumentWithRequiredActors({
@@ -608,7 +607,7 @@ describe('RewardsDistributionProcessor', () => {
               certificatePercentage: expect.any(String),
               documentId: massDocument.id,
               massPercentage:
-                actorType === DocumentEventActorType.SOURCE
+                actorType === SOURCE
                   ? formatPercentage(
                       fiftyPercentageDiscount(rewardDistribution[actorType]),
                     ) // SOURCE (50% of SOURCE percentage) -> APPOINTED_NGO
@@ -631,7 +630,7 @@ describe('RewardsDistributionProcessor', () => {
     const sourceActorEvent = massDocument.externalEvents!.find(
       (event) =>
         getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE) ===
-        DocumentEventActorType.SOURCE,
+        SOURCE,
     );
 
     const data = random<RuleInput>();
@@ -648,7 +647,7 @@ describe('RewardsDistributionProcessor', () => {
     expect(result.resultContent).toMatchObject({
       massRewards: expect.arrayContaining([
         {
-          actorType: DocumentEventActorType.SOURCE,
+          actorType: SOURCE,
           certificatePercentage: expect.any(String),
           documentId: massDocument.id,
           massPercentage: formatPercentage(
