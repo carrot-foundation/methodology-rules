@@ -41,6 +41,19 @@ describe('NetWeightVerificationProcessor', () => {
         externalEvents: [
           replaceMetadataAttributeValue(
             stubWeighingMoveEvent(),
+            DocumentEventAttributeName.LOAD_NET_WEIGHT,
+            '',
+          ),
+        ],
+      }),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario: 'no load-net-weight attribute',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          replaceMetadataAttributeValue(
+            stubWeighingMoveEvent(),
             DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
             '12.00 KG',
           ),
