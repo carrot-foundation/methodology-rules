@@ -52,7 +52,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
       const attributes = extractWeightAttributes(event);
 
       if (!attributes) {
-        return false;
+        return true;
       }
 
       const { loadNetWeight, vehicleGrossWeight, vehicleWeight } = attributes;

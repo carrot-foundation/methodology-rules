@@ -378,17 +378,17 @@ export const rejectedMassDocument: Document = {
           {
             isPublic: true,
             name: 'vehicle-gross-weight',
-            value: '128900.00 HG',
+            value: '128900.00 KG',
           },
           {
             isPublic: true,
             name: 'vehicle-weight',
-            value: '19700.00 HG',
+            value: '19700.00 KG',
           },
           {
             isPublic: true,
             name: 'load-net-weight',
-            value: '109200.00 HG',
+            value: '1092000.00 KG',
           },
         ],
       },
