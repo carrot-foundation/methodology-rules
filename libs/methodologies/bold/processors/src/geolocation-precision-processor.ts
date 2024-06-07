@@ -38,6 +38,7 @@ import {
   compareAddresses,
   getParticipantHomologationDocument,
   homologationIsNotExpired,
+  mapMassDocumentAddress,
   participantHomologationCriteria,
 } from './geolocation-precision.helpers';
 
@@ -148,7 +149,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
 
     return {
       homologationDocument: participantHomologationDocument,
-      massDocumentAddress: massDocumentEvent.address,
+      massDocumentAddress: mapMassDocumentAddress(massDocumentEvent),
     };
   }
 

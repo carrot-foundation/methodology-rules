@@ -14,6 +14,7 @@ import {
 import {
   type Address,
   type Document,
+  type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   type DocumentSubtype,
@@ -106,4 +107,25 @@ export const compareAddresses = (
     pick(addressA, 'latitude', 'longitude'),
     pick(addressB, 'latitude', 'longitude'),
   );
+};
+
+export const mapMassDocumentAddress = (event: DocumentEvent): Address => {
+  const gpsLatitude = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.APP_GPS_LATITUDE,
+  );
+  const gpsLongitude = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.APP_GPS_LONGITUDE,
+  );
+
+  if (is<number>(gpsLatitude) && is<number>(gpsLongitude)) {
+    return {
+      ...event.address,
+      latitude: gpsLatitude,
+      longitude: gpsLongitude,
+    };
+  }
+
+  return event.address;
 };
