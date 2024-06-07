@@ -25,7 +25,7 @@ jobs:
         if: ${{ failure() && github.ref_name == 'main' }}
         with:
           slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
-          message: "Backend ESLint job failed :suffering_cat:"
+          message: 'Backend ESLint job failed :suffering_cat:'
 
   backend-typescript:
     name: TypeScript
@@ -43,7 +43,7 @@ jobs:
         if: ${{ failure() && github.ref_name == 'main' }}
         with:
           slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
-          message: "Backend TypeScript job failed :suffering_cat:"
+          message: 'Backend TypeScript job failed :suffering_cat:'
 
   backend-tests:
     name: Tests
@@ -63,9 +63,11 @@ jobs:
         if: ${{ failure() && github.ref_name == 'main' }}
         with:
           slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL_PIPELINE }}
-          message: "Backend Tests job failed :suffering_cat:"
+          message: 'Backend Tests job failed :suffering_cat:'
 
       - name: Upload coverage reports to Codecov with GitHub Action
         uses: codecov/codecov-action@v4.2.0
+        with:
+          directory: ./coverage
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
