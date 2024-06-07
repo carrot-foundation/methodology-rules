@@ -1,5 +1,9 @@
 import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
+import type {
+  Latitude,
+  Longitude,
+  NonEmptyString,
+} from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
 import {
@@ -109,6 +113,23 @@ export const compareAddresses = (
   );
 };
 
+export const isMetadataGeolocationValid = (event: DocumentEvent): boolean => {
+  const gpsLatitude = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.APP_GPS_LATITUDE,
+  );
+  const gpsLongitude = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.APP_GPS_LONGITUDE,
+  );
+
+  if (isNil(gpsLatitude) && isNil(gpsLongitude)) {
+    return true;
+  }
+
+  return is<Latitude>(gpsLatitude) && is<Longitude>(gpsLongitude);
+};
+
 export const mapMassDocumentAddress = (event: DocumentEvent): Address => {
   const gpsLatitude = getEventAttributeValue(
     event,
@@ -119,13 +140,9 @@ export const mapMassDocumentAddress = (event: DocumentEvent): Address => {
     DocumentEventAttributeName.APP_GPS_LONGITUDE,
   );
 
-  if (is<number>(gpsLatitude) && is<number>(gpsLongitude)) {
-    return {
-      ...event.address,
-      latitude: gpsLatitude,
-      longitude: gpsLongitude,
-    };
-  }
-
-  return event.address;
+  return {
+    ...event.address,
+    latitude: (gpsLatitude ?? event.address.latitude) as Latitude,
+    longitude: (gpsLongitude ?? event.address.longitude) as Longitude,
+  };
 };

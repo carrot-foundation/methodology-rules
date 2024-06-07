@@ -15,7 +15,6 @@ import {
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/predicates';
 import {
-  type Address,
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
@@ -38,6 +37,7 @@ import {
   compareAddresses,
   getParticipantHomologationDocument,
   homologationIsNotExpired,
+  isMetadataGeolocationValid,
   mapMassDocumentAddress,
   participantHomologationCriteria,
 } from './geolocation-precision.helpers';
@@ -47,17 +47,19 @@ const { MOVE_TYPE } = DocumentEventAttributeName;
 
 export interface RuleSubject {
   homologationDocument?: Document | undefined;
-  massDocumentAddress?: Address | undefined;
+  massDocumentEvent?: DocumentEvent | undefined;
 }
 
 export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcessor {
   ResultComment = {
-    EVENT_NOT_FOUND: 'Rule not applicable: The MOVE event was not found',
+    EVENT_NOT_FOUND: 'Rule not applicable: The EVENT was not found',
     HOMOLOGATION_ADDRESS_NOT_FOUND: 'Homologation address was not found',
     HOMOLOGATION_DOCUMENT_NOT_FOUND: 'Homologation document was not found',
     HOMOLOGATION_EXPIRED: 'Homologation document has expired',
+    METADATA_GEOLOCATION_INVALID:
+      'The app-gps geolocation data type is invalid',
     REJECTED: 'The address geolocation precision is greater than 2',
-  };
+  } as const;
 
   private createResultOutput(isValid: boolean) {
     return {
@@ -69,12 +71,21 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
 
   private evaluateResult({
     homologationDocument,
-    massDocumentAddress,
+    massDocumentEvent,
   }: RuleSubject): EvaluateResultOutput {
-    if (isNil(massDocumentAddress)) {
+    if (isNil(massDocumentEvent)) {
       return {
         resultComment: this.ResultComment.EVENT_NOT_FOUND,
         resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
+
+    const valid = isMetadataGeolocationValid(massDocumentEvent);
+
+    if (!valid) {
+      return {
+        resultComment: this.ResultComment.METADATA_GEOLOCATION_INVALID,
+        resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
@@ -103,7 +114,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
     }
 
     const isSameAddress = compareAddresses(
-      massDocumentAddress,
+      mapMassDocumentAddress(massDocumentEvent),
       homologationAddress,
     );
 
@@ -149,7 +160,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
 
     return {
       homologationDocument: participantHomologationDocument,
-      massDocumentAddress: mapMassDocumentAddress(massDocumentEvent),
+      massDocumentEvent,
     };
   }
 

@@ -407,6 +407,73 @@ describe('GeolocationPrecisionRuleProcessor', () => {
       scenario:
         'should return REJECTED when the app-gps-latitude and app-gps-longitude are found and the geolocation precision is not valid',
     },
+    {
+      documents: [
+        {
+          ...massDocumentStub,
+          externalEvents: [
+            {
+              ...pickUpEvent,
+              metadata: {
+                attributes: [
+                  ...(pickUpEvent.metadata?.attributes ?? []),
+                  {
+                    isPublic: false,
+                    name: DocumentEventAttributeName.APP_GPS_LATITUDE,
+                    value: faker.string.uuid(),
+                  },
+                  {
+                    isPublic: false,
+                    name: DocumentEventAttributeName.APP_GPS_LONGITUDE,
+                    value: faker.string.uuid(),
+                  },
+                ],
+              },
+            },
+            stubDocumentEvent({
+              name: DocumentEventName.OUTPUT,
+              relatedDocument: massValidationReference,
+            }),
+          ],
+        },
+        recyclerHomologationDocumentStub,
+      ],
+      resultComment:
+        ruleDataProcessor['ResultComment'].METADATA_GEOLOCATION_INVALID,
+      scenario:
+        'should return REKECTED when the app-gps-latitude and app-gps-longitude are invalid data types',
+    },
+    {
+      documents: [
+        {
+          ...massDocumentStub,
+          externalEvents: [
+            {
+              ...pickUpEvent,
+              metadata: {
+                attributes: [
+                  ...(pickUpEvent.metadata?.attributes ?? []),
+                  {
+                    isPublic: false,
+                    name: DocumentEventAttributeName.APP_GPS_LATITUDE,
+                    value: faker.location.latitude(),
+                  },
+                ],
+              },
+            },
+            stubDocumentEvent({
+              name: DocumentEventName.OUTPUT,
+              relatedDocument: massValidationReference,
+            }),
+          ],
+        },
+        recyclerHomologationDocumentStub,
+      ],
+      resultComment:
+        ruleDataProcessor['ResultComment'].METADATA_GEOLOCATION_INVALID,
+      scenario:
+        'should return REJECTED when the app-gps-latitude is found but the app-gps-longitude is not',
+    },
   ])('$scenario', async ({ documents, resultComment }) => {
     spyOnDocumentQueryServiceLoad(stubDocument(), [
       massValidationDocumentStub,
