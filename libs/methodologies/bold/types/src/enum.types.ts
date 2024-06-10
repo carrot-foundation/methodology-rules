@@ -75,6 +75,8 @@ export enum DocumentEventName {
 
 export enum DocumentEventAttributeName {
   ACTOR_TYPE = 'actor-type',
+  APP_GPS_LATITUDE = 'app-gps-latitude',
+  APP_GPS_LONGITUDE = 'app-gps-longitude',
   CERTIFICATE_VALUE_LABEL = 'certificate-value-label',
   DRIVER_INTERNAL_ID = 'driver-internal-id',
   EVENT_VALUE = 'event-value',
