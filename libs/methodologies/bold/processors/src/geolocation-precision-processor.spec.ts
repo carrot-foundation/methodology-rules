@@ -441,7 +441,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
       resultComment:
         ruleDataProcessor['ResultComment'].METADATA_GEOLOCATION_INVALID,
       scenario:
-        'should return REKECTED when the app-gps-latitude and app-gps-longitude are invalid data types',
+        'should return REJECTED when the app-gps-latitude and app-gps-longitude are invalid data types',
     },
     {
       documents: [
