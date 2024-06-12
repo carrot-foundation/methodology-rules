@@ -12,6 +12,7 @@ import {
   STSClient,
 } from '@aws-sdk/client-sts';
 import { fromEnv } from '@aws-sdk/credential-providers';
+import { logger } from '@carrot-fndn/shared/helpers';
 import { SignatureV4 } from '@smithy/signature-v4';
 import { assert } from 'typia';
 
@@ -148,8 +149,7 @@ export const reportRuleResults = async (
       );
     }
   } catch (error) {
-    // TODO: use logger API
-    console.error('Failed to report rule results', error);
+    logger.error(error, 'Failed to report rule results');
 
     throw error;
   }

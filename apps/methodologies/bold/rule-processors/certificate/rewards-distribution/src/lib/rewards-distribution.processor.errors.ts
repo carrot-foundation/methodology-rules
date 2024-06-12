@@ -1,3 +1,5 @@
+import { logger } from '@carrot-fndn/shared/helpers';
+
 export class RewardsDistributionProcessorErrors {
   private readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
 
@@ -28,8 +30,7 @@ export class RewardsDistributionProcessorErrors {
       return this.getKnownErrorMessage(error);
     }
 
-    // TODO: replace by logger when implemented
-    console.error(error);
+    logger.error(error, 'Unexpected error on "processKnownError" method');
 
     return undefined;
   }

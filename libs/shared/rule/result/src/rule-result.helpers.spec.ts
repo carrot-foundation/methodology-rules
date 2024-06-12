@@ -5,6 +5,7 @@ import type {
 } from '@carrot-fndn/shared/rule/types';
 
 import { STSClient } from '@aws-sdk/client-sts';
+import { logger } from '@carrot-fndn/shared/helpers';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -203,13 +204,13 @@ describe('reportRuleResults', () => {
     } as never);
 
     jest.spyOn(global, 'fetch').mockRejectedValueOnce(errorResponse);
-    jest.spyOn(console, 'error').mockImplementationOnce(() => {});
+    jest.spyOn(logger, 'error').mockImplementationOnce(() => {});
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBe(errorResponse);
 
-    expect(console.error).toHaveBeenCalledWith(
-      'Failed to report rule results',
+    expect(logger.error).toHaveBeenCalledWith(
       expect.anything(),
+      'Failed to report rule results',
     );
 
     expect(fetch).toHaveBeenCalled();
