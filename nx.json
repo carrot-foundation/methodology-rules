@@ -81,14 +81,13 @@
     },
     "upload-lambda": {
       "executor": "nx:run-commands",
-      "cache": true,
       "inputs": [
         "build",
         "^production",
         "{workspaceRoot}/scripts/package-lambda.sh",
         "{workspaceRoot}/scripts/upload-lambda.sh"
       ],
-      "dependsOn": ["package-lambda"],
+      "dependsOn": ["ts", "lint", "test", "package-lambda"],
       "options": {
         "commands": [
           "{workspaceRoot}/scripts/upload-lambda.sh {projectRoot} {args.zipPath} {args.environment}",

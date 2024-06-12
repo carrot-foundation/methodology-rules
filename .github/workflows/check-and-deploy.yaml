@@ -3,9 +3,9 @@ name: Check and Deploy
 on:
   push:
     branches:
-      - "**"
+      - '**'
     tags-ignore:
-      - "**"
+      - '**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,7 +29,7 @@ jobs:
 
       - id: affected
         run: |
-          echo "backend=$([ $(pnpm nx show projects -t lint ts --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
+          echo "backend=$([ $(pnpm nx show projects -t lint ts test --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
           echo "upload-lambda=$([ $(pnpm nx show projects -t upload-lambda --affected --json) = '[]' ] && echo 'false' || echo 'true')" >> $GITHUB_OUTPUT
 
   backend-check:
@@ -43,6 +43,6 @@ jobs:
   deploy:
     name: Deploy
     needs: [affected, backend-check]
-    if: ${{ github.ref_name == 'main' && needs.affected.outputs.upload-lambda == 'true' && (needs.backend-check.result == 'success' || needs.backend-check.result == 'skipped') }}
+    if: ${{ github.ref_name == 'main' && needs.affected.outputs.upload-lambda == 'true' }}
     uses: ./.github/workflows/deploy.yaml
     secrets: inherit
