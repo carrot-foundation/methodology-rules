@@ -6,6 +6,7 @@ import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Handler } from 'aws-lambda';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
 import { AWSLambda, setTags } from '@sentry/serverless';
 
@@ -43,7 +44,7 @@ export const wrapRuleIntoLambdaHandler = (
   ): Promise<MethodologyRuleResponse> => {
     const ruleInput = mapEventToRuleInput(event);
 
-    console.log(`Calling rule with input ${JSON.stringify(ruleInput)}`);
+    logger.info({ ruleInput }, 'Rule invoked');
 
     try {
       const ruleOutput = await rule.process(ruleInput);

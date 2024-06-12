@@ -4,3 +4,4 @@ export * from './common.helpers';
 export * from './document.helpers';
 export * from './math.helpers';
 export * from './string.helpers';
+export * from './logger.helpers';
