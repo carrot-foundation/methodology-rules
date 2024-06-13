@@ -37,6 +37,8 @@ export const wrapRuleIntoLambdaHandler = (
 ): Handler<MethodologyRuleEvent, MethodologyRuleResponse> => {
   AWSLambda.init({
     dsn: String(process.env['SENTRY_DSN']),
+    enabled: String(process.env['NODE_ENV']) === 'production',
+    environment: String(process.env['ENVIRONMENT']),
   });
 
   const handler = async (
