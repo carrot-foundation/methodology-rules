@@ -346,7 +346,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           ],
         },
       ],
-      resultComment: undefined,
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       scenario:
         'should return REJECTED when the homologation address is different from the mass document address',
     },
@@ -369,7 +369,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           ],
         },
       ],
-      resultComment: undefined,
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       scenario:
         'should return REJECTED when the homologation address is equal but the distance is greater than 2',
     },
@@ -404,6 +404,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
         },
         recyclerHomologationDocumentStub,
       ],
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       scenario:
         'should return REJECTED when the app-gps-latitude and app-gps-longitude are found and the geolocation precision is not valid',
     },
