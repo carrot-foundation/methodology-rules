@@ -22,7 +22,7 @@ import { assert, random, validate } from 'typia';
 import type {
   CertificateMetadata,
   MassMetadata,
-  MethodologyOfferNftMetadataDto,
+  MethodologyCreditNftMetadataDto,
 } from './nft-metadata-selection.dto';
 import type { DocumentLinks } from './nft-metadata-selection.processor';
 
@@ -219,11 +219,11 @@ describe('Helpers', () => {
 
   describe('mapNftMetadata', () => {
     it('should map the nft metadata correctly', () => {
-      const methodologyOfferNftMetadataDtoStub =
-        random<MethodologyOfferNftMetadataDto>();
+      const methodologyCreditNftMetadataDtoStub =
+        random<MethodologyCreditNftMetadataDto>();
 
       // @ts-expect-error: We are stubbing forced values
-      const result = mapNftMetadata(methodologyOfferNftMetadataDtoStub);
+      const result = mapNftMetadata(methodologyCreditNftMetadataDtoStub);
 
       const validation = validate(result);
 
@@ -327,7 +327,7 @@ describe('Helpers', () => {
       });
 
       expect(() => findMassValidationId(documentStub, new Map())).toThrow(
-        `Mass document ${documentStub.id} does not have an available mass validation document this offer`,
+        `Mass document ${documentStub.id} does not have an available mass validation document this credit`,
       );
     });
 
@@ -359,7 +359,7 @@ describe('Helpers', () => {
       ]);
 
       expect(() => findMassValidationId(documentStub, documentsLinks)).toThrow(
-        `Mass document ${documentStub.id} has more than one available mass validation document this offer`,
+        `Mass document ${documentStub.id} has more than one available mass validation document this credit`,
       );
     });
 
@@ -399,18 +399,18 @@ describe('Helpers', () => {
   describe('mapNftMetadataDto', () => {
     it('should map the nft metadata dto correctly', () => {
       const ruleInputDto = stubRuleInput();
-      const dtoStub = random<MethodologyOfferNftMetadataDto>();
+      const dtoStub = random<MethodologyCreditNftMetadataDto>();
 
       // @ts-expect-error: We are stubbing forced values
       const result = mapNftMetadataDto(dtoStub, ruleInputDto);
 
-      const validation = validate<MethodologyOfferNftMetadataDto>(result);
+      const validation = validate<MethodologyCreditNftMetadataDto>(result);
 
       expect(validation.errors).toEqual([]);
     });
 
     it('should throw an error if the the return value is incorrect', () => {
-      const dtoStub = random<MethodologyOfferNftMetadataDto>();
+      const dtoStub = random<MethodologyCreditNftMetadataDto>();
 
       expect(() =>
         // @ts-expect-error: force invalid return value

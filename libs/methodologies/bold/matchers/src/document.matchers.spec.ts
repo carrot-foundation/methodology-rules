@@ -179,8 +179,8 @@ describe('Document Matchers', () => {
     });
   });
 
-  describe('OFFER_CERTIFICATES', () => {
-    it('should return true if the document category is Methodology and type is Offer Certificates', () => {
+  describe('CREDIT_CERTIFICATES', () => {
+    it('should return true if the document category is Methodology and type is Credit Certificates', () => {
       const documentReference = stubDocumentReference({
         category: CREDIT_CERTIFICATES.match.category,
         subtype: CREDIT_CERTIFICATES.match.subtype,
@@ -203,7 +203,7 @@ describe('Document Matchers', () => {
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Offer Certificates', () => {
+    it('should return false if the document type is not Credit Certificates', () => {
       const documentReference = stubDocumentReference({
         category: CREDIT_CERTIFICATES.match.category,
         type: DocumentType.MASS_VALIDATION,

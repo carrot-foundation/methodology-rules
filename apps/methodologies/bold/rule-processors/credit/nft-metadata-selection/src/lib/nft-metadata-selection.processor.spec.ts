@@ -27,12 +27,12 @@ import { NftMetadataSelection } from './nft-metadata-selection.processor';
 import {
   stubCertificateAuditDocument,
   stubCertificateDocument,
+  stubCreditCertificatesDocument,
   stubDocumentOutputEvent,
   stubDocumentRelatedEvent,
   stubMassDocument,
   stubMassValidationDocument,
   stubMethodologyDefinitionDocument,
-  stubOfferCertificatesDocument,
 } from './nft-metadata-selection.stubs';
 
 const {
@@ -49,9 +49,9 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 describe('NftMetadataSelection', () => {
   const ruleDataProcessor = new NftMetadataSelection();
 
-  const offerDocumentId = faker.string.uuid();
+  const creditDocumentId = faker.string.uuid();
 
-  const offerCertificatesReference: DocumentReference = {
+  const creditCertificatesReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
     documentId: faker.string.uuid(),
     subtype: DocumentSubtype.GROUP,
@@ -80,14 +80,14 @@ describe('NftMetadataSelection', () => {
       documentId: faker.string.uuid(),
     };
 
-    const offerCertificatesDocumentStub = stubOfferCertificatesDocument({
+    const creditCertificatesDocumentStub = stubCreditCertificatesDocument({
       externalEvents: [stubDocumentRelatedEvent(certificateAuditReference)],
-      id: offerCertificatesReference.documentId,
-      parentDocumentId: offerDocumentId,
+      id: creditCertificatesReference.documentId,
+      parentDocumentId: creditDocumentId,
     });
     const certificateAuditDocumentStub = stubCertificateAuditDocument({
       externalEvents: [
-        stubDocumentRelatedEvent(offerCertificatesReference),
+        stubDocumentRelatedEvent(creditCertificatesReference),
         stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [
           [RULE_SLUG, REWARDS_DISTRIBUTION],
           [RULE_PROCESSOR_CODE_VERSION, faker.git.commitSha()],
@@ -125,7 +125,7 @@ describe('NftMetadataSelection', () => {
 
     const documents = [
       stubMethodologyDefinitionDocument(),
-      offerCertificatesDocumentStub,
+      creditCertificatesDocumentStub,
       certificateAuditDocumentStub,
       certificateDocumentStub,
       massValidationDocumentStub,
@@ -136,7 +136,7 @@ describe('NftMetadataSelection', () => {
 
     const result = await ruleDataProcessor.process({
       ...random<RuleInput>(),
-      documentId: offerDocumentId,
+      documentId: creditDocumentId,
     });
 
     const validation = validate<NftMetadata>(result.resultContent);
@@ -178,19 +178,19 @@ describe('NftMetadataSelection', () => {
       2,
     );
 
-    const offerCertificatesDocumentsStub = stubOfferCertificatesDocument({
+    const creditCertificatesDocumentsStub = stubCreditCertificatesDocument({
       externalEvents: certificateAuditsReferences.map((certificateAudit) =>
         stubDocumentRelatedEvent(certificateAudit),
       ),
-      id: offerCertificatesReference.documentId,
-      parentDocumentId: offerDocumentId,
+      id: creditCertificatesReference.documentId,
+      parentDocumentId: creditDocumentId,
     });
 
     const certificateAuditsDocumentsStubs = certificatesReferences.map(
       (certificate, index) =>
         stubCertificateAuditDocument({
           externalEvents: [
-            stubDocumentRelatedEvent(offerCertificatesReference),
+            stubDocumentRelatedEvent(creditCertificatesReference),
             stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [
               [RULE_SLUG, REWARDS_DISTRIBUTION],
               [RULE_PROCESSOR_CODE_VERSION, faker.git.commitSha()],
@@ -257,7 +257,7 @@ describe('NftMetadataSelection', () => {
 
     spyOnDocumentQueryServiceLoad(stubDocument(), [
       stubMethodologyDefinitionDocument(),
-      offerCertificatesDocumentsStub,
+      creditCertificatesDocumentsStub,
       ...certificateAuditsDocumentsStubs,
       ...certificatesDocumentsStubs,
       ...massValidationsDocumentStubs,
@@ -266,7 +266,7 @@ describe('NftMetadataSelection', () => {
 
     const result = await ruleDataProcessor.process({
       ...random<RuleInput>(),
-      documentId: offerDocumentId,
+      documentId: creditDocumentId,
     });
 
     const resultContent = result.resultContent as NftMetadata;

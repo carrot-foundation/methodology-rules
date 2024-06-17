@@ -26,8 +26,8 @@ import {
 import { NFT_METADATA_SELECTION_CRITERIA } from './nft-metadata-selection.constants';
 import {
   type CertificateMetadata,
+  type MethodologyCreditNftMetadataDto,
   type MethodologyMetadata,
-  type MethodologyOfferNftMetadataDto,
   type RewardsDistributionMetadata,
 } from './nft-metadata-selection.dto';
 import {
@@ -64,7 +64,7 @@ export class NftMetadataSelection extends RuleDataProcessor {
 
   private async getRuleSubject(
     documentQuery: DocumentQuery<Document>,
-  ): Promise<Omit<MethodologyOfferNftMetadataDto, 'offerDocumentId'>> {
+  ): Promise<Omit<MethodologyCreditNftMetadataDto, 'creditDocumentId'>> {
     const documentsLinks = new Map<string, DocumentLinks>();
     const certificates = new Map<string, CertificateMetadata>();
 

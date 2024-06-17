@@ -37,13 +37,13 @@ import { handler } from '../lambda';
 import {
   stubCertificateAuditDocument,
   stubCertificateDocument,
+  stubCreditCertificatesDocument,
+  stubCreditDocument,
   stubDocumentOutputEvent,
   stubDocumentRelatedEvent,
   stubMassDocument,
   stubMassValidationDocument,
   stubMethodologyDefinitionDocument,
-  stubOfferCertificatesDocument,
-  stubOfferDocument,
 } from './nft-metadata-selection.stubs';
 
 const { RECYCLER } = DocumentEventActorType;
@@ -62,12 +62,12 @@ const { CERTIFICATE, CERTIFICATE_AUDIT, CREDIT_CERTIFICATES, MASS_VALIDATION } =
 
 describe('NftMetadataSelection E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
-  const offerDocumentId = faker.string.uuid();
+  const creditDocumentId = faker.string.uuid();
 
   // TODO: Refac this test to use a builder or a stub that prepares the documents https://app.clickup.com/t/86a36ut5a
-  const offerDocumentReference: DocumentReference = {
+  const creditDocumentReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
-    documentId: offerDocumentId,
+    documentId: creditDocumentId,
     type: DocumentType.CREDIT,
   };
   const certificateAuditsReferences: DocumentReference[] = stubArray(
@@ -102,7 +102,7 @@ describe('NftMetadataSelection E2E', () => {
     }),
     2,
   );
-  const offerCertificatesReference: DocumentReference = {
+  const creditCertificatesReference: DocumentReference = {
     category: METHODOLOGY,
     documentId: faker.string.uuid(),
     subtype: DocumentSubtype.GROUP,
@@ -114,30 +114,30 @@ describe('NftMetadataSelection E2E', () => {
     type: DocumentType.DEFINITION,
   };
 
-  const offerDocumentStub = stubOfferDocument({
+  const creditDocumentStub = stubCreditDocument({
     externalEvents: [
-      stubDocumentOutputEvent(offerCertificatesReference),
+      stubDocumentOutputEvent(creditCertificatesReference),
       stubDocumentEvent({
         name: LINK,
         relatedDocument: methodologyDefinitionReference,
       }),
     ],
-    id: offerDocumentReference.documentId,
+    id: creditDocumentReference.documentId,
   });
 
-  const offerCertificatesDocumentStub = stubOfferCertificatesDocument({
+  const creditCertificatesDocumentStub = stubCreditCertificatesDocument({
     externalEvents: certificateAuditsReferences.map((certificateAudit) =>
       stubDocumentRelatedEvent(certificateAudit),
     ),
-    id: offerCertificatesReference.documentId,
-    parentDocumentId: offerDocumentId,
+    id: creditCertificatesReference.documentId,
+    parentDocumentId: creditDocumentId,
   });
 
   const certificateAuditsDocumentsStubs = certificatesReferences.map(
     (certificate, index) =>
       stubCertificateAuditDocument({
         externalEvents: [
-          stubDocumentRelatedEvent(offerCertificatesReference),
+          stubDocumentRelatedEvent(creditCertificatesReference),
           stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [
             [RULE_SLUG, REWARDS_DISTRIBUTION],
             [RULE_PROCESSOR_CODE_VERSION, faker.git.commitSha()],
@@ -204,9 +204,9 @@ describe('NftMetadataSelection E2E', () => {
   });
 
   const documents: Document[] = [
-    offerDocumentStub,
+    creditDocumentStub,
     methodologyDefinitionDocumentStub,
-    offerCertificatesDocumentStub,
+    creditCertificatesDocumentStub,
     ...certificateAuditsDocumentsStubs,
     ...certificatesDocumentsStubs,
     ...massValidationsDocumentStubs,
@@ -228,7 +228,7 @@ describe('NftMetadataSelection E2E', () => {
   it('should return the rule output APPROVED and with the extracted NFT metadata', async () => {
     const response = (await handler(
       stubRuleInput({
-        documentId: offerDocumentId,
+        documentId: creditDocumentId,
         documentKeyPrefix,
       }),
       stubContext(),

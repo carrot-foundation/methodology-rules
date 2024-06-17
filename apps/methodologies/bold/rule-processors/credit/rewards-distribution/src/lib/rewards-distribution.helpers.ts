@@ -21,7 +21,7 @@ export const formatPercentage = (percentage: BigNumber): BigNumber =>
 export const formatDecimalPlaces = (value: BigNumber): BigNumber =>
   value.decimalPlaces(6, BigNumber.ROUND_DOWN);
 
-export const calculateOfferPercentage = (
+export const calculateCreditPercentage = (
   amount: BigNumber,
   amountTotal: BigNumber,
 ): string =>
@@ -99,7 +99,7 @@ export const aggregateCertificateRewards = (
     resultContentsWithMassValue.map(({ massValue }) => massValue),
   );
 
-  const offerTotal = formatDecimalPlaces(
+  const creditTotal = formatDecimalPlaces(
     massTotalValue.multipliedBy(unitPrice),
   );
 
@@ -122,7 +122,10 @@ export const aggregateCertificateRewards = (
         actorType,
         amount,
         participant,
-        percentage: calculateOfferPercentage(new BigNumber(amount), offerTotal),
+        percentage: calculateCreditPercentage(
+          new BigNumber(amount),
+          creditTotal,
+        ),
       });
     }
   }

@@ -46,8 +46,8 @@ describe('Rewards Distribution Helpers', () => {
     });
   });
 
-  describe('calculateOfferPercentage', () => {
-    it('should return the correct percentage that the participant has in the offer', () => {
+  describe('calculateCreditPercentage', () => {
+    it('should return the correct percentage that the participant has in the credit', () => {
       const result = formatDecimalPlaces(
         new BigNumber('13.6898828123'),
       ).toString();
@@ -85,7 +85,7 @@ describe('Rewards Distribution Helpers', () => {
   });
 
   describe('calculateRemainder', () => {
-    it('should return the correct remainder of the offer', () => {
+    it('should return the correct remainder of the credit', () => {
       const massTotalValue = new BigNumber(2500);
       const actors: ActorsByActorType = new Map();
 
