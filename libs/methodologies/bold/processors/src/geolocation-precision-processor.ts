@@ -61,14 +61,6 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
     REJECTED: 'The address geolocation precision is greater than 2',
   } as const;
 
-  private createResultOutput(isValid: boolean) {
-    return {
-      resultStatus: isValid
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
-    };
-  }
-
   private evaluateResult({
     homologationDocument,
     massDocumentEvent,
@@ -118,7 +110,12 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
       homologationAddress,
     );
 
-    return this.createResultOutput(isSameAddress);
+    return {
+      resultComment: isSameAddress ? undefined : this.ResultComment.REJECTED,
+      resultStatus: isSameAddress
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED,
+    };
   }
 
   private async getRuleSubject(
