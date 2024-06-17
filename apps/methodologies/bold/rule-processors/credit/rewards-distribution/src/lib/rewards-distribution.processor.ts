@@ -46,8 +46,8 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   private ErrorMessage = {
     CERTIFICATE_AUDITS_NOT_FOUND: 'The Certificate Audits was not found',
-    INVALID_UNIT_PRICE: 'Unit Price in Offer document is not a string number',
-    OFFER_NOT_FOUND: 'The Offer was not found',
+    CREDIT_NOT_FOUND: 'The Credit was not found',
+    INVALID_UNIT_PRICE: 'Unit Price in Credit document is not a string number',
     UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT: (id: string) =>
       `${RULE_PROCESSOR_RESULT_CONTENT} is not with the expected value for the id ${id}`,
   };
@@ -80,7 +80,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   ) {
     const { certificateAuditsQuery, documentQueryService } = documentQueries;
 
-    const offer = await loadParentDocument(
+    const credit = await loadParentDocument(
       this.context.documentLoaderService,
       toDocumentKey({
         documentId: ruleInput.documentId,
@@ -147,7 +147,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     );
 
     return {
-      offer,
+      credit,
       resultContentsWithMassValue,
     };
   }
@@ -155,18 +155,18 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   private result(
     ruleInput: RuleInput,
     ruleSubject: {
-      offer: Document | undefined;
+      credit: Document | undefined;
       resultContentsWithMassValue: ResultContentWithMassValue[];
     },
   ) {
-    const { offer, resultContentsWithMassValue } = ruleSubject;
+    const { credit, resultContentsWithMassValue } = ruleSubject;
 
-    if (isNil(offer)) {
-      throw new Error(this.ErrorMessage.OFFER_NOT_FOUND);
+    if (isNil(credit)) {
+      throw new Error(this.ErrorMessage.CREDIT_NOT_FOUND);
     }
 
     const unitPrice = getEventAttributeValue(
-      offer.externalEvents?.find(eventNameIsAnyOf([OPEN])),
+      credit.externalEvents?.find(eventNameIsAnyOf([OPEN])),
       UNIT_PRICE,
     );
 

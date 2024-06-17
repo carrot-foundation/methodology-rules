@@ -116,7 +116,7 @@ export const stubMassValidationDocumentWithActorAndAttribute = (
     ],
   });
 
-export const stubOfferDocument = (
+export const stubCreditDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
@@ -125,7 +125,7 @@ export const stubOfferDocument = (
     ...partialDocument,
   });
 
-export const stubOfferCertificatesDocument = (
+export const stubCreditCertificatesDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({

@@ -75,7 +75,7 @@ export const stubCertificateAuditDocument = (
   type: DocumentType.CERTIFICATE_AUDIT,
 });
 
-export const stubOfferDocument = (partialDocument?: Partial<Document>) => ({
+export const stubCreditDocument = (partialDocument?: Partial<Document>) => ({
   ...random<RequiredDeep<Document>>(),
   ...partialDocument,
   category: DocumentCategory.METHODOLOGY,
@@ -99,7 +99,7 @@ export const stubMassDocument = (
   category: DocumentCategory.MASS,
 });
 
-export const stubOfferCertificatesDocument = (
+export const stubCreditCertificatesDocument = (
   partialDocument?: Partial<Document>,
 ): Document => ({
   ...random<RequiredDeep<Document>>(),

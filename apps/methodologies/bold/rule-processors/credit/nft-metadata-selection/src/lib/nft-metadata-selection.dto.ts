@@ -41,9 +41,9 @@ export interface RewardsDistributionMetadata {
   policyVersion: NonEmptyString;
 }
 
-export interface MethodologyOfferNftMetadataDto {
+export interface MethodologyCreditNftMetadataDto {
   certificates: NonEmptyArray<CertificateMetadata>;
+  creditDocumentId: NonEmptyString;
   methodology: MethodologyMetadata;
-  offerDocumentId: NonEmptyString;
   rewardsDistribution: RewardsDistributionMetadata;
 }

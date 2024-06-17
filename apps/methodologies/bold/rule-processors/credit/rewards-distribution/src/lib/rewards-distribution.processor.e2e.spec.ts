@@ -1,10 +1,10 @@
 import {
   stubCertificateDocument,
+  stubCreditCertificatesDocument,
+  stubCreditDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubMassValidationDocument,
-  stubOfferCertificatesDocument,
-  stubOfferDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   DocumentEventActorType,
@@ -37,7 +37,7 @@ const { UNIT_PRICE } = DocumentEventAttributeName;
 
 describe('RewardsDistributionProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
-  const offerId = faker.string.uuid();
+  const creditId = faker.string.uuid();
   const unitPrice = faker.number.float({ fractionDigits: 2, max: 50, min: 10 });
   const massTotalValue = new BigNumber(
     faker.number.float({
@@ -77,7 +77,7 @@ describe('RewardsDistributionProcessor E2E', () => {
     { parentDocumentId: certificate.id },
     rewards,
   );
-  const offerCertificate = stubOfferCertificatesDocument({
+  const creditCertificate = stubCreditCertificatesDocument({
     externalEvents: [
       stubDocumentEvent({
         relatedDocument: {
@@ -86,30 +86,30 @@ describe('RewardsDistributionProcessor E2E', () => {
         },
       }),
     ],
-    parentDocumentId: offerId,
+    parentDocumentId: creditId,
   });
 
-  const offer = stubOfferDocument({
+  const credit = stubCreditDocument({
     externalEvents: [
       stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
         [UNIT_PRICE, unitPrice],
       ]),
       stubDocumentEvent({
         relatedDocument: {
-          ...pick(offerCertificate, 'category', 'type', 'subtype'),
-          documentId: offerCertificate.id,
+          ...pick(creditCertificate, 'category', 'type', 'subtype'),
+          documentId: creditCertificate.id,
         },
       }),
     ],
-    id: offerId,
+    id: creditId,
   });
 
   beforeAll(() => {
     prepareEnvironmentTestE2E([
       {
-        document: offer,
+        document: credit,
         documentKey: toDocumentKey({
-          documentId: offer.id,
+          documentId: credit.id,
           documentKeyPrefix,
         }),
       },
@@ -121,9 +121,9 @@ describe('RewardsDistributionProcessor E2E', () => {
         }),
       },
       {
-        document: offerCertificate,
+        document: creditCertificate,
         documentKey: toDocumentKey({
-          documentId: offerCertificate.id,
+          documentId: creditCertificate.id,
           documentKeyPrefix,
         }),
       },
@@ -213,7 +213,7 @@ describe('RewardsDistributionProcessor E2E', () => {
   it('should return APPROVED and correct rewards distribution', async () => {
     const response = (await handler(
       stubRuleInput({
-        documentId: offer.id,
+        documentId: credit.id,
         documentKeyPrefix,
       }),
       stubContext(),

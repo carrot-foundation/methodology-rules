@@ -27,8 +27,8 @@ import { assert } from 'typia';
 import type {
   CertificateMetadata,
   MassMetadata,
+  MethodologyCreditNftMetadataDto,
   MethodologyMetadata,
-  MethodologyOfferNftMetadataDto,
   RewardsDistributionMetadata,
   RewardsDistributionParticipant,
 } from './nft-metadata-selection.dto';
@@ -96,13 +96,13 @@ export const findMassValidationId = (
 
     if (!isNonEmptyArray<string>(availableMassValidationIds)) {
       throw new Error(
-        `Mass document ${massDocument.id} does not have an available mass validation document this offer`,
+        `Mass document ${massDocument.id} does not have an available mass validation document this credit`,
       );
     }
 
     if (availableMassValidationIds.length > 1) {
       throw new Error(
-        `Mass document ${massDocument.id} has more than one available mass validation document this offer: ${availableMassValidationIds.join(', ')}`,
+        `Mass document ${massDocument.id} has more than one available mass validation document this credit: ${availableMassValidationIds.join(', ')}`,
       );
     }
 
@@ -221,20 +221,20 @@ export const mapRewardDistributionMetadata = (
 };
 
 export const mapNftMetadataDto = (
-  ruleSubject: Omit<MethodologyOfferNftMetadataDto, 'offerDocumentId'>,
+  ruleSubject: Omit<MethodologyCreditNftMetadataDto, 'creditDocumentId'>,
   ruleInput: RuleInput,
-): MethodologyOfferNftMetadataDto =>
-  assert<MethodologyOfferNftMetadataDto>({
+): MethodologyCreditNftMetadataDto =>
+  assert<MethodologyCreditNftMetadataDto>({
     ...ruleSubject,
-    offerDocumentId: ruleInput.documentId,
+    creditDocumentId: ruleInput.documentId,
   });
 
 export const mapNftMetadata = ({
   certificates,
+  creditDocumentId,
   methodology,
-  offerDocumentId,
   rewardsDistribution,
-}: MethodologyOfferNftMetadataDto): NftMetadata => {
+}: MethodologyCreditNftMetadataDto): NftMetadata => {
   const { originCountry, originCountryState, recyclerName, subtype, type } =
     certificates[0].masses[0];
 
@@ -301,8 +301,8 @@ export const mapNftMetadata = ({
         origin_country: originCountry,
       },
     },
-    external_id: offerDocumentId,
-    external_url: getCarrotExplorePageUrl(offerDocumentId),
+    external_id: creditDocumentId,
+    external_url: getCarrotExplorePageUrl(creditDocumentId),
     image:
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
     name: 'BOLD',
