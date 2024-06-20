@@ -44,7 +44,7 @@ export class MassValidationDocumentStatusProcessor extends RuleDataProcessor {
           metadataAttributeValueIsAnyOf(METHODOLOGY_EVALUATION_RESULT, [
             APPROVED,
           ]),
-          eventHasCarrotParticipant,
+          (event) => eventHasCarrotParticipant(event, document.dataSetName),
         ),
       ),
     );

@@ -9,6 +9,7 @@ export enum DocumentCategory {
 
 export enum DataSetName {
   PROD = 'PROD',
+  PROD_SIMULATION = 'PROD_SIMULATION',
   TEST = 'TEST',
 }
 
