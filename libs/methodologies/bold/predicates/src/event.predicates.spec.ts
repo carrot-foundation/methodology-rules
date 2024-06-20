@@ -4,6 +4,7 @@ import {
   stubDocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
+  DataSetName,
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
@@ -496,14 +497,30 @@ describe('Event Predicates', () => {
 
 describe('eventHasCarrotParticipant', () => {
   it.each([
-    { expected: true, id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development.id },
-    { expected: true, id: CARROT_PARTICIPANT_BY_ENVIRONMENT.production.id },
-    { expected: false, id: faker.string.uuid() },
-  ])('should return $expected if id is $id', ({ expected, id }) => {
-    const event = stubDocumentEvent({ participant: { id } });
+    {
+      dataSetName: DataSetName.PROD,
+      expected: true,
+      id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development.PROD.id,
+    },
+    {
+      dataSetName: DataSetName.TEST,
+      expected: true,
+      id: CARROT_PARTICIPANT_BY_ENVIRONMENT.production.TEST.id,
+    },
+    {
+      dataSetName: DataSetName.PROD_SIMULATION,
+      expected: true,
+      id: CARROT_PARTICIPANT_BY_ENVIRONMENT.production.PROD_SIMULATION.id,
+    },
+    { dataSetName: DataSetName.PROD, expected: false, id: faker.string.uuid() },
+  ])(
+    'should return $expected if id is $id',
+    ({ dataSetName, expected, id }) => {
+      const event = stubDocumentEvent({ participant: { id } });
 
-    const result = eventHasCarrotParticipant(event);
+      const result = eventHasCarrotParticipant(event, dataSetName);
 
-    expect(result).toBe(expected);
-  });
+      expect(result).toBe(expected);
+    },
+  );
 });

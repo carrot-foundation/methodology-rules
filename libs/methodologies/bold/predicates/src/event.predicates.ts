@@ -1,5 +1,6 @@
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
 import {
+  DataSetName,
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
@@ -109,6 +110,11 @@ export const eventHasMetadataAttribute = (options: {
   return isValidMetadataName && isValidName && isValidValue;
 };
 
-export const eventHasCarrotParticipant = (event: DocumentEvent): boolean =>
-  event.participant.id === CARROT_PARTICIPANT_BY_ENVIRONMENT.development.id ||
-  event.participant.id === CARROT_PARTICIPANT_BY_ENVIRONMENT.production.id;
+export const eventHasCarrotParticipant = (
+  event: DocumentEvent,
+  dataSetName: DataSetName,
+): boolean =>
+  event.participant.id ===
+    CARROT_PARTICIPANT_BY_ENVIRONMENT.development[dataSetName].id ||
+  event.participant.id ===
+    CARROT_PARTICIPANT_BY_ENVIRONMENT.production[dataSetName].id;
