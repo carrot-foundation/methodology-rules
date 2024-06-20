@@ -5,6 +5,7 @@ import {
   stubMassValidationDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
+  DataSetName,
   DocumentEventAttributeName,
   DocumentEventName,
   MethodologyEvaluationResult,
@@ -20,6 +21,7 @@ import {
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
+import { random } from 'typia';
 
 import { handler } from '../lambda';
 
@@ -30,15 +32,24 @@ describe('MassValidationDocumentStatusProcessor E2E', () => {
   const { CLOSE } = DocumentEventName;
   const { METHODOLOGY_EVALUATION_RESULT } = DocumentEventAttributeName;
   const { APPROVED } = MethodologyEvaluationResult;
+  const dataSetName = random<DataSetName>();
+
+  const document = stubDocument({
+    dataSetName,
+    parentDocumentId,
+  });
 
   const relatedDocumentsOfParentDocument = stubArray(() =>
     stubMassValidationDocument({
+      dataSetName,
       externalEvents: [
         stubDocumentEventWithMetadataAttributes(
           {
             name: CLOSE,
             participant: {
-              id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development.id,
+              id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development[
+                document.dataSetName
+              ].id,
             },
           },
           [[METHODOLOGY_EVALUATION_RESULT, APPROVED]],
@@ -47,11 +58,8 @@ describe('MassValidationDocumentStatusProcessor E2E', () => {
     }),
   );
 
-  const document = stubDocument({
-    parentDocumentId,
-  });
-
   const parentDocument = stubDocument({
+    dataSetName,
     externalEvents: relatedDocumentsOfParentDocument.map((value) =>
       stubDocumentEvent({
         relatedDocument: {
