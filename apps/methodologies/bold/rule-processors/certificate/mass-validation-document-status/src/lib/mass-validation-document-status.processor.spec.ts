@@ -6,6 +6,7 @@ import {
   stubMassValidationDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
+  DataSetName,
   DocumentEventAttributeName,
   DocumentEventName,
   MethodologyEvaluationResult,
@@ -34,12 +35,13 @@ describe('MassValidationDocumentStatusProcessor', () => {
 
     const relatedDocumentsOfParentDocument = stubArray(() =>
       stubMassValidationDocument({
+        dataSetName: DataSetName.TEST,
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             {
               name: CLOSE,
               participant: {
-                id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development.id,
+                id: CARROT_PARTICIPANT_BY_ENVIRONMENT.development.TEST.id,
               },
             },
             [[METHODOLOGY_EVALUATION_RESULT, APPROVED]],
