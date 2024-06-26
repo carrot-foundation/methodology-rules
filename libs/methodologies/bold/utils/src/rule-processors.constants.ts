@@ -13,7 +13,7 @@ export const CARROT_PARTICIPANT_BY_ENVIRONMENT = {
       name: CARROT_PARTICIPANT_NAME,
     },
     [DataSetName.PROD_SIMULATION]: {
-      id: 'e710790f-5909-4a54-ab89-6a59819472ee',
+      id: 'f5746bcf-8510-46ca-96d8-d4081bda9410',
       name: CARROT_PARTICIPANT_NAME,
     },
     [DataSetName.TEST]: {
@@ -27,7 +27,7 @@ export const CARROT_PARTICIPANT_BY_ENVIRONMENT = {
       name: CARROT_PARTICIPANT_NAME,
     },
     [DataSetName.PROD_SIMULATION]: {
-      id: 'b20a7caf-3e55-42f7-86f5-9bde362a4b0f',
+      id: 'c1b2301f-4196-4156-9d43-d047dc593d8b',
       name: CARROT_PARTICIPANT_NAME,
     },
     [DataSetName.TEST]: {
