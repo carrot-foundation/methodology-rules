@@ -1,7 +1,7 @@
 {
   "name": "carrot-audit-rules",
   "version": "0.0.0",
-  "license": "UNLICENSED",
+  "license": "LGPL-3.0",
   "scripts": {
     "build-lambda": "nx build-lambda",
     "build-lambda:affected": "nx affected --target build-lambda",
