@@ -19,7 +19,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
-export class PickUpMoveProcessor extends RuleDataProcessor {
+export class MandatoryMetadataProcessor extends RuleDataProcessor {
   static resultComment = {
     eventNotFound:
       'The OPEN event with metadata move-type = Pick-up or Shipment-request was not found',
@@ -53,7 +53,7 @@ export class PickUpMoveProcessor extends RuleDataProcessor {
 
     if (!pickUpEventPresent) {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
+        resultComment: MandatoryMetadataProcessor.resultComment.eventNotFound,
       });
     }
 

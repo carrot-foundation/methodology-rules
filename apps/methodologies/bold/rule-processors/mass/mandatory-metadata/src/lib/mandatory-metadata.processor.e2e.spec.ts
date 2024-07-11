@@ -4,5 +4,5 @@ import { handler } from '../lambda';
 
 testRuleProcessorWithMassDocuments({
   handler,
-  ruleName: 'PickUpMoveProcessor',
+  ruleName: 'MandatoryMetadataProcessor',
 });

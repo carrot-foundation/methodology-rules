@@ -16,12 +16,12 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { PickUpMoveProcessor } from './pick-up-move.processor';
+import { MandatoryMetadataProcessor } from './mandatory-metadata.processor';
 
 jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
 
-describe('PickUpMoveProcessor', () => {
-  const ruleDataProcessor = new PickUpMoveProcessor();
+describe('MandatoryMetadataProcessor', () => {
+  const ruleDataProcessor = new MandatoryMetadataProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each([
@@ -39,7 +39,7 @@ describe('PickUpMoveProcessor', () => {
     },
     {
       attributeValue: DocumentEventMoveType.WEIGHING,
-      resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
+      resultComment: MandatoryMetadataProcessor.resultComment.eventNotFound,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'The OPEN event with metadata move-type = Pick-up or Shipment-request was not found',
@@ -110,7 +110,7 @@ describe('PickUpMoveProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
+      resultComment: MandatoryMetadataProcessor.resultComment.eventNotFound,
       resultStatus: RuleOutputStatus.REJECTED,
     };
 
