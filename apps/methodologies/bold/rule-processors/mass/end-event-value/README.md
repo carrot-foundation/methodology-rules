@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check if the declared value in the End event, corresponding to the completion of the composting process, is equal to the value declared in the document.</td>
+        <td>Check if the declared value in the event, corresponding to the completion of the composting process, is equal to the value declared in the document.</td>
       </tr>
     </tbody>
   </table>
