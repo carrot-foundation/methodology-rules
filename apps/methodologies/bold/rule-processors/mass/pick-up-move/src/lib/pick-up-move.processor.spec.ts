@@ -38,13 +38,34 @@ describe('PickUpMoveProcessor', () => {
                 },
               ],
             },
-            name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            name: random<DocumentEventName.OPEN>(),
           }),
         ],
       }),
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'a MOVE or OPEN event with PICK_UP attribute',
+      scenario: 'a OPEN event with PICK_UP attribute',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubDocumentEvent({
+            metadata: {
+              attributes: [
+                {
+                  isPublic: true,
+                  name: DocumentEventAttributeName.MOVE_TYPE,
+                  value: DocumentEventMoveType.SHIPMENT_REQUEST,
+                },
+              ],
+            },
+            name: random<DocumentEventName.OPEN>(),
+          }),
+        ],
+      }),
+      resultComment: undefined,
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario: 'a OPEN event with SHIPMENT_REQUEST attribute',
     },
     {
       document: stubDocument({
@@ -59,13 +80,14 @@ describe('PickUpMoveProcessor', () => {
                 },
               ],
             },
-            name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            name: random<DocumentEventName.OPEN>(),
           }),
         ],
       }),
       resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'no MOVE or OPEN event with PICK_UP attribute',
+      scenario:
+        'The OPEN event with metadata move-type = Pick-up or Shipment-request was not found',
     },
   ])(
     `should return $resultStatus when the document has $scenario`,
