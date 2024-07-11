@@ -26,53 +26,47 @@ describe('PickUpMoveProcessor', () => {
 
   it.each([
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.PICK_UP,
-                },
-              ],
-            },
-            name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
-          }),
-        ],
-      }),
+      attributeValue: DocumentEventMoveType.PICK_UP,
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'a MOVE or OPEN event with PICK_UP attribute',
+      scenario: 'a OPEN event with PICK_UP attribute',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.WEIGHING,
-                },
-              ],
-            },
-            name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
-          }),
-        ],
-      }),
+      attributeValue: DocumentEventMoveType.SHIPMENT_REQUEST,
+      resultComment: undefined,
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario: 'a OPEN event with SHIPMENT_REQUEST attribute',
+    },
+    {
+      attributeValue: DocumentEventMoveType.WEIGHING,
       resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'no MOVE or OPEN event with PICK_UP attribute',
+      scenario:
+        'The OPEN event with metadata move-type = Pick-up or Shipment-request was not found',
     },
   ])(
     `should return $resultStatus when the document has $scenario`,
-    async ({ document, resultComment, resultStatus }) => {
+    async ({ attributeValue, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.mockResolvedValueOnce(document);
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEvent({
+            metadata: {
+              attributes: [
+                {
+                  isPublic: true,
+                  name: DocumentEventAttributeName.MOVE_TYPE,
+                  value: attributeValue,
+                },
+              ],
+            },
+            name: DocumentEventName.OPEN,
+          }),
+        ],
+      });
+
+      documentLoaderService.mockResolvedValueOnce(documentStub);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -87,6 +81,41 @@ describe('PickUpMoveProcessor', () => {
       expect(ruleOutput).toEqual(expectedRuleOutput);
     },
   );
+
+  it('should return REJECTED when the document has no OPEN event with MOVE_TYPE', async () => {
+    const ruleInput = random<Required<RuleInput>>();
+
+    const documentStub = stubDocument({
+      externalEvents: [
+        stubDocumentEvent({
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: DocumentEventAttributeName.RULE_NAME,
+                value: DocumentEventMoveType.PICK_UP,
+              },
+            ],
+          },
+          name: DocumentEventName.OPEN,
+        }),
+      ],
+    });
+
+    documentLoaderService.mockResolvedValueOnce(documentStub);
+
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
+      resultStatus: RuleOutputStatus.REJECTED,
+    };
+
+    expect(ruleOutput).toEqual(expectedRuleOutput);
+  });
 
   it('should return REJECTED when the document is undefined', async () => {
     const ruleInput = random<RuleInput>();

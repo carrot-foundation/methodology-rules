@@ -22,7 +22,7 @@ import {
 export class PickUpMoveProcessor extends RuleDataProcessor {
   static resultComment = {
     eventNotFound:
-      'The OPEN or MOVE event with metadata move-type = Pick-up was not found',
+      'The OPEN event with metadata move-type = Pick-up or Shipment-request was not found',
   };
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
@@ -41,13 +41,13 @@ export class PickUpMoveProcessor extends RuleDataProcessor {
     }
 
     const { MOVE_TYPE } = DocumentEventAttributeName;
-    const { MOVE, OPEN } = DocumentEventName;
-    const { PICK_UP } = DocumentEventMoveType;
+    const { OPEN } = DocumentEventName;
+    const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
     const pickUpEventPresent = document.externalEvents?.find(
       and(
-        eventNameIsAnyOf([MOVE, OPEN]),
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
+        eventNameIsAnyOf([OPEN]),
+        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
       ),
     );
 
