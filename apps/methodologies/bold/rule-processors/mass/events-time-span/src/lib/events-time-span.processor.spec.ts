@@ -2,8 +2,13 @@ import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
+  stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/methodologies/bold/types';
+import {
+  DocumentEventAttributeName,
+  DocumentEventMoveType,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -15,41 +20,52 @@ import { EventsTimeSpanProcessor } from './events-time-span.processor';
 
 jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
 
+const { DROP_OFF } = DocumentEventMoveType;
+const { MOVE_TYPE } = DocumentEventAttributeName;
+
 describe('EventsTimeSpanProcessor', () => {
   const ruleDataProcessor = new EventsTimeSpanProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each([
     {
-      eventEnd: '2024-02-27T11:00:00.000Z',
-      eventOpen: '2024-02-25T12:00:00.000Z',
+      endEventDate: '2024-02-27T11:00:00.000Z',
+      eventWithDropOffValueDate: '2024-02-25T12:00:00.000Z',
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
     },
     {
-      eventEnd: '2024-02-27T12:00:00.000Z',
-      eventOpen: undefined,
+      endEventDate: '2024-02-27T12:00:00.000Z',
+      eventWithDropOffValueDate: undefined,
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
     },
     {
-      eventEnd: '2024-02-27T11:00:00.000Z',
-      eventOpen: '2023-11-25T12:00:00.000Z',
+      endEventDate: '2024-02-27T11:00:00.000Z',
+      eventWithDropOffValueDate: '2023-11-25T12:00:00.000Z',
       resultComment: ruleDataProcessor['ResultComment'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
     },
   ])(
-    `should the difference between eventEnd and eventOpen must be between 60 and 120: $resultStatus`,
-    async ({ eventEnd, eventOpen, resultComment, resultStatus }) => {
+    `should the difference between END event's date and the event with DROP_OFF value date must be between 60 and 120: $resultStatus`,
+    async ({
+      endEventDate,
+      eventWithDropOffValueDate,
+      resultComment,
+      resultStatus,
+    }) => {
       const ruleInput = random<Required<RuleInput>>();
       const document = stubDocument({
         externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            {
+              externalCreatedAt: eventWithDropOffValueDate,
+              name: random<DocumentEventName>(),
+            },
+            [[MOVE_TYPE, DROP_OFF]],
+          ),
           stubDocumentEvent({
-            externalCreatedAt: eventOpen,
-            name: DocumentEventName.OPEN,
-          }),
-          stubDocumentEvent({
-            externalCreatedAt: eventEnd,
+            externalCreatedAt: endEventDate,
             name: DocumentEventName.END,
           }),
         ],
