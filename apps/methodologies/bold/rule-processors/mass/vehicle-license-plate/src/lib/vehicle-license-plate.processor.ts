@@ -3,7 +3,6 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import {
   and,
   eventHasNonEmptyStringAttribute,
-  eventNameIsAnyOf,
   metadataAttributeNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
   not,
@@ -14,13 +13,11 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-const { MOVE, OPEN } = DocumentEventName;
-const { PICK_UP } = DocumentEventMoveType;
+const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 const { MOVE_TYPE, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   DocumentEventAttributeName;
 const { BICYCLE, CART, SLUDGE_PIPES } = DocumentEventVehicleType;
@@ -29,7 +26,7 @@ export class VehicleLicensePlateProcessor extends ParentDocumentRuleProcessor<Do
   private ResultComment = {
     APPROVED: 'The vehicle-license-plate attribute is a non-empty string',
     NOT_APPLICABLE:
-      'Rule not applicable: The OPEN or MOVE event with attribute move-type with Pick-up value and vehicle-type with a value not in [Sludge Pipes, Cart, Bicycle] was not found',
+      'Rule not applicable: An event with attribute move-type with Pick-up value and vehicle-type with a value not in [Sludge Pipes, Cart, Bicycle] was not found',
     REJECTED: 'The vehicle-license-plate attribute is not a non-empty string',
   };
 
@@ -60,8 +57,7 @@ export class VehicleLicensePlateProcessor extends ParentDocumentRuleProcessor<Do
     document: Document,
   ): DocumentEvent | undefined {
     const findEventCondition = and(
-      eventNameIsAnyOf([MOVE, OPEN]),
-      metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
+      metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
       metadataAttributeNameIsAnyOf([VEHICLE_TYPE]),
       not(
         metadataAttributeValueIsAnyOf(VEHICLE_TYPE, [

@@ -26,7 +26,7 @@ jest.mock('@carrot-fndn/shared/document/loader');
 describe('VehicleLicensePlateProcessor', () => {
   const { OTHERS } = DocumentEventVehicleType;
   const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
-  const { PICK_UP } = DocumentEventMoveType;
+  const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
   const ruleDataProcessor = new VehicleLicensePlateProcessor();
   const documentLoaderService = jest.mocked(DocumentLoaderService.prototype);
 
@@ -43,21 +43,20 @@ describe('VehicleLicensePlateProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'does not have OPEN or MOVE event with metadata attribute move-type with a value equal to Pick-up',
+        'does not have an event with metadata attribute move-type with a value equal to Pick-up or Shipment-request',
     },
     {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
-            [[MOVE_TYPE, PICK_UP]],
+            [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
           ),
         ],
       }),
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'does not have OPEN or MOVE event with metadata attribute vehicle-type',
+      scenario: 'does not have an event with metadata attribute vehicle-type',
     },
   ])(
     `should return "$resultStatus" when the document $scenario`,
