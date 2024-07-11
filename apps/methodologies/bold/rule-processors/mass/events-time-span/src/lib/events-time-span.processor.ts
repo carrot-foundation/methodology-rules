@@ -1,18 +1,25 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 import type { SetRequiredNonNullable } from '@carrot-fndn/shared/types';
 
-import { eventNameIsAnyOf } from '@carrot-fndn/methodologies/bold/predicates';
+import {
+  eventHasMetadataAttribute,
+  eventNameIsAnyOf,
+} from '@carrot-fndn/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
+  DocumentEventMoveType,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { differenceInDays, parseISO } from 'date-fns';
 
-const { END, OPEN } = DocumentEventName;
+const { END } = DocumentEventName;
+const { MOVE_TYPE } = DocumentEventAttributeName;
+const { DROP_OFF } = DocumentEventMoveType;
 
 type Subject = {
   endEvent: SetRequiredNonNullable<DocumentEvent, 'externalCreatedAt'>;
@@ -22,7 +29,7 @@ type Subject = {
 export class EventsTimeSpanProcessor extends ParentDocumentRuleProcessor<Subject> {
   private ResultComment = {
     APPROVED:
-      'The difference in days between externalCreatedAt of the OPEN event and the END event is between 60 and 120',
+      'The difference in days between externalCreatedAt of the event with DROP_OFF value and the END event is between 60 and 120',
     NOT_APPLICABLE:
       'Rule not applicable: The OPEN event or END event with externalCreatedAt was not found',
     REJECTED:
@@ -57,11 +64,17 @@ export class EventsTimeSpanProcessor extends ParentDocumentRuleProcessor<Subject
   }
 
   protected override getRuleSubject(document: Document): Subject | undefined {
-    const openEvent = document.externalEvents?.find(eventNameIsAnyOf([OPEN]));
+    const eventWithDropOffValue = document.externalEvents?.find((event) =>
+      eventHasMetadataAttribute({
+        event,
+        metadataName: MOVE_TYPE,
+        metadataValues: [DROP_OFF],
+      }),
+    );
     const endEvent = document.externalEvents?.find(eventNameIsAnyOf([END]));
 
     if (
-      isNil(openEvent?.externalCreatedAt) ||
+      isNil(eventWithDropOffValue?.externalCreatedAt) ||
       isNil(endEvent?.externalCreatedAt)
     ) {
       return undefined;
@@ -73,8 +86,8 @@ export class EventsTimeSpanProcessor extends ParentDocumentRuleProcessor<Subject
         externalCreatedAt: endEvent.externalCreatedAt,
       },
       openEvent: {
-        ...openEvent,
-        externalCreatedAt: openEvent.externalCreatedAt,
+        ...eventWithDropOffValue,
+        externalCreatedAt: eventWithDropOffValue.externalCreatedAt,
       },
     };
   }
