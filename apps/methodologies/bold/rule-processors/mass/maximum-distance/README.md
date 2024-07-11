@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Verify if the geolocation distance between the OPEN or MOVE event with ‘move-type’ declared as ‘Pick-up’ and the MOVE event with ‘move-type’ declared as ‘Drop-off’, is less than or equal to 200km.</td>
+        <td>Verify if the geolocation distance between the event with ‘move-type’ declared as ‘Pick-up’ or ‘Shipment-request’ and the event with ‘move-type’ declared as ‘Drop-off’, is less than or equal to 200km.</td>
       </tr>
     </tbody>
   </table>
