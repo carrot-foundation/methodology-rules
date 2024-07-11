@@ -26,64 +26,19 @@ describe('PickUpMoveProcessor', () => {
 
   it.each([
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.PICK_UP,
-                },
-              ],
-            },
-            name: DocumentEventName.OPEN,
-          }),
-        ],
-      }),
+      attributeValue: DocumentEventMoveType.PICK_UP,
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario: 'a OPEN event with PICK_UP attribute',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.SHIPMENT_REQUEST,
-                },
-              ],
-            },
-            name: DocumentEventName.OPEN,
-          }),
-        ],
-      }),
+      attributeValue: DocumentEventMoveType.SHIPMENT_REQUEST,
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario: 'a OPEN event with SHIPMENT_REQUEST attribute',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.WEIGHING,
-                },
-              ],
-            },
-            name: DocumentEventName.OPEN,
-          }),
-        ],
-      }),
+      attributeValue: DocumentEventMoveType.WEIGHING,
       resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
@@ -91,10 +46,27 @@ describe('PickUpMoveProcessor', () => {
     },
   ])(
     `should return $resultStatus when the document has $scenario`,
-    async ({ document, resultComment, resultStatus }) => {
+    async ({ attributeValue, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.mockResolvedValueOnce(document);
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEvent({
+            metadata: {
+              attributes: [
+                {
+                  isPublic: true,
+                  name: DocumentEventAttributeName.MOVE_TYPE,
+                  value: attributeValue,
+                },
+              ],
+            },
+            name: DocumentEventName.OPEN,
+          }),
+        ],
+      });
+
+      documentLoaderService.mockResolvedValueOnce(documentStub);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
