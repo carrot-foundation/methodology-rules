@@ -26,7 +26,7 @@
 
 ### 📂 Implementation
 
-- **[Main Implementation File](./src/lib/pick-up-move.processor.ts)**
+- **[Main Implementation File](./src/lib/mandatory-metadata.processor.ts)**
 
 ### 👥 Contributors
 
