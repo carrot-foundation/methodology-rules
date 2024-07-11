@@ -28,62 +28,74 @@ describe('HasCdfProcessor', () => {
   const { HAS_CDF, REPORT_TYPE } = DocumentEventAttributeName;
   const { CDF, MTR } = ReportType;
 
-  it.each([
+  const scenarios = [
     {
-      event: stubDocumentEventWithMetadataAttributes(
-        { name: random<DocumentEventName>() },
-        [
-          [HAS_CDF, false],
-          [REPORT_TYPE, CDF],
-        ],
-      ),
+      hasCdf: false,
+      reportType: CDF,
+      resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returValue equal to true when has-cdf is false and report-type is CDF',
+        'should return the returnValue equal to true when has-cdf is false and report-type is CDF',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes(
-        { name: random<DocumentEventName>() },
-        [
-          [HAS_CDF, true],
-          [REPORT_TYPE, CDF],
-        ],
-      ),
+      hasCdf: true,
+      reportType: CDF,
+      resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returValue equal to true when has-cdf is true and report-type is CDF',
+        'should return the returnValue equal to true when has-cdf is true and report-type is CDF',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes(
-        { name: random<DocumentEventName>() },
-        [
-          [HAS_CDF, true],
-          [REPORT_TYPE, MTR],
-        ],
-      ),
+      hasCdf: true,
+      reportType: MTR,
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the returValue equal to false when there is no event with report-type equal to CDF or has-cdf equal to false',
+        'should return the returnValue equal to false when report-type is MTR and has-cdf is true',
     },
-  ])(`$scenario`, async ({ event, resultComment, resultStatus }) => {
-    const ruleInput = random<Required<RuleInput>>();
-    const document = stubDocument({
-      externalEvents: [...stubArray(() => random<DocumentEvent>(), 3), event],
-    });
+    {
+      hasCdf: undefined,
+      reportType: undefined,
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should return the return value equal to false when neither has-cdf nor report-type are present',
+    },
+  ];
 
-    documentLoaderService.mockResolvedValueOnce(document);
+  it.each(scenarios)(
+    `$scenario`,
+    async ({ hasCdf, reportType, resultComment, resultStatus }) => {
+      const attributes: [DocumentEventAttributeName, ReportType | boolean][] =
+        [];
 
-    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+      if (hasCdf !== undefined) attributes.push([HAS_CDF, hasCdf]);
+      if (reportType !== undefined) attributes.push([REPORT_TYPE, reportType]);
 
-    const expectedRuleOutput: RuleOutput = {
-      requestId: ruleInput.requestId,
-      responseToken: ruleInput.responseToken,
-      responseUrl: ruleInput.responseUrl,
-      resultComment,
-      resultStatus,
-    };
+      const event = stubDocumentEventWithMetadataAttributes(
+        { name: random<DocumentEventName>() },
+        attributes,
+      );
 
-    expect(ruleOutput).toEqual(expectedRuleOutput);
-  });
+      const document = stubDocument({
+        externalEvents: [...stubArray(() => random<DocumentEvent>(), 3), event],
+      });
+
+      const ruleInput = random<Required<RuleInput>>();
+
+      documentLoaderService.mockResolvedValueOnce(document);
+
+      const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+      const expectedRuleOutput: RuleOutput = {
+        requestId: ruleInput.requestId,
+        responseToken: ruleInput.responseToken,
+        responseUrl: ruleInput.responseUrl,
+        resultComment,
+        resultStatus,
+      };
+
+      expect(ruleOutput).toEqual(expectedRuleOutput);
+    },
+  );
 });
