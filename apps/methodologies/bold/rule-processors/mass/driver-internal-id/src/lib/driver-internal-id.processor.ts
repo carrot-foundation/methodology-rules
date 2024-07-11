@@ -2,7 +2,6 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 
 import {
   and,
-  eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
   metadataAttributeValueIsNotEmpty,
   not,
@@ -13,7 +12,6 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -57,13 +55,10 @@ export class DriverInternalIdProcessor extends ParentDocumentRuleProcessor<
     externalEvents,
   }: Document): DocumentEvent[] | undefined {
     const { MOVE_TYPE } = DocumentEventAttributeName;
-    const { PICK_UP } = DocumentEventMoveType;
+    const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
     return externalEvents?.filter(
-      and(
-        eventNameIsAnyOf([DocumentEventName.OPEN, DocumentEventName.MOVE]),
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
-      ),
+      metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
     );
   }
 }

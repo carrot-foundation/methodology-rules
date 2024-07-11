@@ -25,45 +25,55 @@ describe('DriverInternalIdProcessor', () => {
   const ruleDataProcessor = new DriverInternalIdProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { MOVE, OPEN } = DocumentEventName;
-
   const { DRIVER_INTERNAL_ID, MOVE_TYPE, VEHICLE_TYPE } =
     DocumentEventAttributeName;
-
   const { TRUCK } = DocumentEventVehicleType;
-
-  const { PICK_UP } = DocumentEventMoveType;
+  const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
   it.each([
     {
       document: stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
-            [MOVE_TYPE, PICK_UP],
-            [VEHICLE_TYPE, TRUCK],
-            [DRIVER_INTERNAL_ID, faker.string.uuid()],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: random<DocumentEventName>() },
+            [
+              [MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()],
+              [VEHICLE_TYPE, TRUCK],
+              [DRIVER_INTERNAL_ID, faker.string.uuid()],
+            ],
+          ),
         ],
       }),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return returnValue true when move-type is Pickup, vehicle-type is not Sludge Pipes and driver-internal-id is not empty when event is OPEN',
+        'should return APPROVED when move-type is Pickup or Shipment-request, vehicle-type is not Sludge Pipes and driver-internal-id is not empty',
     },
     {
       document: stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: MOVE }, [
-            [MOVE_TYPE, PICK_UP],
-            [VEHICLE_TYPE, TRUCK],
-            [DRIVER_INTERNAL_ID, faker.string.uuid()],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: random<DocumentEventName>() },
+            [
+              [MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()],
+              [VEHICLE_TYPE, TRUCK],
+              [DRIVER_INTERNAL_ID, ''],
+            ],
+          ),
         ],
       }),
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
+      resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return returnValue true when move-type is Pickup, vehicle-type is not Sludge Pipes and driver-internal-id is not empty when event is MOVE',
+        'should return REJECTED when move-type is Pickup or Shipment-request, vehicle-type is not Sludge Pipes and driver-internal-id is empty',
     },
-  ])('$scenario', async ({ document, resultStatus }) => {
+    {
+      document: stubDocument({
+        externalEvents: [],
+      }),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario: 'should return APPROVED when there is no external events',
+    },
+  ])('$scenario', async ({ document, resultComment, resultStatus }) => {
     const ruleInput = random<Required<RuleInput>>();
 
     documentLoaderService.mockResolvedValueOnce(document);
@@ -72,6 +82,7 @@ describe('DriverInternalIdProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
+      resultComment,
       resultStatus,
     };
 
