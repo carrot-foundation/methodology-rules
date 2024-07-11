@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check in the End event if there is a CDF for that event.</td>
+        <td>Check if 'has-cdf' is false or 'report-type' is CDF in any event.</td>
       </tr>
     </tbody>
   </table>
