@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>In the case of the vehicle type indicated as 'other' in the OPEN or MOVE event, when the 'move type' is identified as 'Pick-up,' verify if the vehicle description field is declared</td>
+        <td>In the case of the vehicle type indicated as 'other' in any event, when the 'move type' is identified as 'Pick-up' or 'Shipment-request,' verify if the vehicle description field is declared</td>
       </tr>
     </tbody>
   </table>

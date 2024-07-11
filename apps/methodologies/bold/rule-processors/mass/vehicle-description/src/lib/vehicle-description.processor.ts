@@ -3,7 +3,6 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import {
   and,
   eventHasNonEmptyStringAttribute,
-  eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
@@ -12,13 +11,11 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-const { MOVE, OPEN } = DocumentEventName;
-const { PICK_UP } = DocumentEventMoveType;
+const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 const { OTHERS } = DocumentEventVehicleType;
 const { MOVE_TYPE, VEHICLE_DESCRIPTION, VEHICLE_TYPE } =
   DocumentEventAttributeName;
@@ -59,8 +56,7 @@ export class VehicleDescriptionProcessor extends ParentDocumentRuleProcessor<Doc
   ): DocumentEvent | undefined {
     return document.externalEvents?.find(
       and(
-        eventNameIsAnyOf([MOVE, OPEN]),
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
+        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
         metadataAttributeValueIsAnyOf(VEHICLE_TYPE, [OTHERS]),
       ),
     );

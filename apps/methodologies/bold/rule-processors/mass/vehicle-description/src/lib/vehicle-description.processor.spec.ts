@@ -25,7 +25,7 @@ import { VehicleDescriptionProcessor } from './vehicle-description.processor';
 jest.mock('@carrot-fndn/shared/document/loader');
 
 describe('VehicleDescriptionProcessor', () => {
-  const { PICK_UP } = DocumentEventMoveType;
+  const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
   const { OTHERS } = DocumentEventVehicleType;
   const { MOVE_TYPE, VEHICLE_DESCRIPTION, VEHICLE_TYPE } =
     DocumentEventAttributeName;
@@ -38,9 +38,9 @@ describe('VehicleDescriptionProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            { name: random<DocumentEventName>() },
             [
-              [MOVE_TYPE, PICK_UP],
+              [MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()],
               [VEHICLE_TYPE, OTHERS],
               [VEHICLE_DESCRIPTION, faker.string.sample()],
             ],
@@ -50,13 +50,13 @@ describe('VehicleDescriptionProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'has the vehicle-description metadata attribute and the value is a non-empty string',
+        'should return APPROVED when has the vehicle-description metadata attribute and the value is a non-empty string',
     },
     {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            { name: random<DocumentEventName>() },
             [[VEHICLE_TYPE, OTHERS]],
           ),
         ],
@@ -64,21 +64,21 @@ describe('VehicleDescriptionProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'only has metadata attribute vehicle-type with value equal to Others',
+        'should return APPROVED when only has metadata attribute vehicle-type with value equal to Others',
     },
     {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
-            [[MOVE_TYPE, PICK_UP]],
+            { name: random<DocumentEventName>() },
+            [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
           ),
         ],
       }),
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'only has metadata attribute move-type with value equal to Pick-up',
+        'should return APPROVED when only has metadata attribute move-type with value equal to Pick-up or Shipment-request',
     },
   ])(
     `should return "$resultStatus" when the document $scenario`,
