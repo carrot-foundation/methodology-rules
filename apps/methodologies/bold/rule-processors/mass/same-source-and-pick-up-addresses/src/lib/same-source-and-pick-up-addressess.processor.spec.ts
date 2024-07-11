@@ -9,7 +9,6 @@ import {
   DocumentEventMoveType,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/utils';
 import {
   type RuleInput,
   type RuleOutput,
@@ -26,21 +25,23 @@ describe('SameSourceAndPickUpAddressProcessor', () => {
   const ruleDataProcessor = new SameSourceAndPickUpAddressesProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { ACTOR, MOVE, OPEN } = DocumentEventName;
+  const { ACTOR } = DocumentEventName;
   const { ACTOR_TYPE, MOVE_TYPE } = DocumentEventAttributeName;
-  const { PICK_UP } = DocumentEventMoveType;
+  const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
   const { SOURCE } = DocumentEventActorType;
 
   const addressId = faker.string.uuid();
 
+  const evaluateEvent = stubDocumentEventWithMetadataAttributes(
+    {
+      address: { id: addressId },
+      name: random<DocumentEventName>(),
+    },
+    [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
+  );
+
   const commonExternalEvents = [
-    stubDocumentEventWithMetadataAttributes(
-      {
-        address: { id: addressId },
-        name: OPEN,
-      },
-      [[MOVE_TYPE, PICK_UP]],
-    ),
+    evaluateEvent,
     stubDocumentEventWithMetadataAttributes(
       {
         address: { id: addressId },
@@ -58,63 +59,37 @@ describe('SameSourceAndPickUpAddressProcessor', () => {
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return returnValue true when event OPEN is/has a move-type, the actor is a source, and addresses match',
+        'should return returnValue true when event is/has a move-type with pick-up or shipment-request, the actor is a source, and addresses match',
     },
     {
       document: stubDocument({
         externalEvents: [],
       }),
-      resultComment:
-        SameSourceAndPickUpAddressesProcessor.resultComments.ruleNotApplicable,
+      resultComment: ruleDataProcessor['ResultComments'].RULE_NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should return returnValue true when neither MOVE nor OPEN event is present',
+      scenario: 'should return returnValue true when no event is present',
     },
     {
       document: stubDocument({
-        externalEvents: [
-          ...commonExternalEvents,
-          stubDocumentEventWithMetadataAttributes(
-            {
-              address: { id: addressId },
-              name: MOVE,
-            },
-            [[MOVE_TYPE, PICK_UP]],
-          ),
-        ],
+        externalEvents: commonExternalEvents,
       }),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return returnValue true when there is MOVE and OPEN event, actor is source and addresses match',
+        'should return returnValue true when there is an event with a valid move-type, actor is source and addresses match',
     },
     {
       document: stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes(
-            {
-              address: { id: addressId },
-              name: MOVE,
-            },
-            [[MOVE_TYPE, PICK_UP]],
-          ),
-        ],
+        externalEvents: [evaluateEvent],
       }),
-      resultComment:
-        SameSourceAndPickUpAddressesProcessor.resultComments.noSourceActorEvent,
+      resultComment: ruleDataProcessor['ResultComments'].NO_SOURCE_ACTOR_EVENT,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return returnValue false when there is no actor event with actor type source',
+        'should return returnValue false when there is no actor event with actor type SOURCE',
     },
     {
       document: stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes(
-            {
-              address: { id: addressId },
-              name: MOVE,
-            },
-            [[MOVE_TYPE, PICK_UP]],
-          ),
+          evaluateEvent,
           stubDocumentEventWithMetadataAttributes(
             {
               address: { id: faker.string.uuid() },
@@ -124,17 +99,9 @@ describe('SameSourceAndPickUpAddressProcessor', () => {
           ),
         ],
       }),
-      resultComment:
-        SameSourceAndPickUpAddressesProcessor.resultComments.doNotMatch,
+      resultComment: ruleDataProcessor['ResultComments'].DO_NOT_MATCH,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return returnValue false when addresses do not match',
-    },
-    {
-      document: undefined,
-      resultComment: DOCUMENT_NOT_FOUND_RESULT_COMMENT,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should return returnValue undefined when document is not found',
     },
   ])('$scenario', async ({ document, resultComment, resultStatus }) => {
     const ruleInput = random<Required<RuleInput>>();
