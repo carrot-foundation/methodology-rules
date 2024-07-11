@@ -30,11 +30,13 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { formatDate } from 'date-fns';
+import { random } from 'typia';
 
 import { handler } from '../lambda';
 
 const { CLOSE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
 describe('PickUpGeolocationPrecision', () => {
   const documentKeyPrefix = faker.string.uuid();
@@ -79,7 +81,7 @@ describe('PickUpGeolocationPrecision', () => {
         {
           isPublic: faker.datatype.boolean(),
           name: DocumentEventAttributeName.MOVE_TYPE,
-          value: DocumentEventMoveType.PICK_UP,
+          value: random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
         },
       ],
     },

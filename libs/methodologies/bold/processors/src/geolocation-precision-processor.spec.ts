@@ -33,9 +33,10 @@ import { GeolocationPrecisionRuleProcessor } from './geolocation-precision-proce
 
 const { CLOSE, MOVE, OPEN } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
 class TestGeolocationPrecisionRuleProcessor extends GeolocationPrecisionRuleProcessor {
-  protected override moveTypeValue = DocumentEventMoveType.PICK_UP;
+  protected override moveTypeValues = [PICK_UP, SHIPMENT_REQUEST];
 
   protected participantHomologationSubtype = DocumentSubtype.SOURCE;
 }
@@ -88,7 +89,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
         {
           isPublic: faker.datatype.boolean(),
           name: DocumentEventAttributeName.MOVE_TYPE,
-          value: DocumentEventMoveType.PICK_UP,
+          value: random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
         },
       ],
     },

@@ -148,6 +148,7 @@ export enum DocumentEventActorType {
 export enum DocumentEventMoveType {
   DROP_OFF = 'Drop-off',
   PICK_UP = 'Pick-up',
+  SHIPMENT_REQUEST = 'Shipment request',
   WEIGHING = 'Weighing',
 }
 
