@@ -13,29 +13,30 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { HAS_CDF, REPORT_TYPE } = DocumentEventAttributeName;
 const { CDF } = ReportType;
-const { END } = DocumentEventName;
 
 export class HasCdfProcessor extends ParentDocumentRuleProcessor<
   DocumentEvent[]
 > {
   private ResultComment = {
     REJECTED:
-      'The END event does not have attribute has-cdf with value equal to false or report-type with value equal to CDF',
+      'No event has attribute report-type equal to CDF or has-cdf equal to false',
   };
 
   protected override evaluateResult(
     events: DocumentEvent[],
   ): EvaluateResultOutput {
-    const resultStatus = events.some((event) =>
+    const hasRequiredMetadata = events.some((event) =>
       [HAS_CDF, REPORT_TYPE].some((attributeName) =>
         eventHasMetadataAttribute({
           event,
-          eventNames: [END],
+          eventNames: Object.values(DocumentEventName),
           metadataName: attributeName,
           metadataValues: attributeName === HAS_CDF ? false : CDF,
         }),
       ),
-    )
+    );
+
+    const resultStatus = hasRequiredMetadata
       ? RuleOutputStatus.APPROVED
       : RuleOutputStatus.REJECTED;
 

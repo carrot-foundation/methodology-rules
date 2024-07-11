@@ -25,51 +25,46 @@ describe('HasCdfProcessor', () => {
   const ruleDataProcessor = new HasCdfProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { HAS_CDF, HAS_MTR, REPORT_TYPE } = DocumentEventAttributeName;
+  const { HAS_CDF, REPORT_TYPE } = DocumentEventAttributeName;
   const { CDF, MTR } = ReportType;
-  const { END } = DocumentEventName;
 
   it.each([
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_CDF, false],
-        [REPORT_TYPE, CDF],
-      ]),
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: random<DocumentEventName>() },
+        [
+          [HAS_CDF, false],
+          [REPORT_TYPE, CDF],
+        ],
+      ),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should return the returValue equal to true when has-cdf is false and report-type is CDF',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_CDF, true],
-        [REPORT_TYPE, CDF],
-      ]),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should return the returValue equal to true when has-cdf is true and report-type is CDF',
-    },
-    {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_MTR, true],
-        [REPORT_TYPE, MTR],
-      ]),
-      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should return the returValue equal to false when the END event has-mtr equal to true and report-type is MTR',
-    },
-    {
       event: stubDocumentEventWithMetadataAttributes(
-        { name: random<Omit<DocumentEventName, 'END'>>() },
+        { name: random<DocumentEventName>() },
         [
           [HAS_CDF, true],
           [REPORT_TYPE, CDF],
         ],
       ),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'should return the returValue equal to true when has-cdf is true and report-type is CDF',
+    },
+    {
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: random<DocumentEventName>() },
+        [
+          [HAS_CDF, true],
+          [REPORT_TYPE, MTR],
+        ],
+      ),
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the returValue equal to false when there is no END event',
+        'should return the returValue equal to false when there is no event with report-type equal to CDF or has-cdf equal to false',
     },
   ])(`$scenario`, async ({ event, resultComment, resultStatus }) => {
     const ruleInput = random<Required<RuleInput>>();
