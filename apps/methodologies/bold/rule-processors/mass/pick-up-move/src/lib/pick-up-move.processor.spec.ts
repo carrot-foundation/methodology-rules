@@ -82,6 +82,41 @@ describe('PickUpMoveProcessor', () => {
     },
   );
 
+  it('should return REJECTED when the document has no OPEN event with MOVE_TYPE', async () => {
+    const ruleInput = random<Required<RuleInput>>();
+
+    const documentStub = stubDocument({
+      externalEvents: [
+        stubDocumentEvent({
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: DocumentEventAttributeName.RULE_NAME,
+                value: DocumentEventMoveType.PICK_UP,
+              },
+            ],
+          },
+          name: DocumentEventName.OPEN,
+        }),
+      ],
+    });
+
+    documentLoaderService.mockResolvedValueOnce(documentStub);
+
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: PickUpMoveProcessor.resultComment.eventNotFound,
+      resultStatus: RuleOutputStatus.REJECTED,
+    };
+
+    expect(ruleOutput).toEqual(expectedRuleOutput);
+  });
+
   it('should return REJECTED when the document is undefined', async () => {
     const ruleInput = random<RuleInput>();
 
