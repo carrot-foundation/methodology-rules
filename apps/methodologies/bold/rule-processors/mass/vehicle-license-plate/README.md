@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>When the vehicle type is different from 'Sludge Pipes,' 'Cart,' or 'Bicycle,' check if the vehicle plate is declared.</td>
+        <td>When the vehicle type is different from `Sludge Pipes`, `Cart`, or `Bicycle`, check if the vehicle plate is declared.</td>
       </tr>
     </tbody>
   </table>

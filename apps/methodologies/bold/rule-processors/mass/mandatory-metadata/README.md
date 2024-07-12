@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-         <td>Check if at least one OPEN event has the 'move type' metadata field declared as 'Pick-up' or 'Shipment-request'.</td>
+         <td>Check if at least one OPEN event has the `move type` metadata field declared as `Pick-up` or `Shipment-request`.</td>
       </tr>
     </tbody>
 

@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Verify if the internal driver identification is declared in an event when the 'move type' is identified as 'Pick-up' or 'Shipment-request'.</td>
+        <td>Verify if the internal driver identification is declared in an event when the `move-type` is identified as `Pick-up` or `Shipment-request`.</td>
       </tr>
     </tbody>
   </table>

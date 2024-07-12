@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Ensure that the address of the MOVE event with 'move type' declared as 'Pick-up' is the same address of the Source participant homologation process and consider a 2km radius as the precision limit margin between the homologated and reported geolocations.</td>
+        <td>Ensure that the address of the event with `move-type` declared as `Pick-up` is the same address of the SOURCE participant homologation process and consider a 2km radius as the precision limit margin between the homologated and reported geolocations.</td>
       </tr>
     </tbody>
   </table>
