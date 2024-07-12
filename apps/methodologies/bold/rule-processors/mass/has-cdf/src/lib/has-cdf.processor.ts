@@ -6,7 +6,6 @@ import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -29,7 +28,6 @@ export class HasCdfProcessor extends ParentDocumentRuleProcessor<
       [HAS_CDF, REPORT_TYPE].some((attributeName) =>
         eventHasMetadataAttribute({
           event,
-          eventNames: Object.values(DocumentEventName),
           metadataName: attributeName,
           metadataValues: attributeName === HAS_CDF ? false : CDF,
         }),
