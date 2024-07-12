@@ -55,14 +55,14 @@ describe('MaximumDistanceProcessor', () => {
   it.each([
     {
       externalEvents: undefined,
-      resultComment: ruleDataProcessor['ResultComment'].PICK_UP_NOT_FOUND,
+      resultComment: ruleDataProcessor['ResultComment'].DROP_OFF_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should return REJECTED when the document does not have the PICK_UP or SHIPMENT_REQUEST event',
     },
     {
       externalEvents: [],
-      resultComment: ruleDataProcessor['ResultComment'].PICK_UP_NOT_FOUND,
+      resultComment: ruleDataProcessor['ResultComment'].DROP_OFF_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should return REJECTED when the document does not have external events',
