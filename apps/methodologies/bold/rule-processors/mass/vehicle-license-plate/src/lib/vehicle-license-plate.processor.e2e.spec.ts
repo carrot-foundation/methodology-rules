@@ -40,7 +40,7 @@ testRuleProcessorWithMassDocuments(
       const document = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            { name: random<DocumentEventName>() },
             [
               [MOVE_TYPE, PICK_UP],
               [VEHICLE_TYPE, OTHERS],
@@ -62,7 +62,7 @@ testRuleProcessorWithMassDocuments(
         ]);
       });
 
-      it('should return REJECTED when OPEN or MOVE event has metadata attribute vehicle-license-plate with a value equal to empty string', async () => {
+      it('should return REJECTED when the event has metadata attribute vehicle-license-plate with a value equal to empty string', async () => {
         const response = await handler(
           stubRuleInput({
             documentKeyPrefix,
