@@ -1,90 +1,80 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+
 import {
-  and,
-  eventNameIsAnyOf,
   isActorEventWithSourceActorType,
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
 import {
+  type Document,
+  type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/utils';
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { isNonEmptyArray, toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
-import {
-  type RuleInput,
-  type RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { isNil } from '@carrot-fndn/shared/helpers';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-export class SameSourceAndPickUpAddressesProcessor extends RuleDataProcessor {
-  static resultComments = {
-    doNotMatch: 'Source and pick-up addresses do not match',
-    noSourceActorEvent: 'No actor event with source actor type found',
-    ruleNotApplicable:
-      'Rule not applicable: No move event with pick-up move type found',
+interface RuleSubject {
+  evaluateEvent?: DocumentEvent | undefined;
+  sourceActorEvent?: DocumentEvent | undefined;
+}
+
+export class SameSourceAndPickUpAddressesProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
+  private ResultComments = {
+    DO_NOT_MATCH: 'Source and pick-up addresses do not match',
+    NO_SOURCE_ACTOR_EVENT: 'No actor event with source actor type found',
+    RULE_NOT_APPLICABLE:
+      'Rule not applicable: No event with pick-up or Shipment-request move-type found',
   };
 
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    const document = await loadParentDocument(
-      this.context.documentLoaderService,
-      toDocumentKey({
-        documentId: ruleInput.parentDocumentId,
-        documentKeyPrefix: ruleInput.documentKeyPrefix,
+  protected override evaluateResult({
+    evaluateEvent,
+    sourceActorEvent,
+  }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+    if (isNil(evaluateEvent)) {
+      return {
+        resultComment: this.ResultComments.RULE_NOT_APPLICABLE,
+        resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
+
+    if (!sourceActorEvent) {
+      return {
+        resultComment: this.ResultComments.NO_SOURCE_ACTOR_EVENT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    const resultStatus =
+      evaluateEvent.address.id === sourceActorEvent.address.id
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED;
+
+    return {
+      resultStatus,
+      ...(resultStatus === RuleOutputStatus.REJECTED && {
+        resultComment: this.ResultComments.DO_NOT_MATCH,
       }),
-    );
+    };
+  }
 
-    if (!document) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: DOCUMENT_NOT_FOUND_RESULT_COMMENT,
-      });
-    }
-
-    const { MOVE, OPEN } = DocumentEventName;
+  protected override getRuleSubject(
+    document: Document,
+  ): RuleSubject | undefined {
     const { MOVE_TYPE } = DocumentEventAttributeName;
-    const { PICK_UP } = DocumentEventMoveType;
+    const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
-    const openOrMoveEvents = document.externalEvents?.filter(
-      and(
-        eventNameIsAnyOf([OPEN, MOVE]),
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
-      ),
+    const evaluateEvent = document.externalEvents?.find(
+      metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
     );
-
-    if (!isNonEmptyArray(openOrMoveEvents)) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
-        resultComment:
-          SameSourceAndPickUpAddressesProcessor.resultComments
-            .ruleNotApplicable,
-      });
-    }
 
     const sourceActorEvent = document.externalEvents?.find(
       isActorEventWithSourceActorType,
     );
 
-    if (!sourceActorEvent) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment:
-          SameSourceAndPickUpAddressesProcessor.resultComments
-            .noSourceActorEvent,
-      });
-    }
-
-    const resultStatus = openOrMoveEvents.every(
-      (event) => event.address.id === sourceActorEvent.address.id,
-    )
-      ? RuleOutputStatus.APPROVED
-      : RuleOutputStatus.REJECTED;
-
-    return mapToRuleOutput(ruleInput, resultStatus, {
-      ...(resultStatus === RuleOutputStatus.REJECTED && {
-        resultComment:
-          SameSourceAndPickUpAddressesProcessor.resultComments.doNotMatch,
-      }),
-    });
+    return {
+      evaluateEvent,
+      sourceActorEvent,
+    };
   }
 }

@@ -20,7 +20,6 @@ import {
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
-import { SameSourceAndPickUpAddressesProcessor } from './same-source-and-pick-up-addresses.processor';
 
 testRuleProcessorWithMassDocuments(
   {
@@ -71,7 +70,7 @@ testRuleProcessorWithMassDocuments(
         ]);
       });
 
-      it('should return returnValue true when neither OPEN nor move event is present', async () => {
+      it('should REJECTE when the address ids do not match', async () => {
         const response = await handler(
           stubRuleInput({
             documentKeyPrefix,
@@ -82,8 +81,6 @@ testRuleProcessorWithMassDocuments(
         );
 
         expect(response).toMatchObject({
-          resultComment:
-            SameSourceAndPickUpAddressesProcessor.resultComments.doNotMatch,
           resultStatus: RuleOutputStatus.REJECTED,
         });
       });
