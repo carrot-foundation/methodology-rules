@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Verify if the time interval between Open and End events is at least 60 days and at most 120 days.</td>
+        <td>Verify if the time interval between the Event with the metadata `move-type` equal `Drop-off` and the `END` event is at least 60 days and at most 120 days.</td>
       </tr>
     </tbody>
   </table>
