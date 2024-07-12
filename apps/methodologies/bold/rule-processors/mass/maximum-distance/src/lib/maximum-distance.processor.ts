@@ -32,11 +32,16 @@ export class MaximumDistanceProcessor extends ParentDocumentRuleProcessor<Subjec
     dropOffEvent,
     pickUpOrShipmentRequestEvent,
   }: Subject): EvaluateResultOutput {
-    if (isNil(dropOffEvent) || isNil(pickUpOrShipmentRequestEvent)) {
+    if (isNil(dropOffEvent)) {
       return {
-        resultComment: pickUpOrShipmentRequestEvent
-          ? this.ResultComment.DROP_OFF_NOT_FOUND
-          : this.ResultComment.PICK_UP_NOT_FOUND,
+        resultComment: this.ResultComment.DROP_OFF_NOT_FOUND,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (isNil(pickUpOrShipmentRequestEvent)) {
+      return {
+        resultComment: this.ResultComment.PICK_UP_NOT_FOUND,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
