@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1 style="margin-bottom: -15px;">Pick Up Move</h1>
+  <h1 style="margin-bottom: -15px;">Mandatory Metadata</h1>
 
   <p style="margin-bottom: 32px;"> Methodology: <strong>Bold</strong> </p>
 
@@ -17,15 +17,16 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check if at least one OPEN or MOVE event has the 'move type' metadata field declared as 'Pick-up'.</td>
+         <td>Check if at least one OPEN event has the 'move type' metadata field declared as 'Pick-up' or 'Shipment-request'.</td>
       </tr>
     </tbody>
+
   </table>
 </div>
 
 ### 📂 Implementation
 
-- **[Main Implementation File](./src/lib/pick-up-move.processor.ts)**
+- **[Main Implementation File](./src/lib/mandatory-metadata.processor.ts)**
 
 ### 👥 Contributors
 

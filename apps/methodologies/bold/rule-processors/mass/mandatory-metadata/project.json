@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-rule-processors-mass-pick-up-move",
+  "name": "methodologies-bold-rule-processors-mass-mandatory-metadata",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
-  "sourceRoot": "apps/methodologies/bold/rule-processors/mass/pick-up-move/src",
+  "sourceRoot": "apps/methodologies/bold/rule-processors/mass/mandatory-metadata/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},
