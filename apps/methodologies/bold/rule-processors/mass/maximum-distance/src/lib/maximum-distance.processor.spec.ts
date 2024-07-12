@@ -1,19 +1,14 @@
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
   stubAddress,
   stubDocument,
   stubDocumentEvent,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
-  type Document,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/utils';
-import {
-  DocumentLoaderService,
-  stubDocumentEntity,
-} from '@carrot-fndn/shared/document/loader';
 import {
   type RuleInput,
   type RuleOutput,
@@ -23,116 +18,121 @@ import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import { MaximumDistanceProcessor } from './maximum-distance.processor';
-import { MAXIMUM_DISTANCE_RESULT_COMMENT } from './maximum-distance.processor.constants';
 
-jest.mock('@carrot-fndn/shared/document/loader');
+jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+
+const { DROP_OFF, PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
 describe('MaximumDistanceProcessor', () => {
   const ruleDataProcessor = new MaximumDistanceProcessor();
-  const documentLoaderService = jest.mocked(DocumentLoaderService.prototype);
+  const documentLoaderService = jest.mocked(loadParentDocument);
+
+  const pickUpOrShipmentRequestEvent = stubDocumentEvent({
+    metadata: {
+      attributes: [
+        {
+          isPublic: faker.datatype.boolean(),
+          name: DocumentEventAttributeName.MOVE_TYPE,
+          value: random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+        },
+      ],
+    },
+    name: random<DocumentEventName>(),
+  });
+  const dropOffEvent = stubDocumentEvent({
+    metadata: {
+      attributes: [
+        {
+          isPublic: faker.datatype.boolean(),
+          name: DocumentEventAttributeName.MOVE_TYPE,
+          value: DROP_OFF,
+        },
+      ],
+    },
+    name: random<DocumentEventName>(),
+  });
 
   it.each([
     {
-      document: undefined as unknown as Document,
-      resultComment: DOCUMENT_NOT_FOUND_RESULT_COMMENT,
+      externalEvents: undefined,
+      resultComment: ruleDataProcessor['ResultComment'].PICK_UP_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'is undefined',
+      scenario:
+        'should return REJECTED when the document does not have the PICK_UP or SHIPMENT_REQUEST event',
     },
     {
-      document: random<Omit<Document, 'category'>>(),
-      resultComment: DOCUMENT_NOT_FOUND_RESULT_COMMENT,
+      externalEvents: [],
+      resultComment: ruleDataProcessor['ResultComment'].PICK_UP_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'has invalid type',
+      scenario:
+        'should return REJECTED when the document does not have external events',
     },
     {
-      document: random<Omit<Document, 'externalEvents'>>(),
-      resultComment: MAXIMUM_DISTANCE_RESULT_COMMENT.pick_up_not_found,
+      externalEvents: [pickUpOrShipmentRequestEvent],
+      resultComment: ruleDataProcessor['ResultComment'].DROP_OFF_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'does not have external events',
+      scenario:
+        'should return REJECTED when the document does not have the DROP_OFF event',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: faker.datatype.boolean(),
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.PICK_UP,
-                },
-              ],
-            },
-            name: DocumentEventName.MOVE,
+      externalEvents: [
+        {
+          ...pickUpOrShipmentRequestEvent,
+          address: stubAddress({
+            latitude: 0,
+            longitude: 0,
           }),
-        ],
-      }),
-      resultComment: MAXIMUM_DISTANCE_RESULT_COMMENT.drop_off_not_found,
+        },
+        {
+          ...dropOffEvent,
+          address: stubAddress({
+            latitude: 100,
+            longitude: 100,
+          }),
+        },
+      ],
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'does not have the Pick-up or Drop-off event',
+      scenario:
+        'should return REJECTED when the distance between the events is too far',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            address: stubAddress({
-              latitude: 0,
-              longitude: 0,
-            }),
-            metadata: {
-              attributes: [
-                {
-                  isPublic: faker.datatype.boolean(),
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.PICK_UP,
-                },
-              ],
-            },
-            name: DocumentEventName.MOVE,
+      externalEvents: [
+        {
+          ...pickUpOrShipmentRequestEvent,
+          address: stubAddress({
+            latitude: 0,
+            longitude: 0,
           }),
-          stubDocumentEvent({
-            address: stubAddress({
-              latitude: 100,
-              longitude: 100,
-            }),
-            metadata: {
-              attributes: [
-                {
-                  isPublic: faker.datatype.boolean(),
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.DROP_OFF,
-                },
-              ],
-            },
-            name: DocumentEventName.MOVE,
+        },
+        {
+          ...dropOffEvent,
+          address: stubAddress({
+            latitude: 0,
+            longitude: 0,
           }),
-        ],
-      }),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'distance between the Pick-up and Drop-off event is too far',
+        },
+      ],
+      resultComment: undefined,
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'should return APPROVED when the distance between the events is less than 200 meters',
     },
-  ])(
-    `should return "$resultStatus" when the document $scenario`,
-    async ({ document, resultComment, resultStatus }) => {
-      const ruleInput = random<Required<RuleInput>>();
-      const documentEntity = {
-        ...stubDocumentEntity(),
-        document,
-      };
+  ])('$scenario', async ({ externalEvents, resultComment, resultStatus }) => {
+    const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.load.mockResolvedValueOnce(documentEntity);
+    documentLoaderService.mockResolvedValueOnce(
+      stubDocument({ externalEvents }),
+    );
 
-      const ruleOutput = await ruleDataProcessor.process(ruleInput);
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment,
+      resultStatus,
+    };
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-      const expectedRuleOutput: RuleOutput = {
-        requestId: ruleInput.requestId,
-        responseToken: ruleInput.responseToken,
-        responseUrl: ruleInput.responseUrl,
-        resultComment,
-        resultStatus,
-      };
-
-      expect(ruleOutput).toEqual(expectedRuleOutput);
-    },
-  );
+    expect(ruleOutput).toEqual(expectedRuleOutput);
+  });
 });
