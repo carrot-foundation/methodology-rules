@@ -17,14 +17,11 @@ type Subject = {
   event: DocumentEvent;
 };
 
-export class EndEventValueProcessor extends ParentDocumentRuleProcessor<Subject> {
+export class EventValueProcessor extends ParentDocumentRuleProcessor<Subject> {
   private ResultComment = {
-    APPROVED:
-      'The event has the event-value attribute value equal to currentValue of document',
-    NOT_APPLICABLE:
-      'Rule not applicable: The event with event-value attribute was not found',
-    REJECTED:
-      'The event has the event-value attribute value different to currentValue of document',
+    APPROVED: `The event has the ${EVENT_VALUE} attribute value equal to currentValue of document`,
+    NOT_APPLICABLE: `Rule not applicable: The event with ${EVENT_VALUE} attribute was not found`,
+    REJECTED: `The event has the ${EVENT_VALUE} attribute value different to currentValue of document`,
   };
 
   protected override evaluateResult({

@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-rule-processors-mass-end-event-value",
+  "name": "methodologies-bold-rule-processors-mass-event-value",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
-  "sourceRoot": "apps/methodologies/bold/rule-processors/end-event-value/src",
+  "sourceRoot": "apps/methodologies/bold/rule-processors/event-value/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},

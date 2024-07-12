@@ -1,6 +1,6 @@
 <div align="center">
 
-  <h1 style="margin-bottom: -15px;">End Event Value</h1>
+  <h1 style="margin-bottom: -15px;">Event Value</h1>
 
   <p style="margin-bottom: 32px;"> Methodology: <strong>Bold</strong> </p>
 
@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check if the declared value in the event, corresponding to the completion of the composting process, is equal to the value declared in the document.</td>
+        <td>Check if the declared value in the first event found with the `event-value` attribute, corresponding to the completion of the composting process, is equal to the value declared in the document.</td>
       </tr>
     </tbody>
   </table>
