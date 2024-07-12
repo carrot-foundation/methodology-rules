@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check if 'has-cdf' is false or 'report-type' is CDF in any event.</td>
+        <td>Check if there is a CDF in the Document.</td>
       </tr>
     </tbody>
   </table>
