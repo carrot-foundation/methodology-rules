@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Verify if the address of the participant identified in an event with 'move type' declared as 'Pick-up' or 'Shipment-request' is the same as the address declared for the participant pointed as SOURCE.</td>
+        <td>Verify if the address of the participant identified in an event with 'move-type' declared as 'Pick-up' or 'Shipment-request' is the same as the address declared for the participant pointed as SOURCE.</td>
       </tr>
     </tbody>
   </table>

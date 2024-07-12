@@ -24,7 +24,7 @@ export class SameSourceAndPickUpAddressesProcessor extends ParentDocumentRulePro
     DO_NOT_MATCH: 'Source and pick-up addresses do not match',
     NO_SOURCE_ACTOR_EVENT: 'No actor event with source actor type found',
     RULE_NOT_APPLICABLE:
-      'Rule not applicable: No move event with pick-up move type found',
+      'Rule not applicable: No event with pick-up or Shipment-request move-type found',
   };
 
   protected override evaluateResult({
