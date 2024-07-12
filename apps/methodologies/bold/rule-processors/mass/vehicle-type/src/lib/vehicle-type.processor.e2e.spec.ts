@@ -31,7 +31,6 @@ testRuleProcessorWithMassDocuments(
     describe('VehicleTypeProcessor E2E', () => {
       const documentKeyPrefix = faker.string.uuid();
       const parentDocumentId = faker.string.uuid();
-      const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
       const document = stubDocument({
         externalEvents: [
@@ -41,7 +40,10 @@ testRuleProcessorWithMassDocuments(
                 {
                   isPublic: true,
                   name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+                  value: random<
+                    | DocumentEventMoveType.PICK_UP
+                    | DocumentEventMoveType.SHIPMENT_REQUEST
+                  >(),
                 },
                 {
                   isPublic: true,

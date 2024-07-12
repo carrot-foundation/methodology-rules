@@ -28,9 +28,9 @@ describe('VehicleTypeProcessor', () => {
   const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
   const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
-  const generateCommonEvents = (moveType: string, vehicleType?: string) => [
+  const generateCommonEvents = (vehicleType?: string) => [
     stubDocumentEventWithMetadataAttributes({}, [
-      [MOVE_TYPE, moveType],
+      [MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()],
       [VEHICLE_TYPE, vehicleType || ''],
     ]),
   ];
@@ -46,7 +46,6 @@ describe('VehicleTypeProcessor', () => {
     {
       document: stubDocument({
         externalEvents: generateCommonEvents(
-          random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
           stubEnumValue(DocumentEventVehicleType),
         ),
       }),
@@ -57,10 +56,7 @@ describe('VehicleTypeProcessor', () => {
     },
     {
       document: stubDocument({
-        externalEvents:
-          generateCommonEvents(
-            random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
-          ),
+        externalEvents: generateCommonEvents(),
       }),
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
