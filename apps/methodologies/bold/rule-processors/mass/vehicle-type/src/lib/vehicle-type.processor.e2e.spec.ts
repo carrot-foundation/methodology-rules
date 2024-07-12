@@ -31,6 +31,7 @@ testRuleProcessorWithMassDocuments(
     describe('VehicleTypeProcessor E2E', () => {
       const documentKeyPrefix = faker.string.uuid();
       const parentDocumentId = faker.string.uuid();
+      const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
       const document = stubDocument({
         externalEvents: [
@@ -40,7 +41,7 @@ testRuleProcessorWithMassDocuments(
                 {
                   isPublic: true,
                   name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: DocumentEventMoveType.PICK_UP,
+                  value: random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
                 },
                 {
                   isPublic: true,
@@ -49,7 +50,7 @@ testRuleProcessorWithMassDocuments(
                 },
               ],
             },
-            name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            name: random<DocumentEventName>(),
           }),
         ],
       });
@@ -66,7 +67,7 @@ testRuleProcessorWithMassDocuments(
         ]);
       });
 
-      it('should return the resultStatus REJECTED if the OPEN or MOVE events does not satisfy the vehicle-type', async () => {
+      it('should return the resultStatus REJECTED if the events does not satisfy the vehicle-type', async () => {
         const response = await handler(
           stubRuleInput({
             documentKeyPrefix,

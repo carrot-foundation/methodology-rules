@@ -17,7 +17,8 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check if the vehicle type is identified in OPEN or MOVE events when the 'move type' is identified as 'Pick-up'.</td>
+        <td>Check if the vehicle type is identified in events when the 'move type' is identified as 'Pick-up' or 
+        'Shipment-request'.</td>
       </tr>
     </tbody>
   </table>

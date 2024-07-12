@@ -7,7 +7,6 @@ import {
   type Document,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
 import {
@@ -26,10 +25,25 @@ describe('VehicleTypeProcessor', () => {
   const ruleDataProcessor = new VehicleTypeProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { MOVE_TYPE } = DocumentEventAttributeName;
-  const { PICK_UP } = DocumentEventMoveType;
-  const { VEHICLE_TYPE } = DocumentEventAttributeName;
-  const { OPEN } = DocumentEventName;
+  const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
+  const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
+
+  const generateTestScenario = (moveType: string, vehicleType?: string) => ({
+    document: stubDocument({
+      externalEvents: [
+        stubDocumentEventWithMetadataAttributes({}, [
+          [MOVE_TYPE, moveType],
+          [VEHICLE_TYPE, vehicleType || ''],
+        ]),
+      ],
+    }),
+    resultComment: vehicleType
+      ? ruleDataProcessor['ResultComment'].APPROVED
+      : ruleDataProcessor['ResultComment'].REJECTED,
+    resultStatus: vehicleType
+      ? RuleOutputStatus.APPROVED
+      : RuleOutputStatus.REJECTED,
+  });
 
   it.each([
     {
@@ -37,48 +51,30 @@ describe('VehicleTypeProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].NOT_APPLICABLE,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the resultStatus APPROVED if there is no move-type attribute in OPEN or MOVE event',
+        'should return the resultStatus APPROVED if there is no move-type attribute',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
-            [MOVE_TYPE, PICK_UP],
-          ]),
-        ],
-      }),
-      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
+      ...generateTestScenario(
+        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+        stubEnumValue(DocumentEventVehicleType),
+      ),
       scenario:
-        'should return the resultStatus REJECTED if move-type is present but the vechicle-type attribute value does not exist',
+        'should return the resultStatus APPROVED if vehicle-type attribute value matches a value from DocumentEventVehicleType enum',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
-            [MOVE_TYPE, PICK_UP],
-            [VEHICLE_TYPE, ''],
-          ]),
-        ],
-      }),
-      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
+      ...generateTestScenario(
+        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+      ),
       scenario:
-        'should return the resultStatus REJECTED if move-type is present but the vechicle-type attribute value is an empty string',
+        'should return the resultStatus REJECTED if move-type is Pick-up but the vehicle-type attribute value does not exist',
     },
     {
-      document: stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
-            [MOVE_TYPE, PICK_UP],
-            [VEHICLE_TYPE, stubEnumValue(DocumentEventVehicleType)],
-          ]),
-        ],
-      }),
-      resultComment: ruleDataProcessor['ResultComment'].APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      ...generateTestScenario(
+        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+        '',
+      ),
       scenario:
-        'should return the resultStatus APPROVED if vechicle-type attribute value matches a value from DocumentEventVehicleType enum',
+        'should return the resultStatus REJECTED if move-type is Pick-up but the vehicle-type attribute value is an empty string',
     },
   ])('$scenario', async ({ document, resultComment, resultStatus }) => {
     const ruleInput = random<Required<RuleInput>>();
