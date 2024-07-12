@@ -54,10 +54,6 @@ export class VehicleTypeProcessor extends ParentDocumentRuleProcessor<
     };
   }
 
-  protected override getMissingRuleSubjectResultComment(): string {
-    return this.ResultComment.NOT_APPLICABLE;
-  }
-
   protected override getRuleSubject(
     document: Document,
   ): DocumentEvent[] | undefined {
