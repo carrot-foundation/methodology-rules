@@ -1,35 +1,30 @@
 <div align="center">
 
-  <h1 style="margin-bottom: -15px;">Cdf Reason Dismissal</h1>
+# Cdf Reason Dismissal
 
-  <p style="margin-bottom: 32px;"> Methodology: <strong>Bold</strong> </p>
+Methodology: **Bold**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/audit-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
 </div>
 
-<div dir="auto">
-  <table>
-    <thead>
-      <tr align="left">
-        <th>📄 Description</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>If the CDF does not exist for the End event, check if the justification field for dispensing with the CDF is declared.</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+## 📄 Description
 
-### 📂 Implementation
+If the CDF does not exist for the `END` event, check if the justification field for dispensing with the CDF is declared.
+
+## 📂 Implementation
 
 - **[Main Implementation File](./src/lib/cdf-reason-dismissal.processor.ts)**
 
-### 👥 Contributors
+## 👥 Contributors
 
-[<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/AMarcosCastelo) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/andtankian) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/7927374?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/cris-santos) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/49005645?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/gabrielsl96) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26340386?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/GLGuilherme) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/45052895?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/RafaPalau) [<img src="https://images.weserv.nl/?url=avatars.githubusercontent.com/u/11515359?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d" >](https://github.com/sangalli)
+[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
+[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
+[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/7927374?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
+[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/49005645?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
+[![GLGuilherme](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26340386?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/GLGuilherme)
+[![RafaPalau](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/45052895?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/RafaPalau)
+[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/11515359?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
 
 ## 🔑 License
 
