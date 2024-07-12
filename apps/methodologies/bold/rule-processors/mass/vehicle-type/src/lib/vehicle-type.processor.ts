@@ -1,24 +1,19 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import {
-  and,
-  eventNameIsAnyOf,
-  metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+import { metadataAttributeValueIsAnyOf } from '@carrot-fndn/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
+import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-const { MOVE, OPEN } = DocumentEventName;
-const { PICK_UP } = DocumentEventMoveType;
-const { MOVE_TYPE } = DocumentEventAttributeName;
+const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
+const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
 
 export class VehicleTypeProcessor extends ParentDocumentRuleProcessor<
   DocumentEvent[]
@@ -34,9 +29,16 @@ export class VehicleTypeProcessor extends ParentDocumentRuleProcessor<
   protected override evaluateResult(
     events: DocumentEvent[],
   ): EvaluateResultOutput {
+    if (!isNonEmptyArray(events)) {
+      return {
+        resultComment: this.ResultComment.NOT_APPLICABLE,
+        resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
+
     const resultStatus = events.every(
       metadataAttributeValueIsAnyOf(
-        DocumentEventAttributeName.VEHICLE_TYPE,
+        VEHICLE_TYPE,
         Object.values(DocumentEventVehicleType),
       ),
     )
@@ -52,18 +54,11 @@ export class VehicleTypeProcessor extends ParentDocumentRuleProcessor<
     };
   }
 
-  protected override getMissingRuleSubjectResultComment(): string {
-    return this.ResultComment.NOT_APPLICABLE;
-  }
-
   protected override getRuleSubject(
     document: Document,
   ): DocumentEvent[] | undefined {
     return document.externalEvents?.filter(
-      and(
-        eventNameIsAnyOf([MOVE, OPEN]),
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP]),
-      ),
+      metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, SHIPMENT_REQUEST]),
     );
   }
 }
