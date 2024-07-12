@@ -17,7 +17,7 @@
     </thead>
     <tbody>
       <tr>
-        <td>Check in the End event if there is a CDF for that event.</td>
+        <td>Check if there is a CDF in the Document.</td>
       </tr>
     </tbody>
   </table>

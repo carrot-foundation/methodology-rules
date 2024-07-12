@@ -25,70 +25,77 @@ describe('HasCdfProcessor', () => {
   const ruleDataProcessor = new HasCdfProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { HAS_CDF, HAS_MTR, REPORT_TYPE } = DocumentEventAttributeName;
+  const { HAS_CDF, REPORT_TYPE } = DocumentEventAttributeName;
   const { CDF, MTR } = ReportType;
-  const { END } = DocumentEventName;
 
-  it.each([
+  const scenarios = [
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_CDF, false],
-        [REPORT_TYPE, CDF],
-      ]),
+      hasCdf: false,
+      reportType: CDF,
+      resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returValue equal to true when has-cdf is false and report-type is CDF',
+        'should return APPROVED when has-cdf is false and report-type is CDF',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_CDF, true],
-        [REPORT_TYPE, CDF],
-      ]),
+      hasCdf: true,
+      reportType: CDF,
+      resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returValue equal to true when has-cdf is true and report-type is CDF',
+        'should return APPROVED when has-cdf is true and report-type is CDF',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: END }, [
-        [HAS_MTR, true],
-        [REPORT_TYPE, MTR],
-      ]),
+      hasCdf: true,
+      reportType: MTR,
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the returValue equal to false when the END event has-mtr equal to true and report-type is MTR',
+        'should return REJECTED when report-type is MTR and has-cdf is true',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes(
-        { name: random<Omit<DocumentEventName, 'END'>>() },
-        [
-          [HAS_CDF, true],
-          [REPORT_TYPE, CDF],
-        ],
-      ),
+      hasCdf: undefined,
+      reportType: undefined,
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the returValue equal to false when there is no END event',
+        'should return REJECTED when neither has-cdf nor report-type are present',
     },
-  ])(`$scenario`, async ({ event, resultComment, resultStatus }) => {
-    const ruleInput = random<Required<RuleInput>>();
-    const document = stubDocument({
-      externalEvents: [...stubArray(() => random<DocumentEvent>(), 3), event],
-    });
+  ];
 
-    documentLoaderService.mockResolvedValueOnce(document);
+  it.each(scenarios)(
+    `$scenario`,
+    async ({ hasCdf, reportType, resultComment, resultStatus }) => {
+      const attributes: [DocumentEventAttributeName, ReportType | boolean][] =
+        [];
 
-    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+      if (hasCdf !== undefined) attributes.push([HAS_CDF, hasCdf]);
+      if (reportType !== undefined) attributes.push([REPORT_TYPE, reportType]);
 
-    const expectedRuleOutput: RuleOutput = {
-      requestId: ruleInput.requestId,
-      responseToken: ruleInput.responseToken,
-      responseUrl: ruleInput.responseUrl,
-      resultComment,
-      resultStatus,
-    };
+      const event = stubDocumentEventWithMetadataAttributes(
+        { name: random<DocumentEventName>() },
+        attributes,
+      );
 
-    expect(ruleOutput).toEqual(expectedRuleOutput);
-  });
+      const document = stubDocument({
+        externalEvents: [...stubArray(() => random<DocumentEvent>(), 3), event],
+      });
+
+      const ruleInput = random<Required<RuleInput>>();
+
+      documentLoaderService.mockResolvedValueOnce(document);
+
+      const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+      const expectedRuleOutput: RuleOutput = {
+        requestId: ruleInput.requestId,
+        responseToken: ruleInput.responseToken,
+        responseUrl: ruleInput.responseUrl,
+        resultComment,
+        resultStatus,
+      };
+
+      expect(ruleOutput).toEqual(expectedRuleOutput);
+    },
+  );
 });
