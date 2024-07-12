@@ -35,7 +35,7 @@ describe('HasCdfProcessor', () => {
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returnValue equal to true when has-cdf is false and report-type is CDF',
+        'should return APPROVED when has-cdf is false and report-type is CDF',
     },
     {
       hasCdf: true,
@@ -43,7 +43,7 @@ describe('HasCdfProcessor', () => {
       resultComment: undefined,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return the returnValue equal to true when has-cdf is true and report-type is CDF',
+        'should return APPROVED when has-cdf is true and report-type is CDF',
     },
     {
       hasCdf: true,
@@ -51,7 +51,7 @@ describe('HasCdfProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the returnValue equal to false when report-type is MTR and has-cdf is true',
+        'should return REJECTED when report-type is MTR and has-cdf is true',
     },
     {
       hasCdf: undefined,
@@ -59,7 +59,7 @@ describe('HasCdfProcessor', () => {
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return the return value equal to false when neither has-cdf nor report-type are present',
+        'should return REJECTED when neither has-cdf nor report-type are present',
     },
   ];
 
