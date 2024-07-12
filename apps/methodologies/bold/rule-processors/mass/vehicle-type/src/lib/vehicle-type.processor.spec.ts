@@ -66,15 +66,7 @@ describe('VehicleTypeProcessor', () => {
         random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
       ),
       scenario:
-        'should return the resultStatus REJECTED if move-type is Pick-up but the vehicle-type attribute value does not exist',
-    },
-    {
-      ...generateTestScenario(
-        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
-        '',
-      ),
-      scenario:
-        'should return the resultStatus REJECTED if move-type is Pick-up but the vehicle-type attribute value is an empty string',
+        'should return the resultStatus REJECTED if move-type is Pick-up or Shipment-Request but the vehicle-type attribute value does not exist or is an empty string',
     },
   ])('$scenario', async ({ document, resultComment, resultStatus }) => {
     const ruleInput = random<Required<RuleInput>>();
