@@ -9,6 +9,7 @@ import {
   DocumentEventMoveType,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/types';
+import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
@@ -28,6 +29,13 @@ export class VehicleTypeProcessor extends ParentDocumentRuleProcessor<
   protected override evaluateResult(
     events: DocumentEvent[],
   ): EvaluateResultOutput {
+    if (!isNonEmptyArray(events)) {
+      return {
+        resultComment: this.ResultComment.NOT_APPLICABLE,
+        resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
+
     const resultStatus = events.every(
       metadataAttributeValueIsAnyOf(
         VEHICLE_TYPE,

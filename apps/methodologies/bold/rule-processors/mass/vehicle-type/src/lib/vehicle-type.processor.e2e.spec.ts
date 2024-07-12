@@ -1,13 +1,7 @@
 import {
   stubDocument,
-  stubDocumentEvent,
   testRuleProcessorWithMassDocuments,
 } from '@carrot-fndn/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventMoveType,
-  DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -17,9 +11,9 @@ import {
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import { handler } from '../lambda';
+import { stubEventWithVehicleType } from './vehicle-type.stubs';
 
 testRuleProcessorWithMassDocuments(
   {
@@ -33,28 +27,7 @@ testRuleProcessorWithMassDocuments(
       const parentDocumentId = faker.string.uuid();
 
       const document = stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            metadata: {
-              attributes: [
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.MOVE_TYPE,
-                  value: random<
-                    | DocumentEventMoveType.PICK_UP
-                    | DocumentEventMoveType.SHIPMENT_REQUEST
-                  >(),
-                },
-                {
-                  isPublic: true,
-                  name: DocumentEventAttributeName.VEHICLE_TYPE,
-                  value: faker.string.sample(),
-                },
-              ],
-            },
-            name: random<DocumentEventName>(),
-          }),
-        ],
+        externalEvents: [stubEventWithVehicleType(faker.string.sample())],
       });
 
       beforeAll(() => {
@@ -69,7 +42,7 @@ testRuleProcessorWithMassDocuments(
         ]);
       });
 
-      it('should return the resultStatus REJECTED if the events does not satisfy the vehicle-type', async () => {
+      it('should return REJECTED if the events does not satisfy the vehicle-type', async () => {
         const response = await handler(
           stubRuleInput({
             documentKeyPrefix,
