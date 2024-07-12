@@ -1,47 +1,37 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
-import {
-  and,
-  eventNameIsAnyOf,
-  metadataAttributeNameIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+import { metadataAttributeNameIsAnyOf } from '@carrot-fndn/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-const { END } = DocumentEventName;
 const { EVENT_VALUE } = DocumentEventAttributeName;
 
 type Subject = {
   currentValue: number;
-  events: Array<DocumentEvent>;
+  event: DocumentEvent;
 };
 
-export class EndEventValueProcessor extends ParentDocumentRuleProcessor<Subject> {
+export class EventValueProcessor extends ParentDocumentRuleProcessor<Subject> {
   private ResultComment = {
-    APPROVED:
-      'The END event has the event-value attribute value equal to currentValue of document',
-    NOT_APPLICABLE:
-      'Rule not applicable: The END event with event-value attribute was not found',
-    REJECTED:
-      'The END event has the event-value attribute value different to currentValue of document',
+    APPROVED: `The event has the ${EVENT_VALUE} attribute value equal to currentValue of document`,
+    NOT_APPLICABLE: `Rule not applicable: The event with ${EVENT_VALUE} attribute was not found`,
+    REJECTED: `The event has the ${EVENT_VALUE} attribute value different to currentValue of document`,
   };
 
   protected override evaluateResult({
     currentValue,
-    events,
+    event,
   }: Subject): EvaluateResultOutput {
-    const resultStatus = events.every(
-      (event) => getEventAttributeValue(event, EVENT_VALUE) === currentValue,
-    )
-      ? RuleOutputStatus.APPROVED
-      : RuleOutputStatus.REJECTED;
+    const resultStatus =
+      getEventAttributeValue(event, EVENT_VALUE) === currentValue
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED;
 
     return {
       resultComment:
@@ -57,14 +47,14 @@ export class EndEventValueProcessor extends ParentDocumentRuleProcessor<Subject>
   }
 
   protected override getRuleSubject(document: Document): Subject | undefined {
-    const events = document.externalEvents?.filter(
-      and(eventNameIsAnyOf([END]), metadataAttributeNameIsAnyOf([EVENT_VALUE])),
+    const event = document.externalEvents?.find(
+      metadataAttributeNameIsAnyOf([EVENT_VALUE]),
     );
 
-    if (events) {
+    if (event) {
       return {
         currentValue: document.currentValue,
-        events,
+        event,
       };
     }
 

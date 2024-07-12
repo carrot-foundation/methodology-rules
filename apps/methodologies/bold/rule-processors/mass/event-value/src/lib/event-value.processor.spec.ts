@@ -15,12 +15,12 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { EndEventValueProcessor } from './end-event-value.processor';
+import { EventValueProcessor } from './event-value.processor';
 
 jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
 
-describe('EndEventValueProcessor', () => {
-  const ruleDataProcessor = new EndEventValueProcessor();
+describe('EventValueProcessor', () => {
+  const ruleDataProcessor = new EventValueProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each([
@@ -38,14 +38,14 @@ describe('EndEventValueProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.END,
+            name: random<DocumentEventName>(),
           }),
         ],
       }),
       resultComment: ruleDataProcessor['ResultComment'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return APPROVED when the event attribute value of END event has the same value declared in the document currentValue',
+        'should return APPROVED when the event attribute value of the event has the same value declared in the document currentValue',
     },
     {
       document: stubDocument({
@@ -61,14 +61,14 @@ describe('EndEventValueProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.END,
+            name: random<DocumentEventName>(),
           }),
         ],
       }),
       resultComment: ruleDataProcessor['ResultComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return REJECTED when the event attribute value of END event has a different value declared in the document currentValue',
+        'should return REJECTED when the event attribute value of the event has a different value declared in the document currentValue',
     },
     {
       document: random<Omit<Document, 'externalEvents'>>(),
