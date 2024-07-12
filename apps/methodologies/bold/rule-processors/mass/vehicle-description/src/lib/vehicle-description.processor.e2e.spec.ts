@@ -63,7 +63,7 @@ testRuleProcessorWithMassDocuments(
         ]);
       });
 
-      it('should return REJECTED when OPEN or MOVE event has metadata attribute vehicle-description with a value equal to empty string', async () => {
+      it('should return REJECTED when any event has metadata attribute vehicle-description with a value equal to empty string', async () => {
         const response = await handler(
           stubRuleInput({
             documentKeyPrefix,
