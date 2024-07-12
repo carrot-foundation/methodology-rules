@@ -28,22 +28,12 @@ describe('VehicleTypeProcessor', () => {
   const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
   const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
-  const generateTestScenario = (moveType: string, vehicleType?: string) => ({
-    document: stubDocument({
-      externalEvents: [
-        stubDocumentEventWithMetadataAttributes({}, [
-          [MOVE_TYPE, moveType],
-          [VEHICLE_TYPE, vehicleType || ''],
-        ]),
-      ],
-    }),
-    resultComment: vehicleType
-      ? ruleDataProcessor['ResultComment'].APPROVED
-      : ruleDataProcessor['ResultComment'].REJECTED,
-    resultStatus: vehicleType
-      ? RuleOutputStatus.APPROVED
-      : RuleOutputStatus.REJECTED,
-  });
+  const generateCommonEvents = (moveType: string, vehicleType?: string) => [
+    stubDocumentEventWithMetadataAttributes({}, [
+      [MOVE_TYPE, moveType],
+      [VEHICLE_TYPE, vehicleType || ''],
+    ]),
+  ];
 
   it.each([
     {
@@ -54,17 +44,26 @@ describe('VehicleTypeProcessor', () => {
         'should return the resultStatus APPROVED if there is no move-type attribute',
     },
     {
-      ...generateTestScenario(
-        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
-        stubEnumValue(DocumentEventVehicleType),
-      ),
+      document: stubDocument({
+        externalEvents: generateCommonEvents(
+          random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+          stubEnumValue(DocumentEventVehicleType),
+        ),
+      }),
+      resultComment: ruleDataProcessor['ResultComment'].APPROVED,
+      resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should return the resultStatus APPROVED if vehicle-type attribute value matches a value from DocumentEventVehicleType enum',
     },
     {
-      ...generateTestScenario(
-        random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
-      ),
+      document: stubDocument({
+        externalEvents:
+          generateCommonEvents(
+            random<typeof PICK_UP | typeof SHIPMENT_REQUEST>(),
+          ),
+      }),
+      resultComment: ruleDataProcessor['ResultComment'].REJECTED,
+      resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should return the resultStatus REJECTED if move-type is Pick-up or Shipment-Request but the vehicle-type attribute value does not exist or is an empty string',
     },
