@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/methodologies/bold/types';
 
 export class DropOffGeolocationPrecisionProcessor extends GeolocationPrecisionRuleProcessor {
-  protected moveTypeValue = DocumentEventMoveType.DROP_OFF;
+  protected moveTypeValues = [DocumentEventMoveType.DROP_OFF];
 
   protected participantHomologationSubtype = DocumentSubtype.RECYCLER;
 }

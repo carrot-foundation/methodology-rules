@@ -9,8 +9,6 @@ import {
   PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
 } from '@carrot-fndn/methodologies/bold/matchers';
 import {
-  and,
-  eventNameIsAnyOf,
   isOpenEvent,
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/predicates';
@@ -19,7 +17,6 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentSubtype,
 } from '@carrot-fndn/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/utils';
@@ -42,7 +39,6 @@ import {
   participantHomologationCriteria,
 } from './geolocation-precision.helpers';
 
-const { MOVE, OPEN } = DocumentEventName;
 const { MOVE_TYPE } = DocumentEventAttributeName;
 
 export interface RuleSubject {
@@ -138,10 +134,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
 
       if (MASS.matches(documentReference)) {
         massDocumentEvent = document.externalEvents?.find(
-          and(
-            eventNameIsAnyOf([MOVE, OPEN]),
-            metadataAttributeValueIsAnyOf(MOVE_TYPE, [this.moveTypeValue]),
-          ),
+          metadataAttributeValueIsAnyOf(MOVE_TYPE, this.moveTypeValues),
         );
       }
     });
@@ -191,7 +184,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
     );
   }
 
-  protected abstract moveTypeValue: DocumentEventMoveType;
+  protected abstract moveTypeValues: DocumentEventMoveType[];
 
   protected abstract participantHomologationSubtype: DocumentSubtype;
 }
