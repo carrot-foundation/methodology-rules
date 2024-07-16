@@ -31,9 +31,9 @@ export class EventsTimeSpanProcessor extends ParentDocumentRuleProcessor<Subject
     APPROVED:
       'The difference in days between externalCreatedAt of the event with DROP_OFF value and the END event is between 60 and 120',
     NOT_APPLICABLE:
-      'Rule not applicable: The OPEN event or END event with externalCreatedAt was not found',
+      'Rule not applicable: The event with DROP_OFF value or END event with externalCreatedAt was not found',
     REJECTED:
-      'The difference in days between externalCreatedAt of the OPEN event and the END event is not between 60 and 120',
+      'The difference in days between externalCreatedAt of the event with DROP_OFF value and the END event is not between 60 and 120',
   };
 
   protected override evaluateResult({

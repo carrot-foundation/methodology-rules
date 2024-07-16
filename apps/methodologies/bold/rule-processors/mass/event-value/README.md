@@ -14,7 +14,7 @@ Check if the declared value in the first event found with the `event-value` attr
 
 ## 📂 Implementation
 
-- **[Main Implementation File](./src/lib/end-event-value.processor.ts)**
+- **[Main Implementation File](./src/lib/event-value.processor.ts)**
 
 ## 👥 Contributors
 
