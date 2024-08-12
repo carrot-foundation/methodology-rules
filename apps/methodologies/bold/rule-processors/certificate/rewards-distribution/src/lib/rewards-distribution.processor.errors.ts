@@ -1,4 +1,5 @@
 import { logger } from '@carrot-fndn/shared/helpers';
+import { AWSLambda } from '@sentry/serverless';
 
 export class RewardsDistributionProcessorErrors {
   private readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
@@ -31,6 +32,7 @@ export class RewardsDistributionProcessorErrors {
     }
 
     logger.error(error, 'Unexpected error on "processKnownError" method');
+    AWSLambda.captureException(error);
 
     return undefined;
   }
