@@ -140,6 +140,5 @@
       "{projectRoot}/jest.config.ts",
       "{projectRoot}/tsconfig.spec.json"
     ]
-  },
-  "nxCloudAccessToken": "Yjc4Mjk0MGYtNjI5MC00NjE2LTg4OTktZTkyZDY1ODA3MzI0fHJlYWQtd3JpdGU="
+  }
 }
