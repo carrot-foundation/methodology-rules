@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Ensure that the address of the `MOVE` event with `move-type` declared as `Drop-off` is the same address of the Recycler participant homologation process and consider a 2km radius as the precision limit margin between the homologated and reported geolocations.
+Ensure that the address of the `MOVE` event, with `move-type` declared as `Drop-off`, is the same address as the participant's homologation process, and consider a radius of 2km as the limit margin of accuracy between the approved and reported geolocations either at the address or in the `gps-app` fields declared in the metadata.
 
 ### 📂 Implementation
 
