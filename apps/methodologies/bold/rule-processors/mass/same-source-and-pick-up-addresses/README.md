@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the address of the participant identified in an event with `move-type` declared as `Pick-up` or `Shipment-request` is the same as the address declared for the participant pointed as `SOURCE`.
+Ensure that the address of the event with `move-type` declared as `Pick-up` is the same address of the `SOURCE` participant homologation process and consider a 2km radius as the precision limit margin between the homologated and reported geolocations.
 
 ## 📂 Implementation
 
