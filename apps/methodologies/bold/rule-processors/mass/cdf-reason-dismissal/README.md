@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-If the CDF does not exist for the `END` event, check if the justification field for dispensing with the CDF is declared.
+If the CDF does not exist for some event, check if the justification field for dispensing with the CDF is declared.
 
 ## 📂 Implementation
 
