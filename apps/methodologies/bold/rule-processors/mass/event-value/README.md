@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the value declared in the event with metadata 'report-type'=''CDF', corresponding to the properly destined amount, is equal to the value declared in the document.
+Check if the value declared in the event with metadata 'report-type'='CDF', corresponding to the properly destined amount, is equal to the value declared in the document.
 
 ## 📂 Implementation
 
