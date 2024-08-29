@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Ensure there is one and only one actor identified as `SOURCE`.
+Ensure there is one and only one actor identified as SOURCE.
 
 ## 📂 Implementation
 

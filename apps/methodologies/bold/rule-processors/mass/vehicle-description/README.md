@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-In the case of the vehicle type indicated as `Other` in any event, when the `move-type` is identified as `Pick-up` or `Shipment-request`, verify if the vehicle description field is declared.
+In the case of the vehicle type indicated as 'Other' in any event, when the 'move-type' is identified as 'Pick-up' or 'Shipment-request', verify if the vehicle description field is declared.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the time interval between the Event with the metadata `move-type` equal `Drop-off` and the `END` event is at least 60 days and at most 120 days.
+Verify if the time interval between the Event with the metadata 'move-type' equal 'Drop-off' and the 'END' event is at least 60 days and at most 120 days.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the vehicle type is identified in events when the `move-type` is identified as `Pick-up` or `Shipment-request`.
+Check if the vehicle type is identified in events when the 'move-type' is identified as 'Pick-up' or 'Shipment-request'.
 
 ## 📂 Implementation
 

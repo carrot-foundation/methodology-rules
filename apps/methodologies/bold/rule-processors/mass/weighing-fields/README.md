@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check in a `MOVE` event, with the`movet-ype` declared as `Weighing`, if it has all the mandatory weighing fields declared.
+Check in a MOVE event, with the 'move-type' declared as 'Weighing,' if it has all the mandatory weighing fields declared.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if there is a CDF in the Document.
+Check that the mandatory 'report-type'='CDF' metadata exists, or that the absence of the document is justified.
 
 ## 📂 Implementation
 

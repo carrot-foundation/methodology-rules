@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the `move-type` metadata field is declared in all events labeled as `MOVE`.
+Verify if the 'move-type' metadata field is declared in all events labeled as MOVE
 
 ## 📂 Implementation
 

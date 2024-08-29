@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check in the `OPEN` event if there is an MTR for that event.
+Check in the OPEN event if there is an MTR for that event.
 
 ## 📂 Implementation
 

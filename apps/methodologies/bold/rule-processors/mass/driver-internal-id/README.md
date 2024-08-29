@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the internal driver identification is declared in an event when the `move-type` is identified as `Pick-up` or `Shipment-request`.
+Verify if the internal driver identification is declared in an event when the 'move-type' is identified as 'Pick-up' or 'Shipment-request'.
 
 ### 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-In an event, when there is a report identified as CDF, verify if the `report-number`, `issue-date`, and the value stated in the report are declared.
+In an event, when there is a report identified as CDF, verify if the report number, issue date, and the value stated in the report are declared.
 
 ## 📂 Implementation
 

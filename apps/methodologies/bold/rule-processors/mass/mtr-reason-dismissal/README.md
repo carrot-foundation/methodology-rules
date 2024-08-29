@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-If the `MTR` does not exist for the `OPEN` event, check if the justification field for dispensing with the MTR is declared.
+If the MTR does not exist for the OPEN event, check if the justification field for MTR dismissal is declared.
 
 ## 📂 Implementation
 

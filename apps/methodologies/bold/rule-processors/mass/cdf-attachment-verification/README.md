@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-If an MTR is declared in an event, check if the event contains a mandatory attachment.
+If a CDF is declared in an event, check if the event contains a mandatory attachment.
 
 ## 📂 Implementation
 

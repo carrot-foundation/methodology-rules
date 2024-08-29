@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if all the values declared in a `MOVE` event, with the `move-type` declared as `Weighing`, are valid numeric values.
+Verify if all the values declared in a MOVE event, with the 'move-type' declared as 'Weighing,' are valid numeric values.
 
 ## 📂 Implementation
 

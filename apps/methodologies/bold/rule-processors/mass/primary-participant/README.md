@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the participant declared as `SOURCE` is the same participant listed as the primary participant in the document.
+Check if the participant declared as SOURCE is the same participant listed as the primary participant in the document.
 
 ## 📂 Implementation
 
