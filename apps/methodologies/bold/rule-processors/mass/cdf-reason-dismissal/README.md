@@ -4,7 +4,7 @@
 
 Methodology: **Bold**
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/audit-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
 </div>
 
@@ -28,4 +28,4 @@ If the CDF does not exist for any event, check if the justification field for di
 
 ## 🔑 License
 
-[License](https://github.com/carrot-foundation/audit-rules/blob/main/LICENSE)
+[License](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
