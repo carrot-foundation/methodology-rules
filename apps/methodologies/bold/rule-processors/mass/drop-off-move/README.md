@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Confirm if at least one `MOVE` event has the `move-type` metadata field declared as `Drop-off`.
+Confirm if at least one MOVE event has the 'move-type' metadata field declared as 'Drop-off'.
 
 ### 📂 Implementation
 

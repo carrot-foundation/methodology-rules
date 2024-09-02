@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the document type is declared as Organic.
+Check if the document type is declared as organic.
 
 ### 📂 Implementation
 

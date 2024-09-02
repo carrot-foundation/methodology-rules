@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check, in a `MOVE` event, when there is metadata declared as `invoice-number`, if the mandatory invoice fields are filled.
+Check, in a MOVE event, when there is metadata declared as 'invoice number', if the mandatory invoice fields are filled.
 
 ## 📂 Implementation
 

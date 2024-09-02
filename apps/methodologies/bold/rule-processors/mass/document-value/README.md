@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the document value is greater than 0.
+Check if the document value is greater than 0
 
 ### 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the address of the participant identified in the `MOVE` event with `move-type` declared as `Drop-off` is the same as the address declared for the participant pointed as `RECYCLER`.
+Verify if the address of the participant identified in the MOVE event with 'move-type' declared as 'Drop-off' is the same as the address declared for the participant pointed as RECYCLER.
 
 ## 📂 Implementation
 

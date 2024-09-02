@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-If the CDF exists for the End event, check if there is an attachment named `CDF` or `CERTIFICADO DE DESTINAÇÃO FINAL`.
+If the CDF exists for the END event, check if there is an attachment named 'CDF' or 'CERTIFICADO DE DESTINAÇÃO FINAL'.
 
 ## 📂 Implementation
 

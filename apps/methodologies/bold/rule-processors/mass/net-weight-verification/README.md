@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Perform the function [`net-cargo-weight` = `vehicle-gross-weight` - `vehicle-tare`] and check if the result of the function is valid based on the declared values.
+Perform the function [net cargo weight = vehicle gross weight - vehicle tare] and check if the result of the function is valid based on the declared values.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-When the vehicle type is different from `Sludge Pipes`, `Cart`, or `Bicycle`, check if the vehicle plate is declared.
+When the vehicle type is different from 'Sludge Pipes', 'Cart', or 'Bicycle', check if the vehicle plate is declared.
 
 ## 📂 Implementation
 

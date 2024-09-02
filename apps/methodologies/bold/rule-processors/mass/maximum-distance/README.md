@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the geolocation distance between the event with `move-type` declared as `Pick-up` or `Shipment-request` and the event with `move-type` declared as `Drop-off`, is less than or equal to 200km.
+Verify if the geolocation distance between the event with 'move-type' declared as 'Pick-up' or 'Shipment-request' and the event with 'move-type' declared as 'Drop-off', is less than or equal to 200km.
 
 ## 📂 Implementation
 

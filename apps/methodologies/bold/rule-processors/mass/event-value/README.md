@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the declared value in the first event found with the `event-value='CDF'` attribute, corresponding to the completion of the composting process, equals the value declared in the document.
+Check if the value declared in the event with metadata 'report-type'='CDF', corresponding to the properly destined amount, is equal to the value declared in the document.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-When a report is identified as `CDF`, verify if the declared addresses for the participant identified in the event and the actor identified as Recycler are the same.
+In an event, when there is a report identified as CDF, verify if the declared addresses for the participant identified in the event and the actor identified as Recycler are the same.
 
 ## 📂 Implementation
 

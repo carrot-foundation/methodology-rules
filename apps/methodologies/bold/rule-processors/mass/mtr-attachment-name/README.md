@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-If the MTR exists for the `OPEN` event, check if there is an attachment named `MTR` or `MANIFESTO DE TRANSPORTE DE RESÍDUOS`.
+If the MTR exists for the OPEN event, check if there is an attachment named 'MTR' or 'MANIFESTO DE TRANSPORTE DE RESÍDUOS'.
 
 ## 📂 Implementation
 

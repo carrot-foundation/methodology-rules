@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if the document category is declared as `Mass`.
+Check if the document category is declared as 'Mass'.
 
 ### 📂 Implementation
 

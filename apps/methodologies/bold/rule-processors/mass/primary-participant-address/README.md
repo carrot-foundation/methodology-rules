@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if the addresses declared for the `SOURCE` type actor and the Primary Participant are the same.
+Verify if the addresses declared for the SOURCE type actor and the Primary Participant are the same.
 
 ## 📂 Implementation
 

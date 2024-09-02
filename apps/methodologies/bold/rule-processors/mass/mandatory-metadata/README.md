@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if at least one `OPEN` event has the `move type` metadata field declared as `Pick-up` or `Shipment-request`.
+Check if at least one 'OPEN' or 'MOVE' event has the 'move-type' metadata field declared as 'Pick-up' or 'Shipment-request'.
 
 ## 📂 Implementation
 
