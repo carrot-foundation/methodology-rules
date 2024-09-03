@@ -1,4 +1,94 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>carrot-foundation/renovate-config"]
+  "extends": ["config:best-practices", ":dependencyDashboard"],
+  "dependencyDashboard": true,
+  "automerge": true,
+  "automergeType": "pr",
+  "reviewers": ["team:Developers"],
+  "schedule": ["on tuesday and thursday"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major devDependencies",
+      "groupSlug": "all-devDependencies-minor-patch",
+      "matchDepTypes": ["devDependencies"],
+      "matchPackageNames": ["*"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "all non-major production dependencies",
+      "groupSlug": "all-productionDependencies-minor-patch",
+      "matchDepTypes": ["dependencies"],
+      "matchPackageNames": ["*"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "aws non-major dependencies",
+      "groupSlug": "aws-minor-patch",
+      "matchPackageNames": ["/aws/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "nestjs non-major dependencies",
+      "groupSlug": "nestjs-minor-patch",
+      "matchPackageNames": ["/nestjs/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "lint non-major dependencies",
+      "groupSlug": "lint-minor-patch",
+      "matchPackageNames": ["/lint/", "/cspell/", "/prettier/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "nx non-major dependencies",
+      "groupSlug": "nx-minor-patch",
+      "matchPackageNames": ["/nx/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "hardhat non-major dependencies",
+      "groupSlug": "hardhat-minor-patch",
+      "matchPackageNames": ["/hardhat/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "openzeppelin non-major dependencies",
+      "groupSlug": "openzeppelin-minor-patch",
+      "matchPackageNames": ["/openzeppelin/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "sentry non-major dependencies",
+      "groupSlug": "sentry-minor-patch",
+      "matchPackageNames": ["/sentry/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "react non-major dependencies",
+      "groupSlug": "react-minor-patch",
+      "matchPackageNames": ["/react/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "mui non-major dependencies",
+      "groupSlug": "mui-minor-patch",
+      "matchPackageNames": ["/mui/"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "typescript non-major dependencies",
+      "groupSlug": "typescript-minor-patch",
+      "matchPackageNames": [
+        "typescript",
+        "typia",
+        "/ts-/",
+        "tslib",
+        "/tsconfig/"
+      ]
+    }
+  ],
+  "major": {
+    "dependencyDashboardApproval": true
+  }
 }
