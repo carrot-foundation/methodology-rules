@@ -299,6 +299,8 @@ export const mapNftMetadata = ({
         mass_subtype: subtype,
         mass_type: type,
         origin_country: originCountry,
+        origin_state: originCountryState,
+        recycler_name: recyclerName,
       },
     },
     external_id: creditDocumentId,
