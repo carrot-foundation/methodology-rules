@@ -48,6 +48,8 @@ interface NftMetadataSummary {
   mass_subtype: NonEmptyString;
   mass_type: NonEmptyString;
   origin_country: NonEmptyString;
+  origin_state: NonEmptyString;
+  recycler_name: NonEmptyString;
 }
 
 export interface NftMetadataRewardsDistribution {
