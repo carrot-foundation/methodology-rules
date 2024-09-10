@@ -42,13 +42,13 @@ export interface NftMetadataMethodology {
 
 interface NftMetadataSummary {
   certificate_label: NonEmptyString;
-  certificates_count: NonZeroPositive;
-  mass_ids_count: NonZeroPositive;
-  mass_ids_total_weight: NonEmptyString;
+  mass_certificate_count: NonZeroPositive;
+  mass_id_count: NonZeroPositive;
+  mass_origin_country: NonEmptyString;
+  mass_origin_state: NonEmptyString;
   mass_subtype: NonEmptyString;
+  mass_total_weight: NonEmptyString;
   mass_type: NonEmptyString;
-  origin_country: NonEmptyString;
-  origin_state: NonEmptyString;
   recycler_name: NonEmptyString;
 }
 
