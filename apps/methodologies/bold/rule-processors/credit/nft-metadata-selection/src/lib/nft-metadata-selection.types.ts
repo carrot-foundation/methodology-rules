@@ -41,7 +41,6 @@ export interface NftMetadataMethodology {
 }
 
 interface NftMetadataSummary {
-  certificate_label: NonEmptyString;
   mass_certificate_count: NonZeroPositive;
   mass_id_count: NonZeroPositive;
   mass_origin_country: NonEmptyString;

@@ -23,7 +23,6 @@ export interface CertificateMetadata {
 }
 
 export interface MethodologyMetadata {
-  certificateValueLabel: NonEmptyString;
   description: NonEmptyString;
   documentId: NonEmptyString;
   name: NonEmptyString;

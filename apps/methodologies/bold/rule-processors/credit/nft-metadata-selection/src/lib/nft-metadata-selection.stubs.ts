@@ -19,7 +19,7 @@ import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 const { OPEN, OUTPUT, RELATED } = DocumentEventName;
-const { CERTIFICATE_VALUE_LABEL, METHODOLOGY_DESCRIPTION, METHODOLOGY_NAME } =
+const { METHODOLOGY_DESCRIPTION, METHODOLOGY_NAME } =
   DocumentEventAttributeName;
 
 export const stubDocumentOutputEvent = (
@@ -48,7 +48,6 @@ export const stubMethodologyDefinitionDocument = (
     ...stubArray(stubDocumentEvent),
     stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
       [METHODOLOGY_DESCRIPTION, faker.lorem.sentence()],
-      [CERTIFICATE_VALUE_LABEL, faker.lorem.sentence()],
       [METHODOLOGY_NAME, faker.lorem.word()],
     ]),
     ...(partialDocument?.externalEvents ?? []),
