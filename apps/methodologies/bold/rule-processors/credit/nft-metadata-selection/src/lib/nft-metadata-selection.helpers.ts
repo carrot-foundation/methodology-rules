@@ -148,6 +148,14 @@ export const getCertificatesMassValue = (
     0,
   );
 
+export const formatCeritificatesMassValue = (
+  certificates: CertificateMetadata[],
+): string =>
+  Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
+  }).format(getCertificatesMassValue(certificates));
+
 export const getCertificatesMassIdsCount = (
   certificates: CertificateMetadata[],
 ): number =>
@@ -241,24 +249,28 @@ export const mapNftMetadata = ({
   return {
     attributes: [
       {
-        trait_type: 'Certified Type',
-        value: `${type} (${subtype})`,
+        trait_type: 'Mass Type',
+        value: type,
       },
       {
-        trait_type: 'Origin Country',
+        trait_type: 'Mass Origin (Country)',
         value: originCountry,
       },
       {
-        trait_type: 'Origin State',
+        trait_type: 'Mass Origin (State)',
         value: originCountryState,
       },
       {
         trait_type: 'Recycler',
         value: recyclerName,
       },
+      {
+        trait_type: 'Amount in Kg',
+        value: formatCeritificatesMassValue(certificates),
+      },
     ],
     description:
-      '"Bold" is the first tokenized recycling certificate (TRC - Tokenized Recycling Credit), which confirms with a high degree of certainty that a mass of material (in kg) has been recycled. The certification of the detour of organic waste from landfills and dumps demonstrates a serious commitment to the environment. BOLD certificates serve as proof of investment in innovative solutions for global sustainability and can be used to meet internal ESG targets.',
+      'This NFT is part of a 10-NFT collection called "BOLD Innovators." BOLD Innovators is the first set of credits (and therefore NFTs) issued on the Carrot Network. The collection is reserved for individuals who are uniquely qualified to understand the environmental and social value that BOLD (Breakthrough in Organic Landfill Diversion) produces for the world, as well as to validate the functionality of a technology expected to be one of the most important ever created to combat climate change and waste pollution. BOLD represents approximately 1 ton of organic waste diverted from a landfill to a composting facility for proper biological treatment. The Carrot team views BOLD as the most significant environmental asset developed to date, as it enables the transition to a resource-efficient, low-carbon circular economy. The use of BOLD at scale will significantly reduce system-wide greenhouse gas emissions, preserve natural resources, reduce waste pollution, and prevent methane emissions at landfills. You can find more details about BOLD and its attributes in the methodologies section of www.carrot.eco',
     details: {
       certificates: {
         count: certificates.length,

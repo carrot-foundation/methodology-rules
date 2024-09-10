@@ -29,6 +29,7 @@ import type { DocumentLinks } from './nft-metadata-selection.processor';
 import {
   findCertificateIdFromDocumentLinks,
   findMassValidationId,
+  formatCeritificatesMassValue,
   formatWeight,
   getCarrotExplorePageUrl,
   getCertificatesMassIdsCount,
@@ -416,6 +417,35 @@ describe('Helpers', () => {
         // @ts-expect-error: force invalid return value
         mapNftMetadataDto(dtoStub, ''),
       ).toThrow('assert');
+    });
+  });
+
+  describe('formatCeritificatesMassValue', () => {
+    it('should return the formatted total mass value', () => {
+      const certificatesStub: CertificateMetadata[] = [
+        {
+          documentId: faker.string.uuid(),
+          masses: [
+            {
+              ...random<MassMetadata>(),
+              value: 1234.56,
+            },
+          ],
+        },
+        {
+          documentId: faker.string.uuid(),
+          masses: [
+            {
+              ...random<MassMetadata>(),
+              value: 7890.12,
+            },
+          ],
+        },
+      ];
+
+      const result = formatCeritificatesMassValue(certificatesStub);
+
+      expect(result).toBe('9,124.68');
     });
   });
 });
