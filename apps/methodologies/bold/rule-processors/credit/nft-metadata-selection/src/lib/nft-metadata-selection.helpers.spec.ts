@@ -45,7 +45,6 @@ import { stubMassDocument } from './nft-metadata-selection.stubs';
 
 const {
   ACTOR_TYPE,
-  CERTIFICATE_VALUE_LABEL,
   METHODOLOGY_DESCRIPTION,
   METHODOLOGY_NAME,
   RULE_PROCESSOR_CODE_VERSION,
@@ -178,7 +177,6 @@ describe('Helpers', () => {
           ...stubArray(stubDocumentEvent),
           stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
             [METHODOLOGY_DESCRIPTION, faker.lorem.sentence()],
-            [CERTIFICATE_VALUE_LABEL, faker.lorem.sentence()],
             [METHODOLOGY_NAME, faker.lorem.sentence()],
           ]),
         ],

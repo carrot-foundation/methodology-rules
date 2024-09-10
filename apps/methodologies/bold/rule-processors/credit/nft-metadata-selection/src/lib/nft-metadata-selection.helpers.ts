@@ -171,14 +171,10 @@ export const mapMethodologyMetadata = (
     eventHasName(event, OPEN),
   );
 
-  const { CERTIFICATE_VALUE_LABEL, METHODOLOGY_DESCRIPTION, METHODOLOGY_NAME } =
+  const { METHODOLOGY_DESCRIPTION, METHODOLOGY_NAME } =
     DocumentEventAttributeName;
 
   return {
-    certificateValueLabel: getEventAttributeValue(
-      openEvent,
-      CERTIFICATE_VALUE_LABEL,
-    ) as string,
     description: getEventAttributeValue(
       openEvent,
       METHODOLOGY_DESCRIPTION,
@@ -302,7 +298,6 @@ export const mapNftMetadata = ({
         policy_version: rewardsDistribution.policyVersion,
       },
       summary: {
-        certificate_label: 'Organics Landfill Diversion',
         mass_certificate_count: certificates.length,
         mass_id_count: getCertificatesMassIdsCount(certificates),
         mass_origin_country: originCountry,
