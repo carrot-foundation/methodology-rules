@@ -106,7 +106,11 @@ describe('Helpers', () => {
       (weight) => {
         const result = formatWeight(weight);
 
-        expect(result).toBe(`${weight}kg`);
+        expect(result).toBe(
+          `${Intl.NumberFormat('en-US', {
+            maximumFractionDigits: 2,
+          }).format(weight)}kg`,
+        );
       },
     );
   });

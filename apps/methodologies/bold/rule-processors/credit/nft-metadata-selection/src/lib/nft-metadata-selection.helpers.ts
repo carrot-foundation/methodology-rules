@@ -66,7 +66,10 @@ export const mapMassMetadata = (document: Document): MassMetadata => ({
 
 export const getMassValue = (mass: MassMetadata): number => mass.value;
 
-export const formatWeight = (weight: number): string => `${weight}kg`;
+export const formatWeight = (weight: number, fractionDigits = 2): string =>
+  `${Intl.NumberFormat('en-US', {
+    maximumFractionDigits: fractionDigits,
+  }).format(weight)}kg`;
 
 export const findMassValidationId = (
   massDocument: Document,
