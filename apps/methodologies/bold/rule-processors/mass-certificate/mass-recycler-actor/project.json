@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-rule-processors-certificate-mass-recycler-actor",
+  "name": "methodologies-bold-rule-processors-mass-certificate-mass-recycler-actor",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
-  "sourceRoot": "apps/methodologies/bold/rule-processors/certificate/mass-recycler-actor/src",
+  "sourceRoot": "apps/methodologies/bold/rule-processors/mass-certificate/mass-recycler-actor/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},
