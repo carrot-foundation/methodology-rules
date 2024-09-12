@@ -97,7 +97,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
   });
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
-    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.future(), 'yyyy/MM/dd')]],
+    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.future(), 'yyyy-MM-dd')]],
   );
   const massDocumentStub = stubMassDocument({
     externalEvents: [
@@ -323,7 +323,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
               name: DocumentEventName.OPEN,
             }),
             stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-              [HOMOLOGATION_DUE_DATE, '1990/01/01'],
+              [HOMOLOGATION_DUE_DATE, '1990-01-01'],
             ]),
           ],
         },
