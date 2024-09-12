@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-rule-processors-certificate-mass-validation-document-status",
+  "name": "methodologies-bold-rule-processors-mass-certificate-mass-document-type",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
-  "sourceRoot": "apps/methodologies/bold/rule-processors/certificate/mass-validation-document-status/src",
+  "sourceRoot": "apps/methodologies/bold/rule-processors/mass-certificate/mass-document-type/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},
