@@ -1,10 +1,10 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
-  stubCertificateDocument,
   stubDocument,
   stubDocumentEvent,
+  stubMassAuditDocument,
+  stubMassCertificateDocument,
   stubMassDocument,
-  stubMassValidationDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   DocumentCategory,
@@ -31,28 +31,28 @@ describe('MassDocumentTypeRuleProcessor', () => {
       { max: 3, min: 1 },
     );
 
-    const massValidations = organicMasses.map((mass) =>
-      stubMassValidationDocument({
+    const massAudits = organicMasses.map((mass) =>
+      stubMassAuditDocument({
         parentDocumentId: mass.id,
       }),
     );
 
-    const certificate = stubCertificateDocument({
-      externalEvents: massValidations.map((massValidation) =>
+    const massCertificate = stubMassCertificateDocument({
+      externalEvents: massAudits.map((massAudit) =>
         stubDocumentEvent({
           relatedDocument: {
             category: DocumentCategory.METHODOLOGY,
-            documentId: massValidation.id,
-            subtype: massValidation.subtype,
-            type: massValidation.type,
+            documentId: massAudit.id,
+            subtype: massAudit.subtype,
+            type: massAudit.type,
           },
         }),
       ),
     });
 
     spyOnDocumentQueryServiceLoad(stubDocument(), [
-      certificate,
-      ...massValidations,
+      massCertificate,
+      ...massAudits,
       ...organicMasses,
     ]);
 

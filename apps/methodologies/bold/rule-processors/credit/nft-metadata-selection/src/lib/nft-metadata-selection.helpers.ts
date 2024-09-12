@@ -3,8 +3,8 @@ import type { NonEmptyArray } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
 import {
-  CERTIFICATE,
-  MASS_VALIDATION,
+  MASS_AUDIT,
+  MASS_CERTIFICATE,
 } from '@carrot-fndn/methodologies/bold/matchers';
 import {
   and,
@@ -25,7 +25,7 @@ import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { assert } from 'typia';
 
 import type {
-  CertificateMetadata,
+  MassCertificateMetadata,
   MassMetadata,
   MethodologyCreditNftMetadataDto,
   MethodologyMetadata,
@@ -35,7 +35,7 @@ import type {
 import type { DocumentLinks } from './nft-metadata-selection.processor';
 import type {
   NftMetadata,
-  NftMetadataCertificate,
+  NftMetadataMassCertificate,
 } from './nft-metadata-selection.types';
 
 const { RECYCLER } = DocumentEventActorType;
@@ -71,80 +71,80 @@ export const formatWeight = (weight: number, fractionDigits = 2): string =>
     maximumFractionDigits: fractionDigits,
   }).format(weight)}kg`;
 
-export const findMassValidationId = (
+export const findMassAuditId = (
   massDocument: Document,
   documentsLinks: Map<string, DocumentLinks>,
 ): string => {
-  const massValidationIds = (massDocument.externalEvents ?? [])
+  const massAuditIds = (massDocument.externalEvents ?? [])
     .filter(
       (event) =>
-        event.relatedDocument && MASS_VALIDATION.matches(event.relatedDocument),
+        event.relatedDocument && MASS_AUDIT.matches(event.relatedDocument),
     )
     .map((event) => event.relatedDocument as DocumentReference)
     .map((relatedDocument) => relatedDocument.documentId);
 
-  if (!isNonEmptyArray<string>(massValidationIds)) {
+  if (!isNonEmptyArray<string>(massAuditIds)) {
     throw new Error(
-      `Mass validation relations not found for mass document ${massDocument.id}`,
+      `Mass audit relations not found for mass document ${massDocument.id}`,
     );
   }
 
-  if (massValidationIds.length > 1) {
+  if (massAuditIds.length > 1) {
     logger.warn(
-      `Multiple mass validation documents found for mass document ${massDocument.id}`,
+      `Multiple mass audit documents found for mass document ${massDocument.id}`,
     );
-    const availableMassValidationIds = massValidationIds.filter((id) =>
+    const availableMassAuditIds = massAuditIds.filter((id) =>
       documentsLinks.has(id),
     );
 
-    if (!isNonEmptyArray<string>(availableMassValidationIds)) {
+    if (!isNonEmptyArray<string>(availableMassAuditIds)) {
       throw new Error(
-        `Mass document ${massDocument.id} does not have an available mass validation document this credit`,
+        `Mass document ${massDocument.id} does not have an available mass audit document this credit`,
       );
     }
 
-    if (availableMassValidationIds.length > 1) {
+    if (availableMassAuditIds.length > 1) {
       throw new Error(
-        `Mass document ${massDocument.id} has more than one available mass validation document this credit: ${availableMassValidationIds.join(', ')}`,
+        `Mass document ${massDocument.id} has more than one available mass audit document this credit: ${availableMassAuditIds.join(', ')}`,
       );
     }
 
-    const massValidationId = availableMassValidationIds[0];
+    const massAuditId = availableMassAuditIds[0];
 
     logger.warn(
-      `Using available mass validation document ${massValidationId} for mass document ${massDocument.id}`,
+      `Using available mass audit document ${massAuditId} for mass document ${massDocument.id}`,
     );
 
-    return massValidationId;
+    return massAuditId;
   }
 
-  return massValidationIds[0];
+  return massAuditIds[0];
 };
 
-export const findCertificateIdFromDocumentLinks = (
-  massValidationId: string,
+export const findMassCertificateIdFromDocumentLinks = (
+  massAuditId: string,
   documentsLinks: Map<string, DocumentLinks>,
 ): string => {
-  const massValidationLink = documentsLinks.get(massValidationId);
+  const massAuditLink = documentsLinks.get(massAuditId);
 
-  const documentId = massValidationLink?.relatedDocuments?.find((related) =>
-    CERTIFICATE.matches(related),
+  const documentId = massAuditLink?.relatedDocuments?.find((related) =>
+    MASS_CERTIFICATE.matches(related),
   )?.documentId;
 
   if (isNil(documentId)) {
-    throw new Error('Related document Certificate not found');
+    throw new Error('Related document Mass Certificate not found');
   }
 
   return documentId;
 };
 
-export const getCertificatesMassValue = (
-  certificates: CertificateMetadata[],
+export const getMassCertificatesMassValue = (
+  massCertificates: MassCertificateMetadata[],
 ): number =>
-  certificates.reduce(
-    (certificatesAccumulator, certificate) =>
-      certificatesAccumulator +
-      certificate.masses.reduce(
+  massCertificates.reduce(
+    (massCertificatesAccumulator, massCertificate) =>
+      massCertificatesAccumulator +
+      massCertificate.masses.reduce(
         (massesAccumulator, mass) => massesAccumulator + getMassValue(mass),
         0,
       ),
@@ -152,18 +152,19 @@ export const getCertificatesMassValue = (
   );
 
 export const formatCeritificatesMassValue = (
-  certificates: CertificateMetadata[],
+  massCertificates: MassCertificateMetadata[],
 ): string =>
   Intl.NumberFormat('en-US', {
     maximumFractionDigits: 2,
     minimumFractionDigits: 2,
-  }).format(getCertificatesMassValue(certificates));
+  }).format(getMassCertificatesMassValue(massCertificates));
 
-export const getCertificatesMassIdsCount = (
-  certificates: CertificateMetadata[],
+export const getMassCertificatesMassIdsCount = (
+  massCertificates: MassCertificateMetadata[],
 ): number =>
-  certificates.reduce(
-    (accumulator, certificate) => accumulator + certificate.masses.length,
+  massCertificates.reduce(
+    (accumulator, massCertificate) =>
+      accumulator + massCertificate.masses.length,
     0,
   );
 
@@ -218,11 +219,13 @@ export const mapRewardDistributionMetadata = (
 
   return {
     externalUrl,
-    participants: ruleResultContent.certificateRewards.map((certificate) => ({
-      id: certificate.participant.id,
-      share: certificate.percentage,
-      type: certificate.actorType,
-    })) as NonEmptyArray<RewardsDistributionParticipant>,
+    participants: ruleResultContent.certificateRewards.map(
+      (massCertificate) => ({
+        id: massCertificate.participant.id,
+        share: massCertificate.percentage,
+        type: massCertificate.actorType,
+      }),
+    ) as NonEmptyArray<RewardsDistributionParticipant>,
     policyVersion,
   };
 };
@@ -237,13 +240,13 @@ export const mapNftMetadataDto = (
   });
 
 export const mapNftMetadata = ({
-  certificates,
   creditDocumentId,
+  massCertificates,
   methodology,
   rewardsDistribution,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const { originCountry, originCountryState, recyclerName, subtype, type } =
-    certificates[0].masses[0];
+    massCertificates[0].masses[0];
 
   return {
     attributes: [
@@ -265,27 +268,27 @@ export const mapNftMetadata = ({
       },
       {
         trait_type: 'Amount in Kg',
-        value: formatCeritificatesMassValue(certificates),
+        value: formatCeritificatesMassValue(massCertificates),
       },
     ],
     description:
       'This NFT is part of a 10-NFT collection called "BOLD Innovators." BOLD Innovators is the first set of credits (and therefore NFTs) issued on the Carrot Network. The collection is reserved for individuals who are uniquely qualified to understand the environmental and social value that BOLD (Breakthrough in Organic Landfill Diversion) produces for the world, as well as to validate the functionality of a technology expected to be one of the most important ever created to combat climate change and waste pollution. BOLD represents approximately 1 ton of organic waste diverted from a landfill to a composting facility for proper biological treatment. The Carrot team views BOLD as the most significant environmental asset developed to date, as it enables the transition to a resource-efficient, low-carbon circular economy. The use of BOLD at scale will significantly reduce system-wide greenhouse gas emissions, preserve natural resources, reduce waste pollution, and prevent methane emissions at landfills. You can find more details about BOLD and its attributes in the methodologies section of www.carrot.eco',
     details: {
-      certificates: {
-        count: certificates.length,
+      massCertificates: {
+        count: massCertificates.length,
         description:
-          'The BOLD certificate is a grouping of MassIDs audited according to the BOLD Methodology. MassIDs represent publicly verifiable ownership, and therefore responsibility, over a unit of waste mass with an immutable record of recycling operations (work orders carried out) registered on it.',
-        documents: certificates.map((certificate) => ({
-          external_id: certificate.documentId,
-          external_url: getCarrotExplorePageUrl(certificate.documentId),
-          mass_id_count: certificate.masses.length,
-          mass_ids: certificate.masses.map((mass) => ({
+          'The BOLD mass certificate is a grouping of MassIDs audited according to the BOLD Methodology. MassIDs represent publicly verifiable ownership, and therefore responsibility, over a unit of waste mass with an immutable record of recycling operations (work orders carried out) registered on it.',
+        documents: massCertificates.map((massCertificate) => ({
+          external_id: massCertificate.documentId,
+          external_url: getCarrotExplorePageUrl(massCertificate.documentId),
+          mass_id_count: massCertificate.masses.length,
+          mass_ids: massCertificate.masses.map((mass) => ({
             external_id: mass.documentId,
             external_url: getCarrotExplorePageUrl(mass.documentId),
             recycler: mass.recyclerName,
             weight: formatWeight(getMassValue(mass)),
           })),
-        })) as NonEmptyArray<NftMetadataCertificate>,
+        })) as NonEmptyArray<NftMetadataMassCertificate>,
       },
       methodology: {
         description: methodology.description,
@@ -301,12 +304,14 @@ export const mapNftMetadata = ({
         policy_version: rewardsDistribution.policyVersion,
       },
       summary: {
-        mass_certificate_count: certificates.length,
-        mass_id_count: getCertificatesMassIdsCount(certificates),
+        mass_certificate_count: massCertificates.length,
+        mass_id_count: getMassCertificatesMassIdsCount(massCertificates),
         mass_origin_country: originCountry,
         mass_origin_state: originCountryState,
         mass_subtype: subtype,
-        mass_total_weight: formatWeight(getCertificatesMassValue(certificates)),
+        mass_total_weight: formatWeight(
+          getMassCertificatesMassValue(massCertificates),
+        ),
         mass_type: type,
         recycler_name: recyclerName,
       },

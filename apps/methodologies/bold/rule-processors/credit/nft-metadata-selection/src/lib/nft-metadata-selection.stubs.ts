@@ -55,23 +55,23 @@ export const stubMethodologyDefinitionDocument = (
   type: DocumentType.DEFINITION,
 });
 
-export const stubCertificateDocument = (
+export const stubMassCertificateDocument = (
   partialDocument?: Partial<Document>,
 ): Document => ({
   ...random<RequiredDeep<Document>>(),
   ...partialDocument,
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.CERTIFICATE,
+  type: DocumentType.MASS_CERTIFICATE,
 });
 
-export const stubCertificateAuditDocument = (
+export const stubMassCertificateAuditDocument = (
   partialDocument?: Partial<Document>,
 ): Document => ({
   ...random<RequiredDeep<Document>>(),
   ...partialDocument,
   category: DocumentCategory.METHODOLOGY,
   subtype: DocumentSubtype.PROCESS,
-  type: DocumentType.CERTIFICATE_AUDIT,
+  type: DocumentType.MASS_CERTIFICATE_AUDIT,
 });
 
 export const stubCreditDocument = (partialDocument?: Partial<Document>) => ({
@@ -81,13 +81,13 @@ export const stubCreditDocument = (partialDocument?: Partial<Document>) => ({
   type: DocumentType.CREDIT,
 });
 
-export const stubMassValidationDocument = (
+export const stubMassAuditDocument = (
   partialDocument?: Partial<Document>,
 ): Document => ({
   ...random<RequiredDeep<Document>>(),
   ...partialDocument,
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_VALIDATION,
+  type: DocumentType.MASS_AUDIT,
 });
 
 export const stubMassDocument = (

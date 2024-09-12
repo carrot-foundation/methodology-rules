@@ -2,7 +2,7 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-  stubMassValidationDocument,
+  stubMassAuditDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   DocumentCategory,
@@ -29,18 +29,18 @@ const { ACTOR_TYPE } = DocumentEventAttributeName;
 
 describe('RecyclerActorDocumentProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
-  const certificateId = faker.string.uuid();
+  const massCertificateId = faker.string.uuid();
   const recyclerId = faker.string.uuid();
 
-  const massValidationDocuments = stubArray(
+  const massAuditDocuments = stubArray(
     () =>
-      stubMassValidationDocument({
+      stubMassAuditDocument({
         parentDocumentId: faker.string.uuid(),
       }),
     { max: 10, min: 2 },
   );
 
-  const massDocuments = massValidationDocuments.map((document) =>
+  const massDocuments = massAuditDocuments.map((document) =>
     stubDocument({
       category: DocumentCategory.MASS,
       externalEvents: [
@@ -53,12 +53,12 @@ describe('RecyclerActorDocumentProcessor E2E', () => {
     }),
   );
 
-  const certificateAudit = stubDocument({
-    parentDocumentId: certificateId,
+  const massCertificateAudit = stubDocument({
+    parentDocumentId: massCertificateId,
   });
 
-  const certificate = stubDocument({
-    externalEvents: massValidationDocuments.map((value) =>
+  const massCertificate = stubDocument({
+    externalEvents: massAuditDocuments.map((value) =>
       stubDocumentEvent({
         relatedDocument: {
           ...pick(value, 'category', 'type', 'subtype'),
@@ -66,26 +66,26 @@ describe('RecyclerActorDocumentProcessor E2E', () => {
         },
       }),
     ),
-    id: certificateId,
+    id: massCertificateId,
   });
 
   beforeAll(() => {
     prepareEnvironmentTestE2E([
       {
-        document: certificateAudit,
+        document: massCertificateAudit,
         documentKey: toDocumentKey({
-          documentId: certificateAudit.id,
+          documentId: massCertificateAudit.id,
           documentKeyPrefix,
         }),
       },
       {
-        document: certificate,
+        document: massCertificate,
         documentKey: toDocumentKey({
-          documentId: certificateId,
+          documentId: massCertificateId,
           documentKeyPrefix,
         }),
       },
-      ...massValidationDocuments.map((document) => ({
+      ...massAuditDocuments.map((document) => ({
         document,
         documentKey: toDocumentKey({
           documentId: document.id,
@@ -105,7 +105,7 @@ describe('RecyclerActorDocumentProcessor E2E', () => {
   it('should return APPROVED when documents have the same participants declared as recycler', async () => {
     const response = await handler(
       stubRuleInput({
-        documentId: certificateAudit.id,
+        documentId: massCertificateAudit.id,
         documentKeyPrefix,
       }),
       stubContext(),

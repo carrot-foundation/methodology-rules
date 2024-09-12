@@ -1,9 +1,9 @@
 import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
 
 import {
-  CERTIFICATE_AUDIT,
   CREDIT_CERTIFICATES,
-  MASS_VALIDATION,
+  MASS_AUDIT,
+  MASS_CERTIFICATE_AUDIT,
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/methodologies/bold/matchers';
 
@@ -14,11 +14,11 @@ export const NFT_METADATA_SELECTION_CRITERIA: DocumentCriteria = {
       ...CREDIT_CERTIFICATES,
       relatedDocuments: [
         {
-          ...CERTIFICATE_AUDIT.match,
+          ...MASS_CERTIFICATE_AUDIT.match,
           parentDocument: {
             relatedDocuments: [
               {
-                ...MASS_VALIDATION.match,
+                ...MASS_AUDIT.match,
                 parentDocument: {},
               },
             ],

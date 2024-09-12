@@ -59,32 +59,32 @@ export const stubDocumentReference = (
   ...partial,
 });
 
-export const stubMassValidationDocument = (
+export const stubMassAuditDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.MASS_VALIDATION,
+    type: DocumentType.MASS_AUDIT,
   });
 
-export const stubCertificateAuditDocument = (
+export const stubMassCertificateAuditDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
     subtype: DocumentSubtype.PROCESS,
-    type: DocumentType.CERTIFICATE_AUDIT,
+    type: DocumentType.MASS_CERTIFICATE_AUDIT,
   });
 
-export const stubCertificateDocument = (
+export const stubMassCertificateDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.CERTIFICATE,
+    type: DocumentType.MASS_CERTIFICATE,
   });
 
 export const stubMassDocument = (
@@ -97,7 +97,7 @@ export const stubMassDocument = (
     category: DocumentCategory.MASS,
   });
 
-export const stubMassValidationDocumentWithActorAndAttribute = (
+export const stubMassAuditDocumentWithActorAndAttribute = (
   eventName: DocumentEventName,
   attributeName: DocumentEventAttributeName,
   attributeValue: DocumentEventAttributeValue,
@@ -107,7 +107,7 @@ export const stubMassValidationDocumentWithActorAndAttribute = (
   partialDocument?: PartialDeep<Document>,
 ) =>
   stubDocument({
-    ...stubMassValidationDocument(partialDocument),
+    ...stubMassAuditDocument(partialDocument),
     externalEvents: [
       stubDocumentEventWithMetadataAttributes({ name: eventName }, [
         [attributeName, attributeValue],
@@ -163,11 +163,11 @@ export const stubParticipantHomologationDocument = (
     type: DocumentType.PARTICIPANT_HOMOLOGATION,
   });
 
-export const stubCertificateAuditWithMethodologySlug = (
+export const stubMassCertificateAuditWithMethodologySlug = (
   methodologySlug?: string,
   partialDocument?: PartialDeep<Document>,
 ) =>
-  stubCertificateAuditDocument({
+  stubMassCertificateAuditDocument({
     externalEvents: [
       stubDocumentEventWithMetadataAttributes(
         { name: DocumentEventName.ACTOR },

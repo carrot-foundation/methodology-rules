@@ -1,7 +1,7 @@
 import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
 
 import {
-  MASS_VALIDATION,
+  MASS_AUDIT,
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/methodologies/bold/matchers';
 import {
@@ -102,7 +102,7 @@ export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
       {
         omit: true,
         parentDocument: {},
-        ...MASS_VALIDATION.match,
+        ...MASS_AUDIT.match,
       },
     ],
   },

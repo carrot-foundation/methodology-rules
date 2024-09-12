@@ -25,13 +25,13 @@ import type { NftMetadata } from './nft-metadata-selection.types';
 
 import { NftMetadataSelection } from './nft-metadata-selection.processor';
 import {
-  stubCertificateAuditDocument,
-  stubCertificateDocument,
   stubCreditCertificatesDocument,
   stubDocumentOutputEvent,
   stubDocumentRelatedEvent,
+  stubMassAuditDocument,
+  stubMassCertificateAuditDocument,
+  stubMassCertificateDocument,
   stubMassDocument,
-  stubMassValidationDocument,
   stubMethodologyDefinitionDocument,
 } from './nft-metadata-selection.stubs';
 
@@ -59,21 +59,21 @@ describe('NftMetadataSelection', () => {
   };
 
   it('should return the rule output with the extracted NFT metadata', async () => {
-    const certificateAuditReference: DocumentReference = {
+    const massCertificateAuditReference: DocumentReference = {
       category: DocumentCategory.METHODOLOGY,
       documentId: faker.string.uuid(),
       subtype: DocumentSubtype.PROCESS,
-      type: DocumentType.CERTIFICATE_AUDIT,
+      type: DocumentType.MASS_CERTIFICATE_AUDIT,
     };
-    const certificateReference: DocumentReference = {
+    const massCertificateReference: DocumentReference = {
       category: DocumentCategory.METHODOLOGY,
       documentId: faker.string.uuid(),
-      type: DocumentType.CERTIFICATE,
+      type: DocumentType.MASS_CERTIFICATE,
     };
-    const massValidationReference: DocumentReference = {
+    const massAuditReference: DocumentReference = {
       category: DocumentCategory.METHODOLOGY,
       documentId: faker.string.uuid(),
-      type: DocumentType.MASS_VALIDATION,
+      type: DocumentType.MASS_AUDIT,
     };
     const massReference: DocumentReference = {
       category: DocumentCategory.MASS,
@@ -81,11 +81,11 @@ describe('NftMetadataSelection', () => {
     };
 
     const creditCertificatesDocumentStub = stubCreditCertificatesDocument({
-      externalEvents: [stubDocumentRelatedEvent(certificateAuditReference)],
+      externalEvents: [stubDocumentRelatedEvent(massCertificateAuditReference)],
       id: creditCertificatesReference.documentId,
       parentDocumentId: creditDocumentId,
     });
-    const certificateAuditDocumentStub = stubCertificateAuditDocument({
+    const massCertificateAuditDocumentStub = stubMassCertificateAuditDocument({
       externalEvents: [
         stubDocumentRelatedEvent(creditCertificatesReference),
         stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [
@@ -98,24 +98,24 @@ describe('NftMetadataSelection', () => {
           ],
         ]),
       ],
-      id: certificateAuditReference.documentId,
-      parentDocumentId: certificateReference.documentId,
+      id: massCertificateAuditReference.documentId,
+      parentDocumentId: massCertificateReference.documentId,
     });
-    const certificateDocumentStub = stubCertificateDocument({
+    const massCertificateDocumentStub = stubMassCertificateDocument({
       externalEvents: [
-        stubDocumentRelatedEvent(massValidationReference),
-        stubDocumentOutputEvent(certificateAuditReference),
+        stubDocumentRelatedEvent(massAuditReference),
+        stubDocumentOutputEvent(massCertificateAuditReference),
       ],
-      id: certificateReference.documentId,
+      id: massCertificateReference.documentId,
     });
-    const massValidationDocumentStub = stubMassValidationDocument({
-      externalEvents: [stubDocumentRelatedEvent(certificateReference)],
-      id: massValidationReference.documentId,
+    const massAuditDocumentStub = stubMassAuditDocument({
+      externalEvents: [stubDocumentRelatedEvent(massCertificateReference)],
+      id: massAuditReference.documentId,
       parentDocumentId: massReference.documentId,
     });
     const massDocumentStub = stubMassDocument({
       externalEvents: [
-        stubDocumentOutputEvent(massValidationReference),
+        stubDocumentOutputEvent(massAuditReference),
         stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
           [ACTOR_TYPE, RECYCLER],
         ]),
@@ -126,9 +126,9 @@ describe('NftMetadataSelection', () => {
     const documents = [
       stubMethodologyDefinitionDocument(),
       creditCertificatesDocumentStub,
-      certificateAuditDocumentStub,
-      certificateDocumentStub,
-      massValidationDocumentStub,
+      massCertificateAuditDocumentStub,
+      massCertificateDocumentStub,
+      massAuditDocumentStub,
       massDocumentStub,
     ];
 
@@ -144,13 +144,13 @@ describe('NftMetadataSelection', () => {
     expect(validation.errors).toEqual([]);
   });
 
-  it('should return the resultContent with a greater amount of certificates and masses', async () => {
-    const certificateAuditsReferences: DocumentReference[] = stubArray(
+  it('should return the resultContent with a greater amount of massCertificates and masses', async () => {
+    const massCertificateAuditsReferences: DocumentReference[] = stubArray(
       () => ({
         category: DocumentCategory.METHODOLOGY,
         documentId: faker.string.uuid(),
         subtype: DocumentSubtype.PROCESS,
-        type: DocumentType.CERTIFICATE_AUDIT,
+        type: DocumentType.MASS_CERTIFICATE_AUDIT,
       }),
       2,
     );
@@ -161,34 +161,35 @@ describe('NftMetadataSelection', () => {
       }),
       10,
     );
-    const massValidationsReferences: DocumentReference[] = stubArray(
+    const massAuditsReferences: DocumentReference[] = stubArray(
       () => ({
         category: DocumentCategory.METHODOLOGY,
         documentId: faker.string.uuid(),
-        type: DocumentType.MASS_VALIDATION,
+        type: DocumentType.MASS_AUDIT,
       }),
       massesReferences.length,
     );
-    const certificatesReferences: DocumentReference[] = stubArray(
+    const massCertificatesReferences: DocumentReference[] = stubArray(
       () => ({
         category: DocumentCategory.METHODOLOGY,
         documentId: faker.string.uuid(),
-        type: DocumentType.CERTIFICATE,
+        type: DocumentType.MASS_CERTIFICATE,
       }),
       2,
     );
 
     const creditCertificatesDocumentsStub = stubCreditCertificatesDocument({
-      externalEvents: certificateAuditsReferences.map((certificateAudit) =>
-        stubDocumentRelatedEvent(certificateAudit),
+      externalEvents: massCertificateAuditsReferences.map(
+        (massCertificateAudit) =>
+          stubDocumentRelatedEvent(massCertificateAudit),
       ),
       id: creditCertificatesReference.documentId,
       parentDocumentId: creditDocumentId,
     });
 
-    const certificateAuditsDocumentsStubs = certificatesReferences.map(
-      (certificate, index) =>
-        stubCertificateAuditDocument({
+    const massCertificateAuditsDocumentsStubs = massCertificatesReferences.map(
+      (massCertificate, index) =>
+        stubMassCertificateAuditDocument({
           externalEvents: [
             stubDocumentRelatedEvent(creditCertificatesReference),
             stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [
@@ -201,44 +202,41 @@ describe('NftMetadataSelection', () => {
               ],
             ]),
           ],
-          id: certificateAuditsReferences[index]!.documentId,
-          parentDocumentId: certificate.documentId,
+          id: massCertificateAuditsReferences[index]!.documentId,
+          parentDocumentId: massCertificate.documentId,
         }),
     );
 
-    const certificatesDocumentsStubs = certificatesReferences.map(
-      (certificateReference, index) => {
-        const firstFiveMassesValidations = massValidationsReferences.slice(
-          0,
-          5,
-        );
-        const lastFiveMassesValidations = massValidationsReferences.slice(5);
+    const massCertificatesDocumentsStubs = massCertificatesReferences.map(
+      (massCertificateReference, index) => {
+        const firstFiveMassesValidations = massAuditsReferences.slice(0, 5);
+        const lastFiveMassesValidations = massAuditsReferences.slice(5);
 
-        return stubCertificateDocument({
+        return stubMassCertificateDocument({
           externalEvents: [
             ...(index === 0
-              ? firstFiveMassesValidations.map((massValidationReference) =>
-                  stubDocumentRelatedEvent(massValidationReference),
+              ? firstFiveMassesValidations.map((massAuditReference) =>
+                  stubDocumentRelatedEvent(massAuditReference),
                 )
-              : lastFiveMassesValidations.map((massValidationReference) =>
-                  stubDocumentRelatedEvent(massValidationReference),
+              : lastFiveMassesValidations.map((massAuditReference) =>
+                  stubDocumentRelatedEvent(massAuditReference),
                 )),
-            stubDocumentOutputEvent(certificateAuditsReferences[index]!),
+            stubDocumentOutputEvent(massCertificateAuditsReferences[index]!),
           ],
-          id: certificateReference.documentId,
+          id: massCertificateReference.documentId,
         });
       },
     );
 
-    const massValidationsDocumentStubs = massesReferences.map(
+    const massAuditsDocumentStubs = massesReferences.map(
       (massReference, index) =>
-        stubMassValidationDocument({
+        stubMassAuditDocument({
           externalEvents: [
             index < 5
-              ? stubDocumentRelatedEvent(certificatesReferences[0]!)
-              : stubDocumentRelatedEvent(certificatesReferences[1]!),
+              ? stubDocumentRelatedEvent(massCertificatesReferences[0]!)
+              : stubDocumentRelatedEvent(massCertificatesReferences[1]!),
           ],
-          id: massValidationsReferences[index]!.documentId,
+          id: massAuditsReferences[index]!.documentId,
           parentDocumentId: massReference.documentId,
         }),
     );
@@ -246,7 +244,7 @@ describe('NftMetadataSelection', () => {
     const massesDocumentStubs = massesReferences.map((massReference, index) =>
       stubMassDocument({
         externalEvents: [
-          stubDocumentOutputEvent(massValidationsReferences[index]!),
+          stubDocumentOutputEvent(massAuditsReferences[index]!),
           stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
             [ACTOR_TYPE, RECYCLER],
           ]),
@@ -258,9 +256,9 @@ describe('NftMetadataSelection', () => {
     spyOnDocumentQueryServiceLoad(stubDocument(), [
       stubMethodologyDefinitionDocument(),
       creditCertificatesDocumentsStub,
-      ...certificateAuditsDocumentsStubs,
-      ...certificatesDocumentsStubs,
-      ...massValidationsDocumentStubs,
+      ...massCertificateAuditsDocumentsStubs,
+      ...massCertificatesDocumentsStubs,
+      ...massAuditsDocumentStubs,
       ...massesDocumentStubs,
     ]);
 
@@ -271,14 +269,14 @@ describe('NftMetadataSelection', () => {
 
     const resultContent = result.resultContent as NftMetadata;
 
-    expect(resultContent.details.certificates.count).toBe(
-      certificatesReferences.length,
+    expect(resultContent.details.massCertificates.count).toBe(
+      massCertificatesReferences.length,
     );
-    expect(resultContent.details.certificates.documents.length).toBe(
-      certificatesReferences.length,
+    expect(resultContent.details.massCertificates.documents.length).toBe(
+      massCertificatesReferences.length,
     );
     expect(
-      resultContent.details.certificates.documents[0].mass_ids,
+      resultContent.details.massCertificates.documents[0].mass_ids,
     ).toHaveLength(5);
   });
 });

@@ -14,8 +14,8 @@ export interface RewardsDistributionActor {
 
 export interface ActorReward {
   actorType: RewardsDistributionActorType;
-  certificatePercentage: BigNumber;
   document: Document;
+  massCertificatePercentage: BigNumber;
   massPercentage: BigNumber;
   participant: RewardActorParticipant;
 }

@@ -20,20 +20,20 @@ import { faker } from '@faker-js/faker';
 import { assert, random, validate } from 'typia';
 
 import type {
-  CertificateMetadata,
+  MassCertificateMetadata,
   MassMetadata,
   MethodologyCreditNftMetadataDto,
 } from './nft-metadata-selection.dto';
 import type { DocumentLinks } from './nft-metadata-selection.processor';
 
 import {
-  findCertificateIdFromDocumentLinks,
-  findMassValidationId,
+  findMassAuditId,
+  findMassCertificateIdFromDocumentLinks,
   formatCeritificatesMassValue,
   formatWeight,
   getCarrotExplorePageUrl,
-  getCertificatesMassIdsCount,
-  getCertificatesMassValue,
+  getMassCertificatesMassIdsCount,
+  getMassCertificatesMassValue,
   getMassValue,
   mapMassMetadata,
   mapMethodologyMetadata,
@@ -115,9 +115,9 @@ describe('Helpers', () => {
     );
   });
 
-  describe('getCertificatesMassValue', () => {
+  describe('getMassCertificatesMassValue', () => {
     it('should return the correct total weight', () => {
-      const certificatesStub: NonEmptyArray<CertificateMetadata> = [
+      const massCertificatesStub: NonEmptyArray<MassCertificateMetadata> = [
         {
           documentId: faker.string.uuid(),
           masses: [
@@ -146,15 +146,15 @@ describe('Helpers', () => {
         },
       ];
 
-      const result = getCertificatesMassValue(certificatesStub);
+      const result = getMassCertificatesMassValue(massCertificatesStub);
 
       expect(result).toBe(10);
     });
   });
 
-  describe('getCertificatesMassIdsCount', () => {
+  describe('getMassCertificatesMassIdsCount', () => {
     it('should return the correct total mass ids count', () => {
-      const certificatesStub: NonEmptyArray<CertificateMetadata> = [
+      const massCertificatesStub: NonEmptyArray<MassCertificateMetadata> = [
         {
           documentId: faker.string.uuid(),
           masses: random<
@@ -167,9 +167,9 @@ describe('Helpers', () => {
         },
       ];
 
-      const result = getCertificatesMassIdsCount(certificatesStub);
+      const result = getMassCertificatesMassIdsCount(massCertificatesStub);
 
-      expect(result).toBe(certificatesStub[0].masses.length + 2);
+      expect(result).toBe(massCertificatesStub[0].masses.length + 2);
     });
   });
 
@@ -234,70 +234,70 @@ describe('Helpers', () => {
     });
   });
 
-  describe('findCertificateIdFromDocumentLinks', () => {
-    it('should return the correct certificate id', () => {
-      const massValidationId = faker.string.uuid();
-      const certificateId = faker.string.uuid();
+  describe('findMassCertificateIdFromDocumentLinks', () => {
+    it('should return the correct mass certificate id', () => {
+      const massAuditId = faker.string.uuid();
+      const massCertificateId = faker.string.uuid();
       const documentsLinks = new Map([
         ...random<Map<string, DocumentLinks>>(),
         [
-          massValidationId,
+          massAuditId,
           {
             parentDocumentId: faker.string.uuid(),
             relatedDocuments: [
               {
                 category: DocumentCategory.METHODOLOGY,
-                documentId: certificateId,
-                type: DocumentType.CERTIFICATE,
+                documentId: massCertificateId,
+                type: DocumentType.MASS_CERTIFICATE,
               },
             ],
           },
         ],
       ]);
 
-      const result = findCertificateIdFromDocumentLinks(
-        massValidationId,
+      const result = findMassCertificateIdFromDocumentLinks(
+        massAuditId,
         documentsLinks,
       );
 
-      expect(result).toBe(certificateId);
+      expect(result).toBe(massCertificateId);
     });
 
-    it('should throw an error if the certificate id is not found', () => {
-      const massValidationId = faker.string.uuid();
+    it('should throw an error if the mass certificate id is not found', () => {
+      const massAuditId = faker.string.uuid();
       const documentsLinks = random<Map<string, DocumentLinks>>();
 
       expect(() =>
-        findCertificateIdFromDocumentLinks(massValidationId, documentsLinks),
+        findMassCertificateIdFromDocumentLinks(massAuditId, documentsLinks),
       ).toThrowErrorMatchingSnapshot();
     });
   });
 
-  describe('findMassValidationId', () => {
-    it('should return the correct mass validation id', () => {
-      const massValidationId = faker.string.uuid();
+  describe('findMassAuditId', () => {
+    it('should return the correct mass audit id', () => {
+      const massAuditId = faker.string.uuid();
       const documentStub = stubMassDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({
             relatedDocument: {
               category: DocumentCategory.METHODOLOGY,
-              documentId: massValidationId,
-              type: DocumentType.MASS_VALIDATION,
+              documentId: massAuditId,
+              type: DocumentType.MASS_AUDIT,
             },
           }),
         ],
       });
 
-      const result = findMassValidationId(documentStub, new Map());
+      const result = findMassAuditId(documentStub, new Map());
 
-      expect(result).toBe(massValidationId);
+      expect(result).toBe(massAuditId);
     });
 
-    it('should throw an error if the mass validation id is not found', () => {
+    it('should throw an error if the mass audit id is not found', () => {
       const documentStub = stubMassDocument();
 
-      expect(() => findMassValidationId(documentStub, new Map())).toThrow(
-        `Mass validation relations not found for mass document ${documentStub.id}`,
+      expect(() => findMassAuditId(documentStub, new Map())).toThrow(
+        `Mass audit relations not found for mass document ${documentStub.id}`,
       );
     });
 
@@ -306,43 +306,43 @@ describe('Helpers', () => {
 
       documentStub.externalEvents = undefined;
 
-      expect(() => findMassValidationId(documentStub, new Map())).toThrow(
-        `Mass validation relations not found for mass document ${documentStub.id}`,
+      expect(() => findMassAuditId(documentStub, new Map())).toThrow(
+        `Mass audit relations not found for mass document ${documentStub.id}`,
       );
     });
 
-    it('should throw an error if there are multiple mass validations for the same mass without a link to the loaded documents', () => {
+    it('should throw an error if there are multiple mass audits for the same mass without a link to the loaded documents', () => {
       const documentStub = stubMassDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({
             relatedDocument: {
               category: DocumentCategory.METHODOLOGY,
-              type: DocumentType.MASS_VALIDATION,
+              type: DocumentType.MASS_AUDIT,
             },
           }),
           stubDocumentEventWithMetadataAttributes({
             relatedDocument: {
               category: DocumentCategory.METHODOLOGY,
-              type: DocumentType.MASS_VALIDATION,
+              type: DocumentType.MASS_AUDIT,
             },
           }),
         ],
       });
 
-      expect(() => findMassValidationId(documentStub, new Map())).toThrow(
-        `Mass document ${documentStub.id} does not have an available mass validation document this credit`,
+      expect(() => findMassAuditId(documentStub, new Map())).toThrow(
+        `Mass document ${documentStub.id} does not have an available mass audit document this credit`,
       );
     });
 
-    it('should throw an error if there are multiple mass validations linked to the loaded documents', () => {
-      const massValidationIds = stubArray(faker.string.uuid, 5);
+    it('should throw an error if there are multiple mass audits linked to the loaded documents', () => {
+      const massAuditIds = stubArray(faker.string.uuid, 5);
       const documentStub = stubMassDocument({
-        externalEvents: massValidationIds.map((massValidationId) =>
+        externalEvents: massAuditIds.map((massAuditId) =>
           stubDocumentEventWithMetadataAttributes({
             relatedDocument: {
               category: DocumentCategory.METHODOLOGY,
-              documentId: massValidationId,
-              type: DocumentType.MASS_VALIDATION,
+              documentId: massAuditId,
+              type: DocumentType.MASS_AUDIT,
             },
           }),
         ),
@@ -351,8 +351,8 @@ describe('Helpers', () => {
       const documentsLinks = new Map([
         ...random<Map<string, DocumentLinks>>(),
         ...new Map(
-          massValidationIds.map((massValidationId) => [
-            massValidationId,
+          massAuditIds.map((massAuditId) => [
+            massAuditId,
             {
               parentDocumentId: faker.string.uuid(),
               relatedDocuments: [],
@@ -361,31 +361,31 @@ describe('Helpers', () => {
         ),
       ]);
 
-      expect(() => findMassValidationId(documentStub, documentsLinks)).toThrow(
-        `Mass document ${documentStub.id} has more than one available mass validation document this credit`,
+      expect(() => findMassAuditId(documentStub, documentsLinks)).toThrow(
+        `Mass document ${documentStub.id} has more than one available mass audit document this credit`,
       );
     });
 
-    it('should return massValidationId if there are multiple mass validations but only one linked to the loaded documents', () => {
-      const massValidationIds = stubArray(faker.string.uuid, 5);
+    it('should return massAuditId if there are multiple mass audits but only one linked to the loaded documents', () => {
+      const massAuditIds = stubArray(faker.string.uuid, 5);
       const documentStub = stubMassDocument({
-        externalEvents: massValidationIds.map((massValidationId) =>
+        externalEvents: massAuditIds.map((massAuditId) =>
           stubDocumentEventWithMetadataAttributes({
             relatedDocument: {
               category: DocumentCategory.METHODOLOGY,
-              documentId: massValidationId,
-              type: DocumentType.MASS_VALIDATION,
+              documentId: massAuditId,
+              type: DocumentType.MASS_AUDIT,
             },
           }),
         ),
       });
 
-      const massValidationId = assert<string>(massValidationIds[0]);
+      const massAuditId = assert<string>(massAuditIds[0]);
 
       const documentsLinks = new Map([
         ...random<Map<string, DocumentLinks>>(),
         [
-          massValidationId,
+          massAuditId,
           {
             parentDocumentId: faker.string.uuid(),
             relatedDocuments: [],
@@ -393,9 +393,9 @@ describe('Helpers', () => {
         ],
       ]);
 
-      const result = findMassValidationId(documentStub, documentsLinks);
+      const result = findMassAuditId(documentStub, documentsLinks);
 
-      expect(result).toBe(massValidationId);
+      expect(result).toBe(massAuditId);
     });
   });
 
@@ -424,7 +424,7 @@ describe('Helpers', () => {
 
   describe('formatCeritificatesMassValue', () => {
     it('should return the formatted total mass value', () => {
-      const certificatesStub: CertificateMetadata[] = [
+      const massCertificatesStub: MassCertificateMetadata[] = [
         {
           documentId: faker.string.uuid(),
           masses: [
@@ -445,7 +445,7 @@ describe('Helpers', () => {
         },
       ];
 
-      const result = formatCeritificatesMassValue(certificatesStub);
+      const result = formatCeritificatesMassValue(massCertificatesStub);
 
       expect(result).toBe('9,124.68');
     });

@@ -228,7 +228,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       certificateRewardGroup.set(`${actor.actorType}-${actor.participant.id}`, {
         actorType: actor.actorType,
         participant: actor.participant,
-        percentage: new BigNumber(actor.certificatePercentage)
+        percentage: new BigNumber(actor.massCertificatePercentage)
           .plus(certificateReward?.percentage ?? 0)
           .toString(),
       });

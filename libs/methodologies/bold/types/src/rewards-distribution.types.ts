@@ -19,9 +19,9 @@ export type RewardsDistributionActorType =
 
 export interface MassReward {
   actorType: RewardsDistributionActorType;
-  // TODO: update with custom tag to validate BigNumber string
-  certificatePercentage: NonEmptyString;
   documentId: NonEmptyString;
+  // TODO: update with custom tag to validate BigNumber string
+  massCertificatePercentage: NonEmptyString;
   // TODO: update with custom tag to validate BigNumber string
   massPercentage: NonEmptyString;
   participant: RewardActorParticipant;

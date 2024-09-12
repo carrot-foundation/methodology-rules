@@ -1,8 +1,8 @@
 import {
-  stubCertificateDocument,
   stubDocumentEvent,
+  stubMassAuditDocument,
+  stubMassCertificateDocument,
   stubMassDocument,
-  stubMassValidationDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import { DocumentType } from '@carrot-fndn/methodologies/bold/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -22,18 +22,18 @@ describe('MassDocumentTypeRuleProcessor E2E', () => {
   const organicMass = stubMassDocument({
     type: DocumentType.ORGANIC,
   });
-  const massValidation = stubMassValidationDocument({
+  const massAudit = stubMassAuditDocument({
     parentDocumentId: organicMass.id,
   });
 
-  const certificate = stubCertificateDocument({
+  const massCertificate = stubMassCertificateDocument({
     externalEvents: [
       stubDocumentEvent({
         relatedDocument: {
-          category: massValidation.category,
-          documentId: massValidation.id,
-          subtype: massValidation.subtype,
-          type: massValidation.type,
+          category: massAudit.category,
+          documentId: massAudit.id,
+          subtype: massAudit.subtype,
+          type: massAudit.type,
         },
       }),
     ],
@@ -42,16 +42,16 @@ describe('MassDocumentTypeRuleProcessor E2E', () => {
   beforeAll(() => {
     prepareEnvironmentTestE2E([
       {
-        document: certificate,
+        document: massCertificate,
         documentKey: toDocumentKey({
-          documentId: certificate.id,
+          documentId: massCertificate.id,
           documentKeyPrefix,
         }),
       },
       {
-        document: massValidation,
+        document: massAudit,
         documentKey: toDocumentKey({
-          documentId: massValidation.id,
+          documentId: massAudit.id,
           documentKeyPrefix,
         }),
       },
@@ -65,11 +65,11 @@ describe('MassDocumentTypeRuleProcessor E2E', () => {
     ]);
   });
 
-  it('should return returnStatus approved when all certificate documents matches type Organic', async () => {
+  it('should return returnStatus approved when all mass certificate documents matches type Organic', async () => {
     const response = await handler(
       stubRuleInput({
         documentKeyPrefix,
-        parentDocumentId: certificate.id,
+        parentDocumentId: massCertificate.id,
       }),
       stubContext(),
       () => stubRuleResponse(),

@@ -1,7 +1,7 @@
 import {
-  stubCertificateAuditWithMethodologySlug,
   stubDocument,
   stubDocumentEvent,
+  stubMassCertificateAuditWithMethodologySlug,
 } from '@carrot-fndn/methodologies/bold/testing';
 import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -15,26 +15,26 @@ import {
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
-import { stubMassValidationDocumentWithMethodologySlug } from './mass-validation-document.stubs';
+import { stubMassAuditDocumentWithMethodologySlug } from './mass-validation-document.stubs';
 
-describe('MassValidationDocumentProcessor E2E', () => {
+describe('MassAuditDocumentProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
-  const certificateId = faker.string.uuid();
+  const massCertificateId = faker.string.uuid();
   const methodologySlug = faker.string.uuid();
 
-  const massValidationDocuments = stubArray(() =>
-    stubMassValidationDocumentWithMethodologySlug(methodologySlug),
+  const massAuditDocuments = stubArray(() =>
+    stubMassAuditDocumentWithMethodologySlug(methodologySlug),
   );
 
-  const certificateAudit = stubCertificateAuditWithMethodologySlug(
+  const massCertificateAudit = stubMassCertificateAuditWithMethodologySlug(
     methodologySlug,
     {
-      parentDocumentId: certificateId,
+      parentDocumentId: massCertificateId,
     },
   );
 
-  const certificate = stubDocument({
-    externalEvents: massValidationDocuments.map((value) =>
+  const massCertificate = stubDocument({
+    externalEvents: massAuditDocuments.map((value) =>
       stubDocumentEvent({
         relatedDocument: {
           ...pick(value, 'category', 'type', 'subtype'),
@@ -42,27 +42,27 @@ describe('MassValidationDocumentProcessor E2E', () => {
         },
       }),
     ),
-    id: certificateId,
+    id: massCertificateId,
     type: faker.string.sample(),
   });
 
   beforeAll(() => {
     prepareEnvironmentTestE2E([
       {
-        document: certificateAudit,
+        document: massCertificateAudit,
         documentKey: toDocumentKey({
-          documentId: certificateAudit.id,
+          documentId: massCertificateAudit.id,
           documentKeyPrefix,
         }),
       },
       {
-        document: certificate,
+        document: massCertificate,
         documentKey: toDocumentKey({
-          documentId: certificateId,
+          documentId: massCertificateId,
           documentKeyPrefix,
         }),
       },
-      ...massValidationDocuments.map((document) => ({
+      ...massAuditDocuments.map((document) => ({
         document,
         documentKey: toDocumentKey({
           documentId: document.id,
@@ -72,10 +72,10 @@ describe('MassValidationDocumentProcessor E2E', () => {
     ]);
   });
 
-  it('should return APPROVED when documents matches mass validation and have bold methodology slug', async () => {
+  it('should return APPROVED when documents matches mass audit and have bold methodology slug', async () => {
     const response = await handler(
       stubRuleInput({
-        documentId: certificateAudit.id,
+        documentId: massCertificateAudit.id,
         documentKeyPrefix,
       }),
       stubContext(),

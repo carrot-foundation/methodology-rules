@@ -2,8 +2,8 @@ import type { NonEmptyArray } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
-  stubCertificateAuditDocument,
   stubDocumentEventWithMetadataAttributes,
+  stubMassCertificateAuditDocument,
   stubMassDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
@@ -27,11 +27,11 @@ const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG } = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 const { NETWORK } = DocumentEventActorType;
 
-export const stubCertificateAuditDocumentWithResultContent = (
+export const stubMassCertificateAuditDocumentWithResultContent = (
   partialDocument?: PartialDeep<Document>,
   resultContent?: CertificateRewardDistributionOutput,
 ) =>
-  stubCertificateAuditDocument({
+  stubMassCertificateAuditDocument({
     ...partialDocument,
     externalEvents: [
       stubDocumentEventWithMetadataAttributes({ name: RULE_EXECUTION }, [

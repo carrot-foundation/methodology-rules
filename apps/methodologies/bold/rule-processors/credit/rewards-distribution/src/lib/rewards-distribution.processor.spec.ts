@@ -18,7 +18,7 @@ import { random } from 'typia';
 
 import { RewardsDistributionProcessor } from './rewards-distribution.processor';
 import {
-  stubCertificateAuditDocumentWithResultContent,
+  stubMassCertificateAuditDocumentWithResultContent,
   stubMassDocumentWithEndEventValue,
 } from './rewards-distribution.stubs';
 
@@ -34,29 +34,31 @@ describe('RewardsDistributionProcessor', () => {
 
   it.each([
     {
-      certificateAudits: [
-        stubCertificateAuditDocumentWithResultContent(
-          { id: '123' },
-          {} as CertificateRewardDistributionOutput,
-        ),
-      ],
       credit: stubCreditDocument(),
       errorMessage:
         ruleDataProcessor[
           'ErrorMessage'
         ].UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT('123'),
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(
+          { id: '123' },
+          {} as CertificateRewardDistributionOutput,
+        ),
+      ],
       scenario: 'the rule result content is an unexpected value',
     },
     {
       credit: stubCreditDocument(),
       errorMessage:
-        ruleDataProcessor['ErrorMessage'].CERTIFICATE_AUDITS_NOT_FOUND,
-      scenario: 'certificate audits are not found',
+        ruleDataProcessor['ErrorMessage'].MASS_CERTIFICATE_AUDITS_NOT_FOUND,
+      scenario: 'mass certificate audits are not found',
     },
     {
-      certificateAudits: [stubCertificateAuditDocumentWithResultContent()],
       credit: stubCreditDocument(),
       errorMessage: 'assert',
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(),
+      ],
       masses: [
         stubMassDocumentWithEndEventValue(
           String(faker.number.int()) as unknown as number,
@@ -65,14 +67,15 @@ describe('RewardsDistributionProcessor', () => {
       scenario: 'the mass END event value is not a number',
     },
     {
-      certificateAudits: [stubCertificateAuditDocumentWithResultContent()],
       credit: undefined,
       errorMessage: ruleDataProcessor['ErrorMessage'].CREDIT_NOT_FOUND,
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(),
+      ],
       masses: [stubMassDocumentWithEndEventValue()],
       scenario: 'the credit document was not found',
     },
     {
-      certificateAudits: [stubCertificateAuditDocumentWithResultContent()],
       credit: stubCreditDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
@@ -81,18 +84,21 @@ describe('RewardsDistributionProcessor', () => {
         ],
       }),
       errorMessage: ruleDataProcessor['ErrorMessage'].INVALID_UNIT_PRICE,
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(),
+      ],
       masses: [stubMassDocumentWithEndEventValue()],
       scenario: 'the credit OPEN event has an invalid unit price',
     },
   ])(
     `should throw error when $scenario`,
-    async ({ certificateAudits, credit, errorMessage, masses }) => {
+    async ({ credit, errorMessage, massCertificateAudits, masses }) => {
       const ruleInput = random<Required<RuleInput>>();
 
       spyOnLoadParentDocument(credit);
 
-      if (certificateAudits) {
-        spyOnDocumentQueryServiceLoad(stubDocument(), certificateAudits);
+      if (massCertificateAudits) {
+        spyOnDocumentQueryServiceLoad(stubDocument(), massCertificateAudits);
       }
 
       if (masses) {

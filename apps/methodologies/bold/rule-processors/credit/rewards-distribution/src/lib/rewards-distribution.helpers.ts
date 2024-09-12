@@ -51,13 +51,13 @@ export const calculateRemainder = (options: {
 };
 
 export const calculateAmount = (options: {
-  certificatePercentage: string;
+  massCertificatePercentage: string;
   massValue: BigNumber;
   participantAmount: string | undefined;
   unitPrice: NonZeroPositive;
 }): NonEmptyString => {
   const amount = formatDecimalPlaces(
-    formatPercentage(new BigNumber(options.certificatePercentage))
+    formatPercentage(new BigNumber(options.massCertificatePercentage))
       .multipliedBy(options.massValue)
       .multipliedBy(new BigNumber(options.unitPrice)),
   );
@@ -112,7 +112,7 @@ export const aggregateCertificateRewards = (
       const actor = actors.get(`${actorType}-${participant.id}`);
 
       const amount = calculateAmount({
-        certificatePercentage: percentage,
+        massCertificatePercentage: percentage,
         massValue,
         participantAmount: actor?.amount,
         unitPrice,

@@ -48,20 +48,20 @@ export const mapMassRewards = (participants: ActorReward[]): MassReward[] =>
   participants.map(
     ({
       actorType,
-      certificatePercentage,
       document,
+      massCertificatePercentage,
       massPercentage,
       participant,
     }) => ({
       actorType,
-      certificatePercentage: formatPercentage(certificatePercentage),
       documentId: document.id,
+      massCertificatePercentage: formatPercentage(massCertificatePercentage),
       massPercentage: formatPercentage(massPercentage),
       participant,
     }),
   );
 
-export const getActorPercentageOfCertificate = (
+export const getActorPercentageOfMassCertificate = (
   document: Document,
   participantPercentage: BigNumber,
   documentsTotalMassWeight: BigNumber,
@@ -87,12 +87,12 @@ export const mapActorReward = ({
   totalMassOfDocuments: BigNumber;
 }): ActorReward => ({
   actorType,
-  certificatePercentage: getActorPercentageOfCertificate(
+  document,
+  massCertificatePercentage: getActorPercentageOfMassCertificate(
     document,
     massPercentage,
     totalMassOfDocuments,
   ),
-  document,
   massPercentage,
   participant,
 });

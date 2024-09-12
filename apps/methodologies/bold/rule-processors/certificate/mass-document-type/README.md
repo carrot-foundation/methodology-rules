@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if all masses that make up the certificate have 'Organic' declared in the 'Document Type' field.
+Verify if all masses that make up the mass certificate have 'Organic' declared in the 'Document Type' field.
 
 ### 📂 Implementation
 

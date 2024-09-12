@@ -268,7 +268,8 @@ describe('RewardsDistributionProcessor', () => {
       (
         result.resultContent as CertificateRewardDistributionOutput
       ).massRewards.map(
-        ({ certificatePercentage }) => new BigNumber(certificatePercentage),
+        ({ massCertificatePercentage }) =>
+          new BigNumber(massCertificatePercentage),
       ),
     );
 
@@ -307,8 +308,8 @@ describe('RewardsDistributionProcessor', () => {
 
           return {
             actorType: type,
-            certificatePercentage: expect.any(String),
             documentId: document.id,
+            massCertificatePercentage: expect.any(String),
             massPercentage: expect.any(String),
             participant: {
               id: actorEvent.participant.id,
@@ -347,22 +348,23 @@ describe('RewardsDistributionProcessor', () => {
       (
         result.resultContent as CertificateRewardDistributionOutput
       ).massRewards.map(
-        ({ certificatePercentage }) => new BigNumber(certificatePercentage),
+        ({ massCertificatePercentage }) =>
+          new BigNumber(massCertificatePercentage),
       ),
     );
 
-    const totalPercentageOfCertificateCertificateRewards = sumBigNumbers(
+    const totalPercentageOfCertificateRewards = sumBigNumbers(
       (
         result.resultContent as CertificateRewardDistributionOutput
       ).certificateRewards.map(({ percentage }) => new BigNumber(percentage)),
     );
 
     expect(totalPercentageOfCertificateMassRewards.toString()).toBe(
-      totalPercentageOfCertificateCertificateRewards.toString(),
+      totalPercentageOfCertificateRewards.toString(),
     );
-    expect(
-      Math.round(totalPercentageOfCertificateCertificateRewards.toNumber()),
-    ).toBe(100);
+    expect(Math.round(totalPercentageOfCertificateRewards.toNumber())).toBe(
+      100,
+    );
 
     const networkReward = (
       result.resultContent as CertificateRewardDistributionOutput
@@ -464,23 +466,24 @@ describe('RewardsDistributionProcessor', () => {
       (
         result.resultContent as CertificateRewardDistributionOutput
       ).massRewards.map(
-        ({ certificatePercentage }) => new BigNumber(certificatePercentage),
+        ({ massCertificatePercentage }) =>
+          new BigNumber(massCertificatePercentage),
       ),
     );
 
-    const totalPercentageOfCertificateCertificateRewards = sumBigNumbers(
+    const totalPercentageOfCertificateRewards = sumBigNumbers(
       (
         result.resultContent as CertificateRewardDistributionOutput
       ).certificateRewards.map(({ percentage }) => new BigNumber(percentage)),
     );
 
     expect(totalPercentOfCertificateMassReward.toString()).toBe(
-      totalPercentageOfCertificateCertificateRewards.toString(),
+      totalPercentageOfCertificateRewards.toString(),
     );
 
-    expect(
-      Math.round(totalPercentageOfCertificateCertificateRewards.toNumber()),
-    ).toBe(100);
+    expect(Math.round(totalPercentageOfCertificateRewards.toNumber())).toBe(
+      100,
+    );
 
     const networkParticipantOfWasteNotIdentified = (
       result.resultContent as CertificateRewardDistributionOutput
@@ -604,8 +607,8 @@ describe('RewardsDistributionProcessor', () => {
 
             return {
               actorType,
-              certificatePercentage: expect.any(String),
               documentId: massDocument.id,
+              massCertificatePercentage: expect.any(String),
               massPercentage:
                 actorType === SOURCE
                   ? formatPercentage(
@@ -648,8 +651,8 @@ describe('RewardsDistributionProcessor', () => {
       massRewards: expect.arrayContaining([
         {
           actorType: SOURCE,
-          certificatePercentage: expect.any(String),
           documentId: massDocument.id,
+          massCertificatePercentage: expect.any(String),
           massPercentage: formatPercentage(
             fiftyPercentageDiscount(
               REWARDS_DISTRIBUTION.FOOD_WASTE.SOURCE.plus(
@@ -704,8 +707,8 @@ describe('RewardsDistributionProcessor', () => {
       massRewards: expect.arrayContaining([
         {
           actorType: DocumentEventActorType.PROCESSOR,
-          certificatePercentage: expect.any(String),
           documentId: massDocument.id,
+          massCertificatePercentage: expect.any(String),
           massPercentage: formatPercentage(
             REWARDS_DISTRIBUTION.FOOD_WASTE.PROCESSOR.dividedBy(2),
           ),

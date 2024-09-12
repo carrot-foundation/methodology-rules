@@ -1,7 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
-  stubCertificateAuditWithMethodologySlug,
   stubDocument,
+  stubMassCertificateAuditWithMethodologySlug,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -12,11 +12,11 @@ import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
-import { MassValidationDocumentProcessor } from './mass-validation-document.processor';
-import { stubMassValidationDocumentWithMethodologySlug } from './mass-validation-document.stubs';
+import { MassAuditDocumentProcessor } from './mass-validation-document.processor';
+import { stubMassAuditDocumentWithMethodologySlug } from './mass-validation-document.stubs';
 
-describe('MassValidationDocumentProcessor', () => {
-  const ruleDataProcessor = new MassValidationDocumentProcessor();
+describe('MassAuditDocumentProcessor', () => {
+  const ruleDataProcessor = new MassAuditDocumentProcessor();
 
   const methodologySlug = faker.string.sample();
 
@@ -27,11 +27,11 @@ describe('MassValidationDocumentProcessor', () => {
         min: 2,
       }),
       resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'not matches mass validation',
+      scenario: 'not matches mass audit',
     },
     {
       relatedDocumentsOfParentDocument: stubArray(
-        () => stubMassValidationDocumentWithMethodologySlug(),
+        () => stubMassAuditDocumentWithMethodologySlug(),
         {
           max: 10,
           min: 2,
@@ -42,11 +42,11 @@ describe('MassValidationDocumentProcessor', () => {
     },
     {
       relatedDocumentsOfParentDocument: stubArray(
-        () => stubMassValidationDocumentWithMethodologySlug(methodologySlug),
+        () => stubMassAuditDocumentWithMethodologySlug(methodologySlug),
         { max: 10, min: 2 },
       ),
       resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'matches mass validation and have correct methodology slug',
+      scenario: 'matches mass audit and have correct methodology slug',
     },
   ])(
     `should return "$resultStatus" when the documents $scenario`,
@@ -54,7 +54,7 @@ describe('MassValidationDocumentProcessor', () => {
       const ruleInput = random<Required<RuleInput>>();
 
       spyOnDocumentQueryServiceLoad(
-        stubCertificateAuditWithMethodologySlug(methodologySlug),
+        stubMassCertificateAuditWithMethodologySlug(methodologySlug),
         relatedDocumentsOfParentDocument,
       );
 
