@@ -5,8 +5,8 @@ import {
   DocumentQueryService,
 } from '@carrot-fndn/methodologies/bold/io-helpers';
 import {
-  CERTIFICATE_AUDIT,
   MASS,
+  MASS_CERTIFICATE_AUDIT,
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/methodologies/bold/matchers';
 import {
@@ -25,14 +25,14 @@ import {
 
 import { NFT_METADATA_SELECTION_CRITERIA } from './nft-metadata-selection.constants';
 import {
-  type CertificateMetadata,
+  type MassCertificateMetadata,
   type MethodologyCreditNftMetadataDto,
   type MethodologyMetadata,
   type RewardsDistributionMetadata,
 } from './nft-metadata-selection.dto';
 import {
-  findCertificateIdFromDocumentLinks,
-  findMassValidationId,
+  findMassAuditId,
+  findMassCertificateIdFromDocumentLinks,
   mapMassMetadata,
   mapMethodologyMetadata,
   mapNftMetadata,
@@ -66,7 +66,7 @@ export class NftMetadataSelection extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document>,
   ): Promise<Omit<MethodologyCreditNftMetadataDto, 'creditDocumentId'>> {
     const documentsLinks = new Map<string, DocumentLinks>();
-    const certificates = new Map<string, CertificateMetadata>();
+    const massCertificates = new Map<string, MassCertificateMetadata>();
 
     let methodologyMetadata: MethodologyMetadata = {} as MethodologyMetadata;
     let rewardsDistribution: RewardsDistributionMetadata =
@@ -83,19 +83,19 @@ export class NftMetadataSelection extends RuleDataProcessor {
       });
 
       if (MASS.matches(documentReference)) {
-        const massValidationId = findMassValidationId(document, documentsLinks);
-        const certificateId = findCertificateIdFromDocumentLinks(
-          massValidationId,
+        const massAuditId = findMassAuditId(document, documentsLinks);
+        const massCertificateId = findMassCertificateIdFromDocumentLinks(
+          massAuditId,
           documentsLinks,
         );
-        const certificate = certificates.get(certificateId);
+        const massCertificate = massCertificates.get(massCertificateId);
         const mass = mapMassMetadata(document);
 
-        if (certificate) {
-          certificate.masses.push(mass);
+        if (massCertificate) {
+          massCertificate.masses.push(mass);
         } else {
-          certificates.set(certificateId, {
-            documentId: certificateId,
+          massCertificates.set(massCertificateId, {
+            documentId: massCertificateId,
             masses: [mass],
           });
         }
@@ -105,15 +105,15 @@ export class NftMetadataSelection extends RuleDataProcessor {
         methodologyMetadata = mapMethodologyMetadata(document);
       }
 
-      if (CERTIFICATE_AUDIT.matches(documentReference)) {
+      if (MASS_CERTIFICATE_AUDIT.matches(documentReference)) {
         rewardsDistribution = mapRewardDistributionMetadata(document);
       }
     });
 
     return {
-      certificates: [
-        ...certificates.values(),
-      ] as NonEmptyArray<CertificateMetadata>,
+      massCertificates: [
+        ...massCertificates.values(),
+      ] as NonEmptyArray<MassCertificateMetadata>,
       methodology: methodologyMetadata,
       rewardsDistribution,
     };

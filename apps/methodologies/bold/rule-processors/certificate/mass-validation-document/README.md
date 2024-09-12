@@ -1,6 +1,6 @@
 <div align="center">
 
-# Mass Validation Document
+# Mass Audit Document
 
 Methodology: **Bold**
 
@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Check if all mass validation documents that make up the certificate are linked to the BOLD methodology.
+Check if all mass audit documents that make up the mass certificate are linked to the BOLD methodology.
 
 ### 📂 Implementation
 

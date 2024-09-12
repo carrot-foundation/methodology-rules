@@ -6,13 +6,13 @@ import {
 } from '@carrot-fndn/methodologies/bold/types';
 
 import {
-  CERTIFICATE,
-  CERTIFICATE_AUDIT,
   CREDIT_CERTIFICATES,
   type DocumentMatch,
   DocumentMatcher,
   MASS,
-  MASS_VALIDATION,
+  MASS_AUDIT,
+  MASS_CERTIFICATE,
+  MASS_CERTIFICATE_AUDIT,
 } from './document.matchers';
 
 describe('Document Matchers', () => {
@@ -42,7 +42,7 @@ describe('Document Matchers', () => {
 
       const documentMatcher = new DocumentMatcher({
         ...documentMatch,
-        type: DocumentType.MASS_VALIDATION,
+        type: DocumentType.MASS_AUDIT,
       });
 
       const matchesResult = documentMatcher.matches(documentReference);
@@ -73,14 +73,14 @@ describe('Document Matchers', () => {
     });
   });
 
-  describe('MASS_VALIDATION', () => {
-    it('should return true if the document category is Methodology and type is Mass Validation', () => {
+  describe('MASS_AUDIT', () => {
+    it('should return true if the document category is Methodology and type is Mass Audit', () => {
       const documentReference = stubDocumentReference({
-        category: MASS_VALIDATION.match.category,
-        type: MASS_VALIDATION.match.type,
+        category: MASS_AUDIT.match.category,
+        type: MASS_AUDIT.match.type,
       });
 
-      const matchesResult = MASS_VALIDATION.matches(documentReference);
+      const matchesResult = MASS_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(true);
     });
@@ -88,35 +88,35 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS,
-        type: MASS_VALIDATION.match.type,
+        type: MASS_AUDIT.match.type,
       });
 
-      const matchesResult = MASS_VALIDATION.matches(documentReference);
+      const matchesResult = MASS_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Mass Validation', () => {
+    it('should return false if the document type is not Mass Audit', () => {
       const documentReference = stubDocumentReference({
-        category: MASS_VALIDATION.match.category,
+        category: MASS_AUDIT.match.category,
         type: DocumentType.ORGANIC,
       });
 
-      const matchesResult = MASS_VALIDATION.matches(documentReference);
+      const matchesResult = MASS_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
   });
 
-  describe('CERTIFICATE_AUDIT', () => {
-    it('should return true if the document category is Methodology and type is Certificate Audit', () => {
+  describe('MASS_CERTIFICATE_AUDIT', () => {
+    it('should return true if the document category is Methodology and type is Mass Certificate Audit', () => {
       const documentReference = stubDocumentReference({
-        category: CERTIFICATE_AUDIT.match.category,
-        subtype: CERTIFICATE_AUDIT.match.subtype,
-        type: CERTIFICATE_AUDIT.match.type,
+        category: MASS_CERTIFICATE_AUDIT.match.category,
+        subtype: MASS_CERTIFICATE_AUDIT.match.subtype,
+        type: MASS_CERTIFICATE_AUDIT.match.type,
       });
 
-      const matchesResult = CERTIFICATE_AUDIT.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(true);
     });
@@ -124,34 +124,34 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS,
-        type: CERTIFICATE_AUDIT.match.type,
+        type: MASS_CERTIFICATE_AUDIT.match.type,
       });
 
-      const matchesResult = CERTIFICATE_AUDIT.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Certificate Audit', () => {
+    it('should return false if the document type is not Mass Certificate Audit', () => {
       const documentReference = stubDocumentReference({
-        category: CERTIFICATE_AUDIT.match.category,
-        type: DocumentType.MASS_VALIDATION,
+        category: MASS_CERTIFICATE_AUDIT.match.category,
+        type: DocumentType.MASS_AUDIT,
       });
 
-      const matchesResult = CERTIFICATE_AUDIT.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE_AUDIT.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
   });
 
-  describe('CERTIFICATE', () => {
-    it('should return true if the document category is Methodology and type is Certificate', () => {
+  describe('MASS_CERTIFICATE', () => {
+    it('should return true if the document category is Methodology and type is MassCertificate', () => {
       const documentReference = stubDocumentReference({
-        category: CERTIFICATE.match.category,
-        type: CERTIFICATE.match.type,
+        category: MASS_CERTIFICATE.match.category,
+        type: MASS_CERTIFICATE.match.type,
       });
 
-      const matchesResult = CERTIFICATE.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE.matches(documentReference);
 
       expect(matchesResult).toBe(true);
     });
@@ -159,21 +159,21 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS,
-        type: CERTIFICATE.match.type,
+        type: MASS_CERTIFICATE.match.type,
       });
 
-      const matchesResult = CERTIFICATE.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Certificate', () => {
+    it('should return false if the document type is not MassCertificate', () => {
       const documentReference = stubDocumentReference({
-        category: CERTIFICATE.match.category,
-        type: DocumentType.MASS_VALIDATION,
+        category: MASS_CERTIFICATE.match.category,
+        type: DocumentType.MASS_AUDIT,
       });
 
-      const matchesResult = CERTIFICATE.matches(documentReference);
+      const matchesResult = MASS_CERTIFICATE.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
@@ -206,7 +206,7 @@ describe('Document Matchers', () => {
     it('should return false if the document type is not Credit Certificates', () => {
       const documentReference = stubDocumentReference({
         category: CREDIT_CERTIFICATES.match.category,
-        type: DocumentType.MASS_VALIDATION,
+        type: DocumentType.MASS_AUDIT,
       });
 
       const matchesResult = CREDIT_CERTIFICATES.matches(documentReference);

@@ -33,7 +33,7 @@ import { assert, is } from 'typia';
 import type { ResultContentWithMassValue } from './rewards-distribution.types';
 
 import {
-  CERTIFICATE_AUDIT_CRITERIA,
+  MASS_CERTIFICATE_AUDIT_CRITERIA,
   MASS_CRITERIA,
 } from './rewards-distribution.constants';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
@@ -45,9 +45,10 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   private ErrorMessage = {
-    CERTIFICATE_AUDITS_NOT_FOUND: 'The Certificate Audits was not found',
     CREDIT_NOT_FOUND: 'The Credit was not found',
     INVALID_UNIT_PRICE: 'Unit Price in Credit document is not a string number',
+    MASS_CERTIFICATE_AUDITS_NOT_FOUND:
+      'The Mass Certificate Audits was not found',
     UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT: (id: string) =>
       `${RULE_PROCESSOR_RESULT_CONTENT} is not with the expected value for the id ${id}`,
   };
@@ -57,28 +58,29 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       provideDocumentLoaderService,
     );
 
-    const certificateAuditsQuery = await documentQueryService.load({
+    const massCertificateAuditsQuery = await documentQueryService.load({
       context: {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
-      criteria: CERTIFICATE_AUDIT_CRITERIA,
+      criteria: MASS_CERTIFICATE_AUDIT_CRITERIA,
       documentId: ruleInput.documentId,
     });
 
     return {
-      certificateAuditsQuery,
       documentQueryService,
+      massCertificateAuditsQuery,
     };
   }
 
   private async getRuleSubject(
     ruleInput: RuleInput,
     documentQueries: {
-      certificateAuditsQuery: DocumentQuery<Document> | undefined;
       documentQueryService: DocumentQueryService;
+      massCertificateAuditsQuery: DocumentQuery<Document> | undefined;
     },
   ) {
-    const { certificateAuditsQuery, documentQueryService } = documentQueries;
+    const { documentQueryService, massCertificateAuditsQuery } =
+      documentQueries;
 
     const credit = await loadParentDocument(
       this.context.documentLoaderService,
@@ -88,62 +90,67 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       }),
     );
 
-    const certificateAuditsRuleResultContent = await certificateAuditsQuery
-      ?.iterator()
-      .map(({ document: { externalEvents, id } }) => {
-        const resultContent = getEventAttributeValue(
-          externalEvents?.find(
-            and(
-              eventNameIsAnyOf([RULE_EXECUTION]),
-              metadataAttributeValueIsAnyOf(RULE_SLUG, [REWARDS_DISTRIBUTION]),
+    const massCertificateAuditsRuleResultContent =
+      await massCertificateAuditsQuery
+        ?.iterator()
+        .map(({ document: { externalEvents, id } }) => {
+          const resultContent = getEventAttributeValue(
+            externalEvents?.find(
+              and(
+                eventNameIsAnyOf([RULE_EXECUTION]),
+                metadataAttributeValueIsAnyOf(RULE_SLUG, [
+                  REWARDS_DISTRIBUTION,
+                ]),
+              ),
             ),
-          ),
-          RULE_PROCESSOR_RESULT_CONTENT,
-        );
-
-        if (!is<CertificateRewardDistributionOutput>(resultContent)) {
-          throw new Error(
-            this.ErrorMessage.UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT(id),
+            RULE_PROCESSOR_RESULT_CONTENT,
           );
-        }
 
-        return {
-          id,
-          resultContent,
-        };
-      });
+          if (!is<CertificateRewardDistributionOutput>(resultContent)) {
+            throw new Error(
+              this.ErrorMessage.UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT(id),
+            );
+          }
 
-    if (isNil(certificateAuditsRuleResultContent)) {
-      throw new Error(this.ErrorMessage.CERTIFICATE_AUDITS_NOT_FOUND);
+          return {
+            id,
+            resultContent,
+          };
+        });
+
+    if (isNil(massCertificateAuditsRuleResultContent)) {
+      throw new Error(this.ErrorMessage.MASS_CERTIFICATE_AUDITS_NOT_FOUND);
     }
 
     const resultContentsWithMassValue = await Promise.all(
-      certificateAuditsRuleResultContent.map(async ({ id, resultContent }) => {
-        let massValue = new BigNumber(0);
+      massCertificateAuditsRuleResultContent.map(
+        async ({ id, resultContent }) => {
+          let massValue = new BigNumber(0);
 
-        const massesQuery = await documentQueryService.load({
-          context: {
-            s3KeyPrefix: ruleInput.documentKeyPrefix,
-          },
-          criteria: MASS_CRITERIA,
-          documentId: id,
-        });
+          const massesQuery = await documentQueryService.load({
+            context: {
+              s3KeyPrefix: ruleInput.documentKeyPrefix,
+            },
+            criteria: MASS_CRITERIA,
+            documentId: id,
+          });
 
-        await massesQuery.iterator().each(({ document }) => {
-          massValue = massValue.plus(
-            new BigNumber(
-              assert<number>(
-                document.externalEvents?.find(eventNameIsAnyOf([END]))?.value,
+          await massesQuery.iterator().each(({ document }) => {
+            massValue = massValue.plus(
+              new BigNumber(
+                assert<number>(
+                  document.externalEvents?.find(eventNameIsAnyOf([END]))?.value,
+                ),
               ),
-            ),
-          );
-        });
+            );
+          });
 
-        return {
-          massValue,
-          resultContent,
-        };
-      }),
+          return {
+            massValue,
+            resultContent,
+          };
+        },
+      ),
     );
 
     return {

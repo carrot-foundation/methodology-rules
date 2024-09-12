@@ -1,10 +1,10 @@
 import {
-  stubCertificateDocument,
   stubCreditCertificatesDocument,
   stubCreditDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-  stubMassValidationDocument,
+  stubMassAuditDocument,
+  stubMassCertificateDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   DocumentEventActorType,
@@ -27,8 +27,8 @@ import type { Actor, RewardsDistribution } from './rewards-distribution.types';
 
 import { handler } from '../lambda';
 import {
-  stubCertificateAuditDocumentWithResultContent,
   stubCertificateRewardsDistributionResultContent,
+  stubMassCertificateAuditDocumentWithResultContent,
   stubMassDocumentWithEndEventValue,
 } from './rewards-distribution.stubs';
 
@@ -54,14 +54,14 @@ describe('RewardsDistributionProcessor E2E', () => {
     2,
   );
 
-  const massValidations = masses.map((value) =>
-    stubMassValidationDocument({
+  const massAudits = masses.map((value) =>
+    stubMassAuditDocument({
       parentDocumentId: value.id,
     }),
   );
 
-  const certificate = stubCertificateDocument({
-    externalEvents: massValidations.map((value) =>
+  const massCertificate = stubMassCertificateDocument({
+    externalEvents: massAudits.map((value) =>
       stubDocumentEvent({
         relatedDocument: {
           ...pick(value, 'category', 'type', 'subtype'),
@@ -73,16 +73,17 @@ describe('RewardsDistributionProcessor E2E', () => {
 
   const rewards = stubCertificateRewardsDistributionResultContent();
 
-  const certificateAudit = stubCertificateAuditDocumentWithResultContent(
-    { parentDocumentId: certificate.id },
-    rewards,
-  );
+  const massCertificateAudit =
+    stubMassCertificateAuditDocumentWithResultContent(
+      { parentDocumentId: massCertificate.id },
+      rewards,
+    );
   const creditCertificate = stubCreditCertificatesDocument({
     externalEvents: [
       stubDocumentEvent({
         relatedDocument: {
-          ...pick(certificateAudit, 'category', 'type', 'subtype'),
-          documentId: certificateAudit.id,
+          ...pick(massCertificateAudit, 'category', 'type', 'subtype'),
+          documentId: massCertificateAudit.id,
         },
       }),
     ],
@@ -114,9 +115,9 @@ describe('RewardsDistributionProcessor E2E', () => {
         }),
       },
       {
-        document: certificate,
+        document: massCertificate,
         documentKey: toDocumentKey({
-          documentId: certificate.id,
+          documentId: massCertificate.id,
           documentKeyPrefix,
         }),
       },
@@ -128,9 +129,9 @@ describe('RewardsDistributionProcessor E2E', () => {
         }),
       },
       {
-        document: certificateAudit,
+        document: massCertificateAudit,
         documentKey: toDocumentKey({
-          documentId: certificateAudit.id,
+          documentId: massCertificateAudit.id,
           documentKeyPrefix,
         }),
       },
@@ -141,7 +142,7 @@ describe('RewardsDistributionProcessor E2E', () => {
           documentKeyPrefix,
         }),
       })),
-      ...massValidations.map((document) => ({
+      ...massAudits.map((document) => ({
         document,
         documentKey: toDocumentKey({
           documentId: document.id,

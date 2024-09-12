@@ -1,8 +1,5 @@
 import { DocumentQueryService } from '@carrot-fndn/methodologies/bold/io-helpers';
-import {
-  MASS,
-  MASS_VALIDATION,
-} from '@carrot-fndn/methodologies/bold/matchers';
+import { MASS, MASS_AUDIT } from '@carrot-fndn/methodologies/bold/matchers';
 import {
   type Document,
   DocumentType,
@@ -35,7 +32,7 @@ export class MassDocumentTypeProcessor extends RuleDataProcessor {
         relatedDocuments: [
           {
             parentDocument: {},
-            ...MASS_VALIDATION.match,
+            ...MASS_AUDIT.match,
           },
         ],
       },

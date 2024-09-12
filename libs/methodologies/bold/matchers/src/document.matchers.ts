@@ -30,20 +30,20 @@ export const MASS = new DocumentMatcher({
   category: DocumentCategory.MASS,
 });
 
-export const MASS_VALIDATION = new DocumentMatcher({
+export const MASS_AUDIT = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_VALIDATION,
+  type: DocumentType.MASS_AUDIT,
 });
 
-export const CERTIFICATE = new DocumentMatcher({
+export const MASS_CERTIFICATE = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.CERTIFICATE,
+  type: DocumentType.MASS_CERTIFICATE,
 });
 
-export const CERTIFICATE_AUDIT = new DocumentMatcher({
+export const MASS_CERTIFICATE_AUDIT = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   subtype: DocumentSubtype.PROCESS,
-  type: DocumentType.CERTIFICATE_AUDIT,
+  type: DocumentType.MASS_CERTIFICATE_AUDIT,
 });
 
 export const CREDIT_CERTIFICATES = new DocumentMatcher({

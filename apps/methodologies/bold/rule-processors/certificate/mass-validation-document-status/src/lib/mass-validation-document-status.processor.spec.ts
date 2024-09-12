@@ -3,7 +3,7 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-  stubMassValidationDocument,
+  stubMassAuditDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   DataSetName,
@@ -21,20 +21,20 @@ import {
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
-import { MassValidationDocumentStatusProcessor } from './mass-validation-document-status.processor';
+import { MassAuditDocumentStatusProcessor } from './mass-validation-document-status.processor';
 
 const { CLOSE } = DocumentEventName;
 const { METHODOLOGY_EVALUATION_RESULT } = DocumentEventAttributeName;
 const { APPROVED } = MethodologyEvaluationResult;
 
-describe('MassValidationDocumentStatusProcessor', () => {
-  const ruleDataProcessor = new MassValidationDocumentStatusProcessor();
+describe('MassAuditDocumentStatusProcessor', () => {
+  const ruleDataProcessor = new MassAuditDocumentStatusProcessor();
 
-  it('should return APPROVED when related documents matches mass validation and have approved close event', async () => {
+  it('should return APPROVED when related documents matches mass audit and have approved close event', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
     const relatedDocumentsOfParentDocument = stubArray(() =>
-      stubMassValidationDocument({
+      stubMassAuditDocument({
         dataSetName: DataSetName.TEST,
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
@@ -68,7 +68,7 @@ describe('MassValidationDocumentStatusProcessor', () => {
     expect(ruleOutput).toEqual(expectedRuleOutput);
   });
 
-  it('should return REJECTED when the related documents do not match the mass validation criteria', async () => {
+  it('should return REJECTED when the related documents do not match the mass audit criteria', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
     const relatedDocumentsOfParentDocument = stubArray(() => stubDocument(), {
@@ -79,7 +79,7 @@ describe('MassValidationDocumentStatusProcessor', () => {
     spyOnDocumentQueryServiceLoad(
       stubDocument(),
       stubArray(() => {
-        const document = stubMassValidationDocument();
+        const document = stubMassAuditDocument();
 
         document.externalEvents = relatedDocumentsOfParentDocument.map(
           (value) =>
@@ -105,11 +105,11 @@ describe('MassValidationDocumentStatusProcessor', () => {
     expect(ruleOutput).toEqual(expectedRuleOutput);
   });
 
-  it('should return REJECTED when the related documents matches mass validation but does not have a CLOSE event', async () => {
+  it('should return REJECTED when the related documents matches mass audit but does not have a CLOSE event', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
     const relatedDocumentsOfParentDocument = stubArray(() => {
-      const document = stubMassValidationDocument();
+      const document = stubMassAuditDocument();
 
       document.externalEvents = [
         stubDocumentEvent({
@@ -123,7 +123,7 @@ describe('MassValidationDocumentStatusProcessor', () => {
     spyOnDocumentQueryServiceLoad(
       stubDocument(),
       stubArray(() => {
-        const document = stubMassValidationDocument();
+        const document = stubMassAuditDocument();
 
         document.externalEvents = relatedDocumentsOfParentDocument.map(
           (value) =>

@@ -4,8 +4,8 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
+  stubMassAuditDocument,
   stubMassDocument,
-  stubMassValidationDocument,
   stubMethodologyDefinitionDocument,
   stubParticipantHomologationDocument,
   stubParticipantHomologationGroupDocument,
@@ -45,18 +45,18 @@ const ruleDataProcessor: TestGeolocationPrecisionRuleProcessor =
   new TestGeolocationPrecisionRuleProcessor();
 
 describe('GeolocationPrecisionRuleProcessor', () => {
-  const massValidationId = faker.string.uuid();
+  const massAuditId = faker.string.uuid();
   const massReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
     documentId: faker.string.uuid(),
     type: DocumentType.ORGANIC,
   };
 
-  const massValidationReference: DocumentReference = {
+  const massAuditReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
-    documentId: massValidationId,
+    documentId: massAuditId,
     subtype: DocumentSubtype.PROCESS,
-    type: DocumentType.MASS_VALIDATION,
+    type: DocumentType.MASS_AUDIT,
   };
 
   const methodologyReference: DocumentReference = {
@@ -104,19 +104,19 @@ describe('GeolocationPrecisionRuleProcessor', () => {
       pickUpEvent,
       stubDocumentEvent({
         name: DocumentEventName.OUTPUT,
-        relatedDocument: massValidationReference,
+        relatedDocument: massAuditReference,
       }),
     ],
     id: massReference.documentId,
   });
-  const massValidationDocumentStub = stubMassValidationDocument({
+  const massAuditDocumentStub = stubMassAuditDocument({
     externalEvents: [
       stubDocumentEvent({
         name: DocumentEventName.ACTOR,
         referencedDocument: methodologyReference,
       }),
     ],
-    id: massValidationReference.documentId,
+    id: massAuditReference.documentId,
     parentDocumentId: massDocumentStub.id,
   });
   const methodologyDocumentStub = stubMethodologyDefinitionDocument({
@@ -195,7 +195,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
             },
             stubDocumentEvent({
               name: DocumentEventName.OUTPUT,
-              relatedDocument: massValidationReference,
+              relatedDocument: massAuditReference,
             }),
           ],
         },
@@ -205,7 +205,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
     },
   ])('$scenario', async ({ documents, resultComment }) => {
     spyOnDocumentQueryServiceLoad(stubDocument(), [
-      massValidationDocumentStub,
+      massAuditDocumentStub,
       methodologyDocumentStub,
       participantHomologationGroupDocumentStub,
       recyclerHomologationDocumentStub,
@@ -214,7 +214,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
 
     const ruleInput = {
       ...random<Required<RuleInput>>(),
-      documentId: massValidationId,
+      documentId: massAuditId,
     };
 
     const ruleOutput = await ruleDataProcessor.process(ruleInput);
@@ -399,7 +399,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
             },
             stubDocumentEvent({
               name: DocumentEventName.OUTPUT,
-              relatedDocument: massValidationReference,
+              relatedDocument: massAuditReference,
             }),
           ],
         },
@@ -434,7 +434,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
             },
             stubDocumentEvent({
               name: DocumentEventName.OUTPUT,
-              relatedDocument: massValidationReference,
+              relatedDocument: massAuditReference,
             }),
           ],
         },
@@ -465,7 +465,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
             },
             stubDocumentEvent({
               name: DocumentEventName.OUTPUT,
-              relatedDocument: massValidationReference,
+              relatedDocument: massAuditReference,
             }),
           ],
         },
@@ -478,7 +478,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
     },
   ])('$scenario', async ({ documents, resultComment }) => {
     spyOnDocumentQueryServiceLoad(stubDocument(), [
-      massValidationDocumentStub,
+      massAuditDocumentStub,
       methodologyDocumentStub,
       participantHomologationGroupDocumentStub,
       // @ts-expect-error: to allow address to be undefined
@@ -487,7 +487,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
 
     const ruleInput = {
       ...random<Required<RuleInput>>(),
-      documentId: massValidationId,
+      documentId: massAuditId,
     };
 
     const ruleOutput = await ruleDataProcessor.process(ruleInput);

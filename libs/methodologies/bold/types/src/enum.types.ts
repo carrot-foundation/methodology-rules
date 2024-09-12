@@ -14,12 +14,12 @@ export enum DataSetName {
 }
 
 export enum DocumentType {
-  CERTIFICATE = 'Certificate',
-  CERTIFICATE_AUDIT = 'Certificate Audit',
   CREDIT = 'Credit',
   CREDIT_CERTIFICATES = 'Credit Certificates',
   DEFINITION = 'Definition',
-  MASS_VALIDATION = 'Mass Validation',
+  MASS_AUDIT = 'Mass Audit',
+  MASS_CERTIFICATE = 'Mass Certificate',
+  MASS_CERTIFICATE_AUDIT = 'Mass Certificate Audit',
   ORGANIC = 'Organic',
   PARTICIPANT_HOMOLOGATION = 'Participant Homologation',
 }

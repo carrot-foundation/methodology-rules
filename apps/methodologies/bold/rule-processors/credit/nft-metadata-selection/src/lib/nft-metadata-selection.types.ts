@@ -20,17 +20,17 @@ interface NftMetadataMassId {
   weight: NonEmptyString;
 }
 
-export interface NftMetadataCertificate {
+export interface NftMetadataMassCertificate {
   external_id: NonEmptyString;
   external_url: Url;
   mass_id_count: NonZeroPositive;
   mass_ids: NonEmptyArray<NftMetadataMassId>;
 }
 
-export interface NftMetadataCertificates {
+export interface NftMetadataMassCertificates {
   count: NonZeroPositive;
   description: NonEmptyString;
-  documents: NonEmptyArray<NftMetadataCertificate>;
+  documents: NonEmptyArray<NftMetadataMassCertificate>;
 }
 
 export interface NftMetadataMethodology {
@@ -59,7 +59,7 @@ export interface NftMetadataRewardsDistribution {
 }
 
 interface NftMetadataDetails {
-  certificates: NftMetadataCertificates;
+  massCertificates: NftMetadataMassCertificates;
   methodology: NftMetadataMethodology;
   rewards_distribution: NftMetadataRewardsDistribution;
   summary: NftMetadataSummary;

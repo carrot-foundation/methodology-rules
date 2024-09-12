@@ -61,7 +61,7 @@ describe('Rewards Distribution Helpers', () => {
       const massValue = new BigNumber(1500);
 
       const amount = calculateAmount({
-        certificatePercentage: '30.1234567892',
+        massCertificatePercentage: '30.1234567892',
         massValue,
         participantAmount: '0',
         unitPrice,
@@ -74,7 +74,7 @@ describe('Rewards Distribution Helpers', () => {
       const massValue = new BigNumber(1500);
 
       const amount = calculateAmount({
-        certificatePercentage: '30.1234567892',
+        massCertificatePercentage: '30.1234567892',
         massValue,
         participantAmount: '3.223669',
         unitPrice,

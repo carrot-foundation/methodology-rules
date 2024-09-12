@@ -1,6 +1,6 @@
 <div align="center">
 
-# Mass Validation Document Status
+# Mass Audit Document Status
 
 Methodology: **Bold**
 
@@ -10,7 +10,7 @@ Methodology: **Bold**
 
 ## 📄 Description
 
-Verify if all mass validation documents that make up the certificate have an approved status.
+Verify if all mass audit documents that make up the mass certificate have an approved status.
 
 ### 📂 Implementation
 

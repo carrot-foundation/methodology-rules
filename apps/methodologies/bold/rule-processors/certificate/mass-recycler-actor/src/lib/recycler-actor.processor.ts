@@ -1,10 +1,7 @@
 import type { DocumentQuery } from '@carrot-fndn/methodologies/bold/io-helpers';
 
 import { DocumentQueryService } from '@carrot-fndn/methodologies/bold/io-helpers';
-import {
-  MASS,
-  MASS_VALIDATION,
-} from '@carrot-fndn/methodologies/bold/matchers';
+import { MASS, MASS_AUDIT } from '@carrot-fndn/methodologies/bold/matchers';
 import {
   and,
   eventHasRecyclerActor,
@@ -73,7 +70,7 @@ export class RecyclerActorDocumentProcessor extends RuleDataProcessor {
           omit: true,
           relatedDocuments: [
             {
-              ...MASS_VALIDATION.match,
+              ...MASS_AUDIT.match,
               omit: true,
               parentDocument: MASS.match,
             },

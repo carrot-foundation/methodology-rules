@@ -1,8 +1,8 @@
 import {
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
+  stubMassAuditDocument,
   stubMassDocument,
-  stubMassValidationDocument,
   stubMethodologyDefinitionDocument,
   stubParticipantHomologationDocument,
   stubParticipantHomologationGroupDocument,
@@ -42,16 +42,16 @@ describe('PickUpGeolocationPrecision', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   // TODO: Refac this test to use a builder or a stub that prepares the documents https://app.clickup.com/t/86a36ut5a
-  const massValidationId = faker.string.uuid();
+  const massAuditId = faker.string.uuid();
   const massReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
     documentId: faker.string.uuid(),
     type: DocumentType.ORGANIC,
   };
-  const massValidationReference: DocumentReference = {
+  const massAuditReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
-    documentId: massValidationId,
-    type: DocumentType.MASS_VALIDATION,
+    documentId: massAuditId,
+    type: DocumentType.MASS_AUDIT,
   };
   const methodologyReference: DocumentReference = {
     category: DocumentCategory.METHODOLOGY,
@@ -96,12 +96,12 @@ describe('PickUpGeolocationPrecision', () => {
       pickUpDocumentEvent,
       stubDocumentEvent({
         name: DocumentEventName.OUTPUT,
-        relatedDocument: massValidationReference,
+        relatedDocument: massAuditReference,
       }),
     ],
     id: massReference.documentId,
   });
-  const massValidationDocumentStub = stubMassValidationDocument({
+  const massAuditDocumentStub = stubMassAuditDocument({
     externalEvents: [
       stubDocumentEvent({
         name: DocumentEventName.ACTOR,
@@ -109,7 +109,7 @@ describe('PickUpGeolocationPrecision', () => {
         relatedDocument: undefined,
       }),
     ],
-    id: massValidationReference.documentId,
+    id: massAuditReference.documentId,
     parentDocumentId: massDocumentStub.id,
   });
   const methodologyDocumentStub = stubMethodologyDefinitionDocument({
@@ -148,7 +148,7 @@ describe('PickUpGeolocationPrecision', () => {
 
   const documents: Document[] = [
     massDocumentStub,
-    massValidationDocumentStub,
+    massAuditDocumentStub,
     methodologyDocumentStub,
     participantHomologationGroupDocumentStub,
     recyclerHomologationDocumentStub,
@@ -169,7 +169,7 @@ describe('PickUpGeolocationPrecision', () => {
   it('should return APPROVED when the homologation address is equal and the precision is valid', async () => {
     const response = (await handler(
       stubRuleInput({
-        documentId: massValidationReference.documentId,
+        documentId: massAuditReference.documentId,
         documentKeyPrefix,
       }),
       stubContext(),

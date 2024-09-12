@@ -17,7 +17,7 @@ export interface MassMetadata {
   value: number & tags.ExclusiveMinimum<0> & tags.Type<'float'>;
 }
 
-export interface CertificateMetadata {
+export interface MassCertificateMetadata {
   documentId: NonEmptyString;
   masses: NonEmptyArray<MassMetadata>;
 }
@@ -41,8 +41,8 @@ export interface RewardsDistributionMetadata {
 }
 
 export interface MethodologyCreditNftMetadataDto {
-  certificates: NonEmptyArray<CertificateMetadata>;
   creditDocumentId: NonEmptyString;
+  massCertificates: NonEmptyArray<MassCertificateMetadata>;
   methodology: MethodologyMetadata;
   rewardsDistribution: RewardsDistributionMetadata;
 }
