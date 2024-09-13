@@ -39,6 +39,7 @@ export enum DocumentSubtype {
   RECYCLER = 'Recycler',
   SOURCE = 'Source',
   WOOD = 'Wood',
+  WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
 export enum MassSubtype {
@@ -52,6 +53,7 @@ export enum MassSubtype {
   INDUSTRIAL_SLUDGE = DocumentSubtype.INDUSTRIAL_SLUDGE,
   OTHER_NON_DANGEROUS_ORGANICS = DocumentSubtype.OTHER_NON_DANGEROUS_ORGANICS,
   WOOD = DocumentSubtype.WOOD,
+  WOOD_AND_WOOD_PRODUCTS = DocumentSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
 export enum MeasurementUnit {
