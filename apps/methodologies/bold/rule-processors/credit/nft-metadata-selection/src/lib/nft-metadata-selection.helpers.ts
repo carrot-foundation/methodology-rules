@@ -267,6 +267,10 @@ export const mapNftMetadata = ({
         value: recyclerName,
       },
       {
+        trait_type: 'Credit Type',
+        value: 'Recycling Credit',
+      },
+      {
         trait_type: 'Amount in Kg',
         value: formatCeritificatesMassValue(massCertificates),
       },
