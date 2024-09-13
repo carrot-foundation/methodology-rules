@@ -94,6 +94,8 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
   [MassSubtype.OTHER_NON_DANGEROUS_ORGANICS]:
     RewardsDistributionWasteType.OTHER_ORGANIC_WASTE,
   [MassSubtype.WOOD]: RewardsDistributionWasteType.OTHER_ORGANIC_WASTE,
+  [MassSubtype.WOOD_AND_WOOD_PRODUCTS]:
+    RewardsDistributionWasteType.OTHER_ORGANIC_WASTE,
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
