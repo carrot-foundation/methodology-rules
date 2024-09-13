@@ -13,9 +13,10 @@ export class DocumentSubtypeProcessor extends ParentDocumentRuleProcessor<string
   };
 
   protected override evaluateResult(ruleSubject: string): EvaluateResultOutput {
-    const resultStatus = Object.values<string>(DocumentSubtype).includes(
-      ruleSubject,
-    )
+    const resultStatus = [
+      'Wood and Wood Products',
+      ...Object.values<string>(DocumentSubtype),
+    ].includes(ruleSubject)
       ? RuleOutputStatus.APPROVED
       : RuleOutputStatus.REJECTED;
 
