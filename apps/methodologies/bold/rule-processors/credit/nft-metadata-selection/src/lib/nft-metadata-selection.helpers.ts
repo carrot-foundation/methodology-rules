@@ -325,6 +325,7 @@ export const mapNftMetadata = ({
       summary: {
         mass_certificate_count: massCertificates.length,
         mass_id_count: getMassCertificatesMassIdsCount(massCertificates),
+        mass_origin_city: originCity,
         mass_origin_country: originCountry,
         mass_origin_state: originCountryState,
         mass_subtype: subtype,
