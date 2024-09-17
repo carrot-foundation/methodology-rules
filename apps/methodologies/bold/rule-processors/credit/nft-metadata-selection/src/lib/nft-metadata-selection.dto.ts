@@ -9,6 +9,7 @@ import type { tags } from 'typia';
 export interface MassMetadata {
   documentId: NonEmptyString;
   measurementUnit: NonEmptyString;
+  originCity: NonEmptyString;
   originCountry: NonEmptyString;
   originCountryState: NonEmptyString;
   recyclerName: NonEmptyString;

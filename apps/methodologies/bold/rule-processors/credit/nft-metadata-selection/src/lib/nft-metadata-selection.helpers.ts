@@ -51,6 +51,7 @@ export const getCarrotExplorePageUrl = (documentId: string) =>
 export const mapMassMetadata = (document: Document): MassMetadata => ({
   documentId: document.id,
   measurementUnit: document.measurementUnit,
+  originCity: document.primaryAddress.city,
   originCountry: document.primaryAddress.countryCode,
   originCountryState: document.primaryAddress.countryState,
   recyclerName: document.externalEvents?.find(
@@ -245,8 +246,14 @@ export const mapNftMetadata = ({
   methodology,
   rewardsDistribution,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
-  const { originCountry, originCountryState, recyclerName, subtype, type } =
-    massCertificates[0].masses[0];
+  const {
+    originCity,
+    originCountry,
+    originCountryState,
+    recyclerName,
+    subtype,
+    type,
+  } = massCertificates[0].masses[0];
 
   return {
     attributes: [
@@ -263,12 +270,20 @@ export const mapNftMetadata = ({
         value: originCountryState,
       },
       {
+        trait_type: 'Mass Origin (City)',
+        value: originCity,
+      },
+      {
         trait_type: 'Recycler',
         value: recyclerName,
       },
       {
         trait_type: 'Credit Type',
         value: 'Recycling Credit',
+      },
+      {
+        trait_type: 'Collection Name',
+        value: 'BOLD Innovators Collection',
       },
       {
         trait_type: 'Amount in Kg',
