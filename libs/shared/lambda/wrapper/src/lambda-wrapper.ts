@@ -60,8 +60,5 @@ export const wrapRuleIntoLambdaHandler = (
     }
   };
 
-  return AWSLambda.wrapHandler(handler, {
-    captureTimeoutWarning: true,
-    timeoutWarningLimit: 30_000,
-  });
+  return AWSLambda.wrapHandler(handler);
 };
