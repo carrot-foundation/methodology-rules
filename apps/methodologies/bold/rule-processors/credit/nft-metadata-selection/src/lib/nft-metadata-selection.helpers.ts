@@ -270,7 +270,7 @@ export const mapNftMetadata = ({
         value: originCountryState,
       },
       {
-        trait_type: 'Mass City',
+        trait_type: 'Mass Origin (City)',
         value: originCity,
       },
       {
