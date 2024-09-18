@@ -2,6 +2,7 @@ import type { CertificateReward } from '@carrot-fndn/methodologies/bold/types';
 import type {
   NonEmptyArray,
   NonEmptyString,
+  Uri,
   Url,
 } from '@carrot-fndn/shared/types';
 import type { tags } from 'typia';
@@ -43,6 +44,7 @@ export interface RewardsDistributionMetadata {
 
 export interface MethodologyCreditNftMetadataDto {
   creditDocumentId: NonEmptyString;
+  image?: Uri | undefined;
   massCertificates: NonEmptyArray<MassCertificateMetadata>;
   methodology: MethodologyMetadata;
   rewardsDistribution: RewardsDistributionMetadata;

@@ -2,6 +2,7 @@ import type { UnknownObject } from '@carrot-fndn/shared/types';
 
 import {
   stubDocumentEvent,
+  stubDocumentEventAttribute,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
@@ -48,7 +49,7 @@ import {
 
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
-const { ACTOR, LINK, RULE_EXECUTION } = DocumentEventName;
+const { ACTOR, LINK, OPEN, RULE_EXECUTION } = DocumentEventName;
 const {
   ACTOR_TYPE,
   RULE_PROCESSOR_CODE_VERSION,
@@ -67,6 +68,7 @@ const {
 describe('NftMetadataSelection E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
   const creditDocumentId = faker.string.uuid();
+  const image = faker.internet.url();
 
   // TODO: Refac this test to use a builder or a stub that prepares the documents https://app.clickup.com/t/86a36ut5a
   const creditDocumentReference: DocumentReference = {
@@ -120,6 +122,19 @@ describe('NftMetadataSelection E2E', () => {
 
   const creditDocumentStub = stubCreditDocument({
     externalEvents: [
+      stubDocumentEvent({
+        metadata: {
+          attributes: [
+            stubDocumentEventAttribute({
+              name: DocumentEventAttributeName.NFT_IMAGE,
+              value: image,
+            }),
+          ],
+        },
+        name: OPEN,
+        referencedDocument: undefined,
+        relatedDocument: undefined,
+      }),
       stubDocumentOutputEvent(creditCertificatesReference),
       stubDocumentEvent({
         name: LINK,
@@ -243,6 +258,7 @@ describe('NftMetadataSelection E2E', () => {
     );
 
     expect(validationResultContent.errors).toEqual([]);
-    expect(response.resultStatus).toEqual(RuleOutputStatus.APPROVED);
+    expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
+    expect(response.resultContent?.['image']).toBe(image);
   });
 });

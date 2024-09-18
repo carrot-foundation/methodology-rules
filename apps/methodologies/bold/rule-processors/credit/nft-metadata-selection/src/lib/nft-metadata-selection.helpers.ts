@@ -1,7 +1,10 @@
 import type { RuleInput } from '@carrot-fndn/shared/rule/types';
-import type { NonEmptyArray } from '@carrot-fndn/shared/types';
+import type { NonEmptyArray, Uri } from '@carrot-fndn/shared/types';
 
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
+import {
+  getEventAttributeValue,
+  getOpenEvent,
+} from '@carrot-fndn/methodologies/bold/getters';
 import {
   MASS_AUDIT,
   MASS_CERTIFICATE,
@@ -22,7 +25,7 @@ import {
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/types';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
-import { assert } from 'typia';
+import { assert, is } from 'typia';
 
 import type {
   MassCertificateMetadata,
@@ -40,13 +43,23 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const { ACTOR_TYPE } = DocumentEventAttributeName;
+const { ACTOR_TYPE, NFT_IMAGE } = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
 
 export const getCarrotExplorePageUrl = (documentId: string) =>
   `https://explore.carrot.eco/document/${documentId}`;
+
+export const getImageFromMetadata = (
+  document: Document | undefined,
+): Uri | undefined => {
+  const openEvent = getOpenEvent(document);
+
+  const uri = getEventAttributeValue(openEvent, NFT_IMAGE);
+
+  return is<Uri>(uri) ? uri : undefined;
+};
 
 export const mapMassMetadata = (document: Document): MassMetadata => ({
   documentId: document.id,
@@ -242,6 +255,7 @@ export const mapNftMetadataDto = (
 
 export const mapNftMetadata = ({
   creditDocumentId,
+  image,
   massCertificates,
   methodology,
   rewardsDistribution,
@@ -339,6 +353,7 @@ export const mapNftMetadata = ({
     external_id: creditDocumentId,
     external_url: getCarrotExplorePageUrl(creditDocumentId),
     image:
+      image ??
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
     name: 'BOLD',
   };
