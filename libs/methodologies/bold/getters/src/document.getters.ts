@@ -21,3 +21,10 @@ export const getAuditorActorEvent = (
       event.name === ACTOR &&
       getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
   );
+
+export const getOpenEvent = (
+  document: Document | undefined,
+): DocumentEvent | undefined =>
+  document?.externalEvents?.find(
+    (event) => event.name === DocumentEventName.OPEN.toString(),
+  );
