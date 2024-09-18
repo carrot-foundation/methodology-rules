@@ -2,6 +2,7 @@ import type { NonEmptyArray, UnknownObject } from '@carrot-fndn/shared/types';
 import type { RequiredDeep } from 'type-fest';
 
 import {
+  stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/methodologies/bold/testing';
@@ -32,6 +33,7 @@ import {
   formatCeritificatesMassValue,
   formatWeight,
   getCarrotExplorePageUrl,
+  getImageFromMetadata,
   getMassCertificatesMassIdsCount,
   getMassCertificatesMassValue,
   getMassValue,
@@ -47,6 +49,7 @@ const {
   ACTOR_TYPE,
   METHODOLOGY_DESCRIPTION,
   METHODOLOGY_NAME,
+  NFT_IMAGE,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
@@ -62,6 +65,47 @@ describe('Helpers', () => {
       const expected = `https://explore.carrot.eco/document/${documentId}`;
 
       expect(getCarrotExplorePageUrl(documentId)).toBe(expected);
+    });
+  });
+
+  describe('getImageFromMetadata', () => {
+    it('should return undefined if the open event does not have the NFT_IMAGE attribute', () => {
+      const documentStub = stubDocument({
+        externalEvents: [stubDocumentEvent({ name: OPEN })],
+      });
+
+      const result = getImageFromMetadata(documentStub);
+
+      expect(result).toBe(undefined);
+    });
+
+    it('should return undefined if the metadata value is not a valid Uri', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
+            [NFT_IMAGE, faker.string.sample()],
+          ]),
+        ],
+      });
+
+      const result = getImageFromMetadata(documentStub);
+
+      expect(result).toBe(undefined);
+    });
+
+    it('should return the metadata value if it is a valid Uri', () => {
+      const image = faker.internet.url();
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
+            [NFT_IMAGE, image],
+          ]),
+        ],
+      });
+
+      const result = getImageFromMetadata(documentStub);
+
+      expect(result).toBe(image);
     });
   });
 

@@ -33,6 +33,7 @@ import {
 import {
   findMassAuditId,
   findMassCertificateIdFromDocumentLinks,
+  getImageFromMetadata,
   mapMassMetadata,
   mapMethodologyMetadata,
   mapNftMetadata,
@@ -67,6 +68,7 @@ export class NftMetadataSelection extends RuleDataProcessor {
   ): Promise<Omit<MethodologyCreditNftMetadataDto, 'creditDocumentId'>> {
     const documentsLinks = new Map<string, DocumentLinks>();
     const massCertificates = new Map<string, MassCertificateMetadata>();
+    const credit = documentQuery.rootDocument;
 
     let methodologyMetadata: MethodologyMetadata = {} as MethodologyMetadata;
     let rewardsDistribution: RewardsDistributionMetadata =
@@ -111,6 +113,7 @@ export class NftMetadataSelection extends RuleDataProcessor {
     });
 
     return {
+      image: getImageFromMetadata(credit),
       massCertificates: [
         ...massCertificates.values(),
       ] as NonEmptyArray<MassCertificateMetadata>,

@@ -100,6 +100,7 @@ export enum DocumentEventAttributeName {
   METHODOLOGY_NAME = 'methodology-name',
   METHODOLOGY_SLUG = 'methodology-slug',
   MOVE_TYPE = 'move-type',
+  NFT_IMAGE = 'nft-image',
   REPORT_DATE_ISSUED = 'report-date-issued',
   REPORT_NUMBER = 'report-number',
   REPORT_TYPE = 'report-type',
