@@ -1,1 +1,1 @@
-## Carrot Methodology Rules
+# Carrot Methodology Rules
