@@ -32,7 +32,7 @@ import {
   stubMassDocumentWithEndEventValue,
 } from './rewards-distribution.stubs';
 
-const { OPEN } = DocumentEventName;
+const { RULES_METADATA } = DocumentEventName;
 const { UNIT_PRICE } = DocumentEventAttributeName;
 
 describe('RewardsDistributionProcessor E2E', () => {
@@ -92,7 +92,7 @@ describe('RewardsDistributionProcessor E2E', () => {
 
   const credit = stubCreditDocument({
     externalEvents: [
-      stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
+      stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
         [UNIT_PRICE, unitPrice],
       ]),
       stubDocumentEvent({

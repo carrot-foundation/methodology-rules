@@ -74,6 +74,7 @@ export enum DocumentEventName {
   OUTPUT = 'OUTPUT',
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',
+  RULES_METADATA = 'RULES METADATA',
 }
 
 export enum DocumentEventAttributeName {
