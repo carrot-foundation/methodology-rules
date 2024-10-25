@@ -38,7 +38,7 @@ import {
 } from './rewards-distribution.constants';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
-const { END, OPEN, RULE_EXECUTION } = DocumentEventName;
+const { END, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG, UNIT_PRICE } =
   DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
@@ -173,7 +173,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     const unitPrice = getEventAttributeValue(
-      credit.externalEvents?.find(eventNameIsAnyOf([OPEN])),
+      credit.externalEvents?.find(eventNameIsAnyOf([RULES_METADATA])),
       UNIT_PRICE,
     );
 
