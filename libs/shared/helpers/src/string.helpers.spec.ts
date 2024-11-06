@@ -40,10 +40,16 @@ describe('string helpers', () => {
       expect(extractNumberFromString('123,456')).toBe(123_456);
     });
 
-    it('should return the number from the string with measurement unit', () => {
+    it('should return the number from the string with spaced measurement unit', () => {
       expect(extractNumberFromString('123 kg')).toBe(123);
       expect(extractNumberFromString('123.456 kg')).toBe(123.456);
       expect(extractNumberFromString('123,456 kg')).toBe(123_456);
+    });
+
+    it('should return the number from the string with measurement unit without space', () => {
+      expect(extractNumberFromString('123kg')).toBe(123);
+      expect(extractNumberFromString('123.456kg')).toBe(123.456);
+      expect(extractNumberFromString('123,456kg')).toBe(123_456);
     });
 
     it('should throw an error if the string is not a number', () => {
