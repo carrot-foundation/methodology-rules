@@ -3,7 +3,11 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
 } from '@carrot-fndn/methodologies/bold/types';
-import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  extractNumberFromString,
+  isNil,
+  isNonEmptyString,
+} from '@carrot-fndn/shared/helpers';
 
 export function extractWeightAttributes(event: DocumentEvent) {
   const { LOAD_NET_WEIGHT, VEHICLE_GROSS_WEIGHT, VEHICLE_WEIGHT } =
@@ -17,7 +21,7 @@ export function extractWeightAttributes(event: DocumentEvent) {
     const value = getEventAttributeValue(event, attributeName);
 
     if (isNonEmptyString(value)) {
-      return Number.parseFloat(value.replace('KG', ''));
+      return extractNumberFromString(value);
     }
 
     return null;
