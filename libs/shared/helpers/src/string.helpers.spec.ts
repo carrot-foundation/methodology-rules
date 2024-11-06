@@ -1,4 +1,8 @@
-import { getNonEmptyString, isNonEmptyString } from './string.helpers';
+import {
+  extractNumberFromString,
+  getNonEmptyString,
+  isNonEmptyString,
+} from './string.helpers';
 
 describe('string helpers', () => {
   describe('isNonEmptyString', () => {
@@ -26,6 +30,26 @@ describe('string helpers', () => {
 
     it('should return undefined if the value is not a string', () => {
       expect(getNonEmptyString(123)).toBe(undefined);
+    });
+  });
+
+  describe('extractNumberFromString', () => {
+    it('should return the number from the string without measurement unit', () => {
+      expect(extractNumberFromString('123')).toBe(123);
+      expect(extractNumberFromString('123.456')).toBe(123.456);
+      expect(extractNumberFromString('123,456')).toBe(123_456);
+    });
+
+    it('should return the number from the string with measurement unit', () => {
+      expect(extractNumberFromString('123 kg')).toBe(123);
+      expect(extractNumberFromString('123.456 kg')).toBe(123.456);
+      expect(extractNumberFromString('123,456 kg')).toBe(123_456);
+    });
+
+    it('should throw an error if the string is not a number', () => {
+      expect(() => extractNumberFromString('test')).toThrow(
+        'Could not extract number from test',
+      );
     });
   });
 });
