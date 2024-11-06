@@ -6,6 +6,8 @@ import {
   stubCreditDocument,
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
+  stubMassCertificateAuditDocument,
+  stubMassDocument,
 } from '@carrot-fndn/methodologies/bold/testing';
 import {
   type CertificateRewardDistributionOutput,
@@ -13,7 +15,6 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
-import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import { RewardsDistributionProcessor } from './rewards-distribution.processor';
@@ -22,7 +23,7 @@ import {
   stubMassDocumentWithEndEventValue,
 } from './rewards-distribution.stubs';
 
-const { RULES_METADATA } = DocumentEventName;
+const { END, RULES_METADATA } = DocumentEventName;
 const { UNIT_PRICE } = DocumentEventAttributeName;
 
 describe('RewardsDistributionProcessor', () => {
@@ -50,21 +51,51 @@ describe('RewardsDistributionProcessor', () => {
     {
       credit: stubCreditDocument(),
       errorMessage:
+        ruleDataProcessor['ErrorMessage'].REWARDS_DISTRIBUTION_NOT_FOUND(
+          'documentId',
+        ),
+      massCertificateAudits: [
+        stubMassCertificateAuditDocument({ id: 'documentId' }),
+      ],
+      scenario: 'the rewards distribution was not found',
+    },
+    {
+      credit: stubCreditDocument(),
+      errorMessage:
         ruleDataProcessor['ErrorMessage'].MASS_CERTIFICATE_AUDITS_NOT_FOUND,
       scenario: 'mass certificate audits are not found',
     },
     {
       credit: stubCreditDocument(),
-      errorMessage: 'assert',
+      errorMessage: ruleDataProcessor['ErrorMessage'].INVALID_END_EVENT_VALUE(
+        'documentId',
+        'invalid',
+      ),
       massCertificateAudits: [
         stubMassCertificateAuditDocumentWithResultContent(),
       ],
       masses: [
-        stubMassDocumentWithEndEventValue(
-          String(faker.number.int()) as unknown as number,
-        ),
+        stubMassDocument({
+          externalEvents: [
+            stubDocumentEventWithMetadataAttributes({
+              name: END,
+              value: 'invalid' as unknown as number,
+            }),
+          ],
+          id: 'documentId',
+        }),
       ],
       scenario: 'the mass END event value is not a number',
+    },
+    {
+      credit: stubCreditDocument(),
+      errorMessage:
+        ruleDataProcessor['ErrorMessage'].END_EVENT_NOT_FOUND('documentId'),
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(),
+      ],
+      masses: [stubMassDocument({ id: 'documentId' })],
+      scenario: 'the mass END event was not found',
     },
     {
       credit: undefined,
@@ -76,14 +107,30 @@ describe('RewardsDistributionProcessor', () => {
       scenario: 'the credit document was not found',
     },
     {
+      credit: stubCreditDocument({ id: 'documentId' }),
+      errorMessage:
+        ruleDataProcessor['ErrorMessage'].RULES_METADATA_NOT_FOUND(
+          'documentId',
+        ),
+      massCertificateAudits: [
+        stubMassCertificateAuditDocumentWithResultContent(),
+      ],
+      masses: [stubMassDocumentWithEndEventValue()],
+      scenario: 'the rules metadata event was not found',
+    },
+    {
       credit: stubCreditDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [UNIT_PRICE, faker.string.alpha()],
+            [UNIT_PRICE, 'invalid'],
           ]),
         ],
+        id: 'documentId',
       }),
-      errorMessage: ruleDataProcessor['ErrorMessage'].INVALID_UNIT_PRICE,
+      errorMessage: ruleDataProcessor['ErrorMessage'].INVALID_UNIT_PRICE(
+        'documentId',
+        'invalid',
+      ),
       massCertificateAudits: [
         stubMassCertificateAuditDocumentWithResultContent(),
       ],

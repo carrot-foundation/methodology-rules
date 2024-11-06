@@ -15,6 +15,7 @@ import {
   type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
+  type DocumentEventAttributeValue,
   DocumentEventName,
   DocumentEventRuleSlug,
 } from '@carrot-fndn/methodologies/bold/types';
@@ -28,7 +29,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import BigNumber from 'bignumber.js';
-import { assert, is } from 'typia';
+import { is } from 'typia';
 
 import type { ResultContentWithMassValue } from './rewards-distribution.types';
 
@@ -46,11 +47,22 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   private ErrorMessage = {
     CREDIT_NOT_FOUND: 'The Credit was not found',
-    INVALID_UNIT_PRICE: 'Unit Price in Credit document is not a string number',
+    END_EVENT_NOT_FOUND: (documentId: string) =>
+      `${END} event not found in the document ${documentId}`,
+    INVALID_END_EVENT_VALUE: (documentId: string, value: unknown) =>
+      `Invalid ${END} event value ${String(value)} in the document ${documentId}`,
+    INVALID_UNIT_PRICE: (
+      documentId: string,
+      untiPrice: DocumentEventAttributeValue | undefined,
+    ) => `Invalid ${String(untiPrice)} in the document ${documentId}`,
     MASS_CERTIFICATE_AUDITS_NOT_FOUND:
       'The Mass Certificate Audits was not found',
-    UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT: (id: string) =>
-      `${RULE_PROCESSOR_RESULT_CONTENT} is not with the expected value for the id ${id}`,
+    REWARDS_DISTRIBUTION_NOT_FOUND: (documentId: string) =>
+      `${REWARDS_DISTRIBUTION} ${RULE_EXECUTION} not found in the document ${documentId}`,
+    RULES_METADATA_NOT_FOUND: (documentId: string) =>
+      `${RULES_METADATA} event not found in the document ${documentId}`,
+    UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT: (documentId: string) =>
+      `Unexpected ${RULE_PROCESSOR_RESULT_CONTENT} on the ${REWARDS_DISTRIBUTION} ${RULE_EXECUTION} event in the document ${documentId}`,
   };
 
   private async generateDocumentQuery(ruleInput: RuleInput) {
@@ -93,30 +105,46 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const massCertificateAuditsRuleResultContent =
       await massCertificateAuditsQuery
         ?.iterator()
-        .map(({ document: { externalEvents, id } }) => {
-          const resultContent = getEventAttributeValue(
-            externalEvents?.find(
+        .map(
+          ({
+            document: { externalEvents, id: massCertificateAuditDocumentId },
+          }) => {
+            const rewardsDistributionEvent = externalEvents?.find(
               and(
                 eventNameIsAnyOf([RULE_EXECUTION]),
                 metadataAttributeValueIsAnyOf(RULE_SLUG, [
                   REWARDS_DISTRIBUTION,
                 ]),
               ),
-            ),
-            RULE_PROCESSOR_RESULT_CONTENT,
-          );
-
-          if (!is<CertificateRewardDistributionOutput>(resultContent)) {
-            throw new Error(
-              this.ErrorMessage.UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT(id),
             );
-          }
 
-          return {
-            id,
-            resultContent,
-          };
-        });
+            if (!rewardsDistributionEvent) {
+              throw new Error(
+                this.ErrorMessage.REWARDS_DISTRIBUTION_NOT_FOUND(
+                  massCertificateAuditDocumentId,
+                ),
+              );
+            }
+
+            const resultContent = getEventAttributeValue(
+              rewardsDistributionEvent,
+              RULE_PROCESSOR_RESULT_CONTENT,
+            );
+
+            if (!is<CertificateRewardDistributionOutput>(resultContent)) {
+              throw new Error(
+                this.ErrorMessage.UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT(
+                  massCertificateAuditDocumentId,
+                ),
+              );
+            }
+
+            return {
+              massCertificateAuditDocumentId,
+              resultContent,
+            };
+          },
+        );
 
     if (isNil(massCertificateAuditsRuleResultContent)) {
       throw new Error(this.ErrorMessage.MASS_CERTIFICATE_AUDITS_NOT_FOUND);
@@ -124,7 +152,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     const resultContentsWithMassValue = await Promise.all(
       massCertificateAuditsRuleResultContent.map(
-        async ({ id, resultContent }) => {
+        async ({ massCertificateAuditDocumentId, resultContent }) => {
           let massValue = new BigNumber(0);
 
           const massesQuery = await documentQueryService.load({
@@ -132,17 +160,33 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
               s3KeyPrefix: ruleInput.documentKeyPrefix,
             },
             criteria: MASS_CRITERIA,
-            documentId: id,
+            documentId: massCertificateAuditDocumentId,
           });
 
           await massesQuery.iterator().each(({ document }) => {
-            massValue = massValue.plus(
-              new BigNumber(
-                assert<number>(
-                  document.externalEvents?.find(eventNameIsAnyOf([END]))?.value,
-                ),
-              ),
+            const massDocumentId = document.id;
+            const endEvent = document.externalEvents?.find(
+              eventNameIsAnyOf([END]),
             );
+
+            if (!endEvent) {
+              throw new Error(
+                this.ErrorMessage.END_EVENT_NOT_FOUND(massDocumentId),
+              );
+            }
+
+            const { value } = endEvent;
+
+            if (!is<number>(value)) {
+              throw new Error(
+                this.ErrorMessage.INVALID_END_EVENT_VALUE(
+                  massDocumentId,
+                  value,
+                ),
+              );
+            }
+
+            massValue = massValue.plus(new BigNumber(value));
           });
 
           return {
@@ -172,13 +216,20 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       throw new Error(this.ErrorMessage.CREDIT_NOT_FOUND);
     }
 
-    const unitPrice = getEventAttributeValue(
-      credit.externalEvents?.find(eventNameIsAnyOf([RULES_METADATA])),
-      UNIT_PRICE,
+    const rulesMetadataEvent = credit.externalEvents?.find(
+      eventNameIsAnyOf([RULES_METADATA]),
     );
 
+    if (!rulesMetadataEvent) {
+      throw new Error(this.ErrorMessage.RULES_METADATA_NOT_FOUND(credit.id));
+    }
+
+    const unitPrice = getEventAttributeValue(rulesMetadataEvent, UNIT_PRICE);
+
     if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
-      throw new Error(this.ErrorMessage.INVALID_UNIT_PRICE);
+      throw new Error(
+        this.ErrorMessage.INVALID_UNIT_PRICE(credit.id, unitPrice),
+      );
     }
 
     return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
