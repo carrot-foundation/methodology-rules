@@ -79,7 +79,7 @@ describe('RewardsDistributionProcessor', () => {
           externalEvents: [
             stubDocumentEventWithMetadataAttributes({
               name: END,
-              value: 'invalid' as unknown as number,
+              value: 'invalid' as never,
             }),
           ],
           id: 'documentId',
