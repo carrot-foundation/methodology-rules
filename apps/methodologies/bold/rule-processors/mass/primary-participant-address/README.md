@@ -2,7 +2,7 @@
 
 # Primary Participant Address
 
-Methodology: **Bold**
+Methodology: **BOLD**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
