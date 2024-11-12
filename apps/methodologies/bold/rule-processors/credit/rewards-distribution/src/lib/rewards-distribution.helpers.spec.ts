@@ -106,11 +106,13 @@ describe('Rewards Distribution Helpers', () => {
     });
 
     it('should match the snapshot', () => {
+      const unitPrice = 0.000_001;
       const result = calculateRewardsDistribution(
-        0.000_001,
+        unitPrice,
         RESULT_CONTENT_WITH_MASS_VALUE_STUB,
       );
 
+      assertExpectedRewardsDistribution(unitPrice, result);
       expect(result).toMatchSnapshot();
     });
 
