@@ -4,6 +4,10 @@ export type NonZeroPositive = number &
   tags.ExclusiveMinimum<0> &
   tags.Type<'float'>;
 
+export type NonZeroPositiveInt = number &
+  tags.ExclusiveMinimum<0> &
+  tags.Type<'int64'>;
+
 export type Latitude = number &
   tags.Maximum<90> &
   tags.Minimum<-90> &
