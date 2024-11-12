@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { randomInt } from 'node:crypto';
 
 export const stubBigNumber = ({
   decimals = 6,
@@ -6,4 +7,7 @@ export const stubBigNumber = ({
 }: {
   decimals?: number;
   max?: number;
-} = {}) => BigNumber(Math.random()).times(max).decimalPlaces(decimals);
+} = {}) =>
+  BigNumber(randomInt(0, 1_000_000) / 1_000_000)
+    .times(max)
+    .decimalPlaces(decimals);

@@ -1,3 +1,4 @@
+import { stubBigNumber } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -37,7 +38,7 @@ describe('Math helpers', () => {
   describe('splitBigNumberIntoParts', () => {
     it('should return an array of BigNumbers with the correct sum', () => {
       const decimals = faker.number.int({ max: 8, min: 3 });
-      const total = BigNumber(Math.random()).times(150).decimalPlaces(decimals);
+      const total = stubBigNumber().times(150).decimalPlaces(decimals);
       const partsCount = faker.number.int({ max: 8, min: 3 });
       const parts = splitBigNumberIntoParts(total, partsCount);
 
