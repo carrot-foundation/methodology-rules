@@ -68,42 +68,6 @@ export const RESULT_CONTENT_WITH_MASS_VALUE_STUB: ResultContentWithMassValue[] =
       },
     },
     {
-      massValue: new BigNumber('24.419'),
-      resultContent: {
-        certificateRewards: [
-          {
-            actorType: DocumentEventActorType.HAULER,
-            participant: { id: 'ighgvmph', name: 'okhwrgefhcnxyaaoekkm' },
-            percentage: '12',
-          },
-          {
-            actorType: DocumentEventActorType.HAULER,
-            participant: { id: 'ighgvmph', name: 'okhwrgefhcnxyaaoekkm' },
-            percentage: '7.711408',
-          },
-          {
-            actorType: DocumentEventActorType.INTEGRATOR,
-            participant: { id: 'ptmeahooevs', name: 'i' },
-            percentage: '17.986262',
-          },
-          {
-            actorType: DocumentEventActorType.RECYCLER,
-            participant: { id: 'ygioqpnmjcak', name: 'iasf' },
-            percentage: '17.95633',
-          },
-          {
-            actorType: DocumentEventActorType.PROCESSOR,
-            participant: {
-              id: 'ttewegtjrygioqpnmjcak',
-              name: 'wupdjxggyfsxb',
-            },
-            percentage: '44.346',
-          },
-        ],
-        massRewards: [] as never,
-      },
-    },
-    {
       massValue: new BigNumber('100'),
       resultContent: {
         certificateRewards: [
