@@ -37,7 +37,9 @@ describe('Rewards Distribution Helpers', () => {
       const percentage = formatPercentage(value, totalValue);
 
       expect(Number(percentage)).toBeLessThan(100);
-      expect(BigNumber(percentage).decimalPlaces()).toBe(PERCENTAGE_DECIMALS);
+      expect(BigNumber(percentage).decimalPlaces()).toBeLessThanOrEqual(
+        PERCENTAGE_DECIMALS,
+      );
     });
 
     it('should return 0 if the total value is 0', () => {

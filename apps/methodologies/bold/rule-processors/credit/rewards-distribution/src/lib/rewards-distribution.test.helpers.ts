@@ -9,6 +9,8 @@ import {
   roundAmount,
 } from './rewards-distribution.helpers';
 
+const PERCENTAGE_TOLERANCE = 0.000_001;
+
 /* istanbul ignore next */
 export const assertExpectedRewardsDistribution = (
   unitPrice: number,
@@ -18,6 +20,7 @@ export const assertExpectedRewardsDistribution = (
 
   expect(validate<RewardsDistribution>(rewardsDistribution).errors).toEqual([]);
 
+  const remainderPercentage = new BigNumber(remainder.percentage);
   const totalAmount = roundAmount(
     new BigNumber(massTotalValue).times(unitPrice),
   ).toString();
@@ -46,8 +49,9 @@ export const assertExpectedRewardsDistribution = (
 
   expect(
     new BigNumber(100).minus(resultTotalPercentage).toNumber(),
-  ).toBeLessThan(0.001);
-  expect(
-    new BigNumber(remainder.percentage).decimalPlaces(),
-  ).toBeLessThanOrEqual(PERCENTAGE_DECIMALS);
+  ).toBeLessThan(PERCENTAGE_TOLERANCE);
+  expect(remainderPercentage.decimalPlaces()).toBeLessThanOrEqual(
+    PERCENTAGE_DECIMALS,
+  );
+  expect(remainderPercentage.toNumber()).toBeGreaterThanOrEqual(0);
 };
