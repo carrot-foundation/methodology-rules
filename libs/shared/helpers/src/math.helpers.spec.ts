@@ -47,6 +47,7 @@ describe('Math helpers', () => {
 
       for (const part of parts) {
         expect(part.decimalPlaces()).toBeLessThanOrEqual(decimals);
+        expect(part.toNumber()).toBeGreaterThan(0);
       }
     });
 

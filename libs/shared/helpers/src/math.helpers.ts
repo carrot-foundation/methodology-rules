@@ -24,11 +24,16 @@ export const splitBigNumberIntoParts = (
   let remaining = total;
 
   for (let index = 0; index < partsCount - 1; index += 1) {
-    const part = BigNumber(randomBytes(8).readInt16BE())
+    const randomValue = new BigNumber(
+      randomBytes(8).readBigUInt64BE().toString(),
+    ).div(new BigNumber(2).pow(64));
+
+    const part = BigNumber(randomValue)
       .times(remaining)
       .decimalPlaces(decimals);
 
-    parts.splice(index, 1, part);
+    // eslint-disable-next-line security/detect-object-injection
+    parts[index] = part;
 
     remaining = remaining.minus(part);
   }
