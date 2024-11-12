@@ -41,11 +41,16 @@ describe('Rewards Distribution Helpers', () => {
   });
 
   describe('roundAmount', () => {
-    it(`should format the number with ${AMOUNT_DECIMALS} decimal places and round down`, () => {
-      const result = roundAmount(new BigNumber('13.6898828123'));
-
-      expect(result.toString()).toBe('13.689882');
-      expect(result.decimalPlaces()).toBe(AMOUNT_DECIMALS);
+    it.each([
+      ['13.6898828123', '13.689882', 'should round down normally'],
+      ['13.6898885999', '13.689888', 'should round down at boundary'],
+      ['0.00000123', '0.000001', 'should handle very small amounts'],
+      ['999999.9999999', '999999.999999', 'should handle large amounts'],
+    ])('case: %s -> %s (%s)', (input, expected) => {
+      expect(roundAmount(new BigNumber(input)).toString()).toBe(expected);
+      expect(roundAmount(new BigNumber(input)).decimalPlaces()).toBe(
+        AMOUNT_DECIMALS,
+      );
     });
   });
 
