@@ -25,13 +25,15 @@ export const assertExpectedRewardsDistribution = (
   let resultTotalAmount = new BigNumber(0);
   let resultTotalPercentage = new BigNumber(0);
 
-  for (const { amount, percentage } of actors) {
-    expect(new BigNumber(amount).decimalPlaces()).toBeLessThanOrEqual(
-      AMOUNT_DECIMALS,
-    );
-    expect(new BigNumber(percentage).decimalPlaces()).toBeLessThanOrEqual(
-      PERCENTAGE_DECIMALS,
-    );
+  for (const actor of actors) {
+    const amount = new BigNumber(actor.amount);
+    const percentage = new BigNumber(actor.percentage);
+
+    expect(amount.toNumber()).toBeGreaterThan(0);
+    expect(amount.decimalPlaces()).toBeLessThanOrEqual(AMOUNT_DECIMALS);
+
+    expect(percentage.toNumber()).toBeGreaterThan(0);
+    expect(percentage.decimalPlaces()).toBeLessThanOrEqual(PERCENTAGE_DECIMALS);
 
     resultTotalAmount = resultTotalAmount.plus(amount);
     resultTotalPercentage = resultTotalPercentage.plus(percentage);

@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Rewards Distribution Helpers calculateRewardsDistribution should match the snapshot 1`] = `
+{
+  "actors": [
+    {
+      "actorType": "HAULER",
+      "amount": "0.00004",
+      "participant": {
+        "id": "ighgvmph",
+        "name": "okhwrgefhcnxyaaoekkm",
+      },
+      "percentage": "34.4827586206",
+    },
+    {
+      "actorType": "INTEGRATOR",
+      "amount": "0.000045",
+      "participant": {
+        "id": "ptmeahooevs",
+        "name": "i",
+      },
+      "percentage": "38.7931034482",
+    },
+    {
+      "actorType": "RECYCLER",
+      "amount": "0.000004",
+      "participant": {
+        "id": "ygioqpnmjcak",
+        "name": "iasf",
+      },
+      "percentage": "3.448275862",
+    },
+    {
+      "actorType": "NETWORK",
+      "amount": "0.000027",
+      "participant": {
+        "id": "ttewegtjrygioqpnmjcak",
+        "name": "wupdjxggyfsxb",
+      },
+      "percentage": "23.2758620689",
+    },
+  ],
+  "massTotalValue": "116.0765",
+  "remainder": {
+    "amount": "0.000005",
+    "percentage": "4.3103448275",
+  },
+  "unitPrice": 0.000001,
+}
+`;
