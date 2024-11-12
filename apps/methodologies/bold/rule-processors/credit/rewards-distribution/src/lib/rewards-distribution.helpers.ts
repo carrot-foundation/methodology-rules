@@ -17,12 +17,17 @@ export const PERCENTAGE_DECIMALS = 10;
 export const roundAmount = (value: BigNumber): BigNumber =>
   value.decimalPlaces(AMOUNT_DECIMALS, BigNumber.ROUND_DOWN);
 
-export const formatPercentage = (value: BigNumber, totalValue: BigNumber) =>
-  value
-    .dividedBy(totalValue)
-    .multipliedBy(100)
-    .decimalPlaces(PERCENTAGE_DECIMALS, BigNumber.ROUND_DOWN)
-    .toString(PERCENTAGE_DECIMALS);
+export const formatPercentage = (
+  value: BigNumber,
+  totalValue: BigNumber,
+): string =>
+  totalValue.isZero()
+    ? new BigNumber(0).toString()
+    : value
+        .dividedBy(totalValue)
+        .multipliedBy(100)
+        .decimalPlaces(PERCENTAGE_DECIMALS, BigNumber.ROUND_DOWN)
+        .toString(PERCENTAGE_DECIMALS);
 
 export const calculateRewardsDistribution = (
   unitPrice: NonZeroPositive,

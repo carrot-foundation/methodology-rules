@@ -38,6 +38,15 @@ describe('Rewards Distribution Helpers', () => {
       expect(Number(percentage)).toBeLessThan(100);
       expect(BigNumber(percentage).decimalPlaces()).toBe(PERCENTAGE_DECIMALS);
     });
+
+    it('should return 0 if the total value is 0', () => {
+      const value = stubBigNumber();
+      const totalValue = new BigNumber(0);
+
+      const percentage = formatPercentage(value, totalValue);
+
+      expect(percentage).toBe('0');
+    });
   });
 
   describe('roundAmount', () => {
