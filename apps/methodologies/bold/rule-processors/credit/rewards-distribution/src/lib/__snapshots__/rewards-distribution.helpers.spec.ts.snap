@@ -5,45 +5,135 @@ exports[`Rewards Distribution Helpers calculateRewardsDistribution should match 
   "actors": [
     {
       "actorType": "HAULER",
-      "amount": "0.00004",
+      "amount": "0.00008",
       "participant": {
         "id": "ighgvmph",
         "name": "okhwrgefhcnxyaaoekkm",
       },
-      "percentage": "34.4827586206",
+      "percentage": "0.0000007999",
     },
     {
       "actorType": "INTEGRATOR",
-      "amount": "0.000045",
+      "amount": "0.00009",
       "participant": {
         "id": "ptmeahooevs",
         "name": "i",
       },
-      "percentage": "38.7931034482",
+      "percentage": "0.0000008999",
     },
     {
       "actorType": "RECYCLER",
-      "amount": "0.000004",
+      "amount": "0.000008",
       "participant": {
         "id": "ygioqpnmjcak",
         "name": "iasf",
       },
-      "percentage": "3.448275862",
+      "percentage": "0.0000000799",
     },
     {
       "actorType": "NETWORK",
-      "amount": "0.000027",
+      "amount": "0.000033",
       "participant": {
         "id": "ttewegtjrygioqpnmjcak",
         "name": "wupdjxggyfsxb",
       },
-      "percentage": "23.2758620689",
+      "percentage": "0.0000003299",
+    },
+    {
+      "actorType": "PROCESSOR",
+      "amount": "0.00001",
+      "participant": {
+        "id": "ttewegtjrygioqpnmjcak",
+        "name": "wupdjxggyfsxb",
+      },
+      "percentage": "0.0000000999",
+    },
+    {
+      "actorType": "RECYCLER",
+      "amount": "0.000012",
+      "participant": {
+        "id": "ttewegtjrygioqpnmjcak",
+        "name": "wupdjxggyfsxb",
+      },
+      "percentage": "0.0000001199",
+    },
+    {
+      "actorType": "HAULER",
+      "amount": "0",
+      "participant": {
+        "id": "edge_actor1",
+        "name": "Edge Actor 1",
+      },
+      "percentage": "0",
+    },
+    {
+      "actorType": "INTEGRATOR",
+      "amount": "0",
+      "participant": {
+        "id": "edge_actor2",
+        "name": "Edge Actor 2",
+      },
+      "percentage": "0",
+    },
+    {
+      "actorType": "RECYCLER",
+      "amount": "0",
+      "participant": {
+        "id": "edge_actor3",
+        "name": "Edge Actor 3",
+      },
+      "percentage": "0",
+    },
+    {
+      "actorType": "HAULER",
+      "amount": "0.00025",
+      "participant": {
+        "id": "sum100_actor1",
+        "name": "Sum100 Actor 1",
+      },
+      "percentage": "0.0000024999",
+    },
+    {
+      "actorType": "RECYCLER",
+      "amount": "0.00025",
+      "participant": {
+        "id": "sum100_actor2",
+        "name": "Sum100 Actor 2",
+      },
+      "percentage": "0.0000024999",
+    },
+    {
+      "actorType": "INTEGRATOR",
+      "amount": "0",
+      "participant": {
+        "id": "boundary_actor1",
+        "name": "Boundary Actor 1",
+      },
+      "percentage": "0",
+    },
+    {
+      "actorType": "HAULER",
+      "amount": "0",
+      "participant": {
+        "id": "boundary_actor2",
+        "name": "Boundary Actor 2",
+      },
+      "percentage": "0",
+    },
+    {
+      "actorType": "PROCESSOR",
+      "amount": "9999.999999",
+      "participant": {
+        "id": "boundary_actor3",
+        "name": "Boundary Actor 3",
+      },
+      "percentage": "99.99999267",
     },
   ],
-  "massTotalValue": "116.0765",
+  "massTotalValue": "10000000732.153",
   "remainder": {
-    "amount": "0.000005",
-    "percentage": "4.3103448275",
+    "amount": "0.000011",
+    "percentage": "0.0000001099",
   },
   "unitPrice": 0.000001,
 }
