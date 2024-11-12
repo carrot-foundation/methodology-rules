@@ -1,6 +1,7 @@
 import type { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 import BigNumber from 'bignumber.js';
+import { randomBytes } from 'node:crypto';
 
 export const sumBigNumbers = (values: BigNumber[]): BigNumber => {
   let result = new BigNumber(0);
@@ -23,7 +24,7 @@ export const splitBigNumberIntoParts = (
   let remaining = total;
 
   for (let index = 0; index < partsCount - 1; index += 1) {
-    const part = BigNumber(Math.random())
+    const part = BigNumber(randomBytes(8).readInt16BE())
       .times(remaining)
       .decimalPlaces(decimals);
 
