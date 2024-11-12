@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 
 import type { ResultContentWithMassValue } from './rewards-distribution.types';
 
-export const RESULT_CONTET_WITH_MASS_VALUE_STUB: ResultContentWithMassValue[] =
+export const RESULT_CONTENT_WITH_MASS_VALUE_STUB: ResultContentWithMassValue[] =
   [
     {
       massValue: new BigNumber('24.419'),

@@ -25,7 +25,7 @@ import {
   roundAmount,
 } from './rewards-distribution.helpers';
 import { stubUnitPrice } from './rewards-distribution.stubs';
-import { RESULT_CONTET_WITH_MASS_VALUE_STUB } from './rewards-distribution.test.data';
+import { RESULT_CONTENT_WITH_MASS_VALUE_STUB } from './rewards-distribution.test.data';
 import { assertExpectedRewardsDistribution } from './rewards-distribution.test.helpers';
 
 describe('Rewards Distribution Helpers', () => {
@@ -108,7 +108,7 @@ describe('Rewards Distribution Helpers', () => {
     it('should match the snapshot', () => {
       const result = calculateRewardsDistribution(
         0.000_001,
-        RESULT_CONTET_WITH_MASS_VALUE_STUB,
+        RESULT_CONTENT_WITH_MASS_VALUE_STUB,
       );
 
       expect(result).toMatchSnapshot();
