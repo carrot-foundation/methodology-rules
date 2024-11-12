@@ -1,169 +1,109 @@
-import type {
-  NonEmptyString,
-  NonZeroPositive,
-} from '@carrot-fndn/shared/types';
+import type { NonZeroPositive } from '@carrot-fndn/shared/types';
 
 import { DocumentEventActorType } from '@carrot-fndn/methodologies/bold/types';
 import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import BigNumber from 'bignumber.js';
 
 import type {
+  Actor,
   ActorsByActorType,
-  AggregateCertificateRewards,
-  Remainder,
   ResultContentWithMassValue,
   RewardsDistribution,
 } from './rewards-distribution.types';
 
-export const formatPercentage = (percentage: BigNumber): BigNumber =>
-  percentage.dividedBy(100);
+export const AMOUNT_DECIMALS = 6;
+export const PERCENTAGE_DECIMALS = 10;
 
-export const formatDecimalPlaces = (value: BigNumber): BigNumber =>
-  value.decimalPlaces(6, BigNumber.ROUND_DOWN);
+export const roundAmount = (value: BigNumber): BigNumber =>
+  value.decimalPlaces(AMOUNT_DECIMALS, BigNumber.ROUND_DOWN);
 
-export const calculateCreditPercentage = (
-  amount: BigNumber,
-  amountTotal: BigNumber,
-): string =>
-  formatDecimalPlaces(
-    amount.dividedBy(amountTotal).multipliedBy(100),
-  ).toString();
-
-export const calculateRemainder = (options: {
-  actors: ActorsByActorType;
-  massTotalValue: BigNumber;
-  unitPrice: NonZeroPositive;
-}): Remainder => {
-  const { actors, massTotalValue, unitPrice } = options;
-
-  let participantsAmount = new BigNumber(0);
-  let participantsPercentage = new BigNumber(0);
-
-  for (const actor of actors.values()) {
-    participantsAmount = participantsAmount.plus(actor.amount);
-    participantsPercentage = participantsPercentage.plus(actor.percentage);
-  }
-
-  return {
-    amount: massTotalValue.multipliedBy(unitPrice).minus(participantsAmount),
-    percentage: new BigNumber(100).minus(participantsPercentage),
-  };
-};
-
-export const calculateAmount = (options: {
-  massCertificatePercentage: string;
-  massValue: BigNumber;
-  participantAmount: string | undefined;
-  unitPrice: NonZeroPositive;
-}): NonEmptyString => {
-  const amount = formatDecimalPlaces(
-    formatPercentage(new BigNumber(options.massCertificatePercentage))
-      .multipliedBy(options.massValue)
-      .multipliedBy(new BigNumber(options.unitPrice)),
-  );
-
-  return amount.plus(options.participantAmount ?? 0).toString();
-};
-
-export const addParticipantRemainder = (options: {
-  actors: ActorsByActorType;
-  massTotalValue: BigNumber;
-  remainder: Remainder;
-  unitPrice: NonZeroPositive;
-}): void => {
-  const { actors, remainder } = options;
-
-  for (const [key, actor] of actors) {
-    if (actor.actorType === DocumentEventActorType.NETWORK) {
-      actors.set(key, {
-        ...actor,
-        amount: remainder.amount.plus(actor.amount).toString(),
-        percentage: remainder.percentage.plus(actor.percentage).toString(),
-      });
-
-      break;
-    }
-  }
-};
-
-const calculateMassTotalValue = (massValues: BigNumber[]) =>
-  sumBigNumbers(massValues);
-
-export const aggregateCertificateRewards = (
-  unitPrice: NonZeroPositive,
-  resultContentsWithMassValue: ResultContentWithMassValue[],
-): AggregateCertificateRewards => {
-  const actors: ActorsByActorType = new Map();
-
-  const massTotalValue = calculateMassTotalValue(
-    resultContentsWithMassValue.map(({ massValue }) => massValue),
-  );
-
-  const creditTotal = formatDecimalPlaces(
-    massTotalValue.multipliedBy(unitPrice),
-  );
-
-  for (const {
-    massValue,
-    resultContent: { certificateRewards },
-  } of resultContentsWithMassValue) {
-    for (const certificateReward of certificateRewards) {
-      const { actorType, participant, percentage } = certificateReward;
-      const actor = actors.get(`${actorType}-${participant.id}`);
-
-      const amount = calculateAmount({
-        massCertificatePercentage: percentage,
-        massValue,
-        participantAmount: actor?.amount,
-        unitPrice,
-      });
-
-      actors.set(`${actorType}-${participant.id}`, {
-        actorType,
-        amount,
-        participant,
-        percentage: calculateCreditPercentage(
-          new BigNumber(amount),
-          creditTotal,
-        ),
-      });
-    }
-  }
-
-  return {
-    actors,
-    massTotalValue,
-  };
-};
+export const formatPercentage = (value: BigNumber, totalValue: BigNumber) =>
+  value
+    .dividedBy(totalValue)
+    .multipliedBy(100)
+    .decimalPlaces(PERCENTAGE_DECIMALS, BigNumber.ROUND_DOWN)
+    .toString(PERCENTAGE_DECIMALS);
 
 export const calculateRewardsDistribution = (
   unitPrice: NonZeroPositive,
   resultContentsWithMassValue: ResultContentWithMassValue[],
 ): RewardsDistribution => {
-  const { actors, massTotalValue } = aggregateCertificateRewards(
-    unitPrice,
-    resultContentsWithMassValue,
+  const actors: ActorsByActorType = new Map();
+  let networkActorKey = '';
+
+  const massTotalValue = sumBigNumbers(
+    resultContentsWithMassValue.map(({ massValue }) => massValue),
+  );
+  const totalAmount = roundAmount(massTotalValue.multipliedBy(unitPrice));
+
+  for (const {
+    massValue,
+    resultContent: { certificateRewards },
+  } of resultContentsWithMassValue) {
+    for (const { actorType, participant, percentage } of certificateRewards) {
+      const actorKey = `${actorType}-${participant.id}`;
+      const aggregatedActor = actors.get(actorKey);
+      const actorCurrentAmount = aggregatedActor?.amount ?? 0;
+      const actorCertificateAmount = roundAmount(
+        new BigNumber(percentage)
+          .dividedBy(100)
+          .multipliedBy(massValue)
+          .multipliedBy(unitPrice),
+      );
+
+      const actorAmount = roundAmount(
+        actorCertificateAmount.plus(actorCurrentAmount),
+      );
+
+      const actor: Actor = {
+        actorType,
+        amount: actorAmount.toString(),
+        participant,
+        percentage: formatPercentage(actorAmount, totalAmount),
+      };
+
+      if (actorType === DocumentEventActorType.NETWORK) {
+        networkActorKey = actorKey;
+      }
+
+      actors.set(actorKey, actor);
+    }
+  }
+
+  const networkActorsKeys = [...actors.keys()].filter((actorKey) =>
+    actorKey.startsWith(DocumentEventActorType.NETWORK),
   );
 
-  const remainder = calculateRemainder({
-    actors,
-    massTotalValue,
-    unitPrice,
-  });
+  if (networkActorsKeys.length > 1) {
+    throw new Error(
+      `Can only have one network actor. Received ${JSON.stringify(networkActorsKeys)}`,
+    );
+  }
 
-  addParticipantRemainder({
-    actors,
-    massTotalValue,
-    remainder,
-    unitPrice,
+  const networkActor = actors.get(networkActorKey);
+
+  if (!networkActor) {
+    throw new Error('Network actor not found when calculating rewards');
+  }
+
+  const actorsAmount = sumBigNumbers(
+    [...actors.values()].map(({ amount }) => new BigNumber(amount)),
+  );
+  const remainderAmount = totalAmount.minus(actorsAmount);
+  const networkActorAmount = remainderAmount.plus(networkActor.amount);
+
+  actors.set(networkActorKey, {
+    ...networkActor,
+    amount: networkActorAmount.toString(),
+    percentage: formatPercentage(networkActorAmount, totalAmount),
   });
 
   return {
     actors: [...actors.values()],
     massTotalValue: massTotalValue.toString(),
     remainder: {
-      amount: remainder.amount.toString(),
-      percentage: remainder.percentage.toString(),
+      amount: remainderAmount.toString(),
+      percentage: formatPercentage(remainderAmount, totalAmount),
     },
     unitPrice,
   };

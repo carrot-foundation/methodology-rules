@@ -27,6 +27,9 @@ const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG } = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 const { NETWORK } = DocumentEventActorType;
 
+export const stubUnitPrice = () =>
+  faker.number.float({ max: 10, min: 0.000_001 });
+
 export const stubMassCertificateAuditDocumentWithResultContent = (
   partialDocument?: PartialDeep<Document>,
   resultContent?: CertificateRewardDistributionOutput,
