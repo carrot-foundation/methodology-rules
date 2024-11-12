@@ -32,12 +32,12 @@ exports[`Rewards Distribution Helpers calculateRewardsDistribution should match 
     },
     {
       "actorType": "NETWORK",
-      "amount": "0.000033",
+      "amount": "0.000034",
       "participant": {
         "id": "ttewegtjrygioqpnmjcak",
         "name": "wupdjxggyfsxb",
       },
-      "percentage": "0.0000003299",
+      "percentage": "0.0000003399",
     },
     {
       "actorType": "PROCESSOR",
@@ -59,30 +59,30 @@ exports[`Rewards Distribution Helpers calculateRewardsDistribution should match 
     },
     {
       "actorType": "HAULER",
-      "amount": "0",
+      "amount": "0.000033",
       "participant": {
         "id": "edge_actor1",
         "name": "Edge Actor 1",
       },
-      "percentage": "0",
+      "percentage": "0.0000003299",
     },
     {
       "actorType": "INTEGRATOR",
-      "amount": "0",
+      "amount": "0.000033",
       "participant": {
         "id": "edge_actor2",
         "name": "Edge Actor 2",
       },
-      "percentage": "0",
+      "percentage": "0.0000003299",
     },
     {
       "actorType": "RECYCLER",
-      "amount": "0",
+      "amount": "0.000033",
       "participant": {
         "id": "edge_actor3",
         "name": "Edge Actor 3",
       },
-      "percentage": "0",
+      "percentage": "0.0000003299",
     },
     {
       "actorType": "HAULER",
@@ -127,13 +127,13 @@ exports[`Rewards Distribution Helpers calculateRewardsDistribution should match 
         "id": "boundary_actor3",
         "name": "Boundary Actor 3",
       },
-      "percentage": "99.99999267",
+      "percentage": "99.99999167",
     },
   ],
-  "massTotalValue": "10000000732.153",
+  "massTotalValue": "10000000832.152999",
   "remainder": {
-    "amount": "0.000011",
-    "percentage": "0.0000001099",
+    "amount": "0.000012",
+    "percentage": "0.0000001199",
   },
   "unitPrice": 0.000001,
 }

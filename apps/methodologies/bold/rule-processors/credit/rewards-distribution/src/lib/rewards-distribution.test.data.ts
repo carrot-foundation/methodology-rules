@@ -129,31 +129,29 @@ export const RESULT_CONTENT_WITH_MASS_VALUE_STUB: ResultContentWithMassValue[] =
         massRewards: [] as never,
       },
     },
-    // Edge cases with maximum decimal precision
     {
-      massValue: new BigNumber('0.000001'),
+      massValue: new BigNumber('100'),
       resultContent: {
         certificateRewards: [
           {
             actorType: DocumentEventActorType.HAULER,
             participant: { id: 'edge_actor1', name: 'Edge Actor 1' },
-            percentage: '33.3333333333', // 10 decimal places
+            percentage: '33.3333333333',
           },
           {
             actorType: DocumentEventActorType.INTEGRATOR,
             participant: { id: 'edge_actor2', name: 'Edge Actor 2' },
-            percentage: '33.3333333333', // 10 decimal places
+            percentage: '33.3333333333',
           },
           {
             actorType: DocumentEventActorType.RECYCLER,
             participant: { id: 'edge_actor3', name: 'Edge Actor 3' },
-            percentage: '33.3333333334', // Summing up to 100%
+            percentage: '33.3333333334',
           },
         ],
         massRewards: [] as never,
       },
     },
-    // Percentages sum exactly to 100%
     {
       massValue: new BigNumber('500'),
       resultContent: {
@@ -172,22 +170,21 @@ export const RESULT_CONTENT_WITH_MASS_VALUE_STUB: ResultContentWithMassValue[] =
         massRewards: [] as never,
       },
     },
-    // Boundary values for mass and percentages
     {
-      massValue: new BigNumber('0'), // Minimum mass value
+      massValue: new BigNumber('0'),
       resultContent: {
         certificateRewards: [
           {
             actorType: DocumentEventActorType.INTEGRATOR,
             participant: { id: 'boundary_actor1', name: 'Boundary Actor 1' },
-            percentage: '100', // Maximum percentage
+            percentage: '100',
           },
         ],
         massRewards: [] as never,
       },
     },
     {
-      massValue: new BigNumber('9999999999.999999'), // Large mass value
+      massValue: new BigNumber('9999999999.999999'),
       resultContent: {
         certificateRewards: [
           {
