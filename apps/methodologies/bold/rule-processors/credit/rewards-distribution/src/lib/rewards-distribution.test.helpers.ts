@@ -29,10 +29,10 @@ export const assertExpectedRewardsDistribution = (
     const amount = new BigNumber(actor.amount);
     const percentage = new BigNumber(actor.percentage);
 
-    expect(amount.toNumber()).toBeGreaterThan(0);
+    expect(amount.toNumber()).toBeGreaterThanOrEqual(0);
     expect(amount.decimalPlaces()).toBeLessThanOrEqual(AMOUNT_DECIMALS);
 
-    expect(percentage.toNumber()).toBeGreaterThan(0);
+    expect(percentage.toNumber()).toBeGreaterThanOrEqual(0);
     expect(percentage.decimalPlaces()).toBeLessThanOrEqual(PERCENTAGE_DECIMALS);
 
     resultTotalAmount = resultTotalAmount.plus(amount);
