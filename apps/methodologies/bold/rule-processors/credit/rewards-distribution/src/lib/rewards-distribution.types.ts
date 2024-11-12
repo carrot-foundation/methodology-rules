@@ -35,11 +35,6 @@ export interface RewardsDistribution {
   unitPrice: NonZeroPositive;
 }
 
-export interface AggregateCertificateRewards {
-  actors: ActorsByActorType;
-  massTotalValue: BigNumber;
-}
-
 export interface Remainder<T = BigNumber> {
   amount: T;
   percentage: T;
