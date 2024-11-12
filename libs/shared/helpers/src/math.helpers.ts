@@ -28,9 +28,10 @@ export const splitBigNumberIntoParts = (
       randomBytes(8).readBigUInt64BE().toString(),
     ).div(new BigNumber(2).pow(64));
 
-    const part = BigNumber(randomValue)
-      .times(remaining)
-      .decimalPlaces(decimals);
+    const part = BigNumber.minimum(
+      BigNumber(randomValue).times(remaining).decimalPlaces(decimals),
+      remaining,
+    );
 
     // eslint-disable-next-line security/detect-object-injection
     parts[index] = part;
