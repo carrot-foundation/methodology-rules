@@ -49,7 +49,7 @@ import {
 
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
-const { ACTOR, LINK, OPEN, RULE_EXECUTION } = DocumentEventName;
+const { ACTOR, LINK, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const {
   ACTOR_TYPE,
   RULE_PROCESSOR_CODE_VERSION,
@@ -131,7 +131,7 @@ describe('NftMetadataSelection E2E', () => {
             }),
           ],
         },
-        name: OPEN,
+        name: RULES_METADATA,
         referencedDocument: undefined,
         relatedDocument: undefined,
       }),
