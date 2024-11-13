@@ -10,9 +10,13 @@ import {
 } from '@carrot-fndn/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 
-import { getAuditorActorEvent, getOpenEvent } from './document.getters';
+import {
+  getAuditorActorEvent,
+  getOpenEvent,
+  getRulesMetadataEvent,
+} from './document.getters';
 
-const { ACTOR, OPEN } = DocumentEventName;
+const { ACTOR, OPEN, RULES_METADATA } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
 
@@ -76,6 +80,39 @@ describe('Document getters', () => {
 
     it('should return undefined if the document is undefined', () => {
       const result = getOpenEvent(undefined);
+
+      expect(result).toBe(undefined);
+    });
+  });
+
+  describe('getRulesMetadataEvent', () => {
+    it('should return the rules metadata event', () => {
+      const rulesMetadataEvent = stubDocumentEvent({ name: RULES_METADATA });
+
+      const document = stubDocument({
+        externalEvents: [
+          ...stubArray(() => stubDocumentEvent()),
+          rulesMetadataEvent,
+        ],
+      });
+
+      const result = getRulesMetadataEvent(document);
+
+      expect(result).toEqual(rulesMetadataEvent);
+    });
+
+    it('should return undefined if the rules metadata event was not found', () => {
+      const document = stubDocument({
+        externalEvents: stubArray(() => stubDocumentEvent()),
+      });
+
+      const result = getRulesMetadataEvent(document);
+
+      expect(result).toBe(undefined);
+    });
+
+    it('should return undefined if the document is undefined', () => {
+      const result = getRulesMetadataEvent(undefined);
 
       expect(result).toBe(undefined);
     });

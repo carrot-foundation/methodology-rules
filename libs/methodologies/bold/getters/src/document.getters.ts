@@ -28,3 +28,10 @@ export const getOpenEvent = (
   document?.externalEvents?.find(
     (event) => event.name === DocumentEventName.OPEN.toString(),
   );
+
+export const getRulesMetadataEvent = (
+  document: Document | undefined,
+): DocumentEvent | undefined =>
+  document?.externalEvents?.find(
+    (event) => event.name === DocumentEventName.RULES_METADATA.toString(),
+  );

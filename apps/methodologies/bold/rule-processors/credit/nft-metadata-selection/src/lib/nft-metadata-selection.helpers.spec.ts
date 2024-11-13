@@ -56,7 +56,7 @@ const {
   RULE_SLUG,
 } = DocumentEventAttributeName;
 const { RECYCLER } = DocumentEventActorType;
-const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
+const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 
 describe('Helpers', () => {
   describe('getCarrotExplorePageUrl', () => {
@@ -71,7 +71,7 @@ describe('Helpers', () => {
   describe('getImageFromMetadata', () => {
     it('should return undefined if the open event does not have the NFT_IMAGE attribute', () => {
       const documentStub = stubDocument({
-        externalEvents: [stubDocumentEvent({ name: OPEN })],
+        externalEvents: [stubDocumentEvent({ name: RULES_METADATA })],
       });
 
       const result = getImageFromMetadata(documentStub);
@@ -82,7 +82,7 @@ describe('Helpers', () => {
     it('should return undefined if the metadata value is not a valid Uri', () => {
       const documentStub = stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, faker.string.sample()],
           ]),
         ],
@@ -97,7 +97,7 @@ describe('Helpers', () => {
       const image = faker.internet.url();
       const documentStub = stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: OPEN }, [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, image],
           ]),
         ],

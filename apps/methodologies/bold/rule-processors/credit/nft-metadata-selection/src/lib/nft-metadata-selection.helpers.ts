@@ -3,7 +3,7 @@ import type { NonEmptyArray, Uri } from '@carrot-fndn/shared/types';
 
 import {
   getEventAttributeValue,
-  getOpenEvent,
+  getRulesMetadataEvent,
 } from '@carrot-fndn/methodologies/bold/getters';
 import {
   MASS_AUDIT,
@@ -54,9 +54,9 @@ export const getCarrotExplorePageUrl = (documentId: string) =>
 export const getImageFromMetadata = (
   document: Document | undefined,
 ): Uri | undefined => {
-  const openEvent = getOpenEvent(document);
+  const rulesMetadataEvent = getRulesMetadataEvent(document);
 
-  const uri = getEventAttributeValue(openEvent, NFT_IMAGE);
+  const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
 
   return is<Uri>(uri) ? uri : undefined;
 };
