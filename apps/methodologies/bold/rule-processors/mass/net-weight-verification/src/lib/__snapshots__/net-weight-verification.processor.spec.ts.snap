@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NetWeightVerificationProcessor should return APPROVED when the document has all the attributes with the correct values 1`] = `"Weighing MOVE event (1): 128901 - 19700 = 109201 | Weighing MOVE event (2): 128901 - 19700 = 109201"`;
+
+exports[`NetWeightVerificationProcessor should return APPROVED when the document has no external events 1`] = `"Weighing MOVE events not found"`;
+
+exports[`NetWeightVerificationProcessor should return APPROVED when the document has the load-net-weight attribute is not present 1`] = `"Weighing MOVE event (1) is missing attributes: load-net-weight"`;
+
+exports[`NetWeightVerificationProcessor should return APPROVED when the document has the vehicle-gross-weight attribute is not present 1`] = `"Weighing MOVE event (1) is missing attributes: vehicle-gross-weight"`;
+
+exports[`NetWeightVerificationProcessor should return APPROVED when the document has the vehicle-weight attribute is not present 1`] = `"Weighing MOVE event (1) is missing attributes: vehicle-weight"`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has load-net-weight is not equal to vehicle-gross-weight minus vehicle-weight 1`] = `"Weighing MOVE event (1): Invalid load net weight (12 - 19700 = -19688) should be equal to 109201"`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has one of the events has invalid attributes 1`] = `"Weighing MOVE event (2) has invalid attributes: Missing measurement unit "KG" on attribute "vehicle-gross-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the load-net-weight attribute is missing the measurement unit 1`] = `"Weighing MOVE event (1) has invalid attributes: Missing measurement unit "KG" on attribute "load-net-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the load-net-weight attribute is not in the correct format 1`] = `"Weighing MOVE event (1) has invalid attributes: Invalid value "undefined KG" on attribute "load-net-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the vehicle-gross-weight attribute is missing the measurement unit 1`] = `"Weighing MOVE event (1) has invalid attributes: Missing measurement unit "KG" on attribute "vehicle-gross-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the vehicle-gross-weight attribute is not in the correct format 1`] = `"Weighing MOVE event (1) has invalid attributes: Invalid value "undefined KG" on attribute "vehicle-gross-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the vehicle-weight attribute is missing the measurement unit 1`] = `"Weighing MOVE event (1) has invalid attributes: Missing measurement unit "KG" on attribute "vehicle-weight"."`;
+
+exports[`NetWeightVerificationProcessor should return REJECTED when the document has the vehicle-weight attribute is not in the correct format 1`] = `"Weighing MOVE event (1) has invalid attributes: Invalid value "undefined KG" on attribute "vehicle-weight"."`;

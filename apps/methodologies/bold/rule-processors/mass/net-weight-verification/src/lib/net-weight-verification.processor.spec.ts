@@ -15,9 +15,15 @@ import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import { NetWeightVerificationProcessor } from './net-weight-verification.processor';
-import { stubWeighingMoveEvent } from './net-weight-verification.stubs';
+import {
+  APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES,
+  stubApprovedWeighingMoveEvent,
+} from './net-weight-verification.stubs';
 
 jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+
+const { LOAD_NET_WEIGHT, VEHICLE_GROSS_WEIGHT, VEHICLE_WEIGHT } =
+  DocumentEventAttributeName;
 
 describe('NetWeightVerificationProcessor', () => {
   const ruleDataProcessor = new NetWeightVerificationProcessor();
@@ -26,7 +32,10 @@ describe('NetWeightVerificationProcessor', () => {
   it.each([
     {
       document: stubDocument({
-        externalEvents: [stubWeighingMoveEvent()],
+        externalEvents: [
+          stubApprovedWeighingMoveEvent(),
+          stubApprovedWeighingMoveEvent(),
+        ],
       }),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario: 'all the attributes with the correct values',
@@ -39,22 +48,23 @@ describe('NetWeightVerificationProcessor', () => {
     {
       document: stubDocument({
         externalEvents: [
+          stubApprovedWeighingMoveEvent(),
           replaceMetadataAttributeValue(
-            stubWeighingMoveEvent(),
-            DocumentEventAttributeName.LOAD_NET_WEIGHT,
-            '',
+            stubApprovedWeighingMoveEvent(),
+            VEHICLE_GROSS_WEIGHT,
+            `${faker.number.int()}`,
           ),
         ],
       }),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'no load-net-weight attribute',
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario: 'one of the events has invalid attributes',
     },
     {
       document: stubDocument({
         externalEvents: [
           replaceMetadataAttributeValue(
-            stubWeighingMoveEvent(),
-            DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
+            stubApprovedWeighingMoveEvent(),
+            VEHICLE_GROSS_WEIGHT,
             '12.00 KG',
           ),
         ],
@@ -63,24 +73,54 @@ describe('NetWeightVerificationProcessor', () => {
       scenario:
         'load-net-weight is not equal to vehicle-gross-weight minus vehicle-weight',
     },
-    ...[
-      DocumentEventAttributeName.VEHICLE_WEIGHT,
-      DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-      DocumentEventAttributeName.LOAD_NET_WEIGHT,
-    ].map((attributeName) => ({
-      document: stubDocument({
-        externalEvents: [
-          replaceMetadataAttributeValue(
-            stubWeighingMoveEvent(),
-            attributeName,
-            `${faker.number.int()}`,
-          ),
-        ],
+    ...[VEHICLE_WEIGHT, VEHICLE_GROSS_WEIGHT, LOAD_NET_WEIGHT].map(
+      (attributeName) => ({
+        document: stubDocument({
+          externalEvents: [
+            replaceMetadataAttributeValue(
+              stubApprovedWeighingMoveEvent(),
+              attributeName,
+              `${faker.number.int()}`,
+            ),
+          ],
+        }),
+        resultStatus: RuleOutputStatus.REJECTED,
+        scenario: `the ${attributeName} attribute is missing the measurement unit`,
       }),
-
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: `the ${attributeName} attribute is not in the correct format`,
-    })),
+    ),
+    ...[VEHICLE_WEIGHT, VEHICLE_GROSS_WEIGHT, LOAD_NET_WEIGHT].map(
+      (attributeName) => ({
+        document: stubDocument({
+          externalEvents: [
+            replaceMetadataAttributeValue(
+              stubApprovedWeighingMoveEvent(),
+              attributeName,
+              'undefined KG',
+            ),
+          ],
+        }),
+        resultStatus: RuleOutputStatus.REJECTED,
+        scenario: `the ${attributeName} attribute is not in the correct format`,
+      }),
+    ),
+    ...[VEHICLE_WEIGHT, VEHICLE_GROSS_WEIGHT, LOAD_NET_WEIGHT].map(
+      (attributeName) => ({
+        document: stubDocument({
+          externalEvents: [
+            {
+              ...stubApprovedWeighingMoveEvent(),
+              metadata: {
+                attributes: APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES.filter(
+                  ({ name }) => name !== attributeName,
+                ),
+              },
+            },
+          ],
+        }),
+        resultStatus: RuleOutputStatus.APPROVED,
+        scenario: `the ${attributeName} attribute is not present`,
+      }),
+    ),
   ])(
     `should return $resultStatus when the document has $scenario`,
     async ({ document, resultStatus }) => {
@@ -94,9 +134,12 @@ describe('NetWeightVerificationProcessor', () => {
         requestId: ruleInput.requestId,
         responseToken: ruleInput.responseToken,
         responseUrl: ruleInput.responseUrl,
+        resultComment: expect.any(String),
+        resultContent: undefined,
         resultStatus,
       };
 
+      expect(ruleOutput.resultComment).toMatchSnapshot();
       expect(ruleOutput).toEqual(expectedRuleOutput);
     },
   );
