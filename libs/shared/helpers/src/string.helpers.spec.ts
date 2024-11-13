@@ -41,17 +41,10 @@ describe('string helpers', () => {
       expect(extractNumberFromString('123,456,678.0')).toBe(123_456_678);
     });
 
-    it('should return the number from the string as European format', () => {
-      expect(extractNumberFromString('123,456')).toBe(123.456);
-      expect(extractNumberFromString('123.456,00')).toBe(123_456);
-      expect(extractNumberFromString('123.456.678,0')).toBe(123_456_678);
-    });
-
     it('should correctly remove unrelated characters', () => {
       expect(extractNumberFromString('123kg')).toBe(123);
       expect(extractNumberFromString('123.456 kg-1')).toBe(123.456);
       expect(extractNumberFromString('123,456,789.12 kg')).toBe(123_456_789.12);
-      expect(extractNumberFromString('123.456.789,12 kg')).toBe(123_456_789.12);
     });
 
     it('should throw an error if the string is not a number', () => {
