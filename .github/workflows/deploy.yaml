@@ -48,7 +48,14 @@ jobs:
           role-to-assume: arn:aws:iam::${{ matrix.AWS_ACCOUNT_ID }}:role/GitHubActions-Elrond
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Create a temporary document to concatenate metadata from rule lambdas
+        run: echo '{"metadata-rules":[' > lambda-rules-metadata.json
+
       - run: pnpm nx affected --target=upload-lambda --configuration=production --environment=${{ matrix.environment }}
+
+      - name: Upload to S3 bucket
+        run: echo ']}' >> lambda-rules-metadata.json
+        run: aws s3 cp lambda-rules-metadata.json s3://elrond-${{ matrix.environment }}-lambda-rules-metadata/lambda-rules-metadata.json
 
       - name: Report failed deployment
         uses: ./.github/actions/send-slack-message

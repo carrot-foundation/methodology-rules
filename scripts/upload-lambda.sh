@@ -28,9 +28,12 @@ SOURCE_CODE_URL=$GIT_REPO_URL/blob/$GIT_BRANCH/$PROJECT_FOLDER
 COMMIT_HASH=$(git rev-parse HEAD)
 
 # Upload zip file to S3 bucket
-if aws s3 cp "$ZIP_PATH" "s3://$S3_BUCKET/$S3_KEY" --metadata="commit-hash=$COMMIT_HASH,file-checksum=$FILE_CHECKSUM,source-code-url=$SOURCE_CODE_URL,rule-name=$RULE_NAME"
+if aws s3 cp "$ZIP_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then
   echo "Uploaded $ZIP_PATH to $S3_URL"
+
+  # concatenates metadata rules in lambda-rules-metadata.json
+  echo "{\"ruleName\": \"$RULE_NAME\", \"commitHash\": \"$COMMIT_HASH\", \"fileChecksum\": \"$FILE_CHECKSUM\", \"sourceCodeUrl\": \"$SOURCE_CODE_URL\"}," >> lambda-rules-metadata.json
 else
   echo "Error: Failed to upload file $ZIP_PATH"
   exit 1
