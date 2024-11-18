@@ -129,8 +129,6 @@ export class NftMetadataSelection extends RuleDataProcessor {
 
     const dto = mapNftMetadataDto(ruleSubject, ruleInput);
 
-    console.log('Temporary log to check the uri value', ruleSubject.image);
-
     return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
       resultContent: mapNftMetadata(dto),
     });
