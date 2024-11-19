@@ -14,7 +14,7 @@ ENVIRONMENT=$3
 FILE_CHECKSUM=$(md5sum "$ZIP_PATH" | cut -f1 -d" ")
 FILE_NAME=$(basename "$ZIP_PATH" .zip)
 
-S3_BUCKET=elrond-$ENVIRONMENT-lambda-artifacts-rules
+S3_BUCKET=elrond-$ENVIRONMENT-methodology-rules-lambda-artifacts
 S3_FOLDER=$(echo "$PROJECT_FOLDER" | sed 's/^apps\/methodologies\///' | sed 's/rule-processors\///')
 S3_KEY=$S3_FOLDER/$FILE_NAME-$FILE_CHECKSUM.zip
 S3_URL=s3://$S3_BUCKET/$S3_KEY
@@ -32,8 +32,13 @@ if aws s3 cp "$ZIP_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then
   echo "Uploaded $ZIP_PATH to $S3_URL"
 
-  # concatenates metadata rules in lambda-rules-metadata.json
-  echo "{\"ruleName\": \"$RULE_NAME\", \"commitHash\": \"$COMMIT_HASH\", \"fileChecksum\": \"$FILE_CHECKSUM\", \"sourceCodeUrl\": \"$SOURCE_CODE_URL\"}," >> lambda-rules-metadata.json
+  # concatenates metadata rules in rules metadata file
+  METADATA_FILE="tmp/rules-metadata.json"
+  METADATA_TEMP_FILE="tmp/temp-rules-metadata.json"
+
+  if [ -s "$METADATA_FILE" ]; then
+    jq ".rulesMetadata += [{\"rule-name\": \"$RULE_NAME\", \"commit-hash\": \"$COMMIT_HASH\", \"file-checksum\": \"$FILE_CHECKSUM\", \"source-code-url\": \"$SOURCE_CODE_URL\", \"s3-bucket\": \"$S3_BUCKET\", \"s3-key\": \"$S3_KEY\"}]" "$METADATA_FILE" > "$METADATA_TEMP_FILE" && mv "$METADATA_TEMP_FILE" "$METADATA_FILE"
+  fi
 else
   echo "Error: Failed to upload file $ZIP_PATH"
   exit 1

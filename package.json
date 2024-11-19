@@ -18,7 +18,8 @@
     "test:all": "nx run-many --target test",
     "ts": "nx ts",
     "ts:affected": "nx affected --target ts",
-    "ts:all": "nx run-many --target ts"
+    "ts:all": "nx run-many --target ts",
+    "upload-lambdas-and-metadata": "./scripts/upload-lambdas-and-metadata.sh"
   },
   "private": true,
   "packageManager": "pnpm@9.12.3",
