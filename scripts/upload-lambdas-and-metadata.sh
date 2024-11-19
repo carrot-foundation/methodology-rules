@@ -8,7 +8,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 ENVIRONMENT=$1
-FILE_PATH="tmp/rules-metadata.json"
+FILE_PATH="rules-metadata.json"
 
 FILE_CHECKSUM=$(md5sum "$FILE_PATH" | cut -f1 -d" ")
 FILE_NAME=$(basename "$FILE_PATH" .json)
