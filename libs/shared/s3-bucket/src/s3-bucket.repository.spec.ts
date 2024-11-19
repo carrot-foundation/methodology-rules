@@ -29,7 +29,7 @@ describe('S3BucketRepository', () => {
 
       await expect(
         repository.readFromS3(faker.string.uuid(), createValidate),
-      ).rejects.toThrow('Unexpected token u in JSON at position 0');
+      ).rejects.toThrow('"undefined" is not valid JSON');
     });
 
     it('should throw error if stored data is invalid', async () => {
