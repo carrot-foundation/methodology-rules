@@ -48,7 +48,7 @@ jobs:
           role-to-assume: arn:aws:iam::${{ matrix.AWS_ACCOUNT_ID }}:role/GitHubActions-Elrond
           aws-region: ${{ env.AWS_REGION }}
 
-      - run: pnpm nx affected --target=upload-lambda --configuration=production --environment=${{ matrix.environment }}
+      - run: pnpm upload-lambdas-and-metadata ${{ matrix.environment }}
 
       - name: Report failed deployment
         uses: ./.github/actions/send-slack-message
