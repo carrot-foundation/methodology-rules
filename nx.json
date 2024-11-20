@@ -88,6 +88,7 @@
         "{workspaceRoot}/scripts/package-lambda.sh",
         "{workspaceRoot}/scripts/upload-lambda.sh"
       ],
+      "parallelism": false,
       "dependsOn": ["package-lambda"],
       "options": {
         "commands": [

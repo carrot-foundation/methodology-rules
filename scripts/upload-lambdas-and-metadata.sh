@@ -20,10 +20,9 @@ if [ -f "$FILE_PATH" ]; then
   rm -f "$FILE_PATH"
 fi
 
-mkdir -p "$(dirname "$FILE_PATH")"
 echo '{"rulesMetadata":[]}' > "$FILE_PATH"
 
-pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT
+pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT --parallel=10
 
 if aws s3 cp "$FILE_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then
