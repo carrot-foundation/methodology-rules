@@ -108,10 +108,10 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
           [VEHICLE_WEIGHT]: vehicleWeight,
         } = attributesValues;
         const netWeightResult = new BigNumber(vehicleGrossWeight).minus(
-          vehicleWeight,
+          new BigNumber(vehicleWeight),
         );
 
-        if (netWeightResult.isEqualTo(loadNetWeight)) {
+        if (netWeightResult.isEqualTo(new BigNumber(vehicleWeight))) {
           approvedResultComments.push(
             this.ResultComment.approved({
               eventIndex,
