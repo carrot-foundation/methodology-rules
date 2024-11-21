@@ -19,6 +19,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import BigNumber from 'bignumber.js';
 
 import {
   extractWeighingAttributes,
@@ -35,7 +36,7 @@ const { LOAD_NET_WEIGHT, VEHICLE_GROSS_WEIGHT, VEHICLE_WEIGHT } =
   DocumentEventAttributeName;
 
 interface CalculationValues {
-  netWeightResult: number;
+  netWeightResult: BigNumber;
   vehicleGrossWeight: number;
   vehicleWeight: number;
 }
@@ -85,7 +86,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
     vehicleGrossWeight,
     vehicleWeight,
   }: CalculationValues): string =>
-    `${vehicleGrossWeight} - ${vehicleWeight} = ${netWeightResult}`;
+    `${vehicleGrossWeight} - ${vehicleWeight} = ${netWeightResult.toString()}`;
 
   private getEventCommentText = (eventIndex: number): string =>
     `${WEIGHING} ${MOVE} event (${eventIndex + 1})`;
@@ -106,9 +107,11 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
           [VEHICLE_GROSS_WEIGHT]: vehicleGrossWeight,
           [VEHICLE_WEIGHT]: vehicleWeight,
         } = attributesValues;
-        const netWeightResult = vehicleGrossWeight - vehicleWeight;
+        const netWeightResult = new BigNumber(vehicleGrossWeight).minus(
+          new BigNumber(vehicleWeight),
+        );
 
-        if (netWeightResult === loadNetWeight) {
+        if (netWeightResult.isEqualTo(new BigNumber(loadNetWeight))) {
           approvedResultComments.push(
             this.ResultComment.approved({
               eventIndex,

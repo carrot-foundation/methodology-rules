@@ -7,6 +7,22 @@ import {
   DocumentEventMoveType,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
+import { faker } from '@faker-js/faker';
+import BigNumber from 'bignumber.js';
+
+const VEHICLE_GROSS_WEIGHT = faker.number.float({
+  fractionDigits: 3,
+  max: 5000,
+  min: 300,
+});
+const VEHICLE_WEIGHT = faker.number.float({
+  fractionDigits: 3,
+  max: VEHICLE_GROSS_WEIGHT,
+  min: 300,
+});
+const LOAD_NET_WEIGHT = new BigNumber(VEHICLE_GROSS_WEIGHT).minus(
+  VEHICLE_WEIGHT,
+);
 
 export const APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES = [
   {
@@ -17,18 +33,18 @@ export const APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES = [
   {
     isPublic: true,
     name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-    value: '128901.00 KG',
+    value: `${VEHICLE_GROSS_WEIGHT} KG`,
   },
   {
     isPublic: true,
     name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-    value: '19700.00 KG',
+    value: `${VEHICLE_WEIGHT} KG`,
   },
 
   {
     isPublic: true,
     name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
-    value: '109201.00 KG',
+    value: `${LOAD_NET_WEIGHT.toString()} KG`,
   },
 ];
 
