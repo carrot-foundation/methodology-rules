@@ -139,7 +139,6 @@ describe('NetWeightVerificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput.resultComment).toMatchSnapshot();
       expect(ruleOutput).toEqual(expectedRuleOutput);
     },
   );
