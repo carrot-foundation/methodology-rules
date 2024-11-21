@@ -6,21 +6,10 @@ on:
   workflow_call:
 
 jobs:
-  package-lambda:
-    name: Package Lambda
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4.1.1
-        with:
-          fetch-depth: 0 # required for Nx affected
-      - uses: ./.github/actions/prepare-to-run-nx
-      - run: pnpm nx affected --target=package-lambda --configuration=production
-
   upload-lambda:
     name: Upload Lambda to S3
     runs-on: ubuntu-latest
     continue-on-error: true
-    needs: [package-lambda]
 
     env:
       AWS_REGION: us-east-1
@@ -29,10 +18,10 @@ jobs:
       matrix:
         include:
           - environment: production
-            AWS_ACCOUNT_ID: "629216831935"
+            AWS_ACCOUNT_ID: '629216831935'
 
           - environment: development
-            AWS_ACCOUNT_ID: "954701063678"
+            AWS_ACCOUNT_ID: '954701063678'
 
     steps:
       - uses: actions/checkout@v4.1.1
