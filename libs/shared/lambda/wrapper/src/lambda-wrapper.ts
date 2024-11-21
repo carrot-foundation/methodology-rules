@@ -48,8 +48,6 @@ export const wrapRuleIntoLambdaHandler = (
 
     logger.info({ ruleInput }, 'Rule invoked');
 
-    logger.info('Force upload all rules');
-
     try {
       const ruleOutput = await rule.process(ruleInput);
 

@@ -10,12 +10,6 @@ fi
 ENVIRONMENT=$1
 FILE_PATH="rules-metadata.json"
 
-FILE_CHECKSUM=$(md5sum "$FILE_PATH" | cut -f1 -d" ")
-FILE_NAME=$(basename "$FILE_PATH" .json)
-
-S3_BUCKET=elrond-$ENVIRONMENT-methodology-rules-metadata-lambda-artifacts
-S3_KEY=$FILE_NAME-$FILE_CHECKSUM.json
-
 if [ -f "$FILE_PATH" ]; then
   rm -f "$FILE_PATH"
 fi
@@ -23,6 +17,12 @@ fi
 echo '{"rulesMetadata":[]}' > "$FILE_PATH"
 
 pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT --parallel=10
+
+FILE_CHECKSUM=$(md5sum "$FILE_PATH" | cut -f1 -d" ")
+FILE_NAME=$(basename "$FILE_PATH" .json)
+
+S3_BUCKET=elrond-$ENVIRONMENT-methodology-rules-metadata-lambda-artifacts
+S3_KEY=$FILE_NAME-$FILE_CHECKSUM.json
 
 if aws s3 cp "$FILE_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then
