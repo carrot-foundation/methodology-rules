@@ -8,7 +8,7 @@ if [ "$#" -ne 1 ]; then
 fi
 
 ENVIRONMENT=$1
-FILE_PATH="tmp/rules-metadata.json"
+FILE_PATH="rules-metadata.json"
 
 FILE_CHECKSUM=$(md5sum "$FILE_PATH" | cut -f1 -d" ")
 FILE_NAME=$(basename "$FILE_PATH" .json)
@@ -20,10 +20,9 @@ if [ -f "$FILE_PATH" ]; then
   rm -f "$FILE_PATH"
 fi
 
-mkdir -p "$(dirname "$FILE_PATH")"
 echo '{"rulesMetadata":[]}' > "$FILE_PATH"
 
-pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT
+pnpm nx affected --target=upload-lambda --configuration=production --environment=$ENVIRONMENT --parallel=10
 
 if aws s3 cp "$FILE_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then

@@ -33,8 +33,8 @@ then
   echo "Uploaded $ZIP_PATH to $S3_URL"
 
   # concatenates metadata rules in rules metadata file
-  METADATA_FILE="tmp/rules-metadata.json"
-  METADATA_TEMP_FILE="tmp/temp-rules-metadata.json"
+  METADATA_FILE="rules-metadata.json"
+  METADATA_TEMP_FILE="temp-rules-metadata.json"
 
   if [ -s "$METADATA_FILE" ]; then
     jq ".rulesMetadata += [{\"rule-name\": \"$RULE_NAME\", \"commit-hash\": \"$COMMIT_HASH\", \"file-checksum\": \"$FILE_CHECKSUM\", \"source-code-url\": \"$SOURCE_CODE_URL\", \"s3-bucket\": \"$S3_BUCKET\", \"s3-key\": \"$S3_KEY\"}]" "$METADATA_FILE" > "$METADATA_TEMP_FILE" && mv "$METADATA_TEMP_FILE" "$METADATA_FILE"
