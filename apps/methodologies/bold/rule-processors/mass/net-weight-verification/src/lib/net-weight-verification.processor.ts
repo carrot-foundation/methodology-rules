@@ -111,7 +111,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
           new BigNumber(vehicleWeight),
         );
 
-        if (netWeightResult.isEqualTo(new BigNumber(vehicleWeight))) {
+        if (netWeightResult.isEqualTo(new BigNumber(loadNetWeight))) {
           approvedResultComments.push(
             this.ResultComment.approved({
               eventIndex,
