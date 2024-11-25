@@ -20,41 +20,46 @@ const VEHICLE_WEIGHT = faker.number.float({
   max: VEHICLE_GROSS_WEIGHT,
   min: 300,
 });
-const LOAD_NET_WEIGHT = new BigNumber(VEHICLE_GROSS_WEIGHT).minus(
-  VEHICLE_WEIGHT,
-);
 
-export const APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES = [
-  {
-    isPublic: true,
-    name: DocumentEventAttributeName.MOVE_TYPE,
-    value: DocumentEventMoveType.WEIGHING,
-  },
-  {
-    isPublic: true,
-    name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-    value: `${VEHICLE_GROSS_WEIGHT} KG`,
-  },
-  {
-    isPublic: true,
-    name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-    value: `${VEHICLE_WEIGHT} KG`,
-  },
+export const stubApprovedWeighingMoveEventAttributes = (
+  weightDifference = 0,
+) => {
+  const loadNetWeight = new BigNumber(VEHICLE_GROSS_WEIGHT)
+    .minus(VEHICLE_WEIGHT)
+    .minus(weightDifference);
 
-  {
-    isPublic: true,
-    name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
-    value: `${LOAD_NET_WEIGHT.toString()} KG`,
-  },
-];
+  return [
+    {
+      isPublic: true,
+      name: DocumentEventAttributeName.MOVE_TYPE,
+      value: DocumentEventMoveType.WEIGHING,
+    },
+    {
+      isPublic: true,
+      name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
+      value: `${VEHICLE_GROSS_WEIGHT} KG`,
+    },
+    {
+      isPublic: true,
+      name: DocumentEventAttributeName.VEHICLE_WEIGHT,
+      value: `${VEHICLE_WEIGHT} KG`,
+    },
+    {
+      isPublic: true,
+      name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
+      value: `${loadNetWeight.toString()} KG`,
+    },
+  ];
+};
 
 export const stubApprovedWeighingMoveEvent = (
   partialEvent?: PartialDeep<DocumentEvent>,
+  weightDifference?: number,
 ): DocumentEvent =>
   stubDocumentEvent({
     ...partialEvent,
     metadata: {
-      attributes: APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES,
+      attributes: stubApprovedWeighingMoveEventAttributes(weightDifference),
     },
     name: DocumentEventName.MOVE,
   });
