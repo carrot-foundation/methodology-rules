@@ -22,6 +22,7 @@ import {
 import BigNumber from 'bignumber.js';
 
 import {
+  ALLOWABLE_WEIGHT_DIFFERENCE,
   extractWeighingAttributes,
   getWeighingAttributesMissingFields,
   getWeighingAttributesValidationErrors,
@@ -69,7 +70,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
       eventIndex: number;
       loadNetWeight: number;
     } & CalculationValues) =>
-      `${this.getEventCommentText(eventIndex)}: Invalid load net weight (${this.formatCalculationText(weighingValues)}) should be equal to ${loadNetWeight}`,
+      `${this.getEventCommentText(eventIndex)}: Invalid load net weight (${this.formatCalculationText(weighingValues)}) should be approximately ${loadNetWeight}`,
 
     validationError: ({
       eventIndex,
@@ -86,7 +87,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
     vehicleGrossWeight,
     vehicleWeight,
   }: CalculationValues): string =>
-    `${vehicleGrossWeight} - ${vehicleWeight} = ${netWeightResult.toString()}`;
+    `${vehicleGrossWeight} - ${vehicleWeight} ≈ ${netWeightResult.toString()}`;
 
   private getEventCommentText = (eventIndex: number): string =>
     `${WEIGHING} ${MOVE} event (${eventIndex + 1})`;
@@ -111,7 +112,12 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
           new BigNumber(vehicleWeight),
         );
 
-        if (netWeightResult.isEqualTo(new BigNumber(loadNetWeight))) {
+        if (
+          netWeightResult
+            .minus(new BigNumber(loadNetWeight))
+            .absoluteValue()
+            .isLessThanOrEqualTo(ALLOWABLE_WEIGHT_DIFFERENCE)
+        ) {
           approvedResultComments.push(
             this.ResultComment.approved({
               eventIndex,

@@ -30,6 +30,8 @@ interface WeighingAttributesOutput {
 
 type ExtracteAttributes = Array<[WeighingAttributes, WeighingAttributesOutput]>;
 
+export const ALLOWABLE_WEIGHT_DIFFERENCE = 1;
+
 export const isValidWeighingAttributes =
   createIs<Record<WeighingAttributes, number>>();
 

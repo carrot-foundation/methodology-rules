@@ -16,8 +16,8 @@ import { random } from 'typia';
 
 import { NetWeightVerificationProcessor } from './net-weight-verification.processor';
 import {
-  APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES,
   stubApprovedWeighingMoveEvent,
+  stubApprovedWeighingMoveEventAttributes,
 } from './net-weight-verification.stubs';
 
 jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
@@ -39,6 +39,40 @@ describe('NetWeightVerificationProcessor', () => {
       }),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario: 'all the attributes with the correct values',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [stubApprovedWeighingMoveEvent(undefined, 1)],
+      }),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'load-net-weight approximate with a difference of 1 kg to vehicle-gross-weight minus vehicle-weight',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubApprovedWeighingMoveEvent(
+            undefined,
+            faker.number.float({ max: 0.99, min: 0 }),
+          ),
+        ],
+      }),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'load-net-weight approximate with a difference between 0 and 0,99 kg to vehicle-gross-weight minus vehicle-weight',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubApprovedWeighingMoveEvent(
+            undefined,
+            faker.number.float({ max: 100, min: 1.01 }),
+          ),
+        ],
+      }),
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'load-net-weight not approximate with difference greater than 1 kg to vehicle-gross-weight minus vehicle-weight',
     },
     {
       document: random<Omit<Document, 'externalEvents'>>(),
@@ -65,13 +99,13 @@ describe('NetWeightVerificationProcessor', () => {
           replaceMetadataAttributeValue(
             stubApprovedWeighingMoveEvent(),
             VEHICLE_GROSS_WEIGHT,
-            '12.00 KG',
+            `${faker.number.int()} KG`,
           ),
         ],
       }),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'load-net-weight is not equal to vehicle-gross-weight minus vehicle-weight',
+        'load-net-weight is not approximate to vehicle-gross-weight minus vehicle-weight',
     },
     ...[VEHICLE_WEIGHT, VEHICLE_GROSS_WEIGHT, LOAD_NET_WEIGHT].map(
       (attributeName) => ({
@@ -110,7 +144,7 @@ describe('NetWeightVerificationProcessor', () => {
             {
               ...stubApprovedWeighingMoveEvent(),
               metadata: {
-                attributes: APPROVED_WEIGHING_MOVE_EVENT_ATTRIBUTES.filter(
+                attributes: stubApprovedWeighingMoveEventAttributes().filter(
                   ({ name }) => name !== attributeName,
                 ),
               },
