@@ -70,7 +70,7 @@ export class NetWeightVerificationProcessor extends RuleDataProcessor {
       eventIndex: number;
       loadNetWeight: number;
     } & CalculationValues) =>
-      `${this.getEventCommentText(eventIndex)}: Invalid load net weight (${this.formatCalculationText(weighingValues)}) should be approximately ${loadNetWeight}`,
+      `${this.getEventCommentText(eventIndex)}: Invalid load net weight (${this.formatCalculationText(weighingValues)}) should be approximately ${loadNetWeight}, allowing for a maximum variation of ${ALLOWABLE_WEIGHT_DIFFERENCE}`,
 
     validationError: ({
       eventIndex,

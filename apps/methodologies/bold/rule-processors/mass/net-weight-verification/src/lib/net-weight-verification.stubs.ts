@@ -10,22 +10,32 @@ import {
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
-const VEHICLE_GROSS_WEIGHT = faker.number.float({
-  fractionDigits: 3,
-  max: 5000,
-  min: 300,
-});
-const VEHICLE_WEIGHT = faker.number.float({
-  fractionDigits: 3,
-  max: VEHICLE_GROSS_WEIGHT,
-  min: 300,
-});
-
 export const stubApprovedWeighingMoveEventAttributes = (
+  fixedWeights = false,
   weightDifference = 0,
 ) => {
-  const loadNetWeight = new BigNumber(VEHICLE_GROSS_WEIGHT)
-    .minus(VEHICLE_WEIGHT)
+  const vehicleGrossWeight = new BigNumber(
+    fixedWeights
+      ? '128901.00'
+      : faker.number.float({
+          fractionDigits: 3,
+          max: 5000,
+          min: 300,
+        }),
+  );
+
+  const vehicleWeight = new BigNumber(
+    fixedWeights
+      ? '19700.00'
+      : faker.number.float({
+          fractionDigits: 3,
+          max: vehicleGrossWeight.toNumber(),
+          min: 300,
+        }),
+  );
+
+  const loadNetWeight = vehicleGrossWeight
+    .minus(vehicleWeight)
     .minus(weightDifference);
 
   return [
@@ -37,12 +47,12 @@ export const stubApprovedWeighingMoveEventAttributes = (
     {
       isPublic: true,
       name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-      value: `${VEHICLE_GROSS_WEIGHT} KG`,
+      value: `${vehicleGrossWeight.toString()} KG`,
     },
     {
       isPublic: true,
       name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-      value: `${VEHICLE_WEIGHT} KG`,
+      value: `${vehicleWeight.toString()} KG`,
     },
     {
       isPublic: true,
@@ -53,13 +63,19 @@ export const stubApprovedWeighingMoveEventAttributes = (
 };
 
 export const stubApprovedWeighingMoveEvent = (
-  partialEvent?: PartialDeep<DocumentEvent>,
-  weightDifference?: number,
+  options: {
+    fixedWeights?: boolean;
+    partialEvent?: PartialDeep<DocumentEvent>;
+    weightDifference?: number;
+  } = {},
 ): DocumentEvent =>
   stubDocumentEvent({
-    ...partialEvent,
+    ...options.partialEvent,
     metadata: {
-      attributes: stubApprovedWeighingMoveEventAttributes(weightDifference),
+      attributes: stubApprovedWeighingMoveEventAttributes(
+        options.fixedWeights,
+        options.weightDifference,
+      ),
     },
     name: DocumentEventName.MOVE,
   });

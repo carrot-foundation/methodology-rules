@@ -42,7 +42,11 @@ describe('NetWeightVerificationProcessor', () => {
     },
     {
       document: stubDocument({
-        externalEvents: [stubApprovedWeighingMoveEvent(undefined, 1)],
+        externalEvents: [
+          stubApprovedWeighingMoveEvent({
+            weightDifference: 1,
+          }),
+        ],
       }),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
@@ -51,10 +55,9 @@ describe('NetWeightVerificationProcessor', () => {
     {
       document: stubDocument({
         externalEvents: [
-          stubApprovedWeighingMoveEvent(
-            undefined,
-            faker.number.float({ max: 0.99, min: 0 }),
-          ),
+          stubApprovedWeighingMoveEvent({
+            weightDifference: faker.number.float({ max: 0.99, min: 0 }),
+          }),
         ],
       }),
       resultStatus: RuleOutputStatus.APPROVED,
@@ -64,20 +67,14 @@ describe('NetWeightVerificationProcessor', () => {
     {
       document: stubDocument({
         externalEvents: [
-          stubApprovedWeighingMoveEvent(
-            undefined,
-            faker.number.float({ max: 100, min: 1.01 }),
-          ),
+          stubApprovedWeighingMoveEvent({
+            weightDifference: faker.number.float({ max: 100, min: 1.01 }),
+          }),
         ],
       }),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'load-net-weight not approximate with difference greater than 1 kg to vehicle-gross-weight minus vehicle-weight',
-    },
-    {
-      document: random<Omit<Document, 'externalEvents'>>(),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'no external events',
     },
     {
       document: stubDocument({
@@ -176,6 +173,69 @@ describe('NetWeightVerificationProcessor', () => {
       expect(ruleOutput).toEqual(expectedRuleOutput);
     },
   );
+
+  it.each([
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubApprovedWeighingMoveEvent({ fixedWeights: true }),
+          stubApprovedWeighingMoveEvent({ fixedWeights: true }),
+        ],
+      }),
+      resultComment: 'approved',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubApprovedWeighingMoveEvent({
+            fixedWeights: true,
+            weightDifference: 10,
+          }),
+        ],
+      }),
+      resultComment: 'rejected',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          stubApprovedWeighingMoveEvent(),
+          replaceMetadataAttributeValue(
+            stubApprovedWeighingMoveEvent(),
+            VEHICLE_GROSS_WEIGHT,
+            `${faker.number.int()}`,
+          ),
+        ],
+      }),
+      resultComment: 'validationError',
+    },
+    {
+      document: stubDocument({
+        externalEvents: [
+          {
+            ...stubApprovedWeighingMoveEvent(),
+            metadata: {
+              attributes: stubApprovedWeighingMoveEventAttributes().filter(
+                ({ name }) => name !== VEHICLE_WEIGHT,
+              ),
+            },
+          },
+        ],
+      }),
+      resultComment: 'missingValues',
+    },
+    {
+      document: random<Omit<Document, 'externalEvents'>>(),
+      resultComment: 'WEIGHING_EVENTS_NOT_FOUND',
+    },
+  ])(`should return $resultComment message`, async ({ document }) => {
+    const ruleInput = random<Required<RuleInput>>();
+
+    documentLoaderService.mockResolvedValueOnce(document);
+
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+    expect(ruleOutput.resultComment).toMatchSnapshot();
+  });
 
   it('should return REJECTED if there is no document', async () => {
     const ruleInput = random<Required<RuleInput>>();
