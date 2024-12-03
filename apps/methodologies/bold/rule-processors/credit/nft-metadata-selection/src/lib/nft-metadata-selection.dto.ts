@@ -43,11 +43,11 @@ export interface RewardsDistributionMetadata {
 }
 
 export interface MethodologyCreditNftMetadataDto {
-  collectionDescription: NonEmptyString;
   collectionName: NonEmptyString;
   creditDocumentId: NonEmptyString;
   image?: Uri | undefined;
   massCertificates: NonEmptyArray<MassCertificateMetadata>;
   methodology: MethodologyMetadata;
+  nftDescription: NonEmptyString;
   rewardsDistribution: RewardsDistributionMetadata;
 }

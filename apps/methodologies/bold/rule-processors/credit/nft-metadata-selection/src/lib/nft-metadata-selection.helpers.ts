@@ -47,12 +47,8 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const {
-  ACTOR_TYPE,
-  COLLECTION_NAME,
-  NFT_DESCRIPTION: COLLECTION_DESCRIPTION,
-  NFT_IMAGE,
-} = DocumentEventAttributeName;
+const { ACTOR_TYPE, COLLECTION_NAME, NFT_DESCRIPTION, NFT_IMAGE } =
+  DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
@@ -63,26 +59,38 @@ export const getCarrotExplorePageUrl = (documentId: string) =>
 export const getRulesMetadataEventValues = (
   document: Document | undefined,
 ): {
-  collectionDescription: NonEmptyString;
   collectionName: NonEmptyString;
   image: Uri | undefined;
+  nftDescription: NonEmptyString;
 } => {
   const rulesMetadataEvent = getRulesMetadataEvent(document);
+
+  if (!rulesMetadataEvent) {
+    throw new Error('Rules metadata event not found');
+  }
 
   const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
   const collectionName = getEventAttributeValue(
     rulesMetadataEvent,
     COLLECTION_NAME,
   );
-  const collectionDescription = getEventAttributeValue(
+  const nftDescription = getEventAttributeValue(
     rulesMetadataEvent,
-    COLLECTION_DESCRIPTION,
+    NFT_DESCRIPTION,
   );
 
+  if (!is<NonEmptyString>(collectionName)) {
+    throw new Error('Required metadata collectionName attribute is missing');
+  }
+
+  if (!is<NonEmptyString>(nftDescription)) {
+    throw new Error('Required metadata nftDescription attribute is missing');
+  }
+
   return {
-    collectionDescription: assert<NonEmptyString>(collectionDescription),
-    collectionName: assert<NonEmptyString>(collectionName),
+    collectionName,
     image: is<Uri>(uri) ? uri : undefined,
+    nftDescription,
   };
 };
 
@@ -279,12 +287,12 @@ export const mapNftMetadataDto = (
   });
 
 export const mapNftMetadata = ({
-  collectionDescription,
   collectionName,
   creditDocumentId,
   image,
   massCertificates,
   methodology,
+  nftDescription,
   rewardsDistribution,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const {
@@ -331,7 +339,7 @@ export const mapNftMetadata = ({
         value: formatCeritificatesMassValue(massCertificates),
       },
     ],
-    description: collectionDescription,
+    description: nftDescription,
     details: {
       massCertificates: {
         count: massCertificates.length,

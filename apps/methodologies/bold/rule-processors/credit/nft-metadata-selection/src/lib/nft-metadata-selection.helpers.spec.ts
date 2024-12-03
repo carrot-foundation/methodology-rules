@@ -71,7 +71,37 @@ describe('Helpers', () => {
   });
 
   describe('getRulesMetadataEventValues', () => {
-    it('should return image undefined if the open event does not have the NFT_IMAGE attribute', () => {
+    it('should throw error when document is undefined', () => {
+      expect(() => getRulesMetadataEventValues(undefined)).toThrow(
+        'Rules metadata event not found',
+      );
+    });
+
+    it('should throw error when rules metadata event is not found', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: OPEN }, []),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        'Rules metadata event not found',
+      );
+    });
+
+    it('should throw error when required metadata collectionName attribute is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, []),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        'Required metadata collectionName attribute is missing',
+      );
+    });
+
+    it('should return image as undefined when NFT_IMAGE attribute is missing', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
@@ -84,13 +114,13 @@ describe('Helpers', () => {
       const result = getRulesMetadataEventValues(documentStub);
 
       expect(result).toEqual({
-        collectionDescription: expect.any(String),
         collectionName: expect.any(String),
         image: undefined,
+        nftDescription: expect.any(String),
       });
     });
 
-    it('should return undefined if the image metadata value is not a valid Uri', () => {
+    it('should return image as undefined when NFT_IMAGE value is not a valid Uri', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
@@ -104,43 +134,23 @@ describe('Helpers', () => {
       const result = getRulesMetadataEventValues(documentStub);
 
       expect(result).toEqual({
-        collectionDescription: expect.any(String),
         collectionName: expect.any(String),
         image: undefined,
+        nftDescription: expect.any(String),
       });
     });
 
-    it('should return the image metadata value if it is a valid Uri', () => {
-      const image = faker.internet.url();
-      const documentStub = stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [NFT_IMAGE, image],
-            [COLLECTION_NAME, faker.lorem.word()],
-            [NFT_DESCRIPTION, faker.lorem.sentence()],
-          ]),
-        ],
-      });
-
-      const result = getRulesMetadataEventValues(documentStub);
-
-      expect(result).toEqual({
-        collectionDescription: expect.any(String),
-        collectionName: expect.any(String),
-        image,
-      });
-    });
-
-    it('should return all the values', () => {
+    it('should return all metadata values when all attributes are valid', () => {
       const image = faker.internet.url();
       const collectionName = faker.lorem.word();
-      const collectionDescription = faker.lorem.sentence();
+      const nftDescription = faker.lorem.sentence();
+
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, image],
             [COLLECTION_NAME, collectionName],
-            [NFT_DESCRIPTION, collectionDescription],
+            [NFT_DESCRIPTION, nftDescription],
           ]),
         ],
       });
@@ -148,13 +158,13 @@ describe('Helpers', () => {
       const result = getRulesMetadataEventValues(documentStub);
 
       expect(result).toEqual({
-        collectionDescription,
         collectionName,
         image,
+        nftDescription,
       });
     });
 
-    it('should throw an error if collection name is not a non empty string', () => {
+    it('should throw error when collection name is missing', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
@@ -163,10 +173,12 @@ describe('Helpers', () => {
         ],
       });
 
-      expect(() => getRulesMetadataEventValues(documentStub)).toThrow('assert');
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        'Required metadata collectionName attribute is missing',
+      );
     });
 
-    it('should throw an error if nft description is not a non empty string', () => {
+    it('should throw error when NFT description is missing', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
@@ -175,7 +187,9 @@ describe('Helpers', () => {
         ],
       });
 
-      expect(() => getRulesMetadataEventValues(documentStub)).toThrow('assert');
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        'Required metadata nftDescription attribute is missing',
+      );
     });
   });
 
