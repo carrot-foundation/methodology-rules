@@ -122,6 +122,9 @@ describe('NftMetadataSelection E2E', () => {
     type: DocumentType.DEFINITION,
   };
 
+  const nftDescription = faker.lorem.sentence();
+  const collectionName = faker.lorem.word();
+
   const creditDocumentStub = stubCreditDocument({
     externalEvents: [
       stubDocumentEvent({
@@ -133,11 +136,11 @@ describe('NftMetadataSelection E2E', () => {
             }),
             stubDocumentEventAttribute({
               name: COLLECTION_NAME,
-              value: faker.lorem.word(),
+              value: collectionName,
             }),
             stubDocumentEventAttribute({
               name: NFT_DESCRIPTION,
-              value: faker.lorem.sentence(),
+              value: nftDescription,
             }),
           ],
         },
@@ -270,5 +273,15 @@ describe('NftMetadataSelection E2E', () => {
     expect(validationResultContent.errors).toEqual([]);
     expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
     expect(response.resultContent?.['image']).toBe(image);
+    expect(response.resultContent?.['description']).toBe(nftDescription);
+    expect(response.resultContent?.['name']).toBe(collectionName);
+    expect(response.resultContent?.['attributes']).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          trait_type: 'Collection Name',
+          value: collectionName,
+        }),
+      ]),
+    );
   });
 });
