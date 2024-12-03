@@ -80,11 +80,15 @@ export const getRulesMetadataEventValues = (
   );
 
   if (!is<NonEmptyString>(collectionName)) {
-    throw new Error('Required metadata collectionName attribute is missing');
+    throw new Error(
+      `Required metadata ${COLLECTION_NAME} attribute is missing`,
+    );
   }
 
   if (!is<NonEmptyString>(nftDescription)) {
-    throw new Error('Required metadata nftDescription attribute is missing');
+    throw new Error(
+      `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
+    );
   }
 
   return {

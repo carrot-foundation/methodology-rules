@@ -97,7 +97,7 @@ describe('Helpers', () => {
       });
 
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
-        'Required metadata collectionName attribute is missing',
+        `Required metadata ${COLLECTION_NAME} attribute is missing`,
       );
     });
 
@@ -174,7 +174,7 @@ describe('Helpers', () => {
       });
 
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
-        'Required metadata collectionName attribute is missing',
+        `Required metadata ${COLLECTION_NAME} attribute is missing`,
       );
     });
 
@@ -188,7 +188,7 @@ describe('Helpers', () => {
       });
 
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
-        'Required metadata nftDescription attribute is missing',
+        `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
       );
     });
   });
