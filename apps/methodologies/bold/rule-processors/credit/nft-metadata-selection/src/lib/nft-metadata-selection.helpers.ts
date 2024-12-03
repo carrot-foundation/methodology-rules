@@ -389,6 +389,6 @@ export const mapNftMetadata = ({
     image:
       image ??
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
-    name: collectionName,
+    name: 'BOLD',
   };
 };

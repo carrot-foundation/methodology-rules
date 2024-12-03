@@ -274,7 +274,6 @@ describe('NftMetadataSelection E2E', () => {
     expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
     expect(response.resultContent?.['image']).toBe(image);
     expect(response.resultContent?.['description']).toBe(nftDescription);
-    expect(response.resultContent?.['name']).toBe(collectionName);
     expect(response.resultContent?.['attributes']).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
