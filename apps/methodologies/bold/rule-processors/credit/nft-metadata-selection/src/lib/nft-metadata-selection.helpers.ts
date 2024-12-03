@@ -47,8 +47,12 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const { ACTOR_TYPE, COLLECTION_DESCRIPTION, COLLECTION_NAME, NFT_IMAGE } =
-  DocumentEventAttributeName;
+const {
+  ACTOR_TYPE,
+  COLLECTION_NAME,
+  NFT_DESCRIPTION: COLLECTION_DESCRIPTION,
+  NFT_IMAGE,
+} = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
@@ -320,7 +324,7 @@ export const mapNftMetadata = ({
       },
       {
         trait_type: 'Collection Name',
-        value: 'BOLD Innovators Collection',
+        value: collectionName,
       },
       {
         trait_type: 'Amount in Kg',

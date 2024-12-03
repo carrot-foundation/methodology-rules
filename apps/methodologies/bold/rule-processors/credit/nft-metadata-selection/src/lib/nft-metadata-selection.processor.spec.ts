@@ -37,8 +37,8 @@ import {
 
 const {
   ACTOR_TYPE,
-  COLLECTION_DESCRIPTION,
   COLLECTION_NAME,
+  NFT_DESCRIPTION,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
@@ -64,7 +64,7 @@ describe('NftMetadataSelection', () => {
     externalEvents: [
       stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
         [COLLECTION_NAME, faker.lorem.word()],
-        [COLLECTION_DESCRIPTION, faker.lorem.sentence()],
+        [NFT_DESCRIPTION, faker.lorem.sentence()],
       ]),
     ],
     id: creditDocumentId,

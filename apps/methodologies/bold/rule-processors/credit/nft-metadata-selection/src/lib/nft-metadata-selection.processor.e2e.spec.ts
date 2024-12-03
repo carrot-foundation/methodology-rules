@@ -52,8 +52,8 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 const { ACTOR, LINK, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const {
   ACTOR_TYPE,
-  COLLECTION_DESCRIPTION,
   COLLECTION_NAME,
+  NFT_DESCRIPTION,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
@@ -136,7 +136,7 @@ describe('NftMetadataSelection E2E', () => {
               value: faker.lorem.word(),
             }),
             stubDocumentEventAttribute({
-              name: COLLECTION_DESCRIPTION,
+              name: NFT_DESCRIPTION,
               value: faker.lorem.sentence(),
             }),
           ],

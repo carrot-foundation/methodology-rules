@@ -47,10 +47,10 @@ import { stubMassDocument } from './nft-metadata-selection.stubs';
 
 const {
   ACTOR_TYPE,
-  COLLECTION_DESCRIPTION,
   COLLECTION_NAME,
   METHODOLOGY_DESCRIPTION,
   METHODOLOGY_NAME,
+  NFT_DESCRIPTION,
   NFT_IMAGE,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
@@ -76,7 +76,7 @@ describe('Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [COLLECTION_NAME, faker.lorem.word()],
-            [COLLECTION_DESCRIPTION, faker.lorem.sentence()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
           ]),
         ],
       });
@@ -96,7 +96,7 @@ describe('Helpers', () => {
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, faker.string.sample()],
             [COLLECTION_NAME, faker.lorem.word()],
-            [COLLECTION_DESCRIPTION, faker.lorem.sentence()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
           ]),
         ],
       });
@@ -117,7 +117,7 @@ describe('Helpers', () => {
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, image],
             [COLLECTION_NAME, faker.lorem.word()],
-            [COLLECTION_DESCRIPTION, faker.lorem.sentence()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
           ]),
         ],
       });
@@ -140,7 +140,7 @@ describe('Helpers', () => {
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, image],
             [COLLECTION_NAME, collectionName],
-            [COLLECTION_DESCRIPTION, collectionDescription],
+            [NFT_DESCRIPTION, collectionDescription],
           ]),
         ],
       });
@@ -158,7 +158,7 @@ describe('Helpers', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [COLLECTION_DESCRIPTION, faker.lorem.sentence()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
           ]),
         ],
       });
@@ -166,7 +166,7 @@ describe('Helpers', () => {
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow('assert');
     });
 
-    it('should throw an error if collection description is not a non empty string', () => {
+    it('should throw an error if nft description is not a non empty string', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
