@@ -33,7 +33,7 @@ import {
 import {
   findMassAuditId,
   findMassCertificateIdFromDocumentLinks,
-  getImageFromMetadata,
+  getRulesMetadataEventValues,
   mapMassMetadata,
   mapMethodologyMetadata,
   mapNftMetadata,
@@ -113,7 +113,7 @@ export class NftMetadataSelection extends RuleDataProcessor {
     });
 
     return {
-      image: getImageFromMetadata(credit),
+      ...getRulesMetadataEventValues(credit),
       massCertificates: [
         ...massCertificates.values(),
       ] as NonEmptyArray<MassCertificateMetadata>,
