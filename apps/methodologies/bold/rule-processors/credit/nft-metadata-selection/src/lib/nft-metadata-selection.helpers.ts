@@ -1,5 +1,9 @@
 import type { RuleInput } from '@carrot-fndn/shared/rule/types';
-import type { NonEmptyArray, Uri } from '@carrot-fndn/shared/types';
+import type {
+  NonEmptyArray,
+  NonEmptyString,
+  Uri,
+} from '@carrot-fndn/shared/types';
 
 import {
   getEventAttributeValue,
@@ -43,7 +47,8 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const { ACTOR_TYPE, NFT_IMAGE } = DocumentEventAttributeName;
+const { ACTOR_TYPE, COLLECTION_NAME, NFT_DESCRIPTION, NFT_IMAGE } =
+  DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
@@ -51,14 +56,46 @@ const logger = console;
 export const getCarrotExplorePageUrl = (documentId: string) =>
   `https://explore.carrot.eco/document/${documentId}`;
 
-export const getImageFromMetadata = (
+export const getRulesMetadataEventValues = (
   document: Document | undefined,
-): Uri | undefined => {
+): {
+  collectionName: NonEmptyString;
+  image: Uri | undefined;
+  nftDescription: NonEmptyString;
+} => {
   const rulesMetadataEvent = getRulesMetadataEvent(document);
 
-  const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
+  if (!rulesMetadataEvent) {
+    throw new Error('Rules metadata event not found');
+  }
 
-  return is<Uri>(uri) ? uri : undefined;
+  const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
+  const collectionName = getEventAttributeValue(
+    rulesMetadataEvent,
+    COLLECTION_NAME,
+  );
+  const nftDescription = getEventAttributeValue(
+    rulesMetadataEvent,
+    NFT_DESCRIPTION,
+  );
+
+  if (!is<NonEmptyString>(collectionName)) {
+    throw new Error(
+      `Required metadata ${COLLECTION_NAME} attribute is missing`,
+    );
+  }
+
+  if (!is<NonEmptyString>(nftDescription)) {
+    throw new Error(
+      `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
+    );
+  }
+
+  return {
+    collectionName,
+    image: is<Uri>(uri) ? uri : undefined,
+    nftDescription,
+  };
 };
 
 export const mapMassMetadata = (document: Document): MassMetadata => ({
@@ -254,10 +291,12 @@ export const mapNftMetadataDto = (
   });
 
 export const mapNftMetadata = ({
+  collectionName,
   creditDocumentId,
   image,
   massCertificates,
   methodology,
+  nftDescription,
   rewardsDistribution,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const {
@@ -297,15 +336,14 @@ export const mapNftMetadata = ({
       },
       {
         trait_type: 'Collection Name',
-        value: 'BOLD Innovators Collection',
+        value: collectionName,
       },
       {
         trait_type: 'Amount in Kg',
         value: formatCeritificatesMassValue(massCertificates),
       },
     ],
-    description:
-      'This BOLD NFT is a member of the exclusive BOLD Innovators collection, which includes not only the first 10 BOLD NFTs but also the first set of recycling credits issued on the Carrot Network. Each BOLD (Breakthrough in Organics Landfill Diversion) credit represents approximately 1 ton of organic waste diverted from landfills to composting facilities for proper biological treatment. The purchase of each credit distributes rewards to supply chain contributors, helping to cover recycling costs and attempting to make composting a cheaper alternative to landfilling. The BOLD credit promotes organic waste sorting and composting, which is critical for increasing overall recycling rates and driving system change towards a sustainable circular future.',
+    description: nftDescription,
     details: {
       massCertificates: {
         count: massCertificates.length,

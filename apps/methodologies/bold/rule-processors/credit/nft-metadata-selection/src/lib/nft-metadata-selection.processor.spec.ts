@@ -37,12 +37,14 @@ import {
 
 const {
   ACTOR_TYPE,
+  COLLECTION_NAME,
+  NFT_DESCRIPTION,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
   RULE_SLUG,
 } = DocumentEventAttributeName;
-const { ACTOR, RULE_EXECUTION } = DocumentEventName;
+const { ACTOR, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
@@ -57,6 +59,16 @@ describe('NftMetadataSelection', () => {
     subtype: DocumentSubtype.GROUP,
     type: DocumentType.CREDIT_CERTIFICATES,
   };
+
+  const creditDocumentStub = stubDocument({
+    externalEvents: [
+      stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
+        [COLLECTION_NAME, faker.lorem.word()],
+        [NFT_DESCRIPTION, faker.lorem.sentence()],
+      ]),
+    ],
+    id: creditDocumentId,
+  });
 
   it('should return the rule output with the extracted NFT metadata', async () => {
     const massCertificateAuditReference: DocumentReference = {
@@ -132,7 +144,7 @@ describe('NftMetadataSelection', () => {
       massDocumentStub,
     ];
 
-    spyOnDocumentQueryServiceLoad(stubDocument(), documents);
+    spyOnDocumentQueryServiceLoad(creditDocumentStub, documents);
 
     const result = await ruleDataProcessor.process({
       ...random<RuleInput>(),
@@ -253,7 +265,7 @@ describe('NftMetadataSelection', () => {
       }),
     );
 
-    spyOnDocumentQueryServiceLoad(stubDocument(), [
+    spyOnDocumentQueryServiceLoad(creditDocumentStub, [
       stubMethodologyDefinitionDocument(),
       creditCertificatesDocumentsStub,
       ...massCertificateAuditsDocumentsStubs,

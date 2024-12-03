@@ -52,6 +52,8 @@ const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 const { ACTOR, LINK, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const {
   ACTOR_TYPE,
+  COLLECTION_NAME,
+  NFT_DESCRIPTION,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
@@ -120,6 +122,9 @@ describe('NftMetadataSelection E2E', () => {
     type: DocumentType.DEFINITION,
   };
 
+  const nftDescription = faker.lorem.sentence();
+  const collectionName = faker.lorem.word();
+
   const creditDocumentStub = stubCreditDocument({
     externalEvents: [
       stubDocumentEvent({
@@ -128,6 +133,14 @@ describe('NftMetadataSelection E2E', () => {
             stubDocumentEventAttribute({
               name: DocumentEventAttributeName.NFT_IMAGE,
               value: image,
+            }),
+            stubDocumentEventAttribute({
+              name: COLLECTION_NAME,
+              value: collectionName,
+            }),
+            stubDocumentEventAttribute({
+              name: NFT_DESCRIPTION,
+              value: nftDescription,
             }),
           ],
         },
@@ -260,5 +273,14 @@ describe('NftMetadataSelection E2E', () => {
     expect(validationResultContent.errors).toEqual([]);
     expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
     expect(response.resultContent?.['image']).toBe(image);
+    expect(response.resultContent?.['description']).toBe(nftDescription);
+    expect(response.resultContent?.['attributes']).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          trait_type: 'Collection Name',
+          value: collectionName,
+        }),
+      ]),
+    );
   });
 });

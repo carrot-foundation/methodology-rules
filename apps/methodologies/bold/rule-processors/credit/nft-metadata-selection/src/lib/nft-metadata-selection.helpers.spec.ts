@@ -33,10 +33,10 @@ import {
   formatCeritificatesMassValue,
   formatWeight,
   getCarrotExplorePageUrl,
-  getImageFromMetadata,
   getMassCertificatesMassIdsCount,
   getMassCertificatesMassValue,
   getMassValue,
+  getRulesMetadataEventValues,
   mapMassMetadata,
   mapMethodologyMetadata,
   mapNftMetadata,
@@ -47,8 +47,10 @@ import { stubMassDocument } from './nft-metadata-selection.stubs';
 
 const {
   ACTOR_TYPE,
+  COLLECTION_NAME,
   METHODOLOGY_DESCRIPTION,
   METHODOLOGY_NAME,
+  NFT_DESCRIPTION,
   NFT_IMAGE,
   RULE_PROCESSOR_CODE_VERSION,
   RULE_PROCESSOR_RESULT_CONTENT,
@@ -68,44 +70,126 @@ describe('Helpers', () => {
     });
   });
 
-  describe('getImageFromMetadata', () => {
-    it('should return undefined if the open event does not have the NFT_IMAGE attribute', () => {
-      const documentStub = stubDocument({
-        externalEvents: [stubDocumentEvent({ name: RULES_METADATA })],
-      });
-
-      const result = getImageFromMetadata(documentStub);
-
-      expect(result).toBe(undefined);
+  describe('getRulesMetadataEventValues', () => {
+    it('should throw error when document is undefined', () => {
+      expect(() => getRulesMetadataEventValues(undefined)).toThrow(
+        'Rules metadata event not found',
+      );
     });
 
-    it('should return undefined if the metadata value is not a valid Uri', () => {
+    it('should throw error when rules metadata event is not found', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: OPEN }, []),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        'Rules metadata event not found',
+      );
+    });
+
+    it('should throw error when required metadata collectionName attribute is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, []),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        `Required metadata ${COLLECTION_NAME} attribute is missing`,
+      );
+    });
+
+    it('should return image as undefined when NFT_IMAGE attribute is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
+            [COLLECTION_NAME, faker.lorem.word()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
+          ]),
+        ],
+      });
+
+      const result = getRulesMetadataEventValues(documentStub);
+
+      expect(result).toEqual({
+        collectionName: expect.any(String),
+        image: undefined,
+        nftDescription: expect.any(String),
+      });
+    });
+
+    it('should return image as undefined when NFT_IMAGE value is not a valid Uri', () => {
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, faker.string.sample()],
+            [COLLECTION_NAME, faker.lorem.word()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
           ]),
         ],
       });
 
-      const result = getImageFromMetadata(documentStub);
+      const result = getRulesMetadataEventValues(documentStub);
 
-      expect(result).toBe(undefined);
+      expect(result).toEqual({
+        collectionName: expect.any(String),
+        image: undefined,
+        nftDescription: expect.any(String),
+      });
     });
 
-    it('should return the metadata value if it is a valid Uri', () => {
+    it('should return all metadata values when all attributes are valid', () => {
       const image = faker.internet.url();
+      const collectionName = faker.lorem.word();
+      const nftDescription = faker.lorem.sentence();
+
       const documentStub = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_IMAGE, image],
+            [COLLECTION_NAME, collectionName],
+            [NFT_DESCRIPTION, nftDescription],
           ]),
         ],
       });
 
-      const result = getImageFromMetadata(documentStub);
+      const result = getRulesMetadataEventValues(documentStub);
 
-      expect(result).toBe(image);
+      expect(result).toEqual({
+        collectionName,
+        image,
+        nftDescription,
+      });
+    });
+
+    it('should throw error when collection name is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
+          ]),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        `Required metadata ${COLLECTION_NAME} attribute is missing`,
+      );
+    });
+
+    it('should throw error when NFT description is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
+            [COLLECTION_NAME, faker.lorem.word()],
+          ]),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
+      );
     });
   });
 
