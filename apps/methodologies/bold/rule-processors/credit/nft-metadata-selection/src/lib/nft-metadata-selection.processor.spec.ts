@@ -43,6 +43,7 @@ const {
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
   RULE_SLUG,
+  STORE_CONTRACT_ADDRESS: STORE_SMART_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { ACTOR, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
@@ -65,6 +66,7 @@ describe('NftMetadataSelection', () => {
       stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
         [COLLECTION_NAME, faker.lorem.word()],
         [NFT_DESCRIPTION, faker.lorem.sentence()],
+        [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
       ]),
     ],
     id: creditDocumentId,

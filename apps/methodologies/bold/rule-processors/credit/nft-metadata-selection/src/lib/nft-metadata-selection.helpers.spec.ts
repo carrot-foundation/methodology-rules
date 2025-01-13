@@ -11,6 +11,7 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  type DocumentEventAttributeValue,
   DocumentEventName,
   DocumentEventRuleSlug,
   DocumentType,
@@ -56,6 +57,7 @@ const {
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
   RULE_SLUG,
+  STORE_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
@@ -101,13 +103,36 @@ describe('Helpers', () => {
       );
     });
 
-    it('should return image as undefined when NFT_IMAGE attribute is missing', () => {
+    it.each([
+      {
+        attributes: [
+          [COLLECTION_NAME, faker.lorem.word()],
+          [NFT_DESCRIPTION, faker.lorem.sentence()],
+          [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+        ],
+        description:
+          'should return image as undefined when NFT_IMAGE attribute is missing',
+      },
+      {
+        attributes: [
+          [NFT_IMAGE, faker.string.sample()],
+          [COLLECTION_NAME, faker.lorem.word()],
+          [NFT_DESCRIPTION, faker.lorem.sentence()],
+          [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+        ],
+        description:
+          'should return image as undefined when NFT_IMAGE value is not a valid Uri',
+      },
+    ])('%description', ({ attributes }) => {
       const documentStub = stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [COLLECTION_NAME, faker.lorem.word()],
-            [NFT_DESCRIPTION, faker.lorem.sentence()],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: RULES_METADATA },
+            attributes as [
+              DocumentEventAttributeName,
+              DocumentEventAttributeValue,
+            ][],
+          ),
         ],
       });
 
@@ -117,26 +142,7 @@ describe('Helpers', () => {
         collectionName: expect.any(String),
         image: undefined,
         nftDescription: expect.any(String),
-      });
-    });
-
-    it('should return image as undefined when NFT_IMAGE value is not a valid Uri', () => {
-      const documentStub = stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [NFT_IMAGE, faker.string.sample()],
-            [COLLECTION_NAME, faker.lorem.word()],
-            [NFT_DESCRIPTION, faker.lorem.sentence()],
-          ]),
-        ],
-      });
-
-      const result = getRulesMetadataEventValues(documentStub);
-
-      expect(result).toEqual({
-        collectionName: expect.any(String),
-        image: undefined,
-        nftDescription: expect.any(String),
+        storeContractAddress: expect.any(String),
       });
     });
 
@@ -144,6 +150,7 @@ describe('Helpers', () => {
       const image = faker.internet.url();
       const collectionName = faker.lorem.word();
       const nftDescription = faker.lorem.sentence();
+      const storeContractAddress = faker.finance.ethereumAddress();
 
       const documentStub = stubDocument({
         externalEvents: [
@@ -151,6 +158,7 @@ describe('Helpers', () => {
             [NFT_IMAGE, image],
             [COLLECTION_NAME, collectionName],
             [NFT_DESCRIPTION, nftDescription],
+            [STORE_CONTRACT_ADDRESS, storeContractAddress],
           ]),
         ],
       });
@@ -161,6 +169,7 @@ describe('Helpers', () => {
         collectionName,
         image,
         nftDescription,
+        storeContractAddress,
       });
     });
 
@@ -169,6 +178,7 @@ describe('Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_DESCRIPTION, faker.lorem.sentence()],
+            [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
           ]),
         ],
       });
@@ -183,12 +193,28 @@ describe('Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [COLLECTION_NAME, faker.lorem.word()],
+            [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
           ]),
         ],
       });
 
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
         `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
+      );
+    });
+
+    it('should throw error when store smart contract address is missing', () => {
+      const documentStub = stubDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
+            [COLLECTION_NAME, faker.lorem.word()],
+            [NFT_DESCRIPTION, faker.lorem.sentence()],
+          ]),
+        ],
+      });
+
+      expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
+        `Required metadata ${STORE_CONTRACT_ADDRESS} attribute is missing`,
       );
     });
   });

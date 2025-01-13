@@ -9,7 +9,7 @@ import {
   type DocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/types';
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
-import { validate } from 'typia';
+import { createValidate, validate } from 'typia';
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
@@ -26,6 +26,21 @@ export const getEventAttributeValue = (
   }
 
   return undefined;
+};
+
+export const getEventAttributeValueOrThrow = <T>(
+  event: Maybe<DocumentEvent>,
+  attributeName: DocumentEventAttributeName | string,
+  validateValue: ReturnType<typeof createValidate<T>>,
+): T => {
+  const value = getEventAttributeValue(event, attributeName);
+  const validation = validateValue(value);
+
+  if (!validation.success) {
+    throw new Error(`Required metadata ${attributeName} attribute is missing`);
+  }
+
+  return validation.data;
 };
 
 export const getDocumentEventAttachmentByLabel = (

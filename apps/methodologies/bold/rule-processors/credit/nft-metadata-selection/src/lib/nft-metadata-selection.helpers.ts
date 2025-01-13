@@ -7,6 +7,7 @@ import type {
 
 import {
   getEventAttributeValue,
+  getEventAttributeValueOrThrow,
   getRulesMetadataEvent,
 } from '@carrot-fndn/methodologies/bold/getters';
 import {
@@ -28,6 +29,7 @@ import {
   type DocumentReference,
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/types';
+import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/utils';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { assert, is } from 'typia';
 
@@ -47,8 +49,13 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const { ACTOR_TYPE, COLLECTION_NAME, NFT_DESCRIPTION, NFT_IMAGE } =
-  DocumentEventAttributeName;
+const {
+  ACTOR_TYPE,
+  COLLECTION_NAME,
+  NFT_DESCRIPTION,
+  NFT_IMAGE,
+  STORE_CONTRACT_ADDRESS,
+} = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
@@ -62,6 +69,7 @@ export const getRulesMetadataEventValues = (
   collectionName: NonEmptyString;
   image: Uri | undefined;
   nftDescription: NonEmptyString;
+  storeContractAddress: NonEmptyString;
 } => {
   const rulesMetadataEvent = getRulesMetadataEvent(document);
 
@@ -70,31 +78,27 @@ export const getRulesMetadataEventValues = (
   }
 
   const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
-  const collectionName = getEventAttributeValue(
+  const collectionName = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     COLLECTION_NAME,
+    validateNonEmptyString,
   );
-  const nftDescription = getEventAttributeValue(
+  const nftDescription = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     NFT_DESCRIPTION,
+    validateNonEmptyString,
   );
-
-  if (!is<NonEmptyString>(collectionName)) {
-    throw new Error(
-      `Required metadata ${COLLECTION_NAME} attribute is missing`,
-    );
-  }
-
-  if (!is<NonEmptyString>(nftDescription)) {
-    throw new Error(
-      `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
-    );
-  }
+  const storeContractAddress = getEventAttributeValueOrThrow(
+    rulesMetadataEvent,
+    STORE_CONTRACT_ADDRESS,
+    validateNonEmptyString,
+  );
 
   return {
     collectionName,
     image: is<Uri>(uri) ? uri : undefined,
     nftDescription,
+    storeContractAddress,
   };
 };
 
@@ -298,6 +302,7 @@ export const mapNftMetadata = ({
   methodology,
   nftDescription,
   rewardsDistribution,
+  storeContractAddress,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const {
     originCity,
@@ -394,5 +399,6 @@ export const mapNftMetadata = ({
       image ??
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
     name: 'BOLD',
+    store_contract_address: storeContractAddress,
   };
 };
