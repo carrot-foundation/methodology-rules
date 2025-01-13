@@ -50,5 +50,5 @@ export interface MethodologyCreditNftMetadataDto {
   methodology: MethodologyMetadata;
   nftDescription: NonEmptyString;
   rewardsDistribution: RewardsDistributionMetadata;
-  storeSmartContractAddress: NonEmptyString;
+  storeContractAddress: NonEmptyString;
 }

@@ -54,7 +54,7 @@ const {
   COLLECTION_NAME,
   NFT_DESCRIPTION,
   NFT_IMAGE,
-  STORE_SMART_CONTRACT_ADDRESS,
+  STORE_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
@@ -69,7 +69,7 @@ export const getRulesMetadataEventValues = (
   collectionName: NonEmptyString;
   image: Uri | undefined;
   nftDescription: NonEmptyString;
-  storeSmartContractAddress: NonEmptyString;
+  storeContractAddress: NonEmptyString;
 } => {
   const rulesMetadataEvent = getRulesMetadataEvent(document);
 
@@ -88,9 +88,9 @@ export const getRulesMetadataEventValues = (
     NFT_DESCRIPTION,
     validateNonEmptyString,
   );
-  const storeSmartContractAddress = getEventAttributeValueOrThrow(
+  const storeContractAddress = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
-    STORE_SMART_CONTRACT_ADDRESS,
+    STORE_CONTRACT_ADDRESS,
     validateNonEmptyString,
   );
 
@@ -98,7 +98,7 @@ export const getRulesMetadataEventValues = (
     collectionName,
     image: is<Uri>(uri) ? uri : undefined,
     nftDescription,
-    storeSmartContractAddress,
+    storeContractAddress,
   };
 };
 
@@ -302,7 +302,7 @@ export const mapNftMetadata = ({
   methodology,
   nftDescription,
   rewardsDistribution,
-  storeSmartContractAddress,
+  storeContractAddress,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const {
     originCity,
@@ -399,6 +399,6 @@ export const mapNftMetadata = ({
       image ??
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
     name: 'BOLD',
-    store_smart_contract_address: storeSmartContractAddress,
+    store_contract_address: storeContractAddress,
   };
 };

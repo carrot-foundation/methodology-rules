@@ -57,7 +57,7 @@ const {
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
   RULE_SLUG,
-  STORE_SMART_CONTRACT_ADDRESS,
+  STORE_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
@@ -108,7 +108,7 @@ describe('Helpers', () => {
         attributes: [
           [COLLECTION_NAME, faker.lorem.word()],
           [NFT_DESCRIPTION, faker.lorem.sentence()],
-          [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+          [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
         ],
         description:
           'should return image as undefined when NFT_IMAGE attribute is missing',
@@ -118,7 +118,7 @@ describe('Helpers', () => {
           [NFT_IMAGE, faker.string.sample()],
           [COLLECTION_NAME, faker.lorem.word()],
           [NFT_DESCRIPTION, faker.lorem.sentence()],
-          [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+          [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
         ],
         description:
           'should return image as undefined when NFT_IMAGE value is not a valid Uri',
@@ -142,7 +142,7 @@ describe('Helpers', () => {
         collectionName: expect.any(String),
         image: undefined,
         nftDescription: expect.any(String),
-        storeSmartContractAddress: expect.any(String),
+        storeContractAddress: expect.any(String),
       });
     });
 
@@ -150,7 +150,7 @@ describe('Helpers', () => {
       const image = faker.internet.url();
       const collectionName = faker.lorem.word();
       const nftDescription = faker.lorem.sentence();
-      const storeSmartContractAddress = faker.finance.ethereumAddress();
+      const storeContractAddress = faker.finance.ethereumAddress();
 
       const documentStub = stubDocument({
         externalEvents: [
@@ -158,7 +158,7 @@ describe('Helpers', () => {
             [NFT_IMAGE, image],
             [COLLECTION_NAME, collectionName],
             [NFT_DESCRIPTION, nftDescription],
-            [STORE_SMART_CONTRACT_ADDRESS, storeSmartContractAddress],
+            [STORE_CONTRACT_ADDRESS, storeContractAddress],
           ]),
         ],
       });
@@ -169,7 +169,7 @@ describe('Helpers', () => {
         collectionName,
         image,
         nftDescription,
-        storeSmartContractAddress,
+        storeContractAddress,
       });
     });
 
@@ -178,7 +178,7 @@ describe('Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [NFT_DESCRIPTION, faker.lorem.sentence()],
-            [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+            [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
           ]),
         ],
       });
@@ -193,7 +193,7 @@ describe('Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
             [COLLECTION_NAME, faker.lorem.word()],
-            [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+            [STORE_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
           ]),
         ],
       });
@@ -214,7 +214,7 @@ describe('Helpers', () => {
       });
 
       expect(() => getRulesMetadataEventValues(documentStub)).toThrow(
-        `Required metadata ${STORE_SMART_CONTRACT_ADDRESS} attribute is missing`,
+        `Required metadata ${STORE_CONTRACT_ADDRESS} attribute is missing`,
       );
     });
   });

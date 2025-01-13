@@ -112,7 +112,7 @@ export enum DocumentEventAttributeName {
   RULE_PROCESSOR_RESULT_CONTENT = 'rule-processor-result-content',
   RULE_PROCESSOR_SOURCE_CODE_URL = 'rule-processor-source-code-url',
   RULE_SLUG = 'rule-slug',
-  STORE_SMART_CONTRACT_ADDRESS = 'store-smart-contract-address',
+  STORE_CONTRACT_ADDRESS = 'store-contract-address',
   UNIT_PRICE = 'unit-price',
   VEHICLE_DESCRIPTION = 'vehicle-description',
   VEHICLE_GROSS_WEIGHT = 'vehicle-gross-weight',
