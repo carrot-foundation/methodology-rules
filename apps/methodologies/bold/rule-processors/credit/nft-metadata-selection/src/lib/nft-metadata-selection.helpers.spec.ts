@@ -11,6 +11,7 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  type DocumentEventAttributeValue,
   DocumentEventName,
   DocumentEventRuleSlug,
   DocumentType,
@@ -102,36 +103,36 @@ describe('Helpers', () => {
       );
     });
 
-    it('should return image as undefined when NFT_IMAGE attribute is missing', () => {
-      const documentStub = stubDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [COLLECTION_NAME, faker.lorem.word()],
-            [NFT_DESCRIPTION, faker.lorem.sentence()],
-            [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
-          ]),
+    it.each([
+      {
+        attributes: [
+          [COLLECTION_NAME, faker.lorem.word()],
+          [NFT_DESCRIPTION, faker.lorem.sentence()],
+          [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
         ],
-      });
-
-      const result = getRulesMetadataEventValues(documentStub);
-
-      expect(result).toEqual({
-        collectionName: expect.any(String),
-        image: undefined,
-        nftDescription: expect.any(String),
-        storeSmartContractAddress: expect.any(String),
-      });
-    });
-
-    it('should return image as undefined when NFT_IMAGE value is not a valid Uri', () => {
+        description:
+          'should return image as undefined when NFT_IMAGE attribute is missing',
+      },
+      {
+        attributes: [
+          [NFT_IMAGE, faker.string.sample()],
+          [COLLECTION_NAME, faker.lorem.word()],
+          [NFT_DESCRIPTION, faker.lorem.sentence()],
+          [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
+        ],
+        description:
+          'should return image as undefined when NFT_IMAGE value is not a valid Uri',
+      },
+    ])('%description', ({ attributes }) => {
       const documentStub = stubDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: RULES_METADATA }, [
-            [NFT_IMAGE, faker.string.sample()],
-            [COLLECTION_NAME, faker.lorem.word()],
-            [NFT_DESCRIPTION, faker.lorem.sentence()],
-            [STORE_SMART_CONTRACT_ADDRESS, faker.finance.ethereumAddress()],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: RULES_METADATA },
+            attributes as [
+              DocumentEventAttributeName,
+              DocumentEventAttributeValue,
+            ][],
+          ),
         ],
       });
 
