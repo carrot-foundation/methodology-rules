@@ -1,4 +1,4 @@
-import type { Maybe, NonEmptyString } from '@carrot-fndn/shared/types';
+import type { Maybe } from '@carrot-fndn/shared/types';
 
 import {
   type DocumentEvent,
@@ -9,7 +9,7 @@ import {
   type DocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/types';
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
-import { is, validate } from 'typia';
+import { createValidate, validate } from 'typia';
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
@@ -28,17 +28,19 @@ export const getEventAttributeValue = (
   return undefined;
 };
 
-export const getEventAttributeValueOrThrow = (
+export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
-): NonEmptyString => {
+  validateValue: ReturnType<typeof createValidate<T>>,
+): T => {
   const value = getEventAttributeValue(event, attributeName);
+  const validation = validateValue(value);
 
-  if (!is<NonEmptyString>(value)) {
+  if (!validation.success) {
     throw new Error(`Required metadata ${attributeName} attribute is missing`);
   }
 
-  return value;
+  return validation.data;
 };
 
 export const getDocumentEventAttachmentByLabel = (

@@ -10,6 +10,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/types';
+import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/utils';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -50,7 +51,11 @@ describe('Event getters', () => {
       });
       const event = stubDocumentEventWithMetadata([attribute]);
 
-      const result = getEventAttributeValueOrThrow(event, attribute.name);
+      const result = getEventAttributeValueOrThrow(
+        event,
+        attribute.name,
+        validateNonEmptyString,
+      );
 
       expect(result).toBe(attribute.value);
     });
@@ -58,9 +63,9 @@ describe('Event getters', () => {
     it('should throw an error if the attribute is missing', () => {
       const event = stubDocumentEventWithMetadata([]);
 
-      expect(() => getEventAttributeValueOrThrow(event, 'missing')).toThrow(
-        'Required metadata missing attribute is missing',
-      );
+      expect(() =>
+        getEventAttributeValueOrThrow(event, 'missing', validateNonEmptyString),
+      ).toThrow('Required metadata missing attribute is missing');
     });
   });
 

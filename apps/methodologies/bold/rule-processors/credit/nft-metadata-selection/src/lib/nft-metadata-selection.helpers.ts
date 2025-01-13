@@ -29,6 +29,7 @@ import {
   type DocumentReference,
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/types';
+import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/utils';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { assert, is } from 'typia';
 
@@ -80,14 +81,17 @@ export const getRulesMetadataEventValues = (
   const collectionName = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     COLLECTION_NAME,
+    validateNonEmptyString,
   );
   const nftDescription = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     NFT_DESCRIPTION,
+    validateNonEmptyString,
   );
   const storeSmartContractAddress = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     STORE_SMART_CONTRACT_ADDRESS,
+    validateNonEmptyString,
   );
 
   return {
