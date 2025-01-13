@@ -74,4 +74,5 @@ export interface NftMetadata {
   external_url: Url;
   image: Uri;
   name: NonEmptyString;
+  store_smart_contract_address: NonEmptyString;
 }

@@ -58,6 +58,7 @@ const {
   RULE_PROCESSOR_RESULT_CONTENT,
   RULE_PROCESSOR_SOURCE_CODE_URL,
   RULE_SLUG,
+  STORE_SMART_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { MASS, METHODOLOGY } = DocumentCategory;
 const {
@@ -124,6 +125,7 @@ describe('NftMetadataSelection E2E', () => {
 
   const nftDescription = faker.lorem.sentence();
   const collectionName = faker.lorem.word();
+  const storeSmartContractAddress = faker.finance.ethereumAddress();
 
   const creditDocumentStub = stubCreditDocument({
     externalEvents: [
@@ -141,6 +143,10 @@ describe('NftMetadataSelection E2E', () => {
             stubDocumentEventAttribute({
               name: NFT_DESCRIPTION,
               value: nftDescription,
+            }),
+            stubDocumentEventAttribute({
+              name: STORE_SMART_CONTRACT_ADDRESS,
+              value: storeSmartContractAddress,
             }),
           ],
         },
@@ -274,6 +280,9 @@ describe('NftMetadataSelection E2E', () => {
     expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
     expect(response.resultContent?.['image']).toBe(image);
     expect(response.resultContent?.['description']).toBe(nftDescription);
+    expect(response.resultContent?.['store_smart_contract_address']).toBe(
+      storeSmartContractAddress,
+    );
     expect(response.resultContent?.['attributes']).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

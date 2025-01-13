@@ -7,6 +7,7 @@ import type {
 
 import {
   getEventAttributeValue,
+  getEventAttributeValueOrThrow,
   getRulesMetadataEvent,
 } from '@carrot-fndn/methodologies/bold/getters';
 import {
@@ -47,8 +48,13 @@ import type {
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
-const { ACTOR_TYPE, COLLECTION_NAME, NFT_DESCRIPTION, NFT_IMAGE } =
-  DocumentEventAttributeName;
+const {
+  ACTOR_TYPE,
+  COLLECTION_NAME,
+  NFT_DESCRIPTION,
+  NFT_IMAGE,
+  STORE_SMART_CONTRACT_ADDRESS,
+} = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 
 const logger = console;
@@ -62,6 +68,7 @@ export const getRulesMetadataEventValues = (
   collectionName: NonEmptyString;
   image: Uri | undefined;
   nftDescription: NonEmptyString;
+  storeSmartContractAddress: NonEmptyString;
 } => {
   const rulesMetadataEvent = getRulesMetadataEvent(document);
 
@@ -70,31 +77,24 @@ export const getRulesMetadataEventValues = (
   }
 
   const uri = getEventAttributeValue(rulesMetadataEvent, NFT_IMAGE);
-  const collectionName = getEventAttributeValue(
+  const collectionName = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     COLLECTION_NAME,
   );
-  const nftDescription = getEventAttributeValue(
+  const nftDescription = getEventAttributeValueOrThrow(
     rulesMetadataEvent,
     NFT_DESCRIPTION,
   );
-
-  if (!is<NonEmptyString>(collectionName)) {
-    throw new Error(
-      `Required metadata ${COLLECTION_NAME} attribute is missing`,
-    );
-  }
-
-  if (!is<NonEmptyString>(nftDescription)) {
-    throw new Error(
-      `Required metadata ${NFT_DESCRIPTION} attribute is missing`,
-    );
-  }
+  const storeSmartContractAddress = getEventAttributeValueOrThrow(
+    rulesMetadataEvent,
+    STORE_SMART_CONTRACT_ADDRESS,
+  );
 
   return {
     collectionName,
     image: is<Uri>(uri) ? uri : undefined,
     nftDescription,
+    storeSmartContractAddress,
   };
 };
 
@@ -298,6 +298,7 @@ export const mapNftMetadata = ({
   methodology,
   nftDescription,
   rewardsDistribution,
+  storeSmartContractAddress,
 }: MethodologyCreditNftMetadataDto): NftMetadata => {
   const {
     originCity,
@@ -394,5 +395,6 @@ export const mapNftMetadata = ({
       image ??
       'ipfs://bafybeiaxb5dwhmai4waltapfxrtf7rzmhulgigy4t27vynvzqtrowktyzi/image.png',
     name: 'BOLD',
+    store_smart_contract_address: storeSmartContractAddress,
   };
 };
