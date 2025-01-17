@@ -33,29 +33,29 @@
     "verbatimModuleSyntax": true,
     "strictNullChecks": true,
     "paths": {
-      "@carrot-fndn/methodologies/bold/getters": [
-        "libs/methodologies/bold/getters/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/getters": [
+        "libs/methodologies/bold/recycling/organic/getters/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/io-helpers": [
-        "libs/methodologies/bold/io-helpers/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/io-helpers": [
+        "libs/methodologies/bold/recycling/organic/io-helpers/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/matchers": [
-        "libs/methodologies/bold/matchers/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/matchers": [
+        "libs/methodologies/bold/recycling/organic/matchers/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/predicates": [
-        "libs/methodologies/bold/predicates/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/predicates": [
+        "libs/methodologies/bold/recycling/organic/predicates/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/processors": [
-        "libs/methodologies/bold/processors/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/processors": [
+        "libs/methodologies/bold/recycling/organic/processors/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/testing": [
-        "libs/methodologies/bold/testing/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/testing": [
+        "libs/methodologies/bold/recycling/organic/testing/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/types": [
-        "libs/methodologies/bold/types/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/types": [
+        "libs/methodologies/bold/recycling/organic/types/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/utils": [
-        "libs/methodologies/bold/utils/src/index.ts"
+      "@carrot-fndn/methodologies/bold/recycling/organic/utils": [
+        "libs/methodologies/bold/recycling/organic/utils/src/index.ts"
       ],
       "@carrot-fndn/shared/app/types": ["libs/shared/app/types/src/index.ts"],
       "@carrot-fndn/shared/document/loader": [

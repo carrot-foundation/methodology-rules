@@ -4,7 +4,7 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttribute,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentCategory,
@@ -16,7 +16,7 @@ import {
   DocumentSubtype,
   DocumentType,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   type RuleOutput,

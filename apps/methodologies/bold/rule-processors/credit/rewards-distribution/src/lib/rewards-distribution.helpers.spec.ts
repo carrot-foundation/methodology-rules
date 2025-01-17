@@ -4,7 +4,7 @@ import {
   type CertificateReward,
   DocumentEventActorType,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { splitBigNumberIntoParts } from '@carrot-fndn/shared/helpers';
 import { stubBigNumber } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';

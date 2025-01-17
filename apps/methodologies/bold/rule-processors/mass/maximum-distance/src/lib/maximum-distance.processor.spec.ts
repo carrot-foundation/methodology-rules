@@ -1,14 +1,14 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   stubAddress,
   stubDocument,
   stubDocumentEvent,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -19,7 +19,7 @@ import { random } from 'typia';
 
 import { MaximumDistanceProcessor } from './maximum-distance.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 const { DROP_OFF, PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 

@@ -1,0 +1,11 @@
+{
+  "name": "methodologies-bold-recycling-organic-types",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any", "methodology:bold"],
+  "sourceRoot": "libs/methodologies/bold/recycling/organic/types/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "ts": {}
+  }
+}

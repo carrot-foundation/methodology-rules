@@ -1,11 +1,11 @@
-import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
+import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 
 import {
   CREDIT_CERTIFICATES,
   MASS_AUDIT,
   MASS_CERTIFICATE_AUDIT,
   METHODOLOGY_DEFINITION,
-} from '@carrot-fndn/methodologies/bold/matchers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 
 export const NFT_METADATA_SELECTION_CRITERIA: DocumentCriteria = {
   relatedDocuments: [

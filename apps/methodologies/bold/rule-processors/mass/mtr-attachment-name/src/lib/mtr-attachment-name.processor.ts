@@ -1,15 +1,15 @@
-import { getDocumentEventAttachmentByLabel } from '@carrot-fndn/methodologies/bold/getters';
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { getDocumentEventAttachmentByLabel } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   and,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
   ReportType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';

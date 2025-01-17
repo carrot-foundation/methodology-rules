@@ -1,6 +1,6 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { stubDocument } from '@carrot-fndn/methodologies/bold/testing';
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/types';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -13,7 +13,7 @@ import { random } from 'typia';
 import { NumericWeightValuesProcessor } from './numeric-weight-values.processor';
 import { stubWeighingMoveEvent } from './numeric-weight-values.stubs';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 describe('NumericWeightValuesProcessor', () => {
   const ruleDataProcessor = new NumericWeightValuesProcessor();

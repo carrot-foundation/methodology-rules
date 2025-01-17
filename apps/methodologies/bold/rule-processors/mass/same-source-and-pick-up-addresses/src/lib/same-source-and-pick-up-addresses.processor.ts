@@ -3,14 +3,14 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import {
   isActorEventWithSourceActorType,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 

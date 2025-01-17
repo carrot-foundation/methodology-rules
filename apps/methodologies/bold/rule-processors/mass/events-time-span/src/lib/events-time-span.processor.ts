@@ -4,15 +4,15 @@ import type { SetRequiredNonNullable } from '@carrot-fndn/shared/types';
 import {
   eventHasMetadataAttribute,
   eventNameIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { differenceInDays, parseISO } from 'date-fns';

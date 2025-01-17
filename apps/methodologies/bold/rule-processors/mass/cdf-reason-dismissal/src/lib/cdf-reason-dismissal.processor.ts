@@ -3,14 +3,14 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import {
   eventHasMetadataAttribute,
   eventHasNonEmptyStringAttribute,
-} from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 export class CdfReasonDismissalProcessor extends ParentDocumentRuleProcessor<DocumentEvent> {

@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   type RuleInput,
   type RuleOutput,
@@ -9,7 +9,7 @@ import { random } from 'typia';
 import { WasteOriginIdentifiedProcessor } from './waste-origin-identified.processor';
 import { stubDocumentWithWasteOriginIdentified } from './waste-origin-identified.stubs';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 describe('WasteOriginIdentifiedProcessor', () => {
   const ruleDataProcessor = new WasteOriginIdentifiedProcessor();

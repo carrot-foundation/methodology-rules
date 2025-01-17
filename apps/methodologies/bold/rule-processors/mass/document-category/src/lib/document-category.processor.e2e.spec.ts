@@ -1,4 +1,4 @@
-import { testRuleProcessorWithMassDocuments } from '@carrot-fndn/methodologies/bold/testing';
+import { testRuleProcessorWithMassDocuments } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 
 import { handler } from '../lambda';
 

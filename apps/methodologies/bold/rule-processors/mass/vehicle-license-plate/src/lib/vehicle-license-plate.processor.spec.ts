@@ -1,13 +1,13 @@
 import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
   DocumentEventVehicleType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   DocumentLoaderService,
   stubDocumentEntity,

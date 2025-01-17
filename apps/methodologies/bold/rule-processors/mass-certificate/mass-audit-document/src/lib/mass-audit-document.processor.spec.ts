@@ -1,8 +1,8 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   stubDocument,
   stubMassCertificateAuditWithMethodologySlug,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type RuleInput,
   type RuleOutput,

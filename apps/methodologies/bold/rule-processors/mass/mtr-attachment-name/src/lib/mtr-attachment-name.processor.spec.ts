@@ -1,15 +1,15 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventAttachment,
   stubDocumentEventAttribute,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
   ReportType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,7 +20,7 @@ import { random } from 'typia';
 import { MtrAttachmentNameProcessor } from './mtr-attachment-name.processor';
 import { MTR_ATTACHMENT_NAME_RESULT_COMMENT } from './mtr-attachment-name.processor.constants';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 describe('MtrAttachmentNameProcessor', () => {
   const ruleDataProcessor = new MtrAttachmentNameProcessor();

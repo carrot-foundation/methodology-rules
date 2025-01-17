@@ -1,5 +1,5 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { stubDocument } from '@carrot-fndn/methodologies/bold/testing';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type RuleInput,
   type RuleOutput,
@@ -10,7 +10,7 @@ import { random } from 'typia';
 import { PrimaryParticipantAddressProcessor } from './primary-participant-address.processor';
 import { stubDocumentActorEventWithSourceActorTypeAndPrimaryAddress } from './primary-participant-address.stubs';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 describe('PrimaryParticipantAddressProcessor', () => {
   const ruleDataProcessor = new PrimaryParticipantAddressProcessor();

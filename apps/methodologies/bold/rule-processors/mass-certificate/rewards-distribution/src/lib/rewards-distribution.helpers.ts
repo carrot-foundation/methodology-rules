@@ -2,7 +2,7 @@ import {
   and,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   type Document,
   DocumentEventActorType,
@@ -11,7 +11,7 @@ import {
   type MassReward,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import BigNumber from 'bignumber.js';
 

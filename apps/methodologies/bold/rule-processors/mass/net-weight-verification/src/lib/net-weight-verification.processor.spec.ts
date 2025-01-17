@@ -1,10 +1,10 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { stubDocument } from '@carrot-fndn/methodologies/bold/testing';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/utils';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,7 +20,7 @@ import {
   stubApprovedWeighingMoveEventAttributes,
 } from './net-weight-verification.stubs';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 const { LOAD_NET_WEIGHT, VEHICLE_GROSS_WEIGHT, VEHICLE_WEIGHT } =
   DocumentEventAttributeName;

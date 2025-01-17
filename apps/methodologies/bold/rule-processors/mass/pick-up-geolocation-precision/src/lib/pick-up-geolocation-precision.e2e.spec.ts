@@ -6,7 +6,7 @@ import {
   stubMethodologyDefinitionDocument,
   stubParticipantHomologationDocument,
   stubParticipantHomologationGroupDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentCategory,
@@ -16,7 +16,7 @@ import {
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   type RuleOutput,

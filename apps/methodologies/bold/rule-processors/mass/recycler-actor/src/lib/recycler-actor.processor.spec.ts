@@ -1,11 +1,11 @@
 import {
   stubDocument,
   stubDocumentWithOneActorType,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentEventActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   DocumentLoaderService,
   stubDocumentEntity,

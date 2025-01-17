@@ -1,9 +1,9 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   DocumentEventAttributeName,
   ReportType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { isNonEmptyArray, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';

@@ -9,17 +9,17 @@ import {
   getEventAttributeValue,
   getEventAttributeValueOrThrow,
   getRulesMetadataEvent,
-} from '@carrot-fndn/methodologies/bold/getters';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
   MASS_AUDIT,
   MASS_CERTIFICATE,
-} from '@carrot-fndn/methodologies/bold/matchers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 import {
   and,
   eventHasName,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   type Document,
   DocumentEventActorType,
@@ -28,8 +28,8 @@ import {
   DocumentEventRuleSlug,
   type DocumentReference,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/types';
-import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/utils';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { assert, is } from 'typia';
 

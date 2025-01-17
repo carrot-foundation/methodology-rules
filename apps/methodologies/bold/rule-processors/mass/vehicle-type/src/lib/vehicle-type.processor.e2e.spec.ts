@@ -1,7 +1,7 @@
 import {
   stubDocument,
   testRuleProcessorWithMassDocuments,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {

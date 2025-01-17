@@ -1,17 +1,17 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DataSetName,
   DocumentEventAttributeName,
   DocumentEventName,
   MethodologyEvaluationResult,
-} from '@carrot-fndn/methodologies/bold/types';
-import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/utils';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,

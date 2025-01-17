@@ -1,11 +1,11 @@
 import type { PartialDeep } from 'type-fest';
 
-import { stubDocumentEventWithMetadataAttributes } from '@carrot-fndn/methodologies/bold/testing';
+import { stubDocumentEventWithMetadataAttributes } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { random } from 'typia';
 
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;

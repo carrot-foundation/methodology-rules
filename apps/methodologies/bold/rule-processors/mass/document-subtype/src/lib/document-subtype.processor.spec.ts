@@ -1,6 +1,6 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { stubDocument } from '@carrot-fndn/methodologies/bold/testing';
-import { DocumentSubtype } from '@carrot-fndn/methodologies/bold/types';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+import { DocumentSubtype } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -11,7 +11,7 @@ import { random } from 'typia';
 
 import { DocumentSubtypeProcessor } from './document-subtype.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/io-helpers');
+jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
 
 describe('DocumentSubtypeProcessor', () => {
   const ruleDataProcessor = new DocumentSubtypeProcessor();

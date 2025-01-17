@@ -1,13 +1,13 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
-import { isActorEventWithSourceActorType } from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+import { isActorEventWithSourceActorType } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 export class WasteOriginIdentifiedProcessor extends ParentDocumentRuleProcessor<DocumentEvent> {
