@@ -1,5 +1,4 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { SetRequiredNonNullable } from '@carrot-fndn/shared/types';
 
 import {
   eventHasMetadataAttribute,
@@ -11,13 +10,16 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import {
+  MethodologyDocumentEventName,
+  type SetRequiredNonNullable,
+} from '@carrot-fndn/shared/types';
 import { differenceInDays, parseISO } from 'date-fns';
 
-const { END } = DocumentEventName;
+const { END } = MethodologyDocumentEventName;
 const { MOVE_TYPE } = DocumentEventAttributeName;
 const { DROP_OFF } = DocumentEventMoveType;
 

@@ -8,7 +8,6 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -19,6 +18,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import {
@@ -29,7 +29,7 @@ import {
   isValidWeighingAttributes,
 } from './net-weight-verification.utils';
 
-const { MOVE } = DocumentEventName;
+const { MOVE } = MethodologyDocumentEventName;
 const { WEIGHING } = DocumentEventMoveType;
 const { MOVE_TYPE } = DocumentEventAttributeName;
 const { APPROVED, REJECTED } = RuleOutputStatus;

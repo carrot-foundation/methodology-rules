@@ -1,4 +1,3 @@
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
@@ -10,11 +9,14 @@ import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  MethodologyDocumentEventName,
+  type NonEmptyString,
+} from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
-const { ACTOR } = DocumentEventName;
+const { ACTOR } = MethodologyDocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE, METHODOLOGY_SLUG } = DocumentEventAttributeName;
 

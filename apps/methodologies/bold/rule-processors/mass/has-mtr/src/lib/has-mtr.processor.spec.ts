@@ -3,10 +3,7 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import {
-  type Document,
-  DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { type Document } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
   DocumentLoaderService,
@@ -18,6 +15,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { HasMtrProcessor } from './has-mtr.processor';
@@ -48,7 +46,7 @@ describe('HasMtrProcessor', () => {
             metadata: {
               attributes: stubArray(() => stubDocumentEventAttribute()),
             },
-            name: DocumentEventName.OPEN,
+            name: MethodologyDocumentEventName.OPEN,
           }),
         ],
       }),
@@ -68,7 +66,7 @@ describe('HasMtrProcessor', () => {
                 }),
               ],
             },
-            name: DocumentEventName.OPEN,
+            name: MethodologyDocumentEventName.OPEN,
           }),
         ],
       }),

@@ -10,7 +10,6 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentEventRuleSlug,
   type DocumentReference,
   DocumentSubtype,
@@ -29,6 +28,7 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random, validate } from 'typia';
 
@@ -49,7 +49,8 @@ import {
 
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
-const { ACTOR, LINK, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
+const { ACTOR, LINK, RULE_EXECUTION, RULES_METADATA } =
+  MethodologyDocumentEventName;
 const {
   ACTOR_TYPE,
   COLLECTION_NAME,

@@ -7,13 +7,13 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -25,7 +25,7 @@ describe('SameSourceAndPickUpAddressProcessor', () => {
   const ruleDataProcessor = new SameSourceAndPickUpAddressesProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { ACTOR } = DocumentEventName;
+  const { ACTOR } = MethodologyDocumentEventName;
   const { ACTOR_TYPE, MOVE_TYPE } = DocumentEventAttributeName;
   const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
   const { SOURCE } = DocumentEventActorType;
@@ -35,7 +35,7 @@ describe('SameSourceAndPickUpAddressProcessor', () => {
   const evaluateEvent = stubDocumentEventWithMetadataAttributes(
     {
       address: { id: addressId },
-      name: random<DocumentEventName>(),
+      name: random<MethodologyDocumentEventName>(),
     },
     [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
   );

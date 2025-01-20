@@ -8,8 +8,8 @@ import {
   type DocumentEvent,
   type DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { REQUIRED_ACTOR_TYPES } from './rewards-distribution.constants';
@@ -24,7 +24,7 @@ const getActorTypeMetadata = (
       value: String(actorType),
     },
   ]),
-  name: DocumentEventName.ACTOR,
+  name: MethodologyDocumentEventName.ACTOR,
 });
 
 export const requiredMassActorEvents = REQUIRED_ACTOR_TYPES.MASS.map(

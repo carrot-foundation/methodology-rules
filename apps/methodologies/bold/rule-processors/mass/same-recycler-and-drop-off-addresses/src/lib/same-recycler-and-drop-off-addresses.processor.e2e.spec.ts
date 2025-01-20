@@ -7,7 +7,6 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -17,6 +16,7 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
@@ -39,11 +39,11 @@ testRuleProcessorWithMassDocuments(
       const document = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.MOVE },
+            { name: MethodologyDocumentEventName.MOVE },
             [[MOVE_TYPE, DROP_OFF]],
           ),
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.ACTOR },
+            { name: MethodologyDocumentEventName.ACTOR },
             [[ACTOR_TYPE, RECYCLER]],
           ),
         ],

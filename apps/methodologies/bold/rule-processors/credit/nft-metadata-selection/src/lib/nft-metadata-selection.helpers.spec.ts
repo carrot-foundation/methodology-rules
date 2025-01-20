@@ -1,4 +1,8 @@
-import type { NonEmptyArray, UnknownObject } from '@carrot-fndn/shared/types';
+import type {
+  MethodologyDocumentEventAttributeValue,
+  NonEmptyArray,
+  UnknownObject,
+} from '@carrot-fndn/shared/types';
 import type { RequiredDeep } from 'type-fest';
 
 import {
@@ -11,13 +15,12 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  type DocumentEventAttributeValue,
-  DocumentEventName,
   DocumentEventRuleSlug,
   DocumentType,
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray, stubRuleInput } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { assert, random, validate } from 'typia';
 
@@ -60,7 +63,8 @@ const {
   STORE_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { RECYCLER } = DocumentEventActorType;
-const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
+const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } =
+  MethodologyDocumentEventName;
 
 describe('Helpers', () => {
   describe('getCarrotExplorePageUrl', () => {
@@ -130,7 +134,7 @@ describe('Helpers', () => {
             { name: RULES_METADATA },
             attributes as [
               DocumentEventAttributeName,
-              DocumentEventAttributeValue,
+              MethodologyDocumentEventAttributeValue,
             ][],
           ),
         ],

@@ -7,7 +7,6 @@ import {
 import {
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
@@ -15,6 +14,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { CdfAddressProcessor } from './cdf-address.processor';
@@ -28,7 +28,7 @@ describe('CdfAddressProcessor', () => {
 
   const { ACTOR_TYPE, REPORT_TYPE } = DocumentEventAttributeName;
   const { CDF } = ReportType;
-  const { ACTOR, MOVE } = DocumentEventName;
+  const { ACTOR, MOVE } = MethodologyDocumentEventName;
   const { RECYCLER } = DocumentEventActorType;
 
   it.each([

@@ -5,7 +5,6 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
@@ -17,6 +16,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -38,7 +38,7 @@ describe('VehicleDescriptionProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName>() },
+            { name: random<MethodologyDocumentEventName>() },
             [
               [MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()],
               [VEHICLE_TYPE, OTHERS],
@@ -56,7 +56,7 @@ describe('VehicleDescriptionProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName>() },
+            { name: random<MethodologyDocumentEventName>() },
             [[VEHICLE_TYPE, OTHERS]],
           ),
         ],
@@ -70,7 +70,7 @@ describe('VehicleDescriptionProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName>() },
+            { name: random<MethodologyDocumentEventName>() },
             [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
           ),
         ],

@@ -1,10 +1,13 @@
 /* cSpell:disable */
+
 import {
-  DataSetName,
   type Document,
-  type DocumentAttachment,
   DocumentEventAttributeName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DataSetName,
+  type MethodologyDocumentAttachment,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -41,7 +44,7 @@ const author = stubAuthor();
 const externalId = faker.string.uuid();
 const externalCreatedAt = '2023-01-31T09:54:06.000Z';
 const lastEventExternalCreatedAt = '2023-12-19T10:35:12.000Z';
-const attachment = random<DocumentAttachment>();
+const attachment = random<MethodologyDocumentAttachment>();
 const vehicleLicensePlate = faker.string.alphanumeric();
 const weightScale = {
   manufacturer: faker.string.sample(),

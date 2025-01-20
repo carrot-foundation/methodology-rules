@@ -7,7 +7,6 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   DocumentEventAttributeName,
-  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -18,6 +17,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 import { MTR_ATTACHMENT_NAME_RESULT_COMMENT } from './mtr-attachment-name.processor.constants';
 
@@ -31,7 +31,7 @@ export class MtrAttachmentNameProcessor extends RuleDataProcessor {
       }),
     );
 
-    const { OPEN } = DocumentEventName;
+    const { OPEN } = MethodologyDocumentEventName;
     const { HAS_MTR } = DocumentEventAttributeName;
 
     const openEventWithMtr = document?.externalEvents?.find(

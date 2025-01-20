@@ -7,7 +7,6 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -18,6 +17,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export class MandatoryMetadataProcessor extends RuleDataProcessor {
   static resultComment = {
@@ -41,7 +41,7 @@ export class MandatoryMetadataProcessor extends RuleDataProcessor {
     }
 
     const { MOVE_TYPE } = DocumentEventAttributeName;
-    const { OPEN } = DocumentEventName;
+    const { OPEN } = MethodologyDocumentEventName;
     const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
     const pickUpEventPresent = document.externalEvents?.find(

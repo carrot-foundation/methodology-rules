@@ -5,8 +5,8 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 export const stubWeighingMoveEvent = (
@@ -38,5 +38,5 @@ export const stubWeighingMoveEvent = (
         },
       ],
     },
-    name: DocumentEventName.MOVE,
+    name: MethodologyDocumentEventName.MOVE,
   });

@@ -12,8 +12,6 @@ import {
 import {
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
-  MethodologyEvaluationResult,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -24,8 +22,12 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import {
+  MethodologyDocumentEventName,
+  MethodologyEvaluationResult,
+} from '@carrot-fndn/shared/types';
 
-const { CLOSE } = DocumentEventName;
+const { CLOSE } = MethodologyDocumentEventName;
 const { METHODOLOGY_EVALUATION_RESULT } = DocumentEventAttributeName;
 const { APPROVED } = MethodologyEvaluationResult;
 

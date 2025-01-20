@@ -7,13 +7,13 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -37,7 +37,7 @@ describe('MaximumDistanceProcessor', () => {
         },
       ],
     },
-    name: random<DocumentEventName>(),
+    name: random<MethodologyDocumentEventName>(),
   });
   const dropOffEvent = stubDocumentEvent({
     metadata: {
@@ -49,7 +49,7 @@ describe('MaximumDistanceProcessor', () => {
         },
       ],
     },
-    name: random<DocumentEventName>(),
+    name: random<MethodologyDocumentEventName>(),
   });
 
   it.each([

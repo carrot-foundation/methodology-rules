@@ -1,10 +1,12 @@
-import type { Maybe } from '@carrot-fndn/shared/types';
+import type {
+  MethodologyDocumentEventAttachment,
+  MethodologyDocumentEventAttributeValue,
+  Maybe,
+} from '@carrot-fndn/shared/types';
 
 import {
   type DocumentEvent,
-  type DocumentEventAttachment,
   DocumentEventAttributeName,
-  type DocumentEventAttributeValue,
   type DocumentEventWithAttachments,
   type DocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
@@ -14,7 +16,7 @@ import { createValidate, validate } from 'typia';
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
-): DocumentEventAttributeValue | undefined => {
+): MethodologyDocumentEventAttributeValue | undefined => {
   const validation = validate<DocumentEventWithMetadata>(event);
 
   if (validation.success) {
@@ -46,7 +48,7 @@ export const getEventAttributeValueOrThrow = <T>(
 export const getDocumentEventAttachmentByLabel = (
   event: DocumentEvent,
   label: string,
-): DocumentEventAttachment | undefined => {
+): MethodologyDocumentEventAttachment | undefined => {
   const validation = validate<DocumentEventWithAttachments>(event);
 
   if (validation.success) {
@@ -60,7 +62,7 @@ export const getDocumentEventAttachmentByLabel = (
 
 export const getEventMethodologySlug = (
   event: Maybe<DocumentEvent>,
-): DocumentEventAttributeValue | undefined =>
+): MethodologyDocumentEventAttributeValue | undefined =>
   getNonEmptyString(
     getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
   );

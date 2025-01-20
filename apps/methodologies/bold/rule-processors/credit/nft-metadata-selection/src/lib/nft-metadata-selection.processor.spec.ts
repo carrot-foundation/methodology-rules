@@ -10,7 +10,6 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentEventRuleSlug,
   type DocumentReference,
   DocumentSubtype,
@@ -18,6 +17,7 @@ import {
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random, validate } from 'typia';
 
@@ -45,7 +45,7 @@ const {
   RULE_SLUG,
   STORE_CONTRACT_ADDRESS: STORE_SMART_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
-const { ACTOR, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
+const { ACTOR, RULE_EXECUTION, RULES_METADATA } = MethodologyDocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 

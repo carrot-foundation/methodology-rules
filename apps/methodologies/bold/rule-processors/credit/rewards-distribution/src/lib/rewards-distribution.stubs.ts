@@ -12,17 +12,17 @@ import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentEventRuleSlug,
   type MassReward,
   type RewardsDistributionActorType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 import { random } from 'typia';
 
-const { END, RULE_EXECUTION } = DocumentEventName;
+const { END, RULE_EXECUTION } = MethodologyDocumentEventName;
 const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG } = DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 const { NETWORK } = DocumentEventActorType;

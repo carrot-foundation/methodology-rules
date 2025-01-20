@@ -1,10 +1,8 @@
 import type { PartialDeep } from 'type-fest';
 
 import { stubDocumentEvent } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import {
-  type DocumentEvent,
-  DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { type DocumentEvent } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { INVOICE_ATTRIBUTES } from './invoice-fields.constants';
@@ -21,5 +19,5 @@ export const stubEventWithAllInvoiceFields = (
         value: faker.string.sample(),
       })),
     },
-    name: DocumentEventName.MOVE,
+    name: MethodologyDocumentEventName.MOVE,
   });

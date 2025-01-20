@@ -7,12 +7,12 @@ import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   type MassReward,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -109,7 +109,7 @@ export const getActorsByType = ({
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
     const methodologyParticipant = methodologyDocument.externalEvents?.find(
       and(
-        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventNameIsAnyOf([MethodologyDocumentEventName.ACTOR]),
         metadataAttributeValueIsAnyOf(DocumentEventAttributeName.ACTOR_TYPE, [
           actorType,
         ]),

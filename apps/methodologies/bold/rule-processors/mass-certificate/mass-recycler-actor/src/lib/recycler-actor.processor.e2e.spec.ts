@@ -8,7 +8,6 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -19,11 +18,12 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
 
-const { ACTOR } = DocumentEventName;
+const { ACTOR } = MethodologyDocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
 

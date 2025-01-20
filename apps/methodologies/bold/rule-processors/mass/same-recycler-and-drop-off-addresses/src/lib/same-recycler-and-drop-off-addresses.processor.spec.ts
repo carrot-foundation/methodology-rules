@@ -7,7 +7,6 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -15,6 +14,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { SameRecyclerAndDropOffAddressesProcessor } from './same-recycler-and-drop-off-addresses.processor';
@@ -40,7 +40,7 @@ describe('SameRecyclerAndDropOffAddressesProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.MOVE },
+            { name: MethodologyDocumentEventName.MOVE },
             [[MOVE_TYPE, DROP_OFF]],
           ),
         ],
@@ -55,7 +55,7 @@ describe('SameRecyclerAndDropOffAddressesProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.OPEN },
+            { name: MethodologyDocumentEventName.OPEN },
             [[ACTOR_TYPE, RECYCLER]],
           ),
         ],
@@ -72,7 +72,7 @@ describe('SameRecyclerAndDropOffAddressesProcessor', () => {
           stubDocumentEventWithMetadataAttributes(
             {
               address: { id: 'address_id' },
-              name: DocumentEventName.MOVE,
+              name: MethodologyDocumentEventName.MOVE,
             },
             [
               [MOVE_TYPE, DROP_OFF],
@@ -91,11 +91,11 @@ describe('SameRecyclerAndDropOffAddressesProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.MOVE },
+            { name: MethodologyDocumentEventName.MOVE },
             [[MOVE_TYPE, DROP_OFF]],
           ),
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.ACTOR },
+            { name: MethodologyDocumentEventName.ACTOR },
             [[ACTOR_TYPE, RECYCLER]],
           ),
         ],

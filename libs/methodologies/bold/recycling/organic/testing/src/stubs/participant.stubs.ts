@@ -1,19 +1,21 @@
 import type {
-  Author,
-  Participant,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+  MethodologyAuthor,
+  MethodologyParticipant,
+} from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import { random } from 'typia';
 
 export const stubParticipant = (
-  partialParticipant?: PartialDeep<Participant>,
-): Participant => ({
-  ...random<Participant>(),
+  partialParticipant?: PartialDeep<MethodologyParticipant>,
+): MethodologyParticipant => ({
+  ...random<MethodologyParticipant>(),
   ...partialParticipant,
 });
 
-export const stubAuthor = (partialAuthor?: PartialDeep<Author>) => ({
-  ...random<Author>(),
+export const stubAuthor = (
+  partialAuthor?: PartialDeep<MethodologyAuthor>,
+): MethodologyAuthor => ({
+  ...random<MethodologyAuthor>(),
   ...partialAuthor,
 });

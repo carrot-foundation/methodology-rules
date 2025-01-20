@@ -1,4 +1,3 @@
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
@@ -7,14 +6,17 @@ import {
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  type DocumentEventAttributeValue,
-  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
   MassSubtype,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
+import {
+  type MethodologyDocumentEventAttributeValue,
+  MethodologyDocumentEventName,
+  type NonEmptyString,
+} from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
@@ -53,7 +55,7 @@ export const stubDocumentWithOneActorType = (
   });
 
 export const stubDocumentReference = (
-  partial?: Partial<Required<DocumentReference>>,
+  partial?: Partial<DocumentReference>,
 ): DocumentReference => ({
   ...random<Required<DocumentReference>>(),
   ...partial,
@@ -98,11 +100,11 @@ export const stubMassDocument = (
   });
 
 export const stubMassAuditDocumentWithActorAndAttribute = (
-  eventName: DocumentEventName,
+  eventName: MethodologyDocumentEventName,
   attributeName: DocumentEventAttributeName,
-  attributeValue: DocumentEventAttributeValue,
+  attributeValue: MethodologyDocumentEventAttributeValue,
   attributePairs: Array<
-    [DocumentEventAttributeName, DocumentEventAttributeValue]
+    [DocumentEventAttributeName, MethodologyDocumentEventAttributeValue]
   >,
   partialDocument?: PartialDeep<Document>,
 ) =>
@@ -170,7 +172,7 @@ export const stubMassCertificateAuditWithMethodologySlug = (
   stubMassCertificateAuditDocument({
     externalEvents: [
       stubDocumentEventWithMetadataAttributes(
-        { name: DocumentEventName.ACTOR },
+        { name: MethodologyDocumentEventName.ACTOR },
         [
           [
             DocumentEventAttributeName.ACTOR_TYPE,

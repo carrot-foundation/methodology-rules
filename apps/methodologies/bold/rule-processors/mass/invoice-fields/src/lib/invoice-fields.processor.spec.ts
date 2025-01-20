@@ -6,7 +6,6 @@ import {
 import {
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -14,6 +13,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -61,7 +61,7 @@ describe('InvoiceFieldsProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.MOVE,
+            name: MethodologyDocumentEventName.MOVE,
           }),
         ],
       }),
@@ -83,7 +83,7 @@ describe('InvoiceFieldsProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.OPEN,
+            name: MethodologyDocumentEventName.OPEN,
           }),
         ],
       }),
@@ -110,7 +110,7 @@ describe('InvoiceFieldsProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.MOVE,
+            name: MethodologyDocumentEventName.MOVE,
           }),
         ],
       }),
@@ -132,7 +132,7 @@ describe('InvoiceFieldsProcessor', () => {
                 },
               ],
             },
-            name: DocumentEventName.MOVE,
+            name: MethodologyDocumentEventName.MOVE,
           }),
         ],
       }),

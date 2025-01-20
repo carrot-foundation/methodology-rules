@@ -6,8 +6,8 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -68,14 +68,14 @@ describe('Predicate Factories', () => {
 
   describe('eventNameIsAnyOf', () => {
     it('should return true if the event has any of the specified names', () => {
-      const { MOVE, OPEN } = DocumentEventName;
+      const { MOVE, OPEN } = MethodologyDocumentEventName;
       const event = stubDocumentEvent({ name: MOVE });
 
       expect(eventNameIsAnyOf([MOVE, OPEN])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified names', () => {
-      const { ACTOR, MOVE, OPEN } = DocumentEventName;
+      const { ACTOR, MOVE, OPEN } = MethodologyDocumentEventName;
       const event = stubDocumentEvent({ name: ACTOR });
 
       expect(eventNameIsAnyOf([MOVE, OPEN])(event)).toBe(false);

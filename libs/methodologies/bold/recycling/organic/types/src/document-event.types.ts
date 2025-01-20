@@ -1,64 +1,35 @@
-import { type UnknownObject } from '@carrot-fndn/shared/types';
-import { tags } from 'typia';
-
-import type { Address } from './address.types';
-import type { Document } from './document.types';
 import type {
+  MethodologyDocumentEvent as MethodologyDocumentEvent,
+  MethodologyDocumentEventAttribute as MethodologyDocumentEventAttribute,
+  MethodologyDocumentEventMetadata as MethodologyDocumentEventMetadata,
+  MethodologyDocumentReference as MethodologyDocumentReference,
+} from '@carrot-fndn/shared/types';
+
+import type {
+  DocumentCategory,
   DocumentEventAttributeName,
-  DocumentEventName,
+  DocumentSubtype,
+  DocumentType,
 } from './enum.types';
-import type { Author, Participant } from './participant.types';
 
-export type DocumentEventAttributeValue =
-  | UnknownObject
-  | boolean
-  | null
-  | number
-  | string
-  | unknown[];
-
-export interface DocumentEventAttribute {
-  isPublic: boolean;
+export interface DocumentEventAttribute
+  extends MethodologyDocumentEventAttribute {
   name: DocumentEventAttributeName | string;
-  value: DocumentEventAttributeValue;
 }
 
-export interface DocumentEventMetadata {
-  attributes?: Array<DocumentEventAttribute> | undefined;
+export interface DocumentEventMetadata
+  extends MethodologyDocumentEventMetadata {
+  attributes?: DocumentEventAttribute[] | undefined;
 }
 
-export interface DocumentEventAttachment {
-  attachmentId: string;
-  contentLength: number & tags.Minimum<0>;
-  isPublic: boolean;
-  label: string;
+export interface DocumentReference extends MethodologyDocumentReference {
+  category?: DocumentCategory | string | undefined;
+  subtype?: DocumentSubtype | string | undefined;
+  type?: DocumentType | string | undefined;
 }
 
-export interface DocumentReference {
-  category?: Document['category'] | undefined;
-  documentId: string;
-  subtype?: Document['subtype'];
-  type?: Document['type'];
-}
-
-export interface DocumentEvent {
-  address: Address;
-  attachments?: DocumentEventAttachment[] | undefined;
-  author: Author;
-  documentSideEffectUpdates?: UnknownObject | undefined;
-  externalCreatedAt?: (string & tags.Format<'date-time'>) | undefined;
-  externalId?: string | undefined;
-  id: string;
-  isPublic: boolean;
+export interface DocumentEvent extends MethodologyDocumentEvent {
   metadata?: DocumentEventMetadata | undefined;
-  name: DocumentEventName | string;
-  participant: Participant;
-  preserveSensitiveData?: boolean | undefined;
-  propagateEvent?: boolean | undefined;
-  propagatedFrom?: UnknownObject | undefined;
   referencedDocument?: DocumentReference | undefined;
   relatedDocument?: DocumentReference | undefined;
-  target?: UnknownObject | undefined;
-  updates?: UnknownObject | undefined;
-  value?: (number & tags.Minimum<0>) | undefined;
 }

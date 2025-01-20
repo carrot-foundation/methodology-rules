@@ -5,8 +5,8 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -77,5 +77,5 @@ export const stubApprovedWeighingMoveEvent = (
         options.weightDifference,
       ),
     },
-    name: DocumentEventName.MOVE,
+    name: MethodologyDocumentEventName.MOVE,
   });

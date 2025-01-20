@@ -6,9 +6,9 @@ import {
 import {
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 import {
   getAuditorActorEvent,
@@ -16,7 +16,7 @@ import {
   getRulesMetadataEvent,
 } from './document.getters';
 
-const { ACTOR, OPEN, RULES_METADATA } = DocumentEventName;
+const { ACTOR, OPEN, RULES_METADATA } = MethodologyDocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
 

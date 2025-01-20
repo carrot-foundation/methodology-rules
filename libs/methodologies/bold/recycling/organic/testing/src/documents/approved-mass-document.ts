@@ -1,12 +1,15 @@
 /* cSpell:disable */
 import {
-  DataSetName,
   type Document,
-  type DocumentAttachment,
+  DocumentCategory,
   DocumentEventAttributeName,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DataSetName,
+  type MethodologyDocumentAttachment,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -58,7 +61,7 @@ const author = stubAuthor();
 const externalId = faker.string.uuid();
 const externalCreatedAt = '2023-03-31T09:54:06.000Z';
 const lastEventExternalCreatedAt = '2023-06-19T10:35:12.000Z';
-const attachment = random<DocumentAttachment>();
+const attachment = random<MethodologyDocumentAttachment>();
 const vehicleLicensePlate = faker.string.alphanumeric();
 const weightScale = {
   manufacturer: faker.string.sample(),
@@ -70,7 +73,7 @@ const weightScale = {
 
 export const approvedMassDocument: Document = {
   attachments: [attachment],
-  category: 'Mass',
+  category: DocumentCategory.MASS,
   createdAt: '2023-12-19T13:34:35.785Z',
   currentValue: 109_200,
   dataSetName: DataSetName.PROD,
@@ -123,42 +126,42 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'move-type',
+            name: DocumentEventAttributeName.MOVE_TYPE,
             value: 'Pick-up',
           },
           {
             isPublic: true,
-            name: 'vehicle-license-plate',
+            name: DocumentEventAttributeName.VEHICLE_LICENSE_PLATE,
             value: vehicleLicensePlate,
           },
           {
             isPublic: true,
-            name: 'vehicle-volume-capacity',
+            name: DocumentEventAttributeName.VEHICLE_VOLUME_CAPACITY,
             value: '131000.00 KG',
           },
           {
             isPublic: true,
-            name: 'vehicle-type',
+            name: DocumentEventAttributeName.VEHICLE_TYPE,
             value: 'Truck',
           },
           {
             isPublic: true,
-            name: 'driver-internal-id',
+            name: DocumentEventAttributeName.DRIVER_INTERNAL_ID,
             value: faker.string.uuid(),
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
           {
             isPublic: true,
-            name: 'has-mtr',
+            name: DocumentEventAttributeName.HAS_MTR,
             value: false,
           },
           {
             isPublic: true,
-            name: 'has-reason-dismissal-mtr',
+            name: DocumentEventAttributeName.HAS_REASON_DISMISSAL_MTR,
             value: faker.string.sample(),
           },
         ],
@@ -183,7 +186,7 @@ export const approvedMassDocument: Document = {
           },
           {
             isPublic: true,
-            name: 'waste-origin-identified',
+            name: DocumentEventAttributeName.WASTE_ORIGIN_IDENTIFIED,
             value: true,
           },
         ],
@@ -261,27 +264,27 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'move-type',
+            name: DocumentEventAttributeName.MOVE_TYPE,
             value: 'Identification',
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
           {
             isPublic: true,
-            name: 'vehicle-license-plate',
+            name: DocumentEventAttributeName.VEHICLE_LICENSE_PLATE,
             value: vehicleLicensePlate,
           },
           {
             isPublic: true,
-            name: 'lpr-software',
+            name: DocumentEventAttributeName.LPR_SOFTWARE,
             value: 'ITSCAM',
           },
           {
             isPublic: true,
-            name: 'lpr-supplier',
+            name: DocumentEventAttributeName.LPR_SUPPLIER,
             value: 'Pumatronix',
           },
         ],
@@ -301,52 +304,52 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'move-type',
+            name: DocumentEventAttributeName.MOVE_TYPE,
             value: 'Weighing',
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
           {
             isPublic: true,
-            name: 'weight-scale-type',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_TYPE,
             value: weightScale.type,
           },
           {
             isPublic: true,
-            name: 'weight-scale-manufacturer',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_MANUFACTURER,
             value: weightScale.manufacturer,
           },
           {
             isPublic: true,
-            name: 'weight-scale-model',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_MODEL,
             value: weightScale.model,
           },
           {
             isPublic: true,
-            name: 'weight-scale-software',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_SOFTWARE,
             value: weightScale.software,
           },
           {
             isPublic: true,
-            name: 'weight-scale-supplier',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_SUPPLIER,
             value: weightScale.supplier,
           },
           {
             isPublic: true,
-            name: 'vehicle-gross-weight',
+            name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
             value: '128901.00 KG',
           },
           {
             isPublic: true,
-            name: 'vehicle-weight',
+            name: DocumentEventAttributeName.VEHICLE_WEIGHT,
             value: '19700.00 KG',
           },
           {
             isPublic: true,
-            name: 'load-net-weight',
+            name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
             value: '109201.00 KG',
           },
         ],
@@ -366,12 +369,12 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'move-type',
+            name: DocumentEventAttributeName.MOVE_TYPE,
             value: 'Drop-off',
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
         ],
@@ -391,52 +394,52 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'move-type',
+            name: DocumentEventAttributeName.MOVE_TYPE,
             value: 'Weighing',
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
           {
             isPublic: true,
-            name: 'weight-scale-type',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_TYPE,
             value: weightScale.type,
           },
           {
             isPublic: true,
-            name: 'weight-scale-manufacturer',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_MANUFACTURER,
             value: weightScale.manufacturer,
           },
           {
             isPublic: true,
-            name: 'weight-scale-model',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_MODEL,
             value: weightScale.model,
           },
           {
             isPublic: true,
-            name: 'weight-scale-software',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_SOFTWARE,
             value: weightScale.software,
           },
           {
             isPublic: true,
-            name: 'weight-scale-supplier',
+            name: DocumentEventAttributeName.WEIGHT_SCALE_SUPPLIER,
             value: weightScale.supplier,
           },
           {
             isPublic: true,
-            name: 'vehicle-gross-weight',
+            name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
             value: '128900.00 KG',
           },
           {
             isPublic: true,
-            name: 'vehicle-weight',
+            name: DocumentEventAttributeName.VEHICLE_WEIGHT,
             value: '19700.00 KG',
           },
           {
             isPublic: true,
-            name: 'load-net-weight',
+            name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
             value: '109200.00 KG',
           },
         ],
@@ -457,52 +460,52 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: false,
-            name: 'invoice-number',
+            name: DocumentEventAttributeName.INVOICE_NUMBER,
             value: faker.string.alphanumeric(),
           },
           {
             isPublic: false,
-            name: 'invoice-key',
+            name: DocumentEventAttributeName.INVOICE_KEY,
             value: faker.string.alphanumeric(),
           },
           {
             isPublic: true,
-            name: 'invoice-date',
+            name: DocumentEventAttributeName.INVOICE_DATE,
             value: '2023-10-02',
           },
           {
             isPublic: true,
-            name: 'invoice-neighborhood',
+            name: DocumentEventAttributeName.INVOICE_NEIGHBORHOOD,
             value: faker.location.street(),
           },
           {
             isPublic: true,
-            name: 'invoice-country-city',
+            name: DocumentEventAttributeName.INVOICE_COUNTRY_CITY,
             value: faker.location.city(),
           },
           {
             isPublic: true,
-            name: 'invoice-country-state',
+            name: DocumentEventAttributeName.INVOICE_COUNTRY_STATE,
             value: faker.location.state(),
           },
           {
             isPublic: true,
-            name: 'invoice-country',
+            name: DocumentEventAttributeName.INVOICE_COUNTRY,
             value: faker.location.country(),
           },
           {
             isPublic: true,
-            name: 'description',
+            name: DocumentEventAttributeName.DESCRIPTION,
             value: faker.string.sample(),
           },
           {
             isPublic: true,
-            name: 'invoice-total-weight',
+            name: DocumentEventAttributeName.INVOICE_TOTAL_WEIGHT,
             value: '136410.00 KG',
           },
           {
             isPublic: true,
-            name: 'invoice-weight-massid-associated',
+            name: DocumentEventAttributeName.INVOICE_WEIGHT_MASSID_ASSOCIATED,
             value: '109200.00 KG',
           },
         ],
@@ -524,17 +527,17 @@ export const approvedMassDocument: Document = {
         attributes: [
           {
             isPublic: true,
-            name: 'report-type',
+            name: DocumentEventAttributeName.REPORT_TYPE,
             value: 'CDF',
           },
           {
             isPublic: true,
-            name: 'report-number',
+            name: DocumentEventAttributeName.REPORT_NUMBER,
             value: faker.string.numeric(),
           },
           {
             isPublic: true,
-            name: 'report-date-issued',
+            name: DocumentEventAttributeName.REPORT_DATE_ISSUED,
             value: false,
           },
         ],

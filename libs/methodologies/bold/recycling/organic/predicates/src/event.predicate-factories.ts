@@ -3,9 +3,11 @@ import type { UnknownArray } from 'type-fest';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
-  type PredicateCallback,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  MethodologyDocumentEventName,
+  type PredicateCallback,
+} from '@carrot-fndn/shared/types';
 
 import {
   eventHasMetadataAttribute,
@@ -30,7 +32,9 @@ export const not =
     !predicateCallback(input);
 
 export const eventNameIsAnyOf =
-  (eventNames: Array<DocumentEventName>): PredicateCallback<DocumentEvent> =>
+  (
+    eventNames: Array<MethodologyDocumentEventName>,
+  ): PredicateCallback<DocumentEvent> =>
   (event) =>
     eventNames.some((name) => eventHasName(event, name));
 

@@ -7,7 +7,6 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentEventAttributeName,
-  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
@@ -15,6 +14,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { MtrAttachmentNameProcessor } from './mtr-attachment-name.processor';
@@ -42,7 +42,7 @@ describe('MtrAttachmentNameProcessor', () => {
                 }),
               ],
             },
-            name: DocumentEventName.OPEN,
+            name: MethodologyDocumentEventName.OPEN,
           }),
         ],
       }),
@@ -72,7 +72,7 @@ describe('MtrAttachmentNameProcessor', () => {
                 }),
               ],
             },
-            name: DocumentEventName.OPEN,
+            name: MethodologyDocumentEventName.OPEN,
           }),
         ],
       }),

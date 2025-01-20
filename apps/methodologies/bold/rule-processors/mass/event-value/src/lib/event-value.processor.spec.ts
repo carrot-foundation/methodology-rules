@@ -6,13 +6,13 @@ import {
 import {
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { EventValueProcessor } from './event-value.processor';
@@ -38,7 +38,7 @@ describe('EventValueProcessor', () => {
                 },
               ],
             },
-            name: random<DocumentEventName>(),
+            name: random<MethodologyDocumentEventName>(),
           }),
         ],
       }),
@@ -61,7 +61,7 @@ describe('EventValueProcessor', () => {
                 },
               ],
             },
-            name: random<DocumentEventName>(),
+            name: random<MethodologyDocumentEventName>(),
           }),
         ],
       }),

@@ -11,11 +11,11 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
-const { MOVE } = DocumentEventName;
+const { MOVE } = MethodologyDocumentEventName;
 const { DROP_OFF } = DocumentEventMoveType;
 const { MOVE_TYPE } = DocumentEventAttributeName;
 
