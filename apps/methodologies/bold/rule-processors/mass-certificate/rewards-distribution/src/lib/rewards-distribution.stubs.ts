@@ -2,14 +2,14 @@ import {
   stubDocumentEventWithMetadata,
   stubMassDocument,
   stubMethodologyDefinitionDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   type DocumentEvent,
   type DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { faker } from '@faker-js/faker';
 
 import { REQUIRED_ACTOR_TYPES } from './rewards-distribution.constants';

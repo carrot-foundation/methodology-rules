@@ -1,4 +1,4 @@
-import { stubDocument } from '@carrot-fndn/methodologies/bold/testing';
+import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentLoaderService,
   stubDocumentEntity,

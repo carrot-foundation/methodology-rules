@@ -1,13 +1,13 @@
-import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
+import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 
 import {
   MASS_AUDIT,
   METHODOLOGY_DEFINITION,
-} from '@carrot-fndn/methodologies/bold/matchers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 import {
   DocumentEventActorType,
   MassSubtype,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import BigNumber from 'bignumber.js';
 
 import type { RewardsDistribution } from './rewards-distribution.types';

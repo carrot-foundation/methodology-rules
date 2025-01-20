@@ -1,12 +1,12 @@
 import type { PartialDeep } from 'type-fest';
 
-import { stubDocumentEvent } from '@carrot-fndn/methodologies/bold/testing';
+import { stubDocumentEvent } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { faker } from '@faker-js/faker';
 
 export const stubWeighingMoveEvent = (

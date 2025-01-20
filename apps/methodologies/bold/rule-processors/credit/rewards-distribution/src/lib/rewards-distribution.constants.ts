@@ -1,4 +1,4 @@
-import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/io-helpers';
+import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 
 import {
   CREDIT_CERTIFICATES,
@@ -6,7 +6,7 @@ import {
   MASS_AUDIT,
   MASS_CERTIFICATE,
   MASS_CERTIFICATE_AUDIT,
-} from '@carrot-fndn/methodologies/bold/matchers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 
 export const MASS_CERTIFICATE_AUDIT_CRITERIA: DocumentCriteria = {
   relatedDocuments: [

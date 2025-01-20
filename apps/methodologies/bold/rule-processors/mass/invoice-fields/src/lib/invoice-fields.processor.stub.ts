@@ -1,10 +1,10 @@
 import type { PartialDeep } from 'type-fest';
 
-import { stubDocumentEvent } from '@carrot-fndn/methodologies/bold/testing';
+import { stubDocumentEvent } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type DocumentEvent,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { faker } from '@faker-js/faker';
 
 import { INVOICE_ATTRIBUTES } from './invoice-fields.constants';

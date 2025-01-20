@@ -1,8 +1,8 @@
-import { eventHasNonEmptyStringAttribute } from '@carrot-fndn/methodologies/bold/predicates';
+import { eventHasNonEmptyStringAttribute } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 
 export const eventHasAllNonEmptyWeightAttributes = (
   event: DocumentEvent,

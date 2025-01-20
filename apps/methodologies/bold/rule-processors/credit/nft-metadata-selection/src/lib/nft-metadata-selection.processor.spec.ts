@@ -1,11 +1,11 @@
 import type { RuleInput } from '@carrot-fndn/shared/rule/types';
 import type { UnknownObject } from '@carrot-fndn/shared/types';
 
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/io-helpers';
+import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentCategory,
   DocumentEventActorType,
@@ -16,7 +16,7 @@ import {
   DocumentSubtype,
   DocumentType,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { random, validate } from 'typia';

@@ -1,8 +1,8 @@
-import { stubDocumentWithOneActorType } from '@carrot-fndn/methodologies/bold/testing';
+import { stubDocumentWithOneActorType } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentEventActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { faker } from '@faker-js/faker';
 
 export const stubDocumentActorEventWithSourceActorTypeAndPrimaryParticipant =

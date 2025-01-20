@@ -5,15 +5,15 @@ import {
   metadataAttributeValueIsAnyOf,
   metadataAttributeValueIsNotEmpty,
   not,
-} from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventVehicleType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 export class DriverInternalIdProcessor extends ParentDocumentRuleProcessor<

@@ -1,18 +1,18 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getDocumentEventAttachmentByLabel } from '@carrot-fndn/methodologies/bold/getters';
+import { getDocumentEventAttachmentByLabel } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
   and,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/processors';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   ReportType,
   ReportTypeLiteralName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { HAS_CDF, REPORT_TYPE } = DocumentEventAttributeName;

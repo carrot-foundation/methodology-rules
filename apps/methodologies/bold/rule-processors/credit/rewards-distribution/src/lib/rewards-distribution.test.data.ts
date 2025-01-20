@@ -2,7 +2,7 @@ import {
   type CertificateReward,
   DocumentEventActorType,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import BigNumber from 'bignumber.js';
 
 import type { ResultContentWithMassValue } from './rewards-distribution.types';

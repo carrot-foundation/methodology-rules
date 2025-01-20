@@ -1,16 +1,16 @@
 import type { NonZeroPositive } from '@carrot-fndn/shared/types';
 
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
+import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
   loadParentDocument,
-} from '@carrot-fndn/methodologies/bold/io-helpers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
 import {
   and,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   type CertificateRewardDistributionOutput,
   type Document,
@@ -18,7 +18,7 @@ import {
   type DocumentEventAttributeValue,
   DocumentEventName,
   DocumentEventRuleSlug,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { isNil, toDocumentKey } from '@carrot-fndn/shared/helpers';

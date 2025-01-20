@@ -1,21 +1,21 @@
 import {
   type DocumentQuery,
   DocumentQueryService,
-} from '@carrot-fndn/methodologies/bold/io-helpers';
-import { MASS_AUDIT } from '@carrot-fndn/methodologies/bold/matchers';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { MASS_AUDIT } from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 import {
   and,
   eventHasCarrotParticipant,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/predicates';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
   DocumentEventName,
   MethodologyEvaluationResult,
-} from '@carrot-fndn/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/utils';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';

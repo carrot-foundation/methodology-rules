@@ -5,7 +5,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubMassCertificateAuditDocument,
   stubMassDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type CertificateReward,
   type CertificateRewardDistributionOutput,
@@ -16,7 +16,7 @@ import {
   DocumentEventRuleSlug,
   type MassReward,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';

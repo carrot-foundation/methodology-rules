@@ -3,14 +3,14 @@ import {
   stubMassAuditDocument,
   stubMassCertificateAuditDocument,
   stubMassCertificateDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentCategory,
   DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {

@@ -1,11 +1,11 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/io-helpers';
-import { eventHasMetadataAttribute } from '@carrot-fndn/methodologies/bold/predicates';
+import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { eventHasMetadataAttribute } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/utils';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';

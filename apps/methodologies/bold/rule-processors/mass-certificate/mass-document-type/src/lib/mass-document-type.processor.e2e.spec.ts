@@ -3,8 +3,8 @@ import {
   stubMassAuditDocument,
   stubMassCertificateDocument,
   stubMassDocument,
-} from '@carrot-fndn/methodologies/bold/testing';
-import { DocumentType } from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+import { DocumentType } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {

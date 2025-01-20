@@ -5,7 +5,7 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/testing';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   type Document,
   DocumentCategory,
@@ -16,7 +16,7 @@ import {
   DocumentEventRuleSlug,
   DocumentType,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray, stubRuleInput } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { assert, random, validate } from 'typia';

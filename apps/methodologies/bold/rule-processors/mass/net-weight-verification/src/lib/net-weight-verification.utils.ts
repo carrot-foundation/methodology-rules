@@ -1,8 +1,8 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/getters';
+import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/types';
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   extractNumberFromString,
   isNonEmptyString,
