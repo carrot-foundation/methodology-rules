@@ -20,7 +20,7 @@ import { validate } from 'typia';
 export const eventHasName = (
   event: DocumentEvent,
   eventName: DocumentEventName,
-): boolean => event.name === eventName;
+): boolean => event.name === eventName.toString();
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);
