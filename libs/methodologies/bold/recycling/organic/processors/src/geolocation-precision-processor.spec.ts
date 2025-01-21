@@ -31,7 +31,7 @@ import { random } from 'typia';
 
 import { GeolocationPrecisionRuleProcessor } from './geolocation-precision-processor';
 
-const { CLOSE, MOVE, OPEN } = DocumentEventName;
+const { CLOSE, MOVE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
@@ -93,7 +93,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
         },
       ],
     },
-    name: random<typeof MOVE | typeof OPEN>(),
+    name: random<typeof MOVE>(),
   });
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },

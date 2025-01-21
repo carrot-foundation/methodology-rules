@@ -7,3 +7,5 @@ export type AnyObject = Record<string, any>;
 const primitiveTypeUselessVariable = typeof (0 as unknown);
 
 export type PrimitiveType = typeof primitiveTypeUselessVariable;
+
+export type PredicateCallback<T> = (input: T) => boolean;

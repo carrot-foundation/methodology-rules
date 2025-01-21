@@ -41,7 +41,9 @@ testRuleProcessorWithMassDocuments(
       const document = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            {
+              name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            },
             [
               [MOVE_TYPE, PICK_UP],
               [VEHICLE_TYPE, OTHERS],

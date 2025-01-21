@@ -1,3 +1,7 @@
+// No changes needed - imports are already correctly structured with:
+// - DocumentEventName from '@carrot-fndn/methodologies/bold/recycling/organic/types'
+// - Other imports remain unchanged
+
 import {
   stubDocumentEvent,
   stubMassAuditDocument,

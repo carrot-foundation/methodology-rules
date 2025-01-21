@@ -1,5 +1,3 @@
-import type { NonZeroPositive } from '@carrot-fndn/shared/types';
-
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
   type DocumentQuery,
@@ -15,7 +13,6 @@ import {
   type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
-  type DocumentEventAttributeValue,
   DocumentEventName,
   DocumentEventRuleSlug,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
@@ -28,6 +25,10 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import {
+  type MethodologyDocumentEventAttributeValue,
+  type NonZeroPositive,
+} from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
@@ -53,7 +54,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       `Invalid ${END} event value ${String(value)} in the document ${documentId}`,
     INVALID_UNIT_PRICE: (
       documentId: string,
-      untiPrice: DocumentEventAttributeValue | undefined,
+      untiPrice: MethodologyDocumentEventAttributeValue | undefined,
     ) => `Invalid ${String(untiPrice)} in the document ${documentId}`,
     MASS_CERTIFICATE_AUDITS_NOT_FOUND:
       'The Mass Certificate Audits was not found',

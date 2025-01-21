@@ -35,7 +35,9 @@ describe('VehicleLicensePlateProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            {
+              name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            },
             [[VEHICLE_TYPE, OTHERS]],
           ),
         ],
@@ -49,7 +51,9 @@ describe('VehicleLicensePlateProcessor', () => {
       document: stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>() },
+            {
+              name: random<DocumentEventName.MOVE | DocumentEventName.OPEN>(),
+            },
             [[MOVE_TYPE, random<typeof PICK_UP | typeof SHIPMENT_REQUEST>()]],
           ),
         ],

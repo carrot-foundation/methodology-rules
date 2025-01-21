@@ -1,10 +1,14 @@
 /* cSpell:disable */
+
+import {
+  type Document,
+  DocumentEventAttributeName,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   DataSetName,
-  type Document,
-  type DocumentAttachment,
-  DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+  type MethodologyDocumentAttachment,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -41,7 +45,7 @@ const author = stubAuthor();
 const externalId = faker.string.uuid();
 const externalCreatedAt = '2023-01-31T09:54:06.000Z';
 const lastEventExternalCreatedAt = '2023-12-19T10:35:12.000Z';
-const attachment = random<DocumentAttachment>();
+const attachment = random<MethodologyDocumentAttachment>();
 const vehicleLicensePlate = faker.string.alphanumeric();
 const weightScale = {
   manufacturer: faker.string.sample(),
@@ -74,7 +78,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'ACTOR',
+      name: DocumentEventName.ACTOR,
       participant: integratorParticipant,
     },
     {
@@ -92,7 +96,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'NOTICE',
+      name: DocumentEventName.NOTICE,
       participant: integratorParticipant,
     },
     {
@@ -141,7 +145,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'OPEN',
+      name: DocumentEventName.OPEN,
       participant: primaryParticipant,
       preserveSensitiveData: false,
     },
@@ -161,7 +165,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'ACTOR',
+      name: DocumentEventName.ACTOR,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -172,7 +176,7 @@ export const rejectedMassDocument: Document = {
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
-      name: 'ACTOR',
+      name: DocumentEventName.ACTOR,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -192,7 +196,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'ACTOR',
+      name: DocumentEventName.ACTOR,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -212,7 +216,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'ACTOR',
+      name: DocumentEventName.ACTOR,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -252,7 +256,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -307,7 +311,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -327,7 +331,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
     },
@@ -392,7 +396,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
       value: 109_200,
@@ -458,7 +462,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
       value: 109_200,
@@ -494,7 +498,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'MOVE',
+      name: DocumentEventName.MOVE,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
       value: 109_200,
@@ -531,7 +535,7 @@ export const rejectedMassDocument: Document = {
           },
         ],
       },
-      name: 'END',
+      name: DocumentEventName.END,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
       value: 109_200,

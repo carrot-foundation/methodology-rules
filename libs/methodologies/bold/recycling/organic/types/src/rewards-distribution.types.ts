@@ -1,10 +1,15 @@
-import type { NonEmptyArray, NonEmptyString } from '@carrot-fndn/shared/types';
-
-import type { Participant } from './participant.types';
+import type {
+  MethodologyParticipant,
+  NonEmptyArray,
+  NonEmptyString,
+} from '@carrot-fndn/shared/types';
 
 import { DocumentEventActorType } from './enum.types';
 
-export type RewardActorParticipant = Pick<Participant, 'id' | 'name'>;
+export type RewardActorParticipant = Pick<
+  MethodologyParticipant,
+  'id' | 'name'
+>;
 
 export type RewardsDistributionActorType =
   | DocumentEventActorType.APPOINTED_NGO

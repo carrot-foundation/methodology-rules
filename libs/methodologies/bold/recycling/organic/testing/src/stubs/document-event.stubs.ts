@@ -1,17 +1,19 @@
-import type { AnyObject } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import {
   type DocumentEvent,
   DocumentEventActorType,
-  type DocumentEventAttachment,
   type DocumentEventAttribute,
   DocumentEventAttributeName,
-  type DocumentEventAttributeValue,
   DocumentEventName,
   type DocumentReference,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  type AnyObject,
+  type MethodologyDocumentEventAttachment,
+  type MethodologyDocumentEventAttributeValue,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -53,9 +55,9 @@ export const stubDocumentEvent = (
 });
 
 export const stubDocumentEventAttachment = (
-  partialInput: Partial<DocumentEventAttachment> = {},
-): DocumentEventAttachment => ({
-  ...random<DocumentEventAttachment>(),
+  partialInput: Partial<MethodologyDocumentEventAttachment> = {},
+): MethodologyDocumentEventAttachment => ({
+  ...random<MethodologyDocumentEventAttachment>(),
   ...partialInput,
 });
 
@@ -120,7 +122,9 @@ export const stubDocumentEventWithReportType = (
 
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
-  attributes?: Array<[DocumentEventAttributeName, DocumentEventAttributeValue]>,
+  attributes?: Array<
+    [DocumentEventAttributeName, MethodologyDocumentEventAttributeValue]
+  >,
 ) =>
   stubDocumentEvent({
     ...partialEvent,

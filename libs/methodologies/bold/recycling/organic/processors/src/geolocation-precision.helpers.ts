@@ -1,9 +1,4 @@
 import type { DocumentCriteria } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import type {
-  Latitude,
-  Longitude,
-  NonEmptyString,
-} from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
@@ -16,7 +11,6 @@ import {
   isOpenEvent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
-  type Address,
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
@@ -24,6 +18,12 @@ import {
   type DocumentSubtype,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { calculateDistance, isNil, pick } from '@carrot-fndn/shared/helpers';
+import {
+  type Latitude,
+  type Longitude,
+  type MethodologyAddress,
+  type NonEmptyString,
+} from '@carrot-fndn/shared/types';
 import { isAfter, startOfToday } from 'date-fns';
 import { is } from 'typia';
 
@@ -93,12 +93,12 @@ export const evaluateGeocodePrecision = (
 ): boolean => calculateDistance(startGeocode, endGeocode) <= 2;
 
 export const compareAddresses = (
-  addressA: Address,
-  addressB: Address,
+  addressA: MethodologyAddress,
+  addressB: MethodologyAddress,
 ): boolean => {
   const keys = Object.keys(addressA).filter(
     (key) => !['latitude', 'longitude'].includes(key),
-  ) as (keyof Address)[];
+  ) as (keyof MethodologyAddress)[];
 
   for (const key of keys) {
     // eslint-disable-next-line security/detect-object-injection
@@ -130,7 +130,9 @@ export const isMetadataGeolocationValid = (event: DocumentEvent): boolean => {
   return is<Latitude>(gpsLatitude) && is<Longitude>(gpsLongitude);
 };
 
-export const mapMassDocumentAddress = (event: DocumentEvent): Address => {
+export const mapMassDocumentAddress = (
+  event: DocumentEvent,
+): MethodologyAddress => {
   const gpsLatitude = getEventAttributeValue(
     event,
     DocumentEventAttributeName.APP_GPS_LATITUDE,

@@ -6,8 +6,8 @@ import {
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,

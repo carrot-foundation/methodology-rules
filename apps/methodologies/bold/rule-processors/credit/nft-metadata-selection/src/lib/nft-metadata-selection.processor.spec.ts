@@ -6,11 +6,11 @@ import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentEventRuleSlug,
   type DocumentReference,
   DocumentSubtype,

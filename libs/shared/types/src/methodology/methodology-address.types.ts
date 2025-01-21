@@ -1,4 +1,4 @@
-export interface Address {
+export interface MethodologyAddress {
   city: string;
   countryCode: string;
   countryState: string;

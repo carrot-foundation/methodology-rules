@@ -4,16 +4,18 @@ import {
   stubDocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
-  DataSetName,
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-  ParticipantType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
+import {
+  DataSetName,
+  MethodologyParticipantType,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -37,7 +39,7 @@ describe('Event Predicates', () => {
     it('should return true if the event is an actor participant type', () => {
       const event = stubDocumentEvent();
 
-      event.participant.type = ParticipantType.ACTOR;
+      event.participant.type = MethodologyParticipantType.ACTOR;
 
       expect(eventHasActorParticipant(event)).toBe(true);
     });
@@ -62,7 +64,9 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the event does not have the event name', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.OPEN });
+      const event = stubDocumentEvent({
+        name: DocumentEventName.OPEN,
+      });
 
       const result = eventHasName(event, DocumentEventName.ACTOR);
 
@@ -72,7 +76,9 @@ describe('Event Predicates', () => {
 
   describe('isActorEvent', () => {
     it('should return true if the event is an actor event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.ACTOR });
+      const event = stubDocumentEvent({
+        name: DocumentEventName.ACTOR,
+      });
 
       const result = isActorEvent(event);
 
@@ -80,7 +86,9 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the event is not an actor event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.OPEN });
+      const event = stubDocumentEvent({
+        name: DocumentEventName.OPEN,
+      });
 
       const result = isActorEvent(event);
 
@@ -90,7 +98,9 @@ describe('Event Predicates', () => {
 
   describe('isOpenEvent', () => {
     it('should return true if the event is an OPEN event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.OPEN });
+      const event = stubDocumentEvent({
+        name: DocumentEventName.OPEN,
+      });
 
       const result = isOpenEvent(event);
 
@@ -98,7 +108,9 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the event is not an actor event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.ACTOR });
+      const event = stubDocumentEvent({
+        name: DocumentEventName.ACTOR,
+      });
 
       const result = isOpenEvent(event);
 

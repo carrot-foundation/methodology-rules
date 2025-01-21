@@ -1,3 +1,5 @@
+import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+
 import {
   getAuditorActorEvent,
   getEventMethodologySlug,
@@ -9,7 +11,6 @@ import {
 import { MASS_AUDIT } from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
 import {
   type Document,
-  type DocumentEventAttributeValue,
   type DocumentReference,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
@@ -36,11 +37,11 @@ export class MassAuditDocumentProcessor extends RuleDataProcessor {
     ruleInput: RuleInput,
     documentReferences: Array<
       DocumentReference & {
-        methodologySlug: DocumentEventAttributeValue | undefined;
+        methodologySlug: MethodologyDocumentEventAttributeValue | undefined;
       }
     >,
     massCertificateAuditMethodologySlug:
-      | DocumentEventAttributeValue
+      | MethodologyDocumentEventAttributeValue
       | undefined,
   ) {
     const documentsWithoutExpectedSlug = documentReferences.filter(

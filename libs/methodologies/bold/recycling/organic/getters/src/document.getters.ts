@@ -17,8 +17,7 @@ export const getAuditorActorEvent = (
 ): DocumentEvent | undefined =>
   document.externalEvents?.find(
     (event) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-      event.name === ACTOR &&
+      event.name === ACTOR.toString() &&
       getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
   );
 

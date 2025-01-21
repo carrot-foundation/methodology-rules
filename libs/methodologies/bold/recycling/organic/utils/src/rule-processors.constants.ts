@@ -1,4 +1,4 @@
-import { DataSetName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DataSetName } from '@carrot-fndn/shared/types';
 
 export const DOCUMENT_NOT_FOUND_RESULT_COMMENT =
   'The mass document was not found';

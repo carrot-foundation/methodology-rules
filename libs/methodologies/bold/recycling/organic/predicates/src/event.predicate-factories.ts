@@ -4,8 +4,8 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  type PredicateCallback,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { type PredicateCallback } from '@carrot-fndn/shared/types';
 
 import {
   eventHasMetadataAttribute,

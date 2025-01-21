@@ -7,11 +7,11 @@ import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
-  DocumentEventName,
   type MassReward,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import BigNumber from 'bignumber.js';
 

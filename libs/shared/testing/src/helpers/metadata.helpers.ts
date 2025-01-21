@@ -1,13 +1,14 @@
-import type {
-  DocumentEvent,
+import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+
+import {
+  type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventAttributeValue,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 
 export const replaceMetadataAttributeValue = (
   documentEvent: DocumentEvent,
   attributeName: DocumentEventAttributeName,
-  newValue: DocumentEventAttributeValue,
+  newValue: MethodologyDocumentEventAttributeValue,
 ): DocumentEvent => {
   const attributes = documentEvent.metadata?.attributes?.map((attribute) => {
     if (attribute.name === String(attributeName)) {

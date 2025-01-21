@@ -1,16 +1,8 @@
-export enum ParticipantType {
-  ACTOR = 'ACTOR',
-}
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export enum DocumentCategory {
   MASS = 'Mass',
   METHODOLOGY = 'Methodology',
-}
-
-export enum DataSetName {
-  PROD = 'PROD',
-  PROD_SIMULATION = 'PROD_SIMULATION',
-  TEST = 'TEST',
 }
 
 export enum DocumentType {
@@ -64,24 +56,12 @@ export enum DocumentEventRuleSlug {
   REWARDS_DISTRIBUTION = 'rewards-distribution',
 }
 
-export enum DocumentEventName {
-  ACTOR = 'ACTOR',
-  CLOSE = 'CLOSE',
-  END = 'END',
-  LINK = 'LINK',
-  MOVE = 'MOVE',
-  OPEN = 'OPEN',
-  OUTPUT = 'OUTPUT',
-  RELATED = 'RELATED',
-  RULE_EXECUTION = 'RULE EXECUTION',
-  RULES_METADATA = 'RULES METADATA',
-}
-
 export enum DocumentEventAttributeName {
   ACTOR_TYPE = 'actor-type',
   APP_GPS_LATITUDE = 'app-gps-latitude',
   APP_GPS_LONGITUDE = 'app-gps-longitude',
   COLLECTION_NAME = 'collection-name',
+  DESCRIPTION = 'description',
   DRIVER_INTERNAL_ID = 'driver-internal-id',
   EVENT_VALUE = 'event-value',
   HAS_CDF = 'has-cdf',
@@ -96,7 +76,11 @@ export enum DocumentEventAttributeName {
   INVOICE_KEY = 'invoice-key',
   INVOICE_NEIGHBORHOOD = 'invoice-neighborhood',
   INVOICE_NUMBER = 'invoice-number',
+  INVOICE_TOTAL_WEIGHT = 'invoice-total-weight',
+  INVOICE_WEIGHT_MASSID_ASSOCIATED = 'invoice-weight-massid-associated',
   LOAD_NET_WEIGHT = 'load-net-weight',
+  LPR_SOFTWARE = 'lpr-software',
+  LPR_SUPPLIER = 'lpr-supplier',
   METHODOLOGY_DESCRIPTION = 'methodology-description',
   METHODOLOGY_EVALUATION_RESULT = 'methodology-evaluation-result',
   METHODOLOGY_NAME = 'methodology-name',
@@ -118,6 +102,7 @@ export enum DocumentEventAttributeName {
   VEHICLE_GROSS_WEIGHT = 'vehicle-gross-weight',
   VEHICLE_LICENSE_PLATE = 'vehicle-license-plate',
   VEHICLE_TYPE = 'vehicle-type',
+  VEHICLE_VOLUME_CAPACITY = 'vehicle-volume-capacity',
   VEHICLE_WEIGHT = 'vehicle-weight',
   WASTE_ORIGIN_IDENTIFIED = 'waste-origin-identified',
   WEIGHT_SCALE_MANUFACTURER = 'weight-scale-manufacturer',
@@ -135,6 +120,20 @@ export enum ReportType {
 export enum ReportTypeLiteralName {
   CDF = 'CERTIFICADO DE DESTINAÇÃO FINAL',
   MTR = 'MANIFESTO DE TRANSPORTE DE RESÍDUOS',
+}
+
+export enum DocumentEventName {
+  ACTOR = MethodologyDocumentEventName.ACTOR,
+  CLOSE = MethodologyDocumentEventName.CLOSE,
+  END = 'END',
+  LINK = MethodologyDocumentEventName.LINK,
+  MOVE = 'MOVE',
+  NOTICE = MethodologyDocumentEventName.NOTICE,
+  OPEN = MethodologyDocumentEventName.OPEN,
+  OUTPUT = MethodologyDocumentEventName.OUTPUT,
+  RELATED = MethodologyDocumentEventName.RELATED,
+  RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
+  RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
 }
 
 export enum DocumentEventActorType {
@@ -169,8 +168,4 @@ export enum DocumentEventVehicleType {
   OTHERS = 'Others',
   SLUDGE_PIPES = 'Sludge Pipes',
   TRUCK = 'Truck',
-}
-
-export enum MethodologyEvaluationResult {
-  APPROVED = 'APPROVED',
 }

@@ -1,11 +1,9 @@
 import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
 import {
-  DataSetName,
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-  ParticipantType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -13,13 +11,16 @@ import {
   isNonEmptyArray,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
+import {
+  DataSetName,
+  MethodologyParticipantType,
+} from '@carrot-fndn/shared/types';
 import { validate } from 'typia';
 
 export const eventHasName = (
   event: DocumentEvent,
   eventName: DocumentEventName,
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-): boolean => event.name === eventName;
+): boolean => event.name === eventName.toString();
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);
@@ -29,7 +30,7 @@ export const isOpenEvent = (event: DocumentEvent): boolean =>
 
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-  event.participant.type === ParticipantType.ACTOR;
+  event.participant.type === MethodologyParticipantType.ACTOR;
 
 export const eventHasSourceActor = (event: DocumentEvent): boolean =>
   getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE) ===
