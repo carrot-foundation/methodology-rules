@@ -7,13 +7,13 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { EventsTimeSpanProcessor } from './events-time-span.processor';
@@ -60,13 +60,13 @@ describe('EventsTimeSpanProcessor', () => {
           stubDocumentEventWithMetadataAttributes(
             {
               externalCreatedAt: eventWithDropOffValueDate,
-              name: random<MethodologyDocumentEventName>(),
+              name: random<DocumentEventName>(),
             },
             [[MOVE_TYPE, DROP_OFF]],
           ),
           stubDocumentEvent({
             externalCreatedAt: endEventDate,
-            name: MethodologyDocumentEventName.END,
+            name: DocumentEventName.END,
           }),
         ],
       });

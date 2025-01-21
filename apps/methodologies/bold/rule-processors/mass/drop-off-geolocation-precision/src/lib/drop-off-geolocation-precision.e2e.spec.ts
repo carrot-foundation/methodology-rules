@@ -12,6 +12,7 @@ import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
@@ -27,13 +28,12 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { formatDate } from 'date-fns';
 
 import { handler } from '../lambda';
 
-const { CLOSE } = MethodologyDocumentEventName;
+const { CLOSE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 
 describe('DropOffGeolocationPrecision', () => {
@@ -83,7 +83,7 @@ describe('DropOffGeolocationPrecision', () => {
         },
       ],
     },
-    name: MethodologyDocumentEventName.MOVE,
+    name: DocumentEventName.MOVE,
   });
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
@@ -93,7 +93,7 @@ describe('DropOffGeolocationPrecision', () => {
     externalEvents: [
       moveDocumentEvent,
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: massAuditReference,
       }),
     ],
@@ -102,7 +102,7 @@ describe('DropOffGeolocationPrecision', () => {
   const massAuditDocumentStub = stubMassAuditDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
         referencedDocument: methodologyReference,
         relatedDocument: undefined,
       }),
@@ -113,7 +113,7 @@ describe('DropOffGeolocationPrecision', () => {
   const methodologyDocumentStub = stubMethodologyDefinitionDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: participantHomologationGroupReference,
       }),
     ],
@@ -123,7 +123,7 @@ describe('DropOffGeolocationPrecision', () => {
     stubParticipantHomologationGroupDocument({
       externalEvents: [
         stubDocumentEvent({
-          name: MethodologyDocumentEventName.OUTPUT,
+          name: DocumentEventName.OUTPUT,
           relatedDocument: recyclerHomologationReference,
         }),
       ],
@@ -134,7 +134,7 @@ describe('DropOffGeolocationPrecision', () => {
     externalEvents: [
       stubDocumentEvent({
         address: moveDocumentEvent.address,
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
         participant: moveDocumentEvent.participant,
       }),
       homologationCloseEvent,
@@ -154,7 +154,7 @@ describe('DropOffGeolocationPrecision', () => {
       externalEvents: [
         stubDocumentEvent({
           address: moveDocumentEvent.address,
-          name: MethodologyDocumentEventName.OPEN,
+          name: DocumentEventName.OPEN,
         }),
       ],
     },

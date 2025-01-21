@@ -6,6 +6,7 @@ import {
 import {
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -15,7 +16,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
@@ -28,7 +28,7 @@ testRuleProcessorWithMassDocuments(
   },
   () => {
     describe('WasteOriginIdentifiedProcessor E2E', () => {
-      const { ACTOR } = MethodologyDocumentEventName;
+      const { ACTOR } = DocumentEventName;
       const { SOURCE } = DocumentEventActorType;
       const { ACTOR_TYPE, WASTE_ORIGIN_IDENTIFIED } =
         DocumentEventAttributeName;

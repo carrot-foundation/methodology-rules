@@ -11,9 +11,8 @@ export enum MethodologyParticipantType {
 export enum MethodologyDocumentEventName {
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',
-  END = 'END',
   LINK = 'LINK',
-  MOVE = 'MOVE',
+  NOTICE = 'NOTICE',
   OPEN = 'OPEN',
   OUTPUT = 'OUTPUT',
   RELATED = 'RELATED',

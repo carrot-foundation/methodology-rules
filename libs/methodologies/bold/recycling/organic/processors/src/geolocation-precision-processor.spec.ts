@@ -14,6 +14,7 @@ import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
@@ -24,14 +25,13 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { formatDate } from 'date-fns';
 import { random } from 'typia';
 
 import { GeolocationPrecisionRuleProcessor } from './geolocation-precision-processor';
 
-const { CLOSE, MOVE } = MethodologyDocumentEventName;
+const { CLOSE, MOVE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
@@ -103,7 +103,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
     externalEvents: [
       pickUpEvent,
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: massAuditReference,
       }),
     ],
@@ -112,7 +112,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
   const massAuditDocumentStub = stubMassAuditDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
         referencedDocument: methodologyReference,
       }),
     ],
@@ -122,7 +122,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
   const methodologyDocumentStub = stubMethodologyDefinitionDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: participantHomologationGroupReference,
       }),
     ],
@@ -132,7 +132,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
     stubParticipantHomologationGroupDocument({
       externalEvents: [
         stubDocumentEvent({
-          name: MethodologyDocumentEventName.OUTPUT,
+          name: DocumentEventName.OUTPUT,
           relatedDocument: recyclerHomologationReference,
         }),
       ],
@@ -143,7 +143,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
     externalEvents: [
       stubDocumentEvent({
         address: pickUpEvent.address,
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
         participant: pickUpEvent.participant,
       }),
       homologationCloseEvent,
@@ -194,7 +194,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
               },
             },
             stubDocumentEvent({
-              name: MethodologyDocumentEventName.OUTPUT,
+              name: DocumentEventName.OUTPUT,
               relatedDocument: massAuditReference,
             }),
           ],
@@ -259,7 +259,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           externalEvents: [
             {
               ...stubDocumentEvent({
-                name: MethodologyDocumentEventName.OPEN,
+                name: DocumentEventName.OPEN,
                 participant: pickUpEvent.participant,
               }),
               address: undefined,
@@ -281,7 +281,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           externalEvents: [
             stubDocumentEvent({
               address: pickUpEvent.address,
-              name: MethodologyDocumentEventName.OPEN,
+              name: DocumentEventName.OPEN,
             }),
             homologationCloseEvent,
           ],
@@ -300,7 +300,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           externalEvents: [
             stubDocumentEvent({
               ...pickUpEvent,
-              name: MethodologyDocumentEventName.OPEN,
+              name: DocumentEventName.OPEN,
             }),
             stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
               [HOMOLOGATION_DUE_DATE, ''],
@@ -320,7 +320,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           externalEvents: [
             stubDocumentEvent({
               ...pickUpEvent,
-              name: MethodologyDocumentEventName.OPEN,
+              name: DocumentEventName.OPEN,
             }),
             stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
               [HOMOLOGATION_DUE_DATE, '1990-01-01'],
@@ -340,7 +340,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
           externalEvents: [
             stubDocumentEvent({
               address: stubAddress(),
-              name: MethodologyDocumentEventName.OPEN,
+              name: DocumentEventName.OPEN,
               participant: pickUpEvent.participant,
             }),
             homologationCloseEvent,
@@ -363,7 +363,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
                 latitude: faker.location.latitude(),
                 longitude: faker.location.longitude(),
               },
-              name: MethodologyDocumentEventName.OPEN,
+              name: DocumentEventName.OPEN,
               participant: pickUpEvent.participant,
             }),
             homologationCloseEvent,
@@ -398,7 +398,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
               },
             },
             stubDocumentEvent({
-              name: MethodologyDocumentEventName.OUTPUT,
+              name: DocumentEventName.OUTPUT,
               relatedDocument: massAuditReference,
             }),
           ],
@@ -433,7 +433,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
               },
             },
             stubDocumentEvent({
-              name: MethodologyDocumentEventName.OUTPUT,
+              name: DocumentEventName.OUTPUT,
               relatedDocument: massAuditReference,
             }),
           ],
@@ -464,7 +464,7 @@ describe('GeolocationPrecisionRuleProcessor', () => {
               },
             },
             stubDocumentEvent({
-              name: MethodologyDocumentEventName.OUTPUT,
+              name: DocumentEventName.OUTPUT,
               relatedDocument: massAuditReference,
             }),
           ],

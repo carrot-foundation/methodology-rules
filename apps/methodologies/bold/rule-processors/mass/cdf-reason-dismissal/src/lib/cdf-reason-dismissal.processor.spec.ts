@@ -7,13 +7,13 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -26,7 +26,7 @@ describe('CdfReasonDismissalProcessor', () => {
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   const { HAS_CDF, HAS_REASON_DISMISSAL_CDF } = DocumentEventAttributeName;
-  const { END } = MethodologyDocumentEventName;
+  const { END } = DocumentEventName;
 
   describe('process', () => {
     it.each([

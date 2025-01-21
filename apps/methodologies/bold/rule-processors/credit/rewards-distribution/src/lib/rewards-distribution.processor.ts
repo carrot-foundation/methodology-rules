@@ -13,6 +13,7 @@ import {
   type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentEventRuleSlug,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -26,7 +27,6 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import {
   type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventName,
   type NonZeroPositive,
 } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
@@ -40,7 +40,7 @@ import {
 } from './rewards-distribution.constants';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
-const { END, RULE_EXECUTION, RULES_METADATA } = MethodologyDocumentEventName;
+const { END, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG, UNIT_PRICE } =
   DocumentEventAttributeName;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;

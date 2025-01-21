@@ -5,6 +5,7 @@ import {
   DocumentEventActorType,
   type DocumentEventAttribute,
   DocumentEventAttributeName,
+  DocumentEventName,
   type DocumentReference,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
@@ -12,7 +13,6 @@ import {
   type AnyObject,
   type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventName,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
@@ -96,7 +96,7 @@ export const stubActorEventWithActorType = (
     metadata: {
       attributes: [...attributes, stubActorTypeMetadataAttribute(actorType)],
     },
-    name: MethodologyDocumentEventName.ACTOR,
+    name: DocumentEventName.ACTOR,
   });
 };
 

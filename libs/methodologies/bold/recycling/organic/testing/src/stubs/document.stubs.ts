@@ -6,6 +6,7 @@ import {
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
@@ -14,7 +15,6 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventName,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
@@ -100,7 +100,7 @@ export const stubMassDocument = (
   });
 
 export const stubMassAuditDocumentWithActorAndAttribute = (
-  eventName: MethodologyDocumentEventName,
+  eventName: DocumentEventName,
   attributeName: DocumentEventAttributeName,
   attributeValue: MethodologyDocumentEventAttributeValue,
   attributePairs: Array<
@@ -172,7 +172,7 @@ export const stubMassCertificateAuditWithMethodologySlug = (
   stubMassCertificateAuditDocument({
     externalEvents: [
       stubDocumentEventWithMetadataAttributes(
-        { name: MethodologyDocumentEventName.ACTOR },
+        { name: DocumentEventName.ACTOR },
         [
           [
             DocumentEventAttributeName.ACTOR_TYPE,

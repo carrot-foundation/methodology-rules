@@ -6,6 +6,7 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -13,7 +14,6 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { MandatoryMetadataProcessor } from './mandatory-metadata.processor';
@@ -61,7 +61,7 @@ describe('MandatoryMetadataProcessor', () => {
                 },
               ],
             },
-            name: MethodologyDocumentEventName.OPEN,
+            name: DocumentEventName.OPEN,
           }),
         ],
       });
@@ -97,7 +97,7 @@ describe('MandatoryMetadataProcessor', () => {
               },
             ],
           },
-          name: MethodologyDocumentEventName.OPEN,
+          name: DocumentEventName.OPEN,
         }),
       ],
     });

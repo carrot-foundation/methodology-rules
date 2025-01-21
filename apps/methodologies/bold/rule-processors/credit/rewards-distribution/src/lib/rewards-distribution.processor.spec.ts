@@ -12,9 +12,9 @@ import {
 import {
   type CertificateRewardDistributionOutput,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { RewardsDistributionProcessor } from './rewards-distribution.processor';
@@ -23,7 +23,7 @@ import {
   stubMassDocumentWithEndEventValue,
 } from './rewards-distribution.stubs';
 
-const { END, RULES_METADATA } = MethodologyDocumentEventName;
+const { END, RULES_METADATA } = DocumentEventName;
 const { UNIT_PRICE } = DocumentEventAttributeName;
 
 describe('RewardsDistributionProcessor', () => {

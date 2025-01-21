@@ -17,6 +17,7 @@ import {
   type CertificateRewardDistributionOutput,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentSubtype,
   type RewardsDistributionActorType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
@@ -26,7 +27,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 import { random, validate } from 'typia';
@@ -175,7 +175,7 @@ describe('RewardsDistributionProcessor', () => {
                 },
               ],
             },
-            name: MethodologyDocumentEventName.ACTOR,
+            name: DocumentEventName.ACTOR,
           }),
         ],
       }),
@@ -388,7 +388,7 @@ describe('RewardsDistributionProcessor', () => {
             },
           ],
         },
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
       }),
     ];
 
@@ -562,7 +562,7 @@ describe('RewardsDistributionProcessor', () => {
               },
             ],
           },
-          name: MethodologyDocumentEventName.ACTOR,
+          name: DocumentEventName.ACTOR,
         }),
       ];
 
@@ -680,7 +680,7 @@ describe('RewardsDistributionProcessor', () => {
           },
         ],
       },
-      name: MethodologyDocumentEventName.ACTOR,
+      name: DocumentEventName.ACTOR,
     });
     const massDocument = stubMassDocument({
       externalEvents: [...requiredActorEvents, processorActorEvent],
@@ -737,7 +737,7 @@ describe('RewardsDistributionProcessor', () => {
             },
           ],
         },
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
         participant,
       }),
     );

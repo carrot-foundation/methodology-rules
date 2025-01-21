@@ -1,7 +1,7 @@
 import type {
+  Maybe,
   MethodologyDocumentEventAttachment,
   MethodologyDocumentEventAttributeValue,
-  Maybe,
 } from '@carrot-fndn/shared/types';
 
 import {

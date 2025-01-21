@@ -5,7 +5,10 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DocumentEventAttributeName,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
@@ -16,14 +19,13 @@ import {
 import { stubArray } from '@carrot-fndn/shared/testing';
 import {
   DataSetName,
-  MethodologyDocumentEventName,
   MethodologyEvaluationResult,
 } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { MassAuditDocumentStatusProcessor } from './mass-audit-document-status.processor';
 
-const { CLOSE } = MethodologyDocumentEventName;
+const { CLOSE } = DocumentEventName;
 const { METHODOLOGY_EVALUATION_RESULT } = DocumentEventAttributeName;
 const { APPROVED } = MethodologyEvaluationResult;
 
@@ -113,7 +115,7 @@ describe('MassAuditDocumentStatusProcessor', () => {
 
       document.externalEvents = [
         stubDocumentEvent({
-          name: MethodologyDocumentEventName.MOVE,
+          name: DocumentEventName.MOVE,
         }),
       ];
 

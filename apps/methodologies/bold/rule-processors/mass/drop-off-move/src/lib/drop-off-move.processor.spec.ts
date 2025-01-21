@@ -6,13 +6,13 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { DropOffMoveProcessor } from './drop-off-move.processor';
@@ -37,7 +37,7 @@ describe('DropOffMoveProcessor', () => {
                 },
               ],
             },
-            name: MethodologyDocumentEventName.MOVE,
+            name: DocumentEventName.MOVE,
           }),
         ],
       }),
@@ -58,7 +58,7 @@ describe('DropOffMoveProcessor', () => {
                 },
               ],
             },
-            name: MethodologyDocumentEventName.MOVE,
+            name: DocumentEventName.MOVE,
           }),
         ],
       }),

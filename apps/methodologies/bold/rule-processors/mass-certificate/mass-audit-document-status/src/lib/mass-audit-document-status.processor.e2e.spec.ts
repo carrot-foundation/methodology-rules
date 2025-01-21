@@ -4,7 +4,10 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DocumentEventAttributeName,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -17,7 +20,6 @@ import {
 } from '@carrot-fndn/shared/testing';
 import {
   DataSetName,
-  MethodologyDocumentEventName,
   MethodologyEvaluationResult,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -29,7 +31,7 @@ describe('MassAuditDocumentStatusProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
   const parentDocumentId = faker.string.uuid();
 
-  const { CLOSE } = MethodologyDocumentEventName;
+  const { CLOSE } = DocumentEventName;
   const { METHODOLOGY_EVALUATION_RESULT } = DocumentEventAttributeName;
   const { APPROVED } = MethodologyEvaluationResult;
   const dataSetName = random<DataSetName>();

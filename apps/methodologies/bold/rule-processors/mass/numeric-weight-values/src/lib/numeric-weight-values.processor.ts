@@ -9,6 +9,7 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { isNil, toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -18,7 +19,6 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export class NumericWeightValuesProcessor extends RuleDataProcessor {
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
@@ -34,7 +34,7 @@ export class NumericWeightValuesProcessor extends RuleDataProcessor {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED);
     }
 
-    const { MOVE } = MethodologyDocumentEventName;
+    const { MOVE } = DocumentEventName;
     const { WEIGHING } = DocumentEventMoveType;
     const { MOVE_TYPE } = DocumentEventAttributeName;
 

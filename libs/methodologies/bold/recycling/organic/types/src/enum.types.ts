@@ -1,3 +1,5 @@
+import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
+
 export enum DocumentCategory {
   MASS = 'Mass',
   METHODOLOGY = 'Methodology',
@@ -118,6 +120,20 @@ export enum ReportType {
 export enum ReportTypeLiteralName {
   CDF = 'CERTIFICADO DE DESTINAÇÃO FINAL',
   MTR = 'MANIFESTO DE TRANSPORTE DE RESÍDUOS',
+}
+
+export enum DocumentEventName {
+  ACTOR = MethodologyDocumentEventName.ACTOR,
+  CLOSE = MethodologyDocumentEventName.CLOSE,
+  END = 'END',
+  LINK = MethodologyDocumentEventName.LINK,
+  MOVE = 'MOVE',
+  NOTICE = MethodologyDocumentEventName.NOTICE,
+  OPEN = MethodologyDocumentEventName.OPEN,
+  OUTPUT = MethodologyDocumentEventName.OUTPUT,
+  RELATED = MethodologyDocumentEventName.RELATED,
+  RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
+  RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
 }
 
 export enum DocumentEventActorType {

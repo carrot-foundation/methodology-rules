@@ -8,6 +8,7 @@ import type {
 import type {
   DocumentCategory,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentSubtype,
   DocumentType,
 } from './enum.types';
@@ -30,6 +31,7 @@ export interface DocumentReference extends MethodologyDocumentReference {
 
 export interface DocumentEvent extends MethodologyDocumentEvent {
   metadata?: DocumentEventMetadata | undefined;
+  name: DocumentEventName | string;
   referencedDocument?: DocumentReference | undefined;
   relatedDocument?: DocumentReference | undefined;
 }

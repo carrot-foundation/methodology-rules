@@ -8,9 +8,9 @@ import {
 import {
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -20,7 +20,7 @@ import {
   getEventMethodologySlug,
 } from './event.getters';
 
-const { ACTOR } = MethodologyDocumentEventName;
+const { ACTOR } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE, METHODOLOGY_SLUG } = DocumentEventAttributeName;
 

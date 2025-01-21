@@ -8,6 +8,7 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
@@ -18,7 +19,6 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export class SameRecyclerAndDropOffAddressesProcessor extends RuleDataProcessor {
   static resultComment = {
@@ -57,7 +57,7 @@ export class SameRecyclerAndDropOffAddressesProcessor extends RuleDataProcessor 
       });
     }
 
-    const { MOVE } = MethodologyDocumentEventName;
+    const { MOVE } = DocumentEventName;
     const { DROP_OFF } = DocumentEventMoveType;
     const { MOVE_TYPE } = DocumentEventAttributeName;
 

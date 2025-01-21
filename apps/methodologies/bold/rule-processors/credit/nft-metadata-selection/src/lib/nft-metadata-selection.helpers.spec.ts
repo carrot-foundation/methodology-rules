@@ -19,8 +19,8 @@ import {
   DocumentType,
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray, stubRuleInput } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { assert, random, validate } from 'typia';
 
@@ -63,8 +63,7 @@ const {
   STORE_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
 const { RECYCLER } = DocumentEventActorType;
-const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } =
-  MethodologyDocumentEventName;
+const { ACTOR, OPEN, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 
 describe('Helpers', () => {
   describe('getCarrotExplorePageUrl', () => {

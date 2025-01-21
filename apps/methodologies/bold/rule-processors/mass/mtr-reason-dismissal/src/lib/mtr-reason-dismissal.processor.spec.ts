@@ -6,6 +6,7 @@ import {
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -14,7 +15,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -97,7 +97,7 @@ describe('MtrReasonDismissalProcessor', () => {
         ...stubArray(() => random<DocumentEvent>()),
         {
           ...stubDocumentEvent({
-            name: MethodologyDocumentEventName.OPEN,
+            name: DocumentEventName.OPEN,
           }),
           metadata: {
             attributes,

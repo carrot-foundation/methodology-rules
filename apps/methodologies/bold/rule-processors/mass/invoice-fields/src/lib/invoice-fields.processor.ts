@@ -3,7 +3,10 @@ import {
   eventHasMetadataAttribute,
   eventHasNonEmptyStringAttribute,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DocumentEventAttributeName,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -13,7 +16,6 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 import { INVOICE_ATTRIBUTES } from './invoice-fields.constants';
 
@@ -41,7 +43,7 @@ export class InvoiceFieldsProcessor extends RuleDataProcessor {
     const resultStatus = (document.externalEvents ?? []).every((event) => {
       const hasInvoiceNumber = eventHasMetadataAttribute({
         event,
-        eventNames: [MethodologyDocumentEventName.MOVE],
+        eventNames: [DocumentEventName.MOVE],
         metadataName: DocumentEventAttributeName.INVOICE_NUMBER,
       });
 

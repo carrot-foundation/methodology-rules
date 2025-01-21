@@ -6,7 +6,10 @@ import {
   stubMassAuditDocument,
   stubMassCertificateDocument,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  DocumentEventAttributeName,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -16,7 +19,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
@@ -28,7 +30,7 @@ import {
 } from './rewards-distribution.stubs';
 import { assertExpectedRewardsDistribution } from './rewards-distribution.test.helpers';
 
-const { RULES_METADATA } = MethodologyDocumentEventName;
+const { RULES_METADATA } = DocumentEventName;
 const { UNIT_PRICE } = DocumentEventAttributeName;
 
 describe('RewardsDistributionProcessor E2E', () => {

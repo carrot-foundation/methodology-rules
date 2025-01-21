@@ -9,9 +9,9 @@ import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export class CdfReasonDismissalProcessor extends ParentDocumentRuleProcessor<DocumentEvent> {
   private ResultComment = {
@@ -49,7 +49,7 @@ export class CdfReasonDismissalProcessor extends ParentDocumentRuleProcessor<Doc
     return document.externalEvents?.find((event) =>
       eventHasMetadataAttribute({
         event,
-        eventNames: [MethodologyDocumentEventName.END],
+        eventNames: [DocumentEventName.END],
         metadataName: DocumentEventAttributeName.HAS_CDF,
         metadataValues: false,
       }),

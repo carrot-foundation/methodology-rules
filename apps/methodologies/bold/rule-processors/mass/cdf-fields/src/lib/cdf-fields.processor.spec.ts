@@ -6,6 +6,7 @@ import {
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
@@ -31,40 +32,52 @@ describe('CdfFieldsProcessor', () => {
 
   it.each([
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: CDF }, [
-        [REPORT_TYPE, CDF],
-        [HAS_CDF, true],
-        [REPORT_NUMBER, faker.number.int()],
-        [REPORT_DATE_ISSUED, true],
-      ]),
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: DocumentEventName.END },
+        [
+          [REPORT_TYPE, CDF],
+          [HAS_CDF, true],
+          [REPORT_NUMBER, faker.number.int()],
+          [REPORT_DATE_ISSUED, true],
+        ],
+      ),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should return APPROVED when has-cdf is true, has report-number and report-date-issued',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: CDF }, [
-        [REPORT_TYPE, CDF],
-        [HAS_CDF, false],
-      ]),
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: DocumentEventName.END },
+        [
+          [REPORT_TYPE, CDF],
+          [HAS_CDF, false],
+        ],
+      ),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should return the resultStatus APPROVED if has-cdf is equal false',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: CDF }, [
-        [REPORT_TYPE, CDF],
-        [HAS_CDF, true],
-      ]),
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: DocumentEventName.END },
+        [
+          [REPORT_TYPE, CDF],
+          [HAS_CDF, true],
+        ],
+      ),
       resultComment: ruleDataProcessor['ResulComment'].REJECTED,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should return the resultStatus REJECTED if has-cdf is equal true, but report-number or report-date-issued are undefined',
     },
     {
-      event: stubDocumentEventWithMetadataAttributes({ name: CDF }, [
-        [REPORT_TYPE, MTR],
-        [HAS_CDF, true],
-      ]),
+      event: stubDocumentEventWithMetadataAttributes(
+        { name: DocumentEventName.END },
+        [
+          [REPORT_TYPE, MTR],
+          [HAS_CDF, true],
+        ],
+      ),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should return the resultStatus APPROVED if the report-type is not CDF',

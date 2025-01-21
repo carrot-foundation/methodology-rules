@@ -14,6 +14,7 @@ import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
   type DocumentSubtype,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { calculateDistance, isNil, pick } from '@carrot-fndn/shared/helpers';
@@ -21,7 +22,6 @@ import {
   type Latitude,
   type Longitude,
   type MethodologyAddress,
-  MethodologyDocumentEventName,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 import { isAfter, startOfToday } from 'date-fns';
@@ -66,7 +66,7 @@ export const getParticipantHomologationDocument = ({
 
 export const homologationIsNotExpired = (document: Document): boolean => {
   const closeEvent = document.externalEvents?.find(
-    eventNameIsAnyOf([MethodologyDocumentEventName.CLOSE]),
+    eventNameIsAnyOf([DocumentEventName.CLOSE]),
   );
   const homologationDueDate = getEventAttributeValue(
     closeEvent,

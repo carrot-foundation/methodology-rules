@@ -8,12 +8,12 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   DataSetName,
-  MethodologyDocumentEventName,
   MethodologyParticipantType,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -55,7 +55,7 @@ describe('Event Predicates', () => {
 
   describe('eventHasName', () => {
     it('should return true if the event has the event name', () => {
-      const name = stubEnumValue(MethodologyDocumentEventName);
+      const name = stubEnumValue(DocumentEventName);
       const event = stubDocumentEvent({ name });
 
       const result = eventHasName(event, name);
@@ -65,10 +65,10 @@ describe('Event Predicates', () => {
 
     it('should return false if the event does not have the event name', () => {
       const event = stubDocumentEvent({
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
       });
 
-      const result = eventHasName(event, MethodologyDocumentEventName.ACTOR);
+      const result = eventHasName(event, DocumentEventName.ACTOR);
 
       expect(result).toBe(false);
     });
@@ -77,7 +77,7 @@ describe('Event Predicates', () => {
   describe('isActorEvent', () => {
     it('should return true if the event is an actor event', () => {
       const event = stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
       });
 
       const result = isActorEvent(event);
@@ -87,7 +87,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is not an actor event', () => {
       const event = stubDocumentEvent({
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
       });
 
       const result = isActorEvent(event);
@@ -99,7 +99,7 @@ describe('Event Predicates', () => {
   describe('isOpenEvent', () => {
     it('should return true if the event is an OPEN event', () => {
       const event = stubDocumentEvent({
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
       });
 
       const result = isOpenEvent(event);
@@ -109,7 +109,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is not an actor event', () => {
       const event = stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
       });
 
       const result = isOpenEvent(event);
@@ -237,7 +237,7 @@ describe('Event Predicates', () => {
             }),
           ],
         },
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
       });
 
       const result = isActorEventWithSourceActorType(event);
@@ -248,7 +248,7 @@ describe('Event Predicates', () => {
     it('should return false if the event is a actor event and not contains source actor type', () => {
       const event = stubDocumentEvent({
         metadata: undefined,
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
       });
 
       const result = isActorEventWithSourceActorType(event);
@@ -266,7 +266,7 @@ describe('Event Predicates', () => {
             }),
           ],
         },
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
       });
 
       const result = isActorEventWithSourceActorType(event);
@@ -385,7 +385,7 @@ describe('Event Predicates', () => {
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [MethodologyDocumentEventName.ACTOR],
+        eventNames: [DocumentEventName.ACTOR],
         metadataName: DocumentEventAttributeName.WASTE_ORIGIN_IDENTIFIED,
       });
 
@@ -441,15 +441,12 @@ describe('Event Predicates', () => {
             value: DocumentEventMoveType.PICK_UP,
           }),
         ]),
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
       });
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [
-          MethodologyDocumentEventName.OPEN,
-          MethodologyDocumentEventName.MOVE,
-        ],
+        eventNames: [DocumentEventName.OPEN, DocumentEventName.MOVE],
         metadataName: DocumentEventAttributeName.MOVE_TYPE,
         metadataValues: DocumentEventMoveType.PICK_UP,
       });

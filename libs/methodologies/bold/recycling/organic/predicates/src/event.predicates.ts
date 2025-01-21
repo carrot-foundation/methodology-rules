@@ -3,6 +3,7 @@ import {
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import {
@@ -12,22 +13,20 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import {
   DataSetName,
-  MethodologyDocumentEventName,
   MethodologyParticipantType,
 } from '@carrot-fndn/shared/types';
 import { validate } from 'typia';
 
 export const eventHasName = (
   event: DocumentEvent,
-  eventName: MethodologyDocumentEventName,
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
+  eventName: DocumentEventName,
 ): boolean => event.name === eventName;
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, MethodologyDocumentEventName.ACTOR);
+  eventHasName(event, DocumentEventName.ACTOR);
 
 export const isOpenEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, MethodologyDocumentEventName.OPEN);
+  eventHasName(event, DocumentEventName.OPEN);
 
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
@@ -79,7 +78,7 @@ export const eventsHasSameMetadataAttributeValue = (
 
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
-  eventNames?: Array<MethodologyDocumentEventName>;
+  eventNames?: Array<DocumentEventName>;
   metadataName: DocumentEventAttributeName;
   metadataValues?: unknown;
 }): boolean => {

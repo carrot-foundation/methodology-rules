@@ -6,6 +6,7 @@ import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   DocumentCategory,
   DocumentEventActorType,
@@ -17,7 +18,6 @@ import {
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random, validate } from 'typia';
 
@@ -45,7 +45,7 @@ const {
   RULE_SLUG,
   STORE_CONTRACT_ADDRESS: STORE_SMART_CONTRACT_ADDRESS,
 } = DocumentEventAttributeName;
-const { ACTOR, RULE_EXECUTION, RULES_METADATA } = MethodologyDocumentEventName;
+const { ACTOR, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
 const { REWARDS_DISTRIBUTION } = DocumentEventRuleSlug;
 

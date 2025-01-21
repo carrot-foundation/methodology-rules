@@ -1,3 +1,7 @@
+// No changes needed - imports are already correctly structured with:
+// - DocumentEventName from '@carrot-fndn/methodologies/bold/recycling/organic/types'
+// - Other imports remain unchanged
+
 import {
   stubDocumentEvent,
   stubMassAuditDocument,
@@ -6,6 +10,7 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentCategory,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
@@ -19,7 +24,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
@@ -66,7 +70,7 @@ describe('RewardsDistributionProcessor E2E', () => {
   const massCertificateAudit = stubMassCertificateAuditDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
         referencedDocument: methodologyReference,
         relatedDocument: undefined,
       }),

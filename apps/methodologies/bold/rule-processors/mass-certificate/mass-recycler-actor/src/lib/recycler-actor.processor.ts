@@ -10,7 +10,10 @@ import {
   eventHasRecyclerActor,
   eventNameIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { type Document } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import {
+  type Document,
+  DocumentEventName,
+} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -19,9 +22,8 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
-const { ACTOR } = MethodologyDocumentEventName;
+const { ACTOR } = DocumentEventName;
 
 export class RecyclerActorDocumentProcessor extends RuleDataProcessor {
   private ResultComment = {

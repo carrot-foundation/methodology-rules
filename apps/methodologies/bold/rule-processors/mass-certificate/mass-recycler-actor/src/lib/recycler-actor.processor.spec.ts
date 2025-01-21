@@ -7,6 +7,7 @@ import {
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   type RuleInput,
@@ -14,12 +15,11 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { RecyclerActorDocumentProcessor } from './recycler-actor.processor';
 
-const { ACTOR } = MethodologyDocumentEventName;
+const { ACTOR } = DocumentEventName;
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
 

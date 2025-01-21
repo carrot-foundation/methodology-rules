@@ -6,6 +6,7 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -16,7 +17,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
@@ -40,7 +40,7 @@ testRuleProcessorWithMassDocuments(
       const document = stubDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: random<MethodologyDocumentEventName>() },
+            { name: random<DocumentEventName>() },
             [
               [MOVE_TYPE, PICK_UP],
               [VEHICLE_TYPE, OTHERS],

@@ -9,16 +9,16 @@ import {
   DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
-const { OPEN, OUTPUT, RELATED } = MethodologyDocumentEventName;
+const { OPEN, OUTPUT, RELATED } = DocumentEventName;
 const { METHODOLOGY_DESCRIPTION, METHODOLOGY_NAME } =
   DocumentEventAttributeName;
 

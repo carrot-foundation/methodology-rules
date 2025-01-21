@@ -12,6 +12,7 @@ import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
@@ -27,14 +28,13 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { formatDate } from 'date-fns';
 import { random } from 'typia';
 
 import { handler } from '../lambda';
 
-const { CLOSE } = MethodologyDocumentEventName;
+const { CLOSE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
@@ -85,7 +85,7 @@ describe('PickUpGeolocationPrecision', () => {
         },
       ],
     },
-    name: MethodologyDocumentEventName.OPEN,
+    name: DocumentEventName.OPEN,
   });
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
@@ -95,7 +95,7 @@ describe('PickUpGeolocationPrecision', () => {
     externalEvents: [
       pickUpDocumentEvent,
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: massAuditReference,
       }),
     ],
@@ -104,7 +104,7 @@ describe('PickUpGeolocationPrecision', () => {
   const massAuditDocumentStub = stubMassAuditDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.ACTOR,
+        name: DocumentEventName.ACTOR,
         referencedDocument: methodologyReference,
         relatedDocument: undefined,
       }),
@@ -115,7 +115,7 @@ describe('PickUpGeolocationPrecision', () => {
   const methodologyDocumentStub = stubMethodologyDefinitionDocument({
     externalEvents: [
       stubDocumentEvent({
-        name: MethodologyDocumentEventName.OUTPUT,
+        name: DocumentEventName.OUTPUT,
         relatedDocument: participantHomologationGroupReference,
       }),
     ],
@@ -125,7 +125,7 @@ describe('PickUpGeolocationPrecision', () => {
     stubParticipantHomologationGroupDocument({
       externalEvents: [
         stubDocumentEvent({
-          name: MethodologyDocumentEventName.OUTPUT,
+          name: DocumentEventName.OUTPUT,
           relatedDocument: recyclerHomologationReference,
         }),
       ],
@@ -136,7 +136,7 @@ describe('PickUpGeolocationPrecision', () => {
     externalEvents: [
       stubDocumentEvent({
         address: pickUpDocumentEvent.address,
-        name: MethodologyDocumentEventName.OPEN,
+        name: DocumentEventName.OPEN,
         participant: pickUpDocumentEvent.participant,
       }),
       homologationCloseEvent,

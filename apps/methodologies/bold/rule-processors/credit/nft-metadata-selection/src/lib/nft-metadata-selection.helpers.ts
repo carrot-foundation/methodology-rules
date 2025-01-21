@@ -24,13 +24,13 @@ import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentEventRuleSlug,
   type DocumentReference,
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { assert, is } from 'typia';
 
 import type {
@@ -48,7 +48,7 @@ import type {
 } from './nft-metadata-selection.types';
 
 const { RECYCLER } = DocumentEventActorType;
-const { ACTOR, OPEN, RULE_EXECUTION } = MethodologyDocumentEventName;
+const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
 const {
   ACTOR_TYPE,
   COLLECTION_NAME,

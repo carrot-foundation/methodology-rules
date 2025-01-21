@@ -1,7 +1,7 @@
 import type {
+  MethodologyParticipant,
   NonEmptyArray,
   NonEmptyString,
-  MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 
 import { DocumentEventActorType } from './enum.types';

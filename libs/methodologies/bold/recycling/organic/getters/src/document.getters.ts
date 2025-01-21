@@ -3,12 +3,12 @@ import {
   type DocumentEvent,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from './event.getters';
 
-const { ACTOR } = MethodologyDocumentEventName;
+const { ACTOR } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
 
@@ -25,13 +25,12 @@ export const getOpenEvent = (
   document: Document | undefined,
 ): DocumentEvent | undefined =>
   document?.externalEvents?.find(
-    (event) => event.name === MethodologyDocumentEventName.OPEN.toString(),
+    (event) => event.name === DocumentEventName.OPEN.toString(),
   );
 
 export const getRulesMetadataEvent = (
   document: Document | undefined,
 ): DocumentEvent | undefined =>
   document?.externalEvents?.find(
-    (event) =>
-      event.name === MethodologyDocumentEventName.RULES_METADATA.toString(),
+    (event) => event.name === DocumentEventName.RULES_METADATA.toString(),
   );

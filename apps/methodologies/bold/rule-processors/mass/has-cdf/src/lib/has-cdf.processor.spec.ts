@@ -6,6 +6,7 @@ import {
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventName,
   ReportType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
@@ -14,7 +15,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { random } from 'typia';
 
 import { HasCdfProcessor } from './has-cdf.processor';
@@ -73,7 +73,7 @@ describe('HasCdfProcessor', () => {
       if (reportType !== undefined) attributes.push([REPORT_TYPE, reportType]);
 
       const event = stubDocumentEventWithMetadataAttributes(
-        { name: random<MethodologyDocumentEventName>() },
+        { name: random<DocumentEventName>() },
         attributes,
       );
 

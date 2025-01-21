@@ -6,6 +6,7 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
+  DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -16,7 +17,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { handler } from '../lambda';
@@ -29,7 +29,7 @@ testRuleProcessorWithMassDocuments(
   },
   () => {
     describe('E2E - DriverInternalIdProcessor', () => {
-      const { OPEN } = MethodologyDocumentEventName;
+      const { OPEN } = DocumentEventName;
       const { MOVE_TYPE, VEHICLE_TYPE } = DocumentEventAttributeName;
       const { TRUCK } = DocumentEventVehicleType;
       const { PICK_UP } = DocumentEventMoveType;
