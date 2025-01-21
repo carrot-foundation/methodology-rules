@@ -1,8 +1,8 @@
 import type {
-  MethodologyDocumentEvent as MethodologyDocumentEvent,
-  MethodologyDocumentEventAttribute as MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventMetadata as MethodologyDocumentEventMetadata,
-  MethodologyDocumentReference as MethodologyDocumentReference,
+  MethodologyDocumentEvent,
+  MethodologyDocumentEventAttribute,
+  MethodologyDocumentEventMetadata,
+  MethodologyDocumentReference,
 } from '@carrot-fndn/shared/types';
 
 import type {

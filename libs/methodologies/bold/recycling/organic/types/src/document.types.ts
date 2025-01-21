@@ -1,4 +1,4 @@
-import type { MethodologyDocument as MethodologyDocument } from '@carrot-fndn/shared/types';
+import type { MethodologyDocument } from '@carrot-fndn/shared/types';
 
 import type { DocumentEvent } from './document-event.types';
 import type {
