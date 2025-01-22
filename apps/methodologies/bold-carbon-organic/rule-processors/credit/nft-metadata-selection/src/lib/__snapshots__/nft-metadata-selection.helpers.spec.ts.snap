@@ -1,0 +1,3 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Helpers findMassCertificateIdFromDocumentLinks should throw an error if the mass certificate id is not found 1`] = `"Related document Mass Certificate not found"`;

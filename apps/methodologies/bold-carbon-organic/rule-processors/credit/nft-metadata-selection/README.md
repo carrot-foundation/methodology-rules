@@ -1,6 +1,6 @@
 <div align="center">
 
-# Cdf Address
+# Nft Metadata Selection
 
 Methodology: **BOLD-CARBON-ORGANIC**
 
@@ -10,13 +10,13 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📄 Description
 
-In an event, when there is a report identified as CDF, verify if the declared addresses for the participant identified in the event and the actor identified as Recycler are the same.
+Collect and aggregate information that is added to the NFT metadata.
 
-## 📂 Implementation
+### 📂 Implementation
 
-- **[Main Implementation File](./src/lib/cdf-address.processor.ts)**
+- **[Main Implementation File](./src/lib/nft-metadata-selection.processor.ts)**
 
-## 👥 Contributors
+### 👥 Contributors
 
 [![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
 [![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
