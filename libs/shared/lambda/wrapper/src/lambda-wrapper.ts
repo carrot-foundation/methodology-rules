@@ -41,9 +41,6 @@ export const wrapRuleIntoLambdaHandler = (
     environment: String(process.env['ENVIRONMENT']),
   });
 
-  // eslint-disable-next-line no-console
-  console.log('Temporary log');
-
   const handler = async (
     event: MethodologyRuleEvent,
   ): Promise<MethodologyRuleResponse> => {
