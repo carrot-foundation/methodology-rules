@@ -1,6 +1,6 @@
 <div align="center">
 
-# Cdf Address
+# Rewards Distribution
 
 Methodology: **BOLD-CARBON-ORGANIC**
 
@@ -10,13 +10,13 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📄 Description
 
-In an event, when there is a report identified as CDF, verify if the declared addresses for the participant identified in the event and the actor identified as Recycler are the same.
+Calculate rewards percentage rights for the participants that contributed to the Circular Economy cycle in this document.
 
-## 📂 Implementation
+### 📂 Implementation
 
-- **[Main Implementation File](./src/lib/cdf-address.processor.ts)**
+- **[Main Implementation File](./src/lib/rewards-distribution.processor.ts)**
 
-## 👥 Contributors
+### 👥 Contributors
 
 [![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
 [![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
