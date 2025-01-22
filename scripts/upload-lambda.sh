@@ -19,6 +19,8 @@ S3_FOLDER=$(echo "$PROJECT_FOLDER" | sed 's/^apps\/methodologies\///' | sed 's/r
 S3_KEY=$S3_FOLDER/$FILE_NAME-$FILE_CHECKSUM.zip
 S3_URL=s3://$S3_BUCKET/$S3_KEY
 
+METHODOLOGY_SLUG=$(echo "$PROJECT_FOLDER" | sed -n 's/^apps\/methodologies\/\([^/]*\)\/rule-processors\/.*/\1/p')
+
 RULE_NAME=$(echo "$S3_FOLDER" | sed 's/\//-/g')
 
 GIT_REPO_URL=$(git config --get remote.origin.url | sed 's/\.git//g')
@@ -37,7 +39,7 @@ then
   METADATA_TEMP_FILE="temp-rules-metadata.json"
 
   if [ -s "$METADATA_FILE" ]; then
-    jq ".rulesMetadata += [{\"rule-name\": \"$RULE_NAME\", \"commit-hash\": \"$COMMIT_HASH\", \"file-checksum\": \"$FILE_CHECKSUM\", \"source-code-url\": \"$SOURCE_CODE_URL\", \"s3-bucket\": \"$S3_BUCKET\", \"s3-key\": \"$S3_KEY\"}]" "$METADATA_FILE" > "$METADATA_TEMP_FILE" && mv "$METADATA_TEMP_FILE" "$METADATA_FILE"
+    jq ".rulesMetadata += [{\"rule-name\": \"$RULE_NAME\", \"methodology-slug\": \"$METHODOLOGY_SLUG\", \"commit-hash\": \"$COMMIT_HASH\", \"file-checksum\": \"$FILE_CHECKSUM\", \"source-code-url\": \"$SOURCE_CODE_URL\", \"s3-bucket\": \"$S3_BUCKET\", \"s3-key\": \"$S3_KEY\"}]" "$METADATA_FILE" > "$METADATA_TEMP_FILE" && mv "$METADATA_TEMP_FILE" "$METADATA_FILE"
   fi
 else
   echo "Error: Failed to upload file $ZIP_PATH"
