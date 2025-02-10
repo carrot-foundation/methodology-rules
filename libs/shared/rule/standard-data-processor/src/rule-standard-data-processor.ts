@@ -35,7 +35,7 @@ export abstract class RuleStandardDataProcessor<
       });
     }
 
-    const ruleSubject = this.getRuleSubject(document);
+    const ruleSubject = await this.getRuleSubject(document);
 
     if (isNil(ruleSubject)) {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
@@ -54,12 +54,12 @@ export abstract class RuleStandardDataProcessor<
   }
 
   protected abstract evaluateResult(
-    data: RuleSubject,
+    data: Promise<RuleSubject> | RuleSubject,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput>;
 
   protected abstract getRuleSubject(
     document: InputDocument,
-  ): RuleSubject | undefined;
+  ): Promise<RuleSubject | undefined> | RuleSubject;
 
   protected abstract loadDocument(
     ruleInput: RuleInput,

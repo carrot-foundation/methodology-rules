@@ -8,7 +8,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import {
-  prepareEnvironmentTestE2E,
   stubContext,
   stubRuleInput,
   stubRuleResponse,
@@ -69,9 +68,9 @@ export const testRuleProcessorWithMassDocuments = (
       }),
     );
 
-    beforeAll(() => {
-      prepareEnvironmentTestE2E(environmentOptions);
-    });
+    // beforeAll(() => {
+    //   prepareEnvironmentTestE2E(environmentOptions);
+    // });
 
     it.each(MASS_DOCUMENT_SCENARIOS)('should $scenario', async (item) => {
       const response = await handler(
