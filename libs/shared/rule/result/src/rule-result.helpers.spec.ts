@@ -265,9 +265,12 @@ describe('signRequest', () => {
       }),
       hostname: input.url.hostname,
       method: input.method,
-      path: input.url.pathname,
-      protocol: 'https',
+      password: undefined,
+      path: `/${input.url.pathname}`,
+      port: undefined,
+      protocol: 'https:',
       query: input.query,
+      username: undefined,
     });
   });
 
