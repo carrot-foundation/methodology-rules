@@ -26,8 +26,8 @@ RULE_NAME=$(echo "$S3_FOLDER" | sed 's/\//-/g')
 GIT_REPO_URL=$(git config --get remote.origin.url | sed 's/\.git//g')
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
-SOURCE_CODE_URL=$GIT_REPO_URL/blob/$GIT_BRANCH/$PROJECT_FOLDER
 COMMIT_HASH=$(git rev-parse HEAD)
+SOURCE_CODE_URL=$GIT_REPO_URL/tree/$COMMIT_HASH/$PROJECT_FOLDER
 
 # Upload zip file to S3 bucket
 if aws s3 cp "$ZIP_PATH" "s3://$S3_BUCKET/$S3_KEY"
