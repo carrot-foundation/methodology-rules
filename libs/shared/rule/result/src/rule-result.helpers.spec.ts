@@ -74,7 +74,7 @@ describe('mapRuleOutputToPostProcessInput', () => {
       delete process.env[variable];
 
       expect(() => mapRuleOutputToPostProcessInput(ruleOutput)).toThrow(
-        'assert',
+        'createAssert',
       );
     },
   );
@@ -287,7 +287,7 @@ describe('signRequest', () => {
     } as never);
 
     await expect(signRequest(input)).rejects.toThrow(
-      'Error on typia.assert(): invalid type on $input, expect to be Credentials',
+      'Error on createAssert(): invalid type on $input, expect to be Credentials',
     );
   });
 
@@ -329,7 +329,7 @@ describe('signRequest', () => {
     } as never);
 
     await expect(signRequest(input)).rejects.toThrow(
-      'Error on typia.assert(): invalid type on $input, expect to be string',
+      'Error on createAssert(): invalid type on $input, expect to be string',
     );
   });
 
@@ -346,7 +346,7 @@ describe('signRequest', () => {
       delete process.env[value];
 
       await expect(signRequest(input)).rejects.toThrow(
-        'Error on typia.assert(): invalid type on $input, expect to be string',
+        'Error on createAssert(): invalid type on $input, expect to be string',
       );
     },
   );

@@ -3,7 +3,8 @@ import type { Maybe } from '@carrot-fndn/shared/types';
 
 import { DocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
-import { validate } from 'typia';
+
+import { validateDocument } from './document-helpers.typia';
 
 export const loadParentDocument = async (
   loaderService: DocumentLoaderService,
@@ -17,7 +18,7 @@ export const loadParentDocument = async (
 
   const { document } = await loaderService.load({ key });
 
-  const validation = validate<Document>(document);
+  const validation = validateDocument(document);
 
   if (!validation.success) {
     logger.warn(

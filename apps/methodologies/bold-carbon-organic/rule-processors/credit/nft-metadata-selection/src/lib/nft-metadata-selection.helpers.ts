@@ -31,7 +31,7 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
-import { assert, is } from 'typia';
+import { is } from 'typia';
 
 import type {
   MassCertificateMetadata,
@@ -46,6 +46,8 @@ import type {
   NftMetadata,
   NftMetadataMassCertificate,
 } from './nft-metadata-selection.types';
+
+import { assertMethodologyCreditNftMetadataDto } from './nft-metadata-selection.helpers.typia';
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
@@ -113,9 +115,9 @@ export const mapMassMetadata = (document: Document): MassMetadata => ({
       eventNameIsAnyOf([ACTOR]),
       metadataAttributeValueIsAnyOf(ACTOR_TYPE, [RECYCLER]),
     ),
-  )?.participant.name as string,
-  subtype: document.subtype as string,
-  type: document.type as string,
+  )?.participant.name as NonEmptyString,
+  subtype: document.subtype as NonEmptyString,
+  type: document.type as NonEmptyString,
   value: document.currentValue,
 });
 
@@ -289,7 +291,7 @@ export const mapNftMetadataDto = (
   ruleSubject: Omit<MethodologyCreditNftMetadataDto, 'creditDocumentId'>,
   ruleInput: RuleInput,
 ): MethodologyCreditNftMetadataDto =>
-  assert<MethodologyCreditNftMetadataDto>({
+  assertMethodologyCreditNftMetadataDto({
     ...ruleSubject,
     creditDocumentId: ruleInput.documentId,
   });

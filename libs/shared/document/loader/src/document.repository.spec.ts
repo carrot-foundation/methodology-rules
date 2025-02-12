@@ -25,7 +25,7 @@ describe('DocumentRepository', () => {
 
       await expect(
         repository.readFromS3(faker.string.uuid(), assertDocumentEntity),
-      ).rejects.toThrow('Error on typia.assert()');
+      ).rejects.toThrow('Error on createAssert()');
     });
 
     it('should return the stored data', async () => {

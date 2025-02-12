@@ -14,9 +14,14 @@ import {
 import { fromEnv } from '@aws-sdk/credential-providers';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { SignatureV4 } from '@smithy/signature-v4';
-import { assert } from 'typia';
 
 import type { PostProcessInput } from './rule-result.types';
+
+import {
+  assertCredentials,
+  assertRuleOutput,
+  assertString,
+} from './rule-result.typia';
 
 export const nilSafeRun = <T, R>(
   value: T | null | undefined,
@@ -28,11 +33,11 @@ export const mapRuleOutputToPostProcessInput = (
   ruleOutput: RuleOutput,
 ): PostProcessInput => ({
   output: {
-    artifactChecksum: assert<string>(process.env['ARTIFACT_CHECKSUM']),
+    artifactChecksum: assertString(process.env['ARTIFACT_CHECKSUM']),
     ...(ruleOutput.resultComment && { comment: ruleOutput.resultComment }),
     ...(ruleOutput.resultContent && { content: ruleOutput.resultContent }),
-    sourceCodeUrl: assert<string>(process.env['SOURCE_CODE_URL']),
-    sourceCodeVersion: assert<string>(process.env['SOURCE_CODE_VERSION']),
+    sourceCodeUrl: assertString(process.env['SOURCE_CODE_URL']),
+    sourceCodeVersion: assertString(process.env['SOURCE_CODE_VERSION']),
     status: ruleOutput.resultStatus,
   },
   taskToken: ruleOutput.responseToken,
@@ -76,7 +81,7 @@ export const assumeRoleSmaugCredentials = async ({
 
   const assumeRoleResponse = await stsClient.send(assumeRoleCommand);
 
-  return assert<Credentials>(assumeRoleResponse.Credentials);
+  return assertCredentials(assumeRoleResponse.Credentials);
 };
 
 export const signRequest = async ({
@@ -90,10 +95,10 @@ export const signRequest = async ({
   query?: Record<string, Array<string> | null | string>;
   url: URL;
 }) => {
-  const smaugApiGatewayAssumeRoleArn = assert<string>(
+  const smaugApiGatewayAssumeRoleArn = assertString(
     process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'],
   );
-  const smaugAwsRegion = assert<string>(process.env['AWS_REGION']);
+  const smaugAwsRegion = assertString(process.env['AWS_REGION']);
 
   const credentials = await assumeRoleSmaugCredentials({
     assumeRoleArn: smaugApiGatewayAssumeRoleArn,
@@ -102,9 +107,9 @@ export const signRequest = async ({
 
   const signer = new SignatureV4({
     credentials: {
-      accessKeyId: assert<string>(credentials.AccessKeyId),
-      secretAccessKey: assert<string>(credentials.SecretAccessKey),
-      sessionToken: assert<string>(credentials.SessionToken),
+      accessKeyId: assertString(credentials.AccessKeyId),
+      secretAccessKey: assertString(credentials.SecretAccessKey),
+      sessionToken: assertString(credentials.SessionToken),
     },
     region: smaugAwsRegion,
     service: 'execute-api',
@@ -128,7 +133,7 @@ export const signRequest = async ({
 export const reportRuleResults = async (
   ruleOutput: RuleOutput,
 ): Promise<void> => {
-  assert<RuleOutput>(ruleOutput);
+  assertRuleOutput(ruleOutput);
 
   try {
     const url = new URL(ruleOutput.responseUrl);

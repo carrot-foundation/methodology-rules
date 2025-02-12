@@ -237,7 +237,7 @@ describe('Helpers', () => {
 
       const validation = validate<MassMetadata>(result);
 
-      expect(validation.errors).toEqual([]);
+      expect(validation.success).toBe(true);
     });
   });
 
@@ -347,7 +347,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.errors).toEqual([]);
+      expect(validation.success).toBe(true);
     });
   });
 
@@ -373,7 +373,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.errors).toEqual([]);
+      expect(validation.success).toBe(true);
     });
   });
 
@@ -387,7 +387,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.errors).toEqual([]);
+      expect(validation.success).toBe(true);
     });
   });
 
@@ -566,7 +566,7 @@ describe('Helpers', () => {
 
       const validation = validate<MethodologyCreditNftMetadataDto>(result);
 
-      expect(validation.errors).toEqual([]);
+      expect(validation.success).toBe(true);
     });
 
     it('should throw an error if the the return value is incorrect', () => {
@@ -575,7 +575,7 @@ describe('Helpers', () => {
       expect(() =>
         // @ts-expect-error: force invalid return value
         mapNftMetadataDto(dtoStub, ''),
-      ).toThrow('assert');
+      ).toThrow('createAssert');
     });
   });
 

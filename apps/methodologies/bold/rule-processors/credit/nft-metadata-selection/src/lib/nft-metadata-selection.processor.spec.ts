@@ -155,7 +155,7 @@ describe('NftMetadataSelection', () => {
 
     const validation = validate<NftMetadata>(result.resultContent);
 
-    expect(validation.errors).toEqual([]);
+    expect(validation.success).toBe(true);
   });
 
   it('should return the resultContent with a greater amount of massCertificates and masses', async () => {

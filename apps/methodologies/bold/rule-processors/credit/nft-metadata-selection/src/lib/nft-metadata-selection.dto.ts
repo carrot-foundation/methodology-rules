@@ -9,13 +9,13 @@ import type { tags } from 'typia';
 
 export interface MassMetadata {
   documentId: NonEmptyString;
-  measurementUnit: NonEmptyString;
-  originCity: NonEmptyString;
-  originCountry: NonEmptyString;
-  originCountryState: NonEmptyString;
-  recyclerName: NonEmptyString;
-  subtype: NonEmptyString;
-  type: NonEmptyString;
+  measurementUnit: string;
+  originCity: string;
+  originCountry: string;
+  originCountryState: string;
+  recyclerName: string;
+  subtype: string;
+  type: string;
   value: number & tags.ExclusiveMinimum<0> & tags.Type<'float'>;
 }
 

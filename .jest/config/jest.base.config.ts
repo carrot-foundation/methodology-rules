@@ -14,6 +14,9 @@ export const getJestBaseConfig = (dirname: string): Config => {
     preset: getFilePath('jest.preset.js'),
     moduleFileExtensions: ['ts', 'js', 'html', 'json'],
     displayName: name,
+    coveragePathIgnorePatterns: [
+      '<rootDir>/src/.+\\.(typia|stubs)\\.ts',
+    ],
     setupFiles: [__dirname + '/dotenv-config.ts'],
     coverageThreshold: {
       global: {

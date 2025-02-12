@@ -104,7 +104,7 @@ describe('Rewards Distribution Helpers', () => {
         },
       ]);
 
-      expect(validate<RewardsDistribution>(result).errors).toEqual([]);
+      expect(validate<RewardsDistribution>(result).success).toBe(true);
     });
 
     it('should match the snapshot', () => {

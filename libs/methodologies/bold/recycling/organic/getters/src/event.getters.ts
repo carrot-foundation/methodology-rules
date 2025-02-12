@@ -8,16 +8,17 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   type DocumentEventWithAttachments,
-  type DocumentEventWithMetadata,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { createValidate, validate } from 'typia';
+
+import { validateDocumentEventWithMetadata } from './event.getters.typia';
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
 ): MethodologyDocumentEventAttributeValue | undefined => {
-  const validation = validate<DocumentEventWithMetadata>(event);
+  const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
     const foundAttribute = validation.data.metadata.attributes.find(
