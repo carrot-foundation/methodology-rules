@@ -10,7 +10,6 @@ import {
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import {
-  type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -18,19 +17,20 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, toDocumentKey } from '@carrot-fndn/shared/helpers';
+import {
+  isNil,
+  isNonZeroPositive,
+  isNumber,
+  toDocumentKey,
+} from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import {
-  type MethodologyDocumentEventAttributeValue,
-  type NonZeroPositive,
-} from '@carrot-fndn/shared/types';
+import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
-import { is } from 'typia';
 
 import type { ResultContentWithMassValue } from './rewards-distribution.types';
 
@@ -39,6 +39,7 @@ import {
   MASS_CRITERIA,
 } from './rewards-distribution.constants';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
+import { isCertificateRewardDistributionOutput } from './rewards-distribution.processor.typia';
 
 const { END, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG, UNIT_PRICE } =
@@ -132,7 +133,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
               RULE_PROCESSOR_RESULT_CONTENT,
             );
 
-            if (!is<CertificateRewardDistributionOutput>(resultContent)) {
+            if (!isCertificateRewardDistributionOutput(resultContent)) {
               throw new Error(
                 this.ErrorMessage.UNEXPECTED_RULE_PROCESSOR_RESULT_CONTENT(
                   massCertificateAuditDocumentId,
@@ -178,7 +179,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
             const { value } = endEvent;
 
-            if (!is<number>(value)) {
+            if (!isNumber(value)) {
               throw new Error(
                 this.ErrorMessage.INVALID_END_EVENT_VALUE(
                   massDocumentId,
@@ -227,7 +228,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     const unitPrice = getEventAttributeValue(rulesMetadataEvent, UNIT_PRICE);
 
-    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
+    if (!isNonZeroPositive(unitPrice) || new BigNumber(unitPrice).isNaN()) {
       throw new Error(
         this.ErrorMessage.INVALID_UNIT_PRICE(credit.id, unitPrice),
       );

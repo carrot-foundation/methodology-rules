@@ -11,7 +11,6 @@ import {
   isNonEmptyString,
   toDocumentKey,
 } from '@carrot-fndn/shared/helpers';
-import { is, validate } from 'typia';
 
 import type {
   ConnectionKeys,
@@ -19,11 +18,16 @@ import type {
   DocumentKey,
   DocumentQueryCriteria,
   QueryContext,
-  RelatedDocumentCriteria,
   Visitor,
 } from './document-query.service.types';
 
 import { BaseDocumentQueryService } from './abstract-document-query.service';
+import {
+  isDocumentReference,
+  isObject,
+  isRelatedDocumentCriteria,
+  validateDocument,
+} from './document-query.service.typia';
 
 export class DocumentQueryService extends BaseDocumentQueryService<
   Document,
@@ -41,7 +45,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
           throw new Error(`Document not found: ${documentKey}`);
         }
 
-        const validation = validate<Document>(document.document);
+        const validation = validateDocument(document.document);
 
         if (!validation.success) {
           throw new Error(
@@ -60,11 +64,11 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     referencedDocument,
     relatedDocument,
   }: DocumentEvent): DocumentReference | undefined {
-    if (is<DocumentReference>(relatedDocument)) {
+    if (isDocumentReference(relatedDocument)) {
       return relatedDocument;
     }
 
-    if (is<DocumentReference>(referencedDocument)) {
+    if (isDocumentReference(referencedDocument)) {
       return referencedDocument;
     }
 
@@ -81,7 +85,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     const connectionKeys: ConnectionKeys<DocumentQueryCriteria>[] = [];
 
     if (
-      is<object>(criteria.parentDocument) &&
+      isObject(criteria.parentDocument) &&
       isNonEmptyString(parentDocumentId)
     ) {
       const parentDocumentKey = this.getDocumentKey({
@@ -110,7 +114,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
           const relationship = this.getEventRelationship(event);
 
           if (
-            is<DocumentReference>(relationship) &&
+            isDocumentReference(relationship) &&
             matcher.matches(relationship)
           ) {
             documentKeys.push(
@@ -162,7 +166,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
 
     const document = await this.documentFetcher.fetch(documentKey);
 
-    if (!(is<RelatedDocumentCriteria>(criteria) && criteria.omit === true)) {
+    if (!isRelatedDocumentCriteria(criteria)) {
       result.push(callback({ document }));
     }
 

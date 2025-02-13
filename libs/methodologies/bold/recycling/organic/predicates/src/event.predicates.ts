@@ -15,7 +15,8 @@ import {
   DataSetName,
   MethodologyParticipantType,
 } from '@carrot-fndn/shared/types';
-import { validate } from 'typia';
+
+import { validateDocumentEvent } from './event.predicates.typia';
 
 export const eventHasName = (
   event: DocumentEvent,
@@ -84,7 +85,7 @@ export const eventHasMetadataAttribute = (options: {
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;
 
-  const validation = validate<DocumentEvent>(event);
+  const validation = validateDocumentEvent(event);
 
   if (!validation.success) {
     return false;

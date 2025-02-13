@@ -18,12 +18,15 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   MassSubtype,
-  type RewardsDistributionActorType,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import {
+  isBigNumber,
+  isNil,
+  isNonEmptyArray,
+} from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -31,7 +34,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { BigNumber } from 'bignumber.js';
-import { is } from 'typia';
 
 import type {
   ActorMassPercentageInputDto,
@@ -55,6 +57,10 @@ import {
   mapMassRewards,
 } from './rewards-distribution.helpers';
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.processor.errors';
+import {
+  isMassSubtype,
+  isRewardsDistributionActorType,
+} from './rewards-distribution.processor.typia';
 
 BigNumber.config({ DECIMAL_PLACES: 10, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 
@@ -103,7 +109,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private extractMassSubtype(document: Document): MassSubtype {
-    if (!is<MassSubtype>(document.subtype)) {
+    if (!isMassSubtype(document.subtype)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.UNEXPECTED_DOCUMENT_SUBTYPE,
       );
@@ -183,8 +189,8 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         this.getRewardsDistributionActorTypePercentages(document),
       )) {
         if (
-          is<RewardsDistributionActorType>(actorType) &&
-          is<BigNumber>(rewardDistribution)
+          isRewardsDistributionActorType(actorType) &&
+          isBigNumber(rewardDistribution)
         ) {
           const actorsByType = getActorsByType({
             actorType,
@@ -288,7 +294,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         DocumentEventAttributeName.ACTOR_TYPE,
       );
 
-      if (is<RewardsDistributionActorType>(actorType)) {
+      if (isRewardsDistributionActorType(actorType)) {
         actors.push({
           participant: {
             id: event.participant.id,

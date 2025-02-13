@@ -5,3 +5,4 @@ export * from './document.helpers';
 export * from './math.helpers';
 export * from './string.helpers';
 export * from './logger.helpers';
+export * from './is.typia';

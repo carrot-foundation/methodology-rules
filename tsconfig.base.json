@@ -4,10 +4,16 @@
   "compilerOptions": {
     "rootDir": ".",
     "baseUrl": ".",
-    "lib": ["es2023"],
+    "lib": [
+      "es2023"
+    ],
     "module": "esnext",
     "target": "es2022",
     "moduleResolution": "node",
+    "typeRoots": [
+      "node_modules/@types",
+      "./types"
+    ],
     "strict": true,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -57,11 +63,15 @@
       "@carrot-fndn/methodologies/bold/recycling/organic/utils": [
         "libs/methodologies/bold/recycling/organic/utils/src/index.ts"
       ],
-      "@carrot-fndn/shared/app/types": ["libs/shared/app/types/src/index.ts"],
+      "@carrot-fndn/shared/app/types": [
+        "libs/shared/app/types/src/index.ts"
+      ],
       "@carrot-fndn/shared/document/loader": [
         "libs/shared/document/loader/src/index.ts"
       ],
-      "@carrot-fndn/shared/helpers": ["libs/shared/helpers/src/index.ts"],
+      "@carrot-fndn/shared/helpers": [
+        "libs/shared/helpers/src/index.ts"
+      ],
       "@carrot-fndn/shared/lambda/types": [
         "libs/shared/lambda/types/src/index.ts"
       ],
@@ -74,10 +84,18 @@
       "@carrot-fndn/shared/rule/standard-data-processor": [
         "libs/shared/rule/standard-data-processor/src/index.ts"
       ],
-      "@carrot-fndn/shared/rule/types": ["libs/shared/rule/types/src/index.ts"],
-      "@carrot-fndn/shared/s3-bucket": ["libs/shared/s3-bucket/src/index.ts"],
-      "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
-      "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"]
+      "@carrot-fndn/shared/rule/types": [
+        "libs/shared/rule/types/src/index.ts"
+      ],
+      "@carrot-fndn/shared/s3-bucket": [
+        "libs/shared/s3-bucket/src/index.ts"
+      ],
+      "@carrot-fndn/shared/testing": [
+        "libs/shared/testing/src/index.ts"
+      ],
+      "@carrot-fndn/shared/types": [
+        "libs/shared/types/src/index.ts"
+      ]
     },
     "plugins": [
       {
@@ -85,5 +103,10 @@
       }
     ]
   },
-  "exclude": ["node_modules", "tmp", "local", "coverage"]
+  "exclude": [
+    "node_modules",
+    "tmp",
+    "local",
+    "coverage"
+  ]
 }
