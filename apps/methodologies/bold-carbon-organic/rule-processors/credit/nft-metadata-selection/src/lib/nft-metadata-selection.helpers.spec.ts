@@ -237,7 +237,7 @@ describe('Helpers', () => {
 
       const validation = validate<MassMetadata>(result);
 
-      expect(validation.success).toBe(true);
+      expect(validation).toPassTypiaValidation();
     });
   });
 
@@ -347,7 +347,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.success).toBe(true);
+      expect(validation).toPassTypiaValidation();
     });
   });
 
@@ -373,7 +373,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.success).toBe(true);
+      expect(validation).toPassTypiaValidation();
     });
   });
 
@@ -387,7 +387,7 @@ describe('Helpers', () => {
 
       const validation = validate(result);
 
-      expect(validation.success).toBe(true);
+      expect(validation).toPassTypiaValidation();
     });
   });
 
@@ -566,7 +566,7 @@ describe('Helpers', () => {
 
       const validation = validate<MethodologyCreditNftMetadataDto>(result);
 
-      expect(validation.success).toBe(true);
+      expect(validation).toPassTypiaValidation();
     });
 
     it('should throw an error if the the return value is incorrect', () => {

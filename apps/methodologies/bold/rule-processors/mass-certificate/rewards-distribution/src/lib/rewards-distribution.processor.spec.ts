@@ -761,7 +761,7 @@ describe('RewardsDistributionProcessor', () => {
 
     const validationResult = validate<CertificateReward[]>(certificateRewards);
 
-    expect(validationResult.success).toBe(true);
+    expect(validationResult).toPassTypiaValidation();
 
     expect(certificateRewards).toEqual(
       expect.arrayContaining(

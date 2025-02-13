@@ -18,7 +18,9 @@ export const assertExpectedRewardsDistribution = (
 ) => {
   const { actors, massTotalValue, remainder } = rewardsDistribution;
 
-  expect(validate<RewardsDistribution>(rewardsDistribution).success).toBe(true);
+  expect(
+    validate<RewardsDistribution>(rewardsDistribution),
+  ).toPassTypiaValidation();
 
   const remainderPercentage = new BigNumber(remainder.percentage);
   const totalAmount = roundAmount(

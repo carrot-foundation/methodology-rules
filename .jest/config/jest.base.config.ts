@@ -15,9 +15,11 @@ export const getJestBaseConfig = (dirname: string): Config => {
     moduleFileExtensions: ['ts', 'js', 'html', 'json'],
     displayName: name,
     coveragePathIgnorePatterns: [
-      '<rootDir>/src/.+\\.(typia|stubs)\\.ts',
+      '<rootDir>/src/.*\\.(typia|stubs)\\.ts$',
+      '<rootDir>.*typia\\.matchers\\.ts$',
     ],
-    setupFiles: [__dirname + '/dotenv-config.ts'],
+    setupFiles: [`${__dirname}/dotenv-config.ts`],
+    setupFilesAfterEnv: [`${__dirname}/setup-after-env.ts`],
     coverageThreshold: {
       global: {
         branches: 100,

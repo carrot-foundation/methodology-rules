@@ -276,7 +276,7 @@ describe('NftMetadataSelection E2E', () => {
       response.resultContent,
     );
 
-    expect(validationResultContent.success).toBe(true);
+    expect(validationResultContent).toPassTypiaValidation();
     expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
     expect(response.resultContent?.['image']).toBe(image);
     expect(response.resultContent?.['description']).toBe(nftDescription);
