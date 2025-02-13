@@ -17,7 +17,12 @@ import {
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, toDocumentKey } from '@carrot-fndn/shared/helpers';
+import {
+  isNil,
+  isNonZeroPositive,
+  isNumber,
+  toDocumentKey,
+} from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -34,11 +39,7 @@ import {
   MASS_CRITERIA,
 } from './rewards-distribution.constants';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
-import {
-  isCertificateRewardDistributionOutput,
-  isNonZeroPositive,
-  isNumber,
-} from './rewards-distribution.processor.typia';
+import { isCertificateRewardDistributionOutput } from './rewards-distribution.processor.typia';
 
 const { END, RULE_EXECUTION, RULES_METADATA } = DocumentEventName;
 const { RULE_PROCESSOR_RESULT_CONTENT, RULE_SLUG, UNIT_PRICE } =

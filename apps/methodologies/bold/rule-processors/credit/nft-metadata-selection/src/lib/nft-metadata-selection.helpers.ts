@@ -30,7 +30,7 @@ import {
   type RewardDistributionResultContent,
 } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import { isNil, isNonEmptyArray, isUri } from '@carrot-fndn/shared/helpers';
 
 import type {
   MassCertificateMetadata,
@@ -46,10 +46,7 @@ import type {
   NftMetadataMassCertificate,
 } from './nft-metadata-selection.types';
 
-import {
-  assertMethodologyCreditNftMetadataDto,
-  isUri,
-} from './nft-metadata-selection.helpers.typia';
+import { assertMethodologyCreditNftMetadataDto } from './nft-metadata-selection.helpers.typia';
 
 const { RECYCLER } = DocumentEventActorType;
 const { ACTOR, OPEN, RULE_EXECUTION } = DocumentEventName;
