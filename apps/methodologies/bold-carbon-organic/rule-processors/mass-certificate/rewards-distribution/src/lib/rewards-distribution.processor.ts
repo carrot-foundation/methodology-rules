@@ -22,7 +22,11 @@ import {
 import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import {
+  isBigNumber,
+  isNil,
+  isNonEmptyArray,
+} from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -54,7 +58,6 @@ import {
 } from './rewards-distribution.helpers';
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.processor.errors';
 import {
-  isBigNumber,
   isMassSubtype,
   isRewardsDistributionActorType,
 } from './rewards-distribution.processor.typia';
