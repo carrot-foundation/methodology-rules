@@ -1,4 +1,4 @@
-import type { CertificateReward } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import type { CertificateReward } from '@carrot-fndn/shared/methodologies/bold/types';
 import type {
   NonEmptyArray,
   NonEmptyString,

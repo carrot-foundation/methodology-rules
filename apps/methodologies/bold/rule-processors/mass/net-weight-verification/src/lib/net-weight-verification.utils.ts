@@ -1,13 +1,13 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
-import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import {
   extractNumberFromString,
   isNonEmptyString,
   logger,
 } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import {
+  type DocumentEvent,
+  DocumentEventAttributeName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { createIs } from 'typia';
 
 const { LOAD_NET_WEIGHT, VEHICLE_GROSS_WEIGHT, VEHICLE_WEIGHT } =

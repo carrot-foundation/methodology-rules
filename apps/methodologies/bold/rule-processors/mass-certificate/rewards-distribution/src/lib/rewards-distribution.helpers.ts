@@ -1,8 +1,9 @@
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   and,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventActorType,
@@ -10,9 +11,8 @@ import {
   type MassReward,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { isNil } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
 import type {

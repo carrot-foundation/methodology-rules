@@ -1,22 +1,22 @@
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
   type DocumentQuery,
   DocumentQueryService,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import { MASS_AUDIT } from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { MASS_AUDIT } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   and,
   eventHasCarrotParticipant,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

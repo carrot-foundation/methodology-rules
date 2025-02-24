@@ -1,15 +1,15 @@
+import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

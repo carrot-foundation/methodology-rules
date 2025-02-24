@@ -6,15 +6,15 @@ import {
   metadataAttributeNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
   not,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventVehicleType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;

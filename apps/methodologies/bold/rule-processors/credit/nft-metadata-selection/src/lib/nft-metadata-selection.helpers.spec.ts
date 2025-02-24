@@ -9,17 +9,17 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentCategory,
   DocumentEventActorType,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentEventRuleSlug,
   DocumentType,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray, stubRuleInput } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { assert, random, validate } from 'typia';

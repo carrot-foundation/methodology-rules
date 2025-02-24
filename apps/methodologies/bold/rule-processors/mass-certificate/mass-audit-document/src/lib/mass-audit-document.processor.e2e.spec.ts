@@ -1,9 +1,9 @@
+import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   stubMassCertificateAuditWithMethodologySlug,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

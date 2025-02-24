@@ -1,7 +1,7 @@
 import type {
   MassSubtype,
   RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { createIs } from 'typia';
 

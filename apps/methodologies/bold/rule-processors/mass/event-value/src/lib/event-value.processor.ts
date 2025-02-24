@@ -1,13 +1,13 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
-import { metadataAttributeNameIsAnyOf } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { metadataAttributeNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { EVENT_VALUE } = DocumentEventAttributeName;

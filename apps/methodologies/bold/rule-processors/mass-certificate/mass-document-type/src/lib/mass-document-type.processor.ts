@@ -1,15 +1,15 @@
-import { DocumentQueryService } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import { DocumentQueryService } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS,
   MASS_AUDIT,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
+} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

@@ -1,6 +1,6 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { DocumentCategory } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -10,7 +10,7 @@ import { random } from 'typia';
 
 import { DocumentCategoryProcessor } from './document-category.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DocumentCategoryProcessor', () => {
   const ruleDataProcessor = new DocumentCategoryProcessor();

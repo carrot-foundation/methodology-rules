@@ -1,4 +1,3 @@
-import type { CertificateReward } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import type {
   NonEmptyArray,
   NonEmptyString,
@@ -6,6 +5,8 @@ import type {
   Url,
 } from '@carrot-fndn/shared/types';
 import type { tags } from 'typia';
+
+import { CertificateReward } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface MassMetadata {
   documentId: NonEmptyString;

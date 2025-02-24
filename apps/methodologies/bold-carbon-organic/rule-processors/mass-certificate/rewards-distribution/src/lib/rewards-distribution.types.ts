@@ -5,7 +5,7 @@ import {
   type DocumentSubtype,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface RewardsDistributionActor {
   participant: RewardActorParticipant;

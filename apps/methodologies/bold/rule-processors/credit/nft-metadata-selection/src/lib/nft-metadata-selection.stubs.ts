@@ -3,7 +3,7 @@ import type { RequiredDeep } from 'type-fest';
 import {
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentCategory,
@@ -13,7 +13,7 @@ import {
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';

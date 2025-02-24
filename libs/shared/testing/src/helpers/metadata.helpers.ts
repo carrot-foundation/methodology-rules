@@ -1,9 +1,9 @@
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
-  type DocumentEvent,
+  DocumentEvent,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const replaceMetadataAttributeValue = (
   documentEvent: DocumentEvent,

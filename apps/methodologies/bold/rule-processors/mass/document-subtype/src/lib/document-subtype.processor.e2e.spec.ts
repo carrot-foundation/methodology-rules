@@ -1,8 +1,8 @@
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocument,
   testRuleProcessorWithMassDocuments,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

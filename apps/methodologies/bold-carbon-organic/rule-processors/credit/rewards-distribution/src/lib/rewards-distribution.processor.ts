@@ -1,20 +1,3 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
-import {
-  type DocumentQuery,
-  DocumentQueryService,
-  loadParentDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import {
-  and,
-  eventNameIsAnyOf,
-  metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventRuleSlug,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
@@ -23,6 +6,23 @@ import {
   isNumber,
   toDocumentKey,
 } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import {
+  type DocumentQuery,
+  DocumentQueryService,
+  loadParentDocument,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  and,
+  eventNameIsAnyOf,
+  metadataAttributeValueIsAnyOf,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import {
+  type Document,
+  DocumentEventAttributeName,
+  DocumentEventName,
+  DocumentEventRuleSlug,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

@@ -1,7 +1,7 @@
 import type { NonZeroPositive } from '@carrot-fndn/shared/types';
 
-import { DocumentEventActorType } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
 import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
+import { DocumentEventActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
 import type {

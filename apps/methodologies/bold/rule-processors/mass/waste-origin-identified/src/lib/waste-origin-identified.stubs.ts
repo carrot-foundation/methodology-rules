@@ -1,12 +1,12 @@
 import {
   stubDocumentEventWithMetadata,
   stubDocumentWithOneActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const stubDocumentWithWasteOriginIdentified = (): Document =>
   stubDocumentWithOneActorType(

@@ -1,25 +1,3 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
-import {
-  type DocumentQuery,
-  DocumentQueryService,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import {
-  MASS,
-  METHODOLOGY_DEFINITION,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
-import {
-  and,
-  isActorEvent,
-  isActorEventWithSourceActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import {
-  type CertificateReward,
-  type Document,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
-  MassSubtype,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
@@ -27,6 +5,28 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import {
+  type DocumentQuery,
+  DocumentQueryService,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  MASS,
+  METHODOLOGY_DEFINITION,
+} from '@carrot-fndn/shared/methodologies/bold/matchers';
+import {
+  and,
+  isActorEvent,
+  isActorEventWithSourceActorType,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import {
+  type CertificateReward,
+  type Document,
+  DocumentEventActorType,
+  DocumentEventAttributeName,
+  MassSubtype,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

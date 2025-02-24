@@ -1,19 +1,19 @@
 import {
   spyOnDocumentQueryServiceLoad,
   spyOnLoadParentDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubCreditDocument,
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
   stubMassCertificateAuditDocument,
   stubMassDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type CertificateRewardDistributionOutput,
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
