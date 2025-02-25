@@ -22,13 +22,13 @@ import {
   metadataAttributeValueIsAnyOf,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  Document,
+  type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventRuleSlug,
-  DocumentReference,
-  RewardDistributionResultContent,
+  type DocumentReference,
+  type RewardDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { validateNonEmptyString } from '@carrot-fndn/shared/methodologies/bold/utils';
 

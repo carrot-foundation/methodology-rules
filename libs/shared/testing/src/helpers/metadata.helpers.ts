@@ -1,7 +1,7 @@
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
-  DocumentEvent,
+  type DocumentEvent,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
