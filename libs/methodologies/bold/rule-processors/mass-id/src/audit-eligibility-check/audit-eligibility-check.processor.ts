@@ -23,6 +23,7 @@ export class AuditEligibilityCheckProcessor extends ParentDocumentRuleProcessor<
     ELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created after ${this.ELIGIBLE_DATE.toISOString().split('T')[0]}.`,
     INELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created before ${this.ELIGIBLE_DATE.toISOString().split('T')[0]}.`,
     MISSING_RECYCLED_EVENT: `The '${DocumentEventName.RECYCLED}' event is missing.`,
+    MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT: `The '${DocumentEventName.RECYCLED}' event has no 'externalCreatedAt' attribute.`,
   } as const;
 
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
@@ -35,8 +36,21 @@ export class AuditEligibilityCheckProcessor extends ParentDocumentRuleProcessor<
       };
     }
 
-    const eventDate = new Date(recycledEvent.externalCreatedAt as string);
-    const isEligible = eventDate.getTime() > this.ELIGIBLE_DATE.getTime();
+    if (isNil(recycledEvent.externalCreatedAt)) {
+      return {
+        resultComment:
+          this.RESULT_COMMENT.MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    const eventDate = new Date(recycledEvent.externalCreatedAt);
+    const eventDateUTC = Date.UTC(
+      eventDate.getUTCFullYear(),
+      eventDate.getUTCMonth(),
+      eventDate.getUTCDate(),
+    );
+    const isEligible = eventDateUTC >= this.ELIGIBLE_DATE.getTime();
 
     return {
       resultComment: isEligible
