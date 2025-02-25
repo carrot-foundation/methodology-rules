@@ -57,6 +57,15 @@ describe('AuditEligibilityCheckProcessor', () => {
       scenario:
         'should APPROVE the rule if the Recycled event was created on the eligible date',
     },
+    {
+      externalCreatedAt: undefined,
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT']
+          .MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should REJECT the rule if the Recycled event has no externalCreatedAt attribute',
+    },
   ])(
     '$scenario',
     async ({ externalCreatedAt, resultComment, resultStatus }) => {
