@@ -6,7 +6,7 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type { tags } from 'typia';
 
-import { CertificateReward } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type CertificateReward } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface MassMetadata {
   documentId: NonEmptyString;
