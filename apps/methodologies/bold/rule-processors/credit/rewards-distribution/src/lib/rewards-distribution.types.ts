@@ -2,7 +2,7 @@ import type {
   CertificateRewardDistributionOutput,
   DocumentEventActorType,
   RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import type {
   NonEmptyString,
   NonZeroPositive,

@@ -1,15 +1,15 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEventAttachment,
   stubDocumentEventAttribute,
   stubDocumentEventWithReportType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
   ReportType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,7 +20,7 @@ import { random } from 'typia';
 
 import { MtrAttachmentVerificationProcessor } from './mtr-attachment-verification.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('MtrAttachmentVerificationProcessor', () => {
   const ruleDataProcessor = new MtrAttachmentVerificationProcessor();

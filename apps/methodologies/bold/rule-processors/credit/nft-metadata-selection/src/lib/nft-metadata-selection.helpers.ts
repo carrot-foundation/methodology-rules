@@ -5,21 +5,22 @@ import type {
   Uri,
 } from '@carrot-fndn/shared/types';
 
+import { isNil, isNonEmptyArray, isUri } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
   getEventAttributeValueOrThrow,
   getRulesMetadataEvent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+} from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   MASS_AUDIT,
   MASS_CERTIFICATE,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
+} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   and,
   eventHasName,
   eventNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventActorType,
@@ -28,9 +29,8 @@ import {
   DocumentEventRuleSlug,
   type DocumentReference,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { validateNonEmptyString } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { isNil, isNonEmptyArray, isUri } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { validateNonEmptyString } from '@carrot-fndn/shared/methodologies/bold/utils';
 
 import type {
   MassCertificateMetadata,

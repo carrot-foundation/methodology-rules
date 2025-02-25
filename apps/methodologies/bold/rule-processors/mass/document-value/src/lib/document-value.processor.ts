@@ -1,7 +1,7 @@
-import type { Document } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 export class DocumentValueProcessor extends ParentDocumentRuleProcessor<Document> {

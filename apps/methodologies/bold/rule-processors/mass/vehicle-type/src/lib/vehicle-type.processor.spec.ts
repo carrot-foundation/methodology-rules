@@ -1,13 +1,13 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventVehicleType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -19,7 +19,7 @@ import { random } from 'typia';
 import { VehicleTypeProcessor } from './vehicle-type.processor';
 import { stubEventWithVehicleType } from './vehicle-type.stubs';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('VehicleTypeProcessor', () => {
   const ruleDataProcessor = new VehicleTypeProcessor();

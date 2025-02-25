@@ -1,21 +1,21 @@
 // No changes needed - imports are already correctly structured with:
-// - DocumentEventName from '@carrot-fndn/methodologies/bold/recycling/organic/types'
+// - DocumentEventName from '@carrot-fndn/shared/methodologies/bold/types'
 // - Other imports remain unchanged
 
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocumentEvent,
   stubMassAuditDocument,
   stubMassCertificateAuditDocument,
   stubMassCertificateDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentCategory,
   DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

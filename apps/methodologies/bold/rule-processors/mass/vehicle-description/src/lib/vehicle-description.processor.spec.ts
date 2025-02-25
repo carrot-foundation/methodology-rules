@@ -1,17 +1,17 @@
 import {
+  DocumentLoaderService,
+  stubDocumentEntity,
+} from '@carrot-fndn/shared/document/loader';
+import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
   DocumentEventVehicleType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import {
-  DocumentLoaderService,
-  stubDocumentEntity,
-} from '@carrot-fndn/shared/document/loader';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,

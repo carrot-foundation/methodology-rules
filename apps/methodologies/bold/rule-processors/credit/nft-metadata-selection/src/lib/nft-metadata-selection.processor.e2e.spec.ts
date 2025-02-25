@@ -1,10 +1,11 @@
 import type { UnknownObject } from '@carrot-fndn/shared/types';
 
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocumentEvent,
   stubDocumentEventAttribute,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentCategory,
@@ -16,8 +17,7 @@ import {
   DocumentSubtype,
   DocumentType,
   type RewardDistributionResultContent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleOutput,
   RuleOutputStatus,

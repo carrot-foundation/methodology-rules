@@ -1,3 +1,4 @@
+import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubCreditCertificatesDocument,
   stubCreditDocument,
@@ -5,12 +6,11 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
   stubMassCertificateDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { pick, toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

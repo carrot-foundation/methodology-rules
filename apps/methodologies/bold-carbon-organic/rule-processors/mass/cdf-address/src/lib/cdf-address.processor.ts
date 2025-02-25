@@ -1,17 +1,17 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   eventHasRecyclerActor,
   metadataAttributeValueIsAnyOf,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   ReportType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { isNil } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 interface RuleSubject {

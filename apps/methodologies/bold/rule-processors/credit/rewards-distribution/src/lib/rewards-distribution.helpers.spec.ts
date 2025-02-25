@@ -1,11 +1,11 @@
 import type { NonEmptyArray } from '@carrot-fndn/shared/types';
 
+import { splitBigNumberIntoParts } from '@carrot-fndn/shared/helpers';
 import {
   type CertificateReward,
   DocumentEventActorType,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { splitBigNumberIntoParts } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubBigNumber } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';

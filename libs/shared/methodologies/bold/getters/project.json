@@ -1,0 +1,12 @@
+{
+  "name": "shared-methodologies-bold-getters",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["type:lib", "app:any", "stack:any", "methodology:bold"],
+  "sourceRoot": "libs/shared/methodologies/bold/getters/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

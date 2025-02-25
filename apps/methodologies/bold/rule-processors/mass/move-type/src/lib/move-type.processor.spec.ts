@@ -1,15 +1,15 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type RuleInput,
   type RuleOutput,
@@ -19,7 +19,7 @@ import { random } from 'typia';
 
 import { MoveTypeProcessor } from './move-type.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('MoveTypeProcessor', () => {
   const ruleDataProcessor = new MoveTypeProcessor();

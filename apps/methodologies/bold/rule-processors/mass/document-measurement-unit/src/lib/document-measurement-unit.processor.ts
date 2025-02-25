@@ -1,10 +1,10 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   MeasurementUnit,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 export class DocumentMeasurementUnitProcessor extends ParentDocumentRuleProcessor<Document> {

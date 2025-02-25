@@ -1,15 +1,15 @@
 import {
-  stubDocument,
-  stubDocumentWithOneActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import {
-  type Document,
-  DocumentEventActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import {
   DocumentLoaderService,
   stubDocumentEntity,
 } from '@carrot-fndn/shared/document/loader';
+import {
+  stubDocument,
+  stubDocumentWithOneActorType,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  type Document,
+  DocumentEventActorType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,

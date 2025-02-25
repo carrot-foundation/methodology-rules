@@ -1,7 +1,7 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import { isActorEventWithSourceActorType } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { isActorEventWithSourceActorType } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

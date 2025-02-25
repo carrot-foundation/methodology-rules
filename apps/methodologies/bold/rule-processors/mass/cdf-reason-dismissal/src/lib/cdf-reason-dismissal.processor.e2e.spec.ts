@@ -1,10 +1,10 @@
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   testRuleProcessorWithMassDocuments,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
-import { DocumentEventName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,

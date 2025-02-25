@@ -1,13 +1,13 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -17,7 +17,7 @@ import { random } from 'typia';
 
 import { DropOffMoveProcessor } from './drop-off-move.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DropOffMoveProcessor', () => {
   const ruleDataProcessor = new DropOffMoveProcessor();

@@ -1,3 +1,4 @@
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
@@ -6,7 +7,7 @@ import {
   stubMethodologyDefinitionDocument,
   stubParticipantHomologationDocument,
   stubParticipantHomologationGroupDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentCategory,
@@ -16,8 +17,7 @@ import {
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleOutput,
   RuleOutputStatus,

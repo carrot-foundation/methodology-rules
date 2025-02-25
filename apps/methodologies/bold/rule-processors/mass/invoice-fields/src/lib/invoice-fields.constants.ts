@@ -1,4 +1,4 @@
-import { DocumentEventAttributeName } from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const INVOICE_ATTRIBUTES = [
   DocumentEventAttributeName.INVOICE_KEY,

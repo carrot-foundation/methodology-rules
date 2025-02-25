@@ -5,13 +5,13 @@ import {
   stubDocument,
   stubDocumentEventWithMetadataAttributes,
   stubMassAuditDocument,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { random } from 'typia';
 
 const { ACTOR } = DocumentEventName;

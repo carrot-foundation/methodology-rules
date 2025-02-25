@@ -1,15 +1,15 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { metadataAttributeValueIsAnyOf } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+import { isNil } from '@carrot-fndn/shared/helpers';
+import { metadataAttributeValueIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { calculateDistanceBetweenTwoEvents } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { isNil } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { calculateDistanceBetweenTwoEvents } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { MOVE_TYPE } = DocumentEventAttributeName;

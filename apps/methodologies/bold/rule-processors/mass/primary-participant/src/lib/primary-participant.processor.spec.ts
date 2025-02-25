@@ -1,8 +1,8 @@
-import { stubDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
 import {
   DocumentLoaderService,
   stubDocumentEntity,
 } from '@carrot-fndn/shared/document/loader';
+import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,

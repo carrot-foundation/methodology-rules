@@ -1,13 +1,13 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import { eventHasMetadataAttribute } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,

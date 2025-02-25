@@ -1,14 +1,14 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -18,7 +18,7 @@ import { random } from 'typia';
 
 import { EventsTimeSpanProcessor } from './events-time-span.processor';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 const { DROP_OFF } = DocumentEventMoveType;
 const { MOVE_TYPE } = DocumentEventAttributeName;

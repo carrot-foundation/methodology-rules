@@ -1,8 +1,8 @@
-import { GeolocationPrecisionRuleProcessor } from '@carrot-fndn/methodologies/bold/recycling/organic/processors';
+import { GeolocationPrecisionRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   DocumentEventMoveType,
   DocumentSubtype,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 export class DropOffGeolocationPrecisionProcessor extends GeolocationPrecisionRuleProcessor {
   protected moveTypeValues = [DocumentEventMoveType.DROP_OFF];

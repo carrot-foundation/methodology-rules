@@ -1,14 +1,14 @@
-import { loadParentDocument } from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubDocument,
   stubDocumentEvent,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
   DocumentEventAttributeName,
   DocumentEventName,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DOCUMENT_NOT_FOUND_RESULT_COMMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,7 +20,7 @@ import { random } from 'typia';
 import { InvoiceFieldsProcessor } from './invoice-fields.processor';
 import { stubEventWithAllInvoiceFields } from './invoice-fields.processor.stub';
 
-jest.mock('@carrot-fndn/methodologies/bold/recycling/organic/io-helpers');
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('InvoiceFieldsProcessor', () => {
   const ruleDataProcessor = new InvoiceFieldsProcessor();

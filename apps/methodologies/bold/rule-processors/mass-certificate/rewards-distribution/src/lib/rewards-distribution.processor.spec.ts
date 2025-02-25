@@ -1,9 +1,10 @@
-import { getEventAttributeValue } from '@carrot-fndn/methodologies/bold/recycling/organic/getters';
+import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   DocumentQueryService,
   spyOnDocumentQueryServiceLoad,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
-import { isActorEventWithSourceActorType } from '@carrot-fndn/methodologies/bold/recycling/organic/predicates';
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { isActorEventWithSourceActorType } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   stubAddress,
   stubDocument,
@@ -11,7 +12,7 @@ import {
   stubMassDocument,
   stubMethodologyDefinitionDocument,
   stubParticipant,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/testing';
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type CertificateReward,
   type CertificateRewardDistributionOutput,
@@ -20,8 +21,7 @@ import {
   DocumentEventName,
   DocumentSubtype,
   type RewardsDistributionActorType,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   RuleOutputStatus,

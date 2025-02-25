@@ -1,21 +1,21 @@
 import type { NonEmptyArray } from '@carrot-fndn/shared/types';
 
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
   type DocumentQuery,
   DocumentQueryService,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/io-helpers';
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS,
   MASS_CERTIFICATE_AUDIT,
   METHODOLOGY_DEFINITION,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/matchers';
+} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
   type DocumentReference,
-} from '@carrot-fndn/methodologies/bold/recycling/organic/types';
-import { mapDocumentReference } from '@carrot-fndn/methodologies/bold/recycling/organic/utils';
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
