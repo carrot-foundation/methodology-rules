@@ -24,7 +24,6 @@ export interface MethodologyDocument {
   externalEvents?: MethodologyDocumentEvent[] | undefined;
   externalId?: string | undefined;
   id: string;
-  initialValue: number & tags.Minimum<0> & tags.Type<'float'>;
   isPublic?: boolean | undefined;
   isPubliclySearchable: boolean;
   measurementUnit: string;
