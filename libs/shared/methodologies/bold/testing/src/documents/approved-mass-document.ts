@@ -58,10 +58,12 @@ const recyclerAddress = stubAddress({
   street: 'Rua dos Digitadores',
 });
 
+// TODO: Update the approved document to use the newest format https://app.clickup.com/t/86a6ygw54
+const lastYear = new Date().getFullYear() - 1;
 const author = stubAuthor();
 const externalId = faker.string.uuid();
-const externalCreatedAt = '2023-03-31T09:54:06.000Z';
-const lastEventExternalCreatedAt = '2023-06-19T10:35:12.000Z';
+const externalCreatedAt = `${lastYear}-03-31T09:54:06.000Z`;
+const lastEventExternalCreatedAt = `${lastYear}-06-19T10:35:12.000Z`;
 const attachment = random<MethodologyDocumentAttachment>();
 const vehicleLicensePlate = faker.string.alphanumeric();
 const weightScale = {
@@ -544,6 +546,38 @@ export const approvedMassDocument: Document = {
         ],
       },
       name: DocumentEventName.END,
+      participant: recyclerParticipant,
+      preserveSensitiveData: false,
+      value: 109_200,
+    },
+    {
+      address: recyclerAddress,
+      attachments: [stubDocumentEventAttachment()],
+      author,
+      externalCreatedAt: lastEventExternalCreatedAt,
+      externalId,
+      id: faker.string.uuid(),
+      isPublic: true,
+      metadata: {
+        attributes: [
+          {
+            isPublic: true,
+            name: DocumentEventAttributeName.REPORT_TYPE,
+            value: 'CDF',
+          },
+          {
+            isPublic: true,
+            name: DocumentEventAttributeName.REPORT_NUMBER,
+            value: faker.string.numeric(),
+          },
+          {
+            isPublic: true,
+            name: DocumentEventAttributeName.REPORT_DATE_ISSUED,
+            value: false,
+          },
+        ],
+      },
+      name: DocumentEventName.RECYCLED,
       participant: recyclerParticipant,
       preserveSensitiveData: false,
       value: 109_200,
