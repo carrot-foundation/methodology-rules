@@ -6,7 +6,6 @@ import {
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
-  type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { addDays, subDays } from 'date-fns';
@@ -16,43 +15,49 @@ import { ProjectPeriodProcessor } from './project-period.processor';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
+class TestProjectPeriodProcessor extends ProjectPeriodProcessor {
+  public getTestEligibleDate(): Date {
+    return this.getEligibleDate();
+  }
+}
+
 describe('ProjectPeriodProcessor', () => {
-  const ruleDataProcessor = new ProjectPeriodProcessor();
+  const ruleDataProcessor = new TestProjectPeriodProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   const { RECYCLED } = DocumentEventName;
 
+  const getEligibleDate = () => ruleDataProcessor.getTestEligibleDate();
+
   it.each([
     {
-      externalCreatedAt: addDays(
-        ruleDataProcessor['ELIGIBLE_DATE'],
-        1,
-      ).toISOString(),
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE,
+      externalCreatedAt: addDays(getEligibleDate(), 1).toISOString(),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should APPROVE the rule if the Recycled event was created after the eligible date',
     },
     {
-      externalCreatedAt: subDays(
-        ruleDataProcessor['ELIGIBLE_DATE'],
-        1,
-      ).toISOString(),
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].INELIGIBLE,
+      externalCreatedAt: subDays(getEligibleDate(), 1).toISOString(),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].INELIGIBLE(getEligibleDate()),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should REJECT the rule if the Recycled event was created before the eligible date',
     },
     {
-      externalCreatedAt: ruleDataProcessor['ELIGIBLE_DATE'].toISOString(),
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE,
+      externalCreatedAt: getEligibleDate().toISOString(),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should APPROVE the rule if the Recycled event was created on the eligible date',
     },
     {
-      externalCreatedAt: ruleDataProcessor['ELIGIBLE_DATE'].toISOString(),
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE,
+      externalCreatedAt: getEligibleDate().toISOString(),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should APPROVE the rule if the Recycled event was created on the eligible date',
@@ -84,15 +89,15 @@ describe('ProjectPeriodProcessor', () => {
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-      const expectedRuleOutput: RuleOutput = {
+      expect(ruleOutput).toMatchObject({
         requestId: ruleInput.requestId,
         responseToken: ruleInput.responseToken,
         responseUrl: ruleInput.responseUrl,
         resultComment,
         resultStatus,
-      };
+      });
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(typeof ruleOutput.resultComment).toBe('string');
     },
   );
 

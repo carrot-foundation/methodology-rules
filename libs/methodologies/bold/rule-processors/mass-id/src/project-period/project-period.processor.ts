@@ -16,19 +16,19 @@ interface RuleSubject {
 }
 
 export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
-  private readonly ELIGIBLE_DATE = new Date(
-    Date.UTC(new Date().getUTCFullYear() - 1, 0, 1),
-  );
-
   private readonly RESULT_COMMENT = {
-    ELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created after ${format(this.ELIGIBLE_DATE, 'yyyy-MM-dd')}.`,
-    INELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created before ${format(this.ELIGIBLE_DATE, 'yyyy-MM-dd')}.`,
+    ELIGIBLE: (eligibleDate: Date) =>
+      `The '${DocumentEventName.RECYCLED}' event was created after ${format(eligibleDate, 'yyyy-MM-dd')}.`,
+    INELIGIBLE: (eligibleDate: Date) =>
+      `The '${DocumentEventName.RECYCLED}' event was created before ${format(eligibleDate, 'yyyy-MM-dd')}.`,
     MISSING_RECYCLED_EVENT: `The '${DocumentEventName.RECYCLED}' event is missing.`,
     MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT: `The '${DocumentEventName.RECYCLED}' event has no 'externalCreatedAt' attribute.`,
   } as const;
 
-  protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
-    const { recycledEvent } = ruleSubject;
+  protected evaluateResult({
+    recycledEvent,
+  }: RuleSubject): EvaluateResultOutput {
+    const eligibleDate = this.getEligibleDate();
 
     if (isNil(recycledEvent)) {
       return {
@@ -52,17 +52,21 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
       eventDate.getUTCDate(),
     );
     const isEligible =
-      isAfter(eventDateUTC, this.ELIGIBLE_DATE) ||
-      isEqual(eventDateUTC, this.ELIGIBLE_DATE);
+      isAfter(eventDateUTC, eligibleDate) ||
+      isEqual(eventDateUTC, eligibleDate);
 
     return {
       resultComment: isEligible
-        ? this.RESULT_COMMENT.ELIGIBLE
-        : this.RESULT_COMMENT.INELIGIBLE,
+        ? this.RESULT_COMMENT.ELIGIBLE(eligibleDate)
+        : this.RESULT_COMMENT.INELIGIBLE(eligibleDate),
       resultStatus: isEligible
         ? RuleOutputStatus.APPROVED
         : RuleOutputStatus.REJECTED,
     };
+  }
+
+  protected getEligibleDate(): Date {
+    return new Date(Date.UTC(new Date().getUTCFullYear() - 1, 0, 1));
   }
 
   protected getRuleSubject(document: Document): RuleSubject {
