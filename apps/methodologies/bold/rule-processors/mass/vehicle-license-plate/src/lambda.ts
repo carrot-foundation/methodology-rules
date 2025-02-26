@@ -4,5 +4,4 @@ import { VehicleLicensePlateProcessor } from './lib/vehicle-license-plate.proces
 
 const instance = new VehicleLicensePlateProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

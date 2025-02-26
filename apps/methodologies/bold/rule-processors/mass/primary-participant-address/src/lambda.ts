@@ -4,5 +4,4 @@ import { PrimaryParticipantAddressProcessor } from './lib/primary-participant-ad
 
 const instance = new PrimaryParticipantAddressProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

@@ -4,5 +4,4 @@ import { NetWeightVerificationProcessor } from './lib/net-weight-verification.pr
 
 const instance = new NetWeightVerificationProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

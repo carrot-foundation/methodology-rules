@@ -4,5 +4,4 @@ import { NumericWeightValuesProcessor } from './lib/numeric-weight-values.proces
 
 const instance = new NumericWeightValuesProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

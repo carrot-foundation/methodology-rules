@@ -4,5 +4,4 @@ import { RewardsDistributionProcessor } from './lib/rewards-distribution.process
 
 const instance = new RewardsDistributionProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);
