@@ -12,8 +12,6 @@ Methodology: **BOLD-RECYCLING-ORGANIC**
 
 <!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
 
-In an event, when there is a report identified as CDF, verify if the declared addresses for the participant identified in the event and the actor identified as Recycler are the same.
-
 ## 📂 Implementation
 
 - **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/audit-eligibility-check/audit-eligibility-check.processor.ts)**
