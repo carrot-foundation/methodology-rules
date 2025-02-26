@@ -585,7 +585,6 @@ export const approvedMassDocument: Document = {
   ],
   externalId: faker.string.uuid(),
   id: faker.string.uuid(),
-  initialValue: 0,
   isPublic: true,
   isPubliclySearchable: true,
   measurementUnit: 'KG',
