@@ -12,12 +12,12 @@ import {
 import { addDays, subDays } from 'date-fns';
 import { random } from 'typia';
 
-import { AuditEligibilityCheckProcessor } from './audit-eligibility-check.processor';
+import { ProjectPeriodProcessor } from './project-period.processor';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-describe('AuditEligibilityCheckProcessor', () => {
-  const ruleDataProcessor = new AuditEligibilityCheckProcessor();
+describe('ProjectPeriodProcessor', () => {
+  const ruleDataProcessor = new ProjectPeriodProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   const { RECYCLED } = DocumentEventName;
