@@ -9,19 +9,20 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { format, isAfter, isEqual } from 'date-fns';
 
 interface RuleSubject {
   recycledEvent: DocumentEvent | undefined;
 }
 
-export class AuditEligibilityCheckProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
+export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   private readonly ELIGIBLE_DATE = new Date(
     Date.UTC(new Date().getUTCFullYear() - 1, 0, 1),
   );
 
   private readonly RESULT_COMMENT = {
-    ELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created after ${this.ELIGIBLE_DATE.toISOString().split('T')[0]}.`,
-    INELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created before ${this.ELIGIBLE_DATE.toISOString().split('T')[0]}.`,
+    ELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created after ${format(this.ELIGIBLE_DATE, 'yyyy-MM-dd')}.`,
+    INELIGIBLE: `The '${DocumentEventName.RECYCLED}' event was created before ${format(this.ELIGIBLE_DATE, 'yyyy-MM-dd')}.`,
     MISSING_RECYCLED_EVENT: `The '${DocumentEventName.RECYCLED}' event is missing.`,
     MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT: `The '${DocumentEventName.RECYCLED}' event has no 'externalCreatedAt' attribute.`,
   } as const;
@@ -50,7 +51,9 @@ export class AuditEligibilityCheckProcessor extends ParentDocumentRuleProcessor<
       eventDate.getUTCMonth(),
       eventDate.getUTCDate(),
     );
-    const isEligible = eventDateUTC >= this.ELIGIBLE_DATE.getTime();
+    const isEligible =
+      isAfter(eventDateUTC, this.ELIGIBLE_DATE) ||
+      isEqual(eventDateUTC, this.ELIGIBLE_DATE);
 
     return {
       resultComment: isEligible
