@@ -98,6 +98,7 @@
     "@aws-sdk/client-s3": "3.744.0",
     "@aws-sdk/client-sts": "3.744.0",
     "@aws-sdk/credential-providers": "3.744.0",
+    "@date-fns/utc": "2.1.0",
     "@sentry/serverless": "7.120.3",
     "@smithy/signature-v4": "5.0.1",
     "bignumber.js": "9.1.2",
