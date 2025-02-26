@@ -29,6 +29,9 @@ export const isActorEvent = (event: DocumentEvent): boolean =>
 export const isOpenEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.OPEN);
 
+export const isRecycledEvent = (event: DocumentEvent): boolean =>
+  eventHasName(event, DocumentEventName.RECYCLED);
+
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   event.participant.type === MethodologyParticipantType.ACTOR;

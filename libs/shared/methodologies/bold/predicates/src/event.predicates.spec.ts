@@ -32,6 +32,7 @@ import {
   isActorEvent,
   isActorEventWithSourceActorType,
   isOpenEvent,
+  isRecycledEvent,
 } from './event.predicates';
 
 describe('Event Predicates', () => {
@@ -50,6 +51,20 @@ describe('Event Predicates', () => {
       event.participant.type = faker.string.sample();
 
       expect(eventHasActorParticipant(event)).toBe(false);
+    });
+  });
+
+  describe('isRecycledEvent', () => {
+    it('should return true if the event is a recycled event', () => {
+      const event = stubDocumentEvent({ name: DocumentEventName.RECYCLED });
+
+      expect(isRecycledEvent(event)).toBe(true);
+    });
+
+    it('should return false if the event is not a recycled event', () => {
+      const event = stubDocumentEvent({ name: DocumentEventName.ACTOR });
+
+      expect(isRecycledEvent(event)).toBe(false);
     });
   });
 

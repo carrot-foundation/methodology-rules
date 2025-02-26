@@ -72,6 +72,9 @@
       "@carrot-fndn/shared/rule/result": [
         "libs/shared/rule/result/src/index.ts"
       ],
+      "@carrot-fndn/methodologies/bold/rule-processors/mass-id": [
+        "libs/methodologies/bold/rule-processors/mass-id/src/index.ts"
+      ],
       "@carrot-fndn/shared/rule/standard-data-processor": [
         "libs/shared/rule/standard-data-processor/src/index.ts"
       ],

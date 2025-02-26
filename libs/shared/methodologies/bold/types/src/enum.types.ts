@@ -131,6 +131,7 @@ export enum DocumentEventName {
   NOTICE = MethodologyDocumentEventName.NOTICE,
   OPEN = MethodologyDocumentEventName.OPEN,
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
+  RECYCLED = MethodologyDocumentEventName.RECYCLED,
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
   RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
