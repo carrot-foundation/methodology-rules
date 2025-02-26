@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { isNil, pick } from './common.helpers';
+import { getOrDefault, getOrUndefined, isNil, pick } from './common.helpers';
 
 describe('common helpers', () => {
   describe('isNil', () => {
@@ -15,6 +15,37 @@ describe('common helpers', () => {
     it('should return false if the value is not null or undefined', () => {
       expect(isNil(123)).toBe(false);
     });
+  });
+
+  describe('getOrDefault', () => {
+    it.each([
+      { expected: 'test', value: 'test' },
+      { expected: 'defaultValue', value: undefined },
+      { expected: 'defaultValue', value: null },
+    ])(
+      'should return $expected when value is $value',
+      ({ expected, value }) => {
+        const defaultValue = 'defaultValue';
+        const result = getOrDefault(value, defaultValue);
+
+        expect(result).toBe(expected);
+      },
+    );
+  });
+
+  describe('getOrUndefined', () => {
+    it.each([
+      { expected: 'test', value: 'test' },
+      { expected: undefined, value: undefined },
+      { expected: undefined, value: null },
+    ])(
+      'should return $expected when value is $value',
+      ({ expected, value }) => {
+        const result = getOrUndefined(value);
+
+        expect(result).toBe(expected);
+      },
+    );
   });
 
   describe('pick', () => {
