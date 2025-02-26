@@ -1,6 +1,6 @@
 <div align="center">
 
-# Audit Eligibility Check
+# Project Period
 
 Methodology: **BOLD-CARBON-ORGANIC**
 
