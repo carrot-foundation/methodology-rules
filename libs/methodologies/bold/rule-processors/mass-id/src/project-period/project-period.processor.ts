@@ -11,6 +11,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { format, isAfter, isEqual } from 'date-fns';
 
+import { getUTCDatePart } from './project-period.helpers';
+
 interface RuleSubject {
   recycledEvent: DocumentEvent | undefined;
 }
@@ -45,11 +47,8 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
       };
     }
 
-    const eventDate = new Date(recycledEvent.externalCreatedAt);
-    const eventDateUTC = Date.UTC(
-      eventDate.getUTCFullYear(),
-      eventDate.getUTCMonth(),
-      eventDate.getUTCDate(),
+    const eventDateUTC = getUTCDatePart(
+      new Date(recycledEvent.externalCreatedAt),
     );
     const isEligible =
       isAfter(eventDateUTC, eligibleDate) ||
@@ -66,7 +65,7 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
   }
 
   protected getEligibleDate(): Date {
-    return new Date(Date.UTC(new Date().getUTCFullYear() - 1, 0, 1));
+    return getUTCDatePart(new Date(new Date().getUTCFullYear() - 1, 0, 1));
   }
 
   protected getRuleSubject(document: Document): RuleSubject {

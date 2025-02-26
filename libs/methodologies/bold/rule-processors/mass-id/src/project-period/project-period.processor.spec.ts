@@ -8,12 +8,19 @@ import {
   type RuleInput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { addDays, subDays } from 'date-fns';
+import { addDays, addHours, subDays, subSeconds } from 'date-fns';
 import { random } from 'typia';
 
 import { ProjectPeriodProcessor } from './project-period.processor';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+
+const createBRTDateString = (date: Date): string => {
+  const utcDate = new Date(date);
+  const brtAsUtc = addHours(utcDate, 3);
+
+  return brtAsUtc.toISOString();
+};
 
 class TestProjectPeriodProcessor extends ProjectPeriodProcessor {
   public getTestEligibleDate(): Date {
@@ -61,6 +68,22 @@ describe('ProjectPeriodProcessor', () => {
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
         'should APPROVE the rule if the Recycled event was created on the eligible date',
+    },
+    {
+      externalCreatedAt: createBRTDateString(subSeconds(getEligibleDate(), 1)),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'should APPROVE the rule if the Recycled event was created 1 second before the eligible date in UTC but appears after in BRT timezone',
+    },
+    {
+      externalCreatedAt: createBRTDateString(getEligibleDate()),
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'should APPROVE the rule if the Recycled event was created exactly at the eligible date (BRT timezone)',
     },
     {
       externalCreatedAt: undefined,
