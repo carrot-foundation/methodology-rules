@@ -4,5 +4,4 @@ import { DropOffGeolocationPrecisionProcessor } from './lib/drop-off-geolocation
 
 const instance = new DropOffGeolocationPrecisionProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

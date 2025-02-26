@@ -4,5 +4,4 @@ import { DocumentMeasurementUnitProcessor } from './lib/document-measurement-uni
 
 const instance = new DocumentMeasurementUnitProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

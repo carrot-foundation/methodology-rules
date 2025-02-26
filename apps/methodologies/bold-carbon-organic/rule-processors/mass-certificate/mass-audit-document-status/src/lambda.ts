@@ -4,5 +4,4 @@ import { MassAuditDocumentStatusProcessor } from './lib/mass-audit-document-stat
 
 const instance = new MassAuditDocumentStatusProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

@@ -4,5 +4,4 @@ import { CdfAttachmentVerificationProcessor } from './lib/cdf-attachment-verific
 
 const instance = new CdfAttachmentVerificationProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);

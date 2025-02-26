@@ -4,5 +4,4 @@ import { PickUpGeolocationPrecisionProcessor } from './lib/pick-up-geolocation-p
 
 const instance = new PickUpGeolocationPrecisionProcessor();
 
-// TODO: we can try to generate this code with a ts-patch program transformer
 export const handler = wrapRuleIntoLambdaHandler(instance);
