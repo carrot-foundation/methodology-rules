@@ -4,6 +4,10 @@ import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  getParticipantHomologationDocumentById,
+  homologationIsNotExpired,
+} from '@carrot-fndn/shared/methodologies/bold/helpers';
+import {
   type DocumentQuery,
   DocumentQueryService,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
@@ -32,8 +36,6 @@ import {
 
 import {
   compareAddresses,
-  getParticipantHomologationDocument,
-  homologationIsNotExpired,
   isMetadataGeolocationValid,
   mapMassDocumentAddress,
   participantHomologationCriteria,
@@ -143,10 +145,11 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
       return {};
     }
 
-    const participantHomologationDocument = getParticipantHomologationDocument({
-      homologationDocuments,
-      participantId: massDocumentEvent.participant.id,
-    });
+    const participantHomologationDocument =
+      getParticipantHomologationDocumentById({
+        homologationDocuments,
+        participantId: massDocumentEvent.participant.id,
+      });
 
     return {
       homologationDocument: participantHomologationDocument,
