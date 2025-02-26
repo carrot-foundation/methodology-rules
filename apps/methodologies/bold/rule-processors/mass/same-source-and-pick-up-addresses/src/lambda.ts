@@ -4,7 +4,4 @@ import { SameSourceAndPickUpAddressesProcessor } from './lib/same-source-and-pic
 
 const instance = new SameSourceAndPickUpAddressesProcessor();
 
-// eslint-disable-next-line no-console
-console.log('Temporary Log');
-
 export const handler = wrapRuleIntoLambdaHandler(instance);
