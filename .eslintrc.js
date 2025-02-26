@@ -1,4 +1,4 @@
-const methodologies = ['bold', 'bold-carbon-organic'];
+const methodologies = ['bold'];
 
 module.exports = {
   root: true,
