@@ -13,6 +13,8 @@ export class DocumentValueProcessor extends ParentDocumentRuleProcessor<Document
         ? RuleOutputStatus.APPROVED
         : RuleOutputStatus.REJECTED;
 
+    console.log('This is to force update the rule');
+
     return {
       resultStatus,
     };
