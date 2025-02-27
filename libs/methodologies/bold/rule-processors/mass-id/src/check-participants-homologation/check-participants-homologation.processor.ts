@@ -7,7 +7,7 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
-import { homologationIsNotExpired } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { isHomologationExpired } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -51,7 +51,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
 
     const expiredHomologationDocuments = [
       ...homologationDocuments.values(),
-    ].filter((document) => !homologationIsNotExpired(document));
+    ].filter((document) => isHomologationExpired(document));
 
     if (isNonEmptyArray(expiredHomologationDocuments)) {
       throw this.errorProcessor.getKnownError(
