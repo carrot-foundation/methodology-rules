@@ -77,7 +77,7 @@ const weightScale = {
 export const approvedMassDocument: Document = {
   attachments: [attachment],
   category: DocumentCategory.MASS,
-  createdAt: '2023-12-19T13:34:35.785Z',
+  createdAt: `${lastYear}-12-19T13:34:35.785Z`,
   currentValue: 109_200,
   dataSetName: DataSetName.PROD,
   externalCreatedAt,
@@ -259,7 +259,7 @@ export const approvedMassDocument: Document = {
     {
       address: recyclerAddress,
       author,
-      externalCreatedAt: '2023-04-10T23:18:00.000Z',
+      externalCreatedAt: `${lastYear}-04-10T23:18:00.000Z`,
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
@@ -299,7 +299,7 @@ export const approvedMassDocument: Document = {
     {
       address: recyclerAddress,
       author,
-      externalCreatedAt: '2023-04-10T23:23:00.000Z',
+      externalCreatedAt: `${lastYear}-04-10T23:23:00.000Z`,
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
@@ -364,7 +364,7 @@ export const approvedMassDocument: Document = {
     {
       address: recyclerAddress,
       author,
-      externalCreatedAt: '2023-04-10T23:29:00.000Z',
+      externalCreatedAt: `${lastYear}-04-10T23:29:00.000Z`,
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
@@ -389,7 +389,7 @@ export const approvedMassDocument: Document = {
     {
       address: recyclerAddress,
       author,
-      externalCreatedAt: '2023-04-10T23:59:00.000Z',
+      externalCreatedAt: `${lastYear}-04-10T23:59:00.000Z`,
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
@@ -455,7 +455,7 @@ export const approvedMassDocument: Document = {
     {
       address: recyclerAddress,
       author,
-      externalCreatedAt: '2023-10-02T00:00:00.000Z',
+      externalCreatedAt: `${lastYear}-10-02T00:00:00.000Z`,
       externalId,
       id: faker.string.uuid(),
       isPublic: true,
@@ -474,7 +474,7 @@ export const approvedMassDocument: Document = {
           {
             isPublic: true,
             name: DocumentEventAttributeName.INVOICE_DATE,
-            value: '2023-10-02',
+            value: `${lastYear}-10-02`,
           },
           {
             isPublic: true,
