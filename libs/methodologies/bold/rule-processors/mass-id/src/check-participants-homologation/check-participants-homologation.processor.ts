@@ -7,7 +7,7 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
-import { homologationIsNotExpired } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { isHomologationExpired } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -35,8 +35,7 @@ export interface RuleSubject {
 
 export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
   private readonly RESULT_COMMENT = {
-    APPROVED:
-      'The participants are homologated and the homologation is not expired',
+    APPROVED: 'The participants are homologated and the homologation is active',
   } as const;
 
   readonly errorProcessor = new CheckParticipantsHomologationProcessorErrors();
@@ -52,7 +51,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
 
     const expiredHomologationDocuments = [
       ...homologationDocuments.values(),
-    ].filter((document) => !homologationIsNotExpired(document));
+    ].filter((document) => isHomologationExpired(document));
 
     if (isNonEmptyArray(expiredHomologationDocuments)) {
       throw this.errorProcessor.getKnownError(
@@ -88,7 +87,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
 
     if (isNil(massDocument)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_DOCUMENT_NOT_FOUND,
+        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
     }
 
@@ -110,24 +109,28 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
   }: RuleSubject) {
     if (!isNonEmptyArray(massDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
+        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
           massDocument.id,
         ),
       );
     }
 
-    const actorParticipantIds = massDocument.externalEvents
-      .filter((event) => isActorEvent(event))
-      .map((event) => event.participant.id);
-
-    const participantsWithoutHomologationDocuments = actorParticipantIds.filter(
-      (participantId) => !homologationDocuments.has(participantId),
+    const actorParticipants: Map<string, string> = new Map(
+      massDocument.externalEvents
+        .filter((event) => isActorEvent(event))
+        .map((event) => [event.participant.id, event.name]),
     );
+
+    const participantsWithoutHomologationDocuments = [
+      ...actorParticipants.entries(),
+    ].filter(([participantId]) => !homologationDocuments.has(participantId));
 
     if (isNonEmptyArray(participantsWithoutHomologationDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS(
-          participantsWithoutHomologationDocuments,
+          participantsWithoutHomologationDocuments.map(
+            ([participantId]) => actorParticipants.get(participantId) as string,
+          ),
         ),
       );
     }

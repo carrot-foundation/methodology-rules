@@ -13,7 +13,7 @@ import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { isAfter, startOfToday } from 'date-fns';
 import { is } from 'typia';
 
-export const getParticipantHomologationDocumentById = ({
+export const getParticipantHomologationDocumentByParticipantId = ({
   homologationDocuments,
   participantId,
 }: {
@@ -26,7 +26,7 @@ export const getParticipantHomologationDocumentById = ({
     return !isNil(openEvent) && openEvent.participant.id === participantId;
   });
 
-export const homologationIsNotExpired = (document: Document): boolean => {
+export const isHomologationExpired = (document: Document): boolean => {
   const closeEvent = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.CLOSE]),
   );
@@ -38,8 +38,8 @@ export const homologationIsNotExpired = (document: Document): boolean => {
   if (is<NonEmptyString>(homologationDueDate)) {
     const dueDate = new Date(homologationDueDate);
 
-    return isAfter(dueDate, startOfToday());
+    return !isAfter(dueDate, startOfToday());
   }
 
-  return false;
+  return true;
 };
