@@ -5,7 +5,7 @@ import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loade
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   getParticipantHomologationDocumentByParticipantId,
-  isHomologationExpired,
+  isHomologationInForce,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
@@ -96,7 +96,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
       };
     }
 
-    if (isHomologationExpired(homologationDocument)) {
+    if (!isHomologationInForce(homologationDocument)) {
       return {
         resultComment: this.ResultComment.HOMOLOGATION_EXPIRED,
         resultStatus: RuleOutputStatus.REJECTED,

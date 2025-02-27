@@ -71,6 +71,7 @@ export enum DocumentEventAttributeName {
   HAS_MTR = 'has-mtr',
   HAS_REASON_DISMISSAL_CDF = 'has-reason-dismissal-cdf',
   HAS_REASON_DISMISSAL_MTR = 'has-reason-dismissal-mtr',
+  HOMOLOGATION_DATE = 'homologation-date',
   HOMOLOGATION_DUE_DATE = 'homologation-due-date',
   INVOICE_COUNTRY = 'invoice-country',
   INVOICE_COUNTRY_CITY = 'invoice-country-city',

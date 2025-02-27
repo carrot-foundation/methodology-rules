@@ -10,7 +10,7 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
-import { isAfter, startOfToday } from 'date-fns';
+import { format } from 'date-fns';
 import { is } from 'typia';
 
 export const getParticipantHomologationDocumentByParticipantId = ({
@@ -26,20 +26,32 @@ export const getParticipantHomologationDocumentByParticipantId = ({
     return !isNil(openEvent) && openEvent.participant.id === participantId;
   });
 
-export const isHomologationExpired = (document: Document): boolean => {
+export const isHomologationInForce = (document: Document): boolean => {
   const closeEvent = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.CLOSE]),
+  );
+
+  if (!closeEvent) {
+    return false;
+  }
+
+  const homologationDate = getEventAttributeValue(
+    closeEvent,
+    DocumentEventAttributeName.HOMOLOGATION_DATE,
   );
   const homologationDueDate = getEventAttributeValue(
     closeEvent,
     DocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
   );
 
-  if (is<NonEmptyString>(homologationDueDate)) {
-    const dueDate = new Date(homologationDueDate);
-
-    return !isAfter(dueDate, startOfToday());
+  if (
+    !is<NonEmptyString>(homologationDate) ||
+    !is<NonEmptyString>(homologationDueDate)
+  ) {
+    return false;
   }
 
-  return true;
+  const todayString = format(new Date(), 'yyyy-MM-dd');
+
+  return homologationDate <= todayString && homologationDueDate >= todayString;
 };
