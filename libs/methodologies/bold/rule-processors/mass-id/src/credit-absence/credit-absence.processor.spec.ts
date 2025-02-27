@@ -158,7 +158,7 @@ describe('CreditAbsenceProcessor', () => {
       resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return APPROVED when there is more than one Credit linked to the MassID, but all are cancelled',
+        'should return APPROVED when there are more than one Credit linked to the MassID, but all are cancelled',
     },
     {
       documents: [
@@ -189,7 +189,7 @@ describe('CreditAbsenceProcessor', () => {
         ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return REJECTED when there is more than one Credit linked to the MassID, but one is not cancelled',
+        'should return REJECTED when there are more than one Credit linked to the MassID, but one is not cancelled',
     },
   ])('$scenario', async ({ documents, resultComment, resultStatus }) => {
     spyOnDocumentQueryServiceLoad(stubDocument(), [
