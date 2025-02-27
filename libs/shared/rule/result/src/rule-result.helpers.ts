@@ -50,7 +50,7 @@ export const mapToRuleOutput = (
     resultComment,
     resultContent,
   }: {
-    resultComment?: string;
+    resultComment?: string | undefined;
     resultContent?: AnyObject;
   } = {},
 ): RuleOutput => ({
