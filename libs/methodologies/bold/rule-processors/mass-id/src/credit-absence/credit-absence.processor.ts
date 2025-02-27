@@ -3,7 +3,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { getOrUndefined, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import { getOrUndefined } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -48,13 +48,6 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
   private evaluateResult({
     creditDocuments,
   }: RuleSubject): EvaluateResultOutput {
-    if (!isNonEmptyArray(creditDocuments)) {
-      return {
-        resultComment: this.RESULT_COMMENT.APPROVED,
-        resultStatus: RuleOutputStatus.APPROVED,
-      };
-    }
-
     const hasNoCancelledCreditDocuments = creditDocuments.some(
       (creditDocument) =>
         creditDocument.status !== DocumentStatus.CANCELLED.toString(),
