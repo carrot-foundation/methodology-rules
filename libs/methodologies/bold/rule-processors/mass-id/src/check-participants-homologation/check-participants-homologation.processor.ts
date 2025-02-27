@@ -88,7 +88,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
 
     if (isNil(massDocument)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_DOCUMENT_NOT_FOUND,
+        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
     }
 
@@ -110,24 +110,28 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
   }: RuleSubject) {
     if (!isNonEmptyArray(massDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
+        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
           massDocument.id,
         ),
       );
     }
 
-    const actorParticipantIds = massDocument.externalEvents
-      .filter((event) => isActorEvent(event))
-      .map((event) => event.participant.id);
-
-    const participantsWithoutHomologationDocuments = actorParticipantIds.filter(
-      (participantId) => !homologationDocuments.has(participantId),
+    const actorParticipants: Map<string, string> = new Map(
+      massDocument.externalEvents
+        .filter((event) => isActorEvent(event))
+        .map((event) => [event.participant.id, event.name]),
     );
+
+    const participantsWithoutHomologationDocuments = [
+      ...actorParticipants.entries(),
+    ].filter(([participantId]) => !homologationDocuments.has(participantId));
 
     if (isNonEmptyArray(participantsWithoutHomologationDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS(
-          participantsWithoutHomologationDocuments,
+          participantsWithoutHomologationDocuments.map(
+            ([participantId]) => actorParticipants.get(participantId) as string,
+          ),
         ),
       );
     }

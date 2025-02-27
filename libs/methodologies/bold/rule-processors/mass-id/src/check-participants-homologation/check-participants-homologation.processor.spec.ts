@@ -210,7 +210,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
       ],
       resultComment:
         processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS(
-          [sourceParticipantEvent.participant.id],
+          [sourceParticipantEvent.name],
         ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
@@ -218,7 +218,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
     },
     {
       documents: [...participantsHomologationDocumentStubs.values()],
-      resultComment: processorError.ERROR_MESSAGE.MASS_DOCUMENT_NOT_FOUND,
+      resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when the mass document does not exist',
     },
@@ -231,7 +231,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
         ...participantsHomologationDocumentStubs.values(),
       ],
       resultComment:
-        processorError.ERROR_MESSAGE.MASS_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
+        processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
           massDocumentStub.id,
         ),
       resultStatus: RuleOutputStatus.REJECTED,
