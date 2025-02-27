@@ -35,8 +35,7 @@ export interface RuleSubject {
 
 export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
   private readonly RESULT_COMMENT = {
-    APPROVED:
-      'The participants are homologated and the homologation is not expired',
+    APPROVED: 'The participants are homologated and the homologation is active',
   } as const;
 
   readonly errorProcessor = new CheckParticipantsHomologationProcessorErrors();
