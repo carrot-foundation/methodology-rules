@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](apps/methodologies/bold-carbon-organic/rule-processors/mass-id/tcc-absence/src/lib/tcc-absence.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/credit-absence/credit-absence.processor.ts)**
 
 ## 👥 Contributors
 
