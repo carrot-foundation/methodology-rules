@@ -1,1 +1,1 @@
-export * from './check-participants-homologation.processor';
+export * from './check-participants-homologation.lambda';
