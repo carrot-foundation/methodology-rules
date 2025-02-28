@@ -1,1 +1,1 @@
-export * from './credit-absence.processor';
+export * from './credit-absence.lambda';
