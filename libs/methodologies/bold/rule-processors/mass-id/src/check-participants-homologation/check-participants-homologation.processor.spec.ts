@@ -22,14 +22,14 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
-import { formatDate } from 'date-fns';
+import { addDays, formatDate, subDays } from 'date-fns';
 import { random } from 'typia';
 
 import { CheckParticipantsHomologationProcessorErrors } from './check-participants-homologation.errors';
 import { CheckParticipantsHomologationProcessor } from './check-participants-homologation.processor';
 
 const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 
 describe('CheckParticipantsHomologationProcessor', () => {
   const ruleDataProcessor = new CheckParticipantsHomologationProcessor();
@@ -76,11 +76,17 @@ describe('CheckParticipantsHomologationProcessor', () => {
 
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
-    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.future(), 'yyyy-MM-dd')]],
+    [
+      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
+    ],
   );
   const expiredCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
-    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.past(), 'yyyy-MM-dd')]],
+    [
+      [HOMOLOGATION_DUE_DATE, formatDate(subDays(new Date(), 1), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 4), 'yyyy-MM-dd')],
+    ],
   );
 
   const participantsHomologationDocumentStubs: Map<DocumentSubtype, Document> =
@@ -162,7 +168,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
       resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario:
-        'should return APPROVED when the participants homologation documents are found and the homologation is not expired',
+        'should return APPROVED when the participants homologation documents are found and the homologation is in force',
     },
     {
       documents: [
@@ -187,7 +193,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
       ]),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return REJECTED when the participants homologation documents are found and the homologation is expired',
+        'should return REJECTED when the participants homologation documents are found and the homologation is not in force',
     },
     {
       documents: [massDocumentStub],
