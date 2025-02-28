@@ -26,13 +26,13 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { formatDate } from 'date-fns';
+import { addDays, formatDate, subDays } from 'date-fns';
 import { random } from 'typia';
 
 import { GeolocationPrecisionRuleProcessor } from './geolocation-precision-processor';
 
 const { CLOSE, MOVE } = DocumentEventName;
-const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 const { PICK_UP, SHIPMENT_REQUEST } = DocumentEventMoveType;
 
 class TestGeolocationPrecisionRuleProcessor extends GeolocationPrecisionRuleProcessor {
@@ -97,7 +97,10 @@ describe('GeolocationPrecisionRuleProcessor', () => {
   });
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
-    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.future(), 'yyyy-MM-dd')]],
+    [
+      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
+    ],
   );
   const massDocumentStub = stubMassDocument({
     externalEvents: [
