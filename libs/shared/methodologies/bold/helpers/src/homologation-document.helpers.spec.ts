@@ -13,7 +13,7 @@ import { addDays, formatDate, subDays } from 'date-fns';
 
 import {
   getParticipantHomologationDocumentByParticipantId,
-  isHomologationInForce,
+  isHomologationActive,
 } from './homologation-document.helpers';
 
 const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
@@ -88,7 +88,7 @@ describe('Homologation Document Helpers', () => {
         ],
       });
 
-      expect(isHomologationInForce(document)).toBe(expected);
+      expect(isHomologationActive(document)).toBe(expected);
     });
 
     it('should return false if the document has no CLOSE event', () => {
@@ -96,7 +96,7 @@ describe('Homologation Document Helpers', () => {
         externalEvents: [],
       });
 
-      expect(isHomologationInForce(document)).toBe(false);
+      expect(isHomologationActive(document)).toBe(false);
     });
 
     it('should return false if the document has a CLOSE event but no homologation date', () => {
@@ -111,7 +111,7 @@ describe('Homologation Document Helpers', () => {
         ],
       });
 
-      expect(isHomologationInForce(document)).toBe(false);
+      expect(isHomologationActive(document)).toBe(false);
     });
 
     it('should return false if the document has a CLOSE event but no homologation due date', () => {
@@ -126,7 +126,7 @@ describe('Homologation Document Helpers', () => {
         ],
       });
 
-      expect(isHomologationInForce(document)).toBe(false);
+      expect(isHomologationActive(document)).toBe(false);
     });
   });
 

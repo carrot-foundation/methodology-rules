@@ -26,7 +26,7 @@ export const getParticipantHomologationDocumentByParticipantId = ({
     return !isNil(openEvent) && openEvent.participant.id === participantId;
   });
 
-export const isHomologationInForce = (document: Document): boolean => {
+export const isHomologationActive = (document: Document): boolean => {
   const closeEvent = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.CLOSE]),
   );
