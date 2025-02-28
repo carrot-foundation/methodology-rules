@@ -9,7 +9,6 @@
     "lint": {},
     "package-lambda": {},
     "upload-lambda": {},
-    "test": {},
     "ts": {}
   }
 }

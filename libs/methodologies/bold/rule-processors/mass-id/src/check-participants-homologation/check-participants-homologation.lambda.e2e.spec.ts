@@ -29,7 +29,7 @@ import {
 import { faker } from '@faker-js/faker';
 import { formatDate } from 'date-fns';
 
-import { handler } from '../lambda';
+import { checkParticipantsHomologationLambda } from './check-participants-homologation.lambda';
 
 const { CLOSE } = DocumentEventName;
 const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
@@ -146,7 +146,7 @@ describe('CheckParticipantsHomologationProcessor', () => {
   });
 
   it('should return APPROVED when the homologation document is not expired', async () => {
-    const response = (await handler(
+    const response = (await checkParticipantsHomologationLambda(
       stubRuleInput({
         documentId: massAuditReference.documentId,
         documentKeyPrefix,
