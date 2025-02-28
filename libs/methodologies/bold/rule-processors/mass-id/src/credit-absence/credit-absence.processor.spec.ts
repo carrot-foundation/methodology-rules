@@ -133,7 +133,7 @@ describe('CreditAbsenceProcessor', () => {
       ],
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
-          assert<NonEmptyString>(TRC_CREDIT_MATCH.match.type),
+          assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
         ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
@@ -185,7 +185,7 @@ describe('CreditAbsenceProcessor', () => {
       ],
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
-          assert<NonEmptyString>(TRC_CREDIT_MATCH.match.type),
+          assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
         ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
