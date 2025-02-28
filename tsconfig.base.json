@@ -52,6 +52,9 @@
       "@carrot-fndn/shared/methodologies/bold/testing": [
         "libs/shared/methodologies/bold/testing/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/helpers": [
+        "libs/shared/methodologies/bold/helpers/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/types": [
         "libs/shared/methodologies/bold/types/src/index.ts"
       ],
@@ -75,6 +78,7 @@
       "@carrot-fndn/methodologies/bold/rule-processors/mass-id": [
         "libs/methodologies/bold/rule-processors/mass-id/src/index.ts"
       ],
+
       "@carrot-fndn/shared/rule/standard-data-processor": [
         "libs/shared/rule/standard-data-processor/src/index.ts"
       ],

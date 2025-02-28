@@ -1,1 +1,1 @@
-export * from './project-period.processor';
+export * from './project-period.lambda';

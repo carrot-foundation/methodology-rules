@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-recycling-organic-rule-processors-mass-project-period",
+  "name": "methodologies-bold-carbon-organic-rule-processors-mass-id-check-participants-homologation",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["type:app", "methodology:bold"],
-  "sourceRoot": "apps/methodologies/bold-recycling-organic/rule-processors/mass/project-period/src",
+  "sourceRoot": "apps/methodologies/bold-carbon-organic/rule-processors/mass-id/check-participants-homologation/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},
