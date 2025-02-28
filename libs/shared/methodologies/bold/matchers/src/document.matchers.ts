@@ -67,3 +67,15 @@ export const PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.PARTICIPANT_HOMOLOGATION,
 });
+
+export const TRC_CREDIT_MATCH = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  subtype: DocumentSubtype.TRC,
+  type: DocumentType.CREDIT,
+});
+
+export const TCC_CREDIT_MATCH = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  subtype: DocumentSubtype.TCC,
+  type: DocumentType.CREDIT,
+});

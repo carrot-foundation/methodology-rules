@@ -5,6 +5,10 @@ export enum DocumentCategory {
   METHODOLOGY = 'Methodology',
 }
 
+export enum DocumentStatus {
+  CANCELLED = 'CANCELLED',
+}
+
 export enum DocumentType {
   CREDIT = 'Credit',
   CREDIT_CERTIFICATES = 'Credit Certificates',
@@ -32,6 +36,8 @@ export enum DocumentSubtype {
   PROCESSOR = 'Processor',
   RECYCLER = 'Recycler',
   SOURCE = 'Source',
+  TCC = 'TCC',
+  TRC = 'TRC',
   WASTE_GENERATOR = 'Waste Generator',
   WOOD = 'Wood',
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',

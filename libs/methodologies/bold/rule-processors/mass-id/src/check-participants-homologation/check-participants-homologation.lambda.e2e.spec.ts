@@ -27,12 +27,12 @@ import {
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { formatDate } from 'date-fns';
+import { addDays, formatDate, subDays } from 'date-fns';
 
 import { checkParticipantsHomologationLambda } from './check-participants-homologation.lambda';
 
 const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 
 describe('CheckParticipantsHomologationProcessor', () => {
   const documentKeyPrefix = faker.string.uuid();
@@ -72,7 +72,10 @@ describe('CheckParticipantsHomologationProcessor', () => {
 
   const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
-    [[HOMOLOGATION_DUE_DATE, formatDate(faker.date.future(), 'yyyy-MM-dd')]],
+    [
+      [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
+    ],
   );
 
   const participantsHomologationDocumentStubs: Map<DocumentSubtype, Document> =
