@@ -41,7 +41,7 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
 
   private get RESULT_COMMENT() {
     return {
-      APPROVED: `The MassID Audit is available to generate credits because no other ${this.creditMatch.match.type} is linked to this MassID`,
+      APPROVED: `The MassID is not linked to a valid ${this.creditMatch.match.type}`,
     } as const;
   }
 
