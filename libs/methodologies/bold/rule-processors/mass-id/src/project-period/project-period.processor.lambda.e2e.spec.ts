@@ -1,8 +1,8 @@
 import { testRuleProcessorWithMassDocuments } from '@carrot-fndn/shared/methodologies/bold/testing';
 
-import { handler } from '../lambda';
+import { projectPeriodProcessorLambda } from './project-period.processor.lambda';
 
 testRuleProcessorWithMassDocuments({
-  handler,
+  handler: projectPeriodProcessorLambda,
   ruleName: 'ProjectPeriodProcessor',
 });
