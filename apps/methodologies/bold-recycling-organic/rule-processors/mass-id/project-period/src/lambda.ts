@@ -1,1 +1,1 @@
-export { projectPeriodProcessorHandler as handler } from '@carrot-fndn/methodologies/bold/rule-processors/mass-id';
+export { projectPeriodLambda as handler } from '@carrot-fndn/methodologies/bold/rule-processors/mass-id';

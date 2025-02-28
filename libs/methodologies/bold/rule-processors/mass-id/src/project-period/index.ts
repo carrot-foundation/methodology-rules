@@ -1,1 +1,1 @@
-export { projectPeriodProcessorLambda as projectPeriodProcessorHandler } from './project-period.processor.lambda';
+export * from './project-period.lambda';

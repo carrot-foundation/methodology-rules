@@ -4,4 +4,4 @@ import { ProjectPeriodProcessor } from './project-period.processor';
 
 const instance = new ProjectPeriodProcessor();
 
-export const projectPeriodProcessorLambda = wrapRuleIntoLambdaHandler(instance);
+export const projectPeriodLambda = wrapRuleIntoLambdaHandler(instance);
