@@ -41,7 +41,7 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
 
   private get RESULT_COMMENT() {
     return {
-      APPROVED: `The MassID is not linked to a valid ${this.creditMatch.match.type}`,
+      APPROVED: `The MassID is not linked to a valid ${this.creditMatch.match.subtype}`,
     } as const;
   }
 
@@ -56,7 +56,7 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
     if (hasNoCancelledCreditDocuments) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
-          assert<NonEmptyString>(this.creditMatch.match.type),
+          assert<NonEmptyString>(this.creditMatch.match.subtype),
         ),
       );
     }
