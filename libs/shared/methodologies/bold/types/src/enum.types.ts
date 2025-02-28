@@ -2,6 +2,7 @@ import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
 
 export enum DocumentCategory {
   MASS = 'Mass',
+  MASS_ID = 'MassID',
   METHODOLOGY = 'Methodology',
 }
 
@@ -16,6 +17,7 @@ export enum DocumentType {
   MASS_AUDIT = 'Mass Audit',
   MASS_CERTIFICATE = 'Mass Certificate',
   MASS_CERTIFICATE_AUDIT = 'Mass Certificate Audit',
+  MASS_ID_AUDIT = 'MassID Audit',
   ORGANIC = 'Organic',
   PARTICIPANT_HOMOLOGATION = 'Participant Homologation',
 }
