@@ -1,4 +1,5 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+import { TRC_CREDIT_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   stubMassAuditDocument,
   stubMassDocument,
@@ -22,9 +23,10 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { handler } from '../lambda';
+import { creditAbsenceLambda } from './credit-absence.lambda';
 
 describe('CheckTCCAbsenceProcessor', () => {
+  const lambda = creditAbsenceLambda(TRC_CREDIT_MATCH);
   const documentKeyPrefix = faker.string.uuid();
 
   // TODO: Refac this test to use a builder or a stub that prepares the documents https://app.clickup.com/t/86a36ut5a
@@ -65,7 +67,7 @@ describe('CheckTCCAbsenceProcessor', () => {
   });
 
   it('should return APPROVED when the MassID has no TCC linked', async () => {
-    const response = (await handler(
+    const response = (await lambda(
       stubRuleInput({
         documentId: massAuditReference.documentId,
         documentKeyPrefix,
