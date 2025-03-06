@@ -41,6 +41,8 @@ export const wrapRuleIntoLambdaHandler = (
     environment: String(process.env['ENVIRONMENT']),
   });
 
+  console.log('Force rules upload');
+
   const handler = async (
     event: MethodologyRuleEvent,
   ): Promise<MethodologyRuleResponse> => {
