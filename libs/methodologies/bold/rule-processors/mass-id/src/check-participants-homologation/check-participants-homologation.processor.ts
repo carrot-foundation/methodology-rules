@@ -118,6 +118,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
     const actorParticipants: Map<string, string> = new Map(
       massDocument.externalEvents
         .filter((event) => isActorEvent(event))
+        // TODO: update to use the event name label instead of the event name
         .map((event) => [event.participant.id, event.name]),
     );
 

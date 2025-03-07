@@ -1,20 +1,12 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  stubDocumentEvent,
+  BoldStubsBuilder,
   stubDocumentEventWithMetadataAttributes,
-  stubMassAuditDocument,
-  stubMassDocument,
-  stubParticipantHomologationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
-  type DocumentReference,
   DocumentSubtype,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleOutput,
@@ -27,137 +19,128 @@ import {
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { addDays, formatDate, subDays } from 'date-fns';
+import { formatDate, subDays } from 'date-fns';
 
 import { checkParticipantsHomologationLambda } from './check-participants-homologation.lambda';
 
 const { CLOSE } = DocumentEventName;
+const { HAULER } = DocumentSubtype;
 const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 
-describe('CheckParticipantsHomologationProcessor', () => {
+describe('CheckParticipantsHomologationProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  // TODO: Refac this test to use a builder or a stub that prepares the documents https://app.clickup.com/t/86a36ut5a
-  const massId = faker.string.uuid();
-  const massAuditId = faker.string.uuid();
-  const homologatedParticipants = [
-    DocumentSubtype.HAULER,
-    DocumentSubtype.PROCESSOR,
-    DocumentSubtype.RECYCLER,
-    DocumentSubtype.WASTE_GENERATOR,
-  ];
+  const massIdAuditWithHomologations = new BoldStubsBuilder()
+    .createMethodologyDocuments()
+    .createParticipantHomologationDocuments()
+    .build();
+  const massIdAuditWithoutHomologations = new BoldStubsBuilder().build();
 
-  const massReference: DocumentReference = {
-    category: DocumentCategory.METHODOLOGY,
-    documentId: massId,
-    type: DocumentType.ORGANIC,
-  };
-  const massAuditReference: DocumentReference = {
-    category: DocumentCategory.METHODOLOGY,
-    documentId: massAuditId,
-    subtype: DocumentSubtype.PROCESS,
-    type: DocumentType.MASS_AUDIT,
-  };
-  const participantsReference: Map<DocumentSubtype, DocumentReference> =
-    new Map(
-      homologatedParticipants.map((subtype) => [
-        subtype,
-        {
-          ...PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match,
-          documentId: faker.string.uuid(),
-          subtype,
-        },
-      ]),
-    );
-
-  const homologationCloseEvent = stubDocumentEventWithMetadataAttributes(
+  const expiredEvent = stubDocumentEventWithMetadataAttributes(
     { name: CLOSE },
     [
-      [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
-      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 10), 'yyyy-MM-dd')],
+      [HOMOLOGATION_DUE_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
     ],
   );
 
-  const participantsHomologationDocumentStubs: Map<DocumentSubtype, Document> =
-    new Map(
-      homologatedParticipants.map((subtype) => [
-        subtype,
-        stubParticipantHomologationDocument({
-          externalEvents: [
-            stubDocumentEvent({
-              name: DocumentEventName.OPEN,
-            }),
-            homologationCloseEvent,
-          ],
-          id: participantsReference.get(subtype)?.documentId ?? '',
-          subtype,
-        }),
-      ]),
-    );
+  it.each([
+    {
+      documents: [
+        massIdAuditWithHomologations.massIdDocumentStub,
+        ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      ],
+      massIdAuditDocumentStub:
+        massIdAuditWithHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.APPROVED,
+      scenario:
+        'should return APPROVED when the participants homologation documents are found and the homologation is active',
+    },
+    {
+      documents: [massIdAuditWithoutHomologations.massIdDocumentStub],
+      massIdAuditDocumentStub:
+        massIdAuditWithoutHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should return REJECTED when the participants homologation documents are not found',
+    },
+    {
+      documents: [
+        massIdAuditWithHomologations.massIdDocumentStub,
+        ...[
+          ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+        ].filter((document) => document.subtype !== HAULER),
+      ],
+      massIdAuditDocumentStub:
+        massIdAuditWithHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should return REJECTED when some participants homologation documents are not found',
+    },
+    {
+      documents: [
+        ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      ],
+      massIdAuditDocumentStub:
+        massIdAuditWithHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario: 'should return REJECTED when the mass document does not exist',
+    },
+    {
+      documents: [
+        {
+          ...massIdAuditWithHomologations.massIdDocumentStub,
+          externalEvents: [],
+        },
+        ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      ],
+      massIdAuditDocumentStub:
+        massIdAuditWithHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should return REJECTED when the mass document does not contain events',
+    },
+    {
+      documents: [
+        massIdAuditWithHomologations.massIdDocumentStub,
+        ...massIdAuditWithHomologations.participantsHomologationDocumentStubs
+          .set(HAULER, {
+            ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.get(
+              HAULER,
+            )!,
+            externalEvents: [expiredEvent],
+          })
+          .values(),
+      ],
+      massIdAuditDocumentStub:
+        massIdAuditWithHomologations.massIdAuditDocumentStub,
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario:
+        'should return REJECTED when the participants homologation documents are found and the homologation is not active',
+    },
+  ])(
+    '$scenario',
+    async ({ documents, massIdAuditDocumentStub, resultStatus }) => {
+      prepareEnvironmentTestE2E(
+        [...documents, massIdAuditDocumentStub].map((document) => ({
+          document,
+          documentKey: toDocumentKey({
+            documentId: document.id,
+            documentKeyPrefix,
+          }),
+        })),
+      );
 
-  const massDocumentStub = stubMassDocument({
-    externalEvents: [
-      ...homologatedParticipants.map((subtype) =>
-        stubDocumentEventWithMetadataAttributes(
-          {
-            name: DocumentEventName.ACTOR,
-            participant: {
-              id:
-                participantsHomologationDocumentStubs.get(subtype)
-                  ?.primaryParticipant.id ?? '',
-            },
-          },
-          // TODO: update this logic to use the event label when it's available
-          [[DocumentEventAttributeName.ACTOR_TYPE, subtype]],
-        ),
-      ),
-      stubDocumentEvent({
-        name: DocumentEventName.OUTPUT,
-        relatedDocument: massAuditReference,
-      }),
-    ],
-    id: massReference.documentId,
-  });
-  const massAuditDocumentStub = stubMassAuditDocument({
-    externalEvents: homologatedParticipants.map((subtype) =>
-      stubDocumentEvent({
-        name: DocumentEventName.LINK,
-        referencedDocument: participantsReference.get(subtype),
-        relatedDocument: undefined,
-      }),
-    ),
-    id: massAuditReference.documentId,
-    parentDocumentId: massDocumentStub.id,
-  });
-
-  const documents: Document[] = [
-    massAuditDocumentStub,
-    massDocumentStub,
-    ...participantsHomologationDocumentStubs.values(),
-  ];
-
-  beforeAll(() => {
-    prepareEnvironmentTestE2E(
-      documents.map((document) => ({
-        document,
-        documentKey: toDocumentKey({
-          documentId: document.id,
+      const response = (await checkParticipantsHomologationLambda(
+        stubRuleInput({
+          documentId: massIdAuditDocumentStub.id,
           documentKeyPrefix,
         }),
-      })),
-    );
-  });
+        stubContext(),
+        () => stubRuleResponse(),
+      )) as RuleOutput;
 
-  it('should return APPROVED when the homologation document is not expired', async () => {
-    const response = (await checkParticipantsHomologationLambda(
-      stubRuleInput({
-        documentId: massAuditReference.documentId,
-        documentKeyPrefix,
-      }),
-      stubContext(),
-      () => stubRuleResponse(),
-    )) as RuleOutput;
-
-    expect(response.resultStatus).toBe(RuleOutputStatus.APPROVED);
-  });
+      expect(response.resultStatus).toBe(resultStatus);
+    },
+  );
 });
