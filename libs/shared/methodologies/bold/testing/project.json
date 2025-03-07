@@ -1,7 +1,13 @@
 {
   "name": "shared-methodologies-bold-testing",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:lib", "app:any", "stack:any", "methodology:bold"],
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "scope:shared",
+    "stack:any",
+    "type:lib"
+  ],
   "sourceRoot": "libs/shared/methodologies/bold/testing/src",
   "projectType": "library",
   "targets": {

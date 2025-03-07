@@ -1,7 +1,14 @@
 {
   "name": "shared-methodologies-bold-processors",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:lib", "app:any", "stack:any", "methodology:bold"],
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "processor:shared",
+    "scope:shared",
+    "stack:any",
+    "type:lib"
+  ],
   "sourceRoot": "libs/shared/methodologies/bold/processors/src",
   "projectType": "library",
   "targets": {

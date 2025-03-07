@@ -1,7 +1,7 @@
 {
   "name": "methodologies-bold-carbon-organic-rule-processors-mass-id-tcc-absence",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:app", "methodology:bold"],
+  "tags": ["methodology:bold", "processor:mass-id", "type:app"],
   "sourceRoot": "apps/methodologies/bold-carbon-organic/rule-processors/mass-id/tcc-absence/src",
   "projectType": "application",
   "targets": {

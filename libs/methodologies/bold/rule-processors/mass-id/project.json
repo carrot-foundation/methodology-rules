@@ -1,7 +1,14 @@
 {
   "name": "methodologies-bold-rule-processors-mass-id",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:lib", "app:any", "stack:any", "methodology:bold"],
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "processor:mass-id",
+    "scope:shared",
+    "stack:any",
+    "type:lib"
+  ],
   "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/src",
   "projectType": "library",
   "targets": {

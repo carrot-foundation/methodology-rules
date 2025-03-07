@@ -1,7 +1,7 @@
 {
   "name": "methodologies-bold-rule-processors-mass-drop-off-geolocation-precision",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:app", "methodology:bold"],
+  "tags": ["methodology:bold", "processor:mass", "type:app"],
   "sourceRoot": "apps/methodologies/bold/rule-processors/mass/drop-off-geolocation-precision/src",
   "projectType": "application",
   "targets": {
