@@ -25,8 +25,10 @@ import {
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
 
-const { ACTOR, CLOSE, LINK, OUTPUT, RELATED } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { ACTOR, BUSINESS_DOCUMENT, CLOSE, LINK, OUTPUT, RELATED } =
+  DocumentEventName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE, PROJECT_SIZE } =
+  DocumentEventAttributeName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
   DocumentType;
@@ -229,6 +231,14 @@ export class BoldStubsBuilder {
 
       const documentStub = stubParticipantHomologationDocument({
         externalEvents: [
+          ...(subtype === DocumentSubtype.RECYCLER
+            ? [
+                stubDocumentEventWithMetadataAttributes(
+                  { name: BUSINESS_DOCUMENT },
+                  [[PROJECT_SIZE, Math.floor(Math.random() * 60_000)]],
+                ),
+              ]
+            : []),
           stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
             [
               HOMOLOGATION_DATE,

@@ -100,6 +100,7 @@ export enum DocumentEventAttributeName {
   MOVE_TYPE = 'move-type',
   NFT_DESCRIPTION = 'nft-description',
   NFT_IMAGE = 'nft-image',
+  PROJECT_SIZE = 'Project Size',
   REPORT_DATE_ISSUED = 'report-date-issued',
   REPORT_NUMBER = 'report-number',
   REPORT_TYPE = 'report-type',
@@ -134,8 +135,13 @@ export enum ReportTypeLiteralName {
   MTR = 'MANIFESTO DE TRANSPORTE DE RESÍDUOS',
 }
 
+export enum HomologationDocumentEventName {
+  BUSINESS_DOCUMENT = 'Business Document',
+}
+
 export enum DocumentEventName {
   ACTOR = MethodologyDocumentEventName.ACTOR,
+  BUSINESS_DOCUMENT = HomologationDocumentEventName.BUSINESS_DOCUMENT,
   CLOSE = MethodologyDocumentEventName.CLOSE,
   END = 'END',
   LINK = MethodologyDocumentEventName.LINK,
