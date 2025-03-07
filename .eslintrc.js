@@ -1,4 +1,5 @@
 const methodologies = ['bold'];
+const ruleProcessorTypes = ['mass', 'mass-id', 'credit', 'certificate'];
 
 module.exports = {
   root: true,
@@ -87,6 +88,18 @@ module.exports = {
                   `/^methodology:(?!${methodology}$).*/`,
                 ],
               })),
+              ...ruleProcessorTypes.map((processorType) => ({
+                sourceTag: `processor:${processorType}`,
+                onlyDependOnLibsWithTags: [
+                  'processor:shared',
+                  `processor:${processorType}`,
+                  'type:lib',
+                ],
+              })),
+              {
+                sourceTag: 'scope:shared',
+                onlyDependOnLibsWithTags: ['scope:shared'],
+              },
             ],
           },
         ],

@@ -1,7 +1,7 @@
 {
   "name": "methodologies-bold-rule-processors-mass-certificate-mass-audit-document-status",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:app", "methodology:bold"],
+  "tags": ["methodology:bold", "processor:certificate", "type:app"],
   "sourceRoot": "apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document-status/src",
   "projectType": "application",
   "targets": {

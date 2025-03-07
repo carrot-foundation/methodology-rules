@@ -1,7 +1,7 @@
 {
   "name": "methodologies-bold-recycling-organic-rule-processors-mass-id-check-participants-homologation",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:app", "methodology:bold"],
+  "tags": ["methodology:bold", "processor:mass-id", "type:app"],
   "sourceRoot": "apps/methodologies/bold-recycling-organic/rule-processors/mass-id/check-participants-homologation/src",
   "projectType": "application",
   "targets": {

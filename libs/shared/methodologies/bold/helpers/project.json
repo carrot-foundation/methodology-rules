@@ -1,7 +1,7 @@
 {
   "name": "shared-methodologies-bold-helpers",
   "$schema": "../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["type:lib", "app:any", "stack:any"],
+  "tags": ["app:any", "scope:shared", "stack:any", "type:lib"],
   "sourceRoot": "libs/shared/methodologies/bold/helpers/src",
   "projectType": "library",
   "targets": {
