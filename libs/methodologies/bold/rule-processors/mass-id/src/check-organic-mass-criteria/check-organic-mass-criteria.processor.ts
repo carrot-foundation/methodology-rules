@@ -29,6 +29,14 @@ export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcess
     } as const;
   }
 
+  private isValidSubtype(subtype: string | undefined): boolean {
+    if (!subtype) {
+      return false;
+    }
+
+    return Object.values<string>(MassSubtype).includes(subtype);
+  }
+
   private validateRequiredFields(
     document: Document,
   ): EvaluateResultOutput | undefined {
@@ -79,9 +87,7 @@ export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcess
       },
       {
         errorMessage: this.RESULT_COMMENT.SUBTYPE_NOT_MATCHING,
-        isValid: document.subtype
-          ? Object.values<string>(MassSubtype).includes(document.subtype)
-          : false,
+        isValid: this.isValidSubtype(document.subtype),
       },
     ];
 

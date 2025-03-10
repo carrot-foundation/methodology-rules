@@ -11,14 +11,12 @@ import {
   DocumentSubtype,
   DocumentType,
   MassSubtype,
-  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type MethodologyDocumentEventAttributeValue,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
-import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
@@ -95,12 +93,10 @@ export const stubMassDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.MASS_ID,
-    currentValue: faker.number.int({ min: 1 }),
-    measurementUnit: MeasurementUnit.KG,
+    category: DocumentCategory.MASS,
     subtype: stubEnumValue(MassSubtype),
     type: DocumentType.ORGANIC,
+    ...partialDocument,
   });
 
 export const stubMassAuditDocumentWithActorAndAttribute = (

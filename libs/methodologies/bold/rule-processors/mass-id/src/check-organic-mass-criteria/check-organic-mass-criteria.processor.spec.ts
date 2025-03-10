@@ -2,6 +2,7 @@ import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { MassSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -16,22 +17,44 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('CheckOrganicMassCriteriaProcessor', () => {
   const ruleDataProcessor = new CheckOrganicMassCriteriaProcessor();
+  const documentLoaderService = jest.mocked(loadParentDocument);
   const processorErrors = new CheckOrganicMassCriteriaProcessorErrors();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const massIdStubs = new BoldStubsBuilder().build();
 
-  const massId = new BoldStubsBuilder().build();
+  describe('isValidSubtype', () => {
+    it('should return false when subtype is undefined', () => {
+      const result = ruleDataProcessor['isValidSubtype'](undefined);
+
+      expect(result).toBe(false);
+    });
+
+    it('should return true when subtype is in MassSubtype enum', () => {
+      const validSubtype = Object.values(MassSubtype)[0];
+      const result = ruleDataProcessor['isValidSubtype'](validSubtype);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when subtype is not in MassSubtype enum', () => {
+      const result = ruleDataProcessor['isValidSubtype'](
+        'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
+      );
+
+      expect(result).toBe(false);
+    });
+  });
 
   it.each([
     {
-      massIdDocument: massId.massIdDocumentStub,
+      massIdDocument: massIdStubs.massIdDocumentStub,
       resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
       scenario: 'should return APPROVED when all the criteria are met',
     },
     {
       massIdDocument: {
-        ...massId.massIdDocumentStub,
+        ...massIdStubs.massIdDocumentStub,
         category: 'INVALID_CATEGORY',
       },
       resultComment: ruleDataProcessor['RESULT_COMMENT'].CATEGORY_NOT_MATCHING,
@@ -40,7 +63,7 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
     },
     {
       massIdDocument: {
-        ...massId.massIdDocumentStub,
+        ...massIdStubs.massIdDocumentStub,
         type: 'INVALID_TYPE',
       },
       resultComment: ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING,
@@ -49,7 +72,7 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
     },
     {
       massIdDocument: {
-        ...massId.massIdDocumentStub,
+        ...massIdStubs.massIdDocumentStub,
         measurementUnit: 'INVALID_UNIT',
       },
       resultComment:
@@ -59,7 +82,7 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
     },
     {
       massIdDocument: {
-        ...massId.massIdDocumentStub,
+        ...massIdStubs.massIdDocumentStub,
         currentValue: 0,
       },
       resultComment:
@@ -70,22 +93,22 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
     },
     {
       massIdDocument: {
-        ...massId.massIdDocumentStub,
-        subtype: 'INVALID_SUBTYPE',
+        ...massIdStubs.massIdDocumentStub,
+        subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
       },
       resultComment: ruleDataProcessor['RESULT_COMMENT'].SUBTYPE_NOT_MATCHING,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
-        'should return REJECTED when subtype is not in the allowed list',
+        'should return REJECTED when subtype is defined but not in the allowed list',
     },
     {
-      massIdDocument: { ...massId.massIdDocumentStub, type: undefined },
+      massIdDocument: { ...massIdStubs.massIdDocumentStub, type: undefined },
       resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when document type is not found',
     },
     {
-      massIdDocument: { ...massId.massIdDocumentStub, subtype: undefined },
+      massIdDocument: { ...massIdStubs.massIdDocumentStub, subtype: undefined },
       resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when document subtype is not found',
