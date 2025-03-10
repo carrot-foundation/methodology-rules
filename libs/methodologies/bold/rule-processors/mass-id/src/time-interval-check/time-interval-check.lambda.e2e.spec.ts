@@ -14,7 +14,7 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 import { timeIntervalCheckLambda } from './time-interval-check.lambda';
 
