@@ -21,16 +21,17 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
   private get RESULT_COMMENT() {
     return {
       APPROVED:
-        'Compliant mass definition: category, type, subtype, value and measurement unit.',
+        'The mass definition is compliant: category, type, subtype, value, and measurement unit are valid.',
       CATEGORY_NOT_MATCHING: (category: string): string =>
-        `Category ${category} should be ${DocumentCategory.MASS_ID}.`,
+        `Expected category "${DocumentCategory.MASS_ID}" but got "${category}".`,
       CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
-        `Current value is ${value}, but it should be greater than 0.`,
+        `Expected current value to be greater than 0 but got ${value}.`,
       MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
-        `Measurement unit ${measurementUnit} should be ${NewMeasurementUnit.KG}.`,
-      SUBTYPE_NOT_MATCHING: `Subtype does not match with any of the allowed subtypes: ${ALLOWED_SUBTYPES.join(', ')}`,
+        `Expected measurement unit "${NewMeasurementUnit.KG}" but got "${measurementUnit}".`,
+      SUBTYPE_NOT_MATCHING: (subtype: string): string =>
+        `Expected subtype to be one of the following: ${ALLOWED_SUBTYPES.join(', ')} but got "${subtype}".`,
       TYPE_NOT_MATCHING: (type: string): string =>
-        `Type ${type} should be ${DocumentType.ORGANIC}.`,
+        `Expected type to be "${DocumentType.ORGANIC}" but got "${type}".`,
     } as const;
   }
 
@@ -99,7 +100,9 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
         isValid: document.currentValue > 0,
       },
       {
-        errorMessage: this.RESULT_COMMENT.SUBTYPE_NOT_MATCHING,
+        errorMessage: this.RESULT_COMMENT.SUBTYPE_NOT_MATCHING(
+          document.subtype!,
+        ),
         isValid: this.isValidSubtype(document.subtype),
       },
     ];
