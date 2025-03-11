@@ -8,6 +8,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
 import { MassDefinitionProcessorErrors } from './mass-definition.errors';
@@ -31,7 +32,7 @@ describe('MassDefinitionProcessor', () => {
     });
 
     it('should return true when subtype is in MassSubtype enum', () => {
-      const validSubtype = Object.values(MassSubtype)[0];
+      const validSubtype = stubEnumValue(MassSubtype);
       const result = ruleDataProcessor['isValidSubtype'](validSubtype);
 
       expect(result).toBe(true);

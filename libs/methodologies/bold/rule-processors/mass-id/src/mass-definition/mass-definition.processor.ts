@@ -7,7 +7,7 @@ import {
   DocumentCategory,
   DocumentType,
   MassSubtype,
-  MeasurementUnit,
+  NewMeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -27,7 +27,7 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
       CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
         `Current value is ${value}, but it should be greater than 0.`,
       MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
-        `Measurement unit ${measurementUnit} should be ${MeasurementUnit.KG}.`,
+        `Measurement unit ${measurementUnit} should be ${NewMeasurementUnit.KG}.`,
       SUBTYPE_NOT_MATCHING: `Subtype does not match with any of the allowed subtypes: ${ALLOWED_SUBTYPES.join(', ')}`,
       TYPE_NOT_MATCHING: (type: string): string =>
         `Type ${type} should be ${DocumentType.ORGANIC}.`,
@@ -88,7 +88,7 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
         errorMessage: this.RESULT_COMMENT.MEASUREMENT_UNIT_NOT_MATCHING(
           document.measurementUnit,
         ),
-        isValid: document.measurementUnit === MeasurementUnit.KG.valueOf(),
+        isValid: document.measurementUnit === NewMeasurementUnit.KG.valueOf(),
       },
       {
         errorMessage: this.RESULT_COMMENT.CURRENT_VALUE_NOT_MATCHING(
