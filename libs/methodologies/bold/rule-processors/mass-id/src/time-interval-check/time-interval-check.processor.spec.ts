@@ -12,6 +12,7 @@ import {
 import { random } from 'typia';
 
 import { TimeIntervalCheckProcessor } from './time-interval-check.processor';
+import { timeIntervalTestCases } from './time-interval-check.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
@@ -19,64 +20,17 @@ describe('TimeIntervalCheckProcessor', () => {
   const ruleDataProcessor = new TimeIntervalCheckProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  it.each([
-    {
-      dropOffEventDate: '2024-02-25T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T11:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'Time interval is less than 60 days (2 days)',
-    },
-    {
-      dropOffEventDate: undefined,
-      recycledEventDate: '2024-02-27T12:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].NOT_APPLICABLE,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'Drop off event date is missing',
-    },
-    {
-      dropOffEventDate: '2023-11-25T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T11:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'Time interval is within range (94 days)',
-    },
-    {
-      dropOffEventDate: '2023-12-29T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T12:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'Edge case: Exactly 60 days (minimum allowed)',
-    },
-    {
-      dropOffEventDate: '2023-08-31T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T12:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'Edge case: Exactly 180 days (maximum allowed)',
-    },
-    {
-      dropOffEventDate: '2023-12-30T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T12:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'Edge case: 59 days (just below minimum)',
-    },
-    {
-      dropOffEventDate: '2023-08-30T12:00:00.000Z',
-      recycledEventDate: '2024-02-27T12:00:00.000Z',
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].REJECTED,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'Edge case: 181 days (just above maximum)',
-    },
-    {
-      dropOffEventDate: '2023-11-25T12:00:00.000Z',
-      recycledEventDate: undefined,
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].NOT_APPLICABLE,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'Recycled event date is missing',
-    },
-  ])(
+  it.each(
+    timeIntervalTestCases.map((testCase) => ({
+      ...testCase,
+      resultComment:
+        testCase.resultStatus === RuleOutputStatus.APPROVED
+          ? testCase.dropOffEventDate && testCase.recycledEventDate
+            ? ruleDataProcessor['RESULT_COMMENT'].APPROVED
+            : ruleDataProcessor['RESULT_COMMENT'].NOT_APPLICABLE
+          : ruleDataProcessor['RESULT_COMMENT'].REJECTED,
+    })),
+  )(
     `should validate time interval between events - $scenario`,
     async ({
       dropOffEventDate,
