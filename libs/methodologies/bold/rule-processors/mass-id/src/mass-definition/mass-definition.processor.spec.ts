@@ -10,15 +10,16 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { CheckOrganicMassCriteriaProcessorErrors } from './check-organic-mass-criteria.errors';
-import { CheckOrganicMassCriteriaProcessor } from './check-organic-mass-criteria.processor';
+import { MassDefinitionProcessorErrors } from './mass-definition.errors';
+import { MassDefinitionProcessor } from './mass-definition.processor';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-describe('CheckOrganicMassCriteriaProcessor', () => {
-  const ruleDataProcessor = new CheckOrganicMassCriteriaProcessor();
+describe('MassDefinitionProcessor', () => {
+  const ruleDataProcessor = new MassDefinitionProcessor();
+  const processorErrors = new MassDefinitionProcessorErrors();
+
   const documentLoaderService = jest.mocked(loadParentDocument);
-  const processorErrors = new CheckOrganicMassCriteriaProcessorErrors();
 
   const massIdStubs = new BoldStubsBuilder().build();
 
@@ -57,7 +58,10 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
         ...massIdStubs.massIdDocumentStub,
         category: 'INVALID_CATEGORY',
       },
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].CATEGORY_NOT_MATCHING,
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].CATEGORY_NOT_MATCHING(
+          'INVALID_CATEGORY',
+        ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when category does not match',
     },
@@ -66,7 +70,8 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
         ...massIdStubs.massIdDocumentStub,
         type: 'INVALID_TYPE',
       },
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING,
+      resultComment:
+        ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING('INVALID_TYPE'),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when type is not ORGANIC',
     },
@@ -76,7 +81,9 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
         measurementUnit: 'INVALID_UNIT',
       },
       resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].MEASUREMENT_UNIT_NOT_MATCHING,
+        ruleDataProcessor['RESULT_COMMENT'].MEASUREMENT_UNIT_NOT_MATCHING(
+          'INVALID_UNIT',
+        ),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when measurement unit is not KG',
     },
@@ -86,7 +93,7 @@ describe('CheckOrganicMassCriteriaProcessor', () => {
         currentValue: 0,
       },
       resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].CURRENT_VALUE_NOT_MATCHING,
+        ruleDataProcessor['RESULT_COMMENT'].CURRENT_VALUE_NOT_MATCHING(0),
       resultStatus: RuleOutputStatus.REJECTED,
       scenario:
         'should return REJECTED when current value is not greater than 0',

@@ -11,21 +11,26 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { CheckOrganicMassCriteriaProcessorErrors } from './check-organic-mass-criteria.errors';
+import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 
-export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcessor<Document> {
-  protected readonly processorErrors =
-    new CheckOrganicMassCriteriaProcessorErrors();
+const ALLOWED_SUBTYPES: string[] = Object.values(MassSubtype);
+
+export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Document> {
+  protected readonly processorErrors = new MassDefinitionProcessorErrors();
 
   private get RESULT_COMMENT() {
     return {
-      APPROVED: 'The Organic MassID criteria is met.',
-      CATEGORY_NOT_MATCHING: `Category does not match with ${DocumentCategory.MASS_ID}`,
-      CURRENT_VALUE_NOT_MATCHING:
-        'The MassID current value is not greater than 0',
-      MEASUREMENT_UNIT_NOT_MATCHING: `Measurement unit does not match with ${MeasurementUnit.KG}`,
-      SUBTYPE_NOT_MATCHING: `Subtype does not match with any of the allowed subtypes`,
-      TYPE_NOT_MATCHING: 'The Organic MassID criteria is not met.',
+      APPROVED:
+        'Compliant mass definition: category, type, subtype, value and measurement unit.',
+      CATEGORY_NOT_MATCHING: (category: string): string =>
+        `Category ${category} should be ${DocumentCategory.MASS_ID}.`,
+      CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
+        `Current value is ${value}, but it should be greater than 0.`,
+      MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
+        `Measurement unit ${measurementUnit} should be ${MeasurementUnit.KG}.`,
+      SUBTYPE_NOT_MATCHING: `Subtype does not match with any of the allowed subtypes: ${ALLOWED_SUBTYPES.join(', ')}`,
+      TYPE_NOT_MATCHING: (type: string): string =>
+        `Type ${type} should be ${DocumentType.ORGANIC}.`,
     } as const;
   }
 
@@ -34,7 +39,7 @@ export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcess
       return false;
     }
 
-    return Object.values<string>(MassSubtype).includes(subtype);
+    return ALLOWED_SUBTYPES.includes(subtype);
   }
 
   private validateRequiredFields(
@@ -68,21 +73,27 @@ export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcess
       return validationResult;
     }
 
-    const validationCriterias = [
+    const validationCriteria = [
       {
-        errorMessage: this.RESULT_COMMENT.CATEGORY_NOT_MATCHING,
+        errorMessage: this.RESULT_COMMENT.CATEGORY_NOT_MATCHING(
+          document.category,
+        ),
         isValid: document.category === DocumentCategory.MASS_ID.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.TYPE_NOT_MATCHING,
+        errorMessage: this.RESULT_COMMENT.TYPE_NOT_MATCHING(document.type!),
         isValid: document.type === DocumentType.ORGANIC.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.MEASUREMENT_UNIT_NOT_MATCHING,
+        errorMessage: this.RESULT_COMMENT.MEASUREMENT_UNIT_NOT_MATCHING(
+          document.measurementUnit,
+        ),
         isValid: document.measurementUnit === MeasurementUnit.KG.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.CURRENT_VALUE_NOT_MATCHING,
+        errorMessage: this.RESULT_COMMENT.CURRENT_VALUE_NOT_MATCHING(
+          document.currentValue,
+        ),
         isValid: document.currentValue > 0,
       },
       {
@@ -91,7 +102,7 @@ export class CheckOrganicMassCriteriaProcessor extends ParentDocumentRuleProcess
       },
     ];
 
-    for (const criteria of validationCriterias) {
+    for (const criteria of validationCriteria) {
       if (!criteria.isValid) {
         return {
           resultComment: criteria.errorMessage,
