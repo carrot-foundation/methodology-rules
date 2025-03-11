@@ -8,6 +8,10 @@ export enum MethodologyParticipantType {
   ACTOR = 'ACTOR',
 }
 
+export enum MethodologyDocumentEventLabel {
+  RECYCLER = 'Recycler',
+}
+
 export enum MethodologyDocumentEventName {
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',
