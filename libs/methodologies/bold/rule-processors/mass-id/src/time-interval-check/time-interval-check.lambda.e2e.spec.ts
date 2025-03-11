@@ -24,20 +24,31 @@ describe('TimeIntervalCheckProcessor E2E', () => {
   it.each(timeIntervalTestCases)(
     'should validate time interval between events - $scenario',
     async ({ dropOffEventDate, recycledEventDate, resultStatus }) => {
+      const externalEvents = [];
+
+      if (dropOffEventDate) {
+        externalEvents.push(
+          stubDocumentEvent({
+            externalCreatedAt: dropOffEventDate,
+            name: DocumentEventName.DROP_OFF,
+          }),
+        );
+      }
+
+      if (recycledEventDate) {
+        externalEvents.push(
+          stubDocumentEvent({
+            externalCreatedAt: recycledEventDate,
+            name: DocumentEventName.RECYCLED,
+          }),
+        );
+      }
+
       prepareEnvironmentTestE2E(
         [
           {
             ...massId.massIdDocumentStub,
-            externalEvents: [
-              stubDocumentEvent({
-                externalCreatedAt: dropOffEventDate,
-                name: DocumentEventName.DROP_OFF,
-              }),
-              stubDocumentEvent({
-                externalCreatedAt: recycledEventDate,
-                name: DocumentEventName.RECYCLED,
-              }),
-            ],
+            externalEvents,
           },
           massId.massIdAuditDocumentStub,
         ].map((document) => ({

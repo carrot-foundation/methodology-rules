@@ -9,6 +9,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { differenceInDays, parseISO } from 'date-fns';
 import { random } from 'typia';
 
 import { TimeIntervalCheckProcessor } from './time-interval-check.processor';
@@ -18,18 +19,36 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('TimeIntervalCheckProcessor', () => {
   const ruleDataProcessor = new TimeIntervalCheckProcessor();
+
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each(
-    timeIntervalTestCases.map((testCase) => ({
-      ...testCase,
-      resultComment:
-        testCase.resultStatus === RuleOutputStatus.APPROVED
-          ? testCase.dropOffEventDate && testCase.recycledEventDate
-            ? ruleDataProcessor['RESULT_COMMENT'].APPROVED
-            : ruleDataProcessor['RESULT_COMMENT'].NOT_APPLICABLE
-          : ruleDataProcessor['RESULT_COMMENT'].REJECTED,
-    })),
+    timeIntervalTestCases.map((testCase) => {
+      let resultComment: string;
+
+      if (!testCase.dropOffEventDate) {
+        resultComment =
+          ruleDataProcessor['RESULT_COMMENT'].MISSING_DROP_OFF_EVENT;
+      } else if (testCase.recycledEventDate) {
+        const difference = differenceInDays(
+          parseISO(testCase.recycledEventDate),
+          parseISO(testCase.dropOffEventDate),
+        );
+
+        resultComment =
+          testCase.resultStatus === RuleOutputStatus.APPROVED
+            ? ruleDataProcessor['RESULT_COMMENT'].APPROVED(difference)
+            : ruleDataProcessor['RESULT_COMMENT'].REJECTED(difference);
+      } else {
+        resultComment =
+          ruleDataProcessor['RESULT_COMMENT'].MISSING_RECYCLED_EVENT;
+      }
+
+      return {
+        ...testCase,
+        resultComment,
+      };
+    }),
   )(
     `should validate time interval between events - $scenario`,
     async ({

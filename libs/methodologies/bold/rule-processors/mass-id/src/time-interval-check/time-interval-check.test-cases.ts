@@ -19,7 +19,7 @@ export const timeIntervalTestCases = [
   {
     dropOffEventDate: undefined,
     recycledEventDate: RECYCLED_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'Drop off event date is missing',
   },
   {
@@ -55,7 +55,7 @@ export const timeIntervalTestCases = [
   {
     dropOffEventDate: DROP_OFF_DATE_94_DAYS,
     recycledEventDate: undefined,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'Recycled event date is missing',
   },
 ];

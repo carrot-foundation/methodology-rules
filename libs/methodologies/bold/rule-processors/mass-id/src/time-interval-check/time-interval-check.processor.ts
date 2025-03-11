@@ -9,22 +9,24 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { type SetRequiredNonNullable } from '@carrot-fndn/shared/types';
 import { differenceInDays, parseISO } from 'date-fns';
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 type Subject = {
-  dropOffEvent: SetRequiredNonNullable<DocumentEvent, 'externalCreatedAt'>;
-  recycledEvent: SetRequiredNonNullable<DocumentEvent, 'externalCreatedAt'>;
+  dropOffEvent?: DocumentEvent | undefined;
+  recycledEvent?: DocumentEvent | undefined;
 };
 
 export class TimeIntervalCheckProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return {
-      APPROVED: `The difference in days between externalCreatedAt of the event ${DROP_OFF} and the ${RECYCLED} event is between 60 and 180`,
-      NOT_APPLICABLE: `Rule not applicable: The event ${DROP_OFF} or ${RECYCLED} event with externalCreatedAt was not found`,
-      REJECTED: `The difference in days between externalCreatedAt of the event ${DROP_OFF} and the ${RECYCLED} event is not between 60 and 180`,
+      APPROVED: (dateDiff: number) =>
+        `The difference in days between the event ${DROP_OFF} and the ${RECYCLED} event is between 60 and 180: ${dateDiff}.`,
+      MISSING_DROP_OFF_EVENT: `The ${DROP_OFF} event was not found.`,
+      MISSING_RECYCLED_EVENT: `The ${RECYCLED} event was not found.`,
+      REJECTED: (dateDiff: number) =>
+        `The difference in days between the event ${DROP_OFF} and the ${RECYCLED} event is not between 60 and 180: ${dateDiff}.`,
     } as const;
   }
 
@@ -32,9 +34,26 @@ export class TimeIntervalCheckProcessor extends ParentDocumentRuleProcessor<Subj
     dropOffEvent,
     recycledEvent,
   }: Subject): EvaluateResultOutput {
+    const dropOffDate = dropOffEvent?.externalCreatedAt;
+    const recycledDate = recycledEvent?.externalCreatedAt;
+
+    if (isNil(dropOffDate)) {
+      return {
+        resultComment: this.RESULT_COMMENT.MISSING_DROP_OFF_EVENT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (isNil(recycledDate)) {
+      return {
+        resultComment: this.RESULT_COMMENT.MISSING_RECYCLED_EVENT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
     const difference = differenceInDays(
-      parseISO(recycledEvent.externalCreatedAt),
-      parseISO(dropOffEvent.externalCreatedAt),
+      parseISO(recycledDate),
+      parseISO(dropOffDate),
     );
 
     const resultStatus =
@@ -45,14 +64,10 @@ export class TimeIntervalCheckProcessor extends ParentDocumentRuleProcessor<Subj
     return {
       resultComment:
         resultStatus === RuleOutputStatus.APPROVED
-          ? this.RESULT_COMMENT.APPROVED
-          : this.RESULT_COMMENT.REJECTED,
+          ? this.RESULT_COMMENT.APPROVED(difference)
+          : this.RESULT_COMMENT.REJECTED(difference),
       resultStatus,
     };
-  }
-
-  protected override getMissingRuleSubjectResultComment(): string {
-    return this.RESULT_COMMENT.NOT_APPLICABLE;
   }
 
   protected override getRuleSubject(document: Document): Subject | undefined {
@@ -63,22 +78,9 @@ export class TimeIntervalCheckProcessor extends ParentDocumentRuleProcessor<Subj
       eventNameIsAnyOf([RECYCLED]),
     );
 
-    if (
-      isNil(dropOffEvent?.externalCreatedAt) ||
-      isNil(recycledEvent?.externalCreatedAt)
-    ) {
-      return undefined;
-    }
-
     return {
-      dropOffEvent: {
-        ...dropOffEvent,
-        externalCreatedAt: dropOffEvent.externalCreatedAt,
-      },
-      recycledEvent: {
-        ...recycledEvent,
-        externalCreatedAt: recycledEvent.externalCreatedAt,
-      },
+      dropOffEvent,
+      recycledEvent,
     };
   }
 }
