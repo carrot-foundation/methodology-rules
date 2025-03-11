@@ -1,6 +1,6 @@
 <div align="center">
 
-# Check Organic Mass Criteria
+# Mass Definition
 
 Methodology: **BOLD-CARBON-ORGANIC**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/check-organic-mass-criteria/check-organic-mass-criteria.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/mass-definition/mass-definition.processor.ts)**
 
 ## 👥 Contributors
 
