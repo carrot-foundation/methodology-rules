@@ -9,7 +9,7 @@ import {
   DocumentSubtype,
   DocumentType,
   MassSubtype,
-  MeasurementUnit,
+  NewMeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -137,7 +137,7 @@ export class BoldStubsBuilder {
   private createMassIdDocumentStub(): Document {
     return stubMassDocument({
       category: DocumentCategory.MASS_ID,
-      currentValue: faker.number.int({ min: 1 }),
+      currentValue: faker.number.float({ min: 1 }),
       externalEvents: [
         ...Array.from(this.actorParticipants, ([, participant]) =>
           stubDocumentEvent({ name: ACTOR, participant }),
@@ -148,7 +148,7 @@ export class BoldStubsBuilder {
         }),
       ],
       id: this.massIdReference.documentId,
-      measurementUnit: MeasurementUnit.KG,
+      measurementUnit: NewMeasurementUnit.KG,
       subtype: stubEnumValue(MassSubtype),
       type: DocumentType.ORGANIC,
     });

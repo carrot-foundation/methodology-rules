@@ -12,9 +12,9 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker/.';
 
-import { checkOrganicMassCriteriaLambda } from './check-organic-mass-criteria.lambda';
+import { massDefinitionLambda } from './mass-definition.lambda';
 
-describe('CheckOrganicMassCriteriaProcessor E2E', () => {
+describe('MassDefinitionLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   const massId = new BoldStubsBuilder().build();
@@ -88,7 +88,7 @@ describe('CheckOrganicMassCriteriaProcessor E2E', () => {
       })),
     );
 
-    const response = (await checkOrganicMassCriteriaLambda(
+    const response = (await massDefinitionLambda(
       stubRuleInput({
         documentKeyPrefix,
         parentDocumentId: massIdDocument.id,
