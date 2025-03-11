@@ -15,24 +15,26 @@ import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassSubtype);
 
+export const RESULT_COMMENTS = {
+  APPROVED:
+    'The mass definition is compliant: category, type, subtype, value, and measurement unit are valid.',
+  CATEGORY_NOT_MATCHING: (category: string): string =>
+    `Expected category "${DocumentCategory.MASS_ID}" but got "${category}".`,
+  CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
+    `Expected current value to be greater than 0 but got ${value}.`,
+  MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
+    `Expected measurement unit "${NewMeasurementUnit.KG}" but got "${measurementUnit}".`,
+  SUBTYPE_NOT_MATCHING: (subtype: string): string =>
+    `Expected subtype to be one of the following: ${ALLOWED_SUBTYPES.join(', ')} but got "${subtype}".`,
+  TYPE_NOT_MATCHING: (type: string): string =>
+    `Expected type to be "${DocumentType.ORGANIC}" but got "${type}".`,
+} as const;
+
 export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Document> {
   protected readonly processorErrors = new MassDefinitionProcessorErrors();
 
   private get RESULT_COMMENT() {
-    return {
-      APPROVED:
-        'The mass definition is compliant: category, type, subtype, value, and measurement unit are valid.',
-      CATEGORY_NOT_MATCHING: (category: string): string =>
-        `Expected category "${DocumentCategory.MASS_ID}" but got "${category}".`,
-      CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
-        `Expected current value to be greater than 0 but got ${value}.`,
-      MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
-        `Expected measurement unit "${NewMeasurementUnit.KG}" but got "${measurementUnit}".`,
-      SUBTYPE_NOT_MATCHING: (subtype: string): string =>
-        `Expected subtype to be one of the following: ${ALLOWED_SUBTYPES.join(', ')} but got "${subtype}".`,
-      TYPE_NOT_MATCHING: (type: string): string =>
-        `Expected type to be "${DocumentType.ORGANIC}" but got "${type}".`,
-    } as const;
+    return RESULT_COMMENTS;
   }
 
   private isValidSubtype(subtype: string | undefined): boolean {
