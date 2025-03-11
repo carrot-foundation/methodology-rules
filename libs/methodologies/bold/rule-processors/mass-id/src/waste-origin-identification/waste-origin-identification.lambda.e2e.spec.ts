@@ -22,7 +22,7 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
 
   it.each(wasteOriginIdentificationTestCases)(
     'should validate waste origin identification - $scenario',
-    async ({ pickUpEvent, resultStatus, wasteGeneratorEvent }) => {
+    async ({ pickUpEvent, resultStatus, wasteGeneratorEvents }) => {
       prepareEnvironmentTestE2E(
         [
           {
@@ -30,7 +30,7 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
             externalEvents: [
               ...(massIdDocumentStub.externalEvents ?? []),
               pickUpEvent,
-              wasteGeneratorEvent,
+              ...(wasteGeneratorEvents ?? []),
             ].filter((event): event is DocumentEvent => event !== undefined),
           },
           massIdAuditDocumentStub,

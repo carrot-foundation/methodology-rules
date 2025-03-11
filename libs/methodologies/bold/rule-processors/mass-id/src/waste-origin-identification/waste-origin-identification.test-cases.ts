@@ -21,7 +21,7 @@ export const wasteOriginIdentificationTestCases = [
     resultComment: RESULT_COMMENT.MISSING_PICK_UP_EVENT,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `${PICK_UP} event is missing`,
-    wasteGeneratorEvent: undefined,
+    wasteGeneratorEvents: undefined,
   },
   {
     pickUpEvent: stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
@@ -30,7 +30,7 @@ export const wasteOriginIdentificationTestCases = [
     resultComment: RESULT_COMMENT.UNIDENTIFIED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `${PICK_UP} event has the metadata ${WASTE_ORIGIN} with the value ${UNIDENTIFIED}`,
-    wasteGeneratorEvent: undefined,
+    wasteGeneratorEvents: undefined,
   },
   {
     pickUpEvent: stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
@@ -39,20 +39,30 @@ export const wasteOriginIdentificationTestCases = [
     resultComment: RESULT_COMMENT.UNIDENTIFIED_WITH_WASTE_GENERATOR,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `${PICK_UP} event has the metadata ${WASTE_ORIGIN} with the value ${UNIDENTIFIED} and ${WASTE_GENERATOR} event is defined`,
-    wasteGeneratorEvent: stubDocumentEvent({ name: WASTE_GENERATOR }),
+    wasteGeneratorEvents: [stubDocumentEvent({ name: WASTE_GENERATOR })],
   },
   {
     pickUpEvent: stubDocumentEvent({ name: PICK_UP }),
     resultComment: RESULT_COMMENT.IDENTIFIED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `${PICK_UP} event without ${WASTE_ORIGIN} metadata and ${WASTE_GENERATOR} event is defined`,
-    wasteGeneratorEvent: stubDocumentEvent({ name: WASTE_GENERATOR }),
+    wasteGeneratorEvents: [stubDocumentEvent({ name: WASTE_GENERATOR })],
   },
   {
     pickUpEvent: stubDocumentEvent({ name: PICK_UP }),
     resultComment: RESULT_COMMENT.UNIDENTIFIED_WITHOUT_WASTE_GENERATOR,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `${PICK_UP} event without ${WASTE_ORIGIN} metadata and no ${WASTE_GENERATOR} event`,
-    wasteGeneratorEvent: undefined,
+    wasteGeneratorEvents: undefined,
+  },
+  {
+    pickUpEvent: stubDocumentEvent({ name: PICK_UP }),
+    resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATORS,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: `MassID document with multiple ${WASTE_GENERATOR} events`,
+    wasteGeneratorEvents: [
+      stubDocumentEvent({ name: WASTE_GENERATOR }),
+      stubDocumentEvent({ name: WASTE_GENERATOR }),
+    ],
   },
 ];

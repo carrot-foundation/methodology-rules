@@ -1,6 +1,6 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
@@ -17,12 +17,13 @@ const { PICK_UP, WASTE_GENERATOR } = DocumentEventName;
 
 type Subject = {
   pickUpEvent?: DocumentEvent | undefined;
-  wasteGeneratorEvent?: DocumentEvent | undefined;
+  wasteGeneratorEvents?: DocumentEvent[] | undefined;
 };
 
 export const RESULT_COMMENT = {
   IDENTIFIED: `The ${WASTE_GENERATOR} event was identified.`,
   MISSING_PICK_UP_EVENT: `The ${PICK_UP} event was not found.`,
+  MULTIPLE_WASTE_GENERATORS: `The ${WASTE_GENERATOR} event was defined more than once.`,
   UNIDENTIFIED: `The ${PICK_UP} event has the metadata ${DocumentEventAttributeName.WASTE_ORIGIN} with the value ${DocumentEventAttributeValue.UNIDENTIFIED}.`,
   UNIDENTIFIED_WITH_WASTE_GENERATOR: `The ${PICK_UP} event has the metadata ${DocumentEventAttributeName.WASTE_ORIGIN} with the value ${DocumentEventAttributeValue.UNIDENTIFIED} and the ${WASTE_GENERATOR} event was defined.`,
   UNIDENTIFIED_WITHOUT_WASTE_GENERATOR: `The ${PICK_UP} event has no ${DocumentEventAttributeName.WASTE_ORIGIN} metadata and the ${WASTE_GENERATOR} event was not defined.`,
@@ -35,7 +36,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
   protected override evaluateResult({
     pickUpEvent,
-    wasteGeneratorEvent,
+    wasteGeneratorEvents,
   }: Subject): EvaluateResultOutput {
     if (isNil(pickUpEvent)) {
       return {
@@ -44,11 +45,21 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       };
     }
 
+    if (
+      isNonEmptyArray(wasteGeneratorEvents) &&
+      wasteGeneratorEvents.length > 1
+    ) {
+      return {
+        resultComment: this.RESULT_COMMENT.MULTIPLE_WASTE_GENERATORS,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
     const wasteOrigin = getEventAttributeValue(
       pickUpEvent,
       DocumentEventAttributeName.WASTE_ORIGIN,
     );
-    const hasWasteGenerator = !isNil(wasteGeneratorEvent);
+    const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
     const isUnidentified =
       wasteOrigin === DocumentEventAttributeValue.UNIDENTIFIED;
 
@@ -84,13 +95,13 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       eventNameIsAnyOf([PICK_UP]),
     );
 
-    const wasteGeneratorEvent = document.externalEvents?.find(
+    const wasteGeneratorEvents = document.externalEvents?.filter(
       eventNameIsAnyOf([WASTE_GENERATOR]),
     );
 
     return {
       pickUpEvent,
-      wasteGeneratorEvent,
+      wasteGeneratorEvents,
     };
   }
 }

@@ -23,7 +23,7 @@ describe('WasteOriginIdentificationProcessor', () => {
       pickUpEvent,
       resultComment,
       resultStatus,
-      wasteGeneratorEvent,
+      wasteGeneratorEvents,
     }) => {
       const ruleInput = random<Required<RuleInput>>();
       const document = {
@@ -31,7 +31,7 @@ describe('WasteOriginIdentificationProcessor', () => {
         externalEvents: [
           ...(massIdDocumentStub.externalEvents ?? []),
           pickUpEvent,
-          wasteGeneratorEvent,
+          ...(wasteGeneratorEvents ?? []),
         ].filter((event): event is DocumentEvent => event !== undefined),
       };
 
