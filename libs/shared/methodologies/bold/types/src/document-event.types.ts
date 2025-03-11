@@ -11,11 +11,12 @@ import type {
   DocumentEventName,
   DocumentSubtype,
   DocumentType,
+  NewDocumentEventAttributeName,
 } from './enum.types';
 
 export interface DocumentEventAttribute
   extends MethodologyDocumentEventAttribute {
-  name: DocumentEventAttributeName | string;
+  name: DocumentEventAttributeName | NewDocumentEventAttributeName | string;
 }
 
 export interface DocumentEventMetadata

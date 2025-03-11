@@ -4,6 +4,7 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type PredicateCallback } from '@carrot-fndn/shared/types';
 
@@ -45,7 +46,7 @@ export const metadataAttributeNameIsAnyOf =
 
 export const metadataAttributeValueIsAnyOf =
   (
-    metadataName: DocumentEventAttributeName,
+    metadataName: DocumentEventAttributeName | NewDocumentEventAttributeName,
     metadataValues: UnknownArray,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>

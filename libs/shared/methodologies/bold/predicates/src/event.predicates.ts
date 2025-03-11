@@ -9,6 +9,7 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
@@ -89,7 +90,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: Array<DocumentEventName>;
-  metadataName: DocumentEventAttributeName;
+  metadataName: DocumentEventAttributeName | NewDocumentEventAttributeName;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

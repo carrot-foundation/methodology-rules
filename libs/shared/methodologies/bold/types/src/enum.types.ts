@@ -67,6 +67,11 @@ export enum DocumentEventRuleSlug {
   REWARDS_DISTRIBUTION = 'rewards-distribution',
 }
 
+// TODO: rename to DocumentEventAttributeName when all rule processors are implemented
+export enum NewDocumentEventAttributeName {
+  VEHICLE_TYPE = 'Vehicle Type',
+}
+
 export enum DocumentEventAttributeName {
   ACTOR_TYPE = 'actor-type',
   APP_GPS_LATITUDE = 'app-gps-latitude',
@@ -143,6 +148,7 @@ export enum DocumentEventName {
   NOTICE = MethodologyDocumentEventName.NOTICE,
   OPEN = MethodologyDocumentEventName.OPEN,
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
+  PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
