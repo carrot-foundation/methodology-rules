@@ -1,7 +1,6 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { MassSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
@@ -11,18 +10,15 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
-import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 import { MassDefinitionProcessor } from './mass-definition.processor';
+import { massDefinitionTestCases } from './mass-definition.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('MassDefinitionProcessor', () => {
   const ruleDataProcessor = new MassDefinitionProcessor();
-  const processorErrors = new MassDefinitionProcessorErrors();
 
   const documentLoaderService = jest.mocked(loadParentDocument);
-
-  const massIdStubs = new BoldStubsBuilder().build();
 
   describe('isValidSubtype', () => {
     it('should return false when subtype is undefined', () => {
@@ -47,95 +43,8 @@ describe('MassDefinitionProcessor', () => {
     });
   });
 
-  it.each([
-    {
-      massIdDocument: massIdStubs.massIdDocumentStub,
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario: 'should return APPROVED when all the criteria are met',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        category: 'INVALID_CATEGORY',
-      },
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].CATEGORY_NOT_MATCHING(
-          'INVALID_CATEGORY',
-        ),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED when category does not match',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        type: 'INVALID_TYPE',
-      },
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING('INVALID_TYPE'),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED when type is not ORGANIC',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        measurementUnit: 'INVALID_UNIT',
-      },
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].MEASUREMENT_UNIT_NOT_MATCHING(
-          'INVALID_UNIT',
-        ),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED when measurement unit is not KG',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        currentValue: 0,
-      },
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].CURRENT_VALUE_NOT_MATCHING(0),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should return REJECTED when current value is not greater than 0',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
-      },
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].SUBTYPE_NOT_MATCHING,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should return REJECTED when subtype is defined but not in the allowed list',
-    },
-    {
-      massIdDocument: { ...massIdStubs.massIdDocumentStub, type: undefined },
-      resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED when document type is not found',
-    },
-    {
-      massIdDocument: { ...massIdStubs.massIdDocumentStub, subtype: undefined },
-      resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED when document subtype is not found',
-    },
-    {
-      massIdDocument: {
-        ...massIdStubs.massIdDocumentStub,
-        subtype: 'INVALID_SUBTYPE',
-        type: 'INVALID_TYPE',
-      },
-      resultComment: [
-        ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING('INVALID_TYPE'),
-        ruleDataProcessor['RESULT_COMMENT'].SUBTYPE_NOT_MATCHING,
-      ].join('\n'),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario: 'should return REJECTED and multiple error messages',
-    },
-  ])(
-    '$scenario',
+  it.each(massDefinitionTestCases)(
+    'should return $resultStatus when $scenario',
     async ({
       massIdDocument,
       resultComment,
