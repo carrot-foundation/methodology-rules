@@ -121,6 +121,19 @@ describe('MassDefinitionProcessor', () => {
       resultStatus: RuleOutputStatus.REJECTED,
       scenario: 'should return REJECTED when document subtype is not found',
     },
+    {
+      massIdDocument: {
+        ...massIdStubs.massIdDocumentStub,
+        subtype: 'INVALID_SUBTYPE',
+        type: 'INVALID_TYPE',
+      },
+      resultComment: [
+        ruleDataProcessor['RESULT_COMMENT'].TYPE_NOT_MATCHING('INVALID_TYPE'),
+        ruleDataProcessor['RESULT_COMMENT'].SUBTYPE_NOT_MATCHING,
+      ].join('\n'),
+      resultStatus: RuleOutputStatus.REJECTED,
+      scenario: 'should return REJECTED and multiple error messages',
+    },
   ])(
     '$scenario',
     async ({

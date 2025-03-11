@@ -67,6 +67,8 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
   protected override evaluateResult(
     document: Document,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+    const errorMessages: string[] = [];
+
     const validationResult = this.validateRequiredFields(document);
 
     if (validationResult) {
@@ -104,16 +106,19 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
 
     for (const criteria of validationCriteria) {
       if (!criteria.isValid) {
-        return {
-          resultComment: criteria.errorMessage,
-          resultStatus: RuleOutputStatus.REJECTED,
-        };
+        errorMessages.push(criteria.errorMessage);
       }
     }
 
+    const isValid = errorMessages.length === 0;
+
     return {
-      resultComment: this.RESULT_COMMENT.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: isValid
+        ? this.RESULT_COMMENT.APPROVED
+        : errorMessages.join('\n'),
+      resultStatus: isValid
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED,
     };
   }
 
