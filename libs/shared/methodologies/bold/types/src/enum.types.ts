@@ -143,6 +143,7 @@ export enum ReportTypeLiteralName {
 export enum DocumentEventName {
   ACTOR = MethodologyDocumentEventName.ACTOR,
   CLOSE = MethodologyDocumentEventName.CLOSE,
+  DROP_OFF = MethodologyDocumentEventName.DROP_OFF,
   END = 'END',
   LINK = MethodologyDocumentEventName.LINK,
   MOVE = 'MOVE',
