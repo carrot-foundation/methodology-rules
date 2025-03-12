@@ -20,7 +20,12 @@ const path = require('path');
 const ruleName = process.argv[2];
 
 // Check for help flag
-if (!ruleName || ruleName === '--help' || ruleName === '-h') {
+if (
+  !ruleName ||
+  ruleName.trim() === '' ||
+  ruleName === '--help' ||
+  ruleName === '-h'
+) {
   console.log(`
 Mass ID Rule Generator
 
@@ -47,13 +52,23 @@ const fileName = ruleName;
 const projectRoot = 'libs/methodologies/bold/rule-processors/mass-id';
 const targetDirectory = path.join(projectRoot, 'src', ruleName);
 
-// Create the target directory if it doesn't exist
 if (!fs.existsSync(targetDirectory)) {
   try {
     fs.mkdirSync(targetDirectory, { recursive: true });
   } catch (error) {
     console.error(
       `Error creating directory ${targetDirectory}: ${error.message}`,
+    );
+    process.exit(1);
+  }
+} else {
+  const filesExist = templates.some((template) =>
+    fs.existsSync(path.join(targetDirectory, template.name)),
+  );
+
+  if (filesExist) {
+    console.error(
+      `Error: Files for rule '${ruleName}' already exist. Use a different name or remove existing files.`,
     );
     process.exit(1);
   }
