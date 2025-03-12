@@ -49,7 +49,14 @@ const targetDirectory = path.join(projectRoot, 'src', ruleName);
 
 // Create the target directory if it doesn't exist
 if (!fs.existsSync(targetDirectory)) {
-  fs.mkdirSync(targetDirectory, { recursive: true });
+  try {
+    fs.mkdirSync(targetDirectory, { recursive: true });
+  } catch (error) {
+    console.error(
+      `Error creating directory ${targetDirectory}: ${error.message}`,
+    );
+    process.exit(1);
+  }
 }
 
 // Define the template files
@@ -295,20 +302,30 @@ describe('${pascalCase}Lambda E2E', () => {
 // Write the template files to the target directory
 templates.forEach((template) => {
   const filePath = path.join(targetDirectory, template.name);
-  fs.writeFileSync(filePath, template.content);
-  console.log(`Created ${filePath}`);
+  try {
+    fs.writeFileSync(filePath, template.content);
+    console.log(`Created ${filePath}`);
+  } catch (error) {
+    console.error(`Error writing file ${filePath}: ${error.message}`);
+    process.exit(1);
+  }
 });
 
 // Update the main index.ts file to export the new rule
 const indexPath = path.join(projectRoot, 'src', 'index.ts');
 if (fs.existsSync(indexPath)) {
-  const indexContent = fs.readFileSync(indexPath, 'utf-8');
-  const newExport = `export * from './${ruleName}';\n`;
+  try {
+    const indexContent = fs.readFileSync(indexPath, 'utf-8');
+    const newExport = `export * from './${ruleName}';\n`;
 
-  // Check if the export already exists to avoid duplicates
-  if (!indexContent.includes(newExport)) {
-    fs.writeFileSync(indexPath, indexContent + newExport);
-    console.log(`Updated ${indexPath}`);
+    // Check if the export already exists to avoid duplicates
+    if (!indexContent.includes(newExport)) {
+      fs.writeFileSync(indexPath, indexContent + newExport);
+      console.log(`Updated ${indexPath}`);
+    }
+  } catch (error) {
+    console.error(`Error updating index file ${indexPath}: ${error.message}`);
+    process.exit(1);
   }
 }
 
