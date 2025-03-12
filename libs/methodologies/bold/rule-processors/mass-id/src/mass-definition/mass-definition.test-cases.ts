@@ -83,7 +83,7 @@ export const massDefinitionTestCases = [
     resultComment: [
       RESULT_COMMENTS.TYPE_NOT_MATCHING('INVALID_TYPE'),
       RESULT_COMMENTS.SUBTYPE_NOT_MATCHING('INVALID_SUBTYPE'),
-    ].join('\n'),
+    ].join('. '),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'there are multiple error messages',
   },

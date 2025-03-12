@@ -120,7 +120,7 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
     return {
       resultComment: isValid
         ? this.RESULT_COMMENT.APPROVED
-        : errorMessages.join('\n'),
+        : errorMessages.join('. '),
       resultStatus: isValid
         ? RuleOutputStatus.APPROVED
         : RuleOutputStatus.REJECTED,
