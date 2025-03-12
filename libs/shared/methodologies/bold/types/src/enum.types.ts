@@ -75,6 +75,8 @@ export enum DocumentEventRuleSlug {
 
 // TODO: rename to DocumentEventAttributeName when all rule processors are implemented
 export enum NewDocumentEventAttributeName {
+  VEHICLE_DESCRIPTION = 'Vehicle Description',
+  VEHICLE_LICENSE_PLATE = 'Vehicle License Plate',
   VEHICLE_TYPE = 'Vehicle Type',
 }
 
