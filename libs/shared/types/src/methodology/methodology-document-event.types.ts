@@ -2,7 +2,10 @@ import { tags } from 'typia';
 
 import type { UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
-import type { MethodologyDocumentEventName } from './methodology-enum.types';
+import type {
+  MethodologyDocumentEventLabel,
+  MethodologyDocumentEventName,
+} from './methodology-enum.types';
 import type {
   MethodologyAuthor,
   MethodologyParticipant,
@@ -49,6 +52,7 @@ export interface MethodologyDocumentEvent {
   externalId?: string | undefined;
   id: string;
   isPublic: boolean;
+  label?: MethodologyDocumentEventLabel | string | undefined;
   metadata?: MethodologyDocumentEventMetadata | undefined;
   name: MethodologyDocumentEventName | string;
   participant: MethodologyParticipant;
