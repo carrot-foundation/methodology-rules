@@ -52,28 +52,6 @@ const fileName = ruleName;
 const projectRoot = 'libs/methodologies/bold/rule-processors/mass-id';
 const targetDirectory = path.join(projectRoot, 'src', ruleName);
 
-if (!fs.existsSync(targetDirectory)) {
-  try {
-    fs.mkdirSync(targetDirectory, { recursive: true });
-  } catch (error) {
-    console.error(
-      `Error creating directory ${targetDirectory}: ${error.message}`,
-    );
-    process.exit(1);
-  }
-} else {
-  const filesExist = templates.some((template) =>
-    fs.existsSync(path.join(targetDirectory, template.name)),
-  );
-
-  if (filesExist) {
-    console.error(
-      `Error: Files for rule '${ruleName}' already exist. Use a different name or remove existing files.`,
-    );
-    process.exit(1);
-  }
-}
-
 // Define the template files
 const templates = [
   {
@@ -278,6 +256,28 @@ describe('${pascalCase}Lambda E2E', () => {
 });\n`,
   },
 ];
+
+if (!fs.existsSync(targetDirectory)) {
+  try {
+    fs.mkdirSync(targetDirectory, { recursive: true });
+  } catch (error) {
+    console.error(
+      `Error creating directory ${targetDirectory}: ${error.message}`,
+    );
+    process.exit(1);
+  }
+} else {
+  const filesExist = templates.some((template) =>
+    fs.existsSync(path.join(targetDirectory, template.name)),
+  );
+
+  if (filesExist) {
+    console.error(
+      `Error: Files for rule '${ruleName}' already exist. Use a different name or remove existing files.`,
+    );
+    process.exit(1);
+  }
+}
 
 // Write the template files to the target directory
 templates.forEach((template) => {
