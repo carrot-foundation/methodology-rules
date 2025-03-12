@@ -96,11 +96,7 @@ export const ${camelCase}Lambda = wrapRuleIntoLambdaHandler(instance);\n`,
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
-import {
-  type Document,
-  DocumentCategory,
-  DocumentType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { ${pascalCase}ProcessorErrors } from './${fileName}.errors';
@@ -140,16 +136,9 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
       return validationResult;
     }
 
-    // TODO: Implement your rule validation logic here
-    const isValid = true; // Replace with actual validation
-
     return {
-      resultComment: isValid
-        ? this.RESULT_COMMENT.APPROVED
-        : this.RESULT_COMMENT.REJECTED,
-      resultStatus: isValid
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+      resultComment: this.RESULT_COMMENT.APPROVED,
+      resultStatus: RuleOutputStatus.APPROVED,
     };
   }
 
@@ -179,10 +168,9 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
-import { ${pascalCase}Processor, RESULT_COMMENTS } from './${fileName}.processor';
+import { ${pascalCase}Processor } from './${fileName}.processor';
 import { ${camelCase}TestCases } from './${fileName}.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
@@ -190,50 +178,36 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('${pascalCase}Processor', () => {
   const ruleDataProcessor = new ${pascalCase}Processor();
 
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
+  const documentLoaderService = jest.mocked(loadParentDocument);
 
-  it('should be defined', () => {
-    expect(ruleDataProcessor).toBeDefined();
-  });
+  it.each(${camelCase}TestCases)(
+    'should return $resultStatus when $scenario',
+    async ({
+      document,
+      resultComment,
+      resultStatus,
+    }: {
+      document: Document;
+      resultComment: string;
+      resultStatus: RuleOutputStatus;
+    }) => {
+      const ruleInput = random<Required<RuleInput>>();
 
-  describe('process', () => {
-    it('should return REJECTED when document is not found', async () => {
-      // Arrange
-      const ruleInput = random<RuleInput>();
-      const mockLoadParentDocument = loadParentDocument as jest.Mock;
-      mockLoadParentDocument.mockResolvedValueOnce(undefined);
+      documentLoaderService.mockResolvedValueOnce(document);
 
-      // Act
-      const result = await ruleDataProcessor.process(ruleInput);
+      const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-      // Assert
-      expect(result).toEqual<RuleOutput>({
-        resultComment: expect.any(String),
-        resultStatus: RuleOutputStatus.REJECTED,
-      });
-    });
+      const expectedRuleOutput: RuleOutput = {
+        requestId: ruleInput.requestId,
+        responseToken: ruleInput.responseToken,
+        responseUrl: ruleInput.responseUrl,
+        resultComment,
+        resultStatus,
+      };
 
-    it.each(${camelCase}TestCases)(
-      'should return $resultStatus when $scenario',
-      async ({ massIdDocument, resultComment, resultStatus }) => {
-        // Arrange
-        const ruleInput = random<RuleInput>();
-        const mockLoadParentDocument = loadParentDocument as jest.Mock;
-        mockLoadParentDocument.mockResolvedValueOnce(massIdDocument);
-
-        // Act
-        const result = await ruleDataProcessor.process(ruleInput);
-
-        // Assert
-        expect(result).toEqual<RuleOutput>({
-          resultComment,
-          resultStatus,
-        });
-      },
-    );
-  });
+      expect(ruleOutput).toEqual(expectedRuleOutput);
+    },
+  );
 });\n`,
   },
   {
@@ -241,15 +215,13 @@ describe('${pascalCase}Processor', () => {
     content: `import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { ${pascalCase}ProcessorErrors } from './${fileName}.errors';
 import { RESULT_COMMENTS } from './${fileName}.processor';
 
 const massIdStubs = new BoldStubsBuilder().build();
-const processorErrors = new ${pascalCase}ProcessorErrors();
 
 export const ${camelCase}TestCases = [
   {
-    massIdDocument: massIdStubs.massIdDocumentStub,
+    document: massIdStubs.massIdDocumentStub,
     resultComment: RESULT_COMMENTS.APPROVED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'all the criteria are met',
@@ -280,34 +252,27 @@ describe('${pascalCase}Lambda E2E', () => {
 
   it.each(${camelCase}TestCases)(
     'should return $resultStatus when $scenario',
-    async ({ massIdDocument, resultComment, resultStatus }) => {
-      // Arrange
-      const documentKey = toDocumentKey(
-        documentKeyPrefix,
-        massIdDocument.documentId,
+    async ({ document, resultStatus }) => {
+      prepareEnvironmentTestE2E(
+        [document, massId.massIdAuditDocumentStub].map((_document) => ({
+          document: _document,
+          documentKey: toDocumentKey({
+            documentId: _document.id,
+            documentKeyPrefix,
+          }),
+        })),
       );
 
-      const ruleInput = stubRuleInput({
-        documentKey,
-      });
-
-      const context = stubContext();
-
-      prepareEnvironmentTestE2E({
-        documentKey,
-        document: massIdDocument,
-      });
-
-      // Act
-      const result = await ${camelCase}Lambda(ruleInput, context);
-
-      // Assert
-      expect(result).toEqual(
-        stubRuleResponse({
-          resultComment,
-          resultStatus,
+      const response = (await ${camelCase}Lambda(
+        stubRuleInput({
+          documentKeyPrefix,
+          parentDocumentId: document.id,
         }),
-      );
+        stubContext(),
+        () => stubRuleResponse(),
+      )) as RuleOutput;
+
+      expect(response.resultStatus).toBe(resultStatus);
     },
   );
 });\n`,
