@@ -253,7 +253,7 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 import { ${camelCase}Lambda } from './${fileName}.lambda';
 import { ${camelCase}TestCases } from './${fileName}.test-cases';
