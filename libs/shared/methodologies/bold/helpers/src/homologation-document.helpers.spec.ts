@@ -8,7 +8,7 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 import { addDays, formatDate, subDays } from 'date-fns';
 
 import {
