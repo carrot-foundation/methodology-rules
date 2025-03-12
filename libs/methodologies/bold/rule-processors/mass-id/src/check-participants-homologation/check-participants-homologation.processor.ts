@@ -13,7 +13,7 @@ import {
   DocumentQueryService,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  MASS,
+  MASS_ID,
   PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
@@ -76,7 +76,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
     await documentQuery?.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
 
-      if (MASS.matches(documentReference)) {
+      if (MASS_ID.matches(documentReference)) {
         massDocument = document;
       }
 
