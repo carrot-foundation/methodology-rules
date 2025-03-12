@@ -93,10 +93,10 @@ export const stubMassDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
+    category: DocumentCategory.MASS,
     subtype: stubEnumValue(MassSubtype),
     type: DocumentType.ORGANIC,
     ...partialDocument,
-    category: DocumentCategory.MASS,
   });
 
 export const stubMassAuditDocumentWithActorAndAttribute = (

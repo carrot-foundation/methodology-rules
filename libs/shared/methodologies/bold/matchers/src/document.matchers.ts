@@ -30,6 +30,10 @@ export const MASS = new DocumentMatcher({
   category: DocumentCategory.MASS,
 });
 
+export const MASS_ID = new DocumentMatcher({
+  category: DocumentCategory.MASS_ID,
+});
+
 export const MASS_AUDIT = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.MASS_AUDIT,
