@@ -16,6 +16,7 @@ export enum MethodologyDocumentEventLabel {
 export enum MethodologyDocumentEventName {
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',
+  DROP_OFF = 'Drop Off',
   LINK = 'LINK',
   NOTICE = 'NOTICE',
   OPEN = 'OPEN',
