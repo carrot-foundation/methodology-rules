@@ -1,24 +1,30 @@
+import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+
 import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
+  stubMassDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 
 import {
   getAuditorActorEvent,
   getOpenEvent,
+  getParticipantActorType,
   getRulesMetadataEvent,
 } from './document.getters';
 
-const { ACTOR, OPEN, RULES_METADATA } = DocumentEventName;
+const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 
 describe('Document getters', () => {
   describe('getAuditorActorEvent', () => {
@@ -115,6 +121,173 @@ describe('Document getters', () => {
       const result = getRulesMetadataEvent(undefined);
 
       expect(result).toBe(undefined);
+    });
+  });
+
+  describe('getParticipantActorType', () => {
+    it(`should return "${WASTE_GENERATOR}" when the event is a pick up at the source`, () => {
+      const sourcePickUpEvent = stubDocumentEvent({ name: PICK_UP });
+      const document = stubMassDocument({
+        externalEvents: [
+          sourcePickUpEvent,
+          stubDocumentEvent({ name: DROP_OFF }),
+          stubDocumentEvent({ name: PICK_UP }),
+          stubDocumentEvent({ name: DROP_OFF }),
+        ],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: sourcePickUpEvent,
+      });
+
+      expect(participantActorType).toEqual(WASTE_GENERATOR);
+    });
+
+    it(`should return "${PROCESSOR}" when the event is a drop off at processor`, () => {
+      const processorDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+      const document = stubMassDocument({
+        externalEvents: [
+          stubDocumentEvent({ name: PICK_UP }),
+          processorDropOffEvent,
+          stubDocumentEvent({ name: PICK_UP }),
+          stubDocumentEvent({ name: DROP_OFF }),
+        ],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: processorDropOffEvent,
+      });
+
+      expect(participantActorType).toEqual(PROCESSOR);
+    });
+
+    it(`should return "${PROCESSOR}" when the event is a pick up at processor`, () => {
+      const processorPickUpEvent = stubDocumentEvent({ name: PICK_UP });
+      const document = stubMassDocument({
+        externalEvents: [
+          stubDocumentEvent({ name: PICK_UP }),
+          stubDocumentEvent({ name: DROP_OFF }),
+          processorPickUpEvent,
+          stubDocumentEvent({ name: DROP_OFF }),
+        ],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: processorPickUpEvent,
+      });
+
+      expect(participantActorType).toEqual(PROCESSOR);
+    });
+
+    it(`should return "${RECYCLER}" when the event is a drop off at recycler`, () => {
+      const recyclerDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+      const document = stubMassDocument({
+        externalEvents: [
+          stubDocumentEvent({ name: PICK_UP }),
+          stubDocumentEvent({ name: DROP_OFF }),
+          stubDocumentEvent({ name: PICK_UP }),
+          recyclerDropOffEvent,
+        ],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: recyclerDropOffEvent,
+      });
+
+      expect(participantActorType).toEqual(RECYCLER);
+    });
+
+    it('should return undefined when the document has no pick up events', () => {
+      const dropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+      const document = stubMassDocument({
+        externalEvents: [dropOffEvent],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: dropOffEvent,
+      });
+
+      expect(participantActorType).toBeUndefined();
+    });
+
+    it('should return undefined when the document has no drop off events', () => {
+      const pickUpEvent = stubDocumentEvent({ name: PICK_UP });
+      const document = stubMassDocument({
+        externalEvents: [pickUpEvent],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: pickUpEvent,
+      });
+
+      expect(participantActorType).toBeUndefined();
+    });
+
+    it('should return undefined when the document has no external events', () => {
+      const event = stubDocumentEvent({ name: PICK_UP });
+      const document = stubMassDocument({
+        externalEvents: undefined,
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event,
+      });
+
+      expect(participantActorType).toBeUndefined();
+    });
+
+    it('should return undefined when the document has empty external events array', () => {
+      const event = stubDocumentEvent({ name: PICK_UP });
+      const document = stubMassDocument({
+        externalEvents: [],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event,
+      });
+
+      expect(participantActorType).toBeUndefined();
+    });
+
+    it('should return undefined when the document has non-array external events', () => {
+      const event = stubDocumentEvent({ name: PICK_UP });
+      const document = {
+        ...stubMassDocument(),
+        externalEvents: 'not an array',
+      } as unknown as Document;
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event,
+      });
+
+      expect(participantActorType).toBeUndefined();
+    });
+
+    it('should return undefined when the event is neither a pick-up nor a drop-off event', () => {
+      const otherEvent = stubDocumentEvent({ name: OPEN });
+      const document = stubMassDocument({
+        externalEvents: [
+          stubDocumentEvent({ name: PICK_UP }),
+          stubDocumentEvent({ name: DROP_OFF }),
+          otherEvent,
+        ],
+      });
+
+      const participantActorType = getParticipantActorType({
+        document,
+        event: otherEvent,
+      });
+
+      expect(participantActorType).toBeUndefined();
     });
   });
 });

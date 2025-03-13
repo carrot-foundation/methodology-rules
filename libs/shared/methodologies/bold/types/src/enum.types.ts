@@ -45,6 +45,13 @@ export enum DocumentSubtype {
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
+export enum MassIDDocumentActorType {
+  HAULER = DocumentSubtype.HAULER,
+  PROCESSOR = DocumentSubtype.PROCESSOR,
+  RECYCLER = DocumentSubtype.RECYCLER,
+  WASTE_GENERATOR = DocumentSubtype.WASTE_GENERATOR,
+}
+
 export enum MassSubtype {
   AGRO_INDUSTRIAL = DocumentSubtype.AGRO_INDUSTRIAL,
   ANIMAL_MANURE = DocumentSubtype.ANIMAL_MANURE,
