@@ -20,10 +20,12 @@ export enum MethodologyDocumentEventName {
   NOTICE = 'NOTICE',
   OPEN = 'OPEN',
   OUTPUT = 'OUTPUT',
+  PICK_UP = 'Pick-up',
   RECYCLED = 'Recycled',
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',
   RULES_METADATA = 'RULES METADATA',
+  WASTE_GENERATOR = 'Waste Generator',
 }
 
 export enum MethodologyEvaluationResult {
