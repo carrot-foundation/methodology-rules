@@ -11,6 +11,7 @@ export enum MethodologyParticipantType {
 export enum MethodologyDocumentEventLabel {
   HAULER = 'Hauler',
   RECYCLER = 'Recycler',
+  WASTE_GENERATOR = 'Waste Generator',
 }
 
 export enum MethodologyDocumentEventName {
