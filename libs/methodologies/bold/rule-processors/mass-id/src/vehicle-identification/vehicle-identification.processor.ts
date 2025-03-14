@@ -22,22 +22,24 @@ const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
 const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = DocumentEventVehicleType;
 const { PICK_UP } = DocumentEventName;
 
-export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = [
+export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
   BICYCLE,
   CART,
   SLUDGE_PIPES,
-];
+]);
 
 export const RESULT_COMMENTS = {
-  APPROVED: (vehicleType: string): string =>
-    `The "${VEHICLE_TYPE}" with value "${vehicleType}" was correctly identified.`,
-  MISSING_VEHICLE_DESCRIPTION: `Expected "${VEHICLE_DESCRIPTION}" attribute to be declared if "${VEHICLE_TYPE}" attribute is "${OTHERS}".`,
-  MISSING_VEHICLE_LICENSE_PLATE: (vehicleType: string): string =>
-    `Expected "${VEHICLE_LICENSE_PLATE}" attribute to be declared if "${VEHICLE_TYPE}" is not one of the following: ${VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.join(', ')}. But got "${vehicleType}".`,
-  MISSING_VEHICLE_TYPE_DECLARATION: `Expected "${VEHICLE_TYPE}" attribute to be declared.`,
+  INVALID_VEHICLE_TYPE: (vehicleType: string) =>
+    `The "${VEHICLE_TYPE}" "${vehicleType}" is not supported by the methodology.`,
+  LICENSE_PLATE_MISSING: (vehicleType: string) =>
+    `The "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_LICENSE_PLATE}", but none was provided.`,
   PICK_UP_EVENT_MISSING: `Expected "${PICK_UP}" event to be declared.`,
-  VEHICLE_TYPE_MISMATCH: (vehicleType: string): string =>
-    `Expected "${VEHICLE_TYPE}" attribute to be one of the following: ${Object.values(DocumentEventVehicleType).join(', ')} but got "${vehicleType}".`,
+  VEHICLE_DESCRIPTION_MISSING: (vehicleType: string) =>
+    `The "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_DESCRIPTION}", but none was provided.`,
+  VEHICLE_IDENTIFIED_WITH_DESCRIPTION: (vehicleType: string) =>
+    `A "${VEHICLE_LICENSE_PLATE}" is not required for "${vehicleType}", and the "${VEHICLE_DESCRIPTION}" was provided.`,
+  VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE: `A valid "${VEHICLE_TYPE}" and correctly formatted "${VEHICLE_LICENSE_PLATE}" were provided.`,
+  VEHICLE_TYPE_MISSING: `The "${VEHICLE_TYPE}" was not provided.`,
 } as const;
 
 interface RuleSubject {
@@ -45,73 +47,78 @@ interface RuleSubject {
 }
 
 export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
-  private get RESULT_COMMENT() {
-    return RESULT_COMMENTS;
-  }
-
-  private approve(vehicleType: string): EvaluateResultOutput {
-    return {
-      resultComment: this.RESULT_COMMENT.APPROVED(vehicleType),
-      resultStatus: RuleOutputStatus.APPROVED,
-    };
-  }
-
-  private reject(resultComment: string): EvaluateResultOutput {
+  private createResult(
+    isApproved: boolean,
+    resultComment: string,
+  ): EvaluateResultOutput {
     return {
       resultComment,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: isApproved
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED,
     };
   }
 
   protected override evaluateResult({
     pickUpEvent: event,
-  }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+  }: RuleSubject): EvaluateResultOutput {
     if (isNil(event)) {
-      return this.reject(this.RESULT_COMMENT.PICK_UP_EVENT_MISSING);
+      return this.createResult(false, RESULT_COMMENTS.PICK_UP_EVENT_MISSING);
     }
 
     const vehicleTypeValue = getEventAttributeValue(event, VEHICLE_TYPE);
 
     if (isNil(vehicleTypeValue)) {
-      return this.reject(this.RESULT_COMMENT.MISSING_VEHICLE_TYPE_DECLARATION);
+      return this.createResult(false, RESULT_COMMENTS.VEHICLE_TYPE_MISSING);
     }
 
     const vehicleTypeValidation =
       validate<DocumentEventVehicleType>(vehicleTypeValue);
 
     if (!vehicleTypeValidation.success) {
-      return this.reject(
-        this.RESULT_COMMENT.VEHICLE_TYPE_MISMATCH(
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.INVALID_VEHICLE_TYPE(
           String(vehicleTypeValidation.data),
         ),
       );
     }
 
-    const vehicleType = vehicleTypeValue as DocumentEventVehicleType;
+    const vehicleType = vehicleTypeValidation.data;
+    const hasDescription = eventHasNonEmptyStringAttribute(
+      event,
+      VEHICLE_DESCRIPTION,
+    );
 
-    if (
-      vehicleType === OTHERS &&
-      !eventHasNonEmptyStringAttribute(event, VEHICLE_DESCRIPTION)
-    ) {
-      return this.reject(this.RESULT_COMMENT.MISSING_VEHICLE_DESCRIPTION);
+    if (vehicleType === OTHERS) {
+      return hasDescription
+        ? this.createResult(
+            true,
+            RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(vehicleType),
+          )
+        : this.createResult(
+            false,
+            RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(vehicleType),
+          );
     }
 
     const needsLicensePlate =
-      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.includes(vehicleType) &&
-      vehicleType !== OTHERS;
+      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleType);
 
     if (
       needsLicensePlate &&
       !eventHasNonEmptyStringAttribute(event, VEHICLE_LICENSE_PLATE)
     ) {
-      return this.reject(
-        this.RESULT_COMMENT.MISSING_VEHICLE_LICENSE_PLATE(
-          vehicleType.toString(),
-        ),
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.LICENSE_PLATE_MISSING(vehicleType),
       );
     }
 
-    return this.approve(vehicleType.toString());
+    return this.createResult(
+      true,
+      RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+    );
   }
 
   protected override getRuleSubject(document: Document): RuleSubject {
