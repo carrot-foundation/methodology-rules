@@ -13,6 +13,7 @@ import {
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   DataSetName,
+  MethodologyDocumentEventLabel,
   MethodologyParticipantType,
 } from '@carrot-fndn/shared/types';
 
@@ -22,6 +23,11 @@ export const eventHasName = (
   event: DocumentEvent,
   eventName: DocumentEventName,
 ): boolean => event.name === eventName.toString();
+
+export const eventHasLabel = (
+  event: DocumentEvent,
+  eventLabel: MethodologyDocumentEventLabel,
+): boolean => event.label === eventLabel.toString();
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);

@@ -100,6 +100,16 @@ export const stubActorEventWithActorType = (
   });
 };
 
+export const stubActorEventWithLabel = (
+  eventLavel: DocumentEvent['label'],
+  partialEvent?: PartialDeep<DocumentEvent>,
+): DocumentEvent =>
+  stubDocumentEvent({
+    ...partialEvent,
+    label: eventLavel,
+    name: DocumentEventName.ACTOR,
+  });
+
 export const stubDocumentEventWithReportType = (
   reportType: ReportType,
   partialEvent?: PartialDeep<DocumentEvent>,
