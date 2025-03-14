@@ -26,6 +26,7 @@ export enum MethodologyDocumentEventName {
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',
   RULES_METADATA = 'RULES METADATA',
+  WASTE_GENERATOR = 'Waste Generator',
 }
 
 export enum MethodologyEvaluationResult {

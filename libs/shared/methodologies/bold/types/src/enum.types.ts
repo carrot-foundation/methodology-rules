@@ -45,6 +45,13 @@ export enum DocumentSubtype {
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
+export enum MassIdDocumentActorType {
+  HAULER = DocumentSubtype.HAULER,
+  PROCESSOR = DocumentSubtype.PROCESSOR,
+  RECYCLER = DocumentSubtype.RECYCLER,
+  WASTE_GENERATOR = DocumentSubtype.WASTE_GENERATOR,
+}
+
 export enum MassSubtype {
   AGRO_INDUSTRIAL = DocumentSubtype.AGRO_INDUSTRIAL,
   ANIMAL_MANURE = DocumentSubtype.ANIMAL_MANURE,
@@ -127,12 +134,17 @@ export enum DocumentEventAttributeName {
   VEHICLE_TYPE = 'vehicle-type',
   VEHICLE_VOLUME_CAPACITY = 'vehicle-volume-capacity',
   VEHICLE_WEIGHT = 'vehicle-weight',
+  WASTE_ORIGIN = 'Waste Origin',
   WASTE_ORIGIN_IDENTIFIED = 'waste-origin-identified',
   WEIGHT_SCALE_MANUFACTURER = 'weight-scale-manufacturer',
   WEIGHT_SCALE_MODEL = 'weight-scale-model',
   WEIGHT_SCALE_SOFTWARE = 'weight-scale-software',
   WEIGHT_SCALE_SUPPLIER = 'weight-scale-supplier',
   WEIGHT_SCALE_TYPE = 'weight-scale-type',
+}
+
+export enum DocumentEventAttributeValue {
+  UNIDENTIFIED = 'Unidentified',
 }
 
 export enum ReportType {
@@ -160,6 +172,7 @@ export enum DocumentEventName {
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
   RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
+  WASTE_GENERATOR = MethodologyDocumentEventName.WASTE_GENERATOR,
 }
 
 export enum DocumentEventActorType {

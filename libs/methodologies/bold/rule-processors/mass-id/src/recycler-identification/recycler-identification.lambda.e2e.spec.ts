@@ -9,15 +9,15 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { recyclerActorLambda } from './recycler-actor.lambda';
-import { recyclerActorProcessorTestCases } from './recycler-actor.test-cases';
+import { recyclerIdentificationLambda } from './recycler-identification.lambda';
+import { recyclerIdentificationTestCases } from './recycler-identification.test-cases';
 
 describe('RecyclerActorProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   const massId = new BoldStubsBuilder().build();
 
-  it.each(recyclerActorProcessorTestCases)(
+  it.each(recyclerIdentificationTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultStatus }) => {
       prepareEnvironmentTestE2E(
@@ -39,7 +39,7 @@ describe('RecyclerActorProcessor E2E', () => {
         })),
       );
 
-      const response = (await recyclerActorLambda(
+      const response = (await recyclerIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
           parentDocumentId: massId.massIdDocumentStub.id,

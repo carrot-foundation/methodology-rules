@@ -1,8 +1,8 @@
 <div align="center">
 
-# Recycler Actor
+# Recycler Identification
 
-Methodology: **BOLD-CARBON-ORGANIC**
+Methodology: **BOLD-RECYCLING-ORGANIC**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/recycler-actor/recycler-actor.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/recycler-identification/recycler-identification.processor.ts)**
 
 ## 👥 Contributors
 
