@@ -2,11 +2,11 @@ import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
-import { RESULT_COMMENT } from './recycler-actor.processor';
+import { RESULT_COMMENT } from './recycler-identification.processor';
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 
-export const recyclerActorProcessorTestCases = [
+export const recyclerIdentificationTestCases = [
   {
     events: [stubActorEventWithLabel('ANY_LABEL')],
     resultComment: RESULT_COMMENT.NO_RECYCLER_ACTOR_EVENT,

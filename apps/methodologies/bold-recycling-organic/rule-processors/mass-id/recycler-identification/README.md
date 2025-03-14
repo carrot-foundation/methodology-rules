@@ -1,6 +1,6 @@
 <div align="center">
 
-# Recycler Actor
+# Recycler Identification
 
 Methodology: **BOLD-RECYCLING-ORGANIC**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/recycler-actor/recycler-actor.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/recycler-identification/recycler-identification.processor.ts)**
 
 ## 👥 Contributors
 

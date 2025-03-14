@@ -27,7 +27,7 @@ export const RESULT_COMMENT = {
   NO_RECYCLER_ACTOR_EVENT: `No "${RECYCLER}" actor event found.`,
 } as const;
 
-export class RecyclerActorProcessor extends ParentDocumentRuleProcessor<Subject> {
+export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return RESULT_COMMENT;
   }

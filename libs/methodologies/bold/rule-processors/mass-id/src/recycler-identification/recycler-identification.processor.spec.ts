@@ -6,19 +6,19 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { RecyclerActorProcessor } from './recycler-actor.processor';
-import { recyclerActorProcessorTestCases } from './recycler-actor.test-cases';
+import { RecyclerIdentificationProcessor } from './recycler-identification.processor';
+import { recyclerIdentificationTestCases } from './recycler-identification.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-describe('RecyclerActorProcessor', () => {
-  const ruleDataProcessor = new RecyclerActorProcessor();
+describe('RecyclerIdentificationProcessor', () => {
+  const ruleDataProcessor = new RecyclerIdentificationProcessor();
 
   const massIdStubs = new BoldStubsBuilder().build();
 
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  it.each(recyclerActorProcessorTestCases)(
+  it.each(recyclerIdentificationTestCases)(
     `should return $resultStatus when $scenario`,
     async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
