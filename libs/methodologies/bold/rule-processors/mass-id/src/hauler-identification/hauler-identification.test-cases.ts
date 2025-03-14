@@ -11,8 +11,8 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import {
-  NON_HAULER_REQUIRED_VEHICLE_TYPES,
-  RESULT_COMMENT,
+  OPTIONAL_HAULER_VEHICLE_TYPES,
+  RESULT_COMMENTS,
 } from './hauler-identification.processor';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
@@ -31,9 +31,9 @@ export const haulerIdentificationTestCases = [
         name: ACTOR,
       }),
     ],
-    resultComment: RESULT_COMMENT.APPROVED,
+    resultComment: RESULT_COMMENTS.HAULER_EVENT_FOUND,
     resultStatus: RuleOutputStatus.APPROVED,
-    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
+    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event exists.`,
   },
@@ -43,9 +43,9 @@ export const haulerIdentificationTestCases = [
         [VEHICLE_TYPE, TRUCK],
       ]),
     ],
-    resultComment: RESULT_COMMENT.NO_HAULER_ACTOR_EVENT,
+    resultComment: RESULT_COMMENTS.HAULER_EVENT_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
+    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event does not exist.`,
   },
@@ -55,10 +55,18 @@ export const haulerIdentificationTestCases = [
         [VEHICLE_TYPE, DocumentEventVehicleType.CART],
       ]),
     ],
-    resultComment: RESULT_COMMENT.NON_HAULER_REQUIRED_VEHICLE_TYPE,
+    resultComment: RESULT_COMMENTS.HAULER_NOT_REQUIRED(
+      DocumentEventVehicleType.CART,
+    ),
     resultStatus: RuleOutputStatus.APPROVED,
-    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is ${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
+    scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event does not exist.`,
+  },
+  {
+    events: [],
+    resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: `no ${PICK_UP} event exists.`,
   },
 ];

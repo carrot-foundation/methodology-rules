@@ -1,33 +1,38 @@
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { RecyclerActorProcessor } from './recycler-actor.processor';
-import { recyclerActorProcessorTestCases } from './recycler-actor.test-cases';
+import { WasteOriginIdentificationProcessor } from './waste-origin-identification.processor';
+import { wasteOriginIdentificationTestCases } from './waste-origin-identification.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-describe('RecyclerActorProcessor', () => {
-  const ruleDataProcessor = new RecyclerActorProcessor();
-
-  const massIdStubs = new BoldStubsBuilder().build();
-
+describe('WasteOriginIdentificationProcessor', () => {
+  const ruleDataProcessor = new WasteOriginIdentificationProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
+  const { massIdDocumentStub } = new BoldStubsBuilder().build();
 
-  it.each(recyclerActorProcessorTestCases)(
+  it.each(wasteOriginIdentificationTestCases)(
     `should return $resultStatus when $scenario`,
-    async ({ events, resultComment, resultStatus }) => {
+    async ({
+      pickUpEvent,
+      resultComment,
+      resultStatus,
+      wasteGeneratorEvents,
+    }) => {
       const ruleInput = random<Required<RuleInput>>();
       const document = {
-        ...massIdStubs.massIdDocumentStub,
+        ...massIdDocumentStub,
         externalEvents: [
-          ...(massIdStubs.massIdDocumentStub.externalEvents ?? []),
-          ...events,
-        ],
+          ...(massIdDocumentStub.externalEvents ?? []),
+          pickUpEvent,
+          ...(wasteGeneratorEvents ?? []),
+        ].filter((event): event is DocumentEvent => event !== undefined),
       };
 
       documentLoaderService.mockResolvedValueOnce(document);

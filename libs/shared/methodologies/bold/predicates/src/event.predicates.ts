@@ -14,8 +14,8 @@ import {
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   DataSetName,
-  MethodologyDocumentEventLabel,
   MethodologyParticipantType,
+  type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.typia';
@@ -27,8 +27,8 @@ export const eventHasName = (
 
 export const eventHasLabel = (
   event: DocumentEvent,
-  eventLabel: MethodologyDocumentEventLabel,
-): boolean => event.label === eventLabel.toString();
+  eventLabel: NonEmptyString,
+): boolean => event.label === eventLabel;
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);

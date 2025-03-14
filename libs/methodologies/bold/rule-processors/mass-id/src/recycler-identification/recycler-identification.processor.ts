@@ -22,12 +22,12 @@ type Subject = {
 };
 
 export const RESULT_COMMENT = {
-  APPROVED: `The "${RECYCLER}" actor event was declared.`,
-  MULTIPLE_RECYCLER_ACTOR_EVENTS: `Found multiple "${RECYCLER}" actor events.`,
-  NO_RECYCLER_ACTOR_EVENT: `No "${RECYCLER}" actor event found.`,
+  MULTIPLE_EVENTS: `More than one "${ACTOR}" event with the label "${RECYCLER}" was found. Only one is allowed.`,
+  NOT_FOUND: `No "${ACTOR}" event with the label "${RECYCLER}" was found.`,
+  SINGLE_EVENT: `A single "${ACTOR}" event with the label "${RECYCLER}" was found.`,
 } as const;
 
-export class RecyclerActorProcessor extends ParentDocumentRuleProcessor<Subject> {
+export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return RESULT_COMMENT;
   }
@@ -37,20 +37,20 @@ export class RecyclerActorProcessor extends ParentDocumentRuleProcessor<Subject>
   }: Subject): EvaluateResultOutput {
     if (!isNonEmptyArray(recyclerActorEvents)) {
       return {
-        resultComment: this.RESULT_COMMENT.NO_RECYCLER_ACTOR_EVENT,
+        resultComment: this.RESULT_COMMENT.NOT_FOUND,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
     if (recyclerActorEvents.length > 1) {
       return {
-        resultComment: this.RESULT_COMMENT.MULTIPLE_RECYCLER_ACTOR_EVENTS,
+        resultComment: this.RESULT_COMMENT.MULTIPLE_EVENTS,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.APPROVED,
+      resultComment: this.RESULT_COMMENT.SINGLE_EVENT,
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }

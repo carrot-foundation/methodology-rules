@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-carbon-organic-rule-processors-mass-id-recycler-actor",
+  "name": "methodologies-bold-carbon-organic-rule-processors-mass-id-recycler-identification",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
-  "sourceRoot": "apps/methodologies/bold-carbon-organic/rule-processors/mass-id/recycler-actor/src",
+  "sourceRoot": "apps/methodologies/bold-carbon-organic/rule-processors/mass-id/recycler-identification/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},

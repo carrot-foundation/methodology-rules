@@ -1,11 +1,12 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getOrDefault } from '@carrot-fndn/shared/helpers';
+import { getOrUndefined, isNil } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   and,
-  eventHasLabel,
-  eventHasName,
-  metadataAttributeValueIsAnyOf,
+  eventHasMetadataAttribute,
+  eventLabelIsAnyOf,
+  eventNameIsAnyOf,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
@@ -18,73 +19,87 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
-const { ACTOR } = DocumentEventName;
+const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = MethodologyDocumentEventLabel;
 const { VEHICLE_TYPE } = NewDocumentEventAttributeName;
 
 type Subject = {
-  externalEvents: DocumentEvent[];
+  haulerEvent: DocumentEvent | undefined;
+  pickUpEvent: DocumentEvent | undefined;
 };
 
-export const NON_HAULER_REQUIRED_VEHICLE_TYPES = [
+export const OPTIONAL_HAULER_VEHICLE_TYPES = [
   DocumentEventVehicleType.SLUDGE_PIPES,
   DocumentEventVehicleType.CART,
 ] as const;
 
-export const RESULT_COMMENT = {
-  APPROVED: `The "${VEHICLE_TYPE}" attribute is set with a different type than "${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
-    ', ',
-  )}" and the "${HAULER}" actor event was declared correctly.`,
-  NO_HAULER_ACTOR_EVENT: `The "${VEHICLE_TYPE}" attribute is set with a different type than "${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
-    ', ',
-  )}" and the "${HAULER}" actor event was not declared.`,
-  NON_HAULER_REQUIRED_VEHICLE_TYPE: `The "${VEHICLE_TYPE}" attribute is set with a type that is ${NON_HAULER_REQUIRED_VEHICLE_TYPES.join(
-    ', ',
-  )} and the ${HAULER} actor event is not necessary.`,
+export const RESULT_COMMENTS = {
+  HAULER_EVENT_FOUND: `A "${HAULER}" event was found.`,
+  HAULER_EVENT_MISSING: (vehicleType: string) =>
+    `No "${HAULER}" event was found, but it is required for the “${vehicleType}" pick-up "${VEHICLE_TYPE}".`,
+  HAULER_NOT_REQUIRED: (vehicleType: string) =>
+    `A "${HAULER}" event is not required because the pick-up "${VEHICLE_TYPE}" is ${vehicleType}.`,
+  PICK_UP_EVENT_MISSING: `A "${PICK_UP}" event is required and was not found.`,
 } as const;
 
 export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
-    return RESULT_COMMENT;
+    return RESULT_COMMENTS;
   }
 
   protected override evaluateResult({
-    externalEvents,
+    haulerEvent,
+    pickUpEvent,
   }: Subject): EvaluateResultOutput {
-    const hasNonHaulerRequiredVehicleType = externalEvents.some(
-      metadataAttributeValueIsAnyOf(
-        VEHICLE_TYPE,
-        NON_HAULER_REQUIRED_VEHICLE_TYPES,
-      ),
-    );
-
-    if (hasNonHaulerRequiredVehicleType) {
+    if (!isNil(haulerEvent)) {
       return {
-        resultComment: this.RESULT_COMMENT.NON_HAULER_REQUIRED_VEHICLE_TYPE,
+        resultComment: this.RESULT_COMMENT.HAULER_EVENT_FOUND,
         resultStatus: RuleOutputStatus.APPROVED,
       };
     }
 
-    const hasHaulerActorEvent = externalEvents.some(
-      and(
-        (event) => eventHasLabel(event, HAULER),
-        (event) => eventHasName(event, ACTOR),
-      ),
-    );
+    if (isNil(pickUpEvent)) {
+      return {
+        resultComment: this.RESULT_COMMENT.PICK_UP_EVENT_MISSING,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    const vehicleType = getEventAttributeValue(pickUpEvent, VEHICLE_TYPE);
+
+    const isHaulerOptional = eventHasMetadataAttribute({
+      event: pickUpEvent,
+      metadataName: VEHICLE_TYPE,
+      metadataValues: OPTIONAL_HAULER_VEHICLE_TYPES,
+    });
+
+    if (isHaulerOptional) {
+      return {
+        resultComment: this.RESULT_COMMENT.HAULER_NOT_REQUIRED(
+          vehicleType as string,
+        ),
+        resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
 
     return {
-      resultComment: hasHaulerActorEvent
-        ? this.RESULT_COMMENT.APPROVED
-        : this.RESULT_COMMENT.NO_HAULER_ACTOR_EVENT,
-      resultStatus: hasHaulerActorEvent
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+      resultComment: this.RESULT_COMMENT.HAULER_EVENT_MISSING(
+        vehicleType as string,
+      ),
+      resultStatus: RuleOutputStatus.REJECTED,
     };
   }
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     return {
-      externalEvents: getOrDefault(document.externalEvents, []),
+      haulerEvent: getOrUndefined(
+        document.externalEvents?.find(
+          and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([HAULER])),
+        ),
+      ),
+      pickUpEvent: getOrUndefined(
+        document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
+      ),
     };
   }
 }
