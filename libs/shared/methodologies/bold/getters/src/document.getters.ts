@@ -5,7 +5,7 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIDDocumentActorType,
+  MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { getEventAttributeValue } from './event.getters';
@@ -13,7 +13,7 @@ import { getEventAttributeValue } from './event.getters';
 const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 export const getAuditorActorEvent = (
   document: Document,
@@ -42,7 +42,7 @@ export const getParticipantActorType = ({
 }: {
   document: Document;
   event: DocumentEvent;
-}): MassIDDocumentActorType | undefined => {
+}): MassIdDocumentActorType | undefined => {
   const events = document.externalEvents;
 
   if (!isNonEmptyArray(events)) {

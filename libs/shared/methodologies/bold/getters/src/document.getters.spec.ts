@@ -10,7 +10,7 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIDDocumentActorType,
+  MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 
@@ -24,7 +24,7 @@ import {
 const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
   describe('getAuditorActorEvent', () => {
