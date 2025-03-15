@@ -20,6 +20,7 @@ export interface MethodologyDocument {
   createdAt: string & tags.Format<'date-time'>;
   currentValue: number & tags.Minimum<0> & tags.Type<'float'>;
   dataSetName: DataSetName;
+  deduplicationId?: string | undefined;
   externalCreatedAt: string & tags.Format<'date-time'>;
   externalEvents?: MethodologyDocumentEvent[] | undefined;
   externalId?: string | undefined;
