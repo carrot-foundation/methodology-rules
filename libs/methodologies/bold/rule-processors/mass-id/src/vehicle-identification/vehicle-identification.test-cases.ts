@@ -1,3 +1,5 @@
+import type { LicensePlate } from '@carrot-fndn/shared/types';
+
 import {
   stubDocumentEventWithMetadataAttributes,
   stubMassDocument,
@@ -8,7 +10,7 @@ import {
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { faker } from '@faker-js/faker';
+import { random } from 'typia';
 
 import {
   RESULT_COMMENTS,
@@ -105,12 +107,25 @@ export const vehicleIdentificationTestCases = [
       externalEvents: [
         stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
           [VEHICLE_TYPE, TRUCK],
-          [VEHICLE_LICENSE_PLATE, faker.vehicle.vrm()],
+          [VEHICLE_LICENSE_PLATE, random<LicensePlate>()],
         ]),
       ],
     }),
     resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
+  },
+  {
+    document: stubMassDocument({
+      externalEvents: [
+        stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
+          [VEHICLE_TYPE, TRUCK],
+          [VEHICLE_LICENSE_PLATE, 'INVALID_LICENSE_PLATE'],
+        ]),
+      ],
+    }),
+    resultComment: RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: `the "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
   },
 ];

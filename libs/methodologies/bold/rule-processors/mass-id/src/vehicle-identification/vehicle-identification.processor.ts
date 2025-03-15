@@ -1,4 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
@@ -15,7 +16,7 @@ import {
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { validate } from 'typia';
+import { is, validate } from 'typia';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
@@ -29,6 +30,7 @@ export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
 ]);
 
 export const RESULT_COMMENTS = {
+  INVALID_LICENSE_PLATE_FORMAT: `The "${VEHICLE_LICENSE_PLATE}" format is invalid.`,
   INVALID_VEHICLE_TYPE: (vehicleType: string) =>
     `The "${VEHICLE_TYPE}" "${vehicleType}" is not supported by the methodology.`,
   LICENSE_PLATE_MISSING: (vehicleType: string) =>
@@ -104,6 +106,14 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
     const needsLicensePlate =
       !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleType);
+    const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
+
+    if (!isNil(licensePlate) && !is<LicensePlate>(licensePlate)) {
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
+      );
+    }
 
     if (
       needsLicensePlate &&
