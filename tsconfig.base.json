@@ -49,6 +49,9 @@
       "@carrot-fndn/shared/methodologies/bold/processors": [
         "libs/shared/methodologies/bold/processors/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/constants": [
+        "libs/shared/methodologies/bold/constants/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/testing": [
         "libs/shared/methodologies/bold/testing/src/index.ts"
       ],

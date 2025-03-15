@@ -1,0 +1,18 @@
+{
+  "name": "shared-methodologies-bold-constants",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "scope:shared",
+    "stack:any",
+    "type:lib"
+  ],
+  "sourceRoot": "libs/shared/methodologies/bold/constants/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

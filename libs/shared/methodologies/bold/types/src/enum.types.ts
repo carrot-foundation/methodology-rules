@@ -210,3 +210,23 @@ export enum DocumentEventVehicleType {
   SLUDGE_PIPES = 'Sludge Pipes',
   TRUCK = 'Truck',
 }
+
+export enum DocumentEventWeighingCaptureMethod {
+  DIGITAL = 'Digital',
+  MANUAL = 'Manual',
+  PHOTO = 'Photo (Scale + Cargo)',
+  TRANSPORT_MANIFEST = 'Transport Manifest',
+}
+
+export enum DocumentEventScaleType {
+  BIN_SCALE = 'Bin Scale',
+  CONVEYOR_BELT_SCALE = 'Conveyor Belt Scale',
+  FLOOR_SCALE = 'Floor Scale',
+  FORKLIFT_SCALE = 'Forklift Scale',
+  HANGING_OR_CRANE_SCALE = 'Hanging / Crane Scale',
+  ONBOARD_TRUCK_SCALE = 'Onboard Truck Scale',
+  PALLET_SCALE = 'Pallet Scale',
+  PORTABLE_AXLE_WEIGHER = 'Portable Axle Weigher',
+  PRECISION_OR_BENCH_SCALE = 'Precision / Bench Scale',
+  WEIGHBRIDGE = 'Weighbridge (Truck Scale)',
+}
