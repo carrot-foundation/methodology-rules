@@ -31,3 +31,14 @@ export enum MethodologyDocumentEventName {
 export enum MethodologyEvaluationResult {
   APPROVED = 'APPROVED',
 }
+
+export enum MethodologyDocumentEventAttributeFormat {
+  CUBIC_METER = 'CUBIC_METER',
+  DATE = 'DATE',
+  KILOGRAM = 'KILOGRAM',
+  LITRE = 'LITRE',
+}
+
+export enum MethodologyDocumentEventAttributeType {
+  REFERENCE = 'REFERENCE',
+}
