@@ -1,4 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -25,6 +26,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { assert } from 'typia';
 
 import { CheckParticipantsHomologationProcessorErrors } from './check-participants-homologation.errors';
 
@@ -33,11 +35,11 @@ export interface RuleSubject {
   massDocument: Document;
 }
 
-export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
-  private readonly RESULT_COMMENT = {
-    APPROVED: 'The participants are homologated and the homologation is active',
-  } as const;
+export const RESULT_COMMENTS = {
+  APPROVED: 'The participants are homologated and the homologation is active',
+} as const;
 
+export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
   readonly errorProcessor = new CheckParticipantsHomologationProcessorErrors();
 
   private evaluateResult({
@@ -62,7 +64,7 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.APPROVED,
+      resultComment: RESULT_COMMENTS.APPROVED,
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
@@ -118,8 +120,10 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
     const actorParticipants: Map<string, string> = new Map(
       massDocument.externalEvents
         .filter((event) => isActorEvent(event))
-        // TODO: update to use the event name label instead of the event name
-        .map((event) => [event.participant.id, event.name]),
+        .map((event) => [
+          event.participant.id,
+          assert<NonEmptyString>(event.label),
+        ]),
     );
 
     const participantsWithoutHomologationDocuments = [
@@ -166,6 +170,8 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
+      console.log(error);
+
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
