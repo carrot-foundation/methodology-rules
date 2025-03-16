@@ -7,13 +7,14 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 const { PICK_UP, WASTE_GENERATOR } = DocumentEventName;
+const { UNIDENTIFIED } = DocumentEventAttributeValue;
 
 type Subject = {
   pickUpEvent?: DocumentEvent | undefined;
@@ -21,26 +22,22 @@ type Subject = {
 };
 
 export const RESULT_COMMENT = {
-  IDENTIFIED: `The ${WASTE_GENERATOR} event was identified.`,
   MISSING_PICK_UP_EVENT: `The ${PICK_UP} event was not found.`,
-  MULTIPLE_WASTE_GENERATORS: `The ${WASTE_GENERATOR} event was defined more than once.`,
-  UNIDENTIFIED: `The ${PICK_UP} event has the metadata ${DocumentEventAttributeName.WASTE_ORIGIN} with the value ${DocumentEventAttributeValue.UNIDENTIFIED}.`,
-  UNIDENTIFIED_WITH_WASTE_GENERATOR: `The ${PICK_UP} event has the metadata ${DocumentEventAttributeName.WASTE_ORIGIN} with the value ${DocumentEventAttributeValue.UNIDENTIFIED} and the ${WASTE_GENERATOR} event was defined.`,
-  UNIDENTIFIED_WITHOUT_WASTE_GENERATOR: `The ${PICK_UP} event has no ${DocumentEventAttributeName.WASTE_ORIGIN} metadata and the ${WASTE_GENERATOR} event was not defined.`,
+  MISSING_WASTE_GENERATOR_EVENT: `No "${WASTE_GENERATOR}" event was found, and the waste origin is not "${UNIDENTIFIED}".`,
+  MULTIPLE_WASTE_GENERATOR_EVENTS: `More than one "${WASTE_GENERATOR}" event was found, but only one is allowed.`,
+  UNIDENTIFIED_WASTE_ORIGIN: `No "${WASTE_GENERATOR}" event was found, and the waste origin is "${UNIDENTIFIED}".`,
+  WASTE_ORIGIN_CONFLICT: `A "${WASTE_GENERATOR}" event was found, but the waste origin is "${UNIDENTIFIED}".`,
+  WASTE_ORIGIN_IDENTIFIED: `A ${WASTE_GENERATOR} event was found.`,
 } as const;
 
 export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
-  private get RESULT_COMMENT() {
-    return RESULT_COMMENT;
-  }
-
   protected override evaluateResult({
     pickUpEvent,
     wasteGeneratorEvents,
   }: Subject): EvaluateResultOutput {
     if (isNil(pickUpEvent)) {
       return {
-        resultComment: this.RESULT_COMMENT.MISSING_PICK_UP_EVENT,
+        resultComment: RESULT_COMMENT.MISSING_PICK_UP_EVENT,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
@@ -50,42 +47,41 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       wasteGeneratorEvents.length > 1
     ) {
       return {
-        resultComment: this.RESULT_COMMENT.MULTIPLE_WASTE_GENERATORS,
+        resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATOR_EVENTS,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
     const wasteOrigin = getEventAttributeValue(
       pickUpEvent,
-      DocumentEventAttributeName.WASTE_ORIGIN,
+      NewDocumentEventAttributeName.WASTE_ORIGIN,
     );
     const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
-    const isUnidentified =
-      wasteOrigin === DocumentEventAttributeValue.UNIDENTIFIED;
+    const isUnidentified = wasteOrigin === UNIDENTIFIED;
 
     if (!isUnidentified && hasWasteGenerator) {
       return {
-        resultComment: this.RESULT_COMMENT.IDENTIFIED,
+        resultComment: RESULT_COMMENT.WASTE_ORIGIN_IDENTIFIED,
         resultStatus: RuleOutputStatus.APPROVED,
       };
     }
 
     if (isUnidentified && !hasWasteGenerator) {
       return {
-        resultComment: this.RESULT_COMMENT.UNIDENTIFIED,
+        resultComment: RESULT_COMMENT.UNIDENTIFIED_WASTE_ORIGIN,
         resultStatus: RuleOutputStatus.APPROVED,
       };
     }
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
-        resultComment: this.RESULT_COMMENT.UNIDENTIFIED_WITHOUT_WASTE_GENERATOR,
+        resultComment: RESULT_COMMENT.MISSING_WASTE_GENERATOR_EVENT,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.UNIDENTIFIED_WITH_WASTE_GENERATOR,
+      resultComment: RESULT_COMMENT.WASTE_ORIGIN_CONFLICT,
       resultStatus: RuleOutputStatus.REJECTED,
     };
   }
