@@ -257,6 +257,7 @@ export type BoldMassIdExternalEventsObject = Partial<
 const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map([
   [DROP_OFF, stubBoldMassIdDropOffEvent()],
   [PICK_UP, stubBoldMassIdPickUpEvent()],
+  [RECYCLED, stubBoldMassIdRecycledEvent()],
   [
     RECYCLING_MANIFEST,
     stubBoldMassIdRecyclingManifestEvent({

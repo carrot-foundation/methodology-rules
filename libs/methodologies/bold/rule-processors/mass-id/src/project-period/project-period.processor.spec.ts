@@ -1,26 +1,22 @@
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  stubDocument,
-  stubDocumentEvent,
+  stubBoldMassIdDocument,
+  stubBoldMassIdRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { addDays, addHours, subDays, subSeconds } from 'date-fns';
 import { random } from 'typia';
 
-import { ProjectPeriodProcessor } from './project-period.processor';
+import {
+  ProjectPeriodProcessor,
+  RESULT_COMMENTS,
+} from './project-period.processor';
+import { projectPeriodTestCases } from './project-period.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
-
-const createBRTDateString = (date: Date): string => {
-  const utcDate = new Date(date);
-  const brtAsUtc = addHours(utcDate, 3);
-
-  return brtAsUtc.toISOString();
-};
 
 class TestProjectPeriodProcessor extends ProjectPeriodProcessor {
   public getTestEligibleDate(): Date {
@@ -28,84 +24,28 @@ class TestProjectPeriodProcessor extends ProjectPeriodProcessor {
   }
 }
 
+const { RECYCLED } = DocumentEventName;
+
 describe('ProjectPeriodProcessor', () => {
   const ruleDataProcessor = new TestProjectPeriodProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
 
-  const { RECYCLED } = DocumentEventName;
-
-  const getEligibleDate = () => ruleDataProcessor.getTestEligibleDate();
-
-  it.each([
-    {
-      externalCreatedAt: addDays(getEligibleDate(), 1).toISOString(),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should APPROVE the rule if the Recycled event was created after the eligible date',
-    },
-    {
-      externalCreatedAt: subDays(getEligibleDate(), 1).toISOString(),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].INELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should REJECT the rule if the Recycled event was created before the eligible date',
-    },
-    {
-      externalCreatedAt: getEligibleDate().toISOString(),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should APPROVE the rule if the Recycled event was created on the eligible date',
-    },
-    {
-      externalCreatedAt: getEligibleDate().toISOString(),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should APPROVE the rule if the Recycled event was created on the eligible date',
-    },
-    {
-      externalCreatedAt: createBRTDateString(subSeconds(getEligibleDate(), 1)),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should APPROVE the rule if the Recycled event was created 1 second before the eligible date in UTC but appears after in BRT timezone',
-    },
-    {
-      externalCreatedAt: createBRTDateString(getEligibleDate()),
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT'].ELIGIBLE(getEligibleDate()),
-      resultStatus: RuleOutputStatus.APPROVED,
-      scenario:
-        'should APPROVE the rule if the Recycled event was created exactly at the eligible date (BRT timezone)',
-    },
-    {
-      externalCreatedAt: undefined,
-      resultComment:
-        ruleDataProcessor['RESULT_COMMENT']
-          .MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
-      resultStatus: RuleOutputStatus.REJECTED,
-      scenario:
-        'should REJECT the rule if the Recycled event has no externalCreatedAt attribute',
-    },
-  ])(
-    '$scenario',
+  it.each(projectPeriodTestCases)(
+    'should return $resultStatus when $scenario',
     async ({ externalCreatedAt, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const document = stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            externalCreatedAt,
-            name: RECYCLED,
-          }),
-        ],
+      const document = stubBoldMassIdDocument({
+        externalEventsMap: new Map([
+          [
+            RECYCLED,
+            stubBoldMassIdRecycledEvent({
+              partialDocumentEvent: {
+                externalCreatedAt,
+              },
+            }),
+          ],
+        ]),
       });
 
       documentLoaderService.mockResolvedValueOnce(document);
@@ -127,8 +67,8 @@ describe('ProjectPeriodProcessor', () => {
   it('should REJECT the rule if the Recycled event is not found', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
-    const document = stubDocument({
-      externalEvents: [],
+    const document = stubBoldMassIdDocument({
+      externalEventsMap: new Map([[RECYCLED, undefined]]),
     });
 
     documentLoaderService.mockResolvedValueOnce(document);
@@ -136,7 +76,7 @@ describe('ProjectPeriodProcessor', () => {
     const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
     expect(ruleOutput).toMatchObject({
-      resultComment: ruleDataProcessor['RESULT_COMMENT'].MISSING_RECYCLED_EVENT,
+      resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
       resultStatus: RuleOutputStatus.REJECTED,
     });
   });

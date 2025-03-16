@@ -19,7 +19,7 @@ const boldMassIdAuditExternalEventsMap: Map<string, DocumentEvent> = new Map(
 export const stubBoldMassIdAuditDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters): Document => {
+}: StubBoldDocumentParameters = {}): Document => {
   const mergedEventsMap = mergeEventsMaps(
     boldMassIdAuditExternalEventsMap,
     externalEventsMap,
