@@ -1,7 +1,8 @@
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  stubDocument,
-  stubDocumentEvent,
+  stubBoldMassIdDocument,
+  stubBoldMassIdDropOffEvent,
+  stubBoldMassIdRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -16,6 +17,8 @@ import { TimeIntervalCheckProcessor } from './time-interval-check.processor';
 import { timeIntervalTestCases } from './time-interval-check.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+
+const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 describe('TimeIntervalCheckProcessor', () => {
   const ruleDataProcessor = new TimeIntervalCheckProcessor();
@@ -58,17 +61,25 @@ describe('TimeIntervalCheckProcessor', () => {
       resultStatus,
     }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const document = stubDocument({
-        externalEvents: [
-          stubDocumentEvent({
-            externalCreatedAt: dropOffEventDate,
-            name: DocumentEventName.DROP_OFF,
-          }),
-          stubDocumentEvent({
-            externalCreatedAt: recycledEventDate,
-            name: DocumentEventName.RECYCLED,
-          }),
-        ],
+      const document = stubBoldMassIdDocument({
+        externalEventsMap: new Map([
+          [
+            DROP_OFF,
+            stubBoldMassIdDropOffEvent({
+              partialDocumentEvent: {
+                externalCreatedAt: dropOffEventDate,
+              },
+            }),
+          ],
+          [
+            RECYCLED,
+            stubBoldMassIdRecycledEvent({
+              partialDocumentEvent: {
+                externalCreatedAt: recycledEventDate,
+              },
+            }),
+          ],
+        ]),
       });
 
       documentLoaderService.mockResolvedValueOnce(document);
