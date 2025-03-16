@@ -1,10 +1,8 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
-
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
@@ -20,16 +18,11 @@ describe('VehicleIdentificationProcessor', () => {
 
   it.each(vehicleIdentificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({
-      document,
-      resultComment,
-      resultStatus,
-    }: {
-      document: Document;
-      resultComment: string;
-      resultStatus: RuleOutputStatus;
-    }) => {
+    async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
+      const document = stubBoldMassIdDocument({
+        externalEventsMap: events,
+      });
 
       documentLoaderService.mockResolvedValueOnce(document);
 

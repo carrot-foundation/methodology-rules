@@ -254,24 +254,26 @@ export type BoldMassIdExternalEventsObject = Partial<
   Record<DocumentEventName, DocumentEvent>
 >;
 
-const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map([
-  [DROP_OFF, stubBoldMassIdDropOffEvent()],
-  [PICK_UP, stubBoldMassIdPickUpEvent()],
-  [RECYCLED, stubBoldMassIdRecycledEvent()],
+export const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map(
   [
-    RECYCLING_MANIFEST,
-    stubBoldMassIdRecyclingManifestEvent({
-      withExemptionJustification: false,
-    }),
+    [DROP_OFF, stubBoldMassIdDropOffEvent()],
+    [PICK_UP, stubBoldMassIdPickUpEvent()],
+    [RECYCLED, stubBoldMassIdRecycledEvent()],
+    [
+      RECYCLING_MANIFEST,
+      stubBoldMassIdRecyclingManifestEvent({
+        withExemptionJustification: false,
+      }),
+    ],
+    [
+      TRANSPORT_MANIFEST,
+      stubBoldMassIdTransportManifestEvent({
+        withExemptionJustification: false,
+      }),
+    ],
+    [WEIGHING, stubBoldMassIdWeighingSingleStepEvent()],
   ],
-  [
-    TRANSPORT_MANIFEST,
-    stubBoldMassIdTransportManifestEvent({
-      withExemptionJustification: false,
-    }),
-  ],
-  [WEIGHING, stubBoldMassIdWeighingSingleStepEvent()],
-]);
+);
 
 export const stubBoldMassIdDocument = ({
   externalEventsMap,

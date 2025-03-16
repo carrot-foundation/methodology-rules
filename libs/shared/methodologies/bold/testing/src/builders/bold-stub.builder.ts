@@ -22,7 +22,6 @@ import {
   stubParticipant,
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
-import { mergeEventsMaps } from './bold.builder.helpers';
 import { stubBoldMassIdDocument } from './bold-mass-id.stubs';
 import { stubBoldMassIdAuditDocument } from './bold-mass-id-audit.stubs';
 import { stubBoldHomologationDocument } from './bold-participant-homologation.stubs';
@@ -187,7 +186,12 @@ export class BoldStubsBuilder {
     ]);
 
     this.massIdDocumentStub = stubBoldMassIdDocument({
-      externalEventsMap: mergeEventsMaps(defaultEventsMap, externalEventsMap),
+      externalEventsMap: new Map([
+        ...defaultEventsMap,
+        ...(externalEventsMap instanceof Map
+          ? externalEventsMap
+          : Object.entries(externalEventsMap ?? {})),
+      ]),
       partialDocument: {
         ...partialDocument,
         id: this.massIdReference.documentId,
