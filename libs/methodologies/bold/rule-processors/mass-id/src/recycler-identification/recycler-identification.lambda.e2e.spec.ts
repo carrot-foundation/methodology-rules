@@ -15,28 +15,26 @@ import { recyclerIdentificationTestCases } from './recycler-identification.test-
 describe('RecyclerActorProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  const massId = new BoldStubsBuilder().build();
-
   it.each(recyclerIdentificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultStatus }) => {
+    async ({ events, resultComment, resultStatus }) => {
+      const massId = new BoldStubsBuilder()
+        .createMassIdDocumentStub({
+          externalEventsMap: events,
+        })
+        .createMassIdAuditDocumentStub()
+        .build();
+
       prepareEnvironmentTestE2E(
-        [
-          {
-            ...massId.massIdDocumentStub,
-            externalEvents: [
-              ...(massId.massIdDocumentStub.externalEvents ?? []),
-              ...events,
-            ],
-          },
-          massId.massIdAuditDocumentStub,
-        ].map((document) => ({
-          document,
-          documentKey: toDocumentKey({
-            documentId: document.id,
-            documentKeyPrefix,
+        [massId.massIdDocumentStub, massId.massIdAuditDocumentStub].map(
+          (document) => ({
+            document,
+            documentKey: toDocumentKey({
+              documentId: document.id,
+              documentKeyPrefix,
+            }),
           }),
-        })),
+        ),
       );
 
       const response = (await recyclerIdentificationLambda(
@@ -48,6 +46,7 @@ describe('RecyclerActorProcessor E2E', () => {
         () => stubRuleResponse(),
       )) as RuleOutput;
 
+      expect(response.resultComment).toBe(resultComment);
       expect(response.resultStatus).toBe(resultStatus);
     },
   );

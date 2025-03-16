@@ -1,5 +1,5 @@
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,
@@ -14,23 +14,17 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('RecyclerIdentificationProcessor', () => {
   const ruleDataProcessor = new RecyclerIdentificationProcessor();
 
-  const massIdStubs = new BoldStubsBuilder().build();
-
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each(recyclerIdentificationTestCases)(
     `should return $resultStatus when $scenario`,
     async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const document = {
-        ...massIdStubs.massIdDocumentStub,
-        externalEvents: [
-          ...(massIdStubs.massIdDocumentStub.externalEvents ?? []),
-          ...events,
-        ],
-      };
+      const massIdDocumentStub = stubBoldMassIdDocument({
+        externalEventsMap: events,
+      });
 
-      documentLoaderService.mockResolvedValueOnce(document);
+      documentLoaderService.mockResolvedValueOnce(massIdDocumentStub);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
