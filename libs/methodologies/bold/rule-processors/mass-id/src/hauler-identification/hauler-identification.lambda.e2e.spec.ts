@@ -13,30 +13,32 @@ import { haulerIdentificationLambda } from './hauler-identification.lambda';
 import { haulerIdentificationTestCases } from './hauler-identification.test-cases';
 
 describe('HaulerIdentificationProcessor E2E', () => {
-  const documentKeyPrefix = faker.string.uuid();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-  const massId = new BoldStubsBuilder().build();
+  const documentKeyPrefix = faker.string.uuid();
 
   it.each(haulerIdentificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultStatus }) => {
+    async ({ events, resultComment, resultStatus }) => {
+      const massId = new BoldStubsBuilder()
+        .createMassIdDocumentStub({
+          externalEventsMap: events,
+        })
+        .createMassIdAuditDocumentStub()
+        .build();
+
       prepareEnvironmentTestE2E(
-        [
-          {
-            ...massId.massIdDocumentStub,
-            externalEvents: [
-              ...(massId.massIdDocumentStub.externalEvents ?? []),
-              ...events,
-            ],
-          },
-          massId.massIdAuditDocumentStub,
-        ].map((document) => ({
-          document,
-          documentKey: toDocumentKey({
-            documentId: document.id,
-            documentKeyPrefix,
+        [massId.massIdDocumentStub, massId.massIdAuditDocumentStub].map(
+          (document) => ({
+            document,
+            documentKey: toDocumentKey({
+              documentId: document.id,
+              documentKeyPrefix,
+            }),
           }),
-        })),
+        ),
       );
 
       const response = (await haulerIdentificationLambda(
@@ -49,6 +51,7 @@ describe('HaulerIdentificationProcessor E2E', () => {
       )) as RuleOutput;
 
       expect(response.resultStatus).toBe(resultStatus);
+      expect(response.resultComment).toBe(resultComment);
     },
   );
 });
