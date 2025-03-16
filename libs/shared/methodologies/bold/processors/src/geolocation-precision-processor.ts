@@ -96,7 +96,7 @@ export abstract class GeolocationPrecisionRuleProcessor extends RuleDataProcesso
       };
     }
 
-    if (!isHomologationActive(homologationDocument)) {
+    if (!isHomologationActive(homologationDocument, false)) {
       return {
         resultComment: this.ResultComment.HOMOLOGATION_EXPIRED,
         resultStatus: RuleOutputStatus.REJECTED,

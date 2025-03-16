@@ -45,6 +45,7 @@ export const haulerIdentificationTestCases = [
   },
   {
     events: new Map([
+      [`${ACTOR}-${HAULER}`, undefined],
       [
         PICK_UP,
         stubBoldMassIdPickUpEvent({
@@ -60,6 +61,7 @@ export const haulerIdentificationTestCases = [
   },
   {
     events: new Map([
+      [`${ACTOR}-${HAULER}`, undefined],
       [
         PICK_UP,
         stubBoldMassIdPickUpEvent({
@@ -76,7 +78,16 @@ export const haulerIdentificationTestCases = [
     )} and the ${HAULER} actor event does not exist.`,
   },
   {
-    events: new Map([[PICK_UP, undefined]]),
+    events: new Map([
+      [
+        `${ACTOR}-${HAULER}`,
+        stubDocumentEvent({
+          label: HAULER,
+          name: ACTOR,
+        }),
+      ],
+      [PICK_UP, undefined],
+    ]),
     resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `no ${PICK_UP} event exists.`,

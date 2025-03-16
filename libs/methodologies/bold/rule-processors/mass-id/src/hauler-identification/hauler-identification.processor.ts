@@ -51,17 +51,17 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     haulerEvent,
     pickUpEvent,
   }: Subject): EvaluateResultOutput {
-    if (!isNil(haulerEvent)) {
-      return {
-        resultComment: this.RESULT_COMMENT.HAULER_EVENT_FOUND,
-        resultStatus: RuleOutputStatus.APPROVED,
-      };
-    }
-
     if (isNil(pickUpEvent)) {
       return {
         resultComment: this.RESULT_COMMENT.PICK_UP_EVENT_MISSING,
         resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (!isNil(haulerEvent)) {
+      return {
+        resultComment: this.RESULT_COMMENT.HAULER_EVENT_FOUND,
+        resultStatus: RuleOutputStatus.APPROVED,
       };
     }
 

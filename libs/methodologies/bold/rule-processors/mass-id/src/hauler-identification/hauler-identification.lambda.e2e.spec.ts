@@ -50,8 +50,8 @@ describe('HaulerIdentificationProcessor E2E', () => {
         () => stubRuleResponse(),
       )) as RuleOutput;
 
-      expect(response.resultStatus).toBe(resultStatus);
       expect(response.resultComment).toBe(resultComment);
+      expect(response.resultStatus).toBe(resultStatus);
     },
   );
 });

@@ -132,7 +132,7 @@ export const checkParticipantsHomologationTestCases = [
     massIdAuditDocumentStub:
       massIdWithExpiredHomologation.massIdAuditDocumentStub,
     resultComment: processorError.ERROR_MESSAGE.HOMOLOGATION_EXPIRED([
-      massIdAuditWithHomologations.participantsHomologationDocumentStubs.get(
+      massIdWithExpiredHomologation.participantsHomologationDocumentStubs.get(
         HAULER,
       )!.id,
     ]),
