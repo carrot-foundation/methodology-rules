@@ -15,7 +15,10 @@ import { massDefinitionTestCases } from './mass-definition.test-cases';
 describe('MassDefinitionLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  const massId = new BoldStubsBuilder().build();
+  const massId = new BoldStubsBuilder()
+    .createMassIdDocumentStub()
+    .createMassIdAuditDocumentStub()
+    .build();
 
   it.each(massDefinitionTestCases)(
     'should return $resultStatus when $scenario',
