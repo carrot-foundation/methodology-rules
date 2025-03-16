@@ -134,19 +134,33 @@ export const stubDocumentEventWithReportType = (
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
-    [
-      DocumentEventAttributeName | NewDocumentEventAttributeName,
-      MethodologyDocumentEventAttributeValue,
-    ]
+    | [
+        DocumentEventAttributeName | NewDocumentEventAttributeName,
+        MethodologyDocumentEventAttributeValue,
+      ]
+    | Omit<DocumentEventAttribute, 'isPublic'>
   >,
 ) =>
   stubDocumentEvent({
     ...partialEvent,
     metadata: {
-      attributes: attributes?.map((attribute) => ({
-        isPublic: faker.datatype.boolean(),
-        name: attribute[0],
-        value: attribute[1],
-      })),
+      attributes: attributes?.map((attribute) => {
+        if (Array.isArray(attribute)) {
+          return {
+            isPublic: faker.datatype.boolean(),
+            name: attribute[0],
+            value: attribute[1],
+          };
+        }
+
+        return {
+          format: attribute.format,
+          isPublic: faker.datatype.boolean(),
+          name: attribute.name,
+          sensitive: attribute.sensitive,
+          type: attribute.type,
+          value: attribute.value,
+        };
+      }),
     },
   });

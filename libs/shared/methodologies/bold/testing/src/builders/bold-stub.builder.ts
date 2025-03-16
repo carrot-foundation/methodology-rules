@@ -1,34 +1,32 @@
 import type { MethodologyParticipant } from '@carrot-fndn/shared/types';
 
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   DocumentCategory,
-  DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-  MassSubtype,
-  NewMeasurementUnit,
+  MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
+import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { addDays, formatDate, subDays } from 'date-fns';
+
+import type { StubBoldDocumentParameters } from './bold.stubs.types';
 
 import {
   stubCreditDocument,
   stubDocumentEvent,
-  stubDocumentEventWithMetadataAttributes,
-  stubMassAuditDocument,
-  stubMassDocument,
   stubMethodologyDefinitionDocument,
   stubParticipant,
-  stubParticipantHomologationDocument,
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
+import { stubBoldMassIdDocument } from './bold-mass-id.stubs';
+import { stubBoldMassIdAuditDocument } from './bold-mass-id-audit.stubs';
+import { stubBoldHomologationDocument } from './bold-participant-homologation.stubs';
 
-const { ACTOR, CLOSE, LINK, OUTPUT, RELATED } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { ACTOR, LINK, OUTPUT, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
   DocumentType;
@@ -51,10 +49,10 @@ export interface BoldStubsBuilderResult {
 }
 
 const ACTOR_PARTICIPANTS = [
-  DocumentSubtype.HAULER,
-  DocumentSubtype.PROCESSOR,
-  DocumentSubtype.RECYCLER,
-  DocumentSubtype.WASTE_GENERATOR,
+  MassIdDocumentActorType.HAULER,
+  MassIdDocumentActorType.PROCESSOR,
+  MassIdDocumentActorType.RECYCLER,
+  MassIdDocumentActorType.WASTE_GENERATOR,
 ] as const;
 
 export class BoldStubsBuilder {
@@ -64,11 +62,11 @@ export class BoldStubsBuilder {
 
   private creditReferences: DocumentReference[] = [];
 
-  private massAuditDocumentStub: Document;
-
   private readonly massAuditReference: DocumentReference;
 
   private readonly massIdAuditDocumentId: string;
+
+  private massIdAuditDocumentStub: Document;
 
   private readonly massIdDocumentId: string;
 
@@ -115,50 +113,13 @@ export class BoldStubsBuilder {
       subtype: PROCESS,
       type: MASS_ID_AUDIT,
     };
-
-    this.massIdDocumentStub = this.createMassIdDocumentStub();
-    this.massAuditDocumentStub = this.createMassAuditDocumentStub();
-  }
-
-  private createMassAuditDocumentStub(): Document {
-    return stubMassAuditDocument({
-      externalEvents: [
-        stubDocumentEvent({
-          name: LINK,
-          referencedDocument: this.massIdReference,
-          relatedDocument: undefined,
-        }),
-      ],
-      id: this.massAuditReference.documentId,
-      parentDocumentId: this.massIdDocumentStub.id,
-    });
-  }
-
-  private createMassIdDocumentStub(): Document {
-    return stubMassDocument({
-      category: DocumentCategory.MASS_ID,
-      currentValue: faker.number.float({ min: 1 }),
-      externalEvents: [
-        ...Array.from(this.actorParticipants, ([, participant]) =>
-          stubDocumentEvent({ name: ACTOR, participant }),
-        ),
-        stubDocumentEvent({
-          name: OUTPUT,
-          relatedDocument: this.massAuditReference,
-        }),
-      ],
-      id: this.massIdReference.documentId,
-      measurementUnit: NewMeasurementUnit.KG,
-      subtype: stubEnumValue(MassSubtype),
-      type: DocumentType.ORGANIC,
-    });
   }
 
   build(): BoldStubsBuilderResult {
     return {
       actorParticipants: this.actorParticipants,
       creditDocumentsStubs: this.creditDocumentsStubs,
-      massIdAuditDocumentStub: this.massAuditDocumentStub,
+      massIdAuditDocumentStub: this.massIdAuditDocumentStub,
       massIdAuditId: this.massIdAuditDocumentId,
       massIdDocumentId: this.massIdDocumentId,
       massIdDocumentStub: this.massIdDocumentStub,
@@ -168,7 +129,76 @@ export class BoldStubsBuilder {
     };
   }
 
+  createMassIdAuditDocumentStub({
+    externalEventsMap,
+    partialDocument,
+  }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
+    if (isNil(this.massIdDocumentStub)) {
+      throw new Error(
+        'MassID document must be created first. Call createMassIdDocumentStub() before this method.',
+      );
+    }
+
+    this.massIdAuditDocumentStub = stubBoldMassIdAuditDocument({
+      externalEventsMap: {
+        [LINK]: stubDocumentEvent({
+          name: LINK,
+          referencedDocument: this.massIdReference,
+          relatedDocument: undefined,
+        }),
+        ...externalEventsMap,
+      },
+      partialDocument: {
+        ...partialDocument,
+        currentValue: this.massIdDocumentStub.currentValue,
+        id: this.massAuditReference.documentId,
+        parentDocumentId: this.massIdDocumentStub.id,
+      },
+    });
+
+    return this;
+  }
+
+  createMassIdDocumentStub({
+    externalEventsMap,
+    partialDocument,
+  }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
+    const actorEvents = Object.fromEntries(
+      Array.from(this.actorParticipants, ([actorType, participant]) => [
+        `${ACTOR}-${actorType}`,
+        stubDocumentEvent({
+          label: actorType,
+          name: ACTOR,
+          participant,
+        }),
+      ]),
+    );
+
+    this.massIdDocumentStub = stubBoldMassIdDocument({
+      externalEventsMap: {
+        [OUTPUT]: stubDocumentEvent({
+          name: OUTPUT,
+          relatedDocument: this.massAuditReference,
+        }),
+        ...actorEvents,
+        ...externalEventsMap,
+      },
+      partialDocument: {
+        ...partialDocument,
+        id: this.massIdReference.documentId,
+      },
+    });
+
+    return this;
+  }
+
   createMethodologyDocuments(): BoldStubsBuilder {
+    if (isNil(this.massIdDocumentStub) || isNil(this.massIdAuditDocumentStub)) {
+      throw new Error(
+        'MassID documents must be created first. Call createMassIdDocumentStub() and createMassIdAuditDocumentStub() before this method.',
+      );
+    }
+
     this.methodologyReference = {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
@@ -198,10 +228,10 @@ export class BoldStubsBuilder {
       id: this.methodologyReference.documentId,
     });
 
-    this.massAuditDocumentStub = {
-      ...this.massAuditDocumentStub,
+    this.massIdAuditDocumentStub = {
+      ...this.massIdAuditDocumentStub,
       externalEvents: [
-        ...(this.massAuditDocumentStub.externalEvents ?? []),
+        ...(this.massIdAuditDocumentStub.externalEvents ?? []),
         stubDocumentEvent({
           name: LINK,
           referencedDocument: this.methodologyReference,
@@ -213,11 +243,16 @@ export class BoldStubsBuilder {
     return this;
   }
 
-  createParticipantHomologationDocuments(): BoldStubsBuilder {
+  createParticipantHomologationDocuments(
+    homologationDocuments?: Map<
+      (typeof ACTOR_PARTICIPANTS)[number],
+      StubBoldDocumentParameters
+    >,
+  ): BoldStubsBuilder {
     if (
-      !this.methodologyReference ||
-      !this.participantHomologationGroupReference ||
-      !this.participantHomologationGroupDocumentStub
+      isNil(this.methodologyReference) ||
+      isNil(this.participantHomologationGroupReference) ||
+      isNil(this.participantHomologationGroupDocumentStub)
     ) {
       throw new Error(
         'Methodology documents must be created first. Call createMethodologyDocuments() before this method.',
@@ -234,23 +269,17 @@ export class BoldStubsBuilder {
 
       this.participantsHomologationReferences.set(subtype, reference);
 
-      const documentStub = stubParticipantHomologationDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [
-              HOMOLOGATION_DATE,
-              formatDate(subDays(new Date(), 2), 'yyyy-MM-dd'),
-            ],
-            [
-              HOMOLOGATION_DUE_DATE,
-              formatDate(addDays(new Date(), 2), 'yyyy-MM-dd'),
-            ],
-          ]),
-        ],
-        id: reference.documentId,
-        parentDocumentId: this.participantHomologationGroupReference.documentId,
-        primaryParticipant: this.actorParticipants.get(subtype)!,
-        subtype,
+      const documentStub = stubBoldHomologationDocument({
+        externalEventsMap:
+          homologationDocuments?.get(subtype)?.externalEventsMap,
+        partialDocument: {
+          ...homologationDocuments?.get(subtype)?.partialDocument,
+          id: reference.documentId,
+          parentDocumentId:
+            this.participantHomologationGroupReference.documentId,
+          primaryParticipant: this.actorParticipants.get(subtype)!,
+          subtype,
+        },
       });
 
       this.participantsHomologationDocumentStubs.set(subtype, documentStub);
@@ -267,10 +296,10 @@ export class BoldStubsBuilder {
         ],
       };
 
-      this.massAuditDocumentStub = {
-        ...this.massAuditDocumentStub,
+      this.massIdAuditDocumentStub = {
+        ...this.massIdAuditDocumentStub,
         externalEvents: [
-          ...(this.massAuditDocumentStub.externalEvents ?? []),
+          ...(this.massIdAuditDocumentStub.externalEvents ?? []),
           stubDocumentEvent({
             name: LINK,
             referencedDocument: reference,
@@ -291,6 +320,12 @@ export class BoldStubsBuilder {
     creditType?: typeof TCC | typeof TRC;
   } = {}): BoldStubsBuilder {
     const creditCount = Math.max(1, count);
+
+    if (isNil(this.massIdDocumentStub)) {
+      throw new Error(
+        'MassID document must be created first. Call createMassIdDocumentStub() before this method.',
+      );
+    }
 
     this.creditReferences = stubArray(
       () => ({

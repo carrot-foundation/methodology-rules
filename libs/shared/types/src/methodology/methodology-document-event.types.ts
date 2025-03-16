@@ -33,7 +33,7 @@ export interface MethodologyDocumentEventAttribute {
   name: string;
   sensitive?: boolean | undefined;
   type?: MethodologyDocumentEventAttributeType | undefined;
-  value: MethodologyDocumentEventAttributeValue;
+  value: MethodologyDocumentEventAttributeValue | undefined;
 }
 
 export interface MethodologyDocumentEventMetadata {
