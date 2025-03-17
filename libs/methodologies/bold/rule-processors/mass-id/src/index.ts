@@ -7,3 +7,4 @@ export * from './waste-origin-identification';
 export * from './project-period';
 export * from './time-interval-check';
 export * from './vehicle-identification';
+export * from './geolocation-precision';

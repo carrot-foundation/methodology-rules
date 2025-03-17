@@ -1,4 +1,8 @@
-import type { MethodologyParticipant } from '@carrot-fndn/shared/types';
+import type {
+  Geolocation,
+  MethodologyAddress,
+  MethodologyParticipant,
+} from '@carrot-fndn/shared/types';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
@@ -16,30 +20,40 @@ import { faker } from '@faker-js/faker';
 import type { StubBoldDocumentParameters } from './bold.stubs.types';
 
 import {
+  generateNearbyCoordinates,
+  stubAddress,
   stubCreditDocument,
   stubDocumentEvent,
   stubMethodologyDefinitionDocument,
   stubParticipant,
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
-import { stubBoldMassIdDocument } from './bold-mass-id.stubs';
+import {
+  stubBoldMassIdDocument,
+  stubBoldMassIdDropOffEvent,
+  stubBoldMassIdPickUpEvent,
+} from './bold-mass-id.stubs';
 import { stubBoldMassIdAuditDocument } from './bold-mass-id-audit.stubs';
 import { stubBoldHomologationDocument } from './bold-participant-homologation.stubs';
 
-const { ACTOR, LINK, OUTPUT, RELATED } = DocumentEventName;
+const { ACTOR, DROP_OFF, LINK, OPEN, OUTPUT, PICK_UP, RELATED } =
+  DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
   DocumentType;
 const { FOOD_WASTE, GROUP, PROCESS, TCC, TRC } = DocumentSubtype;
 
 export interface BoldStubsBuilderOptions {
+  actorParticipants?: Map<string, MethodologyParticipant> | undefined;
   massIdAuditDocumentId?: string;
   massIdDocumentId?: string;
 }
 
 export interface BoldStubsBuilderResult {
   actorParticipants: Map<string, MethodologyParticipant>;
+  actorParticipantsAddresses: Map<string, MethodologyAddress>;
   creditDocuments: Document[];
+  creditDocumentsStubs: Document[];
   massIdAuditDocument: Document;
   massIdAuditId: string;
   massIdDocument: Document;
@@ -48,7 +62,7 @@ export interface BoldStubsBuilderResult {
   participantsHomologationDocuments: Map<string, Document>;
 }
 
-const ACTOR_PARTICIPANTS = [
+export const ACTOR_PARTICIPANTS = [
   MassIdDocumentActorType.HAULER,
   MassIdDocumentActorType.PROCESSOR,
   MassIdDocumentActorType.RECYCLER,
@@ -58,7 +72,16 @@ const ACTOR_PARTICIPANTS = [
 export class BoldStubsBuilder {
   private readonly actorParticipants: Map<string, MethodologyParticipant>;
 
+  private readonly actorParticipantsAddresses: Map<string, MethodologyAddress>;
+
+  private readonly actorsCoordinates: Map<
+    string,
+    { base: Geolocation; nearby: Geolocation }
+  >;
+
   private creditDocuments: Document[] = [];
+
+  private creditDocumentsStubs: Document[] = [];
 
   private creditReferences: DocumentReference[] = [];
 
@@ -92,11 +115,36 @@ export class BoldStubsBuilder {
     this.massIdAuditDocumentId =
       options.massIdAuditDocumentId ?? faker.string.uuid();
 
-    this.actorParticipants = new Map(
+    this.actorParticipants =
+      options.actorParticipants ??
+      new Map(
+        ACTOR_PARTICIPANTS.map((subtype) => [
+          subtype,
+          stubParticipant({ type: subtype }),
+        ]),
+      );
+
+    this.actorsCoordinates = new Map(
       ACTOR_PARTICIPANTS.map((subtype) => [
         subtype,
-        stubParticipant({ id: faker.string.uuid() }),
+        generateNearbyCoordinates(),
       ]),
+    );
+
+    this.actorParticipantsAddresses = new Map(
+      ACTOR_PARTICIPANTS.map((subtype) => {
+        const coords = this.actorsCoordinates.get(subtype)!.base;
+        const address = stubAddress();
+
+        return [
+          subtype,
+          {
+            ...address,
+            latitude: coords.latitude,
+            longitude: coords.longitude,
+          },
+        ];
+      }),
     );
 
     this.massIdReference = {
@@ -117,7 +165,9 @@ export class BoldStubsBuilder {
   build(): BoldStubsBuilderResult {
     return {
       actorParticipants: this.actorParticipants,
+      actorParticipantsAddresses: this.actorParticipantsAddresses,
       creditDocuments: this.creditDocuments,
+      creditDocumentsStubs: this.creditDocumentsStubs,
       massIdAuditDocument: this.massIdAuditDocument,
       massIdAuditId: this.massIdAuditDocumentId,
       massIdDocument: this.massIdDocument,
@@ -165,6 +215,7 @@ export class BoldStubsBuilder {
       Array.from(this.actorParticipants, ([actorType, participant]) => [
         `${ACTOR}-${actorType}`,
         stubDocumentEvent({
+          address: this.actorParticipantsAddresses.get(actorType)!,
           label: actorType,
           name: ACTOR,
           participant,
@@ -174,10 +225,36 @@ export class BoldStubsBuilder {
 
     const defaultEventsMap = new Map([
       [
+        DROP_OFF,
+        stubBoldMassIdDropOffEvent({
+          partialDocumentEvent: {
+            address: this.actorParticipantsAddresses.get(
+              MassIdDocumentActorType.RECYCLER,
+            )!,
+            participant: this.actorParticipants.get(
+              MassIdDocumentActorType.RECYCLER,
+            )!,
+          },
+        }),
+      ],
+      [
         OUTPUT,
         stubDocumentEvent({
           name: OUTPUT,
           relatedDocument: this.massAuditReference,
+        }),
+      ],
+      [
+        PICK_UP,
+        stubBoldMassIdPickUpEvent({
+          partialDocumentEvent: {
+            address: this.actorParticipantsAddresses.get(
+              MassIdDocumentActorType.WASTE_GENERATOR,
+            )!,
+            participant: this.actorParticipants.get(
+              MassIdDocumentActorType.WASTE_GENERATOR,
+            )!,
+          },
         }),
       ],
       ...Object.entries(actorEvents),
@@ -251,10 +328,7 @@ export class BoldStubsBuilder {
   }
 
   createParticipantHomologationDocuments(
-    homologationDocuments?: Map<
-      (typeof ACTOR_PARTICIPANTS)[number],
-      StubBoldDocumentParameters
-    >,
+    homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined,
   ): BoldStubsBuilder {
     if (
       isNil(this.methodologyReference) ||
@@ -274,29 +348,46 @@ export class BoldStubsBuilder {
         type: PARTICIPANT_HOMOLOGATION,
       };
 
-      this.participantsHomologationReferences.set(subtype, reference);
+      const primaryAddress = this.actorParticipantsAddresses.get(subtype)!;
+      const primaryParticipant = this.actorParticipants.get(subtype)!;
+      const defaultEventsMap = new Map([
+        [
+          OPEN,
+          stubDocumentEvent({
+            address: primaryAddress,
+            name: OPEN,
+            participant: primaryParticipant,
+          }),
+        ],
+      ]);
+      const externalEventsMap =
+        homologationDocuments?.get(subtype)?.externalEventsMap;
 
       const documentStub = stubBoldHomologationDocument({
-        externalEventsMap:
-          homologationDocuments?.get(subtype)?.externalEventsMap,
+        externalEventsMap: new Map([
+          ...defaultEventsMap,
+          ...(externalEventsMap instanceof Map
+            ? externalEventsMap
+            : Object.entries(externalEventsMap ?? {})),
+        ]),
         partialDocument: {
-          ...homologationDocuments?.get(subtype)?.partialDocument,
           id: reference.documentId,
           parentDocumentId:
             this.participantHomologationGroupReference.documentId,
-          primaryParticipant: this.actorParticipants.get(subtype)!,
+          primaryAddress,
+          primaryParticipant,
           subtype,
         },
       });
-
-      this.participantsHomologationDocuments.set(subtype, documentStub);
 
       this.participantHomologationGroupDocument = {
         ...this.participantHomologationGroupDocument,
         externalEvents: [
           ...(this.participantHomologationGroupDocument.externalEvents ?? []),
           stubDocumentEvent({
+            address: primaryAddress,
             name: OUTPUT,
+            participant: primaryParticipant,
             relatedDocument: reference,
           }),
         ],
@@ -307,12 +398,17 @@ export class BoldStubsBuilder {
         externalEvents: [
           ...(this.massIdAuditDocument.externalEvents ?? []),
           stubDocumentEvent({
+            address: primaryAddress,
             name: LINK,
+            participant: primaryParticipant,
             referencedDocument: reference,
             relatedDocument: undefined,
           }),
         ],
       };
+
+      this.participantsHomologationReferences.set(subtype, reference);
+      this.participantsHomologationDocuments.set(subtype, documentStub);
     }
 
     return this;
