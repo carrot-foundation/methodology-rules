@@ -61,7 +61,7 @@ export const isActorEventWithSourceActorType = (
 
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,
-  attributeName: DocumentEventAttributeName,
+  attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
 export const hasWeightFormat = (

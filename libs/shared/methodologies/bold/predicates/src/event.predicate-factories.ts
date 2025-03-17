@@ -46,7 +46,9 @@ export const eventLabelIsAnyOf =
 
 export const metadataAttributeNameIsAnyOf =
   (
-    metadataNames: Array<DocumentEventAttributeName>,
+    metadataNames: Array<
+      DocumentEventAttributeName | NewDocumentEventAttributeName
+    >,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
     metadataNames.some((metadataName) =>
