@@ -41,7 +41,7 @@ export enum MethodologyDocumentEventAttributeFormat {
   CUBIC_METER = 'CUBIC_METER',
   DATE = 'DATE',
   KILOGRAM = 'KILOGRAM',
-  LITRE = 'LITRE',
+  LITER = 'LITER',
 }
 
 export enum MethodologyDocumentEventAttributeType {
