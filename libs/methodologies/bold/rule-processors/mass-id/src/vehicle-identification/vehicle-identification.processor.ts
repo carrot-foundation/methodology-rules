@@ -1,5 +1,4 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
@@ -17,6 +16,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
+
+import { validateLicensePlate } from './vehicle-identification.helpers';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
@@ -100,15 +101,11 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
           );
     }
 
-    // Convert the vehicleTypeValue to the enum type for comparison
-    const vehicleType = vehicleTypeValue as unknown as DocumentEventVehicleType;
-
-    // Check if the vehicle type is in the set of types that don't need a license plate
     const needsLicensePlate =
-      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleType);
+      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
     const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
 
-    if (!isNil(licensePlate) && !is<LicensePlate>(licensePlate)) {
+    if (isNonEmptyString(licensePlate) && !validateLicensePlate(licensePlate)) {
       return this.createResult(
         false,
         RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
