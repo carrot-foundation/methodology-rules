@@ -1,6 +1,7 @@
 export * from './mass-definition';
 export * from './credit-absence';
 export * from './check-participants-homologation';
+export * from './hauler-identification';
 export * from './recycler-identification';
 export * from './waste-origin-identification';
 export * from './project-period';

@@ -9,12 +9,13 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   DataSetName,
-  MethodologyDocumentEventLabel,
   MethodologyParticipantType,
+  type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.typia';
@@ -26,8 +27,8 @@ export const eventHasName = (
 
 export const eventHasLabel = (
   event: DocumentEvent,
-  eventLabel: MethodologyDocumentEventLabel,
-): boolean => event.label === eventLabel.toString();
+  eventLabel: NonEmptyString,
+): boolean => event.label === eventLabel;
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);
@@ -89,7 +90,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: Array<DocumentEventName>;
-  metadataName: DocumentEventAttributeName;
+  metadataName: DocumentEventAttributeName | NewDocumentEventAttributeName;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

@@ -8,10 +8,12 @@ import {
   DocumentEventMoveType,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
   and,
+  eventLabelIsAnyOf,
   eventNameIsAnyOf,
   metadataAttributeNameIsAnyOf,
   metadataAttributeValueIsAnyOf,
@@ -79,6 +81,23 @@ describe('Predicate Factories', () => {
       const event = stubDocumentEvent({ name: ACTOR });
 
       expect(eventNameIsAnyOf([MOVE, OPEN])(event)).toBe(false);
+    });
+  });
+
+  describe('eventLabelIsAnyOf', () => {
+    it('should return true if the event has any of the specified labels', () => {
+      const { HAULER, RECYCLER } = MethodologyDocumentEventLabel;
+      const event = stubDocumentEvent({ label: HAULER });
+
+      expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(true);
+    });
+
+    it('should return false if the event has none of the specified labels', () => {
+      const { HAULER, RECYCLER, WASTE_GENERATOR } =
+        MethodologyDocumentEventLabel;
+      const event = stubDocumentEvent({ label: WASTE_GENERATOR });
+
+      expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(false);
     });
   });
 

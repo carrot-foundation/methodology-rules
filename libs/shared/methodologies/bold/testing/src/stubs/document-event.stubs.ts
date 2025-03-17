@@ -7,6 +7,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
+  NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -133,7 +134,10 @@ export const stubDocumentEventWithReportType = (
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
-    [DocumentEventAttributeName, MethodologyDocumentEventAttributeValue]
+    [
+      DocumentEventAttributeName | NewDocumentEventAttributeName,
+      MethodologyDocumentEventAttributeValue,
+    ]
   >,
 ) =>
   stubDocumentEvent({

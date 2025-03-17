@@ -4,10 +4,15 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type PredicateCallback } from '@carrot-fndn/shared/types';
+import {
+  type NonEmptyString,
+  type PredicateCallback,
+} from '@carrot-fndn/shared/types';
 
 import {
+  eventHasLabel,
   eventHasMetadataAttribute,
   eventHasName,
   eventHasNonEmptyStringAttribute,
@@ -34,6 +39,11 @@ export const eventNameIsAnyOf =
   (event) =>
     eventNames.some((name) => eventHasName(event, name));
 
+export const eventLabelIsAnyOf =
+  (eventLabels: Array<NonEmptyString>): PredicateCallback<DocumentEvent> =>
+  (event) =>
+    eventLabels.some((label) => eventHasLabel(event, label));
+
 export const metadataAttributeNameIsAnyOf =
   (
     metadataNames: Array<DocumentEventAttributeName>,
@@ -45,7 +55,7 @@ export const metadataAttributeNameIsAnyOf =
 
 export const metadataAttributeValueIsAnyOf =
   (
-    metadataName: DocumentEventAttributeName,
+    metadataName: DocumentEventAttributeName | NewDocumentEventAttributeName,
     metadataValues: UnknownArray,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
