@@ -17,7 +17,7 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
 
   it.each(wasteOriginIdentificationTestCases)(
     'should validate waste origin identification - $scenario',
-    async ({ events, resultStatus }) => {
+    async ({ events, resultComment, resultStatus }) => {
       const { massIdAuditDocumentStub, massIdDocumentStub } =
         new BoldStubsBuilder()
           .createMassIdDocumentStub({
@@ -45,6 +45,7 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
         () => stubRuleResponse(),
       )) as RuleOutput;
 
+      expect(response.resultComment).toBe(resultComment);
       expect(response.resultStatus).toBe(resultStatus);
     },
   );

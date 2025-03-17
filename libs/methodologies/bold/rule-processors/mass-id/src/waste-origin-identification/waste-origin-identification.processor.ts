@@ -2,7 +2,11 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 
 import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import {
+  and,
+  eventLabelIsAnyOf,
+  eventNameIsAnyOf,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
@@ -13,7 +17,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-const { PICK_UP, WASTE_GENERATOR } = DocumentEventName;
+const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 
 type Subject = {
@@ -23,11 +27,11 @@ type Subject = {
 
 export const RESULT_COMMENT = {
   MISSING_PICK_UP_EVENT: `The ${PICK_UP} event was not found.`,
-  MISSING_WASTE_GENERATOR_EVENT: `No "${WASTE_GENERATOR}" event was found, and the waste origin is not "${UNIDENTIFIED}".`,
-  MULTIPLE_WASTE_GENERATOR_EVENTS: `More than one "${WASTE_GENERATOR}" event was found, but only one is allowed.`,
-  UNIDENTIFIED_WASTE_ORIGIN: `No "${WASTE_GENERATOR}" event was found, and the waste origin is "${UNIDENTIFIED}".`,
-  WASTE_ORIGIN_CONFLICT: `A "${WASTE_GENERATOR}" event was found, but the waste origin is "${UNIDENTIFIED}".`,
-  WASTE_ORIGIN_IDENTIFIED: `A ${WASTE_GENERATOR} event was found.`,
+  MISSING_WASTE_GENERATOR_EVENT: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, and the waste origin is not "${UNIDENTIFIED}".`,
+  MULTIPLE_WASTE_GENERATOR_EVENTS: `More than one "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, but only one is allowed.`,
+  UNIDENTIFIED_WASTE_ORIGIN: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" event was found, and the waste origin is "${UNIDENTIFIED}".`,
+  WASTE_ORIGIN_CONFLICT: `An "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, but the waste origin is "${UNIDENTIFIED}".`,
+  WASTE_ORIGIN_IDENTIFIED: `A single "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found.`,
 } as const;
 
 export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -92,7 +96,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     );
 
     const wasteGeneratorEvents = document.externalEvents?.filter(
-      eventNameIsAnyOf([WASTE_GENERATOR]),
+      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
     );
 
     return {
