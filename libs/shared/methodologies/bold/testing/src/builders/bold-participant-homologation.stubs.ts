@@ -1,5 +1,6 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   DocumentCategory,
   DocumentEventName,
@@ -51,10 +52,9 @@ export const stubBoldHomologationDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters): Document => {
-  const mergedEventsMap = mergeEventsMaps(
-    boldHomologationExternalEventsMap,
-    externalEventsMap,
-  );
+  const mergedEventsMap = isNil(externalEventsMap)
+    ? boldHomologationExternalEventsMap
+    : mergeEventsMaps(boldHomologationExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(

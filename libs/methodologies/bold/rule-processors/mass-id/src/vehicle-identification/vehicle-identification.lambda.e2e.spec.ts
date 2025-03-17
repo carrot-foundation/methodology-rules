@@ -12,8 +12,6 @@ import { faker } from '@faker-js/faker/.';
 import { vehicleIdentificationLambda } from './vehicle-identification.lambda';
 import { vehicleIdentificationTestCases } from './vehicle-identification.test-cases';
 
-jest.setTimeout(100_000);
-
 describe('VehicleIdentificationLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 

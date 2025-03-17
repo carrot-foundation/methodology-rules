@@ -12,7 +12,7 @@ import {
 
 export type MergeEventsMapsParameter =
   | Map<DocumentEventName | string, DocumentEvent | undefined>
-  | Partial<Record<string, DocumentEvent | undefined>>
+  | Record<string, DocumentEvent | undefined>
   | undefined;
 
 /**
@@ -20,24 +20,19 @@ export type MergeEventsMapsParameter =
  * If an event in the override map is undefined, it will be removed from the result.
  *
  * @param defaultEventsMap - The default Map of events to start with
- * @param overrideEventsMap - Optional Map or object containing events that should override the defaults
+ * @param overridenEventsMap - Optional Map or object containing events that should override the defaults
  * @returns A new Map with the merged events
  */
-export function mergeEventsMaps<T extends DocumentEventName | string>(
+export const mergeEventsMaps = <T extends DocumentEventName | string>(
   defaultEventsMap: Map<T, DocumentEvent>,
-  overrideEventsMap?:
+  overridenEventsMap:
     | Map<T, DocumentEvent | undefined>
-    | Partial<Record<string, DocumentEvent | undefined>>
-    | undefined,
-): Map<T, DocumentEvent> {
+    | Record<string, DocumentEvent | undefined>,
+): Map<T, DocumentEvent> => {
   const mergedEventsMap = new Map(defaultEventsMap);
 
-  if (!overrideEventsMap) {
-    return mergedEventsMap;
-  }
-
-  if (overrideEventsMap instanceof Map) {
-    for (const [key, value] of overrideEventsMap.entries()) {
+  if (overridenEventsMap instanceof Map) {
+    for (const [key, value] of overridenEventsMap.entries()) {
       if (value === undefined) {
         mergedEventsMap.delete(key);
       } else {
@@ -45,7 +40,7 @@ export function mergeEventsMaps<T extends DocumentEventName | string>(
       }
     }
   } else {
-    for (const [key, value] of Object.entries(overrideEventsMap)) {
+    for (const [key, value] of Object.entries(overridenEventsMap)) {
       if (value === undefined) {
         mergedEventsMap.delete(key as T);
       } else {
@@ -55,7 +50,7 @@ export function mergeEventsMaps<T extends DocumentEventName | string>(
   }
 
   return mergedEventsMap;
-}
+};
 
 export type MetadataAttributeTupleParameter = [
   DocumentEventAttributeName | NewDocumentEventAttributeName,
@@ -75,35 +70,33 @@ export type MetadataAttributeResponse =
   | MetadataAttributeTupleResponse
   | Omit<DocumentEventAttribute, 'isPublic'>;
 
-function isTuple(
+export const isTuple = (
   attribute: MetadataAttributeParameter,
-): attribute is MetadataAttributeTupleParameter {
-  return Array.isArray(attribute);
-}
+): attribute is MetadataAttributeTupleParameter => Array.isArray(attribute);
 
-function getAttributeName(attribute: MetadataAttributeParameter): string {
-  return (isTuple(attribute) ? attribute[0] : attribute.name).toString();
-}
+export const getAttributeName = (
+  attribute: MetadataAttributeParameter,
+): string => (isTuple(attribute) ? attribute[0] : attribute.name).toString();
 
 /**
  * Merges default metadata attributes with override attributes, prioritizing the override values.
  * If an attribute in the override array has undefined value, it will be removed from the result.
  *
  * @param defaultAttributes - The default array of attributes to start with
- * @param overrideAttributes - Optional array of attributes that should override the defaults
+ * @param overridenAttributes - Optional array of attributes that should override the defaults
  * @returns A new array with the merged attributes
  */
-export function mergeMetadataAttributes(
+export const mergeMetadataAttributes = (
   defaultAttributes: MetadataAttributeParameter[],
-  overrideAttributes?: MetadataAttributeParameter[] | undefined,
-): MetadataAttributeResponse[] {
+  overridenAttributes?: MetadataAttributeParameter[] | undefined,
+): MetadataAttributeResponse[] => {
   const filteredDefaults = defaultAttributes.filter((attribute) =>
     isTuple(attribute)
       ? attribute[1] !== undefined
       : attribute.value !== undefined,
   );
 
-  if (!overrideAttributes || overrideAttributes.length === 0) {
+  if (!overridenAttributes || overridenAttributes.length === 0) {
     return filteredDefaults as MetadataAttributeResponse[];
   }
 
@@ -113,7 +106,7 @@ export function mergeMetadataAttributes(
     attributesMap.set(getAttributeName(attribute), attribute);
   }
 
-  for (const attribute of overrideAttributes) {
+  for (const attribute of overridenAttributes) {
     const name = getAttributeName(attribute);
 
     const hasValue = isTuple(attribute)
@@ -128,4 +121,4 @@ export function mergeMetadataAttributes(
   }
 
   return [...attributesMap.values()] as MetadataAttributeResponse[];
-}
+};

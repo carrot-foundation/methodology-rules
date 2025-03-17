@@ -1,3 +1,4 @@
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   DocumentCategory,
@@ -279,10 +280,9 @@ export const stubBoldMassIdDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters = {}): Document => {
-  const mergedEventsMap = mergeEventsMaps(
-    boldMassIdExternalEventsMap,
-    externalEventsMap,
-  );
+  const mergedEventsMap = isNil(externalEventsMap)
+    ? boldMassIdExternalEventsMap
+    : mergeEventsMaps(boldMassIdExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(

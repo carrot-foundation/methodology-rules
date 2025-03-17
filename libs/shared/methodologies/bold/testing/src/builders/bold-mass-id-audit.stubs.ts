@@ -3,6 +3,7 @@ import type {
   DocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   DocumentCategory,
   DocumentType,
@@ -20,10 +21,9 @@ export const stubBoldMassIdAuditDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters = {}): Document => {
-  const mergedEventsMap = mergeEventsMaps(
-    boldMassIdAuditExternalEventsMap,
-    externalEventsMap,
-  );
+  const mergedEventsMap = isNil(externalEventsMap)
+    ? boldMassIdAuditExternalEventsMap
+    : mergeEventsMaps(boldMassIdAuditExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(
