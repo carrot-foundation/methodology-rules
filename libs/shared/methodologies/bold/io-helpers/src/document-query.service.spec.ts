@@ -143,8 +143,6 @@ describe('DocumenQueryService', () => {
       });
       const relatedDocument = stubDocument({
         ...externalEvent,
-        externalCreatedAt:
-          externalEvent.externalCreatedAt ?? new Date().toISOString(),
       });
       const parentDocument = stubDocument({ externalEvents: [externalEvent] });
       const document = stubDocument({ parentDocumentId: parentDocument.id });
@@ -458,8 +456,6 @@ describe('DocumenQueryService', () => {
       });
       const relatedDocument = stubDocument({
         ...externalEvent,
-        externalCreatedAt:
-          externalEvent.externalCreatedAt ?? new Date().toISOString(),
       });
       const parentDocument = stubDocument({ externalEvents: [externalEvent] });
       const document = stubDocument({ parentDocumentId: parentDocument.id });
