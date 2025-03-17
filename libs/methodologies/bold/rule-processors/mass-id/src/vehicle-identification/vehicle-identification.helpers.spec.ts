@@ -1,60 +1,66 @@
-import { validateLicensePlate } from './vehicle-identification.helpers';
+import { isValidLicensePlate } from './vehicle-identification.helpers';
 
-describe('Helpers', () => {
+describe('Vehicle Identification Helpers', () => {
   describe('validateLicensePlate', () => {
     describe('valid formats', () => {
       it.each([
-        ['ABC1D23', true],
-        ['XYZ9A01', true],
-        ['DEF5G78', true],
-        ['ABC-1234', true],
-        ['XYZ-5678', true],
-        ['DEF-9012', true],
-        ['AB-1234', true],
-        ['XY-5678', true],
-        ['CD-9012', true],
-      ])('should validate %s as %s', (input, expected) => {
-        expect(validateLicensePlate(input)).toBe(expected);
+        'ABC1D23',
+        'XYZ9A01',
+        'DEF5G78',
+        'ABC-1234',
+        'XYZ-5678',
+        'DEF-9012',
+        'AB-1234',
+        'XY-5678',
+        'CD-9012',
+      ])('should validate %s as true', (input) => {
+        expect(isValidLicensePlate(input)).toBeTruthy();
       });
     });
 
     describe('invalid formats', () => {
       it.each([
-        ['', false],
-        [null, false],
-        [undefined, false],
-        ['abc1d23', false],
-        ['abc-1234', false],
-        ['ab-1234', false],
-        ['AbC1D23', false],
-        ['aBc-1234', false],
-        ['Ab-1234', false],
-        ['AB1C2', false],
-        ['AB-123', false],
-        ['A-1234', false],
-        ['ABCD1E23', false],
-        ['ABCD-1234', false],
-        ['ABC-12345', false],
-        ['A1C1D23', false],
-        ['1BC1D23', false],
-        ['ABCAD23', false],
-        ['ABC1DAB', false],
-        ['ABC-ABCD', false],
-        ['AB-ABCD', false],
-        ['ABC1234', false],
-        ['AB1234', false],
-        ['AB1-234', false],
-        ['A-BC1234', false],
-        ['ABCD-123', false],
-        ['ABC.1234', false],
-        ['ABC_1234', false],
-        ['ABC 1234', false],
-        ['AB.1234', false],
-        [12_345, false],
-        [{}, false],
-        [[], false],
-      ])('should validate %s as %s', (input, expected) => {
-        expect(validateLicensePlate(input)).toBe(expected);
+        '',
+        null,
+        undefined,
+        'abc1d23',
+        'abc-1234',
+        'ab-1234',
+        'AbC1D23',
+        'aBc-1234',
+        'Ab-1234',
+        'AB1C2',
+        'AB-123',
+        'A-1234',
+        'ABCD1E23',
+        'ABCD-1234',
+        'ABC-12345',
+        'A1C1D23',
+        '1BC1D23',
+        'ABCAD23',
+        'ABC1DAB',
+        'ABC-ABCD',
+        'AB-ABCD',
+        'ABC1234',
+        'AB1234',
+        'AB1-234',
+        'A-BC1234',
+        'ABCD-123',
+        'ABC.1234',
+        'ABC_1234',
+        'ABC 1234',
+        'AB.1234',
+        12_345,
+        {},
+        '***1***',
+        '***-****',
+        '**-****',
+        '****1*23',
+        '****-1234',
+        '***-12345',
+        [],
+      ])('should validate %s as false', (input) => {
+        expect(isValidLicensePlate(input)).toBeFalsy();
       });
     });
   });

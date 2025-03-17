@@ -17,7 +17,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
-import { validateLicensePlate } from './vehicle-identification.helpers';
+import { isValidLicensePlate } from './vehicle-identification.helpers';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
@@ -126,7 +126,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       );
     }
 
-    if (!validateLicensePlate(licensePlate)) {
+    if (!isValidLicensePlate(licensePlate)) {
       return this.createResult(
         false,
         RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
