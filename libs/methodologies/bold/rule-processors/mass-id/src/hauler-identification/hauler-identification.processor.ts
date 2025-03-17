@@ -34,12 +34,12 @@ export const OPTIONAL_HAULER_VEHICLE_TYPES = [
 ] as const;
 
 export const RESULT_COMMENTS = {
-  HAULER_EVENT_FOUND: `A "${HAULER}" event was found.`,
+  HAULER_EVENT_FOUND: `An "${ACTOR}" with the label "${HAULER}" was found.`,
   HAULER_EVENT_MISSING: (vehicleType: string) =>
-    `No "${HAULER}" event was found, but it is required for the “${vehicleType}" pick-up "${VEHICLE_TYPE}".`,
+    `No "${ACTOR}" event with the label "${HAULER}" was found, but it is required for the "${vehicleType}" pick-up "${VEHICLE_TYPE}".`,
   HAULER_NOT_REQUIRED: (vehicleType: string) =>
     `A "${HAULER}" event is not required because the pick-up "${VEHICLE_TYPE}" is ${vehicleType}.`,
-  PICK_UP_EVENT_MISSING: `A "${PICK_UP}" event is required and was not found.`,
+  PICK_UP_EVENT_MISSING: `No "${PICK_UP}" event was found in the document.`,
 } as const;
 
 export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
