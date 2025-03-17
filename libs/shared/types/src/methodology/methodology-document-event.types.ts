@@ -60,7 +60,7 @@ export interface MethodologyDocumentEvent {
   author: MethodologyAuthor;
   deduplicationId?: string | undefined;
   documentSideEffectUpdates?: UnknownObject | undefined;
-  externalCreatedAt?: (string & tags.Format<'date-time'>) | undefined;
+  externalCreatedAt: string & tags.Format<'date-time'>;
   externalId?: string | undefined;
   id: string;
   isPublic: boolean;

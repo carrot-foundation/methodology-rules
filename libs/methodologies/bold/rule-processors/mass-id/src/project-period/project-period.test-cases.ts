@@ -62,10 +62,4 @@ export const projectPeriodTestCases = [
     scenario:
       'the Recycled event was created exactly at the eligible date (BRT timezone)',
   },
-  {
-    externalCreatedAt: undefined,
-    resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
-    resultStatus: RuleOutputStatus.REJECTED,
-    scenario: 'the Recycled event has no externalCreatedAt attribute',
-  },
 ];

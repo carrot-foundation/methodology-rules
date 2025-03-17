@@ -4,7 +4,10 @@ import {
   stubBoldMassIdDropOffEvent,
   stubBoldMassIdRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  type DocumentEvent,
+  DocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -67,7 +70,8 @@ describe('TimeIntervalCheckProcessor', () => {
             DROP_OFF,
             stubBoldMassIdDropOffEvent({
               partialDocumentEvent: {
-                externalCreatedAt: dropOffEventDate,
+                externalCreatedAt:
+                  dropOffEventDate as DocumentEvent['externalCreatedAt'],
               },
             }),
           ],
@@ -75,7 +79,8 @@ describe('TimeIntervalCheckProcessor', () => {
             RECYCLED,
             stubBoldMassIdRecycledEvent({
               partialDocumentEvent: {
-                externalCreatedAt: recycledEventDate,
+                externalCreatedAt:
+                  recycledEventDate as DocumentEvent['externalCreatedAt'],
               },
             }),
           ],

@@ -21,7 +21,6 @@ const { RECYCLED } = DocumentEventName;
 export const RESULT_COMMENTS = {
   INVALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred before the first day of the previous year, in UTC time.`,
   MISSING_RECYCLED_EVENT: `No "${RECYCLED}" event was found in the document.`,
-  MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT: `The '${RECYCLED}' event has no 'externalCreatedAt' attribute.`,
   VALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred on or after the first day of the previous year, in UTC time.`,
 } as const;
 
@@ -34,14 +33,6 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
     if (isNil(recycledEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (isNil(recycledEvent.externalCreatedAt)) {
-      return {
-        resultComment:
-          RESULT_COMMENTS.MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }

@@ -33,9 +33,9 @@ describe('ProjectPeriodLambda E2E', () => {
           [
             RECYCLED,
             stubBoldMassIdRecycledEvent({
-              partialDocumentEvent: {
-                externalCreatedAt,
-              },
+              partialDocumentEvent: externalCreatedAt
+                ? { externalCreatedAt }
+                : {},
             }),
           ],
         ]),
