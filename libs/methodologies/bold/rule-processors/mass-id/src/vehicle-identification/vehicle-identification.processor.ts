@@ -104,7 +104,6 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     const needsLicensePlate =
       !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
 
-    // If vehicle type doesn't need license plate, approve immediately
     if (!needsLicensePlate) {
       return this.createResult(
         true,
@@ -112,7 +111,6 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       );
     }
 
-    // Only validate license plate for vehicle types that need it
     const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
     const hasLicensePlate = eventHasNonEmptyStringAttribute(
       event,
