@@ -170,8 +170,6 @@ export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      console.log(error);
-
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });

@@ -13,23 +13,6 @@ import { creditAbsenceTestCases } from './credit-absence.test-cases';
 describe('CreditAbsenceProcessor', () => {
   const ruleDataProcessor = new CreditAbsenceProcessor(TRC_CREDIT_MATCH);
 
-  // const massIdWithCreditStubs = new BoldStubsBuilder()
-  //   .createMassIdDocumentStub()
-  //   .createMassIdAuditDocumentStub()
-  //   .withCredits()
-  //   .build();
-  // const massIdWithoutCreditsStubs = new BoldStubsBuilder()
-  //   .createMassIdDocumentStub()
-  //   .createMassIdAuditDocumentStub()
-  //   .build();
-  // const massIdWithMultipleCreditsStubs = new BoldStubsBuilder()
-  //   .createMassIdDocumentStub()
-  //   .createMassIdAuditDocumentStub()
-  //   .withCredits({
-  //     count: 4,
-  //   })
-  //   .build();
-
   it.each(creditAbsenceTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {

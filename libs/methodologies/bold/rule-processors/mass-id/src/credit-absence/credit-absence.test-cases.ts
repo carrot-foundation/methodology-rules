@@ -14,12 +14,6 @@ import { CreditAbsenceProcessorErrors } from './credit-absence.processor.errors'
 
 const processorError = new CreditAbsenceProcessorErrors();
 
-// const massIdWithCreditStubs = new BoldStubsBuilder()
-//   .createMassIdDocumentStub()
-//   .createMassIdAuditDocumentStub()
-//   .withCredits()
-//   .build();
-
 const massIdWithoutCreditsStubs = new BoldStubsBuilder()
   .createMassIdDocumentStub()
   .createMassIdAuditDocumentStub()
