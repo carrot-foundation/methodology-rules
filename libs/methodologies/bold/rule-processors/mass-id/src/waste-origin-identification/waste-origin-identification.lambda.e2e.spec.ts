@@ -1,5 +1,3 @@
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
-
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
@@ -17,24 +15,18 @@ import { wasteOriginIdentificationTestCases } from './waste-origin-identificatio
 describe('WasteOriginIdentificationProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  const { massIdAuditDocumentStub, massIdDocumentStub } =
-    new BoldStubsBuilder().build();
-
   it.each(wasteOriginIdentificationTestCases)(
     'should validate waste origin identification - $scenario',
-    async ({ pickUpEvent, resultStatus, wasteGeneratorEvents }) => {
+    async ({ events, resultComment, resultStatus }) => {
+      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocument({
+          externalEventsMap: events,
+        })
+        .createMassIdAuditDocument()
+        .build();
+
       prepareEnvironmentTestE2E(
-        [
-          {
-            ...massIdDocumentStub,
-            externalEvents: [
-              ...(massIdDocumentStub.externalEvents ?? []),
-              pickUpEvent,
-              ...(wasteGeneratorEvents ?? []),
-            ].filter((event): event is DocumentEvent => event !== undefined),
-          },
-          massIdAuditDocumentStub,
-        ].map((document) => ({
+        [massIdDocument, massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -46,12 +38,13 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
       const response = (await wasteOriginIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocumentStub.id,
+          parentDocumentId: massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),
       )) as RuleOutput;
 
+      expect(response.resultComment).toBe(resultComment);
       expect(response.resultStatus).toBe(resultStatus);
     },
   );

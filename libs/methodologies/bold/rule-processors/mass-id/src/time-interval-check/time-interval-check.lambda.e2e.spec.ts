@@ -1,9 +1,13 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   BoldStubsBuilder,
-  stubDocumentEvent,
+  stubBoldMassIdDropOffEvent,
+  stubBoldMassIdRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  type DocumentEvent,
+  DocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -16,42 +20,47 @@ import { faker } from '@faker-js/faker';
 import { timeIntervalCheckLambda } from './time-interval-check.lambda';
 import { timeIntervalTestCases } from './time-interval-check.test-cases';
 
+const { DROP_OFF, RECYCLED } = DocumentEventName;
+
 describe('TimeIntervalCheckProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
-
-  const massId = new BoldStubsBuilder().build();
 
   it.each(timeIntervalTestCases)(
     'should validate time interval between events - $scenario',
     async ({ dropOffEventDate, recycledEventDate, resultStatus }) => {
-      const externalEvents = [];
+      const externalEvents = new Map<DocumentEventName, DocumentEvent>();
 
       if (dropOffEventDate) {
-        externalEvents.push(
-          stubDocumentEvent({
-            externalCreatedAt: dropOffEventDate,
-            name: DocumentEventName.DROP_OFF,
+        externalEvents.set(
+          DROP_OFF,
+          stubBoldMassIdDropOffEvent({
+            partialDocumentEvent: {
+              externalCreatedAt: dropOffEventDate,
+            },
           }),
         );
       }
 
       if (recycledEventDate) {
-        externalEvents.push(
-          stubDocumentEvent({
-            externalCreatedAt: recycledEventDate,
-            name: DocumentEventName.RECYCLED,
+        externalEvents.set(
+          RECYCLED,
+          stubBoldMassIdRecycledEvent({
+            partialDocumentEvent: {
+              externalCreatedAt: recycledEventDate,
+            },
           }),
         );
       }
 
+      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocument({
+          externalEventsMap: externalEvents,
+        })
+        .createMassIdAuditDocument()
+        .build();
+
       prepareEnvironmentTestE2E(
-        [
-          {
-            ...massId.massIdDocumentStub,
-            externalEvents,
-          },
-          massId.massIdAuditDocumentStub,
-        ].map((document) => ({
+        [massIdDocument, massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -63,7 +72,7 @@ describe('TimeIntervalCheckProcessor E2E', () => {
       const response = (await timeIntervalCheckLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massId.massIdDocumentStub.id,
+          parentDocumentId: massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

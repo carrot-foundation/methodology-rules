@@ -10,22 +10,21 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { UTCDate } from '@date-fns/utc';
-import { format, isAfter, isEqual } from 'date-fns';
+import { isAfter, isEqual } from 'date-fns';
 
 interface RuleSubject {
   recycledEvent: DocumentEvent | undefined;
 }
 
-export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
-  private readonly RESULT_COMMENT = {
-    ELIGIBLE: (eligibleDate: Date) =>
-      `The '${DocumentEventName.RECYCLED}' event was created after ${format(eligibleDate, 'yyyy-MM-dd')}.`,
-    INELIGIBLE: (eligibleDate: Date) =>
-      `The '${DocumentEventName.RECYCLED}' event was created before ${format(eligibleDate, 'yyyy-MM-dd')}.`,
-    MISSING_RECYCLED_EVENT: `The '${DocumentEventName.RECYCLED}' event is missing.`,
-    MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT: `The '${DocumentEventName.RECYCLED}' event has no 'externalCreatedAt' attribute.`,
-  } as const;
+const { RECYCLED } = DocumentEventName;
 
+export const RESULT_COMMENTS = {
+  INVALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred before the first day of the previous year, in UTC time.`,
+  MISSING_RECYCLED_EVENT: `No "${RECYCLED}" event was found in the document.`,
+  VALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred on or after the first day of the previous year, in UTC time.`,
+} as const;
+
+export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   protected evaluateResult({
     recycledEvent,
   }: RuleSubject): EvaluateResultOutput {
@@ -33,15 +32,7 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
 
     if (isNil(recycledEvent)) {
       return {
-        resultComment: this.RESULT_COMMENT.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (isNil(recycledEvent.externalCreatedAt)) {
-      return {
-        resultComment:
-          this.RESULT_COMMENT.MISSING_RECYCLED_EVENT_EXTERNAL_CREATED_AT,
+        resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
@@ -53,8 +44,8 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
 
     return {
       resultComment: isEligible
-        ? this.RESULT_COMMENT.ELIGIBLE(eligibleDate)
-        : this.RESULT_COMMENT.INELIGIBLE(eligibleDate),
+        ? RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE
+        : RESULT_COMMENTS.INVALID_RECYCLED_EVENT_DATE,
       resultStatus: isEligible
         ? RuleOutputStatus.APPROVED
         : RuleOutputStatus.REJECTED,

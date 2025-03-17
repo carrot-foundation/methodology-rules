@@ -13,24 +13,24 @@ import { haulerIdentificationLambda } from './hauler-identification.lambda';
 import { haulerIdentificationTestCases } from './hauler-identification.test-cases';
 
 describe('HaulerIdentificationProcessor E2E', () => {
-  const documentKeyPrefix = faker.string.uuid();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-  const massId = new BoldStubsBuilder().build();
+  const documentKeyPrefix = faker.string.uuid();
 
   it.each(haulerIdentificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultStatus }) => {
+    async ({ events, resultComment, resultStatus }) => {
+      const massId = new BoldStubsBuilder()
+        .createMassIdDocument({
+          externalEventsMap: events,
+        })
+        .createMassIdAuditDocument()
+        .build();
+
       prepareEnvironmentTestE2E(
-        [
-          {
-            ...massId.massIdDocumentStub,
-            externalEvents: [
-              ...(massId.massIdDocumentStub.externalEvents ?? []),
-              ...events,
-            ],
-          },
-          massId.massIdAuditDocumentStub,
-        ].map((document) => ({
+        [massId.massIdDocument, massId.massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -42,12 +42,13 @@ describe('HaulerIdentificationProcessor E2E', () => {
       const response = (await haulerIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massId.massIdDocumentStub.id,
+          parentDocumentId: massId.massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),
       )) as RuleOutput;
 
+      expect(response.resultComment).toBe(resultComment);
       expect(response.resultStatus).toBe(resultStatus);
     },
   );

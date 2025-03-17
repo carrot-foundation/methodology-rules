@@ -17,17 +17,20 @@ export enum MethodologyDocumentEventLabel {
 export enum MethodologyDocumentEventName {
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',
-  DROP_OFF = 'Drop Off',
+  DROP_OFF = 'Drop-off',
   LINK = 'LINK',
   NOTICE = 'NOTICE',
   OPEN = 'OPEN',
   OUTPUT = 'OUTPUT',
   PICK_UP = 'Pick-up',
   RECYCLED = 'Recycled',
+  RECYCLING_MANIFEST = 'Recycling Manifest',
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',
   RULES_METADATA = 'RULES METADATA',
+  TRANSPORT_MANIFEST = 'Transport Manifest',
   WASTE_GENERATOR = 'Waste Generator',
+  WEIGHING = 'Weighing',
 }
 
 export enum MethodologyEvaluationResult {

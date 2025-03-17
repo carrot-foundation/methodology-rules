@@ -29,6 +29,7 @@ import { stubParticipant } from './participant.stubs';
 
 export const stubDocument = (
   partialDocument?: PartialDeep<Document>,
+  stubExternalEvents = true,
 ): Document => {
   const externalEvents =
     partialDocument?.externalEvents?.map((event) => stubDocumentEvent(event)) ??
@@ -38,7 +39,10 @@ export const stubDocument = (
     ...random<Document>(),
     category: stubEnumValue(DocumentCategory),
     ...partialDocument,
-    externalEvents: [...random<Array<DocumentEvent>>(), ...externalEvents],
+    externalEvents: [
+      ...(stubExternalEvents ? random<Array<DocumentEvent>>() : []),
+      ...externalEvents,
+    ],
     primaryAddress: stubAddress(partialDocument?.primaryAddress),
     primaryParticipant: stubParticipant(partialDocument?.primaryParticipant),
   };

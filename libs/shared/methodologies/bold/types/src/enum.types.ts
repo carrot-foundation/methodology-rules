@@ -82,9 +82,33 @@ export enum DocumentEventRuleSlug {
 
 // TODO: rename to DocumentEventAttributeName when all rule processors are implemented
 export enum NewDocumentEventAttributeName {
+  CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
+  CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
+  CONTAINER_CAPACITY = 'Container Capacity',
+  CONTAINER_QUANTITY = 'Container Quantity',
+  CONTAINER_TYPE = 'Container Type',
+  DESCRIPTION = 'Description',
+  DOCUMENT_NUMBER = 'Document Number',
+  DOCUMENT_TYPE = 'Document Type',
+  DRIVER_IDENTIFIER = 'Driver Identifier',
+  DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION = 'Driver Identifier Exemption Justification',
+  EXEMPTION_JUSTIFICATION = 'Exemption Justification',
+  GROSS_WEIGHT = 'Gross Weight',
+  HOMOLOGATION_DATE = 'Homologation Date',
+  HOMOLOGATION_DUE_DATE = 'Homologation Due Date',
+  ISSUE_DATE = 'Issue Date',
+  LOCAL_WASTE_CLASSIFICATION_DESC = 'Local Waste Classification Desc',
+  LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
+  MASS_NET_WEIGHT = 'Mass Net Weight',
+  RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
+  SCALE_HOMOLOGATION = 'Scale Homologation',
+  SCALE_TYPE = 'Scale Type',
+  TARE = 'Tare',
   VEHICLE_DESCRIPTION = 'Vehicle Description',
   VEHICLE_LICENSE_PLATE = 'Vehicle License Plate',
   VEHICLE_TYPE = 'Vehicle Type',
+  WASTE_ORIGIN = 'Waste Origin',
+  WEIGHING_CAPTURE_METHOD = 'Weighing Capture Method',
 }
 
 export enum DocumentEventAttributeName {
@@ -136,7 +160,6 @@ export enum DocumentEventAttributeName {
   VEHICLE_TYPE = 'vehicle-type',
   VEHICLE_VOLUME_CAPACITY = 'vehicle-volume-capacity',
   VEHICLE_WEIGHT = 'vehicle-weight',
-  WASTE_ORIGIN = 'Waste Origin',
   WASTE_ORIGIN_IDENTIFIED = 'waste-origin-identified',
   WEIGHT_SCALE_MANUFACTURER = 'weight-scale-manufacturer',
   WEIGHT_SCALE_MODEL = 'weight-scale-model',
@@ -171,10 +194,13 @@ export enum DocumentEventName {
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
   PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,
+  RECYCLING_MANIFEST = MethodologyDocumentEventName.RECYCLING_MANIFEST,
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
   RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
+  TRANSPORT_MANIFEST = MethodologyDocumentEventName.TRANSPORT_MANIFEST,
   WASTE_GENERATOR = MethodologyDocumentEventName.WASTE_GENERATOR,
+  WEIGHING = MethodologyDocumentEventName.WEIGHING,
 }
 
 export enum DocumentEventActorType {
@@ -209,4 +235,34 @@ export enum DocumentEventVehicleType {
   OTHERS = 'Others',
   SLUDGE_PIPES = 'Sludge Pipes',
   TRUCK = 'Truck',
+}
+
+export enum DocumentEventWeighingCaptureMethod {
+  DIGITAL = 'Digital',
+  MANUAL = 'Manual',
+  PHOTO = 'Photo (Scale + Cargo)',
+  TRANSPORT_MANIFEST = 'Transport Manifest',
+}
+
+export enum DocumentEventScaleType {
+  BIN_SCALE = 'Bin Scale',
+  CONVEYOR_BELT_SCALE = 'Conveyor Belt Scale',
+  FLOOR_SCALE = 'Floor Scale',
+  FORKLIFT_SCALE = 'Forklift Scale',
+  HANGING_OR_CRANE_SCALE = 'Hanging / Crane Scale',
+  ONBOARD_TRUCK_SCALE = 'Onboard Truck Scale',
+  PALLET_SCALE = 'Pallet Scale',
+  PORTABLE_AXLE_WEIGHER = 'Portable Axle Weigher',
+  PRECISION_OR_BENCH_SCALE = 'Precision / Bench Scale',
+  WEIGHBRIDGE = 'Weighbridge (Truck Scale)',
+}
+
+export enum DocumentEventContainerType {
+  BAG = 'Bag',
+  BIN = 'Bin',
+  DRUM = 'Drum',
+  PAIL = 'Pail',
+  STREET_BIN = 'Street Bin',
+  TRUCK = 'Truck',
+  WASTE_BOX = 'Waste Box',
 }

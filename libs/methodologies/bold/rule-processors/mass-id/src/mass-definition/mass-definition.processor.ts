@@ -15,19 +15,23 @@ import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassSubtype);
 
+const { MASS_ID } = DocumentCategory;
+const { KG } = NewMeasurementUnit;
+const { ORGANIC } = DocumentType;
+
 export const RESULT_COMMENTS = {
   APPROVED:
-    'The mass definition is compliant: category, type, subtype, value, and measurement unit are valid.',
-  CATEGORY_NOT_MATCHING: (category: string): string =>
-    `Expected category "${DocumentCategory.MASS_ID}" but got "${category}".`,
-  CURRENT_VALUE_NOT_MATCHING: (value: number): string =>
-    `Expected current value to be greater than 0 but got ${value}.`,
-  MEASUREMENT_UNIT_NOT_MATCHING: (measurementUnit: string): string =>
-    `Expected measurement unit "${NewMeasurementUnit.KG}" but got "${measurementUnit}".`,
-  SUBTYPE_NOT_MATCHING: (subtype: string): string =>
-    `Expected subtype to be one of the following: ${ALLOWED_SUBTYPES.join(', ')} but got "${subtype}".`,
-  TYPE_NOT_MATCHING: (type: string): string =>
-    `Expected type to be "${DocumentType.ORGANIC}" but got "${type}".`,
+    'The document category, measurement unit, subtype, type, and value are correctly defined.',
+  INVALID_CATEGORY: (category: string): string =>
+    `The document category must be "${MASS_ID}", but "${category}" was provided.`,
+  INVALID_MEASUREMENT_UNIT: (measurementUnit: string): string =>
+    `The measurement unit must be "${KG}", but "${measurementUnit}" was provided.`,
+  INVALID_SUBTYPE: (subtype: string): string =>
+    `The subtype "${subtype}" is not among the allowed values.`,
+  INVALID_TYPE: (type: string): string =>
+    `The document type must be "${ORGANIC}", but "${type}" was provided.`,
+  INVALID_VALUE: (value: number): string =>
+    `The document value must be greater than 0, but "${value}" was provided.`,
 } as const;
 
 export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Document> {
@@ -80,31 +84,25 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
 
     const validationCriteria = [
       {
-        errorMessage: this.RESULT_COMMENT.CATEGORY_NOT_MATCHING(
-          document.category,
-        ),
-        isValid: document.category === DocumentCategory.MASS_ID.valueOf(),
+        errorMessage: this.RESULT_COMMENT.INVALID_CATEGORY(document.category),
+        isValid: document.category === MASS_ID.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.TYPE_NOT_MATCHING(document.type!),
-        isValid: document.type === DocumentType.ORGANIC.valueOf(),
+        errorMessage: this.RESULT_COMMENT.INVALID_TYPE(document.type!),
+        isValid: document.type === ORGANIC.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.MEASUREMENT_UNIT_NOT_MATCHING(
+        errorMessage: this.RESULT_COMMENT.INVALID_MEASUREMENT_UNIT(
           document.measurementUnit,
         ),
-        isValid: document.measurementUnit === NewMeasurementUnit.KG.valueOf(),
+        isValid: document.measurementUnit === KG.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.CURRENT_VALUE_NOT_MATCHING(
-          document.currentValue,
-        ),
+        errorMessage: this.RESULT_COMMENT.INVALID_VALUE(document.currentValue),
         isValid: document.currentValue > 0,
       },
       {
-        errorMessage: this.RESULT_COMMENT.SUBTYPE_NOT_MATCHING(
-          document.subtype!,
-        ),
+        errorMessage: this.RESULT_COMMENT.INVALID_SUBTYPE(document.subtype!),
         isValid: this.isValidSubtype(document.subtype),
       },
     ];
@@ -120,7 +118,7 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
     return {
       resultComment: isValid
         ? this.RESULT_COMMENT.APPROVED
-        : errorMessages.join('. '),
+        : errorMessages.join(' '),
       resultStatus: isValid
         ? RuleOutputStatus.APPROVED
         : RuleOutputStatus.REJECTED,

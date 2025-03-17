@@ -1,6 +1,5 @@
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,
@@ -15,27 +14,16 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('WasteOriginIdentificationProcessor', () => {
   const ruleDataProcessor = new WasteOriginIdentificationProcessor();
   const documentLoaderService = jest.mocked(loadParentDocument);
-  const { massIdDocumentStub } = new BoldStubsBuilder().build();
 
   it.each(wasteOriginIdentificationTestCases)(
     `should return $resultStatus when $scenario`,
-    async ({
-      pickUpEvent,
-      resultComment,
-      resultStatus,
-      wasteGeneratorEvents,
-    }) => {
+    async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const document = {
-        ...massIdDocumentStub,
-        externalEvents: [
-          ...(massIdDocumentStub.externalEvents ?? []),
-          pickUpEvent,
-          ...(wasteGeneratorEvents ?? []),
-        ].filter((event): event is DocumentEvent => event !== undefined),
-      };
+      const massIdDocument = stubBoldMassIdDocument({
+        externalEventsMap: events,
+      });
 
-      documentLoaderService.mockResolvedValueOnce(document);
+      documentLoaderService.mockResolvedValueOnce(massIdDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

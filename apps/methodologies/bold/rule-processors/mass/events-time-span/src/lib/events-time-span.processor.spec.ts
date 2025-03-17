@@ -5,6 +5,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
@@ -59,7 +60,8 @@ describe('EventsTimeSpanProcessor', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             {
-              externalCreatedAt: eventWithDropOffValueDate,
+              externalCreatedAt:
+                eventWithDropOffValueDate as DocumentEvent['externalCreatedAt'],
               name: random<DocumentEventName>(),
             },
             [[MOVE_TYPE, DROP_OFF]],

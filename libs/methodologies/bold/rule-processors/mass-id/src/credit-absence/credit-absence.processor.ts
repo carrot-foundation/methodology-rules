@@ -28,6 +28,11 @@ export interface RuleSubject {
   creditDocuments: Document[];
 }
 
+export const RESULT_COMMENTS = {
+  APPROVED: (creditType: string) =>
+    `The MassID is not linked to a valid ${creditType}`,
+} as const;
+
 export class CreditAbsenceProcessor extends RuleDataProcessor {
   private readonly creditMatch: DocumentMatcher;
 
@@ -37,12 +42,6 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
     super();
 
     this.creditMatch = creditMatch;
-  }
-
-  private get RESULT_COMMENT() {
-    return {
-      APPROVED: `The MassID is not linked to a valid ${this.creditMatch.match.subtype}`,
-    } as const;
   }
 
   private evaluateResult({
@@ -62,7 +61,9 @@ export class CreditAbsenceProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.APPROVED,
+      resultComment: RESULT_COMMENTS.APPROVED(
+        assert<NonEmptyString>(this.creditMatch.match.subtype),
+      ),
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }

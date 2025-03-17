@@ -1,6 +1,6 @@
 import {
+  stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
-  stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventName,
@@ -22,15 +22,21 @@ const { TRUCK } = DocumentEventVehicleType;
 
 export const haulerIdentificationTestCases = [
   {
-    events: [
-      stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
-        [VEHICLE_TYPE, TRUCK],
-      ]),
-      stubDocumentEvent({
-        label: HAULER,
-        name: ACTOR,
-      }),
-    ],
+    events: new Map([
+      [
+        `${ACTOR}-${HAULER}`,
+        stubDocumentEvent({
+          label: HAULER,
+          name: ACTOR,
+        }),
+      ],
+      [
+        PICK_UP,
+        stubBoldMassIdPickUpEvent({
+          metadataAttributes: [[VEHICLE_TYPE, TRUCK]],
+        }),
+      ],
+    ]),
     resultComment: RESULT_COMMENTS.HAULER_EVENT_FOUND,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
@@ -38,11 +44,15 @@ export const haulerIdentificationTestCases = [
     )} and the ${HAULER} actor event exists.`,
   },
   {
-    events: [
-      stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
-        [VEHICLE_TYPE, TRUCK],
-      ]),
-    ],
+    events: new Map([
+      [`${ACTOR}-${HAULER}`, undefined],
+      [
+        PICK_UP,
+        stubBoldMassIdPickUpEvent({
+          metadataAttributes: [[VEHICLE_TYPE, TRUCK]],
+        }),
+      ],
+    ]),
     resultComment: RESULT_COMMENTS.HAULER_EVENT_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
@@ -50,11 +60,15 @@ export const haulerIdentificationTestCases = [
     )} and the ${HAULER} actor event does not exist.`,
   },
   {
-    events: [
-      stubDocumentEventWithMetadataAttributes({ name: PICK_UP }, [
-        [VEHICLE_TYPE, DocumentEventVehicleType.CART],
-      ]),
-    ],
+    events: new Map([
+      [`${ACTOR}-${HAULER}`, undefined],
+      [
+        PICK_UP,
+        stubBoldMassIdPickUpEvent({
+          metadataAttributes: [[VEHICLE_TYPE, DocumentEventVehicleType.CART]],
+        }),
+      ],
+    ]),
     resultComment: RESULT_COMMENTS.HAULER_NOT_REQUIRED(
       DocumentEventVehicleType.CART,
     ),
@@ -64,7 +78,16 @@ export const haulerIdentificationTestCases = [
     )} and the ${HAULER} actor event does not exist.`,
   },
   {
-    events: [],
+    events: new Map([
+      [
+        `${ACTOR}-${HAULER}`,
+        stubDocumentEvent({
+          label: HAULER,
+          name: ACTOR,
+        }),
+      ],
+      [PICK_UP, undefined],
+    ]),
     resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `no ${PICK_UP} event exists.`,
