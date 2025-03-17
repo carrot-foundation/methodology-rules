@@ -16,15 +16,15 @@ describe('MassDefinitionLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   const massId = new BoldStubsBuilder()
-    .createMassIdDocumentStub()
-    .createMassIdAuditDocumentStub()
+    .createMassIdDocument()
+    .createMassIdAuditDocument()
     .build();
 
   it.each(massDefinitionTestCases)(
     'should return $resultStatus when $scenario',
     async ({ massIdDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [massIdDocument, massId.massIdAuditDocumentStub].map((document) => ({
+        [massIdDocument, massId.massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,

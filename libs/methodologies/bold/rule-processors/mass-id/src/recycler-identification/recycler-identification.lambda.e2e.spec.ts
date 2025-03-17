@@ -18,29 +18,27 @@ describe('RecyclerActorProcessor E2E', () => {
   it.each(recyclerIdentificationTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
-      const massId = new BoldStubsBuilder()
-        .createMassIdDocumentStub({
+      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocument({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocumentStub()
+        .createMassIdAuditDocument()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massId.massIdDocumentStub, massId.massIdAuditDocumentStub].map(
-          (document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document.id,
-              documentKeyPrefix,
-            }),
+        [massIdDocument, massIdAuditDocument].map((document) => ({
+          document,
+          documentKey: toDocumentKey({
+            documentId: document.id,
+            documentKeyPrefix,
           }),
-        ),
+        })),
       );
 
       const response = (await recyclerIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massId.massIdDocumentStub.id,
+          parentDocumentId: massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

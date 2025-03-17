@@ -52,29 +52,27 @@ describe('TimeIntervalCheckProcessor E2E', () => {
         );
       }
 
-      const massId = new BoldStubsBuilder()
-        .createMassIdDocumentStub({
+      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocument({
           externalEventsMap: externalEvents,
         })
-        .createMassIdAuditDocumentStub()
+        .createMassIdAuditDocument()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massId.massIdDocumentStub, massId.massIdAuditDocumentStub].map(
-          (document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document.id,
-              documentKeyPrefix,
-            }),
+        [massIdDocument, massIdAuditDocument].map((document) => ({
+          document,
+          documentKey: toDocumentKey({
+            documentId: document.id,
+            documentKeyPrefix,
           }),
-        ),
+        })),
       );
 
       const response = (await timeIntervalCheckLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massId.massIdDocumentStub.id,
+          parentDocumentId: massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

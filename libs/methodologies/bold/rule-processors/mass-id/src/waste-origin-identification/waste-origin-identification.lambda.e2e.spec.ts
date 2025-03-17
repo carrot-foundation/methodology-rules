@@ -18,16 +18,15 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
   it.each(wasteOriginIdentificationTestCases)(
     'should validate waste origin identification - $scenario',
     async ({ events, resultComment, resultStatus }) => {
-      const { massIdAuditDocumentStub, massIdDocumentStub } =
-        new BoldStubsBuilder()
-          .createMassIdDocumentStub({
-            externalEventsMap: events,
-          })
-          .createMassIdAuditDocumentStub()
-          .build();
+      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocument({
+          externalEventsMap: events,
+        })
+        .createMassIdAuditDocument()
+        .build();
 
       prepareEnvironmentTestE2E(
-        [massIdDocumentStub, massIdAuditDocumentStub].map((document) => ({
+        [massIdDocument, massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -39,7 +38,7 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
       const response = (await wasteOriginIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocumentStub.id,
+          parentDocumentId: massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

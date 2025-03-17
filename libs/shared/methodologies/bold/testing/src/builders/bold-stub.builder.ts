@@ -39,13 +39,13 @@ export interface BoldStubsBuilderOptions {
 
 export interface BoldStubsBuilderResult {
   actorParticipants: Map<string, MethodologyParticipant>;
-  creditDocumentsStubs: Document[];
-  massIdAuditDocumentStub: Document;
+  creditDocuments: Document[];
+  massIdAuditDocument: Document;
   massIdAuditId: string;
+  massIdDocument: Document;
   massIdDocumentId: string;
-  massIdDocumentStub: Document;
-  methodologyDocumentStub?: Document | undefined;
-  participantsHomologationDocumentStubs: Map<string, Document>;
+  methodologyDocument?: Document | undefined;
+  participantsHomologationDocuments: Map<string, Document>;
 }
 
 const ACTOR_PARTICIPANTS = [
@@ -58,32 +58,31 @@ const ACTOR_PARTICIPANTS = [
 export class BoldStubsBuilder {
   private readonly actorParticipants: Map<string, MethodologyParticipant>;
 
-  private creditDocumentsStubs: Document[] = [];
+  private creditDocuments: Document[] = [];
 
   private creditReferences: DocumentReference[] = [];
 
   private readonly massAuditReference: DocumentReference;
 
+  private massIdAuditDocument: Document;
+
   private readonly massIdAuditDocumentId: string;
 
-  private massIdAuditDocumentStub: Document;
+  private massIdDocument: Document;
 
   private readonly massIdDocumentId: string;
 
-  private massIdDocumentStub: Document;
-
   private readonly massIdReference: DocumentReference;
 
-  private methodologyDocumentStub?: Document;
+  private methodologyDocument?: Document;
 
   private methodologyReference?: DocumentReference;
 
-  private participantHomologationGroupDocumentStub?: Document;
+  private participantHomologationGroupDocument?: Document;
 
   private participantHomologationGroupReference?: DocumentReference;
 
-  private participantsHomologationDocumentStubs: Map<string, Document> =
-    new Map();
+  private participantsHomologationDocuments: Map<string, Document> = new Map();
 
   private participantsHomologationReferences: Map<string, DocumentReference> =
     new Map();
@@ -118,28 +117,27 @@ export class BoldStubsBuilder {
   build(): BoldStubsBuilderResult {
     return {
       actorParticipants: this.actorParticipants,
-      creditDocumentsStubs: this.creditDocumentsStubs,
-      massIdAuditDocumentStub: this.massIdAuditDocumentStub,
+      creditDocuments: this.creditDocuments,
+      massIdAuditDocument: this.massIdAuditDocument,
       massIdAuditId: this.massIdAuditDocumentId,
+      massIdDocument: this.massIdDocument,
       massIdDocumentId: this.massIdDocumentId,
-      massIdDocumentStub: this.massIdDocumentStub,
-      methodologyDocumentStub: this.methodologyDocumentStub,
-      participantsHomologationDocumentStubs:
-        this.participantsHomologationDocumentStubs,
+      methodologyDocument: this.methodologyDocument,
+      participantsHomologationDocuments: this.participantsHomologationDocuments,
     };
   }
 
-  createMassIdAuditDocumentStub({
+  createMassIdAuditDocument({
     externalEventsMap,
     partialDocument,
   }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
-    if (isNil(this.massIdDocumentStub)) {
+    if (isNil(this.massIdDocument)) {
       throw new Error(
-        'MassID document must be created first. Call createMassIdDocumentStub() before this method.',
+        'MassID document must be created first. Call createMassIdDocument() before this method.',
       );
     }
 
-    this.massIdAuditDocumentStub = stubBoldMassIdAuditDocument({
+    this.massIdAuditDocument = stubBoldMassIdAuditDocument({
       externalEventsMap: {
         [LINK]: stubDocumentEvent({
           name: LINK,
@@ -150,16 +148,16 @@ export class BoldStubsBuilder {
       },
       partialDocument: {
         ...partialDocument,
-        currentValue: this.massIdDocumentStub.currentValue,
+        currentValue: this.massIdDocument.currentValue,
         id: this.massAuditReference.documentId,
-        parentDocumentId: this.massIdDocumentStub.id,
+        parentDocumentId: this.massIdDocument.id,
       },
     });
 
     return this;
   }
 
-  createMassIdDocumentStub({
+  createMassIdDocument({
     externalEventsMap,
     partialDocument,
   }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
@@ -185,7 +183,7 @@ export class BoldStubsBuilder {
       ...Object.entries(actorEvents),
     ]);
 
-    this.massIdDocumentStub = stubBoldMassIdDocument({
+    this.massIdDocument = stubBoldMassIdDocument({
       externalEventsMap: new Map([
         ...defaultEventsMap,
         ...(externalEventsMap instanceof Map
@@ -202,9 +200,9 @@ export class BoldStubsBuilder {
   }
 
   createMethodologyDocuments(): BoldStubsBuilder {
-    if (isNil(this.massIdDocumentStub) || isNil(this.massIdAuditDocumentStub)) {
+    if (isNil(this.massIdDocument) || isNil(this.massIdAuditDocument)) {
       throw new Error(
-        'MassID documents must be created first. Call createMassIdDocumentStub() and createMassIdAuditDocumentStub() before this method.',
+        'MassID documents must be created first. Call createMassIdDocument() and createMassIdAuditDocument() before this method.',
       );
     }
 
@@ -221,13 +219,13 @@ export class BoldStubsBuilder {
       type: PARTICIPANT_HOMOLOGATION,
     };
 
-    this.participantHomologationGroupDocumentStub =
+    this.participantHomologationGroupDocument =
       stubParticipantHomologationGroupDocument({
         id: this.participantHomologationGroupReference.documentId,
         parentDocumentId: this.methodologyReference.documentId,
       });
 
-    this.methodologyDocumentStub = stubMethodologyDefinitionDocument({
+    this.methodologyDocument = stubMethodologyDefinitionDocument({
       externalEvents: [
         stubDocumentEvent({
           name: OUTPUT,
@@ -237,10 +235,10 @@ export class BoldStubsBuilder {
       id: this.methodologyReference.documentId,
     });
 
-    this.massIdAuditDocumentStub = {
-      ...this.massIdAuditDocumentStub,
+    this.massIdAuditDocument = {
+      ...this.massIdAuditDocument,
       externalEvents: [
-        ...(this.massIdAuditDocumentStub.externalEvents ?? []),
+        ...(this.massIdAuditDocument.externalEvents ?? []),
         stubDocumentEvent({
           name: LINK,
           referencedDocument: this.methodologyReference,
@@ -261,7 +259,7 @@ export class BoldStubsBuilder {
     if (
       isNil(this.methodologyReference) ||
       isNil(this.participantHomologationGroupReference) ||
-      isNil(this.participantHomologationGroupDocumentStub)
+      isNil(this.participantHomologationGroupDocument)
     ) {
       throw new Error(
         'Methodology documents must be created first. Call createMethodologyDocuments() before this method.',
@@ -291,13 +289,12 @@ export class BoldStubsBuilder {
         },
       });
 
-      this.participantsHomologationDocumentStubs.set(subtype, documentStub);
+      this.participantsHomologationDocuments.set(subtype, documentStub);
 
-      this.participantHomologationGroupDocumentStub = {
-        ...this.participantHomologationGroupDocumentStub,
+      this.participantHomologationGroupDocument = {
+        ...this.participantHomologationGroupDocument,
         externalEvents: [
-          ...(this.participantHomologationGroupDocumentStub.externalEvents ??
-            []),
+          ...(this.participantHomologationGroupDocument.externalEvents ?? []),
           stubDocumentEvent({
             name: OUTPUT,
             relatedDocument: reference,
@@ -305,10 +302,10 @@ export class BoldStubsBuilder {
         ],
       };
 
-      this.massIdAuditDocumentStub = {
-        ...this.massIdAuditDocumentStub,
+      this.massIdAuditDocument = {
+        ...this.massIdAuditDocument,
         externalEvents: [
-          ...(this.massIdAuditDocumentStub.externalEvents ?? []),
+          ...(this.massIdAuditDocument.externalEvents ?? []),
           stubDocumentEvent({
             name: LINK,
             referencedDocument: reference,
@@ -330,9 +327,9 @@ export class BoldStubsBuilder {
   } = {}): BoldStubsBuilder {
     const creditCount = Math.max(1, count);
 
-    if (isNil(this.massIdDocumentStub)) {
+    if (isNil(this.massIdDocument)) {
       throw new Error(
-        'MassID document must be created first. Call createMassIdDocumentStub() before this method.',
+        'MassID document must be created first. Call createMassIdDocument() before this method.',
       );
     }
 
@@ -346,17 +343,17 @@ export class BoldStubsBuilder {
       { max: creditCount },
     );
 
-    this.creditDocumentsStubs = this.creditReferences.map((reference) =>
+    this.creditDocuments = this.creditReferences.map((reference) =>
       stubCreditDocument({
         id: reference.documentId,
         subtype: reference.subtype,
       }),
     );
 
-    this.massIdDocumentStub = {
-      ...this.massIdDocumentStub,
+    this.massIdDocument = {
+      ...this.massIdDocument,
       externalEvents: [
-        ...(this.massIdDocumentStub.externalEvents ?? []),
+        ...(this.massIdDocument.externalEvents ?? []),
         ...this.creditReferences.map((reference) =>
           stubDocumentEvent({
             name: RELATED,

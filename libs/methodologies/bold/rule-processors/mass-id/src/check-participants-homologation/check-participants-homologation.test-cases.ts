@@ -21,15 +21,15 @@ const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } =
 const processorError = new CheckParticipantsHomologationProcessorErrors();
 
 const massIdAuditWithHomologations = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .createMethodologyDocuments()
   .createParticipantHomologationDocuments()
   .build();
 
 const massIdWithExpiredHomologation = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .createMethodologyDocuments()
   .createParticipantHomologationDocuments(
     new Map([
@@ -62,20 +62,18 @@ const massIdWithExpiredHomologation = new BoldStubsBuilder()
 export const checkParticipantsHomologationTestCases = [
   {
     documents: [
-      massIdAuditWithHomologations.massIdDocumentStub,
-      ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      massIdAuditWithHomologations.massIdDocument,
+      ...massIdAuditWithHomologations.participantsHomologationDocuments.values(),
     ],
-    massIdAuditDocumentStub:
-      massIdAuditWithHomologations.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario:
       'the participants homologation documents are found and the homologation is active',
   },
   {
-    documents: [massIdAuditWithHomologations.massIdDocumentStub],
-    massIdAuditDocumentStub:
-      massIdAuditWithHomologations.massIdAuditDocumentStub,
+    documents: [massIdAuditWithHomologations.massIdDocument],
+    massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.HOMOLOGATION_DOCUMENTS_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
@@ -83,13 +81,12 @@ export const checkParticipantsHomologationTestCases = [
   },
   {
     documents: [
-      massIdAuditWithHomologations.massIdDocumentStub,
+      massIdAuditWithHomologations.massIdDocument,
       ...[
-        ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+        ...massIdAuditWithHomologations.participantsHomologationDocuments.values(),
       ].filter((document) => document.subtype !== HAULER),
     ],
-    massIdAuditDocumentStub:
-      massIdAuditWithHomologations.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS([
         HAULER,
@@ -99,10 +96,9 @@ export const checkParticipantsHomologationTestCases = [
   },
   {
     documents: [
-      ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      ...massIdAuditWithHomologations.participantsHomologationDocuments.values(),
     ],
-    massIdAuditDocumentStub:
-      massIdAuditWithHomologations.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the mass document does not exist',
@@ -110,29 +106,27 @@ export const checkParticipantsHomologationTestCases = [
   {
     documents: [
       {
-        ...massIdAuditWithHomologations.massIdDocumentStub,
+        ...massIdAuditWithHomologations.massIdDocument,
         externalEvents: [],
       },
-      ...massIdAuditWithHomologations.participantsHomologationDocumentStubs.values(),
+      ...massIdAuditWithHomologations.participantsHomologationDocuments.values(),
     ],
-    massIdAuditDocumentStub:
-      massIdAuditWithHomologations.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
-        massIdAuditWithHomologations.massIdDocumentStub.id,
+        massIdAuditWithHomologations.massIdDocument.id,
       ),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the mass document does not contain events',
   },
   {
     documents: [
-      massIdWithExpiredHomologation.massIdDocumentStub,
-      ...massIdWithExpiredHomologation.participantsHomologationDocumentStubs.values(),
+      massIdWithExpiredHomologation.massIdDocument,
+      ...massIdWithExpiredHomologation.participantsHomologationDocuments.values(),
     ],
-    massIdAuditDocumentStub:
-      massIdWithExpiredHomologation.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdWithExpiredHomologation.massIdAuditDocument,
     resultComment: processorError.ERROR_MESSAGE.HOMOLOGATION_EXPIRED([
-      massIdWithExpiredHomologation.participantsHomologationDocumentStubs.get(
+      massIdWithExpiredHomologation.participantsHomologationDocuments.get(
         HAULER,
       )!.id,
     ]),

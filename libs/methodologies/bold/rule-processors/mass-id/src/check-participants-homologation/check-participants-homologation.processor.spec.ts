@@ -14,20 +14,15 @@ describe('CheckParticipantsHomologationProcessor', () => {
 
   it.each(checkParticipantsHomologationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({
-      documents,
-      massIdAuditDocumentStub,
-      resultComment,
-      resultStatus,
-    }) => {
+    async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
       spyOnDocumentQueryServiceLoad(stubDocument(), [
-        massIdAuditDocumentStub,
+        massIdAuditDocument,
         ...documents,
       ]);
 
       const ruleInput = {
         ...random<Required<RuleInput>>(),
-        documentId: massIdAuditDocumentStub.id,
+        documentId: massIdAuditDocument.id,
       };
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);

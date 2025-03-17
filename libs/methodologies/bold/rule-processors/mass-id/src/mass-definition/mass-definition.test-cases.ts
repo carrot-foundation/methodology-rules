@@ -5,21 +5,21 @@ import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 import { RESULT_COMMENTS } from './mass-definition.processor';
 
 const massIdStubs = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .build();
 const processorErrors = new MassDefinitionProcessorErrors();
 
 export const massDefinitionTestCases = [
   {
-    massIdDocument: massIdStubs.massIdDocumentStub,
+    massIdDocument: massIdStubs.massIdDocument,
     resultComment: RESULT_COMMENTS.APPROVED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'all the criteria are met',
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       category: 'INVALID_CATEGORY',
     },
     resultComment: RESULT_COMMENTS.INVALID_CATEGORY('INVALID_CATEGORY'),
@@ -28,7 +28,7 @@ export const massDefinitionTestCases = [
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       type: 'INVALID_TYPE',
     },
     resultComment: RESULT_COMMENTS.INVALID_TYPE('INVALID_TYPE'),
@@ -37,7 +37,7 @@ export const massDefinitionTestCases = [
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       measurementUnit: 'INVALID_UNIT',
     },
     resultComment: RESULT_COMMENTS.INVALID_MEASUREMENT_UNIT('INVALID_UNIT'),
@@ -46,7 +46,7 @@ export const massDefinitionTestCases = [
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       currentValue: 0,
     },
     resultComment: RESULT_COMMENTS.INVALID_VALUE(0),
@@ -55,7 +55,7 @@ export const massDefinitionTestCases = [
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
     },
     resultComment: RESULT_COMMENTS.INVALID_SUBTYPE(
@@ -65,20 +65,20 @@ export const massDefinitionTestCases = [
     scenario: 'subtype is defined but not in the allowed list',
   },
   {
-    massIdDocument: { ...massIdStubs.massIdDocumentStub, type: undefined },
+    massIdDocument: { ...massIdStubs.massIdDocument, type: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'document type is not found',
   },
   {
-    massIdDocument: { ...massIdStubs.massIdDocumentStub, subtype: undefined },
+    massIdDocument: { ...massIdStubs.massIdDocument, subtype: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'document subtype is not found',
   },
   {
     massIdDocument: {
-      ...massIdStubs.massIdDocumentStub,
+      ...massIdStubs.massIdDocument,
       subtype: 'INVALID_SUBTYPE',
       type: 'INVALID_TYPE',
     },

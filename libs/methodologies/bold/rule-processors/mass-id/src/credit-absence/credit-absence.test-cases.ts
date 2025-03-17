@@ -15,17 +15,17 @@ import { CreditAbsenceProcessorErrors } from './credit-absence.processor.errors'
 const processorError = new CreditAbsenceProcessorErrors();
 
 const massIdWithoutCreditsStubs = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .build();
 const massIdWithCreditStubs = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .withCredits()
   .build();
 const massIdWithMultipleCreditsStubs = new BoldStubsBuilder()
-  .createMassIdDocumentStub()
-  .createMassIdAuditDocumentStub()
+  .createMassIdDocument()
+  .createMassIdAuditDocument()
   .withCredits({
     count: 4,
   })
@@ -33,8 +33,8 @@ const massIdWithMultipleCreditsStubs = new BoldStubsBuilder()
 
 export const creditAbsenceTestCases = [
   {
-    documents: [massIdWithoutCreditsStubs.massIdDocumentStub],
-    massIdAuditDocument: massIdWithoutCreditsStubs.massIdAuditDocumentStub,
+    documents: [massIdWithoutCreditsStubs.massIdDocument],
+    massIdAuditDocument: massIdWithoutCreditsStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
       assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
     ),
@@ -43,13 +43,13 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithCreditStubs.massIdDocumentStub,
+      massIdWithCreditStubs.massIdDocument,
       {
-        ...massIdWithCreditStubs.creditDocumentsStubs[0],
+        ...massIdWithCreditStubs.creditDocuments[0],
         status: DocumentStatus.CANCELLED,
       },
     ] as Document[],
-    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
       assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
     ),
@@ -58,10 +58,10 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithCreditStubs.massIdDocumentStub,
-      ...massIdWithCreditStubs.creditDocumentsStubs,
+      massIdWithCreditStubs.massIdDocument,
+      ...massIdWithCreditStubs.creditDocuments,
     ],
-    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
         assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
@@ -71,15 +71,15 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithMultipleCreditsStubs.massIdDocumentStub,
-      ...massIdWithMultipleCreditsStubs.creditDocumentsStubs.map(
-        (creditDocumentStub: Document) => ({
-          ...creditDocumentStub,
+      massIdWithMultipleCreditsStubs.massIdDocument,
+      ...massIdWithMultipleCreditsStubs.creditDocuments.map(
+        (creditDocument: Document) => ({
+          ...creditDocument,
           status: DocumentStatus.CANCELLED,
         }),
       ),
     ],
-    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
       assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
     ),
@@ -89,16 +89,16 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithMultipleCreditsStubs.massIdDocumentStub,
-      ...massIdWithMultipleCreditsStubs.creditDocumentsStubs.map(
-        (creditDocumentStub: Document, index: number) => ({
-          ...creditDocumentStub,
+      massIdWithMultipleCreditsStubs.massIdDocument,
+      ...massIdWithMultipleCreditsStubs.creditDocuments.map(
+        (creditDocument: Document, index: number) => ({
+          ...creditDocument,
           status:
             index === 0 ? random<NonEmptyString>() : DocumentStatus.CANCELLED,
         }),
       ),
     ],
-    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocumentStub,
+    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
         assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),

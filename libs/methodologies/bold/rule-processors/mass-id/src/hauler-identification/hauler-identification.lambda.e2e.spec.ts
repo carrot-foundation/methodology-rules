@@ -23,28 +23,26 @@ describe('HaulerIdentificationProcessor E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const massId = new BoldStubsBuilder()
-        .createMassIdDocumentStub({
+        .createMassIdDocument({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocumentStub()
+        .createMassIdAuditDocument()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massId.massIdDocumentStub, massId.massIdAuditDocumentStub].map(
-          (document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document.id,
-              documentKeyPrefix,
-            }),
+        [massId.massIdDocument, massId.massIdAuditDocument].map((document) => ({
+          document,
+          documentKey: toDocumentKey({
+            documentId: document.id,
+            documentKeyPrefix,
           }),
-        ),
+        })),
       );
 
       const response = (await haulerIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massId.massIdDocumentStub.id,
+          parentDocumentId: massId.massIdDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

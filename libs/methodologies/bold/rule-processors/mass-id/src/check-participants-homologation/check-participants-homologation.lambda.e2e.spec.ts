@@ -20,9 +20,9 @@ describe('CheckParticipantsHomologationProcessor E2E', () => {
 
   it.each(checkParticipantsHomologationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocumentStub, resultStatus }) => {
+    async ({ documents, massIdAuditDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [...documents, massIdAuditDocumentStub].map((document) => ({
+        [...documents, massIdAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -33,7 +33,7 @@ describe('CheckParticipantsHomologationProcessor E2E', () => {
 
       const response = (await checkParticipantsHomologationLambda(
         stubRuleInput({
-          documentId: massIdAuditDocumentStub.id,
+          documentId: massIdAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
