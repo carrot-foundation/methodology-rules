@@ -1,7 +1,6 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { LicensePlate } from '@carrot-fndn/shared/types';
 
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   eventHasNonEmptyStringAttribute,
@@ -16,7 +15,9 @@ import {
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { is, validate } from 'typia';
+import { is } from 'typia';
+
+import { validateLicensePlate } from './vehicle-identification.helpers';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
@@ -70,45 +71,41 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
     const vehicleTypeValue = getEventAttributeValue(event, VEHICLE_TYPE);
 
-    if (isNil(vehicleTypeValue)) {
+    if (!isNonEmptyString(vehicleTypeValue)) {
       return this.createResult(false, RESULT_COMMENTS.VEHICLE_TYPE_MISSING);
     }
 
-    const vehicleTypeValidation =
-      validate<DocumentEventVehicleType>(vehicleTypeValue);
-
-    if (!vehicleTypeValidation.success) {
+    if (!is<DocumentEventVehicleType>(vehicleTypeValue)) {
       return this.createResult(
         false,
-        RESULT_COMMENTS.INVALID_VEHICLE_TYPE(
-          String(vehicleTypeValidation.data),
-        ),
+        RESULT_COMMENTS.INVALID_VEHICLE_TYPE(vehicleTypeValue),
       );
     }
 
-    const vehicleType = vehicleTypeValidation.data;
     const hasDescription = eventHasNonEmptyStringAttribute(
       event,
       VEHICLE_DESCRIPTION,
     );
 
-    if (vehicleType === OTHERS) {
+    if (vehicleTypeValue === OTHERS) {
       return hasDescription
         ? this.createResult(
             true,
-            RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(vehicleType),
+            RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(
+              vehicleTypeValue,
+            ),
           )
         : this.createResult(
             false,
-            RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(vehicleType),
+            RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(vehicleTypeValue),
           );
     }
 
     const needsLicensePlate =
-      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleType);
+      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
     const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
 
-    if (!isNil(licensePlate) && !is<LicensePlate>(licensePlate)) {
+    if (isNonEmptyString(licensePlate) && !validateLicensePlate(licensePlate)) {
       return this.createResult(
         false,
         RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
@@ -121,7 +118,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     ) {
       return this.createResult(
         false,
-        RESULT_COMMENTS.LICENSE_PLATE_MISSING(vehicleType),
+        RESULT_COMMENTS.LICENSE_PLATE_MISSING(vehicleTypeValue),
       );
     }
 
