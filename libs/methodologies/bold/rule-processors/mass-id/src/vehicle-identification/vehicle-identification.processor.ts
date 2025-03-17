@@ -17,7 +17,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
-import { validateLicensePlate } from './vehicle-identification.helpers';
+import { isValidLicensePlate } from './vehicle-identification.helpers';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
@@ -103,22 +103,33 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
     const needsLicensePlate =
       !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
-    const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
 
-    if (isNonEmptyString(licensePlate) && !validateLicensePlate(licensePlate)) {
+    // If vehicle type doesn't need license plate, approve immediately
+    if (!needsLicensePlate) {
       return this.createResult(
-        false,
-        RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
+        true,
+        RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
       );
     }
 
-    if (
-      needsLicensePlate &&
-      !eventHasNonEmptyStringAttribute(event, VEHICLE_LICENSE_PLATE)
-    ) {
+    // Only validate license plate for vehicle types that need it
+    const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
+    const hasLicensePlate = eventHasNonEmptyStringAttribute(
+      event,
+      VEHICLE_LICENSE_PLATE,
+    );
+
+    if (!hasLicensePlate) {
       return this.createResult(
         false,
         RESULT_COMMENTS.LICENSE_PLATE_MISSING(vehicleTypeValue),
+      );
+    }
+
+    if (!isValidLicensePlate(licensePlate)) {
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
       );
     }
 
