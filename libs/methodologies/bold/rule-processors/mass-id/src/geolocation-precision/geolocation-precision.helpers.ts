@@ -34,11 +34,7 @@ export const getHomologatedAddressByParticipantId = (
     eventNameIsAnyOf([DocumentEventName.OPEN]),
   );
 
-  if (isNil(openEvent)) {
-    return undefined;
-  }
-
-  return openEvent.address;
+  return openEvent?.address;
 };
 
 export const getEventGpsGeolocation = (

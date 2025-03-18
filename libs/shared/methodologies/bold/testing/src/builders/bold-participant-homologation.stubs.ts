@@ -51,7 +51,7 @@ const boldHomologationExternalEventsMap = new Map([
 export const stubBoldHomologationDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters): Document => {
+}: StubBoldDocumentParameters = {}): Document => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldHomologationExternalEventsMap
     : mergeEventsMaps(boldHomologationExternalEventsMap, externalEventsMap);
