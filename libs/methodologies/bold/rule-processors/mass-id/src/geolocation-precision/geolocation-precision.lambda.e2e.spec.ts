@@ -10,7 +10,10 @@ import {
 import { faker } from '@faker-js/faker';
 
 import { geolocationPrecisionLambda } from './geolocation-precision.lambda';
-import { geolocationPrecisionTestCases } from './geolocation-precision.test-cases';
+import {
+  geolocationPrecisionErrorTestCases,
+  geolocationPrecisionTestCases,
+} from './geolocation-precision.test-cases';
 
 describe('GeolocationPrecisionProcessor E2E', () => {
   beforeEach(() => {
@@ -68,4 +71,32 @@ describe('GeolocationPrecisionProcessor E2E', () => {
       });
     },
   );
+
+  describe('GeolocationPrecisionProcessorErrors', () => {
+    it.each(geolocationPrecisionErrorTestCases)(
+      'should return $resultStatus when $scenario',
+      async ({ documents, massIdAuditDocument, resultStatus }) => {
+        prepareEnvironmentTestE2E(
+          [...documents, massIdAuditDocument].map((document) => ({
+            document,
+            documentKey: toDocumentKey({
+              documentId: document.id,
+              documentKeyPrefix,
+            }),
+          })),
+        );
+
+        const response = (await geolocationPrecisionLambda(
+          stubRuleInput({
+            documentId: massIdAuditDocument.id,
+            documentKeyPrefix,
+          }),
+          stubContext(),
+          () => stubRuleResponse(),
+        )) as RuleOutput;
+
+        expect(response.resultStatus).toBe(resultStatus);
+      },
+    );
+  });
 });
