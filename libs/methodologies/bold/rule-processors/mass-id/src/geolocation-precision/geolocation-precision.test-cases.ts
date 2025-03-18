@@ -248,7 +248,7 @@ export const geolocationPrecisionTestCases: {
     resultComment: `${RESULT_COMMENTS.APPROVED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)} ${RESULT_COMMENTS.APPROVED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)}`,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario:
-      'the gps is set and both gps geolocation and event address are invalid',
+      'the gps is set and both gps geolocation and event address are valid but nearby',
   },
   {
     actorParticipants,

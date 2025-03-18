@@ -71,7 +71,7 @@ export const RESULT_COMMENTS = {
   ): string =>
     `(${actorType}) The event address is ${addressDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the event address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_HOMOLOGATION_ADDRESS: (actorType: string): string =>
     `No homologated address was found for the ${actorType} actor.`,
 } as const;
