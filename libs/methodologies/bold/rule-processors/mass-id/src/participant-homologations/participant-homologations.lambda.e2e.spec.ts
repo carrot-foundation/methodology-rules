@@ -8,17 +8,17 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { checkParticipantsHomologationLambda } from './check-participants-homologation.lambda';
-import { checkParticipantsHomologationTestCases } from './check-participants-homologation.test-cases';
+import { participantHomologationsLambda } from './participant-homologations.lambda';
+import { participantHomologationsTestCases } from './participant-homologations.test-cases';
 
-describe('CheckParticipantsHomologationProcessor E2E', () => {
+describe('ParticipantHomologationsProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(checkParticipantsHomologationTestCases)(
+  it.each(participantHomologationsTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
@@ -31,7 +31,7 @@ describe('CheckParticipantsHomologationProcessor E2E', () => {
         })),
       );
 
-      const response = (await checkParticipantsHomologationLambda(
+      const response = (await participantHomologationsLambda(
         stubRuleInput({
           documentId: massIdAuditDocument.id,
           documentKeyPrefix,
