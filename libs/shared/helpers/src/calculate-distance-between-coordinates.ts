@@ -8,5 +8,5 @@ export const calculateDistance = (
 ): number => {
   const distanceInMeters = getDistance(coordinateA, coordinateB);
 
-  return convertDistance(distanceInMeters, 'km');
+  return convertDistance(distanceInMeters, 'm');
 };

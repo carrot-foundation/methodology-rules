@@ -4,7 +4,7 @@ import type { PartialDeep } from 'type-fest';
 import { random } from 'typia';
 
 export const stubAddress = (
-  partialAddress?: PartialDeep<MethodologyAddress>,
+  partialAddress: PartialDeep<MethodologyAddress> = {},
 ): MethodologyAddress => ({
   ...random<MethodologyAddress>(),
   ...partialAddress,

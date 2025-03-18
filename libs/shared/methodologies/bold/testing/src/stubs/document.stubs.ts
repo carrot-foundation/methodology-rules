@@ -17,6 +17,7 @@ import {
   type MethodologyDocumentEventAttributeValue,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
+import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
@@ -102,6 +103,22 @@ export const stubMassDocument = (
     type: DocumentType.ORGANIC,
     ...partialDocument,
   });
+
+export const generateNearbyCoordinates = (
+  baseLatitude?: number,
+  baseLongitude?: number,
+) => {
+  const baseLat = baseLatitude ?? faker.location.latitude();
+  const baseLng = baseLongitude ?? faker.location.longitude();
+
+  const latOffset = faker.number.float({ max: 0.015, min: -0.015 });
+  const lngOffset = faker.number.float({ max: 0.015, min: -0.015 });
+
+  return {
+    base: { latitude: baseLat, longitude: baseLng },
+    nearby: { latitude: baseLat + latOffset, longitude: baseLng + lngOffset },
+  };
+};
 
 export const stubMassAuditDocumentWithActorAndAttribute = (
   eventName: DocumentEventName,
