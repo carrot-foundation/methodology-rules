@@ -62,10 +62,3 @@ export const getEventGpsGeolocation = (
 
   return undefined;
 };
-
-export const getAddressGeolocation = (
-  address: MethodologyAddress,
-): Geolocation => ({
-  latitude: address.latitude,
-  longitude: address.longitude,
-});

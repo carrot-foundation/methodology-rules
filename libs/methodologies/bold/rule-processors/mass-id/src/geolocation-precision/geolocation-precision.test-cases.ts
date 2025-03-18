@@ -3,6 +3,7 @@ import type { MethodologyParticipant } from '@carrot-fndn/shared/types';
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
   ACTOR_PARTICIPANTS,
+  BoldStubsBuilder,
   type StubBoldDocumentParameters,
   generateNearbyCoordinates,
   stubAddress,
@@ -19,6 +20,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 
+import { GeolocationPrecisionProcessorErrors } from './geolocation-precision.errors';
 import { RESULT_COMMENTS } from './geolocation-precision.processor';
 
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
@@ -75,6 +77,46 @@ const nearbyWasteGeneratorAddressDistance = calculateDistance(
   nearbyWasteGeneratorAddress,
 );
 
+const validHomologationDocuments = new Map([
+  [
+    RECYCLER,
+    {
+      externalEventsMap: {
+        [OPEN]: stubDocumentEvent({
+          address: recyclerAddress,
+          name: OPEN,
+          participant: recyclerParticipant,
+        }),
+      },
+    },
+  ],
+  [
+    WASTE_GENERATOR,
+    {
+      externalEventsMap: {
+        [OPEN]: stubDocumentEvent({
+          address: wasteGeneratorAddress,
+          name: OPEN,
+          participant: wasteGeneratorParticipant,
+        }),
+      },
+    },
+  ],
+]);
+
+const recyclerActorEvent = stubDocumentEvent({
+  address: recyclerAddress,
+  label: RECYCLER,
+  name: ACTOR,
+  participant: recyclerParticipant,
+});
+const wasteGeneratorActorEvent = stubDocumentEvent({
+  address: wasteGeneratorAddress,
+  label: WASTE_GENERATOR,
+  name: ACTOR,
+  participant: wasteGeneratorParticipant,
+});
+
 export const geolocationPrecisionTestCases: {
   actorParticipants?: Map<string, MethodologyParticipant> | undefined;
   homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
@@ -108,46 +150,11 @@ export const geolocationPrecisionTestCases: {
   },
   {
     actorParticipants,
-    homologationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: recyclerAddress,
-              name: OPEN,
-              participant: recyclerParticipant,
-            }),
-          },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: wasteGeneratorAddress,
-              name: OPEN,
-              participant: wasteGeneratorParticipant,
-            }),
-          },
-        },
-      ],
-    ]),
+    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: recyclerAddress,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: recyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: wasteGeneratorParticipant,
-        }),
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, undefined],
@@ -177,46 +184,11 @@ export const geolocationPrecisionTestCases: {
   },
   {
     actorParticipants,
-    homologationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: recyclerAddress,
-              name: OPEN,
-              participant: recyclerParticipant,
-            }),
-          },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: wasteGeneratorAddress,
-              name: OPEN,
-              participant: wasteGeneratorParticipant,
-            }),
-          },
-        },
-      ],
-    ]),
+    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: recyclerAddress,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: recyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: wasteGeneratorParticipant,
-        }),
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, undefined],
@@ -246,46 +218,11 @@ export const geolocationPrecisionTestCases: {
   },
   {
     actorParticipants,
-    homologationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: recyclerAddress,
-              name: OPEN,
-              participant: recyclerParticipant,
-            }),
-          },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: wasteGeneratorAddress,
-              name: OPEN,
-              participant: wasteGeneratorParticipant,
-            }),
-          },
-        },
-      ],
-    ]),
+    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: recyclerAddress,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: recyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: wasteGeneratorParticipant,
-        }),
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, nearbyRecyclerAddress.latitude],
@@ -315,46 +252,11 @@ export const geolocationPrecisionTestCases: {
   },
   {
     actorParticipants,
-    homologationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: recyclerAddress,
-              name: OPEN,
-              participant: recyclerParticipant,
-            }),
-          },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: wasteGeneratorAddress,
-              name: OPEN,
-              participant: wasteGeneratorParticipant,
-            }),
-          },
-        },
-      ],
-    ]),
+    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: recyclerAddress,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: recyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: wasteGeneratorParticipant,
-        }),
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, invalidRecyclerAddress.latitude],
@@ -383,46 +285,11 @@ export const geolocationPrecisionTestCases: {
   },
   {
     actorParticipants,
-    homologationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: recyclerAddress,
-              name: OPEN,
-              participant: recyclerParticipant,
-            }),
-          },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [OPEN]: stubDocumentEvent({
-              address: wasteGeneratorAddress,
-              name: OPEN,
-              participant: wasteGeneratorParticipant,
-            }),
-          },
-        },
-      ],
-    ]),
+    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: recyclerAddress,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: recyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: wasteGeneratorParticipant,
-        }),
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, invalidRecyclerAddress.latitude],
@@ -439,5 +306,59 @@ export const geolocationPrecisionTestCases: {
     resultComment: RESULT_COMMENTS.INVALID_ACTOR_TYPE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the processor cannot extract the actor type',
+  },
+];
+
+const errorMessage = new GeolocationPrecisionProcessorErrors();
+
+const {
+  massIdAuditDocument,
+  massIdDocument,
+  participantsHomologationDocuments,
+} = new BoldStubsBuilder()
+  .createMassIdDocument({
+    externalEventsMap: {
+      [DROP_OFF]: undefined,
+      [PICK_UP]: undefined,
+    },
+  })
+  .createMassIdAuditDocument()
+  .createMethodologyDocuments()
+  .createParticipantHomologationDocuments()
+  .build();
+
+export const geolocationPrecisionErrorTestCases = [
+  {
+    documents: [
+      massIdAuditDocument,
+      ...participantsHomologationDocuments.values(),
+    ],
+    massIdAuditDocument,
+    resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: 'the MassID document does not exist',
+  },
+  {
+    documents: [
+      massIdDocument,
+      massIdAuditDocument,
+      ...participantsHomologationDocuments.values(),
+    ],
+    massIdAuditDocument,
+    resultComment:
+      errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
+        massIdDocument.id,
+      ),
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario:
+      'the MassId document does not contain a DROP_OFF or PICK_UP event',
+  },
+  {
+    documents: [massIdDocument, massIdAuditDocument],
+    massIdAuditDocument,
+    resultComment:
+      errorMessage.ERROR_MESSAGE.PARTICIPANT_HOMOLOGATION_DOCUMENTS_NOT_FOUND,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: 'the homologation documents are not found',
   },
 ];

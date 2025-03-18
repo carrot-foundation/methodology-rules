@@ -37,7 +37,6 @@ import {
 
 import { GeolocationPrecisionProcessorErrors } from './geolocation-precision.errors';
 import {
-  getAddressGeolocation,
   getEventGpsGeolocation,
   getHomologatedAddressByParticipantId,
 } from './geolocation-precision.helpers';
@@ -140,20 +139,14 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
     eventAddress: MethodologyAddress,
     homologatedAddress: MethodologyAddress,
   ): number {
-    return calculateDistance(
-      getAddressGeolocation(eventAddress),
-      getAddressGeolocation(homologatedAddress),
-    );
+    return calculateDistance(eventAddress, homologatedAddress);
   }
 
   private calculateGpsDistance(
     homologatedAddress: MethodologyAddress,
     gpsGeolocation: Geolocation,
   ): number {
-    return calculateDistance(
-      getAddressGeolocation(homologatedAddress),
-      gpsGeolocation,
-    );
+    return calculateDistance(homologatedAddress, gpsGeolocation);
   }
 
   private async collectDocuments(
