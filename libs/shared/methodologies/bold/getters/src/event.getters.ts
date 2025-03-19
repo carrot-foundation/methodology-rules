@@ -1,6 +1,7 @@
 import type {
   Maybe,
   MethodologyDocumentEventAttachment,
+  MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
@@ -31,6 +32,21 @@ export const getEventAttributeValue = (
   return undefined;
 };
 
+export const getEventAttributeByName = (
+  event: Maybe<DocumentEvent>,
+  attributeName: DocumentEventAttributeName | string,
+): MethodologyDocumentEventAttribute | undefined => {
+  const validation = validateDocumentEventWithMetadata(event);
+
+  if (validation.success) {
+    return validation.data.metadata.attributes.find(
+      (attribute) => attribute.name === attributeName,
+    );
+  }
+
+  return undefined;
+};
+
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
@@ -56,6 +72,18 @@ export const getDocumentEventAttachmentByLabel = (
     return validation.data.attachments.find(
       (attachment) => attachment.label === label,
     );
+  }
+
+  return undefined;
+};
+
+export const getFirstDocumentEventAttachment = (
+  event: DocumentEvent,
+): MethodologyDocumentEventAttachment | undefined => {
+  const validation = validate<DocumentEventWithAttachments>(event);
+
+  if (validation.success) {
+    return validation.data.attachments[0];
   }
 
   return undefined;

@@ -182,6 +182,11 @@ export enum ReportTypeLiteralName {
   MTR = 'MANIFESTO DE TRANSPORTE DE RESÍDUOS',
 }
 
+export enum DocumentEventAttachmentLabel {
+  RECYCLING_MANIFEST = 'Recycling Manifest',
+  TRANSPORT_MANIFEST = 'Transport Manifest',
+}
+
 export enum DocumentEventName {
   ACTOR = MethodologyDocumentEventName.ACTOR,
   CLOSE = MethodologyDocumentEventName.CLOSE,

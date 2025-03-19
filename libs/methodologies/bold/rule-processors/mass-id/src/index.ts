@@ -10,3 +10,4 @@ export * from './vehicle-identification';
 export * from './geolocation-precision';
 export * from './local-waste-classification';
 export * from './processor-identification';
+export * from './document-manifest';
