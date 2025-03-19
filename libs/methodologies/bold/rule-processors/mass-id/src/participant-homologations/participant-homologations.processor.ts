@@ -28,7 +28,7 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { assert } from 'typia';
 
-import { CheckParticipantsHomologationProcessorErrors } from './check-participants-homologation.errors';
+import { ParticipantHomologationsProcessorErrors } from './participant-homologations.errors';
 
 export interface RuleSubject {
   homologationDocuments: Map<string, Document>;
@@ -39,8 +39,8 @@ export const RESULT_COMMENTS = {
   APPROVED: 'The participants are homologated and the homologation is active',
 } as const;
 
-export class CheckParticipantsHomologationProcessor extends RuleDataProcessor {
-  readonly errorProcessor = new CheckParticipantsHomologationProcessorErrors();
+export class ParticipantHomologationsProcessor extends RuleDataProcessor {
+  readonly errorProcessor = new ParticipantHomologationsProcessorErrors();
 
   private evaluateResult({
     homologationDocuments,

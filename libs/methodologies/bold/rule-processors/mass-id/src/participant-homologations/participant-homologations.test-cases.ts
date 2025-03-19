@@ -10,15 +10,15 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { formatDate, subDays } from 'date-fns';
 
-import { CheckParticipantsHomologationProcessorErrors } from './check-participants-homologation.errors';
-import { RESULT_COMMENTS } from './check-participants-homologation.processor';
+import { ParticipantHomologationsProcessorErrors } from './participant-homologations.errors';
+import { RESULT_COMMENTS } from './participant-homologations.processor';
 
 const { HAULER } = MassIdDocumentActorType;
 const { CLOSE } = DocumentEventName;
 const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } =
   NewDocumentEventAttributeName;
 
-const processorError = new CheckParticipantsHomologationProcessorErrors();
+const processorError = new ParticipantHomologationsProcessorErrors();
 
 const massIdAuditWithHomologations = new BoldStubsBuilder()
   .createMassIdDocument()
@@ -59,7 +59,7 @@ const massIdWithExpiredHomologation = new BoldStubsBuilder()
   )
   .build();
 
-export const checkParticipantsHomologationTestCases = [
+export const participantHomologationsTestCases = [
   {
     documents: [
       massIdAuditWithHomologations.massIdDocument,

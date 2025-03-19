@@ -1,6 +1,6 @@
 <div align="center">
 
-# Check Participants Homologation
+# Participant Homologations
 
 Methodology: **BOLD-RECYCLING-ORGANIC**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/check-participants-homologation/check-participants-homologation.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/participant-homologations/participant-homologations.processor.ts)**
 
 ## 👥 Contributors
 
