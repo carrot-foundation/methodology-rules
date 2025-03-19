@@ -1,7 +1,7 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { getOrDefault, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
@@ -54,21 +54,21 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     }
 
     if (
-      isNil(driverIdentifier) &&
-      isNil(driverIdentifierExemptionJustification)
+      !isNonEmptyString(driverIdentifier) &&
+      !isNonEmptyString(driverIdentifierExemptionJustification)
     ) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(
-          vehicleType?.toString() ?? '',
+          getOrDefault(vehicleType?.toString(), ''),
         ),
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
-    if (isNil(driverIdentifier)) {
+    if (!isNonEmptyString(driverIdentifier)) {
       return {
         resultComment: RESULT_COMMENTS.JUSTIFICATION_PROVIDED(
-          driverIdentifierExemptionJustification?.toString() ?? '',
+          driverIdentifierExemptionJustification as string,
         ),
         resultStatus: RuleOutputStatus.APPROVED,
       };
