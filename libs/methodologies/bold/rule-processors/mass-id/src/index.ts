@@ -9,4 +9,5 @@ export * from './time-interval-check';
 export * from './vehicle-identification';
 export * from './geolocation-precision';
 export * from './driver-identification';
+export * from './local-waste-classification';
 export * from './processor-identification';
