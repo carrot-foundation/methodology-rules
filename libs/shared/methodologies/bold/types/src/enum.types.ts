@@ -20,6 +20,7 @@ export enum DocumentType {
   MASS_ID_AUDIT = 'MassID Audit',
   ORGANIC = 'Organic',
   PARTICIPANT_HOMOLOGATION = 'Participant Homologation',
+  RECYCLED_ID = 'RecycledID',
 }
 
 export enum DocumentSubtype {
