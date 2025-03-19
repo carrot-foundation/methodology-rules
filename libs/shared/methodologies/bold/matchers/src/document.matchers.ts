@@ -39,6 +39,16 @@ export const MASS_AUDIT = new DocumentMatcher({
   type: DocumentType.MASS_AUDIT,
 });
 
+export const MASS_ID_AUDIT = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  type: DocumentType.MASS_ID_AUDIT,
+});
+
+export const RECYCLED_ID = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  type: DocumentType.RECYCLED_ID,
+});
+
 export const MASS_CERTIFICATE = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.MASS_CERTIFICATE,
