@@ -74,8 +74,8 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, TRUCK],
       ],
     }),
-    resultComment: RESULT_COMMENTS.DRIVER_IDENTIFIER,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.DRIVER_AND_JUSTIFICATION_PROVIDED,
+    resultStatus: RuleOutputStatus.REJECTED,
     scenario: `both ${DRIVER_IDENTIFIER} and ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} are provided`,
   },
 ];

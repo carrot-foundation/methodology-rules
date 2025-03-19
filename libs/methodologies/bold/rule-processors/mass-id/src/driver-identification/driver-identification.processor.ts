@@ -27,7 +27,7 @@ export const RESULT_COMMENTS = {
   JUSTIFICATION_PROVIDED: (justification: string) =>
     `The "${DRIVER_IDENTIFIER}" was not provided, but a "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" was declared: ${justification}.`,
   MISSING_JUSTIFICATION: (vehicleType: string) =>
-    `The vehicle “${vehicleType}” requires either a "${DRIVER_IDENTIFIER}" or an "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}".`,
+    `The vehicle "${vehicleType}" requires either a "${DRIVER_IDENTIFIER}" or an "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}".`,
   SLUDGE_PIPES: `The "${VEHICLE_TYPE}" is "${SLUDGE_PIPES}", so driver identification is not required.`,
 } as const;
 
@@ -35,9 +35,8 @@ interface RuleSubject {
   driverIdentifier: MethodologyDocumentEventAttributeValue | undefined;
   driverIdentifierExemptionJustification:
     | MethodologyDocumentEventAttributeValue
-    | string
     | undefined;
-  vehicleType: MethodologyDocumentEventAttributeValue | string | undefined;
+  vehicleType: MethodologyDocumentEventAttributeValue | undefined;
 }
 
 export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -45,7 +44,13 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     driverIdentifier,
     driverIdentifierExemptionJustification,
     vehicleType,
-  }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+  }: RuleSubject): EvaluateResultOutput {
+    const hasDriverId = isNonEmptyString(driverIdentifier);
+    const hasJustification = isNonEmptyString(
+      driverIdentifierExemptionJustification,
+    );
+    const vehicleTypeString = getOrDefault(vehicleType?.toString(), '');
+
     if (vehicleType === SLUDGE_PIPES) {
       return {
         resultComment: RESULT_COMMENTS.SLUDGE_PIPES,
@@ -53,22 +58,24 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
       };
     }
 
-    if (
-      !isNonEmptyString(driverIdentifier) &&
-      !isNonEmptyString(driverIdentifierExemptionJustification)
-    ) {
+    if (hasDriverId && hasJustification) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(
-          getOrDefault(vehicleType?.toString(), ''),
-        ),
+        resultComment: RESULT_COMMENTS.DRIVER_AND_JUSTIFICATION_PROVIDED,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
-    if (!isNonEmptyString(driverIdentifier)) {
+    if (!hasDriverId && !hasJustification) {
+      return {
+        resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(vehicleTypeString),
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (hasJustification) {
       return {
         resultComment: RESULT_COMMENTS.JUSTIFICATION_PROVIDED(
-          driverIdentifierExemptionJustification as string,
+          String(driverIdentifierExemptionJustification),
         ),
         resultStatus: RuleOutputStatus.APPROVED,
       };
