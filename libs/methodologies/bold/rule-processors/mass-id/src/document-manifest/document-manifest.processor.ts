@@ -85,24 +85,24 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
   ): ValidationResult {
     const rejectedMessages: string[] = [];
 
-    const typeString = documentType?.toString();
-    const numberString = documentNumber?.toString();
+    const documentTypeString = documentType?.toString();
+    const documentNumberString = documentNumber?.toString();
 
-    if (!isNonEmptyString(typeString)) {
+    if (!isNonEmptyString(documentTypeString)) {
       rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_TYPE);
     }
 
     if (
-      isNonEmptyString(typeString) &&
-      typeString !== ReportType.MTR.toString() &&
-      recyclerCountryCode !== 'BR'
+      isNonEmptyString(documentTypeString) &&
+      recyclerCountryCode === 'BR' &&
+      documentTypeString !== ReportType.MTR.toString()
     ) {
       rejectedMessages.push(
-        RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(typeString),
+        RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(documentTypeString),
       );
     }
 
-    if (!isNonEmptyString(numberString)) {
+    if (!isNonEmptyString(documentNumberString)) {
       rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
     }
 

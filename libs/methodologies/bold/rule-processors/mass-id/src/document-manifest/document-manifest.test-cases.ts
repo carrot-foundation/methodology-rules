@@ -136,13 +136,20 @@ export const documentManifestTestCases = [
   {
     documentManifestType,
     events: {
+      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+        address: {
+          ...sameAddress,
+          countryCode: 'BR',
+        },
+        label: RECYCLER,
+        name: ACTOR,
+      }),
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [[DOCUMENT_TYPE, 'EMITIARE']],
         partialDocumentEvent: {
           address: sameAddress,
         },
       }),
-      ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE('EMITIARE'),
     resultStatus: RuleOutputStatus.REJECTED,
