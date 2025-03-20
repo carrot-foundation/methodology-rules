@@ -11,3 +11,4 @@ export * from './geolocation-precision';
 export * from './driver-identification';
 export * from './local-waste-classification';
 export * from './processor-identification';
+export * from './project-boundary';

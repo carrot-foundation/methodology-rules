@@ -1,3 +1,5 @@
+import type { AnyObject } from '@carrot-fndn/shared/types';
+
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,
@@ -153,6 +155,34 @@ describe('RuleStandardDataProcessor', () => {
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
       resultComment: 'Rejected',
+      resultStatus: RuleOutputStatus.REJECTED,
+    };
+
+    expect(result).toEqual(expectedRuleOutput);
+  });
+
+  it('should return a resultContent when the rule is applicable and approved', async () => {
+    const ruleInput = random<RuleInput>();
+    const resultContent = random<AnyObject>();
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
+      resultComment: 'Rejected',
+      resultContent,
+      resultStatus: RuleOutputStatus.REJECTED,
+    }));
+
+    const result = await ruleStandardDataProcessor.process({
+      ...ruleInput,
+      parentDocumentId: 'valid-id',
+    });
+
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: 'Rejected',
+      resultContent,
       resultStatus: RuleOutputStatus.REJECTED,
     };
 
