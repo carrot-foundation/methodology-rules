@@ -7,9 +7,9 @@ import {
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
 import {
+  getDocumentEventAttachmentByLabel,
   getEventAttributeByName,
   getEventAttributeValue,
-  getFirstDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   and,
@@ -20,19 +20,18 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttachmentLabel,
   DocumentEventName,
   NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
+  type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
-import { is } from 'typia';
 
 import { RESULT_COMMENTS } from './document-manifest.constants';
 
@@ -48,7 +47,7 @@ interface ValidationResult {
 }
 
 interface DocumentManifestEventSubject {
-  attachmentLabel: DocumentEventAttachmentLabel | string | undefined;
+  attachment: MethodologyDocumentEventAttachment | undefined;
   documentNumber: MethodologyDocumentEventAttributeValue | string | undefined;
   documentType: MethodologyDocumentEventAttributeValue | string | undefined;
   eventAddressId: string | undefined;
@@ -57,6 +56,7 @@ interface DocumentManifestEventSubject {
     | MethodologyDocumentEventAttributeValue
     | string
     | undefined;
+  hasWrongLabelAttachment: boolean;
   issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
   recyclerCountryCode: string | undefined;
 }
@@ -114,12 +114,13 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     recyclerEvent: DocumentEvent,
   ): ValidationResult {
     const {
-      attachmentLabel,
+      attachment,
       documentNumber,
       documentType,
       eventAddressId,
       eventValue,
       exemptionJustification,
+      hasWrongLabelAttachment,
       issueDateAttribute,
       recyclerCountryCode,
     } = subject;
@@ -134,8 +135,9 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     }
 
     const exemptionResult = this.validateExemptionAndAttachment(
-      attachmentLabel,
+      attachment,
       exemptionJustification,
+      hasWrongLabelAttachment,
     );
 
     if (exemptionResult.approvedMessage) {
@@ -187,50 +189,38 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
   }
 
   private validateExemptionAndAttachment(
-    attachmentLabel: string | undefined,
+    attachment: MethodologyDocumentEventAttachment | undefined,
     exemptionJustification:
       | MethodologyDocumentEventAttributeValue
       | string
       | undefined,
+    hasWrongLabelAttachment: boolean,
   ): ValidationResult {
     const justificationString = exemptionJustification?.toString();
 
-    if (
-      !isNonEmptyString(attachmentLabel) &&
-      isNonEmptyString(justificationString)
-    ) {
+    if (hasWrongLabelAttachment) {
+      return {
+        rejectedMessages: [RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL],
+      };
+    }
+
+    if (isNil(attachment) && isNonEmptyString(justificationString)) {
       return {
         approvedMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
         rejectedMessages: [],
       };
     }
 
-    if (
-      !isNonEmptyString(justificationString) &&
-      !isNonEmptyString(attachmentLabel)
-    ) {
+    if (isNil(attachment) && !isNonEmptyString(justificationString)) {
       return {
         rejectedMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
       };
     }
 
-    if (
-      isNonEmptyString(justificationString) &&
-      is<DocumentEventAttachmentLabel>(attachmentLabel)
-    ) {
+    if (isNonEmptyString(justificationString) && !isNil(attachment)) {
       return {
         rejectedMessages: [
           RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
-        ],
-      };
-    }
-
-    if (!is<DocumentEventAttachmentLabel>(attachmentLabel)) {
-      return {
-        rejectedMessages: [
-          RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(
-            getOrDefault(attachmentLabel, 'undefined'),
-          ),
         ],
       };
     }
@@ -310,19 +300,30 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
 
     return {
       documentManifestEvents: getOrDefault(
-        transportManifestEvents?.map((event) => ({
-          attachmentLabel: getFirstDocumentEventAttachment(event)?.label,
-          documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-          documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
-          eventAddressId: event.address.id,
-          eventValue: event.value,
-          exemptionJustification: getEventAttributeValue(
+        transportManifestEvents?.map((event) => {
+          const correctLabelAttachment = getDocumentEventAttachmentByLabel(
             event,
-            EXEMPTION_JUSTIFICATION,
-          ),
-          issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
-          recyclerCountryCode: recyclerEvent?.address.countryCode,
-        })),
+            this.documentManifestType,
+          );
+
+          const hasWrongLabelAttachment =
+            !correctLabelAttachment && isNonEmptyArray(event.attachments);
+
+          return {
+            attachment: correctLabelAttachment,
+            documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
+            documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+            eventAddressId: event.address.id,
+            eventValue: event.value,
+            exemptionJustification: getEventAttributeValue(
+              event,
+              EXEMPTION_JUSTIFICATION,
+            ),
+            hasWrongLabelAttachment,
+            issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+            recyclerCountryCode: recyclerEvent?.address.countryCode,
+          };
+        }),
         [],
       ),
       recyclerEvent,

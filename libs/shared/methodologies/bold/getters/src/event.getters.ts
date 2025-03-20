@@ -77,18 +77,6 @@ export const getDocumentEventAttachmentByLabel = (
   return undefined;
 };
 
-export const getFirstDocumentEventAttachment = (
-  event: DocumentEvent,
-): MethodologyDocumentEventAttachment | undefined => {
-  const validation = validate<DocumentEventWithAttachments>(event);
-
-  if (validation.success) {
-    return validation.data.attachments[0];
-  }
-
-  return undefined;
-};
-
 export const getEventMethodologySlug = (
   event: Maybe<DocumentEvent>,
 ): MethodologyDocumentEventAttributeValue | undefined =>

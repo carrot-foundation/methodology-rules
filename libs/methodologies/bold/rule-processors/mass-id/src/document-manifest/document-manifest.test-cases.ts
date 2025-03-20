@@ -108,7 +108,7 @@ export const documentManifestTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL('MTR'),
+    resultComment: RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the MassID document has a ${documentManifestType} event with a wrong attachment label`,
   },

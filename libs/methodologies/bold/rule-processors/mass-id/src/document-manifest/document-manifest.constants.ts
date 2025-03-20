@@ -19,8 +19,7 @@ const { MTR } = ReportType;
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" event address.`,
   ATTACHMENT_AND_JUSTIFICATION_PROVIDED: `The "${EXEMPTION_JUSTIFICATION}" should not be provided when a "${TRANSPORT_MANIFEST}" attachment is present.`,
-  INCORRECT_ATTACHMENT_LABEL: (label: string) =>
-    `Expected "${TRANSPORT_MANIFEST}" attachment label, but "${label}" was provided.`,
+  INCORRECT_ATTACHMENT_LABEL: `Expected an attachment with the "${TRANSPORT_MANIFEST}" label, but no one was found.`,
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "${DOCUMENT_TYPE}" must be "${MTR}" for recyclers in Brazil, but "${documentType}" was provided.`,
   INVALID_EVENT_VALUE: (event: string) =>
