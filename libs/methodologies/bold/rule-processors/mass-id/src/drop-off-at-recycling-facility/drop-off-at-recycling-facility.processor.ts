@@ -29,7 +29,6 @@ export const RESULT_COMMENTS = {
   APPROVED: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
   MISSING_DROP_OFF_EVENT: `No "${DROP_OFF}" event was found in the document.`,
   MISSING_RECEIVING_OPERATOR_IDENTIFIER: `The "${DROP_OFF}" event must include a "${RECEIVING_OPERATOR_IDENTIFIER}", but none was provided.`,
-  MULTIPLE_RECYCLER_EVENTS: `More than one "${RECYCLER}" event was found, but only one is allowed.`,
 } as const;
 
 interface RuleSubject {
