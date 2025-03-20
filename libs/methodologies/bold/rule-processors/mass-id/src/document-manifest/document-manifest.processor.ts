@@ -7,9 +7,9 @@ import {
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
 import {
+  getDocumentEventAttachmentByLabel,
   getEventAttributeByName,
   getEventAttributeValue,
-  getFirstDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   and,
@@ -20,19 +20,18 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttachmentLabel,
   DocumentEventName,
   NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
+  type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
-import { is } from 'typia';
 
 import { RESULT_COMMENTS } from './document-manifest.constants';
 
@@ -43,12 +42,12 @@ const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
 interface ValidationResult {
-  approvedMessages: string[];
+  approvedMessage?: string;
   rejectedMessages: string[];
 }
 
 interface DocumentManifestEventSubject {
-  attachmentLabel: DocumentEventAttachmentLabel | string | undefined;
+  attachment: MethodologyDocumentEventAttachment | undefined;
   documentNumber: MethodologyDocumentEventAttributeValue | string | undefined;
   documentType: MethodologyDocumentEventAttributeValue | string | undefined;
   eventAddressId: string | undefined;
@@ -57,6 +56,7 @@ interface DocumentManifestEventSubject {
     | MethodologyDocumentEventAttributeValue
     | string
     | undefined;
+  hasWrongLabelAttachment: boolean;
   issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
   recyclerCountryCode: string | undefined;
 }
@@ -85,28 +85,28 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
   ): ValidationResult {
     const rejectedMessages: string[] = [];
 
-    const typeString = documentType?.toString();
-    const numberString = documentNumber?.toString();
+    const documentTypeString = documentType?.toString();
+    const documentNumberString = documentNumber?.toString();
 
-    if (!isNonEmptyString(typeString)) {
+    if (!isNonEmptyString(documentTypeString)) {
       rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_TYPE);
     }
 
     if (
-      isNonEmptyString(typeString) &&
-      typeString !== ReportType.MTR.toString() &&
-      recyclerCountryCode !== 'BR'
+      isNonEmptyString(documentTypeString) &&
+      recyclerCountryCode === 'BR' &&
+      documentTypeString !== ReportType.MTR.toString()
     ) {
       rejectedMessages.push(
-        RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(typeString),
+        RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(documentTypeString),
       );
     }
 
-    if (!isNonEmptyString(numberString)) {
+    if (!isNonEmptyString(documentNumberString)) {
       rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
     }
 
-    return { approvedMessages: [], rejectedMessages };
+    return { rejectedMessages };
   }
 
   private validateDocumentManifestEvents(
@@ -114,12 +114,13 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     recyclerEvent: DocumentEvent,
   ): ValidationResult {
     const {
-      attachmentLabel,
+      attachment,
       documentNumber,
       documentType,
       eventAddressId,
       eventValue,
       exemptionJustification,
+      hasWrongLabelAttachment,
       issueDateAttribute,
       recyclerCountryCode,
     } = subject;
@@ -129,17 +130,17 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       this.documentManifestType === RECYCLING_MANIFEST
     ) {
       return {
-        approvedMessages: [],
         rejectedMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
       };
     }
 
     const exemptionResult = this.validateExemptionAndAttachment(
-      attachmentLabel,
+      attachment,
       exemptionJustification,
+      hasWrongLabelAttachment,
     );
 
-    if (exemptionResult.approvedMessages.length > 0) {
+    if (exemptionResult.approvedMessage) {
       return exemptionResult;
     }
 
@@ -161,18 +162,16 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     const rejectedMessages = validations.flatMap((v) => v.rejectedMessages);
 
     if (rejectedMessages.length > 0) {
-      return { approvedMessages: [], rejectedMessages };
+      return { rejectedMessages };
     }
 
     return {
-      approvedMessages: [
-        RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
-          documentNumber: documentNumber as string,
-          documentType: documentType as string,
-          issueDate: issueDateAttribute?.value as string,
-          value: getOrDefault(eventValue, 0),
-        }),
-      ],
+      approvedMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
+        documentNumber: documentNumber as string,
+        documentType: documentType as string,
+        issueDate: issueDateAttribute?.value as string,
+        value: getOrDefault(eventValue, 0),
+      }),
       rejectedMessages: [],
     };
   }
@@ -180,69 +179,53 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
   private validateEventValue(eventValue: number | undefined): ValidationResult {
     if (eventValue === 0) {
       return {
-        approvedMessages: [],
         rejectedMessages: [
           RESULT_COMMENTS.INVALID_EVENT_VALUE(eventValue.toString()),
         ],
       };
     }
 
-    return { approvedMessages: [], rejectedMessages: [] };
+    return { rejectedMessages: [] };
   }
 
   private validateExemptionAndAttachment(
-    attachmentLabel: string | undefined,
+    attachment: MethodologyDocumentEventAttachment | undefined,
     exemptionJustification:
       | MethodologyDocumentEventAttributeValue
       | string
       | undefined,
+    hasWrongLabelAttachment: boolean,
   ): ValidationResult {
     const justificationString = exemptionJustification?.toString();
 
-    if (
-      !isNonEmptyString(attachmentLabel) &&
-      isNonEmptyString(justificationString)
-    ) {
+    if (hasWrongLabelAttachment) {
       return {
-        approvedMessages: [RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION],
+        rejectedMessages: [RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL],
+      };
+    }
+
+    if (isNil(attachment) && isNonEmptyString(justificationString)) {
+      return {
+        approvedMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
         rejectedMessages: [],
       };
     }
 
-    if (
-      !isNonEmptyString(justificationString) &&
-      !isNonEmptyString(attachmentLabel)
-    ) {
+    if (isNil(attachment) && !isNonEmptyString(justificationString)) {
       return {
-        approvedMessages: [],
         rejectedMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
       };
     }
 
-    if (
-      isNonEmptyString(justificationString) &&
-      is<DocumentEventAttachmentLabel>(attachmentLabel)
-    ) {
+    if (isNonEmptyString(justificationString) && !isNil(attachment)) {
       return {
-        approvedMessages: [],
         rejectedMessages: [
           RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
         ],
       };
     }
 
-    if (!is<DocumentEventAttachmentLabel>(attachmentLabel)) {
-      return {
-        approvedMessages: [],
-        rejectedMessages: [
-          RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(
-            getOrDefault(attachmentLabel, 'undefined'),
-          ),
-        ],
-      };
-    }
-
-    return { approvedMessages: [], rejectedMessages: [] };
+    return { rejectedMessages: [] };
   }
 
   private validateIssueDate(
@@ -260,7 +243,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       );
     }
 
-    return { approvedMessages: [], rejectedMessages };
+    return { rejectedMessages };
   }
 
   protected override evaluateResult(
@@ -290,9 +273,9 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     const allRejectedMessages = validationResults.flatMap(
       (v) => v.rejectedMessages,
     );
-    const allApprovedMessages = validationResults.flatMap(
-      (v) => v.approvedMessages,
-    );
+    const approvedMessages = validationResults
+      .map((v) => v.approvedMessage)
+      .filter(Boolean) as string[];
 
     if (allRejectedMessages.length > 0) {
       return {
@@ -302,7 +285,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     }
 
     return {
-      resultComment: allApprovedMessages.join(' '),
+      resultComment: approvedMessages.join(' '),
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
@@ -317,19 +300,30 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
 
     return {
       documentManifestEvents: getOrDefault(
-        transportManifestEvents?.map((event) => ({
-          attachmentLabel: getFirstDocumentEventAttachment(event)?.label,
-          documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-          documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
-          eventAddressId: event.address.id,
-          eventValue: event.value,
-          exemptionJustification: getEventAttributeValue(
+        transportManifestEvents?.map((event) => {
+          const correctLabelAttachment = getDocumentEventAttachmentByLabel(
             event,
-            EXEMPTION_JUSTIFICATION,
-          ),
-          issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
-          recyclerCountryCode: recyclerEvent?.address.countryCode,
-        })),
+            this.documentManifestType,
+          );
+
+          const hasWrongLabelAttachment =
+            !correctLabelAttachment && isNonEmptyArray(event.attachments);
+
+          return {
+            attachment: correctLabelAttachment,
+            documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
+            documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+            eventAddressId: event.address.id,
+            eventValue: event.value,
+            exemptionJustification: getEventAttributeValue(
+              event,
+              EXEMPTION_JUSTIFICATION,
+            ),
+            hasWrongLabelAttachment,
+            issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+            recyclerCountryCode: recyclerEvent?.address.countryCode,
+          };
+        }),
         [],
       ),
       recyclerEvent,
