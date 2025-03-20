@@ -43,7 +43,7 @@ const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
 interface ValidationResult {
-  approvedMessages: string[];
+  approvedMessage?: string;
   rejectedMessages: string[];
 }
 
@@ -106,7 +106,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
     }
 
-    return { approvedMessages: [], rejectedMessages };
+    return { rejectedMessages };
   }
 
   private validateDocumentManifestEvents(
@@ -129,7 +129,6 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       this.documentManifestType === RECYCLING_MANIFEST
     ) {
       return {
-        approvedMessages: [],
         rejectedMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
       };
     }
@@ -139,7 +138,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       exemptionJustification,
     );
 
-    if (exemptionResult.approvedMessages.length > 0) {
+    if (exemptionResult.approvedMessage) {
       return exemptionResult;
     }
 
@@ -161,18 +160,16 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     const rejectedMessages = validations.flatMap((v) => v.rejectedMessages);
 
     if (rejectedMessages.length > 0) {
-      return { approvedMessages: [], rejectedMessages };
+      return { rejectedMessages };
     }
 
     return {
-      approvedMessages: [
-        RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
-          documentNumber: documentNumber as string,
-          documentType: documentType as string,
-          issueDate: issueDateAttribute?.value as string,
-          value: getOrDefault(eventValue, 0),
-        }),
-      ],
+      approvedMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
+        documentNumber: documentNumber as string,
+        documentType: documentType as string,
+        issueDate: issueDateAttribute?.value as string,
+        value: getOrDefault(eventValue, 0),
+      }),
       rejectedMessages: [],
     };
   }
@@ -180,14 +177,13 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
   private validateEventValue(eventValue: number | undefined): ValidationResult {
     if (eventValue === 0) {
       return {
-        approvedMessages: [],
         rejectedMessages: [
           RESULT_COMMENTS.INVALID_EVENT_VALUE(eventValue.toString()),
         ],
       };
     }
 
-    return { approvedMessages: [], rejectedMessages: [] };
+    return { rejectedMessages: [] };
   }
 
   private validateExemptionAndAttachment(
@@ -204,7 +200,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       isNonEmptyString(justificationString)
     ) {
       return {
-        approvedMessages: [RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION],
+        approvedMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
         rejectedMessages: [],
       };
     }
@@ -214,7 +210,6 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       !isNonEmptyString(attachmentLabel)
     ) {
       return {
-        approvedMessages: [],
         rejectedMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
       };
     }
@@ -224,7 +219,6 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       is<DocumentEventAttachmentLabel>(attachmentLabel)
     ) {
       return {
-        approvedMessages: [],
         rejectedMessages: [
           RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
         ],
@@ -233,7 +227,6 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
 
     if (!is<DocumentEventAttachmentLabel>(attachmentLabel)) {
       return {
-        approvedMessages: [],
         rejectedMessages: [
           RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(
             getOrDefault(attachmentLabel, 'undefined'),
@@ -242,7 +235,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       };
     }
 
-    return { approvedMessages: [], rejectedMessages: [] };
+    return { rejectedMessages: [] };
   }
 
   private validateIssueDate(
@@ -260,7 +253,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       );
     }
 
-    return { approvedMessages: [], rejectedMessages };
+    return { rejectedMessages };
   }
 
   protected override evaluateResult(
@@ -290,9 +283,9 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     const allRejectedMessages = validationResults.flatMap(
       (v) => v.rejectedMessages,
     );
-    const allApprovedMessages = validationResults.flatMap(
-      (v) => v.approvedMessages,
-    );
+    const approvedMessages = validationResults
+      .map((v) => v.approvedMessage)
+      .filter(Boolean) as string[];
 
     if (allRejectedMessages.length > 0) {
       return {
@@ -302,7 +295,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     }
 
     return {
-      resultComment: allApprovedMessages.join(' '),
+      resultComment: approvedMessages.join(' '),
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
