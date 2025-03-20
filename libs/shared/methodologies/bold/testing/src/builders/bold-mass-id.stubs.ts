@@ -66,6 +66,7 @@ const {
   LOCAL_WASTE_CLASSIFICATION_DESC,
   LOCAL_WASTE_CLASSIFICATION_ID,
   MASS_NET_WEIGHT,
+  RECEIVING_OPERATOR_IDENTIFIER,
   RECYCLER_OPERATOR_IDENTIFIER,
   SCALE_HOMOLOGATION,
   SCALE_TYPE,
@@ -195,6 +196,7 @@ export const stubBoldMassIdWeighingSingleStepEvent = ({
   );
 
 const defaultDropOffAttributes: MetadataAttributeParameter[] = [
+  [RECEIVING_OPERATOR_IDENTIFIER, faker.string.uuid()],
   [RECYCLER_OPERATOR_IDENTIFIER, faker.string.uuid()],
   [DESCRIPTION, faker.lorem.sentence()],
   [CAPTURED_GPS_LATITUDE, faker.location.latitude()],

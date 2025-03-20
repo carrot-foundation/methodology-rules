@@ -10,7 +10,10 @@ import {
   type DocumentQuery,
   DocumentQueryService,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { MASS_AUDIT } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import {
+  MASS_ID_AUDIT,
+  RECYCLED_ID,
+} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
   type DocumentReference,
@@ -75,10 +78,14 @@ export class MassAuditDocumentProcessor extends RuleDataProcessor {
         s3KeyPrefix: documentKeyPrefix,
       },
       criteria: {
-        parentDocument: {
-          omit: true,
-          relatedDocuments: [MASS_AUDIT.match],
-        },
+        relatedDocuments: [
+          {
+            ...RECYCLED_ID.match,
+            parentDocument: {
+              ...MASS_ID_AUDIT.match,
+            },
+          },
+        ],
       },
       documentId,
     });

@@ -20,6 +20,7 @@ export enum DocumentType {
   MASS_ID_AUDIT = 'MassID Audit',
   ORGANIC = 'Organic',
   PARTICIPANT_HOMOLOGATION = 'Participant Homologation',
+  RECYCLED_ID = 'RecycledID',
 }
 
 export enum DocumentSubtype {
@@ -100,6 +101,7 @@ export enum NewDocumentEventAttributeName {
   LOCAL_WASTE_CLASSIFICATION_DESC = 'Local Waste Classification Desc',
   LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
   MASS_NET_WEIGHT = 'Mass Net Weight',
+  RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
   SCALE_HOMOLOGATION = 'Scale Homologation',
   SCALE_TYPE = 'Scale Type',
