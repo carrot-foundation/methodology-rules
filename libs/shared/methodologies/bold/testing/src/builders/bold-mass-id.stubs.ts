@@ -220,7 +220,7 @@ const defaultRecyclingManifestWithExemptionAttributes: MetadataAttributeParamete
 
 const defaultRecyclingManifestAttributes: MetadataAttributeParameter[] = [
   [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.MTR],
+  [DOCUMENT_TYPE, ReportType.CDF],
   {
     format: DATE,
     name: ISSUE_DATE,

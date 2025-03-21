@@ -70,6 +70,11 @@ export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
   | typeof TRANSPORT_MANIFEST;
 
+const DOCUMENT_TYPE_MAPPING = {
+  [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
+  [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
+} as const;
+
 export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   private readonly documentManifestType: DocumentManifestType;
 
@@ -95,7 +100,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     if (
       isNonEmptyString(documentTypeString) &&
       recyclerCountryCode === 'BR' &&
-      documentTypeString !== ReportType.MTR.toString()
+      documentTypeString !== DOCUMENT_TYPE_MAPPING[this.documentManifestType]
     ) {
       rejectedMessages.push(
         RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(documentTypeString),
