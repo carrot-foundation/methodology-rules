@@ -15,6 +15,7 @@ import { faker } from '@faker-js/faker';
 
 import {
   getDocumentEventAttachmentByLabel,
+  getEventAttributeByName,
   getEventAttributeValue,
   getEventAttributeValueOrThrow,
   getEventMethodologySlug,
@@ -131,6 +132,41 @@ describe('Event getters', () => {
       const result = getEventMethodologySlug(event);
 
       expect(result).toBe(undefined);
+    });
+  });
+
+  describe('getEventAttributeByName', () => {
+    it('should return the correct attribute', () => {
+      const event = stubDocumentEventWithMetadataAttributes({}, [
+        [ACTOR_TYPE, AUDITOR],
+      ]);
+
+      const result = getEventAttributeByName(event, ACTOR_TYPE);
+
+      expect(result).toEqual(
+        expect.objectContaining({
+          name: ACTOR_TYPE,
+          value: AUDITOR,
+        }),
+      );
+    });
+
+    it('should return undefined if the attribute does not exist', () => {
+      const event = stubDocumentEventWithMetadataAttributes({}, [
+        [ACTOR_TYPE, AUDITOR],
+      ]);
+
+      const result = getEventAttributeByName(event, 'missing');
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined if the event does not have metadata', () => {
+      const event = stubDocumentEvent();
+
+      const result = getEventAttributeByName(event, ACTOR_TYPE);
+
+      expect(result).toBeUndefined();
     });
   });
 });
