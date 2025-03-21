@@ -1,3 +1,5 @@
+import type { AnyObject } from '@carrot-fndn/shared/types';
+
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -9,6 +11,7 @@ import {
 
 export interface EvaluateResultOutput {
   resultComment?: string | undefined;
+  resultContent?: AnyObject;
   resultStatus: RuleOutputStatus;
 }
 
@@ -43,12 +46,15 @@ export abstract class RuleStandardDataProcessor<
       });
     }
 
-    const { resultComment, resultStatus } =
+    const { resultComment, resultContent, resultStatus } =
       await this.evaluateResult(ruleSubject);
 
     return mapToRuleOutput(ruleInput, resultStatus, {
       ...(resultComment && {
         resultComment,
+      }),
+      ...(resultContent && {
+        resultContent,
       }),
     });
   }
