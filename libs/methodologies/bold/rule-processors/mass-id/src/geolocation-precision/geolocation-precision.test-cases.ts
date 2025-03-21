@@ -51,8 +51,14 @@ const recyclerAddress = stubAddress({
 const wasteGeneratorAddress = stubAddress({
   ...actorsCoordinates.get(WASTE_GENERATOR)!.base,
 });
-const invalidRecyclerAddress = stubAddress();
-const invalidWasteGeneratorAddress = stubAddress();
+const invalidRecyclerAddress = stubAddress({
+  latitude: 40.7128,
+  longitude: -74.006,
+});
+const invalidWasteGeneratorAddress = stubAddress({
+  latitude: 34.0522,
+  longitude: -118.2437,
+});
 const nearbyRecyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.nearby,
 });
@@ -157,74 +163,6 @@ export const geolocationPrecisionTestCases: {
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
         [DROP_OFF]: stubBoldMassIdDropOffEvent({
           metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: recyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: wasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
-      },
-    },
-    resultComment: `${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(RECYCLER, 0)} ${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(WASTE_GENERATOR, 0)}`,
-    resultStatus: RuleOutputStatus.APPROVED,
-    scenario:
-      'the gps is not set, but the homologated address is set and is valid',
-  },
-  {
-    actorParticipants,
-    homologationDocuments: validHomologationDocuments,
-    massIdDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: invalidRecyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: invalidWasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
-      },
-    },
-    resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)}`,
-    resultStatus: RuleOutputStatus.REJECTED,
-    scenario:
-      'the gps is not set, but the homologated address is set and not valid',
-  },
-  {
-    actorParticipants,
-    homologationDocuments: validHomologationDocuments,
-    massIdDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
             [CAPTURED_GPS_LATITUDE, nearbyRecyclerAddress.latitude],
             [CAPTURED_GPS_LONGITUDE, nearbyRecyclerAddress.longitude],
           ],
@@ -306,6 +244,74 @@ export const geolocationPrecisionTestCases: {
     resultComment: RESULT_COMMENTS.INVALID_ACTOR_TYPE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the processor cannot extract the actor type',
+  },
+  {
+    actorParticipants,
+    homologationDocuments: validHomologationDocuments,
+    massIdDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: stubBoldMassIdDropOffEvent({
+          metadataAttributes: [
+            [CAPTURED_GPS_LATITUDE, undefined],
+            [CAPTURED_GPS_LONGITUDE, undefined],
+          ],
+          partialDocumentEvent: {
+            address: recyclerAddress,
+            participant: recyclerParticipant,
+          },
+        }),
+        [PICK_UP]: stubBoldMassIdPickUpEvent({
+          metadataAttributes: [
+            [CAPTURED_GPS_LATITUDE, undefined],
+            [CAPTURED_GPS_LONGITUDE, undefined],
+          ],
+          partialDocumentEvent: {
+            address: wasteGeneratorAddress,
+            participant: wasteGeneratorParticipant,
+          },
+        }),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(RECYCLER, 0)} ${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(WASTE_GENERATOR, 0)}`,
+    resultStatus: RuleOutputStatus.APPROVED,
+    scenario:
+      'the gps is not set, but the homologated address is set and is valid',
+  },
+  {
+    actorParticipants,
+    homologationDocuments: validHomologationDocuments,
+    massIdDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: stubBoldMassIdDropOffEvent({
+          metadataAttributes: [
+            [CAPTURED_GPS_LATITUDE, undefined],
+            [CAPTURED_GPS_LONGITUDE, undefined],
+          ],
+          partialDocumentEvent: {
+            address: invalidRecyclerAddress,
+            participant: recyclerParticipant,
+          },
+        }),
+        [PICK_UP]: stubBoldMassIdPickUpEvent({
+          metadataAttributes: [
+            [CAPTURED_GPS_LATITUDE, undefined],
+            [CAPTURED_GPS_LONGITUDE, undefined],
+          ],
+          partialDocumentEvent: {
+            address: invalidWasteGeneratorAddress,
+            participant: wasteGeneratorParticipant,
+          },
+        }),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)}`,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario:
+      'the gps is not set, but the homologated address is set and not valid',
   },
 ];
 
