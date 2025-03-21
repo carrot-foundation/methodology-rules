@@ -18,6 +18,7 @@ import {
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
+import { computeDestinationPoint } from 'geolib';
 import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
@@ -104,19 +105,39 @@ export const stubMassDocument = (
     ...partialDocument,
   });
 
-export const generateNearbyCoordinates = (
-  baseLatitude?: number,
-  baseLongitude?: number,
-) => {
-  const baseLat = baseLatitude ?? faker.location.latitude();
-  const baseLng = baseLongitude ?? faker.location.longitude();
+export const generateNearbyCoordinates = (options?: {
+  distance?: number;
+  latitude?: number;
+  longitude?: number;
+}) => {
+  const baseLat = options?.latitude ?? faker.location.latitude();
+  const baseLng = options?.longitude ?? faker.location.longitude();
+  const targetDistance = options?.distance;
 
-  const latOffset = faker.number.float({ max: 0.015, min: -0.015 });
-  const lngOffset = faker.number.float({ max: 0.015, min: -0.015 });
+  if (targetDistance === undefined) {
+    const latOffset = faker.number.float({ max: 0.015, min: -0.015 });
+    const lngOffset = faker.number.float({ max: 0.015, min: -0.015 });
+
+    return {
+      base: { latitude: baseLat, longitude: baseLng },
+      nearby: { latitude: baseLat + latOffset, longitude: baseLng + lngOffset },
+    };
+  }
+
+  const bearing = faker.number.float({ max: 360, min: 0 });
+
+  const destination = computeDestinationPoint(
+    { latitude: baseLat, longitude: baseLng },
+    targetDistance,
+    bearing,
+  );
 
   return {
     base: { latitude: baseLat, longitude: baseLng },
-    nearby: { latitude: baseLat + latOffset, longitude: baseLng + lngOffset },
+    nearby: {
+      latitude: destination.latitude,
+      longitude: destination.longitude,
+    },
   };
 };
 
