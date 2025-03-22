@@ -1,6 +1,10 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  isNil,
+  isNonEmptyString,
+  isValidLicensePlate,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   eventHasNonEmptyStringAttribute,
@@ -16,8 +20,6 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
-
-import { isValidLicensePlate } from './vehicle-identification.helpers';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   NewDocumentEventAttributeName;
