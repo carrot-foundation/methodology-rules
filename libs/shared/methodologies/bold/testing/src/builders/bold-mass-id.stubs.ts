@@ -44,6 +44,7 @@ const {
   PICK_UP,
   RECYCLED,
   RECYCLING_MANIFEST,
+  SORTING,
   TRANSPORT_MANIFEST,
   WEIGHING,
 } = DocumentEventName;
@@ -68,6 +69,8 @@ const {
   RECYCLER_OPERATOR_IDENTIFIER,
   SCALE_HOMOLOGATION,
   SCALE_TYPE,
+  SORTING_DESCRIPTION,
+  SORTING_FACTOR,
   TARE,
   VEHICLE_DESCRIPTION,
   VEHICLE_LICENSE_PLATE,
@@ -105,6 +108,7 @@ export const stubBoldMassIdPickUpEvent = ({
     {
       ...partialDocumentEvent,
       name: PICK_UP,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes(defaultPickUpAttributes, metadataAttributes),
   );
@@ -138,6 +142,7 @@ export const stubBoldMassIdTransportManifestEvent = ({
     {
       ...partialDocumentEvent,
       name: TRANSPORT_MANIFEST,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes(defaultAttributes, metadataAttributes),
   );
@@ -181,6 +186,7 @@ export const stubBoldMassIdWeighingSingleStepEvent = ({
     {
       ...partialDocumentEvent,
       name: WEIGHING,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes(defaultWeighingAttributes, metadataAttributes),
   );
@@ -201,6 +207,7 @@ export const stubBoldMassIdDropOffEvent = ({
     {
       ...partialDocumentEvent,
       name: DROP_OFF,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes(defaultDropOffAttributes, metadataAttributes),
   );
@@ -234,6 +241,7 @@ export const stubBoldMassIdRecyclingManifestEvent = ({
     {
       ...partialDocumentEvent,
       name: RECYCLING_MANIFEST,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes(defaultAttributes, metadataAttributes),
   );
@@ -247,8 +255,27 @@ export const stubBoldMassIdRecycledEvent = ({
     {
       ...partialDocumentEvent,
       name: RECYCLED,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
     },
     mergeMetadataAttributes([], metadataAttributes),
+  );
+
+const defaultSortingAttributes: MetadataAttributeParameter[] = [
+  [SORTING_DESCRIPTION, faker.lorem.sentence()],
+  [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
+];
+
+export const stubBoldMassIdSortingEvent = ({
+  metadataAttributes,
+  partialDocumentEvent,
+}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+  stubDocumentEventWithMetadataAttributes(
+    {
+      ...partialDocumentEvent,
+      name: SORTING,
+      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+    },
+    mergeMetadataAttributes(defaultSortingAttributes, metadataAttributes),
   );
 
 export type BoldMassIdExternalEventsMap = Map<
@@ -261,15 +288,7 @@ export type BoldMassIdExternalEventsObject = Partial<
 
 export const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map(
   [
-    [DROP_OFF, stubBoldMassIdDropOffEvent()],
     [PICK_UP, stubBoldMassIdPickUpEvent()],
-    [RECYCLED, stubBoldMassIdRecycledEvent()],
-    [
-      RECYCLING_MANIFEST,
-      stubBoldMassIdRecyclingManifestEvent({
-        withExemptionJustification: false,
-      }),
-    ],
     [
       TRANSPORT_MANIFEST,
       stubBoldMassIdTransportManifestEvent({
@@ -277,6 +296,18 @@ export const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map(
       }),
     ],
     [WEIGHING, stubBoldMassIdWeighingSingleStepEvent()],
+    // eslint-disable-next-line perfectionist/sort-maps
+    [DROP_OFF, stubBoldMassIdDropOffEvent()],
+    [SORTING, stubBoldMassIdSortingEvent()],
+    // eslint-disable-next-line perfectionist/sort-maps
+    [
+      RECYCLING_MANIFEST,
+      stubBoldMassIdRecyclingManifestEvent({
+        withExemptionJustification: false,
+      }),
+    ],
+    // eslint-disable-next-line perfectionist/sort-maps
+    [RECYCLED, stubBoldMassIdRecycledEvent()],
   ],
 );
 

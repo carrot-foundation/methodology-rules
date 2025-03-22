@@ -1,3 +1,5 @@
+import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+
 import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
@@ -6,6 +8,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { getEventAttributeValue } from './event.getters';
@@ -23,6 +26,27 @@ export const getAuditorActorEvent = (
       event.name === ACTOR.toString() &&
       getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
   );
+
+export const getFirstDocumentEventAttributeValue = (
+  document: Document,
+  attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
+): MethodologyDocumentEventAttributeValue | undefined => {
+  const { externalEvents } = document;
+
+  if (!isNonEmptyArray(externalEvents)) {
+    return undefined;
+  }
+
+  for (const event of externalEvents) {
+    const attributeValue = getEventAttributeValue(event, attributeName);
+
+    if (attributeValue !== undefined) {
+      return attributeValue;
+    }
+  }
+
+  return undefined;
+};
 
 export const getOpenEvent = (
   document: Document | undefined,
