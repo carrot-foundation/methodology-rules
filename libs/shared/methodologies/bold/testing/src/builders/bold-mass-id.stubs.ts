@@ -3,6 +3,7 @@ import {
   type Document,
   DocumentCategory,
   type DocumentEvent,
+  DocumentEventAttachmentLabel,
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
@@ -26,6 +27,7 @@ import { random } from 'typia';
 
 import {
   stubDocument,
+  stubDocumentEventAttachment,
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
@@ -136,6 +138,14 @@ export const stubBoldMassIdTransportManifestEvent = ({
 
   return stubDocumentEventWithMetadataAttributes(
     {
+      attachments:
+        withExemptionJustification === true
+          ? []
+          : [
+              stubDocumentEventAttachment({
+                label: DocumentEventAttachmentLabel.TRANSPORT_MANIFEST,
+              }),
+            ],
       ...partialDocumentEvent,
       name: TRANSPORT_MANIFEST,
     },
@@ -210,7 +220,7 @@ const defaultRecyclingManifestWithExemptionAttributes: MetadataAttributeParamete
 
 const defaultRecyclingManifestAttributes: MetadataAttributeParameter[] = [
   [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.MTR],
+  [DOCUMENT_TYPE, ReportType.CDF],
   {
     format: DATE,
     name: ISSUE_DATE,
@@ -232,6 +242,14 @@ export const stubBoldMassIdRecyclingManifestEvent = ({
 
   return stubDocumentEventWithMetadataAttributes(
     {
+      attachments:
+        withExemptionJustification === true
+          ? []
+          : [
+              stubDocumentEventAttachment({
+                label: DocumentEventAttachmentLabel.RECYCLING_MANIFEST,
+              }),
+            ],
       ...partialDocumentEvent,
       name: RECYCLING_MANIFEST,
     },
