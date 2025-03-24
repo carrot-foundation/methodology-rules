@@ -15,3 +15,4 @@ export * from './document-manifest';
 export * from './project-boundary';
 export * from './drop-off-at-recycling-facility';
 export * from './mass-sorting';
+export * from './weighing';

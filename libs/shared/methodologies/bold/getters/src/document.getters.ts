@@ -27,6 +27,12 @@ export const getAuditorActorEvent = (
       getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
   );
 
+export const getDocumentEventById = (
+  document: Document,
+  eventId: string,
+): DocumentEvent | undefined =>
+  document.externalEvents?.find((event) => event.id === eventId);
+
 export const getFirstDocumentEventAttributeValue = (
   document: Document,
   attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
