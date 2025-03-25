@@ -24,7 +24,7 @@ const processorErrors = new MassSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { CLOSE, DROP_OFF, OPEN, SORTING } = DocumentEventName;
-const { SORTING_DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
 
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
@@ -42,7 +42,7 @@ export const massSortingTestCases = [
   {
     massIdEvents: {
       [SORTING]: stubBoldMassIdSortingEvent({
-        metadataAttributes: [[SORTING_DESCRIPTION, undefined]],
+        metadataAttributes: [[DESCRIPTION, undefined]],
       }),
     },
     resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
@@ -129,7 +129,7 @@ export const massSortingTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.REJECTED(
-      calculatedSortingValue - wrongSortingValue,
+      Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the sorting value calculation difference is greater than 0.1',

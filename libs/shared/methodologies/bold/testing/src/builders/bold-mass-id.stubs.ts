@@ -71,7 +71,6 @@ const {
   RECYCLER_OPERATOR_IDENTIFIER,
   SCALE_HOMOLOGATION,
   SCALE_TYPE,
-  SORTING_DESCRIPTION,
   SORTING_FACTOR,
   TARE,
   VEHICLE_DESCRIPTION,
@@ -283,7 +282,7 @@ export const stubBoldMassIdRecycledEvent = ({
   );
 
 const defaultSortingAttributes: MetadataAttributeParameter[] = [
-  [SORTING_DESCRIPTION, faker.lorem.sentence()],
+  [DESCRIPTION, faker.lorem.sentence()],
   [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
 ];
 

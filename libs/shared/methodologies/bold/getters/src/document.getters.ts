@@ -19,9 +19,9 @@ const { ACTOR_TYPE } = DocumentEventAttributeName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 export const getAuditorActorEvent = (
-  document: Document,
+  document: Document | undefined,
 ): DocumentEvent | undefined =>
-  document.externalEvents?.find(
+  document?.externalEvents?.find(
     (event) =>
       event.name === ACTOR.toString() &&
       getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
@@ -34,9 +34,13 @@ export const getDocumentEventById = (
   document.externalEvents?.find((event) => event.id === eventId);
 
 export const getFirstDocumentEventAttributeValue = (
-  document: Document,
+  document: Document | undefined,
   attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
 ): MethodologyDocumentEventAttributeValue | undefined => {
+  if (!document) {
+    return undefined;
+  }
+
   const { externalEvents } = document;
 
   if (!isNonEmptyArray(externalEvents)) {
