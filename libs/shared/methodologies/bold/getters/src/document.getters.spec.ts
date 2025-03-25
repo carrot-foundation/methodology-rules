@@ -18,6 +18,7 @@ import { faker } from '@faker-js/faker';
 
 import {
   getAuditorActorEvent,
+  getDocumentEventById,
   getFirstDocumentEventAttributeValue,
   getOpenEvent,
   getParticipantActorType,
@@ -378,6 +379,27 @@ describe('Document getters', () => {
         document,
         SORTING_FACTOR,
       );
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getDocumentEventById', () => {
+    it('should return the document event by id', () => {
+      const documentEvent = stubDocumentEvent();
+      const document = stubMassDocument({
+        externalEvents: [documentEvent],
+      });
+
+      const result = getDocumentEventById(document, documentEvent.id);
+
+      expect(result).toEqual(documentEvent);
+    });
+
+    it('should return undefined when the document event is not found', () => {
+      const document = stubMassDocument();
+
+      const result = getDocumentEventById(document, 'non-existent-id');
 
       expect(result).toBeUndefined();
     });

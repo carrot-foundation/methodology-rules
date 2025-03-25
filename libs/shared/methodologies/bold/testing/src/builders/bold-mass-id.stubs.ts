@@ -164,7 +164,11 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   [SCALE_HOMOLOGATION, random<MethodologyDocumentEventAttributeReference>()],
   [CONTAINER_TYPE, random<DocumentEventContainerType>()],
   [CONTAINER_QUANTITY, faker.number.int({ min: 1 })],
-  [CONTAINER_CAPACITY, faker.number.int({ min: 1 })],
+  {
+    format: KILOGRAM,
+    name: CONTAINER_CAPACITY,
+    value: faker.number.float({ min: 1 }),
+  },
   {
     format: KILOGRAM,
     name: GROSS_WEIGHT,
@@ -187,7 +191,7 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   },
 ];
 
-export const stubBoldMassIdWeighingSingleStepEvent = ({
+export const stubBoldMassIdWeighingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -312,7 +316,7 @@ export const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map(
         withExemptionJustification: false,
       }),
     ],
-    [WEIGHING, stubBoldMassIdWeighingSingleStepEvent()],
+    [WEIGHING, stubBoldMassIdWeighingEvent()],
     // eslint-disable-next-line perfectionist/sort-maps
     [DROP_OFF, stubBoldMassIdDropOffEvent()],
     [SORTING, stubBoldMassIdSortingEvent()],
