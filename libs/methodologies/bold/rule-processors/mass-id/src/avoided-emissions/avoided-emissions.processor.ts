@@ -32,9 +32,7 @@ import {
 
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 
-const {
-  PROJECT_EMISSION_CALCULATION_INDEX: PROJECT_EMISION_CALCULATION_INDEX,
-} = NewDocumentEventAttributeName;
+const { PROJECT_EMISSION_CALCULATION_INDEX } = NewDocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (
@@ -42,8 +40,8 @@ export const RESULT_COMMENTS = {
     emissionIndex: number,
     currentValue: number,
   ) =>
-    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula ${emissionIndex} × ${currentValue} = ${avoidedEmissions}[formula: emission_index × current_value = avoided_emissions].`,
-  MISSING_INDEX: `The "${PROJECT_EMISION_CALCULATION_INDEX}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula ${emissionIndex} × ${currentValue} = ${avoidedEmissions} [formula: emission_index × current_value = avoided_emissions].`,
+  MISSING_INDEX: `The "${PROJECT_EMISSION_CALCULATION_INDEX}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
 } as const;
 
 interface DocumentPair {
@@ -148,7 +146,7 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     return {
       emissionIndex: getFirstDocumentEventAttributeValue(
         recyclerHomologationDocument,
-        PROJECT_EMISION_CALCULATION_INDEX,
+        PROJECT_EMISSION_CALCULATION_INDEX,
       ),
       massIdDocumentValue: massIdDocument.currentValue,
     };

@@ -75,7 +75,7 @@ describe('AvoidedEmissionsProcessor E2E', () => {
     },
   );
 
-  describe('WeighingProcessorErrors', () => {
+  describe('AvoidedEmissionsProcessorErrors', () => {
     it.each(avoidedEmissionsErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({ documents, massIdAuditDocument, resultStatus }) => {

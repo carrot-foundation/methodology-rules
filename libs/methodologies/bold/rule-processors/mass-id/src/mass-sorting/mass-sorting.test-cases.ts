@@ -40,6 +40,7 @@ const actorParticipants = new Map(
 
 export const massSortingTestCases = [
   {
+    actorParticipants,
     massIdEvents: {
       [SORTING]: stubBoldMassIdSortingEvent({
         metadataAttributes: [[DESCRIPTION, undefined]],
