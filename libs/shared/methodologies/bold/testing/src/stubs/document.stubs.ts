@@ -86,6 +86,27 @@ export const stubMassCertificateAuditDocument = (
     type: DocumentType.MASS_CERTIFICATE_AUDIT,
   });
 
+export const stubMassAuditCertificateDocument = (
+  partialDocument?: PartialDeep<Document>,
+): Document =>
+  stubDocument({
+    category: DocumentCategory.METHODOLOGY,
+    subtype: DocumentSubtype.PROCESS,
+    type: random<DocumentType.GAS_ID | DocumentType.RECYCLED_ID>(),
+    ...partialDocument,
+  });
+
+// TODO: will be renamed to stubCreditDocument when all structure is ready
+export const stubNewCreditDocument = (
+  partialDocument?: PartialDeep<Document>,
+): Document =>
+  stubDocument({
+    category: DocumentCategory.METHODOLOGY,
+    subtype: random<DocumentSubtype.TCC | DocumentSubtype.TRC>(),
+    type: DocumentType.CREDIT,
+    ...partialDocument,
+  });
+
 export const stubMassCertificateDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
