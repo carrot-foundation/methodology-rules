@@ -29,6 +29,7 @@ export enum MethodologyDocumentEventName {
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',
   RULES_METADATA = 'RULES METADATA',
+  SORTING = 'Sorting',
   TRANSPORT_MANIFEST = 'Transport Manifest',
   WASTE_GENERATOR = 'Waste Generator',
   WEIGHING = 'Weighing',

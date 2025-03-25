@@ -11,11 +11,14 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { faker } from '@faker-js/faker';
 
 import {
   getAuditorActorEvent,
+  getFirstDocumentEventAttributeValue,
   getOpenEvent,
   getParticipantActorType,
   getRulesMetadataEvent,
@@ -24,6 +27,7 @@ import {
 const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { AUDITOR } = DocumentEventActorType;
 const { ACTOR_TYPE } = DocumentEventAttributeName;
+const { SORTING_FACTOR } = NewDocumentEventAttributeName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
@@ -56,6 +60,12 @@ describe('Document getters', () => {
       });
 
       const result = getAuditorActorEvent(document);
+
+      expect(result).toBe(undefined);
+    });
+
+    it('should return undefined if the document is undefined', () => {
+      const result = getAuditorActorEvent(undefined as unknown as Document);
 
       expect(result).toBe(undefined);
     });
@@ -288,6 +298,88 @@ describe('Document getters', () => {
       });
 
       expect(participantActorType).toBeUndefined();
+    });
+  });
+
+  describe('getFirstDocumentEventAttributeValue', () => {
+    it(`should return the first attribute value that matches the attribute name`, () => {
+      const attributeValue = faker.number.float({ max: 1, min: 0 });
+      const eventWithTheAttribute = stubDocumentEventWithMetadataAttributes(
+        {},
+        [[SORTING_FACTOR, attributeValue]],
+      );
+      const document = stubMassDocument({
+        externalEvents: [
+          eventWithTheAttribute,
+          ...stubArray(() => stubDocumentEvent()),
+        ],
+      });
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toEqual(attributeValue);
+    });
+
+    it(`should return undefined when the attribute name is not found`, () => {
+      const document = stubMassDocument();
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the document does not have external events', () => {
+      const document = stubMassDocument({
+        externalEvents: undefined,
+      });
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the document has empty external events array', () => {
+      const document = stubMassDocument();
+
+      document.externalEvents = [];
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the document is undefined', () => {
+      const result = getFirstDocumentEventAttributeValue(
+        undefined as unknown as Document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when all events have undefined attribute values', () => {
+      const document = stubMassDocument({
+        externalEvents: [stubDocumentEvent(), stubDocumentEvent()],
+      });
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
     });
   });
 });

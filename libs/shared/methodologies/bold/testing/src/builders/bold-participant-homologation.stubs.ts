@@ -7,6 +7,7 @@ import {
   DocumentType,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { faker } from '@faker-js/faker';
 import { addDays, formatDate, subDays } from 'date-fns';
 
 import {
@@ -24,12 +25,14 @@ import {
 } from './bold.stubs.types';
 
 const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } =
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE, SORTING_FACTOR } =
   NewDocumentEventAttributeName;
 
 const defaultCloseEventMetadataAttributes: MetadataAttributeParameter[] = [
   [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
   [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
+  // TODO: it's temporary, we need to remove when the homologation document is defined
+  [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
 ];
 
 export const stubBoldHomologationDocumentCloseEvent = ({
@@ -45,7 +48,7 @@ export const stubBoldHomologationDocumentCloseEvent = ({
   );
 
 const boldHomologationExternalEventsMap = new Map([
-  [CLOSE, stubBoldHomologationDocumentCloseEvent({})],
+  [CLOSE, stubBoldHomologationDocumentCloseEvent()],
 ]);
 
 export const stubBoldHomologationDocument = ({
