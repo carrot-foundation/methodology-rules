@@ -30,6 +30,7 @@ import { is } from 'typia';
 import {
   INVALID_RESULT_COMMENTS,
   MISSING_RESULT_COMMENTS,
+  NET_WEIGHT_CALCULATION_TOLERANCE,
   NOT_FOUND_RESULT_COMMENTS,
 } from './weighing.constants';
 
@@ -255,9 +256,9 @@ export const validateNetWeightCalculationDifference = ({
   tare: number;
 }): ValidationResult => {
   const calculatedNetWeight = grossWeight - tare * containerQuantity;
-  const tolerance = 0.1;
 
-  return Math.abs(calculatedNetWeight - massNetWeight) > tolerance
+  return Math.abs(calculatedNetWeight - massNetWeight) >
+    NET_WEIGHT_CALCULATION_TOLERANCE
     ? [
         INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
           calculatedNetWeight,
