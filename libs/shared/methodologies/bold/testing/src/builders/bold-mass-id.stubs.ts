@@ -345,7 +345,9 @@ export const stubBoldMassIdDocument = ({
       {
         ...partialDocument,
         category: MASS_ID,
-        currentValue: faker.number.float({ min: 1 }),
+        currentValue: isNil(partialDocument?.currentValue)
+          ? faker.number.float({ min: 1 })
+          : partialDocument.currentValue,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),

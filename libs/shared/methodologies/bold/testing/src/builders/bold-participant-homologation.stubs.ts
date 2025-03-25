@@ -29,12 +29,18 @@ import {
 } from './bold.stubs.types';
 
 const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE, SCALE_TYPE, SORTING_FACTOR } =
-  NewDocumentEventAttributeName;
+const {
+  HOMOLOGATION_DATE,
+  HOMOLOGATION_DUE_DATE,
+  PROJECT_EMISSION_CALCULATION_INDEX: PROJECT_EMISION_CALCULATION_INDEX,
+  SCALE_TYPE,
+  SORTING_FACTOR,
+} = NewDocumentEventAttributeName;
 
 const defaultCloseEventMetadataAttributes: MetadataAttributeParameter[] = [
   [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
   [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
+  [PROJECT_EMISION_CALCULATION_INDEX, faker.number.float({ max: 1, min: 0 })],
   // TODO: it's temporary, we need to remove when the homologation document is defined
   [SCALE_TYPE, random<DocumentEventScaleType>()],
   // TODO: it's temporary, we need to remove when the homologation document is defined
