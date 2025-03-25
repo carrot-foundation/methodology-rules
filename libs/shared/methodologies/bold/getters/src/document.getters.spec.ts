@@ -63,6 +63,12 @@ describe('Document getters', () => {
 
       expect(result).toBe(undefined);
     });
+
+    it('should return undefined if the document is undefined', () => {
+      const result = getAuditorActorEvent(undefined as unknown as Document);
+
+      expect(result).toBe(undefined);
+    });
   });
 
   describe('getOpenEvent', () => {
@@ -331,6 +337,41 @@ describe('Document getters', () => {
     it('should return undefined when the document does not have external events', () => {
       const document = stubMassDocument({
         externalEvents: undefined,
+      });
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the document has empty external events array', () => {
+      const document = stubMassDocument();
+
+      document.externalEvents = [];
+
+      const result = getFirstDocumentEventAttributeValue(
+        document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when the document is undefined', () => {
+      const result = getFirstDocumentEventAttributeValue(
+        undefined as unknown as Document,
+        SORTING_FACTOR,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when all events have undefined attribute values', () => {
+      const document = stubMassDocument({
+        externalEvents: [stubDocumentEvent(), stubDocumentEvent()],
       });
 
       const result = getFirstDocumentEventAttributeValue(
