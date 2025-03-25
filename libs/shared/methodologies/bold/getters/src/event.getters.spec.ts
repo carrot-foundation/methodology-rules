@@ -168,5 +168,15 @@ describe('Event getters', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('should return undefined if the event does not have metadata attributes', () => {
+      const event = stubDocumentEvent({
+        metadata: undefined,
+      });
+
+      const result = getEventAttributeByName(event, ACTOR_TYPE);
+
+      expect(result).toBeUndefined();
+    });
   });
 });
