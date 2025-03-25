@@ -129,7 +129,7 @@ export const massSortingTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.REJECTED(
-      calculatedSortingValue - wrongSortingValue,
+      Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the sorting value calculation difference is greater than 0.1',

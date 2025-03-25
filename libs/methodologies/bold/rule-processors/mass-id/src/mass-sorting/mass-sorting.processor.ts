@@ -162,8 +162,9 @@ export class MassSortingProcessor extends RuleDataProcessor {
 
     const calculatedSortingValue =
       Number(valueBeforeSorting) * Number(sortingFactor);
-    const sortingValueCalculationDifference =
-      calculatedSortingValue - Number(valueAfterSorting);
+    const sortingValueCalculationDifference = Math.abs(
+      calculatedSortingValue - Number(valueAfterSorting),
+    );
 
     return {
       calculatedSortingValue,
@@ -189,10 +190,7 @@ export class MassSortingProcessor extends RuleDataProcessor {
       };
     }
 
-    if (
-      Math.abs(sortingData.sortingValueCalculationDifference) >
-      SORTING_TOLERANCE
-    ) {
+    if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
         resultComment: RESULT_COMMENTS.REJECTED(
           sortingData.sortingValueCalculationDifference,
