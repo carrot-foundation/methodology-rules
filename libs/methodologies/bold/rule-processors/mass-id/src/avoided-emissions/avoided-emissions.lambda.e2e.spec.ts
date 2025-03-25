@@ -15,7 +15,7 @@ import {
   avoidedEmissionsTestCases,
 } from './avoided-emissions.test-cases';
 
-describe('WeighingProcessor E2E', () => {
+describe('AvoidedEmissionsProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -37,7 +37,7 @@ describe('WeighingProcessor E2E', () => {
       } = new BoldStubsBuilder()
         .createMassIdDocument({
           partialDocument: {
-            currentValue: massIdDocumentValue,
+            currentValue: massIdDocumentValue as number,
           },
         })
         .createMassIdAuditDocument()

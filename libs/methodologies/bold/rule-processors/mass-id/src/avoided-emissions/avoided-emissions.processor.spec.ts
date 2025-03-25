@@ -32,7 +32,7 @@ describe('AvoidedEmissionsProcessor', () => {
         } = new BoldStubsBuilder()
           .createMassIdDocument({
             partialDocument: {
-              currentValue: massIdDocumentValue,
+              currentValue: massIdDocumentValue as number,
             },
           })
           .createMassIdAuditDocument()

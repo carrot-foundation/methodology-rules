@@ -19,25 +19,25 @@ const { RECYCLER } = MassIdDocumentActorType;
 const { CLOSE } = DocumentEventName;
 
 export const avoidedEmissionsTestCases = [
-  // {
-  //   homologationDocuments: new Map([
-  //     [
-  //       RECYCLER,
-  //       {
-  //         externalEventsMap: {
-  //           [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-  //             metadataAttributes: [
-  //               [PROJECT_EMISION_CALCULATION_INDEX, undefined],
-  //             ],
-  //           }),
-  //         },
-  //       },
-  //     ],
-  //   ]),
-  //   resultComment: RESULT_COMMENTS.MISSING_INDEX,
-  //   resultStatus: RuleOutputStatus.REJECTED,
-  //   scenario: `the Recycler Homologation document does not have the "${PROJECT_EMISION_CALCULATION_INDEX}" attribute`,
-  // },
+  {
+    homologationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [CLOSE]: stubBoldHomologationDocumentCloseEvent({
+              metadataAttributes: [
+                [PROJECT_EMISION_CALCULATION_INDEX, undefined],
+              ],
+            }),
+          },
+        },
+      ],
+    ]),
+    resultComment: RESULT_COMMENTS.MISSING_INDEX,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: `the Recycler Homologation document does not have the "${PROJECT_EMISION_CALCULATION_INDEX}" attribute`,
+  },
   {
     homologationDocuments: new Map([
       [
