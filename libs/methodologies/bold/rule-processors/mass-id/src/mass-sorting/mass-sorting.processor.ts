@@ -40,13 +40,13 @@ import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared
 import { MassSortingProcessorErrors } from './mass-sorting.errors';
 
 const { SORTING } = DocumentEventName;
-const { SORTING_DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
 const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
   APPROVED: (sortingValueCalculationDifference: number) =>
     `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is "${sortingValueCalculationDifference}" kg.`,
-  MISSING_SORTING_DESCRIPTION: `The "${SORTING_DESCRIPTION}" must be provided.`,
+  MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
   REJECTED: (sortingValueCalculationDifference: number) =>
     `The calculated sorting value differs from the actual value by "${sortingValueCalculationDifference}" kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
 } as const;
@@ -138,7 +138,7 @@ export class MassSortingProcessor extends RuleDataProcessor {
     );
     const sortingDescription = getEventAttributeValue(
       sortingEvent,
-      SORTING_DESCRIPTION,
+      DESCRIPTION,
     );
 
     this.validateOrThrow(
@@ -162,8 +162,9 @@ export class MassSortingProcessor extends RuleDataProcessor {
 
     const calculatedSortingValue =
       Number(valueBeforeSorting) * Number(sortingFactor);
-    const sortingValueCalculationDifference =
-      calculatedSortingValue - Number(valueAfterSorting);
+    const sortingValueCalculationDifference = Math.abs(
+      calculatedSortingValue - Number(valueAfterSorting),
+    );
 
     return {
       calculatedSortingValue,
@@ -189,10 +190,7 @@ export class MassSortingProcessor extends RuleDataProcessor {
       };
     }
 
-    if (
-      Math.abs(sortingData.sortingValueCalculationDifference) >
-      SORTING_TOLERANCE
-    ) {
+    if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
         resultComment: RESULT_COMMENTS.REJECTED(
           sortingData.sortingValueCalculationDifference,

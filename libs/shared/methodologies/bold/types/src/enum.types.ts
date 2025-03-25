@@ -105,7 +105,6 @@ export enum NewDocumentEventAttributeName {
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
   SCALE_HOMOLOGATION = 'Scale Homologation',
   SCALE_TYPE = 'Scale Type',
-  SORTING_DESCRIPTION = 'Sorting Description',
   SORTING_FACTOR = 'Sorting Factor',
   TARE = 'Tare',
   VEHICLE_DESCRIPTION = 'Vehicle Description',
