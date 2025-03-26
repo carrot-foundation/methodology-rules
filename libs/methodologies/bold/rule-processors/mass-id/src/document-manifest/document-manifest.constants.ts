@@ -1,7 +1,7 @@
 import {
   DocumentEventName,
+  MeasurementUnit,
   NewDocumentEventAttributeName,
-  NewMeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -44,5 +44,5 @@ export const RESULT_COMMENTS = {
     issueDate: string;
     value: number;
   }) =>
-    `The ${documentType} attachment (No. ${documentNumber}), issued on ${issueDate}, with a value of ${value}${NewMeasurementUnit.KG}, was provided.`,
+    `The ${documentType} attachment (No. ${documentNumber}), issued on ${issueDate}, with a value of ${value}${MeasurementUnit.KG}, was provided.`,
 } as const;
