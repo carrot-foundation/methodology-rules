@@ -66,6 +66,7 @@
         "libs/shared/document/loader/src/index.ts"
       ],
       "@carrot-fndn/shared/helpers": ["libs/shared/helpers/src/index.ts"],
+      "@carrot-fndn/shared/aws-http": ["libs/shared/aws-http/src/index.ts"],
       "@carrot-fndn/shared/lambda/types": [
         "libs/shared/lambda/types/src/index.ts"
       ],
