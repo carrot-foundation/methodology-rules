@@ -51,7 +51,7 @@ export const mapToRuleOutput = (
     resultContent,
   }: {
     resultComment?: string | undefined;
-    resultContent?: AnyObject;
+    resultContent?: AnyObject | undefined;
   } = {},
 ): RuleOutput => ({
   requestId: ruleInput.requestId,
