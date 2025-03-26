@@ -6,6 +6,10 @@ export type UnknownObject = Record<string, unknown>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyObject = Record<string, any>;
 
+export interface StringObject {
+  [key: string]: string;
+}
+
 const primitiveTypeUselessVariable = typeof (0 as unknown);
 
 export type PrimitiveType = typeof primitiveTypeUselessVariable;
