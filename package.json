@@ -105,6 +105,7 @@
     "@date-fns/utc": "2.1.0",
     "@sentry/serverless": "7.120.3",
     "@smithy/signature-v4": "5.0.1",
+    "axios": "1.8.4",
     "bignumber.js": "9.1.2",
     "date-fns": "4.1.0",
     "geolib": "3.3.4",
