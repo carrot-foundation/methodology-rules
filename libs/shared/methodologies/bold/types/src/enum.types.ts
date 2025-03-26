@@ -69,7 +69,7 @@ export enum MassSubtype {
 
 // TODO: Remove this enum after finish the rules development
 export enum MeasurementUnit {
-  KG = 'KG',
+  KG = 'kg',
 }
 
 // TODO: Rename this enum after finish the rules development

@@ -587,7 +587,7 @@ export const approvedMassDocument: Document = {
   id: faker.string.uuid(),
   isPublic: true,
   isPubliclySearchable: true,
-  measurementUnit: 'KG',
+  measurementUnit: 'kg',
   permissions: [
     {
       id: faker.string.uuid(),

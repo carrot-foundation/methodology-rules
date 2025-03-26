@@ -10,7 +10,7 @@ Methodology: **BOLD**
 
 ## 📄 Description
 
-Check if the unit of measurement declared in the document is KG
+Check if the unit of measurement declared in the document is kg
 
 ### 📂 Implementation
 
