@@ -23,6 +23,7 @@ describe('AvoidedEmissionsProcessor', () => {
         homologationDocuments,
         massIdDocumentValue,
         resultComment,
+        resultContent,
         resultStatus,
       }) => {
         const {
@@ -60,6 +61,7 @@ describe('AvoidedEmissionsProcessor', () => {
           responseToken: ruleInput.responseToken,
           responseUrl: ruleInput.responseUrl,
           resultComment,
+          resultContent,
           resultStatus,
         });
       },

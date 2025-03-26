@@ -118,6 +118,9 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
         emissionIndex,
         massIdDocumentValue,
       ),
+      resultContent: {
+        avoidedEmissions,
+      },
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
@@ -158,10 +161,12 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
       const documents = await this.collectDocuments(documentsQuery);
       const ruleSubject = this.getRuleSubject(documents);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultContent, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultContent,
       });
     } catch (error: unknown) {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {

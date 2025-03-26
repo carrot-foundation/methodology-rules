@@ -53,6 +53,9 @@ export const avoidedEmissionsTestCases = [
     ]),
     massIdDocumentValue: 100,
     resultComment: RESULT_COMMENTS.APPROVED(80, 0.8, 100),
+    resultContent: {
+      avoidedEmissions: 80,
+    },
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `the Recycler Homologation document has the "${PROJECT_EMISION_CALCULATION_INDEX}" attribute and was calculated correctly`,
   },
