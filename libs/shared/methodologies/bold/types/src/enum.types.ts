@@ -67,13 +67,7 @@ export enum MassSubtype {
   WOOD_AND_WOOD_PRODUCTS = DocumentSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
-// TODO: Remove this enum after finish the rules development
 export enum MeasurementUnit {
-  KG = 'kg',
-}
-
-// TODO: Rename this enum after finish the rules development
-export enum NewMeasurementUnit {
   KG = 'kg',
 }
 

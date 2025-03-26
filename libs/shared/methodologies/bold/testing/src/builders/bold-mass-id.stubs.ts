@@ -11,8 +11,8 @@ import {
   DocumentEventWeighingCaptureMethod,
   DocumentType,
   MassSubtype,
+  MeasurementUnit,
   NewDocumentEventAttributeName,
-  NewMeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
@@ -352,7 +352,7 @@ export const stubBoldMassIdDocument = ({
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        measurementUnit: NewMeasurementUnit.KG,
+        measurementUnit: MeasurementUnit.KG,
         subtype: stubEnumValue(MassSubtype),
         type: DocumentType.ORGANIC,
       },
