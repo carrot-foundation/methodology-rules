@@ -124,7 +124,7 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
 });
 
 export const geolocationPrecisionTestCases: {
-  actorParticipants?: Map<string, MethodologyParticipant> | undefined;
+  actorParticipants: Map<string, MethodologyParticipant>;
   homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdDocumentParameters?: StubBoldDocumentParameters | undefined;
   resultComment: string;
@@ -132,6 +132,7 @@ export const geolocationPrecisionTestCases: {
   scenario: string;
 }[] = [
   {
+    actorParticipants,
     homologationDocuments: new Map([
       [
         RECYCLER,

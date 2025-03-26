@@ -67,13 +67,7 @@ export enum MassSubtype {
   WOOD_AND_WOOD_PRODUCTS = DocumentSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
-// TODO: Remove this enum after finish the rules development
 export enum MeasurementUnit {
-  KG = 'KG',
-}
-
-// TODO: Rename this enum after finish the rules development
-export enum NewMeasurementUnit {
   KG = 'kg',
 }
 
@@ -101,6 +95,7 @@ export enum NewDocumentEventAttributeName {
   LOCAL_WASTE_CLASSIFICATION_DESC = 'Local Waste Classification Desc',
   LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
   MASS_NET_WEIGHT = 'Mass Net Weight',
+  PROJECT_EMISSION_CALCULATION_INDEX = 'Project Emission Calculation Index',
   RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
   SCALE_HOMOLOGATION = 'Scale Homologation',
