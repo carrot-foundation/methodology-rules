@@ -1,11 +1,9 @@
-import type { AxiosRequestConfig } from 'axios';
-
 import { signRequest } from '@carrot-fndn/shared/aws-http';
 import {
   isNonEmptyString,
   logger as pinoLogger,
 } from '@carrot-fndn/shared/helpers';
-import axios from 'axios';
+import axios, { type AxiosRequestConfig } from 'axios';
 import { type Logger } from 'pino';
 
 export const prepareHttpRequestConfig = async (
