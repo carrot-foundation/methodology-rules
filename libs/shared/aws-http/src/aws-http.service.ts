@@ -15,20 +15,30 @@ export class AwsHttpService {
     url: Uri,
     dto: DTO,
   ): Promise<Response> {
-    const { headers, ...signedRequest } = await this.signRequest({
-      dto,
-      method,
-      url,
-    });
+    try {
+      const { headers, ...signedRequest } = await this.signRequest({
+        dto,
+        method,
+        url,
+      });
 
-    const { data } = await this.httpService.request<Response>({
-      data: signedRequest.body as unknown,
-      headers,
-      method,
-      url,
-    });
+      const { data } = await this.httpService.request<Response>({
+        data: signedRequest.body as unknown,
+        headers,
+        method,
+        url,
+      });
 
-    return data;
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new TypeError(
+          `AWS HTTP ${method} request failed: ${error.message}`,
+        );
+      }
+
+      throw error;
+    }
   }
 
   private async signRequest({

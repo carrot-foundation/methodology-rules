@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios';
+import { type AxiosInstance } from 'axios';
 
 import { AwsHttpService } from './aws-http.service';
 import * as awsHelpers from './aws-http.service.helpers';
@@ -68,6 +68,24 @@ describe('HttpService', () => {
       await expect(
         service['post']('https://api.example.com', { data: 'test' }),
       ).rejects.toThrow('AWS_REGION is not set');
+    });
+
+    it('should throw error when request fails', async () => {
+      mockAxios.request.mockRejectedValueOnce(new Error('Request failed'));
+
+      await expect(
+        service['post']('https://api.example.com', { data: 'test' }),
+      ).rejects.toThrow('AWS HTTP POST request failed: Request failed');
+    });
+
+    it('should throw original error when non-Error object is thrown', async () => {
+      const nonErrorObject = { message: 'Custom error' };
+
+      mockAxios.request.mockRejectedValueOnce(nonErrorObject);
+
+      await expect(
+        service['post']('https://api.example.com', { data: 'test' }),
+      ).rejects.toBe(nonErrorObject);
     });
   });
 
