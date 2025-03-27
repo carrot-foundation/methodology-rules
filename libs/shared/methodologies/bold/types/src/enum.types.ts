@@ -8,6 +8,7 @@ export enum DocumentCategory {
 
 export enum DocumentStatus {
   CANCELLED = 'CANCELLED',
+  OPEN = 'OPEN',
 }
 
 export enum DocumentType {
