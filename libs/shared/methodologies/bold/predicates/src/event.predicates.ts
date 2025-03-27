@@ -9,6 +9,7 @@ import {
   DocumentEventActorType,
   DocumentEventAttributeName,
   DocumentEventName,
+  MeasurementUnit,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -69,7 +70,11 @@ export const hasWeightFormat = (
 ): boolean => {
   const parts = unparsedWeightValue?.split(' ');
 
-  return parts?.length === 2 && !Number.isNaN(parts[0]) && parts[1] === 'KG';
+  return (
+    parts?.length === 2 &&
+    !Number.isNaN(parts[0]) &&
+    parts[1] === MeasurementUnit.KG
+  );
 };
 
 export const eventsHasSameMetadataAttributeValue = (
