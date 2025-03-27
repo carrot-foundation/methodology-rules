@@ -6,6 +6,7 @@ import {
   DocumentEventName,
   DocumentSubtype,
   DocumentType,
+  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DataSetName,
@@ -140,7 +141,7 @@ export const approvedMassDocument: Document = {
           {
             isPublic: true,
             name: DocumentEventAttributeName.VEHICLE_VOLUME_CAPACITY,
-            value: '131000.00 KG',
+            value: `131000.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
@@ -343,17 +344,17 @@ export const approvedMassDocument: Document = {
           {
             isPublic: true,
             name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-            value: '128901.00 KG',
+            value: `128901.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
             name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-            value: '19700.00 KG',
+            value: `19700.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
             name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
-            value: '109201.00 KG',
+            value: `109201.00 ${MeasurementUnit.KG}`,
           },
         ],
       },
@@ -433,17 +434,17 @@ export const approvedMassDocument: Document = {
           {
             isPublic: true,
             name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-            value: '128900.00 KG',
+            value: `128900.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
             name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-            value: '19700.00 KG',
+            value: `19700.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
             name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
-            value: '109200.00 KG',
+            value: `109200.00 ${MeasurementUnit.KG}`,
           },
         ],
       },
@@ -504,12 +505,12 @@ export const approvedMassDocument: Document = {
           {
             isPublic: true,
             name: DocumentEventAttributeName.INVOICE_TOTAL_WEIGHT,
-            value: '136410.00 KG',
+            value: `136410.00 ${MeasurementUnit.KG}`,
           },
           {
             isPublic: true,
             name: DocumentEventAttributeName.INVOICE_WEIGHT_MASSID_ASSOCIATED,
-            value: '109200.00 KG',
+            value: `109200.00 ${MeasurementUnit.KG}`,
           },
         ],
       },
@@ -587,7 +588,7 @@ export const approvedMassDocument: Document = {
   id: faker.string.uuid(),
   isPublic: true,
   isPubliclySearchable: true,
-  measurementUnit: 'kg',
+  measurementUnit: MeasurementUnit.KG,
   permissions: [
     {
       id: faker.string.uuid(),
