@@ -7,7 +7,7 @@ import {
   DocumentCategory,
   DocumentType,
   MassSubtype,
-  NewMeasurementUnit,
+  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -16,7 +16,7 @@ import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 const ALLOWED_SUBTYPES: string[] = Object.values(MassSubtype);
 
 const { MASS_ID } = DocumentCategory;
-const { KG } = NewMeasurementUnit;
+const { KG } = MeasurementUnit;
 const { ORGANIC } = DocumentType;
 
 export const RESULT_COMMENTS = {
