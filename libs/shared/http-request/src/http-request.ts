@@ -91,6 +91,9 @@ export const httpRequest = async (
   try {
     return await axios(requestConfig);
   } catch (error) {
-    return handleRequestError(error, config, { ignoreTimeoutError, logger });
+    return handleRequestError(error, requestConfig, {
+      ignoreTimeoutError,
+      logger,
+    });
   }
 };
