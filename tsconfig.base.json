@@ -65,6 +65,9 @@
       "@carrot-fndn/shared/document/loader": [
         "libs/shared/document/loader/src/index.ts"
       ],
+      "@carrot-fndn/shared/document/seeds": [
+        "libs/shared/document/seeds/src/index.ts"
+      ],
       "@carrot-fndn/shared/http-request": [
         "libs/shared/http-request/src/index.ts"
       ],

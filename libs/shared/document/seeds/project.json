@@ -1,0 +1,12 @@
+{
+  "name": "shared-document-seeds",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:shared", "stack:any", "type:lib"],
+  "sourceRoot": "libs/shared/document/seeds/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}
