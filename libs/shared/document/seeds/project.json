@@ -6,7 +6,6 @@
   "projectType": "library",
   "targets": {
     "lint": {},
-    "test": {},
     "ts": {}
   }
 }
