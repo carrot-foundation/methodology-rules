@@ -5,9 +5,9 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   stubDocumentEvent,
+  stubMassAuditCertificateDocument,
   stubMassAuditDocument,
-  stubMassCertificateAuditDocument,
-  stubMassCertificateDocument,
+  stubNewCreditDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentCategory,
@@ -51,36 +51,45 @@ describe('RewardsDistributionProcessor E2E', () => {
       parentDocumentId: id,
     }),
   );
+
+  const massAuditCertificates = massAudits.map(({ id }) =>
+    stubMassAuditCertificateDocument({
+      parentDocumentId: id,
+      type: DocumentType.RECYCLED_ID,
+    }),
+  );
+
   const methodologyDocument = stubMethodologyWithRequiredActors({
     id: methodologyReference.documentId,
   });
-  const externalEvents = massAudits.map(({ category, id, subtype, type }) =>
+
+  const externalEvents = massAuditCertificates.map(
+    ({ category, id, subtype, type }) =>
+      stubDocumentEvent({
+        relatedDocument: {
+          category,
+          documentId: id,
+          subtype,
+          type,
+        },
+      }),
+  );
+
+  externalEvents.push(
     stubDocumentEvent({
-      relatedDocument: {
-        category,
-        documentId: id,
-        subtype,
-        type,
-      },
+      name: DocumentEventName.ACTOR,
+      referencedDocument: methodologyReference,
+      relatedDocument: undefined,
     }),
   );
-  const massCertificate = stubMassCertificateDocument({
+
+  const credit = stubNewCreditDocument({
     externalEvents,
-  });
-  const massCertificateAudit = stubMassCertificateAuditDocument({
-    externalEvents: [
-      stubDocumentEvent({
-        name: DocumentEventName.ACTOR,
-        referencedDocument: methodologyReference,
-        relatedDocument: undefined,
-      }),
-    ],
-    parentDocumentId: massCertificate.id,
   });
 
   const documents = [
-    massCertificate,
-    massCertificateAudit,
+    credit,
+    ...massAuditCertificates,
     methodologyDocument,
     ...organicMasses,
     ...massAudits,
@@ -98,10 +107,10 @@ describe('RewardsDistributionProcessor E2E', () => {
     );
   });
 
-  it('should return resultStatus approved when all massCertificates containing mass documents are correct', async () => {
+  it('should return resultStatus approved when all credits containing mass documents are correct', async () => {
     const response = await handler(
       stubRuleInput({
-        documentId: massCertificateAudit.id,
+        documentId: credit.id,
         documentKeyPrefix,
       }),
       stubContext(),
