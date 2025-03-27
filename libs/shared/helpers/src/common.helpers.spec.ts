@@ -1,6 +1,14 @@
 import { faker } from '@faker-js/faker';
 
-import { getOrDefault, getOrUndefined, isNil, pick } from './common.helpers';
+import {
+  getOrDefault,
+  getOrUndefined,
+  isNil,
+  isNonEmptyObject,
+  isObject,
+  isPlainObject,
+  pick,
+} from './common.helpers';
 
 describe('common helpers', () => {
   describe('isNil', () => {
@@ -48,6 +56,63 @@ describe('common helpers', () => {
     );
   });
 
+  describe('isObject', () => {
+    it('should return true for objects', () => {
+      expect(isObject({})).toBe(true);
+      expect(isObject({ key: 'value' })).toBe(true);
+    });
+
+    it('should return false for non-objects', () => {
+      expect(isObject(null)).toBe(false);
+      expect(isObject(undefined)).toBe(false);
+      expect(isObject('string')).toBe(false);
+      expect(isObject(123)).toBe(false);
+    });
+  });
+
+  describe('isPlainObject', () => {
+    it('should return true for plain objects', () => {
+      expect(isPlainObject({})).toBe(true);
+      expect(isPlainObject({ key: 'value' })).toBe(true);
+
+      // Test Object.create(null) - This is for the proto === null case
+      const objectWithNullProto: Record<string, string> = Object.create(null);
+
+      objectWithNullProto['test'] = 'value';
+      expect(isPlainObject(objectWithNullProto)).toBe(true);
+    });
+
+    it('should return false for non-plain objects', () => {
+      expect(isPlainObject(null)).toBe(false);
+      expect(isPlainObject(undefined)).toBe(false);
+      expect(isPlainObject('string')).toBe(false);
+      expect(isPlainObject(123)).toBe(false);
+      expect(isPlainObject([])).toBe(false);
+      expect(isPlainObject(new Date())).toBe(false);
+
+      // Mock an object with a different constructor string
+      class CustomClass {}
+      expect(isPlainObject(new CustomClass())).toBe(false);
+    });
+  });
+
+  describe('isNonEmptyObject', () => {
+    it('should return true for non-empty objects', () => {
+      expect(isNonEmptyObject({ key: 'value' })).toBe(true);
+    });
+
+    it('should return false for empty objects', () => {
+      expect(isNonEmptyObject({})).toBe(false);
+    });
+
+    it('should return false for non-objects', () => {
+      expect(isNonEmptyObject(null)).toBe(false);
+      expect(isNonEmptyObject(undefined)).toBe(false);
+      expect(isNonEmptyObject('string')).toBe(false);
+      expect(isNonEmptyObject(123)).toBe(false);
+    });
+  });
+
   describe('pick', () => {
     it('should return an object with only the keys passed', () => {
       const object = {
@@ -62,6 +127,17 @@ describe('common helpers', () => {
         valueA: object.valueA,
         valueB: object.valueB,
       });
+    });
+
+    it('should handle empty keys array', () => {
+      const object = {
+        valueA: faker.string.sample(),
+        valueB: faker.string.sample(),
+      };
+
+      const pickedObject = pick(object);
+
+      expect(pickedObject).toEqual({});
     });
   });
 });
