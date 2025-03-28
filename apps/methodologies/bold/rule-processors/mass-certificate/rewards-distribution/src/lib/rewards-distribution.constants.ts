@@ -1,8 +1,9 @@
 import type { DocumentCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 
 import {
-  MASS_AUDIT,
+  MASS_ID_AUDIT,
   METHODOLOGY_DEFINITION,
+  RECYCLED_ID,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   DocumentEventActorType,
@@ -99,14 +100,14 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
-  parentDocument: {
-    relatedDocuments: [
-      {
-        omit: true,
+  relatedDocuments: [
+    {
+      ...RECYCLED_ID.match,
+      parentDocument: {
+        ...MASS_ID_AUDIT.match,
         parentDocument: {},
-        ...MASS_AUDIT.match,
       },
-    ],
-  },
-  relatedDocuments: [METHODOLOGY_DEFINITION.match],
+    },
+    METHODOLOGY_DEFINITION.match,
+  ],
 };

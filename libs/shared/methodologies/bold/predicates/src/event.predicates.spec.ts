@@ -9,6 +9,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
+  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
@@ -365,7 +366,7 @@ describe('Event Predicates', () => {
 
   describe('hasWeightFormat', () => {
     it('should return true if the weight format is valid', () => {
-      const weight = `${faker.number.float()} KG`;
+      const weight = `${faker.number.float()} ${MeasurementUnit.KG}`;
 
       const result = hasWeightFormat(weight);
 

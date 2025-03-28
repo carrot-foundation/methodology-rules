@@ -6,6 +6,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventMoveType,
   DocumentEventName,
+  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
@@ -24,17 +25,17 @@ export const stubWeighingMoveEvent = (
         {
           isPublic: true,
           name: DocumentEventAttributeName.VEHICLE_GROSS_WEIGHT,
-          value: `${faker.number.float()} KG`,
+          value: `${faker.number.float()} ${MeasurementUnit.KG}`,
         },
         {
           isPublic: true,
           name: DocumentEventAttributeName.VEHICLE_WEIGHT,
-          value: `${faker.number.float()} KG`,
+          value: `${faker.number.float()} ${MeasurementUnit.KG}`,
         },
         {
           isPublic: true,
           name: DocumentEventAttributeName.LOAD_NET_WEIGHT,
-          value: `${faker.number.float()} KG`,
+          value: `${faker.number.float()} ${MeasurementUnit.KG}`,
         },
       ],
     },
