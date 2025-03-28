@@ -40,6 +40,9 @@
       "@carrot-fndn/shared/methodologies/bold/io-helpers": [
         "libs/shared/methodologies/bold/io-helpers/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/audit-api": [
+        "libs/shared/methodologies/audit-api/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/matchers": [
         "libs/shared/methodologies/bold/matchers/src/index.ts"
       ],
