@@ -15,6 +15,7 @@ export enum DocumentType {
   CREDIT = 'Credit',
   CREDIT_CERTIFICATES = 'Credit Certificates',
   DEFINITION = 'Definition',
+  GAS_ID = 'GasID',
   MASS_AUDIT = 'Mass Audit',
   MASS_CERTIFICATE = 'Mass Certificate',
   MASS_CERTIFICATE_AUDIT = 'Mass Certificate Audit',

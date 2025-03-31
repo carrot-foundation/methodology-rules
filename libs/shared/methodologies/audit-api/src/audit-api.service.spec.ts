@@ -3,7 +3,7 @@ import { random } from 'typia';
 
 import type { CheckDuplicatesDto } from './audit.api.dto';
 
-import { AUDIT_API_URL_MAP } from './audit-api.constants';
+import { AUDIT_API_URL } from './audit-api.constants';
 import { AuditApiService } from './audit-api.service';
 
 describe('AuditApiService', () => {
@@ -26,7 +26,7 @@ describe('AuditApiService', () => {
       await service.checkDuplicateDocuments(dto);
 
       expect(service['post']).toHaveBeenCalledWith(
-        `${AUDIT_API_URL_MAP.development}/documents/check-duplicates`,
+        `${AUDIT_API_URL}/documents/check-duplicates`,
         dto,
       );
     });

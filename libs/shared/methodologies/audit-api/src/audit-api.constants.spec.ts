@@ -1,49 +1,41 @@
-import { AUDIT_API_URL_MAP } from './audit-api.constants';
-
-interface Constants {
-  AUDIT_API_URL: string;
-  AUDIT_API_URL_MAP: typeof AUDIT_API_URL_MAP;
-}
-
 describe('Audit API Constants', () => {
-  let originalEnvironment: string | undefined;
+  let originalAuditUrl: string | undefined;
 
   beforeEach(() => {
-    originalEnvironment = process.env['ENVIRONMENT'];
+    originalAuditUrl = process.env['AUDIT_URL'];
   });
 
   afterEach(() => {
-    process.env['ENVIRONMENT'] = originalEnvironment;
+    process.env['AUDIT_URL'] = originalAuditUrl;
     jest.resetModules();
   });
 
   describe('AUDIT_API_URL', () => {
-    it('should use development URL when ENVIRONMENT is set to development', () => {
-      process.env['ENVIRONMENT'] = 'development';
+    it('should use the value from AUDIT_URL environment variable', () => {
+      process.env['AUDIT_URL'] = 'https://test.carrot.eco';
       jest.resetModules();
-      const constants = require('./audit-api.constants') as Constants;
+      const { AUDIT_API_URL } = require('./audit-api.constants');
 
-      expect(constants.AUDIT_API_URL).toBe(AUDIT_API_URL_MAP.development);
+      expect(AUDIT_API_URL).toBe('https://test.carrot.eco');
     });
 
-    it('should use production URL when ENVIRONMENT is set to production', () => {
-      process.env['ENVIRONMENT'] = 'production';
+    it('should throw an error when AUDIT_URL is not defined', () => {
+      delete process.env['AUDIT_URL'];
       jest.resetModules();
-      const constants = require('./audit-api.constants') as Constants;
 
-      expect(constants.AUDIT_API_URL).toBe(AUDIT_API_URL_MAP.production);
+      let error: Error | null = null;
+
+      try {
+        require('./audit-api.constants');
+      } catch (error_) {
+        error = error_ as Error;
+      }
+
+      expect(error).not.toBeNull();
     });
 
-    it('should default to development URL when ENVIRONMENT is not set', () => {
-      delete process.env['ENVIRONMENT'];
-      jest.resetModules();
-      const constants = require('./audit-api.constants') as Constants;
-
-      expect(constants.AUDIT_API_URL).toBe(AUDIT_API_URL_MAP.development);
-    });
-
-    it('should throw an error when ENVIRONMENT is invalid', () => {
-      process.env['ENVIRONMENT'] = 'invalid';
+    it('should throw an error when AUDIT_URL is not a valid URI', () => {
+      process.env['AUDIT_URL'] = 'not-a-valid-uri';
       jest.resetModules();
 
       let error: Error | null = null;
