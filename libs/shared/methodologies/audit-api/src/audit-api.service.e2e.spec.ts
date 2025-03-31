@@ -6,8 +6,6 @@ import { AuditApiService } from './audit-api.service';
 
 const endpoint = `${AUDIT_API_URL}/documents`;
 
-jest.setTimeout(100_000);
-
 describe('Audit API Service', () => {
   let auditApiService: AuditApiService;
 
