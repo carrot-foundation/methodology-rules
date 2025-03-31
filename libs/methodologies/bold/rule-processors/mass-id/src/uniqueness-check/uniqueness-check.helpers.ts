@@ -1,13 +1,7 @@
-import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type ApiDocumentCheckDuplicatesResponse,
   AuditApiService,
 } from '@carrot-fndn/shared/methodologies/audit-api';
-import {
-  and,
-  eventLabelIsAnyOf,
-  eventNameIsAnyOf,
-} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentCategory,
@@ -18,71 +12,58 @@ import {
   DocumentEventName,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import {
+  MethodologyDocumentEventLabel,
+  type NonEmptyString,
+} from '@carrot-fndn/shared/types';
 
 const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
 const {
   ACTOR_TYPE,
   MOVE_TYPE,
-  VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_OLD,
+  VEHICLE_LICENSE_PLATE: OLD_VEHICLE_LICENSE_PLATE,
 } = DocumentEventAttributeName;
 const { ACTOR, DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
 const { DROP_OFF: DROP_OFF_MOVE_TYPE } = DocumentEventMoveType;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { RECYCLER: RECYCLER_ACTOR_TYPE, SOURCE } = DocumentEventActorType;
+const { RECYCLER: RECYCLER_ACTOR_TYPE, SOURCE: SOURCE_ACTOR_TYPE } =
+  DocumentEventActorType;
 
-const LICENSE_PLATE_REGEX = '^IO\\*{3}1\\s*$';
-
-export type RequiredEvents = {
+export type EventsData = {
   dropOffEvent: DocumentEvent;
   pickUpEvent: DocumentEvent;
   recyclerEvent: DocumentEvent;
+  vehicleLicensePlate: NonEmptyString;
   wasteGeneratorEvent: DocumentEvent;
+};
+
+export const createLicensePlateRegex = (
+  licensePlate: NonEmptyString,
+): string => {
+  const escapedValue = licensePlate
+    .replaceAll(/\s+/g, '')
+    .replaceAll(/[$()*+./?[\\\]^{|}-]/g, '\\$&');
+
+  return `^${escapedValue}$`;
 };
 
 /* istanbul ignore next */
 export const createAuditApiService = (): AuditApiService =>
   new AuditApiService();
 
-export const findRequiredEvents = (
+export const mapMassIdV2Query = (
   document: Document,
-): RequiredEvents | null => {
-  const pickUpEvent = document.externalEvents?.find(
-    eventNameIsAnyOf([PICK_UP]),
-  );
-  const dropOffEvent = document.externalEvents?.find(
-    eventNameIsAnyOf([DROP_OFF]),
-  );
-  const wasteGeneratorEvent = document.externalEvents?.find(
-    and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
-  );
-  const recyclerEvent = document.externalEvents?.find(
-    and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
-  );
-
-  if (
-    isNil(pickUpEvent) ||
-    isNil(dropOffEvent) ||
-    isNil(wasteGeneratorEvent) ||
-    isNil(recyclerEvent)
-  ) {
-    return null;
-  }
-
-  return {
+  requiredData: EventsData,
+) => {
+  const {
     dropOffEvent,
     pickUpEvent,
     recyclerEvent,
+    vehicleLicensePlate,
     wasteGeneratorEvent,
-  };
-};
+  } = requiredData;
 
-export const createNewFormatQuery = (
-  document: Document,
-  events: RequiredEvents,
-) => {
-  const { dropOffEvent, pickUpEvent, recyclerEvent, wasteGeneratorEvent } =
-    events;
+  const licensePlateRegex = createLicensePlateRegex(vehicleLicensePlate);
 
   return {
     match: {
@@ -95,7 +76,7 @@ export const createNewFormatQuery = (
               'metadata.attributes': {
                 $elemMatch: {
                   name: VEHICLE_LICENSE_PLATE,
-                  value: { $options: 'i', $regex: LICENSE_PLATE_REGEX },
+                  value: { $options: 'i', $regex: licensePlateRegex },
                 },
               },
               name: PICK_UP,
@@ -139,12 +120,16 @@ export const createNewFormatQuery = (
   };
 };
 
-export const createOldFormatQuery = (
-  document: Document,
-  events: RequiredEvents,
-) => {
-  const { dropOffEvent, pickUpEvent, recyclerEvent, wasteGeneratorEvent } =
-    events;
+export const mapMassIdV1Query = (document: Document, events: EventsData) => {
+  const {
+    dropOffEvent,
+    pickUpEvent,
+    recyclerEvent,
+    vehicleLicensePlate,
+    wasteGeneratorEvent,
+  } = events;
+
+  const licensePlateRegex = createLicensePlateRegex(vehicleLicensePlate);
 
   return {
     match: {
@@ -156,8 +141,8 @@ export const createOldFormatQuery = (
               externalCreatedAt: pickUpEvent.externalCreatedAt,
               'metadata.attributes': {
                 $elemMatch: {
-                  name: VEHICLE_LICENSE_PLATE_OLD,
-                  value: { $options: 'i', $regex: LICENSE_PLATE_REGEX },
+                  name: OLD_VEHICLE_LICENSE_PLATE,
+                  value: { $options: 'i', $regex: licensePlateRegex },
                 },
               },
               name: OPEN,
@@ -185,7 +170,7 @@ export const createOldFormatQuery = (
               'metadata.attributes': {
                 $elemMatch: {
                   name: ACTOR_TYPE,
-                  value: SOURCE,
+                  value: SOURCE_ACTOR_TYPE,
                 },
               },
               name: ACTOR,
@@ -217,22 +202,21 @@ export const createOldFormatQuery = (
   };
 };
 
-export const fetchSimilarMassIdDocuments = async (
-  document: Document,
-  apiService: AuditApiService,
-): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
-  const events = findRequiredEvents(document);
-
-  if (!events) {
-    return [];
-  }
-
-  const newFormatQuery = createNewFormatQuery(document, events);
-  const oldFormatQuery = createOldFormatQuery(document, events);
+export const fetchSimilarMassIdDocuments = async ({
+  auditApiService,
+  document,
+  eventsData,
+}: {
+  auditApiService: AuditApiService;
+  document: Document;
+  eventsData: EventsData;
+}): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
+  const newFormatQuery = mapMassIdV2Query(document, eventsData);
+  const oldFormatQuery = mapMassIdV1Query(document, eventsData);
 
   const [newFormattedDuplicates, oldFormattedDuplicates] = await Promise.all([
-    apiService.checkDuplicateDocuments(newFormatQuery),
-    apiService.checkDuplicateDocuments(oldFormatQuery),
+    auditApiService.checkDuplicateDocuments(newFormatQuery),
+    auditApiService.checkDuplicateDocuments(oldFormatQuery),
   ]);
 
   return [...newFormattedDuplicates, ...oldFormattedDuplicates];
