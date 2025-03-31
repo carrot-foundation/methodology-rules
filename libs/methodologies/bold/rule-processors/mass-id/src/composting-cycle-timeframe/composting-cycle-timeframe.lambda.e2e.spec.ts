@@ -17,15 +17,15 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { timeIntervalCheckLambda } from './time-interval-check.lambda';
-import { timeIntervalTestCases } from './time-interval-check.test-cases';
+import { compostingCycleTimeframeLambda } from './composting-cycle-timeframe.lambda';
+import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 describe('TimeIntervalCheckProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(timeIntervalTestCases)(
+  it.each(compostingCycleTimeframeTestCases)(
     'should validate time interval between events - $scenario',
     async ({ dropOffEventDate, recycledEventDate, resultStatus }) => {
       const externalEvents = new Map<DocumentEventName, DocumentEvent>();
@@ -69,7 +69,7 @@ describe('TimeIntervalCheckProcessor E2E', () => {
         })),
       );
 
-      const response = (await timeIntervalCheckLambda(
+      const response = (await compostingCycleTimeframeLambda(
         stubRuleInput({
           documentKeyPrefix,
           parentDocumentId: massIdDocument.id,
