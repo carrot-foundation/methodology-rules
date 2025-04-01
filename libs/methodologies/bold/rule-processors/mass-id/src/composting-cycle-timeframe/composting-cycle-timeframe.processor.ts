@@ -18,15 +18,15 @@ type Subject = {
   recycledEvent?: DocumentEvent | undefined;
 };
 
-export class TimeIntervalCheckProcessor extends ParentDocumentRuleProcessor<Subject> {
+export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return {
       APPROVED: (dateDiff: number) =>
-        `The difference in days between the event ${DROP_OFF} and the ${RECYCLED} event is between 60 and 180: ${dateDiff}.`,
-      MISSING_DROP_OFF_EVENT: `The ${DROP_OFF} event was not found.`,
-      MISSING_RECYCLED_EVENT: `The ${RECYCLED} event was not found.`,
+        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, within the valid range (60-180 days).`,
+      MISSING_DROP_OFF_EVENT: `Unable to verify the timeframe because the "${DROP_OFF}" event is missing.`,
+      MISSING_RECYCLED_EVENT: `Unable to verify the timeframe because the "${RECYCLED}" event is missing.`,
       REJECTED: (dateDiff: number) =>
-        `The difference in days between the event ${DROP_OFF} and the ${RECYCLED} event is not between 60 and 180: ${dateDiff}.`,
+        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, wich is outside the valid range (60-180 days).`,
     } as const;
   }
 

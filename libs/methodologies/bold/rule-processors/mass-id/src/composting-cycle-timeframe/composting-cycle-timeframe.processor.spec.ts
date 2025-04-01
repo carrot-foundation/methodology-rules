@@ -16,20 +16,20 @@ import {
 import { differenceInDays, parseISO } from 'date-fns';
 import { random } from 'typia';
 
-import { TimeIntervalCheckProcessor } from './time-interval-check.processor';
-import { timeIntervalTestCases } from './time-interval-check.test-cases';
+import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.processor';
+import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
-describe('TimeIntervalCheckProcessor', () => {
-  const ruleDataProcessor = new TimeIntervalCheckProcessor();
+describe('CompostingCycleTimeframeProcessor', () => {
+  const ruleDataProcessor = new CompostingCycleTimeframeProcessor();
 
   const documentLoaderService = jest.mocked(loadParentDocument);
 
   it.each(
-    timeIntervalTestCases.map((testCase) => {
+    compostingCycleTimeframeTestCases.map((testCase) => {
       let resultComment: string;
 
       if (!testCase.dropOffEventDate) {

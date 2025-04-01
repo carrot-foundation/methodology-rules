@@ -9,7 +9,7 @@ const DROP_OFF_DATE_59_DAYS = '2023-12-30T12:00:00.000Z';
 const DROP_OFF_DATE_180_DAYS = '2023-08-31T12:00:00.000Z';
 const DROP_OFF_DATE_181_DAYS = '2023-08-30T12:00:00.000Z';
 
-export const timeIntervalTestCases = [
+export const compostingCycleTimeframeTestCases = [
   {
     dropOffEventDate: DROP_OFF_DATE_RECENT,
     recycledEventDate: RECYCLED_DATE_EARLIER,

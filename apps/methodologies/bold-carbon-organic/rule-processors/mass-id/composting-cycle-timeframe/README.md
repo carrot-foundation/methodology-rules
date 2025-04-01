@@ -1,6 +1,6 @@
 <div align="center">
 
-# Time Interval Check
+# Composting Cycle Timeframe
 
 Methodology: **BOLD-CARBON-ORGANIC**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/time-interval-check/time-interval-check.processor.ts)**
+- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/composting-cycle-timeframe/composting-cycle-timeframe.processor.ts)**
 
 ## 👥 Contributors
 
