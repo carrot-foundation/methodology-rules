@@ -22,7 +22,7 @@ import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
-describe('TimeIntervalCheckProcessor E2E', () => {
+describe('CompostingCycleTimeframeProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   it.each(compostingCycleTimeframeTestCases)(
