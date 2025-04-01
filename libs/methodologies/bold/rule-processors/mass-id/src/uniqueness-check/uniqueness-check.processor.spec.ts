@@ -1,4 +1,4 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -12,6 +12,8 @@ import {
   uniquenessCheckTestCases,
 } from './uniqueness-check.test-cases';
 
+jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+
 const mockCheckDuplicateDocuments = jest.fn();
 const mockAuditApiService = {
   checkDuplicateDocuments: mockCheckDuplicateDocuments,
@@ -23,40 +25,30 @@ jest.mock('./uniqueness-check.helpers', () => ({
   createAuditApiService: () => mockAuditApiService,
 }));
 
-describe('Uniqueness Check Processor', () => {
+describe('UniquenessCheckProcessor Rule', () => {
   const ruleDataProcessor = new UniquenessCheckProcessor();
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+  const documentLoaderService = jest.mocked(loadParentDocument);
 
   describe('UniquenessCheckProcessor', () => {
     it.each(uniquenessCheckTestCases)(
-      'should return $resultStatus when $scenario',
+      `should return $resultStatus when $scenario`,
       async ({
         newDuplicateDocuments,
         oldDuplicateDocuments,
         resultComment,
         resultStatus,
       }) => {
-        const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-          .createMassIdDocument()
-          .createMassIdAuditDocument()
-          .build();
+        const ruleInput = random<Required<RuleInput>>();
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, [
-          massIdAuditDocument,
-          massIdDocument,
-        ]);
+        const { massIdDocument } = new BoldStubsBuilder()
+          .createMassIdDocument()
+          .build();
 
         mockCheckDuplicateDocuments
           .mockResolvedValueOnce(newDuplicateDocuments)
           .mockResolvedValueOnce(oldDuplicateDocuments);
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
-        };
+        documentLoaderService.mockResolvedValueOnce(massIdDocument);
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -73,33 +65,25 @@ describe('Uniqueness Check Processor', () => {
     );
   });
 
-  describe('UniquenessCheckProcessorErrors', () => {
+  describe('UniquenessCheckProcessor Errors', () => {
     it.each(uniquenessCheckErrorTestCases)(
-      'should return $resultStatus when $scenario',
-      async ({
-        documents,
-        massIdAuditDocument,
-        resultComment,
-        resultStatus,
-      }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+      `should return $resultStatus when $scenario`,
+      async ({ massIdDocument, resultComment, resultStatus }) => {
+        const ruleInput = random<Required<RuleInput>>();
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
-
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
-        };
+        documentLoaderService.mockResolvedValueOnce(massIdDocument);
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        expect(ruleOutput).toEqual({
+        const expectedRuleOutput: RuleOutput = {
           requestId: ruleInput.requestId,
           responseToken: ruleInput.responseToken,
           responseUrl: ruleInput.responseUrl,
           resultComment,
           resultStatus,
-        });
+        };
+
+        expect(ruleOutput).toEqual(expectedRuleOutput);
       },
     );
   });

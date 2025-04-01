@@ -79,102 +79,90 @@ const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
 
 export const uniquenessCheckErrorTestCases = [
   {
-    documents: [],
     massIdAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.MASS_DOCUMENT_NOT_FOUND,
+    massIdDocument: undefined,
+    resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'when the MassID document is missing',
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
-          (event) => event.name !== DROP_OFF.toString(),
-        ),
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: massIdDocument.externalEvents?.filter(
+        (event) => event.name !== DROP_OFF.toString(),
+      ),
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the "${DROP_OFF}" event is missing`,
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
-          (event) => event.name !== PICK_UP.toString(),
-        ),
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: massIdDocument.externalEvents?.filter(
+        (event) => event.name !== PICK_UP.toString(),
+      ),
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_PICK_UP_EVENT,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the "${PICK_UP}" event is missing`,
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
-          (event) => event.label !== WASTE_GENERATOR.toString(),
-        ),
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: massIdDocument.externalEvents?.filter(
+        (event) => event.label !== WASTE_GENERATOR.toString(),
+      ),
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_WASTE_GENERATOR_EVENT,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the "${WASTE_GENERATOR}" event is missing`,
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
-          (event) => event.label !== RECYCLER.toString(),
-        ),
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: massIdDocument.externalEvents?.filter(
+        (event) => event.label !== RECYCLER.toString(),
+      ),
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_EVENT,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the "${RECYCLER}" event is missing`,
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: [
-          ...(massIdDocument.externalEvents ?? []).filter(
-            (event) => event.name !== PICK_UP.toString(),
-          ),
-          stubBoldMassIdPickUpEvent({
-            metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
-          }),
-        ],
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: [
+        ...(massIdDocument.externalEvents ?? []).filter(
+          (event) => event.name !== PICK_UP.toString(),
+        ),
+        stubBoldMassIdPickUpEvent({
+          metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
+        }),
+      ],
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the old "${VEHICLE_LICENSE_PLATE_V1}" attribute is missing`,
   },
   {
-    documents: [
-      {
-        ...massIdDocument,
-        externalEvents: [
-          ...(massIdDocument.externalEvents ?? []).filter(
-            (event) => event.name !== PICK_UP.toString(),
-          ),
-          stubBoldMassIdPickUpEvent({
-            metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
-          }),
-        ],
-      },
-    ],
     massIdAuditDocument,
+    massIdDocument: {
+      ...massIdDocument,
+      externalEvents: [
+        ...(massIdDocument.externalEvents ?? []).filter(
+          (event) => event.name !== PICK_UP.toString(),
+        ),
+        stubBoldMassIdPickUpEvent({
+          metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
+        }),
+      ],
+    },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `when the new "${VEHICLE_LICENSE_PLATE_V2}" attribute is missing`,

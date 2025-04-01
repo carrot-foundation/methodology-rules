@@ -10,7 +10,10 @@ import {
 import { faker } from '@faker-js/faker';
 
 import { uniquenessCheckLambda } from './uniqueness-check.lambda';
-import { uniquenessCheckTestCases } from './uniqueness-check.test-cases';
+import {
+  uniquenessCheckErrorTestCases,
+  uniquenessCheckTestCases,
+} from './uniqueness-check.test-cases';
 
 const mockCheckDuplicateDocuments = jest.fn();
 const mockAuditApiService = {
@@ -30,38 +33,72 @@ describe('UniquenessCheckLambda E2E', () => {
     jest.clearAllMocks();
   });
 
-  it.each(uniquenessCheckTestCases)(
-    'should return $resultStatus when $scenario',
-    async ({ newDuplicateDocuments, oldDuplicateDocuments, resultStatus }) => {
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument()
-        .createMassIdAuditDocument()
-        .build();
+  describe('uniquenessCheckTestCases', () => {
+    it.each(uniquenessCheckTestCases)(
+      'should return $resultStatus when $scenario',
+      async ({
+        newDuplicateDocuments,
+        oldDuplicateDocuments,
+        resultStatus,
+      }) => {
+        const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
+          .createMassIdDocument()
+          .createMassIdAuditDocument()
+          .build();
 
-      mockCheckDuplicateDocuments
-        .mockResolvedValueOnce(newDuplicateDocuments)
-        .mockResolvedValueOnce(oldDuplicateDocuments);
+        mockCheckDuplicateDocuments
+          .mockResolvedValueOnce(newDuplicateDocuments)
+          .mockResolvedValueOnce(oldDuplicateDocuments);
 
-      prepareEnvironmentTestE2E(
-        [massIdAuditDocument, massIdDocument].map((_document) => ({
-          document: _document,
-          documentKey: toDocumentKey({
-            documentId: _document.id,
+        prepareEnvironmentTestE2E(
+          [massIdAuditDocument, massIdDocument].map((_document) => ({
+            document: _document,
+            documentKey: toDocumentKey({
+              documentId: _document.id,
+              documentKeyPrefix,
+            }),
+          })),
+        );
+
+        const response = (await uniquenessCheckLambda(
+          stubRuleInput({
             documentKeyPrefix,
+            parentDocumentId: massIdDocument.id,
           }),
-        })),
-      );
+          stubContext(),
+          () => stubRuleResponse(),
+        )) as RuleOutput;
 
-      const response = (await uniquenessCheckLambda(
-        stubRuleInput({
-          documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
-        }),
-        stubContext(),
-        () => stubRuleResponse(),
-      )) as RuleOutput;
+        expect(response.resultStatus).toBe(resultStatus);
+      },
+    );
+  });
 
-      expect(response.resultStatus).toBe(resultStatus);
-    },
-  );
+  describe('uniquenessCheckErrorTestCases', () => {
+    it.each(uniquenessCheckErrorTestCases)(
+      'should return $resultStatus when $scenario',
+      async ({ massIdAuditDocument, massIdDocument, resultStatus }) => {
+        prepareEnvironmentTestE2E(
+          [massIdAuditDocument, massIdDocument].map((_document) => ({
+            document: _document,
+            documentKey: toDocumentKey({
+              documentId: _document?.id,
+              documentKeyPrefix,
+            }),
+          })),
+        );
+
+        const response = (await uniquenessCheckLambda(
+          stubRuleInput({
+            documentKeyPrefix,
+            parentDocumentId: massIdDocument?.id ?? faker.string.uuid(),
+          }),
+          stubContext(),
+          () => stubRuleResponse(),
+        )) as RuleOutput;
+
+        expect(response.resultStatus).toBe(resultStatus);
+      },
+    );
+  });
 });

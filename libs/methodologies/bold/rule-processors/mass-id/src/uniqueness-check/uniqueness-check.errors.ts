@@ -11,7 +11,7 @@ const { MASS_ID } = DocumentCategory;
 
 export class UniquenessCheckProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
-    MASS_DOCUMENT_NOT_FOUND: 'MassID document not found.',
+    MASS_ID_DOCUMENT_NOT_FOUND: 'MassID document not found.',
     MISSING_DROP_OFF_EVENT: `Unable to validate the "${MASS_ID}" uniqueness because the "${DROP_OFF}" event is missing.`,
     MISSING_PICK_UP_EVENT: `Unable to validate the "${MASS_ID}" uniqueness because the "${PICK_UP}" event is missing.`,
     MISSING_RECYCLER_EVENT: `Unable to validate the "${MASS_ID}" uniqueness because the "${RECYCLER}" event is missing.`,

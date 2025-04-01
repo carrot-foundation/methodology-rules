@@ -1,7 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
   getOrUndefined,
   isNil,
@@ -9,15 +7,11 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentQuery,
-  DocumentQueryService,
-} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { MASS_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import {
   and,
   eventLabelIsAnyOf,
   eventNameIsAnyOf,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
   type DocumentEvent,
@@ -26,7 +20,6 @@ import {
   DocumentStatus,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -73,71 +66,71 @@ interface RuleSubject {
   validDuplicatesCount: number;
 }
 
-export class UniquenessCheckProcessor extends RuleDataProcessor {
+export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   protected readonly errorProcessor = new UniquenessCheckProcessorErrors();
 
-  private getDropOffEvent(document: Document): DocumentEvent {
-    const dropOffEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([DROP_OFF]),
+  private collectRequiredEventsData(document: Document): EventsData {
+    const dropOffEvent = this.getEventOrThrow(
+      document,
+      { name: [DROP_OFF] },
+      'MISSING_DROP_OFF_EVENT',
     );
 
-    if (isNil(dropOffEvent)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_DROP_OFF_EVENT,
-      );
-    }
-
-    return dropOffEvent;
-  }
-
-  private async getMassIdDocument(
-    documentQuery: DocumentQuery<Document>,
-  ): Promise<Document> {
-    let massIdDocument: Document | undefined;
-
-    await documentQuery.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
-
-      if (MASS_ID.matches(documentReference)) {
-        massIdDocument = document;
-      }
-    });
-
-    if (isNil(massIdDocument)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_DOCUMENT_NOT_FOUND,
-      );
-    }
-
-    return massIdDocument;
-  }
-
-  private getPickUpEvent(document: Document): DocumentEvent {
-    const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
+    const pickUpEvent = this.getEventOrThrow(
+      document,
+      { name: [PICK_UP] },
+      'MISSING_PICK_UP_EVENT',
     );
 
-    if (isNil(pickUpEvent)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_PICK_UP_EVENT,
-      );
-    }
-
-    return pickUpEvent;
-  }
-
-  private getRecyclerEvent(document: Document): DocumentEvent {
-    const recyclerEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+    const recyclerEvent = this.getEventOrThrow(
+      document,
+      { label: [RECYCLER], name: [ACTOR] },
+      'MISSING_RECYCLER_EVENT',
     );
 
-    if (isNil(recyclerEvent)) {
+    const wasteGeneratorEvent = this.getEventOrThrow(
+      document,
+      { label: [WASTE_GENERATOR], name: [ACTOR] },
+      'MISSING_WASTE_GENERATOR_EVENT',
+    );
+
+    const vehicleLicensePlate = this.getVehicleLicensePlate(pickUpEvent);
+
+    return {
+      dropOffEvent,
+      pickUpEvent,
+      recyclerEvent,
+      vehicleLicensePlate,
+      wasteGeneratorEvent,
+    };
+  }
+
+  private getEventOrThrow(
+    document: Document,
+    criteria: {
+      label?: MethodologyDocumentEventLabel[];
+      name?: DocumentEventName[];
+    },
+    errorMessage: keyof UniquenessCheckProcessorErrors['ERROR_MESSAGE'],
+  ): DocumentEvent {
+    const { label, name } = criteria;
+
+    const nameFilter = name ? eventNameIsAnyOf(name) : null;
+    const labelFilter = label ? eventLabelIsAnyOf(label) : null;
+
+    const event = document.externalEvents?.find(
+      nameFilter && labelFilter
+        ? and(nameFilter, labelFilter)
+        : nameFilter || labelFilter || (() => true),
+    );
+
+    if (isNil(event)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_RECYCLER_EVENT,
+        this.errorProcessor.ERROR_MESSAGE[errorMessage],
       );
     }
 
-    return recyclerEvent;
+    return event;
   }
 
   private getVehicleLicensePlate(pickUpEvent: DocumentEvent): NonEmptyString {
@@ -162,20 +155,6 @@ export class UniquenessCheckProcessor extends RuleDataProcessor {
     throw this.errorProcessor.getKnownError(
       this.errorProcessor.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
     );
-  }
-
-  private getWasteGeneratorEvent(document: Document): DocumentEvent {
-    const wasteGeneratorEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
-    );
-
-    if (isNil(wasteGeneratorEvent)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_WASTE_GENERATOR_EVENT,
-      );
-    }
-
-    return wasteGeneratorEvent;
   }
 
   protected evaluateResult({
@@ -209,32 +188,8 @@ export class UniquenessCheckProcessor extends RuleDataProcessor {
     };
   }
 
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: {
-        parentDocument: {},
-      },
-      documentId: ruleInput.documentId,
-    });
-  }
-
   protected async getRuleSubject(document: Document): Promise<RuleSubject> {
-    const eventsData: EventsData = {
-      dropOffEvent: this.getDropOffEvent(document),
-      pickUpEvent: this.getPickUpEvent(document),
-      recyclerEvent: this.getRecyclerEvent(document),
-      vehicleLicensePlate: this.getVehicleLicensePlate(
-        this.getPickUpEvent(document),
-      ),
-      wasteGeneratorEvent: this.getWasteGeneratorEvent(document),
-    };
+    const eventsData = this.collectRequiredEventsData(document);
 
     const duplicateDocuments = await fetchSimilarMassIdDocuments({
       auditApiService: createAuditApiService(),
@@ -254,11 +209,21 @@ export class UniquenessCheckProcessor extends RuleDataProcessor {
     };
   }
 
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+  override async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const massIdDocument = await this.getMassIdDocument(documentsQuery);
-      const ruleSubject = await this.getRuleSubject(massIdDocument);
+      const document = await this.loadDocument(ruleInput);
+
+      if (isNil(document)) {
+        return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+          resultComment: this.errorProcessor.getResultCommentFromError(
+            this.errorProcessor.getKnownError(
+              this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+            ),
+          ),
+        });
+      }
+
+      const ruleSubject = await this.getRuleSubject(document);
 
       const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
 

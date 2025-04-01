@@ -78,7 +78,7 @@ describe('uniqueness-check.helpers', () => {
     });
   });
 
-  describe('fetchSimilarMassIdDocumentsImpl', () => {
+  describe('fetchSimilarMassIdDocuments', () => {
     it('should call API with both new and old format queries and combine results', async () => {
       const { massIdDocument } = new BoldStubsBuilder()
         .createMassIdDocument()
