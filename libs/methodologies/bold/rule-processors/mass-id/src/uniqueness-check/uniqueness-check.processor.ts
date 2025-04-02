@@ -14,6 +14,7 @@ import {
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
+  DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -44,20 +45,20 @@ const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V1 } =
   DocumentEventAttributeName;
 const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V2 } =
   NewDocumentEventAttributeName;
+const { MASS_ID } = DocumentCategory;
 
 export const RESULT_COMMENTS = {
-  NO_DUPLICATES_FOUND:
-    'No other documents with the same attributes were found.',
+  NO_DUPLICATES_FOUND: `No other ${MASS_ID}s with the same attributes were found.`,
   ONLY_CANCELLED_DUPLICATES: (
     totalDuplicates: number,
     cancelledCount: number,
   ) =>
-    `${totalDuplicates} similar documents were found, but all are cancelled (${cancelledCount}).`,
+    `${totalDuplicates} similar ${MASS_ID}s were found, but all are cancelled (${cancelledCount}).`,
   VALID_DUPLICATE_FOUND: (
     totalDuplicates: number,
     validDuplicatesCount: number,
   ) =>
-    `${totalDuplicates} similar documents were found, of which ${validDuplicatesCount} are not cancelled.`,
+    `${totalDuplicates} similar ${MASS_ID}s were found, of which ${validDuplicatesCount} are not cancelled.`,
 } as const;
 
 interface RuleSubject {
