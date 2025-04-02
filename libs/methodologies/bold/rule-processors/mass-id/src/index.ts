@@ -5,7 +5,7 @@ export * from './hauler-identification';
 export * from './recycler-identification';
 export * from './waste-origin-identification';
 export * from './project-period';
-export * from './time-interval-check';
+export * from './composting-cycle-timeframe';
 export * from './vehicle-identification';
 export * from './geolocation-precision';
 export * from './driver-identification';
