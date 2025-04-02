@@ -14,7 +14,7 @@ Verify if all the values declared in a MOVE event, with the 'move-type' declared
 
 ## 📂 Implementation
 
-- **[Main Implementation File](./src/lib/numeric-weight-values.processor.ts)**
+- **[Last Version Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/numeric-weight-values)**
 
 ## 👥 Contributors
 
