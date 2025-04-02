@@ -3,14 +3,12 @@ import {
   stubBoldMassIdPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
   DocumentEventName,
   DocumentStatus,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
-import { faker } from '@faker-js/faker';
 
 import { UniquenessCheckProcessorErrors } from './uniqueness-check.errors';
 import { RESULT_COMMENTS } from './uniqueness-check.processor';
@@ -18,10 +16,7 @@ import { RESULT_COMMENTS } from './uniqueness-check.processor';
 const { CANCELLED, OPEN } = DocumentStatus;
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V1 } =
-  DocumentEventAttributeName;
-const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V2 } =
-  NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
 
 export const uniquenessCheckTestCases = [
   {
@@ -64,16 +59,7 @@ export const uniquenessCheckTestCases = [
 const processorErrors = new UniquenessCheckProcessorErrors();
 
 const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-  .createMassIdDocument({
-    externalEventsMap: {
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
-        metadataAttributes: [
-          [VEHICLE_LICENSE_PLATE_V1, faker.vehicle.vrm()],
-          [VEHICLE_LICENSE_PLATE_V2, faker.vehicle.vrm()],
-        ],
-      }),
-    },
-  })
+  .createMassIdDocument()
   .createMassIdAuditDocument()
   .build();
 
@@ -142,29 +128,12 @@ export const uniquenessCheckErrorTestCases = [
           (event) => event.name !== PICK_UP.toString(),
         ),
         stubBoldMassIdPickUpEvent({
-          metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
+          metadataAttributes: [[VEHICLE_LICENSE_PLATE, undefined]],
         }),
       ],
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `when the old "${VEHICLE_LICENSE_PLATE_V1}" attribute is missing`,
-  },
-  {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
-      externalEvents: [
-        ...(massIdDocument.externalEvents ?? []).filter(
-          (event) => event.name !== PICK_UP.toString(),
-        ),
-        stubBoldMassIdPickUpEvent({
-          metadataAttributes: [[VEHICLE_LICENSE_PLATE_V2, undefined]],
-        }),
-      ],
-    },
-    resultComment: processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
-    resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `when the new "${VEHICLE_LICENSE_PLATE_V2}" attribute is missing`,
+    scenario: `when the "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
   },
 ];

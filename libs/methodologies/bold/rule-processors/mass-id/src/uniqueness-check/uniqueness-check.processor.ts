@@ -16,7 +16,6 @@ import {
   type Document,
   DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttributeName,
   DocumentEventName,
   DocumentStatus,
   NewDocumentEventAttributeName,
@@ -41,10 +40,7 @@ import {
 
 const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V1 } =
-  DocumentEventAttributeName;
-const { VEHICLE_LICENSE_PLATE: VEHICLE_LICENSE_PLATE_V2 } =
-  NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
 const { MASS_ID } = DocumentCategory;
 
 export const RESULT_COMMENTS = {
@@ -110,19 +106,17 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
     document: Document,
     criteria: {
       label?: MethodologyDocumentEventLabel[];
-      name?: DocumentEventName[];
+      name: DocumentEventName[];
     },
     errorMessage: keyof UniquenessCheckProcessorErrors['ERROR_MESSAGE'],
   ): DocumentEvent {
     const { label, name } = criteria;
 
-    const nameFilter = name ? eventNameIsAnyOf(name) : null;
+    const nameFilter = eventNameIsAnyOf(name);
     const labelFilter = label ? eventLabelIsAnyOf(label) : null;
 
     const event = document.externalEvents?.find(
-      nameFilter && labelFilter
-        ? and(nameFilter, labelFilter)
-        : nameFilter || labelFilter || (() => true),
+      labelFilter ? and(nameFilter, labelFilter) : nameFilter,
     );
 
     if (isNil(event)) {
@@ -135,22 +129,13 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
   }
 
   private getVehicleLicensePlate(pickUpEvent: DocumentEvent): NonEmptyString {
-    const vehicleLicensePlateV1 = getEventAttributeValue(
+    const vehicleLicensePlate = getEventAttributeValue(
       pickUpEvent,
-      VEHICLE_LICENSE_PLATE_V1,
+      VEHICLE_LICENSE_PLATE,
     );
 
-    if (isNonEmptyString(vehicleLicensePlateV1)) {
-      return vehicleLicensePlateV1;
-    }
-
-    const vehicleLicensePlateV2 = getEventAttributeValue(
-      pickUpEvent,
-      VEHICLE_LICENSE_PLATE_V2,
-    );
-
-    if (isNonEmptyString(vehicleLicensePlateV2)) {
-      return vehicleLicensePlateV2;
+    if (isNonEmptyString(vehicleLicensePlate)) {
+      return vehicleLicensePlate;
     }
 
     throw this.errorProcessor.getKnownError(
