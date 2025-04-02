@@ -14,7 +14,7 @@ Check if all mass audit documents that make up the mass certificate are linked t
 
 ### 📂 Implementation
 
-- **[Main Implementation File](./src/lib/mass-audit-document.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document)**
 
 ### 👥 Contributors
 

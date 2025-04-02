@@ -14,7 +14,7 @@ Check if the mass origin identification field is declared as true or false.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](./src/lib/waste-origin-identified.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/waste-origin-identified)**
 
 ## 👥 Contributors
 

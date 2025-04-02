@@ -14,7 +14,7 @@ In an event, when there is a report identified as CDF, verify if the declared ad
 
 ## 📂 Implementation
 
-- **[Main Implementation File](./src/lib/cdf-address.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/cdf-address)**
 
 ## 👥 Contributors
 
