@@ -45,4 +45,7 @@ jobs:
     needs: [affected, backend-check]
     if: ${{ github.ref_name == 'main' && needs.affected.outputs.upload-lambda == 'true' && (needs.backend-check.result == 'success' || needs.backend-check.result == 'skipped') }}
     uses: ./.github/workflows/deploy.yaml
-    secrets: inherit
+    secrets:
+      AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
+      AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+      ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
