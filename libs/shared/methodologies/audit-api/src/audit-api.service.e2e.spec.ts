@@ -1,10 +1,7 @@
 import { seedDocument } from '@carrot-fndn/shared/document/seeds';
 import { faker } from '@faker-js/faker';
 
-import { AUDIT_API_URL } from './audit-api.constants';
 import { AuditApiService } from './audit-api.service';
-
-const endpoint = `${AUDIT_API_URL}/documents`;
 
 describe('Audit API Service', () => {
   let auditApiService: AuditApiService;
@@ -37,11 +34,9 @@ describe('Audit API Service', () => {
 
       const [documentId1, documentId2] = await Promise.all([
         seedDocument({
-          endpoint,
           partialDocument: duplicatedDto,
         }),
         seedDocument({
-          endpoint,
           partialDocument: duplicatedDto,
         }),
       ]);

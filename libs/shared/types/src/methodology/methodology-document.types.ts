@@ -34,7 +34,7 @@ export interface MethodologyDocument {
   primaryParticipant: MethodologyParticipant;
   status: string;
   subtype?: string | undefined;
-  tags?: Record<string, string> | undefined;
+  tags?: Record<string, null | string | undefined> | undefined;
   type?: string | undefined;
   updatedAt: string & tags.Format<'date-time'>;
 }
