@@ -70,7 +70,7 @@ export const mapMassIdV2Query = (
       $and: [
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'address.id': pickUpEvent.address.id,
               externalCreatedAt: pickUpEvent.externalCreatedAt,
               'metadata.attributes': {
@@ -85,7 +85,7 @@ export const mapMassIdV2Query = (
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'address.id': dropOffEvent.address.id,
               externalCreatedAt: dropOffEvent.externalCreatedAt,
               name: DROP_OFF,
@@ -94,7 +94,7 @@ export const mapMassIdV2Query = (
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               label: WASTE_GENERATOR,
               name: ACTOR,
               'participant.id': wasteGeneratorEvent.participant.id,
@@ -103,7 +103,7 @@ export const mapMassIdV2Query = (
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               label: RECYCLER,
               name: ACTOR,
               'participant.id': recyclerEvent.participant.id,
@@ -136,7 +136,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
       $and: [
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'address.id': pickUpEvent.address.id,
               externalCreatedAt: pickUpEvent.externalCreatedAt,
               'metadata.attributes': {
@@ -151,7 +151,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'address.id': dropOffEvent.address.id,
               externalCreatedAt: dropOffEvent.externalCreatedAt,
               'metadata.attributes': {
@@ -166,7 +166,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'metadata.attributes': {
                 $elemMatch: {
                   name: ACTOR_TYPE,
@@ -180,7 +180,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
         },
         {
           externalEvents: {
-            $elementMatch: {
+            $elemMatch: {
               'metadata.attributes': {
                 $elemMatch: {
                   name: ACTOR_TYPE,
@@ -211,13 +211,13 @@ export const fetchSimilarMassIdDocuments = async ({
   document: Document;
   eventsData: EventsData;
 }): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
-  const newFormatQuery = mapMassIdV2Query(document, eventsData);
-  const oldFormatQuery = mapMassIdV1Query(document, eventsData);
+  const v2FormatQuery = mapMassIdV2Query(document, eventsData);
+  const v1FormatQuery = mapMassIdV1Query(document, eventsData);
 
-  const [newFormattedDuplicates, oldFormattedDuplicates] = await Promise.all([
-    auditApiService.checkDuplicateDocuments(newFormatQuery),
-    auditApiService.checkDuplicateDocuments(oldFormatQuery),
+  const [v2FormattedDuplicates, v1FormattedDuplicates] = await Promise.all([
+    auditApiService.checkDuplicateDocuments(v2FormatQuery),
+    auditApiService.checkDuplicateDocuments(v1FormatQuery),
   ]);
 
-  return [...newFormattedDuplicates, ...oldFormattedDuplicates];
+  return [...v2FormattedDuplicates, ...v1FormattedDuplicates];
 };

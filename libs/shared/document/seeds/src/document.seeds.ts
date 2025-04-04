@@ -1,53 +1,66 @@
-import type {
-  AuditApiDocumentPrimitiveEntity,
-  MethodologyDocument,
-  NonEmptyString,
-  Uri,
-} from '@carrot-fndn/shared/types';
 import type { Logger } from 'pino';
-import type { PartialDeep } from 'type-fest';
 
 import {
   isNonEmptyObject,
   logger as pinoLogger,
 } from '@carrot-fndn/shared/helpers';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
+import {
+  type MethodologyDocument,
+  type NonEmptyString,
+  type Uri,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { assert, random } from 'typia';
 
+import type {
+  ApiDocumentCreateDto,
+  AuditApiDocumentPartSnapshotEntity,
+  AuditApiDocumentPrimitiveEntity,
+} from './document.seeds.types';
+
+const mapDocumentParts = (
+  document: Partial<MethodologyDocument>,
+): AuditApiDocumentPartSnapshotEntity[] =>
+  document.externalEvents?.map((event) => ({
+    part: event,
+    partId: event.id,
+    path: 'externalEvents',
+  })) ?? [];
+
 export const seedDocument = async ({
-  endpoint,
   logger = pinoLogger,
   partialDocument = {},
 }: {
-  endpoint: Uri;
   logger?: Logger;
-  partialDocument?: PartialDeep<MethodologyDocument> | undefined;
-}): Promise<NonEmptyString> => {
-  const documentId = partialDocument.id ?? faker.string.uuid();
+  partialDocument?: Partial<MethodologyDocument>;
+} = {}): Promise<NonEmptyString> => {
+  const documentId = faker.string.uuid();
+  const endpoint = `${assert<Uri>(process.env['AUDIT_URL'])}/documents`;
+
+  const data: ApiDocumentCreateDto = {
+    ...random<ApiDocumentCreateDto>(),
+    document: {
+      ...random<MethodologyDocument>(),
+      ...partialDocument,
+      createdAt: new Date().toISOString(),
+      externalCreatedAt: new Date().toISOString(),
+      id: documentId,
+      status: 'OPEN',
+      tags: {
+        'e2e-test': 'true',
+        'test-source': 'methodology-rules',
+      },
+    },
+    documentId,
+    parts: mapDocumentParts(partialDocument),
+    versionDate: new Date().toISOString(),
+  };
 
   const response = await httpRequest(
     {
       baseURL: endpoint,
-      data: {
-        ...random<AuditApiDocumentPrimitiveEntity>(),
-        createdAt: new Date().toISOString(),
-        document: {
-          ...random<MethodologyDocument>(),
-          ...partialDocument,
-          createdAt: new Date().toISOString(),
-          dataSetName: 'TEST',
-          externalCreatedAt: new Date().toISOString(),
-          id: documentId,
-          status: 'OPEN',
-          tags: {
-            'e2e-test': 'true',
-            'test-source': 'methodology-rules',
-          },
-        },
-        documentId,
-        versionDate: new Date().toISOString(),
-      },
+      data,
       method: 'POST',
     },
     { logger },

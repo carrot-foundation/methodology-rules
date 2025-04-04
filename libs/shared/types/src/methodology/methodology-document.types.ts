@@ -1,4 +1,4 @@
-import { type Primitive, tags } from 'typia';
+import { tags } from 'typia';
 
 import type { UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
@@ -34,14 +34,7 @@ export interface MethodologyDocument {
   primaryParticipant: MethodologyParticipant;
   status: string;
   subtype?: string | undefined;
+  tags?: Record<string, string> | undefined;
   type?: string | undefined;
   updatedAt: string & tags.Format<'date-time'>;
-}
-
-export interface AuditApiDocumentPrimitiveEntity {
-  createdAt: string & tags.Format<'date-time'>;
-  document: Primitive<MethodologyDocument>;
-  documentId: string;
-  snapshotId: string;
-  versionDate: string & tags.Format<'date-time'>;
 }
