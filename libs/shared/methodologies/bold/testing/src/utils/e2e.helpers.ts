@@ -17,12 +17,6 @@ import { faker } from '@faker-js/faker';
 
 import { approvedMassDocument, rejectedMassDocument } from '../documents';
 
-process.env = {
-  ...process.env,
-  AWS_ACCESS_KEY_ID: faker.string.uuid(),
-  AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-};
-
 export const testRuleProcessorWithMassDocuments = (
   options: {
     handler: Handler<RuleInput, MethodologyRuleResponse>;
@@ -37,6 +31,12 @@ export const testRuleProcessorWithMassDocuments = (
   ) => void,
 ) => {
   const { handler, ruleName, skipRejectTest = false } = options;
+
+  process.env = {
+    ...process.env,
+    AWS_ACCESS_KEY_ID: faker.string.uuid(),
+    AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
+  };
 
   describe(`E2E - ${ruleName} with pre-defined documents`, () => {
     const approvedMassDocumentScenario =
