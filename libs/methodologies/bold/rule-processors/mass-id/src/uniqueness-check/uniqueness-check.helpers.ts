@@ -40,11 +40,19 @@ export type EventsData = {
 export const createLicensePlateRegex = (
   licensePlate: NonEmptyString,
 ): string => {
-  const escapedValue = licensePlate
+  const normalizedValue = licensePlate
     .replaceAll(/\s+/g, '')
-    .replaceAll(/[$()*+./?[\\\]^{|}-]/g, '\\$&');
+    .replaceAll('-', '');
 
-  return `^${escapedValue}$`;
+  let escapedPattern = '';
+
+  for (const char of normalizedValue) {
+    const escapedChar = char.replaceAll(/[$()*+./?[\\\]^{|}-]/g, '\\$&');
+
+    escapedPattern += `${escapedChar}[-\\s]*`;
+  }
+
+  return `^${escapedPattern.slice(0, -6)}$`;
 };
 
 /* istanbul ignore next */

@@ -127,33 +127,34 @@ describe('uniqueness-check.helpers', () => {
 
   describe('createLicensePlateRegex', () => {
     it('should create a regex that matches the exact license plate value', () => {
-      const licensePlate = 'ABC123';
+      const licensePlate = 'ABC1234';
       const regex = helpers.createLicensePlateRegex(
         licensePlate as NonEmptyString,
       );
 
-      expect(regex).toBe('^ABC123$');
+      const pattern = new RegExp(regex, 'i');
 
-      const pattern = new RegExp(regex);
-
-      expect(pattern.test('ABC123')).toBe(true);
-      expect(pattern.test('abc123')).toBe(false);
-      expect(pattern.test('ABC1234')).toBe(false);
-      expect(pattern.test('AB123')).toBe(false);
+      expect(pattern.test('ABC1234')).toBe(true);
+      expect(pattern.test('A-BC1234')).toBe(true);
+      expect(pattern.test('ABC-1234')).toBe(true);
+      expect(pattern.test('A B C 1 2 3 4')).toBe(true);
+      expect(pattern.test('ABC12')).toBe(false);
+      expect(pattern.test('ABCD1234')).toBe(false);
     });
 
     it('should remove whitespace from the license plate value', () => {
-      const licensePlate = ' A BC 123 ';
+      const licensePlate = ' A BC 123 4';
       const regex = helpers.createLicensePlateRegex(
         licensePlate as NonEmptyString,
       );
 
-      expect(regex).toBe('^ABC123$');
+      const pattern = new RegExp(regex, 'i');
 
-      const pattern = new RegExp(regex);
-
-      expect(pattern.test('ABC123')).toBe(true);
-      expect(pattern.test(' A BC 123 ')).toBe(false);
+      expect(pattern.test('ABC1234')).toBe(true);
+      expect(pattern.test('ABC-1234')).toBe(true);
+      expect(pattern.test('ABC 1234')).toBe(true);
+      expect(pattern.test('A-B-C-1-2-3-4')).toBe(true);
+      expect(pattern.test('A B C 1 2 3 4')).toBe(true);
     });
 
     it('should escape special regex characters in the license plate', () => {
@@ -162,16 +163,49 @@ describe('uniqueness-check.helpers', () => {
         licensePlate as NonEmptyString,
       );
 
-      expect(regex).toContain('\\.');
-      expect(regex).toContain('\\*');
-      expect(regex).toContain('\\(');
-      expect(regex).toContain('\\)');
-      expect(regex).toContain('\\?');
-
-      const pattern = new RegExp(regex);
+      const pattern = new RegExp(regex, 'i');
 
       expect(pattern.test('A.B*C(1)2?3')).toBe(true);
+      expect(pattern.test('A.B*C-(1)2-?3')).toBe(true);
       expect(pattern.test('ABC123')).toBe(false);
+      expect(pattern.test('A.BDC(1)2?3')).toBe(false);
+      expect(pattern.test('A,B*C(1)2?3')).toBe(false);
+    });
+
+    it('should match license plates ignoring hyphens and spaces', () => {
+      const plateWithHyphen = 'ABC-123';
+      const regexWithHyphen = helpers.createLicensePlateRegex(
+        plateWithHyphen as NonEmptyString,
+      );
+
+      const patternWithHyphen = new RegExp(regexWithHyphen, 'i');
+
+      expect(patternWithHyphen.test('ABC123')).toBe(true);
+      expect(patternWithHyphen.test('A-BC-123')).toBe(true);
+      expect(patternWithHyphen.test('A B C 1 2 3')).toBe(true);
+
+      const plateNoHyphen = 'ABC123';
+      const regexNoHyphen = helpers.createLicensePlateRegex(
+        plateNoHyphen as NonEmptyString,
+      );
+
+      const patternNoHyphen = new RegExp(regexNoHyphen, 'i');
+
+      expect(patternNoHyphen.test('ABC-123')).toBe(true);
+      expect(patternNoHyphen.test('A-B-C-1-2-3')).toBe(true);
+    });
+
+    it('should be case-insensitive when using the i flag', () => {
+      const licensePlate = 'ABC-123';
+      const regex = helpers.createLicensePlateRegex(
+        licensePlate as NonEmptyString,
+      );
+
+      const pattern = new RegExp(regex, 'i');
+
+      expect(pattern.test('abc123')).toBe(true);
+      expect(pattern.test('AbC123')).toBe(true);
+      expect(pattern.test('ABC123')).toBe(true);
     });
   });
 });
