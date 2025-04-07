@@ -11,10 +11,8 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import {
-  RESULT_COMMENTS,
-  WASTE_CLASSIFICATION_IDS,
-} from './local-waste-classification.processor';
+import { WASTE_CLASSIFICATION_IDS } from './loca-waste-classification.constants';
+import { RESULT_COMMENTS } from './local-waste-classification.processor';
 
 const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
   NewDocumentEventAttributeName;
@@ -46,7 +44,7 @@ export const localWasteClassificationTestCases = [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [
             LOCAL_WASTE_CLASSIFICATION_DESC,
-            WASTE_CLASSIFICATION_IDS.BR['02 01 01'],
+            WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
           ],
         ],
       }),
@@ -64,7 +62,7 @@ export const localWasteClassificationTestCases = [
           [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
           [
             LOCAL_WASTE_CLASSIFICATION_DESC,
-            WASTE_CLASSIFICATION_IDS.BR['02 01 01'],
+            WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
           ],
         ],
       }),
@@ -78,10 +76,7 @@ export const localWasteClassificationTestCases = [
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
-          [
-            LOCAL_WASTE_CLASSIFICATION_ID,
-            WASTE_CLASSIFICATION_IDS.BR['02 01 01'],
-          ],
+          [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [LOCAL_WASTE_CLASSIFICATION_DESC, undefined],
         ],
       }),

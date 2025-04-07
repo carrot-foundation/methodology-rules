@@ -23,6 +23,7 @@
     "ts:affected": "nx affected --target ts",
     "ts:all": "nx run-many --target ts",
     "update-tags": "node scripts/update-project-tags.js",
+    "update-waste-classification": "node tools/update-waste-classification.js",
     "upload-lambdas-and-metadata": "./scripts/upload-lambdas-and-metadata.sh"
   },
   "private": true,

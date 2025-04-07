@@ -35,6 +35,9 @@ importers:
       bignumber.js:
         specifier: 9.1.2
         version: 9.1.2
+      csv-parser:
+        specifier: 3.0.0
+        version: 3.0.0
       date-fns:
         specifier: 4.1.0
         version: 4.1.0
@@ -3443,6 +3446,11 @@ packages:
   csso@5.0.5:
     resolution: {integrity: sha512-0LrrStPOdJj+SPCCrGhzryycLjwcgUSHBtxNA8aIDxf0GLsRh1cKYhB00Gd1lDOS4yGH69+SNn13+TWbVHETFQ==}
     engines: {node: ^10 || ^12.20.0 || ^14.13.0 || >=15.0.0, npm: '>=7.0.0'}
+
+  csv-parser@3.0.0:
+    resolution: {integrity: sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==}
+    engines: {node: '>= 10'}
+    hasBin: true
 
   cz-git@1.11.0:
     resolution: {integrity: sha512-FCNkpyVmNPX0P8kHtX8uoFcXsJ4bjivMXVS5vc/qCyM8jj+Tuqo6CXQjGQKwKl0Lk9VNz7o6JfPoU/mM/XhxqA==}
@@ -11839,6 +11847,10 @@ snapshots:
   csso@5.0.5:
     dependencies:
       css-tree: 2.2.1
+
+  csv-parser@3.0.0:
+    dependencies:
+      minimist: 1.2.8
 
   cz-git@1.11.0: {}
 
