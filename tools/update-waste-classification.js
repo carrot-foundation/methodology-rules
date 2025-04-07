@@ -15,12 +15,12 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
+const { parse } = require('csv-parse');
 
 // Define the target file path
 const TARGET_FILE = path.resolve(
   __dirname,
-  '../libs/methodologies/bold/rule-processors/mass-id/src/local-waste-classification/loca-waste-classification.constants.ts',
+  '../libs/methodologies/bold/rule-processors/mass-id/src/local-waste-classification/local-waste-classification.constants.ts',
 );
 
 // Get command line arguments
@@ -61,139 +61,137 @@ const currentFile = fs.readFileSync(TARGET_FILE, 'utf8');
 function extractWasteClassificationFromCSV(csvFilePath) {
   return new Promise((resolve, reject) => {
     const results = { BR: {} };
-    let lineCount = 0;
     let rowCount = 0;
     let codesFound = 0;
     let codesSkippedNoCmd = 0;
     const missingCmdCodes = [];
     const validCodes = [];
 
+    // Create a readable stream from the CSV file
+    const parser = parse({
+      delimiter: ',',
+      from_line: 6, // Skip the header lines (equivalent to skipping first 5 lines)
+      skip_empty_lines: true,
+      trim: true,
+      columns: false, // We'll work with raw arrays instead of objects
+      relax_column_count: true, // Allow varying column counts in rows
+    });
+
+    // Create the readable stream
     const fileStream = fs.createReadStream(csvFilePath);
-    const rl = readline.createInterface({
-      input: fileStream,
-      crlfDelay: Infinity,
-    });
 
-    rl.on('line', (line) => {
-      lineCount++;
-      const parts = line.split(',');
+    // Pipe the file stream to the parser
+    fileStream
+      .pipe(parser)
+      .on('data', (record) => {
+        // Check if this is a waste code line (starts with XX XX XX format)
+        const code = record[0]?.trim() || '';
+        if (code && code.length === 8 && code[2] === ' ' && code[5] === ' ') {
+          rowCount++;
+          // Extract description
+          const description = (record[1] || '')
+            .trim()
+            .replace(/–\s*$/, '')
+            .replace(/-\s*$/, '')
+            .replace(/^"/, '')
+            .replace(/"$/, '');
 
-      // Skip header lines
-      if (lineCount < 6) return;
+          // Specifically look for CMD_CODE in column F (index 5) which is "CARROT'S BOLD-C"
+          let cmdCode = '';
+          if (record.length > 5) {
+            const columnValue = record[5]?.trim() || '';
+            if (columnValue.match(/^8\.\d+[A-D]?$/)) {
+              cmdCode = columnValue;
+            }
+          }
 
-      // Check if this is a waste code line (starts with XX XX XX format)
-      const code = parts[0]?.trim() || '';
-      if (code && code.length === 8 && code[2] === ' ' && code[5] === ' ') {
-        rowCount++;
-        // Extract description
-        const description = (parts[1] || '')
-          .trim()
-          .replace(/–\s*$/, '')
-          .replace(/-\s*$/, '')
-          .replace(/^"/, '')
-          .replace(/"$/, '');
-
-        // Look for the CMD_CODE column (CARROT'S BOLD-C)
-        let cmdCode = '';
-
-        // Look for column with CMD_CODE (expected to be around column 5-7)
-        for (let i = 0; i < parts.length; i++) {
-          const columnValue = parts[i]?.trim() || '';
-          if (columnValue.match(/^8\.\d+[A-D]?$/)) {
-            cmdCode = columnValue;
-            break;
+          if (description && cmdCode) {
+            // Only add codes that have a valid CMD_CODE in the CARROT'S BOLD-C column
+            codesFound++;
+            validCodes.push(code);
+            // Use the code as a string key to avoid octal literals errors
+            results.BR[code] = {
+              CMD_CODE: cmdCode,
+              description: description,
+            };
+          } else if (description) {
+            // Log codes where CMD_CODE wasn't found in the CARROT'S BOLD-C column but DO NOT include in results
+            codesSkippedNoCmd++;
+            missingCmdCodes.push({ code, description });
           }
         }
-
-        if (description && cmdCode) {
-          // Only add codes that have a valid CMD_CODE
-          codesFound++;
-          validCodes.push(code);
-          // Use the code as a string key to avoid octal literals errors
-          results.BR[code] = {
-            CMD_CODE: cmdCode,
-            description: description,
-          };
-        } else if (description) {
-          // Log codes where CMD_CODE wasn't found but DO NOT include in results
-          codesSkippedNoCmd++;
-          missingCmdCodes.push({ code, description });
-        }
-      }
-    });
-
-    rl.on('close', () => {
-      if (codesFound === 0) {
-        reject(
-          new Error('No valid waste classification data found in the CSV.'),
-        );
-      } else {
-        console.log(`Processed ${lineCount} lines from the CSV file.`);
-        console.log(
-          `Found ${codesFound} waste classification codes with valid CMD_CODE.`,
-        );
-
-        if (codesSkippedNoCmd > 0) {
-          console.log(
-            `Skipped ${codesSkippedNoCmd} codes because they don't have a CMD_CODE.`,
+      })
+      .on('end', () => {
+        if (codesFound === 0) {
+          reject(
+            new Error('No valid waste classification data found in the CSV.'),
           );
-        }
-
-        if (missingCmdCodes.length > 0) {
+        } else {
+          console.log(`Processed ${rowCount} rows from the CSV file.`);
           console.log(
-            `Warning: ${missingCmdCodes.length} codes had no CMD_CODE and were NOT included in the constants file:`,
+            `Found ${codesFound} waste classification codes with valid CMD_CODE.`,
           );
-          missingCmdCodes.slice(0, 5).forEach((item) => {
+
+          if (codesSkippedNoCmd > 0) {
             console.log(
-              `  - ${item.code}: ${item.description.substring(0, 30)}...`,
+              `Skipped ${codesSkippedNoCmd} codes because they don't have a CMD_CODE.`,
             );
-          });
-          if (missingCmdCodes.length > 5) {
-            console.log(`  ... and ${missingCmdCodes.length - 5} more`);
           }
 
-          // Write missing codes to a file for manual review
-          const missingCodesFile = path.join(
+          if (missingCmdCodes.length > 0) {
+            console.log(
+              `Warning: ${missingCmdCodes.length} codes had no CMD_CODE and were NOT included in the constants file:`,
+            );
+            missingCmdCodes.slice(0, 5).forEach((item) => {
+              console.log(
+                `  - ${item.code}: ${item.description.substring(0, 30)}...`,
+              );
+            });
+            if (missingCmdCodes.length > 5) {
+              console.log(`  ... and ${missingCmdCodes.length - 5} more`);
+            }
+
+            // Write missing codes to a file for manual review
+            const missingCodesFile = path.join(
+              __dirname,
+              'missing-waste-codes.json',
+            );
+            fs.writeFileSync(
+              missingCodesFile,
+              JSON.stringify(missingCmdCodes, null, 2),
+              'utf8',
+            );
+            console.log(
+              `Full list of skipped codes written to ${missingCodesFile}`,
+            );
+          }
+
+          // Write validation report
+          const validationReport = {
+            totalRowsProcessed: rowCount,
+            totalCodesFound: codesFound,
+            codesSkippedNoCmd: codesSkippedNoCmd,
+            validCodes: validCodes,
+            missingCmdCodes: missingCmdCodes.map((item) => item.code),
+          };
+
+          const reportFile = path.join(
             __dirname,
-            'missing-waste-codes.json',
+            'waste-classification-report.json',
           );
           fs.writeFileSync(
-            missingCodesFile,
-            JSON.stringify(missingCmdCodes, null, 2),
+            reportFile,
+            JSON.stringify(validationReport, null, 2),
             'utf8',
           );
-          console.log(
-            `Full list of skipped codes written to ${missingCodesFile}`,
-          );
+          console.log(`Validation report written to ${reportFile}`);
+
+          resolve(results);
         }
-
-        // Write validation report
-        const validationReport = {
-          totalLinesProcessed: lineCount,
-          totalCodesFound: codesFound,
-          codesSkippedNoCmd: codesSkippedNoCmd,
-          validCodes: validCodes,
-          missingCmdCodes: missingCmdCodes.map((item) => item.code),
-        };
-
-        const reportFile = path.join(
-          __dirname,
-          'waste-classification-report.json',
-        );
-        fs.writeFileSync(
-          reportFile,
-          JSON.stringify(validationReport, null, 2),
-          'utf8',
-        );
-        console.log(`Validation report written to ${reportFile}`);
-
-        resolve(results);
-      }
-    });
-
-    rl.on('error', (error) => {
-      reject(new Error(`Error reading CSV file: ${error.message}`));
-    });
+      })
+      .on('error', (error) => {
+        reject(new Error(`Error parsing CSV file: ${error.message}`));
+      });
   });
 }
 

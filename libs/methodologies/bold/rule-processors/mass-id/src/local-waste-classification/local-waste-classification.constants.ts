@@ -10,22 +10,6 @@ const WASTE_FROM_SCREENING = 'Resíduos retirados da fase de gradeamento';
 
 export const WASTE_CLASSIFICATION_IDS = {
   BR: {
-    '01 01 01': {
-      CMD_CODE: '8.3',
-      description: 'Resíduos da extração de minérios metálicos ',
-    },
-    '01 01 02': {
-      CMD_CODE: '8.4',
-      description: 'Resíduos da extração de minérios não metálicos ',
-    },
-    '01 03 04': {
-      CMD_CODE: '8.6',
-      description: '(*) Rejeitados geradores de ácidos',
-    },
-    '01 03 05': {
-      CMD_CODE: '8.7',
-      description: '(*) Outros rejeitados contendo substâncias perigosas ',
-    },
     '02 01 01': {
       CMD_CODE: '8.7B',
       description: WASHING_CLEANING_SLUDGE,
@@ -44,7 +28,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '02 01 06': {
       CMD_CODE: '8.7D',
-      description: 'Fezes',
+      description:
+        'Fezes, uri- e estrume de animais (incluindo palha suja), efluentes recolhidos separadamente e tratados noutro local ',
     },
     '02 01 07': {
       CMD_CODE: '8.1',
@@ -56,7 +41,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '02 02 02': {
       CMD_CODE: '8.3',
-      description: 'Resíduos de tecidos animais e orgânico de processo (sebo',
+      description:
+        'Resíduos de tecidos animais e orgânico de processo (sebo, soro, ossos, sangue, etc.) ',
     },
     '02 02 03': {
       CMD_CODE: '8.3',
@@ -72,7 +58,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '02 03 01': {
       CMD_CODE: '8.7B',
-      description: 'Lodos de lavagem',
+      description:
+        'Lodos de lavagem, limpeza, descasque, centrifugação e separação ',
     },
     '02 03 04': {
       CMD_CODE: '8.3',
@@ -144,7 +131,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '03 01 05': {
       CMD_CODE: '8.1',
-      description: 'Serragem',
+      description:
+        'Serragem, aparas, fitas de aplai-mento, madeira, aglomerados e folheados não abrangidos em 03 01 04 ',
     },
     '03 01 99': {
       CMD_CODE: '8.7D',
@@ -161,7 +149,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '03 03 05': {
       CMD_CODE: '8.7B',
-      description: 'Lodos de branqueamento',
+      description:
+        'Lodos de branqueamento, provenientes da reciclagem de papel ',
     },
     '03 03 07': {
       CMD_CODE: '8.2',
@@ -179,7 +168,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '03 03 10': {
       CMD_CODE: '8.2',
-      description: 'Rejeitos de fibras e lodos de fibras',
+      description:
+        'Rejeitos de fibras e lodos de fibras, fillers e revestimentos, provenientes da separação mecânica ',
     },
     '03 03 11': {
       CMD_CODE: '8.7C',
@@ -204,15 +194,18 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '04 01 06': {
       CMD_CODE: '8.7B',
-      description: 'Lodos',
+      description:
+        'Lodos, em especial do tratamento local de efluentes, contendo cromo ',
     },
     '04 01 07': {
       CMD_CODE: '8.7B',
-      description: 'Lodos',
+      description:
+        'Lodos, em especial do tratamento local de efluentes, sem cromo ',
     },
     '04 01 08': {
       CMD_CODE: '8.7D',
-      description: 'Aparas',
+      description:
+        'Aparas, serragem e pós de couro provenientes de couros curtidos ao cromo ',
     },
     '04 01 09': {
       CMD_CODE: '8.7D',
@@ -228,11 +221,13 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '04 02 09': {
       CMD_CODE: '8.4',
-      description: 'Resíduos de materiais têxteis (têxteis impreg-dos',
+      description:
+        'Resíduos de materiais têxteis (têxteis impreg-dos, elastômeros, plastômeros) ',
     },
     '04 02 10': {
       CMD_CODE: '8.7D',
-      description: 'Matéria orgânica de produtos -turais (por exemplo',
+      description:
+        'Matéria orgânica de produtos -turais (por exemplo, gordura, cera) ',
     },
     '04 02 15': {
       CMD_CODE: '8.7D',
@@ -554,7 +549,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '17 04 01': {
       CMD_CODE: '8.6',
-      description: 'Cobre',
+      description: 'Cobre, bronze e latão ',
     },
     '17 04 02': {
       CMD_CODE: '8.6',
@@ -609,7 +604,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '17 09 04': {
       CMD_CODE: '8.6',
       description:
-        'Mistura de resíduos de construção e demolição não abrangidos em 17 09 01',
+        'Mistura de resíduos de construção e demolição não abrangidos em 17 09 01, 17 09 02 e 17 09 03 ',
     },
     '19 01 02': {
       CMD_CODE: '8.6',
@@ -721,7 +716,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 08 09': {
       CMD_CODE: '8.7B',
-      description: 'Misturas de gorduras e óleos',
+      description:
+        'Misturas de gorduras e óleos, da separação óleo/água, contendo ape-s óleos e gorduras alimentares ',
     },
     '19 08 12': {
       CMD_CODE: '8.7D',
@@ -747,7 +743,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 09 05': {
       CMD_CODE: '8.6',
-      description: 'Resi-s de troca iônica',
+      description: 'Resi-s de troca iônica, saturadas ou usadas ',
     },
     '19 09 06': {
       CMD_CODE: '8.7D',
@@ -808,7 +804,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 12 09': {
       CMD_CODE: '8.6',
-      description: 'Substâncias minerais (por exemplo',
+      description: 'Substâncias minerais (por exemplo, areia, rochas) ',
     },
     '19 12 10': {
       CMD_CODE: '8.7D',
@@ -886,7 +882,8 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '20 02 01': {
       CMD_CODE: '8.5',
-      description: 'Resíduos de varrição',
+      description:
+        'Resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- biodegradáveis ',
     },
     '20 02 02': {
       CMD_CODE: '8.6',
@@ -894,11 +891,13 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '20 02 03': {
       CMD_CODE: '8.6',
-      description: 'Outros resíduos de varrição',
+      description:
+        'Outros resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- não biodegradáveis ',
     },
     '20 03 01': {
       CMD_CODE: '8.7D',
-      description: 'Outros resíduos urbanos e equiparados',
+      description:
+        'Outros resíduos urbanos e equiparados, incluindo misturas de resíduos ',
     },
     '20 03 02': {
       CMD_CODE: '8.3',
@@ -915,7 +914,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '20 03 06': {
       CMD_CODE: '8.7C',
-      description: 'Resíduos da limpeza de esgotos',
+      description: 'Resíduos da limpeza de esgotos, bueiros e bocas-de-lobo ',
     },
     '20 03 99': {
       CMD_CODE: '8.7D',
