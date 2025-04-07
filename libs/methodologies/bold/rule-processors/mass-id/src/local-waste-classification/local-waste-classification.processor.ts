@@ -19,7 +19,7 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
-import { WASTE_CLASSIFICATION_IDS } from './loca-waste-classification.constants';
+import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants';
 import { LocalWasteClassificationProcessorErrors } from './local-waste-classification.errors';
 
 const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
