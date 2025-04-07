@@ -1,6 +1,6 @@
 # Waste Classification Constants
 
-This directory contains constants related to waste classification used in the BOLD Methodology's Mass-ID rule processor.
+This directory contains constants related to waste classification used in the BOLD Methodology's MassID rule processor.
 
 ## Data Sources
 
