@@ -4,7 +4,7 @@ This directory contains constants related to waste classification used in the BO
 
 ## Data Sources
 
-The waste classification codes in `loca-waste-classification.constants.ts` are populated based on data from:
+The waste classification codes in `local-waste-classification.constants.ts` are populated based on data from:
 
 - [IBAMA - Brazilian List of Solid Waste](https://www.ibama.gov.br/phocadownload/emissoeseresiduos/residuos/ibama-lista-brasileira-de-residuos-solidos.xls)
 
