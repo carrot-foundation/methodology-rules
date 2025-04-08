@@ -7,9 +7,9 @@ import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates'
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -17,7 +17,7 @@ const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
   VEHICLE_TYPE,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 const { PICK_UP } = DocumentEventName;
 const { SLUDGE_PIPES } = DocumentEventVehicleType;
 

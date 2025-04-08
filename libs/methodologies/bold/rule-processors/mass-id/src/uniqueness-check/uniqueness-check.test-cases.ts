@@ -3,9 +3,9 @@ import {
   stubBoldMassIdPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentStatus,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -16,7 +16,7 @@ import { RESULT_COMMENTS } from './uniqueness-check.processor';
 const { CANCELLED, OPEN } = DocumentStatus;
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 export const uniquenessCheckTestCases = [
   {

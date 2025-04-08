@@ -72,7 +72,7 @@ export enum DocumentEventRuleSlug {
   REWARDS_DISTRIBUTION = 'rewards-distribution',
 }
 
-export enum NewDocumentEventAttributeName {
+export enum DocumentEventAttributeName {
   CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
   CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
   CONTAINER_CAPACITY = 'Container Capacity',

@@ -13,12 +13,12 @@ import {
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
   DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type MethodologyDocumentEventAttribute,
@@ -48,7 +48,7 @@ const {
   VEHICLE_LICENSE_PLATE,
   VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 
 export interface WeighingEventValues {
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;

@@ -4,8 +4,8 @@ import {
   stubParticipantHomologationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -16,8 +16,7 @@ import {
   isHomologationActive,
 } from './homologation-document.helpers';
 
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } =
-  NewDocumentEventAttributeName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 const { CLOSE } = DocumentEventName;
 
 describe('Homologation Document Helpers', () => {

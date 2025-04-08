@@ -2,12 +2,12 @@ import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared
 
 import {
   type DocumentEvent,
-  NewDocumentEventAttributeName,
+  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const replaceMetadataAttributeValue = (
   documentEvent: DocumentEvent,
-  attributeName: NewDocumentEventAttributeName,
+  attributeName: DocumentEventAttributeName,
   newValue: MethodologyDocumentEventAttributeValue,
 ): DocumentEvent => {
   const attributes = documentEvent.metadata?.attributes?.map((attribute) => {

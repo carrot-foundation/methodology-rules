@@ -13,9 +13,9 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
@@ -26,7 +26,7 @@ import { RESULT_COMMENTS } from './geolocation-precision.processor';
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 const { ACTOR, DROP_OFF, OPEN, PICK_UP } = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 
 const actorParticipants = new Map(
   ACTOR_PARTICIPANTS.map((subtype) => [

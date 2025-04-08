@@ -3,9 +3,9 @@ import {
   stubBoldHomologationDocumentCloseEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { formatDate, subDays } from 'date-fns';
@@ -15,8 +15,7 @@ import { RESULT_COMMENTS } from './participant-homologations.processor';
 
 const { HAULER } = MassIdDocumentActorType;
 const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } =
-  NewDocumentEventAttributeName;
+const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
 
 const processorError = new ParticipantHomologationsProcessorErrors();
 

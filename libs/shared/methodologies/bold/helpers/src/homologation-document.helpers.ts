@@ -6,8 +6,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { format } from 'date-fns';
@@ -37,11 +37,11 @@ export const isHomologationActive = (document: Document): boolean => {
 
   const homologationDate = getEventAttributeValue(
     closeEvent,
-    NewDocumentEventAttributeName.HOMOLOGATION_DATE,
+    DocumentEventAttributeName.HOMOLOGATION_DATE,
   );
   const homologationDueDate = getEventAttributeValue(
     closeEvent,
-    NewDocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
+    DocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
   );
 
   if (

@@ -4,8 +4,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -102,7 +102,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeNameIsAnyOf', () => {
     it('should return true if the event has any of the specified metadata attribute names', () => {
-      const { DESCRIPTION, DOCUMENT_NUMBER } = NewDocumentEventAttributeName;
+      const { DESCRIPTION, DOCUMENT_NUMBER } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -114,7 +114,7 @@ describe('Predicate Factories', () => {
 
     it('should return false if the event has none of the specified metadata attribute names', () => {
       const { CONTAINER_TYPE, DESCRIPTION, DOCUMENT_NUMBER } =
-        NewDocumentEventAttributeName;
+        DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -127,7 +127,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeValueIsAnyOf', () => {
     it('should return true if the metadata attribute has any of the specified values', () => {
-      const { DESCRIPTION } = NewDocumentEventAttributeName;
+      const { DESCRIPTION } = DocumentEventAttributeName;
       const description = faker.string.sample();
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, description],
@@ -142,7 +142,7 @@ describe('Predicate Factories', () => {
     });
 
     it('should return false if the metadata attribute has none of the specified values', () => {
-      const { DESCRIPTION } = NewDocumentEventAttributeName;
+      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -158,7 +158,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeValueIsNotEmpty', () => {
     it('should return true if the metadata attribute value is not empty', () => {
-      const { DESCRIPTION } = NewDocumentEventAttributeName;
+      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -167,7 +167,7 @@ describe('Predicate Factories', () => {
     });
 
     it('should return false if the metadata attribute value is empty', () => {
-      const { DESCRIPTION } = NewDocumentEventAttributeName;
+      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, undefined as any], // necessary cast to reuse stub
       ]);

@@ -1,15 +1,15 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   DocumentCategory,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { MASS_ID } = DocumentCategory;
 const { SORTING } = DocumentEventName;
-const { SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { SORTING_FACTOR } = DocumentEventAttributeName;
 
 export class MassSortingProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {

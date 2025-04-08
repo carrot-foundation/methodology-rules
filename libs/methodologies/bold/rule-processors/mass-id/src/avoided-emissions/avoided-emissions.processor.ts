@@ -19,8 +19,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
+  DocumentEventAttributeName,
   DocumentSubtype,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -32,7 +32,7 @@ import {
 
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 
-const { PROJECT_EMISSION_CALCULATION_INDEX } = NewDocumentEventAttributeName;
+const { PROJECT_EMISSION_CALCULATION_INDEX } = DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (

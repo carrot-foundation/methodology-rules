@@ -16,9 +16,9 @@ import {
   type Document,
   DocumentCategory,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentStatus,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -40,7 +40,7 @@ import {
 
 const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 const { MASS_ID } = DocumentCategory;
 
 export const RESULT_COMMENTS = {

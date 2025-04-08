@@ -20,9 +20,9 @@ import {
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -63,7 +63,7 @@ const {
   SCALE_TYPE,
   VEHICLE_LICENSE_PLATE,
   WEIGHING_CAPTURE_METHOD,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 
 interface RuleSubject {
   recyclerHomologationDocument: Document;

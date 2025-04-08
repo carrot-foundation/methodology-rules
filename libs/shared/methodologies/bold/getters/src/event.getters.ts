@@ -8,8 +8,8 @@ import type {
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentEvent,
+  DocumentEventAttributeName,
   type DocumentEventWithAttachments,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { createValidate, validate } from 'typia';
 
@@ -17,7 +17,7 @@ import { validateDocumentEventWithMetadata } from './event.getters.typia';
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
-  attributeName: NewDocumentEventAttributeName | string,
+  attributeName: DocumentEventAttributeName | string,
 ): MethodologyDocumentEventAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -34,7 +34,7 @@ export const getEventAttributeValue = (
 
 export const getEventAttributeByName = (
   event: Maybe<DocumentEvent>,
-  attributeName: NewDocumentEventAttributeName | string,
+  attributeName: DocumentEventAttributeName | string,
 ): MethodologyDocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -49,7 +49,7 @@ export const getEventAttributeByName = (
 
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
-  attributeName: NewDocumentEventAttributeName | string,
+  attributeName: DocumentEventAttributeName | string,
   validateValue: ReturnType<typeof createValidate<T>>,
 ): T => {
   const value = getEventAttributeValue(event, attributeName);
@@ -81,8 +81,5 @@ export const getEventMethodologySlug = (
   event: Maybe<DocumentEvent>,
 ): MethodologyDocumentEventAttributeValue | undefined =>
   getNonEmptyString(
-    getEventAttributeValue(
-      event,
-      NewDocumentEventAttributeName.METHODOLOGY_SLUG,
-    ),
+    getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
   );
