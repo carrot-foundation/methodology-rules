@@ -8,15 +8,15 @@ The waste classification codes in `local-waste-classification.constants.ts` are 
 
 - [IBAMA - Brazilian List of Solid Waste](https://www.ibama.gov.br/phocadownload/emissoeseresiduos/residuos/ibama-lista-brasileira-de-residuos-solidos.xls)
 
-The CMD_CODE values represent mappings to waste types according to the Clean Development Mechanism (CDM) categorization found in:
+The CDM_CODE values represent mappings to waste types according to the Clean Development Mechanism (CDM) categorization found in:
 
 - [CDM Methodologies Tool](https://cdm.unfccc.int/methodologies/PAmethodologies/tools/am-tool-04-v8.0.pdf)
 
-## CMD_CODE Mapping
+## CDM_CODE Mapping
 
-The CMD codes follow this classification structure:
+The CDM codes follow this classification structure:
 
-| CMD_CODE | Description                                                 |
+| CDM_CODE | Description                                                 |
 | -------- | ----------------------------------------------------------- |
 | 8.1      | Wood and wood products                                      |
 | 8.2      | Pulp, paper and cardboard (other than sludge)               |

@@ -4,7 +4,7 @@
  * Update Waste Classification Constants
  *
  * This script updates the waste classification constants file based on a CSV file.
- * It reads the CSV data, extracts codes with valid CMD_CODE values, and updates the constants file.
+ * It reads the CSV data, extracts codes with valid CDM_CODE values, and updates the constants file.
  *
  * Usage:
  *   node update-waste-classification.js <path-to-csv-file>
@@ -96,26 +96,26 @@ function extractWasteClassificationFromCSV(csvFilePath) {
             .replace(/^"/, '')
             .replace(/"$/, '');
 
-          // Specifically look for CMD_CODE in column F (index 5) which is "CARROT'S BOLD-C"
-          let cmdCode = '';
+          // Specifically look for CDM_CODE in column F (index 5) which is "CARROT'S BOLD-C"
+          let cdmCode = '';
           if (record.length > 5) {
             const columnValue = record[5]?.trim() || '';
             if (columnValue.match(/^8\.\d+[A-D]?$/)) {
-              cmdCode = columnValue;
+              cdmCode = columnValue;
             }
           }
 
-          if (description && cmdCode) {
-            // Only add codes that have a valid CMD_CODE in the CARROT'S BOLD-C column
+          if (description && cdmCode) {
+            // Only add codes that have a valid CDM_CODE in the CARROT'S BOLD-C column
             codesFound++;
             validCodes.push(code);
             // Use the code as a string key to avoid octal literals errors
             results.BR[code] = {
-              CMD_CODE: cmdCode,
+              CDM_CODE: cdmCode,
               description: description,
             };
           } else if (description) {
-            // Log codes where CMD_CODE wasn't found in the CARROT'S BOLD-C column but DO NOT include in results
+            // Log codes where CDM_CODE wasn't found in the CARROT'S BOLD-C column but DO NOT include in results
             codesSkippedNoCmd++;
             missingCmdCodes.push({ code, description });
           }
@@ -129,18 +129,18 @@ function extractWasteClassificationFromCSV(csvFilePath) {
         } else {
           console.log(`Processed ${rowCount} rows from the CSV file.`);
           console.log(
-            `Found ${codesFound} waste classification codes with valid CMD_CODE.`,
+            `Found ${codesFound} waste classification codes with valid CDM_CODE.`,
           );
 
           if (codesSkippedNoCmd > 0) {
             console.log(
-              `Skipped ${codesSkippedNoCmd} codes because they don't have a CMD_CODE.`,
+              `Skipped ${codesSkippedNoCmd} codes because they don't have a CDM_CODE.`,
             );
           }
 
           if (missingCmdCodes.length > 0) {
             console.log(
-              `Warning: ${missingCmdCodes.length} codes had no CMD_CODE and were NOT included in the constants file:`,
+              `Warning: ${missingCmdCodes.length} codes had no CDM_CODE and were NOT included in the constants file:`,
             );
             missingCmdCodes.slice(0, 5).forEach((item) => {
               console.log(
@@ -238,10 +238,10 @@ function updateConstantsFile(currentFile, newData) {
   for (const code of sortedCodes) {
     const item = newData.BR[code];
     const description = item.description;
-    const cmdCode = item.CMD_CODE;
+    const cdmCode = item.CDM_CODE;
 
     formattedOutput += `    '${code}': {\n`;
-    formattedOutput += `      CMD_CODE: "${cmdCode}",\n`;
+    formattedOutput += `      CDM_CODE: "${cdmCode}",\n`;
     formattedOutput += `      description: ${getConstantOrValue(description)}\n`;
     formattedOutput += `    },\n`;
   }
@@ -258,9 +258,9 @@ function showDiff(oldContent, newContent) {
   try {
     // Extract the waste code definitions
     const oldCodesPattern =
-      /'(\d\d \d\d \d\d)':\s*{[^}]*CMD_CODE:\s*"([^"]+)"[^}]*description:\s*([^,}]+)/g;
+      /'(\d\d \d\d \d\d)':\s*{[^}]*CDM_CODE:\s*"([^"]+)"[^}]*description:\s*([^,}]+)/g;
     const newCodesPattern =
-      /'(\d\d \d\d \d\d)':\s*{[^}]*CMD_CODE:\s*"([^"]+)"[^}]*description:\s*([^,}]+)/g;
+      /'(\d\d \d\d \d\d)':\s*{[^}]*CDM_CODE:\s*"([^"]+)"[^}]*description:\s*([^,}]+)/g;
 
     const oldCodes = {};
     const newCodes = {};
@@ -269,17 +269,17 @@ function showDiff(oldContent, newContent) {
     let match;
     while ((match = oldCodesPattern.exec(oldContent)) !== null) {
       const code = match[1];
-      const cmdCode = match[2];
+      const cdmCode = match[2];
       const description = match[3].trim();
-      oldCodes[code] = { cmdCode, description };
+      oldCodes[code] = { cdmCode, description };
     }
 
     // Extract new codes
     while ((match = newCodesPattern.exec(newContent)) !== null) {
       const code = match[1];
-      const cmdCode = match[2];
+      const cdmCode = match[2];
       const description = match[3].trim();
-      newCodes[code] = { cmdCode, description };
+      newCodes[code] = { cdmCode, description };
     }
 
     // Count changes
@@ -294,14 +294,14 @@ function showDiff(oldContent, newContent) {
       if (oldCodes[code]) {
         // Check if changed
         if (
-          oldCodes[code].cmdCode !== newCodes[code].cmdCode ||
+          oldCodes[code].cdmCode !== newCodes[code].cdmCode ||
           oldCodes[code].description !== newCodes[code].description
         ) {
           changedLines++;
           console.log(`\nCode ${code} changed:`);
-          if (oldCodes[code].cmdCode !== newCodes[code].cmdCode) {
-            console.log(`- CMD_CODE: "${oldCodes[code].cmdCode}"`);
-            console.log(`+ CMD_CODE: "${newCodes[code].cmdCode}"`);
+          if (oldCodes[code].cdmCode !== newCodes[code].cdmCode) {
+            console.log(`- CDM_CODE: "${oldCodes[code].cdmCode}"`);
+            console.log(`+ CDM_CODE: "${newCodes[code].cdmCode}"`);
           }
           if (oldCodes[code].description !== newCodes[code].description) {
             console.log(`- Description: ${oldCodes[code].description}`);
@@ -312,7 +312,7 @@ function showDiff(oldContent, newContent) {
         // New code
         addedLines++;
         console.log(`\nNew code added: ${code}`);
-        console.log(`+ CMD_CODE: "${newCodes[code].cmdCode}"`);
+        console.log(`+ CDM_CODE: "${newCodes[code].cdmCode}"`);
         console.log(`+ Description: ${newCodes[code].description}`);
       }
     }
@@ -322,7 +322,7 @@ function showDiff(oldContent, newContent) {
       if (!newCodes[code]) {
         removedLines++;
         console.log(`\nCode removed: ${code}`);
-        console.log(`- CMD_CODE: "${oldCodes[code].cmdCode}"`);
+        console.log(`- CDM_CODE: "${oldCodes[code].cdmCode}"`);
         console.log(`- Description: ${oldCodes[code].description}`);
       }
     }
