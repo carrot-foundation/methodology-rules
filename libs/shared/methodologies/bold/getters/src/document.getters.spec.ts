@@ -4,11 +4,9 @@ import {
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
-  stubMassDocument,
+  stubMassIdDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventActorType,
-  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
   NewDocumentEventAttributeName,
@@ -17,7 +15,6 @@ import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import {
-  getAuditorActorEvent,
   getDocumentEventById,
   getFirstDocumentEventAttributeValue,
   getOpenEvent,
@@ -25,53 +22,11 @@ import {
   getRulesMetadataEvent,
 } from './document.getters';
 
-const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
-const { AUDITOR } = DocumentEventActorType;
-const { ACTOR_TYPE } = DocumentEventAttributeName;
+const { DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { SORTING_FACTOR } = NewDocumentEventAttributeName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
-  describe('getAuditorActorEvent', () => {
-    it('should return the auditor actor event', () => {
-      const auditorActorEvent = stubDocumentEventWithMetadataAttributes(
-        { name: ACTOR },
-        [[ACTOR_TYPE, AUDITOR]],
-      );
-
-      const document = stubDocument({
-        externalEvents: [
-          auditorActorEvent,
-          ...stubArray(() => stubDocumentEvent()),
-        ],
-      });
-
-      const result = getAuditorActorEvent(document);
-
-      expect(result).toEqual(auditorActorEvent);
-    });
-
-    it('should return undefined if the auditor actor event was not found', () => {
-      const actorEvent = stubDocumentEventWithMetadataAttributes({
-        name: ACTOR,
-      });
-
-      const document = stubDocument({
-        externalEvents: [actorEvent, ...stubArray(() => stubDocumentEvent())],
-      });
-
-      const result = getAuditorActorEvent(document);
-
-      expect(result).toBe(undefined);
-    });
-
-    it('should return undefined if the document is undefined', () => {
-      const result = getAuditorActorEvent(undefined as unknown as Document);
-
-      expect(result).toBe(undefined);
-    });
-  });
-
   describe('getOpenEvent', () => {
     it('should return the open event', () => {
       const openEvent = stubDocumentEvent({ name: OPEN });
@@ -138,7 +93,7 @@ describe('Document getters', () => {
   describe('getParticipantActorType', () => {
     it(`should return "${WASTE_GENERATOR}" when the event is a pick up at the source`, () => {
       const sourcePickUpEvent = stubDocumentEvent({ name: PICK_UP });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           sourcePickUpEvent,
           stubDocumentEvent({ name: DROP_OFF }),
@@ -157,7 +112,7 @@ describe('Document getters', () => {
 
     it(`should return "${PROCESSOR}" when the event is a drop off at processor`, () => {
       const processorDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),
           processorDropOffEvent,
@@ -176,7 +131,7 @@ describe('Document getters', () => {
 
     it(`should return "${PROCESSOR}" when the event is a pick up at processor`, () => {
       const processorPickUpEvent = stubDocumentEvent({ name: PICK_UP });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),
           stubDocumentEvent({ name: DROP_OFF }),
@@ -195,7 +150,7 @@ describe('Document getters', () => {
 
     it(`should return "${RECYCLER}" when the event is a drop off at recycler`, () => {
       const recyclerDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),
           stubDocumentEvent({ name: DROP_OFF }),
@@ -214,7 +169,7 @@ describe('Document getters', () => {
 
     it('should return undefined when the document has no pick up events', () => {
       const dropOffEvent = stubDocumentEvent({ name: DROP_OFF });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [dropOffEvent],
       });
 
@@ -228,7 +183,7 @@ describe('Document getters', () => {
 
     it('should return undefined when the document has no drop off events', () => {
       const pickUpEvent = stubDocumentEvent({ name: PICK_UP });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [pickUpEvent],
       });
 
@@ -242,7 +197,7 @@ describe('Document getters', () => {
 
     it('should return undefined when the document has no external events', () => {
       const event = stubDocumentEvent({ name: PICK_UP });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: undefined,
       });
 
@@ -256,7 +211,7 @@ describe('Document getters', () => {
 
     it('should return undefined when the document has empty external events array', () => {
       const event = stubDocumentEvent({ name: PICK_UP });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [],
       });
 
@@ -271,7 +226,7 @@ describe('Document getters', () => {
     it('should return undefined when the document has non-array external events', () => {
       const event = stubDocumentEvent({ name: PICK_UP });
       const document = {
-        ...stubMassDocument(),
+        ...stubMassIdDocument(),
         externalEvents: 'not an array',
       } as unknown as Document;
 
@@ -285,7 +240,7 @@ describe('Document getters', () => {
 
     it('should return undefined when the event is neither a pick-up nor a drop-off event', () => {
       const otherEvent = stubDocumentEvent({ name: OPEN });
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),
           stubDocumentEvent({ name: DROP_OFF }),
@@ -309,7 +264,7 @@ describe('Document getters', () => {
         {},
         [[SORTING_FACTOR, attributeValue]],
       );
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [
           eventWithTheAttribute,
           ...stubArray(() => stubDocumentEvent()),
@@ -325,7 +280,7 @@ describe('Document getters', () => {
     });
 
     it(`should return undefined when the attribute name is not found`, () => {
-      const document = stubMassDocument();
+      const document = stubMassIdDocument();
 
       const result = getFirstDocumentEventAttributeValue(
         document,
@@ -336,7 +291,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document does not have external events', () => {
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: undefined,
       });
 
@@ -349,7 +304,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document has empty external events array', () => {
-      const document = stubMassDocument();
+      const document = stubMassIdDocument();
 
       document.externalEvents = [];
 
@@ -371,7 +326,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when all events have undefined attribute values', () => {
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [stubDocumentEvent(), stubDocumentEvent()],
       });
 
@@ -387,7 +342,7 @@ describe('Document getters', () => {
   describe('getDocumentEventById', () => {
     it('should return the document event by id', () => {
       const documentEvent = stubDocumentEvent();
-      const document = stubMassDocument({
+      const document = stubMassIdDocument({
         externalEvents: [documentEvent],
       });
 
@@ -397,7 +352,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document event is not found', () => {
-      const document = stubMassDocument();
+      const document = stubMassIdDocument();
 
       const result = getDocumentEventById(document, 'non-existent-id');
 

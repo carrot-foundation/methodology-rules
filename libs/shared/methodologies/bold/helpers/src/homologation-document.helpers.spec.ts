@@ -4,7 +4,6 @@ import {
   stubParticipantHomologationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
   DocumentEventName,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -91,52 +90,6 @@ describe('Homologation Document Helpers', () => {
       });
 
       expect(isHomologationActive(document)).toBe(expected);
-    });
-
-    it('should use new attributes when useNewAttributes is true', () => {
-      const today = new Date();
-      const pastDate = subDays(today, 5);
-      const futureDate = addDays(today, 5);
-
-      const document = stubParticipantHomologationDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [
-              NewDocumentEventAttributeName.HOMOLOGATION_DATE,
-              formatDate(pastDate, 'yyyy-MM-dd'),
-            ],
-            [
-              NewDocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
-              formatDate(futureDate, 'yyyy-MM-dd'),
-            ],
-          ]),
-        ],
-      });
-
-      expect(isHomologationActive(document, true)).toBe(true);
-    });
-
-    it('should use old attributes when useNewAttributes is false', () => {
-      const today = new Date();
-      const pastDate = subDays(today, 5);
-      const futureDate = addDays(today, 5);
-
-      const document = stubParticipantHomologationDocument({
-        externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [
-              DocumentEventAttributeName.HOMOLOGATION_DATE,
-              formatDate(pastDate, 'yyyy-MM-dd'),
-            ],
-            [
-              DocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
-              formatDate(futureDate, 'yyyy-MM-dd'),
-            ],
-          ]),
-        ],
-      });
-
-      expect(isHomologationActive(document, false)).toBe(true);
     });
 
     it('should return false if the document has no CLOSE event', () => {

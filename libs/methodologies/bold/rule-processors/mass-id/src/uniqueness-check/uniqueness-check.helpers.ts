@@ -4,11 +4,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/audit-api';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
-  DocumentEventMoveType,
   DocumentEventName,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -18,16 +14,8 @@ import {
 } from '@carrot-fndn/shared/types';
 
 const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
-const {
-  ACTOR_TYPE,
-  MOVE_TYPE,
-  VEHICLE_LICENSE_PLATE: OLD_VEHICLE_LICENSE_PLATE,
-} = DocumentEventAttributeName;
 const { ACTOR, DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
-const { DROP_OFF: DROP_OFF_MOVE_TYPE } = DocumentEventMoveType;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { RECYCLER: RECYCLER_ACTOR_TYPE, SOURCE: SOURCE_ACTOR_TYPE } =
-  DocumentEventActorType;
 
 export type EventsData = {
   dropOffEvent: DocumentEvent;
@@ -149,7 +137,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
               externalCreatedAt: pickUpEvent.externalCreatedAt,
               'metadata.attributes': {
                 $elemMatch: {
-                  name: OLD_VEHICLE_LICENSE_PLATE,
+                  name: 'vehicle-license-plate',
                   value: { $options: 'i', $regex: licensePlateRegex },
                 },
               },
@@ -164,8 +152,8 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
               externalCreatedAt: dropOffEvent.externalCreatedAt,
               'metadata.attributes': {
                 $elemMatch: {
-                  name: MOVE_TYPE,
-                  value: DROP_OFF_MOVE_TYPE,
+                  name: 'move-type',
+                  value: 'Drop-off',
                 },
               },
               name: MOVE,
@@ -177,8 +165,8 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
             $elemMatch: {
               'metadata.attributes': {
                 $elemMatch: {
-                  name: ACTOR_TYPE,
-                  value: SOURCE_ACTOR_TYPE,
+                  name: 'actor-type',
+                  value: 'SOURCE',
                 },
               },
               name: ACTOR,
@@ -191,8 +179,8 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
             $elemMatch: {
               'metadata.attributes': {
                 $elemMatch: {
-                  name: ACTOR_TYPE,
-                  value: RECYCLER_ACTOR_TYPE,
+                  name: 'actor-type',
+                  value: 'RECYCLER',
                 },
               },
               name: ACTOR,
@@ -201,7 +189,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
           },
         },
       ],
-      category: DocumentCategory.MASS,
+      category: 'Mass',
       currentValue: document.currentValue,
       dataSetName: document.dataSetName,
       subtype: document.subtype,

@@ -26,17 +26,8 @@ export class DocumentMatcher {
   }
 }
 
-export const MASS = new DocumentMatcher({
-  category: DocumentCategory.MASS,
-});
-
 export const MASS_ID = new DocumentMatcher({
   category: DocumentCategory.MASS_ID,
-});
-
-export const MASS_AUDIT = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_AUDIT,
 });
 
 export const MASS_ID_AUDIT = new DocumentMatcher({
@@ -47,23 +38,6 @@ export const MASS_ID_AUDIT = new DocumentMatcher({
 export const RECYCLED_ID = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.RECYCLED_ID,
-});
-
-export const MASS_CERTIFICATE = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_CERTIFICATE,
-});
-
-export const MASS_CERTIFICATE_AUDIT = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  subtype: DocumentSubtype.PROCESS,
-  type: DocumentType.MASS_CERTIFICATE_AUDIT,
-});
-
-export const CREDIT_CERTIFICATES = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  subtype: DocumentSubtype.GROUP,
-  type: DocumentType.CREDIT_CERTIFICATES,
 });
 
 export const METHODOLOGY_DEFINITION = new DocumentMatcher({

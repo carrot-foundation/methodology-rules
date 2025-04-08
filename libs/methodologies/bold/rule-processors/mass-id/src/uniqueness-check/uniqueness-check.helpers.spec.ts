@@ -11,7 +11,7 @@ import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import * as helpers from './uniqueness-check.helpers';
 
-const { MASS, MASS_ID } = DocumentCategory;
+const { MASS_ID } = DocumentCategory;
 
 const mockCheckDuplicateDocuments = jest.fn();
 const mockAuditApiService = {
@@ -72,7 +72,7 @@ describe('uniqueness-check.helpers', () => {
       const query = helpers.mapMassIdV1Query(massIdDocument, eventsData);
 
       expect(query).toHaveProperty('match.$and');
-      expect(query.match.category).toBe(MASS);
+      expect(query.match.category).toBe('Mass');
       expect(query.match.$and).toBeInstanceOf(Array);
       expect(query.match.$and).toHaveLength(4);
     });
@@ -121,7 +121,7 @@ describe('uniqueness-check.helpers', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(calls[0][0].match.category).toBe(MASS_ID);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      expect(calls[1][0].match.category).toBe(MASS);
+      expect(calls[1][0].match.category).toBe('Mass');
     });
   });
 

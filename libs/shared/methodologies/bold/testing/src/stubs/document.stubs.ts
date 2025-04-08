@@ -4,29 +4,17 @@ import {
   type Document,
   DocumentCategory,
   type DocumentEvent,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
-  DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
   DocumentType,
-  MassSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import {
-  type MethodologyDocumentEventAttributeValue,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { computeDestinationPoint } from 'geolib';
 import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
-import {
-  stubActorEventWithActorType,
-  stubDocumentEvent,
-  stubDocumentEventWithMetadataAttributes,
-} from './document-event.stubs';
+import { stubDocumentEvent } from './document-event.stubs';
 import { stubParticipant } from './participant.stubs';
 
 export const stubDocument = (
@@ -50,41 +38,12 @@ export const stubDocument = (
   };
 };
 
-export const stubDocumentWithOneActorType = (
-  actorType: DocumentEventActorType,
-  partialDocument?: PartialDeep<Document>,
-  partialActorEvent?: PartialDeep<DocumentEvent>,
-): Document =>
-  stubDocument({
-    ...partialDocument,
-    externalEvents: [stubActorEventWithActorType(actorType, partialActorEvent)],
-  });
-
 export const stubDocumentReference = (
   partial?: Partial<DocumentReference>,
 ): DocumentReference => ({
   ...random<Required<DocumentReference>>(),
   ...partial,
 });
-
-export const stubMassAuditDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.MASS_AUDIT,
-  });
-
-export const stubMassCertificateAuditDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    subtype: DocumentSubtype.PROCESS,
-    type: DocumentType.MASS_CERTIFICATE_AUDIT,
-  });
 
 export const stubMassAuditCertificateDocument = (
   partialDocument?: PartialDeep<Document>,
@@ -96,8 +55,7 @@ export const stubMassAuditCertificateDocument = (
     ...partialDocument,
   });
 
-// TODO: will be renamed to stubCreditDocument when all structure is ready
-export const stubNewCreditDocument = (
+export const stubCreditDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
@@ -107,21 +65,11 @@ export const stubNewCreditDocument = (
     ...partialDocument,
   });
 
-export const stubMassCertificateDocument = (
+export const stubMassIdDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.MASS_CERTIFICATE,
-  });
-
-export const stubMassDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    category: DocumentCategory.MASS,
-    subtype: stubEnumValue(MassSubtype),
+    category: DocumentCategory.MASS_ID,
     type: DocumentType.ORGANIC,
     ...partialDocument,
   });
@@ -162,44 +110,6 @@ export const generateNearbyCoordinates = (options?: {
   };
 };
 
-export const stubMassAuditDocumentWithActorAndAttribute = (
-  eventName: DocumentEventName,
-  attributeName: DocumentEventAttributeName,
-  attributeValue: MethodologyDocumentEventAttributeValue,
-  attributePairs: Array<
-    [DocumentEventAttributeName, MethodologyDocumentEventAttributeValue]
-  >,
-  partialDocument?: PartialDeep<Document>,
-) =>
-  stubDocument({
-    ...stubMassAuditDocument(partialDocument),
-    externalEvents: [
-      stubDocumentEventWithMetadataAttributes({ name: eventName }, [
-        [attributeName, attributeValue],
-        ...attributePairs,
-      ]),
-    ],
-  });
-
-export const stubCreditDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.CREDIT,
-    ...partialDocument,
-  });
-
-export const stubCreditCertificatesDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    subtype: DocumentSubtype.GROUP,
-    type: DocumentType.CREDIT_CERTIFICATES,
-  });
-
 export const stubMethodologyDefinitionDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
@@ -226,27 +136,4 @@ export const stubParticipantHomologationDocument = (
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
     type: DocumentType.PARTICIPANT_HOMOLOGATION,
-  });
-
-export const stubMassCertificateAuditWithMethodologySlug = (
-  methodologySlug?: string,
-  partialDocument?: PartialDeep<Document>,
-) =>
-  stubMassCertificateAuditDocument({
-    externalEvents: [
-      stubDocumentEventWithMetadataAttributes(
-        { name: DocumentEventName.ACTOR },
-        [
-          [
-            DocumentEventAttributeName.ACTOR_TYPE,
-            DocumentEventActorType.AUDITOR,
-          ],
-          [
-            DocumentEventAttributeName.METHODOLOGY_SLUG,
-            methodologySlug ?? random<NonEmptyString>(),
-          ],
-        ],
-      ),
-    ],
-    ...partialDocument,
   });

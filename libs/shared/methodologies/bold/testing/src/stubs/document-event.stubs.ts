@@ -2,13 +2,10 @@ import type { PartialDeep } from 'type-fest';
 
 import {
   type DocumentEvent,
-  DocumentEventActorType,
   type DocumentEventAttribute,
-  DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
   NewDocumentEventAttributeName,
-  ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type AnyObject,
@@ -78,29 +75,6 @@ export const stubDocumentEventAttribute = (
   ...partialInput,
 });
 
-export const stubActorTypeMetadataAttribute = (
-  actorType: DocumentEventActorType,
-): DocumentEventAttribute => ({
-  ...random<DocumentEventAttribute>(),
-  name: DocumentEventAttributeName.ACTOR_TYPE,
-  value: actorType,
-});
-
-export const stubActorEventWithActorType = (
-  actorType: DocumentEventActorType,
-  partialEvent?: PartialDeep<DocumentEvent>,
-): DocumentEvent => {
-  const attributes = partialEvent?.metadata?.attributes ?? [];
-
-  return stubDocumentEvent({
-    ...partialEvent,
-    metadata: {
-      attributes: [...attributes, stubActorTypeMetadataAttribute(actorType)],
-    },
-    name: DocumentEventName.ACTOR,
-  });
-};
-
 export const stubActorEventWithLabel = (
   eventLavel: DocumentEvent['label'],
   partialEvent?: PartialDeep<DocumentEvent>,
@@ -111,31 +85,11 @@ export const stubActorEventWithLabel = (
     name: DocumentEventName.ACTOR,
   });
 
-export const stubDocumentEventWithReportType = (
-  reportType: ReportType,
-  partialEvent?: PartialDeep<DocumentEvent>,
-): DocumentEvent => {
-  const attributes = partialEvent?.metadata?.attributes ?? [];
-
-  return stubDocumentEvent({
-    ...partialEvent,
-    metadata: {
-      attributes: [
-        ...attributes,
-        stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.REPORT_TYPE,
-          value: reportType,
-        }),
-      ],
-    },
-  });
-};
-
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
     | [
-        DocumentEventAttributeName | NewDocumentEventAttributeName,
+        NewDocumentEventAttributeName | string,
         MethodologyDocumentEventAttributeValue,
       ]
     | Omit<DocumentEventAttribute, 'isPublic'>

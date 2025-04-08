@@ -6,7 +6,6 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  DocumentEventAttributeName,
   DocumentEventName,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -27,10 +26,7 @@ export const getParticipantHomologationDocumentByParticipantId = ({
     return !isNil(openEvent) && openEvent.participant.id === participantId;
   });
 
-export const isHomologationActive = (
-  document: Document,
-  useNewAttributes = true,
-): boolean => {
+export const isHomologationActive = (document: Document): boolean => {
   const closeEvent = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.CLOSE]),
   );
@@ -39,24 +35,13 @@ export const isHomologationActive = (
     return false;
   }
 
-  const attributeNames = useNewAttributes
-    ? {
-        homologationDate: NewDocumentEventAttributeName.HOMOLOGATION_DATE,
-        homologationDueDate:
-          NewDocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
-      }
-    : {
-        homologationDate: DocumentEventAttributeName.HOMOLOGATION_DATE,
-        homologationDueDate: DocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
-      };
-
   const homologationDate = getEventAttributeValue(
     closeEvent,
-    attributeNames.homologationDate,
+    NewDocumentEventAttributeName.HOMOLOGATION_DATE,
   );
   const homologationDueDate = getEventAttributeValue(
     closeEvent,
-    attributeNames.homologationDueDate,
+    NewDocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
   );
 
   if (

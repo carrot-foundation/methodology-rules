@@ -7,7 +7,6 @@ import type {
 
 import type {
   DocumentCategory,
-  DocumentEventAttributeName,
   DocumentEventName,
   DocumentSubtype,
   DocumentType,
@@ -16,7 +15,7 @@ import type {
 
 export interface DocumentEventAttribute
   extends MethodologyDocumentEventAttribute {
-  name: DocumentEventAttributeName | NewDocumentEventAttributeName | string;
+  name: NewDocumentEventAttributeName | string;
 }
 
 export interface DocumentEventMetadata

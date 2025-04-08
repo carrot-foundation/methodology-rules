@@ -4,9 +4,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventMoveType,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -103,74 +102,77 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeNameIsAnyOf', () => {
     it('should return true if the event has any of the specified metadata attribute names', () => {
-      const { ACTOR_TYPE, MOVE_TYPE } = DocumentEventAttributeName;
-      const { PICK_UP } = DocumentEventMoveType;
+      const { DESCRIPTION, DOCUMENT_NUMBER } = NewDocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, PICK_UP],
-      ]);
-
-      expect(metadataAttributeNameIsAnyOf([ACTOR_TYPE, MOVE_TYPE])(event)).toBe(
-        true,
-      );
-    });
-
-    it('should return false if the event has none of the specified metadata attribute names', () => {
-      const { ACTOR_TYPE, MOVE_TYPE, REPORT_TYPE } = DocumentEventAttributeName;
-      const { PICK_UP } = DocumentEventMoveType;
-      const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, PICK_UP],
+        [DESCRIPTION, faker.string.sample()],
       ]);
 
       expect(
-        metadataAttributeNameIsAnyOf([ACTOR_TYPE, REPORT_TYPE])(event),
+        metadataAttributeNameIsAnyOf([DESCRIPTION, DOCUMENT_NUMBER])(event),
+      ).toBe(true);
+    });
+
+    it('should return false if the event has none of the specified metadata attribute names', () => {
+      const { CONTAINER_TYPE, DESCRIPTION, DOCUMENT_NUMBER } =
+        NewDocumentEventAttributeName;
+      const event = stubDocumentEventWithMetadataAttributes(undefined, [
+        [DESCRIPTION, faker.string.sample()],
+      ]);
+
+      expect(
+        metadataAttributeNameIsAnyOf([CONTAINER_TYPE, DOCUMENT_NUMBER])(event),
       ).toBe(false);
     });
   });
 
   describe('metadataAttributeValueIsAnyOf', () => {
     it('should return true if the metadata attribute has any of the specified values', () => {
-      const { MOVE_TYPE } = DocumentEventAttributeName;
-      const { DROP_OFF, PICK_UP } = DocumentEventMoveType;
+      const { DESCRIPTION } = NewDocumentEventAttributeName;
+      const description = faker.string.sample();
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, PICK_UP],
+        [DESCRIPTION, description],
       ]);
 
       expect(
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [PICK_UP, DROP_OFF])(event),
+        metadataAttributeValueIsAnyOf(DESCRIPTION, [
+          description,
+          faker.string.sample(),
+        ])(event),
       ).toBe(true);
     });
 
     it('should return false if the metadata attribute has none of the specified values', () => {
-      const { MOVE_TYPE } = DocumentEventAttributeName;
-      const { DROP_OFF, PICK_UP, WEIGHING } = DocumentEventMoveType;
+      const { DESCRIPTION } = NewDocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, PICK_UP],
+        [DESCRIPTION, faker.string.sample()],
       ]);
 
       expect(
-        metadataAttributeValueIsAnyOf(MOVE_TYPE, [WEIGHING, DROP_OFF])(event),
+        metadataAttributeValueIsAnyOf(DESCRIPTION, [
+          faker.string.sample(),
+          faker.string.sample(),
+        ])(event),
       ).toBe(false);
     });
   });
 
   describe('metadataAttributeValueIsNotEmpty', () => {
     it('should return true if the metadata attribute value is not empty', () => {
-      const { MOVE_TYPE } = DocumentEventAttributeName;
-      const { PICK_UP } = DocumentEventMoveType;
+      const { DESCRIPTION } = NewDocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, PICK_UP],
+        [DESCRIPTION, faker.string.sample()],
       ]);
 
-      expect(metadataAttributeValueIsNotEmpty(MOVE_TYPE)(event)).toBe(true);
+      expect(metadataAttributeValueIsNotEmpty(DESCRIPTION)(event)).toBe(true);
     });
 
     it('should return false if the metadata attribute value is empty', () => {
-      const { MOVE_TYPE } = DocumentEventAttributeName;
+      const { DESCRIPTION } = NewDocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [MOVE_TYPE, undefined as any], // necessary cast to reuse stub
+        [DESCRIPTION, undefined as any], // necessary cast to reuse stub
       ]);
 
-      expect(metadataAttributeValueIsNotEmpty(MOVE_TYPE)(event)).toBe(false);
+      expect(metadataAttributeValueIsNotEmpty(DESCRIPTION)(event)).toBe(false);
     });
   });
 });

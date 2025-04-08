@@ -9,9 +9,6 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentCategory,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
   DocumentEventName,
   NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -32,13 +29,6 @@ const { ACTOR } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
 const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
-const {
-  ACTOR_TYPE,
-  MOVE_TYPE,
-  VEHICLE_LICENSE_PLATE: V1_VEHICLE_LICENSE_PLATE,
-} = DocumentEventAttributeName;
-const { RECYCLER: RECYCLER_ACTOR_TYPE, SOURCE: SOURCE_ACTOR_TYPE } =
-  DocumentEventActorType;
 
 describe('Uniqueness Check Helpers E2E', () => {
   let auditApiService: AuditApiService;
@@ -142,7 +132,7 @@ describe('Uniqueness Check Helpers E2E', () => {
 
     it('should return a list of similar documents when a v1 document is similar to a v2 document', async () => {
       const v1DocumentStub = stubDocument({
-        category: DocumentCategory.MASS,
+        category: 'Mass',
         currentValue: v2DocumentStub.currentValue,
         dataSetName: v2DocumentStub.dataSetName,
         externalEvents: [
@@ -151,28 +141,28 @@ describe('Uniqueness Check Helpers E2E', () => {
               ...eventsData.pickUpEvent,
               name: OPEN,
             },
-            [[V1_VEHICLE_LICENSE_PLATE, vehicleLicensePlate]],
+            [['vehicle-license-plate', vehicleLicensePlate]],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.dropOffEvent,
               name: MOVE,
             },
-            [[MOVE_TYPE, DROP_OFF]],
+            [['move-type', 'Drop-off']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.recyclerEvent,
               name: ACTOR,
             },
-            [[ACTOR_TYPE, RECYCLER_ACTOR_TYPE]],
+            [['actor-type', 'RECYCLER']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.wasteGeneratorEvent,
               name: ACTOR,
             },
-            [[ACTOR_TYPE, SOURCE_ACTOR_TYPE]],
+            [['actor-type', 'SOURCE']],
           ),
         ],
         subtype: v2DocumentStub.subtype,

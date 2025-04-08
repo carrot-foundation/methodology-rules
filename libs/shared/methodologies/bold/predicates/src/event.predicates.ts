@@ -6,8 +6,6 @@ import {
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
   NewDocumentEventAttributeName,
@@ -44,25 +42,9 @@ export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
   event.participant.type === MethodologyParticipantType.ACTOR;
 
-export const eventHasSourceActor = (event: DocumentEvent): boolean =>
-  getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE) ===
-  DocumentEventActorType.SOURCE;
-
-export const eventHasRecyclerActor = (event: DocumentEvent): boolean =>
-  getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE) ===
-  DocumentEventActorType.RECYCLER;
-
-export const eventHasAuditorActor = (event: DocumentEvent): boolean =>
-  getEventAttributeValue(event, DocumentEventAttributeName.ACTOR_TYPE) ===
-  DocumentEventActorType.AUDITOR;
-
-export const isActorEventWithSourceActorType = (
-  event: DocumentEvent,
-): boolean => isActorEvent(event) && eventHasSourceActor(event);
-
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,
-  attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
+  attributeName: NewDocumentEventAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
 export const hasWeightFormat = (
@@ -79,7 +61,7 @@ export const hasWeightFormat = (
 
 export const eventsHasSameMetadataAttributeValue = (
   events: Array<DocumentEvent>,
-  metadataName: DocumentEventAttributeName,
+  metadataName: NewDocumentEventAttributeName,
 ): boolean => {
   if (isNonEmptyArray<DocumentEvent>(events)) {
     return events.every(
@@ -95,7 +77,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: Array<DocumentEventName>;
-  metadataName: DocumentEventAttributeName | NewDocumentEventAttributeName;
+  metadataName: NewDocumentEventAttributeName | string;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;
@@ -113,7 +95,6 @@ export const eventHasMetadataAttribute = (options: {
   const isValidMetadataName =
     !!validation.data.metadata?.attributes &&
     validation.data.metadata.attributes.some(
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
       (attribute) => attribute.name === metadataName,
     );
 
