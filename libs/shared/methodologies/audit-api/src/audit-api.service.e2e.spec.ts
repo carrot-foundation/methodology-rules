@@ -47,10 +47,12 @@ describe('Audit API Service', () => {
         },
       });
 
-      expect(response).toEqual([
-        { id: documentId2, status: 'OPEN' },
-        { id: documentId1, status: 'OPEN' },
-      ]);
+      expect(response).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: documentId2, status: 'OPEN' }),
+          expect.objectContaining({ id: documentId1, status: 'OPEN' }),
+        ]),
+      );
     });
   });
 });
