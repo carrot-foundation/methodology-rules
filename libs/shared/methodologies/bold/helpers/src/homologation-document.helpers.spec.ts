@@ -5,128 +5,147 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
+  DocumentEventHomologationStatus,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { addDays, formatDate, subDays } from 'date-fns';
+import { addDays, subDays } from 'date-fns';
 
 import {
   getParticipantHomologationDocumentByParticipantId,
-  isHomologationActive,
+  isHomologationValid,
 } from './homologation-document.helpers';
 
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
-const { CLOSE } = DocumentEventName;
+const { EFFECTIVE_DATE, EXPIRATION_DATE, HOMOLOGATION_STATUS } =
+  DocumentEventAttributeName;
+const { HOMOLOGATION_RESULT } = DocumentEventName;
 
 describe('Homologation Document Helpers', () => {
-  describe('isHomologationActive', () => {
+  describe('isHomologationValid', () => {
     it.each([
       {
         date: subDays(new Date(), 2),
         dueDate: addDays(new Date(), 2),
         expected: true,
         scenario:
-          'should return true if the homologation date is in the past and the due date is in the future',
+          'should return true if the effective date is in the past and the expiration date is in the future',
       },
       {
         date: addDays(new Date(), 2),
         dueDate: addDays(new Date(), 5),
         expected: false,
         scenario:
-          'should return false if the homologation date is in the future and the due date is in the future',
+          'should return false if the effective date is in the future and the expiration date is in the future',
       },
       {
         date: subDays(new Date(), 2),
         dueDate: subDays(new Date(), 1),
         expected: false,
         scenario:
-          'should return false if the homologation date is in the past and the due date is in the past',
+          'should return false if the effective date is in the past and the expiration date is in the past',
       },
       {
         date: new Date(),
         dueDate: addDays(new Date(), 5),
         expected: true,
         scenario:
-          'should return true if the homologation date is today and the due date is in the future',
+          'should return true if the effective date is today and the expiration date is in the future',
       },
       {
         date: subDays(new Date(), 5),
         dueDate: new Date(),
         expected: true,
         scenario:
-          'should return true if the homologation date is in the past and the due date is today',
+          'should return true if the effective date is in the past and the expiration date is today',
       },
       {
         date: new Date(),
         dueDate: new Date(),
         expected: true,
         scenario:
-          'should return true if both the homologation date and due date are today',
+          'should return true if both the effective date and expiration date are today',
       },
       {
         date: addDays(new Date(), 1),
         dueDate: new Date(),
         expected: false,
         scenario:
-          'should return false if the homologation date is in the future and the due date is today',
+          'should return false if the effective date is in the future and the expiration date is today',
       },
       {
         date: new Date(),
         dueDate: subDays(new Date(), 1),
         expected: false,
         scenario:
-          'should return false if the homologation date is today and the due date is in the past',
+          'should return false if the effective date is today and the expiration date is in the past',
       },
     ])('$scenario', ({ date, dueDate, expected }) => {
       const document = stubParticipantHomologationDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [HOMOLOGATION_DUE_DATE, formatDate(dueDate, 'yyyy-MM-dd')],
-            [HOMOLOGATION_DATE, formatDate(date, 'yyyy-MM-dd')],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: HOMOLOGATION_RESULT },
+            [
+              [EXPIRATION_DATE, dueDate.toISOString()],
+              [EFFECTIVE_DATE, date.toISOString()],
+              [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.APPROVED],
+            ],
+          ),
         ],
       });
 
-      expect(isHomologationActive(document)).toBe(expected);
+      expect(isHomologationValid(document)).toBe(expected);
     });
 
-    it('should return false if the document has no CLOSE event', () => {
+    it('should return false if the document has a HOMOLOGATION_RESULT event but the status is not APPROVED', () => {
+      const document = stubParticipantHomologationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: HOMOLOGATION_RESULT },
+            [
+              [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.REJECTED],
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+            ],
+          ),
+        ],
+      });
+
+      expect(isHomologationValid(document)).toBe(false);
+    });
+
+    it('should return false if the document has no HOMOLOGATION_RESULT event', () => {
       const document = stubParticipantHomologationDocument({
         externalEvents: [],
       });
 
-      expect(isHomologationActive(document)).toBe(false);
+      expect(isHomologationValid(document)).toBe(false);
     });
 
-    it('should return false if the document has a CLOSE event but no homologation date', () => {
+    it('should return false if the document has a HOMOLOGATION_RESULT event but no expiration date', () => {
       const document = stubParticipantHomologationDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [
-              HOMOLOGATION_DUE_DATE,
-              formatDate(addDays(new Date(), 5), 'yyyy-MM-dd'),
-            ],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: HOMOLOGATION_RESULT },
+            [[EFFECTIVE_DATE, addDays(new Date(), 5).toISOString()]],
+          ),
         ],
       });
 
-      expect(isHomologationActive(document)).toBe(false);
+      expect(isHomologationValid(document)).toBe(false);
     });
 
-    it('should return false if the document has a CLOSE event but no homologation due date', () => {
+    it('should return false if the document has a HOMOLOGATION_RESULT event but no effective date', () => {
       const document = stubParticipantHomologationDocument({
         externalEvents: [
-          stubDocumentEventWithMetadataAttributes({ name: CLOSE }, [
-            [
-              HOMOLOGATION_DATE,
-              formatDate(subDays(new Date(), 5), 'yyyy-MM-dd'),
-            ],
-          ]),
+          stubDocumentEventWithMetadataAttributes(
+            { name: HOMOLOGATION_RESULT },
+            [[EXPIRATION_DATE, subDays(new Date(), 5).toISOString()]],
+          ),
         ],
       });
 
-      expect(isHomologationActive(document)).toBe(false);
+      expect(isHomologationValid(document)).toBe(false);
     });
   });
 

@@ -1,3 +1,5 @@
+import type { tags } from 'typia';
+
 import { type Latitude, type Longitude } from './number.types';
 
 export type Maybe<T> = T | null | undefined;
@@ -9,6 +11,8 @@ export type AnyObject = Record<string, any>;
 export interface StringObject {
   [key: string]: string;
 }
+
+export type DateTime = string & tags.Format<'date-time'>;
 
 const primitiveTypeUselessVariable = typeof (0 as unknown);
 

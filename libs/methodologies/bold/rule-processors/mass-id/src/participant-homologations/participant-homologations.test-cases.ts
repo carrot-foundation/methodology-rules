@@ -1,6 +1,6 @@
 import {
   BoldStubsBuilder,
-  stubBoldHomologationDocumentCloseEvent,
+  stubBoldHomologationResultEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
@@ -8,14 +8,14 @@ import {
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { formatDate, subDays } from 'date-fns';
+import { subDays } from 'date-fns';
 
 import { ParticipantHomologationsProcessorErrors } from './participant-homologations.errors';
 import { RESULT_COMMENTS } from './participant-homologations.processor';
 
 const { HAULER } = MassIdDocumentActorType;
-const { CLOSE } = DocumentEventName;
-const { HOMOLOGATION_DATE, HOMOLOGATION_DUE_DATE } = DocumentEventAttributeName;
+const { HOMOLOGATION_RESULT } = DocumentEventName;
+const { EFFECTIVE_DATE, EXPIRATION_DATE } = DocumentEventAttributeName;
 
 const processorError = new ParticipantHomologationsProcessorErrors();
 
@@ -37,17 +37,11 @@ const massIdWithExpiredHomologation = new BoldStubsBuilder()
         {
           externalEventsMap: new Map([
             [
-              CLOSE,
-              stubBoldHomologationDocumentCloseEvent({
+              HOMOLOGATION_RESULT,
+              stubBoldHomologationResultEvent({
                 metadataAttributes: [
-                  [
-                    HOMOLOGATION_DATE,
-                    formatDate(subDays(new Date(), 10), 'yyyy-MM-dd'),
-                  ],
-                  [
-                    HOMOLOGATION_DUE_DATE,
-                    formatDate(subDays(new Date(), 2), 'yyyy-MM-dd'),
-                  ],
+                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
+                  [EXPIRATION_DATE, subDays(new Date(), 2).toISOString()],
                 ],
               }),
             ],
@@ -124,7 +118,7 @@ export const participantHomologationsTestCases = [
       ...massIdWithExpiredHomologation.participantsHomologationDocuments.values(),
     ],
     massIdAuditDocument: massIdWithExpiredHomologation.massIdAuditDocument,
-    resultComment: processorError.ERROR_MESSAGE.HOMOLOGATION_EXPIRED([
+    resultComment: RESULT_COMMENTS.INVALID_HOMOLOGATION_DOCUMENTS([
       massIdWithExpiredHomologation.participantsHomologationDocuments.get(
         HAULER,
       )!.id,

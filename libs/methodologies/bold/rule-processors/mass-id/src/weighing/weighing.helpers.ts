@@ -8,8 +8,8 @@ import {
 import {
   getEventAttributeByName,
   getEventAttributeValue,
-  getFirstDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   type DocumentEvent,
@@ -34,7 +34,7 @@ import {
   NOT_FOUND_RESULT_COMMENTS,
 } from './weighing.constants';
 
-const { WEIGHING } = DocumentEventName;
+const { MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } = DocumentEventName;
 const { TRUCK } = DocumentEventVehicleType;
 const {
   CONTAINER_CAPACITY,
@@ -218,8 +218,12 @@ export const validateScaleHomologationStatus = (
   scaleType: MethodologyDocumentEventAttributeValue | undefined,
   recyclerHomologationDocument: Document,
 ): ValidationResult => {
-  const homologationScaleType = getFirstDocumentEventAttributeValue(
-    recyclerHomologationDocument,
+  const monitoringSystemsAndEquipmentEvent =
+    recyclerHomologationDocument.externalEvents?.find(
+      eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),
+    );
+  const homologationScaleType = getEventAttributeValue(
+    monitoringSystemsAndEquipmentEvent,
     SCALE_TYPE,
   );
 

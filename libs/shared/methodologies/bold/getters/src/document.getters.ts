@@ -1,49 +1,27 @@
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
-
 import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { getEventAttributeValue } from './event.getters';
-
-const { DROP_OFF, PICK_UP, RULES_METADATA } = DocumentEventName;
+const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
+  DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
+
+export const getEmissionAndCompostingMetricsEvent = (
+  document: Document,
+): DocumentEvent | undefined =>
+  document.externalEvents?.find((event) =>
+    event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS),
+  );
 
 export const getDocumentEventById = (
   document: Document,
   eventId: string,
 ): DocumentEvent | undefined =>
   document.externalEvents?.find((event) => event.id === eventId);
-
-export const getFirstDocumentEventAttributeValue = (
-  document: Document | undefined,
-  attributeName: DocumentEventAttributeName,
-): MethodologyDocumentEventAttributeValue | undefined => {
-  if (!document) {
-    return undefined;
-  }
-
-  const { externalEvents } = document;
-
-  if (!isNonEmptyArray(externalEvents)) {
-    return undefined;
-  }
-
-  for (const event of externalEvents) {
-    const attributeValue = getEventAttributeValue(event, attributeName);
-
-    if (attributeValue !== undefined) {
-      return attributeValue;
-    }
-  }
-
-  return undefined;
-};
 
 export const getRulesMetadataEvent = (
   document: Document | undefined,

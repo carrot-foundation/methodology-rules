@@ -1,6 +1,6 @@
-import { tags } from 'typia';
+import type { tags } from 'typia';
 
-import type { UnknownObject } from '../common.types';
+import type { DateTime, UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
 import type { MethodologyDocumentEvent } from './methodology-document-event.types';
 import type { MethodologyParticipant } from './methodology-participant.types';
@@ -17,11 +17,11 @@ export interface MethodologyDocumentAttachment {
 export interface MethodologyDocument {
   attachments?: MethodologyDocumentAttachment[] | undefined;
   category: string;
-  createdAt: string & tags.Format<'date-time'>;
+  createdAt: DateTime;
   currentValue: number & tags.Minimum<0> & tags.Type<'float'>;
   dataSetName: DataSetName;
   deduplicationId?: string | undefined;
-  externalCreatedAt: string & tags.Format<'date-time'>;
+  externalCreatedAt: DateTime;
   externalEvents?: MethodologyDocumentEvent[] | undefined;
   externalId?: string | undefined;
   id: string;
@@ -36,5 +36,5 @@ export interface MethodologyDocument {
   subtype?: string | undefined;
   tags?: Record<string, null | string | undefined> | undefined;
   type?: string | undefined;
-  updatedAt: string & tags.Format<'date-time'>;
+  updatedAt: DateTime;
 }

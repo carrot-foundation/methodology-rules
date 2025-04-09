@@ -8,7 +8,10 @@ import {
   isNil,
   isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
-import { getFirstDocumentEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import {
+  getEmissionAndCompostingMetricsEvent,
+  getEventAttributeValue,
+} from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -32,7 +35,7 @@ import {
 
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 
-const { PROJECT_EMISSION_CALCULATION_INDEX } = DocumentEventAttributeName;
+const { EMISSION_FACTOR } = DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (
@@ -41,7 +44,7 @@ export const RESULT_COMMENTS = {
     currentValue: number,
   ) =>
     `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula ${emissionIndex} × ${currentValue} = ${avoidedEmissions} [formula: emission_index × current_value = avoided_emissions].`,
-  MISSING_INDEX: `The "${PROJECT_EMISSION_CALCULATION_INDEX}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+  MISSING_EMISSION_FACTOR: `The "${EMISSION_FACTOR}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
 } as const;
 
 interface DocumentPair {
@@ -50,7 +53,7 @@ interface DocumentPair {
 }
 
 interface RuleSubject {
-  emissionIndex: MethodologyDocumentEventAttributeValue | undefined;
+  emissionFactor: MethodologyDocumentEventAttributeValue | undefined;
   massIdDocumentValue: number;
 }
 
@@ -101,21 +104,21 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
   }
 
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
-    const { emissionIndex, massIdDocumentValue } = ruleSubject;
+    const { emissionFactor, massIdDocumentValue } = ruleSubject;
 
-    if (!isNonZeroPositive(emissionIndex)) {
+    if (!isNonZeroPositive(emissionFactor)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_INDEX,
+        resultComment: RESULT_COMMENTS.MISSING_EMISSION_FACTOR,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
-    const avoidedEmissions = emissionIndex * massIdDocumentValue;
+    const avoidedEmissions = emissionFactor * massIdDocumentValue;
 
     return {
       resultComment: RESULT_COMMENTS.APPROVED(
         avoidedEmissions,
-        emissionIndex,
+        emissionFactor,
         massIdDocumentValue,
       ),
       resultContent: {
@@ -146,10 +149,13 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     massIdDocument,
     recyclerHomologationDocument,
   }: DocumentPair): RuleSubject {
+    const emissionAndCompostingMetricsEvent =
+      getEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
+
     return {
-      emissionIndex: getFirstDocumentEventAttributeValue(
-        recyclerHomologationDocument,
-        PROJECT_EMISSION_CALCULATION_INDEX,
+      emissionFactor: getEventAttributeValue(
+        emissionAndCompostingMetricsEvent,
+        EMISSION_FACTOR,
       ),
       massIdDocumentValue: massIdDocument.currentValue,
     };
