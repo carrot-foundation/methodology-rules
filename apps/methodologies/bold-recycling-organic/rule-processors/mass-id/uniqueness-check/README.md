@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/uniqueness-check/uniqueness-check.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/uniqueness-check/uniqueness-check.processor.ts)**
 
 ## 👥 Contributors
 
