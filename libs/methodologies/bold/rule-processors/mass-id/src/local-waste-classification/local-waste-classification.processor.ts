@@ -19,24 +19,13 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
+import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants';
 import { LocalWasteClassificationProcessorErrors } from './local-waste-classification.errors';
 
 const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
   DocumentEventAttributeName;
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
-
-// TODO: move to constants and finish the definition when the excel is ready
-// https://docs.google.com/spreadsheets/d/13bE20vi84pn4QFIJLnQA3lG3w4_Au6th/edit?gid=1083330900#gid=1083330900
-export const WASTE_CLASSIFICATION_IDS = {
-  BR: {
-    '02 01 01': 'Lodos provenientes da lavagem e limpeza',
-    '02 02 01': 'Lodos provenientes da lavagem e limpeza',
-    '02 02 04': 'Lodos do tratamento local de efluentes',
-    '02 03 01':
-      'Lodos de lavagem, limpeza, descasque, centrifugação e separação',
-  },
-} as const;
 
 export const RESULT_COMMENTS = {
   CLASSIFICATION_DESCRIPTION_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_DESC}" was not provided.`,
@@ -96,7 +85,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     const expectedDescription =
       WASTE_CLASSIFICATION_IDS.BR[
         id as keyof typeof WASTE_CLASSIFICATION_IDS.BR
-      ];
+      ].description;
 
     if (description !== expectedDescription) {
       return this.isRejected(
