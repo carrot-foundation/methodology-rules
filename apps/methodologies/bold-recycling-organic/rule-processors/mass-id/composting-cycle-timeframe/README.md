@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING-ORGANIC**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/mass-id/src/composting-cycle-timeframe/composting-cycle-timeframe.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/composting-cycle-timeframe/composting-cycle-timeframe.processor.ts)**
 
 ## 👥 Contributors
 

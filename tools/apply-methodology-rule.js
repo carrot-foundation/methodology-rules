@@ -131,7 +131,7 @@ Methodology: **BOLD-${methodologyName.toUpperCase()}**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](libs/methodologies/bold/rule-processors/${scope}/src/${ruleName}/${ruleName}.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/${scope}/src/${ruleName}/${ruleName}.processor.ts)**
 
 ## 👥 Contributors
 
