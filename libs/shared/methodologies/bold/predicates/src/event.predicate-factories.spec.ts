@@ -69,17 +69,17 @@ describe('Predicate Factories', () => {
 
   describe('eventNameIsAnyOf', () => {
     it('should return true if the event has any of the specified names', () => {
-      const { MOVE, OPEN } = DocumentEventName;
+      const { ACTOR, MOVE } = DocumentEventName;
       const event = stubDocumentEvent({ name: MOVE });
 
-      expect(eventNameIsAnyOf([MOVE, OPEN])(event)).toBe(true);
+      expect(eventNameIsAnyOf([MOVE, ACTOR])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified names', () => {
-      const { ACTOR, MOVE, OPEN } = DocumentEventName;
+      const { ACTOR, DROP_OFF, MOVE } = DocumentEventName;
       const event = stubDocumentEvent({ name: ACTOR });
 
-      expect(eventNameIsAnyOf([MOVE, OPEN])(event)).toBe(false);
+      expect(eventNameIsAnyOf([MOVE, DROP_OFF])(event)).toBe(false);
     });
   });
 

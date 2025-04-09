@@ -1,9 +1,6 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import {
-  eventNameIsAnyOf,
-  isOpenEvent,
-} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
@@ -21,9 +18,14 @@ export const getParticipantHomologationDocumentByParticipantId = ({
   participantId: NonEmptyString;
 }): Document | undefined =>
   homologationDocuments.find((document) => {
-    const openEvent = document.externalEvents?.find(isOpenEvent);
+    const homologationContextEvent = document.externalEvents?.find(
+      eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_CONTEXT]),
+    );
 
-    return !isNil(openEvent) && openEvent.participant.id === participantId;
+    return (
+      !isNil(homologationContextEvent) &&
+      homologationContextEvent.participant.id === participantId
+    );
   });
 
 export const isHomologationActive = (document: Document): boolean => {

@@ -28,7 +28,6 @@ import {
   eventsHasSameMetadataAttributeValue,
   hasWeightFormat,
   isActorEvent,
-  isOpenEvent,
   isRecycledEvent,
 } from './event.predicates';
 
@@ -93,7 +92,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event does not have the event name', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.OPEN,
+        name: DocumentEventName.CLOSE,
       });
 
       const result = eventHasName(event, DocumentEventName.ACTOR);
@@ -115,32 +114,10 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is not an actor event', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.OPEN,
+        name: DocumentEventName.CLOSE,
       });
 
       const result = isActorEvent(event);
-
-      expect(result).toBe(false);
-    });
-  });
-
-  describe('isOpenEvent', () => {
-    it('should return true if the event is an OPEN event', () => {
-      const event = stubDocumentEvent({
-        name: DocumentEventName.OPEN,
-      });
-
-      const result = isOpenEvent(event);
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false if the event is not an actor event', () => {
-      const event = stubDocumentEvent({
-        name: DocumentEventName.ACTOR,
-      });
-
-      const result = isOpenEvent(event);
 
       expect(result).toBe(false);
     });
@@ -312,12 +289,12 @@ describe('Event Predicates', () => {
             value: description,
           }),
         ]),
-        name: DocumentEventName.OPEN,
+        name: DocumentEventName.DROP_OFF,
       });
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [DocumentEventName.OPEN, DocumentEventName.MOVE],
+        eventNames: [DocumentEventName.DROP_OFF, DocumentEventName.MOVE],
         metadataName: DocumentEventAttributeName.DESCRIPTION,
         metadataValues: [description],
       });

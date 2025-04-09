@@ -17,46 +17,16 @@ import { faker } from '@faker-js/faker';
 import {
   getDocumentEventById,
   getFirstDocumentEventAttributeValue,
-  getOpenEvent,
   getParticipantActorType,
   getRulesMetadataEvent,
 } from './document.getters';
 
-const { DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
+const { DROP_OFF, HOMOLOGATION_CONTEXT, PICK_UP, RULES_METADATA } =
+  DocumentEventName;
 const { SORTING_FACTOR } = DocumentEventAttributeName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
-  describe('getOpenEvent', () => {
-    it('should return the open event', () => {
-      const openEvent = stubDocumentEvent({ name: OPEN });
-
-      const document = stubDocument({
-        externalEvents: [...stubArray(() => stubDocumentEvent()), openEvent],
-      });
-
-      const result = getOpenEvent(document);
-
-      expect(result).toEqual(openEvent);
-    });
-
-    it('should return undefined if the open event was not found', () => {
-      const document = stubDocument({
-        externalEvents: stubArray(() => stubDocumentEvent()),
-      });
-
-      const result = getOpenEvent(document);
-
-      expect(result).toBe(undefined);
-    });
-
-    it('should return undefined if the document is undefined', () => {
-      const result = getOpenEvent(undefined);
-
-      expect(result).toBe(undefined);
-    });
-  });
-
   describe('getRulesMetadataEvent', () => {
     it('should return the rules metadata event', () => {
       const rulesMetadataEvent = stubDocumentEvent({ name: RULES_METADATA });
@@ -239,7 +209,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the event is neither a pick-up nor a drop-off event', () => {
-      const otherEvent = stubDocumentEvent({ name: OPEN });
+      const otherEvent = stubDocumentEvent({ name: HOMOLOGATION_CONTEXT });
       const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),

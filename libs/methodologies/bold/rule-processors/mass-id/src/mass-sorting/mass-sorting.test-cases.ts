@@ -23,7 +23,7 @@ import { RESULT_COMMENTS } from './mass-sorting.processor';
 const processorErrors = new MassSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
-const { CLOSE, DROP_OFF, OPEN, SORTING } = DocumentEventName;
+const { CLOSE, DROP_OFF, HOMOLOGATION_CONTEXT, SORTING } = DocumentEventName;
 const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
 
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
@@ -65,8 +65,8 @@ export const massSortingTestCases = [
                 )!,
               },
             }),
-            [OPEN]: stubDocumentEvent({
-              name: OPEN,
+            [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
+              name: HOMOLOGATION_CONTEXT,
               participant: actorParticipants.get(
                 MassIdDocumentActorType.RECYCLER,
               )!,
@@ -107,8 +107,8 @@ export const massSortingTestCases = [
                 )!,
               },
             }),
-            [OPEN]: stubDocumentEvent({
-              name: OPEN,
+            [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
+              name: HOMOLOGATION_CONTEXT,
               participant: actorParticipants.get(
                 MassIdDocumentActorType.RECYCLER,
               )!,

@@ -37,8 +37,7 @@ import {
 import { stubBoldMassIdAuditDocument } from './bold-mass-id-audit.stubs';
 import { stubBoldHomologationDocument } from './bold-participant-homologation.stubs';
 
-const { ACTOR, DROP_OFF, LINK, OPEN, OUTPUT, PICK_UP, RELATED } =
-  DocumentEventName;
+const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
   DocumentType;
@@ -463,10 +462,10 @@ export class BoldStubsBuilder {
 
       const defaultEventsMap = new Map([
         [
-          OPEN,
+          DocumentEventName.HOMOLOGATION_CONTEXT,
           stubDocumentEvent({
             address: primaryAddress,
-            name: OPEN,
+            name: DocumentEventName.HOMOLOGATION_CONTEXT,
             participant: primaryParticipant,
           }),
         ],

@@ -14,7 +14,7 @@ import {
 } from '@carrot-fndn/shared/types';
 
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { ACTOR, DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
+const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 
 export type EventsData = {
@@ -141,7 +141,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
                   value: { $options: 'i', $regex: licensePlateRegex },
                 },
               },
-              name: OPEN,
+              name: 'OPEN',
             },
           },
         },
