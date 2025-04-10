@@ -1,16 +1,17 @@
 import type {
   AnyObject,
+  DateTime,
   MethodologyDocument,
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
-import type { Primitive, tags } from 'typia';
+import type { Primitive } from 'typia';
 
 export interface AuditApiDocumentPrimitiveEntity {
-  createdAt: string & tags.Format<'date-time'>;
+  createdAt: DateTime;
   document: Primitive<MethodologyDocument>;
   documentId: string;
   snapshotId: string;
-  versionDate: string & tags.Format<'date-time'>;
+  versionDate: DateTime;
 }
 
 export interface AuditApiDocumentPartSnapshotEntity<
@@ -27,5 +28,5 @@ export interface ApiDocumentCreateDto
     'createdAt' | 'id' | 'versionDate'
   > {
   parts?: AuditApiDocumentPartSnapshotEntity[] | undefined;
-  versionDate: string & tags.Format<'date-time'>;
+  versionDate: DateTime;
 }

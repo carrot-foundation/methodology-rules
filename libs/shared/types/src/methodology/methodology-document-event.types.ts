@@ -1,6 +1,6 @@
 import { tags } from 'typia';
 
-import type { UnknownObject } from '../common.types';
+import type { DateTime, UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
 import type {
   MethodologyDocumentEventAttributeFormat,
@@ -60,7 +60,7 @@ export interface MethodologyDocumentEvent {
   author: MethodologyAuthor;
   deduplicationId?: string | undefined;
   documentSideEffectUpdates?: UnknownObject | undefined;
-  externalCreatedAt: string & tags.Format<'date-time'>;
+  externalCreatedAt: DateTime;
   externalId?: string | undefined;
   id: string;
   isPublic: boolean;

@@ -1,7 +1,7 @@
 import {
   ACTOR_PARTICIPANTS,
   BoldStubsBuilder,
-  stubBoldHomologationDocumentCloseEvent,
+  stubBoldEmissionAndCompostingMetricsEvent,
   stubBoldMassIdDropOffEvent,
   stubBoldMassIdSortingEvent,
   stubDocumentEvent,
@@ -23,7 +23,12 @@ import { RESULT_COMMENTS } from './mass-sorting.processor';
 const processorErrors = new MassSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
-const { CLOSE, DROP_OFF, HOMOLOGATION_CONTEXT, SORTING } = DocumentEventName;
+const {
+  DROP_OFF,
+  EMISSION_AND_COMPOSTING_METRICS,
+  HOMOLOGATION_CONTEXT,
+  SORTING,
+} = DocumentEventName;
 const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
 
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
@@ -57,14 +62,15 @@ export const massSortingTestCases = [
         RECYCLER,
         {
           externalEventsMap: {
-            [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-              metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
-              partialDocumentEvent: {
-                participant: actorParticipants.get(
-                  MassIdDocumentActorType.RECYCLER,
-                )!,
-              },
-            }),
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
+                partialDocumentEvent: {
+                  participant: actorParticipants.get(
+                    MassIdDocumentActorType.RECYCLER,
+                  )!,
+                },
+              }),
             [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
               name: HOMOLOGATION_CONTEXT,
               participant: actorParticipants.get(
@@ -99,14 +105,15 @@ export const massSortingTestCases = [
         RECYCLER,
         {
           externalEventsMap: {
-            [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-              metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
-              partialDocumentEvent: {
-                participant: actorParticipants.get(
-                  MassIdDocumentActorType.RECYCLER,
-                )!,
-              },
-            }),
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
+                partialDocumentEvent: {
+                  participant: actorParticipants.get(
+                    MassIdDocumentActorType.RECYCLER,
+                  )!,
+                },
+              }),
             [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
               name: HOMOLOGATION_CONTEXT,
               participant: actorParticipants.get(
@@ -234,7 +241,9 @@ export const massSortingErrorTestCases = [
         ...participantsHomologationDocuments.get(RECYCLER),
         externalEvents: participantsHomologationDocuments
           .get(RECYCLER)
-          ?.externalEvents?.filter((event) => event.name !== CLOSE.toString()),
+          ?.externalEvents?.filter(
+            (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
+          ),
       } as Document,
     ],
     massIdAuditDocument,

@@ -3,30 +3,59 @@ import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   stubDocument,
   stubDocumentEvent,
-  stubDocumentEventWithMetadataAttributes,
   stubMassIdDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker';
+import { getYear } from 'date-fns';
 
 import {
   getDocumentEventById,
-  getFirstDocumentEventAttributeValue,
+  getEmissionAndCompostingMetricsEvent,
   getParticipantActorType,
   getRulesMetadataEvent,
 } from './document.getters';
 
-const { DROP_OFF, HOMOLOGATION_CONTEXT, PICK_UP, RULES_METADATA } =
-  DocumentEventName;
-const { SORTING_FACTOR } = DocumentEventAttributeName;
+const {
+  DROP_OFF,
+  EMISSION_AND_COMPOSTING_METRICS,
+  HOMOLOGATION_CONTEXT,
+  PICK_UP,
+  RULES_METADATA,
+} = DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
+  describe('getEmissionAndCompostingMetricsEvent', () => {
+    it('should return the emission and composting metrics event', () => {
+      const emissionAndCompostingMetricsEvent = stubDocumentEvent({
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      });
+
+      const document = stubDocument({
+        externalEvents: [
+          ...stubArray(() => stubDocumentEvent()),
+          emissionAndCompostingMetricsEvent,
+        ],
+      });
+
+      const result = getEmissionAndCompostingMetricsEvent(document);
+
+      expect(result).toEqual(emissionAndCompostingMetricsEvent);
+    });
+
+    it('should return undefined if the emission and composting metrics event is not found', () => {
+      const document = stubDocument();
+
+      const result = getEmissionAndCompostingMetricsEvent(document);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('getRulesMetadataEvent', () => {
     it('should return the rules metadata event', () => {
       const rulesMetadataEvent = stubDocumentEvent({ name: RULES_METADATA });
@@ -224,88 +253,6 @@ describe('Document getters', () => {
       });
 
       expect(participantActorType).toBeUndefined();
-    });
-  });
-
-  describe('getFirstDocumentEventAttributeValue', () => {
-    it(`should return the first attribute value that matches the attribute name`, () => {
-      const attributeValue = faker.number.float({ max: 1, min: 0 });
-      const eventWithTheAttribute = stubDocumentEventWithMetadataAttributes(
-        {},
-        [[SORTING_FACTOR, attributeValue]],
-      );
-      const document = stubMassIdDocument({
-        externalEvents: [
-          eventWithTheAttribute,
-          ...stubArray(() => stubDocumentEvent()),
-        ],
-      });
-
-      const result = getFirstDocumentEventAttributeValue(
-        document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toEqual(attributeValue);
-    });
-
-    it(`should return undefined when the attribute name is not found`, () => {
-      const document = stubMassIdDocument();
-
-      const result = getFirstDocumentEventAttributeValue(
-        document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when the document does not have external events', () => {
-      const document = stubMassIdDocument({
-        externalEvents: undefined,
-      });
-
-      const result = getFirstDocumentEventAttributeValue(
-        document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when the document has empty external events array', () => {
-      const document = stubMassIdDocument();
-
-      document.externalEvents = [];
-
-      const result = getFirstDocumentEventAttributeValue(
-        document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when the document is undefined', () => {
-      const result = getFirstDocumentEventAttributeValue(
-        undefined as unknown as Document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toBeUndefined();
-    });
-
-    it('should return undefined when all events have undefined attribute values', () => {
-      const document = stubMassIdDocument({
-        externalEvents: [stubDocumentEvent(), stubDocumentEvent()],
-      });
-
-      const result = getFirstDocumentEventAttributeValue(
-        document,
-        SORTING_FACTOR,
-      );
-
-      expect(result).toBeUndefined();
     });
   });
 

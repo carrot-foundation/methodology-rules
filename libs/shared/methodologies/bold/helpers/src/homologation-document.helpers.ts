@@ -1,13 +1,13 @@
-import { isNil } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
+  DocumentEventHomologationStatus,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type NonEmptyString } from '@carrot-fndn/shared/types';
-import { format } from 'date-fns';
+import { type DateTime, type NonEmptyString } from '@carrot-fndn/shared/types';
+import { isAfter, isBefore, isToday } from 'date-fns';
 import { is } from 'typia';
 
 export const getParticipantHomologationDocumentByParticipantId = ({
@@ -18,42 +18,50 @@ export const getParticipantHomologationDocumentByParticipantId = ({
   participantId: NonEmptyString;
 }): Document | undefined =>
   homologationDocuments.find((document) => {
-    const homologationContextEvent = document.externalEvents?.find(
+    const event = document.externalEvents?.find(
       eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_CONTEXT]),
     );
 
-    return (
-      !isNil(homologationContextEvent) &&
-      homologationContextEvent.participant.id === participantId
-    );
+    return event?.participant.id === participantId;
   });
 
-export const isHomologationActive = (document: Document): boolean => {
-  const closeEvent = document.externalEvents?.find(
-    eventNameIsAnyOf([DocumentEventName.CLOSE]),
+export const isHomologationValid = (document: Document): boolean => {
+  const event = document.externalEvents?.find(
+    eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_RESULT]),
   );
 
-  if (!closeEvent) {
-    return false;
-  }
+  if (!event) return false;
 
-  const homologationDate = getEventAttributeValue(
-    closeEvent,
-    DocumentEventAttributeName.HOMOLOGATION_DATE,
+  const effectiveDate = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.EFFECTIVE_DATE,
   );
-  const homologationDueDate = getEventAttributeValue(
-    closeEvent,
-    DocumentEventAttributeName.HOMOLOGATION_DUE_DATE,
+  const expirationDate = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.EXPIRATION_DATE,
+  );
+  const status = getEventAttributeValue(
+    event,
+    DocumentEventAttributeName.HOMOLOGATION_STATUS,
   );
 
   if (
-    !is<NonEmptyString>(homologationDate) ||
-    !is<NonEmptyString>(homologationDueDate)
+    !is<DateTime>(effectiveDate) ||
+    !is<DateTime>(expirationDate) ||
+    !is<DocumentEventHomologationStatus>(status) ||
+    status !== DocumentEventHomologationStatus.APPROVED
   ) {
     return false;
   }
 
-  const todayString = format(new Date(), 'yyyy-MM-dd');
+  const today = new Date();
+  const effectiveDateObject = new Date(effectiveDate);
+  const expirationDateObject = new Date(expirationDate);
 
-  return homologationDate <= todayString && homologationDueDate >= todayString;
+  const isEffectiveValid =
+    isToday(effectiveDateObject) || isBefore(effectiveDateObject, today);
+  const isExpirationValid =
+    isToday(expirationDateObject) || isAfter(expirationDateObject, today);
+
+  return isEffectiveValid && isExpirationValid;
 };

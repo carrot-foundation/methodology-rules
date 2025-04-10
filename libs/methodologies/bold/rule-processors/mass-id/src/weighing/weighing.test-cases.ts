@@ -1,8 +1,8 @@
 import {
   BoldStubsBuilder,
   type MetadataAttributeParameter,
-  stubBoldHomologationDocumentCloseEvent,
   stubBoldMassIdWeighingEvent,
+  stubBoldMonitoringSystemsAndEquipmentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -27,7 +27,7 @@ import {
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 
-const { CLOSE, WEIGHING } = DocumentEventName;
+const { CLOSE, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } = DocumentEventName;
 const {
   CONTAINER_CAPACITY,
   CONTAINER_QUANTITY,
@@ -59,9 +59,10 @@ const stubBaseHomologationDocuments = (
       RECYCLER,
       {
         externalEventsMap: {
-          [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-            metadataAttributes: [[SCALE_TYPE, scaleTypeValue]],
-          }),
+          [MONITORING_SYSTEMS_AND_EQUIPMENT]:
+            stubBoldMonitoringSystemsAndEquipmentEvent({
+              metadataAttributes: [[SCALE_TYPE, scaleTypeValue]],
+            }),
         },
       },
     ],

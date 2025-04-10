@@ -8,7 +8,7 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
-import { isHomologationActive } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { isHomologationValid } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -32,11 +32,13 @@ import { ParticipantHomologationsProcessorErrors } from './participant-homologat
 
 export interface RuleSubject {
   homologationDocuments: Map<string, Document>;
-  massDocument: Document;
+  massIdDocument: Document;
 }
 
 export const RESULT_COMMENTS = {
-  APPROVED: 'The participants are homologated and the homologation is active',
+  APPROVED: 'All participant homologations are active and approved.',
+  INVALID_HOMOLOGATION_DOCUMENTS: (documentIds: string[]) =>
+    `These homologations are invalid: ${documentIds.join(', ')}`,
 } as const;
 
 export class ParticipantHomologationsProcessor extends RuleDataProcessor {
@@ -44,23 +46,24 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
 
   private evaluateResult({
     homologationDocuments,
-    massDocument,
+    massIdDocument,
   }: RuleSubject): EvaluateResultOutput {
     this.verifyAllParticipantsHaveHomologationDocuments({
       homologationDocuments,
-      massDocument,
+      massIdDocument,
     });
 
-    const expiredHomologationDocuments = [
+    const invalidHomologationDocuments = [
       ...homologationDocuments.values(),
-    ].filter((document) => !isHomologationActive(document));
+    ].filter((document) => !isHomologationValid(document));
 
-    if (isNonEmptyArray(expiredHomologationDocuments)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.HOMOLOGATION_EXPIRED(
-          expiredHomologationDocuments.map((document) => document.id),
+    if (isNonEmptyArray(invalidHomologationDocuments)) {
+      return {
+        resultComment: RESULT_COMMENTS.INVALID_HOMOLOGATION_DOCUMENTS(
+          invalidHomologationDocuments.map((document) => document.id),
         ),
-      );
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
     }
 
     return {
@@ -73,13 +76,13 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
     const homologationDocuments: Map<string, Document> = new Map();
-    let massDocument: Document | undefined;
+    let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
 
       if (MASS_ID.matches(documentReference)) {
-        massDocument = document;
+        massIdDocument = document;
       }
 
       if (PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference)) {
@@ -87,7 +90,7 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
       }
     });
 
-    if (isNil(massDocument)) {
+    if (isNil(massIdDocument)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
@@ -101,24 +104,24 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
 
     return {
       homologationDocuments,
-      massDocument,
+      massIdDocument,
     };
   }
 
   private verifyAllParticipantsHaveHomologationDocuments({
     homologationDocuments,
-    massDocument,
-  }: RuleSubject) {
-    if (!isNonEmptyArray(massDocument.externalEvents)) {
+    massIdDocument,
+  }: Omit<RuleSubject, 'massIdAuditDocument'>) {
+    if (!isNonEmptyArray(massIdDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
-          massDocument.id,
+          massIdDocument.id,
         ),
       );
     }
 
     const actorParticipants: Map<string, string> = new Map(
-      massDocument.externalEvents
+      massIdDocument.externalEvents
         .filter((event) => isActorEvent(event))
         .map((event) => [
           event.participant.id,

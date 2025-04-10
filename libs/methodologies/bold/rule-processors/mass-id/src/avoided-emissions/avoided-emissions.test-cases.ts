@@ -1,6 +1,6 @@
 import {
   BoldStubsBuilder,
-  stubBoldHomologationDocumentCloseEvent,
+  stubBoldEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
@@ -12,11 +12,9 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 import { RESULT_COMMENTS } from './avoided-emissions.processor';
 
-const {
-  PROJECT_EMISSION_CALCULATION_INDEX: PROJECT_EMISION_CALCULATION_INDEX,
-} = DocumentEventAttributeName;
+const { EMISSION_FACTOR } = DocumentEventAttributeName;
 const { RECYCLER } = MassIdDocumentActorType;
-const { CLOSE } = DocumentEventName;
+const { EMISSION_AND_COMPOSTING_METRICS } = DocumentEventName;
 
 export const avoidedEmissionsTestCases = [
   {
@@ -25,18 +23,17 @@ export const avoidedEmissionsTestCases = [
         RECYCLER,
         {
           externalEventsMap: {
-            [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-              metadataAttributes: [
-                [PROJECT_EMISION_CALCULATION_INDEX, undefined],
-              ],
-            }),
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [[EMISSION_FACTOR, undefined]],
+              }),
           },
         },
       ],
     ]),
-    resultComment: RESULT_COMMENTS.MISSING_INDEX,
+    resultComment: RESULT_COMMENTS.MISSING_EMISSION_FACTOR,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the Recycler Homologation document does not have the "${PROJECT_EMISION_CALCULATION_INDEX}" attribute`,
+    scenario: `the Recycler Homologation document does not have the "${EMISSION_FACTOR}" attribute`,
   },
   {
     homologationDocuments: new Map([
@@ -44,9 +41,10 @@ export const avoidedEmissionsTestCases = [
         RECYCLER,
         {
           externalEventsMap: {
-            [CLOSE]: stubBoldHomologationDocumentCloseEvent({
-              metadataAttributes: [[PROJECT_EMISION_CALCULATION_INDEX, 0.8]],
-            }),
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [[EMISSION_FACTOR, 0.8]],
+              }),
           },
         },
       ],
@@ -57,7 +55,7 @@ export const avoidedEmissionsTestCases = [
       avoidedEmissions: 80,
     },
     resultStatus: RuleOutputStatus.APPROVED,
-    scenario: `the Recycler Homologation document has the "${PROJECT_EMISION_CALCULATION_INDEX}" attribute and was calculated correctly`,
+    scenario: `the Recycler Homologation document has the "${EMISSION_FACTOR}" attribute and was calculated correctly`,
   },
 ];
 

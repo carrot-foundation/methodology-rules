@@ -1,17 +1,18 @@
-import type {
-  Document,
-  DocumentEventScaleType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-
 import { isNil } from '@carrot-fndn/shared/helpers';
+import {
+  type Document,
+  DocumentEventHomologationStatus,
+  type DocumentEventScaleType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { addDays, formatDate, subDays } from 'date-fns';
+import { addDays, getYear, subDays } from 'date-fns';
 import { random } from 'typia';
 
 import {
@@ -28,39 +29,93 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { CLOSE } = DocumentEventName;
 const {
-  HOMOLOGATION_DATE,
-  HOMOLOGATION_DUE_DATE,
-  PROJECT_EMISSION_CALCULATION_INDEX,
+  EMISSION_AND_COMPOSTING_METRICS,
+  HOMOLOGATION_RESULT,
+  MONITORING_SYSTEMS_AND_EQUIPMENT,
+} = DocumentEventName;
+const {
+  EFFECTIVE_DATE,
+  EMISSION_FACTOR,
+  EXPIRATION_DATE,
+  HOMOLOGATION_STATUS,
   SCALE_TYPE,
   SORTING_FACTOR,
 } = DocumentEventAttributeName;
+const { DATE } = MethodologyDocumentEventAttributeFormat;
 
-const defaultCloseEventMetadataAttributes: MetadataAttributeParameter[] = [
-  [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],
-  [HOMOLOGATION_DUE_DATE, formatDate(addDays(new Date(), 2), 'yyyy-MM-dd')],
-  [PROJECT_EMISSION_CALCULATION_INDEX, faker.number.float({ max: 1, min: 0 })],
-  // TODO: it's temporary, we need to remove when the homologation document is defined
-  [SCALE_TYPE, random<DocumentEventScaleType>()],
-  // TODO: it's temporary, we need to remove when the homologation document is defined
-  [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
-];
+const defaultHomologationResultEventMetadataAttributes: MetadataAttributeParameter[] =
+  [
+    {
+      format: DATE,
+      name: EFFECTIVE_DATE,
+      value: subDays(new Date(), 2).toISOString(),
+    },
+    {
+      format: DATE,
+      name: EXPIRATION_DATE,
+      value: addDays(new Date(), 2).toISOString(),
+    },
+    [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.APPROVED],
+  ];
 
-export const stubBoldHomologationDocumentCloseEvent = ({
+export const stubBoldHomologationResultEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
   stubDocumentEventWithMetadataAttributes(
-    { ...partialDocumentEvent, name: CLOSE },
+    { ...partialDocumentEvent, name: HOMOLOGATION_RESULT },
     mergeMetadataAttributes(
-      defaultCloseEventMetadataAttributes,
+      defaultHomologationResultEventMetadataAttributes,
+      metadataAttributes,
+    ),
+  );
+
+const defaultEmissionAndCompostingMetricsEventMetadataAttributes: MetadataAttributeParameter[] =
+  [
+    [EMISSION_FACTOR, faker.number.float({ max: 1, min: 0 })],
+    [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
+  ];
+
+export const stubBoldEmissionAndCompostingMetricsEvent = ({
+  metadataAttributes,
+  partialDocumentEvent,
+}: StubBoldDocumentEventParameters = {}) =>
+  stubDocumentEventWithMetadataAttributes(
+    {
+      ...partialDocumentEvent,
+      name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+    },
+    mergeMetadataAttributes(
+      defaultEmissionAndCompostingMetricsEventMetadataAttributes,
+      metadataAttributes,
+    ),
+  );
+
+const defaultMonitoringSystemsAndEquipmentEventMetadataAttributes: MetadataAttributeParameter[] =
+  [[SCALE_TYPE, random<DocumentEventScaleType>()]];
+
+export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
+  metadataAttributes,
+  partialDocumentEvent,
+}: StubBoldDocumentEventParameters = {}) =>
+  stubDocumentEventWithMetadataAttributes(
+    {
+      ...partialDocumentEvent,
+      name: MONITORING_SYSTEMS_AND_EQUIPMENT,
+    },
+    mergeMetadataAttributes(
+      defaultMonitoringSystemsAndEquipmentEventMetadataAttributes,
       metadataAttributes,
     ),
   );
 
 const boldHomologationExternalEventsMap = new Map([
-  [CLOSE, stubBoldHomologationDocumentCloseEvent()],
+  [
+    EMISSION_AND_COMPOSTING_METRICS,
+    stubBoldEmissionAndCompostingMetricsEvent(),
+  ],
+  [HOMOLOGATION_RESULT, stubBoldHomologationResultEvent()],
 ]);
 
 export const stubBoldHomologationDocument = ({
