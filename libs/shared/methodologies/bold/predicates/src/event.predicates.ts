@@ -32,9 +32,6 @@ export const eventHasLabel = (
 export const isActorEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);
 
-export const isOpenEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.OPEN);
-
 export const isRecycledEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.RECYCLED);
 

@@ -27,7 +27,7 @@ import {
 
 const { ACTOR } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
+const { DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 describe('Uniqueness Check Helpers E2E', () => {
@@ -139,7 +139,7 @@ describe('Uniqueness Check Helpers E2E', () => {
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.pickUpEvent,
-              name: OPEN,
+              name: 'OPEN',
             },
             [['vehicle-license-plate', vehicleLicensePlate]],
           ),

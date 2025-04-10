@@ -30,11 +30,12 @@ export const getHomologatedAddressByParticipantId = (
     return undefined;
   }
 
-  const openEvent = participantHomologationDocument.externalEvents?.find(
-    eventNameIsAnyOf([DocumentEventName.OPEN]),
-  );
+  const homologationContextEvent =
+    participantHomologationDocument.externalEvents?.find(
+      eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_CONTEXT]),
+    );
 
-  return openEvent?.address;
+  return homologationContextEvent?.address;
 };
 
 export const getEventGpsGeolocation = (

@@ -16,7 +16,7 @@ import {
   getHomologatedAddressByParticipantId,
 } from './geolocation-precision.helpers';
 
-const { OPEN } = DocumentEventName;
+const { HOMOLOGATION_CONTEXT } = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
@@ -24,12 +24,14 @@ describe('GeolocationPrecisionHelpers', () => {
   describe('getHomologatedAddressByParticipantId', () => {
     it('should return the homologated address by participant id', () => {
       const participantId = faker.string.uuid();
-      const openEvent = stubDocumentEvent({
-        name: OPEN,
+      const homologationContextEvent = stubDocumentEvent({
+        name: HOMOLOGATION_CONTEXT,
         participant: stubParticipant({ id: participantId }),
       });
       const documentStub = stubBoldHomologationDocument({
-        externalEventsMap: new Map([[OPEN, openEvent]]),
+        externalEventsMap: new Map([
+          [HOMOLOGATION_CONTEXT, homologationContextEvent],
+        ]),
       });
 
       const result = getHomologatedAddressByParticipantId(participantId, [
@@ -37,13 +39,16 @@ describe('GeolocationPrecisionHelpers', () => {
         ...stubArray(() =>
           stubBoldHomologationDocument({
             externalEventsMap: new Map([
-              [OPEN, stubDocumentEvent({ name: OPEN })],
+              [
+                HOMOLOGATION_CONTEXT,
+                stubDocumentEvent({ name: HOMOLOGATION_CONTEXT }),
+              ],
             ]),
           }),
         ),
       ]);
 
-      expect(result?.id).toBe(openEvent.address.id);
+      expect(result?.id).toBe(homologationContextEvent.address.id);
     });
 
     it('should return undefined if the participant has no homologated address', () => {
@@ -52,7 +57,10 @@ describe('GeolocationPrecisionHelpers', () => {
         ...stubArray(() =>
           stubBoldHomologationDocument({
             externalEventsMap: new Map([
-              [OPEN, stubDocumentEvent({ name: OPEN })],
+              [
+                HOMOLOGATION_CONTEXT,
+                stubDocumentEvent({ name: HOMOLOGATION_CONTEXT }),
+              ],
             ]),
           }),
         ),

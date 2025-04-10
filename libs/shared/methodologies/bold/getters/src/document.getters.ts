@@ -11,7 +11,7 @@ import {
 
 import { getEventAttributeValue } from './event.getters';
 
-const { DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
+const { DROP_OFF, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 export const getDocumentEventById = (
@@ -44,11 +44,6 @@ export const getFirstDocumentEventAttributeValue = (
 
   return undefined;
 };
-
-export const getOpenEvent = (
-  document: Document | undefined,
-): DocumentEvent | undefined =>
-  document?.externalEvents?.find((event) => event.name === OPEN.toString());
 
 export const getRulesMetadataEvent = (
   document: Document | undefined,

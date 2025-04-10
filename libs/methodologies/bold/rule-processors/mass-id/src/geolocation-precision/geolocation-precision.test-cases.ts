@@ -24,7 +24,7 @@ import { GeolocationPrecisionProcessorErrors } from './geolocation-precision.err
 import { RESULT_COMMENTS } from './geolocation-precision.processor';
 
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
-const { ACTOR, DROP_OFF, OPEN, PICK_UP } = DocumentEventName;
+const { ACTOR, DROP_OFF, HOMOLOGATION_CONTEXT, PICK_UP } = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
@@ -88,9 +88,9 @@ const validHomologationDocuments = new Map([
     RECYCLER,
     {
       externalEventsMap: {
-        [OPEN]: stubDocumentEvent({
+        [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
           address: recyclerAddress,
-          name: OPEN,
+          name: HOMOLOGATION_CONTEXT,
           participant: recyclerParticipant,
         }),
       },
@@ -100,9 +100,9 @@ const validHomologationDocuments = new Map([
     WASTE_GENERATOR,
     {
       externalEventsMap: {
-        [OPEN]: stubDocumentEvent({
+        [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
           address: wasteGeneratorAddress,
-          name: OPEN,
+          name: HOMOLOGATION_CONTEXT,
           participant: wasteGeneratorParticipant,
         }),
       },
@@ -138,7 +138,7 @@ export const geolocationPrecisionTestCases: {
         RECYCLER,
         {
           externalEventsMap: {
-            [OPEN]: undefined,
+            [HOMOLOGATION_CONTEXT]: undefined,
           },
         },
       ],
@@ -146,7 +146,7 @@ export const geolocationPrecisionTestCases: {
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [OPEN]: undefined,
+            [HOMOLOGATION_CONTEXT]: undefined,
           },
         },
       ],
