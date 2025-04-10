@@ -4,8 +4,6 @@ import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventActorType,
-  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
   NewDocumentEventAttributeName,
@@ -13,19 +11,8 @@ import {
 
 import { getEventAttributeValue } from './event.getters';
 
-const { ACTOR, DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
-const { AUDITOR } = DocumentEventActorType;
-const { ACTOR_TYPE } = DocumentEventAttributeName;
+const { DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
-
-export const getAuditorActorEvent = (
-  document: Document | undefined,
-): DocumentEvent | undefined =>
-  document?.externalEvents?.find(
-    (event) =>
-      event.name === ACTOR.toString() &&
-      getEventAttributeValue(event, ACTOR_TYPE) === AUDITOR,
-  );
 
 export const getDocumentEventById = (
   document: Document,
@@ -35,7 +22,7 @@ export const getDocumentEventById = (
 
 export const getFirstDocumentEventAttributeValue = (
   document: Document | undefined,
-  attributeName: DocumentEventAttributeName | NewDocumentEventAttributeName,
+  attributeName: NewDocumentEventAttributeName,
 ): MethodologyDocumentEventAttributeValue | undefined => {
   if (!document) {
     return undefined;

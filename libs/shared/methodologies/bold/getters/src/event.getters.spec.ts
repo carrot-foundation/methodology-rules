@@ -6,9 +6,8 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventActorType,
-  DocumentEventAttributeName,
   DocumentEventName,
+  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { validateNonEmptyString } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { faker } from '@faker-js/faker';
@@ -22,8 +21,7 @@ import {
 } from './event.getters';
 
 const { ACTOR } = DocumentEventName;
-const { AUDITOR } = DocumentEventActorType;
-const { ACTOR_TYPE, METHODOLOGY_SLUG } = DocumentEventAttributeName;
+const { DESCRIPTION, METHODOLOGY_SLUG } = NewDocumentEventAttributeName;
 
 describe('Event getters', () => {
   describe('getEventAttributeValue', () => {
@@ -115,7 +113,6 @@ describe('Event getters', () => {
       const methodologySlug = faker.string.sample();
 
       const event = stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
-        [ACTOR_TYPE, AUDITOR],
         [METHODOLOGY_SLUG, methodologySlug],
       ]);
 
@@ -125,9 +122,7 @@ describe('Event getters', () => {
     });
 
     it('should return undefined if the event does not have methodology slug', () => {
-      const event = stubDocumentEventWithMetadataAttributes({ name: ACTOR }, [
-        [ACTOR_TYPE, AUDITOR],
-      ]);
+      const event = stubDocumentEventWithMetadataAttributes({ name: ACTOR });
 
       const result = getEventMethodologySlug(event);
 
@@ -137,23 +132,24 @@ describe('Event getters', () => {
 
   describe('getEventAttributeByName', () => {
     it('should return the correct attribute', () => {
+      const description = faker.string.sample();
       const event = stubDocumentEventWithMetadataAttributes({}, [
-        [ACTOR_TYPE, AUDITOR],
+        [DESCRIPTION, description],
       ]);
 
-      const result = getEventAttributeByName(event, ACTOR_TYPE);
+      const result = getEventAttributeByName(event, DESCRIPTION);
 
       expect(result).toEqual(
         expect.objectContaining({
-          name: ACTOR_TYPE,
-          value: AUDITOR,
+          name: DESCRIPTION,
+          value: description,
         }),
       );
     });
 
     it('should return undefined if the attribute does not exist', () => {
       const event = stubDocumentEventWithMetadataAttributes({}, [
-        [ACTOR_TYPE, AUDITOR],
+        [DESCRIPTION, faker.string.sample()],
       ]);
 
       const result = getEventAttributeByName(event, 'missing');
@@ -164,7 +160,7 @@ describe('Event getters', () => {
     it('should return undefined if the event does not have metadata', () => {
       const event = stubDocumentEvent();
 
-      const result = getEventAttributeByName(event, ACTOR_TYPE);
+      const result = getEventAttributeByName(event, DESCRIPTION);
 
       expect(result).toBeUndefined();
     });
@@ -174,7 +170,7 @@ describe('Event getters', () => {
         metadata: undefined,
       });
 
-      const result = getEventAttributeByName(event, ACTOR_TYPE);
+      const result = getEventAttributeByName(event, DESCRIPTION);
 
       expect(result).toBeUndefined();
     });
