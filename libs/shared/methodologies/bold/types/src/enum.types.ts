@@ -73,6 +73,7 @@ export enum DocumentEventRuleSlug {
 }
 
 export enum DocumentEventAttributeName {
+  APPROVED_EXCEPTIONS = 'Approved Exceptions',
   CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
   CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
   CONTAINER_CAPACITY = 'Container Capacity',

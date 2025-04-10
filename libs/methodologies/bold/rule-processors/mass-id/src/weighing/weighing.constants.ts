@@ -31,6 +31,8 @@ const supportedFormats = Object.values(
 ).join(', ');
 
 export const APPROVED_RESULT_COMMENTS = {
+  APPROVED_WITH_EXCEPTION: (originalApproveMessage: string) =>
+    `${originalApproveMessage} The omission of the "${CONTAINER_CAPACITY}" permitted under an approved exception granted to this recycler for the duration of the homologation period.`,
   SINGLE_STEP: `The weighing event was captured as a single-step process, and all required attributes are valid.`,
   TRANSPORT_MANIFEST: `The "${WEIGHING}" event was captured from the "${TRANSPORT_MANIFEST}", and all required attributes are valid.`,
   TWO_STEP: `The "${WEIGHING}" event was captured in two steps, and all required attributes are valid.`,
