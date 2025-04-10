@@ -5,8 +5,8 @@ import type {
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export type MergeEventsMapsParameter =
@@ -52,12 +52,12 @@ export const mergeEventsMaps = <T extends DocumentEventName | string>(
 };
 
 export type MetadataAttributeTupleParameter = [
-  NewDocumentEventAttributeName,
+  DocumentEventAttributeName,
   MethodologyDocumentEventAttributeValue | undefined,
 ];
 
 export type MetadataAttributeTupleResponse = [
-  NewDocumentEventAttributeName,
+  DocumentEventAttributeName,
   MethodologyDocumentEventAttributeValue,
 ];
 

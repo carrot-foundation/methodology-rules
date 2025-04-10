@@ -7,9 +7,9 @@ import {
   stubMassIdDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -23,7 +23,7 @@ import {
 } from './document.getters';
 
 const { DROP_OFF, OPEN, PICK_UP, RULES_METADATA } = DocumentEventName;
-const { SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { SORTING_FACTOR } = DocumentEventAttributeName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {

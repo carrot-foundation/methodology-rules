@@ -3,9 +3,9 @@ import type { PartialDeep } from 'type-fest';
 import {
   type DocumentEvent,
   type DocumentEventAttribute,
+  DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type AnyObject,
@@ -89,7 +89,7 @@ export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
     | [
-        NewDocumentEventAttributeName | string,
+        DocumentEventAttributeName | string,
         MethodologyDocumentEventAttributeValue,
       ]
     | Omit<DocumentEventAttribute, 'isPublic'>

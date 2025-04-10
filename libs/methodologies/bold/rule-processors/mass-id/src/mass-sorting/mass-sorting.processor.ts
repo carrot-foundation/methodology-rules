@@ -24,9 +24,9 @@ import {
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentSubtype,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -40,7 +40,7 @@ import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared
 import { MassSortingProcessorErrors } from './mass-sorting.errors';
 
 const { SORTING } = DocumentEventName;
-const { DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
 const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {

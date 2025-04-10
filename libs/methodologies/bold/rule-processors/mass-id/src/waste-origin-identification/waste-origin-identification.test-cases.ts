@@ -3,9 +3,9 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -13,7 +13,7 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { RESULT_COMMENT } from './waste-origin-identification.processor';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { WASTE_ORIGIN } = NewDocumentEventAttributeName;
+const { WASTE_ORIGIN } = DocumentEventAttributeName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 const { WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 

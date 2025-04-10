@@ -9,8 +9,8 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type LicensePlate,
@@ -28,7 +28,7 @@ import {
 const { ACTOR } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
-const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 describe('Uniqueness Check Helpers E2E', () => {
   let auditApiService: AuditApiService;

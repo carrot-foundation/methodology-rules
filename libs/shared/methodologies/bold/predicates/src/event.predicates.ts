@@ -6,9 +6,9 @@ import {
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
@@ -44,7 +44,7 @@ export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
 
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,
-  attributeName: NewDocumentEventAttributeName,
+  attributeName: DocumentEventAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
 export const hasWeightFormat = (
@@ -61,7 +61,7 @@ export const hasWeightFormat = (
 
 export const eventsHasSameMetadataAttributeValue = (
   events: Array<DocumentEvent>,
-  metadataName: NewDocumentEventAttributeName,
+  metadataName: DocumentEventAttributeName,
 ): boolean => {
   if (isNonEmptyArray<DocumentEvent>(events)) {
     return events.every(
@@ -77,7 +77,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: Array<DocumentEventName>;
-  metadataName: NewDocumentEventAttributeName | string;
+  metadataName: DocumentEventAttributeName | string;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

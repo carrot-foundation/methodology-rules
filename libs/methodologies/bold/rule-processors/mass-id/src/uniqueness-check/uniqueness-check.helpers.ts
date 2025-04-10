@@ -5,15 +5,15 @@ import {
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   MethodologyDocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
-const { VEHICLE_LICENSE_PLATE } = NewDocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 const { ACTOR, DROP_OFF, MOVE, OPEN, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 

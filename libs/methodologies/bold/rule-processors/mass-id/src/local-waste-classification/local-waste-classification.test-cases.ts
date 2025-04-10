@@ -4,8 +4,8 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -15,7 +15,7 @@ import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants
 import { RESULT_COMMENTS } from './local-waste-classification.processor';
 
 const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;

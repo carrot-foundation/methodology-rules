@@ -1,9 +1,9 @@
 import {
+  DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
@@ -21,7 +21,7 @@ const {
   VEHICLE_LICENSE_PLATE,
   VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 const { TRUCK } = DocumentEventVehicleType;
 
 export const NET_WEIGHT_CALCULATION_TOLERANCE = 0.1;

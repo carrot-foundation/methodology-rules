@@ -7,15 +7,15 @@ import type {
 
 import type {
   DocumentCategory,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentSubtype,
   DocumentType,
-  NewDocumentEventAttributeName,
 } from './enum.types';
 
 export interface DocumentEventAttribute
   extends MethodologyDocumentEventAttribute {
-  name: NewDocumentEventAttributeName | string;
+  name: DocumentEventAttributeName | string;
 }
 
 export interface DocumentEventMetadata

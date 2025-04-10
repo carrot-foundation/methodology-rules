@@ -3,9 +3,9 @@ import {
   stubBoldHomologationDocumentCloseEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -14,7 +14,7 @@ import { RESULT_COMMENTS } from './avoided-emissions.processor';
 
 const {
   PROJECT_EMISSION_CALCULATION_INDEX: PROJECT_EMISION_CALCULATION_INDEX,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 const { RECYCLER } = MassIdDocumentActorType;
 const { CLOSE } = DocumentEventName;
 

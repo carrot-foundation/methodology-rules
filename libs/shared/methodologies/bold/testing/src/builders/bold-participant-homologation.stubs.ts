@@ -6,9 +6,9 @@ import type {
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   DocumentCategory,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 import { addDays, formatDate, subDays } from 'date-fns';
@@ -35,7 +35,7 @@ const {
   PROJECT_EMISSION_CALCULATION_INDEX,
   SCALE_TYPE,
   SORTING_FACTOR,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 
 const defaultCloseEventMetadataAttributes: MetadataAttributeParameter[] = [
   [HOMOLOGATION_DATE, formatDate(subDays(new Date(), 2), 'yyyy-MM-dd')],

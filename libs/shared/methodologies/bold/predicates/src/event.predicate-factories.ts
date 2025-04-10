@@ -2,8 +2,8 @@ import type { UnknownArray } from 'type-fest';
 
 import {
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type NonEmptyString,
@@ -45,7 +45,7 @@ export const eventLabelIsAnyOf =
 
 export const metadataAttributeNameIsAnyOf =
   (
-    metadataNames: Array<NewDocumentEventAttributeName>,
+    metadataNames: Array<DocumentEventAttributeName>,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
     metadataNames.some((metadataName) =>
@@ -54,7 +54,7 @@ export const metadataAttributeNameIsAnyOf =
 
 export const metadataAttributeValueIsAnyOf =
   (
-    metadataName: NewDocumentEventAttributeName,
+    metadataName: DocumentEventAttributeName,
     metadataValues: UnknownArray,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
@@ -62,7 +62,7 @@ export const metadataAttributeValueIsAnyOf =
 
 export const metadataAttributeValueIsNotEmpty =
   (
-    metadataName: NewDocumentEventAttributeName,
+    metadataName: DocumentEventAttributeName,
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
     eventHasNonEmptyStringAttribute(event, metadataName);

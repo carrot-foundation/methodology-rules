@@ -11,8 +11,8 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -22,7 +22,7 @@ import {
 
 const { ACTOR, DROP_OFF } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
-const { RECEIVING_OPERATOR_IDENTIFIER } = NewDocumentEventAttributeName;
+const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${DROP_OFF}" event address does not match the "${RECYCLER}" event address.`,

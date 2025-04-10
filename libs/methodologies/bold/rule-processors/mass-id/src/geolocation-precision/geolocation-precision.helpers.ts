@@ -5,8 +5,8 @@ import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predica
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type Geolocation,
@@ -42,11 +42,11 @@ export const getEventGpsGeolocation = (
 ): Geolocation | undefined => {
   const gpsLatitude = getEventAttributeValue(
     event,
-    NewDocumentEventAttributeName.CAPTURED_GPS_LATITUDE,
+    DocumentEventAttributeName.CAPTURED_GPS_LATITUDE,
   );
   const gpsLongitude = getEventAttributeValue(
     event,
-    NewDocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
   );
 
   if (is<Latitude>(gpsLatitude) && is<Longitude>(gpsLongitude)) {

@@ -20,8 +20,8 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -37,7 +37,7 @@ import { RESULT_COMMENTS } from './document-manifest.constants';
 
 const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 

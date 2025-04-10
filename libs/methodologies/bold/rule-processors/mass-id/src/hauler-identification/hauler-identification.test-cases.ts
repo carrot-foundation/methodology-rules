@@ -3,9 +3,9 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -17,7 +17,7 @@ import {
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = MethodologyDocumentEventLabel;
-const { VEHICLE_TYPE } = NewDocumentEventAttributeName;
+const { VEHICLE_TYPE } = DocumentEventAttributeName;
 const { TRUCK } = DocumentEventVehicleType;
 
 export const haulerIdentificationTestCases = [

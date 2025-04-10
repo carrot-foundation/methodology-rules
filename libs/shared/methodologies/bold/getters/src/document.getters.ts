@@ -4,9 +4,9 @@ import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { getEventAttributeValue } from './event.getters';
@@ -22,7 +22,7 @@ export const getDocumentEventById = (
 
 export const getFirstDocumentEventAttributeValue = (
   document: Document | undefined,
-  attributeName: NewDocumentEventAttributeName,
+  attributeName: DocumentEventAttributeName,
 ): MethodologyDocumentEventAttributeValue | undefined => {
   if (!document) {
     return undefined;

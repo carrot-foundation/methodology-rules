@@ -5,8 +5,8 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -18,7 +18,7 @@ import {
 
 const { OPEN } = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 
 describe('GeolocationPrecisionHelpers', () => {
   describe('getHomologatedAddressByParticipantId', () => {

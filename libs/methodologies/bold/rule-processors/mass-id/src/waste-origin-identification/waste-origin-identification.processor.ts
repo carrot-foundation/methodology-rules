@@ -11,9 +11,9 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -58,7 +58,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
     const wasteOrigin = getEventAttributeValue(
       pickUpEvent,
-      NewDocumentEventAttributeName.WASTE_ORIGIN,
+      DocumentEventAttributeName.WASTE_ORIGIN,
     );
     const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
     const isUnidentified = wasteOrigin === UNIDENTIFIED;

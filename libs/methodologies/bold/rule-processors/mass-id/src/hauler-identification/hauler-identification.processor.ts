@@ -12,16 +12,16 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = MethodologyDocumentEventLabel;
-const { VEHICLE_TYPE } = NewDocumentEventAttributeName;
+const { VEHICLE_TYPE } = DocumentEventAttributeName;
 
 type Subject = {
   haulerEvent: DocumentEvent | undefined;

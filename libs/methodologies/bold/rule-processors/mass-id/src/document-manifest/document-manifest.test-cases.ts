@@ -6,8 +6,8 @@ import {
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -22,7 +22,7 @@ import { type DocumentManifestType } from './document-manifest.processor';
 const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { CUBIC_METER, DATE } = MethodologyDocumentEventAttributeFormat;
 

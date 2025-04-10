@@ -4,6 +4,7 @@ import {
   DocumentCategory,
   type DocumentEvent,
   DocumentEventAttachmentLabel,
+  DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
@@ -12,7 +13,6 @@ import {
   DocumentType,
   MassSubtype,
   MeasurementUnit,
-  NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
@@ -78,7 +78,7 @@ const {
   VEHICLE_TYPE,
   WASTE_ORIGIN,
   WEIGHING_CAPTURE_METHOD,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 const { DATE, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
 const defaultPickUpAttributes: MetadataAttributeParameter[] = [

@@ -14,15 +14,15 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = DocumentEventVehicleType;
 const { PICK_UP } = DocumentEventName;
 

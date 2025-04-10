@@ -1,7 +1,7 @@
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
-  NewDocumentEventAttributeName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@carrot-fndn/shared/types';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 const { RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 const { RECYCLER } = MethodologyDocumentEventLabel;

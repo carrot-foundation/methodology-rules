@@ -2,9 +2,9 @@ import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { stubBoldMassIdPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
@@ -15,7 +15,7 @@ import {
 } from './vehicle-identification.processor';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  NewDocumentEventAttributeName;
+  DocumentEventAttributeName;
 const { PICK_UP } = DocumentEventName;
 const { OTHERS, TRUCK } = DocumentEventVehicleType;
 

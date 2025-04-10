@@ -6,13 +6,13 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
   DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
@@ -40,7 +40,7 @@ const {
   VEHICLE_LICENSE_PLATE,
   VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
-} = NewDocumentEventAttributeName;
+} = DocumentEventAttributeName;
 const { RECYCLER } = MassIdDocumentActorType;
 const { CAR, TRUCK } = DocumentEventVehicleType;
 const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;

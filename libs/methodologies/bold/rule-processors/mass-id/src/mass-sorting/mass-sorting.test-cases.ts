@@ -9,9 +9,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
-  NewDocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -24,7 +24,7 @@ const processorErrors = new MassSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { CLOSE, DROP_OFF, OPEN, SORTING } = DocumentEventName;
-const { DESCRIPTION, SORTING_FACTOR } = NewDocumentEventAttributeName;
+const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
 
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
