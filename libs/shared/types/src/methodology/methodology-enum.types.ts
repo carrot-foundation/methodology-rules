@@ -15,6 +15,10 @@ export enum MethodologyDocumentEventLabel {
   WASTE_GENERATOR = 'Waste Generator',
 }
 
+export enum MethodologyApprovedExceptionType {
+  MANDATORY_ATTRIBUTE = 'Exemption for Mandatory Attribute',
+}
+
 export enum MethodologyDocumentEventName {
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',

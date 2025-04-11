@@ -2,13 +2,7 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import {
-  getOrUndefined,
-  isNil,
-  isNonEmptyArray,
-  isNonEmptyString,
-} from '@carrot-fndn/shared/helpers';
-import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -20,7 +14,6 @@ import {
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -34,36 +27,15 @@ import {
 
 import {
   APPROVED_RESULT_COMMENTS,
-  INVALID_RESULT_COMMENTS,
   NOT_FOUND_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 import {
-  type WeighingEventValues,
-  getWeighingEventValues,
+  getValuesRelatedToWeighing,
   getWeighingEvents,
-  validateContainerCapacityAttribute,
-  validateContainerQuantity,
-  validateContainerType,
-  validateDescription,
-  validateGrossWeightAttribute,
-  validateMassNetWeightAttribute,
-  validateNetWeightCalculationDifference,
-  validateScaleHomologationStatus,
-  validateScaleType,
-  validateTareAttribute,
-  validateVehicleLicensePlateAttribute,
-  validateWeighingCaptureMethod,
+  validateTwoStepWeighingEvents,
+  validateWeighingValues,
 } from './weighing.helpers';
-
-const {
-  CONTAINER_CAPACITY,
-  CONTAINER_TYPE,
-  GROSS_WEIGHT,
-  SCALE_TYPE,
-  VEHICLE_LICENSE_PLATE,
-  WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
 
 interface RuleSubject {
   recyclerHomologationDocument: Document;
@@ -79,12 +51,12 @@ export class WeighingProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new WeighingProcessorErrors();
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<Document>,
   ): Promise<DocumentPair> {
     let recyclerHomologationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
 
-    await documentQuery?.iterator().each(({ document }) => {
+    await documentQuery.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
 
       if (
@@ -115,152 +87,6 @@ export class WeighingProcessor extends RuleDataProcessor {
     };
   }
 
-  private evaluateTwoStepWeighingEventValues(weighingEvents: DocumentEvent[]): {
-    rejectedMessages: string[];
-  } {
-    const rejectedMessages: string[] = [];
-    const firstWeighingEvent = weighingEvents[0];
-    const secondWeighingEvent = weighingEvents[1];
-
-    const twoStepWeighingErrors = [
-      WEIGHING_CAPTURE_METHOD,
-      SCALE_TYPE,
-      CONTAINER_CAPACITY,
-      CONTAINER_TYPE,
-      GROSS_WEIGHT,
-      VEHICLE_LICENSE_PLATE,
-    ].map((attributeName) => {
-      const firstWeighingEventValue = getEventAttributeValue(
-        firstWeighingEvent,
-        attributeName,
-      );
-
-      const secondWeighingEventValue = getEventAttributeValue(
-        secondWeighingEvent,
-        attributeName,
-      );
-
-      if (firstWeighingEventValue === secondWeighingEventValue) {
-        return null;
-      }
-
-      return INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
-        attributeName,
-        firstValue: firstWeighingEventValue,
-        secondValue: secondWeighingEventValue,
-      });
-    });
-
-    if (
-      firstWeighingEvent?.participant.id !== secondWeighingEvent?.participant.id
-    ) {
-      rejectedMessages.push(
-        INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
-      );
-    }
-
-    rejectedMessages.push(
-      ...twoStepWeighingErrors.filter((error) => isNonEmptyString(error)),
-    );
-
-    return {
-      rejectedMessages,
-    };
-  }
-
-  private evaluateWeighingEventValues(
-    weighingEventValues: WeighingEventValues,
-    recyclerHomologationDocument: Document,
-    isTwoStepWeighingEvent = false,
-  ): {
-    rejectedMessages: string[];
-  } {
-    const rejectedMessages: string[] = [];
-
-    const scaleHomologationMessages = validateScaleHomologationStatus(
-      weighingEventValues.scaleType,
-      recyclerHomologationDocument,
-    );
-
-    rejectedMessages.push(...scaleHomologationMessages);
-
-    const containerQuantityMessages = validateContainerQuantity(
-      weighingEventValues.containerQuantity,
-      weighingEventValues.vehicleType,
-    );
-
-    rejectedMessages.push(...containerQuantityMessages);
-
-    const grossWeightMessages = validateGrossWeightAttribute(
-      weighingEventValues.grossWeight,
-    );
-
-    rejectedMessages.push(...grossWeightMessages);
-
-    const massNetWeightMessages = validateMassNetWeightAttribute(
-      weighingEventValues.massNetWeight,
-    );
-
-    rejectedMessages.push(...massNetWeightMessages);
-
-    const descriptionMessages = validateDescription(
-      weighingEventValues.description,
-    );
-
-    rejectedMessages.push(...descriptionMessages);
-
-    const tareMessages = validateTareAttribute(weighingEventValues.tare);
-
-    rejectedMessages.push(...tareMessages);
-
-    const containerTypeMessages = validateContainerType(
-      weighingEventValues.containerType,
-      isTwoStepWeighingEvent,
-    );
-
-    rejectedMessages.push(...containerTypeMessages);
-
-    const scaleTypeMessages = validateScaleType(
-      weighingEventValues.scaleType,
-      isTwoStepWeighingEvent,
-    );
-
-    rejectedMessages.push(...scaleTypeMessages);
-
-    const captureMethodMessages = validateWeighingCaptureMethod(
-      weighingEventValues.weighingCaptureMethod,
-    );
-
-    rejectedMessages.push(...captureMethodMessages);
-
-    const containerCapacityMessages = validateContainerCapacityAttribute(
-      weighingEventValues.containerCapacityAttribute,
-    );
-
-    rejectedMessages.push(...containerCapacityMessages);
-
-    const vehicleLicensePlateMessages = validateVehicleLicensePlateAttribute(
-      weighingEventValues.vehicleLicensePlateAttribute,
-    );
-
-    rejectedMessages.push(...vehicleLicensePlateMessages);
-
-    const netWeightCalculationMessages = validateNetWeightCalculationDifference(
-      {
-        containerQuantity: Number(weighingEventValues.containerQuantity),
-        grossWeight: Number(weighingEventValues.grossWeight?.value),
-        massNetWeight: Number(weighingEventValues.massNetWeight?.value),
-        tare: Number(weighingEventValues.tare?.value),
-      },
-    );
-
-    rejectedMessages.push(...netWeightCalculationMessages);
-
-    return {
-      rejectedMessages,
-    };
-  }
-
   private validateOrThrow(condition: boolean, errorMessage: string): void {
     if (condition) {
       throw this.processorErrors.getKnownError(errorMessage);
@@ -270,7 +96,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   private validateWeighingEvents(
     weighingEvents: DocumentEvent[] | undefined,
   ): EvaluateResultOutput | undefined {
-    if (!isNonEmptyArray(weighingEvents)) {
+    if (isNil(weighingEvents) || weighingEvents.length === 0) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
         resultStatus: RuleOutputStatus.REJECTED,
@@ -291,81 +117,65 @@ export class WeighingProcessor extends RuleDataProcessor {
     recyclerHomologationDocument,
     weighingEvents,
   }: RuleSubject): EvaluateResultOutput {
-    const weighingEventsResult = this.validateWeighingEvents(weighingEvents);
+    const initialValidation = this.validateWeighingEvents(weighingEvents);
 
-    if (weighingEventsResult) {
-      return weighingEventsResult;
+    if (initialValidation) {
+      return initialValidation;
     }
 
-    if (weighingEvents.length === 1) {
-      const weighingEventValues = getWeighingEventValues(
-        weighingEvents[0] as DocumentEvent,
-      );
+    const isTwoStepWeighingEvent = weighingEvents.length === 2;
 
-      const result = this.evaluateWeighingEventValues(
-        weighingEventValues,
-        recyclerHomologationDocument,
-      );
+    if (isTwoStepWeighingEvent) {
+      const twoStepValidationMessages =
+        validateTwoStepWeighingEvents(weighingEvents);
 
-      if (isNonEmptyArray(result.rejectedMessages)) {
+      if (twoStepValidationMessages.errors.length > 0) {
         return {
-          resultComment: result.rejectedMessages.join(' '),
+          resultComment: twoStepValidationMessages.errors.join(' '),
           resultStatus: RuleOutputStatus.REJECTED,
         };
       }
-
-      if (
-        weighingEventValues.weighingCaptureMethod ===
-        DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST
-      ) {
-        return {
-          resultComment: APPROVED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
-          resultStatus: RuleOutputStatus.APPROVED,
-        };
-      }
-
-      return {
-        resultComment: APPROVED_RESULT_COMMENTS.SINGLE_STEP,
-        resultStatus: RuleOutputStatus.APPROVED,
-      };
     }
 
-    const weighingEventResults: {
-      rejectedMessages: string[];
-    }[] = [];
+    const weighingEvent = weighingEvents[0] as DocumentEvent;
+    const weighingValues = getValuesRelatedToWeighing(
+      weighingEvent,
+      recyclerHomologationDocument,
+    );
 
-    for (const weighingEvent of weighingEvents) {
-      const weighingEventValues = getWeighingEventValues(weighingEvent);
+    const validationMessages = validateWeighingValues(
+      weighingValues,
+      isTwoStepWeighingEvent,
+    );
 
-      const result = this.evaluateWeighingEventValues(
-        weighingEventValues,
-        recyclerHomologationDocument,
-        true,
-      );
-
-      if (isNonEmptyArray(result.rejectedMessages)) {
-        weighingEventResults.push(result);
-      }
-    }
-
-    const result = this.evaluateTwoStepWeighingEventValues(weighingEvents);
-
-    if (
-      isNonEmptyArray([...weighingEventResults, ...result.rejectedMessages])
-    ) {
+    if (validationMessages.errors.length > 0) {
       return {
-        resultComment: [
-          ...weighingEventResults.flatMap(
-            ({ rejectedMessages }) => rejectedMessages,
-          ),
-          ...result.rejectedMessages,
-        ].join(' '),
+        resultComment: validationMessages.errors.join(' '),
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
+    let approvalMessage = '';
+
+    const isTransportManifest =
+      weighingValues.weighingCaptureMethod ===
+      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
+
+    if (isTransportManifest) {
+      approvalMessage = APPROVED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
+    } else if (isTwoStepWeighingEvent) {
+      approvalMessage = APPROVED_RESULT_COMMENTS.TWO_STEP;
+    } else {
+      approvalMessage = APPROVED_RESULT_COMMENTS.SINGLE_STEP;
+    }
+
+    if (!isNil(weighingValues.containerCapacityException)) {
+      approvalMessage =
+        APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(approvalMessage);
+    }
+
     return {
-      resultComment: APPROVED_RESULT_COMMENTS.TWO_STEP,
+      resultComment: approvalMessage,
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
@@ -401,16 +211,15 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const documents = await this.collectDocuments(documentsQuery);
-      const ruleSubject = this.getRuleSubject(documents);
+      const documentQuery = await this.generateDocumentQuery(ruleInput);
+      const documentPair = await this.collectDocuments(documentQuery);
+      const ruleSubject = this.getRuleSubject(documentPair);
+      const evaluationResult = this.evaluateResult(ruleSubject);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
+      return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
+        resultComment: evaluationResult.resultComment,
       });
-    } catch (error: unknown) {
+    } catch (error) {
       return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
