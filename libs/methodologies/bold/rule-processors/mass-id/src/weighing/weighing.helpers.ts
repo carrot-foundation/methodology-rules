@@ -31,9 +31,9 @@ import { is } from 'typia';
 
 import {
   INVALID_RESULT_COMMENTS,
-  MISSING_RESULT_COMMENTS,
   NET_WEIGHT_CALCULATION_TOLERANCE,
   NOT_FOUND_RESULT_COMMENTS,
+  WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
 import { isApprovedExceptionAttributeValue } from './weighing.typia';
 
@@ -71,14 +71,13 @@ export interface WeighingValues {
   weighingCaptureMethod: string | undefined;
 }
 
-export type ValidationResult = string[];
+export type ValidationResult = { errors: string[] };
 
-const hasKilogramFormat = (
+const hasValidAttributeFormat = (
   attribute?: MethodologyDocumentEventAttribute,
-): boolean =>
-  attribute?.format === MethodologyDocumentEventAttributeFormat.KILOGRAM;
+): boolean => is<MethodologyDocumentEventAttributeFormat>(attribute?.format);
 
-const hasPositiveValue = (
+const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
@@ -165,96 +164,103 @@ export const getWeighingEvents = (document: Document): DocumentEvent[] =>
     [],
   );
 
-type Validator = (values: WeighingValues, isTwoStep?: boolean) => string[];
+type Validator = (
+  values: WeighingValues,
+  isTwoStep?: boolean,
+) => { errors: string[] };
 
 const validators: Record<string, Validator> = {
   containerCapacity: (values) => {
     if (!isNil(values.containerCapacityException)) {
-      return [];
+      return { errors: [] };
     }
 
-    const messages: string[] = [];
+    const errors: string[] = [];
 
-    if (!hasPositiveValue(values.containerCapacityAttribute)) {
-      messages.push(MISSING_RESULT_COMMENTS.CONTAINER_CAPACITY);
+    if (!hasPositiveFloatAttributeValue(values.containerCapacityAttribute)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY);
     }
 
-    if (!hasKilogramFormat(values.containerCapacityAttribute)) {
-      messages.push(INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT);
+    if (!hasValidAttributeFormat(values.containerCapacityAttribute)) {
+      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT);
     }
 
-    return messages;
+    return { errors };
   },
 
   containerQuantity: (values) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
 
     if (
       values.vehicleType === TRUCK &&
       isNonZeroPositiveInt(values.containerQuantity)
     ) {
-      messages.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
+      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
     if (!isNonZeroPositiveInt(values.containerQuantity)) {
-      messages.push(MISSING_RESULT_COMMENTS.CONTAINER_QUANTITY);
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
-    return messages;
+    return { errors };
   },
 
   containerType: (values, isTwoStep) => {
     if (!values.containerType) {
-      return [MISSING_RESULT_COMMENTS.CONTAINER_TYPE];
+      return { errors: [WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE] };
     }
 
     if (
       isTwoStep === true &&
       values.containerType !== DocumentEventContainerType.TRUCK.toString()
     ) {
-      return [
-        INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(values.containerType),
-      ];
+      return {
+        errors: [
+          INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(values.containerType),
+        ],
+      };
     }
 
-    return [];
+    return { errors: [] };
   },
 
   description: (values) =>
     isNonEmptyString(values.description)
-      ? []
-      : [MISSING_RESULT_COMMENTS.DESCRIPTION],
+      ? { errors: [] }
+      : { errors: [WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION] },
 
   grossWeight: (values) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
 
-    if (!hasPositiveValue(values.grossWeight)) {
-      messages.push(
-        MISSING_RESULT_COMMENTS.GROSS_WEIGHT(values.grossWeight?.value),
+    if (!hasPositiveFloatAttributeValue(values.grossWeight)) {
+      errors.push(
+        WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(values.grossWeight?.value),
       );
     }
 
-    if (!hasKilogramFormat(values.grossWeight)) {
-      messages.push(INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT);
+    if (!hasValidAttributeFormat(values.grossWeight)) {
+      errors.push(INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT);
     }
 
-    return messages;
+    return { errors };
   },
 
   massNetWeight: (values) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
 
-    if (!hasPositiveValue(values.massNetWeight)) {
-      messages.push(
-        MISSING_RESULT_COMMENTS.MASS_NET_WEIGHT(values.massNetWeight?.value),
+    if (!hasPositiveFloatAttributeValue(values.massNetWeight)) {
+      errors.push(
+        WRONG_FORMAT_RESULT_COMMENTS.MASS_NET_WEIGHT(
+          values.massNetWeight?.value,
+        ),
       );
     }
 
-    if (!hasKilogramFormat(values.massNetWeight)) {
-      messages.push(INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT);
+    if (!hasValidAttributeFormat(values.massNetWeight)) {
+      errors.push(INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT);
     }
 
-    return messages;
+    return { errors };
   },
 
   netWeightCalculation: (values) => {
@@ -264,7 +270,7 @@ const validators: Record<string, Validator> = {
       isNil(values.containerQuantity) ||
       isNil(values.massNetWeight?.value)
     ) {
-      return [];
+      return { errors: [] };
     }
 
     const massNetWeight = Number(values.massNetWeight.value);
@@ -276,29 +282,31 @@ const validators: Record<string, Validator> = {
     const diff = Math.abs(calculatedNetWeight - massNetWeight);
 
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
-      return [
-        INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
-          calculatedNetWeight,
-          containerQuantity,
-          grossWeight,
-          massNetWeight,
-          tare,
-        }),
-      ];
+      return {
+        errors: [
+          INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
+            calculatedNetWeight,
+            containerQuantity,
+            grossWeight,
+            massNetWeight,
+            tare,
+          }),
+        ],
+      };
     }
 
-    return [];
+    return { errors: [] };
   },
 
   scaleType: (values, isTwoStep) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
 
     if (!isNonEmptyString(values.homologationScaleType)) {
-      return [NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT];
+      return { errors: [NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT] };
     }
 
     if (String(values.scaleType) !== String(values.homologationScaleType)) {
-      messages.push(
+      errors.push(
         INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
           values.scaleType,
           values.homologationScaleType,
@@ -307,62 +315,64 @@ const validators: Record<string, Validator> = {
     }
 
     if (!is<DocumentEventScaleType>(values.scaleType)) {
-      messages.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
+      errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
     }
 
     if (
       isTwoStep === true &&
       values.scaleType !== DocumentEventScaleType.WEIGHBRIDGE
     ) {
-      messages.push(
+      errors.push(
         INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
           values.scaleType,
         ),
       );
     }
 
-    return messages;
+    return { errors };
   },
 
   tare: (values) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
 
-    if (!hasPositiveValue(values.tare)) {
-      messages.push(MISSING_RESULT_COMMENTS.TARE(values.tare?.value));
+    if (!hasPositiveFloatAttributeValue(values.tare)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.TARE(values.tare?.value));
     }
 
-    if (!hasKilogramFormat(values.tare)) {
-      messages.push(INVALID_RESULT_COMMENTS.TARE_FORMAT);
+    if (!hasValidAttributeFormat(values.tare)) {
+      errors.push(INVALID_RESULT_COMMENTS.TARE_FORMAT);
     }
 
-    return messages;
+    return { errors };
   },
 
   vehicleLicensePlate: (values) => {
-    const messages: string[] = [];
+    const errors: string[] = [];
     const attribute = values.vehicleLicensePlateAttribute;
 
     if (!isValidLicensePlate(attribute?.value)) {
-      messages.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
+      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
     }
 
     if (attribute?.sensitive !== true) {
-      messages.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE);
+      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE);
     }
 
-    return messages;
+    return { errors };
   },
 
   weighingCaptureMethod: (values) => {
     if (is<DocumentEventWeighingCaptureMethod>(values.weighingCaptureMethod)) {
-      return [];
+      return { errors: [] };
     }
 
-    return [
-      INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
-        values.weighingCaptureMethod,
-      ),
-    ];
+    return {
+      errors: [
+        INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
+          values.weighingCaptureMethod,
+        ),
+      ],
+    };
   },
 };
 
@@ -370,10 +380,10 @@ export const validateWeighingValues = (
   values: WeighingValues,
   isTwoStepWeighingEvent = false,
 ): ValidationResult => {
-  const results: string[] = [];
+  const results: ValidationResult = { errors: [] };
 
   for (const validator of Object.values(validators)) {
-    results.push(...validator(values, isTwoStepWeighingEvent));
+    results.errors.push(...validator(values, isTwoStepWeighingEvent).errors);
   }
 
   return results;
@@ -382,14 +392,14 @@ export const validateWeighingValues = (
 export const validateTwoStepWeighingEvents = (
   events: DocumentEvent[],
 ): ValidationResult => {
-  if (events.length !== 2) return [];
+  if (events.length !== 2) return { errors: [] };
 
-  const messages: string[] = [];
+  const errors: string[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];
 
   if (firstEvent?.participant.id !== secondEvent?.participant.id) {
-    messages.push(
+    errors.push(
       INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
     );
   }
@@ -408,7 +418,7 @@ export const validateTwoStepWeighingEvents = (
     const secondValue = getEventAttributeValue(secondEvent, attributeName);
 
     if (firstValue !== secondValue) {
-      messages.push(
+      errors.push(
         INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
           attributeName,
           firstValue,
@@ -418,5 +428,5 @@ export const validateTwoStepWeighingEvents = (
     }
   }
 
-  return messages;
+  return { errors };
 };

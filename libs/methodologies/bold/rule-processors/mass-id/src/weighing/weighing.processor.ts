@@ -129,9 +129,9 @@ export class WeighingProcessor extends RuleDataProcessor {
       const twoStepValidationMessages =
         validateTwoStepWeighingEvents(weighingEvents);
 
-      if (twoStepValidationMessages.length > 0) {
+      if (twoStepValidationMessages.errors.length > 0) {
         return {
-          resultComment: twoStepValidationMessages.join(' '),
+          resultComment: twoStepValidationMessages.errors.join(' '),
           resultStatus: RuleOutputStatus.REJECTED,
         };
       }
@@ -148,9 +148,9 @@ export class WeighingProcessor extends RuleDataProcessor {
       isTwoStepWeighingEvent,
     );
 
-    if (validationMessages.length > 0) {
+    if (validationMessages.errors.length > 0) {
       return {
-        resultComment: validationMessages.join(' '),
+        resultComment: validationMessages.errors.join(' '),
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }

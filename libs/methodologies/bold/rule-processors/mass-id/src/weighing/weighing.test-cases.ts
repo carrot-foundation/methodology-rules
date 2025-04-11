@@ -17,24 +17,23 @@ import {
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import {
+  MethodologyApprovedExceptionType,
+  MethodologyDocumentEventAttributeFormat,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import {
   APPROVED_RESULT_COMMENTS,
   INVALID_RESULT_COMMENTS,
-  MISSING_RESULT_COMMENTS,
   NOT_FOUND_RESULT_COMMENTS,
+  WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 
-const {
-  CLOSE,
-  HOMOLOGATION_RESULT,
-  MONITORING_SYSTEMS_AND_EQUIPMENT,
-  WEIGHING,
-} = DocumentEventName;
+const { HOMOLOGATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
+  DocumentEventName;
 const {
   APPROVED_EXCEPTIONS,
   CONTAINER_CAPACITY,
@@ -85,7 +84,8 @@ const stubBaseHomologationDocuments = ({
                           Event: WEIGHING,
                         },
                         'Attribute Name': CONTAINER_CAPACITY,
-                        'Exception Type': 'Exemption for Mandatory Attribute',
+                        'Exception Type':
+                          MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
                         Reason:
                           'The container capacity is not required for this event',
                       },
@@ -149,7 +149,7 @@ export const weighingTestCases = [
         RECYCLER,
         {
           externalEventsMap: {
-            [CLOSE]: undefined,
+            [MONITORING_SYSTEMS_AND_EQUIPMENT]: undefined,
           },
         },
       ],
@@ -173,7 +173,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: `${MISSING_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${CONTAINER_CAPACITY} attribute is missing`,
   },
@@ -188,7 +188,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: MISSING_RESULT_COMMENTS.CONTAINER_QUANTITY,
+    resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${VEHICLE_TYPE} is ${TRUCK}`,
   },
@@ -217,7 +217,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: `${MISSING_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${GROSS_WEIGHT} attribute is missing`,
   },
@@ -231,7 +231,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: `${MISSING_RESULT_COMMENTS.MASS_NET_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT}`,
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.MASS_NET_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT}`,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${MASS_NET_WEIGHT} attribute is missing`,
   },
@@ -242,7 +242,7 @@ export const weighingTestCases = [
         metadataAttributes: [...validWeighingAttributes, [TARE, undefined]],
       }),
     },
-    resultComment: `${MISSING_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${TARE} attribute is missing`,
   },
@@ -256,7 +256,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: MISSING_RESULT_COMMENTS.DESCRIPTION,
+    resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${DESCRIPTION} attribute is missing`,
   },
@@ -267,7 +267,7 @@ export const weighingTestCases = [
         metadataAttributes: [[DESCRIPTION, ''], ...validWeighingAttributes],
       }),
     },
-    resultComment: MISSING_RESULT_COMMENTS.DESCRIPTION,
+    resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${DESCRIPTION} attribute is an empty string`,
   },
@@ -330,7 +330,7 @@ export const weighingTestCases = [
         ],
       }),
     },
-    resultComment: MISSING_RESULT_COMMENTS.CONTAINER_TYPE,
+    resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${CONTAINER_TYPE} attribute is missing`,
   },
