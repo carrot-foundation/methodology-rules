@@ -35,6 +35,10 @@ const setRuleSentryTags = ({
 export const wrapRuleIntoLambdaHandler = (
   rule: RuleDataProcessor,
 ): Handler<MethodologyRuleEvent, MethodologyRuleResponse> => {
+  // Prevent MaxListenersExceededWarning by increasing the limit
+  // This addresses the issue with multiple uncaughtException listeners added by Sentry
+  process.setMaxListeners(20);
+
   AWSLambda.init({
     dsn: String(process.env['SENTRY_DSN']),
     enabled: String(process.env['NODE_ENV']) === 'production',
