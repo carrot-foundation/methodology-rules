@@ -34,9 +34,13 @@ export const uniquenessCheckTestCases = [
     scenario: 'only cancelled duplicates are found',
   },
   {
-    newDuplicateDocuments: [{ status: OPEN }, { status: CANCELLED }],
+    newDuplicateDocuments: [
+      { status: OPEN },
+      { status: OPEN },
+      { status: CANCELLED },
+    ],
     oldDuplicateDocuments: [],
-    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(2, 1),
+    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'valid duplicates are found',
   },
@@ -48,9 +52,9 @@ export const uniquenessCheckTestCases = [
     scenario: 'valid duplicates are found in old format',
   },
   {
-    newDuplicateDocuments: [{ status: OPEN }],
+    newDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     oldDuplicateDocuments: [{ status: CANCELLED }],
-    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(2, 1),
+    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'valid duplicates are found in both formats',
   },
