@@ -16,18 +16,27 @@ export const loadParentDocument = async (
     return undefined;
   }
 
-  const { document } = await loaderService.load({ key });
+  try {
+    const { document } = await loaderService.load({ key });
 
-  const validation = validateDocument(document);
+    const validation = validateDocument(document);
 
-  if (!validation.success) {
+    if (!validation.success) {
+      logger.warn(
+        { validationErrors: validation.errors },
+        `[loadParentDocument] Invalid parent document ${key}`,
+      );
+
+      return undefined;
+    }
+
+    return validation.data;
+  } catch (error) {
     logger.warn(
-      { validationErrors: validation.errors },
-      `[loadParentDocument] Invalid parent document ${key}`,
+      { error },
+      `[loadParentDocument] Failed to load document: ${key}`,
     );
 
     return undefined;
   }
-
-  return validation.data;
 };

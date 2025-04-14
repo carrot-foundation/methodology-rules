@@ -378,7 +378,7 @@ const validators: Record<string, Validator> = {
 
 export const validateWeighingValues = (
   values: WeighingValues,
-  isTwoStepWeighingEvent = false,
+  isTwoStepWeighingEvent: boolean | undefined,
 ): ValidationResult => {
   const results: ValidationResult = { errors: [] };
 
@@ -392,8 +392,6 @@ export const validateWeighingValues = (
 export const validateTwoStepWeighingEvents = (
   events: DocumentEvent[],
 ): ValidationResult => {
-  if (events.length !== 2) return { errors: [] };
-
   const errors: string[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];

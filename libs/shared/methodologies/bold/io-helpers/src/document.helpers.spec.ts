@@ -57,5 +57,19 @@ describe('Document Helpers', () => {
 
       expect(result).toEqual(document);
     });
+
+    it('should return undefined when document loading throws an error', async () => {
+      const key = faker.string.uuid();
+
+      jest
+        .spyOn(loaderService, 'load')
+        .mockRejectedValueOnce(
+          new Error('Not found document for Parent Document Key'),
+        );
+
+      const result = await loadParentDocument(loaderService, key);
+
+      expect(result).toBe(undefined);
+    });
   });
 });

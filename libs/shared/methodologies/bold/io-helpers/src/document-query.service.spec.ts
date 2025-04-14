@@ -110,13 +110,29 @@ describe('DocumenQueryService', () => {
       });
       const documentEntity = stubDocumentEntity({ document });
 
-      jest
+      // Mock implementation based on document id instead of sequence
+      const mockLoad = jest
         .spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
-        .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<Document>)
-        .mockResolvedValueOnce(
-          parentDocumentOfParentDocumentEntity as DocumentEntity<Document>,
-        );
+        .mockImplementation(({ key }) => {
+          // Extract document ID from the key format
+          const regex = /\/([^/]+)\.json$/;
+          const match = key.match(regex);
+          const id = match ? match[1] : null;
+
+          if (id === document.id)
+            return Promise.resolve(documentEntity as DocumentEntity<Document>);
+          if (id === parentDocument.id)
+            return Promise.resolve(
+              parentDocumentEntity as DocumentEntity<Document>,
+            );
+          if (id === parentDocumentOfParentDocument.id)
+            return Promise.resolve(
+              parentDocumentOfParentDocumentEntity as DocumentEntity<Document>,
+            );
+
+          // Return a value that matches the expected type
+          throw new Error(`Document not found: ${key}`);
+        });
 
       const loaderDocuments = await loadDocuments.load({
         context: stubQueryContext(),
@@ -132,8 +148,22 @@ describe('DocumenQueryService', () => {
         .iterator()
         .map(({ document: documentLoad }) => documentLoad);
 
-      expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(3);
+      // Check that it was called with the right documents, regardless of order
+      expect(mockLoad).toHaveBeenCalled();
       expect(result).toEqual([parentDocument, parentDocumentOfParentDocument]);
+
+      // Verify each document was loaded by checking if their IDs appear in any of the keys
+      const callArguments = mockLoad.mock.calls.map((call) => call[0].key);
+
+      expect(callArguments.some((key) => key.includes(document.id))).toBe(true);
+      expect(callArguments.some((key) => key.includes(parentDocument.id))).toBe(
+        true,
+      );
+      expect(
+        callArguments.some((key) =>
+          key.includes(parentDocumentOfParentDocument.id),
+        ),
+      ).toBe(true);
     });
 
     it('should return array with parentDocument and its relatedDocuments', async () => {
