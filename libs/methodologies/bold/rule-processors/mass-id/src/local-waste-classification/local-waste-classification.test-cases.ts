@@ -14,8 +14,10 @@ import { faker } from '@faker-js/faker';
 import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants';
 import { RESULT_COMMENTS } from './local-waste-classification.processor';
 
-const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
-  DocumentEventAttributeName;
+const {
+  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+  LOCAL_WASTE_CLASSIFICATION_ID,
+} = DocumentEventAttributeName;
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
@@ -43,7 +45,7 @@ export const localWasteClassificationTestCases = [
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [
-            LOCAL_WASTE_CLASSIFICATION_DESC,
+            LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
             WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
           ],
         ],
@@ -61,7 +63,7 @@ export const localWasteClassificationTestCases = [
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
           [
-            LOCAL_WASTE_CLASSIFICATION_DESC,
+            LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
             WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
           ],
         ],
@@ -77,7 +79,7 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-          [LOCAL_WASTE_CLASSIFICATION_DESC, undefined],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, undefined],
         ],
       }),
     },
@@ -91,7 +93,7 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-          [LOCAL_WASTE_CLASSIFICATION_DESC, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
         ],
       }),
     },
@@ -106,7 +108,7 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-          [LOCAL_WASTE_CLASSIFICATION_DESC, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
         ],
       }),
     },
@@ -120,7 +122,7 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, faker.lorem.word()],
-          [LOCAL_WASTE_CLASSIFICATION_DESC, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
         ],
       }),
     },
