@@ -148,7 +148,7 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
     totalDuplicates,
     validDuplicatesCount,
   }: RuleSubject): EvaluateResultOutput {
-    if (validDuplicatesCount > 0) {
+    if (validDuplicatesCount > 1) {
       return {
         resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(
           totalDuplicates,
