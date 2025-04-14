@@ -91,7 +91,7 @@ export enum DocumentEventAttributeName {
   GROSS_WEIGHT = 'Gross Weight',
   HOMOLOGATION_STATUS = 'Homologation Status',
   ISSUE_DATE = 'Issue Date',
-  LOCAL_WASTE_CLASSIFICATION_DESC = 'Local Waste Classification Desc',
+  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION = 'Local Waste Classification Description',
   LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
   MASS_NET_WEIGHT = 'Mass Net Weight',
   METHODOLOGY_SLUG = 'Methodology Slug',

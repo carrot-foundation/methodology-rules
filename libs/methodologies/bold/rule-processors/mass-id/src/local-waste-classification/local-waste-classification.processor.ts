@@ -22,15 +22,17 @@ import {
 import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants';
 import { LocalWasteClassificationProcessorErrors } from './local-waste-classification.errors';
 
-const { LOCAL_WASTE_CLASSIFICATION_DESC, LOCAL_WASTE_CLASSIFICATION_ID } =
-  DocumentEventAttributeName;
+const {
+  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+  LOCAL_WASTE_CLASSIFICATION_ID,
+} = DocumentEventAttributeName;
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 
 export const RESULT_COMMENTS = {
-  CLASSIFICATION_DESCRIPTION_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_DESC}" was not provided.`,
+  CLASSIFICATION_DESCRIPTION_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" was not provided.`,
   CLASSIFICATION_ID_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" was not provided.`,
-  INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESC}" does not match the expected IBAMA code description.`,
+  INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" does not match the expected IBAMA code description.`,
   INVALID_CLASSIFICATION_ID: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" does not match any IBAMA code.`,
   UNSUPPORTED_COUNTRY: (recyclerCountryCode: string) =>
     `Local waste classification is only validated for recyclers in Brazil, but the recycler country is ${recyclerCountryCode}.`,
@@ -110,7 +112,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     return {
       description: getEventAttributeValue(
         pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_DESC,
+        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
       ),
       id: getEventAttributeValue(pickUpEvent, LOCAL_WASTE_CLASSIFICATION_ID),
       recyclerCountryCode: getOrDefault(recyclerEvent?.address.countryCode, ''),
