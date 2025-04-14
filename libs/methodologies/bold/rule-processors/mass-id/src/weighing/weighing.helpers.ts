@@ -1,5 +1,6 @@
 import {
   getOrDefault,
+  isNil,
   isNonEmptyString,
   isNonZeroPositive,
   isNonZeroPositiveInt,
@@ -21,6 +22,7 @@ import {
   DocumentEventWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  type ApprovedException,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
@@ -29,14 +31,17 @@ import { is } from 'typia';
 
 import {
   INVALID_RESULT_COMMENTS,
-  MISSING_RESULT_COMMENTS,
   NET_WEIGHT_CALCULATION_TOLERANCE,
   NOT_FOUND_RESULT_COMMENTS,
+  WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
+import { isApprovedExceptionAttributeValue } from './weighing.typia';
 
-const { MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } = DocumentEventName;
+const { HOMOLOGATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
+  DocumentEventName;
 const { TRUCK } = DocumentEventVehicleType;
 const {
+  APPROVED_EXCEPTIONS,
   CONTAINER_CAPACITY,
   CONTAINER_QUANTITY,
   CONTAINER_TYPE,
@@ -50,12 +55,14 @@ const {
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 
-export interface WeighingEventValues {
+export interface WeighingValues {
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
+  containerCapacityException: ApprovedException | undefined;
   containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
   containerType: string | undefined;
   description: MethodologyDocumentEventAttributeValue | undefined;
   grossWeight: MethodologyDocumentEventAttribute | undefined;
+  homologationScaleType: MethodologyDocumentEventAttributeValue | undefined;
   massNetWeight: MethodologyDocumentEventAttribute | undefined;
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
@@ -64,24 +71,69 @@ export interface WeighingEventValues {
   weighingCaptureMethod: string | undefined;
 }
 
-export type ValidationResult = string[];
+export type ValidationResult = { errors: string[] };
 
-const hasKilogramFormat = (
+const hasValidAttributeFormat = (
   attribute?: MethodologyDocumentEventAttribute,
-): boolean =>
-  attribute?.format === MethodologyDocumentEventAttributeFormat.KILOGRAM;
+): boolean => is<MethodologyDocumentEventAttributeFormat>(attribute?.format);
 
-const hasPositiveValue = (
+const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
-export const getWeighingEventValues = (
+export const getMandatoryFieldExceptionFromHomologationDocument = (
+  recyclerHomologationDocument: Document,
+  fieldName: DocumentEventAttributeName,
+): ApprovedException | undefined => {
+  const homologationResultEvent =
+    recyclerHomologationDocument.externalEvents?.find(
+      eventNameIsAnyOf([HOMOLOGATION_RESULT]),
+    );
+
+  if (!homologationResultEvent) {
+    return undefined;
+  }
+
+  const approvedExceptions = getEventAttributeValue(
+    homologationResultEvent,
+    APPROVED_EXCEPTIONS,
+  );
+
+  if (!isApprovedExceptionAttributeValue(approvedExceptions)) {
+    return undefined;
+  }
+
+  return approvedExceptions.find(
+    (exception) =>
+      exception['Attribute Location'].Event === WEIGHING.toString() &&
+      exception['Attribute Name'] === fieldName,
+  );
+};
+
+export const getHomologationScaleType = (
+  recyclerHomologationDocument: Document,
+): MethodologyDocumentEventAttributeValue | undefined => {
+  const monitoringSystemsAndEquipmentEvent =
+    recyclerHomologationDocument.externalEvents?.find(
+      eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),
+    );
+
+  return getEventAttributeValue(monitoringSystemsAndEquipmentEvent, SCALE_TYPE);
+};
+
+export const getValuesRelatedToWeighing = (
   weighingEvent: DocumentEvent,
-): WeighingEventValues => ({
+  recyclerHomologationDocument: Document,
+): WeighingValues => ({
   containerCapacityAttribute: getEventAttributeByName(
     weighingEvent,
     CONTAINER_CAPACITY,
   ),
+  containerCapacityException:
+    getMandatoryFieldExceptionFromHomologationDocument(
+      recyclerHomologationDocument,
+      CONTAINER_CAPACITY,
+    ),
   containerQuantity: getEventAttributeValue(weighingEvent, CONTAINER_QUANTITY),
   containerType: getEventAttributeValue(
     weighingEvent,
@@ -89,6 +141,7 @@ export const getWeighingEventValues = (
   )?.toString(),
   description: getEventAttributeValue(weighingEvent, DESCRIPTION),
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
+  homologationScaleType: getHomologationScaleType(recyclerHomologationDocument),
   massNetWeight: getEventAttributeByName(weighingEvent, MASS_NET_WEIGHT),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
   tare: getEventAttributeByName(weighingEvent, TARE),
@@ -111,207 +164,269 @@ export const getWeighingEvents = (document: Document): DocumentEvent[] =>
     [],
   );
 
-export const validateContainerCapacityAttribute = (
-  containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined,
-): ValidationResult => {
-  const rejectedMessages: string[] = [];
+type Validator = (
+  values: WeighingValues,
+  isTwoStep?: boolean,
+) => { errors: string[] };
 
-  if (!hasPositiveValue(containerCapacityAttribute)) {
-    rejectedMessages.push(MISSING_RESULT_COMMENTS.CONTAINER_CAPACITY);
-  }
+const validators: Record<string, Validator> = {
+  containerCapacity: (values) => {
+    if (!isNil(values.containerCapacityException)) {
+      return { errors: [] };
+    }
 
-  if (!hasKilogramFormat(containerCapacityAttribute)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT);
-  }
+    const errors: string[] = [];
 
-  return rejectedMessages;
+    if (!hasPositiveFloatAttributeValue(values.containerCapacityAttribute)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY);
+    }
+
+    if (!hasValidAttributeFormat(values.containerCapacityAttribute)) {
+      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT);
+    }
+
+    return { errors };
+  },
+
+  containerQuantity: (values) => {
+    const errors: string[] = [];
+
+    if (
+      values.vehicleType === TRUCK &&
+      isNonZeroPositiveInt(values.containerQuantity)
+    ) {
+      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
+    }
+
+    if (!isNonZeroPositiveInt(values.containerQuantity)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
+    }
+
+    return { errors };
+  },
+
+  containerType: (values, isTwoStep) => {
+    if (!values.containerType) {
+      return { errors: [WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE] };
+    }
+
+    if (
+      isTwoStep === true &&
+      values.containerType !== DocumentEventContainerType.TRUCK.toString()
+    ) {
+      return {
+        errors: [
+          INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(values.containerType),
+        ],
+      };
+    }
+
+    return { errors: [] };
+  },
+
+  description: (values) =>
+    isNonEmptyString(values.description)
+      ? { errors: [] }
+      : { errors: [WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION] },
+
+  grossWeight: (values) => {
+    const errors: string[] = [];
+
+    if (!hasPositiveFloatAttributeValue(values.grossWeight)) {
+      errors.push(
+        WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(values.grossWeight?.value),
+      );
+    }
+
+    if (!hasValidAttributeFormat(values.grossWeight)) {
+      errors.push(INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT);
+    }
+
+    return { errors };
+  },
+
+  massNetWeight: (values) => {
+    const errors: string[] = [];
+
+    if (!hasPositiveFloatAttributeValue(values.massNetWeight)) {
+      errors.push(
+        WRONG_FORMAT_RESULT_COMMENTS.MASS_NET_WEIGHT(
+          values.massNetWeight?.value,
+        ),
+      );
+    }
+
+    if (!hasValidAttributeFormat(values.massNetWeight)) {
+      errors.push(INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT);
+    }
+
+    return { errors };
+  },
+
+  netWeightCalculation: (values) => {
+    if (
+      isNil(values.grossWeight?.value) ||
+      isNil(values.tare?.value) ||
+      isNil(values.containerQuantity) ||
+      isNil(values.massNetWeight?.value)
+    ) {
+      return { errors: [] };
+    }
+
+    const massNetWeight = Number(values.massNetWeight.value);
+    const grossWeight = Number(values.grossWeight.value);
+    const tare = Number(values.tare.value);
+    const containerQuantity = Number(values.containerQuantity);
+
+    const calculatedNetWeight = grossWeight - tare * containerQuantity;
+    const diff = Math.abs(calculatedNetWeight - massNetWeight);
+
+    if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
+      return {
+        errors: [
+          INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
+            calculatedNetWeight,
+            containerQuantity,
+            grossWeight,
+            massNetWeight,
+            tare,
+          }),
+        ],
+      };
+    }
+
+    return { errors: [] };
+  },
+
+  scaleType: (values, isTwoStep) => {
+    const errors: string[] = [];
+
+    if (!isNonEmptyString(values.homologationScaleType)) {
+      return { errors: [NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT] };
+    }
+
+    if (String(values.scaleType) !== String(values.homologationScaleType)) {
+      errors.push(
+        INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
+          values.scaleType,
+          values.homologationScaleType,
+        ),
+      );
+    }
+
+    if (!is<DocumentEventScaleType>(values.scaleType)) {
+      errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
+    }
+
+    if (
+      isTwoStep === true &&
+      values.scaleType !== DocumentEventScaleType.WEIGHBRIDGE
+    ) {
+      errors.push(
+        INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
+          values.scaleType,
+        ),
+      );
+    }
+
+    return { errors };
+  },
+
+  tare: (values) => {
+    const errors: string[] = [];
+
+    if (!hasPositiveFloatAttributeValue(values.tare)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.TARE(values.tare?.value));
+    }
+
+    if (!hasValidAttributeFormat(values.tare)) {
+      errors.push(INVALID_RESULT_COMMENTS.TARE_FORMAT);
+    }
+
+    return { errors };
+  },
+
+  vehicleLicensePlate: (values) => {
+    const errors: string[] = [];
+    const attribute = values.vehicleLicensePlateAttribute;
+
+    if (!isValidLicensePlate(attribute?.value)) {
+      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
+    }
+
+    if (attribute?.sensitive !== true) {
+      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE);
+    }
+
+    return { errors };
+  },
+
+  weighingCaptureMethod: (values) => {
+    if (is<DocumentEventWeighingCaptureMethod>(values.weighingCaptureMethod)) {
+      return { errors: [] };
+    }
+
+    return {
+      errors: [
+        INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
+          values.weighingCaptureMethod,
+        ),
+      ],
+    };
+  },
 };
 
-export const validateContainerQuantity = (
-  containerQuantity: MethodologyDocumentEventAttributeValue | undefined,
-  vehicleType: MethodologyDocumentEventAttributeValue | undefined,
+export const validateWeighingValues = (
+  values: WeighingValues,
+  isTwoStepWeighingEvent = false,
 ): ValidationResult => {
-  const rejectedMessages: string[] = [];
+  const results: ValidationResult = { errors: [] };
 
-  if (vehicleType === TRUCK && isNonZeroPositiveInt(containerQuantity)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
+  for (const validator of Object.values(validators)) {
+    results.errors.push(...validator(values, isTwoStepWeighingEvent).errors);
   }
 
-  if (!isNonZeroPositiveInt(containerQuantity)) {
-    rejectedMessages.push(MISSING_RESULT_COMMENTS.CONTAINER_QUANTITY);
-  }
-
-  return rejectedMessages;
+  return results;
 };
 
-export const validateGrossWeightAttribute = (
-  grossWeight: MethodologyDocumentEventAttribute | undefined,
+export const validateTwoStepWeighingEvents = (
+  events: DocumentEvent[],
 ): ValidationResult => {
-  const rejectedMessages: string[] = [];
+  if (events.length !== 2) return { errors: [] };
 
-  if (!hasPositiveValue(grossWeight)) {
-    rejectedMessages.push(
-      MISSING_RESULT_COMMENTS.GROSS_WEIGHT(grossWeight?.value),
+  const errors: string[] = [];
+  const firstEvent = events[0];
+  const secondEvent = events[1];
+
+  if (firstEvent?.participant.id !== secondEvent?.participant.id) {
+    errors.push(
+      INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
     );
   }
 
-  if (!hasKilogramFormat(grossWeight)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT);
-  }
-
-  return rejectedMessages;
-};
-
-export const validateMassNetWeightAttribute = (
-  massNetWeightAttribute: MethodologyDocumentEventAttribute | undefined,
-): ValidationResult => {
-  const rejectedMessages: string[] = [];
-
-  if (!hasPositiveValue(massNetWeightAttribute)) {
-    rejectedMessages.push(
-      MISSING_RESULT_COMMENTS.MASS_NET_WEIGHT(massNetWeightAttribute?.value),
-    );
-  }
-
-  if (!hasKilogramFormat(massNetWeightAttribute)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT);
-  }
-
-  return rejectedMessages;
-};
-
-export const validateTareAttribute = (
-  tare: MethodologyDocumentEventAttribute | undefined,
-): ValidationResult => {
-  const rejectedMessages: string[] = [];
-
-  if (!hasPositiveValue(tare)) {
-    rejectedMessages.push(MISSING_RESULT_COMMENTS.TARE(tare?.value));
-  }
-
-  if (!hasKilogramFormat(tare)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.TARE_FORMAT);
-  }
-
-  return rejectedMessages;
-};
-
-export const validateVehicleLicensePlateAttribute = (
-  vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined,
-): ValidationResult => {
-  const rejectedMessages: string[] = [];
-
-  if (!isValidLicensePlate(vehicleLicensePlateAttribute?.value)) {
-    rejectedMessages.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
-  }
-
-  if (vehicleLicensePlateAttribute?.sensitive !== true) {
-    rejectedMessages.push(
-      INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE,
-    );
-  }
-
-  return rejectedMessages;
-};
-
-export const validateScaleHomologationStatus = (
-  scaleType: MethodologyDocumentEventAttributeValue | undefined,
-  recyclerHomologationDocument: Document,
-): ValidationResult => {
-  const monitoringSystemsAndEquipmentEvent =
-    recyclerHomologationDocument.externalEvents?.find(
-      eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),
-    );
-  const homologationScaleType = getEventAttributeValue(
-    monitoringSystemsAndEquipmentEvent,
+  const attributesToCheck = [
+    WEIGHING_CAPTURE_METHOD,
     SCALE_TYPE,
-  );
+    CONTAINER_CAPACITY,
+    CONTAINER_TYPE,
+    GROSS_WEIGHT,
+    VEHICLE_LICENSE_PLATE,
+  ];
 
-  if (!isNonEmptyString(homologationScaleType)) {
-    return [NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT];
-  }
+  for (const attributeName of attributesToCheck) {
+    const firstValue = getEventAttributeValue(firstEvent, attributeName);
+    const secondValue = getEventAttributeValue(secondEvent, attributeName);
 
-  if (scaleType !== homologationScaleType) {
-    return [
-      INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
-        scaleType,
-        homologationScaleType,
-      ),
-    ];
-  }
-
-  return [];
-};
-
-export const validateDescription = (
-  description: MethodologyDocumentEventAttributeValue | undefined,
-): ValidationResult =>
-  isNonEmptyString(description) ? [] : [MISSING_RESULT_COMMENTS.DESCRIPTION];
-
-export const validateNetWeightCalculationDifference = ({
-  containerQuantity,
-  grossWeight,
-  massNetWeight,
-  tare,
-}: {
-  containerQuantity: number;
-  grossWeight: number;
-  massNetWeight: number;
-  tare: number;
-}): ValidationResult => {
-  const calculatedNetWeight = grossWeight - tare * containerQuantity;
-
-  return Math.abs(calculatedNetWeight - massNetWeight) >
-    NET_WEIGHT_CALCULATION_TOLERANCE
-    ? [
-        INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
-          calculatedNetWeight,
-          containerQuantity,
-          grossWeight,
-          massNetWeight,
-          tare,
+    if (firstValue !== secondValue) {
+      errors.push(
+        INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
+          attributeName,
+          firstValue,
+          secondValue,
         }),
-      ]
-    : [];
-};
-
-export const validateContainerType = (
-  containerType: string | undefined,
-  isTwoStepWeighingEvent?: boolean,
-): ValidationResult => {
-  if (
-    isTwoStepWeighingEvent === true &&
-    containerType !== DocumentEventContainerType.TRUCK
-  ) {
-    return [INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(containerType)];
+      );
+    }
   }
 
-  return is<DocumentEventContainerType>(containerType)
-    ? []
-    : [MISSING_RESULT_COMMENTS.CONTAINER_TYPE];
-};
-
-export const validateWeighingCaptureMethod = (
-  weighingCaptureMethod: string | undefined,
-): ValidationResult =>
-  is<DocumentEventWeighingCaptureMethod>(weighingCaptureMethod)
-    ? []
-    : [INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(weighingCaptureMethod)];
-
-export const validateScaleType = (
-  scaleType: MethodologyDocumentEventAttributeValue | undefined,
-  isTwoStepWeighingEvent?: boolean,
-): ValidationResult => {
-  if (
-    isTwoStepWeighingEvent === true &&
-    scaleType !== DocumentEventScaleType.WEIGHBRIDGE
-  ) {
-    return [
-      INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(scaleType),
-    ];
-  }
-
-  return is<DocumentEventScaleType>(scaleType)
-    ? []
-    : [INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleType)];
+  return { errors };
 };

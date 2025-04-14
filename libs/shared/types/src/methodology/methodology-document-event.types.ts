@@ -13,12 +13,29 @@ import type {
   MethodologyParticipant,
 } from './methodology-participant.types';
 
+import { type NonEmptyString } from '../string.types';
+
 export interface MethodologyDocumentEventAttributeReference {
   documentId: string;
   eventId: string;
 }
 
+export interface ApprovedException {
+  'Attribute Location': {
+    Asset: {
+      Category: NonEmptyString;
+    };
+    Event: NonEmptyString;
+  };
+  'Attribute Name': NonEmptyString;
+  'Exception Type': NonEmptyString;
+  Reason: NonEmptyString;
+}
+
+export type ApprovedExceptionAttributeValue = ApprovedException[];
+
 export type MethodologyDocumentEventAttributeValue =
+  | ApprovedExceptionAttributeValue
   | MethodologyDocumentEventAttributeReference
   | UnknownObject
   | boolean

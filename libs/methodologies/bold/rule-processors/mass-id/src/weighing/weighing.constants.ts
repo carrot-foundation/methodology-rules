@@ -31,6 +31,8 @@ const supportedFormats = Object.values(
 ).join(', ');
 
 export const APPROVED_RESULT_COMMENTS = {
+  APPROVED_WITH_EXCEPTION: (originalApproveMessage: string) =>
+    `${originalApproveMessage} The omission of the "${CONTAINER_CAPACITY}" is permitted under an approved exception granted to this recycler for the duration of the homologation period.`,
   SINGLE_STEP: `The weighing event was captured as a single-step process, and all required attributes are valid.`,
   TRANSPORT_MANIFEST: `The "${WEIGHING}" event was captured from the "${TRANSPORT_MANIFEST}", and all required attributes are valid.`,
   TWO_STEP: `The "${WEIGHING}" event was captured in two steps, and all required attributes are valid.`,
@@ -82,7 +84,7 @@ export const INVALID_RESULT_COMMENTS = {
     `The "${WEIGHING_CAPTURE_METHOD}" "${String(captureMethod)}" is not supported by the methodology.`,
 } as const;
 
-export const MISSING_RESULT_COMMENTS = {
+export const WRONG_FORMAT_RESULT_COMMENTS = {
   CONTAINER_CAPACITY: `The "${CONTAINER_CAPACITY}" must be greater than 0.`,
   CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must be greater than 0 unless the "${VEHICLE_TYPE}" is "${TRUCK}".`,
   CONTAINER_TYPE: `The "${CONTAINER_TYPE}" must be provided.`,
