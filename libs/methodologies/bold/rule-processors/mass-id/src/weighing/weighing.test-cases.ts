@@ -193,6 +193,26 @@ export const weighingTestCases = [
     scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${VEHICLE_TYPE} is ${TRUCK}`,
   },
   {
+    homologationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [HOMOLOGATION_RESULT]: undefined,
+          },
+        },
+      ],
+    ]),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [[VEHICLE_TYPE, CAR], ...validWeighingAttributes],
+      }),
+    },
+    resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario: `the ${HOMOLOGATION_RESULT} event is missing`,
+  },
+  {
     homologationDocuments: stubBaseHomologationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
