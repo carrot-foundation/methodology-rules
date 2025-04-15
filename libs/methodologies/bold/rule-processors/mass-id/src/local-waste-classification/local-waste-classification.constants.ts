@@ -16,24 +16,24 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '02 01 02': {
       CDM_CODE: '8.3',
-      description: 'Resíduos de tecidos animais ',
+      description: 'Resíduos de tecidos animais',
     },
     '02 01 03': {
       CDM_CODE: '8.3',
-      description: 'Resíduos de tecidos vegetais ',
+      description: 'Resíduos de tecidos vegetais',
     },
     '02 01 04': {
       CDM_CODE: '8.6',
-      description: 'Resíduos de plásticos (excluindo embalagens) ',
+      description: 'Resíduos de plásticos (excluindo embalagens)',
     },
     '02 01 06': {
       CDM_CODE: '8.7D',
       description:
-        'Fezes, uri- e estrume de animais (incluindo palha suja), efluentes recolhidos separadamente e tratados noutro local ',
+        'Fezes, uri- e estrume de animais (incluindo palha suja), efluentes recolhidos separadamente e tratados noutro local',
     },
     '02 01 07': {
       CDM_CODE: '8.1',
-      description: 'Resíduos silvícolas ',
+      description: 'Resíduos silvícolas',
     },
     '02 02 01': {
       CDM_CODE: '8.7B',
@@ -42,7 +42,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '02 02 02': {
       CDM_CODE: '8.3',
       description:
-        'Resíduos de tecidos animais e orgânico de processo (sebo, soro, ossos, sangue, etc.) ',
+        'Resíduos de tecidos animais e orgânico de processo (sebo, soro, ossos, sangue, etc.)',
     },
     '02 02 03': {
       CDM_CODE: '8.3',
@@ -59,7 +59,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '02 03 01': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos de lavagem, limpeza, descasque, centrifugação e separação ',
+        'Lodos de lavagem, limpeza, descasque, centrifugação e separação',
     },
     '02 03 04': {
       CDM_CODE: '8.3',
@@ -111,7 +111,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '02 07 02': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos da destilação de álcool ',
+      description: 'Resíduos da destilação de álcool',
     },
     '02 07 04': {
       CDM_CODE: '8.3',
@@ -127,12 +127,12 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '03 01 01': {
       CDM_CODE: '8.1',
-      description: 'Resíduos do descasque da madeira ',
+      description: 'Resíduos do descasque da madeira',
     },
     '03 01 05': {
       CDM_CODE: '8.1',
       description:
-        'Serragem, aparas, fitas de aplai-mento, madeira, aglomerados e folheados não abrangidos em 03 01 04 ',
+        'Serragem, aparas, fitas de aplai-mento, madeira, aglomerados e folheados não abrangidos em 03 01 04',
     },
     '03 01 99': {
       CDM_CODE: '8.7D',
@@ -140,41 +140,41 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '03 03 01': {
       CDM_CODE: '8.1',
-      description: 'Resíduos do descasque de madeira e resíduos de madeira ',
+      description: 'Resíduos do descasque de madeira e resíduos de madeira',
     },
     '03 03 02': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos da lixívia verde (provenientes da valorização da lixívia de cozimento ou licor negro) ',
+        'Lodos da lixívia verde (provenientes da valorização da lixívia de cozimento ou licor negro)',
     },
     '03 03 05': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos de branqueamento, provenientes da reciclagem de papel ',
+        'Lodos de branqueamento, provenientes da reciclagem de papel',
     },
     '03 03 07': {
       CDM_CODE: '8.2',
       description:
-        'Rejeitos mecanicamente separados da fabricação de pasta a partir de papel e papelão usado ',
+        'Rejeitos mecanicamente separados da fabricação de pasta a partir de papel e papelão usado',
     },
     '03 03 08': {
       CDM_CODE: '8.2',
       description:
-        'Resíduos da triagem de papel e papelão desti-do a reciclagem ',
+        'Resíduos da triagem de papel e papelão desti-do a reciclagem',
     },
     '03 03 09': {
       CDM_CODE: '8.7B',
-      description: 'Resíduos de lodos de cal ',
+      description: 'Resíduos de lodos de cal',
     },
     '03 03 10': {
       CDM_CODE: '8.2',
       description:
-        'Rejeitos de fibras e lodos de fibras, fillers e revestimentos, provenientes da separação mecânica ',
+        'Rejeitos de fibras e lodos de fibras, fillers e revestimentos, provenientes da separação mecânica',
     },
     '03 03 11': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 03 03 10 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 03 03 10',
     },
     '03 03 99': {
       CDM_CODE: '8.7D',
@@ -182,34 +182,34 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '04 01 01': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos das operações de descar- e divisão de tripa ',
+      description: 'Resíduos das operações de descar- e divisão de tripa',
     },
     '04 01 04': {
       CDM_CODE: '8.7D',
-      description: 'Licores de curtimenta contendo cromo ',
+      description: 'Licores de curtimenta contendo cromo',
     },
     '04 01 05': {
       CDM_CODE: '8.7D',
-      description: 'Licores de curtimenta sem cromo ',
+      description: 'Licores de curtimenta sem cromo',
     },
     '04 01 06': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos, em especial do tratamento local de efluentes, contendo cromo ',
+        'Lodos, em especial do tratamento local de efluentes, contendo cromo',
     },
     '04 01 07': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos, em especial do tratamento local de efluentes, sem cromo ',
+        'Lodos, em especial do tratamento local de efluentes, sem cromo',
     },
     '04 01 08': {
       CDM_CODE: '8.7D',
       description:
-        'Aparas, serragem e pós de couro provenientes de couros curtidos ao cromo ',
+        'Aparas, serragem e pós de couro provenientes de couros curtidos ao cromo',
     },
     '04 01 09': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos da confecção e acabamentos ',
+      description: 'Resíduos da confecção e acabamentos',
     },
     '04 01 10': {
       CDM_CODE: '8.7B',
@@ -222,29 +222,29 @@ export const WASTE_CLASSIFICATION_IDS = {
     '04 02 09': {
       CDM_CODE: '8.4',
       description:
-        'Resíduos de materiais têxteis (têxteis impreg-dos, elastômeros, plastômeros) ',
+        'Resíduos de materiais têxteis (têxteis impreg-dos, elastômeros, plastômeros)',
     },
     '04 02 10': {
       CDM_CODE: '8.7D',
       description:
-        'Matéria orgânica de produtos -turais (por exemplo, gordura, cera) ',
+        'Matéria orgânica de produtos -turais (por exemplo, gordura, cera)',
     },
     '04 02 15': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos dos acabamentos não abrangidos em 04 02 14 ',
+      description: 'Resíduos dos acabamentos não abrangidos em 04 02 14',
     },
     '04 02 20': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 04 02 19 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 04 02 19',
     },
     '04 02 21': {
       CDM_CODE: '8.2',
-      description: 'Resíduos de fibras têxteis não processadas ',
+      description: 'Resíduos de fibras têxteis não processadas',
     },
     '04 02 22': {
       CDM_CODE: '8.2',
-      description: 'Resíduos de fibras têxteis processadas ',
+      description: 'Resíduos de fibras têxteis processadas',
     },
     '04 02 99': {
       CDM_CODE: '8.7D',
@@ -253,7 +253,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '05 01 10': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 05 01 09 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 05 01 09',
     },
     '05 06 99': {
       CDM_CODE: '8.7D',
@@ -278,7 +278,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '06 05 03': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 06 05 02 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 06 05 02',
     },
     '06 07 99': {
       CDM_CODE: '8.7D',
@@ -295,7 +295,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 01 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 01 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 01 11',
     },
     '07 01 99': {
       CDM_CODE: '8.7D',
@@ -304,7 +304,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 02 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 02 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 02 11',
     },
     '07 02 99': {
       CDM_CODE: '8.7D',
@@ -313,7 +313,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 03 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 03 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 03 11',
     },
     '07 03 99': {
       CDM_CODE: '8.7D',
@@ -322,7 +322,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 04 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 04 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 04 11',
     },
     '07 04 99': {
       CDM_CODE: '8.7D',
@@ -331,11 +331,11 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 05 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 05 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 05 11',
     },
     '07 05 14': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos sólidos não abrangidos em 07 05 13 ',
+      description: 'Resíduos sólidos não abrangidos em 07 05 13',
     },
     '07 05 99': {
       CDM_CODE: '8.7D',
@@ -344,7 +344,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 06 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 06 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 06 11',
     },
     '07 06 99': {
       CDM_CODE: '8.7D',
@@ -353,7 +353,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '07 07 12': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 07 07 11 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 07 07 11',
     },
     '07 07 99': {
       CDM_CODE: '8.7D',
@@ -382,12 +382,12 @@ export const WASTE_CLASSIFICATION_IDS = {
     '10 01 21': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 10 01 20 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 10 01 20',
     },
     '10 01 23': {
       CDM_CODE: '8.7B',
       description:
-        'Lodos aquosas provenientes da limpeza de caldeiras não abrangidas em 10 01 22 ',
+        'Lodos aquosas provenientes da limpeza de caldeiras não abrangidas em 10 01 22',
     },
     '10 01 99': {
       CDM_CODE: '8.7D',
@@ -396,11 +396,11 @@ export const WASTE_CLASSIFICATION_IDS = {
     '10 02 08': {
       CDM_CODE: '8.7D',
       description:
-        'Resíduos sólidos do tratamento de gases não abrangidos em 10 02 07 ',
+        'Resíduos sólidos do tratamento de gases não abrangidos em 10 02 07',
     },
     '10 02 15': {
       CDM_CODE: '8.7D',
-      description: 'Outras lodos e tortas de filtro ',
+      description: 'Outras lodos e tortas de filtro',
     },
     '10 02 99': {
       CDM_CODE: '8.7D',
@@ -437,7 +437,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     '10 11 20': {
       CDM_CODE: '8.7C',
       description:
-        'Resíduos sólidos do tratamento local de efluentes não abrangidos em 10 11 19 ',
+        'Resíduos sólidos do tratamento local de efluentes não abrangidos em 10 11 19',
     },
     '10 11 99': {
       CDM_CODE: '8.7D',
@@ -457,7 +457,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '11 01 10': {
       CDM_CODE: '8.7D',
-      description: 'Lodos e tortas de filtro não abrangidos em 11 01 09 ',
+      description: 'Lodos e tortas de filtro não abrangidos em 11 01 09',
     },
     '11 01 99': {
       CDM_CODE: '8.7D',
@@ -477,51 +477,51 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '15 01 01': {
       CDM_CODE: '8.2',
-      description: 'Embalagens de papel e cartão ',
+      description: 'Embalagens de papel e cartão',
     },
     '15 01 02': {
       CDM_CODE: '8.6',
-      description: 'Embalagens de plástico ',
+      description: 'Embalagens de plástico',
     },
     '15 01 03': {
       CDM_CODE: '8.1',
-      description: 'Embalagens de madeira ',
+      description: 'Embalagens de madeira',
     },
     '15 01 04': {
       CDM_CODE: '8.6',
-      description: 'Embalagens de metal ',
+      description: 'Embalagens de metal',
     },
     '15 01 05': {
       CDM_CODE: '8.6',
-      description: 'Embalagens longa-vida ',
+      description: 'Embalagens longa-vida',
     },
     '15 01 06': {
       CDM_CODE: '8.6',
-      description: 'Misturas de embalagens ',
+      description: 'Misturas de embalagens',
     },
     '15 01 07': {
       CDM_CODE: '8.6',
-      description: 'Embalagens de vidro ',
+      description: 'Embalagens de vidro',
     },
     '15 01 09': {
       CDM_CODE: '8.4',
-      description: 'Embalagens têxteis ',
+      description: 'Embalagens têxteis',
     },
     '16 01 17': {
       CDM_CODE: '8.6',
-      description: 'Sucatas metálicas ferrosas ',
+      description: 'Sucatas metálicas ferrosas',
     },
     '16 01 18': {
       CDM_CODE: '8.6',
-      description: 'Sucatas metálicas não ferrosas ',
+      description: 'Sucatas metálicas não ferrosas',
     },
     '16 01 19': {
       CDM_CODE: '8.6',
-      description: 'Plástico ',
+      description: 'Plástico',
     },
     '16 01 20': {
       CDM_CODE: '8.6',
-      description: 'Vidro ',
+      description: 'Vidro',
     },
     '16 01 99': {
       CDM_CODE: '8.7D',
@@ -529,7 +529,7 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '16 03 06': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos orgânicos não abrangidos em 16 03 05 ',
+      description: 'Resíduos orgânicos não abrangidos em 16 03 05',
     },
     '16 07 99': {
       CDM_CODE: '8.7D',
@@ -537,90 +537,90 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '17 02 01': {
       CDM_CODE: '8.1',
-      description: 'Madeira ',
+      description: 'Madeira',
     },
     '17 02 02': {
       CDM_CODE: '8.6',
-      description: 'Vidro ',
+      description: 'Vidro',
     },
     '17 02 03': {
       CDM_CODE: '8.6',
-      description: 'Plástico ',
+      description: 'Plástico',
     },
     '17 04 01': {
       CDM_CODE: '8.6',
-      description: 'Cobre, bronze e latão ',
+      description: 'Cobre, bronze e latão',
     },
     '17 04 02': {
       CDM_CODE: '8.6',
-      description: 'Alumínio ',
+      description: 'Alumínio',
     },
     '17 04 03': {
       CDM_CODE: '8.6',
-      description: 'Chumbo ',
+      description: 'Chumbo',
     },
     '17 04 04': {
       CDM_CODE: '8.6',
-      description: 'Zinco ',
+      description: 'Zinco',
     },
     '17 04 05': {
       CDM_CODE: '8.6',
-      description: 'Ferro e aço ',
+      description: 'Ferro e aço',
     },
     '17 04 06': {
       CDM_CODE: '8.6',
-      description: 'Estanho ',
+      description: 'Estanho',
     },
     '17 04 07': {
       CDM_CODE: '8.6',
-      description: 'Mistura de sucatas ',
+      description: 'Mistura de sucatas',
     },
     '17 04 12': {
       CDM_CODE: '8.6',
-      description: 'Magnésio ',
+      description: 'Magnésio',
     },
     '17 04 13': {
       CDM_CODE: '8.6',
-      description: 'Níquel ',
+      description: 'Níquel',
     },
     '17 05 04': {
       CDM_CODE: '8.6',
-      description: 'Solos e rochas não abrangidos em 17 05 03 ',
+      description: 'Solos e rochas não abrangidos em 17 05 03',
     },
     '17 05 06': {
       CDM_CODE: '8.7D',
-      description: 'Lodos de dragagem não abrangidas em 17 05 05 ',
+      description: 'Lodos de dragagem não abrangidas em 17 05 05',
     },
     '17 05 08': {
       CDM_CODE: '8.6',
       description:
-        'Britas de linhas de ferroviárias  não abrangidos em 17 05 07 ',
+        'Britas de linhas de ferroviárias  não abrangidos em 17 05 07',
     },
     '17 06 04': {
       CDM_CODE: '8.6',
       description:
-        'Materiais de isolamento não abrangidos em 17 06 01 e 17 06 03 ',
+        'Materiais de isolamento não abrangidos em 17 06 01 e 17 06 03',
     },
     '17 09 04': {
       CDM_CODE: '8.6',
       description:
-        'Mistura de resíduos de construção e demolição não abrangidos em 17 09 01, 17 09 02 e 17 09 03 ',
+        'Mistura de resíduos de construção e demolição não abrangidos em 17 09 01, 17 09 02 e 17 09 03',
     },
     '19 01 02': {
       CDM_CODE: '8.6',
-      description: 'Materiais ferrosos removidos das cinzas ',
+      description: 'Materiais ferrosos removidos das cinzas',
     },
     '19 01 12': {
       CDM_CODE: '8.6',
-      description: 'Cinzas e escórias não abrangidas em 19 01 11 ',
+      description: 'Cinzas e escórias não abrangidas em 19 01 11',
     },
     '19 01 18': {
       CDM_CODE: '8.6',
-      description: 'Resíduos de pirólise não abrangidos em 19 01 17 ',
+      description: 'Resíduos de pirólise não abrangidos em 19 01 17',
     },
     '19 01 19': {
       CDM_CODE: '8.6',
-      description: 'Areias de leitos fluidizados ',
+      description: 'Areias de leitos fluidizados',
     },
     '19 01 99': {
       CDM_CODE: '8.7D',
@@ -628,13 +628,12 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 02 03': {
       CDM_CODE: '8.7D',
-      description:
-        'Misturas de resíduos contendo ape-s resíduos não perigosos ',
+      description: 'Misturas de resíduos contendo ape-s resíduos não perigosos',
     },
     '19 02 06': {
       CDM_CODE: '8.7D',
       description:
-        'Lodos de tratamento físico-químico não abrangidas em 19 02 05 ',
+        'Lodos de tratamento físico-químico não abrangidas em 19 02 05',
     },
     '19 02 99': {
       CDM_CODE: '8.7D',
@@ -642,27 +641,27 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 03 05': {
       CDM_CODE: '8.6',
-      description: 'Resíduos estabilizados não abrangidos em 19 03 04 ',
+      description: 'Resíduos estabilizados não abrangidos em 19 03 04',
     },
     '19 03 07': {
       CDM_CODE: '8.6',
-      description: 'Resíduos solidificados não abrangidos em 19 03 06 ',
+      description: 'Resíduos solidificados não abrangidos em 19 03 06',
     },
     '19 04 01': {
       CDM_CODE: '8.6',
-      description: 'Resíduos vitrificados ',
+      description: 'Resíduos vitrificados',
     },
     '19 05 01': {
       CDM_CODE: '8.7D',
-      description: 'Fração não compostada de resíduos urbanos e equiparados ',
+      description: 'Fração não compostada de resíduos urbanos e equiparados',
     },
     '19 05 02': {
       CDM_CODE: '8.7D',
-      description: 'Fração não compostada de resíduos animais e vegetais ',
+      description: 'Fração não compostada de resíduos animais e vegetais',
     },
     '19 05 03': {
       CDM_CODE: '8.7D',
-      description: 'Composto fora de especificação ',
+      description: 'Composto fora de especificação',
     },
     '19 05 99': {
       CDM_CODE: '8.7D',
@@ -671,22 +670,21 @@ export const WASTE_CLASSIFICATION_IDS = {
     '19 06 03': {
       CDM_CODE: '8.7C',
       description:
-        'Lodo do tratamento a-eróbio de resíduos urbanos e equiparados ',
+        'Lodo do tratamento a-eróbio de resíduos urbanos e equiparados',
     },
     '19 06 04': {
       CDM_CODE: '8.7C',
       description:
-        'Lamas e lodos de digestores de tratamento a-eróbio de resíduos urbanos e equiparados ',
+        'Lamas e lodos de digestores de tratamento a-eróbio de resíduos urbanos e equiparados',
     },
     '19 06 05': {
       CDM_CODE: '8.7B',
-      description:
-        'Lodo do tratamento a-eróbio de resíduos animais e vegetais ',
+      description: 'Lodo do tratamento a-eróbio de resíduos animais e vegetais',
     },
     '19 06 06': {
       CDM_CODE: '8.7B',
       description:
-        'Lamas e lodos de digestores de tratamento a-eróbio de resíduos animais e vegetais ',
+        'Lamas e lodos de digestores de tratamento a-eróbio de resíduos animais e vegetais',
     },
     '19 06 99': {
       CDM_CODE: '8.7B',
@@ -695,12 +693,12 @@ export const WASTE_CLASSIFICATION_IDS = {
     '19 07 02': {
       CDM_CODE: '8.7D',
       description:
-        '(*) Lixiviados ou líquidos percolados de aterros contendo substâncias perigosas ',
+        '(*) Lixiviados ou líquidos percolados de aterros contendo substâncias perigosas',
     },
     '19 07 03': {
       CDM_CODE: '8.7D',
       description:
-        'Lixiviados ou líquidos percolados de aterros não abrangidos em 19 07 02 ',
+        'Lixiviados ou líquidos percolados de aterros não abrangidos em 19 07 02',
     },
     '19 08 01': {
       CDM_CODE: '8.7D',
@@ -708,26 +706,26 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 08 02': {
       CDM_CODE: '8.6',
-      description: 'Resíduos do desare-mento ',
+      description: 'Resíduos do desare-mento',
     },
     '19 08 05': {
       CDM_CODE: '8.7C',
-      description: 'Lodos do tratamento de efluentes urbanos ',
+      description: 'Lodos do tratamento de efluentes urbanos',
     },
     '19 08 09': {
       CDM_CODE: '8.7B',
       description:
-        'Misturas de gorduras e óleos, da separação óleo/água, contendo ape-s óleos e gorduras alimentares ',
+        'Misturas de gorduras e óleos, da separação óleo/água, contendo ape-s óleos e gorduras alimentares',
     },
     '19 08 12': {
       CDM_CODE: '8.7D',
       description:
-        'Lodos do tratamento biológico de efluentes industriais não abrangidas em 19 08 11 ',
+        'Lodos do tratamento biológico de efluentes industriais não abrangidas em 19 08 11',
     },
     '19 08 14': {
       CDM_CODE: '8.7D',
       description:
-        'Lodos de outros tratamentos de efluentes industriais não abrangidas em 19 08 13 ',
+        'Lodos de outros tratamentos de efluentes industriais não abrangidas em 19 08 13',
     },
     '19 08 99': {
       CDM_CODE: '8.7D',
@@ -739,15 +737,15 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 09 04': {
       CDM_CODE: '8.6',
-      description: 'Carvão ativado usado ',
+      description: 'Carvão ativado usado',
     },
     '19 09 05': {
       CDM_CODE: '8.6',
-      description: 'Resi-s de troca iônica, saturadas ou usadas ',
+      description: 'Resi-s de troca iônica, saturadas ou usadas',
     },
     '19 09 06': {
       CDM_CODE: '8.7D',
-      description: 'Soluções e lodos da regeneração de colu-s de troca iônica ',
+      description: 'Soluções e lodos da regeneração de colu-s de troca iônica',
     },
     '19 09 99': {
       CDM_CODE: '8.7D',
@@ -755,20 +753,20 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 10 01': {
       CDM_CODE: '8.6',
-      description: 'Resíduos de ferro ou aço ',
+      description: 'Resíduos de ferro ou aço',
     },
     '19 10 02': {
       CDM_CODE: '8.7D',
-      description: 'Resíduos não ferrosos ',
+      description: 'Resíduos não ferrosos',
     },
     '19 10 06': {
       CDM_CODE: '8.7D',
-      description: 'Outras frações não abrangidas em 19 10 05 ',
+      description: 'Outras frações não abrangidas em 19 10 05',
     },
     '19 11 06': {
       CDM_CODE: '8.7C',
       description:
-        'Lodos do tratamento local de efluentes não abrangidas em 19 11 05 ',
+        'Lodos do tratamento local de efluentes não abrangidas em 19 11 05',
     },
     '19 11 99': {
       CDM_CODE: '8.7D',
@@ -780,23 +778,23 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 12 02': {
       CDM_CODE: '8.6',
-      description: 'Metais ferrosos ',
+      description: 'Metais ferrosos',
     },
     '19 12 03': {
       CDM_CODE: '8.6',
-      description: 'Metais não ferrosos ',
+      description: 'Metais não ferrosos',
     },
     '19 12 04': {
       CDM_CODE: '8.6',
-      description: 'Plásticos ',
+      description: 'Plásticos',
     },
     '19 12 05': {
       CDM_CODE: '8.6',
-      description: 'Vidro ',
+      description: 'Vidro',
     },
     '19 12 07': {
       CDM_CODE: '8.1',
-      description: 'Madeira não abrangida em 19 12 06 ',
+      description: 'Madeira não abrangida em 19 12 06',
     },
     '19 12 08': {
       CDM_CODE: '8.4',
@@ -804,41 +802,40 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '19 12 09': {
       CDM_CODE: '8.6',
-      description: 'Substâncias minerais (por exemplo, areia, rochas) ',
+      description: 'Substâncias minerais (por exemplo, areia, rochas)',
     },
     '19 12 10': {
       CDM_CODE: '8.7D',
-      description:
-        'Resíduos combustíveis (combustíveis derivados de resíduos) ',
+      description: 'Resíduos combustíveis (combustíveis derivados de resíduos)',
     },
     '19 12 11': {
       CDM_CODE: '8.6',
-      description: 'Borrachas ',
+      description: 'Borrachas',
     },
     '19 12 13': {
       CDM_CODE: '8.7D',
       description:
-        'Outros resíduos (incluindo misturas de materiais) do tratamento mecânico de resíduos não abrangidos em 19 12 12 ',
+        'Outros resíduos (incluindo misturas de materiais) do tratamento mecânico de resíduos não abrangidos em 19 12 12',
     },
     '19 13 02': {
       CDM_CODE: '8.7D',
       description:
-        'Resíduos sólidos da descontami-ção de solos não abrangidos em 19 13 01 ',
+        'Resíduos sólidos da descontami-ção de solos não abrangidos em 19 13 01',
     },
     '19 13 04': {
       CDM_CODE: '8.7D',
       description:
-        'Lodos da descontami-ção de solos não abrangidas em 19 13 03 ',
+        'Lodos da descontami-ção de solos não abrangidas em 19 13 03',
     },
     '19 13 06': {
       CDM_CODE: '8.7D',
       description:
-        'Lodos da descontami-ção de águas freáticas não abrangidas em 19 13 05 ',
+        'Lodos da descontami-ção de águas freáticas não abrangidas em 19 13 05',
     },
     '19 13 08': {
       CDM_CODE: '8.7D',
       description:
-        'Resíduos líquidos aquosos e concentrados aquosos da descontami-ção de águas freáticas não abrangidos em 19 13 07 ',
+        'Resíduos líquidos aquosos e concentrados aquosos da descontami-ção de águas freáticas não abrangidos em 19 13 07',
     },
     '20 01 01': {
       CDM_CODE: '8.2',
@@ -846,15 +843,15 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '20 01 02': {
       CDM_CODE: '8.6',
-      description: 'Vidro ',
+      description: 'Vidro',
     },
     '20 01 08': {
       CDM_CODE: '8.3',
-      description: 'Resíduos biodegradáveis de cozinhas e canti-s ',
+      description: 'Resíduos biodegradáveis de cozinhas e canti-s',
     },
     '20 01 10': {
       CDM_CODE: '8.4',
-      description: 'Roupas ',
+      description: 'Roupas',
     },
     '20 01 11': {
       CDM_CODE: '8.4',
@@ -862,64 +859,64 @@ export const WASTE_CLASSIFICATION_IDS = {
     },
     '20 01 25': {
       CDM_CODE: '8.3',
-      description: 'Óleos e gorduras alimentares ',
+      description: 'Óleos e gorduras alimentares',
     },
     '20 01 38': {
       CDM_CODE: '8.1',
-      description: 'Madeira não abrangida em 20 01 37 ',
+      description: 'Madeira não abrangida em 20 01 37',
     },
     '20 01 39': {
       CDM_CODE: '8.6',
-      description: 'Plásticos ',
+      description: 'Plásticos',
     },
     '20 01 40': {
       CDM_CODE: '8.6',
-      description: 'Metais ',
+      description: 'Metais',
     },
     '20 01 99': {
       CDM_CODE: '8.7D',
-      description: 'Outras frações não anteriormente especificadas ',
+      description: 'Outras frações não anteriormente especificadas',
     },
     '20 02 01': {
       CDM_CODE: '8.5',
       description:
-        'Resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- biodegradáveis ',
+        'Resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- biodegradáveis',
     },
     '20 02 02': {
       CDM_CODE: '8.6',
-      description: 'Terras e pedras ',
+      description: 'Terras e pedras',
     },
     '20 02 03': {
       CDM_CODE: '8.6',
       description:
-        'Outros resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- não biodegradáveis ',
+        'Outros resíduos de varrição, limpeza de logradouros e vias públicas e outros serviços de limpeza urba- não biodegradáveis',
     },
     '20 03 01': {
       CDM_CODE: '8.7D',
       description:
-        'Outros resíduos urbanos e equiparados, incluindo misturas de resíduos ',
+        'Outros resíduos urbanos e equiparados, incluindo misturas de resíduos',
     },
     '20 03 02': {
       CDM_CODE: '8.3',
-      description: 'Resíduos de mercados públicos e feiras ',
+      description: 'Resíduos de mercados públicos e feiras',
     },
     '20 03 03': {
       CDM_CODE: '8.7D',
       description:
-        'Resíduos da limpeza de ruas e de galerias de dre-gem pluvial ',
+        'Resíduos da limpeza de ruas e de galerias de dre-gem pluvial',
     },
     '20 03 04': {
       CDM_CODE: '8.7C',
-      description: 'Lodos de fossas sépticas ',
+      description: 'Lodos de fossas sépticas',
     },
     '20 03 06': {
       CDM_CODE: '8.7C',
-      description: 'Resíduos da limpeza de esgotos, bueiros e bocas-de-lobo ',
+      description: 'Resíduos da limpeza de esgotos, bueiros e bocas-de-lobo',
     },
     '20 03 99': {
       CDM_CODE: '8.7D',
       description:
-        'Resíduos urbanos e equiparados não anteriormente especificados ',
+        'Resíduos urbanos e equiparados não anteriormente especificados',
     },
   },
 } as const;
