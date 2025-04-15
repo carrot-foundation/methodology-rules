@@ -89,7 +89,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
         id as keyof typeof WASTE_CLASSIFICATION_IDS.BR
       ].description;
 
-    if (description !== expectedDescription) {
+    if (description.trim() !== expectedDescription.trim()) {
       return this.isRejected(
         RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
       );
