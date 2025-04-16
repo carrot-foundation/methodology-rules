@@ -11,7 +11,7 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { WASTE_CLASSIFICATION_IDS } from './local-waste-classification.constants';
+import { WASTE_CLASSIFICATION_CODES } from './local-waste-classification.constants';
 import { RESULT_COMMENTS } from './local-waste-classification.processor';
 
 const {
@@ -22,6 +22,8 @@ const {
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 
+const randomId = faker.lorem.word();
+const randomDescription = faker.lorem.sentence();
 const brazilianRecyclerEvent = stubDocumentEvent({
   address: stubAddress({
     countryCode: 'BR',
@@ -46,12 +48,17 @@ export const localWasteClassificationTestCases = [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [
             LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-            WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
+            WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
           ],
         ],
       }),
     },
     resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultContent: {
+      description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
+      id: '02 01 01',
+      recyclerCountryCode: 'BR',
+    },
     resultStatus: RuleOutputStatus.APPROVED,
     scenario:
       'the local waste classification ID and description match an IBAMA code.',
@@ -61,15 +68,43 @@ export const localWasteClassificationTestCases = [
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
+          [LOCAL_WASTE_CLASSIFICATION_ID, '020101'],
+          [
+            LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+            WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
+          ],
+        ],
+      }),
+    },
+    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultContent: {
+      description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
+      id: '020101',
+      recyclerCountryCode: 'BR',
+    },
+    resultStatus: RuleOutputStatus.APPROVED,
+    scenario:
+      'the local waste classification ID and description match the IBAMA code without spaces.',
+  },
+  {
+    events: {
+      [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+      [PICK_UP]: stubBoldMassIdPickUpEvent({
+        metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
           [
             LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-            WASTE_CLASSIFICATION_IDS.BR['02 01 01'].description,
+            WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
           ],
         ],
       }),
     },
     resultComment: RESULT_COMMENTS.CLASSIFICATION_ID_MISSING,
+    resultContent: {
+      description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
+      id: undefined,
+      recyclerCountryCode: 'BR',
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the local waste classification ID is missing.',
   },
@@ -84,6 +119,11 @@ export const localWasteClassificationTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.CLASSIFICATION_DESCRIPTION_MISSING,
+    resultContent: {
+      description: undefined,
+      id: '02 01 01',
+      recyclerCountryCode: 'BR',
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the local waste classification description is missing.',
   },
@@ -93,11 +133,16 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
         ],
       }),
     },
     resultComment: RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
+    resultContent: {
+      description: randomDescription,
+      id: '02 01 01',
+      recyclerCountryCode: 'BR',
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario:
       'the local waste classification description does not match the expected IBAMA code.',
@@ -108,11 +153,16 @@ export const localWasteClassificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
         ],
       }),
     },
     resultComment: RESULT_COMMENTS.UNSUPPORTED_COUNTRY('US'),
+    resultContent: {
+      description: randomDescription,
+      id: '02 01 01',
+      recyclerCountryCode: 'US',
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the recycler is not from Brazil.',
   },
@@ -121,12 +171,17 @@ export const localWasteClassificationTestCases = [
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
-          [LOCAL_WASTE_CLASSIFICATION_ID, faker.lorem.word()],
-          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
+          [LOCAL_WASTE_CLASSIFICATION_ID, randomId],
+          [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
         ],
       }),
     },
     resultComment: RESULT_COMMENTS.INVALID_CLASSIFICATION_ID,
+    resultContent: {
+      description: randomDescription,
+      id: randomId,
+      recyclerCountryCode: 'BR',
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the local waste classification ID is not valid.',
   },

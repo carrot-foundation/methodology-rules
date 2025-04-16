@@ -18,7 +18,7 @@ describe('LocalWasteClassificationProcessor', () => {
 
   it.each(localWasteClassificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultComment, resultStatus }) => {
+    async ({ events, resultComment, resultContent, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
@@ -36,6 +36,7 @@ describe('LocalWasteClassificationProcessor', () => {
         responseToken: ruleInput.responseToken,
         responseUrl: ruleInput.responseUrl,
         resultComment,
+        resultContent,
         resultStatus,
       };
 
