@@ -1,5 +1,4 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -17,7 +16,7 @@ import {
   MASS_ID,
   PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -26,6 +25,10 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import {
+  MethodologyDocumentEventLabel,
+  type NonEmptyString,
+} from '@carrot-fndn/shared/types';
 import { assert } from 'typia';
 
 import { ParticipantHomologationsProcessorErrors } from './participant-homologations.errors';
@@ -122,7 +125,14 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
 
     const actorParticipants: Map<string, string> = new Map(
       massIdDocument.externalEvents
-        .filter((event) => isActorEvent(event))
+        .filter(
+          eventLabelIsAnyOf([
+            MethodologyDocumentEventLabel.HAULER,
+            MethodologyDocumentEventLabel.PROCESSOR,
+            MethodologyDocumentEventLabel.RECYCLER,
+            MethodologyDocumentEventLabel.WASTE_GENERATOR,
+          ]),
+        )
         .map((event) => [
           event.participant.id,
           assert<NonEmptyString>(event.label),
