@@ -8,7 +8,7 @@ const PAPER_CARDBOARD = 'Papel e cartão';
 const WASHING_CLEANING_SLUDGE = 'Lodos provenientes da lavagem e limpeza';
 const WASTE_FROM_SCREENING = 'Resíduos retirados da fase de gradeamento';
 
-export const WASTE_CLASSIFICATION_IDS = {
+export const WASTE_CLASSIFICATION_CODES = {
   BR: {
     '02 01 01': {
       CDM_CODE: '8.7B',
