@@ -189,15 +189,13 @@ const validators: Record<string, Validator> = {
 
   containerQuantity: (values) => {
     const errors: string[] = [];
+    const isTruck = values.vehicleType === TRUCK;
 
-    if (
-      values.vehicleType === TRUCK &&
-      isNonZeroPositiveInt(values.containerQuantity)
-    ) {
+    if (isTruck && isNonZeroPositiveInt(values.containerQuantity)) {
       errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
-    if (!isNonZeroPositiveInt(values.containerQuantity)) {
+    if (!isTruck && !isNonZeroPositiveInt(values.containerQuantity)) {
       errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
