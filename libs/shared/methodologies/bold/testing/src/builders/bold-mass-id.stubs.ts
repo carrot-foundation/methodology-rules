@@ -66,7 +66,6 @@ const {
   ISSUE_DATE,
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-  MASS_NET_WEIGHT,
   RECEIVING_OPERATOR_IDENTIFIER,
   RECYCLER_OPERATOR_IDENTIFIER,
   SCALE_HOMOLOGATION,
@@ -172,11 +171,6 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   {
     format: KILOGRAM,
     name: GROSS_WEIGHT,
-    value: faker.number.float({ min: 1 }),
-  },
-  {
-    format: KILOGRAM,
-    name: MASS_NET_WEIGHT,
     value: faker.number.float({ min: 1 }),
   },
   {

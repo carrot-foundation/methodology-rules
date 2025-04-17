@@ -93,7 +93,6 @@ export enum DocumentEventAttributeName {
   ISSUE_DATE = 'Issue Date',
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION = 'Local Waste Classification Description',
   LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
-  MASS_NET_WEIGHT = 'Mass Net Weight',
   METHODOLOGY_SLUG = 'Methodology Slug',
   RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',

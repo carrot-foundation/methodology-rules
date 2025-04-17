@@ -47,7 +47,6 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
-  MASS_NET_WEIGHT,
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
@@ -61,9 +60,9 @@ export interface WeighingValues {
   containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
   containerType: string | undefined;
   description: MethodologyDocumentEventAttributeValue | undefined;
+  eventValue: number | undefined;
   grossWeight: MethodologyDocumentEventAttribute | undefined;
   homologationScaleType: MethodologyDocumentEventAttributeValue | undefined;
-  massNetWeight: MethodologyDocumentEventAttribute | undefined;
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
@@ -140,9 +139,9 @@ export const getValuesRelatedToWeighing = (
     CONTAINER_TYPE,
   )?.toString(),
   description: getEventAttributeValue(weighingEvent, DESCRIPTION),
+  eventValue: weighingEvent.value,
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
   homologationScaleType: getHomologationScaleType(recyclerHomologationDocument),
-  massNetWeight: getEventAttributeByName(weighingEvent, MASS_NET_WEIGHT),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
   tare: getEventAttributeByName(weighingEvent, TARE),
   vehicleLicensePlateAttribute: getEventAttributeByName(
@@ -229,6 +228,16 @@ const validators: Record<string, Validator> = {
       ? { errors: [] }
       : { errors: [WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION] },
 
+  eventValue: (values) => {
+    const errors: string[] = [];
+
+    if (!isNonZeroPositive(values.eventValue)) {
+      errors.push(WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(values.eventValue));
+    }
+
+    return { errors };
+  },
+
   grossWeight: (values) => {
     const errors: string[] = [];
 
@@ -245,35 +254,18 @@ const validators: Record<string, Validator> = {
     return { errors };
   },
 
-  massNetWeight: (values) => {
-    const errors: string[] = [];
-
-    if (!hasPositiveFloatAttributeValue(values.massNetWeight)) {
-      errors.push(
-        WRONG_FORMAT_RESULT_COMMENTS.MASS_NET_WEIGHT(
-          values.massNetWeight?.value,
-        ),
-      );
-    }
-
-    if (!hasValidAttributeFormat(values.massNetWeight)) {
-      errors.push(INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT);
-    }
-
-    return { errors };
-  },
-
   netWeightCalculation: (values) => {
     if (
       isNil(values.grossWeight?.value) ||
       isNil(values.tare?.value) ||
       isNil(values.containerQuantity) ||
-      isNil(values.massNetWeight?.value)
+      isNil(values.eventValue) ||
+      values.eventValue === 0
     ) {
       return { errors: [] };
     }
 
-    const massNetWeight = Number(values.massNetWeight.value);
+    const massNetWeight = Number(values.eventValue);
     const grossWeight = Number(values.grossWeight.value);
     const tare = Number(values.tare.value);
     const containerQuantity = Number(values.containerQuantity);
@@ -287,8 +279,8 @@ const validators: Record<string, Validator> = {
           INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
             calculatedNetWeight,
             containerQuantity,
+            eventValue: values.eventValue,
             grossWeight,
-            massNetWeight,
             tare,
           }),
         ],

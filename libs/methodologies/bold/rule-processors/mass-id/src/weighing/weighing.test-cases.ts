@@ -41,7 +41,6 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
-  MASS_NET_WEIGHT,
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
@@ -103,6 +102,7 @@ const stubBaseHomologationDocuments = ({
     ],
   ]);
 
+const eventValue = 99;
 const validWeighingAttributes: MetadataAttributeParameter[] = [
   [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
   [SCALE_TYPE, scaleType],
@@ -111,11 +111,6 @@ const validWeighingAttributes: MetadataAttributeParameter[] = [
     format: KILOGRAM,
     name: GROSS_WEIGHT,
     value: 100,
-  },
-  {
-    format: KILOGRAM,
-    name: MASS_NET_WEIGHT,
-    value: 99,
   },
   {
     format: KILOGRAM,
@@ -156,7 +151,10 @@ export const weighingTestCases = [
     ]),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [...validWeighingAttributes],
+        metadataAttributes: validWeighingAttributes,
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
@@ -171,6 +169,9 @@ export const weighingTestCases = [
           [CONTAINER_CAPACITY, undefined],
           ...validWeighingAttributes,
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
@@ -186,6 +187,9 @@ export const weighingTestCases = [
           ...validWeighingAttributes,
           [CONTAINER_QUANTITY, undefined],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
@@ -206,6 +210,9 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [[VEHICLE_TYPE, CAR], ...validWeighingAttributes],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
@@ -221,6 +228,9 @@ export const weighingTestCases = [
           [VEHICLE_TYPE, TRUCK],
           ...validWeighingAttributes,
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
@@ -235,6 +245,9 @@ export const weighingTestCases = [
           ...validWeighingAttributes,
           [GROSS_WEIGHT, undefined],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
@@ -245,21 +258,24 @@ export const weighingTestCases = [
     homologationDocuments: stubBaseHomologationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [
-          ...validWeighingAttributes,
-          [MASS_NET_WEIGHT, undefined],
-        ],
+        metadataAttributes: validWeighingAttributes,
+        partialDocumentEvent: {
+          value: 0,
+        },
       }),
     },
-    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.MASS_NET_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.MASS_NET_WEIGHT_FORMAT}`,
+    resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the ${MASS_NET_WEIGHT} attribute is missing`,
+    scenario: `the event value field is missing`,
   },
   {
     homologationDocuments: stubBaseHomologationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [...validWeighingAttributes, [TARE, undefined]],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
@@ -274,6 +290,9 @@ export const weighingTestCases = [
           [DESCRIPTION, undefined],
           ...validWeighingAttributes,
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
@@ -285,6 +304,9 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [[DESCRIPTION, ''], ...validWeighingAttributes],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
@@ -300,6 +322,9 @@ export const weighingTestCases = [
           ...validWeighingAttributes,
           [SCALE_TYPE, scaleTypeMismatch],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: `${INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
@@ -318,6 +343,9 @@ export const weighingTestCases = [
           [WEIGHING_CAPTURE_METHOD, weighingCaptureMethodMismatch],
           [SCALE_TYPE, scaleType],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
@@ -334,6 +362,9 @@ export const weighingTestCases = [
           [VEHICLE_LICENSE_PLATE, undefined],
           ...validWeighingAttributes,
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: `${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT} ${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE}`,
@@ -348,6 +379,9 @@ export const weighingTestCases = [
           [CONTAINER_TYPE, undefined],
           ...validWeighingAttributes,
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
@@ -358,7 +392,10 @@ export const weighingTestCases = [
     homologationDocuments: stubBaseHomologationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [...validWeighingAttributes],
+        metadataAttributes: validWeighingAttributes,
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: APPROVED_RESULT_COMMENTS.SINGLE_STEP,
@@ -375,6 +412,9 @@ export const weighingTestCases = [
           ...validWeighingAttributes,
           [CONTAINER_CAPACITY, undefined],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(
@@ -394,6 +434,9 @@ export const weighingTestCases = [
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -401,6 +444,9 @@ export const weighingTestCases = [
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment:
@@ -423,6 +469,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
@@ -434,6 +481,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
     },
@@ -456,6 +504,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
@@ -466,6 +515,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
     },
@@ -486,6 +536,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
@@ -501,6 +552,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
     },
@@ -525,6 +577,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
@@ -535,6 +588,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
     },
@@ -557,6 +611,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
@@ -567,6 +622,7 @@ export const weighingTestCases = [
         ],
         partialDocumentEvent: {
           participant: twoStepWeighingEventParticipant,
+          value: eventValue,
         },
       }),
     },
@@ -590,6 +646,9 @@ export const weighingTestCases = [
           ],
           [SCALE_TYPE, scaleType],
         ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
       }),
     },
     resultComment: APPROVED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
@@ -600,46 +659,21 @@ export const weighingTestCases = [
     homologationDocuments: stubBaseHomologationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [
-          ...validWeighingAttributes,
-          {
-            format: KILOGRAM,
-            name: MASS_NET_WEIGHT,
-            value: 98,
-          },
-        ],
+        metadataAttributes: validWeighingAttributes,
+        partialDocumentEvent: {
+          value: 98,
+        },
       }),
     },
     resultComment: INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
       calculatedNetWeight: 99,
       containerQuantity: 1,
+      eventValue: 98,
       grossWeight: 100,
-      massNetWeight: 98,
       tare: 1,
     }),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: 'the calculated net weight is not equal to the mass net weight',
-  },
-];
-
-export const temporary = [
-  {
-    homologationDocuments: stubBaseHomologationDocuments({
-      withContainerCapacityException: true,
-    }),
-    massIdDocumentEvents: {
-      [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [
-          ...validWeighingAttributes,
-          [CONTAINER_CAPACITY, undefined],
-        ],
-      }),
-    },
-    resultComment: APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(
-      APPROVED_RESULT_COMMENTS.SINGLE_STEP,
-    ),
-    resultStatus: RuleOutputStatus.APPROVED,
-    scenario: `the one step ${WEIGHING} event is valid with container capacity exception`,
   },
 ];
 

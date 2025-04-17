@@ -14,7 +14,6 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
-  MASS_NET_WEIGHT,
   SCALE_HOMOLOGATION,
   SCALE_TYPE,
   TARE,
@@ -42,21 +41,20 @@ export const INVALID_RESULT_COMMENTS = {
   CONTAINER_CAPACITY_FORMAT: `The "${CONTAINER_CAPACITY}" format must be one of the supported formats: ${supportedFormats}.`,
   CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must not be declared when the "${VEHICLE_TYPE}" is "${TRUCK}".`,
   GROSS_WEIGHT_FORMAT: `The "${GROSS_WEIGHT}" format must be one of the supported formats: ${supportedFormats}.`,
-  MASS_NET_WEIGHT_FORMAT: `The "${MASS_NET_WEIGHT}" format must be one of the supported formats: ${supportedFormats}.`,
   NET_WEIGHT_CALCULATION: ({
     calculatedNetWeight,
     containerQuantity,
+    eventValue,
     grossWeight,
-    massNetWeight,
     tare,
   }: {
     calculatedNetWeight: number;
     containerQuantity: number;
+    eventValue: number;
     grossWeight: number;
-    massNetWeight: number;
     tare: number;
   }) =>
-    `The calculated net weight (${calculatedNetWeight}) differs from the declared "${MASS_NET_WEIGHT}" (${massNetWeight}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE}kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
+    `The calculated net weight (${calculatedNetWeight}) differs from the declared "Event Value" (${eventValue}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE}kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
   SCALE_TYPE: (scaleType: unknown) =>
     `The "${SCALE_TYPE}" "${String(scaleType)}" is not supported by the methodology.`,
   SCALE_TYPE_MISMATCH: (scaleType: unknown, homologationScaleType: unknown) =>
@@ -89,10 +87,10 @@ export const WRONG_FORMAT_RESULT_COMMENTS = {
   CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must be greater than 0 unless the "${VEHICLE_TYPE}" is "${TRUCK}".`,
   CONTAINER_TYPE: `The "${CONTAINER_TYPE}" must be provided.`,
   DESCRIPTION: `The "${WEIGHING}" event must have a "${DESCRIPTION}", but none was provided.`,
+  EVENT_VALUE: (eventValue: unknown) =>
+    `The "Event Value" must be provided and greater than 0. Received "${String(eventValue)}".`,
   GROSS_WEIGHT: (grossWeight: unknown) =>
-    `The "${GROSS_WEIGHT}" must be provided and greater than 0. Received "${String(grossWeight)}"`,
-  MASS_NET_WEIGHT: (massNetWeight: unknown) =>
-    `The "${MASS_NET_WEIGHT}" must be provided and greater than 0. Received "${String(massNetWeight)}"`,
+    `The "${GROSS_WEIGHT}" must be provided and greater than 0. Received "${String(grossWeight)}".`,
   TARE: (tare: unknown) =>
     `The "${TARE}" must be provided and greater than 0. Received "${String(tare)}"`,
 } as const;
