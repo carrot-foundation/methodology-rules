@@ -11,7 +11,7 @@ import {
   DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
   DocumentType,
-  MassSubtype,
+  MassIdSubtype,
   MeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -347,7 +347,7 @@ export const stubBoldMassIdDocument = ({
           ...(partialDocument?.externalEvents ?? []),
         ],
         measurementUnit: MeasurementUnit.KG,
-        subtype: stubEnumValue(MassSubtype),
+        subtype: stubEnumValue(MassIdSubtype),
         type: DocumentType.ORGANIC,
       },
       false,

@@ -20,27 +20,41 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
-export enum DocumentSubtype {
-  AGRO_INDUSTRIAL = 'Agro-industrial',
-  ANIMAL_MANURE = 'Animal Manure',
-  ANIMAL_WASTE_MANAGEMENT = 'Animal Waste Management',
+export enum MassIdSubtype {
   DOMESTIC_SLUDGE = 'Domestic Sludge',
-  FOOD_WASTE = 'Food Waste',
-  GARDEN_AND_PARK_WASTE = 'Garden and Park Waste',
+  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = 'EFB similar to Garden, Yard and Park Waste',
+  FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
+  GARDEN_YARD_AND_PARK_WASTE = 'Garden, Yard and Park Waste',
+  GLASS_PLASTIC_METAL_OTHER_INERT_WASTE = 'Glass, Plastic, Metal, Other Inert Waste',
+  INDUSTRIAL_SLUDGE = 'Industrial Sludge',
+  OTHERS = 'Others',
+  PULP_PAPER_AND_CARDBOARD = 'Pulp, Paper and Cardboard',
+  TEXTILES = 'Textiles',
+  TOBACCO = 'Tobacco',
+  WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
+}
+
+export enum DocumentSubtype {
+  DOMESTIC_SLUDGE = MassIdSubtype.DOMESTIC_SLUDGE,
+  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIdSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
+  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIdSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+  GARDEN_YARD_AND_PARK_WASTE = MassIdSubtype.GARDEN_YARD_AND_PARK_WASTE,
+  GLASS_PLASTIC_METAL_OTHER_INERT_WASTE = MassIdSubtype.GLASS_PLASTIC_METAL_OTHER_INERT_WASTE,
   GROUP = 'Group',
   HAULER = 'Hauler',
-  INDUSTRIAL_FOOD_WASTE = 'Industrial Food-Waste',
-  INDUSTRIAL_SLUDGE = 'Industrial Sludge',
-  OTHER_NON_DANGEROUS_ORGANICS = 'Other Non-Dangerous Organics',
+  INDUSTRIAL_SLUDGE = MassIdSubtype.INDUSTRIAL_SLUDGE,
+  OTHERS = MassIdSubtype.OTHERS,
   PROCESS = 'Process',
   PROCESSOR = 'Processor',
+  PULP_PAPER_AND_CARDBOARD = MassIdSubtype.PULP_PAPER_AND_CARDBOARD,
   RECYCLER = 'Recycler',
   SOURCE = 'Source',
   TCC = 'TCC',
+  TEXTILES = MassIdSubtype.TEXTILES,
+  TOBACCO = MassIdSubtype.TOBACCO,
   TRC = 'TRC',
   WASTE_GENERATOR = 'Waste Generator',
-  WOOD = 'Wood',
-  WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
+  WOOD_AND_WOOD_PRODUCTS = MassIdSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
 export enum MassIdDocumentActorType {
@@ -48,20 +62,6 @@ export enum MassIdDocumentActorType {
   PROCESSOR = DocumentSubtype.PROCESSOR,
   RECYCLER = DocumentSubtype.RECYCLER,
   WASTE_GENERATOR = DocumentSubtype.WASTE_GENERATOR,
-}
-
-export enum MassSubtype {
-  AGRO_INDUSTRIAL = DocumentSubtype.AGRO_INDUSTRIAL,
-  ANIMAL_MANURE = DocumentSubtype.ANIMAL_MANURE,
-  ANIMAL_WASTE_MANAGEMENT = DocumentSubtype.ANIMAL_WASTE_MANAGEMENT,
-  DOMESTIC_SLUDGE = DocumentSubtype.DOMESTIC_SLUDGE,
-  FOOD_WASTE = DocumentSubtype.FOOD_WASTE,
-  GARDEN_AND_PARK_WASTE = DocumentSubtype.GARDEN_AND_PARK_WASTE,
-  INDUSTRIAL_FOOD_WASTE = DocumentSubtype.INDUSTRIAL_FOOD_WASTE,
-  INDUSTRIAL_SLUDGE = DocumentSubtype.INDUSTRIAL_SLUDGE,
-  OTHER_NON_DANGEROUS_ORGANICS = DocumentSubtype.OTHER_NON_DANGEROUS_ORGANICS,
-  WOOD = DocumentSubtype.WOOD,
-  WOOD_AND_WOOD_PRODUCTS = DocumentSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
 export enum MeasurementUnit {

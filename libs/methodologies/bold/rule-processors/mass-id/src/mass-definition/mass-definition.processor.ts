@@ -6,14 +6,14 @@ import {
   type Document,
   DocumentCategory,
   DocumentType,
-  MassSubtype,
+  MassIdSubtype,
   MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 
-const ALLOWED_SUBTYPES: string[] = Object.values(MassSubtype);
+const ALLOWED_SUBTYPES: string[] = Object.values(MassIdSubtype);
 
 const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;
