@@ -41,7 +41,8 @@ const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
   DocumentType;
-const { FOOD_WASTE, GROUP, PROCESS, TCC, TRC } = DocumentSubtype;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS, TCC, TRC } =
+  DocumentSubtype;
 
 export interface BoldStubsBuilderOptions {
   actorParticipants?: Map<string, MethodologyParticipant>;
@@ -242,7 +243,7 @@ export class BoldStubsBuilder {
     return {
       category: MASS_ID,
       documentId: this.massIdDocumentId,
-      subtype: FOOD_WASTE,
+      subtype: FOOD_FOOD_WASTE_AND_BEVERAGES,
       type: ORGANIC,
     };
   }

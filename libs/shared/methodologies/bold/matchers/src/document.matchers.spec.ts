@@ -23,7 +23,7 @@ describe('Document Matchers', () => {
     it('should return true if document has the same values passed in match', () => {
       const documentMatch: DocumentMatch = {
         category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.AGRO_INDUSTRIAL,
+        subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         type: DocumentType.ORGANIC,
       };
       const documentReference = stubDocumentReference(documentMatch);
@@ -38,7 +38,7 @@ describe('Document Matchers', () => {
     it('should return false if document has at least one value different from those passed in match', () => {
       const documentMatch: DocumentMatch = {
         category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.AGRO_INDUSTRIAL,
+        subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         type: DocumentType.ORGANIC,
       };
       const documentReference = stubDocumentReference(documentMatch);

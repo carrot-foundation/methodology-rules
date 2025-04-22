@@ -1,7 +1,7 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { MassSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MassIdSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -27,14 +27,14 @@ describe('MassDefinitionProcessor', () => {
       expect(result).toBe(false);
     });
 
-    it('should return true when subtype is in MassSubtype enum', () => {
-      const validSubtype = stubEnumValue(MassSubtype);
+    it('should return true when subtype is in MassIdSubtype enum', () => {
+      const validSubtype = stubEnumValue(MassIdSubtype);
       const result = ruleDataProcessor['isValidSubtype'](validSubtype);
 
       expect(result).toBe(true);
     });
 
-    it('should return false when subtype is not in MassSubtype enum', () => {
+    it('should return false when subtype is not in MassIdSubtype enum', () => {
       const result = ruleDataProcessor['isValidSubtype'](
         'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
       );
