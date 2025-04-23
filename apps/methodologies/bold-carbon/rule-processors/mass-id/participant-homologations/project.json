@@ -1,0 +1,14 @@
+{
+  "name": "methodologies-bold-carbon-rule-processors-mass-id-participant-homologations",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["methodology:bold", "processor:mass-id", "type:app"],
+  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/participant-homologations/src",
+  "projectType": "application",
+  "targets": {
+    "build-lambda": {},
+    "lint": {},
+    "package-lambda": {},
+    "upload-lambda": {},
+    "ts": {}
+  }
+}
