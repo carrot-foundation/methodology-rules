@@ -10,7 +10,7 @@
  *   pnpm apply-methodology-rule <methodology-name> <rule-name> <scope>
  *
  * Example:
- *   pnpm apply-methodology-rule carbon-organic geolocation-precision mass-id
+ *   pnpm apply-methodology-rule carbon geolocation-precision mass-id
  */
 
 const fs = require('fs');
@@ -35,12 +35,12 @@ Methodology Rule Application
 Usage: apply-methodology-rule <methodology-name> <rule-name> <scope>
 
 Arguments:
-  methodology-name  The name of the bold methodology (e.g., carbon-organic, recycling-organic)
+  methodology-name  The name of the bold methodology (e.g., carbon, recycling)
   rule-name         The name of the rule to apply (must exist in @rule-processors)
   scope             The scope of the rule (e.g., mass-id)
 
 Example:
-  apply-methodology-rule carbon-organic geolocation-precision mass-id
+  apply-methodology-rule carbon geolocation-precision mass-id
   `);
   process.exit(0);
 }
