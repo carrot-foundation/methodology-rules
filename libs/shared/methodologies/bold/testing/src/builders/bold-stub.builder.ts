@@ -54,11 +54,11 @@ export interface BoldStubsBuilderResult {
   creditDocuments: Document[];
   creditDocumentsStubs: Document[];
   massIdActorParticipants: Map<string, MethodologyParticipant>;
+  massIdActorParticipantsAddresses: Map<string, MethodologyAddress>;
   massIdAuditDocument: Document;
   massIdAuditId: string;
   massIdDocument: Document;
   massIdDocumentId: string;
-  massIdactorParticipantsAddresses: Map<string, MethodologyAddress>;
   methodologyActorParticipants: Map<string, MethodologyParticipant>;
   methodologyDocument: Document | undefined;
   participantsHomologationDocuments: Map<string, Document>;
@@ -398,11 +398,11 @@ export class BoldStubsBuilder {
       creditDocuments: this.creditDocuments,
       creditDocumentsStubs: this.creditDocumentsStubs,
       massIdActorParticipants: this.massIdActorParticipants,
+      massIdActorParticipantsAddresses: this.massIdActorParticipantsAddresses,
       massIdAuditDocument: this.massIdAuditDocument,
       massIdAuditId: this.massIdAuditDocumentId,
       massIdDocument: this.massIdDocument,
       massIdDocumentId: this.massIdDocumentId,
-      massIdactorParticipantsAddresses: this.massIdActorParticipantsAddresses,
       methodologyActorParticipants: this.methodologyActorParticipants,
       methodologyDocument: this.methodologyDocument,
       participantsHomologationDocuments: this.participantsHomologationDocuments,
