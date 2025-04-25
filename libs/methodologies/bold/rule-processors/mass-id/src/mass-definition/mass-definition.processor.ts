@@ -6,14 +6,14 @@ import {
   type Document,
   DocumentCategory,
   DocumentType,
-  MassIdSubtype,
+  MassIdOrganicSubtype,
   MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 
-const ALLOWED_SUBTYPES: string[] = Object.values(MassIdSubtype);
+const ALLOWED_SUBTYPES: string[] = Object.values(MassIdOrganicSubtype);
 
 const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;
@@ -26,8 +26,8 @@ export const RESULT_COMMENTS = {
     `The document category must be "${MASS_ID}", but "${category}" was provided.`,
   INVALID_MEASUREMENT_UNIT: (measurementUnit: string): string =>
     `The measurement unit must be "${KG}", but "${measurementUnit}" was provided.`,
-  INVALID_SUBTYPE: (subtype: string): string =>
-    `The subtype "${subtype}" is not among the allowed values.`,
+  INVALID_SUBTYPE: (subtype: unknown): string =>
+    `The subtype "${String(subtype)}" is not among the allowed values.`,
   INVALID_TYPE: (type: string): string =>
     `The document type must be "${ORGANIC}", but "${type}" was provided.`,
   INVALID_VALUE: (value: number): string =>
@@ -102,7 +102,7 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
         isValid: document.currentValue > 0,
       },
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_SUBTYPE(document.subtype!),
+        errorMessage: this.RESULT_COMMENT.INVALID_SUBTYPE(document.subtype),
         isValid: this.isValidSubtype(document.subtype),
       },
     ];

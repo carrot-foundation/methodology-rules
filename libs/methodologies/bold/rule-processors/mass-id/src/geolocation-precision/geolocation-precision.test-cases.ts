@@ -1,9 +1,7 @@
-import type { MethodologyParticipant } from '@carrot-fndn/shared/types';
-
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
-  ACTOR_PARTICIPANTS,
   BoldStubsBuilder,
+  MASS_ID_ACTOR_PARTICIPANTS,
   type StubBoldDocumentParameters,
   generateNearbyCoordinates,
   stubAddress,
@@ -18,6 +16,7 @@ import {
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { type MethodologyParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { GeolocationPrecisionProcessorErrors } from './geolocation-precision.errors';
@@ -29,13 +28,16 @@ const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 const actorParticipants = new Map(
-  ACTOR_PARTICIPANTS.map((subtype) => [
+  MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
     subtype,
     stubParticipant({ id: faker.string.uuid(), type: subtype }),
   ]),
 );
 const actorsCoordinates = new Map(
-  ACTOR_PARTICIPANTS.map((subtype) => [subtype, generateNearbyCoordinates()]),
+  MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
+    subtype,
+    generateNearbyCoordinates(),
+  ]),
 );
 
 const recyclerParticipant = actorParticipants.get(
@@ -330,7 +332,7 @@ const {
     },
   })
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 

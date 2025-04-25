@@ -34,7 +34,7 @@ describe('WeighingProcessor', () => {
             externalEventsMap: massIdDocumentEvents,
           })
           .createMassIdAuditDocument()
-          .createMethodologyDocuments()
+          .createMethodologyDocument()
           .createParticipantHomologationDocuments(homologationDocuments)
           .build();
 

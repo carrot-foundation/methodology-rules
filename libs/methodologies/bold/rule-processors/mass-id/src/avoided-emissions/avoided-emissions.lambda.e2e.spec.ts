@@ -41,7 +41,7 @@ describe('AvoidedEmissionsProcessor E2E', () => {
           },
         })
         .createMassIdAuditDocument()
-        .createMethodologyDocuments()
+        .createMethodologyDocument()
         .createParticipantHomologationDocuments(homologationDocuments)
         .build();
 

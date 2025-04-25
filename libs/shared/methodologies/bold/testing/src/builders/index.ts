@@ -4,3 +4,4 @@ export * from './bold-mass-id-audit.stubs';
 export * from './bold-participant-homologation.stubs';
 export * from './bold.builder.helpers';
 export * from './bold.stubs.types';
+export * from './bold-methodology-definition.stubs';

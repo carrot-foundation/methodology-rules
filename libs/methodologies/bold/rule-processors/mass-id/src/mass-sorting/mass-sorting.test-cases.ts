@@ -1,6 +1,6 @@
 import {
-  ACTOR_PARTICIPANTS,
   BoldStubsBuilder,
+  MASS_ID_ACTOR_PARTICIPANTS,
   stubBoldEmissionAndCompostingMetricsEvent,
   stubBoldMassIdDropOffEvent,
   stubBoldMassIdSortingEvent,
@@ -37,7 +37,7 @@ const calculatedSortingValue = valueBeforeSorting * sortingFactor;
 const wrongSortingValue = calculatedSortingValue + 0.15;
 
 const actorParticipants = new Map(
-  ACTOR_PARTICIPANTS.map((subtype) => [
+  MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
     subtype,
     stubParticipant({ id: faker.string.uuid(), type: subtype }),
   ]),
@@ -159,7 +159,7 @@ const {
     },
   })
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 
@@ -174,7 +174,7 @@ const invalidSortingValue = new BoldStubsBuilder()
     },
   })
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 

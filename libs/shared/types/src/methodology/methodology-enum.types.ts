@@ -8,11 +8,34 @@ export enum MethodologyParticipantType {
   ACTOR = 'ACTOR',
 }
 
-export enum MethodologyDocumentEventLabel {
+export enum MethodologyActorType {
+  APPOINTED_NGO = 'Appointed NGO',
+  AUDITOR = 'Auditor',
   HAULER = 'Hauler',
+  INTEGRATOR = 'Integrator',
+  METHODOLOGY_AUTHOR = 'Methodology Author',
+  METHODOLOGY_DEVELOPER = 'Methodology Developer',
+  NETWORK = 'Network',
   PROCESSOR = 'Processor',
   RECYCLER = 'Recycler',
+  REMAINDER = 'Remainder',
+  SOURCE = 'Source',
   WASTE_GENERATOR = 'Waste Generator',
+}
+
+export enum MethodologyDocumentEventLabel {
+  APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
+  AUDITOR = MethodologyActorType.AUDITOR,
+  HAULER = MethodologyActorType.HAULER,
+  INTEGRATOR = MethodologyActorType.INTEGRATOR,
+  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
+  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
+  NETWORK = MethodologyActorType.NETWORK,
+  PROCESSOR = MethodologyActorType.PROCESSOR,
+  RECYCLER = MethodologyActorType.RECYCLER,
+  REMAINDER = MethodologyActorType.REMAINDER,
+  SOURCE = MethodologyActorType.SOURCE,
+  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
 }
 
 export enum MethodologyApprovedExceptionType {
@@ -38,7 +61,7 @@ export enum MethodologyDocumentEventName {
   RULES_METADATA = 'RULES METADATA',
   SORTING = 'Sorting',
   TRANSPORT_MANIFEST = 'Transport Manifest',
-  WASTE_GENERATOR = 'Waste Generator',
+  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
   WEIGHING = 'Weighing',
 }
 
