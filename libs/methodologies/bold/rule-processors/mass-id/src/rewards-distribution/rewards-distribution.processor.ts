@@ -1,6 +1,10 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import {
+  getOrDefault,
+  isNil,
+  isNonEmptyArray,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
@@ -88,15 +92,22 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
   private checkIfWasteOriginIsNotIdentified(document: Document): boolean {
-    return Boolean(
-      document.externalEvents?.some(
-        (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
-      ) === true &&
-        !document.externalEvents.some(
-          (event) =>
-            isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
-        ),
+    const hasUnidentifiedOriginAttribute = getOrDefault(
+      document.externalEvents,
+      [],
+    ).some(
+      (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
     );
+
+    const hasWasteGeneratorEvent = getOrDefault(
+      document.externalEvents,
+      [],
+    ).some(
+      (event) =>
+        isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
+    );
+
+    return Boolean(hasUnidentifiedOriginAttribute && !hasWasteGeneratorEvent);
   }
 
   private extractMassIdSubtype(document: Document): MassIdOrganicSubtype {
@@ -114,22 +125,17 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   private getActorMassIdPercentage(
     dto: ActorMassIdPercentageInputDto,
   ): BigNumber {
-    const {
-      actorType,
-      actors,
-      massIdDocument: document,
-      rewardDistribution,
-    } = dto;
+    const { actorType, actors, massIdDocument, rewardDistribution } = dto;
 
     let actorMassPercentage = rewardDistribution;
     const rewardDistributions =
-      this.getRewardsDistributionActorTypePercentages(document);
+      this.getRewardsDistributionActorTypePercentages(massIdDocument);
     const wasteGeneratorRewardDistribution =
       rewardDistributions['Waste Generator'];
 
     if (actorType === RewardsDistributionActorType.WASTE_GENERATOR) {
       actorMassPercentage = this.getWasteGeneratorActorMassIdPercentage(
-        document,
+        massIdDocument,
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
@@ -138,7 +144,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     if (actorType === RewardsDistributionActorType.APPOINTED_NGO) {
       const sourcePercentage = this.getNgoActorMassIdPercentage(
-        document,
+        massIdDocument,
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
@@ -147,7 +153,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       actorMassPercentage = actorMassPercentage.plus(sourcePercentage);
     }
 
-    if (this.checkIfWasteOriginIsNotIdentified(document)) {
+    if (this.checkIfWasteOriginIsNotIdentified(massIdDocument)) {
       if (actorType === RewardsDistributionActorType.NETWORK) {
         actorMassPercentage = actorMassPercentage
           .plus(wasteGeneratorRewardDistribution)
@@ -187,11 +193,12 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     methodologyDocument: Document;
   }): ActorReward[] {
     const result: ActorReward[] = [];
-
     const actors = this.getRewardsDistributionActors(massIdDocument);
+    const distributions =
+      this.getRewardsDistributionActorTypePercentages(massIdDocument);
 
     for (const [actorType, rewardDistribution] of Object.entries(
-      this.getRewardsDistributionActorTypePercentages(massIdDocument),
+      distributions,
     )) {
       if (
         is<RewardsDistributionActorType>(actorType) &&
@@ -244,11 +251,9 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     document: Document,
   ): RewardsDistributionActorTypePercentage {
     const documentSubtype = this.extractMassIdSubtype(document);
+    const wasteType = REWARDS_DISTRIBUTION_BY_WASTE_TYPE[documentSubtype];
 
-    return REWARDS_DISTRIBUTION[
-      // eslint-disable-next-line security/detect-object-injection
-      REWARDS_DISTRIBUTION_BY_WASTE_TYPE[documentSubtype]
-    ];
+    return REWARDS_DISTRIBUTION[wasteType];
   }
 
   private getRewardsDistributionActors(
@@ -297,14 +302,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    return this.checkIfWasteOriginIsNotIdentified(document)
-      ? new BigNumber(0)
-      : actorMassIdPercentage.plus(
-          this.getWasteGeneratorAdditionalPercentage(
-            actors,
-            rewardDistributions,
-          ),
-        );
+    if (this.checkIfWasteOriginIsNotIdentified(document)) {
+      return new BigNumber(0);
+    }
+
+    return actorMassIdPercentage.plus(
+      this.getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
+    );
   }
 
   private getWasteGeneratorActorMassIdPercentage(
@@ -313,23 +317,28 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    return this.getWasteGeneratorActorMassIdFullPercentage(
+    const fullPercentage = this.getWasteGeneratorActorMassIdFullPercentage(
       document,
       actorMassIdPercentage,
       actors,
       rewardDistributions,
-    ).multipliedBy(1 - LARGE_SOURCE_COMPANY_DISCOUNT);
+    );
+
+    return fullPercentage.multipliedBy(1 - LARGE_SOURCE_COMPANY_DISCOUNT);
   }
 
+  /**
+   * Calculate additional percentage for waste generators
+   */
   private getWasteGeneratorAdditionalPercentage(
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
     if (!checkIfHaulerActorExists(actors)) {
-      return rewardDistributions.Hauler;
+      return new BigNumber(rewardDistributions.Hauler);
     }
 
-    return BigNumber(0);
+    return new BigNumber(0);
   }
 
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{

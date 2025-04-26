@@ -22,7 +22,7 @@ import { REQUIRED_ACTOR_TYPES } from './rewards-distribution.constants';
 
 export const checkIfHaulerActorExists = (
   participants: RewardsDistributionActor[],
-) =>
+): boolean =>
   participants.some(({ type }) => type === RewardsDistributionActorType.HAULER);
 
 export const formatPercentage = (percentage: BigNumber): string =>
