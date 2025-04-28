@@ -1,4 +1,7 @@
-import { MethodologyDocumentEventName } from '@carrot-fndn/shared/types';
+import {
+  MethodologyActorType,
+  MethodologyDocumentEventName,
+} from '@carrot-fndn/shared/types';
 
 export enum DocumentCategory {
   MASS_ID = 'MassID',
@@ -20,48 +23,51 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
-export enum MassIdSubtype {
+export enum MassIdOrganicSubtype {
   DOMESTIC_SLUDGE = 'Domestic Sludge',
   EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = 'EFB similar to Garden, Yard and Park Waste',
   FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
   GARDEN_YARD_AND_PARK_WASTE = 'Garden, Yard and Park Waste',
-  GLASS_PLASTIC_METAL_OTHER_INERT_WASTE = 'Glass, Plastic, Metal, Other Inert Waste',
   INDUSTRIAL_SLUDGE = 'Industrial Sludge',
-  OTHERS = 'Others',
   PULP_PAPER_AND_CARDBOARD = 'Pulp, Paper and Cardboard',
-  TEXTILES = 'Textiles',
   TOBACCO = 'Tobacco',
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
 export enum DocumentSubtype {
-  DOMESTIC_SLUDGE = MassIdSubtype.DOMESTIC_SLUDGE,
-  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIdSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
-  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIdSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-  GARDEN_YARD_AND_PARK_WASTE = MassIdSubtype.GARDEN_YARD_AND_PARK_WASTE,
-  GLASS_PLASTIC_METAL_OTHER_INERT_WASTE = MassIdSubtype.GLASS_PLASTIC_METAL_OTHER_INERT_WASTE,
+  DOMESTIC_SLUDGE = MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIdOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
+  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+  GARDEN_YARD_AND_PARK_WASTE = MassIdOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE,
   GROUP = 'Group',
-  HAULER = 'Hauler',
-  INDUSTRIAL_SLUDGE = MassIdSubtype.INDUSTRIAL_SLUDGE,
-  OTHERS = MassIdSubtype.OTHERS,
+  HAULER = MethodologyActorType.HAULER,
+  INDUSTRIAL_SLUDGE = MassIdOrganicSubtype.INDUSTRIAL_SLUDGE,
+  INTEGRATOR = MethodologyActorType.INTEGRATOR,
   PROCESS = 'Process',
-  PROCESSOR = 'Processor',
-  PULP_PAPER_AND_CARDBOARD = MassIdSubtype.PULP_PAPER_AND_CARDBOARD,
-  RECYCLER = 'Recycler',
+  PROCESSOR = MethodologyActorType.PROCESSOR,
+  PULP_PAPER_AND_CARDBOARD = MassIdOrganicSubtype.PULP_PAPER_AND_CARDBOARD,
+  RECYCLER = MethodologyActorType.RECYCLER,
   SOURCE = 'Source',
   TCC = 'TCC',
-  TEXTILES = MassIdSubtype.TEXTILES,
-  TOBACCO = MassIdSubtype.TOBACCO,
+  TOBACCO = MassIdOrganicSubtype.TOBACCO,
   TRC = 'TRC',
-  WASTE_GENERATOR = 'Waste Generator',
-  WOOD_AND_WOOD_PRODUCTS = MassIdSubtype.WOOD_AND_WOOD_PRODUCTS,
+  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
+  WOOD_AND_WOOD_PRODUCTS = MassIdOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
 export enum MassIdDocumentActorType {
-  HAULER = DocumentSubtype.HAULER,
-  PROCESSOR = DocumentSubtype.PROCESSOR,
-  RECYCLER = DocumentSubtype.RECYCLER,
-  WASTE_GENERATOR = DocumentSubtype.WASTE_GENERATOR,
+  HAULER = MethodologyActorType.HAULER,
+  INTEGRATOR = MethodologyActorType.INTEGRATOR,
+  PROCESSOR = MethodologyActorType.PROCESSOR,
+  RECYCLER = MethodologyActorType.RECYCLER,
+  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
+}
+
+export enum MethodologyDocumentActorType {
+  APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
+  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
+  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
+  NETWORK = MethodologyActorType.NETWORK,
 }
 
 export enum MeasurementUnit {

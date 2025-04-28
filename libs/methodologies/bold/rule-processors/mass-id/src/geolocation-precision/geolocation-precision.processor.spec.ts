@@ -29,10 +29,10 @@ describe('GeolocationPrecisionProcessor', () => {
         massIdAuditDocument,
         massIdDocument,
         participantsHomologationDocuments,
-      } = new BoldStubsBuilder({ actorParticipants })
+      } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
         .createMassIdDocument(massIdDocumentParameters)
         .createMassIdAuditDocument()
-        .createMethodologyDocuments()
+        .createMethodologyDocument()
         .createParticipantHomologationDocuments(homologationDocuments)
         .build();
 

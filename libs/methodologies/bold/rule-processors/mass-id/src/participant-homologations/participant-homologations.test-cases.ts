@@ -22,14 +22,14 @@ const processorError = new ParticipantHomologationsProcessorErrors();
 const massIdAuditWithHomologations = new BoldStubsBuilder()
   .createMassIdDocument()
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 
 const massIdWithExpiredHomologation = new BoldStubsBuilder()
   .createMassIdDocument()
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments(
     new Map([
       [

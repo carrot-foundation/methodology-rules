@@ -68,7 +68,7 @@ const {
 } = new BoldStubsBuilder()
   .createMassIdDocument()
   .createMassIdAuditDocument()
-  .createMethodologyDocuments()
+  .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 

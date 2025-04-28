@@ -37,7 +37,7 @@ describe('AvoidedEmissionsProcessor', () => {
             },
           })
           .createMassIdAuditDocument()
-          .createMethodologyDocuments()
+          .createMethodologyDocument()
           .createParticipantHomologationDocuments(homologationDocuments)
           .build();
 
