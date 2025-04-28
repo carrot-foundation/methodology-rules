@@ -9,6 +9,7 @@
     "build-lambda:all": "nx run-many --target build-lambda",
     "commit": "czg",
     "create-mass-id-rule": "node tools/create-mass-id-rule.js",
+    "create-rule": "node tools/create-rule.js",
     "fix-project-format": "node scripts/fix-project-json-format.js",
     "lint": "nx lint",
     "lint:affected": "nx affected --target lint --fix",
