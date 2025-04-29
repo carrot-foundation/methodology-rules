@@ -18,7 +18,6 @@ const {
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
-  VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 const { TRUCK } = DocumentEventVehicleType;
@@ -39,7 +38,7 @@ export const APPROVED_RESULT_COMMENTS = {
 
 export const INVALID_RESULT_COMMENTS = {
   CONTAINER_CAPACITY_FORMAT: `The "${CONTAINER_CAPACITY}" format must be one of the supported formats: ${supportedFormats}.`,
-  CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must not be declared when the "${VEHICLE_TYPE}" is "${TRUCK}".`,
+  CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must not be declared when the "${CONTAINER_TYPE}" is "${TRUCK}".`,
   GROSS_WEIGHT_FORMAT: `The "${GROSS_WEIGHT}" format must be one of the supported formats: ${supportedFormats}.`,
   NET_WEIGHT_CALCULATION: ({
     calculatedNetWeight,
@@ -84,7 +83,7 @@ export const INVALID_RESULT_COMMENTS = {
 
 export const WRONG_FORMAT_RESULT_COMMENTS = {
   CONTAINER_CAPACITY: `The "${CONTAINER_CAPACITY}" must be greater than 0.`,
-  CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must be greater than 0 unless the "${VEHICLE_TYPE}" is "${TRUCK}".`,
+  CONTAINER_QUANTITY: `The "${CONTAINER_QUANTITY}" must be greater than 0 unless the "${CONTAINER_TYPE}" is "${TRUCK}".`,
   CONTAINER_TYPE: `The "${CONTAINER_TYPE}" must be provided.`,
   DESCRIPTION: `The "${WEIGHING}" event must have a "${DESCRIPTION}", but none was provided.`,
   EVENT_VALUE: (eventValue: unknown) =>
