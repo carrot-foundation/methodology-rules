@@ -12,7 +12,6 @@ import {
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
-  DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -44,11 +43,9 @@ const {
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
-  VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 const { RECYCLER } = MassIdDocumentActorType;
-const { CAR, TRUCK } = DocumentEventVehicleType;
 const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
 const scaleType = random<DocumentEventScaleType>();
@@ -107,6 +104,22 @@ const validWeighingAttributes: MetadataAttributeParameter[] = [
   [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
   [SCALE_TYPE, scaleType],
   [CONTAINER_QUANTITY, 1],
+  {
+    format: KILOGRAM,
+    name: GROSS_WEIGHT,
+    value: 100,
+  },
+  {
+    format: KILOGRAM,
+    name: TARE,
+    value: 1,
+  },
+];
+
+const validWeighingAttributesWithoutQuantity: MetadataAttributeParameter[] = [
+  [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+  [SCALE_TYPE, scaleType],
+  [CONTAINER_QUANTITY, undefined],
   {
     format: KILOGRAM,
     name: GROSS_WEIGHT,
@@ -183,7 +196,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          [VEHICLE_TYPE, CAR],
+          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
           ...validWeighingAttributes,
           [CONTAINER_QUANTITY, undefined],
         ],
@@ -194,7 +207,7 @@ export const weighingTestCases = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${VEHICLE_TYPE} is ${TRUCK}`,
+    scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${CONTAINER_TYPE} is ${DocumentEventContainerType.BAG}`,
   },
   {
     homologationDocuments: new Map([
@@ -209,7 +222,10 @@ export const weighingTestCases = [
     ]),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
-        metadataAttributes: [[VEHICLE_TYPE, CAR], ...validWeighingAttributes],
+        metadataAttributes: [
+          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
+          ...validWeighingAttributes,
+        ],
         partialDocumentEvent: {
           value: eventValue,
         },
@@ -225,7 +241,7 @@ export const weighingTestCases = [
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
           [CONTAINER_QUANTITY, 1],
-          [VEHICLE_TYPE, TRUCK],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
           ...validWeighingAttributes,
         ],
         partialDocumentEvent: {
@@ -235,7 +251,7 @@ export const weighingTestCases = [
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the ${CONTAINER_QUANTITY} attribute is defined, but the ${VEHICLE_TYPE} is ${TRUCK}`,
+    scenario: `the ${CONTAINER_QUANTITY} attribute is defined, but the ${CONTAINER_TYPE} is ${DocumentEventContainerType.TRUCK}`,
   },
   {
     homologationDocuments: stubBaseHomologationDocuments(),
@@ -430,7 +446,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -440,7 +456,7 @@ export const weighingTestCases = [
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -462,7 +478,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
           [CONTAINER_CAPACITY, undefined],
@@ -474,7 +490,7 @@ export const weighingTestCases = [
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
           [CONTAINER_CAPACITY, undefined],
@@ -498,7 +514,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -509,7 +525,7 @@ export const weighingTestCases = [
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -530,7 +546,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -541,7 +557,7 @@ export const weighingTestCases = [
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, twoStepScaleType],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
           {
@@ -571,7 +587,7 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, DocumentEventScaleType.CONVEYOR_BELT_SCALE],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
@@ -582,7 +598,7 @@ export const weighingTestCases = [
       }),
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
-          ...validWeighingAttributes,
+          ...validWeighingAttributesWithoutQuantity,
           [SCALE_TYPE, DocumentEventScaleType.CONVEYOR_BELT_SCALE],
           [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
         ],
