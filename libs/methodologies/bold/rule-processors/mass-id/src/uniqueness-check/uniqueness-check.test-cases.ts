@@ -63,8 +63,8 @@ export const uniquenessCheckTestCases = [
 const processorErrors = new UniquenessCheckProcessorErrors();
 
 const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .build();
 
 export const uniquenessCheckErrorTestCases = [

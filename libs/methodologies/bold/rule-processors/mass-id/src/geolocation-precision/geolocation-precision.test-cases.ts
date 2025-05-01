@@ -325,13 +325,13 @@ const {
   massIdDocument,
   participantsHomologationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocument({
+  .createMassIdDocuments({
     externalEventsMap: {
       [DROP_OFF]: undefined,
       [PICK_UP]: undefined,
     },
   })
-  .createMassIdAuditDocument()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();

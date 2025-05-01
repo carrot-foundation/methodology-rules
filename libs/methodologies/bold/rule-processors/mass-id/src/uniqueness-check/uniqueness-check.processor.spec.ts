@@ -41,7 +41,7 @@ describe('UniquenessCheckProcessor Rule', () => {
         const ruleInput = random<Required<RuleInput>>();
 
         const { massIdDocument } = new BoldStubsBuilder()
-          .createMassIdDocument()
+          .createMassIdDocuments()
           .build();
 
         mockCheckDuplicateDocuments

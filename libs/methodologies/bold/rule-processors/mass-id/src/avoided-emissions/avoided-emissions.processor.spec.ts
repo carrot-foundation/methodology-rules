@@ -31,12 +31,12 @@ describe('AvoidedEmissionsProcessor', () => {
           massIdDocument,
           participantsHomologationDocuments,
         } = new BoldStubsBuilder()
-          .createMassIdDocument({
+          .createMassIdDocuments({
             partialDocument: {
               currentValue: massIdDocumentValue as number,
             },
           })
-          .createMassIdAuditDocument()
+          .createMassIdAuditDocuments()
           .createMethodologyDocument()
           .createParticipantHomologationDocuments(homologationDocuments)
           .build();

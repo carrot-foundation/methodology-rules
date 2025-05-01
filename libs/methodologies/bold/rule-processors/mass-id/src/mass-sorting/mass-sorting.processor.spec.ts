@@ -31,10 +31,10 @@ describe('MassSortingProcessor', () => {
           massIdDocument,
           participantsHomologationDocuments,
         } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-          .createMassIdDocument({
+          .createMassIdDocuments({
             externalEventsMap: massIdEvents,
           })
-          .createMassIdAuditDocument()
+          .createMassIdAuditDocuments()
           .createMethodologyDocument()
           .createParticipantHomologationDocuments(homologationDocuments)
           .build();

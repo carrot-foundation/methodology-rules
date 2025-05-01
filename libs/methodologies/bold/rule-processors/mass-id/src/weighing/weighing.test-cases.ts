@@ -700,8 +700,8 @@ const {
   massIdDocument,
   participantsHomologationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();

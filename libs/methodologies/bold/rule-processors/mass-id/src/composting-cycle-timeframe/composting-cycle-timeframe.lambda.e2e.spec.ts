@@ -53,10 +53,10 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
       }
 
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: externalEvents,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
