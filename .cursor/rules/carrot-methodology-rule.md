@@ -1,0 +1,132 @@
+---
+title: Carrot Methodology Rule Assistant
+description: AI assistant specialized for Carrot Methodology Rules
+---
+
+# Carrot Methodology Rule Assistant
+
+## Project Context
+
+This project, `carrot-methodology-rules`, is focused on implementing and managing rule processors for different Bold methodologies like carbon, recycling, etc. The codebase is structured using the Nx build system with a modular approach.
+
+## Node.js Environment
+
+- Always use `pnpm` as the Node.js package manager
+- Use `nvm` to manage Node.js versions
+- Current Node.js version required: 22.15.0 (as specified in `.nvmrc`)
+
+## Architecture Understanding
+
+The codebase is organized as follows:
+
+- `apps/methodologies/` - Contains methodology-specific applications
+  - `bold-carbon/` - Carbon methodology rules
+  - `bold-recycling/` - Recycling methodology rules
+- `libs/methodologies/bold/rule-processors/` - Contains shared rule processor libraries
+- `tools/` - Contains scripts for rule management (e.g., `apply-methodology-rule.js`)
+
+## Common Tasks
+
+### Creating a New Rule
+
+To create a new rule, use the script:
+
+```bash
+pnpm apply-methodology-rule <methodology-name> <rule-name> <scope>
+```
+
+Example:
+
+```bash
+pnpm apply-methodology-rule carbon-organic geolocation-precision mass-id
+```
+
+### Rule Structure
+
+Rules should follow the project's established patterns:
+
+- Implement in TypeScript
+- Follow the naming pattern `[rule-name].processor.ts`
+- Include proper README.md documentation
+- Include Jest tests
+
+## Style Guidelines
+
+- Follow the project's ESLint configuration
+- Use TypeScript for type safety
+- Follow the repository's commit message conventions using `pnpm commit`
+
+## Development Workflow
+
+1. **Creating a Rule**:
+
+   - Use the `apply-methodology-rule.js` script
+   - Implement the rule logic
+   - Write tests
+
+2. **Testing**:
+
+   - Run tests with `pnpm test:all`
+   - Check for affected projects with `pnpm test:affected`
+
+3. **Linting**:
+
+   - Run linting with `pnpm lint:all`
+   - Fix linting issues with `pnpm lint:affected --fix`
+
+4. **Building**:
+
+   - Build Lambda functions with `pnpm build-lambda`
+   - Build affected Lambdas with `pnpm build-lambda:affected`
+
+5. **Deployment**:
+   - Use `pnpm upload-lambdas-and-metadata` to deploy
+
+## Best Practices
+
+- Maintain proper separation between rule processors and methodology-specific implementations
+- Reuse code from existing rules when appropriate
+- Keep rules focused on single responsibilities
+- Ensure proper error handling
+- Add comprehensive tests for all rule logic
+- Follow the existing project structure and patterns
+
+## Common Libraries and Tools
+
+- AWS SDK for Lambda functionality
+- Jest for testing
+- ESLint for code quality
+- TypeScript for type safety
+- Nx for build system and project management
+
+## Helpful Commands
+
+```bash
+# Install dependencies
+pnpm install
+
+# Run tests
+pnpm test
+
+# Lint code
+pnpm lint
+
+# Check TypeScript
+pnpm ts
+
+# Build Lambda
+pnpm build-lambda
+
+# Apply a methodology rule
+pnpm apply-methodology-rule <methodology-name> <rule-name> <scope>
+```
+
+## Troubleshooting
+
+If you encounter issues:
+
+1. Check the Node.js version matches `.nvmrc`
+2. Ensure all dependencies are installed with `pnpm install`
+3. Check for linting errors with `pnpm lint:all`
+4. Verify the rule follows the correct structure
+5. Check the logs for build errors
