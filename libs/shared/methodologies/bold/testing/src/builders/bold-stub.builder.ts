@@ -556,7 +556,7 @@ export class BoldStubsBuilder {
   }: StubBoldDocumentParameters & { count?: number } = {}): BoldStubsBuilder {
     if (count !== undefined) {
       this.count = count;
-      // Create new arrays instead of modifying readonly properties
+
       const newMassIdDocumentIds = Array.from({ length: this.count }, () =>
         faker.string.uuid(),
       );
@@ -564,7 +564,6 @@ export class BoldStubsBuilder {
         faker.string.uuid(),
       );
 
-      // Assign to class properties
       this.massIdDocumentIds = newMassIdDocumentIds;
       this.massIdAuditDocumentIds = newMassIdAuditDocumentIds;
 
@@ -647,7 +646,6 @@ export class BoldStubsBuilder {
       },
     });
 
-    // Add link to methodology for all audit documents
     this.massIdAuditDocuments = this.massIdAuditDocuments.map((auditDocument) =>
       this.addExternalEventToDocument(
         auditDocument,
