@@ -33,7 +33,7 @@ describe('uniqueness-check.helpers', () => {
   describe('mapMassIdV2Query', () => {
     it('should create a valid query object with proper structure', () => {
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument()
+        .createMassIdDocuments()
         .build();
 
       const eventsData: helpers.EventsData = {
@@ -58,7 +58,7 @@ describe('uniqueness-check.helpers', () => {
   describe('createOldFormatQuery', () => {
     it('should create a valid query object with proper structure', () => {
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument()
+        .createMassIdDocuments()
         .build();
 
       const eventsData: helpers.EventsData = {
@@ -81,7 +81,7 @@ describe('uniqueness-check.helpers', () => {
   describe('fetchSimilarMassIdDocuments', () => {
     it('should call API with both new and old format queries and combine results', async () => {
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument()
+        .createMassIdDocuments()
         .build();
 
       const newFormatDuplicates = [

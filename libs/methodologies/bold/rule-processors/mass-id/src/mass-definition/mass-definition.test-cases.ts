@@ -5,8 +5,8 @@ import { MassDefinitionProcessorErrors } from './mass-definition.errors';
 import { RESULT_COMMENTS } from './mass-definition.processor';
 
 const massIdStubs = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .build();
 const processorErrors = new MassDefinitionProcessorErrors();
 

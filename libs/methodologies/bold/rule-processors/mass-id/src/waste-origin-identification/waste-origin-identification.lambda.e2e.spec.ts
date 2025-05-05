@@ -19,10 +19,10 @@ describe('WasteOriginIdentificationProcessor E2E', () => {
     'should validate waste origin identification - $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(

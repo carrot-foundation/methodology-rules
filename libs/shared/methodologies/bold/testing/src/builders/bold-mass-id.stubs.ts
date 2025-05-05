@@ -161,7 +161,14 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   [WEIGHING_CAPTURE_METHOD, random<DocumentEventWeighingCaptureMethod>()],
   [SCALE_TYPE, random<DocumentEventScaleType>()],
   [SCALE_HOMOLOGATION, random<MethodologyDocumentEventAttributeReference>()],
-  [CONTAINER_TYPE, random<DocumentEventContainerType>()],
+  [
+    CONTAINER_TYPE,
+    faker.helpers.arrayElement(
+      Object.values(DocumentEventContainerType).filter(
+        (type) => type !== DocumentEventContainerType.TRUCK,
+      ),
+    ),
+  ],
   [CONTAINER_QUANTITY, faker.number.int({ min: 1 })],
   {
     format: KILOGRAM,

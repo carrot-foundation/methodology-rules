@@ -61,7 +61,7 @@ describe('Uniqueness Check Helpers E2E', () => {
     auditApiService = new AuditApiService();
 
     const { massIdDocument } = new BoldStubsBuilder()
-      .createMassIdDocument({
+      .createMassIdDocuments({
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: eventsData.recyclerEvent,
           [`${ACTOR}-${WASTE_GENERATOR}`]: eventsData.wasteGeneratorEvent,
@@ -81,7 +81,7 @@ describe('Uniqueness Check Helpers E2E', () => {
   describe('fetchSimilarMassIdDocuments', () => {
     it('should return an empty array when no similar documents are found', async () => {
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument()
+        .createMassIdDocuments()
         .build();
 
       const result = await fetchSimilarMassIdDocuments({

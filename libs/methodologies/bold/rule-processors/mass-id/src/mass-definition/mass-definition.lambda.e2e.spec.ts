@@ -16,8 +16,8 @@ describe('MassDefinitionLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   const massId = new BoldStubsBuilder()
-    .createMassIdDocument()
-    .createMassIdAuditDocument()
+    .createMassIdDocuments()
+    .createMassIdAuditDocuments()
     .build();
 
   it.each(massDefinitionTestCases)(
