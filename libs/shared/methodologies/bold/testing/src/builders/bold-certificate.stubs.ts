@@ -4,7 +4,7 @@ import {
   DocumentCategory,
   type DocumentEvent,
   DocumentEventName,
-  DocumentSubtype,
+  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { random } from 'typia';
 
@@ -53,7 +53,7 @@ export const stubBoldCertificateDocument = ({
   return {
     ...stubDocument(
       {
-        type: random<DocumentSubtype.TCC | DocumentSubtype.TRC>(),
+        type: random<DocumentType.GAS_ID | DocumentType.RECYCLED_ID>(),
         ...partialDocument,
         category: DocumentCategory.METHODOLOGY,
         externalEvents: [
