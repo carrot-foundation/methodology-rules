@@ -29,11 +29,11 @@ describe('RewardsDistributionProcessor E2E', () => {
     async ({ massIdDocumentEvents, massIdPartialDocument, resultStatus }) => {
       const { massIdAuditDocument, massIdDocument, methodologyDocument } =
         new BoldStubsBuilder()
-          .createMassIdDocument({
+          .createMassIdDocuments({
             externalEventsMap: massIdDocumentEvents,
             partialDocument: massIdPartialDocument,
           })
-          .createMassIdAuditDocument()
+          .createMassIdAuditDocuments()
           .createMethodologyDocument()
           .build();
 

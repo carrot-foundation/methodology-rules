@@ -33,11 +33,11 @@ describe('RewardsDistributionProcessor', () => {
       }) => {
         const { massIdAuditDocument, massIdDocument, methodologyDocument } =
           new BoldStubsBuilder()
-            .createMassIdDocument({
+            .createMassIdDocuments({
               externalEventsMap: massIdDocumentEvents,
               partialDocument: massIdPartialDocument,
             })
-            .createMassIdAuditDocument()
+            .createMassIdAuditDocuments()
             .createMethodologyDocument()
             .build();
 
