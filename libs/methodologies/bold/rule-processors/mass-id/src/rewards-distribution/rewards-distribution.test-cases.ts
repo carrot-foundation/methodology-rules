@@ -149,8 +149,8 @@ export const rewardsDistributionProcessorTestCases: {
 
 const { massIdAuditDocument, massIdDocument, methodologyDocument } =
   new BoldStubsBuilder()
-    .createMassIdDocument()
-    .createMassIdAuditDocument()
+    .createMassIdDocuments()
+    .createMassIdAuditDocuments()
     .createMethodologyDocument()
     .build();
 
