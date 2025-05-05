@@ -27,7 +27,7 @@ describe('DocumentManifestProcessor', () => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
         .build();

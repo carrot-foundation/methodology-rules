@@ -22,12 +22,12 @@ describe('DriverIdentificationLambda E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ pickUpEvent, resultStatus }) => {
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: {
             [PICK_UP]: pickUpEvent,
           },
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(

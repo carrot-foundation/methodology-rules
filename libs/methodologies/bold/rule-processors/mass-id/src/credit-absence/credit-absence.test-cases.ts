@@ -1,35 +1,55 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { TRC_CREDIT_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  stubBoldCreditsDocument,
+  stubDocumentEvent,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
+  DocumentEventName,
   DocumentStatus,
+  DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { assert, random } from 'typia';
+import { assert } from 'typia';
 
 import { RESULT_COMMENTS } from './credit-absence.processor';
 import { CreditAbsenceProcessorErrors } from './credit-absence.processor.errors';
 
+const { RELATED } = DocumentEventName;
+const { TRC } = DocumentSubtype;
+
 const processorError = new CreditAbsenceProcessorErrors();
 
 const massIdWithoutCreditsStubs = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .build();
 const massIdWithCreditStubs = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
-  .withCredits()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
+  .createCertificateDocuments()
+  .createCreditsDocument(TRC)
   .build();
-const massIdWithMultipleCreditsStubs = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
-  .withCredits({
-    count: 4,
-  })
-  .build();
+const cancelledCreditsDocument = stubBoldCreditsDocument({
+  partialDocument: {
+    status: DocumentStatus.CANCELLED,
+    subtype: TRC,
+  },
+});
+const massIdWithCancelledCreditsDocument = {
+  ...massIdWithCreditStubs.massIdDocument,
+  externalEvents: [
+    ...(massIdWithCreditStubs.massIdDocument.externalEvents ?? []),
+    stubDocumentEvent({
+      name: RELATED,
+      relatedDocument: mapDocumentReference(cancelledCreditsDocument),
+    }),
+  ],
+};
 
 export const creditAbsenceTestCases = [
   {
@@ -45,7 +65,7 @@ export const creditAbsenceTestCases = [
     documents: [
       massIdWithCreditStubs.massIdDocument,
       {
-        ...massIdWithCreditStubs.creditDocuments[0],
+        ...massIdWithCreditStubs.creditsDocument,
         status: DocumentStatus.CANCELLED,
       },
     ] as Document[],
@@ -59,7 +79,7 @@ export const creditAbsenceTestCases = [
   {
     documents: [
       massIdWithCreditStubs.massIdDocument,
-      ...massIdWithCreditStubs.creditDocuments,
+      massIdWithCreditStubs.creditsDocument,
     ],
     massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment:
@@ -67,19 +87,18 @@ export const creditAbsenceTestCases = [
         assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
       ),
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: 'when a no Cancelled Credit is linked to the MassID',
+    scenario: 'a no Cancelled Credit is linked to the MassID',
   },
   {
     documents: [
-      massIdWithMultipleCreditsStubs.massIdDocument,
-      ...massIdWithMultipleCreditsStubs.creditDocuments.map(
-        (creditDocument: Document) => ({
-          ...creditDocument,
-          status: DocumentStatus.CANCELLED,
-        }),
-      ),
+      massIdWithCancelledCreditsDocument,
+      {
+        ...massIdWithCreditStubs.creditsDocument,
+        status: DocumentStatus.CANCELLED,
+      },
+      cancelledCreditsDocument,
     ],
-    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocument,
+    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
       assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
     ),
@@ -89,16 +108,11 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithMultipleCreditsStubs.massIdDocument,
-      ...massIdWithMultipleCreditsStubs.creditDocuments.map(
-        (creditDocument: Document, index: number) => ({
-          ...creditDocument,
-          status:
-            index === 0 ? random<NonEmptyString>() : DocumentStatus.CANCELLED,
-        }),
-      ),
+      massIdWithCancelledCreditsDocument,
+      massIdWithCreditStubs.creditsDocument,
+      cancelledCreditsDocument,
     ],
-    massIdAuditDocument: massIdWithMultipleCreditsStubs.massIdAuditDocument,
+    massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT(
         assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),

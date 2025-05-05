@@ -42,7 +42,7 @@ describe('ProjectBoundaryProcessor', () => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
         .build();
@@ -85,7 +85,7 @@ describe('ProjectBoundaryProcessor', () => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: {
             [DocumentEventName.DROP_OFF]: stubBoldMassIdDropOffEvent(),
             [DocumentEventName.PICK_UP]: stubBoldMassIdPickUpEvent(),

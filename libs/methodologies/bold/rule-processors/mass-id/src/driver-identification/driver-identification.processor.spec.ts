@@ -25,7 +25,7 @@ describe('DriverIdentificationProcessor', () => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: {
             [PICK_UP]: pickUpEvent,
           },

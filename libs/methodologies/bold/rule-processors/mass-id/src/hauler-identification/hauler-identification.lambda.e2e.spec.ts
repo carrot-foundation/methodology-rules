@@ -23,10 +23,10 @@ describe('HaulerIdentificationProcessor E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const massId = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(

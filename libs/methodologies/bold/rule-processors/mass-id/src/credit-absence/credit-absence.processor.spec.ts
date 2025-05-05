@@ -16,10 +16,9 @@ describe('CreditAbsenceProcessor', () => {
   it.each(creditAbsenceTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
-      spyOnDocumentQueryServiceLoad(stubDocument(), [
-        ...documents,
-        massIdAuditDocument,
-      ]);
+      const allDocuments = [...documents, massIdAuditDocument];
+
+      spyOnDocumentQueryServiceLoad(stubDocument(), allDocuments);
 
       const ruleInput = {
         ...random<Required<RuleInput>>(),

@@ -36,8 +36,8 @@ describe('GeolocationPrecisionProcessor E2E', () => {
         massIdDocument,
         participantsHomologationDocuments,
       } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-        .createMassIdDocument(massIdDocumentParameters)
-        .createMassIdAuditDocument()
+        .createMassIdDocuments(massIdDocumentParameters)
+        .createMassIdAuditDocuments()
         .createMethodologyDocument()
         .createParticipantHomologationDocuments(homologationDocuments)
         .build();

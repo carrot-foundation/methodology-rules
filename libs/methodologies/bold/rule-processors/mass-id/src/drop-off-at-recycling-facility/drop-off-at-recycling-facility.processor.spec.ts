@@ -20,7 +20,7 @@ describe('DropOffAtRecyclingFacilityProcessor', () => {
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
         .build();

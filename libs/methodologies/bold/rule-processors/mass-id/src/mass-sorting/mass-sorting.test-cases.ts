@@ -149,7 +149,7 @@ const {
   massIdDocument,
   participantsHomologationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocument({
+  .createMassIdDocuments({
     externalEventsMap: {
       [DROP_OFF]: stubBoldMassIdDropOffEvent({
         partialDocumentEvent: {
@@ -158,13 +158,13 @@ const {
       }),
     },
   })
-  .createMassIdAuditDocument()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 
 const invalidSortingValue = new BoldStubsBuilder()
-  .createMassIdDocument({
+  .createMassIdDocuments({
     externalEventsMap: {
       [SORTING]: stubBoldMassIdSortingEvent({
         partialDocumentEvent: {
@@ -173,7 +173,7 @@ const invalidSortingValue = new BoldStubsBuilder()
       }),
     },
   })
-  .createMassIdAuditDocument()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
