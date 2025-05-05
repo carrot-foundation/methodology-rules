@@ -20,15 +20,15 @@ const { EFFECTIVE_DATE, EXPIRATION_DATE } = DocumentEventAttributeName;
 const processorError = new ParticipantHomologationsProcessorErrors();
 
 const massIdAuditWithHomologations = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments()
   .build();
 
 const massIdWithExpiredHomologation = new BoldStubsBuilder()
-  .createMassIdDocument()
-  .createMassIdAuditDocument()
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
   .createMethodologyDocument()
   .createParticipantHomologationDocuments(
     new Map([

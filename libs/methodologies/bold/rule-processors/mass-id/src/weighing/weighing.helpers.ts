@@ -18,7 +18,6 @@ import {
   DocumentEventContainerType,
   DocumentEventName,
   DocumentEventScaleType,
-  DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -39,7 +38,6 @@ import { isApprovedExceptionAttributeValue } from './weighing.typia';
 
 const { HOMOLOGATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
-const { TRUCK } = DocumentEventVehicleType;
 const {
   APPROVED_EXCEPTIONS,
   CONTAINER_CAPACITY,
@@ -50,7 +48,6 @@ const {
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
-  VEHICLE_TYPE,
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 
@@ -66,7 +63,6 @@ export interface WeighingValues {
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
-  vehicleType: MethodologyDocumentEventAttributeValue | undefined;
   weighingCaptureMethod: string | undefined;
 }
 
@@ -148,7 +144,6 @@ export const getValuesRelatedToWeighing = (
     weighingEvent,
     VEHICLE_LICENSE_PLATE,
   ),
-  vehicleType: getEventAttributeValue(weighingEvent, VEHICLE_TYPE),
   weighingCaptureMethod: getEventAttributeValue(
     weighingEvent,
     WEIGHING_CAPTURE_METHOD,
@@ -189,7 +184,7 @@ const validators: Record<string, Validator> = {
 
   containerQuantity: (values) => {
     const errors: string[] = [];
-    const isTruck = values.vehicleType === TRUCK;
+    const isTruck = values.containerType === DocumentEventContainerType.TRUCK;
 
     if (isTruck && isNonZeroPositiveInt(values.containerQuantity)) {
       errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);

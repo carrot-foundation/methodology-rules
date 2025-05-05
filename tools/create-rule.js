@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * Mass ID Rule Generator
+ * Rule Generator
  *
- * This script generates a new rule for the mass-id library with all necessary files.
- * It creates the rule structure based on the mass-definition example.
+ * This script generates a new rule for the specified scope with all necessary files.
+ * It creates the rule structure based on the existing examples.
  *
  * Usage:
- *   pnpm create-mass-id-rule <rule-name> [description]
+ *   pnpm create-mass-id-rule <rule-name> [scope] [description]
  *
  * Example:
- *   pnpm create-mass-id-rule vehicle-definition "Validates the vehicle definition in the mass-id document"
+ *   pnpm create-mass-id-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
+ *   pnpm create-mass-id-rule credit-allocation credit "Validates the credit allocation process"
  */
 
 const fs = require('fs');
@@ -27,21 +28,33 @@ if (
   ruleName === '-h'
 ) {
   console.log(`
-Mass ID Rule Generator
+Rule Generator
 
-Usage: create-mass-id-rule <rule-name> [description]
+Usage: create-mass-id-rule <rule-name> [scope] [description]
 
 Arguments:
   rule-name    The name of the rule (required)
+  scope        The scope/domain of the rule (defaults to 'mass-id')
   description  A brief description of the rule (optional)
 
-Example:
-  create-mass-id-rule vehicle-definition "Validates the vehicle definition in the mass-id document"
+Examples:
+  create-mass-id-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
+  create-mass-id-rule credit-allocation credit "Validates the credit allocation process"
   `);
   process.exit(0);
 }
 
-const description = process.argv[3] || 'The rule validation is compliant.';
+// Get the scope (default to 'mass-id' if not provided)
+const scope =
+  process.argv[3] && !process.argv[3].startsWith('"')
+    ? process.argv[3]
+    : 'mass-id';
+
+// Get the description (adjust based on whether scope was provided)
+const description =
+  process.argv[3] && process.argv[3].startsWith('"')
+    ? process.argv[3]
+    : process.argv[4] || 'The rule validation is compliant.';
 
 // Convert rule name to different formats
 const camelCase = ruleName.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -49,7 +62,7 @@ const pascalCase = camelCase.charAt(0).toUpperCase() + camelCase.slice(1);
 const fileName = ruleName;
 
 // Define the target directory
-const projectRoot = 'libs/methodologies/bold/rule-processors/mass-id';
+const projectRoot = `libs/methodologies/bold/rule-processors/${scope}`;
 const targetDirectory = path.join(projectRoot, 'src', ruleName);
 
 // Define the template files
@@ -195,11 +208,11 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './${fileName}.processor';
 
-const massIdStubs = new BoldStubsBuilder().build();
+const stubs = new BoldStubsBuilder().build();
 
 export const ${camelCase}TestCases = [
   {
-    document: massIdStubs.massIdDocumentStub,
+    document: stubs.massIdDocumentStub,
     resultComment: RESULT_COMMENTS.APPROVED,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'all the criteria are met',
@@ -226,13 +239,13 @@ import { ${camelCase}TestCases } from './${fileName}.test-cases';
 describe('${pascalCase}Lambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  const massId = new BoldStubsBuilder().build();
+  const stubs = new BoldStubsBuilder().build();
 
   it.each(${camelCase}TestCases)(
     'should return $resultStatus when $scenario',
     async ({ document, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [document, massId.massIdAuditDocumentStub].map((_document) => ({
+        [document, stubs.massIdAuditDocumentStub].map((_document) => ({
           document: _document,
           documentKey: toDocumentKey({
             documentId: _document.id,
@@ -309,7 +322,7 @@ if (fs.existsSync(indexPath)) {
   }
 }
 
-console.log(`\nSuccessfully created rule: ${ruleName}`);
+console.log(`\nSuccessfully created rule: ${ruleName} in scope: ${scope}`);
 console.log(`\nNext steps:`);
 console.log(
   `1. Implement your rule validation logic in ${targetDirectory}/${fileName}.processor.ts`,

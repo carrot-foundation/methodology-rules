@@ -24,10 +24,10 @@ describe('DocumentManifestLambda E2E', () => {
       const lambda = documentManifestLambda(documentManifestType);
 
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(

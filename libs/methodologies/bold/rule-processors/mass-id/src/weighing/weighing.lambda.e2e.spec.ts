@@ -35,10 +35,10 @@ describe('WeighingProcessor E2E', () => {
         massIdDocument,
         participantsHomologationDocuments,
       } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: massIdDocumentEvents,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .createMethodologyDocument()
         .createParticipantHomologationDocuments(homologationDocuments)
         .build();

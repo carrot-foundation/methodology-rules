@@ -42,8 +42,8 @@ describe('UniquenessCheckLambda E2E', () => {
         resultStatus,
       }) => {
         const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-          .createMassIdDocument()
-          .createMassIdAuditDocument()
+          .createMassIdDocuments()
+          .createMassIdAuditDocuments()
           .build();
 
         mockCheckDuplicateDocuments

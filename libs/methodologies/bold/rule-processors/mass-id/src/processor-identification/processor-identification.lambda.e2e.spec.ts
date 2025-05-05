@@ -19,10 +19,10 @@ describe('ProcessorIdentificationProcessor E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocument({
+        .createMassIdDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocument()
+        .createMassIdAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
