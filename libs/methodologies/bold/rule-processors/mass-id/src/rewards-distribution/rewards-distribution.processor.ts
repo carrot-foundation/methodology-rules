@@ -327,9 +327,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     return fullPercentage.multipliedBy(1 - LARGE_SOURCE_COMPANY_DISCOUNT);
   }
 
-  /**
-   * Calculate additional percentage for waste generators
-   */
   private getWasteGeneratorAdditionalPercentage(
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
