@@ -1,8 +1,10 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  type CertificateRewardDistributionOutput,
   type Document,
   DocumentCategory,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -23,8 +25,14 @@ import {
 } from './bold.stubs.types';
 
 const { RULES_METADATA } = DocumentEventName;
+const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT } = DocumentEventAttributeName;
 
-const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [];
+const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
+  [
+    REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT,
+    random<CertificateRewardDistributionOutput>(),
+  ],
+];
 
 export const stubBoldCertificateRulesMetadataEvent = ({
   metadataAttributes,

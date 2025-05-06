@@ -39,8 +39,15 @@ import { stubBoldHomologationDocument } from './bold-participant-homologation.st
 
 const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { CREDIT, DEFINITION, MASS_ID_AUDIT, ORGANIC, PARTICIPANT_HOMOLOGATION } =
-  DocumentType;
+const {
+  CREDITS,
+  DEFINITION,
+  GAS_ID,
+  MASS_ID_AUDIT,
+  ORGANIC,
+  PARTICIPANT_HOMOLOGATION,
+  RECYCLED_ID,
+} = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS, TCC, TRC } =
   DocumentSubtype;
 
@@ -49,6 +56,7 @@ export interface BoldStubsBuilderOptions {
   massIdActorParticipants?: Map<string, MethodologyParticipant>;
   massIdAuditDocumentIds?: string[];
   massIdDocumentIds?: string[];
+  methodologyActorParticipants?: Map<string, MethodologyParticipant>;
 }
 
 export interface BoldStubsBuilderResult {
@@ -152,7 +160,9 @@ export class BoldStubsBuilder {
     );
 
     this.methodologyActorParticipants =
-      this.initializeMethodologyActorParticipants();
+      this.initializeMethodologyActorParticipants(
+        options.methodologyActorParticipants,
+      );
     this.actorsCoordinates = this.initializeActorsCoordinates();
     this.massIdActorParticipantsAddresses = this.initializeActorAddresses();
 
@@ -160,6 +170,21 @@ export class BoldStubsBuilder {
     this.certificateDocumentReferences =
       this.createCertificateDocumentReferences();
     this.massAuditReferences = this.createMassAuditReferences();
+  }
+
+  private addCertificatesReferencesToCreditsDocument(): void {
+    this.creditsDocument = {
+      ...this.creditsDocument,
+      externalEvents: [
+        ...(this.creditsDocument.externalEvents ?? []),
+        ...this.certificateDocumentReferences.map((reference) =>
+          stubDocumentEvent({
+            name: RELATED,
+            relatedDocument: reference,
+          }),
+        ),
+      ],
+    };
   }
 
   private addCreditReferenceToMassIdDocument(
@@ -188,7 +213,7 @@ export class BoldStubsBuilder {
   }
 
   private createCertificateDocumentReferences(
-    certificateType: typeof TCC | typeof TRC = TCC,
+    certificateType: typeof GAS_ID | typeof RECYCLED_ID = RECYCLED_ID,
   ): DocumentReference[] {
     return Array.from({ length: this.count }, () => ({
       category: METHODOLOGY,
@@ -204,7 +229,7 @@ export class BoldStubsBuilder {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
       subtype,
-      type: CREDIT,
+      type: CREDITS,
     };
   }
 
@@ -354,10 +379,13 @@ export class BoldStubsBuilder {
     );
   }
 
-  private initializeMethodologyActorParticipants(): Map<
-    string,
-    MethodologyParticipant
-  > {
+  private initializeMethodologyActorParticipants(
+    providedParticipants?: Map<string, MethodologyParticipant>,
+  ): Map<string, MethodologyParticipant> {
+    if (providedParticipants) {
+      return providedParticipants;
+    }
+
     return new Map(
       METHODOLOGY_ACTOR_PARTICIPANTS.map((subtype) => {
         const participant = stubParticipant({ type: subtype });
@@ -476,6 +504,11 @@ export class BoldStubsBuilder {
     this.validateMassIdDocumentsExist();
     this.validateMassIdAuditDocumentsExist();
 
+    this.certificateDocumentReferences =
+      this.createCertificateDocumentReferences(
+        partialDocument?.type as typeof GAS_ID | typeof RECYCLED_ID,
+      );
+
     this.certificateDocuments = this.massIdAuditDocuments.map(
       (auditDocument, index) =>
         stubBoldCertificateDocument({
@@ -492,22 +525,26 @@ export class BoldStubsBuilder {
     return this;
   }
 
-  createCreditsDocument(
-    creditsSubtype?: typeof TCC | typeof TRC,
-  ): BoldStubsBuilder {
+  createCreditsDocument({
+    externalEventsMap,
+    partialDocument,
+  }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
     this.validateMassIdDocumentsExist();
     this.validateMassIdAuditDocumentsExist();
     this.validateCertificateDocumentsExist();
+    const defaultSubtype = partialDocument?.type as typeof TCC | typeof TRC;
 
-    this.creditsReference = this.createCreditsDocumentReference(
-      creditsSubtype ?? TRC,
-    );
+    this.creditsReference = this.createCreditsDocumentReference(defaultSubtype);
     this.creditsDocument = stubBoldCreditsDocument({
+      externalEventsMap,
       partialDocument: {
+        ...partialDocument,
         id: this.creditsReference.documentId,
-        subtype: creditsSubtype ?? this.creditsReference.subtype,
+        subtype: defaultSubtype,
       },
     });
+
+    this.addCertificatesReferencesToCreditsDocument();
 
     this.massIdDocuments = this.massIdDocuments.map((document) =>
       this.addCreditReferenceToMassIdDocument(document),
@@ -568,8 +605,6 @@ export class BoldStubsBuilder {
       this.massIdAuditDocumentIds = newMassIdAuditDocumentIds;
 
       this.massIdReferences = this.createMassIdReferences();
-      this.certificateDocumentReferences =
-        this.createCertificateDocumentReferences();
       this.massAuditReferences = this.createMassAuditReferences();
     }
 
