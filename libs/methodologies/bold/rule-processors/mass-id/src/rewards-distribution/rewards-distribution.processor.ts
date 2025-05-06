@@ -91,25 +91,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
-  private checkIfWasteOriginIsNotIdentified(document: Document): boolean {
-    const hasUnidentifiedOriginAttribute = getOrDefault(
-      document.externalEvents,
-      [],
-    ).some(
-      (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
-    );
-
-    const hasWasteGeneratorEvent = getOrDefault(
-      document.externalEvents,
-      [],
-    ).some(
-      (event) =>
-        isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
-    );
-
-    return Boolean(hasUnidentifiedOriginAttribute && !hasWasteGeneratorEvent);
-  }
-
   private extractMassIdSubtype(document: Document): MassIdOrganicSubtype {
     if (!is<MassIdOrganicSubtype>(document.subtype)) {
       throw this.errorProcessor.getKnownError(
@@ -153,7 +134,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       actorMassPercentage = actorMassPercentage.plus(sourcePercentage);
     }
 
-    if (this.checkIfWasteOriginIsNotIdentified(massIdDocument)) {
+    if (!this.isWasteOriginIdentified(massIdDocument)) {
       if (actorType === RewardsDistributionActorType.NETWORK) {
         actorMassPercentage = actorMassPercentage
           .plus(wasteGeneratorRewardDistribution)
@@ -302,13 +283,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    if (this.checkIfWasteOriginIsNotIdentified(document)) {
-      return new BigNumber(0);
+    if (this.isWasteOriginIdentified(document)) {
+      return actorMassIdPercentage.plus(
+        this.getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
+      );
     }
 
-    return actorMassIdPercentage.plus(
-      this.getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
-    );
+    return new BigNumber(0);
   }
 
   private getWasteGeneratorActorMassIdPercentage(
@@ -339,6 +320,25 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     return new BigNumber(0);
+  }
+
+  private isWasteOriginIdentified(document: Document): boolean {
+    const hasUnidentifiedOriginAttribute = getOrDefault(
+      document.externalEvents,
+      [],
+    ).some(
+      (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
+    );
+
+    const hasWasteGeneratorEvent = getOrDefault(
+      document.externalEvents,
+      [],
+    ).some(
+      (event) =>
+        isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
+    );
+
+    return !hasUnidentifiedOriginAttribute || hasWasteGeneratorEvent;
   }
 
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
