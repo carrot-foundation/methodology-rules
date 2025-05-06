@@ -265,7 +265,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TRC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
@@ -277,7 +277,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS_ID,
         subtype: DocumentSubtype.TRC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
@@ -289,7 +289,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
@@ -303,7 +303,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
@@ -315,7 +315,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS_ID,
         subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
@@ -327,7 +327,7 @@ describe('Document Matchers', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TRC,
-        type: DocumentType.CREDIT,
+        type: DocumentType.CREDITS,
       });
 
       const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
