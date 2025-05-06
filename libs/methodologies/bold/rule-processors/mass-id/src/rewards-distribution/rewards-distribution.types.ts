@@ -40,3 +40,12 @@ export interface ActorMassIdPercentageInputDto {
   massIdDocument: Document;
   rewardDistribution: BigNumber;
 }
+
+export interface UnidentifiedWasteCalculationDto {
+  actorType: RewardsDistributionActorType;
+  actors: RewardsDistributionActor[];
+  additionalPercentage: BigNumber;
+  basePercentage: BigNumber;
+  rewardDistributions: RewardsDistributionActorTypePercentage;
+  wasteGeneratorPercentage: BigNumber;
+}
