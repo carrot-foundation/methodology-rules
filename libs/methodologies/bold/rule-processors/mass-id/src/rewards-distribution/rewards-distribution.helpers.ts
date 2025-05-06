@@ -28,9 +28,11 @@ import type {
   UnidentifiedWasteCalculationDto,
 } from './rewards-distribution.types';
 
-import { REQUIRED_ACTOR_TYPES } from './rewards-distribution.constants';
+import {
+  LARGE_REVENUE_BUSINESS_DISCOUNT,
+  REQUIRED_ACTOR_TYPES,
+} from './rewards-distribution.constants';
 
-const LARGE_SOURCE_COMPANY_DISCOUNT = 0.5;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 const { WASTE_ORIGIN } = DocumentEventAttributeName;
 const WASTE_GENERATOR = 'Waste Generator';
@@ -201,7 +203,7 @@ export const getNgoActorMassIdPercentage = (
     actorMassIdPercentage,
     actors,
     rewardDistributions,
-  ).multipliedBy(LARGE_SOURCE_COMPANY_DISCOUNT);
+  ).multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
 
 export const checkIfHasRequiredActorTypes = ({
   actors,

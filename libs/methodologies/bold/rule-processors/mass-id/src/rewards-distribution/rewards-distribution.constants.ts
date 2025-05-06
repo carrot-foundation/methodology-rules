@@ -27,6 +27,8 @@ const {
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
 
+export const LARGE_REVENUE_BUSINESS_DISCOUNT = 0.5;
+
 export const REQUIRED_ACTOR_TYPES = {
   MASS_ID: [RECYCLER, PROCESSOR, INTEGRATOR],
   METHODOLOGY: [

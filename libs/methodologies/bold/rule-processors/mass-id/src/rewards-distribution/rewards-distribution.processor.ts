@@ -26,6 +26,7 @@ import { BigNumber } from 'bignumber.js';
 import { is } from 'typia';
 
 import {
+  LARGE_REVENUE_BUSINESS_DISCOUNT,
   REQUIRED_ACTOR_TYPES,
   REWARDS_DISTRIBUTION,
   REWARDS_DISTRIBUTION_BY_WASTE_TYPE,
@@ -50,8 +51,6 @@ import {
 } from './rewards-distribution.types';
 
 BigNumber.config({ DECIMAL_PLACES: 10, ROUNDING_MODE: BigNumber.ROUND_DOWN });
-
-const LARGE_SOURCE_COMPANY_DISCOUNT = 0.5;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -256,7 +255,8 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       rewardDistributions,
     );
 
-    return fullPercentage.multipliedBy(1 - LARGE_SOURCE_COMPANY_DISCOUNT);
+    // TODO: Today all waste generators are eligible for the discount, but we need to apply it only to large source companies based on the homologation document
+    return fullPercentage.multipliedBy(1 - LARGE_REVENUE_BUSINESS_DISCOUNT);
   }
 
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
