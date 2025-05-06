@@ -532,7 +532,9 @@ export class BoldStubsBuilder {
     this.validateMassIdDocumentsExist();
     this.validateMassIdAuditDocumentsExist();
     this.validateCertificateDocumentsExist();
-    const defaultSubtype = partialDocument?.type as typeof TCC | typeof TRC;
+    const defaultSubtype = (partialDocument?.subtype ?? TRC) as
+      | typeof TCC
+      | typeof TRC;
 
     this.creditsReference = this.createCreditsDocumentReference(defaultSubtype);
     this.creditsDocument = stubBoldCreditsDocument({
