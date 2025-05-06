@@ -42,12 +42,14 @@ export const calculateRemainder = (options: {
     participantsAmount = participantsAmount.plus(actor.amount);
     participantsPercentage = participantsPercentage.plus(actor.percentage);
   }
+  const rawAmount = massIdTotalValue
+    .multipliedBy(creditsDocumentUnitPrice)
+    .minus(participantsAmount);
+  const rawPercentage = new BigNumber(100).minus(participantsPercentage);
 
   return {
-    amount: massIdTotalValue
-      .multipliedBy(creditsDocumentUnitPrice)
-      .minus(participantsAmount),
-    percentage: new BigNumber(100).minus(participantsPercentage),
+    amount: formatDecimalPlaces(BigNumber.maximum(rawAmount, 0)),
+    percentage: formatDecimalPlaces(BigNumber.maximum(rawPercentage, 0)),
   };
 };
 
