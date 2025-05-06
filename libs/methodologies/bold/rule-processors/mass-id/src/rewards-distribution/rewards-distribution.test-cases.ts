@@ -13,12 +13,12 @@ import {
   DocumentEventName,
   MassIdOrganicSubtype,
   RewardsDistributionActorType,
+  RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.constants';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
-import { RewardsDistributionWasteType } from './rewards-distribution.types';
 
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const { PICK_UP } = DocumentEventName;

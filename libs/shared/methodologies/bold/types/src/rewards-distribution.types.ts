@@ -10,6 +10,12 @@ export type RewardActorParticipant = Pick<
   'id' | 'name'
 >;
 
+export enum RewardsDistributionWasteType {
+  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
+  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
+  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
+}
+
 export enum RewardsDistributionActorType {
   APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
   HAULER = MethodologyActorType.HAULER,
@@ -40,3 +46,6 @@ export interface RewardDistributionResultContent {
   massIdDocumentId: NonEmptyString;
   massIdRewards: NonEmptyArray<MassIdReward>;
 }
+
+export type CertificateRewardDistributionOutput =
+  RewardDistributionResultContent;

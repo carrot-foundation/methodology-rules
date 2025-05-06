@@ -7,13 +7,11 @@ import {
 import {
   MassIdOrganicSubtype,
   RewardsDistributionActorType,
+  RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
-import {
-  type RewardsDistribution,
-  RewardsDistributionWasteType,
-} from './rewards-distribution.types';
+import { type RewardsDistribution } from './rewards-distribution.types';
 
 const {
   APPOINTED_NGO,
