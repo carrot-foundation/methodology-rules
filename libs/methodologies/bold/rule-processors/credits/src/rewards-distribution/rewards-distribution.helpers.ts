@@ -24,8 +24,9 @@ export const calculateCreditPercentage = (
   amount: BigNumber,
   amountTotal: BigNumber,
 ): string =>
-  formatDecimalPlaces(
-    amount.dividedBy(amountTotal).multipliedBy(100),
+  (amountTotal.isZero()
+    ? new BigNumber(0)
+    : formatDecimalPlaces(amount.dividedBy(amountTotal).multipliedBy(100))
   ).toString();
 
 export const calculateRemainder = (options: {
