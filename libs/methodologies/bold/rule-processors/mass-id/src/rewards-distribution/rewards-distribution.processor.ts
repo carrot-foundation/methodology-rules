@@ -44,8 +44,8 @@ import {
 } from './rewards-distribution.constants';
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import {
-  checkIfHaulerActorExists,
   getActorsByType,
+  isHaulerActorDefined,
   mapActorReward,
   mapMassIdRewards,
 } from './rewards-distribution.helpers';
@@ -166,7 +166,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           .plus(new BigNumber(rewardDistributions.Processor).multipliedBy(0.25))
           .plus(new BigNumber(rewardDistributions.Recycler).multipliedBy(0.25));
 
-        if (checkIfHaulerActorExists(actors)) {
+        if (isHaulerActorDefined(actors)) {
           actorMassPercentage = actorMassPercentage.plus(
             new BigNumber(rewardDistributions.Hauler).multipliedBy(0.25),
           );
@@ -334,7 +334,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    if (!checkIfHaulerActorExists(actors)) {
+    if (!isHaulerActorDefined(actors)) {
       return new BigNumber(rewardDistributions.Hauler);
     }
 

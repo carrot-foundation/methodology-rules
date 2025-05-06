@@ -20,7 +20,7 @@ import type {
 
 import { REQUIRED_ACTOR_TYPES } from './rewards-distribution.constants';
 
-export const checkIfHaulerActorExists = (
+export const isHaulerActorDefined = (
   participants: RewardsDistributionActor[],
 ): boolean =>
   participants.some(({ type }) => type === RewardsDistributionActorType.HAULER);
