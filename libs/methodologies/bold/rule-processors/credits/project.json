@@ -1,0 +1,19 @@
+{
+  "name": "methodologies-bold-rule-processors-credits",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "processor:credits",
+    "scope:shared",
+    "stack:any",
+    "type:lib"
+  ],
+  "sourceRoot": "libs/methodologies/bold/rule-processors/credits/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}
