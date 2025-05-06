@@ -7,6 +7,7 @@ import {
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import BigNumber from 'bignumber.js';
 import { random } from 'typia';
 
@@ -49,10 +50,9 @@ describe('RewardsDistributionProcessor', () => {
 
         spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
+        const ruleInput = stubRuleInput({
           documentId: massIdAuditDocument.id,
-        };
+        });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

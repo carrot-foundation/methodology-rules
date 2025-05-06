@@ -22,7 +22,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { BigNumber } from 'bignumber.js';
+import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
 import {
@@ -143,23 +143,25 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           methodologyDocument,
         });
 
-        const massIdPercentage = this.getActorMassIdPercentage({
-          actorType,
-          actors,
-          massIdDocument,
-          rewardDistribution,
-        }).div(actorsByType.length);
+        if (isNonEmptyArray(actorsByType)) {
+          const massIdPercentage = this.getActorMassIdPercentage({
+            actorType,
+            actors,
+            massIdDocument,
+            rewardDistribution,
+          }).div(actorsByType.length);
 
-        result.push(
-          ...actorsByType.map(({ participant, type }) =>
-            mapActorReward({
-              actorType: type,
-              massIdDocument,
-              massIdPercentage,
-              participant,
-            }),
-          ),
-        );
+          result.push(
+            ...actorsByType.map(({ participant, type }) =>
+              mapActorReward({
+                actorType: type,
+                massIdDocument,
+                massIdPercentage,
+                participant,
+              }),
+            ),
+          );
+        }
       }
     }
 
