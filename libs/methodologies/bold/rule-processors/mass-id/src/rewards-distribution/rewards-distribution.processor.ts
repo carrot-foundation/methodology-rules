@@ -1,11 +1,6 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import {
-  getOrDefault,
-  isNil,
-  isNonEmptyArray,
-} from '@carrot-fndn/shared/helpers';
-import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -14,14 +9,9 @@ import {
   MASS_ID,
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import {
-  eventLabelIsAnyOf,
-  isActorEvent,
-} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
   MassIdOrganicSubtype,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -32,7 +22,6 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { BigNumber } from 'bignumber.js';
 import { is } from 'typia';
 
@@ -44,8 +33,12 @@ import {
 } from './rewards-distribution.constants';
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import {
+  calculatePercentageForUnidentifiedWasteOrigin,
+  checkIfHasRequiredActorTypes,
   getActorsByType,
-  isHaulerActorDefined,
+  getNgoActorMassIdPercentage,
+  getWasteGeneratorAdditionalPercentage,
+  isWasteOriginIdentified,
   mapActorReward,
   mapMassIdRewards,
 } from './rewards-distribution.helpers';
@@ -56,39 +49,11 @@ import {
   type RewardsDistributionActorTypePercentage,
 } from './rewards-distribution.types';
 
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
-const { WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-
 BigNumber.config({ DECIMAL_PLACES: 10, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 
 const LARGE_SOURCE_COMPANY_DISCOUNT = 0.5;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
-  private checkIfHasRequiredActorTypes = ({
-    actors,
-    documentId,
-    requiredActorTypes,
-  }: {
-    actors: RewardsDistributionActor[];
-    documentId: string;
-    requiredActorTypes: RewardsDistributionActorType[];
-  }) => {
-    const missingRequiredActors = requiredActorTypes.filter(
-      (requiredActorType) =>
-        !actors.some((actor) => actor.type === requiredActorType),
-    );
-
-    if (isNonEmptyArray(missingRequiredActors)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(
-          documentId,
-          missingRequiredActors,
-        ),
-      );
-    }
-  };
-
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
   private extractMassIdSubtype(document: Document): MassIdOrganicSubtype {
@@ -108,14 +73,14 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   ): BigNumber {
     const { actorType, actors, massIdDocument, rewardDistribution } = dto;
 
-    let actorMassPercentage = rewardDistribution;
+    let actorMassIdPercentage = rewardDistribution;
     const rewardDistributions =
       this.getRewardsDistributionActorTypePercentages(massIdDocument);
     const wasteGeneratorRewardDistribution =
       rewardDistributions['Waste Generator'];
 
     if (actorType === RewardsDistributionActorType.WASTE_GENERATOR) {
-      actorMassPercentage = this.getWasteGeneratorActorMassIdPercentage(
+      actorMassIdPercentage = this.getWasteGeneratorActorMassIdPercentage(
         massIdDocument,
         wasteGeneratorRewardDistribution,
         actors,
@@ -124,46 +89,34 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     if (actorType === RewardsDistributionActorType.APPOINTED_NGO) {
-      const sourcePercentage = this.getNgoActorMassIdPercentage(
+      const sourcePercentage = getNgoActorMassIdPercentage(
         massIdDocument,
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
+        this.getWasteGeneratorActorMassIdFullPercentage.bind(this),
       );
 
-      actorMassPercentage = actorMassPercentage.plus(sourcePercentage);
+      actorMassIdPercentage = actorMassIdPercentage.plus(sourcePercentage);
     }
 
-    if (!this.isWasteOriginIdentified(massIdDocument)) {
-      if (actorType === RewardsDistributionActorType.NETWORK) {
-        actorMassPercentage = actorMassPercentage
-          .plus(wasteGeneratorRewardDistribution)
-          .plus(
-            this.getWasteGeneratorAdditionalPercentage(
-              actors,
-              rewardDistributions,
-            ),
-          )
-          .plus(new BigNumber(rewardDistributions.Processor).multipliedBy(0.25))
-          .plus(new BigNumber(rewardDistributions.Recycler).multipliedBy(0.25));
+    if (!isWasteOriginIdentified(massIdDocument)) {
+      const additionalPercentage = getWasteGeneratorAdditionalPercentage(
+        actors,
+        rewardDistributions,
+      );
 
-        if (isHaulerActorDefined(actors)) {
-          actorMassPercentage = actorMassPercentage.plus(
-            new BigNumber(rewardDistributions.Hauler).multipliedBy(0.25),
-          );
-        }
-      } else if (
-        [
-          RewardsDistributionActorType.HAULER,
-          RewardsDistributionActorType.PROCESSOR,
-          RewardsDistributionActorType.RECYCLER,
-        ].includes(actorType)
-      ) {
-        actorMassPercentage = actorMassPercentage.multipliedBy(0.75);
-      }
+      actorMassIdPercentage = calculatePercentageForUnidentifiedWasteOrigin({
+        actorType,
+        actors,
+        additionalPercentage,
+        basePercentage: actorMassIdPercentage,
+        rewardDistributions,
+        wasteGeneratorPercentage: wasteGeneratorRewardDistribution,
+      });
     }
 
-    return actorMassPercentage;
+    return actorMassIdPercentage;
   }
 
   private getActorRewards({
@@ -214,20 +167,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     return result;
   }
 
-  private getNgoActorMassIdPercentage(
-    document: Document,
-    actorMassIdPercentage: BigNumber,
-    actors: RewardsDistributionActor[],
-    rewardDistributions: RewardsDistributionActorTypePercentage,
-  ): BigNumber {
-    return this.getWasteGeneratorActorMassIdFullPercentage(
-      document,
-      actorMassIdPercentage,
-      actors,
-      rewardDistributions,
-    ).multipliedBy(LARGE_SOURCE_COMPANY_DISCOUNT);
-  }
-
   private getRewardsDistributionActorTypePercentages(
     document: Document,
   ): RewardsDistributionActorTypePercentage {
@@ -268,11 +207,23 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       }
     }
 
-    this.checkIfHasRequiredActorTypes({
-      actors,
-      documentId: document.id,
-      requiredActorTypes: REQUIRED_ACTOR_TYPES.MASS_ID,
-    });
+    try {
+      checkIfHasRequiredActorTypes({
+        actors,
+        documentId: document.id,
+        requiredActorTypes: REQUIRED_ACTOR_TYPES.MASS_ID,
+      });
+    } catch {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(
+          document.id,
+          REQUIRED_ACTOR_TYPES.MASS_ID.filter(
+            (requiredActorType) =>
+              !actors.some((actor) => actor.type === requiredActorType),
+          ),
+        ),
+      );
+    }
 
     return actors;
   }
@@ -283,9 +234,9 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    if (this.isWasteOriginIdentified(document)) {
+    if (isWasteOriginIdentified(document)) {
       return actorMassIdPercentage.plus(
-        this.getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
+        getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
       );
     }
 
@@ -306,39 +257,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     );
 
     return fullPercentage.multipliedBy(1 - LARGE_SOURCE_COMPANY_DISCOUNT);
-  }
-
-  /**
-   * Calculate additional percentage for waste generators
-   */
-  private getWasteGeneratorAdditionalPercentage(
-    actors: RewardsDistributionActor[],
-    rewardDistributions: RewardsDistributionActorTypePercentage,
-  ): BigNumber {
-    if (!isHaulerActorDefined(actors)) {
-      return new BigNumber(rewardDistributions.Hauler);
-    }
-
-    return new BigNumber(0);
-  }
-
-  private isWasteOriginIdentified(document: Document): boolean {
-    const hasUnidentifiedOriginAttribute = getOrDefault(
-      document.externalEvents,
-      [],
-    ).some(
-      (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
-    );
-
-    const hasWasteGeneratorEvent = getOrDefault(
-      document.externalEvents,
-      [],
-    ).some(
-      (event) =>
-        isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
-    );
-
-    return !hasUnidentifiedOriginAttribute || hasWasteGeneratorEvent;
   }
 
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
