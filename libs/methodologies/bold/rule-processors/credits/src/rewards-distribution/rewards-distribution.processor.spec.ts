@@ -5,6 +5,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import {
   MethodologyActorType,
   type NonEmptyString,
@@ -40,10 +41,9 @@ describe('RewardsDistributionProcessor', () => {
         spyOnLoadParentDocument(creditsDocument);
         spyOnDocumentQueryServiceLoad(creditsDocument, certificateDocuments);
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
+        const ruleInput = stubRuleInput({
           documentId: creditsDocument.id,
-        };
+        });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
