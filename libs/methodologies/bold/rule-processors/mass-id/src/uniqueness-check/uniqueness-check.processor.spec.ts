@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -27,7 +27,7 @@ jest.mock('./uniqueness-check.helpers', () => ({
 
 describe('UniquenessCheckProcessor Rule', () => {
   const ruleDataProcessor = new UniquenessCheckProcessor();
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   describe('UniquenessCheckProcessor', () => {
     it.each(uniquenessCheckTestCases)(

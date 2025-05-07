@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -17,7 +17,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('DriverIdentificationProcessor', () => {
   const ruleDataProcessor = new DriverIdentificationProcessor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(driverIdentificationTestCases)(
     'should return $resultStatus when $scenario',

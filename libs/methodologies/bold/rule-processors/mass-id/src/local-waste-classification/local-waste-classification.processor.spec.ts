@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -14,7 +14,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('LocalWasteClassificationProcessor', () => {
   const ruleDataProcessor = new LocalWasteClassificationProcessor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(localWasteClassificationTestCases)(
     'should return $resultStatus when $scenario',

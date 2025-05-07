@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -13,7 +13,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('WasteOriginIdentificationProcessor', () => {
   const ruleDataProcessor = new WasteOriginIdentificationProcessor();
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(wasteOriginIdentificationTestCases)(
     `should return $resultStatus when $scenario`,

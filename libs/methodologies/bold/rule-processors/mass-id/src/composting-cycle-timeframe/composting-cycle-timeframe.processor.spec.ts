@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubBoldMassIdDocument,
   stubBoldMassIdDropOffEvent,
@@ -26,7 +26,7 @@ const { DROP_OFF, RECYCLED } = DocumentEventName;
 describe('CompostingCycleTimeframeProcessor', () => {
   const ruleDataProcessor = new CompostingCycleTimeframeProcessor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(
     compostingCycleTimeframeTestCases.map((testCase) => {
