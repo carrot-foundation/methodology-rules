@@ -12,8 +12,10 @@ import type {
 } from './rewards-distribution.types';
 
 import {
+  addAmount,
   addParticipantRemainder,
   aggregateMassIdCertificatesRewards,
+  calculateAbsoluteValue,
   calculateAmount,
   calculateCreditPercentage,
   calculateRemainder,
@@ -58,6 +60,55 @@ describe('Rewards Distribution Helpers', () => {
       expect(() => getAggregateParticipantKey(undefined, undefined)).toThrow(
         'Actor type and participant ID are required',
       );
+    });
+  });
+
+  describe('calculateAbsoluteValue', () => {
+    it('should calculate absolute value correctly', () => {
+      const result = calculateAbsoluteValue({
+        massIdCertificateValue: new BigNumber(2000),
+        percentage: new BigNumber(10),
+      });
+
+      expect(result).toBe('200');
+    });
+
+    it('should handle zero values correctly', () => {
+      const resultZeroPercentage = calculateAbsoluteValue({
+        massIdCertificateValue: new BigNumber(1000),
+        percentage: new BigNumber(0),
+      });
+
+      expect(resultZeroPercentage).toBe('0');
+
+      const resultZeroCertificateValue = calculateAbsoluteValue({
+        massIdCertificateValue: new BigNumber(0),
+        percentage: new BigNumber(50),
+      });
+
+      expect(resultZeroCertificateValue).toBe('0');
+    });
+  });
+
+  describe('addAmount', () => {
+    it('should add amounts correctly', () => {
+      const result = addAmount({
+        previousAmount: new BigNumber(100),
+        pricePerUnit: new BigNumber(5),
+        value: new BigNumber(200),
+      });
+
+      expect(result).toBe('1100');
+    });
+
+    it('should handle zero previousAmount correctly', () => {
+      const result = addAmount({
+        previousAmount: new BigNumber(0),
+        pricePerUnit: new BigNumber(3),
+        value: new BigNumber(150),
+      });
+
+      expect(result).toBe('450');
     });
   });
 
@@ -125,8 +176,8 @@ describe('Rewards Distribution Helpers', () => {
       const amount = calculateAmount({
         creditUnitPrice,
         massIdCertificateValue: new BigNumber(1500),
-        massIdPercentage: '30.1234567892',
-        participantAmount: '0',
+        massIdPercentage: new BigNumber('30.1234567892'),
+        previousParticipantAmount: new BigNumber(0),
       });
 
       expect(amount.toString()).toEqual('2363.185185');
@@ -136,8 +187,8 @@ describe('Rewards Distribution Helpers', () => {
       const amount = calculateAmount({
         creditUnitPrice,
         massIdCertificateValue: new BigNumber(1500),
-        massIdPercentage: '30.1234567892',
-        participantAmount: '3.223669',
+        massIdPercentage: new BigNumber('30.1234567892'),
+        previousParticipantAmount: new BigNumber('3.223669'),
       });
 
       expect(amount.toString()).toEqual('2366.408854');
@@ -147,8 +198,8 @@ describe('Rewards Distribution Helpers', () => {
       const amount = calculateAmount({
         creditUnitPrice,
         massIdCertificateValue: new BigNumber(100),
-        massIdPercentage: '10',
-        participantAmount: undefined,
+        massIdPercentage: new BigNumber('10'),
+        previousParticipantAmount: new BigNumber(0),
       });
 
       expect(amount).toBe('52.3');

@@ -29,6 +29,46 @@ export const calculateCreditPercentage = ({
     : formatDecimalPlaces(amount.dividedBy(totalAmount).multipliedBy(100))
   ).toString();
 
+export const calculateAbsoluteValue = (options: {
+  massIdCertificateValue: BigNumber;
+  percentage: BigNumber;
+}): NonEmptyString =>
+  formatPercentage(options.percentage)
+    .multipliedBy(options.massIdCertificateValue)
+    .toString();
+
+export const addAmount = (options: {
+  previousAmount: BigNumber;
+  pricePerUnit: BigNumber;
+  value: BigNumber;
+}): NonEmptyString => {
+  const amount = formatDecimalPlaces(
+    options.value.multipliedBy(options.pricePerUnit),
+  );
+
+  return amount.plus(options.previousAmount).toString();
+};
+
+export const calculateAmount = (options: {
+  creditUnitPrice: BigNumber;
+  massIdCertificateValue: BigNumber;
+  massIdPercentage: BigNumber;
+  previousParticipantAmount: BigNumber;
+}): NonEmptyString => {
+  const value = new BigNumber(
+    calculateAbsoluteValue({
+      massIdCertificateValue: options.massIdCertificateValue,
+      percentage: options.massIdPercentage,
+    }),
+  );
+
+  return addAmount({
+    previousAmount: options.previousParticipantAmount,
+    pricePerUnit: options.creditUnitPrice,
+    value,
+  });
+};
+
 export const calculateRemainder = (options: {
   actors: ActorsByActorType;
   certificateTotalValue: BigNumber;
@@ -52,21 +92,6 @@ export const calculateRemainder = (options: {
     amount: formatDecimalPlaces(BigNumber.maximum(rawAmount, 0)),
     percentage: formatDecimalPlaces(BigNumber.maximum(rawPercentage, 0)),
   };
-};
-
-export const calculateAmount = (options: {
-  creditUnitPrice: BigNumber;
-  massIdCertificateValue: BigNumber;
-  massIdPercentage: string;
-  participantAmount: string | undefined;
-}): NonEmptyString => {
-  const amount = formatDecimalPlaces(
-    formatPercentage(new BigNumber(options.massIdPercentage))
-      .multipliedBy(options.massIdCertificateValue)
-      .multipliedBy(new BigNumber(options.creditUnitPrice)),
-  );
-
-  return amount.plus(options.participantAmount ?? 0).toString();
 };
 
 export const addParticipantRemainder = (options: {
@@ -133,8 +158,10 @@ export const aggregateMassIdCertificatesRewards = (
       const amount = calculateAmount({
         creditUnitPrice,
         massIdCertificateValue,
-        massIdPercentage,
-        participantAmount: actor?.amount,
+        massIdPercentage: new BigNumber(massIdPercentage),
+        previousParticipantAmount: actor?.amount
+          ? new BigNumber(actor.amount)
+          : new BigNumber(0),
       });
 
       actors.set(participantKey, {
