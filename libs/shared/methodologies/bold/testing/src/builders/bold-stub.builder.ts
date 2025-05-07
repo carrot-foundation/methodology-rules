@@ -48,8 +48,7 @@ const {
   PARTICIPANT_HOMOLOGATION,
   RECYCLED_ID,
 } = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS, TCC, TRC } =
-  DocumentSubtype;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
@@ -222,13 +221,10 @@ export class BoldStubsBuilder {
     }));
   }
 
-  private createCreditsDocumentReference(
-    subtype: typeof TCC | typeof TRC,
-  ): DocumentReference {
+  private createCreditsDocumentReference(): DocumentReference {
     return {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
-      subtype,
       type: CREDITS,
     };
   }
@@ -532,17 +528,13 @@ export class BoldStubsBuilder {
     this.validateMassIdDocumentsExist();
     this.validateMassIdAuditDocumentsExist();
     this.validateCertificateDocumentsExist();
-    const defaultSubtype = (partialDocument?.subtype ?? TRC) as
-      | typeof TCC
-      | typeof TRC;
 
-    this.creditsReference = this.createCreditsDocumentReference(defaultSubtype);
+    this.creditsReference = this.createCreditsDocumentReference();
     this.creditsDocument = stubBoldCreditsDocument({
       externalEventsMap,
       partialDocument: {
         ...partialDocument,
         id: this.creditsReference.documentId,
-        subtype: defaultSubtype,
       },
     });
 

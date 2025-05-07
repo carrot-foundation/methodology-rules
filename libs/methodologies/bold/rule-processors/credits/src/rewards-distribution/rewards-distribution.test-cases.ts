@@ -56,7 +56,7 @@ type ErrorTestCase = {
 };
 
 const { CREDITS, RECYCLED_ID } = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES, TRC } = DocumentSubtype;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
 const { RELATED, RULES_METADATA } = DocumentEventName;
 const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
   DocumentEventAttributeName;
@@ -298,9 +298,6 @@ const buildCertificateDocuments = (options: {
         [RULES_METADATA]: stubBoldCreditsRulesMetadataEvent({
           metadataAttributes: [[UNIT_PRICE, UNIT_PRICE_VALUE]],
         }),
-      },
-      partialDocument: {
-        subtype: TRC,
       },
     })
     .build();
