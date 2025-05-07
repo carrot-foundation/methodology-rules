@@ -2,7 +2,7 @@ import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { RuleInput } from '@carrot-fndn/shared/rule/types';
 
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RuleStandardDataProcessor } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 export abstract class ParentDocumentRuleProcessor<
@@ -11,7 +11,7 @@ export abstract class ParentDocumentRuleProcessor<
   protected override async loadDocument(
     ruleInput: RuleInput,
   ): Promise<Document | undefined> {
-    return loadParentDocument(
+    return loadDocument(
       this.context.documentLoaderService,
       toDocumentKey({
         documentId: ruleInput.parentDocumentId,
