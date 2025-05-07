@@ -29,7 +29,6 @@ export enum MassIdOrganicSubtype {
   FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
   GARDEN_YARD_AND_PARK_WASTE = 'Garden, Yard and Park Waste',
   INDUSTRIAL_SLUDGE = 'Industrial Sludge',
-  PULP_PAPER_AND_CARDBOARD = 'Pulp, Paper and Cardboard',
   TOBACCO = 'Tobacco',
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
@@ -45,7 +44,6 @@ export enum DocumentSubtype {
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
   PROCESS = 'Process',
   PROCESSOR = MethodologyActorType.PROCESSOR,
-  PULP_PAPER_AND_CARDBOARD = MassIdOrganicSubtype.PULP_PAPER_AND_CARDBOARD,
   RECYCLER = MethodologyActorType.RECYCLER,
   SOURCE = 'Source',
   TCC = 'TCC',
