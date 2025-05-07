@@ -1,9 +1,6 @@
 import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type NonEmptyString,
-  type NonZeroPositive,
-} from '@carrot-fndn/shared/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -20,21 +17,24 @@ export const formatPercentage = (percentage: BigNumber): BigNumber =>
 export const formatDecimalPlaces = (value: BigNumber): BigNumber =>
   value.decimalPlaces(6, BigNumber.ROUND_DOWN);
 
-export const calculateCreditPercentage = (
-  amount: BigNumber,
-  amountTotal: BigNumber,
-): string =>
-  (amountTotal.isZero()
+export const calculateCreditPercentage = ({
+  amount,
+  totalAmount,
+}: {
+  amount: BigNumber;
+  totalAmount: BigNumber;
+}): string =>
+  (totalAmount.isZero()
     ? new BigNumber(0)
-    : formatDecimalPlaces(amount.dividedBy(amountTotal).multipliedBy(100))
+    : formatDecimalPlaces(amount.dividedBy(totalAmount).multipliedBy(100))
   ).toString();
 
 export const calculateRemainder = (options: {
   actors: ActorsByActorType;
-  creditsDocumentUnitPrice: NonZeroPositive;
-  massIdTotalValue: BigNumber;
+  certificateTotalValue: BigNumber;
+  creditUnitPrice: BigNumber;
 }): Remainder => {
-  const { actors, creditsDocumentUnitPrice, massIdTotalValue } = options;
+  const { actors, certificateTotalValue, creditUnitPrice } = options;
 
   let participantsAmount = new BigNumber(0);
   let participantsPercentage = new BigNumber(0);
@@ -43,8 +43,8 @@ export const calculateRemainder = (options: {
     participantsAmount = participantsAmount.plus(actor.amount);
     participantsPercentage = participantsPercentage.plus(actor.percentage);
   }
-  const rawAmount = massIdTotalValue
-    .multipliedBy(creditsDocumentUnitPrice)
+  const rawAmount = certificateTotalValue
+    .multipliedBy(creditUnitPrice)
     .minus(participantsAmount);
   const rawPercentage = new BigNumber(100).minus(participantsPercentage);
 
@@ -55,7 +55,7 @@ export const calculateRemainder = (options: {
 };
 
 export const calculateAmount = (options: {
-  creditsDocumentUnitPrice: NonZeroPositive;
+  creditUnitPrice: BigNumber;
   massIdCertificateValue: BigNumber;
   massIdPercentage: string;
   participantAmount: string | undefined;
@@ -63,7 +63,7 @@ export const calculateAmount = (options: {
   const amount = formatDecimalPlaces(
     formatPercentage(new BigNumber(options.massIdPercentage))
       .multipliedBy(options.massIdCertificateValue)
-      .multipliedBy(new BigNumber(options.creditsDocumentUnitPrice)),
+      .multipliedBy(new BigNumber(options.creditUnitPrice)),
   );
 
   return amount.plus(options.participantAmount ?? 0).toString();
@@ -91,8 +91,19 @@ export const addParticipantRemainder = (options: {
 const calculateCertificateTotalValue = (certificateValues: BigNumber[]) =>
   sumBigNumbers(certificateValues);
 
+export const getAggregateParticipantKey = (
+  actorType: RewardsDistributionActorType | string | undefined,
+  participantId: string | undefined,
+): string => {
+  if (!actorType || !participantId) {
+    throw new Error('Actor type and participant ID are required');
+  }
+
+  return `${actorType}-${participantId}`;
+};
+
 export const aggregateMassIdCertificatesRewards = (
-  creditsDocumentUnitPrice: NonZeroPositive,
+  creditUnitPrice: BigNumber,
   resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[],
 ): AggregateMassIdRewards => {
   const actors: ActorsByActorType = new Map();
@@ -104,7 +115,7 @@ export const aggregateMassIdCertificatesRewards = (
   );
 
   const creditTotal = formatDecimalPlaces(
-    certificateTotalValue.multipliedBy(creditsDocumentUnitPrice),
+    certificateTotalValue.multipliedBy(creditUnitPrice),
   );
 
   for (const {
@@ -113,38 +124,42 @@ export const aggregateMassIdCertificatesRewards = (
   } of resultContentsWithMassIdCertificateValue) {
     for (const massIdReward of massIdRewards) {
       const { actorType, massIdPercentage, participant } = massIdReward;
-      const actor = actors.get(`${actorType}-${participant.id}`);
+      const participantKey = getAggregateParticipantKey(
+        actorType,
+        participant.id,
+      );
+      const actor = actors.get(participantKey);
 
       const amount = calculateAmount({
-        creditsDocumentUnitPrice,
+        creditUnitPrice,
         massIdCertificateValue,
         massIdPercentage,
         participantAmount: actor?.amount,
       });
 
-      actors.set(`${actorType}-${participant.id}`, {
+      actors.set(participantKey, {
         actorType,
         amount,
         participant,
-        percentage: calculateCreditPercentage(
-          new BigNumber(amount),
-          creditTotal,
-        ),
+        percentage: calculateCreditPercentage({
+          amount: new BigNumber(amount),
+          totalAmount: creditTotal,
+        }),
       });
     }
   }
 
   return {
     actors,
-    massIdTotalValue: certificateTotalValue,
+    certificateTotalValue,
   };
 };
 
 export const calculateRewardsDistribution = (ruleSubject: {
-  creditsDocumentUnitPrice: NonZeroPositive;
+  creditUnitPrice: BigNumber;
   resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
 }): RewardsDistribution => {
-  const { creditsDocumentUnitPrice } = ruleSubject;
+  const { creditUnitPrice } = ruleSubject;
 
   const resultContentsWithMassIdCertificateValue =
     ruleSubject.resultContentsWithMassIdCertificateValue.map(
@@ -154,15 +169,15 @@ export const calculateRewardsDistribution = (ruleSubject: {
       }),
     );
 
-  const { actors, massIdTotalValue } = aggregateMassIdCertificatesRewards(
-    creditsDocumentUnitPrice,
+  const { actors, certificateTotalValue } = aggregateMassIdCertificatesRewards(
+    creditUnitPrice,
     resultContentsWithMassIdCertificateValue,
   );
 
   const remainder = calculateRemainder({
     actors,
-    creditsDocumentUnitPrice,
-    massIdTotalValue,
+    certificateTotalValue,
+    creditUnitPrice,
   });
 
   addParticipantRemainder({
@@ -172,8 +187,8 @@ export const calculateRewardsDistribution = (ruleSubject: {
 
   return {
     actors: [...actors.values()],
-    creditsUnitPrice: creditsDocumentUnitPrice,
-    massIdTotalValue: massIdTotalValue.toString(),
+    certificateTotalValue: certificateTotalValue.toString(),
+    creditsUnitPrice: creditUnitPrice.toString(),
     remainder: {
       amount: remainder.amount.toString(),
       percentage: remainder.percentage.toString(),
