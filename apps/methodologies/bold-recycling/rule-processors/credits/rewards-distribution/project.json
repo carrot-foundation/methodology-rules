@@ -1,0 +1,14 @@
+{
+  "name": "methodologies-bold-recycling-rule-processors-credits-rewards-distribution",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["methodology:bold", "processor:credits", "type:app"],
+  "sourceRoot": "apps/methodologies/bold-recycling/rule-processors/credits/rewards-distribution/src",
+  "projectType": "application",
+  "targets": {
+    "build-lambda": {},
+    "lint": {},
+    "package-lambda": {},
+    "upload-lambda": {},
+    "ts": {}
+  }
+}
