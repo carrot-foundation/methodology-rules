@@ -32,7 +32,10 @@ import { type NonZeroPositive } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
-import type { ResultContentsWithMassIdCertificateValue } from './rewards-distribution.types';
+import type {
+  ResultContentsWithMassIdCertificateValue,
+  RuleSubject,
+} from './rewards-distribution.types';
 
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
@@ -40,13 +43,6 @@ import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 const { RULES_METADATA } = DocumentEventName;
 const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
   DocumentEventAttributeName;
-
-export const RESULT_COMMENTS = {} as const;
-
-interface RuleSubject {
-  creditUnitPrice: BigNumber;
-  resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
-}
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();

@@ -8,6 +8,11 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type BigNumber from 'bignumber.js';
 
+export interface RuleSubject {
+  creditUnitPrice: BigNumber;
+  resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
+}
+
 export interface ResultContentsWithMassIdCertificateValue {
   massIdCertificateValue: BigNumber;
   resultContent: CertificateRewardDistributionOutput;

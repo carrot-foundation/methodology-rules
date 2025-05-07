@@ -9,6 +9,7 @@ import type {
   Remainder,
   ResultContentsWithMassIdCertificateValue,
   RewardsDistribution,
+  RuleSubject,
 } from './rewards-distribution.types';
 
 export const formatPercentage = (percentage: BigNumber): BigNumber =>
@@ -182,10 +183,9 @@ export const aggregateMassIdCertificatesRewards = (
   };
 };
 
-export const calculateRewardsDistribution = (ruleSubject: {
-  creditUnitPrice: BigNumber;
-  resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
-}): RewardsDistribution => {
+export const calculateRewardsDistribution = (
+  ruleSubject: RuleSubject,
+): RewardsDistribution => {
   const { creditUnitPrice } = ruleSubject;
 
   const resultContentsWithMassIdCertificateValue =
