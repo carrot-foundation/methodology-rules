@@ -6,12 +6,12 @@ import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 
 import { validateDocument } from './document-helpers.typia';
 
-export const loadParentDocument = async (
+export const loadDocument = async (
   loaderService: DocumentLoaderService,
   key: Maybe<string>,
 ): Promise<Document | undefined> => {
   if (!isNonEmptyString(key)) {
-    logger.info(`[loadParentDocument] Invalid key provided: ${key}`);
+    logger.info(`[loadDocument] Invalid key provided: ${key}`);
 
     return undefined;
   }
@@ -24,7 +24,7 @@ export const loadParentDocument = async (
     if (!validation.success) {
       logger.warn(
         { validationErrors: validation.errors },
-        `[loadParentDocument] Invalid parent document ${key}`,
+        `[loadDocument] Invalid document ${key}`,
       );
 
       return undefined;
@@ -32,10 +32,7 @@ export const loadParentDocument = async (
 
     return validation.data;
   } catch (error) {
-    logger.warn(
-      { error },
-      `[loadParentDocument] Failed to load document: ${key}`,
-    );
+    logger.warn({ error }, `[loadDocument] Failed to load document: ${key}`);
 
     return undefined;
   }
