@@ -19,10 +19,47 @@ import {
   calculateRemainder,
   formatDecimalPlaces,
   formatPercentage,
+  getAggregateParticipantKey,
 } from './rewards-distribution.helpers';
 
 describe('Rewards Distribution Helpers', () => {
-  const creditsDocumentUnitPrice = 5.23;
+  const creditUnitPrice = new BigNumber(5.23);
+
+  describe('getAggregateParticipantKey', () => {
+    it('should return the correct key format when given valid inputs', () => {
+      expect(
+        getAggregateParticipantKey(
+          RewardsDistributionActorType.HAULER,
+          'participant-id-123',
+        ),
+      ).toEqual(`${RewardsDistributionActorType.HAULER}-participant-id-123`);
+
+      expect(
+        getAggregateParticipantKey('CUSTOM_TYPE', 'custom-id-456'),
+      ).toEqual('CUSTOM_TYPE-custom-id-456');
+    });
+
+    it('should throw an error when actorType is undefined', () => {
+      expect(() =>
+        getAggregateParticipantKey(undefined, 'participant-id'),
+      ).toThrow('Actor type and participant ID are required');
+    });
+
+    it('should throw an error when participantId is undefined', () => {
+      expect(() =>
+        getAggregateParticipantKey(
+          RewardsDistributionActorType.RECYCLER,
+          undefined,
+        ),
+      ).toThrow('Actor type and participant ID are required');
+    });
+
+    it('should throw an error when both actorType and participantId are undefined', () => {
+      expect(() => getAggregateParticipantKey(undefined, undefined)).toThrow(
+        'Actor type and participant ID are required',
+      );
+    });
+  });
 
   describe('formatPercentage', () => {
     it('should return correct percentage divided by 100', () => {
@@ -53,9 +90,7 @@ describe('Rewards Distribution Helpers', () => {
         '-1.234567',
       );
     });
-  });
 
-  describe('calculateCreditPercentage', () => {
     it('should return the correct percentage that the participant has in the credit', () => {
       const result = formatDecimalPlaces(
         new BigNumber('13.6898828123'),
@@ -63,19 +98,24 @@ describe('Rewards Distribution Helpers', () => {
 
       expect(result).toEqual('13.689882');
     });
+  });
 
+  describe('calculateCreditPercentage', () => {
     it('should return 0 if amountTotal is zero', () => {
-      const result = calculateCreditPercentage(
-        new BigNumber(10),
-        new BigNumber(0),
-      );
+      const result = calculateCreditPercentage({
+        amount: new BigNumber(10),
+        totalAmount: new BigNumber(0),
+      });
 
       expect(result).toBe('0');
     });
 
     it('should return 0 if amount is zero', () => {
       expect(
-        calculateCreditPercentage(new BigNumber(0), new BigNumber(100)),
+        calculateCreditPercentage({
+          amount: new BigNumber(0),
+          totalAmount: new BigNumber(100),
+        }),
       ).toBe('0');
     });
   });
@@ -83,7 +123,7 @@ describe('Rewards Distribution Helpers', () => {
   describe('calculateAmount', () => {
     it('should return the correct amount of the participant', () => {
       const amount = calculateAmount({
-        creditsDocumentUnitPrice,
+        creditUnitPrice,
         massIdCertificateValue: new BigNumber(1500),
         massIdPercentage: '30.1234567892',
         participantAmount: '0',
@@ -94,7 +134,7 @@ describe('Rewards Distribution Helpers', () => {
 
     it('should return the correct amount of the participant when the same participant already exists', () => {
       const amount = calculateAmount({
-        creditsDocumentUnitPrice,
+        creditUnitPrice,
         massIdCertificateValue: new BigNumber(1500),
         massIdPercentage: '30.1234567892',
         participantAmount: '3.223669',
@@ -105,7 +145,7 @@ describe('Rewards Distribution Helpers', () => {
 
     it('should handle undefined participantAmount', () => {
       const amount = calculateAmount({
-        creditsDocumentUnitPrice,
+        creditUnitPrice,
         massIdCertificateValue: new BigNumber(100),
         massIdPercentage: '10',
         participantAmount: undefined,
@@ -117,25 +157,23 @@ describe('Rewards Distribution Helpers', () => {
 
   describe('calculateRemainder', () => {
     it('should return the correct remainder of the credit', () => {
-      const massIdTotalValue = new BigNumber(2500);
-      const actors: ActorsByActorType = new Map();
+      const certificateTotalValue = new BigNumber(2500);
 
-      // eslint-disable-next-line @typescript-eslint/naming-convention, no-underscore-dangle, @typescript-eslint/no-unused-vars
-      for (const _iterator of Array.from({ length: 3 })) {
-        actors.set(
+      const actors = new Map(
+        Array.from({ length: 3 }).map(() => [
           `${random<RewardsDistributionActorType>()}-${faker.string.uuid()}`,
           {
             ...random<RewardsDistributionActor>(),
             amount: '12.503982',
             percentage: '33.333333',
           },
-        );
-      }
+        ]),
+      );
 
       const { amount, percentage } = calculateRemainder({
         actors,
-        creditsDocumentUnitPrice,
-        massIdTotalValue,
+        certificateTotalValue,
+        creditUnitPrice,
       });
 
       expect(amount.toString()).toEqual('13037.488054');
@@ -144,7 +182,7 @@ describe('Rewards Distribution Helpers', () => {
   });
 
   describe('addParticipantRemainder', () => {
-    it('should sum remainder value to participant amount and remainderPercentage', () => {
+    it('should sum remainder amount and percentage to NETWORK participant amount and percentage', () => {
       const actors: ActorsByActorType = new Map();
       const remainder = {
         amount: new BigNumber('3.543984'),
@@ -155,6 +193,7 @@ describe('Rewards Distribution Helpers', () => {
         ...random<RewardsDistributionActor>(),
         actorType: RewardsDistributionActorType.NETWORK,
         amount: '8.023876',
+        percentage: '0',
       });
 
       addParticipantRemainder({
@@ -163,7 +202,12 @@ describe('Rewards Distribution Helpers', () => {
       });
 
       expect(actors.get(MethodologyActorType.NETWORK)).toMatchObject({
-        amount: '11.56786',
+        amount: formatDecimalPlaces(
+          new BigNumber('8.023876').plus('3.543984'),
+        ).toString(),
+        percentage: formatDecimalPlaces(
+          new BigNumber('0').plus('0.027105'),
+        ).toString(),
       });
     });
 
@@ -182,7 +226,11 @@ describe('Rewards Distribution Helpers', () => {
       };
 
       addParticipantRemainder({ actors, remainder });
-      expect(actors.get('OTHER-1')?.amount).toBe('1');
+
+      expect(actors.get('OTHER-1')).toMatchObject({
+        amount: '1',
+        percentage: '1',
+      });
     });
   });
 
@@ -199,7 +247,10 @@ describe('Rewards Distribution Helpers', () => {
       );
 
       const getActorKeyByIndex = (index: number) =>
-        `${actorsData[index]?.actorType}-${actorsData[index]?.participant.id}`;
+        getAggregateParticipantKey(
+          actorsData[index]?.actorType,
+          actorsData[index]?.participant.id,
+        );
 
       const resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[] =
         [
@@ -241,12 +292,13 @@ describe('Rewards Distribution Helpers', () => {
           },
         ];
 
-      const { actors, massIdTotalValue } = aggregateMassIdCertificatesRewards(
-        creditsDocumentUnitPrice,
-        resultContentsWithMassIdCertificateValue,
-      );
+      const { actors, certificateTotalValue } =
+        aggregateMassIdCertificatesRewards(
+          creditUnitPrice,
+          resultContentsWithMassIdCertificateValue,
+        );
 
-      expect(massIdTotalValue.toString()).toEqual('1800');
+      expect(certificateTotalValue.toString()).toEqual('1800');
 
       expect(actors.get(getActorKeyByIndex(0))).toMatchObject({
         amount: '947.211111',
@@ -260,6 +312,124 @@ describe('Rewards Distribution Helpers', () => {
       expect(actors.get(getActorKeyByIndex(3))).toMatchObject({
         amount: '3194.929288',
       });
+    });
+
+    it('should add amount, and handle the same participants in both certificates', () => {
+      const participant1 = {
+        id: faker.string.uuid(),
+        name: faker.company.name(),
+      };
+      const participant2 = {
+        id: faker.string.uuid(),
+        name: faker.company.name(),
+      };
+
+      const actorType1 = RewardsDistributionActorType.WASTE_GENERATOR;
+      const actorType2 = RewardsDistributionActorType.HAULER;
+
+      const resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[] =
+        [
+          {
+            massIdCertificateValue: new BigNumber(1000),
+            resultContent: {
+              massIdDocumentId: faker.string.uuid(),
+              massIdRewards: [
+                {
+                  actorType: actorType1,
+                  massIdPercentage: '40',
+                  participant: participant1,
+                },
+                {
+                  actorType: actorType2,
+                  massIdPercentage: '60',
+                  participant: participant2,
+                },
+              ],
+            },
+          },
+          {
+            massIdCertificateValue: new BigNumber(500),
+            resultContent: {
+              massIdDocumentId: faker.string.uuid(),
+              massIdRewards: [
+                {
+                  actorType: actorType1,
+                  massIdPercentage: '30',
+                  participant: participant1,
+                },
+                {
+                  actorType: actorType2,
+                  massIdPercentage: '70',
+                  participant: participant2,
+                },
+              ],
+            },
+          },
+        ];
+
+      const { actors, certificateTotalValue } =
+        aggregateMassIdCertificatesRewards(
+          creditUnitPrice,
+          resultContentsWithMassIdCertificateValue,
+        );
+
+      const expectedAmount1 = formatDecimalPlaces(
+        new BigNumber('0.4')
+          .multipliedBy(1000)
+          .multipliedBy(creditUnitPrice)
+          .plus(
+            new BigNumber('0.3')
+              .multipliedBy(500)
+              .multipliedBy(creditUnitPrice),
+          ),
+      ).toString();
+
+      const expectedAmount2 = formatDecimalPlaces(
+        new BigNumber('0.6')
+          .multipliedBy(1000)
+          .multipliedBy(creditUnitPrice)
+          .plus(
+            new BigNumber('0.7')
+              .multipliedBy(500)
+              .multipliedBy(creditUnitPrice),
+          ),
+      ).toString();
+
+      const participantType1 = getAggregateParticipantKey(
+        actorType1,
+        participant1.id,
+      );
+      const participantType2 = getAggregateParticipantKey(
+        actorType2,
+        participant2.id,
+      );
+
+      const expectedPercentage1 = calculateCreditPercentage({
+        amount: new BigNumber(expectedAmount1),
+        totalAmount: new BigNumber('7845'),
+      });
+      const expectedPercentage2 = calculateCreditPercentage({
+        amount: new BigNumber(expectedAmount2),
+        totalAmount: new BigNumber('7845'),
+      });
+
+      expect(certificateTotalValue.toString()).toEqual('1500');
+
+      expect(actors.get(participantType1)?.amount).toEqual(expectedAmount1);
+      expect(actors.get(participantType2)?.amount).toEqual(expectedAmount2);
+
+      expect(actors.get(participantType1)?.percentage).toEqual(
+        expectedPercentage1,
+      );
+      expect(actors.get(participantType2)?.percentage).toEqual(
+        expectedPercentage2,
+      );
+
+      expect(actors.get(participantType1)?.participant).toEqual(participant1);
+      expect(actors.get(participantType2)?.participant).toEqual(participant2);
+
+      expect(actors.get(participantType1)?.actorType).toEqual(actorType1);
+      expect(actors.get(participantType2)?.actorType).toEqual(actorType2);
     });
   });
 });
