@@ -341,8 +341,6 @@ const createTestDocuments = () => {
     ],
   };
 
-  console.log(JSON.stringify(multipleCertificatesCreditsDocument));
-
   return {
     massId1Value,
     massId2Value,

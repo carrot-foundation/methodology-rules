@@ -32,7 +32,11 @@ const massIdWithCreditStubs = new BoldStubsBuilder()
   .createMassIdDocuments()
   .createMassIdAuditDocuments()
   .createCertificateDocuments()
-  .createCreditsDocument(TRC)
+  .createCreditsDocument({
+    partialDocument: {
+      subtype: TRC,
+    },
+  })
   .build();
 const cancelledCreditsDocument = stubBoldCreditsDocument({
   partialDocument: {

@@ -15,6 +15,7 @@ import {
   addParticipantRemainder,
   aggregateMassIdCertificatesRewards,
   calculateAmount,
+  calculateCreditPercentage,
   calculateRemainder,
   formatDecimalPlaces,
   formatPercentage,
@@ -31,6 +32,10 @@ describe('Rewards Distribution Helpers', () => {
 
       expect(percentage).toEqual('0.13709504');
     });
+
+    it('should return 0 for 0 percentage', () => {
+      expect(formatPercentage(new BigNumber(0)).toString()).toBe('0');
+    });
   });
 
   describe('formatDecimalPlaces', () => {
@@ -41,6 +46,13 @@ describe('Rewards Distribution Helpers', () => {
 
       expect(result).toEqual('13.689882');
     });
+
+    it('should handle zero and negative numbers in formatDecimalPlaces', () => {
+      expect(formatDecimalPlaces(new BigNumber(0)).toString()).toBe('0');
+      expect(formatDecimalPlaces(new BigNumber('-1.2345678')).toString()).toBe(
+        '-1.234567',
+      );
+    });
   });
 
   describe('calculateCreditPercentage', () => {
@@ -50,6 +62,21 @@ describe('Rewards Distribution Helpers', () => {
       ).toString();
 
       expect(result).toEqual('13.689882');
+    });
+
+    it('should return 0 if amountTotal is zero', () => {
+      const result = calculateCreditPercentage(
+        new BigNumber(10),
+        new BigNumber(0),
+      );
+
+      expect(result).toBe('0');
+    });
+
+    it('should return 0 if amount is zero', () => {
+      expect(
+        calculateCreditPercentage(new BigNumber(0), new BigNumber(100)),
+      ).toBe('0');
     });
   });
 
@@ -74,6 +101,17 @@ describe('Rewards Distribution Helpers', () => {
       });
 
       expect(amount.toString()).toEqual('2366.408854');
+    });
+
+    it('should handle undefined participantAmount', () => {
+      const amount = calculateAmount({
+        creditsDocumentUnitPrice,
+        massIdCertificateValue: new BigNumber(100),
+        massIdPercentage: '10',
+        participantAmount: undefined,
+      });
+
+      expect(amount).toBe('52.3');
     });
   });
 
@@ -127,6 +165,24 @@ describe('Rewards Distribution Helpers', () => {
       expect(actors.get(MethodologyActorType.NETWORK)).toMatchObject({
         amount: '11.56786',
       });
+    });
+
+    it('should do nothing if NETWORK actor is not present', () => {
+      const actors: ActorsByActorType = new Map();
+
+      actors.set('OTHER-1', {
+        actorType: RewardsDistributionActorType.HAULER,
+        amount: '1',
+        participant: { id: '1', name: 'A' },
+        percentage: '1',
+      });
+      const remainder = {
+        amount: new BigNumber(5),
+        percentage: new BigNumber(5),
+      };
+
+      addParticipantRemainder({ actors, remainder });
+      expect(actors.get('OTHER-1')?.amount).toBe('1');
     });
   });
 
