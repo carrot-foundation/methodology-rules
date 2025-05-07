@@ -36,7 +36,7 @@ describe('RewardsDistributionProcessor', () => {
         certificateDocuments,
         creditsDocument,
         expectedActorsResult,
-        expectedMassIdTotalValue,
+        expectedCertificateTotalValue,
         unitPrice,
       }) => {
         spyOnLoadParentDocument(creditsDocument);
@@ -48,7 +48,7 @@ describe('RewardsDistributionProcessor', () => {
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        const { actors, creditsUnitPrice, massIdTotalValue, remainder } =
+        const { actors, certificateTotalValue, creditsUnitPrice, remainder } =
           ruleOutput.resultContent as RewardsDistribution;
 
         const actorsResult = actors.map((actor) => ({
@@ -69,8 +69,9 @@ describe('RewardsDistributionProcessor', () => {
         const totalAmount = sumBigNumbers(
           actorsResult.map((actor) => BigNumber(actor.amount)),
         );
-        const totalCreditsPrice =
-          BigNumber(creditsUnitPrice).multipliedBy(massIdTotalValue);
+        const totalCreditsPrice = BigNumber(creditsUnitPrice).multipliedBy(
+          certificateTotalValue,
+        );
 
         expect(
           Math.abs(totalPercentage.minus(100).toNumber()) < 0.000_005,
@@ -78,8 +79,10 @@ describe('RewardsDistributionProcessor', () => {
         expect(
           Math.abs(totalAmount.minus(totalCreditsPrice).toNumber()) < 0.000_005,
         ).toBeTruthy();
-        expect(creditsUnitPrice).toBe(unitPrice);
-        expect(massIdTotalValue).toBe(String(expectedMassIdTotalValue));
+        expect(creditsUnitPrice).toBe(String(unitPrice));
+        expect(certificateTotalValue).toBe(
+          String(expectedCertificateTotalValue),
+        );
 
         expect(actorsResult.length).toBe(expectedActorsResult.length);
 
