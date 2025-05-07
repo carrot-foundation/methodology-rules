@@ -1,7 +1,13 @@
+import type { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
+
 import { wrapRuleIntoLambdaHandler } from '@carrot-fndn/shared/lambda/wrapper';
 
 import { RewardsDistributionProcessor } from './rewards-distribution.processor';
 
-const instance = new RewardsDistributionProcessor();
+export const rewardsDistributionLambda = (
+  certificateMatch: DocumentMatcher,
+) => {
+  const instance = new RewardsDistributionProcessor(certificateMatch);
 
-export const rewardsDistributionLambda = wrapRuleIntoLambdaHandler(instance);
+  return wrapRuleIntoLambdaHandler(instance);
+};

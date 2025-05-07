@@ -1,4 +1,5 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
+import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -47,7 +48,7 @@ describe('RewardsDistributionProcessor E2E', () => {
           })),
         );
 
-        const response = (await rewardsDistributionLambda(
+        const response = (await rewardsDistributionLambda(RECYCLED_ID)(
           stubRuleInput({
             documentId: creditsDocument.id,
             documentKeyPrefix,
@@ -104,7 +105,7 @@ describe('RewardsDistributionProcessor E2E', () => {
           })),
         );
 
-        const response = (await rewardsDistributionLambda(
+        const response = (await rewardsDistributionLambda(RECYCLED_ID)(
           stubRuleInput({
             documentId: creditsDocument?.id ?? random<NonEmptyString>(),
             documentKeyPrefix,

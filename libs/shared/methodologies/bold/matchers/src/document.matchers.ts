@@ -40,6 +40,11 @@ export const RECYCLED_ID = new DocumentMatcher({
   type: DocumentType.RECYCLED_ID,
 });
 
+export const GAS_ID = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  type: DocumentType.GAS_ID,
+});
+
 export const METHODOLOGY_DEFINITION = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.DEFINITION,

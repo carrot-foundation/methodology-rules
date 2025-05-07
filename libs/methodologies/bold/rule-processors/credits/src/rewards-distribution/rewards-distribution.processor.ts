@@ -11,7 +11,7 @@ import {
   DocumentQueryService,
   loadParentDocument,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   eventHasName,
   eventNameIsAnyOf,
@@ -51,6 +51,10 @@ interface RuleSubject {
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
+  constructor(private readonly certificateMatch: DocumentMatcher) {
+    super();
+  }
+
   async generateCertificateDocumentsQuery(
     ruleInput: RuleInput,
   ): Promise<DocumentQuery<Document> | undefined> {
@@ -63,7 +67,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
       criteria: {
-        relatedDocuments: [RECYCLED_ID.match],
+        relatedDocuments: [this.certificateMatch.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -142,7 +146,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     if (!isNonEmptyArray(resultContentsWithMassIdCertificateValue)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.CERTIFICATE_DOCUMENT_NOT_FOUND(
-          RECYCLED_ID.match.type,
+          this.certificateMatch.match.type,
         ),
       );
     }
