@@ -41,7 +41,7 @@ type TestCase = {
   certificateDocuments: CertificateDocument[];
   creditsDocument: CreditsDocument;
   expectedActorsResult: ActorResult[];
-  expectedMassIdTotalValue: number;
+  expectedCertificateTotalValue: number;
   resultStatus: RuleOutputStatus;
   scenario: string;
   unitPrice: number;
@@ -144,38 +144,48 @@ const createStandardRewardsDistribution = (
 const createMethodologyActorReward = (
   actorType: RewardsDistributionActorType,
   percentage: string,
-) => ({
-  actorType,
-  massIdPercentage: percentage,
-  participant: {
-    id:
-      methodologyActorParticipants.get(
-        actorType as unknown as MethodologyDocumentActorType,
-      )?.id ?? '',
-    name:
-      methodologyActorParticipants.get(
-        actorType as unknown as MethodologyDocumentActorType,
-      )?.name ?? '',
-  },
-});
+) => {
+  const id =
+    methodologyActorParticipants.get(
+      actorType as unknown as MethodologyDocumentActorType,
+    )?.id || faker.string.uuid();
+
+  const name =
+    methodologyActorParticipants.get(
+      actorType as unknown as MethodologyDocumentActorType,
+    )?.name || `${actorType} Participant`;
+
+  return {
+    actorType,
+    massIdPercentage: percentage,
+    participant: {
+      id,
+      name,
+    },
+  };
+};
 
 const createMassIdActorReward = (
   actorType: RewardsDistributionActorType,
   percentage: string,
-) => ({
-  actorType,
-  massIdPercentage: percentage,
-  participant: {
-    id:
-      massIdActorParticipants.get(
-        actorType as unknown as MassIdDocumentActorType,
-      )?.id ?? '',
-    name:
-      massIdActorParticipants.get(
-        actorType as unknown as MassIdDocumentActorType,
-      )?.name ?? '',
-  },
-});
+) => {
+  const id =
+    massIdActorParticipants.get(actorType as unknown as MassIdDocumentActorType)
+      ?.id || faker.string.uuid();
+
+  const name =
+    massIdActorParticipants.get(actorType as unknown as MassIdDocumentActorType)
+      ?.name || `${actorType} Participant`;
+
+  return {
+    actorType,
+    massIdPercentage: percentage,
+    participant: {
+      id,
+      name,
+    },
+  };
+};
 
 const createMultiHaulerRewardsDistribution = (
   documentId: string,
@@ -409,7 +419,7 @@ const expectedResults = {
       amount: '0',
       percentage: '0',
     },
-  ] as ActorResult[],
+  ],
 
   multipleHaulers: [
     {
@@ -472,7 +482,7 @@ const expectedResults = {
       amount: '0.000001',
       percentage: '0.000003',
     },
-  ] as ActorResult[],
+  ],
 
   singleCertificateStandard: [
     {
@@ -525,7 +535,7 @@ const expectedResults = {
       amount: '0',
       percentage: '0',
     },
-  ] as ActorResult[],
+  ],
 };
 
 export const rewardsDistributionProcessorTestCases: TestCase[] = [
@@ -533,7 +543,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     certificateDocuments: documents.standard.certificateDocuments,
     creditsDocument: documents.standard.creditsDocument,
     expectedActorsResult: expectedResults.singleCertificateStandard,
-    expectedMassIdTotalValue: documents.massId1Value,
+    expectedCertificateTotalValue: documents.massId1Value,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
@@ -542,7 +552,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     certificateDocuments: documents.multiHauler.certificateDocuments,
     creditsDocument: documents.multiHauler.creditsDocument,
     expectedActorsResult: expectedResults.multipleHaulers,
-    expectedMassIdTotalValue: documents.massId1Value,
+    expectedCertificateTotalValue: documents.massId1Value,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
@@ -551,7 +561,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     certificateDocuments: documents.multipleCertificates.certificateDocuments,
     creditsDocument: documents.multipleCertificates.creditsDocument,
     expectedActorsResult: expectedResults.multipleCertificates,
-    expectedMassIdTotalValue: documents.multipleCertificates.totalValue,
+    expectedCertificateTotalValue: documents.multipleCertificates.totalValue,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
