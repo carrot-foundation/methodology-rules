@@ -5,7 +5,6 @@ import type {
 import type {
   MethodologyActorType,
   NonEmptyString,
-  NonZeroPositive,
 } from '@carrot-fndn/shared/types';
 import type BigNumber from 'bignumber.js';
 
@@ -30,14 +29,14 @@ export type ActorsByActorType = Map<string, RewardsDistributionActor>;
 
 export interface RewardsDistribution {
   actors: RewardsDistributionActor[];
-  creditsUnitPrice: NonZeroPositive;
-  massIdTotalValue: NonEmptyString;
+  certificateTotalValue: NonEmptyString;
+  creditsUnitPrice: NonEmptyString;
   remainder: Remainder<string>;
 }
 
 export interface AggregateMassIdRewards {
   actors: ActorsByActorType;
-  massIdTotalValue: BigNumber;
+  certificateTotalValue: BigNumber;
 }
 
 export interface Remainder<T = BigNumber> {

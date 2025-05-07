@@ -44,7 +44,7 @@ const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
 export const RESULT_COMMENTS = {} as const;
 
 interface RuleSubject {
-  creditsDocumentUnitPrice: NonZeroPositive;
+  creditUnitPrice: BigNumber;
   resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
 }
 
@@ -152,7 +152,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     return {
-      creditsDocumentUnitPrice: await this.getCreditsUnitPrice(ruleInput),
+      creditUnitPrice: new BigNumber(await this.getCreditsUnitPrice(ruleInput)),
       resultContentsWithMassIdCertificateValue,
     };
   }
