@@ -4,6 +4,7 @@ import {
   type Document,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
+  RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface RewardsDistributionActor {
@@ -16,12 +17,6 @@ export interface ActorReward {
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
-}
-
-export enum RewardsDistributionWasteType {
-  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
-  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
-  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
 }
 
 export type RewardsDistributionActorTypePercentage = Record<

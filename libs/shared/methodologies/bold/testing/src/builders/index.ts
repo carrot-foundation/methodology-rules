@@ -6,3 +6,4 @@ export * from './bold.builder.helpers';
 export * from './bold.stubs.types';
 export * from './bold-methodology-definition.stubs';
 export * from './bold-credits.stubs';
+export * from './bold-certificate.stubs';

@@ -14,7 +14,7 @@ export enum DocumentStatus {
 }
 
 export enum DocumentType {
-  CREDIT = 'Credit',
+  CREDITS = 'Credits',
   DEFINITION = 'Definition',
   GAS_ID = 'GasID',
   MASS_ID_AUDIT = 'MassID Audit',
@@ -100,10 +100,13 @@ export enum DocumentEventAttributeName {
   METHODOLOGY_SLUG = 'Methodology Slug',
   RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
+  REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT = 'Rewards Distribution Rule Result Content',
+  RULE_PROCESSOR_RESULT_CONTENT = 'Rule Processor Result Content',
   SCALE_HOMOLOGATION = 'Scale Homologation',
   SCALE_TYPE = 'Scale Type',
   SORTING_FACTOR = 'Sorting Factor',
   TARE = 'Tare',
+  UNIT_PRICE = 'Unit Price',
   VEHICLE_DESCRIPTION = 'Vehicle Description',
   VEHICLE_LICENSE_PLATE = 'Vehicle License Plate',
   VEHICLE_TYPE = 'Vehicle Type',

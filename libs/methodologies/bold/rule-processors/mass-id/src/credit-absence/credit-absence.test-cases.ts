@@ -3,7 +3,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import { TRC_CREDIT_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   BoldStubsBuilder,
-  stubBoldCreditsDocument,
+  stubBoldCreditOrderDocument,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -24,37 +24,41 @@ const { TRC } = DocumentSubtype;
 
 const processorError = new CreditAbsenceProcessorErrors();
 
-const massIdWithoutCreditsStubs = new BoldStubsBuilder()
+const massIdWithoutCreditStubs = new BoldStubsBuilder()
   .createMassIdDocuments()
   .createMassIdAuditDocuments()
   .build();
 const massIdWithCreditStubs = new BoldStubsBuilder()
   .createMassIdDocuments()
   .createMassIdAuditDocuments()
-  .createCertificateDocuments()
-  .createCreditsDocument(TRC)
+  .createMassIdCertificateDocuments()
+  .createCreditOrderDocument({
+    partialDocument: {
+      subtype: TRC,
+    },
+  })
   .build();
-const cancelledCreditsDocument = stubBoldCreditsDocument({
+const cancelledCreditOrderDocument = stubBoldCreditOrderDocument({
   partialDocument: {
     status: DocumentStatus.CANCELLED,
     subtype: TRC,
   },
 });
-const massIdWithCancelledCreditsDocument = {
+const massIdWithCancelledCreditOrderDocument = {
   ...massIdWithCreditStubs.massIdDocument,
   externalEvents: [
     ...(massIdWithCreditStubs.massIdDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: RELATED,
-      relatedDocument: mapDocumentReference(cancelledCreditsDocument),
+      relatedDocument: mapDocumentReference(cancelledCreditOrderDocument),
     }),
   ],
 };
 
 export const creditAbsenceTestCases = [
   {
-    documents: [massIdWithoutCreditsStubs.massIdDocument],
-    massIdAuditDocument: massIdWithoutCreditsStubs.massIdAuditDocument,
+    documents: [massIdWithoutCreditStubs.massIdDocument],
+    massIdAuditDocument: massIdWithoutCreditStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
       assert<NonEmptyString>(TRC_CREDIT_MATCH.match.subtype),
     ),
@@ -65,7 +69,7 @@ export const creditAbsenceTestCases = [
     documents: [
       massIdWithCreditStubs.massIdDocument,
       {
-        ...massIdWithCreditStubs.creditsDocument,
+        ...massIdWithCreditStubs.creditOrderDocument,
         status: DocumentStatus.CANCELLED,
       },
     ] as Document[],
@@ -79,7 +83,7 @@ export const creditAbsenceTestCases = [
   {
     documents: [
       massIdWithCreditStubs.massIdDocument,
-      massIdWithCreditStubs.creditsDocument,
+      massIdWithCreditStubs.creditOrderDocument,
     ],
     massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment:
@@ -91,12 +95,12 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithCancelledCreditsDocument,
+      massIdWithCancelledCreditOrderDocument,
       {
-        ...massIdWithCreditStubs.creditsDocument,
+        ...massIdWithCreditStubs.creditOrderDocument,
         status: DocumentStatus.CANCELLED,
       },
-      cancelledCreditsDocument,
+      cancelledCreditOrderDocument,
     ],
     massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.APPROVED(
@@ -108,9 +112,9 @@ export const creditAbsenceTestCases = [
   },
   {
     documents: [
-      massIdWithCancelledCreditsDocument,
-      massIdWithCreditStubs.creditsDocument,
-      cancelledCreditsDocument,
+      massIdWithCancelledCreditOrderDocument,
+      massIdWithCreditStubs.creditOrderDocument,
+      cancelledCreditOrderDocument,
     ],
     massIdAuditDocument: massIdWithCreditStubs.massIdAuditDocument,
     resultComment:

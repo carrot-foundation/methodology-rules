@@ -40,6 +40,11 @@ export const RECYCLED_ID = new DocumentMatcher({
   type: DocumentType.RECYCLED_ID,
 });
 
+export const GAS_ID = new DocumentMatcher({
+  category: DocumentCategory.METHODOLOGY,
+  type: DocumentType.GAS_ID,
+});
+
 export const METHODOLOGY_DEFINITION = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   type: DocumentType.DEFINITION,
@@ -59,11 +64,11 @@ export const PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH = new DocumentMatcher({
 export const TRC_CREDIT_MATCH = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   subtype: DocumentSubtype.TRC,
-  type: DocumentType.CREDIT,
+  type: DocumentType.CREDITS,
 });
 
 export const TCC_CREDIT_MATCH = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   subtype: DocumentSubtype.TCC,
-  type: DocumentType.CREDIT,
+  type: DocumentType.CREDITS,
 });
