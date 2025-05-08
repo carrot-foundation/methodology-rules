@@ -14,7 +14,7 @@ export enum DocumentStatus {
 }
 
 export enum DocumentType {
-  CREDITS = 'Credits',
+  CREDITS = 'Credit',
   DEFINITION = 'Definition',
   GAS_ID = 'GasID',
   MASS_ID_AUDIT = 'MassID Audit',

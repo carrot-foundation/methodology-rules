@@ -123,7 +123,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
-    const creditsDocument = await loadParentDocument(
+    const creditOrderDocument = await loadParentDocument(
       this.context.documentLoaderService,
       toDocumentKey({
         documentId: ruleInput.documentId,
@@ -131,14 +131,14 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       }),
     );
 
-    if (isNil(creditsDocument)) {
+    if (isNil(creditOrderDocument)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.CREDITS_DOCUMENT_NOT_FOUND,
       );
     }
 
     const unitPrice = getEventAttributeValue(
-      creditsDocument.externalEvents?.find((event) =>
+      creditOrderDocument.externalEvents?.find((event) =>
         eventHasName(event, RULES_METADATA),
       ),
       UNIT_PRICE,

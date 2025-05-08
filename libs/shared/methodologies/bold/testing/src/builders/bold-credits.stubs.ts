@@ -32,7 +32,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
   [UNIT_PRICE, random<NonZeroPositive>()],
 ];
 
-export const stubBoldCreditsRulesMetadataEvent = ({
+export const stubBoldCreditRulesMetadataEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -44,17 +44,17 @@ export const stubBoldCreditsRulesMetadataEvent = ({
     mergeMetadataAttributes(defaultRulesMetadataAttributes, metadataAttributes),
   );
 
-const boldCreditsExternalEventsMap = new Map([
-  [RULES_METADATA, stubBoldCreditsRulesMetadataEvent()],
+const boldCreditExternalEventsMap = new Map([
+  [RULES_METADATA, stubBoldCreditRulesMetadataEvent()],
 ]);
 
-export const stubBoldCreditsDocument = ({
+export const stubBoldCreditOrderDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters = {}): Document => {
   const mergedEventsMap = isNil(externalEventsMap)
-    ? boldCreditsExternalEventsMap
-    : mergeEventsMaps(boldCreditsExternalEventsMap, externalEventsMap);
+    ? boldCreditExternalEventsMap
+    : mergeEventsMaps(boldCreditExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(

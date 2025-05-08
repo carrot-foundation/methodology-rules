@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js';
 import { random } from 'typia';
 
 import type {
-  ActorsByActorType,
+  ActorsByType,
   ResultContentsWithMassIdCertificateValue,
   RewardsDistributionActor,
 } from './rewards-distribution.types';
@@ -208,7 +208,7 @@ describe('Rewards Distribution Helpers', () => {
 
   describe('calculateRemainder', () => {
     it('should return the correct remainder of the credit', () => {
-      const certificateTotalValue = new BigNumber(2500);
+      const massIdCertificateTotalValue = new BigNumber(2500);
 
       const actors = new Map(
         Array.from({ length: 3 }).map(() => [
@@ -223,8 +223,8 @@ describe('Rewards Distribution Helpers', () => {
 
       const { amount, percentage } = calculateRemainder({
         actors,
-        certificateTotalValue,
         creditUnitPrice,
+        massIdCertificateTotalValue,
       });
 
       expect(amount.toString()).toEqual('13037.488054');
@@ -234,7 +234,7 @@ describe('Rewards Distribution Helpers', () => {
 
   describe('addParticipantRemainder', () => {
     it('should sum remainder amount and percentage to NETWORK participant amount and percentage', () => {
-      const actors: ActorsByActorType = new Map();
+      const actors: ActorsByType = new Map();
       const remainder = {
         amount: new BigNumber('3.543984'),
         percentage: new BigNumber('0.027105'),
@@ -263,7 +263,7 @@ describe('Rewards Distribution Helpers', () => {
     });
 
     it('should do nothing if NETWORK actor is not present', () => {
-      const actors: ActorsByActorType = new Map();
+      const actors: ActorsByType = new Map();
 
       actors.set('OTHER-1', {
         actorType: RewardsDistributionActorType.HAULER,
@@ -343,13 +343,13 @@ describe('Rewards Distribution Helpers', () => {
           },
         ];
 
-      const { actors, certificateTotalValue } =
+      const { actors, massIdCertificateTotalValue } =
         aggregateMassIdCertificatesRewards(
           creditUnitPrice,
           resultContentsWithMassIdCertificateValue,
         );
 
-      expect(certificateTotalValue.toString()).toEqual('1800');
+      expect(massIdCertificateTotalValue.toString()).toEqual('1800');
 
       expect(actors.get(getActorKeyByIndex(0))).toMatchObject({
         amount: '947.211111',
@@ -418,7 +418,7 @@ describe('Rewards Distribution Helpers', () => {
           },
         ];
 
-      const { actors, certificateTotalValue } =
+      const { actors, massIdCertificateTotalValue } =
         aggregateMassIdCertificatesRewards(
           creditUnitPrice,
           resultContentsWithMassIdCertificateValue,
@@ -464,7 +464,7 @@ describe('Rewards Distribution Helpers', () => {
         totalAmount: new BigNumber('7845'),
       });
 
-      expect(certificateTotalValue.toString()).toEqual('1500');
+      expect(massIdCertificateTotalValue.toString()).toEqual('1500');
 
       expect(actors.get(participantType1)?.amount).toEqual(expectedAmount1);
       expect(actors.get(participantType2)?.amount).toEqual(expectedAmount2);

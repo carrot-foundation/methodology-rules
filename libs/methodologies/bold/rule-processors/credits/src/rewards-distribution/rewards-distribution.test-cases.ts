@@ -5,7 +5,7 @@ import {
   MASS_ID_ACTOR_PARTICIPANTS,
   METHODOLOGY_ACTOR_PARTICIPANTS,
   stubBoldCertificateRulesMetadataEvent,
-  stubBoldCreditsRulesMetadataEvent,
+  stubBoldCreditRulesMetadataEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -35,21 +35,21 @@ type ActorResult = {
 };
 
 type CertificateDocument = Document;
-type CreditsDocument = Document;
+type CreditOrderDocument = Document;
 
 type TestCase = {
-  certificateDocuments: CertificateDocument[];
-  creditsDocument: CreditsDocument;
+  creditOrderDocument: CreditOrderDocument;
   expectedActorsResult: ActorResult[];
   expectedCertificateTotalValue: number;
+  massIdCertificateDocuments: CertificateDocument[];
   resultStatus: RuleOutputStatus;
   scenario: string;
   unitPrice: number;
 };
 
 type ErrorTestCase = {
-  certificateDocuments: CertificateDocument[];
-  creditsDocument: CreditsDocument | undefined;
+  creditOrderDocument: CreditOrderDocument | undefined;
+  massIdCertificateDocuments: CertificateDocument[];
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
@@ -261,15 +261,15 @@ const createMultiHaulerRewardsDistribution = (
 };
 
 const buildCertificateDocuments = (options: {
-  documentId: string;
+  massIdDocumentId: string;
   rewardsDistribution: CertificateRewardDistributionOutput;
   value: number;
 }) => {
-  const { documentId, rewardsDistribution, value } = options;
+  const { massIdDocumentId, rewardsDistribution, value } = options;
 
   return new BoldStubsBuilder({
     massIdActorParticipants,
-    massIdDocumentIds: [documentId],
+    massIdDocumentIds: [massIdDocumentId],
   })
     .createMassIdDocuments({
       partialDocument: {
@@ -277,7 +277,7 @@ const buildCertificateDocuments = (options: {
       },
     })
     .createMassIdAuditDocuments()
-    .createCertificateDocuments({
+    .createMassIdCertificateDocuments({
       externalEventsMap: {
         [RULES_METADATA]: stubBoldCertificateRulesMetadataEvent({
           metadataAttributes: [
@@ -293,9 +293,9 @@ const buildCertificateDocuments = (options: {
         type: RECYCLED_ID,
       },
     })
-    .createCreditsDocument({
+    .createCreditOrderDocument({
       externalEventsMap: {
-        [RULES_METADATA]: stubBoldCreditsRulesMetadataEvent({
+        [RULES_METADATA]: stubBoldCreditRulesMetadataEvent({
           metadataAttributes: [[UNIT_PRICE, UNIT_PRICE_VALUE]],
         }),
       },
@@ -308,13 +308,13 @@ const createTestDocuments = () => {
   const massId1DocumentId = faker.string.uuid();
 
   const standardDocuments = buildCertificateDocuments({
-    documentId: massId1DocumentId,
+    massIdDocumentId: massId1DocumentId,
     rewardsDistribution: createStandardRewardsDistribution(massId1DocumentId),
     value: massId1Value,
   });
 
   const multiHaulerDocuments = buildCertificateDocuments({
-    documentId: massId1DocumentId,
+    massIdDocumentId: massId1DocumentId,
     rewardsDistribution:
       createMultiHaulerRewardsDistribution(massId1DocumentId),
     value: massId1Value,
@@ -323,7 +323,7 @@ const createTestDocuments = () => {
   const massId2Value = 500;
   const massId2DocumentId = faker.string.uuid();
   const secondDocuments = buildCertificateDocuments({
-    documentId: massId2DocumentId,
+    massIdDocumentId: massId2DocumentId,
     rewardsDistribution: createStandardRewardsDistribution(massId2DocumentId),
     value: massId2Value,
   });
@@ -331,18 +331,18 @@ const createTestDocuments = () => {
   const combinedValue = massId1Value + massId2Value;
 
   const multipleCertificateDocuments = [
-    ...standardDocuments.certificateDocuments,
-    ...secondDocuments.certificateDocuments,
+    ...standardDocuments.massIdCertificateDocuments,
+    ...secondDocuments.massIdCertificateDocuments,
   ];
 
-  const multipleCertificatesCreditsDocument = {
-    ...standardDocuments.creditsDocument,
+  const multipleCertificatesCreditOrderDocument = {
+    ...standardDocuments.creditOrderDocument,
     externalEvents: [
-      ...(standardDocuments.creditsDocument.externalEvents ?? []),
+      ...(standardDocuments.creditOrderDocument.externalEvents ?? []),
       stubDocumentEvent({
         name: RELATED,
         relatedDocument: mapDocumentReference(
-          secondDocuments.certificateDocuments[0]!,
+          secondDocuments.massIdCertificateDocuments[0]!,
         ),
       }),
     ],
@@ -353,8 +353,8 @@ const createTestDocuments = () => {
     massId2Value,
     multiHauler: multiHaulerDocuments,
     multipleCertificates: {
-      certificateDocuments: multipleCertificateDocuments,
-      creditsDocument: multipleCertificatesCreditsDocument,
+      creditOrderDocument: multipleCertificatesCreditOrderDocument,
+      massIdCertificateDocuments: multipleCertificateDocuments,
       totalValue: combinedValue,
     },
     secondDocument: secondDocuments,
@@ -537,28 +537,30 @@ const expectedResults = {
 
 export const rewardsDistributionProcessorTestCases: TestCase[] = [
   {
-    certificateDocuments: documents.standard.certificateDocuments,
-    creditsDocument: documents.standard.creditsDocument,
+    creditOrderDocument: documents.standard.creditOrderDocument,
     expectedActorsResult: expectedResults.singleCertificateStandard,
     expectedCertificateTotalValue: documents.massId1Value,
+    massIdCertificateDocuments: documents.standard.massIdCertificateDocuments,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
   },
   {
-    certificateDocuments: documents.multiHauler.certificateDocuments,
-    creditsDocument: documents.multiHauler.creditsDocument,
+    creditOrderDocument: documents.multiHauler.creditOrderDocument,
     expectedActorsResult: expectedResults.multipleHaulers,
     expectedCertificateTotalValue: documents.massId1Value,
+    massIdCertificateDocuments:
+      documents.multiHauler.massIdCertificateDocuments,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
   },
   {
-    certificateDocuments: documents.multipleCertificates.certificateDocuments,
-    creditsDocument: documents.multipleCertificates.creditsDocument,
+    creditOrderDocument: documents.multipleCertificates.creditOrderDocument,
     expectedActorsResult: expectedResults.multipleCertificates,
     expectedCertificateTotalValue: documents.multipleCertificates.totalValue,
+    massIdCertificateDocuments:
+      documents.multipleCertificates.massIdCertificateDocuments,
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
@@ -569,26 +571,27 @@ const createErrorTestCases = () => {
   const errorStubs = new BoldStubsBuilder()
     .createMassIdDocuments()
     .createMassIdAuditDocuments()
-    .createCertificateDocuments({
+    .createMassIdCertificateDocuments({
       partialDocument: {
         type: RECYCLED_ID,
       },
     })
-    .createCreditsDocument()
+    .createCreditOrderDocument()
     .build();
 
   const creditsDocumentWithoutRulesMetadata = {
-    ...errorStubs.creditsDocument,
-    externalEvents: errorStubs.creditsDocument.externalEvents?.filter(
+    ...errorStubs.creditOrderDocument,
+    externalEvents: errorStubs.creditOrderDocument.externalEvents?.filter(
       (event) => event.name !== RULES_METADATA.toString(),
     ),
   };
 
   const certificateDocumentWithoutRulesMetadata = {
-    ...errorStubs.certificateDocuments[0]!,
-    externalEvents: errorStubs.certificateDocuments[0]!.externalEvents?.filter(
-      (event) => event.name !== RULES_METADATA.toString(),
-    ),
+    ...errorStubs.massIdCertificateDocuments[0]!,
+    externalEvents:
+      errorStubs.massIdCertificateDocuments[0]!.externalEvents?.filter(
+        (event) => event.name !== RULES_METADATA.toString(),
+      ),
   };
 
   return {
@@ -602,34 +605,38 @@ const errorTestData = createErrorTestCases();
 
 export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   {
-    certificateDocuments: [],
-    creditsDocument: errorTestData.errorStubs.creditsDocument,
+    creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
+    massIdCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND(RECYCLED_ID),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${RECYCLED_ID} documents is not found`,
   },
   {
-    certificateDocuments: [...errorTestData.errorStubs.certificateDocuments],
-    creditsDocument: undefined,
+    creditOrderDocument: undefined,
+    massIdCertificateDocuments: [
+      ...errorTestData.errorStubs.massIdCertificateDocuments,
+    ],
     resultComment: ERROR_MESSAGES.CREDITS_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the ${CREDITS} document is not found`,
   },
   {
-    certificateDocuments: [...errorTestData.errorStubs.certificateDocuments],
-    creditsDocument: errorTestData.creditsDocumentWithoutRulesMetadata,
+    creditOrderDocument: errorTestData.creditsDocumentWithoutRulesMetadata,
+    massIdCertificateDocuments: [
+      ...errorTestData.errorStubs.massIdCertificateDocuments,
+    ],
     resultComment: ERROR_MESSAGES.INVALID_UNIT_PRICE,
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the "${UNIT_PRICE}" attribute in the ${CREDITS} document is invalid`,
   },
   {
-    certificateDocuments: [
+    creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
+    massIdCertificateDocuments: [
       errorTestData.certificateDocumentWithoutRulesMetadata,
     ],
-    creditsDocument: errorTestData.errorStubs.creditsDocument,
     resultComment:
       ERROR_MESSAGES.REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND(
-        errorTestData.errorStubs.certificateDocuments[0]!.id,
+        errorTestData.errorStubs.massIdCertificateDocuments[0]!.id,
       ),
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `a certificate document has no "${REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT}" attribute`,

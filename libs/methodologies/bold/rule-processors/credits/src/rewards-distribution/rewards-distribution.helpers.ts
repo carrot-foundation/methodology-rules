@@ -4,7 +4,7 @@ import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import type {
-  ActorsByActorType,
+  ActorsByType,
   AggregateMassIdRewards,
   Remainder,
   ResultContentsWithMassIdCertificateValue,
@@ -71,11 +71,11 @@ export const calculateAmount = (options: {
 };
 
 export const calculateRemainder = (options: {
-  actors: ActorsByActorType;
-  certificateTotalValue: BigNumber;
+  actors: ActorsByType;
   creditUnitPrice: BigNumber;
+  massIdCertificateTotalValue: BigNumber;
 }): Remainder => {
-  const { actors, certificateTotalValue, creditUnitPrice } = options;
+  const { actors, creditUnitPrice, massIdCertificateTotalValue } = options;
 
   let participantsAmount = new BigNumber(0);
   let participantsPercentage = new BigNumber(0);
@@ -84,7 +84,7 @@ export const calculateRemainder = (options: {
     participantsAmount = participantsAmount.plus(actor.amount);
     participantsPercentage = participantsPercentage.plus(actor.percentage);
   }
-  const rawAmount = certificateTotalValue
+  const rawAmount = massIdCertificateTotalValue
     .multipliedBy(creditUnitPrice)
     .minus(participantsAmount);
   const rawPercentage = new BigNumber(100).minus(participantsPercentage);
@@ -96,7 +96,7 @@ export const calculateRemainder = (options: {
 };
 
 export const addParticipantRemainder = (options: {
-  actors: ActorsByActorType;
+  actors: ActorsByType;
   remainder: Remainder;
 }): void => {
   const { actors, remainder } = options;
@@ -132,16 +132,16 @@ export const aggregateMassIdCertificatesRewards = (
   creditUnitPrice: BigNumber,
   resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[],
 ): AggregateMassIdRewards => {
-  const actors: ActorsByActorType = new Map();
+  const actors: ActorsByType = new Map();
 
-  const certificateTotalValue = calculateCertificateTotalValue(
+  const massIdCertificateTotalValue = calculateCertificateTotalValue(
     resultContentsWithMassIdCertificateValue.map(
       ({ massIdCertificateValue }) => massIdCertificateValue,
     ),
   );
 
   const creditTotal = formatDecimalPlaces(
-    certificateTotalValue.multipliedBy(creditUnitPrice),
+    massIdCertificateTotalValue.multipliedBy(creditUnitPrice),
   );
 
   for (const {
@@ -179,7 +179,7 @@ export const aggregateMassIdCertificatesRewards = (
 
   return {
     actors,
-    certificateTotalValue,
+    massIdCertificateTotalValue,
   };
 };
 
@@ -196,15 +196,16 @@ export const calculateRewardsDistribution = (
       }),
     );
 
-  const { actors, certificateTotalValue } = aggregateMassIdCertificatesRewards(
-    creditUnitPrice,
-    resultContentsWithMassIdCertificateValue,
-  );
+  const { actors, massIdCertificateTotalValue } =
+    aggregateMassIdCertificatesRewards(
+      creditUnitPrice,
+      resultContentsWithMassIdCertificateValue,
+    );
 
   const remainder = calculateRemainder({
     actors,
-    certificateTotalValue,
     creditUnitPrice,
+    massIdCertificateTotalValue,
   });
 
   addParticipantRemainder({
@@ -214,8 +215,8 @@ export const calculateRewardsDistribution = (
 
   return {
     actors: [...actors.values()],
-    certificateTotalValue: certificateTotalValue.toString(),
     creditUnitPrice: creditUnitPrice.toString(),
+    massIdCertificateTotalValue: massIdCertificateTotalValue.toString(),
     remainder: {
       amount: remainder.amount.toString(),
       percentage: remainder.percentage.toString(),

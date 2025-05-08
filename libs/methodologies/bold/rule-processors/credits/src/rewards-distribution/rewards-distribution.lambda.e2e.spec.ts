@@ -34,23 +34,25 @@ describe('RewardsDistributionProcessor E2E', () => {
     it.each(rewardsDistributionProcessorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
-        certificateDocuments,
-        creditsDocument,
+        creditOrderDocument,
         expectedActorsResult,
+        massIdCertificateDocuments,
       }) => {
         prepareEnvironmentTestE2E(
-          [...certificateDocuments, creditsDocument].map((document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document.id,
-              documentKeyPrefix,
+          [...massIdCertificateDocuments, creditOrderDocument].map(
+            (document) => ({
+              document,
+              documentKey: toDocumentKey({
+                documentId: document.id,
+                documentKeyPrefix,
+              }),
             }),
-          })),
+          ),
         );
 
         const response = (await rewardsDistributionLambda(RECYCLED_ID)(
           stubRuleInput({
-            documentId: creditsDocument.id,
+            documentId: creditOrderDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),
@@ -94,20 +96,26 @@ describe('RewardsDistributionProcessor E2E', () => {
   describe('RewardsDistributionProcessorErrors', () => {
     it.each(rewardsDistributionProcessorErrors)(
       'should return $resultStatus when $scenario',
-      async ({ certificateDocuments, creditsDocument, resultStatus }) => {
+      async ({
+        creditOrderDocument,
+        massIdCertificateDocuments,
+        resultStatus,
+      }) => {
         prepareEnvironmentTestE2E(
-          [...certificateDocuments, creditsDocument].map((document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document?.id ?? random<NonEmptyString>(),
-              documentKeyPrefix,
+          [...massIdCertificateDocuments, creditOrderDocument].map(
+            (document) => ({
+              document,
+              documentKey: toDocumentKey({
+                documentId: document?.id ?? random<NonEmptyString>(),
+                documentKeyPrefix,
+              }),
             }),
-          })),
+          ),
         );
 
         const response = (await rewardsDistributionLambda(RECYCLED_ID)(
           stubRuleInput({
-            documentId: creditsDocument?.id ?? random<NonEmptyString>(),
+            documentId: creditOrderDocument?.id ?? random<NonEmptyString>(),
             documentKeyPrefix,
           }),
           stubContext(),

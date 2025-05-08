@@ -30,18 +30,18 @@ export interface RewardsDistributionActor {
   percentage: NonEmptyString;
 }
 
-export type ActorsByActorType = Map<string, RewardsDistributionActor>;
+export type ActorsByType = Map<string, RewardsDistributionActor>;
 
 export interface RewardsDistribution {
   actors: RewardsDistributionActor[];
-  certificateTotalValue: NonEmptyString;
   creditUnitPrice: NonEmptyString;
+  massIdCertificateTotalValue: NonEmptyString;
   remainder: Remainder<string>;
 }
 
 export interface AggregateMassIdRewards {
-  actors: ActorsByActorType;
-  certificateTotalValue: BigNumber;
+  actors: ActorsByType;
+  massIdCertificateTotalValue: BigNumber;
 }
 
 export interface Remainder<T = BigNumber> {

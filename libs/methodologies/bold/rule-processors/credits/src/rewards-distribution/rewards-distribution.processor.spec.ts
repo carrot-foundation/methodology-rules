@@ -33,23 +33,30 @@ describe('RewardsDistributionProcessor', () => {
     it.each(rewardsDistributionProcessorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
-        certificateDocuments,
-        creditsDocument,
+        creditOrderDocument,
         expectedActorsResult,
         expectedCertificateTotalValue,
+        massIdCertificateDocuments,
         unitPrice,
       }) => {
-        spyOnLoadParentDocument(creditsDocument);
-        spyOnDocumentQueryServiceLoad(creditsDocument, certificateDocuments);
+        spyOnLoadParentDocument(creditOrderDocument);
+        spyOnDocumentQueryServiceLoad(
+          creditOrderDocument,
+          massIdCertificateDocuments,
+        );
 
         const ruleInput = stubRuleInput({
-          documentId: creditsDocument.id,
+          documentId: creditOrderDocument.id,
         });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        const { actors, certificateTotalValue, creditUnitPrice, remainder } =
-          ruleOutput.resultContent as RewardsDistribution;
+        const {
+          actors,
+          creditUnitPrice,
+          massIdCertificateTotalValue,
+          remainder,
+        } = ruleOutput.resultContent as RewardsDistribution;
 
         const actorsResult = actors.map((actor) => ({
           actorType: actor.actorType,
@@ -69,18 +76,18 @@ describe('RewardsDistributionProcessor', () => {
         const totalAmount = sumBigNumbers(
           actorsResult.map((actor) => BigNumber(actor.amount)),
         );
-        const totalCreditsPrice = BigNumber(creditUnitPrice).multipliedBy(
-          certificateTotalValue,
+        const totalCreditPrice = BigNumber(creditUnitPrice).multipliedBy(
+          massIdCertificateTotalValue,
         );
 
         expect(
           Math.abs(totalPercentage.minus(100).toNumber()) < 0.000_005,
         ).toBeTruthy();
         expect(
-          Math.abs(totalAmount.minus(totalCreditsPrice).toNumber()) < 0.000_005,
+          Math.abs(totalAmount.minus(totalCreditPrice).toNumber()) < 0.000_005,
         ).toBeTruthy();
         expect(creditUnitPrice).toBe(String(unitPrice));
-        expect(certificateTotalValue).toBe(
+        expect(massIdCertificateTotalValue).toBe(
           String(expectedCertificateTotalValue),
         );
 
@@ -109,20 +116,23 @@ describe('RewardsDistributionProcessor', () => {
     it.each(rewardsDistributionProcessorErrors)(
       'should return $resultStatus when $scenario',
       async ({
-        certificateDocuments,
-        creditsDocument,
+        creditOrderDocument,
+        massIdCertificateDocuments,
         resultComment,
         resultStatus,
       }) => {
-        if (!isNil(creditsDocument)) {
-          spyOnLoadParentDocument(creditsDocument);
+        if (!isNil(creditOrderDocument)) {
+          spyOnLoadParentDocument(creditOrderDocument);
         }
 
-        spyOnDocumentQueryServiceLoad(stubDocument(), certificateDocuments);
+        spyOnDocumentQueryServiceLoad(
+          stubDocument(),
+          massIdCertificateDocuments,
+        );
 
         const ruleInput = {
           ...random<Required<RuleInput>>(),
-          documentId: creditsDocument?.id ?? random<NonEmptyString>(),
+          documentId: creditOrderDocument?.id ?? random<NonEmptyString>(),
         };
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
