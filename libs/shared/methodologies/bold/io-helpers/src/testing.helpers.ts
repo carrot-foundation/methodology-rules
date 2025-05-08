@@ -22,10 +22,8 @@ export const spyOnDocumentQueryServiceLoad = (
   });
 };
 
-export const spyOnLoadParentDocument = (
-  result: Awaited<ReturnType<(typeof documentHelpers)['loadParentDocument']>>,
+export const spyOnLoadDocument = (
+  result: Awaited<ReturnType<(typeof documentHelpers)['loadDocument']>>,
 ) => {
-  jest
-    .spyOn(documentHelpers, 'loadParentDocument')
-    .mockResolvedValueOnce(result);
+  jest.spyOn(documentHelpers, 'loadDocument').mockResolvedValueOnce(result);
 };

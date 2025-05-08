@@ -9,16 +9,16 @@ import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
 import { random } from 'typia';
 
-import { loadParentDocument } from './document.helpers';
+import { loadDocument } from './document.helpers';
 
 const loaderService = createMock<DocumentLoaderService>();
 
 describe('Document Helpers', () => {
-  describe('loadParentDocument', () => {
+  describe('loadDocument', () => {
     it('should return undefined if no key is provided', async () => {
       const key = undefined;
 
-      const result = await loadParentDocument(loaderService, key);
+      const result = await loadDocument(loaderService, key);
 
       expect(result).toBe(undefined);
     });
@@ -26,7 +26,7 @@ describe('Document Helpers', () => {
     it('should return undefined if the provided key is an empty string', async () => {
       const key = '';
 
-      const result = await loadParentDocument(loaderService, key);
+      const result = await loadDocument(loaderService, key);
 
       expect(result).toBe(undefined);
     });
@@ -40,7 +40,7 @@ describe('Document Helpers', () => {
           random<DocumentEntity>() as DocumentEntity<Document>,
         );
 
-      const result = await loadParentDocument(loaderService, key);
+      const result = await loadDocument(loaderService, key);
 
       expect(result).toBe(undefined);
     });
@@ -53,7 +53,7 @@ describe('Document Helpers', () => {
         .spyOn(loaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }));
 
-      const result = await loadParentDocument(loaderService, key);
+      const result = await loadDocument(loaderService, key);
 
       expect(result).toEqual(document);
     });
@@ -67,7 +67,7 @@ describe('Document Helpers', () => {
           new Error('Not found document for Parent Document Key'),
         );
 
-      const result = await loadParentDocument(loaderService, key);
+      const result = await loadDocument(loaderService, key);
 
       expect(result).toBe(undefined);
     });

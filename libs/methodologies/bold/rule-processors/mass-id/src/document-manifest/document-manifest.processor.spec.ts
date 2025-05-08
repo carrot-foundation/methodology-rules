@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -15,7 +15,7 @@ import {
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DocumentManifestProcessor', () => {
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each([...exceptionTestCases, ...documentManifestTestCases])(
     'should return $resultStatus when $scenario',

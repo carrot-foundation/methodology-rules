@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
@@ -13,7 +13,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('HaulerIdentificationProcessor', () => {
   const ruleDataProcessor = new HaulerIdentificationProcessor();
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(haulerIdentificationTestCases)(
     `should return $resultStatus when $scenario`,

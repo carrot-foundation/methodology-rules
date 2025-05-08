@@ -1,6 +1,6 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { MassIdOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
@@ -18,7 +18,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('MassDefinitionProcessor', () => {
   const ruleDataProcessor = new MassDefinitionProcessor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   describe('isValidSubtype', () => {
     it('should return false when subtype is undefined', () => {

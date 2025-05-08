@@ -2,7 +2,7 @@ import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   type RuleInput,
   RuleOutputStatus,
@@ -14,7 +14,7 @@ import { ParentDocumentRuleProcessor } from './parent-document-rule-processor';
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('ParentDocumentRuleProcessor', () => {
-  const mockedloadParentDocument = jest.mocked(loadParentDocument);
+  const mockedloadDocument = jest.mocked(loadDocument);
 
   class TestParentDocumentRuleProcessor extends ParentDocumentRuleProcessor<
     []
@@ -56,7 +56,7 @@ describe('ParentDocumentRuleProcessor', () => {
       const ruleInput = random<RuleInput>();
       const document = random<Document>();
 
-      mockedloadParentDocument.mockResolvedValueOnce(document);
+      mockedloadDocument.mockResolvedValueOnce(document);
 
       const result = await processor['loadDocument'](ruleInput);
 

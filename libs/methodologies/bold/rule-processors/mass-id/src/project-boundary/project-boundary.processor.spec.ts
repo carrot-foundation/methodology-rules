@@ -1,5 +1,5 @@
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   BoldStubsBuilder,
   stubBoldMassIdDropOffEvent,
@@ -29,7 +29,7 @@ jest.mock('@carrot-fndn/shared/helpers', () => ({
 describe('ProjectBoundaryProcessor', () => {
   const ruleDataProcessor = new ProjectBoundaryProcessor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
   const calculateDistanceMock = jest.mocked(calculateDistance);
 
   beforeEach(() => {

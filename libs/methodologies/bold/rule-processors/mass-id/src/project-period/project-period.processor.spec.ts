@@ -1,4 +1,4 @@
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   stubBoldMassIdDocument,
   stubBoldMassIdRecycledEvent,
@@ -28,7 +28,7 @@ const { RECYCLED } = DocumentEventName;
 
 describe('ProjectPeriodProcessor', () => {
   const ruleDataProcessor = new TestProjectPeriodProcessor();
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(projectPeriodTestCases)(
     'should return $resultStatus when $scenario',

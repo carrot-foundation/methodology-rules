@@ -153,7 +153,7 @@ export class ${pascalCase}ProcessorErrors extends BaseProcessorErrors {
     name: `${fileName}.processor.spec.ts`,
     content: `import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { loadParentDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   type RuleInput,
   type RuleOutput,
@@ -169,7 +169,7 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 describe('${pascalCase}Processor', () => {
   const ruleDataProcessor = new ${pascalCase}Processor();
 
-  const documentLoaderService = jest.mocked(loadParentDocument);
+  const documentLoaderService = jest.mocked(loadDocument);
 
   it.each(${camelCase}TestCases)(
     'should return $resultStatus when $scenario',
