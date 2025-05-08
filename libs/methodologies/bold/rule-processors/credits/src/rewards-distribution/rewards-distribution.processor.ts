@@ -69,37 +69,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     });
   }
 
-  async getCreditsUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
-    const creditsDocument = await loadParentDocument(
-      this.context.documentLoaderService,
-      toDocumentKey({
-        documentId: ruleInput.documentId,
-        documentKeyPrefix: ruleInput.documentKeyPrefix,
-      }),
-    );
-
-    if (isNil(creditsDocument)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.CREDITS_DOCUMENT_NOT_FOUND,
-      );
-    }
-
-    const unitPrice = getEventAttributeValue(
-      creditsDocument.externalEvents?.find((event) =>
-        eventHasName(event, RULES_METADATA),
-      ),
-      UNIT_PRICE,
-    );
-
-    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.INVALID_UNIT_PRICE,
-      );
-    }
-
-    return unitPrice;
-  }
-
   getRewardsDistributionRuleValue(
     massIdCertificateDocument: Document,
   ): CertificateRewardDistributionOutput {
@@ -148,9 +117,40 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     return {
-      creditUnitPrice: new BigNumber(await this.getCreditsUnitPrice(ruleInput)),
+      creditUnitPrice: new BigNumber(await this.getcreditUnitPrice(ruleInput)),
       resultContentsWithMassIdCertificateValue,
     };
+  }
+
+  async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
+    const creditsDocument = await loadParentDocument(
+      this.context.documentLoaderService,
+      toDocumentKey({
+        documentId: ruleInput.documentId,
+        documentKeyPrefix: ruleInput.documentKeyPrefix,
+      }),
+    );
+
+    if (isNil(creditsDocument)) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.CREDITS_DOCUMENT_NOT_FOUND,
+      );
+    }
+
+    const unitPrice = getEventAttributeValue(
+      creditsDocument.externalEvents?.find((event) =>
+        eventHasName(event, RULES_METADATA),
+      ),
+      UNIT_PRICE,
+    );
+
+    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.INVALID_UNIT_PRICE,
+      );
+    }
+
+    return unitPrice;
   }
 
   override async process(ruleInput: RuleInput): Promise<RuleOutput> {

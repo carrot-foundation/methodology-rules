@@ -48,7 +48,7 @@ describe('RewardsDistributionProcessor', () => {
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        const { actors, certificateTotalValue, creditsUnitPrice, remainder } =
+        const { actors, certificateTotalValue, creditUnitPrice, remainder } =
           ruleOutput.resultContent as RewardsDistribution;
 
         const actorsResult = actors.map((actor) => ({
@@ -69,7 +69,7 @@ describe('RewardsDistributionProcessor', () => {
         const totalAmount = sumBigNumbers(
           actorsResult.map((actor) => BigNumber(actor.amount)),
         );
-        const totalCreditsPrice = BigNumber(creditsUnitPrice).multipliedBy(
+        const totalCreditsPrice = BigNumber(creditUnitPrice).multipliedBy(
           certificateTotalValue,
         );
 
@@ -79,7 +79,7 @@ describe('RewardsDistributionProcessor', () => {
         expect(
           Math.abs(totalAmount.minus(totalCreditsPrice).toNumber()) < 0.000_005,
         ).toBeTruthy();
-        expect(creditsUnitPrice).toBe(String(unitPrice));
+        expect(creditUnitPrice).toBe(String(unitPrice));
         expect(certificateTotalValue).toBe(
           String(expectedCertificateTotalValue),
         );

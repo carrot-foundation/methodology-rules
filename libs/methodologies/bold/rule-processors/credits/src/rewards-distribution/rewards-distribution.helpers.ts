@@ -215,7 +215,7 @@ export const calculateRewardsDistribution = (
   return {
     actors: [...actors.values()],
     certificateTotalValue: certificateTotalValue.toString(),
-    creditsUnitPrice: creditUnitPrice.toString(),
+    creditUnitPrice: creditUnitPrice.toString(),
     remainder: {
       amount: remainder.amount.toString(),
       percentage: remainder.percentage.toString(),

@@ -35,7 +35,7 @@ export type ActorsByActorType = Map<string, RewardsDistributionActor>;
 export interface RewardsDistribution {
   actors: RewardsDistributionActor[];
   certificateTotalValue: NonEmptyString;
-  creditsUnitPrice: NonEmptyString;
+  creditUnitPrice: NonEmptyString;
   remainder: Remainder<string>;
 }
 
