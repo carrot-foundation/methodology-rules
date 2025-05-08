@@ -39,7 +39,7 @@ export interface RewardsDistribution {
   remainder: Remainder<string>;
 }
 
-export interface AggregateMassIdRewards {
+export interface AggregateMassIdCertificateRewards {
   actors: ActorsByType;
   massIdCertificateTotalValue: BigNumber;
 }

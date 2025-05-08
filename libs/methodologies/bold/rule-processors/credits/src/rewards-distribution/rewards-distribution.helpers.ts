@@ -5,7 +5,7 @@ import BigNumber from 'bignumber.js';
 
 import type {
   ActorsByType,
-  AggregateMassIdRewards,
+  AggregateMassIdCertificateRewards,
   Remainder,
   ResultContentsWithMassIdCertificateValue,
   RewardsDistribution,
@@ -131,7 +131,7 @@ export const getAggregateParticipantKey = (
 export const aggregateMassIdCertificatesRewards = (
   creditUnitPrice: BigNumber,
   resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[],
-): AggregateMassIdRewards => {
+): AggregateMassIdCertificateRewards => {
   const actors: ActorsByType = new Map();
 
   const massIdCertificateTotalValue = calculateCertificateTotalValue(
