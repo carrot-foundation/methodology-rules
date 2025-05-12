@@ -35,7 +35,7 @@ export interface MethodologyDocument {
   permissions?: Array<UnknownObject> | undefined;
   primaryAddress: MethodologyAddress;
   primaryParticipant: MethodologyParticipant;
-  status: MethodologyDocumentStatus;
+  status: MethodologyDocumentStatus | string;
   subtype?: string | undefined;
   tags?: Record<string, null | string | undefined> | undefined;
   type?: string | undefined;
