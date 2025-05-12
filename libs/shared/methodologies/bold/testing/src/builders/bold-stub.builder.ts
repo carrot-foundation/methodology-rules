@@ -98,7 +98,7 @@ export const METHODOLOGY_ACTOR_PARTICIPANTS = [
 const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
   [BoldMethodologyName.CARBON]: GAS_ID,
   [BoldMethodologyName.RECYCLING]: RECYCLED_ID,
-} as const;
+} as const satisfies Record<BoldMethodologyName, DocumentType>;
 
 export class BoldStubsBuilder {
   private readonly actorsCoordinates: Map<
