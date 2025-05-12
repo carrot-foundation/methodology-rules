@@ -13,8 +13,6 @@ import { faker } from '@faker-js/faker';
 import { certificateUniquenessCheckLambda } from './certificate-uniqueness-check.lambda';
 import { certificateUniquenessCheckTestCases } from './certificate-uniqueness-check.test-cases';
 
-jest.setTimeout(100_000);
-
 describe('CertificateUniquenessCheckProcessor E2E', () => {
   beforeEach(() => {
     jest.restoreAllMocks();
