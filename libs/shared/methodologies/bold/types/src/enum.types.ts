@@ -3,14 +3,14 @@ import {
   MethodologyDocumentEventName,
 } from '@carrot-fndn/shared/types';
 
+export enum BoldMethodologyName {
+  CARBON = 'BOLD Carbon',
+  RECYCLING = 'BOLD Recycling',
+}
+
 export enum DocumentCategory {
   MASS_ID = 'MassID',
   METHODOLOGY = 'Methodology',
-}
-
-export enum DocumentStatus {
-  CANCELLED = 'CANCELLED',
-  OPEN = 'OPEN',
 }
 
 export enum DocumentType {
