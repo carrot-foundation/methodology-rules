@@ -6,6 +6,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
+  CREDITS,
   type DocumentMatch,
   DocumentMatcher,
   MASS_ID,
@@ -14,8 +15,6 @@ import {
   PARTICIPANT_HOMOLOGATION_GROUP,
   PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
   RECYCLED_ID,
-  TCC_CREDIT_MATCH,
-  TRC_CREDIT_MATCH,
 } from './document.matchers';
 
 describe('Document Matchers', () => {
@@ -260,15 +259,14 @@ describe('Document Matchers', () => {
     });
   });
 
-  describe('TRC_CREDIT_MATCH', () => {
-    it('should return true if document matches category, type and TRC subtype', () => {
+  describe('CREDITS', () => {
+    it('should return true if document matches category and type', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.TRC,
         type: DocumentType.CREDITS,
       });
 
-      const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
+      const matchesResult = CREDITS.matches(documentReference);
 
       expect(matchesResult).toBe(true);
     });
@@ -276,61 +274,10 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.TRC,
         type: DocumentType.CREDITS,
       });
 
-      const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
-
-      expect(matchesResult).toBe(false);
-    });
-
-    it('should return false if the document subtype is not TRC', () => {
-      const documentReference = stubDocumentReference({
-        category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDITS,
-      });
-
-      const matchesResult = TRC_CREDIT_MATCH.matches(documentReference);
-
-      expect(matchesResult).toBe(false);
-    });
-  });
-
-  describe('TCC_CREDIT_MATCH', () => {
-    it('should return true if document matches category, type and TCC subtype', () => {
-      const documentReference = stubDocumentReference({
-        category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDITS,
-      });
-
-      const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
-
-      expect(matchesResult).toBe(true);
-    });
-
-    it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
-        category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.TCC,
-        type: DocumentType.CREDITS,
-      });
-
-      const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
-
-      expect(matchesResult).toBe(false);
-    });
-
-    it('should return false if the document subtype is not TCC', () => {
-      const documentReference = stubDocumentReference({
-        category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.TRC,
-        type: DocumentType.CREDITS,
-      });
-
-      const matchesResult = TCC_CREDIT_MATCH.matches(documentReference);
+      const matchesResult = CREDITS.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
