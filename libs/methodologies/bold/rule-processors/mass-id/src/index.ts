@@ -1,5 +1,5 @@
 export * from './mass-definition';
-export * from './credit-absence';
+export * from './certificate-uniqueness-check';
 export * from './participant-homologations';
 export * from './hauler-identification';
 export * from './recycler-identification';
