@@ -66,22 +66,6 @@ const massIdWithTwoAuditDocuments: Document = {
   ],
 };
 
-export const temporary = [
-  {
-    documents: [
-      massIdWithCreditsStubs.massIdDocument,
-      massIdWithCreditsStubs.massIdAuditDocument,
-      massIdWithCreditsStubs.massIdCertificateDocument,
-      massIdWithCreditsStubs.creditOrderDocument,
-    ],
-    massIdAuditDocument: massIdWithCreditsStubs.massIdAuditDocument,
-    resultComment:
-      processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
-    resultStatus: RuleOutputStatus.REJECTED,
-    scenario: 'has a valid credit document',
-  },
-];
-
 export const certificateUniquenessCheckTestCases = [
   {
     documents: [simpleMassIdStubs.massIdDocument],
