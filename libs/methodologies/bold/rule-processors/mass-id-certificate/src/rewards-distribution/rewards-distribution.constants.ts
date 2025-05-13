@@ -1,7 +1,7 @@
 import type { DocumentCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 
 import {
-  MASS_ID_AUDIT,
+  MASS_ID,
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
@@ -94,14 +94,5 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
-  parentDocument: {
-    relatedDocuments: [
-      {
-        omit: true,
-        parentDocument: {},
-        ...MASS_ID_AUDIT.match,
-      },
-    ],
-  },
-  relatedDocuments: [METHODOLOGY_DEFINITION.match],
+  relatedDocuments: [METHODOLOGY_DEFINITION.match, MASS_ID.match],
 };

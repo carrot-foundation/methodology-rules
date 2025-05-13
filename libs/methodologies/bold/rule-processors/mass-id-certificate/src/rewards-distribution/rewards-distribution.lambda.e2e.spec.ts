@@ -27,20 +27,26 @@ describe('RewardsDistributionProcessor E2E', () => {
   it.each(rewardsDistributionProcessorTestCases)(
     'should return $resultStatus when $scenario',
     async ({ massIdDocumentEvents, massIdPartialDocument, resultStatus }) => {
-      const { massIdAuditDocument, massIdDocument, methodologyDocument } =
-        new BoldStubsBuilder()
-          .createMassIdDocuments({
-            externalEventsMap: massIdDocumentEvents,
-            partialDocument: massIdPartialDocument,
-          })
-          .createMassIdAuditDocuments()
-          .createMethodologyDocument()
-          .build();
+      const {
+        massIdAuditDocument,
+        massIdCertificateDocument,
+        massIdDocument,
+        methodologyDocument,
+      } = new BoldStubsBuilder()
+        .createMassIdDocuments({
+          externalEventsMap: massIdDocumentEvents,
+          partialDocument: massIdPartialDocument,
+        })
+        .createMassIdAuditDocuments()
+        .createMassIdCertificateDocuments()
+        .createMethodologyDocument()
+        .build();
 
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
           massIdAuditDocument,
+          massIdCertificateDocument,
           methodologyDocument as Document,
         ].map((document) => ({
           document,

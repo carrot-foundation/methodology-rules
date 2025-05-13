@@ -2,6 +2,7 @@ import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldMethodologyName,
   type Document,
   type RewardDistributionResultContent,
   RewardsDistributionActorType,
@@ -32,19 +33,27 @@ describe('RewardsDistributionProcessor', () => {
         massIdDocumentEvents,
         massIdPartialDocument,
       }) => {
-        const { massIdAuditDocument, massIdDocument, methodologyDocument } =
-          new BoldStubsBuilder()
-            .createMassIdDocuments({
-              externalEventsMap: massIdDocumentEvents,
-              partialDocument: massIdPartialDocument,
-            })
-            .createMassIdAuditDocuments()
-            .createMethodologyDocument()
-            .build();
+        const {
+          massIdAuditDocument,
+          massIdCertificateDocument,
+          massIdDocument,
+          methodologyDocument,
+        } = new BoldStubsBuilder({
+          methodologyName: BoldMethodologyName.RECYCLING,
+        })
+          .createMassIdDocuments({
+            externalEventsMap: massIdDocumentEvents,
+            partialDocument: massIdPartialDocument,
+          })
+          .createMassIdAuditDocuments()
+          .createMassIdCertificateDocuments()
+          .createMethodologyDocument()
+          .build();
 
         const allDocuments = [
           massIdAuditDocument,
           massIdDocument,
+          massIdCertificateDocument,
           methodologyDocument as Document,
         ];
 
