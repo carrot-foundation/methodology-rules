@@ -34,6 +34,7 @@ import { buildDocumentsCriteria } from './certificate-uniqueness-check.constants
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
 const { MASS_ID } = DocumentCategory;
+const { CANCELLED } = MethodologyDocumentStatus;
 
 export interface RuleSubject {
   creditDocuments: Document[];
@@ -149,13 +150,13 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     massIdCertificateDocuments: Document[],
   ): boolean {
     return massIdCertificateDocuments.some(
-      (document) => document.status !== MethodologyDocumentStatus.CANCELLED,
+      (document) => document.status !== CANCELLED.toString(),
     );
   }
 
   private hasSomeValidCreditDocument(creditDocuments: Document[]): boolean {
     return creditDocuments.some(
-      (document) => document.status !== MethodologyDocumentStatus.CANCELLED,
+      (document) => document.status !== CANCELLED.toString(),
     );
   }
 
