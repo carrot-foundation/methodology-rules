@@ -20,7 +20,10 @@ export const getJestBaseConfig = (dirname: string): Config => {
       '<rootDir>/src/.*\\.test-cases\\.ts$',
     ],
     setupFiles: [`${__dirname}/dotenv-config.ts`],
-    setupFilesAfterEnv: [`${__dirname}/setup-after-env.ts`],
+    setupFilesAfterEnv: [
+      `${__dirname}/setup-after-env.ts`,
+      `${__dirname}/setup-logger.ts`,
+    ],
     coverageThreshold: {
       global: {
         branches: 100,
