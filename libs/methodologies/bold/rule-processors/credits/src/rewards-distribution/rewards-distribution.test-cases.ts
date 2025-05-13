@@ -10,6 +10,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldMethodologyName,
   type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
@@ -270,6 +271,7 @@ const buildCertificateDocuments = (options: {
   return new BoldStubsBuilder({
     massIdActorParticipants,
     massIdDocumentIds: [massIdDocumentId],
+    methodologyName: BoldMethodologyName.RECYCLING,
   })
     .createMassIdDocuments({
       partialDocument: {
