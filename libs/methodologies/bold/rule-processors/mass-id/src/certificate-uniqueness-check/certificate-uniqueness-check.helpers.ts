@@ -38,12 +38,13 @@ export const hasSomeDocumentOpen = (documents: Document[]): boolean =>
   documents.some((document) => !isDocumentCancelled(document));
 
 export const isMassIdAuditInProgress = (document: Document): boolean =>
+  !isDocumentCancelled(document) &&
   document.externalEvents?.some(
     (event) =>
       !eventHasMetadataAttribute({
         event,
         metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
-      }) && !isDocumentCancelled(document),
+      }),
   ) === true;
 
 export const hasApprovedOrInProgressMassIdAuditForTheSameMethodology = (
