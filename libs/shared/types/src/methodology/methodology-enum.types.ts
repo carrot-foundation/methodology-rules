@@ -79,3 +79,8 @@ export enum MethodologyDocumentEventAttributeFormat {
 export enum MethodologyDocumentEventAttributeType {
   REFERENCE = 'REFERENCE',
 }
+
+export enum MethodologyDocumentStatus {
+  CANCELLED = 'CANCELLED',
+  OPEN = 'OPEN',
+}

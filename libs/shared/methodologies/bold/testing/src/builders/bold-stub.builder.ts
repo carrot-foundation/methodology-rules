@@ -1,8 +1,11 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  BoldMethodologyName,
+  BoldMethodologySlug,
   type Document,
   DocumentCategory,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
@@ -16,6 +19,7 @@ import {
   type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
+import { random } from 'typia';
 
 import type { StubBoldDocumentParameters } from './bold.stubs.types';
 
@@ -23,6 +27,7 @@ import {
   generateNearbyCoordinates,
   stubAddress,
   stubDocumentEvent,
+  stubDocumentEventWithMetadataAttributes,
   stubParticipant,
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
@@ -49,16 +54,20 @@ const {
   RECYCLED_ID,
 } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
+const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
   massIdActorParticipants?: Map<string, MethodologyParticipant>;
   massIdAuditDocumentIds?: string[];
+  massIdCertificateDocumentIds?: string[];
   massIdDocumentIds?: string[];
   methodologyActorParticipants?: Map<string, MethodologyParticipant>;
+  methodologyName?: BoldMethodologyName;
 }
 
 export interface BoldStubsBuilderResult {
+  boldMethodologyName: BoldMethodologyName;
   creditOrderDocument: Document;
   massIdActorParticipants: Map<string, MethodologyParticipant>;
   massIdActorParticipantsAddresses: Map<string, MethodologyAddress>;
@@ -90,19 +99,24 @@ export const METHODOLOGY_ACTOR_PARTICIPANTS = [
   MethodologyDocumentActorType.METHODOLOGY_DEVELOPER,
 ] as const;
 
+const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
+  [BoldMethodologyName.CARBON]: GAS_ID,
+  [BoldMethodologyName.RECYCLING]: RECYCLED_ID,
+} as const satisfies Record<BoldMethodologyName, DocumentType>;
+
 export class BoldStubsBuilder {
   private readonly actorsCoordinates: Map<
     string,
     { base: Geolocation; nearby: Geolocation }
   >;
 
+  private boldMethodologyName: BoldMethodologyName;
+
   private count: number;
 
   private creditOrderDocument: Document;
 
   private creditOrderReference: DocumentReference;
-
-  private massAuditReferences: DocumentReference[] = [];
 
   private readonly massIdActorParticipants: Map<string, MethodologyParticipant>;
 
@@ -114,6 +128,10 @@ export class BoldStubsBuilder {
   private massIdAuditDocumentIds: string[];
 
   private massIdAuditDocuments: Document[] = [];
+
+  private massIdAuditReferences: DocumentReference[] = [];
+
+  private massIdCertificateDocumentIds: string[];
 
   private massIdCertificateDocumentReferences: DocumentReference[] = [];
 
@@ -145,6 +163,8 @@ export class BoldStubsBuilder {
 
   constructor(options: BoldStubsBuilderOptions = {}) {
     this.count = options.count ?? 1;
+    this.boldMethodologyName =
+      options.methodologyName ?? random<BoldMethodologyName>();
 
     this.massIdDocumentIds =
       options.massIdDocumentIds ??
@@ -152,6 +172,10 @@ export class BoldStubsBuilder {
 
     this.massIdAuditDocumentIds =
       options.massIdAuditDocumentIds ??
+      Array.from({ length: this.count }, () => faker.string.uuid());
+
+    this.massIdCertificateDocumentIds =
+      options.massIdCertificateDocumentIds ??
       Array.from({ length: this.count }, () => faker.string.uuid());
 
     this.massIdActorParticipants = this.initializeMassIdActorParticipants(
@@ -168,7 +192,7 @@ export class BoldStubsBuilder {
     this.massIdReferences = this.createMassIdReferences();
     this.massIdCertificateDocumentReferences =
       this.createMassIdCertificateDocumentReferences();
-    this.massAuditReferences = this.createMassIdAuditReferences();
+    this.massIdAuditReferences = this.createMassIdAuditReferences();
   }
 
   private addCertificatesReferencesToCreditOrderDocument(): void {
@@ -179,6 +203,7 @@ export class BoldStubsBuilder {
         ...this.massIdCertificateDocumentReferences.map((reference) =>
           stubDocumentEvent({
             name: RELATED,
+            referencedDocument: undefined,
             relatedDocument: reference,
           }),
         ),
@@ -186,7 +211,7 @@ export class BoldStubsBuilder {
     };
   }
 
-  private addCreditReferenceToMassIdDocument(
+  private addCreditReferenceToMassIdCertificateDocument(
     massIdDocument: Document,
   ): Document {
     return {
@@ -195,6 +220,7 @@ export class BoldStubsBuilder {
         ...(massIdDocument.externalEvents ?? []),
         stubDocumentEvent({
           name: RELATED,
+          referencedDocument: undefined,
           relatedDocument: this.creditOrderReference,
         }),
       ],
@@ -209,6 +235,32 @@ export class BoldStubsBuilder {
       ...document,
       externalEvents: [...(document.externalEvents ?? []), event],
     };
+  }
+
+  private addMassIdAuditReferencesToMassIdDocuments(): void {
+    this.massIdDocuments = this.massIdDocuments.map((document, index) =>
+      this.addExternalEventToDocument(
+        document,
+        stubDocumentEvent({
+          name: LINK,
+          referencedDocument: undefined,
+          relatedDocument: this.massIdAuditReferences[index],
+        }),
+      ),
+    );
+  }
+
+  private addMassIdCertificateDocumentReferencesToMassIdDocuments(): void {
+    this.massIdDocuments = this.massIdDocuments.map((document, index) =>
+      this.addExternalEventToDocument(
+        document,
+        stubDocumentEvent({
+          name: RELATED,
+          referencedDocument: undefined,
+          relatedDocument: this.massIdCertificateDocumentReferences[index],
+        }),
+      ),
+    );
   }
 
   private createCreditOrderDocumentReference(): DocumentReference {
@@ -241,7 +293,8 @@ export class BoldStubsBuilder {
         OUTPUT,
         stubDocumentEvent({
           name: OUTPUT,
-          relatedDocument: this.massAuditReferences[index],
+          referencedDocument: undefined,
+          relatedDocument: this.massIdAuditReferences[index],
         }),
       ],
       [
@@ -284,13 +337,11 @@ export class BoldStubsBuilder {
     }));
   }
 
-  private createMassIdCertificateDocumentReferences(
-    certificateType: typeof GAS_ID | typeof RECYCLED_ID = RECYCLED_ID,
-  ): DocumentReference[] {
-    return Array.from({ length: this.count }, () => ({
+  private createMassIdCertificateDocumentReferences(): DocumentReference[] {
+    return this.massIdCertificateDocumentIds.map((documentId) => ({
       category: METHODOLOGY,
-      documentId: faker.string.uuid(),
-      type: certificateType,
+      documentId,
+      type: MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME[this.boldMethodologyName],
     }));
   }
 
@@ -450,8 +501,23 @@ export class BoldStubsBuilder {
     }
   }
 
+  addMassIdCertificateDocumentReferencesToMassIdAuditDocuments(): void {
+    this.massIdAuditDocuments = this.massIdAuditDocuments.map(
+      (document, index) =>
+        this.addExternalEventToDocument(
+          document,
+          stubDocumentEvent({
+            name: RELATED,
+            referencedDocument: undefined,
+            relatedDocument: this.massIdCertificateDocumentReferences[index],
+          }),
+        ),
+    );
+  }
+
   build(): BoldStubsBuilderResult {
     return {
+      boldMethodologyName: this.boldMethodologyName,
       creditOrderDocument: this.creditOrderDocument,
       massIdActorParticipants: this.massIdActorParticipants,
       massIdActorParticipantsAddresses: this.massIdActorParticipantsAddresses,
@@ -497,8 +563,6 @@ export class BoldStubsBuilder {
     externalEventsMap,
     partialDocument,
   }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
-    this.validateMassIdDocumentsExist();
-    this.validateMassIdAuditDocumentsExist();
     this.validateCertificateDocumentsExist();
 
     this.creditOrderReference = this.createCreditOrderDocumentReference();
@@ -512,8 +576,9 @@ export class BoldStubsBuilder {
 
     this.addCertificatesReferencesToCreditOrderDocument();
 
-    this.massIdDocuments = this.massIdDocuments.map((document) =>
-      this.addCreditReferenceToMassIdDocument(document),
+    this.massIdCertificateDocuments = this.massIdCertificateDocuments.map(
+      (document) =>
+        this.addCreditReferenceToMassIdCertificateDocument(document),
     );
 
     return this;
@@ -525,6 +590,8 @@ export class BoldStubsBuilder {
   }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
     this.validateMassIdDocumentsExist();
 
+    const methodologyEventName = `${this.boldMethodologyName} Methodology`;
+
     this.massIdAuditDocuments = this.massIdDocuments.map(
       (massIdDocument, index) =>
         stubBoldMassIdAuditDocument({
@@ -534,20 +601,26 @@ export class BoldStubsBuilder {
               referencedDocument: this.massIdReferences[index],
               relatedDocument: undefined,
             }),
-            [RELATED]: stubDocumentEvent({
-              name: RELATED,
-              relatedDocument: this.massIdCertificateDocumentReferences[index],
-            }),
+            [methodologyEventName]: stubDocumentEventWithMetadataAttributes(
+              {
+                name: methodologyEventName,
+                referencedDocument: undefined,
+                relatedDocument: this.methodologyReference,
+              },
+              [[METHODOLOGY_SLUG, BoldMethodologySlug.RECYCLING]],
+            ),
             ...externalEventsMap,
           },
           partialDocument: {
             ...partialDocument,
             currentValue: massIdDocument.currentValue,
-            id: this.massAuditReferences[index]!.documentId,
+            id: this.massIdAuditReferences[index]!.documentId,
             parentDocumentId: massIdDocument.id,
           },
         }),
     );
+
+    this.addMassIdAuditReferencesToMassIdDocuments();
 
     return this;
   }
@@ -556,13 +629,10 @@ export class BoldStubsBuilder {
     externalEventsMap,
     partialDocument,
   }: StubBoldDocumentParameters = {}): BoldStubsBuilder {
-    this.validateMassIdDocumentsExist();
     this.validateMassIdAuditDocumentsExist();
 
     this.massIdCertificateDocumentReferences =
-      this.createMassIdCertificateDocumentReferences(
-        partialDocument?.type as typeof GAS_ID | typeof RECYCLED_ID,
-      );
+      this.createMassIdCertificateDocumentReferences();
 
     this.massIdCertificateDocuments = this.massIdAuditDocuments.map(
       (auditDocument, index) =>
@@ -570,12 +640,16 @@ export class BoldStubsBuilder {
           externalEventsMap,
           partialDocument: {
             currentValue: auditDocument.currentValue,
+            type: this.massIdCertificateDocumentReferences[index]!.type,
             ...partialDocument,
             id: this.massIdCertificateDocumentReferences[index]!.documentId,
             parentDocumentId: auditDocument.id,
           },
         }),
     );
+
+    this.addMassIdCertificateDocumentReferencesToMassIdDocuments();
+    this.addMassIdCertificateDocumentReferencesToMassIdAuditDocuments();
 
     return this;
   }
@@ -594,12 +668,21 @@ export class BoldStubsBuilder {
       const newMassIdAuditDocumentIds = Array.from({ length: this.count }, () =>
         faker.string.uuid(),
       );
+      const newMassIdCertificateDocumentIds = Array.from(
+        {
+          length: this.count,
+        },
+        () => faker.string.uuid(),
+      );
 
       this.massIdDocumentIds = newMassIdDocumentIds;
       this.massIdAuditDocumentIds = newMassIdAuditDocumentIds;
+      this.massIdCertificateDocumentIds = newMassIdCertificateDocumentIds;
 
       this.massIdReferences = this.createMassIdReferences();
-      this.massAuditReferences = this.createMassIdAuditReferences();
+      this.massIdAuditReferences = this.createMassIdAuditReferences();
+      this.massIdCertificateDocumentReferences =
+        this.createMassIdCertificateDocumentReferences();
     }
 
     const actorEvents = this.createMassIdActorEvents();
@@ -639,6 +722,7 @@ export class BoldStubsBuilder {
         OUTPUT,
         stubDocumentEvent({
           name: OUTPUT,
+          referencedDocument: undefined,
           relatedDocument: this.participantHomologationGroupReference!,
         }),
       ],
@@ -737,6 +821,7 @@ export class BoldStubsBuilder {
             address: primaryAddress,
             name: OUTPUT,
             participant: primaryParticipant,
+            referencedDocument: undefined,
             relatedDocument: reference,
           }),
         );

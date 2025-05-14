@@ -1,19 +1,27 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { TRC_CREDIT_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { CreditAbsenceProcessor } from './credit-absence.processor';
-import { creditAbsenceTestCases } from './credit-absence.test-cases';
+import { CertificateUniquenessCheck } from './certificate-uniqueness-check.processor';
+import { certificateUniquenessCheckTestCases } from './certificate-uniqueness-check.test-cases';
 
-describe('CreditAbsenceProcessor', () => {
-  const ruleDataProcessor = new CreditAbsenceProcessor(TRC_CREDIT_MATCH);
+describe('CertificateUniquenessCheck', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
 
-  it.each(creditAbsenceTestCases)(
+  const ruleDataProcessor = new CertificateUniquenessCheck(
+    RECYCLED_ID,
+    BoldMethodologySlug.RECYCLING,
+  );
+
+  it.each(certificateUniquenessCheckTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
       const allDocuments = [...documents, massIdAuditDocument];

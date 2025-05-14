@@ -1,6 +1,6 @@
 <div align="center">
 
-# TRC Absense
+# Certificate Uniqueness Check
 
 Methodology: **BOLD-RECYCLING**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/credit-absence/credit-absence.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/certificate-uniqueness-check/certificate-uniqueness-check.processor.ts)**
 
 ## 👥 Contributors
 

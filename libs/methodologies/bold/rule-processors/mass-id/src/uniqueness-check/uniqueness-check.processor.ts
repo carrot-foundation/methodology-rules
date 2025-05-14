@@ -18,7 +18,6 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  DocumentStatus,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -28,6 +27,7 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyDocumentEventLabel,
+  MethodologyDocumentStatus,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -185,7 +185,7 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
 
     const cancelledCount = duplicateDocuments.filter(
       (duplicateDocument) =>
-        duplicateDocument.status === DocumentStatus.CANCELLED,
+        duplicateDocument.status === MethodologyDocumentStatus.CANCELLED,
     ).length;
 
     return {

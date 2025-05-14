@@ -6,16 +6,34 @@ import type {
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   DocumentCategory,
+  DocumentEventAttributeName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { stubDocument } from '../stubs';
+import {
+  stubDocument,
+  stubDocumentEventWithMetadataAttributes,
+} from '../stubs';
 import { mergeEventsMaps } from './bold.builder.helpers';
 import { type StubBoldDocumentParameters } from './bold.stubs.types';
 
-const boldMassIdAuditExternalEventsMap: Map<string, DocumentEvent> = new Map(
-  [],
-);
+const { EVALUATION_RESULT } = DocumentEventAttributeName;
+const { APPROVED } = RuleOutputStatus;
+
+const resultEventName = `Result: MassID ${APPROVED}`;
+
+const boldMassIdAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
+  [
+    resultEventName,
+    stubDocumentEventWithMetadataAttributes(
+      {
+        name: resultEventName,
+      },
+      [[EVALUATION_RESULT, APPROVED]],
+    ),
+  ],
+]);
 
 export const stubBoldMassIdAuditDocument = ({
   externalEventsMap,

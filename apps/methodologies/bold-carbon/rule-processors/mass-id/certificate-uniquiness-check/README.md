@@ -1,6 +1,6 @@
 <div align="center">
 
-# TCC Absense
+# Certificate Uniqueness Check
 
 Methodology: **BOLD-CARBON**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/credit-absence/credit-absence.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/certificate-uniquiness-check/certificate-uniquiness-check.processor.ts)**
 
 ## 👥 Contributors
 

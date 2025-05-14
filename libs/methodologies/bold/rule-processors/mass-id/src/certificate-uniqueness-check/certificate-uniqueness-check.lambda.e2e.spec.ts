@@ -1,5 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { TRC_CREDIT_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -9,18 +10,27 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { creditAbsenceLambda } from './credit-absence.lambda';
-import { creditAbsenceTestCases } from './credit-absence.test-cases';
+import { certificateUniquenessCheckLambda } from './certificate-uniqueness-check.lambda';
+import { certificateUniquenessCheckTestCases } from './certificate-uniqueness-check.test-cases';
 
-describe('CheckTCCAbsenceProcessor E2E', () => {
-  const lambda = creditAbsenceLambda(TRC_CREDIT_MATCH);
+describe('CertificateUniquenessCheckProcessor E2E', () => {
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const lambda = certificateUniquenessCheckLambda(
+    RECYCLED_ID,
+    BoldMethodologySlug.RECYCLING,
+  );
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(creditAbsenceTestCases)(
+  it.each(certificateUniquenessCheckTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocument, resultStatus }) => {
+    async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
+      const allDocuments = [...documents, massIdAuditDocument];
+
       prepareEnvironmentTestE2E(
-        [...documents, massIdAuditDocument].map((document) => ({
+        allDocuments.map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -38,6 +48,7 @@ describe('CheckTCCAbsenceProcessor E2E', () => {
         () => stubRuleResponse(),
       )) as RuleOutput;
 
+      expect(response.resultComment).toBe(resultComment);
       expect(response.resultStatus).toBe(resultStatus);
     },
   );

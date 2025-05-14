@@ -9,7 +9,7 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import {
   type DocumentQuery,
   DocumentQueryService,
-  loadParentDocument,
+  loadDocument,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
@@ -123,7 +123,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
-    const creditOrderDocument = await loadParentDocument(
+    const creditOrderDocument = await loadDocument(
       this.context.documentLoaderService,
       toDocumentKey({
         documentId: ruleInput.documentId,

@@ -5,7 +5,10 @@ import type { MethodologyAddress } from './methodology-address.types';
 import type { MethodologyDocumentEvent } from './methodology-document-event.types';
 import type { MethodologyParticipant } from './methodology-participant.types';
 
-import { DataSetName } from './methodology-enum.types';
+import {
+  DataSetName,
+  MethodologyDocumentStatus,
+} from './methodology-enum.types';
 
 export interface MethodologyDocumentAttachment {
   contentLength: number & tags.Minimum<0>;
@@ -32,7 +35,7 @@ export interface MethodologyDocument {
   permissions?: Array<UnknownObject> | undefined;
   primaryAddress: MethodologyAddress;
   primaryParticipant: MethodologyParticipant;
-  status: string;
+  status: MethodologyDocumentStatus | string;
   subtype?: string | undefined;
   tags?: Record<string, null | string | undefined> | undefined;
   type?: string | undefined;

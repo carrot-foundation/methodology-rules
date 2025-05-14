@@ -3,14 +3,19 @@ import {
   MethodologyDocumentEventName,
 } from '@carrot-fndn/shared/types';
 
+export enum BoldMethodologyName {
+  CARBON = 'BOLD Carbon',
+  RECYCLING = 'BOLD Recycling',
+}
+
+export enum BoldMethodologySlug {
+  CARBON = 'bold-carbon',
+  RECYCLING = 'bold-recycling',
+}
+
 export enum DocumentCategory {
   MASS_ID = 'MassID',
   METHODOLOGY = 'Methodology',
-}
-
-export enum DocumentStatus {
-  CANCELLED = 'CANCELLED',
-  OPEN = 'OPEN',
 }
 
 export enum DocumentType {
@@ -90,6 +95,7 @@ export enum DocumentEventAttributeName {
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION = 'Driver Identifier Exemption Justification',
   EFFECTIVE_DATE = 'Effective Date',
   EMISSION_FACTOR = 'Emission Factor',
+  EVALUATION_RESULT = 'Evaluation Result',
   EXEMPTION_JUSTIFICATION = 'Exemption Justification',
   EXPIRATION_DATE = 'Expiration Date',
   GROSS_WEIGHT = 'Gross Weight',

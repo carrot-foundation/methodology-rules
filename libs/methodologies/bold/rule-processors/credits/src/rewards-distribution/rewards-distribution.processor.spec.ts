@@ -1,7 +1,7 @@
 import { isNil, sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import {
   spyOnDocumentQueryServiceLoad,
-  spyOnLoadParentDocument,
+  spyOnLoadDocument,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -39,7 +39,7 @@ describe('RewardsDistributionProcessor', () => {
         massIdCertificateDocuments,
         unitPrice,
       }) => {
-        spyOnLoadParentDocument(creditOrderDocument);
+        spyOnLoadDocument(creditOrderDocument);
         spyOnDocumentQueryServiceLoad(
           creditOrderDocument,
           massIdCertificateDocuments,
@@ -122,7 +122,7 @@ describe('RewardsDistributionProcessor', () => {
         resultStatus,
       }) => {
         if (!isNil(creditOrderDocument)) {
-          spyOnLoadParentDocument(creditOrderDocument);
+          spyOnLoadDocument(creditOrderDocument);
         }
 
         spyOnDocumentQueryServiceLoad(
