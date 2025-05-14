@@ -33,7 +33,7 @@ import {
 } from './certificate-uniqueness-check.constants';
 import {
   hasApprovedOrInProgressMassIdAuditForTheSameMethodology,
-  hasSomeDocumentOpen,
+  hasNonCancelledDocuments,
 } from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
@@ -71,14 +71,14 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     massIdCertificateDocuments,
     relatedMassIdAuditDocuments,
   }: RuleSubject): EvaluateResultOutput {
-    if (hasSomeDocumentOpen(creditDocuments)) {
+    if (hasNonCancelledDocuments(creditDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE
           .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
       );
     }
 
-    if (hasSomeDocumentOpen(massIdCertificateDocuments)) {
+    if (hasNonCancelledDocuments(massIdCertificateDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
           assert<NonEmptyString>(this.massIdCertificateMatcher.match.type),
