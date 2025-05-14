@@ -1,7 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { BoldMethodologyName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -18,7 +18,7 @@ describe('CertificateUniquenessCheck', () => {
 
   const ruleDataProcessor = new CertificateUniquenessCheck(
     RECYCLED_ID,
-    BoldMethodologyName.RECYCLING,
+    BoldMethodologySlug.RECYCLING,
   );
 
   it.each(certificateUniquenessCheckTestCases)(
