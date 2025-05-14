@@ -1,10 +1,13 @@
 import {
   BoldStubsBuilder,
   stubDocumentEvent,
+  stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldMethodologyName,
+  BoldMethodologySlug,
   type Document,
+  DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -17,7 +20,8 @@ import { RESULT_COMMENTS } from './certificate-uniqueness-check.processor';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
 const { RELATED } = DocumentEventName;
-const { RECYCLING } = BoldMethodologyName;
+const { CARBON, RECYCLING } = BoldMethodologyName;
+const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
 const processorError = new CertificateUniquenessCheckProcessorErrors();
 
@@ -67,6 +71,33 @@ const massIdWithTwoAuditDocuments: Document = {
   ],
 };
 
+const boldCarbonEventName = `${CARBON} Methodology`;
+const massIdAuditForOtherMethodology: Document = {
+  ...duplicatedMassIdAuditDocument,
+  externalEvents: [
+    ...(duplicatedMassIdAuditDocument.externalEvents?.filter(
+      (event) => !event.name.includes(RECYCLING),
+    ) ?? []),
+    stubDocumentEventWithMetadataAttributes(
+      {
+        name: boldCarbonEventName,
+      },
+      [[METHODOLOGY_SLUG, BoldMethodologySlug.CARBON]],
+    ),
+  ],
+};
+const massIdWithAuditDocumentsForDifferentMethodologies: Document = {
+  ...simpleMassIdStubs.massIdDocument,
+  externalEvents: [
+    ...(simpleMassIdStubs.massIdDocument.externalEvents ?? []),
+    stubDocumentEvent({
+      name: RELATED,
+      referencedDocument: undefined,
+      relatedDocument: mapDocumentReference(massIdAuditForOtherMethodology),
+    }),
+  ],
+};
+
 export const certificateUniquenessCheckTestCases = [
   {
     documents: [simpleMassIdStubs.massIdDocument],
@@ -89,6 +120,18 @@ export const certificateUniquenessCheckTestCases = [
     resultStatus: RuleOutputStatus.REJECTED,
     scenario:
       'has an approved MassID audit document for the same methodology name',
+  },
+  {
+    documents: [
+      massIdAuditForOtherMethodology,
+      simpleMassIdStubs.massIdAuditDocument,
+      massIdWithAuditDocumentsForDifferentMethodologies,
+    ],
+    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    resultComment: RESULT_COMMENTS.APPROVED,
+    resultStatus: RuleOutputStatus.APPROVED,
+    scenario:
+      'has an approved MassID Audit document for a different methodology',
   },
   {
     documents: [

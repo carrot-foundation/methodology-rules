@@ -32,7 +32,7 @@ import {
   buildDocumentsCriteria,
 } from './certificate-uniqueness-check.constants';
 import {
-  hasApprovedMassIdAuditForTheSameMethodology,
+  hasApprovedOrInProgressMassIdAuditForTheSameMethodology,
   hasSomeDocumentOpen,
 } from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
@@ -87,7 +87,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     if (
-      hasApprovedMassIdAuditForTheSameMethodology(
+      hasApprovedOrInProgressMassIdAuditForTheSameMethodology(
         relatedMassIdAuditDocuments,
         this.methodologySlug,
       )

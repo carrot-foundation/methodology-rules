@@ -31,18 +31,27 @@ const isMassIdAuditApproved = (document: Document): boolean =>
     }),
   ) === true;
 
-export const hasApprovedMassIdAuditForTheSameMethodology = (
+const isDocumentCancelled = (document: Document): boolean =>
+  document.status === CANCELLED.toString();
+
+export const hasSomeDocumentOpen = (documents: Document[]): boolean =>
+  documents.some((document) => !isDocumentCancelled(document));
+
+export const isMassIdAuditInProgress = (document: Document): boolean =>
+  document.externalEvents?.some(
+    (event) =>
+      !eventHasMetadataAttribute({
+        event,
+        metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
+      }) && !isDocumentCancelled(document),
+  ) === true;
+
+export const hasApprovedOrInProgressMassIdAuditForTheSameMethodology = (
   massIdAuditDocuments: Document[],
   methodologySlug: BoldMethodologySlug,
 ): boolean =>
   massIdAuditDocuments.some(
     (document) =>
       hasMethodologySlugAttribute(document, methodologySlug) &&
-      isMassIdAuditApproved(document),
+      (isMassIdAuditApproved(document) || isMassIdAuditInProgress(document)),
   );
-
-export const isDocumentCancelled = (document: Document): boolean =>
-  document.status === CANCELLED.toString();
-
-export const hasSomeDocumentOpen = (documents: Document[]): boolean =>
-  documents.some((document) => !isDocumentCancelled(document));
