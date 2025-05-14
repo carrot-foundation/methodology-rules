@@ -18,4 +18,3 @@ export * from './mass-sorting';
 export * from './weighing';
 export * from './avoided-emissions';
 export * from './uniqueness-check';
-export * from './rewards-distribution';
