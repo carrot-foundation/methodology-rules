@@ -123,6 +123,28 @@ export const certificateUniquenessCheckTestCases = [
   },
   {
     documents: [
+      massIdWithTwoAuditDocuments,
+      simpleMassIdStubs.massIdAuditDocument,
+      {
+        ...duplicatedMassIdAuditDocument,
+        externalEvents: [
+          ...(duplicatedMassIdAuditDocument.externalEvents?.filter(
+            (event) => !event.name.includes(RuleOutputStatus.APPROVED),
+          ) ?? []),
+        ],
+      },
+    ],
+    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    resultComment:
+      processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
+        BoldMethodologyName.RECYCLING,
+      ),
+    resultStatus: RuleOutputStatus.REJECTED,
+    scenario:
+      'has an in-progress MassID audit document for the same methodology name',
+  },
+  {
+    documents: [
       massIdAuditForOtherMethodology,
       simpleMassIdStubs.massIdAuditDocument,
       massIdWithAuditDocumentsForDifferentMethodologies,
