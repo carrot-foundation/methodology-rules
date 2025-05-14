@@ -13,7 +13,7 @@ import {
   MASS_ID_AUDIT,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  BoldMethodologyName,
+  BoldMethodologySlug,
   type Document,
   DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -24,17 +24,20 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import {
-  MethodologyDocumentStatus,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { assert } from 'typia';
 
-import { buildDocumentsCriteria } from './certificate-uniqueness-check.constants';
+import {
+  METHODOLOGY_NAME_BY_SLUG,
+  buildDocumentsCriteria,
+} from './certificate-uniqueness-check.constants';
+import {
+  hasApprovedMassIdAuditForTheSameMethodology,
+  hasSomeDocumentOpen,
+} from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
 const { MASS_ID } = DocumentCategory;
-const { CANCELLED } = MethodologyDocumentStatus;
 
 export interface RuleSubject {
   creditDocuments: Document[];
@@ -49,18 +52,18 @@ export const RESULT_COMMENTS = {
 export class CertificateUniquenessCheck extends RuleDataProcessor {
   private readonly massIdCertificateMatcher: DocumentMatcher;
 
-  private readonly methodologyName: BoldMethodologyName;
+  private readonly methodologySlug: BoldMethodologySlug;
 
   readonly errorProcessor = new CertificateUniquenessCheckProcessorErrors();
 
   constructor(
     massIdCertificateMatcher: DocumentMatcher,
-    methodologyName: BoldMethodologyName,
+    methodologySlug: BoldMethodologySlug,
   ) {
     super();
 
     this.massIdCertificateMatcher = massIdCertificateMatcher;
-    this.methodologyName = methodologyName;
+    this.methodologySlug = methodologySlug;
   }
 
   private evaluateResult({
@@ -68,14 +71,14 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     massIdCertificateDocuments,
     relatedMassIdAuditDocuments,
   }: RuleSubject): EvaluateResultOutput {
-    if (this.hasSomeValidCreditDocument(creditDocuments)) {
+    if (hasSomeDocumentOpen(creditDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE
           .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
       );
     }
 
-    if (this.hasSomeValidCertificateDocument(massIdCertificateDocuments)) {
+    if (hasSomeDocumentOpen(massIdCertificateDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
           assert<NonEmptyString>(this.massIdCertificateMatcher.match.type),
@@ -84,13 +87,14 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     if (
-      this.hasApprovedMassIdAuditForTheSameMethodology(
+      hasApprovedMassIdAuditForTheSameMethodology(
         relatedMassIdAuditDocuments,
+        this.methodologySlug,
       )
     ) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
-          this.methodologyName,
+          METHODOLOGY_NAME_BY_SLUG[this.methodologySlug],
         ),
       );
     }
@@ -133,34 +137,6 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
       massIdCertificateDocuments,
       relatedMassIdAuditDocuments,
     };
-  }
-
-  private hasApprovedMassIdAuditForTheSameMethodology(
-    massIdAuditDocuments: Document[],
-  ): boolean {
-    return massIdAuditDocuments.some(
-      (document) =>
-        document.externalEvents?.some((event) =>
-          event.name.includes(this.methodologyName),
-        ) === true &&
-        document.externalEvents.some((event) =>
-          event.name.includes(RuleOutputStatus.APPROVED),
-        ) === true,
-    );
-  }
-
-  private hasSomeValidCertificateDocument(
-    massIdCertificateDocuments: Document[],
-  ): boolean {
-    return massIdCertificateDocuments.some(
-      (document) => document.status !== CANCELLED.toString(),
-    );
-  }
-
-  private hasSomeValidCreditDocument(creditDocuments: Document[]): boolean {
-    return creditDocuments.some(
-      (document) => document.status !== CANCELLED.toString(),
-    );
   }
 
   protected async generateDocumentQuery(ruleInput: RuleInput) {

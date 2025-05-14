@@ -17,6 +17,7 @@ import { RESULT_COMMENTS } from './certificate-uniqueness-check.processor';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
 const { RELATED } = DocumentEventName;
+const { RECYCLING } = BoldMethodologyName;
 
 const processorError = new CertificateUniquenessCheckProcessorErrors();
 
@@ -27,13 +28,13 @@ const openDocumentField = {
 };
 
 const simpleMassIdStubs = new BoldStubsBuilder({
-  methodologyName: BoldMethodologyName.RECYCLING,
+  methodologyName: RECYCLING,
 })
   .createMassIdDocuments(openDocumentField)
   .createMassIdAuditDocuments(openDocumentField)
   .build();
 const massIdWithAuditStubs = new BoldStubsBuilder({
-  methodologyName: BoldMethodologyName.RECYCLING,
+  methodologyName: RECYCLING,
 })
   .createMassIdDocuments(openDocumentField)
   .createMassIdAuditDocuments(openDocumentField)
@@ -41,7 +42,7 @@ const massIdWithAuditStubs = new BoldStubsBuilder({
   .build();
 
 const massIdWithCreditsStubs = new BoldStubsBuilder({
-  methodologyName: BoldMethodologyName.RECYCLING,
+  methodologyName: RECYCLING,
 })
   .createMassIdDocuments(openDocumentField)
   .createMassIdAuditDocuments(openDocumentField)

@@ -1,6 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { BoldMethodologyName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -20,7 +20,7 @@ describe('CertificateUniquenessCheckProcessor E2E', () => {
 
   const lambda = certificateUniquenessCheckLambda(
     RECYCLED_ID,
-    BoldMethodologyName.RECYCLING,
+    BoldMethodologySlug.RECYCLING,
   );
   const documentKeyPrefix = faker.string.uuid();
 

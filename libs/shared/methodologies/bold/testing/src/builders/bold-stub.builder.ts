@@ -1,9 +1,11 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   BoldMethodologyName,
+  BoldMethodologySlug,
   type Document,
   DocumentCategory,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   type DocumentReference,
   DocumentSubtype,
@@ -25,6 +27,7 @@ import {
   generateNearbyCoordinates,
   stubAddress,
   stubDocumentEvent,
+  stubDocumentEventWithMetadataAttributes,
   stubParticipant,
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
@@ -51,6 +54,7 @@ const {
   RECYCLED_ID,
 } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
+const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
@@ -597,11 +601,14 @@ export class BoldStubsBuilder {
               referencedDocument: this.massIdReferences[index],
               relatedDocument: undefined,
             }),
-            [methodologyEventName]: stubDocumentEvent({
-              name: methodologyEventName,
-              referencedDocument: undefined,
-              relatedDocument: this.methodologyReference,
-            }),
+            [methodologyEventName]: stubDocumentEventWithMetadataAttributes(
+              {
+                name: methodologyEventName,
+                referencedDocument: undefined,
+                relatedDocument: this.methodologyReference,
+              },
+              [[METHODOLOGY_SLUG, BoldMethodologySlug.RECYCLING]],
+            ),
             ...externalEventsMap,
           },
           partialDocument: {
