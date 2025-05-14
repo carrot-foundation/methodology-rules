@@ -83,7 +83,11 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
       );
     }
 
-    if (this.hasSomeApprovedMassIdAuditDocument(relatedMassIdAuditDocuments)) {
+    if (
+      this.hasApprovedMassIdAuditForTheSameMethodology(
+        relatedMassIdAuditDocuments,
+      )
+    ) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
           this.methodologyName,
@@ -103,7 +107,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
   ): Promise<RuleSubject> {
     const creditDocuments: Document[] = [];
     const massIdCertificateDocuments: Document[] = [];
-    let relatedMassIdAuditDocuments: Document[] = [];
+    const relatedMassIdAuditDocuments: Document[] = [];
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
@@ -116,14 +120,13 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
         massIdCertificateDocuments.push(document);
       }
 
-      if (MASS_ID_AUDIT.matches(documentReference)) {
+      if (
+        MASS_ID_AUDIT.matches(documentReference) &&
+        documentReference.documentId !== ruleInput.documentId
+      ) {
         relatedMassIdAuditDocuments.push(document);
       }
     });
-
-    relatedMassIdAuditDocuments = relatedMassIdAuditDocuments.filter(
-      (document) => document.id !== ruleInput.documentId,
-    );
 
     return {
       creditDocuments,
@@ -132,7 +135,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     };
   }
 
-  private hasSomeApprovedMassIdAuditDocument(
+  private hasApprovedMassIdAuditForTheSameMethodology(
     massIdAuditDocuments: Document[],
   ): boolean {
     return massIdAuditDocuments.some(
