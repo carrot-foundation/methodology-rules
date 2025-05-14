@@ -2,7 +2,7 @@
 
 # Rewards Distribution
 
-Methodology: **BOLD-CARBON**
+Methodology: **BOLD-RECYCLING**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/rewards-distribution/rewards-distribution.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id-certificate/src/rewards-distribution/rewards-distribution.processor.ts)**
 
 ## 👥 Contributors
 

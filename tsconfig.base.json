@@ -91,6 +91,9 @@
       "@carrot-fndn/methodologies/bold/rule-processors/credits": [
         "libs/methodologies/bold/rule-processors/credits/src/index.ts"
       ],
+      "@carrot-fndn/methodologies/bold/rule-processors/mass-id-certificate": [
+        "libs/methodologies/bold/rule-processors/mass-id-certificate/src/index.ts"
+      ],
       "@carrot-fndn/shared/rule/standard-data-processor": [
         "libs/shared/rule/standard-data-processor/src/index.ts"
       ],

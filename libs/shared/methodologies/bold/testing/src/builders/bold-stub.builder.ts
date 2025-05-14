@@ -271,6 +271,39 @@ export class BoldStubsBuilder {
     };
   }
 
+  private createDefaultMassIdCertificateDocumentEventsMap(
+    index: number,
+  ): Map<string, DocumentEvent> {
+    const methodologyEventName = `${this.boldMethodologyName} Methodology`;
+
+    return new Map([
+      [
+        MASS_ID,
+        stubDocumentEvent({
+          name: MASS_ID,
+          referencedDocument: undefined,
+          relatedDocument: this.massIdReferences[index]!,
+        }),
+      ],
+      [
+        MASS_ID_AUDIT,
+        stubDocumentEvent({
+          name: MASS_ID_AUDIT,
+          referencedDocument: undefined,
+          relatedDocument: this.massIdAuditReferences[index]!,
+        }),
+      ],
+      [
+        methodologyEventName,
+        stubDocumentEvent({
+          name: methodologyEventName,
+          referencedDocument: undefined,
+          relatedDocument: this.methodologyReference,
+        }),
+      ],
+    ]);
+  }
+
   private createDefaultMassIdEventsMap(
     index: number,
     actorEvents: Record<string, DocumentEvent>,
@@ -635,9 +668,16 @@ export class BoldStubsBuilder {
       this.createMassIdCertificateDocumentReferences();
 
     this.massIdCertificateDocuments = this.massIdAuditDocuments.map(
-      (auditDocument, index) =>
-        stubBoldCertificateDocument({
-          externalEventsMap,
+      (auditDocument, index) => {
+        const defaultEventsMap =
+          this.createDefaultMassIdCertificateDocumentEventsMap(index);
+
+        const mergedEventsMap = isNil(externalEventsMap)
+          ? defaultEventsMap
+          : this.mergeEventsMaps(defaultEventsMap, externalEventsMap);
+
+        return stubBoldCertificateDocument({
+          externalEventsMap: mergedEventsMap,
           partialDocument: {
             currentValue: auditDocument.currentValue,
             type: this.massIdCertificateDocumentReferences[index]!.type,
@@ -645,7 +685,8 @@ export class BoldStubsBuilder {
             id: this.massIdCertificateDocumentReferences[index]!.documentId,
             parentDocumentId: auditDocument.id,
           },
-        }),
+        });
+      },
     );
 
     this.addMassIdCertificateDocumentReferencesToMassIdDocuments();
