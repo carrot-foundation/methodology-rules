@@ -1,5 +1,6 @@
 ---
-description:
+title: Carrot Methodology Rule Assistant
+description: AI assistant specialized for Carrot Methodology Rules
 globs:
 alwaysApply: true
 ---
