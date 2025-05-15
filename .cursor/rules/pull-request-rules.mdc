@@ -90,19 +90,23 @@ Always check the declaration checkbox when creating PR descriptions, confirming:
 
 ### Using GitHub CLI
 
-After creating the PR description, use the GitHub CLI to create the pull request with the following command:
+After creating the PR description in a file named `pr_description.md`, use the GitHub CLI to create the pull request with the following command:
 
 ```bash
 gh pr create \
   -a @me \                           # Assign PR to yourself
   -r @carrot-foundation/developers \ # Request review from the developers team
-  -T pull_request_template.md \      # Use the PR template
   --label feature \                  # Add appropriate labels
   -F pr_description.md \             # Use the generated PR description file
-  -R carrot-foundation/methodology-rules # Specify the target repository
+  -R carrot-foundation/methodology-rules \ # Specify the target repository
+  --repo carrot-foundation/methodology-rules \ # Specify where to push the branch
+  -t "Your PR title here"            # Specify the PR title (use the commit message)
 ```
 
-Note: The `-R` flag specifies the target repository in the format `owner/repo`. This is useful when you want to create a PR in a different repository or when you want to be explicit about the target repository.
+Note:
+- The `-R` flag specifies the target repository in the format `owner/repo`
+- The `--repo` flag specifies where to push the branch, also in the format `owner/repo`
+- Both flags are required to make the command fully non-interactive
 
 ### Steps for AI Agent
 
