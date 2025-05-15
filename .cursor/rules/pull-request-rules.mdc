@@ -1,0 +1,128 @@
+---
+description: When creating PR descriptions, follow these guidelines to ensure consistency and clarity
+globs:
+alwaysApply: false
+---
+# Pull Request Description Guidelines
+
+When creating PR descriptions, follow these guidelines to ensure consistency and clarity:
+
+## Template Structure
+
+Always use the template from `.github/pull_request_template.md` which includes:
+- Summary
+- Details
+- Related links
+- Declaration checkbox
+
+## Writing Guidelines
+
+### Summary Section
+
+The summary should:
+- Be concise (1-3 sentences)
+- Start with an action verb (Updates, Adds, Fixes, etc.)
+- Clearly state the main purpose of the changes
+- Use present tense
+- Not include implementation details
+
+Example:
+```markdown
+Updates the rule creation script command name and improves its documentation for better clarity and maintainability.
+```
+
+### Details Section
+
+Structure the details as:
+1. **Main Changes List**:
+   - Use bullet points or numbered lists
+   - Group related changes
+   - Include before/after examples for significant changes
+   - Highlight breaking changes if any
+
+2. **Technical Details** (if applicable):
+   - File structure changes
+   - Configuration updates
+   - Dependencies modified
+   - Performance implications
+
+Example:
+```markdown
+The changes include:
+
+1. **Command Name Update**:
+   - Changed `old-command` to `new-command`
+   - Updated all examples and documentation
+
+2. **Configuration Changes**:
+   - Added new options in `config.json`
+   - Updated default values
+```
+
+### Related Links Section
+
+Include when applicable:
+- Notion documentation links
+- ClickUp task links
+- Related PRs
+- External references
+
+If no related links exist, use "N/A"
+
+### Declaration Checkbox
+
+Always check the declaration checkbox when creating PR descriptions, confirming:
+- The changes work as expected
+- No services are broken
+- Best practices were followed
+- Code quality has improved
+
+## Special Cases
+
+### Breaking Changes
+
+When the PR includes breaking changes:
+1. Highlight them at the top of the Details section
+2. Use a "⚠️ BREAKING CHANGES" header
+3. List all breaking changes and their impact
+4. Provide migration steps if applicable
+
+### Dependencies Updates
+
+When updating dependencies:
+1. List all updated packages
+2. Include version changes (from -> to)
+3. Highlight any breaking changes
+4. Mention any required follow-up actions
+
+### Documentation Updates
+
+When updating documentation:
+1. List all modified documents
+2. Summarize key changes
+3. Include before/after examples for significant changes
+4. Mention any required updates in related documents
+
+## Best Practices
+
+1. **Clarity**:
+   - Use clear, professional language
+   - Avoid jargon unless necessary
+   - Explain acronyms on first use
+
+2. **Completeness**:
+   - Include all relevant information
+   - Don't assume reader knowledge
+   - Link to additional resources when helpful
+
+3. **Formatting**:
+   - Use proper markdown syntax
+   - Include code blocks with proper language tags
+   - Use headers for organization
+   - Use lists for multiple items
+
+4. **Review**:
+   - Double-check all links work
+   - Verify code examples are correct
+   - Ensure all sections are filled
+   - Check for typos and formatting issues
