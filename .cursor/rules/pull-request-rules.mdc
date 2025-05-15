@@ -1,16 +1,15 @@
 ---
-description: When creating PR descriptions, follow these guidelines to ensure consistency and clarity
+description: When creating PR, PR descriptions, and PR titles, follow these guidelines to ensure consistency and clarity
 globs:
 alwaysApply: false
 ---
-
 # Pull Request Description Guidelines
 
 When creating PR descriptions, follow these guidelines to ensure consistency and clarity:
 
 ## Template Structure
 
-Always use the template from [`.github/pull_request_template.md`](mdc:../.github/pull_request_template.md) which includes:
+Always use the template from @`.github/pull_request_template.md` which includes:
 
 - Summary
 - Details
@@ -87,6 +86,40 @@ Always check the declaration checkbox when creating PR descriptions, confirming:
 - Best practices were followed
 - Code quality has improved
 
+## Creating Pull Requests
+
+### Using GitHub CLI
+
+After creating the PR description, use the GitHub CLI to create the pull request with the following command:
+
+```bash
+gh pr create \
+  -a @me \                           # Assign PR to yourself
+  -r @carrot-foundation/developers \ # Request review from the developers team
+  -T pull_request_template.md \      # Use the PR template
+  --label feature \                  # Add appropriate labels
+  -F pr_description.md \             # Use the generated PR description file
+  -R carrot-foundation/methodology-rules # Specify the target repository
+```
+
+Note: The `-R` flag specifies the target repository in the format `owner/repo`. This is useful when you want to create a PR in a different repository or when you want to be explicit about the target repository.
+
+### Steps for AI Agent
+
+1. Create the PR description following the template and guidelines above
+2. Save the PR description to a temporary file named `pr_description.md`
+3. Execute the gh CLI command to create the PR
+4. Clean up the temporary description file after PR creation
+
+### Labels
+
+Use appropriate labels based on the PR type:
+- `feature` for new features
+- `bug` for bug fixes
+- `chore` for maintenance tasks
+- `docs` for documentation updates
+- `refactoring` for refactoring changes
+
 ## Special Cases
 
 ### Breaking Changes
@@ -143,4 +176,4 @@ When updating documentation:
    - Ensure all sections are filled
    - Check for typos and formatting issues
 
-- [Conventional Commits](mdc:https:/www.conventionalcommits.org)
+- @Conventional Commits
