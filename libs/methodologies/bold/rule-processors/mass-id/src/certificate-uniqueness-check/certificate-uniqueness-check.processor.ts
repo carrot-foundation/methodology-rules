@@ -8,7 +8,7 @@ import {
   DocumentQueryService,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  CREDITS,
+  CREDIT_ORDER_MATCH,
   DocumentMatcher,
   MASS_ID_AUDIT,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
@@ -116,7 +116,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     await documentQuery?.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
 
-      if (CREDITS.matches(documentReference)) {
+      if (CREDIT_ORDER_MATCH.matches(documentReference)) {
         creditDocuments.push(document);
       }
 
