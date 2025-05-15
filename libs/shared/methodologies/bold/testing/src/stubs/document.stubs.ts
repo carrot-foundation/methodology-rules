@@ -61,7 +61,7 @@ export const stubCreditDocument = (
   stubDocument({
     category: DocumentCategory.METHODOLOGY,
     subtype: random<DocumentSubtype.TCC | DocumentSubtype.TRC>(),
-    type: DocumentType.CREDITS,
+    type: DocumentType.CREDIT_ORDER,
     ...partialDocument,
   });
 
