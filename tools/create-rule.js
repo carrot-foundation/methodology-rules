@@ -3,15 +3,31 @@
 /**
  * Rule Generator
  *
- * This script generates a new rule for the specified scope with all necessary files.
- * It creates the rule structure based on the existing examples.
+ * This script generates a new rule with all necessary files and structure.
+ * It creates the following files in the rule's directory:
+ * - index.ts - Exports the rule's lambda handler
+ * - [rule-name].lambda.ts - Lambda handler wrapper
+ * - [rule-name].processor.ts - Main rule processor implementation
+ * - [rule-name].errors.ts - Error message definitions
+ * - [rule-name].processor.spec.ts - Unit tests
+ * - [rule-name].test-cases.ts - Test case definitions
+ * - [rule-name].lambda.e2e.spec.ts - End-to-end tests
+ *
+ * The script will also update the scope's main index.ts to export the new rule.
  *
  * Usage:
- *   pnpm create-mass-id-rule <rule-name> [scope] [description]
+ *   pnpm create-rule <rule-name> [scope] [description]
  *
- * Example:
- *   pnpm create-mass-id-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
- *   pnpm create-mass-id-rule credit-allocation credit "Validates the credit allocation process"
+ * Arguments:
+ *   rule-name    The name of the rule (required, kebab-case)
+ *   scope        The scope/domain of the rule (optional, defaults to 'mass-id')
+ *   description  A brief description of what the rule validates (optional)
+ *
+ * Examples:
+ *   pnpm create-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
+ *   pnpm create-rule credit-allocation credit "Validates the credit allocation process"
+ *
+ * The rule will be created under libs/methodologies/bold/rule-processors/[scope]/src/[rule-name]/
  */
 
 const fs = require('fs');
@@ -30,7 +46,7 @@ if (
   console.log(`
 Rule Generator
 
-Usage: create-mass-id-rule <rule-name> [scope] [description]
+Usage: create-rule <rule-name> [scope] [description]
 
 Arguments:
   rule-name    The name of the rule (required)
@@ -38,8 +54,8 @@ Arguments:
   description  A brief description of the rule (optional)
 
 Examples:
-  create-mass-id-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
-  create-mass-id-rule credit-allocation credit "Validates the credit allocation process"
+  create-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
+  create-rule credit-allocation credit "Validates the credit allocation process"
   `);
   process.exit(0);
 }
