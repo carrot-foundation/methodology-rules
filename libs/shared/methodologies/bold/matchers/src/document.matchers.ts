@@ -61,7 +61,7 @@ export const PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH = new DocumentMatcher({
   type: DocumentType.PARTICIPANT_HOMOLOGATION,
 });
 
-export const CREDITS = new DocumentMatcher({
+export const CREDIT_ORDER_MATCH = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.CREDITS,
+  type: DocumentType.CREDIT_ORDER,
 });
