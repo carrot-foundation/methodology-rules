@@ -1,0 +1,100 @@
+---
+description: Follow these guidelines to create consistent and meaningful commit messages using the conventional commits specification
+globs:
+alwaysApply: false
+---
+# Commit Message Guidelines
+
+Follow these guidelines to create consistent and meaningful commit messages using the conventional commits specification.
+
+## Basic Structure
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+## Types
+
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code (white-space, formatting, etc)
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `test`: Adding missing tests or correcting existing tests
+- `chore`: Changes to the build process or auxiliary tools and libraries
+- `revert`: Reverts a previous commit
+
+## Scopes
+
+The following scopes are defined for this project:
+- `nx`: Changes related to Nx configuration or workspace setup
+- `rule`: Changes related to methodology rules
+- `shared`: Changes to shared code or utilities
+- `script`: Changes to build scripts or tooling
+
+## Description Guidelines
+
+- Use imperative, present tense: "change" not "changed" nor "changes"
+- Don't capitalize the first letter
+- No period (.) at the end
+- Keep it concise (< 72 characters)
+- Describe what the change does, not how it does it
+
+## Body Guidelines
+
+- Use imperative, present tense
+- Include motivation for the change
+- Contrast this with previous behavior
+- Wrap lines at 72 characters
+- Use multiple paragraphs if needed
+
+## Breaking Changes
+
+Indicate breaking changes in one of two ways:
+1. Add `!` after type/scope: `feat(api)!: send an email to the customer when a product is shipped`
+2. Add `BREAKING CHANGE:` in the footer:
+```
+feat: allow provided config object to extend other configs
+
+BREAKING CHANGE: `extends` key in config file is now used for extending other config files
+```
+
+## Examples
+
+Simple feature with scope:
+```
+feat(rule): add vehicle definition validation
+```
+
+Bug fix with body:
+```
+fix(shared): prevent racing of requests
+
+Introduce a request id and a reference to latest request.
+Dismiss incoming responses other than from latest request.
+```
+
+Breaking change with scope:
+```
+feat(nx)!: update to Nx 17.0.0
+
+BREAKING CHANGE: Drop support for Node.js 14
+```
+
+Documentation update:
+```
+docs(rule): update README with new rule creation steps
+```
+
+Multiple-line commit with footer:
+```
+fix(script): correct minor typos in code
+
+See the issue for details on the typos fixed.
+
+Refs: #123

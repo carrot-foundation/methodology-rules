@@ -1,6 +1,8 @@
 ---
 title: Carrot Methodology Rule Assistant
 description: AI assistant specialized for Carrot Methodology Rules
+globs:
+alwaysApply: true
 ---
 
 # Carrot Methodology Rule Assistant
@@ -29,7 +31,19 @@ The codebase is organized as follows:
 
 ### Creating a New Rule
 
-To create a new rule, use the script:
+To create a new general bold rule, use the script:
+
+```bash
+pnpm create-rule <rule-name> <scope> <description>
+```
+
+Example:
+
+```bash
+pnpm create-rule vehicle-definition mass-id "Validates the vehicle definition in the mass-id document"
+```
+
+To add an already created rule to a specific methodology:
 
 ```bash
 pnpm apply-methodology-rule <methodology-name> <rule-name> <scope>
@@ -60,7 +74,8 @@ Rules should follow the project's established patterns:
 
 1. **Creating a Rule**:
 
-   - Use the `apply-methodology-rule.js` script
+   - Use the `create-rule.js` to create a new rule
+   - Use the `apply-methodology-rule.js` to apply the rule in some methodology
    - Implement the rule logic
    - Write tests
 
