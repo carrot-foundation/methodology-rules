@@ -1,15 +1,15 @@
 {
-  "name": "methodologies-bold-rule-processors-credits",
+  "name": "methodologies-bold-rule-processors-credit-order",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": [
     "app:any",
     "methodology:bold",
-    "processor:credits",
+    "processor:credit-order",
     "scope:shared",
     "stack:any",
     "type:lib"
   ],
-  "sourceRoot": "libs/methodologies/bold/rule-processors/credits/src",
+  "sourceRoot": "libs/methodologies/bold/rule-processors/credit-order/src",
   "projectType": "library",
   "targets": {
     "lint": {},

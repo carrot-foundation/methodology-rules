@@ -88,8 +88,8 @@
       "@carrot-fndn/methodologies/bold/rule-processors/mass-id": [
         "libs/methodologies/bold/rule-processors/mass-id/src/index.ts"
       ],
-      "@carrot-fndn/methodologies/bold/rule-processors/credits": [
-        "libs/methodologies/bold/rule-processors/credits/src/index.ts"
+      "@carrot-fndn/methodologies/bold/rule-processors/credit-order": [
+        "libs/methodologies/bold/rule-processors/credit-order/src/index.ts"
       ],
       "@carrot-fndn/methodologies/bold/rule-processors/mass-id-certificate": [
         "libs/methodologies/bold/rule-processors/mass-id-certificate/src/index.ts"

@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/credits/src/rewards-distribution/rewards-distribution.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/credit-order/src/rewards-distribution/rewards-distribution.processor.ts)**
 
 ## 👥 Contributors
 
