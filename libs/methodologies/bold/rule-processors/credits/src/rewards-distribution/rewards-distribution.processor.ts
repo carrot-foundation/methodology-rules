@@ -133,7 +133,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     if (isNil(creditOrderDocument)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.CREDITS_DOCUMENT_NOT_FOUND,
+        this.errorProcessor.ERROR_MESSAGE.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
       );
     }
 
