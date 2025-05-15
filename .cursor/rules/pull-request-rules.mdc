@@ -87,6 +87,44 @@ Always check the declaration checkbox when creating PR descriptions, confirming:
 - Best practices were followed
 - Code quality has improved
 
+## Creating Pull Requests
+
+### Using GitHub CLI
+
+After creating the PR description in a file named `pr_description.md`, use the GitHub CLI to create the pull request with the following command:
+
+```bash
+gh pr create \
+  -a @me \                           # Assign PR to yourself
+  -r @carrot-foundation/developers \ # Request review from the developers team
+  --label feature \                  # Add appropriate labels
+  -F pr_description.md \             # Use the generated PR description file
+  -R carrot-foundation/methodology-rules \ # Specify the target repository
+  --head $(git branch --show-current) \    # Specify the current branch to push
+  -t "Your PR title here"            # Specify the PR title (use the commit message)
+```
+
+Note:
+- The `-R` flag specifies the target repository in the format `owner/repo`
+- The `--head` flag with `$(git branch --show-current)` automatically uses your current branch name, making the command non-interactive
+- The `-t` flag should use your commit message as the PR title for consistency
+
+### Steps for AI Agent
+
+1. Create the PR description following the template and guidelines above
+2. Save the PR description to a temporary file named `pr_description.md`
+3. Execute the gh CLI command to create the PR
+4. Clean up the temporary description file after PR creation
+
+### Labels
+
+Use appropriate labels based on the PR type:
+- `feature` for new features
+- `bug` for bug fixes
+- `chore` for maintenance tasks
+- `docs` for documentation updates
+- `refactoring` for refactoring changes
+
 ## Special Cases
 
 ### Breaking Changes
@@ -143,4 +181,4 @@ When updating documentation:
    - Ensure all sections are filled
    - Check for typos and formatting issues
 
-- [Conventional Commits](mdc:https:/www.conventionalcommits.org)
+- @Conventional Commits
