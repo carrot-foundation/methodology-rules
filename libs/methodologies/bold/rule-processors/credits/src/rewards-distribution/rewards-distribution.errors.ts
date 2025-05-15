@@ -4,18 +4,18 @@ import {
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { CREDIT_ORDER } = DocumentType;
+const { CREDITS } = DocumentType;
 const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
   DocumentEventAttributeName;
 
 export const ERROR_MESSAGES = {
   CERTIFICATE_DOCUMENT_NOT_FOUND: (certificateType: unknown) =>
     `The "${String(certificateType)}" documents were not found.`,
-  CREDIT_ORDER_DOCUMENT_NOT_FOUND: `The "${CREDIT_ORDER}" document was not found.`,
-  INVALID_UNIT_PRICE: `The "${UNIT_PRICE}" attribute in the "${CREDIT_ORDER}" document is invalid.`,
+  CREDITS_DOCUMENT_NOT_FOUND: `The "${CREDITS}" document was not found.`,
+  INVALID_UNIT_PRICE: `The "${UNIT_PRICE}" attribute in the "${CREDITS}" document is invalid.`,
   REJECTED_BY_ERROR: 'Unable to calculate rewards distribution.',
   REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND: (documentId: string) =>
-    `The "${documentId}" document has no "${REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT}" attribute in the "${CREDIT_ORDER}" document.`,
+    `The "${documentId}" document has no "${REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT}" attribute in the "${CREDITS}" document.`,
 } as const;
 
 export class RewardsDistributionProcessorErrors extends BaseProcessorErrors {

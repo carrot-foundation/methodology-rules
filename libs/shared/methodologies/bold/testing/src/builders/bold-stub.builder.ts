@@ -32,7 +32,7 @@ import {
   stubParticipantHomologationGroupDocument,
 } from '../stubs';
 import { stubBoldCertificateDocument } from './bold-certificate.stubs';
-import { stubBoldCreditOrderDocument } from './bold-credit-order.stubs';
+import { stubBoldCreditOrderDocument } from './bold-credits.stubs';
 import {
   stubBoldMassIdDocument,
   stubBoldMassIdDropOffEvent,
@@ -45,7 +45,7 @@ import { stubBoldHomologationDocument } from './bold-participant-homologation.st
 const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
 const {
-  CREDIT_ORDER,
+  CREDITS,
   DEFINITION,
   GAS_ID,
   MASS_ID_AUDIT,
@@ -267,7 +267,7 @@ export class BoldStubsBuilder {
     return {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
-      type: CREDIT_ORDER,
+      type: CREDITS,
     };
   }
 

@@ -19,7 +19,7 @@ export enum DocumentCategory {
 }
 
 export enum DocumentType {
-  CREDIT_ORDER = 'Credit Order',
+  CREDITS = 'Credits',
   DEFINITION = 'Definition',
   GAS_ID = 'GasID',
   MASS_ID_AUDIT = 'MassID Audit',

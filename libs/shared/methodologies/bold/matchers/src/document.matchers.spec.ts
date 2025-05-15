@@ -6,7 +6,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
-  CREDIT_ORDER_MATCH,
+  CREDITS,
   type DocumentMatch,
   DocumentMatcher,
   MASS_ID,
@@ -259,14 +259,14 @@ describe('Document Matchers', () => {
     });
   });
 
-  describe('CREDIT_ORDER_MATCH', () => {
+  describe('CREDITS', () => {
     it('should return true if document matches category and type', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.CREDIT_ORDER,
+        type: DocumentType.CREDITS,
       });
 
-      const matchesResult = CREDIT_ORDER_MATCH.matches(documentReference);
+      const matchesResult = CREDITS.matches(documentReference);
 
       expect(matchesResult).toBe(true);
     });
@@ -274,10 +274,10 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentReference = stubDocumentReference({
         category: DocumentCategory.MASS_ID,
-        type: DocumentType.CREDIT_ORDER,
+        type: DocumentType.CREDITS,
       });
 
-      const matchesResult = CREDIT_ORDER_MATCH.matches(documentReference);
+      const matchesResult = CREDITS.matches(documentReference);
 
       expect(matchesResult).toBe(false);
     });
