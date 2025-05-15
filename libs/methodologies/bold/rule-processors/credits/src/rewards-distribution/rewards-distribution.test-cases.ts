@@ -5,7 +5,7 @@ import {
   MASS_ID_ACTOR_PARTICIPANTS,
   METHODOLOGY_ACTOR_PARTICIPANTS,
   stubBoldCertificateRulesMetadataEvent,
-  stubBoldCreditRulesMetadataEvent,
+  stubBoldCreditOrderRulesMetadataEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -56,7 +56,7 @@ type ErrorTestCase = {
   scenario: string;
 };
 
-const { CREDITS, RECYCLED_ID } = DocumentType;
+const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
 const { RELATED, RULES_METADATA } = DocumentEventName;
 const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
@@ -297,7 +297,7 @@ const buildCertificateDocuments = (options: {
     })
     .createCreditOrderDocument({
       externalEventsMap: {
-        [RULES_METADATA]: stubBoldCreditRulesMetadataEvent({
+        [RULES_METADATA]: stubBoldCreditOrderRulesMetadataEvent({
           metadataAttributes: [[UNIT_PRICE, UNIT_PRICE_VALUE]],
         }),
       },
@@ -581,7 +581,7 @@ const createErrorTestCases = () => {
     .createCreditOrderDocument()
     .build();
 
-  const creditsDocumentWithoutRulesMetadata = {
+  const creditOrderDocumentWithoutRulesMetadata = {
     ...errorStubs.creditOrderDocument,
     externalEvents: errorStubs.creditOrderDocument.externalEvents?.filter(
       (event) => event.name !== RULES_METADATA.toString(),
@@ -598,7 +598,7 @@ const createErrorTestCases = () => {
 
   return {
     certificateDocumentWithoutRulesMetadata,
-    creditsDocumentWithoutRulesMetadata,
+    creditOrderDocumentWithoutRulesMetadata,
     errorStubs,
   };
 };
@@ -618,18 +618,18 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     massIdCertificateDocuments: [
       ...errorTestData.errorStubs.massIdCertificateDocuments,
     ],
-    resultComment: ERROR_MESSAGES.CREDITS_DOCUMENT_NOT_FOUND,
+    resultComment: ERROR_MESSAGES.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the ${CREDITS} document is not found`,
+    scenario: `the ${CREDIT_ORDER} document is not found`,
   },
   {
-    creditOrderDocument: errorTestData.creditsDocumentWithoutRulesMetadata,
+    creditOrderDocument: errorTestData.creditOrderDocumentWithoutRulesMetadata,
     massIdCertificateDocuments: [
       ...errorTestData.errorStubs.massIdCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.INVALID_UNIT_PRICE,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the "${UNIT_PRICE}" attribute in the ${CREDITS} document is invalid`,
+    scenario: `the "${UNIT_PRICE}" attribute in the ${CREDIT_ORDER} document is invalid`,
   },
   {
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
