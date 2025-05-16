@@ -25,6 +25,7 @@ runs:
       shell: bash
       env:
         AWS_REGION: us-east-1
+        NX_CACHE_BUCKET: methodology-rules-nx-cache
       run: |
         if [[ "${{ inputs.environment }}" == "production" ]]; then
             echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_production }}" >> $GITHUB_ENV
@@ -33,6 +34,8 @@ runs:
           fi
         echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
         echo "S3_KEY=${{ inputs.s3_key }}" >> $GITHUB_ENV
+        echo "NX_CACHE_BUCKET=$NX_CACHE_BUCKET" >> $GITHUB_ENV
+        echo "NX_CLOUD_ACCESS_TOKEN=${{ inputs.s3_key }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
