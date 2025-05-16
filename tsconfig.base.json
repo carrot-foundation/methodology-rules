@@ -55,6 +55,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution": [
         "libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/credit-order/rewards-distribution": [
+        "libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/testing": [
         "libs/shared/methodologies/bold/testing/src/index.ts"
       ],
