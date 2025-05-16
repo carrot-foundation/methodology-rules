@@ -7,7 +7,7 @@
     "processor:credit-order",
     "scope:shared",
     "stack:any",
-    "type:lib"
+    "type:library"
   ],
   "sourceRoot": "libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src",
   "projectType": "library",

@@ -30,89 +30,12 @@
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "strictPropertyInitialization": false,
-    "verbatimModuleSyntax": true,
-    "strictNullChecks": true,
-    "paths": {
-      "@carrot-fndn/shared/methodologies/bold/getters": [
-        "libs/shared/methodologies/bold/getters/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/io-helpers": [
-        "libs/shared/methodologies/bold/io-helpers/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/audit-api": [
-        "libs/shared/methodologies/audit-api/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/matchers": [
-        "libs/shared/methodologies/bold/matchers/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/predicates": [
-        "libs/shared/methodologies/bold/predicates/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/processors": [
-        "libs/shared/methodologies/bold/processors/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution": [
-        "libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/credit-order/rewards-distribution": [
-        "libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/testing": [
-        "libs/shared/methodologies/bold/testing/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/helpers": [
-        "libs/shared/methodologies/bold/helpers/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/types": [
-        "libs/shared/methodologies/bold/types/src/index.ts"
-      ],
-      "@carrot-fndn/shared/methodologies/bold/utils": [
-        "libs/shared/methodologies/bold/utils/src/index.ts"
-      ],
-      "@carrot-fndn/shared/app/types": ["libs/shared/app/types/src/index.ts"],
-      "@carrot-fndn/shared/document/loader": [
-        "libs/shared/document/loader/src/index.ts"
-      ],
-      "@carrot-fndn/shared/document/seeds": [
-        "libs/shared/document/seeds/src/index.ts"
-      ],
-      "@carrot-fndn/shared/http-request": [
-        "libs/shared/http-request/src/index.ts"
-      ],
-      "@carrot-fndn/shared/helpers": ["libs/shared/helpers/src/index.ts"],
-      "@carrot-fndn/shared/aws-http": ["libs/shared/aws-http/src/index.ts"],
-      "@carrot-fndn/shared/lambda/types": [
-        "libs/shared/lambda/types/src/index.ts"
-      ],
-      "@carrot-fndn/shared/lambda/wrapper": [
-        "libs/shared/lambda/wrapper/src/index.ts"
-      ],
-      "@carrot-fndn/shared/rule/result": [
-        "libs/shared/rule/result/src/index.ts"
-      ],
-      "@carrot-fndn/methodologies/bold/rule-processors/mass-id": [
-        "libs/methodologies/bold/rule-processors/mass-id/src/index.ts"
-      ],
-      "@carrot-fndn/methodologies/bold/rule-processors/credit-order": [
-        "libs/methodologies/bold/rule-processors/credit-order/src/index.ts"
-      ],
-      "@carrot-fndn/methodologies/bold/rule-processors/mass-id-certificate": [
-        "libs/methodologies/bold/rule-processors/mass-id-certificate/src/index.ts"
-      ],
-      "@carrot-fndn/shared/rule/standard-data-processor": [
-        "libs/shared/rule/standard-data-processor/src/index.ts"
-      ],
-      "@carrot-fndn/shared/rule/types": ["libs/shared/rule/types/src/index.ts"],
-      "@carrot-fndn/shared/s3-bucket": ["libs/shared/s3-bucket/src/index.ts"],
-      "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
-      "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"]
-    },
     "plugins": [
       {
         "transform": "typia/lib/transform"
       }
     ]
   },
-  "exclude": ["node_modules", "tmp", "local", "coverage"]
+  "exclude": ["node_modules", "tmp"],
+  "extends": "./tsconfig.paths.json"
 }
