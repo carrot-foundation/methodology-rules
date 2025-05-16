@@ -7,6 +7,12 @@ inputs:
   environment:
     description: The environment to run the Nx target in
     required: true
+  aws_account_id_production:
+    description: AWS Account ID for production environment
+    required: true
+  aws_account_id_development:
+    description: AWS Account ID for development environment
+    required: true
 
 runs:
   using: composite
@@ -18,9 +24,9 @@ runs:
         AWS_REGION: us-east-1
       run: |
         if [[ "${{ inputs.environment }}" == "production" ]]; then
-            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}" >> $GITHUB_ENV
+            echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_production }}" >> $GITHUB_ENV
           else
-            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
+            echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_development }}" >> $GITHUB_ENV
           fi
         echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
 
