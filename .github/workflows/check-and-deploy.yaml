@@ -43,10 +43,7 @@ jobs:
     name: Backend Check
     needs: affected
     uses: ./.github/workflows/backend-check.yaml
-    secrets:
-      AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
-      AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-      S3_KEY: ${{ secrets.S3_KEY }}
+    secrets: inherit
     with:
       skip: ${{ needs.affected.outputs.backend != 'true' }}
 
