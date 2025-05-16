@@ -46,6 +46,8 @@
     "@nx/js": "20.4.2",
     "@nx/linter": "19.8.4",
     "@nx/node": "20.4.2",
+    "@nx/powerpack-license": "2.0.3",
+    "@nx/powerpack-s3-cache": "2.0.3",
     "@nx/webpack": "20.4.2",
     "@smithy/util-stream": "4.0.2",
     "@swc-node/register": "1.10.9",
