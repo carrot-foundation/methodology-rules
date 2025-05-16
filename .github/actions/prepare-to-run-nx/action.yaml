@@ -13,6 +13,9 @@ inputs:
   aws_account_id_development:
     description: AWS Account ID for development environment
     required: true
+  s3_key:
+    description: Nx Powerpack S3 key
+    required: true
 
 runs:
   using: composite
@@ -29,6 +32,7 @@ runs:
             echo "AWS_ACCOUNT_ID=${{ inputs.aws_account_id_development }}" >> $GITHUB_ENV
           fi
         echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
+        echo "S3_KEY=${{ inputs.s3_key }}" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2

@@ -32,6 +32,7 @@ jobs:
           environment: development
           aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          s3_key: ${{ secrets.S3_KEY }}
 
       - id: affected
         run: |
@@ -55,3 +56,4 @@ jobs:
       AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
       AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
       ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      S3_KEY: ${{ secrets.S3_KEY }}
