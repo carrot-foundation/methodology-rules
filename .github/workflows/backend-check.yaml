@@ -14,7 +14,7 @@ on:
         required: true
       AWS_ACCOUNT_ID_DEVELOPMENT:
         required: true
-      S3_KEY:
+      nx_key:
         required: true
 
 jobs:
@@ -31,7 +31,7 @@ jobs:
           environment: development
           aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-          s3_key: ${{ secrets.S3_KEY }}
+          nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=lint
 
@@ -54,7 +54,7 @@ jobs:
           environment: development
           aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-          s3_key: ${{ secrets.S3_KEY }}
+          nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=ts
 
@@ -78,7 +78,7 @@ jobs:
           environment: development
           aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-          s3_key: ${{ secrets.S3_KEY }}
+          nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm nx affected --target=test --ci --parallel=1 --runInBand --configuration=ci
         env:

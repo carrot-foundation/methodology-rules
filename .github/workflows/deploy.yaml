@@ -11,7 +11,7 @@ on:
         required: true
       ADMIN_GITHUB_TOKEN:
         required: true
-      S3_KEY:
+      nx_key:
         required: true
 
 jobs:
@@ -38,7 +38,7 @@ jobs:
           environment: ${{ matrix.environment }}
           aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-          s3_key: ${{ secrets.S3_KEY }}
+          nx_key: ${{ secrets.NX_KEY }}
 
       - run: pnpm upload-lambdas-and-metadata ${{ matrix.environment }}
 
