@@ -1,10 +1,34 @@
 name: Prepare environment to run Nx targets
 description: Runs all required steps to prepare runner to run a Nx target
 
+permissions: write-all # required for AWS credentials
+
+inputs:
+  environment:
+    description: The environment to run the Nx target in
+    required: true
+
 runs:
   using: composite
+  env:
+    AWS_REGION: us-east-1
 
   steps:
+    - name: Set AWS Account ID
+      id: set-aws-account
+      run: |
+        if [[ "${{ inputs.environment }}" == "production" ]]; then
+            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}" >> $GITHUB_ENV
+          else
+            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
+          fi
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+      with:
+        role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActions-methodology-rules
+        aws-region: ${{ env.AWS_REGION }}
+
     - name: Derive appropriate SHAs for base and head for `nx affected` commands
       uses: nrwl/nx-set-shas@76907e7e5d3cd17ddb5e2b123389f054bffcdd03 # v4.0.4
 

@@ -1,8 +1,6 @@
 name: Backend Check
 
-permissions:
-  id-token: write
-  contents: read
+permissions: write-all # required for AWS credentials
 
 on:
   workflow_call:

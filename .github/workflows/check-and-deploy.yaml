@@ -1,5 +1,7 @@
 name: Check and Deploy
 
+permissions: write-all # required for AWS credentials
+
 on:
   push:
     branches:
