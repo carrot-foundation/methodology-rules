@@ -11,7 +11,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { MassDefinitionProcessorErrors } from './mass-definition.errors';
+import { MassDefinitionProcessorErrors } from './mass-id-definition.errors';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIdOrganicSubtype);
 

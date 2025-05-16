@@ -9,8 +9,8 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { massDefinitionLambda } from './mass-definition.lambda';
-import { massDefinitionTestCases } from './mass-definition.test-cases';
+import { massDefinitionLambda } from './mass-id-definition.lambda';
+import { massDefinitionTestCases } from './mass-id-definition.test-cases';
 
 describe('MassDefinitionLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();

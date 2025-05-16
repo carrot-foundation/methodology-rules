@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-carbon-rule-processors-mass-id-tcc-absence",
+  "name": "methodologies-bold-carbon-rule-processors-mass-id-certificate-uniquiness-check",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
-  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/tcc-absence/src",
+  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/certificate-uniquiness-check/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},

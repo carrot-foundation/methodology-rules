@@ -10,8 +10,8 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
-import { MassDefinitionProcessor } from './mass-definition.processor';
-import { massDefinitionTestCases } from './mass-definition.test-cases';
+import { MassDefinitionProcessor } from './mass-id-definition.processor';
+import { massDefinitionTestCases } from './mass-id-definition.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 

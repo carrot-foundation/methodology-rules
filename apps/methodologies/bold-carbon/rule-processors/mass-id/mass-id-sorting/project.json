@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-carbon-rule-processors-mass-id-mass-definition",
+  "name": "methodologies-bold-carbon-rule-processors-mass-id-mass-id-sorting",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
-  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/mass-definition/src",
+  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/mass-id-sorting/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},

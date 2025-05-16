@@ -9,11 +9,11 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { massSortingLambda } from './mass-sorting.lambda';
+import { massSortingLambda } from './mass-id-sorting.lambda';
 import {
   massSortingErrorTestCases,
   massSortingTestCases,
-} from './mass-sorting.test-cases';
+} from './mass-id-sorting.test-cases';
 
 describe('MassSortingProcessor E2E', () => {
   beforeEach(() => {
