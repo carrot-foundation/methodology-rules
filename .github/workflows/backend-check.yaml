@@ -9,6 +9,11 @@ on:
         description: Skip backend check
         required: false
         type: boolean
+    secrets:
+      AWS_ACCOUNT_ID_PRODUCTION:
+        required: true
+      AWS_ACCOUNT_ID_DEVELOPMENT:
+        required: true
 
 jobs:
   backend-lint:
@@ -20,6 +25,10 @@ jobs:
         with:
           fetch-depth: 0 # required for Nx affected
       - uses: ./.github/actions/prepare-to-run-nx
+        with:
+          environment: development
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
+          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
 
       - run: pnpm nx affected --target=lint
 
@@ -38,6 +47,10 @@ jobs:
         with:
           fetch-depth: 0 # required for Nx affected
       - uses: ./.github/actions/prepare-to-run-nx
+        with:
+          environment: development
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
+          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
 
       - run: pnpm nx affected --target=ts
 
@@ -51,22 +64,16 @@ jobs:
     name: Tests
     runs-on: ubuntu-latest
     if: ${{ !github.event.inputs.skip }}
-    env:
-      AWS_REGION: us-east-1
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
 
       - uses: ./.github/actions/prepare-to-run-nx
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActions-methodology-rules
-          aws-region: ${{ env.AWS_REGION }}
+          environment: development
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
+          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
 
       - run: pnpm nx affected --target=test --ci --parallel=1 --runInBand --configuration=ci
         env:
