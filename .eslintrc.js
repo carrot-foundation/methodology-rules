@@ -1,5 +1,11 @@
 const methodologies = ['bold'];
-const ruleProcessorTypes = ['mass', 'mass-id', 'credit', 'certificate'];
+const ruleProcessorTypes = [
+  'mass-id',
+  'credit-order',
+  'mass-id-certificate',
+  'gas-id',
+  'recycled-id',
+];
 
 module.exports = {
   root: true,
@@ -93,6 +99,10 @@ module.exports = {
                 onlyDependOnLibsWithTags: [
                   'processor:shared',
                   `processor:${processorType}`,
+                  ...(processorType === 'gas-id' ||
+                  processorType === 'recycled-id'
+                    ? ['processor:mass-id-certificate']
+                    : []),
                   'type:lib',
                 ],
               })),
