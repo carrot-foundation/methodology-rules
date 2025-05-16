@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/geolocation-precision/geolocation-precision.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-precision/src/index.ts)**
 
 ## 👥 Contributors
 

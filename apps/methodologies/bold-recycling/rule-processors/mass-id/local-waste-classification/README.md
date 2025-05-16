@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/local-waste-classification/local-waste-classification.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/local-waste-classification/src/index.ts)**
 
 ## 👥 Contributors
 

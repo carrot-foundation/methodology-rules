@@ -7,7 +7,7 @@
     "processor:mass-id-certificate",
     "scope:shared",
     "stack:any",
-    "type:lib"
+    "type:library"
   ],
   "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src",
   "projectType": "library",

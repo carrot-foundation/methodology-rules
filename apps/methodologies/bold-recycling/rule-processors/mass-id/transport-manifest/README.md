@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/document-manifest/document-manifest.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/transport-manifest/src/index.ts)**
 
 ## 👥 Contributors
 

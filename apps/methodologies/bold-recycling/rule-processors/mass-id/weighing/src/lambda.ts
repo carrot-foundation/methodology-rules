@@ -1,1 +1,1 @@
-export { weighingLambda as handler } from '@carrot-fndn/methodologies/bold/rule-processors/mass-id';
+export { weighingLambda as handler } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/weighing';
