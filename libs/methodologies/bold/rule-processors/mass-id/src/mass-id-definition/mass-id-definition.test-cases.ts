@@ -1,8 +1,8 @@
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { MassDefinitionProcessorErrors } from './mass-definition.errors';
-import { RESULT_COMMENTS } from './mass-definition.processor';
+import { MassDefinitionProcessorErrors } from './mass-id-definition.errors';
+import { RESULT_COMMENTS } from './mass-id-definition.processor';
 
 const massIdStubs = new BoldStubsBuilder()
   .createMassIdDocuments()

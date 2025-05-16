@@ -1,8 +1,8 @@
 <div align="center">
 
-# Mass Definition
+# Mass Sorting
 
-Methodology: **BOLD-RECYCLING**
+Methodology: **BOLD-CARBON**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
 
@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+<!-- TODO: Update README rule descriptions -->
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/mass-definition/mass-definition.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/mass-id-sorting/mass-id-sorting.processor.ts)**
 
 ## 👥 Contributors
 

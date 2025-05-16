@@ -1,4 +1,4 @@
-export * from './mass-definition';
+export * from './mass-id-definition';
 export * from './certificate-uniqueness-check';
 export * from './participant-homologations';
 export * from './hauler-identification';
@@ -14,7 +14,7 @@ export * from './processor-identification';
 export * from './document-manifest';
 export * from './project-boundary';
 export * from './drop-off-at-recycling-facility';
-export * from './mass-sorting';
+export * from './mass-id-sorting';
 export * from './weighing';
 export * from './avoided-emissions';
 export * from './uniqueness-check';

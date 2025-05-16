@@ -22,6 +22,6 @@ export class MassSortingProcessorErrors extends BaseProcessorErrors {
     MISSING_RECYCLER_HOMOLOGATION_DOCUMENT: `The "${RECYCLER}" homologation was not found.`,
     MISSING_SORTING_EVENT: `No "${SORTING}" event was found in the document.`,
     MISSING_SORTING_FACTOR: `The "${SORTING_FACTOR}" was not found in the "${RECYCLER}" homologation.`,
-    REJECTED_BY_ERROR: 'Unable to validate the mass-sorting.',
+    REJECTED_BY_ERROR: 'Unable to validate the mass-id-sorting.',
   } as const;
 }

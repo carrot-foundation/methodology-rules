@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-recycling-rule-processors-mass-id-mass-definition",
+  "name": "methodologies-bold-recycling-rule-processors-mass-id-mass-id-definition",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
-  "sourceRoot": "apps/methodologies/bold-recycling/rule-processors/mass-id/mass-definition/src",
+  "sourceRoot": "apps/methodologies/bold-recycling/rule-processors/mass-id/mass-id-definition/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},

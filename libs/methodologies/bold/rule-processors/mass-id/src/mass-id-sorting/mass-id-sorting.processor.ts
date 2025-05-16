@@ -37,7 +37,7 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
-import { MassSortingProcessorErrors } from './mass-sorting.errors';
+import { MassSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const { SORTING } = DocumentEventName;
 const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;

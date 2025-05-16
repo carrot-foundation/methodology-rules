@@ -17,8 +17,8 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { MassSortingProcessorErrors } from './mass-sorting.errors';
-import { RESULT_COMMENTS } from './mass-sorting.processor';
+import { MassSortingProcessorErrors } from './mass-id-sorting.errors';
+import { RESULT_COMMENTS } from './mass-id-sorting.processor';
 
 const processorErrors = new MassSortingProcessorErrors();
 

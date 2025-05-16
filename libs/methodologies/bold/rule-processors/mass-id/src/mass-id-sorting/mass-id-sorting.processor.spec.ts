@@ -3,11 +3,11 @@ import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { MassSortingProcessor } from './mass-sorting.processor';
+import { MassSortingProcessor } from './mass-id-sorting.processor';
 import {
   massSortingErrorTestCases,
   massSortingTestCases,
-} from './mass-sorting.test-cases';
+} from './mass-id-sorting.test-cases';
 
 describe('MassSortingProcessor', () => {
   const ruleDataProcessor = new MassSortingProcessor();
