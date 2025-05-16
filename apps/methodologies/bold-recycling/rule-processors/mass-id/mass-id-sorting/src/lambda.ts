@@ -1,1 +1,1 @@
-export { massSortingLambda as handler } from '@carrot-fndn/methodologies/bold/rule-processors/mass-id';
+export { massIdSortingLambda as handler } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-sorting';
