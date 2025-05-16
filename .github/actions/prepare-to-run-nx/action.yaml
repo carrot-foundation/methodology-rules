@@ -10,18 +10,19 @@ inputs:
 
 runs:
   using: composite
-  env:
-    AWS_REGION: us-east-1
-
   steps:
     - name: Set AWS Account ID
       id: set-aws-account
+      shell: bash
+      env:
+        AWS_REGION: us-east-1
       run: |
         if [[ "${{ inputs.environment }}" == "production" ]]; then
             echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}" >> $GITHUB_ENV
           else
             echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
           fi
+        echo "AWS_REGION=$AWS_REGION" >> $GITHUB_ENV
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
