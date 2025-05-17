@@ -1,4 +1,4 @@
-import { arrayOfUniqueValues, isNonEmptyArray } from './array.helpers';
+import { isNonEmptyArray } from './array.helpers';
 
 describe('ArrayHelpers', () => {
   describe('isNonEmptyArray', () => {
@@ -17,24 +17,6 @@ describe('ArrayHelpers', () => {
       { expected: false, input: undefined },
     ])('should return %s for %s', ({ expected, input }) => {
       expect(isNonEmptyArray(input)).toEqual(expected);
-    });
-  });
-
-  describe('arrayOfUniqueValues', () => {
-    it.each([
-      { expected: [], input: [] },
-      { expected: [1], input: [1] },
-      { expected: [1], input: [1, 1, 1, 1] },
-      { expected: [1, 2], input: [1, 2, 1, 2] },
-    ])('should return $expected for $input', ({ expected, input }) => {
-      expect(arrayOfUniqueValues(input)).toEqual(expected);
-    });
-
-    it.each([
-      { expected: ['a'], input: ['a', 'a', 'a'] },
-      { expected: ['1', '2'], input: ['1', '2', '1', '2'] },
-    ])('should return $expected for $input', ({ expected, input }) => {
-      expect(arrayOfUniqueValues(input)).toEqual(expected);
     });
   });
 });

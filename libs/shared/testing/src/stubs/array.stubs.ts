@@ -16,6 +16,3 @@ export const stubArray = <T>(
     },
     stubFunction,
   );
-
-export const stubStringArray = (min = 1, max = 5): string[] =>
-  stubArray(() => faker.string.nanoid(), { max, min });

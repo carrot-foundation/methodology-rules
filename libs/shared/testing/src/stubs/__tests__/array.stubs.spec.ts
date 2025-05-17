@@ -1,6 +1,6 @@
 import { faker } from '@faker-js/faker';
 
-import { stubArray, stubStringArray } from '../array.stubs';
+import { stubArray } from '../array.stubs';
 
 describe('array stubs', () => {
   describe('stubArray', () => {
@@ -29,22 +29,6 @@ describe('array stubs', () => {
       const result = stubArray(() => value, { max: 1, min: 1 });
 
       expect(result).toEqual([value]);
-    });
-  });
-
-  describe('stubStringArray', () => {
-    it('should return an array with a random size', () => {
-      const result = stubStringArray();
-
-      expect(result.length).toBeGreaterThanOrEqual(1);
-
-      expect(result.every((item) => typeof item === 'string')).toBe(true);
-    });
-
-    it('should set array range', () => {
-      const result = stubStringArray(1, 1);
-
-      expect(result).toEqual([expect.any(String)]);
     });
   });
 });

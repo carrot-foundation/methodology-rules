@@ -1,8 +1,6 @@
-import { stubBigNumber } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
-import { splitBigNumberIntoParts, sumBigNumbers } from './math.helpers';
+import { sumBigNumbers } from './math.helpers';
 
 describe('Math helpers', () => {
   describe('sumBigNumbers', () => {
@@ -32,37 +30,6 @@ describe('Math helpers', () => {
       const result = sumBigNumbers(values);
 
       expect(result.toString()).toBe('-8');
-    });
-  });
-
-  describe('splitBigNumberIntoParts', () => {
-    it('should return an array of BigNumbers with the correct sum', () => {
-      const decimals = faker.number.int({ max: 8, min: 3 });
-      const total = stubBigNumber().times(150).decimalPlaces(decimals);
-      const partsCount = faker.number.int({ max: 8, min: 3 });
-      const parts = splitBigNumberIntoParts(total, partsCount);
-
-      expect(parts.length).toBe(partsCount);
-      expect(sumBigNumbers(parts).toString()).toBe(total.toString());
-
-      for (const part of parts) {
-        expect(part.decimalPlaces()).toBeLessThanOrEqual(decimals);
-        expect(part.toNumber()).toBeGreaterThan(0);
-      }
-    });
-
-    it('should handle NaN correctly', () => {
-      const partsCount = faker.number.int({ max: 3, min: 1 });
-      const parts = splitBigNumberIntoParts(
-        new BigNumber(Number.NaN),
-        partsCount,
-      );
-
-      expect(parts.length).toBe(partsCount);
-
-      for (const part of parts) {
-        expect(part.toString()).toBe('NaN');
-      }
     });
   });
 });

@@ -65,10 +65,6 @@ export enum MethodologyDocumentEventName {
   WEIGHING = 'Weighing',
 }
 
-export enum MethodologyEvaluationResult {
-  APPROVED = 'APPROVED',
-}
-
 export enum MethodologyDocumentEventAttributeFormat {
   CUBIC_METER = 'CUBIC_METER',
   DATE = 'DATE',

@@ -33,7 +33,7 @@ import { assert } from 'typia';
 
 import { ParticipantHomologationsProcessorErrors } from './participant-homologations.errors';
 
-export interface RuleSubject {
+interface RuleSubject {
   homologationDocuments: Map<string, Document>;
   massIdDocument: Document;
 }
