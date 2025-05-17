@@ -14,10 +14,6 @@ export interface StringObject {
 
 export type DateTime = string & tags.Format<'date-time'>;
 
-const primitiveTypeUselessVariable = typeof (0 as unknown);
-
-export type PrimitiveType = typeof primitiveTypeUselessVariable;
-
 export type PredicateCallback<T> = (input: T) => boolean;
 
 export interface Geolocation {
