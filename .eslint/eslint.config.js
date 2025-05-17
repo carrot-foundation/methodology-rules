@@ -5,6 +5,8 @@ const packageDir = require.resolve('../package.json');
 function getBaseEslintConfig({ projectPath, overrides = [] }) {
   return [
     ...baseConfig,
+    // '!**/*' pattern is required to run ESLint on all files using Nx to compensate the lint-staged config pattern '**/*' on the root config
+    { ignores: ['!**/*', '**/generated/*'] },
     {
       files: ['*.ts', '*.js'],
       rules: {

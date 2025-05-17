@@ -76,6 +76,7 @@ const nxPluginConfigs = {
 
 const ignorePatterns = {
   ignores: [
+    '**/*', // Required to run `eslint —fix` in lint-staged.config.js
     'node_modules',
     'coverage',
     'dist',
