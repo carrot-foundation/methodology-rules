@@ -33,8 +33,8 @@ import {
 
 import { UniquenessCheckProcessorErrors } from './uniqueness-check.errors';
 import {
-  type EventsData,
   createAuditApiService,
+  type EventsData,
   fetchSimilarMassIdDocuments,
 } from './uniqueness-check.helpers';
 
@@ -65,6 +65,87 @@ interface RuleSubject {
 
 export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   protected readonly errorProcessor = new UniquenessCheckProcessorErrors();
+
+  override async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const document = await this.loadDocument(ruleInput);
+
+      if (isNil(document)) {
+        return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+          resultComment: this.errorProcessor.getResultCommentFromError(
+            this.errorProcessor.getKnownError(
+              this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+            ),
+          ),
+        });
+      }
+
+      const ruleSubject = await this.getRuleSubject(document);
+
+      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.errorProcessor.getResultCommentFromError(error),
+      });
+    }
+  }
+
+  protected evaluateResult({
+    cancelledCount,
+    totalDuplicates,
+    validDuplicatesCount,
+  }: RuleSubject): EvaluateResultOutput {
+    if (validDuplicatesCount > 1) {
+      return {
+        resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(
+          totalDuplicates,
+          validDuplicatesCount,
+        ),
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (cancelledCount > 0) {
+      return {
+        resultComment: RESULT_COMMENTS.ONLY_CANCELLED_DUPLICATES(
+          totalDuplicates,
+          cancelledCount,
+        ),
+        resultStatus: RuleOutputStatus.APPROVED,
+      };
+    }
+
+    return {
+      resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
+      resultStatus: RuleOutputStatus.APPROVED,
+    };
+  }
+
+  protected async getRuleSubject(document: Document): Promise<RuleSubject> {
+    const eventsData = this.collectRequiredEventsData(document);
+
+    const duplicateDocuments = await fetchSimilarMassIdDocuments({
+      auditApiService: createAuditApiService(),
+      document,
+      eventsData,
+    });
+
+    const cancelledCount = duplicateDocuments.filter(
+      (duplicateDocument) =>
+        duplicateDocument.status ===
+        MethodologyDocumentStatus.CANCELLED.toString(),
+    ).length;
+
+    return {
+      cancelledCount,
+      totalDuplicates: duplicateDocuments.length,
+      validDuplicatesCount: duplicateDocuments.length - cancelledCount,
+    };
+  }
 
   private collectRequiredEventsData(document: Document): EventsData {
     const dropOffEvent = this.getEventOrThrow(
@@ -141,85 +222,5 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
     throw this.errorProcessor.getKnownError(
       this.errorProcessor.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
     );
-  }
-
-  protected evaluateResult({
-    cancelledCount,
-    totalDuplicates,
-    validDuplicatesCount,
-  }: RuleSubject): EvaluateResultOutput {
-    if (validDuplicatesCount > 1) {
-      return {
-        resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(
-          totalDuplicates,
-          validDuplicatesCount,
-        ),
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (cancelledCount > 0) {
-      return {
-        resultComment: RESULT_COMMENTS.ONLY_CANCELLED_DUPLICATES(
-          totalDuplicates,
-          cancelledCount,
-        ),
-        resultStatus: RuleOutputStatus.APPROVED,
-      };
-    }
-
-    return {
-      resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
-      resultStatus: RuleOutputStatus.APPROVED,
-    };
-  }
-
-  protected async getRuleSubject(document: Document): Promise<RuleSubject> {
-    const eventsData = this.collectRequiredEventsData(document);
-
-    const duplicateDocuments = await fetchSimilarMassIdDocuments({
-      auditApiService: createAuditApiService(),
-      document,
-      eventsData,
-    });
-
-    const cancelledCount = duplicateDocuments.filter(
-      (duplicateDocument) =>
-        duplicateDocument.status === MethodologyDocumentStatus.CANCELLED,
-    ).length;
-
-    return {
-      cancelledCount,
-      totalDuplicates: duplicateDocuments.length,
-      validDuplicatesCount: duplicateDocuments.length - cancelledCount,
-    };
-  }
-
-  override async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const document = await this.loadDocument(ruleInput);
-
-      if (isNil(document)) {
-        return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-          resultComment: this.errorProcessor.getResultCommentFromError(
-            this.errorProcessor.getKnownError(
-              this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-            ),
-          ),
-        });
-      }
-
-      const ruleSubject = await this.getRuleSubject(document);
-
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
-    }
   }
 }

@@ -47,6 +47,41 @@ export const RESULT_COMMENTS = {
 export class ParticipantHomologationsProcessor extends RuleDataProcessor {
   readonly errorProcessor = new ParticipantHomologationsProcessorErrors();
 
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentsQuery = await this.generateDocumentQuery(ruleInput);
+
+      const ruleSubject = await this.getRuleSubject(documentsQuery);
+
+      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.errorProcessor.getResultCommentFromError(error),
+      });
+    }
+  }
+
+  protected async generateDocumentQuery(ruleInput: RuleInput) {
+    const documentQueryService = new DocumentQueryService(
+      provideDocumentLoaderService,
+    );
+
+    return documentQueryService.load({
+      context: {
+        s3KeyPrefix: ruleInput.documentKeyPrefix,
+      },
+      criteria: {
+        parentDocument: {},
+        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+      },
+      documentId: ruleInput.documentId,
+    });
+  }
+
   private evaluateResult({
     homologationDocuments,
     massIdDocument,
@@ -151,41 +186,6 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
           ),
         ),
       );
-    }
-  }
-
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: {
-        parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
-      },
-      documentId: ruleInput.documentId,
-    });
-  }
-
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-
-      const ruleSubject = await this.getRuleSubject(documentsQuery);
-
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
     }
   }
 }

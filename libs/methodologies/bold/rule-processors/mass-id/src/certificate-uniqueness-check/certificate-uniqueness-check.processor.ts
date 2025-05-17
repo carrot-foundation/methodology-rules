@@ -28,8 +28,8 @@ import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { assert } from 'typia';
 
 import {
-  METHODOLOGY_NAME_BY_SLUG,
   buildDocumentsCriteria,
+  METHODOLOGY_NAME_BY_SLUG,
 } from './certificate-uniqueness-check.constants';
 import {
   hasApprovedOrInProgressMassIdAuditForTheSameMethodology,
@@ -50,11 +50,11 @@ export const RESULT_COMMENTS = {
 } as const;
 
 export class CertificateUniquenessCheck extends RuleDataProcessor {
+  readonly errorProcessor = new CertificateUniquenessCheckProcessorErrors();
+
   private readonly massIdCertificateMatcher: DocumentMatcher;
 
   private readonly methodologySlug: BoldMethodologySlug;
-
-  readonly errorProcessor = new CertificateUniquenessCheckProcessorErrors();
 
   constructor(
     massIdCertificateMatcher: DocumentMatcher,
@@ -64,6 +64,38 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
 
     this.massIdCertificateMatcher = massIdCertificateMatcher;
     this.methodologySlug = methodologySlug;
+  }
+
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentsQuery = await this.generateDocumentQuery(ruleInput);
+
+      const ruleSubject = await this.getRuleSubject(documentsQuery, ruleInput);
+
+      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.errorProcessor.getResultCommentFromError(error),
+      });
+    }
+  }
+
+  protected async generateDocumentQuery(ruleInput: RuleInput) {
+    const documentQueryService = new DocumentQueryService(
+      provideDocumentLoaderService,
+    );
+
+    return documentQueryService.load({
+      context: {
+        s3KeyPrefix: ruleInput.documentKeyPrefix,
+      },
+      criteria: buildDocumentsCriteria(this.massIdCertificateMatcher),
+      documentId: ruleInput.documentId,
+    });
   }
 
   private evaluateResult({
@@ -137,37 +169,5 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
       massIdCertificateDocuments,
       relatedMassIdAuditDocuments,
     };
-  }
-
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: buildDocumentsCriteria(this.massIdCertificateMatcher),
-      documentId: ruleInput.documentId,
-    });
-  }
-
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-
-      const ruleSubject = await this.getRuleSubject(documentsQuery, ruleInput);
-
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
-    }
   }
 }

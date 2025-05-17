@@ -1,5 +1,5 @@
 import { logger } from '@carrot-fndn/shared/helpers';
-import { AWSLambda } from '@sentry/serverless';
+import * as Sentry from '@sentry/aws-serverless';
 
 import { BaseProcessorErrors } from './base-processor.errors';
 
@@ -18,10 +18,8 @@ jest.mock('@carrot-fndn/shared/helpers', () => ({
   },
 }));
 
-jest.mock('@sentry/serverless', () => ({
-  AWSLambda: {
-    captureException: jest.fn(),
-  },
+jest.mock('@sentry/aws-serverless', () => ({
+  captureException: jest.fn(),
 }));
 
 describe('BaseProcessorErrors', () => {
@@ -55,7 +53,7 @@ describe('BaseProcessorErrors', () => {
 
       expect(result).toBe('Unable to process request');
       expect(logger.error).toHaveBeenCalled();
-      expect(AWSLambda.captureException).toHaveBeenCalledWith(error);
+      expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
 
     it('should handle non-error objects', () => {
@@ -65,7 +63,7 @@ describe('BaseProcessorErrors', () => {
 
       expect(result).toBe('Unable to process request');
       expect(logger.error).toHaveBeenCalled();
-      expect(AWSLambda.captureException).toHaveBeenCalled();
+      expect(Sentry.captureException).toHaveBeenCalled();
     });
   });
 

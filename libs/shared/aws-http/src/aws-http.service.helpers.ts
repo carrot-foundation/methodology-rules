@@ -6,7 +6,7 @@ import { SignatureV4 } from '@smithy/signature-v4';
 export interface SignRequestInput {
   body?: unknown;
   method: string;
-  query?: Record<string, Array<string> | null | string> | undefined;
+  query?: Record<string, null | string | string[]> | undefined;
   url: URL;
 }
 

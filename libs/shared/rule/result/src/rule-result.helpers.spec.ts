@@ -16,6 +16,8 @@ import {
   signRequest,
 } from './rule-result.helpers';
 
+type Query = Record<string, null | string | string[]>;
+
 describe('mapToRuleOutput', () => {
   it('should map to RuleOutput without resultComment or resultContent', () => {
     const ruleInput = random<RuleInput>();
@@ -137,7 +139,7 @@ describe('reportRuleResults', () => {
       url: new URL(ruleOutput.responseUrl),
     });
 
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce(new Response());
+    jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
 
     await expect(reportRuleResults(ruleOutput)).resolves.not.toThrow();
 
@@ -182,7 +184,7 @@ describe('reportRuleResults', () => {
     } as never);
 
     jest
-      .spyOn(global, 'fetch')
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(null, { status: 400 }));
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
@@ -203,7 +205,7 @@ describe('reportRuleResults', () => {
       },
     } as never);
 
-    jest.spyOn(global, 'fetch').mockRejectedValueOnce(errorResponse);
+    jest.spyOn(globalThis, 'fetch').mockRejectedValueOnce(errorResponse);
     jest.spyOn(logger, 'error').mockImplementationOnce(() => {});
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBe(errorResponse);
@@ -242,7 +244,7 @@ describe('signRequest', () => {
     const input = random<{
       body: unknown;
       method: string;
-      query: Record<string, Array<string> | null | string>;
+      query: Query;
       url: URL;
     }>();
 
@@ -259,9 +261,9 @@ describe('signRequest', () => {
     expect(result).toEqual({
       body: JSON.stringify(input.body),
       headers: expect.objectContaining({
+        authorization: expect.any(String),
         'Content-Type': 'application/json',
         Host: input.url.host,
-        authorization: expect.any(String),
       }),
       hostname: input.url.hostname,
       method: input.method,
@@ -278,7 +280,7 @@ describe('signRequest', () => {
     const input = random<{
       body: unknown;
       method: string;
-      query: Record<string, Array<string> | null | string>;
+      query: Query;
       url: URL;
     }>();
 
@@ -320,7 +322,7 @@ describe('signRequest', () => {
     const input = random<{
       body: unknown;
       method: string;
-      query: Record<string, Array<string> | null | string>;
+      query: Query;
       url: URL;
     }>();
 
@@ -339,7 +341,7 @@ describe('signRequest', () => {
       const input = random<{
         body: unknown;
         method: string;
-        query: Record<string, Array<string> | null | string>;
+        query: Query;
         url: URL;
       }>();
 

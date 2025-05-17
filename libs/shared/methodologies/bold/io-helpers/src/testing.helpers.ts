@@ -1,12 +1,11 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
-// eslint-disable-next-line import/no-namespace
-import * as documentHelpers from './document.helpers';
 import { DocumentQueryService } from './document-query.service';
+import * as documentHelpers from './document.helpers';
 
 export const spyOnDocumentQueryServiceLoad = (
   rootDocument: Document,
-  documents: Array<Document>,
+  documents: Document[],
 ) => {
   jest.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
     iterator: () => ({

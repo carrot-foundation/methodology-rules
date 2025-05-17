@@ -7,9 +7,11 @@ import {
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-export interface RewardsDistributionActor {
-  participant: RewardActorParticipant;
-  type: RewardsDistributionActorType;
+export interface ActorMassIdPercentageInputDto {
+  actors: RewardsDistributionActor[];
+  actorType: RewardsDistributionActorType;
+  massIdDocument: Document;
+  rewardDistribution: BigNumber;
 }
 
 export interface ActorReward {
@@ -19,26 +21,24 @@ export interface ActorReward {
   participant: RewardActorParticipant;
 }
 
-export type RewardsDistributionActorTypePercentage = Record<
-  RewardsDistributionActorType,
-  BigNumber
->;
-
 export type RewardsDistribution = Record<
   RewardsDistributionWasteType,
   RewardsDistributionActorTypePercentage
 >;
 
-export interface ActorMassIdPercentageInputDto {
-  actorType: RewardsDistributionActorType;
-  actors: RewardsDistributionActor[];
-  massIdDocument: Document;
-  rewardDistribution: BigNumber;
+export interface RewardsDistributionActor {
+  participant: RewardActorParticipant;
+  type: RewardsDistributionActorType;
 }
 
+export type RewardsDistributionActorTypePercentage = Record<
+  RewardsDistributionActorType,
+  BigNumber
+>;
+
 export interface UnidentifiedWasteCalculationDto {
-  actorType: RewardsDistributionActorType;
   actors: RewardsDistributionActor[];
+  actorType: RewardsDistributionActorType;
   additionalPercentage: BigNumber;
   basePercentage: BigNumber;
   rewardDistributions: RewardsDistributionActorTypePercentage;

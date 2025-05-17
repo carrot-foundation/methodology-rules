@@ -3,7 +3,7 @@ import {
   isNonEmptyString,
   logger as pinoLogger,
 } from '@carrot-fndn/shared/helpers';
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosRequestConfig, isAxiosError } from 'axios';
 import { type Logger } from 'pino';
 
 export const prepareHttpRequestConfig = async (
@@ -48,7 +48,7 @@ export const handleRequestError = (
   const { ignoreTimeoutError, logger } = options;
   const url = new URL([config.baseURL, config.url].join(''));
 
-  if (!axios.isAxiosError(error)) {
+  if (!isAxiosError(error)) {
     throw new Error('Request failed', { cause: error });
   }
 

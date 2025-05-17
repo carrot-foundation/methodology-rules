@@ -60,46 +60,23 @@ interface RuleSubject {
 export class AvoidedEmissionsProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new AvoidedEmissionsProcessorErrors();
 
-  private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
-  ): Promise<DocumentPair> {
-    let recyclerHomologationDocument: Document | undefined;
-    let massIdDocument: Document | undefined;
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentsQuery = await this.generateDocumentQuery(ruleInput);
+      const documents = await this.collectDocuments(documentsQuery);
+      const ruleSubject = this.getRuleSubject(documents);
 
-    await documentQuery?.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
+      const { resultComment, resultContent, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
-      if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
-        documentReference.subtype === DocumentSubtype.RECYCLER
-      ) {
-        recyclerHomologationDocument = document;
-      }
-
-      if (MASS_ID.matches(documentReference)) {
-        massIdDocument = document;
-      }
-    });
-
-    this.validateOrThrow(
-      isNil(recyclerHomologationDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
-    );
-
-    this.validateOrThrow(
-      isNil(massIdDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
-    );
-
-    return {
-      massIdDocument: massIdDocument as Document,
-      recyclerHomologationDocument: recyclerHomologationDocument as Document,
-    };
-  }
-
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
-    if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+        resultContent,
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.processorErrors.getResultCommentFromError(error),
+      });
     }
   }
 
@@ -161,23 +138,46 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     };
   }
 
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const documents = await this.collectDocuments(documentsQuery);
-      const ruleSubject = this.getRuleSubject(documents);
+  private async collectDocuments(
+    documentQuery: DocumentQuery<Document> | undefined,
+  ): Promise<DocumentPair> {
+    let recyclerHomologationDocument: Document | undefined;
+    let massIdDocument: Document | undefined;
 
-      const { resultComment, resultContent, resultStatus } =
-        this.evaluateResult(ruleSubject);
+    await documentQuery?.iterator().each(({ document }) => {
+      const documentReference = mapDocumentReference(document);
 
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-        resultContent,
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+      if (
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
+        documentReference.subtype === DocumentSubtype.RECYCLER
+      ) {
+        recyclerHomologationDocument = document;
+      }
+
+      if (MASS_ID.matches(documentReference)) {
+        massIdDocument = document;
+      }
+    });
+
+    this.validateOrThrow(
+      isNil(recyclerHomologationDocument),
+      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+    );
+
+    this.validateOrThrow(
+      isNil(massIdDocument),
+      this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
+    );
+
+    return {
+      massIdDocument: massIdDocument as Document,
+      recyclerHomologationDocument: recyclerHomologationDocument as Document,
+    };
+  }
+
+  private validateOrThrow(condition: boolean, errorMessage: string): void {
+    if (condition) {
+      throw this.processorErrors.getKnownError(errorMessage);
     }
   }
 }

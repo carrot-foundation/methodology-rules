@@ -57,7 +57,7 @@ export const hasWeightFormat = (
 };
 
 export const eventsHasSameMetadataAttributeValue = (
-  events: Array<DocumentEvent>,
+  events: DocumentEvent[],
   metadataName: DocumentEventAttributeName,
 ): boolean => {
   if (isNonEmptyArray<DocumentEvent>(events)) {
@@ -73,7 +73,7 @@ export const eventsHasSameMetadataAttributeValue = (
 
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
-  eventNames?: Array<DocumentEventName>;
+  eventNames?: DocumentEventName[];
   metadataName: DocumentEventAttributeName | string;
   metadataValues?: unknown;
 }): boolean => {

@@ -1,7 +1,4 @@
-import type {
-  MethodologyRuleEvent,
-  MethodologyRuleResponse,
-} from '@carrot-fndn/shared/lambda/types';
+import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
 import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Handler } from 'aws-lambda';
 
@@ -14,9 +11,8 @@ const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput => ({
   ...event,
 });
 
-const mapRuleOutputToLambdaResult = (
-  ruleOutput: RuleOutput,
-): MethodologyRuleResponse => ruleOutput;
+const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
+  ruleOutput;
 
 const setRuleSentryTags = ({
   documentId,
@@ -34,7 +30,7 @@ const setRuleSentryTags = ({
 
 export const wrapRuleIntoLambdaHandler = (
   rule: RuleDataProcessor,
-): Handler<MethodologyRuleEvent, MethodologyRuleResponse> => {
+): Handler<MethodologyRuleEvent, unknown> => {
   // Prevent MaxListenersExceededWarning by increasing the limit
   // This addresses the issue with multiple uncaughtException listeners added by Sentry
   process.setMaxListeners(20);
@@ -45,9 +41,7 @@ export const wrapRuleIntoLambdaHandler = (
     environment: String(process.env['ENVIRONMENT']),
   });
 
-  const handler = async (
-    event: MethodologyRuleEvent,
-  ): Promise<MethodologyRuleResponse> => {
+  const handler = async (event: MethodologyRuleEvent): Promise<unknown> => {
     const ruleInput = mapEventToRuleInput(event);
 
     logger.info({ ruleInput }, 'Rule invoked');

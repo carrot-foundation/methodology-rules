@@ -69,6 +69,37 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     });
   }
 
+  async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
+    const creditOrderDocument = await loadDocument(
+      this.context.documentLoaderService,
+      toDocumentKey({
+        documentId: ruleInput.documentId,
+        documentKeyPrefix: ruleInput.documentKeyPrefix,
+      }),
+    );
+
+    if (isNil(creditOrderDocument)) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
+      );
+    }
+
+    const unitPrice = getEventAttributeValue(
+      creditOrderDocument.externalEvents?.find((event) =>
+        eventHasName(event, RULES_METADATA),
+      ),
+      UNIT_PRICE,
+    );
+
+    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.INVALID_UNIT_PRICE,
+      );
+    }
+
+    return unitPrice;
+  }
+
   getRewardsDistributionRuleValue(
     massIdCertificateDocument: Document,
   ): CertificateRewardDistributionOutput {
@@ -120,37 +151,6 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       creditUnitPrice: new BigNumber(await this.getcreditUnitPrice(ruleInput)),
       resultContentsWithMassIdCertificateValue,
     };
-  }
-
-  async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
-    const creditOrderDocument = await loadDocument(
-      this.context.documentLoaderService,
-      toDocumentKey({
-        documentId: ruleInput.documentId,
-        documentKeyPrefix: ruleInput.documentKeyPrefix,
-      }),
-    );
-
-    if (isNil(creditOrderDocument)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
-      );
-    }
-
-    const unitPrice = getEventAttributeValue(
-      creditOrderDocument.externalEvents?.find((event) =>
-        eventHasName(event, RULES_METADATA),
-      ),
-      UNIT_PRICE,
-    );
-
-    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.INVALID_UNIT_PRICE,
-      );
-    }
-
-    return unitPrice;
   }
 
   override async process(ruleInput: RuleInput): Promise<RuleOutput> {

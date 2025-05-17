@@ -3,12 +3,19 @@ import type { AxiosInstance } from 'axios';
 
 import { isNonEmptyString } from '@carrot-fndn/shared/helpers';
 
-import { type SignRequestInput, signRequest } from './aws-http.service.helpers';
+import { signRequest, type SignRequestInput } from './aws-http.service.helpers';
 
 type Body = Required<SignRequestInput['body']>;
 
 export class AwsHttpService {
   constructor(readonly httpService: AxiosInstance) {}
+
+  protected async post<Response, DTO extends Body = AnyObject>(
+    url: Uri,
+    dto: DTO,
+  ): Promise<Response> {
+    return this.request<Response, DTO>('POST', url, dto);
+  }
 
   private async request<Response, DTO extends Body = AnyObject>(
     method: 'POST' | 'PUT',
@@ -65,12 +72,5 @@ export class AwsHttpService {
       },
       awsRegion,
     );
-  }
-
-  protected async post<Response, DTO extends Body = AnyObject>(
-    url: Uri,
-    dto: DTO,
-  ): Promise<Response> {
-    return this.request<Response, DTO>('POST', url, dto);
   }
 }

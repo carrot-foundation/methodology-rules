@@ -1,6 +1,6 @@
+import { DocumentLoaderService } from './document-loader.service';
 import { DocumentRepository } from './document.repository';
 import { stubDocumentEntity, stubDocumentKeyDto } from './document.stubs';
-import { DocumentLoaderService } from './document-loader.service';
 
 jest.mock('./document.repository');
 

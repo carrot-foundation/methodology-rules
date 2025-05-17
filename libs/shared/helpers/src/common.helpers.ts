@@ -13,7 +13,7 @@ export const isPlainObject = (
     return false;
   }
 
-  const proto = Object.getPrototypeOf(value) as Record<string, unknown> | null;
+  const proto = Object.getPrototypeOf(value) as null | Record<string, unknown>;
 
   if (proto === null) {
     return true;
@@ -49,7 +49,7 @@ export const pick = <T, K extends keyof T>(
 };
 
 export const getOrDefault = <T, D extends NonNullableOrNullOrUndefined<T>>(
-  value: T | null | undefined,
+  value: null | T | undefined,
   defaultValue: D,
 ): NonNullableOrNullOrUndefined<T> => {
   if (isNil(value)) {
@@ -60,5 +60,5 @@ export const getOrDefault = <T, D extends NonNullableOrNullOrUndefined<T>>(
 };
 
 export const getOrUndefined = <T>(
-  value: T | null | undefined,
+  value: null | T | undefined,
 ): NonNullable<T> | undefined => value ?? undefined;

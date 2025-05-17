@@ -2,6 +2,15 @@ import type { AnyObject } from '@carrot-fndn/shared/types';
 
 import { tags } from 'typia';
 
+export enum RuleOutputStatus {
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export interface IRuleDataProcessor {
+  process(data: RuleInput): Promise<RuleOutput>;
+}
+
 export type RuleEnvironment = 'DEVELOPMENT' | 'PRODUCTION';
 
 export interface RuleInput {
@@ -15,11 +24,6 @@ export interface RuleInput {
   // TODO: add environment
 }
 
-export enum RuleOutputStatus {
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-}
-
 export interface RuleOutput {
   requestId: string;
   responseToken: string;
@@ -27,8 +31,4 @@ export interface RuleOutput {
   resultComment?: string | undefined;
   resultContent?: AnyObject | undefined;
   resultStatus: RuleOutputStatus;
-}
-
-export interface IRuleDataProcessor {
-  process(data: RuleInput): Promise<RuleOutput>;
 }

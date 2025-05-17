@@ -5,7 +5,7 @@ import { fromContainerMetadata } from '@aws-sdk/credential-providers';
 import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
-import { type SignRequestInput, signRequest } from './aws-http.service.helpers';
+import { signRequest, type SignRequestInput } from './aws-http.service.helpers';
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('@aws-sdk/credential-providers', () => ({
@@ -64,8 +64,8 @@ describe('signRequest', () => {
     expect(result).toMatchObject({
       body: JSON.stringify(input.body),
       headers: expect.objectContaining({
-        Host: input.url.host,
         authorization: expect.any(String),
+        Host: input.url.host,
       }),
       query: input.query,
     });
@@ -98,8 +98,8 @@ describe('signRequest', () => {
 
       expect(result).toMatchObject({
         headers: expect.objectContaining({
-          Host: input.url.host,
           authorization: expect.any(String),
+          Host: input.url.host,
         }),
       });
     },

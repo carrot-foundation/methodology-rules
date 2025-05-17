@@ -88,13 +88,13 @@ const EXPECTED_REWARDS = {
   },
 };
 
-export const rewardsDistributionProcessorTestCases: {
+export const rewardsDistributionProcessorTestCases: Array<{
   expectedRewards: Record<string, string>;
   massIdDocumentEvents?: BoldExternalEventsObject | undefined;
   massIdPartialDocument: PartialDeep<Document>;
   resultStatus: RuleOutputStatus;
   scenario: string;
-}[] = [
+}> = [
   ...Object.entries(REWARDS_DISTRIBUTION_BY_WASTE_TYPE).map(
     ([wasteType, expectedRewards]) => ({
       // eslint-disable-next-line security/detect-object-injection

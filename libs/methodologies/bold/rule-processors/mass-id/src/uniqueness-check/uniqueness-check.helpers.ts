@@ -35,7 +35,10 @@ export const createLicensePlateRegex = (
   let escapedPattern = '';
 
   for (const char of normalizedValue) {
-    const escapedChar = char.replaceAll(/[$()*+./?[\\\]^{|}-]/g, '\\$&');
+    const escapedChar = char.replaceAll(
+      /[$()*+./?[\\\]^{|}-]/g,
+      String.raw`\$&`,
+    );
 
     escapedPattern += `${escapedChar}[-\\s]*`;
   }

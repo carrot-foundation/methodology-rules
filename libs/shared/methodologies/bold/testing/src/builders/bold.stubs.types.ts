@@ -6,11 +6,11 @@ import type { PartialDeep } from 'type-fest';
 
 import type { MetadataAttributeParameter } from './bold.builder.helpers';
 
+export type BoldExternalEventsMap = Map<string, DocumentEvent | undefined>;
+
 export type BoldExternalEventsObject = Partial<
   Record<string, DocumentEvent | undefined>
 >;
-
-export type BoldExternalEventsMap = Map<string, DocumentEvent | undefined>;
 
 export interface StubBoldDocumentEventParameters {
   metadataAttributes?: MetadataAttributeParameter[] | undefined;

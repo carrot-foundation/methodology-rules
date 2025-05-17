@@ -10,12 +10,6 @@ import {
   MethodologyDocumentStatus,
 } from './methodology-enum.types';
 
-export interface MethodologyDocumentAttachment {
-  contentLength: number & tags.Minimum<0>;
-  fileName: string;
-  id: string;
-}
-
 // TODO: Think about to abstract these generics from the codebase
 export interface MethodologyDocument {
   attachments?: MethodologyDocumentAttachment[] | undefined;
@@ -32,7 +26,7 @@ export interface MethodologyDocument {
   isPubliclySearchable: boolean;
   measurementUnit: string;
   parentDocumentId?: string | undefined;
-  permissions?: Array<UnknownObject> | undefined;
+  permissions?: undefined | UnknownObject[];
   primaryAddress: MethodologyAddress;
   primaryParticipant: MethodologyParticipant;
   status: MethodologyDocumentStatus | string;
@@ -40,4 +34,10 @@ export interface MethodologyDocument {
   tags?: Record<string, null | string | undefined> | undefined;
   type?: string | undefined;
   updatedAt: DateTime;
+}
+
+export interface MethodologyDocumentAttachment {
+  contentLength: number & tags.Minimum<0>;
+  fileName: string;
+  id: string;
 }

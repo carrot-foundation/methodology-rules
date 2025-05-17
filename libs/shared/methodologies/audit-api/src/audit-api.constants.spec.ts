@@ -14,6 +14,7 @@ describe('Audit API Constants', () => {
     it('should use the value from AUDIT_URL environment variable', () => {
       process.env['AUDIT_URL'] = 'https://test.carrot.eco';
       jest.resetModules();
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { AUDIT_API_URL } = require('./audit-api.constants');
 
       expect(AUDIT_API_URL).toBe('https://test.carrot.eco');
@@ -26,6 +27,7 @@ describe('Audit API Constants', () => {
       let error: Error | null = null;
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('./audit-api.constants');
       } catch (error_) {
         error = error_ as Error;
@@ -41,6 +43,7 @@ describe('Audit API Constants', () => {
       let error: Error | null = null;
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('./audit-api.constants');
       } catch (error_) {
         error = error_ as Error;

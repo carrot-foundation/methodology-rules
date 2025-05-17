@@ -41,36 +41,6 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
     return RESULT_COMMENTS;
   }
 
-  private isValidSubtype(subtype: string | undefined): boolean {
-    if (!subtype) {
-      return false;
-    }
-
-    return ALLOWED_SUBTYPES.includes(subtype);
-  }
-
-  private validateRequiredFields(
-    document: Document,
-  ): EvaluateResultOutput | undefined {
-    if (isNil(document.type)) {
-      return {
-        resultComment:
-          this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (isNil(document.subtype)) {
-      return {
-        resultComment:
-          this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    return undefined;
-  }
-
   protected override evaluateResult(
     document: Document,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
@@ -127,5 +97,35 @@ export class MassDefinitionProcessor extends ParentDocumentRuleProcessor<Documen
 
   protected override getRuleSubject(document: Document): Document | undefined {
     return document;
+  }
+
+  private isValidSubtype(subtype: string | undefined): boolean {
+    if (!subtype) {
+      return false;
+    }
+
+    return ALLOWED_SUBTYPES.includes(subtype);
+  }
+
+  private validateRequiredFields(
+    document: Document,
+  ): EvaluateResultOutput | undefined {
+    if (isNil(document.type)) {
+      return {
+        resultComment:
+          this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (isNil(document.subtype)) {
+      return {
+        resultComment:
+          this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    return undefined;
   }
 }

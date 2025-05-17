@@ -1,5 +1,5 @@
 import { logger } from '@carrot-fndn/shared/helpers';
-import { AWSLambda } from '@sentry/serverless';
+import * as Sentry from '@sentry/aws-serverless';
 
 export interface ErrorMessage {
   [key: string]: ((...arguments_: never[]) => string) | string;
@@ -7,7 +7,19 @@ export interface ErrorMessage {
 }
 
 export abstract class BaseProcessorErrors {
+  abstract readonly ERROR_MESSAGE: ErrorMessage;
+
   protected readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
+
+  getKnownError(message: string): Error {
+    return new Error(this.KNOWN_ERROR_PREFIX + message);
+  }
+
+  getResultCommentFromError(error: unknown): string {
+    return (
+      this.processKnownError(error) || this.ERROR_MESSAGE.REJECTED_BY_ERROR
+    );
+  }
 
   private getKnownErrorMessage(error: Error): string {
     return error.message.replace(this.KNOWN_ERROR_PREFIX, '');
@@ -26,20 +38,8 @@ export abstract class BaseProcessorErrors {
     }
 
     logger.error(error, 'Unexpected error on "processKnownError" method');
-    AWSLambda.captureException(error);
+    Sentry.captureException(error);
 
     return undefined;
   }
-
-  getKnownError(message: string): Error {
-    return new Error(this.KNOWN_ERROR_PREFIX + message);
-  }
-
-  getResultCommentFromError(error: unknown): string {
-    return (
-      this.processKnownError(error) || this.ERROR_MESSAGE.REJECTED_BY_ERROR
-    );
-  }
-
-  abstract readonly ERROR_MESSAGE: ErrorMessage;
 }

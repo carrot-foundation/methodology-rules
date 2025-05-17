@@ -24,8 +24,8 @@ import {
 } from './rule-result.typia';
 
 export const nilSafeRun = <T, R>(
-  value: T | null | undefined,
-  callback: (value: T) => R,
+  value: null | T | undefined,
+  callback: (parameter: T) => R,
 ): R | undefined =>
   value !== null && value !== undefined ? callback(value) : undefined;
 
@@ -92,7 +92,7 @@ export const signRequest = async ({
 }: {
   body?: unknown;
   method: string;
-  query?: Record<string, Array<string> | null | string>;
+  query?: Record<string, null | string | string[]>;
   url: URL;
 }) => {
   const smaugApiGatewayAssumeRoleArn = assertString(

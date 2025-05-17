@@ -6,11 +6,12 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type { Primitive } from 'typia';
 
-export interface AuditApiDocumentPrimitiveEntity {
-  createdAt: DateTime;
-  document: Primitive<MethodologyDocument>;
-  documentId: string;
-  snapshotId: string;
+export interface ApiDocumentCreateDto
+  extends Omit<
+    AuditApiDocumentPrimitiveEntity,
+    'createdAt' | 'id' | 'versionDate'
+  > {
+  parts?: AuditApiDocumentPartSnapshotEntity[] | undefined;
   versionDate: DateTime;
 }
 
@@ -22,11 +23,10 @@ export interface AuditApiDocumentPartSnapshotEntity<
   path: NonEmptyString;
 }
 
-export interface ApiDocumentCreateDto
-  extends Omit<
-    AuditApiDocumentPrimitiveEntity,
-    'createdAt' | 'id' | 'versionDate'
-  > {
-  parts?: AuditApiDocumentPartSnapshotEntity[] | undefined;
+export interface AuditApiDocumentPrimitiveEntity {
+  createdAt: DateTime;
+  document: Primitive<MethodologyDocument>;
+  documentId: string;
+  snapshotId: string;
   versionDate: DateTime;
 }

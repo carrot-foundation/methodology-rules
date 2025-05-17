@@ -5,17 +5,6 @@ import {
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
-export type RewardActorParticipant = Pick<
-  MethodologyParticipant,
-  'id' | 'name'
->;
-
-export enum RewardsDistributionWasteType {
-  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
-  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
-  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
-}
-
 export enum RewardsDistributionActorType {
   APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
   HAULER = MethodologyActorType.HAULER,
@@ -28,11 +17,10 @@ export enum RewardsDistributionActorType {
   WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
 }
 
-export interface MassIdReward {
-  actorType: RewardsDistributionActorType;
-  // TODO: update with custom tag to validate BigNumber string
-  massIdPercentage: NonEmptyString;
-  participant: RewardActorParticipant;
+export enum RewardsDistributionWasteType {
+  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
+  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
+  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
 }
 
 export interface CertificateReward {
@@ -42,10 +30,22 @@ export interface CertificateReward {
   percentage: NonEmptyString;
 }
 
+export type CertificateRewardDistributionOutput =
+  RewardDistributionResultContent;
+
+export interface MassIdReward {
+  actorType: RewardsDistributionActorType;
+  // TODO: update with custom tag to validate BigNumber string
+  massIdPercentage: NonEmptyString;
+  participant: RewardActorParticipant;
+}
+
+export type RewardActorParticipant = Pick<
+  MethodologyParticipant,
+  'id' | 'name'
+>;
+
 export interface RewardDistributionResultContent {
   massIdDocumentId: NonEmptyString;
   massIdRewards: NonEmptyArray<MassIdReward>;
 }
-
-export type CertificateRewardDistributionOutput =
-  RewardDistributionResultContent;

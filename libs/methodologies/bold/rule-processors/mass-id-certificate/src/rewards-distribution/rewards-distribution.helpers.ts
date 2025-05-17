@@ -70,12 +70,12 @@ export const mapActorReward = ({
 });
 
 export const getActorsByType = ({
-  actorType,
   actors,
+  actorType,
   methodologyDocument,
 }: {
-  actorType: RewardsDistributionActorType;
   actors: RewardsDistributionActor[];
+  actorType: RewardsDistributionActorType;
   methodologyDocument: Document;
 }): RewardsDistributionActor[] => {
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
@@ -187,19 +187,19 @@ export const getWasteGeneratorAdditionalPercentage = (
 };
 
 export const getNgoActorMassIdPercentage = (
-  document: Document,
+  massIdDocument: Document,
   actorMassIdPercentage: BigNumber,
   actors: RewardsDistributionActor[],
   rewardDistributions: RewardsDistributionActorTypePercentage,
   getWasteGeneratorFullPercentage: (
-    document: Document,
-    actorMassIdPercentage: BigNumber,
-    actors: RewardsDistributionActor[],
-    rewardDistributions: RewardsDistributionActorTypePercentage,
+    targetDocument: Document,
+    targetActorMassIdPercentage: BigNumber,
+    targetActors: RewardsDistributionActor[],
+    targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
 ): BigNumber =>
   getWasteGeneratorFullPercentage(
-    document,
+    massIdDocument,
     actorMassIdPercentage,
     actors,
     rewardDistributions,

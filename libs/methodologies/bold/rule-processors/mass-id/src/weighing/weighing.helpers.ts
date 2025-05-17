@@ -51,6 +51,8 @@ const {
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 
+export type ValidationResult = { errors: string[] };
+
 export interface WeighingValues {
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
   containerCapacityException: ApprovedException | undefined;
@@ -65,8 +67,6 @@ export interface WeighingValues {
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
   weighingCaptureMethod: string | undefined;
 }
-
-export type ValidationResult = { errors: string[] };
 
 const hasValidAttributeFormat = (
   attribute?: MethodologyDocumentEventAttribute,
@@ -101,7 +101,7 @@ export const getMandatoryFieldExceptionFromHomologationDocument = (
   return approvedExceptions.find(
     (exception) =>
       exception['Attribute Location'].Event === WEIGHING.toString() &&
-      exception['Attribute Name'] === fieldName,
+      exception['Attribute Name'] === fieldName.toString(),
   );
 };
 

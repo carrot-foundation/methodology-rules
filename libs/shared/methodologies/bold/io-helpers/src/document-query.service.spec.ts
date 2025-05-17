@@ -116,19 +116,24 @@ describe('DocumenQueryService', () => {
         .mockImplementation(({ key }) => {
           // Extract document ID from the key format
           const regex = /\/([^/]+)\.json$/;
-          const match = key.match(regex);
+          const match = regex.exec(key);
           const id = match ? match[1] : null;
 
-          if (id === document.id)
+          if (id === document.id) {
             return Promise.resolve(documentEntity as DocumentEntity<Document>);
-          if (id === parentDocument.id)
+          }
+
+          if (id === parentDocument.id) {
             return Promise.resolve(
               parentDocumentEntity as DocumentEntity<Document>,
             );
-          if (id === parentDocumentOfParentDocument.id)
+          }
+
+          if (id === parentDocumentOfParentDocument.id) {
             return Promise.resolve(
               parentDocumentOfParentDocumentEntity as DocumentEntity<Document>,
             );
+          }
 
           // Return a value that matches the expected type
           throw new Error(`Document not found: ${key}`);
@@ -168,6 +173,7 @@ describe('DocumenQueryService', () => {
 
     it('should return array with parentDocument and its relatedDocuments', async () => {
       const category = stubEnumValue(DocumentCategory);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },
       });
@@ -481,6 +487,7 @@ describe('DocumenQueryService', () => {
 
     it('should only return related documents when the parent document is omitted', async () => {
       const category = stubEnumValue(DocumentCategory);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },
       });
