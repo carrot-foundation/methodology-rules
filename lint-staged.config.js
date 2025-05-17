@@ -1,6 +1,6 @@
 module.exports = {
   '*': 'prettier --write --ignore-unknown',
-  '**/*.{[jt]s,yaml,json}': 'eslint --fix',
-  '*': 'cspell --no-must-find-files',
+  '**/*.[jt]s?(x)': () => 'nx affected --target=lint --fix',
   'package.json': 'npmPkgJsonLint .',
+  'tsconfig.base.json': () => 'nx format:write --files tsconfig.base.json',
 };
