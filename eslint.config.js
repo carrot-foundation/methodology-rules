@@ -76,7 +76,7 @@ const nxPluginConfigs = {
 
 const ignorePatterns = {
   ignores: [
-    '**/*', // Required to run `eslint —fix` in lint-staged.config.js
+    '**/*', // Ignore all files by default. Overridden in .eslint/eslint.config.js with '!**/*' so lint-staged’s **/* pattern applies to all staged files.
     'node_modules',
     'coverage',
     'dist',

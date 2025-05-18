@@ -124,8 +124,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     }
 
     return {
-      resultComment:
-        approvedMessages.length > 0 ? approvedMessages.join(' ') : undefined,
+      resultComment: approvedMessages.join(' '),
       resultStatus: RuleOutputStatus.APPROVED,
     };
   }
