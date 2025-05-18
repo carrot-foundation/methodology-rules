@@ -8,7 +8,7 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type BigNumber from 'bignumber.js';
 
-export type ActorsByType = Map<string, RewardsDistributionActor>;
+export type ActorsByType = Map<MethodologyActorType, RewardsDistributionActor>;
 
 export interface AggregateMassIdCertificateRewards {
   actors: ActorsByType;
