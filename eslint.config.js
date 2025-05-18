@@ -84,7 +84,7 @@ const ignorePatterns = {
     'cache',
     'coverage.json',
     'local',
-    '**/.eslintrc.js',
+    'eslint.config.js',
   ],
 };
 
