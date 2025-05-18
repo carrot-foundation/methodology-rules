@@ -1,4 +1,5 @@
 const baseConfig = require('../eslint.config.js');
+const path = require('path');
 
 const packageDir = require.resolve('../package.json');
 
@@ -12,7 +13,7 @@ function getBaseEslintConfig({ projectPath, overrides = [] }) {
       rules: {
         'import/no-extraneous-dependencies': [
           'error',
-          { packageDir: `${packageDir.split('/').slice(0, -1).join('/')}` },
+          { packageDir: path.dirname(packageDir) },
         ],
       },
     },
