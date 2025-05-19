@@ -133,7 +133,7 @@
       "node",
       "ts",
       "{workspaceRoot}/.eslint/eslint.config.js",
-      "{workspaceRoot}/.eslintrc.js",
+      "{workspaceRoot}/eslint.config.js",
       "{workspaceRoot}/.eslintignore"
     ],
     "build": [

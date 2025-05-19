@@ -14,7 +14,11 @@ export interface DocumentMatch {
 }
 
 export class DocumentMatcher {
-  constructor(readonly match: DocumentMatch) {}
+  readonly match: DocumentMatch;
+
+  constructor(match: DocumentMatch) {
+    this.match = match;
+  }
 
   matches(document: Omit<DocumentReference, 'id'>): boolean {
     const matchKeys = Object.keys(this.match) as Array<keyof DocumentMatch>;

@@ -15,11 +15,6 @@ import type {
 
 import { type NonEmptyString } from '../string.types';
 
-export interface MethodologyDocumentEventAttributeReference {
-  documentId: string;
-  eventId: string;
-}
-
 export interface ApprovedException {
   'Attribute Location': {
     Asset: {
@@ -34,15 +29,36 @@ export interface ApprovedException {
 
 export type ApprovedExceptionAttributeValue = ApprovedException[];
 
-export type MethodologyDocumentEventAttributeValue =
-  | ApprovedExceptionAttributeValue
-  | MethodologyDocumentEventAttributeReference
-  | UnknownObject
-  | boolean
-  | null
-  | number
-  | string
-  | unknown[];
+export interface MethodologyDocumentEvent {
+  address: MethodologyAddress;
+  attachments?: MethodologyDocumentEventAttachment[] | undefined;
+  author: MethodologyAuthor;
+  deduplicationId?: string | undefined;
+  documentSideEffectUpdates?: undefined | UnknownObject;
+  externalCreatedAt: DateTime;
+  externalId?: string | undefined;
+  id: string;
+  isPublic: boolean;
+  label?: MethodologyDocumentEventLabel | string | undefined;
+  metadata?: MethodologyDocumentEventMetadata | undefined;
+  name: MethodologyDocumentEventName | string;
+  participant: MethodologyParticipant;
+  preserveSensitiveData?: boolean | undefined;
+  propagatedFrom?: undefined | UnknownObject;
+  propagateEvent?: boolean | undefined;
+  referencedDocument?: MethodologyDocumentReference | undefined;
+  relatedDocument?: MethodologyDocumentReference | undefined;
+  target?: undefined | UnknownObject;
+  updates?: undefined | UnknownObject;
+  value?: (number & tags.Minimum<0>) | undefined;
+}
+
+export interface MethodologyDocumentEventAttachment {
+  attachmentId: string;
+  contentLength: number & tags.Minimum<0>;
+  isPublic: boolean;
+  label: string;
+}
 
 export interface MethodologyDocumentEventAttribute {
   format?: MethodologyDocumentEventAttributeFormat | undefined;
@@ -53,15 +69,23 @@ export interface MethodologyDocumentEventAttribute {
   value: MethodologyDocumentEventAttributeValue | undefined;
 }
 
-export interface MethodologyDocumentEventMetadata {
-  attributes?: Array<MethodologyDocumentEventAttribute> | undefined;
+export interface MethodologyDocumentEventAttributeReference {
+  documentId: string;
+  eventId: string;
 }
 
-export interface MethodologyDocumentEventAttachment {
-  attachmentId: string;
-  contentLength: number & tags.Minimum<0>;
-  isPublic: boolean;
-  label: string;
+export type MethodologyDocumentEventAttributeValue =
+  | ApprovedExceptionAttributeValue
+  | boolean
+  | MethodologyDocumentEventAttributeReference
+  | null
+  | number
+  | string
+  | unknown[]
+  | UnknownObject;
+
+export interface MethodologyDocumentEventMetadata {
+  attributes?: MethodologyDocumentEventAttribute[] | undefined;
 }
 
 export interface MethodologyDocumentReference {
@@ -69,28 +93,4 @@ export interface MethodologyDocumentReference {
   documentId: string;
   subtype?: string | undefined;
   type?: string | undefined;
-}
-
-export interface MethodologyDocumentEvent {
-  address: MethodologyAddress;
-  attachments?: MethodologyDocumentEventAttachment[] | undefined;
-  author: MethodologyAuthor;
-  deduplicationId?: string | undefined;
-  documentSideEffectUpdates?: UnknownObject | undefined;
-  externalCreatedAt: DateTime;
-  externalId?: string | undefined;
-  id: string;
-  isPublic: boolean;
-  label?: MethodologyDocumentEventLabel | string | undefined;
-  metadata?: MethodologyDocumentEventMetadata | undefined;
-  name: MethodologyDocumentEventName | string;
-  participant: MethodologyParticipant;
-  preserveSensitiveData?: boolean | undefined;
-  propagateEvent?: boolean | undefined;
-  propagatedFrom?: UnknownObject | undefined;
-  referencedDocument?: MethodologyDocumentReference | undefined;
-  relatedDocument?: MethodologyDocumentReference | undefined;
-  target?: UnknownObject | undefined;
-  updates?: UnknownObject | undefined;
-  value?: (number & tags.Minimum<0>) | undefined;
 }

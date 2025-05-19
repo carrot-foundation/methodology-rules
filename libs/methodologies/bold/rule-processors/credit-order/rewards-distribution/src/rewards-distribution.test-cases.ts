@@ -38,6 +38,14 @@ type ActorResult = {
 type CertificateDocument = Document;
 type CreditOrderDocument = Document;
 
+type ErrorTestCase = {
+  creditOrderDocument: CreditOrderDocument | undefined;
+  massIdCertificateDocuments: CertificateDocument[];
+  resultComment: string;
+  resultStatus: RuleOutputStatus;
+  scenario: string;
+};
+
 type TestCase = {
   creditOrderDocument: CreditOrderDocument;
   expectedActorsResult: ActorResult[];
@@ -46,14 +54,6 @@ type TestCase = {
   resultStatus: RuleOutputStatus;
   scenario: string;
   unitPrice: number;
-};
-
-type ErrorTestCase = {
-  creditOrderDocument: CreditOrderDocument | undefined;
-  massIdCertificateDocuments: CertificateDocument[];
-  resultComment: string;
-  resultStatus: RuleOutputStatus;
-  scenario: string;
 };
 
 const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;

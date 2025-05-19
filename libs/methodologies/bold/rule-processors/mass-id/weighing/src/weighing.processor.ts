@@ -37,80 +37,34 @@ import {
   validateWeighingValues,
 } from './weighing.helpers';
 
-interface RuleSubject {
-  recyclerHomologationDocument: Document;
-  weighingEvents: DocumentEvent[];
-}
-
 interface DocumentPair {
   massIdDocument: Document;
   recyclerHomologationDocument: Document;
 }
 
+interface RuleSubject {
+  recyclerHomologationDocument: Document;
+  weighingEvents: DocumentEvent[];
+}
+
 export class WeighingProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new WeighingProcessorErrors();
 
-  private async collectDocuments(
-    documentQuery: DocumentQuery<Document>,
-  ): Promise<DocumentPair> {
-    let recyclerHomologationDocument: Document | undefined;
-    let massIdDocument: Document | undefined;
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentQuery = await this.generateDocumentQuery(ruleInput);
+      const documentPair = await this.collectDocuments(documentQuery);
+      const ruleSubject = this.getRuleSubject(documentPair);
+      const evaluationResult = this.evaluateResult(ruleSubject);
 
-    await documentQuery.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
-
-      if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
-        documentReference.subtype === DocumentSubtype.RECYCLER
-      ) {
-        recyclerHomologationDocument = document;
-      }
-
-      if (MASS_ID.matches(documentReference)) {
-        massIdDocument = document;
-      }
-    });
-
-    this.validateOrThrow(
-      isNil(recyclerHomologationDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
-    );
-
-    this.validateOrThrow(
-      isNil(massIdDocument),
-      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    );
-
-    return {
-      massIdDocument: massIdDocument as Document,
-      recyclerHomologationDocument: recyclerHomologationDocument as Document,
-    };
-  }
-
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
-    if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
+      return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
+        resultComment: evaluationResult.resultComment,
+      });
+    } catch (error) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.processorErrors.getResultCommentFromError(error),
+      });
     }
-  }
-
-  private validateWeighingEvents(
-    weighingEvents: DocumentEvent[] | undefined,
-  ): EvaluateResultOutput | undefined {
-    if (isNil(weighingEvents) || weighingEvents.length === 0) {
-      return {
-        resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (weighingEvents.length > 2) {
-      return {
-        resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    return undefined;
   }
 
   protected evaluateResult({
@@ -209,20 +163,66 @@ export class WeighingProcessor extends RuleDataProcessor {
     };
   }
 
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentQuery = await this.generateDocumentQuery(ruleInput);
-      const documentPair = await this.collectDocuments(documentQuery);
-      const ruleSubject = this.getRuleSubject(documentPair);
-      const evaluationResult = this.evaluateResult(ruleSubject);
+  private async collectDocuments(
+    documentQuery: DocumentQuery<Document>,
+  ): Promise<DocumentPair> {
+    let recyclerHomologationDocument: Document | undefined;
+    let massIdDocument: Document | undefined;
 
-      return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
-        resultComment: evaluationResult.resultComment,
-      });
-    } catch (error) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+    await documentQuery.iterator().each(({ document }) => {
+      const documentReference = mapDocumentReference(document);
+
+      if (
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
+        documentReference.subtype === DocumentSubtype.RECYCLER
+      ) {
+        recyclerHomologationDocument = document;
+      }
+
+      if (MASS_ID.matches(documentReference)) {
+        massIdDocument = document;
+      }
+    });
+
+    this.validateOrThrow(
+      isNil(recyclerHomologationDocument),
+      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+    );
+
+    this.validateOrThrow(
+      isNil(massIdDocument),
+      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+    );
+
+    return {
+      massIdDocument: massIdDocument as Document,
+      recyclerHomologationDocument: recyclerHomologationDocument as Document,
+    };
+  }
+
+  private validateOrThrow(condition: boolean, errorMessage: string): void {
+    if (condition) {
+      throw this.processorErrors.getKnownError(errorMessage);
     }
+  }
+
+  private validateWeighingEvents(
+    weighingEvents: DocumentEvent[] | undefined,
+  ): EvaluateResultOutput | undefined {
+    if (isNil(weighingEvents) || weighingEvents.length === 0) {
+      return {
+        resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (weighingEvents.length > 2) {
+      return {
+        resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    return undefined;
   }
 }

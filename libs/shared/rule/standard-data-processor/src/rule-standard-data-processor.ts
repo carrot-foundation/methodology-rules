@@ -19,14 +19,6 @@ export abstract class RuleStandardDataProcessor<
   InputDocument,
   RuleSubject,
 > extends RuleDataProcessor {
-  protected getDocumentNotFoundResultComment(documentId: string): string {
-    return `Could not load the document with id ${documentId}`;
-  }
-
-  protected getMissingRuleSubjectResultComment(): string {
-    return 'Rule not applicable';
-  }
-
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     const document = await this.loadDocument(ruleInput);
 
@@ -62,6 +54,14 @@ export abstract class RuleStandardDataProcessor<
   protected abstract evaluateResult(
     data: RuleSubject,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput>;
+
+  protected getDocumentNotFoundResultComment(documentId: string): string {
+    return `Could not load the document with id ${documentId}`;
+  }
+
+  protected getMissingRuleSubjectResultComment(): string {
+    return 'Rule not applicable';
+  }
 
   protected abstract getRuleSubject(
     document: InputDocument,

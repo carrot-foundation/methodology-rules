@@ -36,6 +36,7 @@ export abstract class BaseDocumentQueryService<
 
     return {
       iterator: () => ({
+        // eslint-disable-next-line no-shadow
         each: async (callback: (document: Visitor<Document>) => void) => {
           await this.loadQueryCriteria({
             callback,
@@ -44,6 +45,7 @@ export abstract class BaseDocumentQueryService<
             document,
           });
         },
+        // eslint-disable-next-line no-shadow
         map: async <T>(callback: (document: Visitor<Document>) => T) =>
           this.loadQueryCriteria<T>({
             callback,
@@ -54,38 +56,6 @@ export abstract class BaseDocumentQueryService<
       }),
       rootDocument: document,
     };
-  }
-
-  protected async loadQueryCriteria<T = void>({
-    callback,
-    context,
-    criteria,
-    document,
-  }: {
-    callback: (document: Visitor<Document>) => T;
-    context: QueryContext;
-    criteria: Criteria;
-    document: Document;
-  }): Promise<Array<T>> {
-    const result: T[] = [];
-
-    const connections = this.getConnectionKeys(criteria, document, context);
-
-    for (const { criteria: connectionCriteria, documentKeys } of connections) {
-      for (const documentKey of documentKeys) {
-        result.push(
-          // eslint-disable-next-line no-await-in-loop
-          ...(await this.loadDocument({
-            callback,
-            context,
-            criteria: connectionCriteria,
-            documentKey,
-          })),
-        );
-      }
-    }
-
-    return result;
   }
 
   protected abstract getConnectionKeys(
@@ -112,5 +82,37 @@ export abstract class BaseDocumentQueryService<
     context: QueryContext;
     criteria: Criteria;
     documentKey: DocumentKey;
-  }): Promise<Array<T>>;
+  }): Promise<T[]>;
+
+  protected async loadQueryCriteria<T = void>({
+    callback,
+    context,
+    criteria,
+    document,
+  }: {
+    // eslint-disable-next-line no-shadow
+    callback: (document: Visitor<Document>) => T;
+    context: QueryContext;
+    criteria: Criteria;
+    document: Document;
+  }): Promise<T[]> {
+    const result: T[] = [];
+
+    const connections = this.getConnectionKeys(criteria, document, context);
+
+    for (const { criteria: connectionCriteria, documentKeys } of connections) {
+      for (const documentKey of documentKeys) {
+        result.push(
+          ...(await this.loadDocument({
+            callback,
+            context,
+            criteria: connectionCriteria,
+            documentKey,
+          })),
+        );
+      }
+    }
+
+    return result;
+  }
 }

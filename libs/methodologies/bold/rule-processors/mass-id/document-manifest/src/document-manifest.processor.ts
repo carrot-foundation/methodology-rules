@@ -41,34 +41,36 @@ const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
-interface ValidationResult {
-  approvedMessage?: string;
-  rejectedMessages: string[];
-}
+export type DocumentManifestType =
+  | typeof RECYCLING_MANIFEST
+  | typeof TRANSPORT_MANIFEST;
 
 interface DocumentManifestEventSubject {
   attachment: MethodologyDocumentEventAttachment | undefined;
-  documentNumber: MethodologyDocumentEventAttributeValue | string | undefined;
-  documentType: MethodologyDocumentEventAttributeValue | string | undefined;
+  documentNumber: EventAttributeValueType;
+  documentType: EventAttributeValueType;
   eventAddressId: string | undefined;
   eventValue: number | undefined;
-  exemptionJustification:
-    | MethodologyDocumentEventAttributeValue
-    | string
-    | undefined;
+  exemptionJustification: EventAttributeValueType;
   hasWrongLabelAttachment: boolean;
   issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
   recyclerCountryCode: string | undefined;
 }
+
+type EventAttributeValueType =
+  | MethodologyDocumentEventAttributeValue
+  | string
+  | undefined;
 
 type RuleSubject = {
   documentManifestEvents: DocumentManifestEventSubject[];
   recyclerEvent: DocumentEvent | undefined;
 };
 
-export type DocumentManifestType =
-  | typeof RECYCLING_MANIFEST
-  | typeof TRANSPORT_MANIFEST;
+interface ValidationResult {
+  approvedMessage?: string;
+  rejectedMessages: string[];
+}
 
 const DOCUMENT_TYPE_MAPPING = {
   [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
@@ -83,9 +85,93 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     this.documentManifestType = documentManifestType;
   }
 
+  protected override evaluateResult(
+    ruleSubject: RuleSubject,
+  ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+    if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
+      return {
+        resultComment: RESULT_COMMENTS.MISSING_EVENT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (isNil(ruleSubject.recyclerEvent)) {
+      return {
+        resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    const validationResults = ruleSubject.documentManifestEvents.map(
+      (subject) =>
+        this.validateDocumentManifestEvents(
+          subject,
+          ruleSubject.recyclerEvent as DocumentEvent,
+        ),
+    );
+    const allRejectedMessages = validationResults.flatMap(
+      (v) => v.rejectedMessages,
+    );
+    const approvedMessages = validationResults
+      .map((v) => v.approvedMessage)
+      .filter(Boolean) as string[];
+
+    if (allRejectedMessages.length > 0) {
+      return {
+        resultComment: allRejectedMessages.join(' '),
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    return {
+      resultComment: approvedMessages.join(' '),
+      resultStatus: RuleOutputStatus.APPROVED,
+    };
+  }
+
+  protected override getRuleSubject(document: Document): RuleSubject {
+    const transportManifestEvents = document.externalEvents?.filter(
+      eventNameIsAnyOf([this.documentManifestType]),
+    );
+    const recyclerEvent = document.externalEvents?.find(
+      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+    );
+
+    return {
+      documentManifestEvents: getOrDefault(
+        transportManifestEvents?.map((event) => {
+          const correctLabelAttachment = getDocumentEventAttachmentByLabel(
+            event,
+            this.documentManifestType,
+          );
+
+          const hasWrongLabelAttachment =
+            !correctLabelAttachment && isNonEmptyArray(event.attachments);
+
+          return {
+            attachment: correctLabelAttachment,
+            documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
+            documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+            eventAddressId: event.address.id,
+            eventValue: event.value,
+            exemptionJustification: getEventAttributeValue(
+              event,
+              EXEMPTION_JUSTIFICATION,
+            ),
+            hasWrongLabelAttachment,
+            issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+            recyclerCountryCode: recyclerEvent?.address.countryCode,
+          };
+        }),
+        [],
+      ),
+      recyclerEvent,
+    };
+  }
+
   private validateDocumentAttributes(
-    documentType: MethodologyDocumentEventAttributeValue | string | undefined,
-    documentNumber: MethodologyDocumentEventAttributeValue | string | undefined,
+    documentType: EventAttributeValueType,
+    documentNumber: EventAttributeValueType,
     recyclerCountryCode: string | undefined,
   ): ValidationResult {
     const rejectedMessages: string[] = [];
@@ -195,10 +281,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
 
   private validateExemptionAndAttachment(
     attachment: MethodologyDocumentEventAttachment | undefined,
-    exemptionJustification:
-      | MethodologyDocumentEventAttributeValue
-      | string
-      | undefined,
+    exemptionJustification: EventAttributeValueType,
     hasWrongLabelAttachment: boolean,
   ): ValidationResult {
     const justificationString = exemptionJustification?.toString();
@@ -249,89 +332,5 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     }
 
     return { rejectedMessages };
-  }
-
-  protected override evaluateResult(
-    ruleSubject: RuleSubject,
-  ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
-    if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
-      return {
-        resultComment: RESULT_COMMENTS.MISSING_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (isNil(ruleSubject.recyclerEvent)) {
-      return {
-        resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    const validationResults = ruleSubject.documentManifestEvents.map(
-      (subject) =>
-        this.validateDocumentManifestEvents(
-          subject,
-          ruleSubject.recyclerEvent as DocumentEvent,
-        ),
-    );
-    const allRejectedMessages = validationResults.flatMap(
-      (v) => v.rejectedMessages,
-    );
-    const approvedMessages = validationResults
-      .map((v) => v.approvedMessage)
-      .filter(Boolean) as string[];
-
-    if (allRejectedMessages.length > 0) {
-      return {
-        resultComment: allRejectedMessages.join(' '),
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    return {
-      resultComment: approvedMessages.join(' '),
-      resultStatus: RuleOutputStatus.APPROVED,
-    };
-  }
-
-  protected override getRuleSubject(document: Document): RuleSubject {
-    const transportManifestEvents = document.externalEvents?.filter(
-      eventNameIsAnyOf([this.documentManifestType]),
-    );
-    const recyclerEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
-    );
-
-    return {
-      documentManifestEvents: getOrDefault(
-        transportManifestEvents?.map((event) => {
-          const correctLabelAttachment = getDocumentEventAttachmentByLabel(
-            event,
-            this.documentManifestType,
-          );
-
-          const hasWrongLabelAttachment =
-            !correctLabelAttachment && isNonEmptyArray(event.attachments);
-
-          return {
-            attachment: correctLabelAttachment,
-            documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-            documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
-            eventAddressId: event.address.id,
-            eventValue: event.value,
-            exemptionJustification: getEventAttributeValue(
-              event,
-              EXEMPTION_JUSTIFICATION,
-            ),
-            hasWrongLabelAttachment,
-            issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
-            recyclerCountryCode: recyclerEvent?.address.countryCode,
-          };
-        }),
-        [],
-      ),
-      recyclerEvent,
-    };
   }
 }

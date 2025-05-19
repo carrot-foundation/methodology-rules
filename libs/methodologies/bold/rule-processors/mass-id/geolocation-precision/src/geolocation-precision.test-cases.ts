@@ -1,10 +1,10 @@
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
   BoldStubsBuilder,
-  MASS_ID_ACTOR_PARTICIPANTS,
-  type StubBoldDocumentParameters,
   generateNearbyCoordinates,
+  MASS_ID_ACTOR_PARTICIPANTS,
   stubAddress,
+  type StubBoldDocumentParameters,
   stubBoldMassIdDropOffEvent,
   stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
@@ -125,14 +125,14 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
   participant: wasteGeneratorParticipant,
 });
 
-export const geolocationPrecisionTestCases: {
+export const geolocationPrecisionTestCases: Array<{
   actorParticipants: Map<string, MethodologyParticipant>;
   homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdDocumentParameters?: StubBoldDocumentParameters | undefined;
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
-}[] = [
+}> = [
   {
     actorParticipants,
     homologationDocuments: new Map([

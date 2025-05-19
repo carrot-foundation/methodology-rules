@@ -1,4 +1,4 @@
-import { type IValidation, is } from 'typia';
+import { is, type IValidation } from 'typia';
 
 expect.extend({
   toPassTypiaValidation(actual: unknown) {

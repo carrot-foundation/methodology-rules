@@ -20,9 +20,9 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
-  type MetadataAttributeParameter,
   mergeEventsMaps,
   mergeMetadataAttributes,
+  type MetadataAttributeParameter,
 } from './bold.builder.helpers';
 import {
   type StubBoldDocumentEventParameters,

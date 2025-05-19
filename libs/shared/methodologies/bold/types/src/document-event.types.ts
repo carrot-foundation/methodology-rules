@@ -13,6 +13,13 @@ import type {
   DocumentType,
 } from './enum.types';
 
+export interface DocumentEvent extends MethodologyDocumentEvent {
+  metadata?: DocumentEventMetadata | undefined;
+  name: DocumentEventName | string;
+  referencedDocument?: DocumentReference | undefined;
+  relatedDocument?: DocumentReference | undefined;
+}
+
 export interface DocumentEventAttribute
   extends MethodologyDocumentEventAttribute {
   name: DocumentEventAttributeName | string;
@@ -27,11 +34,4 @@ export interface DocumentReference extends MethodologyDocumentReference {
   category?: DocumentCategory | string | undefined;
   subtype?: DocumentSubtype | string | undefined;
   type?: DocumentType | string | undefined;
-}
-
-export interface DocumentEvent extends MethodologyDocumentEvent {
-  metadata?: DocumentEventMetadata | undefined;
-  name: DocumentEventName | string;
-  referencedDocument?: DocumentReference | undefined;
-  relatedDocument?: DocumentReference | undefined;
 }

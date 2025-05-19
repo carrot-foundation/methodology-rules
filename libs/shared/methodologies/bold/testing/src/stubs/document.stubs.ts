@@ -30,7 +30,7 @@ export const stubDocument = (
     category: stubEnumValue(DocumentCategory),
     ...partialDocument,
     externalEvents: [
-      ...(stubExternalEvents ? random<Array<DocumentEvent>>() : []),
+      ...(stubExternalEvents ? random<DocumentEvent[]>() : []),
       ...externalEvents,
     ],
     primaryAddress: stubAddress(partialDocument?.primaryAddress),

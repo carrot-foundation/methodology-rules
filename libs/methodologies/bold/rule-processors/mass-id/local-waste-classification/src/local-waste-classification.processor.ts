@@ -51,17 +51,6 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
   protected readonly processorErrors =
     new LocalWasteClassificationProcessorErrors();
 
-  private isRejected(
-    resultComment: string,
-    resultContent?: AnyObject,
-  ): EvaluateResultOutput {
-    return {
-      resultComment,
-      ...(resultContent && { resultContent }),
-      resultStatus: RuleOutputStatus.REJECTED,
-    };
-  }
-
   protected override evaluateResult(
     subject: Subject,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
@@ -135,6 +124,17 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
       ),
       id: getEventAttributeValue(pickUpEvent, LOCAL_WASTE_CLASSIFICATION_ID),
       recyclerCountryCode: getOrDefault(recyclerEvent?.address.countryCode, ''),
+    };
+  }
+
+  private isRejected(
+    resultComment: string,
+    resultContent?: AnyObject,
+  ): EvaluateResultOutput {
+    return {
+      resultComment,
+      ...(resultContent && { resultContent }),
+      resultStatus: RuleOutputStatus.REJECTED,
     };
   }
 }

@@ -2,21 +2,21 @@ import type { tags } from 'typia';
 
 import { type Latitude, type Longitude } from './number.types';
 
-export type Maybe<T> = T | null | undefined;
-export type UnknownObject = Record<string, unknown>;
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyObject = Record<string, any>;
-
-export interface StringObject {
-  [key: string]: string;
-}
-
 export type DateTime = string & tags.Format<'date-time'>;
-
-export type PredicateCallback<T> = (input: T) => boolean;
 
 export interface Geolocation {
   latitude: Latitude;
   longitude: Longitude;
 }
+
+export type Maybe<T> = null | T | undefined;
+
+export type PredicateCallback<T> = (input: T) => boolean;
+
+export interface StringObject {
+  [key: string]: string;
+}
+
+export type UnknownObject = Record<string, unknown>;

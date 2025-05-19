@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 
 export const stubArray = <T>(
   stubFunction: () => T,
-  range?: { max?: number; min?: number } | number,
+  range?: number | { max?: number; min?: number },
 ): T[] =>
   Array.from(
     {

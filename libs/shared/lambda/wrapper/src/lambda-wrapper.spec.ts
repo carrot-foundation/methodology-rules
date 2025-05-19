@@ -44,7 +44,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       },
     } as never);
 
-    jest.spyOn(global, 'fetch').mockResolvedValueOnce(new Response());
+    jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
 

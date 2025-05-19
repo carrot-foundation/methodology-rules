@@ -71,6 +71,67 @@ interface SortingData {
 export class MassIdSortingProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new MassIdSortingProcessorErrors();
 
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentsQuery = await this.generateDocumentQuery(ruleInput);
+      const documents = await this.collectDocuments(documentsQuery);
+
+      const sortingData = this.extractSortingData(documents);
+
+      const { resultComment, resultStatus } = this.evaluateResult(sortingData);
+
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.processorErrors.getResultCommentFromError(error),
+      });
+    }
+  }
+
+  protected evaluateResult(sortingData: SortingData): EvaluateResultOutput {
+    if (!isNonEmptyString(sortingData.sortingDescription)) {
+      return {
+        resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
+      return {
+        resultComment: RESULT_COMMENTS.REJECTED(
+          sortingData.sortingValueCalculationDifference,
+        ),
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    return {
+      resultComment: RESULT_COMMENTS.APPROVED(
+        sortingData.sortingValueCalculationDifference,
+      ),
+      resultStatus: RuleOutputStatus.APPROVED,
+    };
+  }
+
+  protected async generateDocumentQuery(ruleInput: RuleInput) {
+    const documentQueryService = new DocumentQueryService(
+      provideDocumentLoaderService,
+    );
+
+    return documentQueryService.load({
+      context: {
+        s3KeyPrefix: ruleInput.documentKeyPrefix,
+      },
+      criteria: {
+        parentDocument: {},
+        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+      },
+      documentId: ruleInput.documentId,
+    });
+  }
+
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<DocumentPair> {
@@ -181,67 +242,6 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
   private validateOrThrow(condition: boolean, errorMessage: string): void {
     if (condition) {
       throw this.processorErrors.getKnownError(errorMessage);
-    }
-  }
-
-  protected evaluateResult(sortingData: SortingData): EvaluateResultOutput {
-    if (!isNonEmptyString(sortingData.sortingDescription)) {
-      return {
-        resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
-      return {
-        resultComment: RESULT_COMMENTS.REJECTED(
-          sortingData.sortingValueCalculationDifference,
-        ),
-        resultStatus: RuleOutputStatus.REJECTED,
-      };
-    }
-
-    return {
-      resultComment: RESULT_COMMENTS.APPROVED(
-        sortingData.sortingValueCalculationDifference,
-      ),
-      resultStatus: RuleOutputStatus.APPROVED,
-    };
-  }
-
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: {
-        parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
-      },
-      documentId: ruleInput.documentId,
-    });
-  }
-
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const documents = await this.collectDocuments(documentsQuery);
-
-      const sortingData = this.extractSortingData(documents);
-
-      const { resultComment, resultStatus } = this.evaluateResult(sortingData);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
     }
   }
 }

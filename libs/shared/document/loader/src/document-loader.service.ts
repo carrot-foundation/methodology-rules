@@ -4,7 +4,11 @@ import { DocumentRepository } from './document.repository';
 import { assertDocumentEntity } from './document.validators';
 
 export class DocumentLoaderService {
-  constructor(private readonly documentRepository: DocumentRepository) {}
+  private readonly documentRepository: DocumentRepository;
+
+  constructor(documentRepository: DocumentRepository) {
+    this.documentRepository = documentRepository;
+  }
 
   async load({ key }: DocumentKeyDto): Promise<DocumentEntity> {
     try {

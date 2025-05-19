@@ -51,6 +51,14 @@ export const mergeEventsMaps = <T extends DocumentEventName | string>(
   return mergedEventsMap;
 };
 
+export type MetadataAttributeParameter =
+  | MetadataAttributeTupleParameter
+  | Omit<DocumentEventAttribute, 'isPublic'>;
+
+export type MetadataAttributeResponse =
+  | MetadataAttributeTupleResponse
+  | Omit<DocumentEventAttribute, 'isPublic'>;
+
 export type MetadataAttributeTupleParameter = [
   DocumentEventAttributeName,
   MethodologyDocumentEventAttributeValue | undefined,
@@ -60,14 +68,6 @@ export type MetadataAttributeTupleResponse = [
   DocumentEventAttributeName,
   MethodologyDocumentEventAttributeValue,
 ];
-
-export type MetadataAttributeParameter =
-  | MetadataAttributeTupleParameter
-  | Omit<DocumentEventAttribute, 'isPublic'>;
-
-export type MetadataAttributeResponse =
-  | MetadataAttributeTupleResponse
-  | Omit<DocumentEventAttribute, 'isPublic'>;
 
 export const isTuple = (
   attribute: MetadataAttributeParameter,
@@ -87,7 +87,7 @@ export const getAttributeName = (
  */
 export const mergeMetadataAttributes = (
   defaultAttributes: MetadataAttributeParameter[],
-  overridenAttributes?: MetadataAttributeParameter[] | undefined,
+  overridenAttributes?: MetadataAttributeParameter[],
 ): MetadataAttributeResponse[] => {
   const filteredDefaults = defaultAttributes.filter((attribute) =>
     isTuple(attribute)

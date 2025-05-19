@@ -19,7 +19,7 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
   };
 
   // Mock report to Smaug
-  global.fetch = (): Promise<Response> =>
+  globalThis.fetch = (): Promise<Response> =>
     Promise.resolve(<Response>{ ok: true });
 
   const noSuchKeyError = new NoSuchKey({
@@ -44,7 +44,7 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
     .callsFake((input: { Key: string }) => {
       const index = options.findIndex((item) => item.documentKey === input.Key);
 
-      if (index < 0) {
+      if (index === -1) {
         throw noSuchKeyError;
       }
 

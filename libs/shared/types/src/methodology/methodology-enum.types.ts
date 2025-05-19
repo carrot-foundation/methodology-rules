@@ -4,10 +4,6 @@ export enum DataSetName {
   TEST = 'TEST',
 }
 
-export enum MethodologyParticipantType {
-  ACTOR = 'ACTOR',
-}
-
 export enum MethodologyActorType {
   APPOINTED_NGO = 'Appointed NGO',
   AUDITOR = 'Auditor',
@@ -23,6 +19,21 @@ export enum MethodologyActorType {
   WASTE_GENERATOR = 'Waste Generator',
 }
 
+export enum MethodologyApprovedExceptionType {
+  MANDATORY_ATTRIBUTE = 'Exemption for Mandatory Attribute',
+}
+
+export enum MethodologyDocumentEventAttributeFormat {
+  CUBIC_METER = 'CUBIC_METER',
+  DATE = 'DATE',
+  KILOGRAM = 'KILOGRAM',
+  LITER = 'LITER',
+}
+
+export enum MethodologyDocumentEventAttributeType {
+  REFERENCE = 'REFERENCE',
+}
+
 export enum MethodologyDocumentEventLabel {
   APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
   AUDITOR = MethodologyActorType.AUDITOR,
@@ -36,10 +47,6 @@ export enum MethodologyDocumentEventLabel {
   REMAINDER = MethodologyActorType.REMAINDER,
   SOURCE = MethodologyActorType.SOURCE,
   WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
-}
-
-export enum MethodologyApprovedExceptionType {
-  MANDATORY_ATTRIBUTE = 'Exemption for Mandatory Attribute',
 }
 
 export enum MethodologyDocumentEventName {
@@ -65,18 +72,15 @@ export enum MethodologyDocumentEventName {
   WEIGHING = 'Weighing',
 }
 
-export enum MethodologyDocumentEventAttributeFormat {
-  CUBIC_METER = 'CUBIC_METER',
-  DATE = 'DATE',
-  KILOGRAM = 'KILOGRAM',
-  LITER = 'LITER',
-}
-
-export enum MethodologyDocumentEventAttributeType {
-  REFERENCE = 'REFERENCE',
-}
-
 export enum MethodologyDocumentStatus {
   CANCELLED = 'CANCELLED',
   OPEN = 'OPEN',
+}
+
+export enum MethodologyEvaluationResult {
+  APPROVED = 'APPROVED',
+}
+
+export enum MethodologyParticipantType {
+  ACTOR = 'ACTOR',
 }

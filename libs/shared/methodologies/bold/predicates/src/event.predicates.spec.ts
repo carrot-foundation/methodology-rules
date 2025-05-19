@@ -343,7 +343,7 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if events has empty', () => {
-      const events = [] as unknown as Array<DocumentEvent>;
+      const events = [] as unknown as DocumentEvent[];
 
       const result = eventsHasSameMetadataAttributeValue(
         events,

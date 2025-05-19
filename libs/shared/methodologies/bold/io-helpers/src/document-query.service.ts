@@ -60,21 +60,6 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     super(documentFetcher, documentFetcher);
   }
 
-  private getEventRelationship({
-    referencedDocument,
-    relatedDocument,
-  }: DocumentEvent): DocumentReference | undefined {
-    if (isDocumentReference(relatedDocument)) {
-      return relatedDocument;
-    }
-
-    if (isDocumentReference(referencedDocument)) {
-      return referencedDocument;
-    }
-
-    return undefined;
-  }
-
   protected getConnectionKeys(
     criteria: DocumentQueryCriteria,
     document: Document,
@@ -82,7 +67,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
   ): Array<ConnectionKeys<DocumentQueryCriteria>> {
     const { externalEvents, parentDocumentId } = document;
 
-    const connectionKeys: ConnectionKeys<DocumentQueryCriteria>[] = [];
+    const connectionKeys: Array<ConnectionKeys<DocumentQueryCriteria>> = [];
 
     if (
       isObject(criteria.parentDocument) &&
@@ -180,5 +165,20 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     );
 
     return result;
+  }
+
+  private getEventRelationship({
+    referencedDocument,
+    relatedDocument,
+  }: DocumentEvent): DocumentReference | undefined {
+    if (isDocumentReference(relatedDocument)) {
+      return relatedDocument;
+    }
+
+    if (isDocumentReference(referencedDocument)) {
+      return referencedDocument;
+    }
+
+    return undefined;
   }
 }

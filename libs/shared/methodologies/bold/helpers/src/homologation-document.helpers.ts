@@ -30,7 +30,9 @@ export const isHomologationValid = (document: Document): boolean => {
     eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_RESULT]),
   );
 
-  if (!event) return false;
+  if (!event) {
+    return false;
+  }
 
   const effectiveDate = getEventAttributeValue(
     event,

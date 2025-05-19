@@ -52,18 +52,6 @@ interface RuleSubject {
 }
 
 export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
-  private createResult(
-    isApproved: boolean,
-    resultComment: string,
-  ): EvaluateResultOutput {
-    return {
-      resultComment,
-      resultStatus: isApproved
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
-    };
-  }
-
   protected override evaluateResult({
     pickUpEvent: event,
   }: RuleSubject): EvaluateResultOutput {
@@ -142,6 +130,18 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
   protected override getRuleSubject(document: Document): RuleSubject {
     return {
       pickUpEvent: document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
+    };
+  }
+
+  private createResult(
+    isApproved: boolean,
+    resultComment: string,
+  ): EvaluateResultOutput {
+    return {
+      resultComment,
+      resultStatus: isApproved
+        ? RuleOutputStatus.APPROVED
+        : RuleOutputStatus.REJECTED,
     };
   }
 }

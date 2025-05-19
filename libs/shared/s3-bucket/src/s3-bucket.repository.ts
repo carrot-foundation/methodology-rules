@@ -1,8 +1,12 @@
 import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { type Primitive, assertEquals } from 'typia';
+import { assertEquals, type Primitive } from 'typia';
 
 export abstract class S3BucketRepository {
-  protected constructor(protected readonly S3_BUCKET_NAME: string) {}
+  private readonly S3_BUCKET_NAME: string;
+
+  protected constructor(S3_BUCKET_NAME: string) {
+    this.S3_BUCKET_NAME = S3_BUCKET_NAME;
+  }
 
   async readFromS3<T>(
     key: string,

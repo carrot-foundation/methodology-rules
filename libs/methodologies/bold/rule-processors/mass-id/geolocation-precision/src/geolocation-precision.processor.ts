@@ -45,14 +45,14 @@ const { DROP_OFF, PICK_UP } = DocumentEventName;
 
 const MAX_ALLOWED_DISTANCE = 2000;
 
+export interface RuleSubject {
+  participantsAddressData: Map<MassIdDocumentActorType, ParticipantAddressData>;
+}
+
 interface ParticipantAddressData {
   eventAddress: MethodologyAddress;
   gpsGeolocation: Geolocation | undefined;
   homologatedAddress: MethodologyAddress | undefined;
-}
-
-export interface RuleSubject {
-  participantsAddressData: Map<MassIdDocumentActorType, ParticipantAddressData>;
 }
 
 export const RESULT_COMMENTS = {
@@ -78,6 +78,39 @@ export const RESULT_COMMENTS = {
 
 export class GeolocationPrecisionProcessor extends RuleDataProcessor {
   private processorErrors = new GeolocationPrecisionProcessorErrors();
+
+  async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    try {
+      const documentsQuery = await this.generateDocumentQuery(ruleInput);
+      const ruleSubject = await this.getRuleSubject(documentsQuery);
+      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+
+      return mapToRuleOutput(ruleInput, resultStatus, {
+        resultComment: getOrUndefined(resultComment),
+      });
+    } catch (error: unknown) {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        resultComment: this.processorErrors.getResultCommentFromError(error),
+      });
+    }
+  }
+
+  protected async generateDocumentQuery(ruleInput: RuleInput) {
+    const documentQueryService = new DocumentQueryService(
+      provideDocumentLoaderService,
+    );
+
+    return documentQueryService.load({
+      context: {
+        s3KeyPrefix: ruleInput.documentKeyPrefix,
+      },
+      criteria: {
+        parentDocument: {},
+        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+      },
+      documentId: ruleInput.documentId,
+    });
+  }
 
   private aggregateResults(
     actorResults: Map<MassIdDocumentActorType, EvaluateResultOutput[]>,
@@ -312,38 +345,5 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
     }
 
     return massIdDocument;
-  }
-
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: {
-        parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
-      },
-      documentId: ruleInput.documentId,
-    });
-  }
-
-  async process(ruleInput: RuleInput): Promise<RuleOutput> {
-    try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const ruleSubject = await this.getRuleSubject(documentsQuery);
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
-
-      return mapToRuleOutput(ruleInput, resultStatus, {
-        resultComment: getOrUndefined(resultComment),
-      });
-    } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
-    }
   }
 }

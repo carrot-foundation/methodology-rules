@@ -22,7 +22,7 @@ export const and =
     ...predicateCallbacks: [
       PredicateCallback<T>,
       PredicateCallback<T>,
-      ...PredicateCallback<T>[],
+      ...Array<PredicateCallback<T>>,
     ]
   ): PredicateCallback<T> =>
   (input: T) =>
@@ -34,18 +34,18 @@ export const not =
     !predicateCallback(input);
 
 export const eventNameIsAnyOf =
-  (eventNames: Array<DocumentEventName>): PredicateCallback<DocumentEvent> =>
+  (eventNames: DocumentEventName[]): PredicateCallback<DocumentEvent> =>
   (event) =>
     eventNames.some((name) => eventHasName(event, name));
 
 export const eventLabelIsAnyOf =
-  (eventLabels: Array<NonEmptyString>): PredicateCallback<DocumentEvent> =>
+  (eventLabels: NonEmptyString[]): PredicateCallback<DocumentEvent> =>
   (event) =>
     eventLabels.some((label) => eventHasLabel(event, label));
 
 export const metadataAttributeNameIsAnyOf =
   (
-    metadataNames: Array<DocumentEventAttributeName>,
+    metadataNames: DocumentEventAttributeName[],
   ): PredicateCallback<DocumentEvent> =>
   (event) =>
     metadataNames.some((metadataName) =>
