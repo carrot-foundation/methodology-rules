@@ -39,7 +39,7 @@ import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniquen
 
 const { MASS_ID } = DocumentCategory;
 
-export interface RuleSubject {
+interface RuleSubject {
   creditDocuments: Document[];
   massIdCertificateDocuments: Document[];
   relatedMassIdAuditDocuments: Document[];
