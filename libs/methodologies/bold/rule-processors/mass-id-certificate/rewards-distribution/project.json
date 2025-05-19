@@ -1,0 +1,19 @@
+{
+  "name": "methodologies-bold-rule-processors-mass-id-certificate-rewards-distribution",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "processor:mass-id-certificate",
+    "scope:shared",
+    "stack:any",
+    "type:library"
+  ],
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

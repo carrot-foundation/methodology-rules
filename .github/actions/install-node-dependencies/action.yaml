@@ -1,6 +1,8 @@
 name: Install node dependencies
 description: Install node dependencies with cache
 
+permissions: write-all # required for AWS credentials
+
 runs:
   using: composite
 

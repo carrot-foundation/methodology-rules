@@ -1,11 +1,13 @@
 name: Check and Deploy
 
+permissions: write-all # required for AWS credentials
+
 on:
   push:
     branches:
-      - "**"
+      - '**'
     tags-ignore:
-      - "**"
+      - '**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -26,6 +28,11 @@ jobs:
           fetch-depth: 0 # required for Nx affected
 
       - uses: ./.github/actions/prepare-to-run-nx
+        with:
+          environment: development
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
+          aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
+          nx_key: ${{ secrets.NX_KEY }}
 
       - id: affected
         run: |
@@ -49,3 +56,5 @@ jobs:
       AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
       AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
       ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      nx_key: ${{ secrets.NX_KEY }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
