@@ -7,7 +7,7 @@
     "processor:shared",
     "scope:shared",
     "stack:any",
-    "type:lib"
+    "type:library"
   ],
   "sourceRoot": "libs/shared/methodologies/bold/processors/src",
   "projectType": "library",
