@@ -1,5 +1,5 @@
 {
-  "name": "methodologies-bold-rule-processors-mass-id-certificate",
+  "name": "methodologies-bold-rule-processors-mass-id-certificate-rewards-distribution",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": [
     "app:any",
@@ -9,7 +9,7 @@
     "stack:any",
     "type:lib"
   ],
-  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id-certificate/src",
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src",
   "projectType": "library",
   "targets": {
     "lint": {},
