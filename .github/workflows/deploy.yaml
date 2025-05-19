@@ -11,6 +11,8 @@ on:
         required: true
       ADMIN_GITHUB_TOKEN:
         required: true
+      SLACK_WEBHOOK_URL:
+        required: true
       nx_key:
         required: true
 
@@ -46,5 +48,5 @@ jobs:
         uses: ./.github/actions/send-slack-message
         if: ${{ failure() }}
         with:
-          slack_webhook_url: ${{ vars.SLACK_WEBHOOK_URL }}
+          slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
           message: Deploy Failed
