@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/mass-id-definition/mass-id-definition.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/mass-id-definition/src/index.ts)**
 
 ## 👥 Contributors
 

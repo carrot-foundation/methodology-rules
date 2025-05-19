@@ -1,0 +1,19 @@
+{
+  "name": "methodologies-bold-rule-processors-credit-order-rewards-distribution",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "processor:credit-order",
+    "scope:shared",
+    "stack:any",
+    "type:library"
+  ],
+  "sourceRoot": "libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}
