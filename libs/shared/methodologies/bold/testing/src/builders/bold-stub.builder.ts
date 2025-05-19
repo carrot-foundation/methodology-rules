@@ -105,6 +105,14 @@ const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
 } as const satisfies Record<BoldMethodologyName, DocumentType>;
 
 export class BoldStubsBuilder {
+  private _creditOrderDocument?: Document;
+
+  private _massIdAuditDocuments: Document[] = [];
+
+  private _massIdCertificateDocuments: Document[] = [];
+
+  private _massIdDocuments: Document[] = [];
+
   private readonly actorsCoordinates: Map<
     string,
     { base: Geolocation; nearby: Geolocation }
@@ -113,8 +121,6 @@ export class BoldStubsBuilder {
   private boldMethodologyName: BoldMethodologyName;
 
   private count: number;
-
-  private creditOrderDocument?: Document;
 
   private creditOrderReference?: DocumentReference;
 
@@ -127,19 +133,13 @@ export class BoldStubsBuilder {
 
   private massIdAuditDocumentIds: string[];
 
-  private massIdAuditDocuments: Document[] = [];
-
   private massIdAuditReferences: DocumentReference[] = [];
 
   private massIdCertificateDocumentIds: string[];
 
   private massIdCertificateDocumentReferences: DocumentReference[] = [];
 
-  private massIdCertificateDocuments: Document[] = [];
-
   private massIdDocumentIds: string[];
-
-  private massIdDocuments: Document[] = [];
 
   private massIdReferences: DocumentReference[] = [];
 
@@ -196,7 +196,7 @@ export class BoldStubsBuilder {
   }
 
   addMassIdCertificateDocumentReferencesToMassIdAuditDocuments(): void {
-    this.massIdAuditDocuments = this.massIdAuditDocuments.map(
+    this._massIdAuditDocuments = this._massIdAuditDocuments.map(
       (document, index) =>
         this.addExternalEventToDocument(
           document,
@@ -210,51 +210,56 @@ export class BoldStubsBuilder {
   }
 
   build(): BoldStubsBuilderResult {
+    const _creditOrderDocument = this._creditOrderDocument;
+    const _massIdAuditDocuments = this._massIdAuditDocuments;
+    const _massIdCertificateDocuments = this._massIdCertificateDocuments;
+    const _massIdDocuments = this._massIdDocuments;
+
     return {
       boldMethodologyName: this.boldMethodologyName,
       get creditOrderDocument() {
-        if (isNil(this.creditOrderDocument)) {
+        if (isNil(_creditOrderDocument)) {
           throw new Error(
             'Credit order document not created. Call createCreditOrderDocument() first.',
           );
         }
 
-        return this.creditOrderDocument;
+        return _creditOrderDocument;
       },
       massIdActorParticipants: this.massIdActorParticipants,
       massIdActorParticipantsAddresses: this.massIdActorParticipantsAddresses,
       get massIdAuditDocument() {
-        if (this.massIdAuditDocuments.length === 0) {
+        if (_massIdAuditDocuments.length === 0) {
           throw new Error(
             'No massId audit documents created. Call createMassIdAuditDocuments() before building.',
           );
         }
 
-        return this.massIdAuditDocuments[0]!;
+        return _massIdAuditDocuments[0]!;
       },
-      massIdAuditDocuments: this.massIdAuditDocuments,
+      massIdAuditDocuments: _massIdAuditDocuments,
       massIdAuditIds: this.massIdAuditDocumentIds,
       get massIdCertificateDocument() {
-        if (this.massIdCertificateDocuments.length === 0) {
+        if (_massIdCertificateDocuments.length === 0) {
           throw new Error(
             'No certificate documents created. Call createCertificateDocuments() before building.',
           );
         }
 
-        return this.massIdCertificateDocuments[0]!;
+        return _massIdCertificateDocuments[0]!;
       },
-      massIdCertificateDocuments: this.massIdCertificateDocuments,
+      massIdCertificateDocuments: _massIdCertificateDocuments,
       get massIdDocument() {
-        if (this.massIdDocuments.length === 0) {
+        if (_massIdDocuments.length === 0) {
           throw new Error(
             'No massId documents created. Call createMassIdDocuments() before building.',
           );
         }
 
-        return this.massIdDocuments[0]!;
+        return _massIdDocuments[0]!;
       },
       massIdDocumentIds: this.massIdDocumentIds,
-      massIdDocuments: this.massIdDocuments,
+      massIdDocuments: _massIdDocuments,
       methodologyActorParticipants: this.methodologyActorParticipants,
       methodologyDocument: this.methodologyDocument,
       participantsHomologationDocuments: this.participantsHomologationDocuments,
@@ -276,11 +281,11 @@ export class BoldStubsBuilder {
       },
     });
 
-    this.creditOrderDocument = creditOrderDocument;
+    this._creditOrderDocument = creditOrderDocument;
 
     this.addCertificatesReferencesToCreditOrderDocument();
 
-    this.massIdCertificateDocuments = this.massIdCertificateDocuments.map(
+    this._massIdCertificateDocuments = this._massIdCertificateDocuments.map(
       (document) =>
         this.addCreditReferenceToMassIdCertificateDocument(document),
     );
@@ -296,7 +301,7 @@ export class BoldStubsBuilder {
 
     const methodologyEventName = `${this.boldMethodologyName} Methodology`;
 
-    this.massIdAuditDocuments = this.massIdDocuments.map(
+    this._massIdAuditDocuments = this._massIdDocuments.map(
       (massIdDocument, index) =>
         stubBoldMassIdAuditDocument({
           externalEventsMap: {
@@ -338,7 +343,7 @@ export class BoldStubsBuilder {
     this.massIdCertificateDocumentReferences =
       this.createMassIdCertificateDocumentReferences();
 
-    this.massIdCertificateDocuments = this.massIdAuditDocuments.map(
+    this._massIdCertificateDocuments = this._massIdAuditDocuments.map(
       (auditDocument, index) => {
         const defaultEventsMap =
           this.createDefaultMassIdCertificateDocumentEventsMap(index);
@@ -399,7 +404,7 @@ export class BoldStubsBuilder {
 
     const actorEvents = this.createMassIdActorEvents();
 
-    this.massIdDocuments = this.massIdDocumentIds.map((_, index) => {
+    this._massIdDocuments = this.massIdDocumentIds.map((_, index) => {
       const defaultEventsMap = this.createDefaultMassIdEventsMap(
         index,
         actorEvents,
@@ -471,15 +476,16 @@ export class BoldStubsBuilder {
       },
     });
 
-    this.massIdAuditDocuments = this.massIdAuditDocuments.map((auditDocument) =>
-      this.addExternalEventToDocument(
-        auditDocument,
-        stubDocumentEvent({
-          name: LINK,
-          referencedDocument: this.methodologyReference,
-          relatedDocument: undefined,
-        }),
-      ),
+    this._massIdAuditDocuments = this._massIdAuditDocuments.map(
+      (auditDocument) =>
+        this.addExternalEventToDocument(
+          auditDocument,
+          stubDocumentEvent({
+            name: LINK,
+            referencedDocument: this.methodologyReference,
+            relatedDocument: undefined,
+          }),
+        ),
     );
 
     return this;
@@ -538,7 +544,7 @@ export class BoldStubsBuilder {
           }),
         );
 
-      this.massIdAuditDocuments = this.massIdAuditDocuments.map(
+      this._massIdAuditDocuments = this._massIdAuditDocuments.map(
         (auditDocument) =>
           this.addExternalEventToDocument(
             auditDocument,
@@ -560,10 +566,10 @@ export class BoldStubsBuilder {
   }
 
   private addCertificatesReferencesToCreditOrderDocument(): void {
-    this.creditOrderDocument = {
-      ...this.creditOrderDocument!,
+    this._creditOrderDocument = {
+      ...this._creditOrderDocument!,
       externalEvents: [
-        ...(this.creditOrderDocument?.externalEvents ?? []),
+        ...(this._creditOrderDocument?.externalEvents ?? []),
         ...this.massIdCertificateDocumentReferences.map((reference) =>
           stubDocumentEvent({
             name: RELATED,
@@ -602,7 +608,7 @@ export class BoldStubsBuilder {
   }
 
   private addMassIdAuditReferencesToMassIdDocuments(): void {
-    this.massIdDocuments = this.massIdDocuments.map((document, index) =>
+    this._massIdDocuments = this._massIdDocuments.map((document, index) =>
       this.addExternalEventToDocument(
         document,
         stubDocumentEvent({
@@ -615,7 +621,7 @@ export class BoldStubsBuilder {
   }
 
   private addMassIdCertificateDocumentReferencesToMassIdDocuments(): void {
-    this.massIdDocuments = this.massIdDocuments.map((document, index) =>
+    this._massIdDocuments = this._massIdDocuments.map((document, index) =>
       this.addExternalEventToDocument(
         document,
         stubDocumentEvent({
@@ -853,8 +859,8 @@ export class BoldStubsBuilder {
 
   private validateAllDocumentsExist(): void {
     if (
-      this.massIdDocuments.length === 0 ||
-      this.massIdAuditDocuments.length === 0
+      this._massIdDocuments.length === 0 ||
+      this._massIdAuditDocuments.length === 0
     ) {
       throw new Error(
         'MassID documents must be created first. Call createMassIdDocuments() and createMassIdAuditDocuments() before this method.',
@@ -863,7 +869,7 @@ export class BoldStubsBuilder {
   }
 
   private validateCertificateDocumentsExist(): void {
-    if (this.massIdCertificateDocuments.length === 0) {
+    if (this._massIdCertificateDocuments.length === 0) {
       throw new Error(
         'MassID Certificate documents must be created first. Call createCertificateDocuments() before this method.',
       );
@@ -871,7 +877,7 @@ export class BoldStubsBuilder {
   }
 
   private validateMassIdAuditDocumentsExist(): void {
-    if (this.massIdAuditDocuments.length === 0) {
+    if (this._massIdAuditDocuments.length === 0) {
       throw new Error(
         'MassID Audit documents must be created first. Call createMassIdAuditDocuments() before this method.',
       );
@@ -879,7 +885,7 @@ export class BoldStubsBuilder {
   }
 
   private validateMassIdDocumentsExist(): void {
-    if (this.massIdDocuments.length === 0) {
+    if (this._massIdDocuments.length === 0) {
       throw new Error(
         'MassID documents must be created first. Call createMassIdDocuments() before this method.',
       );
