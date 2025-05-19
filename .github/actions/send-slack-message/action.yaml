@@ -20,7 +20,7 @@ runs:
       with:
         payload: |
           {
+            "text": "${{ inputs.message }}",
             "author": "${{ github.actor }}",
-            "run_url": "github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-            "message": "${{ inputs.message }}"
+            "run_url": "github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
