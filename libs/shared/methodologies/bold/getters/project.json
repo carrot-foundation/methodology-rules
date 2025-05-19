@@ -6,7 +6,7 @@
     "methodology:bold",
     "scope:shared",
     "stack:any",
-    "type:lib"
+    "type:library"
   ],
   "sourceRoot": "libs/shared/methodologies/bold/getters/src",
   "projectType": "library",

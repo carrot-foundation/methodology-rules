@@ -1,7 +1,7 @@
 {
   "name": "shared-rule-standard-data-processor",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["app:any", "scope:shared", "stack:any", "type:lib"],
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
   "sourceRoot": "libs/shared/rule/standard-data-processor/src",
   "projectType": "library",
   "targets": {

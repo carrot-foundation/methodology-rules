@@ -1,7 +1,7 @@
 {
   "name": "shared-document-loader",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["app:any", "scope:shared", "stack:any", "type:lib"],
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
   "sourceRoot": "libs/shared/document/loader/src",
   "projectType": "library",
   "targets": {

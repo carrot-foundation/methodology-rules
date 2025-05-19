@@ -1,7 +1,7 @@
 {
   "name": "shared-rule-types",
   "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "tags": ["app:any", "scope:shared", "stack:any", "type:lib"],
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
   "sourceRoot": "libs/shared/rule/types/src",
   "projectType": "library",
   "targets": {

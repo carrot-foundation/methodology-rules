@@ -43,11 +43,11 @@ const nxPluginConfigs = {
           },
           {
             sourceTag: 'type:app',
-            onlyDependOnLibsWithTags: ['type:lib'],
+            onlyDependOnLibsWithTags: ['type:library'],
           },
           {
-            sourceTag: 'type:lib',
-            onlyDependOnLibsWithTags: ['type:lib'],
+            sourceTag: 'type:library',
+            onlyDependOnLibsWithTags: ['type:library'],
           },
           ...methodologies.map((methodology) => ({
             sourceTag: `methodology:${methodology}`,
@@ -61,7 +61,7 @@ const nxPluginConfigs = {
               ...(processorType === 'gas-id' || processorType === 'recycled-id'
                 ? ['processor:mass-id-certificate']
                 : []),
-              'type:lib',
+              'type:library',
             ],
           })),
           {
