@@ -23,17 +23,6 @@ export enum MethodologyApprovedExceptionType {
   MANDATORY_ATTRIBUTE = 'Exemption for Mandatory Attribute',
 }
 
-export enum MethodologyDocumentEventAttributeFormat {
-  CUBIC_METER = 'CUBIC_METER',
-  DATE = 'DATE',
-  KILOGRAM = 'KILOGRAM',
-  LITER = 'LITER',
-}
-
-export enum MethodologyDocumentEventAttributeType {
-  REFERENCE = 'REFERENCE',
-}
-
 export enum MethodologyDocumentEventLabel {
   APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
   AUDITOR = MethodologyActorType.AUDITOR,
@@ -70,6 +59,17 @@ export enum MethodologyDocumentEventName {
   TRANSPORT_MANIFEST = 'Transport Manifest',
   WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
   WEIGHING = 'Weighing',
+}
+
+export enum MethodologyDocumentEventAttributeFormat {
+  CUBIC_METER = 'CUBIC_METER',
+  DATE = 'DATE',
+  KILOGRAM = 'KILOGRAM',
+  LITER = 'LITER',
+}
+
+export enum MethodologyDocumentEventAttributeType {
+  REFERENCE = 'REFERENCE',
 }
 
 export enum MethodologyDocumentStatus {

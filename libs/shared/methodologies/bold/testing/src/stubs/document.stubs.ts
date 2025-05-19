@@ -45,26 +45,6 @@ export const stubDocumentReference = (
   ...partial,
 });
 
-export const stubMassAuditCertificateDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    category: DocumentCategory.METHODOLOGY,
-    subtype: DocumentSubtype.PROCESS,
-    type: random<DocumentType.GAS_ID | DocumentType.RECYCLED_ID>(),
-    ...partialDocument,
-  });
-
-export const stubCreditDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    category: DocumentCategory.METHODOLOGY,
-    subtype: random<DocumentSubtype.TCC | DocumentSubtype.TRC>(),
-    type: DocumentType.CREDIT_ORDER,
-    ...partialDocument,
-  });
-
 export const stubMassIdDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
@@ -109,15 +89,6 @@ export const generateNearbyCoordinates = (options?: {
     },
   };
 };
-
-export const stubMethodologyDefinitionDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
-  stubDocument({
-    ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.DEFINITION,
-  });
 
 export const stubParticipantHomologationGroupDocument = (
   partialDocument?: PartialDeep<Document>,

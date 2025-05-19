@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/src/driver-identification/driver-identification.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/driver-identification/src/index.ts)**
 
 ## 👥 Contributors
 

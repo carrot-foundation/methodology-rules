@@ -114,9 +114,9 @@ export class BoldStubsBuilder {
 
   private count: number;
 
-  private creditOrderDocument: Document;
+  private creditOrderDocument?: Document;
 
-  private creditOrderReference: DocumentReference;
+  private creditOrderReference?: DocumentReference;
 
   private readonly massIdActorParticipants: Map<string, MethodologyParticipant>;
 
@@ -212,7 +212,15 @@ export class BoldStubsBuilder {
   build(): BoldStubsBuilderResult {
     return {
       boldMethodologyName: this.boldMethodologyName,
-      creditOrderDocument: this.creditOrderDocument,
+      get creditOrderDocument() {
+        if (isNil(this.creditOrderDocument)) {
+          throw new Error(
+            'Credit order document not created. Call createCreditOrderDocument() first.',
+          );
+        }
+
+        return this.creditOrderDocument;
+      },
       massIdActorParticipants: this.massIdActorParticipants,
       massIdActorParticipantsAddresses: this.massIdActorParticipantsAddresses,
       get massIdAuditDocument() {
@@ -260,13 +268,15 @@ export class BoldStubsBuilder {
     this.validateCertificateDocumentsExist();
 
     this.creditOrderReference = this.createCreditOrderDocumentReference();
-    this.creditOrderDocument = stubBoldCreditOrderDocument({
+    const creditOrderDocument = stubBoldCreditOrderDocument({
       externalEventsMap,
       partialDocument: {
         ...partialDocument,
         id: this.creditOrderReference.documentId,
       },
     });
+
+    this.creditOrderDocument = creditOrderDocument;
 
     this.addCertificatesReferencesToCreditOrderDocument();
 
@@ -551,9 +561,9 @@ export class BoldStubsBuilder {
 
   private addCertificatesReferencesToCreditOrderDocument(): void {
     this.creditOrderDocument = {
-      ...this.creditOrderDocument,
+      ...this.creditOrderDocument!,
       externalEvents: [
-        ...(this.creditOrderDocument.externalEvents ?? []),
+        ...(this.creditOrderDocument?.externalEvents ?? []),
         ...this.massIdCertificateDocumentReferences.map((reference) =>
           stubDocumentEvent({
             name: RELATED,
@@ -566,12 +576,12 @@ export class BoldStubsBuilder {
   }
 
   private addCreditReferenceToMassIdCertificateDocument(
-    massIdDocument: Document,
+    massIdCertificateDocument: Document,
   ): Document {
     return {
-      ...massIdDocument,
+      ...massIdCertificateDocument,
       externalEvents: [
-        ...(massIdDocument.externalEvents ?? []),
+        ...(massIdCertificateDocument.externalEvents ?? []),
         stubDocumentEvent({
           name: RELATED,
           referencedDocument: undefined,
