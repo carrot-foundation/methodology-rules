@@ -14,6 +14,8 @@ on:
         required: true
       AWS_ACCOUNT_ID_DEVELOPMENT:
         required: true
+      SLACK_WEBHOOK_URL:
+        required: true
       nx_key:
         required: true
 
