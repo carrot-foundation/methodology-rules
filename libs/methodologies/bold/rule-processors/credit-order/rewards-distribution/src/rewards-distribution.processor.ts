@@ -12,15 +12,11 @@ import {
   loadDocument,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import {
-  eventHasMetadataAttribute,
-  eventHasName,
-} from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type CertificateRewardDistributionOutput,
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -40,8 +36,7 @@ import type {
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
-const { RULES_METADATA } = DocumentEventName;
-const { RULE_RESULT_DETAILS, UNIT_PRICE } = DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -83,16 +78,17 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       );
     }
 
-    const unitPrice = getEventAttributeValue(
-      creditOrderDocument.externalEvents?.find((event) =>
-        eventHasName(event, RULES_METADATA),
-      ),
-      UNIT_PRICE,
+    const creditsEvent = creditOrderDocument.externalEvents?.find((event) =>
+      eventHasMetadataAttribute({
+        event,
+        metadataName: CREDIT_UNIT_PRICE,
+      }),
     );
+    const unitPrice = getEventAttributeValue(creditsEvent, CREDIT_UNIT_PRICE);
 
     if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.INVALID_UNIT_PRICE,
+        this.errorProcessor.ERROR_MESSAGE.INVALID_CREDIT_UNIT_PRICE,
       );
     }
 

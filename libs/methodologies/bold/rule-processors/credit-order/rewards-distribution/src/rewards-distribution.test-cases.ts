@@ -2,11 +2,12 @@ import type { AnyObject, NonEmptyArray } from '@carrot-fndn/shared/types';
 
 import {
   BoldStubsBuilder,
+  CREDITS_EVENT_NAME,
   MASS_ID_ACTOR_PARTICIPANTS,
   METHODOLOGY_ACTOR_PARTICIPANTS,
   REWARDS_DISTRIBUTION_RULE_SLUG,
   stubBoldCertificateRewardsDistributionMetadataEvent,
-  stubBoldCreditOrderRulesMetadataEvent,
+  stubBoldCreditOrderCreditsEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -59,8 +60,8 @@ type TestCase = {
 
 const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
-const { RELATED, RULES_METADATA } = DocumentEventName;
-const { RULE_RESULT_DETAILS, UNIT_PRICE } = DocumentEventAttributeName;
+const { RELATED } = DocumentEventName;
+const { RULE_RESULT_DETAILS, CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
 const {
   APPOINTED_NGO,
   HAULER,
@@ -295,8 +296,8 @@ const buildCertificateDocuments = (options: {
     })
     .createCreditOrderDocument({
       externalEventsMap: {
-        [RULES_METADATA]: stubBoldCreditOrderRulesMetadataEvent({
-          metadataAttributes: [[UNIT_PRICE, UNIT_PRICE_VALUE]],
+        [CREDITS_EVENT_NAME]: stubBoldCreditOrderCreditsEvent({
+          metadataAttributes: [[CREDIT_UNIT_PRICE, UNIT_PRICE_VALUE]],
         }),
       },
     })
@@ -579,14 +580,14 @@ const createErrorTestCases = () => {
     .createCreditOrderDocument()
     .build();
 
-  const creditOrderDocumentWithoutRulesMetadata = {
+  const creditOrderDocumentWithoutCreditsEvent = {
     ...errorStubs.creditOrderDocument,
     externalEvents: errorStubs.creditOrderDocument.externalEvents?.filter(
-      (event) => event.name !== RULES_METADATA.toString(),
+      (event) => event.name !== CREDITS_EVENT_NAME,
     ),
   };
 
-  const certificateDocumentWithoutRulesMetadata = {
+  const certificateDocumentWithoutRuleEvent = {
     ...errorStubs.massIdCertificateDocuments[0]!,
     externalEvents:
       errorStubs.massIdCertificateDocuments[0]!.externalEvents?.filter(
@@ -595,8 +596,10 @@ const createErrorTestCases = () => {
   };
 
   return {
-    certificateDocumentWithoutRulesMetadata,
-    creditOrderDocumentWithoutRulesMetadata,
+    certificateDocumentWithoutRulesMetadata:
+      certificateDocumentWithoutRuleEvent,
+    creditOrderDocumentWithoutRulesMetadata:
+      creditOrderDocumentWithoutCreditsEvent,
     errorStubs,
   };
 };
@@ -625,9 +628,9 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     massIdCertificateDocuments: [
       ...errorTestData.errorStubs.massIdCertificateDocuments,
     ],
-    resultComment: ERROR_MESSAGES.INVALID_UNIT_PRICE,
+    resultComment: ERROR_MESSAGES.INVALID_CREDIT_UNIT_PRICE,
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `the "${UNIT_PRICE}" attribute in the ${CREDIT_ORDER} document is invalid`,
+    scenario: `the "${CREDIT_UNIT_PRICE}" attribute in the ${CREDIT_ORDER} document is invalid`,
   },
   {
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
