@@ -4,4 +4,7 @@ import { MassIdDefinitionProcessor } from './mass-id-definition.processor';
 
 const instance = new MassIdDefinitionProcessor();
 
+// Remove it
+console.log('Temporary log');
+
 export const massIdDefinitionLambda = wrapRuleIntoLambdaHandler(instance);
