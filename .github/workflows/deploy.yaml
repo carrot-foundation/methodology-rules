@@ -37,23 +37,10 @@ jobs:
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
+          environment: ${{ matrix.environment }}
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
-
-      - name: Set AWS Account ID
-        id: set-aws-account
-        run: |
-          if [[ "${{ matrix.environment }}" == "production" ]]; then
-            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}" >> $GITHUB_ENV
-          else
-            echo "AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}" >> $GITHUB_ENV
-          fi
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-        with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT_ID }}:role/GitHubActions-methodology-rules
-          aws-region: ${{ env.AWS_REGION }}
 
       - run: pnpm upload-lambdas-and-metadata ${{ matrix.environment }}
 
