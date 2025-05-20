@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const { CREDIT_ORDER } = DocumentType;
-const { RULE_RESULT_DETAILS, CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
 export const ERROR_MESSAGES = {
   CERTIFICATE_DOCUMENT_NOT_FOUND: (certificateType: unknown) =>

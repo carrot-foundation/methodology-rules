@@ -36,7 +36,7 @@ import type {
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
-const { RULE_RESULT_DETAILS, CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();

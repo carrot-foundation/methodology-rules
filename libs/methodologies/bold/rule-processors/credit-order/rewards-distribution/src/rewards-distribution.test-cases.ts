@@ -61,7 +61,7 @@ type TestCase = {
 const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
 const { RELATED } = DocumentEventName;
-const { RULE_RESULT_DETAILS, CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 const {
   APPOINTED_NGO,
   HAULER,
