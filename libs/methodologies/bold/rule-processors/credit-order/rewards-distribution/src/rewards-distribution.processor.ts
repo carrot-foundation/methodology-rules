@@ -13,8 +13,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
+  eventHasMetadataAttribute,
   eventHasName,
-  eventNameIsAnyOf,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type CertificateRewardDistributionOutput,
@@ -41,8 +41,7 @@ import { RewardsDistributionProcessorErrors } from './rewards-distribution.error
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
 const { RULES_METADATA } = DocumentEventName;
-const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
-  DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, UNIT_PRICE } = DocumentEventAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -103,13 +102,17 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   getRewardsDistributionRuleValue(
     massIdCertificateDocument: Document,
   ): CertificateRewardDistributionOutput {
-    const rulesMetadataEvent = massIdCertificateDocument.externalEvents?.find(
-      eventNameIsAnyOf([RULES_METADATA]),
-    );
-
+    const rewardsDistributionRuleEvent =
+      massIdCertificateDocument.externalEvents?.find((event) =>
+        eventHasMetadataAttribute({
+          event,
+          metadataName: DocumentEventAttributeName.SLUG,
+          metadataValues: 'rewards-distribution',
+        }),
+      );
     const rewardsDistributionRuleResultContent = getEventAttributeValue(
-      rulesMetadataEvent,
-      REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT,
+      rewardsDistributionRuleEvent,
+      RULE_RESULT_DETAILS,
     );
 
     if (

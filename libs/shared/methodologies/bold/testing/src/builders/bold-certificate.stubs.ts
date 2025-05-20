@@ -5,7 +5,6 @@ import {
   DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { random } from 'typia';
@@ -24,30 +23,32 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { RULES_METADATA } = DocumentEventName;
-const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT } = DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, SLUG } = DocumentEventAttributeName;
+
+export const REWARDS_DISTRIBUTION_RULE_SLUG = 'rewards-distribution';
 
 const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
-  [
-    REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT,
-    random<CertificateRewardDistributionOutput>(),
-  ],
+  [RULE_RESULT_DETAILS, random<CertificateRewardDistributionOutput>()],
+  [SLUG, REWARDS_DISTRIBUTION_RULE_SLUG],
 ];
 
-export const stubBoldCertificateRulesMetadataEvent = ({
+export const stubBoldCertificateRewardsDistributionMetadataEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
   stubDocumentEventWithMetadataAttributes(
     {
       ...partialDocumentEvent,
-      name: RULES_METADATA,
+      name: REWARDS_DISTRIBUTION_RULE_SLUG,
     },
     mergeMetadataAttributes(defaultRulesMetadataAttributes, metadataAttributes),
   );
 
 const boldCertificateExternalEventsMap = new Map([
-  [RULES_METADATA, stubBoldCertificateRulesMetadataEvent()],
+  [
+    REWARDS_DISTRIBUTION_RULE_SLUG,
+    stubBoldCertificateRewardsDistributionMetadataEvent(),
+  ],
 ]);
 
 export const stubBoldCertificateDocument = ({
