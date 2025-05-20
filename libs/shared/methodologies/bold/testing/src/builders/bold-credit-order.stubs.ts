@@ -6,7 +6,6 @@ import {
   DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { random } from 'typia';
@@ -25,27 +24,28 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { RULES_METADATA } = DocumentEventName;
-const { UNIT_PRICE } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
+
+export const CREDITS_EVENT_NAME = 'Credits';
 
 const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
-  [UNIT_PRICE, random<NonZeroPositive>()],
+  [CREDIT_UNIT_PRICE, random<NonZeroPositive>()],
 ];
 
-export const stubBoldCreditOrderRulesMetadataEvent = ({
+export const stubBoldCreditOrderCreditsEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
   stubDocumentEventWithMetadataAttributes(
     {
       ...partialDocumentEvent,
-      name: RULES_METADATA,
+      name: CREDITS_EVENT_NAME,
     },
     mergeMetadataAttributes(defaultRulesMetadataAttributes, metadataAttributes),
   );
 
 const boldCreditOrderExternalEventsMap = new Map([
-  [RULES_METADATA, stubBoldCreditOrderRulesMetadataEvent()],
+  [CREDITS_EVENT_NAME, stubBoldCreditOrderCreditsEvent()],
 ]);
 
 export const stubBoldCreditOrderDocument = ({
