@@ -4,7 +4,8 @@ import {
   BoldStubsBuilder,
   MASS_ID_ACTOR_PARTICIPANTS,
   METHODOLOGY_ACTOR_PARTICIPANTS,
-  stubBoldCertificateRulesMetadataEvent,
+  REWARDS_DISTRIBUTION_RULE_SLUG,
+  stubBoldCertificateRewardsDistributionMetadataEvent,
   stubBoldCreditOrderRulesMetadataEvent,
   stubDocumentEvent,
   stubParticipant,
@@ -59,8 +60,7 @@ type TestCase = {
 const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
 const { RELATED, RULES_METADATA } = DocumentEventName;
-const { REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT, UNIT_PRICE } =
-  DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, UNIT_PRICE } = DocumentEventAttributeName;
 const {
   APPOINTED_NGO,
   HAULER,
@@ -281,14 +281,12 @@ const buildCertificateDocuments = (options: {
     .createMassIdAuditDocuments()
     .createMassIdCertificateDocuments({
       externalEventsMap: {
-        [RULES_METADATA]: stubBoldCertificateRulesMetadataEvent({
-          metadataAttributes: [
-            [
-              REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT,
-              rewardsDistribution as AnyObject,
+        [REWARDS_DISTRIBUTION_RULE_SLUG]:
+          stubBoldCertificateRewardsDistributionMetadataEvent({
+            metadataAttributes: [
+              [RULE_RESULT_DETAILS, rewardsDistribution as AnyObject],
             ],
-          ],
-        }),
+          }),
       },
       partialDocument: {
         currentValue: value,
@@ -592,7 +590,7 @@ const createErrorTestCases = () => {
     ...errorStubs.massIdCertificateDocuments[0]!,
     externalEvents:
       errorStubs.massIdCertificateDocuments[0]!.externalEvents?.filter(
-        (event) => event.name !== RULES_METADATA.toString(),
+        (event) => event.name !== REWARDS_DISTRIBUTION_RULE_SLUG,
       ),
   };
 
@@ -641,6 +639,6 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
         errorTestData.errorStubs.massIdCertificateDocuments[0]!.id,
       ),
     resultStatus: RuleOutputStatus.REJECTED,
-    scenario: `a certificate document has no "${REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT}" attribute`,
+    scenario: `a certificate document has no "${RULE_RESULT_DETAILS}" attribute`,
   },
 ];
