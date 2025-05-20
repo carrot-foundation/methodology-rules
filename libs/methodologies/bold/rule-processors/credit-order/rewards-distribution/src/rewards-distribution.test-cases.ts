@@ -582,7 +582,7 @@ const createErrorTestCases = () => {
   const creditOrderDocumentWithoutRulesMetadata = {
     ...errorStubs.creditOrderDocument,
     externalEvents: errorStubs.creditOrderDocument.externalEvents?.filter(
-      (event) => event.name !== RULES_METADATA,
+      (event) => event.name !== RULES_METADATA.toString(),
     ),
   };
 
