@@ -29,6 +29,8 @@ jobs:
 
       - uses: ./.github/actions/prepare-to-run-nx
         with:
+          environment: development
+          aws_account_id_production: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
