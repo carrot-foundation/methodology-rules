@@ -1,4 +1,5 @@
 export * from './array.helpers';
+export * from './assert.typia';
 export * from './calculate-distance-between-coordinates';
 export * from './common.helpers';
 export * from './document.helpers';

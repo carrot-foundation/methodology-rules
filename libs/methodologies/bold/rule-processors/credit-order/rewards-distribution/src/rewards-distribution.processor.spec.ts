@@ -37,7 +37,7 @@ describe('RewardsDistributionProcessor', () => {
         expectedActorsResult,
         expectedCertificateTotalValue,
         massIdCertificateDocuments,
-        unitPrice,
+        unitPriceNumberPart,
       }) => {
         spyOnLoadDocument(creditOrderDocument);
         spyOnDocumentQueryServiceLoad(
@@ -86,7 +86,7 @@ describe('RewardsDistributionProcessor', () => {
         expect(
           Math.abs(totalAmount.minus(totalCreditPrice).toNumber()) < 0.000_005,
         ).toBeTruthy();
-        expect(creditUnitPrice).toBe(String(unitPrice));
+        expect(creditUnitPrice).toBe(String(unitPriceNumberPart));
         expect(massIdCertificateTotalValue).toBe(
           String(expectedCertificateTotalValue),
         );
