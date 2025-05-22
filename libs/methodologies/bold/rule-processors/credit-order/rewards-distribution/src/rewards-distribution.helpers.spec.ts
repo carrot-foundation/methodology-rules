@@ -512,10 +512,10 @@ describe('Rewards Distribution Helpers', () => {
         parseUnitPriceNumberPartOrReturnUndefined(undefined),
       ).toBeUndefined();
       expect(
-        parseUnitPriceNumberPartOrReturnUndefined(null as any),
+        parseUnitPriceNumberPartOrReturnUndefined(null as never),
       ).toBeUndefined();
       expect(
-        parseUnitPriceNumberPartOrReturnUndefined(123 as any),
+        parseUnitPriceNumberPartOrReturnUndefined(123 as never),
       ).toBeUndefined();
     });
 

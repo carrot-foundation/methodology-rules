@@ -1,12 +1,14 @@
+import type {
+  MethodologyDocumentEventAttributeValue,
+  type NonEmptyString,
+  NonZeroPositive,
+} from '@carrot-fndn/shared/types';
+
 import {
   assertNonEmptyString,
   sumBigNumbers,
 } from '@carrot-fndn/shared/helpers';
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type NonEmptyString,
-  NonZeroPositive,
-} from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
@@ -18,8 +20,6 @@ import type {
   RewardsDistribution,
   RuleSubject,
 } from './rewards-distribution.types';
-
-import { MethodologyDocumentEventAttributeValue } from './../../../../../../shared/types/src/methodology/methodology-document-event.types';
 
 const DOLLAR_REGEX = /^(\d+(?:\.\d{1,6})?)\sUSD$/;
 
