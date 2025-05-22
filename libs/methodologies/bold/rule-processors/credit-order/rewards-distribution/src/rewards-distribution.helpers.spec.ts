@@ -22,6 +22,7 @@ import {
   formatDecimalPlaces,
   formatPercentage,
   getAggregateParticipantKey,
+  parseUnitPriceNumberPartOrReturnUndefined,
 } from './rewards-distribution.helpers';
 
 describe('Rewards Distribution Helpers', () => {
@@ -481,6 +482,68 @@ describe('Rewards Distribution Helpers', () => {
 
       expect(actors.get(participantType1)?.actorType).toEqual(actorType1);
       expect(actors.get(participantType2)?.actorType).toEqual(actorType2);
+    });
+  });
+
+  describe('parseUnitPriceNumberPartOrReturnUndefined', () => {
+    it('should parse a valid unit price string with USD', () => {
+      expect(parseUnitPriceNumberPartOrReturnUndefined('0.15333 USD')).toBe(
+        0.153_33,
+      );
+      expect(parseUnitPriceNumberPartOrReturnUndefined('1 USD')).toBe(1);
+      expect(parseUnitPriceNumberPartOrReturnUndefined('123.456789 USD')).toBe(
+        123.456_789,
+      );
+    });
+
+    it('should return undefined for missing USD', () => {
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('0.15333'),
+      ).toBeUndefined();
+      expect(parseUnitPriceNumberPartOrReturnUndefined('1')).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('123.456789'),
+      ).toBeUndefined();
+    });
+
+    it('should return undefined for empty or non-string input', () => {
+      expect(parseUnitPriceNumberPartOrReturnUndefined('')).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined(undefined),
+      ).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined(null as any),
+      ).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined(123 as any),
+      ).toBeUndefined();
+    });
+
+    it('should return undefined for zero or negative values', () => {
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('0 USD'),
+      ).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('-1 USD'),
+      ).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('-0.1 USD'),
+      ).toBeUndefined();
+    });
+
+    it('should return undefined for malformed strings', () => {
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('USD 0.15333'),
+      ).toBeUndefined();
+      expect(parseUnitPriceNumberPartOrReturnUndefined('USD')).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('0.15333 usd'),
+      ).toBeUndefined();
+      expect(
+        parseUnitPriceNumberPartOrReturnUndefined('USD 1'),
+      ).toBeUndefined();
+      expect(parseUnitPriceNumberPartOrReturnUndefined('1USD')).toBeUndefined();
+      expect(parseUnitPriceNumberPartOrReturnUndefined('USD1')).toBeUndefined();
     });
   });
 });

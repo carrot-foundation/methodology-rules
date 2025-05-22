@@ -34,7 +34,10 @@ import type {
 } from './rewards-distribution.types';
 
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
-import { calculateRewardsDistribution } from './rewards-distribution.helpers';
+import {
+  calculateRewardsDistribution,
+  parseUnitPriceNumberPartOrReturnUndefined,
+} from './rewards-distribution.helpers';
 
 const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
@@ -63,7 +66,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     });
   }
 
-  async getcreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
+  async getCreditUnitPrice(ruleInput: RuleInput): Promise<NonZeroPositive> {
     const creditOrderDocument = await loadDocument(
       this.context.documentLoaderService,
       toDocumentKey({
@@ -84,15 +87,19 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         metadataName: CREDIT_UNIT_PRICE,
       }),
     );
+
     const unitPrice = getEventAttributeValue(creditsEvent, CREDIT_UNIT_PRICE);
 
-    if (!is<NonZeroPositive>(unitPrice) || new BigNumber(unitPrice).isNaN()) {
+    const unitPriceNumberPart =
+      parseUnitPriceNumberPartOrReturnUndefined(unitPrice);
+
+    if (isNil(unitPriceNumberPart)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.INVALID_CREDIT_UNIT_PRICE,
       );
     }
 
-    return unitPrice;
+    return unitPriceNumberPart;
   }
 
   getRewardsDistributionRuleValue(
@@ -147,7 +154,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     return {
-      creditUnitPrice: new BigNumber(await this.getcreditUnitPrice(ruleInput)),
+      creditUnitPrice: new BigNumber(await this.getCreditUnitPrice(ruleInput)),
       resultContentsWithMassIdCertificateValue,
     };
   }
