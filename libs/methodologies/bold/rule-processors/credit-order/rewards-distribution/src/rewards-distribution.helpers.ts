@@ -1,6 +1,6 @@
 import type {
   MethodologyDocumentEventAttributeValue,
-  type NonEmptyString,
+  NonEmptyString,
   NonZeroPositive,
 } from '@carrot-fndn/shared/types';
 
