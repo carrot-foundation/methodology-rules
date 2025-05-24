@@ -71,7 +71,7 @@ export interface MethodologyDocumentEventAttribute {
 
 export interface MethodologyDocumentEventAttributeReference {
   documentId: string;
-  eventId: string;
+  eventId?: string | undefined;
 }
 
 export type MethodologyDocumentEventAttributeValue =
