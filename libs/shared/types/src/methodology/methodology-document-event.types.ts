@@ -67,6 +67,8 @@ export interface MethodologyDocumentEventAttribute {
   sensitive?: boolean | undefined;
   type?: MethodologyDocumentEventAttributeType | undefined;
   value: MethodologyDocumentEventAttributeValue | undefined;
+  valuePrefix?: NonEmptyString | undefined;
+  valueSuffix?: NonEmptyString | undefined;
 }
 
 export interface MethodologyDocumentEventAttributeReference {
