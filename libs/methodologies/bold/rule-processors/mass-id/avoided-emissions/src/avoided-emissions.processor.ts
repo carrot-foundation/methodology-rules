@@ -1,5 +1,4 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -23,7 +22,10 @@ import {
 import {
   type Document,
   DocumentEventAttributeName,
+  DocumentEventName,
   DocumentSubtype,
+  MassIdOrganicSubtype,
+  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -32,29 +34,37 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { is } from 'typia';
 
+import { AVOIDED_EMISSIONS_BASELINE_MATRIX } from './avoided-emissions.constants';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
+import {
+  type RuleSubject,
+  WasteGeneratorBaselinesValue,
+} from './avoided-emissions.types';
 
-const { EMISSION_FACTOR } = DocumentEventAttributeName;
+const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
+  DocumentEventAttributeName;
+const { RECYCLING_BASELINE } = DocumentEventName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (
     avoidedEmissions: number,
-    emissionIndex: number,
+    exceedingemissionCoefficient: number,
     currentValue: number,
   ) =>
-    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula ${emissionIndex} × ${currentValue} = ${avoidedEmissions} [formula: emission_index × current_value = avoided_emissions].`,
-  MISSING_EMISSION_FACTOR: `The "${EMISSION_FACTOR}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula (1 - ${exceedingemissionCoefficient}) × ${currentValue} = ${avoidedEmissions} [formula: (1 - emission_index) × current_value = avoided_emissions].`,
+  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+  MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
+    wasteSubtype: MassIdOrganicSubtype,
+  ) =>
+    `The "${BASELINES}" was not found in the "Waste Generator Homologation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
 } as const;
 
-interface DocumentPair {
+interface Documents {
   massIdDocument: Document;
   recyclerHomologationDocument: Document;
-}
-
-interface RuleSubject {
-  emissionFactor: MethodologyDocumentEventAttributeValue | undefined;
-  massIdDocumentValue: number;
+  wasteGeneratorHomologationDocument: Document;
 }
 
 export class AvoidedEmissionsProcessor extends RuleDataProcessor {
@@ -81,21 +91,42 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
   }
 
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
-    const { emissionFactor, massIdDocumentValue } = ruleSubject;
+    const {
+      exceedingEmissionCoefficient: exceedingemissionCoefficient,
+      massIdDocumentValue,
+      wasteGeneratorBaseline,
+      wasteSubtype,
+    } = ruleSubject;
 
-    if (!isNonZeroPositive(emissionFactor)) {
+    if (!isNonZeroPositive(exceedingemissionCoefficient)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_EMISSION_FACTOR,
+        resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
         resultStatus: RuleOutputStatus.REJECTED,
       };
     }
 
-    const avoidedEmissions = emissionFactor * massIdDocumentValue;
+    if (isNil(wasteGeneratorBaseline)) {
+      return {
+        resultComment:
+          RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
+            wasteSubtype,
+          ),
+        resultStatus: RuleOutputStatus.REJECTED,
+      };
+    }
+
+    const avoidedEmissionsBaseline =
+      AVOIDED_EMISSIONS_BASELINE_MATRIX[wasteSubtype][wasteGeneratorBaseline];
+
+    const avoidedEmissions =
+      (1 - exceedingemissionCoefficient) *
+      avoidedEmissionsBaseline *
+      massIdDocumentValue;
 
     return {
       resultComment: RESULT_COMMENTS.APPROVED(
         avoidedEmissions,
-        emissionFactor,
+        exceedingemissionCoefficient,
         massIdDocumentValue,
       ),
       resultContent: {
@@ -125,24 +156,39 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIdDocument,
     recyclerHomologationDocument,
-  }: DocumentPair): RuleSubject {
+    wasteGeneratorHomologationDocument,
+  }: Documents): RuleSubject {
     const emissionAndCompostingMetricsEvent =
       getEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
 
+    if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
+      );
+    }
+
+    const wasteGeneratorBaseline = this.getWasteGeneratorBaselineByWasteSubtype(
+      wasteGeneratorHomologationDocument,
+      massIdDocument.subtype,
+    );
+
     return {
-      emissionFactor: getEventAttributeValue(
+      exceedingEmissionCoefficient: getEventAttributeValue(
         emissionAndCompostingMetricsEvent,
-        EMISSION_FACTOR,
+        EXCEEDING_EMISSION_COEFFICIENT,
       ),
       massIdDocumentValue: massIdDocument.currentValue,
+      wasteGeneratorBaseline,
+      wasteSubtype: massIdDocument.subtype,
     };
   }
 
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
-  ): Promise<DocumentPair> {
+  ): Promise<Documents> {
     let recyclerHomologationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
+    let wasteGeneratorHomologationDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentReference = mapDocumentReference(document);
@@ -152,6 +198,13 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
         documentReference.subtype === DocumentSubtype.RECYCLER
       ) {
         recyclerHomologationDocument = document;
+      }
+
+      if (
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
+        documentReference.subtype === DocumentSubtype.WASTE_GENERATOR
+      ) {
+        wasteGeneratorHomologationDocument = document;
       }
 
       if (MASS_ID.matches(documentReference)) {
@@ -169,10 +222,38 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
       this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
     );
 
+    this.validateOrThrow(
+      isNil(wasteGeneratorHomologationDocument),
+      this.processorErrors.ERROR_MESSAGE
+        .MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT,
+    );
+
     return {
       massIdDocument: massIdDocument as Document,
       recyclerHomologationDocument: recyclerHomologationDocument as Document,
+      wasteGeneratorHomologationDocument:
+        wasteGeneratorHomologationDocument as Document,
     };
+  }
+
+  private getWasteGeneratorBaselineByWasteSubtype(
+    wasteGeneratorHomologationDocument: Document,
+    wasteSubtype: MassIdOrganicSubtype,
+  ): MethodologyBaseline | undefined {
+    const recyclingBaselineEvent =
+      wasteGeneratorHomologationDocument.externalEvents?.find(
+        (event) => event.name === RECYCLING_BASELINE.toString(),
+      );
+
+    const baselines = getEventAttributeValue(recyclingBaselineEvent, BASELINES);
+
+    if (!is<WasteGeneratorBaselinesValue>(baselines)) {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
+      );
+    }
+
+    return baselines[wasteSubtype];
   }
 
   private validateOrThrow(condition: boolean, errorMessage: string): void {
