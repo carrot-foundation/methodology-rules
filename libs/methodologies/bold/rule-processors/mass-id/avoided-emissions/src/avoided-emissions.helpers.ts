@@ -7,11 +7,10 @@ import {
   MassIdOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { is } from 'typia';
 
 import { AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
-import { WasteGeneratorBaselineValues } from './avoided-emissions.types';
+import { isWasteGeneratorBaselineValues } from './avoided-emissions.typia';
 
 const { BASELINES } = DocumentEventAttributeName;
 const { RECYCLING_BASELINES } = DocumentEventName;
@@ -49,7 +48,7 @@ export const getWasteGeneratorBaselineByWasteSubtype = (
 
   const baselines = getEventAttributeValue(recyclingBaselineEvent, BASELINES);
 
-  if (!is<WasteGeneratorBaselineValues>(baselines)) {
+  if (!isWasteGeneratorBaselineValues(baselines)) {
     throw processorErrors.getKnownError(
       processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
     );
