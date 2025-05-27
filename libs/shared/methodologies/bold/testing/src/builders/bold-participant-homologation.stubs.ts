@@ -3,6 +3,8 @@ import {
   type Document,
   DocumentEventHomologationStatus,
   type DocumentEventScaleType,
+  MassIdOrganicSubtype,
+  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentCategory,
@@ -33,10 +35,12 @@ const {
   EMISSION_AND_COMPOSTING_METRICS,
   HOMOLOGATION_RESULT,
   MONITORING_SYSTEMS_AND_EQUIPMENT,
+  RECYCLING_BASELINES,
 } = DocumentEventName;
 const {
+  BASELINES,
   EFFECTIVE_DATE,
-  EMISSION_FACTOR,
+  EXCEEDING_EMISSION_COEFFICIENT,
   EXPIRATION_DATE,
   HOMOLOGATION_STATUS,
   SCALE_TYPE,
@@ -73,7 +77,11 @@ export const stubBoldHomologationResultEvent = ({
 
 const defaultEmissionAndCompostingMetricsEventMetadataAttributes: MetadataAttributeParameter[] =
   [
-    [EMISSION_FACTOR, faker.number.float({ max: 1, min: 0 })],
+    {
+      name: EXCEEDING_EMISSION_COEFFICIENT,
+      value: faker.number.float({ max: 1, min: 0 }),
+      valueSuffix: 'tCO2e/ton',
+    },
     [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
   ];
 
@@ -88,6 +96,29 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
     },
     mergeMetadataAttributes(
       defaultEmissionAndCompostingMetricsEventMetadataAttributes,
+      metadataAttributes,
+    ),
+  );
+
+const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParameter[] =
+  [
+    [
+      BASELINES,
+      { [random<MassIdOrganicSubtype>()]: random<MethodologyBaseline>() },
+    ],
+  ];
+
+export const stubBoldRecyclingBaselinesEvent = ({
+  metadataAttributes,
+  partialDocumentEvent,
+}: StubBoldDocumentEventParameters = {}) =>
+  stubDocumentEventWithMetadataAttributes(
+    {
+      ...partialDocumentEvent,
+      name: RECYCLING_BASELINES,
+    },
+    mergeMetadataAttributes(
+      defaultRecyclingBaselinesEventMetadataAttributes,
       metadataAttributes,
     ),
   );

@@ -25,6 +25,7 @@ export enum DocumentEventAttachmentLabel {
 
 export enum DocumentEventAttributeName {
   APPROVED_EXCEPTIONS = 'Approved Exceptions',
+  BASELINES = 'Baselines',
   CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
   CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
   CONTAINER_CAPACITY = 'Container Capacity',
@@ -37,8 +38,8 @@ export enum DocumentEventAttributeName {
   DRIVER_IDENTIFIER = 'Driver Identifier',
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION = 'Driver Identifier Exemption Justification',
   EFFECTIVE_DATE = 'Effective Date',
-  EMISSION_FACTOR = 'Emission Factor',
   EVALUATION_RESULT = 'Evaluation Result',
+  EXCEEDING_EMISSION_COEFFICIENT = 'Exceeding Emission Coefficient (per ton)',
   EXEMPTION_JUSTIFICATION = 'Exemption Justification',
   EXPIRATION_DATE = 'Expiration Date',
   GROSS_WEIGHT = 'Gross Weight',
@@ -97,6 +98,7 @@ export enum DocumentEventName {
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
   PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,
+  RECYCLING_BASELINES = MethodologyDocumentEventName.RECYCLING_BASELINES,
   RECYCLING_MANIFEST = MethodologyDocumentEventName.RECYCLING_MANIFEST,
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
@@ -194,6 +196,12 @@ export enum MassIdDocumentActorType {
 
 export enum MeasurementUnit {
   KG = 'kg',
+}
+
+export enum MethodologyBaseline {
+  LANDFILLS_WITH_FLARING_OF_METHANE_GAS = 'Landfills with flaring of methane gas (and/or capture of biogas)',
+  LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS = 'Landfills without flaring of methane gas',
+  OPEN_AIR_DUMP = 'Open-air dump',
 }
 
 export enum MethodologyDocumentActorType {

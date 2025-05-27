@@ -25,6 +25,7 @@ describe('AvoidedEmissionsProcessor', () => {
         resultComment,
         resultContent,
         resultStatus,
+        subtype,
       }) => {
         const {
           massIdAuditDocument,
@@ -34,6 +35,7 @@ describe('AvoidedEmissionsProcessor', () => {
           .createMassIdDocuments({
             partialDocument: {
               currentValue: massIdDocumentValue as number,
+              subtype,
             },
           })
           .createMassIdAuditDocuments()
