@@ -1,0 +1,65 @@
+---
+description: If the user's prompt involves improving code quality, simplifying logic, renaming symbols, cleaning up structure, or explicitly mentions refactoring — interpret it as a request to refactor the code using principles from Martin Fowler's Refactoring book. Prioritize safe transformations that enhance readability, maintainability, and clarity without changing external behavior.
+globs:
+alwaysApply: false
+---
+# Refactoring Rules for Carrot Methodology Rules
+
+## Purpose
+Guide safe, incremental improvements to code quality, readability, and maintainability in this Nx monorepo. All refactoring must preserve external behavior and follow project standards.
+
+## General Principles
+- **Prefer clarity over cleverness**
+- **Make small, safe changes** (test after each step)
+- **Follow TypeScript and ESLint rules** (see `eslint.config.js`)
+- **Keep public APIs stable** unless a breaking change is justified
+- **Leave code better than you found it**
+
+## What to Refactor
+- Complex or deeply nested logic
+- Large functions or files (extract methods, split files)
+- Poorly named variables, functions, or classes
+- Magic numbers/strings (replace with constants)
+- Dead, duplicate, or commented-out code
+- Repeated patterns (extract reusable utilities)
+
+## How to Refactor
+- **Extract Function/Variable/Class**: Isolate logic for clarity and reuse
+- **Rename for Intent**: Use descriptive names (see ESLint/prettier rules)
+- **Decompose Conditionals**: Simplify with early returns or polymorphism
+- **Encapsulate Collections/State**: Use objects or classes for related data
+- **Move Code**: Place logic where it belongs (e.g., shared libs)
+- **Separate Query from Modifier**: Functions should either return data or change state, not both
+- **Write/Update Tests**: Cover all refactored logic with Jest
+
+## Project-Specific Practices
+- Use TypeScript for all code
+- Follow Nx module boundaries and tags
+- Use `pnpm` and `nvm` for environment management
+- Run `pnpm lint:all` and `pnpm test:all` after changes
+- Use commit scopes from `.vscode/settings.json` and conventional commits
+- Document complex refactors in PRs (see `.github/pull_request_template.md`)
+
+## Example Techniques (from Refactoring Guru)
+- Extract Function / Inline Function
+- Extract Variable / Inline Variable
+- Replace Conditional with Polymorphism
+- Introduce Parameter Object
+- Encapsulate Collection
+- Move Function / Move Field
+- Remove Middle Man
+- Decompose Conditional
+
+## Constraints
+- Do **not** introduce new features or bugs
+- Do **not** change public APIs unless necessary
+- Do **not** ignore lint or type errors
+- Do **not** leave code untested
+
+## If Unsure
+- Add a TODO or comment for risky changes
+- Ask for review on complex refactors
+
+---
+
+For more patterns and examples, see [Refactoring Guru](mdc:https:/refactoring.guru), and always align with the latest project and ESLint configs.
