@@ -100,7 +100,7 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
     ),
   );
 
-const defaultRecyclingBaselineEventMetadataAttributes: MetadataAttributeParameter[] =
+const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParameter[] =
   [
     [
       BASELINES,
@@ -108,7 +108,7 @@ const defaultRecyclingBaselineEventMetadataAttributes: MetadataAttributeParamete
     ],
   ];
 
-export const stubBoldRecyclingBaselineEvent = ({
+export const stubBoldRecyclingBaselinesEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
@@ -118,7 +118,7 @@ export const stubBoldRecyclingBaselineEvent = ({
       name: RECYCLING_BASELINES,
     },
     mergeMetadataAttributes(
-      defaultRecyclingBaselineEventMetadataAttributes,
+      defaultRecyclingBaselinesEventMetadataAttributes,
       metadataAttributes,
     ),
   );

@@ -200,7 +200,7 @@ export enum MeasurementUnit {
 }
 
 export enum MethodologyBaseline {
-  LANDFILLS_WITH_FLARING_OF_METHANE_GAS = 'Landfills with flaring of methane gas',
+  LANDFILLS_WITH_FLARING_OF_METHANE_GAS = 'Landfills with flaring of methane gas (and/or capture of biogas)',
   LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS = 'Landfills without flaring of methane gas',
   OPEN_AIR_DUMP = 'Open-air dump',
 }

@@ -3,7 +3,10 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-export const AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON: Record<
+/**
+ * Read the file README.md for more information about the constants in this file.
+ */
+export const AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
   MassIdOrganicSubtype,
   Record<MethodologyBaseline, number>
 > = {

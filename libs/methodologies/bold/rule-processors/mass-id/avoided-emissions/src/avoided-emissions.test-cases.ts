@@ -1,7 +1,7 @@
 import {
   BoldStubsBuilder,
   stubBoldEmissionAndCompostingMetricsEvent,
-  stubBoldRecyclingBaselineEvent,
+  stubBoldRecyclingBaselinesEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   Document,
@@ -13,7 +13,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
+import { AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 import { RESULT_COMMENTS } from './avoided-emissions.processor';
 
@@ -28,7 +28,7 @@ const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
 const exceedingEmissionCoefficient = 0.8;
 const massIdDocumentValue = 100;
 const baselineValue =
-  AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON[subtype][baseline];
+  AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
 const expectedAvoidedEmissions =
   (1 - exceedingEmissionCoefficient) * baselineValue * massIdDocumentValue;
 
@@ -52,7 +52,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -60,6 +60,14 @@ export const avoidedEmissionsTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultContent: {
+      ruleSubject: {
+        exceedingEmissionCoefficient: undefined,
+        massIdDocumentValue: 1,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the Recycler Homologation document does not have the "${EXCEEDING_EMISSION_COEFFICIENT}" attribute`,
     subtype,
@@ -86,7 +94,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -96,11 +104,18 @@ export const avoidedEmissionsTestCases = [
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.APPROVED(
       expectedAvoidedEmissions,
+      baselineValue,
       exceedingEmissionCoefficient,
       massIdDocumentValue,
     ),
     resultContent: {
       avoidedEmissions: expectedAvoidedEmissions,
+      ruleSubject: {
+        exceedingEmissionCoefficient,
+        massIdDocumentValue,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
     },
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: `the calculation is correct with all required attributes`,
@@ -128,7 +143,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -139,6 +154,14 @@ export const avoidedEmissionsTestCases = [
     resultComment: RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
       MassIdOrganicSubtype.DOMESTIC_SLUDGE,
     ),
+    resultContent: {
+      ruleSubject: {
+        exceedingEmissionCoefficient,
+        massIdDocumentValue,
+        wasteGeneratorBaseline: undefined,
+        wasteSubtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+      },
+    },
     resultStatus: RuleOutputStatus.REJECTED,
     scenario: `the Waste Generator Homologation document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
     subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
@@ -215,7 +238,7 @@ export const avoidedEmissionsErrorTestCases = [
           ...(wasteGeneratorHomologationDocument.externalEvents?.filter(
             (event) => event.name !== RECYCLING_BASELINES.toString(),
           ) ?? []),
-          stubBoldRecyclingBaselineEvent({
+          stubBoldRecyclingBaselinesEvent({
             metadataAttributes: [[BASELINES, undefined]],
           }),
         ],
