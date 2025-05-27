@@ -23,7 +23,7 @@ export const AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
   [MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]: {
     [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459,
     [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.94,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.727,
+    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.726,
   },
   [MassIdOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE]: {
     [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.499,
@@ -38,7 +38,7 @@ export const AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
   [MassIdOrganicSubtype.TOBACCO]: {
     [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459,
     [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.94,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.727,
+    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.726,
   },
   [MassIdOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]: {
     [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.72,
