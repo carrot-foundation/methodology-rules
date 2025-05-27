@@ -99,6 +99,7 @@ export enum DocumentEventName {
   PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,
   RECYCLING_BASELINE = MethodologyDocumentEventName.RECYCLING_BASELINE,
+  RECYCLING_BASELINES = MethodologyDocumentEventName.RECYCLING_BASELINES,
   RECYCLING_MANIFEST = MethodologyDocumentEventName.RECYCLING_MANIFEST,
   RELATED = MethodologyDocumentEventName.RELATED,
   RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,

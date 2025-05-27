@@ -35,7 +35,7 @@ const {
   EMISSION_AND_COMPOSTING_METRICS,
   HOMOLOGATION_RESULT,
   MONITORING_SYSTEMS_AND_EQUIPMENT,
-  RECYCLING_BASELINE,
+  RECYCLING_BASELINES,
 } = DocumentEventName;
 const {
   BASELINES,
@@ -115,7 +115,7 @@ export const stubBoldRecyclingBaselineEvent = ({
   stubDocumentEventWithMetadataAttributes(
     {
       ...partialDocumentEvent,
-      name: RECYCLING_BASELINE,
+      name: RECYCLING_BASELINES,
     },
     mergeMetadataAttributes(
       defaultRecyclingBaselineEventMetadataAttributes,

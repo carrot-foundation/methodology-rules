@@ -13,6 +13,6 @@ export interface RuleSubject {
   wasteSubtype: MassIdOrganicSubtype;
 }
 
-export type WasteGeneratorBaselinesValue = Partial<
+export type WasteGeneratorBaselineValues = Partial<
   Record<MassIdOrganicSubtype, MethodologyBaseline>
 >;

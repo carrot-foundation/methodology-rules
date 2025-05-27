@@ -13,21 +13,22 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { AVOIDED_EMISSIONS_BASELINE_MATRIX } from './avoided-emissions.constants';
+import { AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 import { RESULT_COMMENTS } from './avoided-emissions.processor';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
-const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINE } =
+const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINES } =
   DocumentEventName;
 
 const subtype = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
 const exceedingEmissionCoefficient = 0.8;
 const massIdDocumentValue = 100;
-const baselineValue = AVOIDED_EMISSIONS_BASELINE_MATRIX[subtype][baseline];
+const baselineValue =
+  AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON[subtype][baseline];
 const expectedAvoidedEmissions =
   (1 - exceedingEmissionCoefficient) * baselineValue * massIdDocumentValue;
 
@@ -51,7 +52,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINE]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -85,7 +86,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINE]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -127,7 +128,7 @@ export const avoidedEmissionsTestCases = [
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [RECYCLING_BASELINE]: stubBoldRecyclingBaselineEvent({
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselineEvent({
               metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
             }),
           },
@@ -212,7 +213,7 @@ export const avoidedEmissionsErrorTestCases = [
         ...wasteGeneratorHomologationDocument,
         externalEvents: [
           ...(wasteGeneratorHomologationDocument.externalEvents?.filter(
-            (event) => event.name !== RECYCLING_BASELINE.toString(),
+            (event) => event.name !== RECYCLING_BASELINES.toString(),
           ) ?? []),
           stubBoldRecyclingBaselineEvent({
             metadataAttributes: [[BASELINES, undefined]],

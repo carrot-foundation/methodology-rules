@@ -63,6 +63,7 @@ export enum MethodologyDocumentEventName {
   PICK_UP = 'Pick-up',
   RECYCLED = 'Recycled',
   RECYCLING_BASELINE = 'Recycling Baseline',
+  RECYCLING_BASELINES = 'Recycling Baselines',
   RECYCLING_MANIFEST = 'Recycling Manifest',
   RELATED = 'RELATED',
   RULE_EXECUTION = 'RULE EXECUTION',

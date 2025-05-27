@@ -36,24 +36,24 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
-import { AVOIDED_EMISSIONS_BASELINE_MATRIX } from './avoided-emissions.constants';
+import { AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
 import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
 import {
   type RuleSubject,
-  WasteGeneratorBaselinesValue,
+  WasteGeneratorBaselineValues,
 } from './avoided-emissions.types';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
-const { RECYCLING_BASELINE } = DocumentEventName;
+const { RECYCLING_BASELINES } = DocumentEventName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (
     avoidedEmissions: number,
-    exceedingemissionCoefficient: number,
+    exceedingEmissionCoefficient: number,
     currentValue: number,
   ) =>
-    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula (1 - ${exceedingemissionCoefficient}) × ${currentValue} = ${avoidedEmissions} [formula: (1 - emission_index) × current_value = avoided_emissions].`,
+    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula (1 - ${exceedingEmissionCoefficient}) × ${currentValue} = ${avoidedEmissions} [formula: (1 - emission_index) × current_value = avoided_emissions].`,
   MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
   MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
     wasteSubtype: MassIdOrganicSubtype,
@@ -92,13 +92,13 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
 
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
     const {
-      exceedingEmissionCoefficient: exceedingemissionCoefficient,
+      exceedingEmissionCoefficient,
       massIdDocumentValue,
       wasteGeneratorBaseline,
       wasteSubtype,
     } = ruleSubject;
 
-    if (!isNonZeroPositive(exceedingemissionCoefficient)) {
+    if (!isNonZeroPositive(exceedingEmissionCoefficient)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
         resultStatus: RuleOutputStatus.REJECTED,
@@ -116,17 +116,20 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     }
 
     const avoidedEmissionsBaseline =
-      AVOIDED_EMISSIONS_BASELINE_MATRIX[wasteSubtype][wasteGeneratorBaseline];
+      AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON[wasteSubtype][
+        wasteGeneratorBaseline
+      ];
 
-    const avoidedEmissions =
-      (1 - exceedingemissionCoefficient) *
-      avoidedEmissionsBaseline *
-      massIdDocumentValue;
+    const avoidedEmissions = this.calculateAvoidedEmissions(
+      exceedingEmissionCoefficient,
+      avoidedEmissionsBaseline,
+      massIdDocumentValue,
+    );
 
     return {
       resultComment: RESULT_COMMENTS.APPROVED(
         avoidedEmissions,
-        exceedingemissionCoefficient,
+        exceedingEmissionCoefficient,
         massIdDocumentValue,
       ),
       resultContent: {
@@ -183,6 +186,18 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     };
   }
 
+  private calculateAvoidedEmissions(
+    exceedingEmissionCoefficient: number,
+    avoidedEmissionsBaseline: number,
+    massIdDocumentValue: number,
+  ): number {
+    return (
+      (1 - exceedingEmissionCoefficient) *
+      avoidedEmissionsBaseline *
+      massIdDocumentValue
+    );
+  }
+
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<Documents> {
@@ -212,18 +227,18 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
       }
     });
 
-    this.validateOrThrow(
-      isNil(recyclerHomologationDocument),
+    this.throwIfMissing(
+      recyclerHomologationDocument,
       this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
     );
 
-    this.validateOrThrow(
-      isNil(massIdDocument),
+    this.throwIfMissing(
+      massIdDocument,
       this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
     );
 
-    this.validateOrThrow(
-      isNil(wasteGeneratorHomologationDocument),
+    this.throwIfMissing(
+      wasteGeneratorHomologationDocument,
       this.processorErrors.ERROR_MESSAGE
         .MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT,
     );
@@ -242,12 +257,12 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
   ): MethodologyBaseline | undefined {
     const recyclingBaselineEvent =
       wasteGeneratorHomologationDocument.externalEvents?.find(
-        (event) => event.name === RECYCLING_BASELINE.toString(),
+        (event) => event.name === RECYCLING_BASELINES.toString(),
       );
 
     const baselines = getEventAttributeValue(recyclingBaselineEvent, BASELINES);
 
-    if (!is<WasteGeneratorBaselinesValue>(baselines)) {
+    if (!is<WasteGeneratorBaselineValues>(baselines)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
       );
@@ -256,8 +271,8 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
     return baselines[wasteSubtype];
   }
 
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
-    if (condition) {
+  private throwIfMissing<T>(value: T | undefined, errorMessage: string): void {
+    if (isNil(value)) {
       throw this.processorErrors.getKnownError(errorMessage);
     }
   }
