@@ -1,5 +1,6 @@
-import { WasteGeneratorBaselineValues } from 'libs/methodologies/bold/rule-processors/mass-id/avoided-emissions/src/avoided-emissions.types';
 import { createIs } from 'typia';
+
+import { WasteGeneratorBaselineValues } from './avoided-emissions.types';
 
 export const isWasteGeneratorBaselineValues =
   createIs<WasteGeneratorBaselineValues>();
