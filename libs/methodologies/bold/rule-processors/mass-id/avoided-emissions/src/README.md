@@ -1,6 +1,6 @@
-# BOLD Carbon CH₄ – Baseline Emission Factors
+# BOLD Carbon CH₄ – [AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON](./avoided-emissions.constants.ts)
 
-This module provides precomputed baseline methane emissions for organic waste disposal scenarios as defined in the **BOLD Carbon CH₄ Methodology**.
+This constant file provides precomputed baseline methane emissions for organic waste disposal scenarios as defined in the **BOLD Carbon CH₄ Methodology**.
 
 ## 📘 Context
 
