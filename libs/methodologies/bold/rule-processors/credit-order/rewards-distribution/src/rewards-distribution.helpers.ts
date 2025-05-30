@@ -1,16 +1,8 @@
-import type {
-  MethodologyDocumentEventAttributeValue,
-  NonEmptyString,
-  NonZeroPositive,
-} from '@carrot-fndn/shared/types';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
-import {
-  assertNonEmptyString,
-  sumBigNumbers,
-} from '@carrot-fndn/shared/helpers';
+import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
-import { is } from 'typia';
 
 import type {
   ActorsByType,
@@ -20,8 +12,6 @@ import type {
   RewardsDistribution,
   RuleSubject,
 } from './rewards-distribution.types';
-
-const DOLLAR_REGEX = /^(\d+(?:\.\d{1,6})?)\sUSD$/;
 
 export const formatPercentage = (percentage: BigNumber): BigNumber =>
   percentage.dividedBy(100);

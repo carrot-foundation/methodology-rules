@@ -74,7 +74,7 @@ const {
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
 
-const UNIT_PRICE_VALUE = 0.15333;
+const UNIT_PRICE_VALUE = 0.153_33;
 
 const DEFAULT_REWARDS = {
   [APPOINTED_NGO]: '0',
