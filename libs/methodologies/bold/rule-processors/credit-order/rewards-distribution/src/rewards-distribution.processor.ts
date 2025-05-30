@@ -3,6 +3,7 @@ import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loade
 import {
   isNil,
   isNonEmptyArray,
+  isNonZeroPositive,
   toDocumentKey,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
@@ -34,10 +35,7 @@ import type {
 } from './rewards-distribution.types';
 
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
-import {
-  calculateRewardsDistribution,
-  parseUnitPriceNumberPartOrReturnUndefined,
-} from './rewards-distribution.helpers';
+import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 
 const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
@@ -90,16 +88,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     const unitPrice = getEventAttributeValue(creditsEvent, CREDIT_UNIT_PRICE);
 
-    const unitPriceNumberPart =
-      parseUnitPriceNumberPartOrReturnUndefined(unitPrice);
-
-    if (isNil(unitPriceNumberPart)) {
+    if (!isNonZeroPositive(unitPrice)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.INVALID_CREDIT_UNIT_PRICE,
       );
     }
 
-    return unitPriceNumberPart;
+    return unitPrice;
   }
 
   getRewardsDistributionRuleValue(

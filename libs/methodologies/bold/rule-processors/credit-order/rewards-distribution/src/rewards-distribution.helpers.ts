@@ -1,16 +1,8 @@
-import type {
-  MethodologyDocumentEventAttributeValue,
-  NonEmptyString,
-  NonZeroPositive,
-} from '@carrot-fndn/shared/types';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
-import {
-  assertNonEmptyString,
-  sumBigNumbers,
-} from '@carrot-fndn/shared/helpers';
+import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
-import { is } from 'typia';
 
 import type {
   ActorsByType,
@@ -20,8 +12,6 @@ import type {
   RewardsDistribution,
   RuleSubject,
 } from './rewards-distribution.types';
-
-const DOLLAR_REGEX = /^(\d+(?:\.\d{1,6})?)\sUSD$/;
 
 export const formatPercentage = (percentage: BigNumber): BigNumber =>
   percentage.dividedBy(100);
@@ -233,28 +223,4 @@ export const calculateRewardsDistribution = (
       percentage: remainder.percentage.toString(),
     },
   };
-};
-
-export const parseUnitPriceNumberPartOrReturnUndefined = (
-  unitPrice: MethodologyDocumentEventAttributeValue | undefined,
-): NonZeroPositive | undefined => {
-  if (!is<NonEmptyString>(unitPrice)) {
-    return undefined;
-  }
-
-  const match = unitPrice.match(DOLLAR_REGEX);
-
-  if (!match) {
-    return undefined;
-  }
-
-  const unitPriceNumberPart = assertNonEmptyString(match[1]);
-
-  const rawUnitPrice = Number(unitPriceNumberPart);
-
-  if (!is<NonZeroPositive>(rawUnitPrice)) {
-    return undefined;
-  }
-
-  return rawUnitPrice;
 };
