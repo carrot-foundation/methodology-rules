@@ -234,27 +234,3 @@ export const calculateRewardsDistribution = (
     },
   };
 };
-
-export const parseUnitPriceNumberPartOrReturnUndefined = (
-  unitPrice: MethodologyDocumentEventAttributeValue | undefined,
-): NonZeroPositive | undefined => {
-  if (!is<NonEmptyString>(unitPrice)) {
-    return undefined;
-  }
-
-  const match = unitPrice.match(DOLLAR_REGEX);
-
-  if (!match) {
-    return undefined;
-  }
-
-  const unitPriceNumberPart = assertNonEmptyString(match[1]);
-
-  const rawUnitPrice = Number(unitPriceNumberPart);
-
-  if (!is<NonZeroPositive>(rawUnitPrice)) {
-    return undefined;
-  }
-
-  return rawUnitPrice;
-};

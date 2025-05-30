@@ -55,8 +55,7 @@ type TestCase = {
   massIdCertificateDocuments: CertificateDocument[];
   resultStatus: RuleOutputStatus;
   scenario: string;
-  unitPrice: string;
-  unitPriceNumberPart: string;
+  unitPrice: number;
 };
 
 const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
@@ -75,8 +74,7 @@ const {
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
 
-const UNIT_PRICE_NUMBER_PART = '0.15333';
-const UNIT_PRICE_VALUE = `${UNIT_PRICE_NUMBER_PART} USD`;
+const UNIT_PRICE_VALUE = 0.15333;
 
 const DEFAULT_REWARDS = {
   [APPOINTED_NGO]: '0',
@@ -547,7 +545,6 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
-    unitPriceNumberPart: UNIT_PRICE_NUMBER_PART,
   },
   {
     creditOrderDocument: documents.multiHauler.creditOrderDocument,
@@ -558,7 +555,6 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
-    unitPriceNumberPart: UNIT_PRICE_NUMBER_PART,
   },
   {
     creditOrderDocument: documents.multipleCertificates.creditOrderDocument,
@@ -569,7 +565,6 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     resultStatus: RuleOutputStatus.APPROVED,
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
-    unitPriceNumberPart: UNIT_PRICE_NUMBER_PART,
   },
 ];
 
