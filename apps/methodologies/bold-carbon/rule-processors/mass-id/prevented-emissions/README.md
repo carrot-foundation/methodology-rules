@@ -1,6 +1,6 @@
 <div align="center">
 
-# Avoided Emissions
+# Prevented Emissions
 
 Methodology: **BOLD-CARBON**
 
