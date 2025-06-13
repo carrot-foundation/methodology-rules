@@ -9,20 +9,20 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { avoidedEmissionsLambda } from './avoided-emissions.lambda';
+import { preventedEmissionsLambda } from './prevented-emissions.lambda';
 import {
-  avoidedEmissionsErrorTestCases,
-  avoidedEmissionsTestCases,
-} from './avoided-emissions.test-cases';
+  preventedEmissionsErrorTestCases,
+  preventedEmissionsTestCases,
+} from './prevented-emissions.test-cases';
 
-describe('AvoidedEmissionsProcessor E2E', () => {
+describe('PreventedEmissionsProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(avoidedEmissionsTestCases)(
+  it.each(preventedEmissionsTestCases)(
     'should return $resultStatus when $scenario',
     async ({
       homologationDocuments,
@@ -61,7 +61,7 @@ describe('AvoidedEmissionsProcessor E2E', () => {
         })),
       );
 
-      const response = (await avoidedEmissionsLambda(
+      const response = (await preventedEmissionsLambda(
         stubRuleInput({
           documentId: massIdAuditDocument.id,
           documentKeyPrefix,
@@ -77,8 +77,8 @@ describe('AvoidedEmissionsProcessor E2E', () => {
     },
   );
 
-  describe('AvoidedEmissionsProcessorErrors', () => {
-    it.each(avoidedEmissionsErrorTestCases)(
+  describe('PreventedEmissionsProcessorErrors', () => {
+    it.each(preventedEmissionsErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({ documents, massIdAuditDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
@@ -91,7 +91,7 @@ describe('AvoidedEmissionsProcessor E2E', () => {
           })),
         );
 
-        const response = (await avoidedEmissionsLambda(
+        const response = (await preventedEmissionsLambda(
           stubRuleInput({
             documentId: massIdAuditDocument.id,
             documentKeyPrefix,

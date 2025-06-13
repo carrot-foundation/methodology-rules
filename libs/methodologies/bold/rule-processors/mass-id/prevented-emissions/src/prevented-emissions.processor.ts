@@ -34,26 +34,26 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
-import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
-  calculateAvoidedEmissions,
-  getAvoidedEmissionsFactor,
+  calculatePreventedEmissions,
+  getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
   throwIfMissing,
-} from './avoided-emissions.helpers';
-import { type RuleSubject } from './avoided-emissions.types';
+} from './prevented-emissions.helpers';
+import { type RuleSubject } from './prevented-emissions.types';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   APPROVED: (
-    avoidedEmissions: number,
-    avoidedEmissionsByWasteSubtypeAndBaselinePerTon: number,
+    preventedEmissions: number,
+    preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
     exceedingEmissionCoefficient: number,
     currentValue: number,
   ) =>
-    `The avoided emissions were calculated as ${avoidedEmissions} kg CO₂e using the formula (1 - ${exceedingEmissionCoefficient}) x ${avoidedEmissionsByWasteSubtypeAndBaselinePerTon} x ${currentValue} = ${avoidedEmissions} [formula: (1 - exceeding_emission_coefficient) x avoided_emissions_by_waste_subtype_and_baseline_per_ton x current_value = avoided_emissions].`,
+    `The prevented emissions were calculated as ${preventedEmissions} kg CO₂e using the formula (1 - ${exceedingEmissionCoefficient}) x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon} x ${currentValue} = ${preventedEmissions} [formula: (1 - exceeding_emission_coefficient) x prevented_emissions_by_waste_subtype_and_baseline_per_ton x current_value = prevented_emissions].`,
   MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
   MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
     wasteSubtype: MassIdOrganicSubtype,
@@ -67,8 +67,8 @@ interface Documents {
   wasteGeneratorHomologationDocument: Document;
 }
 
-export class AvoidedEmissionsProcessor extends RuleDataProcessor {
-  protected readonly processorErrors = new AvoidedEmissionsProcessorErrors();
+export class PreventedEmissionsProcessor extends RuleDataProcessor {
+  protected readonly processorErrors = new PreventedEmissionsProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
@@ -118,24 +118,24 @@ export class AvoidedEmissionsProcessor extends RuleDataProcessor {
       };
     }
 
-    const avoidedEmissionsByWasteSubtypeAndBaselinePerTon =
-      getAvoidedEmissionsFactor(wasteSubtype, wasteGeneratorBaseline);
+    const preventedEmissionsByWasteSubtypeAndBaselinePerTon =
+      getPreventedEmissionsFactor(wasteSubtype, wasteGeneratorBaseline);
 
-    const avoidedEmissions = calculateAvoidedEmissions(
+    const preventedEmissions = calculatePreventedEmissions(
       exceedingEmissionCoefficient,
-      avoidedEmissionsByWasteSubtypeAndBaselinePerTon,
+      preventedEmissionsByWasteSubtypeAndBaselinePerTon,
       massIdDocumentValue,
     );
 
     return {
       resultComment: RESULT_COMMENTS.APPROVED(
-        avoidedEmissions,
-        avoidedEmissionsByWasteSubtypeAndBaselinePerTon,
+        preventedEmissions,
+        preventedEmissionsByWasteSubtypeAndBaselinePerTon,
         exceedingEmissionCoefficient,
         massIdDocumentValue,
       ),
       resultContent: {
-        avoidedEmissions,
+        preventedEmissions,
       },
       resultStatus: RuleOutputStatus.APPROVED,
     };

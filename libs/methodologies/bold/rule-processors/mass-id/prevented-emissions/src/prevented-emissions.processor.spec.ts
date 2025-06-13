@@ -3,21 +3,21 @@ import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { AvoidedEmissionsProcessor } from './avoided-emissions.processor';
+import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
-  avoidedEmissionsErrorTestCases,
-  avoidedEmissionsTestCases,
-} from './avoided-emissions.test-cases';
+  preventedEmissionsErrorTestCases,
+  preventedEmissionsTestCases,
+} from './prevented-emissions.test-cases';
 
-describe('AvoidedEmissionsProcessor', () => {
-  const ruleDataProcessor = new AvoidedEmissionsProcessor();
+describe('PreventedEmissionsProcessor', () => {
+  const ruleDataProcessor = new PreventedEmissionsProcessor();
 
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  describe('AvoidedEmissionsProcessor', () => {
-    it.each(avoidedEmissionsTestCases)(
+  describe('PreventedEmissionsProcessor', () => {
+    it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         homologationDocuments,
@@ -70,8 +70,8 @@ describe('AvoidedEmissionsProcessor', () => {
     );
   });
 
-  describe('AvoidedEmissionsProcessorErrors', () => {
-    it.each(avoidedEmissionsErrorTestCases)(
+  describe('PreventedEmissionsProcessorErrors', () => {
+    it.each(preventedEmissionsErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         documents,
