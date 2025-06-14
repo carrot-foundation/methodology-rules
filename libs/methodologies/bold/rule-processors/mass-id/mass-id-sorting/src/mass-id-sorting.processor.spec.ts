@@ -1,5 +1,8 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  expectRuleOutput,
+  createRuleTestFixture,
+  spyOnDocumentQueryServiceLoad,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
@@ -12,10 +15,6 @@ import {
 describe('MassIdSortingProcessor', () => {
   const ruleDataProcessor = new MassIdSortingProcessor();
 
-  beforeEach(() => {
-    jest.restoreAllMocks();
-  });
-
   describe('MassIdSortingProcessor', () => {
     it.each(massIdSortingTestCases)(
       'should return $resultStatus when $scenario',
@@ -26,40 +25,20 @@ describe('MassIdSortingProcessor', () => {
         resultComment,
         resultStatus,
       }) => {
-        const {
-          massIdAuditDocument,
-          massIdDocument,
-          participantsHomologationDocuments,
-        } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-          .createMassIdDocuments({
+        const { ruleInput, ruleOutput } = await createRuleTestFixture({
+          homologationDocuments,
+          massIdActorParticipants: actorParticipants,
+          massIdDocumentsParams: {
             externalEventsMap: massIdEvents,
-          })
-          .createMassIdAuditDocuments()
-          .createMethodologyDocument()
-          .createParticipantHomologationDocuments(homologationDocuments)
-          .build();
+          },
+          ruleDataProcessor,
+        });
 
-        const allDocuments = [
-          massIdDocument,
-          massIdAuditDocument,
-          ...participantsHomologationDocuments.values(),
-        ];
-
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
-
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
-        };
-
-        const ruleOutput = await ruleDataProcessor.process(ruleInput);
-
-        expect(ruleOutput).toEqual({
-          requestId: ruleInput.requestId,
-          responseToken: ruleInput.responseToken,
-          responseUrl: ruleInput.responseUrl,
+        expectRuleOutput({
           resultComment,
           resultStatus,
+          ruleInput,
+          ruleOutput,
         });
       },
     );
