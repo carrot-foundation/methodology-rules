@@ -25,8 +25,8 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/credit-order/rewards-distribution": [
         "libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/avoided-emissions": [
-        "libs/methodologies/bold/rule-processors/mass-id/avoided-emissions/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions": [
+        "libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/certificate-uniqueness-check": [
         "libs/methodologies/bold/rule-processors/mass-id/certificate-uniqueness-check/src/index.ts"

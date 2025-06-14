@@ -252,7 +252,9 @@ const jestFilesConfigs = [
       '@typescript-eslint/dot-notation': 'off',
       'jest/expect-expect': [
         'error',
-        { assertFunctionNames: ['expect', 'expectRequest'] },
+        {
+          assertFunctionNames: ['expect', 'expectRequest', 'expectRuleOutput'],
+        },
       ],
     },
   },

@@ -13,9 +13,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
-import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
-import { RESULT_COMMENTS } from './avoided-emissions.processor';
+import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { RESULT_COMMENTS } from './prevented-emissions.processor';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
@@ -28,11 +28,11 @@ const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
 const exceedingEmissionCoefficient = 0.8;
 const massIdDocumentValue = 100;
 const baselineValue =
-  AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
-const expectedAvoidedEmissions =
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
+const expectedPreventedEmissions =
   (1 - exceedingEmissionCoefficient) * baselineValue * massIdDocumentValue;
 
-export const avoidedEmissionsTestCases = [
+export const preventedEmissionsTestCases = [
   {
     homologationDocuments: new Map([
       [
@@ -103,13 +103,13 @@ export const avoidedEmissionsTestCases = [
     ]),
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.APPROVED(
-      expectedAvoidedEmissions,
+      expectedPreventedEmissions,
       baselineValue,
       exceedingEmissionCoefficient,
       massIdDocumentValue,
     ),
     resultContent: {
-      avoidedEmissions: expectedAvoidedEmissions,
+      preventedEmissions: expectedPreventedEmissions,
       ruleSubject: {
         exceedingEmissionCoefficient,
         massIdDocumentValue,
@@ -168,7 +168,7 @@ export const avoidedEmissionsTestCases = [
   },
 ];
 
-const processorErrors = new AvoidedEmissionsProcessorErrors();
+const processorErrors = new PreventedEmissionsProcessorErrors();
 
 const {
   massIdAuditDocument,
@@ -184,7 +184,7 @@ const {
 const wasteGeneratorHomologationDocument =
   participantsHomologationDocuments.get(WASTE_GENERATOR) as Document;
 
-export const avoidedEmissionsErrorTestCases = [
+export const preventedEmissionsErrorTestCases = [
   {
     documents: [
       {
