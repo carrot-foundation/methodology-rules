@@ -20,6 +20,7 @@ export const spyOnDocumentQueryServiceLoad = (
     iterator: () => ({
       each: (callback) =>
         Promise.resolve(
+          // eslint-disable-next-line github/array-foreach, unicorn/no-array-for-each
           documents.forEach((document) => callback({ document })),
         ),
       map: (callback) =>
@@ -48,7 +49,7 @@ interface ProcessRuleTestParams {
   ruleDataProcessor: RuleDataProcessor;
 }
 
-interface TestExpectedRuleOutputParams {
+interface TestExpectedRuleOutputParameters {
   resultComment: string;
   resultContent?: AnyObject | undefined;
   resultStatus: string;
@@ -112,7 +113,7 @@ export function expectRuleOutput({
   resultStatus,
   ruleInput,
   ruleOutput,
-}: TestExpectedRuleOutputParams): void {
+}: TestExpectedRuleOutputParameters): void {
   expect(ruleOutput).toEqual({
     requestId: ruleInput.requestId,
     responseToken: ruleInput.responseToken,
