@@ -1,6 +1,6 @@
 import {
-  expectRuleOutput,
   createRuleTestFixture,
+  expectRuleOutput,
   spyOnDocumentQueryServiceLoad,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
@@ -14,6 +14,10 @@ import {
 
 describe('WeighingProcessor', () => {
   const ruleDataProcessor = new WeighingProcessor();
+
+  beforeEach(() => {
+    jest.restoreAllMocks();
+  });
 
   describe('WeighingProcessor', () => {
     it.each(weighingTestCases)(
