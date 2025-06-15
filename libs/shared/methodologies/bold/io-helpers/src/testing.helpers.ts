@@ -42,7 +42,7 @@ interface CreateBoldStubsParameters {
   massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
 }
 
-interface ProcessRuleTestParams {
+interface ProcessRuleTestParameters {
   homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
   massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
@@ -77,7 +77,7 @@ export async function createRuleTestFixture({
   massIdActorParticipants,
   massIdDocumentsParams,
   ruleDataProcessor,
-}: ProcessRuleTestParams): Promise<{
+}: ProcessRuleTestParameters): Promise<{
   ruleInput: RuleInput;
   ruleOutput: RuleOutput;
 }> {
