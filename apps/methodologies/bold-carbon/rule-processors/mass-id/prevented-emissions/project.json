@@ -1,8 +1,8 @@
 {
-  "name": "methodologies-bold-carbon-rule-processors-mass-id-avoided-emissions",
+  "name": "methodologies-bold-carbon-rule-processors-mass-id-prevented-emissions",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
-  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/avoided-emissions/src",
+  "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/prevented-emissions/src",
   "projectType": "application",
   "targets": {
     "build-lambda": {},
