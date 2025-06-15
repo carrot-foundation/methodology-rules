@@ -36,7 +36,7 @@ export const spyOnLoadDocument = (
   jest.spyOn(documentHelpers, 'loadDocument').mockResolvedValueOnce(result);
 };
 
-interface CreateBoldStubsParams {
+interface CreateBoldStubsParameters {
   homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
   massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
@@ -61,7 +61,7 @@ export function createBoldStubsForMassIdProcessor({
   homologationDocuments,
   massIdActorParticipants,
   massIdDocumentsParams,
-}: CreateBoldStubsParams) {
+}: CreateBoldStubsParameters) {
   return new BoldStubsBuilder({
     ...(massIdActorParticipants && { massIdActorParticipants }),
   })
