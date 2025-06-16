@@ -6,40 +6,44 @@ import {
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { MassIdSortingProcessor } from './mass-id-sorting.processor';
+import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
-  massIdSortingErrorTestCases,
-  massIdSortingTestCases,
-} from './mass-id-sorting.test-cases';
+  preventedEmissionsErrorTestCases,
+  preventedEmissionsTestCases,
+} from './prevented-emissions.test-cases';
 
-describe('MassIdSortingProcessor', () => {
-  const ruleDataProcessor = new MassIdSortingProcessor();
+describe('PreventedEmissionsProcessor', () => {
+  const ruleDataProcessor = new PreventedEmissionsProcessor();
 
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  describe('MassIdSortingProcessor', () => {
-    it.each(massIdSortingTestCases)(
+  describe('PreventedEmissionsProcessor', () => {
+    it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
-        actorParticipants,
         homologationDocuments,
-        massIdEvents,
+        massIdDocumentValue,
         resultComment,
+        resultContent,
         resultStatus,
+        subtype,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           homologationDocuments,
-          massIdActorParticipants: actorParticipants,
           massIdDocumentsParams: {
-            externalEventsMap: massIdEvents,
+            partialDocument: {
+              currentValue: massIdDocumentValue as number,
+              subtype,
+            },
           },
           ruleDataProcessor,
         });
 
         expectRuleOutput({
           resultComment,
+          resultContent,
           resultStatus,
           ruleInput,
           ruleOutput,
@@ -48,8 +52,8 @@ describe('MassIdSortingProcessor', () => {
     );
   });
 
-  describe('MassIdSortingProcessorErrors', () => {
-    it.each(massIdSortingErrorTestCases)(
+  describe('PreventedEmissionsProcessorErrors', () => {
+    it.each(preventedEmissionsErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         documents,

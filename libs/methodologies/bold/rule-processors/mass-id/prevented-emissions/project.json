@@ -1,5 +1,5 @@
 {
-  "name": "methodologies-bold-rule-processors-mass-id-avoided-emissions",
+  "name": "methodologies-bold-rule-processors-mass-id-prevented-emissions",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": [
     "app:any",
@@ -8,7 +8,7 @@
     "stack:any",
     "type:library"
   ],
-  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/avoided-emissions/src",
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src",
   "projectType": "library",
   "targets": {
     "lint": {},

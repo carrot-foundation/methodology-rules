@@ -1,10 +1,10 @@
-# BOLD Carbon CH₄ – [AVOIDED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON](./avoided-emissions.constants.ts)
+# BOLD Carbon CH₄ – [PREVENTED_EMISSIONS_BY_MATERIAL_AND_BASELINE_PER_TON](./prevented-emissions.constants.ts)
 
 This constant file provides precomputed baseline methane emissions for organic waste disposal scenarios as defined in the **BOLD Carbon CH₄ Methodology**.
 
 ## 📘 Context
 
-When calculating avoided emissions for composting projects, it is essential to compare each material's potential emissions under traditional waste disposal scenarios. These reference scenarios (baselines) are:
+When calculating prevented emissions for composting projects, it is essential to compare each material's potential emissions under traditional waste disposal scenarios. These reference scenarios (baselines) are:
 
 - **Landfills with flaring of methane gas (and/or capture of biogas)**
 - **Landfills without methane flaring**

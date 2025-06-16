@@ -1,6 +1,6 @@
 <div align="center">
 
-# Avoided Emissions
+# Prevented Emissions
 
 Methodology: **BOLD-CARBON**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/avoided-emissions/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/index.ts)**
 
 ## 👥 Contributors
 

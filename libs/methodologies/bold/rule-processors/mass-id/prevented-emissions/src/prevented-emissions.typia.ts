@@ -1,6 +1,6 @@
 import { createIs } from 'typia';
 
-import { WasteGeneratorBaselineValues } from './avoided-emissions.types';
+import { WasteGeneratorBaselineValues } from './prevented-emissions.types';
 
 export const isWasteGeneratorBaselineValues =
   createIs<WasteGeneratorBaselineValues>();

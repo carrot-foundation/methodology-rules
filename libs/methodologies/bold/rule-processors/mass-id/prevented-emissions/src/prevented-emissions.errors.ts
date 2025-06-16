@@ -1,6 +1,6 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 
-export class AvoidedEmissionsProcessorErrors extends BaseProcessorErrors {
+export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     INVALID_MASS_ID_DOCUMENT_SUBTYPE:
       'The "MassID" document has an invalid subtype.',
@@ -11,6 +11,6 @@ export class AvoidedEmissionsProcessorErrors extends BaseProcessorErrors {
       'The "Recycler homologation" document was not found.',
     MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT:
       'The "Waste Generator homologation" document was not found.',
-    REJECTED_BY_ERROR: 'Unable to validate the avoided-emissions process.',
+    REJECTED_BY_ERROR: 'Unable to validate the prevented-emissions process.',
   } as const;
 }

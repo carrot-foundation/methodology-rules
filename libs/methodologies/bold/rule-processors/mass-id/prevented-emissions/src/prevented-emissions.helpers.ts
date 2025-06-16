@@ -8,38 +8,38 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './avoided-emissions.constants';
-import { AvoidedEmissionsProcessorErrors } from './avoided-emissions.errors';
-import { isWasteGeneratorBaselineValues } from './avoided-emissions.typia';
+import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { isWasteGeneratorBaselineValues } from './prevented-emissions.typia';
 
 const { BASELINES } = DocumentEventAttributeName;
 const { RECYCLING_BASELINES } = DocumentEventName;
 
-export const getAvoidedEmissionsFactor = (
+export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIdOrganicSubtype,
   wasteGeneratorBaseline: MethodologyBaseline,
 ): number => {
   const factor =
-    AVOIDED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[wasteSubtype][
+    PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[wasteSubtype][
       wasteGeneratorBaseline
     ];
 
   return factor;
 };
 
-export const calculateAvoidedEmissions = (
+export const calculatePreventedEmissions = (
   exceedingEmissionCoefficient: number,
-  avoidedEmissionsByMaterialAndBaselinePerTon: number,
+  preventedEmissionsByMaterialAndBaselinePerTon: number,
   massIdDocumentValue: number,
 ): number =>
   (1 - exceedingEmissionCoefficient) *
-  avoidedEmissionsByMaterialAndBaselinePerTon *
+  preventedEmissionsByMaterialAndBaselinePerTon *
   massIdDocumentValue;
 
 export const getWasteGeneratorBaselineByWasteSubtype = (
   wasteGeneratorHomologationDocument: Document,
   wasteSubtype: MassIdOrganicSubtype,
-  processorErrors: AvoidedEmissionsProcessorErrors,
+  processorErrors: PreventedEmissionsProcessorErrors,
 ): MethodologyBaseline | undefined => {
   const recyclingBaselineEvent =
     wasteGeneratorHomologationDocument.externalEvents?.find(
@@ -60,7 +60,7 @@ export const getWasteGeneratorBaselineByWasteSubtype = (
 export const throwIfMissing = <T>(
   value: T | undefined,
   errorMessage: string,
-  processorErrors: AvoidedEmissionsProcessorErrors,
+  processorErrors: PreventedEmissionsProcessorErrors,
 ): void => {
   if (isNil(value)) {
     throw processorErrors.getKnownError(errorMessage);
