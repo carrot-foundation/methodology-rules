@@ -10,6 +10,7 @@ const sonarjsPlugin = require('eslint-plugin-sonarjs');
 const unicornPlugin = require('eslint-plugin-unicorn');
 const commentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments/configs');
 const securityPlugin = require('eslint-plugin-security');
+const globals = require('globals');
 const jestFormattingPlugin = require('eslint-plugin-jest-formatting');
 const jestAsyncPlugin = require('eslint-plugin-jest-async');
 const ymlPlugin = require('eslint-plugin-yml');
@@ -114,6 +115,11 @@ const tsFilesConfig = {
   plugins: {
     '@nx/typescript': nxPlugin,
   },
+  languageOptions: {
+    globals: {
+      ...globals.node, // Adds process and other Node.js globals
+    },
+  },
   rules: {
     // TODO: fix the no-unused-vars rule
     'no-unused-vars': 'off',
@@ -214,7 +220,12 @@ const jsFilesConfigs = {
 const jestFilesConfigs = [
   {
     ...jestPlugin.configs['flat/recommended'],
-    files: ['**/*.spec.ts', '**/*.spec.js'],
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.js',
+      '**/typia.matchers.ts',
+      '**/testing.helpers.ts',
+    ],
     plugins: {
       'jest-formatting': jestFormattingPlugin,
       'jest-async': jestAsyncPlugin,
