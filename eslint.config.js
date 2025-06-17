@@ -7,7 +7,6 @@ const prettierPluginRecommended = require('eslint-plugin-prettier/recommended');
 const promisePlugin = require('eslint-plugin-promise');
 const tsEslintPlugin = require('typescript-eslint');
 const sonarjsPlugin = require('eslint-plugin-sonarjs');
-const globals = require('globals');
 const unicornPlugin = require('eslint-plugin-unicorn');
 const commentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments/configs');
 const securityPlugin = require('eslint-plugin-security');
@@ -97,15 +96,6 @@ const eslintJsConfigs = [
     },
   },
 ];
-
-const configWithGlobals = {
-  languageOptions: {
-    globals: {
-      ...globals.node,
-      ...globals.jest,
-    },
-  },
-};
 
 const githubConfigs = [
   {
@@ -297,7 +287,6 @@ module.exports = defineConfig([
   promisePlugin.configs['flat/recommended'],
   sonarjsPlugin.configs.recommended,
   ...eslintJsConfigs,
-  configWithGlobals,
   unicornPlugin.default.configs.recommended,
   tsAndJsFilesConfigs,
   commentsPlugin.recommended,
