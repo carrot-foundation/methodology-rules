@@ -250,6 +250,11 @@ const jestFilesConfigs = [
   },
   {
     files: ['**/jest.config.ts'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+      },
+    },
     rules: {
       '@nx/enforce-module-boundaries': 'off',
       'import/no-relative-packages': 'off',
