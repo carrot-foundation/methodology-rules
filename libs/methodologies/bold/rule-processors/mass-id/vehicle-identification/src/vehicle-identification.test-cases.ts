@@ -30,7 +30,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.INVALID_VEHICLE_TYPE('INVALID_VEHICLE_TYPE'),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not a valid vehicle type`,
   },
   {
@@ -43,7 +43,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.VEHICLE_TYPE_MISSING,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not present`,
   },
   {
@@ -59,7 +59,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(OTHERS),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} but the "${VEHICLE_DESCRIPTION}" attribute is not present`,
   },
   {
@@ -75,13 +75,13 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(OTHERS),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} and the "${VEHICLE_DESCRIPTION}" attribute is present`,
   },
   {
     events: new Map([[PICK_UP, undefined]]),
     resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${PICK_UP}" event is not present`,
   },
   ...[...VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES].map((vehicleType) => ({
@@ -94,7 +94,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
   })),
   {
@@ -110,7 +110,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.LICENSE_PLATE_MISSING(TRUCK),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,
   },
   {
@@ -126,7 +126,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
   },
   {
@@ -142,7 +142,7 @@ export const vehicleIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
   },
 ];

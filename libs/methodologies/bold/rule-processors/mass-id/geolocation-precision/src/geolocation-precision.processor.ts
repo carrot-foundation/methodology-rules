@@ -56,14 +56,6 @@ interface ParticipantAddressData {
 }
 
 export const RESULT_COMMENTS = {
-  APPROVED_WITH_GPS: (
-    actorType: string,
-    addressDistance: number,
-    gpsDistance: number,
-  ): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
-  APPROVED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m). No GPS data was provided.`,
   INVALID_ACTOR_TYPE: 'Could not extract the event actor type.',
   INVALID_ADDRESS_DISTANCE: (
     actorType: string,
@@ -74,6 +66,14 @@ export const RESULT_COMMENTS = {
     `(${actorType}) The captured GPS location is ${gpsDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_HOMOLOGATION_ADDRESS: (actorType: string): string =>
     `No homologated address was found for the ${actorType} actor.`,
+  PASSED_WITH_GPS: (
+    actorType: string,
+    addressDistance: number,
+    gpsDistance: number,
+  ): string =>
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+  PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m). No GPS data was provided.`,
 } as const;
 
 export class GeolocationPrecisionProcessor extends RuleDataProcessor {
@@ -89,7 +89,7 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -117,8 +117,8 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
   ): EvaluateResultOutput {
     const allResults = [...actorResults.values()].flat();
 
-    const isApproved = allResults.every(
-      (result) => result.resultStatus === RuleOutputStatus.APPROVED,
+    const passed = allResults.every(
+      (result) => result.resultStatus === RuleOutputStatus.PASSED,
     );
 
     const resultComment = allResults
@@ -127,9 +127,7 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
 
     return {
       resultComment,
-      resultStatus: isApproved
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+      resultStatus: passed ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };
   }
 
@@ -221,7 +219,7 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
         {
           resultComment:
             RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(actorType),
-          resultStatus: RuleOutputStatus.REJECTED,
+          resultStatus: RuleOutputStatus.FAILED,
         },
       ];
     }
@@ -238,7 +236,7 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
             actorType,
             addressDistance,
           ),
-          resultStatus: RuleOutputStatus.REJECTED,
+          resultStatus: RuleOutputStatus.FAILED,
         },
       ];
     }
@@ -256,30 +254,30 @@ export class GeolocationPrecisionProcessor extends RuleDataProcessor {
               actorType,
               gpsDistance,
             ),
-            resultStatus: RuleOutputStatus.REJECTED,
+            resultStatus: RuleOutputStatus.FAILED,
           },
         ];
       }
 
       return [
         {
-          resultComment: RESULT_COMMENTS.APPROVED_WITH_GPS(
+          resultComment: RESULT_COMMENTS.PASSED_WITH_GPS(
             actorType,
             addressDistance,
             gpsDistance,
           ),
-          resultStatus: RuleOutputStatus.APPROVED,
+          resultStatus: RuleOutputStatus.PASSED,
         },
       ];
     }
 
     return [
       {
-        resultComment: RESULT_COMMENTS.APPROVED_WITHOUT_GPS(
+        resultComment: RESULT_COMMENTS.PASSED_WITHOUT_GPS(
           actorType,
           addressDistance,
         ),
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       },
     ];
   }

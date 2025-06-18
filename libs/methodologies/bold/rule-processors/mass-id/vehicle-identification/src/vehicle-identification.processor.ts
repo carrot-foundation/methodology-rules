@@ -134,14 +134,12 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
   }
 
   private createResult(
-    isApproved: boolean,
+    passed: boolean,
     resultComment: string,
   ): EvaluateResultOutput {
     return {
       resultComment,
-      resultStatus: isApproved
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+      resultStatus: passed ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };
   }
 }

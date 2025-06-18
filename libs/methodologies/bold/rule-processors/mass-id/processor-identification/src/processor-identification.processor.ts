@@ -38,20 +38,20 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
     if (!isNonEmptyArray(processorActorEvents)) {
       return {
         resultComment: this.RESULT_COMMENT.NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (processorActorEvents.length > 1) {
       return {
         resultComment: this.RESULT_COMMENT.MULTIPLE_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
       resultComment: this.RESULT_COMMENT.SINGLE_EVENT,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

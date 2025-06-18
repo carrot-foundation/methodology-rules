@@ -22,8 +22,8 @@ describe('ParentDocumentRuleProcessor', () => {
     evaluateResult(data: []): EvaluateResultOutput {
       return {
         resultStatus: isNil(data)
-          ? RuleOutputStatus.REJECTED
-          : RuleOutputStatus.APPROVED,
+          ? RuleOutputStatus.FAILED
+          : RuleOutputStatus.PASSED,
       };
     }
 

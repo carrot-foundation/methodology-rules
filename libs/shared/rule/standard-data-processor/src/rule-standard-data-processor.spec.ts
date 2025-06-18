@@ -21,8 +21,8 @@ describe('RuleStandardDataProcessor', () => {
     protected evaluateResult(data: string[]): EvaluateResultOutput {
       return {
         resultStatus: isNil(data)
-          ? RuleOutputStatus.REJECTED
-          : RuleOutputStatus.APPROVED,
+          ? RuleOutputStatus.FAILED
+          : RuleOutputStatus.PASSED,
       };
     }
 
@@ -47,7 +47,7 @@ describe('RuleStandardDataProcessor', () => {
     ruleStandardDataProcessor = new TestRuleStandardDataProcessor();
   });
 
-  it('should return a result with a rejection comment when the document is not found', async () => {
+  it('should return a result with a fail comment when the document is not found', async () => {
     const ruleInput = random<RuleInput>();
     const parentDocumentId = 'invalid-id';
 
@@ -64,13 +64,13 @@ describe('RuleStandardDataProcessor', () => {
         ruleStandardDataProcessor['getDocumentNotFoundResultComment'](
           parentDocumentId,
         ),
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     };
 
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultStatus REJECTED if the rule is not applicable', async () => {
+  it('should return a resultStatus PASSED if the rule is not applicable', async () => {
     const ruleInput = random<RuleInput>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -89,13 +89,13 @@ describe('RuleStandardDataProcessor', () => {
       responseUrl: ruleInput.responseUrl,
       resultComment:
         ruleStandardDataProcessor['getMissingRuleSubjectResultComment'](),
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
 
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultStatus APPROVED if the rule is applicable and approved', async () => {
+  it('should return a resultStatus PASSED if the rule is applicable and passed', async () => {
     const ruleInput = random<RuleInput>();
 
     const result = await ruleStandardDataProcessor.process({
@@ -107,18 +107,18 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
 
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultStatus REJECTED if the rule is applicable and rejected', async () => {
+  it('should return a resultStatus FAILED if the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -130,19 +130,19 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     };
 
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a result with an rejected comment when the rule is applicable and rejected', async () => {
+  it('should return a result with a fail comment when the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
-      resultComment: 'Rejected',
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultComment: 'Failed',
+      resultStatus: RuleOutputStatus.FAILED,
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -154,22 +154,22 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultComment: 'Rejected',
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultComment: 'Failed',
+      resultStatus: RuleOutputStatus.FAILED,
     };
 
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultContent when the rule is applicable and approved', async () => {
+  it('should return a resultContent when the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
     const resultContent = random<AnyObject>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
-      resultComment: 'Rejected',
+      resultComment: 'Failed',
       resultContent,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -181,9 +181,9 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultComment: 'Rejected',
+      resultComment: 'Failed',
       resultContent,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     };
 
     expect(result).toEqual(expectedRuleOutput);

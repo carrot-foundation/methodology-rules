@@ -112,14 +112,14 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         methodologyDocument,
       });
 
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
         resultContent: {
           massIdDocumentId: massIdDocument.id,
           massIdRewards: mapMassIdRewards(actorRewards),
         },
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }

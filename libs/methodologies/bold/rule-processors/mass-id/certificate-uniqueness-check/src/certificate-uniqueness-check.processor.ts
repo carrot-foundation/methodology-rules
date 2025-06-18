@@ -32,8 +32,8 @@ import {
   METHODOLOGY_NAME_BY_SLUG,
 } from './certificate-uniqueness-check.constants';
 import {
-  hasApprovedOrInProgressMassIdAuditForTheSameMethodology,
   hasNonCancelledDocuments,
+  hasPassedOrInProgressMassIdAuditForTheSameMethodology,
 } from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
@@ -46,7 +46,7 @@ interface RuleSubject {
 }
 
 export const RESULT_COMMENTS = {
-  APPROVED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+  PASSED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
 } as const;
 
 export class CertificateUniquenessCheck extends RuleDataProcessor {
@@ -78,7 +78,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -119,7 +119,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     if (
-      hasApprovedOrInProgressMassIdAuditForTheSameMethodology(
+      hasPassedOrInProgressMassIdAuditForTheSameMethodology(
         relatedMassIdAuditDocuments,
         this.methodologySlug,
       )
@@ -132,8 +132,8 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: RESULT_COMMENTS.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

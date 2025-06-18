@@ -23,7 +23,7 @@ export const wasteOriginIdentificationTestCases = [
       [PICK_UP]: undefined,
     },
     resultComment: RESULT_COMMENT.MISSING_PICK_UP_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `${PICK_UP} event is missing`,
   },
   {
@@ -34,7 +34,7 @@ export const wasteOriginIdentificationTestCases = [
       }),
     },
     resultComment: RESULT_COMMENT.UNIDENTIFIED_WASTE_ORIGIN,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `${PICK_UP} event has the metadata ${WASTE_ORIGIN} with the value ${UNIDENTIFIED}`,
   },
   {
@@ -48,7 +48,7 @@ export const wasteOriginIdentificationTestCases = [
       }),
     },
     resultComment: RESULT_COMMENT.WASTE_ORIGIN_CONFLICT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `${PICK_UP} event has the metadata ${WASTE_ORIGIN} with the value ${UNIDENTIFIED} and ${WASTE_GENERATOR} event is defined`,
   },
   {
@@ -60,7 +60,7 @@ export const wasteOriginIdentificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.WASTE_ORIGIN_IDENTIFIED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `${PICK_UP} event without ${WASTE_ORIGIN} metadata and ${WASTE_GENERATOR} event is defined`,
   },
   {
@@ -69,7 +69,7 @@ export const wasteOriginIdentificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.MISSING_WASTE_GENERATOR_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `${PICK_UP} event without ${WASTE_ORIGIN} metadata and no ${WASTE_GENERATOR} event`,
   },
   {
@@ -85,7 +85,7 @@ export const wasteOriginIdentificationTestCases = [
       [PICK_UP]: stubBoldMassIdPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATOR_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `MassID document with multiple ${WASTE_GENERATOR} events`,
   },
 ];

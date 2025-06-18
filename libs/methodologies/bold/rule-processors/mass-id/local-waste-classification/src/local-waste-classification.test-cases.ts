@@ -59,7 +59,7 @@ export const localWasteClassificationTestCases = [
       id: '02 01 01',
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the local waste classification ID and description match an IBAMA code.',
   },
@@ -82,7 +82,7 @@ export const localWasteClassificationTestCases = [
       id: '020101',
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the local waste classification ID and description match the IBAMA code without spaces.',
   },
@@ -105,7 +105,7 @@ export const localWasteClassificationTestCases = [
       id: undefined,
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the local waste classification ID is missing.',
   },
   {
@@ -124,7 +124,7 @@ export const localWasteClassificationTestCases = [
       id: '02 01 01',
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the local waste classification description is missing.',
   },
   {
@@ -143,7 +143,7 @@ export const localWasteClassificationTestCases = [
       id: '02 01 01',
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the local waste classification description does not match the expected IBAMA code.',
   },
@@ -163,7 +163,7 @@ export const localWasteClassificationTestCases = [
       id: '02 01 01',
       recyclerCountryCode: 'US',
     },
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the recycler is not from Brazil.',
   },
   {
@@ -182,7 +182,7 @@ export const localWasteClassificationTestCases = [
       id: randomId,
       recyclerCountryCode: 'BR',
     },
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the local waste classification ID is not valid.',
   },
 ];

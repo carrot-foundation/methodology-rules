@@ -30,7 +30,7 @@ export const projectBoundaryTestCases = [
       [DROP_OFF]: undefined,
     },
     resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'missing drop off event',
   },
   {
@@ -38,7 +38,7 @@ export const projectBoundaryTestCases = [
       [PICK_UP]: undefined,
     },
     resultComment: RESULT_COMMENTS.MISSING_PICK_UP_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'missing pick up event',
   },
   {
@@ -64,7 +64,7 @@ export const projectBoundaryTestCases = [
     resultContent: {
       distance: distanceInKm,
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'there are more than one drop off event and all criteria are met',
   },
 ];

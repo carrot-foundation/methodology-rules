@@ -24,9 +24,9 @@ import { faker } from '@faker-js/faker';
 import { random } from 'typia';
 
 import {
-  APPROVED_RESULT_COMMENTS,
   INVALID_RESULT_COMMENTS,
   NOT_FOUND_RESULT_COMMENTS,
+  PASSED_RESULT_COMMENTS,
   WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
@@ -138,7 +138,7 @@ export const weighingTestCases = [
       [WEIGHING]: undefined,
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document does not have ${WEIGHING} events`,
   },
   {
@@ -148,7 +148,7 @@ export const weighingTestCases = [
       [`${WEIGHING}-3`]: stubBoldMassIdWeighingEvent(),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has more than two ${WEIGHING} events`,
   },
   {
@@ -171,7 +171,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the Recycler Homologation document does not have a ${SCALE_TYPE} attribute`,
   },
   {
@@ -188,7 +188,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${CONTAINER_CAPACITY} attribute is missing`,
   },
   {
@@ -206,7 +206,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${CONTAINER_TYPE} is ${DocumentEventContainerType.BAG}`,
   },
   {
@@ -232,7 +232,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${HOMOLOGATION_RESULT} event is missing`,
   },
   {
@@ -250,7 +250,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${CONTAINER_QUANTITY} attribute is defined, but the ${CONTAINER_TYPE} is ${DocumentEventContainerType.TRUCK}`,
   },
   {
@@ -267,7 +267,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${GROSS_WEIGHT} attribute is missing`,
   },
   {
@@ -281,7 +281,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the event value field is missing`,
   },
   {
@@ -295,7 +295,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${TARE} attribute is missing`,
   },
   {
@@ -312,7 +312,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${DESCRIPTION} attribute is missing`,
   },
   {
@@ -326,7 +326,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${DESCRIPTION} attribute is an empty string`,
   },
   {
@@ -347,7 +347,7 @@ export const weighingTestCases = [
       scaleTypeMismatch,
       scaleType,
     )} ${INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleTypeMismatch)}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${SCALE_TYPE} attribute is not equal to the ${SCALE_TYPE} attribute in the Recycler Homologation document and is not supported by the methodology`,
   },
   {
@@ -367,7 +367,7 @@ export const weighingTestCases = [
     resultComment: INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
       weighingCaptureMethodMismatch,
     ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is not supported by the methodology`,
   },
   {
@@ -384,7 +384,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: `${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT} ${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${VEHICLE_LICENSE_PLATE} attribute is missing and is not sensitive`,
   },
   {
@@ -401,7 +401,7 @@ export const weighingTestCases = [
       }),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${CONTAINER_TYPE} attribute is missing`,
   },
   {
@@ -414,8 +414,8 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: APPROVED_RESULT_COMMENTS.SINGLE_STEP,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the one step ${WEIGHING} event is valid`,
   },
   {
@@ -433,10 +433,10 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(
-      APPROVED_RESULT_COMMENTS.SINGLE_STEP,
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the one step ${WEIGHING} event is valid with container capacity exception`,
   },
   {
@@ -467,7 +467,7 @@ export const weighingTestCases = [
     },
     resultComment:
       INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the two step ${WEIGHING} event participant ids do not match`,
   },
   {
@@ -501,10 +501,10 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(
-      APPROVED_RESULT_COMMENTS.TWO_STEP,
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(
+      PASSED_RESULT_COMMENTS.TWO_STEP,
     ),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the two step ${WEIGHING} events are valid with container capacity exception`,
   },
   {
@@ -535,8 +535,8 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: APPROVED_RESULT_COMMENTS.TWO_STEP,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: PASSED_RESULT_COMMENTS.TWO_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the two step ${WEIGHING} events are valid`,
   },
   {
@@ -577,7 +577,7 @@ export const weighingTestCases = [
       firstValue: 2,
       secondValue: 1,
     }),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the two step ${WEIGHING} event ${CONTAINER_CAPACITY} attribute values do not match`,
   },
   {
@@ -611,7 +611,7 @@ export const weighingTestCases = [
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
       DocumentEventScaleType.CONVEYOR_BELT_SCALE,
     ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the two step ${WEIGHING} event scale type is not ${DocumentEventScaleType.WEIGHBRIDGE}`,
   },
   {
@@ -645,7 +645,7 @@ export const weighingTestCases = [
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(
       DocumentEventContainerType.BAG,
     ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the two step ${WEIGHING} event container type is not ${DocumentEventContainerType.TRUCK}`,
   },
   {
@@ -667,8 +667,8 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: APPROVED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is ${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST} and the ${WEIGHING} event is valid`,
   },
   {
@@ -688,7 +688,7 @@ export const weighingTestCases = [
       grossWeight: 100,
       tare: 1,
     }),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the calculated net weight is not equal to the mass net weight',
   },
 ];
@@ -711,7 +711,7 @@ export const weighingErrorTestCases = [
     documents: [...participantsHomologationDocuments.values()],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document was not found`,
   },
   {
@@ -719,7 +719,7 @@ export const weighingErrorTestCases = [
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the Recycler Homologation document was not found`,
   },
 ];

@@ -103,7 +103,7 @@ export const rewardsDistributionProcessorTestCases: Array<{
       massIdPartialDocument: {
         subtype: wasteType,
       },
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
       scenario: `the massRewards is calculated successfully for ${wasteType} waste type and ${expectedRewards} rewards`,
     }),
   ),
@@ -119,7 +119,7 @@ export const rewardsDistributionProcessorTestCases: Array<{
     massIdPartialDocument: {
       subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is not present`,
   },
   {
@@ -133,7 +133,7 @@ export const rewardsDistributionProcessorTestCases: Array<{
     massIdPartialDocument: {
       subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is present`,
   },
   {
@@ -142,7 +142,7 @@ export const rewardsDistributionProcessorTestCases: Array<{
     massIdPartialDocument: {
       subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `all rewards are applied for the ${REWARDS_DISTRIBUTION_BY_WASTE_TYPE['Food, Food Waste and Beverages']}`,
   },
 ];
@@ -159,14 +159,14 @@ export const rewardsDistributionProcessorErrors = [
     documents: [],
     massIdAuditDocument,
     resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `${MASS_ID} document is not found`,
   },
   {
     documents: [massIdDocument],
     massIdAuditDocument,
     resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `${METHODOLOGY} document is not found`,
   },
   {
@@ -183,7 +183,7 @@ export const rewardsDistributionProcessorErrors = [
     resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIdDocument.id, [
       RewardsDistributionActorType.INTEGRATOR,
     ]),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document does not have the required actors`,
   },
   {
@@ -195,8 +195,8 @@ export const rewardsDistributionProcessorErrors = [
       massIdDocument,
     ],
     massIdAuditDocument,
-    resultComment: ERROR_MESSAGES.REJECTED_BY_ERROR,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${METHODOLOGY} document does not have the required actors`,
   },
   {
@@ -209,7 +209,7 @@ export const rewardsDistributionProcessorErrors = [
     ],
     massIdAuditDocument,
     resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(massIdDocument.id),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document does not have external events`,
   },
   {
@@ -222,7 +222,7 @@ export const rewardsDistributionProcessorErrors = [
     ],
     massIdAuditDocument,
     resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document has an unexpected subtype`,
   },
 ];

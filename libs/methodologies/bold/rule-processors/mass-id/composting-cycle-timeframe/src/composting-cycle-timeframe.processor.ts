@@ -21,12 +21,12 @@ type Subject = {
 export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return {
-      APPROVED: (dateDiff: number) =>
-        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, within the valid range (60-180 days).`,
+      FAILED: (dateDiff: number) =>
+        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, which is outside the valid range (60-180 days).`,
       MISSING_DROP_OFF_EVENT: `Unable to verify the timeframe because the "${DROP_OFF}" event is missing.`,
       MISSING_RECYCLED_EVENT: `Unable to verify the timeframe because the "${RECYCLED}" event is missing.`,
-      REJECTED: (dateDiff: number) =>
-        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, wich is outside the valid range (60-180 days).`,
+      PASSED: (dateDiff: number) =>
+        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, within the valid range (60-180 days).`,
     } as const;
   }
 
@@ -40,14 +40,14 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     if (isNil(dropOffDate)) {
       return {
         resultComment: this.RESULT_COMMENT.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (isNil(recycledDate)) {
       return {
         resultComment: this.RESULT_COMMENT.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -58,14 +58,14 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
 
     const resultStatus =
       difference >= 60 && difference <= 180
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED;
+        ? RuleOutputStatus.PASSED
+        : RuleOutputStatus.FAILED;
 
     return {
       resultComment:
-        resultStatus === RuleOutputStatus.APPROVED
-          ? this.RESULT_COMMENT.APPROVED(difference)
-          : this.RESULT_COMMENT.REJECTED(difference),
+        resultStatus === RuleOutputStatus.PASSED
+          ? this.RESULT_COMMENT.PASSED(difference)
+          : this.RESULT_COMMENT.FAILED(difference),
       resultStatus,
     };
   }

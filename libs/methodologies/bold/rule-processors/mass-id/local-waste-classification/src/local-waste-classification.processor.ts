@@ -57,21 +57,18 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     const { description, id, recyclerCountryCode } = subject;
 
     if (recyclerCountryCode !== 'BR') {
-      return this.isRejected(
+      return this.isFailed(
         RESULT_COMMENTS.UNSUPPORTED_COUNTRY(recyclerCountryCode),
         subject,
       );
     }
 
     if (!isNonEmptyString(id)) {
-      return this.isRejected(
-        RESULT_COMMENTS.CLASSIFICATION_ID_MISSING,
-        subject,
-      );
+      return this.isFailed(RESULT_COMMENTS.CLASSIFICATION_ID_MISSING, subject);
     }
 
     if (!isNonEmptyString(description)) {
-      return this.isRejected(
+      return this.isFailed(
         RESULT_COMMENTS.CLASSIFICATION_DESCRIPTION_MISSING,
         subject,
       );
@@ -84,10 +81,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     );
 
     if (!normalizedId) {
-      return this.isRejected(
-        RESULT_COMMENTS.INVALID_CLASSIFICATION_ID,
-        subject,
-      );
+      return this.isFailed(RESULT_COMMENTS.INVALID_CLASSIFICATION_ID, subject);
     }
 
     const expectedDescription =
@@ -96,7 +90,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
       ].description;
 
     if (description.trim() !== expectedDescription.trim()) {
-      return this.isRejected(
+      return this.isFailed(
         RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
         subject,
       );
@@ -105,7 +99,7 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     return {
       resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
       resultContent: subject,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 
@@ -127,14 +121,14 @@ export class LocalWasteClassificationProcessor extends ParentDocumentRuleProcess
     };
   }
 
-  private isRejected(
+  private isFailed(
     resultComment: string,
     resultContent?: AnyObject,
   ): EvaluateResultOutput {
     return {
       resultComment,
       ...(resultContent && { resultContent }),
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     };
   }
 }

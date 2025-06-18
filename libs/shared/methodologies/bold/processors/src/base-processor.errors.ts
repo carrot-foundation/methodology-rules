@@ -3,7 +3,7 @@ import * as Sentry from '@sentry/aws-serverless';
 
 export interface ErrorMessage {
   [key: string]: ((...arguments_: never[]) => string) | string;
-  REJECTED_BY_ERROR: string;
+  FAILED_BY_ERROR: string;
 }
 
 export abstract class BaseProcessorErrors {
@@ -16,9 +16,7 @@ export abstract class BaseProcessorErrors {
   }
 
   getResultCommentFromError(error: unknown): string {
-    return (
-      this.processKnownError(error) || this.ERROR_MESSAGE.REJECTED_BY_ERROR
-    );
+    return this.processKnownError(error) || this.ERROR_MESSAGE.FAILED_BY_ERROR;
   }
 
   private getKnownErrorMessage(error: Error): string {

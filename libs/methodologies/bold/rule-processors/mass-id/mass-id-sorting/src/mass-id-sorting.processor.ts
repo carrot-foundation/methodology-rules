@@ -44,11 +44,11 @@ const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
 const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
-  APPROVED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is "${sortingValueCalculationDifference}" kg.`,
+  FAILED: (sortingValueCalculationDifference: number) =>
+    `The calculated sorting value differs from the actual value by ${sortingValueCalculationDifference} kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
   MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
-  REJECTED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value differs from the actual value by "${sortingValueCalculationDifference}" kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
+  PASSED: (sortingValueCalculationDifference: number) =>
+    `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
 } as const;
 
 interface DocumentPair {
@@ -84,7 +84,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -94,24 +94,24 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.REJECTED(
+        resultComment: RESULT_COMMENTS.FAILED(
           sortingData.sortingValueCalculationDifference,
         ),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED(
+      resultComment: RESULT_COMMENTS.PASSED(
         sortingData.sortingValueCalculationDifference,
       ),
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

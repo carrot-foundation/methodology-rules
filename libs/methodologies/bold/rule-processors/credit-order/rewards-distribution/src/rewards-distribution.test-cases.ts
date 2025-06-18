@@ -542,7 +542,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedActorsResult: expectedResults.singleCertificateStandard,
     expectedCertificateTotalValue: documents.massId1Value,
     massIdCertificateDocuments: documents.standard.massIdCertificateDocuments,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -552,7 +552,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedCertificateTotalValue: documents.massId1Value,
     massIdCertificateDocuments:
       documents.multiHauler.massIdCertificateDocuments,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -562,7 +562,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedCertificateTotalValue: documents.multipleCertificates.totalValue,
     massIdCertificateDocuments:
       documents.multipleCertificates.massIdCertificateDocuments,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -611,7 +611,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
     massIdCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND(RECYCLED_ID),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${RECYCLED_ID} documents is not found`,
   },
   {
@@ -620,7 +620,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ...errorTestData.errorStubs.massIdCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${CREDIT_ORDER} document is not found`,
   },
   {
@@ -629,7 +629,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ...errorTestData.errorStubs.massIdCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.INVALID_CREDIT_UNIT_PRICE,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${CREDIT_UNIT_PRICE}" attribute in the ${CREDIT_ORDER} document is invalid`,
   },
   {
@@ -641,7 +641,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ERROR_MESSAGES.REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND(
         errorTestData.errorStubs.massIdCertificateDocuments[0]!.id,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `a certificate document has no "${RULE_RESULT_DETAILS}" attribute`,
   },
 ];

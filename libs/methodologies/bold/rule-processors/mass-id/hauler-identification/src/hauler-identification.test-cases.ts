@@ -38,7 +38,7 @@ export const haulerIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.HAULER_EVENT_FOUND,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event exists.`,
@@ -54,7 +54,7 @@ export const haulerIdentificationTestCases = [
       ],
     ]),
     resultComment: RESULT_COMMENTS.HAULER_EVENT_MISSING(TRUCK),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event does not exist.`,
@@ -72,7 +72,7 @@ export const haulerIdentificationTestCases = [
     resultComment: RESULT_COMMENTS.HAULER_NOT_REQUIRED(
       DocumentEventVehicleType.CART,
     ),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the ${HAULER} actor event does not exist.`,
@@ -89,7 +89,7 @@ export const haulerIdentificationTestCases = [
       [PICK_UP, undefined],
     ]),
     resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `no ${PICK_UP} event exists.`,
   },
 ];
