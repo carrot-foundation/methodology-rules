@@ -32,8 +32,8 @@ import {
   METHODOLOGY_NAME_BY_SLUG,
 } from './certificate-uniqueness-check.constants';
 import {
-  hasPassedOrInProgressMassIdAuditForTheSameMethodology,
   hasNonCancelledDocuments,
+  hasPassedOrInProgressMassIdAuditForTheSameMethodology,
 } from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
 
