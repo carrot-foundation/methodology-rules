@@ -26,8 +26,8 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
-  APPROVED_RESULT_COMMENTS,
   NOT_FOUND_RESULT_COMMENTS,
+  PASSED_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 import {
@@ -61,7 +61,7 @@ export class WeighingProcessor extends RuleDataProcessor {
         resultComment: evaluationResult.resultComment,
       });
     } catch (error) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -86,7 +86,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       if (twoStepValidationMessages.errors.length > 0) {
         return {
           resultComment: twoStepValidationMessages.errors.join(' '),
-          resultStatus: RuleOutputStatus.REJECTED,
+          resultStatus: RuleOutputStatus.FAILED,
         };
       }
     }
@@ -105,7 +105,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (validationMessages.errors.length > 0) {
       return {
         resultComment: validationMessages.errors.join(' '),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -116,21 +116,21 @@ export class WeighingProcessor extends RuleDataProcessor {
       DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
 
     if (isTransportManifest) {
-      approvalMessage = APPROVED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
+      approvalMessage = PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
     } else if (isTwoStepWeighingEvent) {
-      approvalMessage = APPROVED_RESULT_COMMENTS.TWO_STEP;
+      approvalMessage = PASSED_RESULT_COMMENTS.TWO_STEP;
     } else {
-      approvalMessage = APPROVED_RESULT_COMMENTS.SINGLE_STEP;
+      approvalMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
     }
 
     if (!isNil(weighingValues.containerCapacityException)) {
       approvalMessage =
-        APPROVED_RESULT_COMMENTS.APPROVED_WITH_EXCEPTION(approvalMessage);
+        PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(approvalMessage);
     }
 
     return {
       resultComment: approvalMessage,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 
@@ -212,14 +212,14 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (isNil(weighingEvents) || weighingEvents.length === 0) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (weighingEvents.length > 2) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 

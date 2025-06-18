@@ -23,12 +23,12 @@ export const hasMethodologySlugAttribute = (
     }),
   );
 
-const isMassIdAuditApproved = (document: Document): boolean =>
+const isMassIdAuditPassed = (document: Document): boolean =>
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
       metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
-      metadataValues: RuleOutputStatus.APPROVED,
+      metadataValues: RuleOutputStatus.PASSED,
     }),
   );
 
@@ -55,5 +55,5 @@ export const hasApprovedOrInProgressMassIdAuditForTheSameMethodology = (
   massIdAuditDocuments.some(
     (document) =>
       hasMethodologySlugAttribute(document, methodologySlug) &&
-      (isMassIdAuditApproved(document) || isMassIdAuditInProgress(document)),
+      (isMassIdAuditPassed(document) || isMassIdAuditInProgress(document)),
   );

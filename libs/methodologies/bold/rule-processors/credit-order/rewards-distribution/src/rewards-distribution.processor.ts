@@ -160,11 +160,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
       const resultContent = calculateRewardsDistribution(ruleSubject);
 
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.APPROVED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
         resultContent,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }

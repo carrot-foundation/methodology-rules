@@ -22,7 +22,7 @@ export const dropOffAtRecyclingFacilityTestCases = [
   {
     events: { [DROP_OFF]: undefined },
     resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has no ${DROP_OFF} event`,
   },
   {
@@ -32,7 +32,7 @@ export const dropOffAtRecyclingFacilityTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${DROP_OFF} event but no ${RECEIVING_OPERATOR_IDENTIFIER} attribute`,
   },
   {
@@ -40,7 +40,7 @@ export const dropOffAtRecyclingFacilityTestCases = [
       [DROP_OFF]: stubBoldMassIdDropOffEvent(),
     },
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${DROP_OFF} event, but the ${RECYCLER} event address does not match the ${DROP_OFF} event address`,
   },
   {
@@ -56,8 +56,8 @@ export const dropOffAtRecyclingFacilityTestCases = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a ${DROP_OFF} event and a ${RECYCLER} event, and the ${DROP_OFF} event address matches the ${RECYCLER} event address`,
   },
 ];

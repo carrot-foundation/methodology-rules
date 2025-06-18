@@ -47,18 +47,18 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
-  APPROVED: (
+  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+  MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
+    wasteSubtype: MassIdOrganicSubtype,
+  ) =>
+    `The "${BASELINES}" was not found in the "Waste Generator Homologation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+  PASSED: (
     preventedEmissions: number,
     preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
     exceedingEmissionCoefficient: number,
     currentValue: number,
   ) =>
     `The prevented emissions were calculated as ${preventedEmissions} kg CO₂e using the formula (1 - ${exceedingEmissionCoefficient}) x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon} x ${currentValue} = ${preventedEmissions} [formula: (1 - exceeding_emission_coefficient) x prevented_emissions_by_waste_subtype_and_baseline_per_ton x current_value = prevented_emissions].`,
-  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
-  MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
-    wasteSubtype: MassIdOrganicSubtype,
-  ) =>
-    `The "${BASELINES}" was not found in the "Waste Generator Homologation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
 } as const;
 
 interface Documents {
@@ -87,7 +87,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         },
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -104,7 +104,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     if (!isNonZeroPositive(exceedingEmissionCoefficient)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -114,7 +114,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
           RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
             wasteSubtype,
           ),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -128,7 +128,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED(
+      resultComment: RESULT_COMMENTS.PASSED(
         preventedEmissions,
         preventedEmissionsByWasteSubtypeAndBaselinePerTon,
         exceedingEmissionCoefficient,
@@ -137,7 +137,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       resultContent: {
         preventedEmissions,
       },
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

@@ -154,7 +154,7 @@ export const geolocationPrecisionTestCases: Array<{
       ],
     ]),
     resultComment: `${RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(RECYCLER)}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the homologated address is not set',
   },
   {
@@ -186,8 +186,8 @@ export const geolocationPrecisionTestCases: Array<{
         }),
       },
     },
-    resultComment: `${RESULT_COMMENTS.APPROVED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.APPROVED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: `${RESULT_COMMENTS.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the gps is set and both gps geolocation and event address are valid but nearby',
   },
@@ -221,7 +221,7 @@ export const geolocationPrecisionTestCases: Array<{
       },
     },
     resultComment: `${RESULT_COMMENTS.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the address is valid but the gps geolocation is invalid',
   },
   {
@@ -245,7 +245,7 @@ export const geolocationPrecisionTestCases: Array<{
       },
     },
     resultComment: RESULT_COMMENTS.INVALID_ACTOR_TYPE,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the processor cannot extract the actor type',
   },
   {
@@ -277,8 +277,8 @@ export const geolocationPrecisionTestCases: Array<{
         }),
       },
     },
-    resultComment: `${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.APPROVED_WITHOUT_GPS(RECYCLER, 0)}`,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the gps is not set, but the homologated address is set and is valid',
   },
@@ -312,7 +312,7 @@ export const geolocationPrecisionTestCases: Array<{
       },
     },
     resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the gps is not set, but the homologated address is set and not valid',
   },
@@ -344,7 +344,7 @@ export const geolocationPrecisionErrorTestCases = [
     ],
     massIdAuditDocument,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document does not exist',
   },
   {
@@ -358,7 +358,7 @@ export const geolocationPrecisionErrorTestCases = [
       errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
         massIdDocument.id,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the MassId document does not contain a DROP_OFF or PICK_UP event',
   },
@@ -367,7 +367,7 @@ export const geolocationPrecisionErrorTestCases = [
     massIdAuditDocument,
     resultComment:
       errorMessage.ERROR_MESSAGE.PARTICIPANT_HOMOLOGATION_DOCUMENTS_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the homologation documents are not found',
   },
 ];

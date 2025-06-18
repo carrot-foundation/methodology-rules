@@ -6,7 +6,7 @@ import { BaseProcessorErrors } from './base-processor.errors';
 // Mock implementation for testing
 class TestProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
-    REJECTED_BY_ERROR: 'Unable to process request',
+    FAILED_BY_ERROR: 'Unable to process request',
     SIMPLE_ERROR: 'Simple error message',
     WITH_PARAMS: (parameter: string) => `Error with param: ${parameter}`,
   };

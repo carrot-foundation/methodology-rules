@@ -27,38 +27,38 @@ export const projectPeriodTestCases = [
   {
     externalCreatedAt: addDays(getEligibleDate(), 1).toISOString(),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'the Recycled event was created after the eligible date',
   },
   {
     externalCreatedAt: subDays(getEligibleDate(), 1).toISOString(),
     resultComment: RESULT_COMMENTS.INVALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the Recycled event was created before the eligible date',
   },
   {
     externalCreatedAt: getEligibleDate().toISOString(),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'the Recycled event was created on the eligible date',
   },
   {
     externalCreatedAt: getEligibleDate().toISOString(),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'the Recycled event was created on the eligible date',
   },
   {
     externalCreatedAt: createBRTDateString(subSeconds(getEligibleDate(), 1)),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the Recycled event was created 1 second before the eligible date in UTC but appears after in BRT timezone',
   },
   {
     externalCreatedAt: createBRTDateString(getEligibleDate()),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the Recycled event was created exactly at the eligible date (BRT timezone)',
   },

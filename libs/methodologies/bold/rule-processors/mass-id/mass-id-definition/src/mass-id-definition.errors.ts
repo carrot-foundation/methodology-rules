@@ -4,6 +4,6 @@ export class MassIdDefinitionProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     DOCUMENT_SUBTYPE_NOT_FOUND: 'Document subtype not found.',
     DOCUMENT_TYPE_NOT_FOUND: 'Document type not found.',
-    REJECTED_BY_ERROR: 'Unable to validate the mass definition.',
+    FAILED_BY_ERROR: 'Unable to validate the mass definition.',
   } as const;
 }

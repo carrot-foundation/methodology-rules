@@ -77,7 +77,7 @@ describe('ProjectPeriodProcessor', () => {
 
     expect(ruleOutput).toMatchObject({
       resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     });
   });
 });

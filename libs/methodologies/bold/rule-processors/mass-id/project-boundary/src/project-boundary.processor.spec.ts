@@ -81,7 +81,7 @@ describe('ProjectBoundaryProcessor', () => {
       });
     });
 
-    it('should return REJECTED when the distance is not calculated', async () => {
+    it('should return FAILED when the distance is not calculated', async () => {
       const ruleInput = random<Required<RuleInput>>();
 
       const { massIdDocument } = new BoldStubsBuilder()
@@ -103,7 +103,7 @@ describe('ProjectBoundaryProcessor', () => {
         responseUrl: ruleInput.responseUrl,
         resultComment: RESULT_COMMENTS.DISTANCE_CALCULATION_FAILED,
         resultContent: undefined,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
 
       expect(ruleOutput).toEqual(expectedRuleOutput);

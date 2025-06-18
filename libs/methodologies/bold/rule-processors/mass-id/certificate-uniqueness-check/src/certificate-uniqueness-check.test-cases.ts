@@ -102,8 +102,8 @@ export const certificateUniquenessCheckTestCases = [
   {
     documents: [simpleMassIdStubs.massIdDocument],
     massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'no Credit is linked to the MassID',
   },
   {
@@ -117,7 +117,7 @@ export const certificateUniquenessCheckTestCases = [
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
         BoldMethodologyName.RECYCLING,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'has an approved MassID audit document for the same methodology name',
   },
@@ -129,7 +129,7 @@ export const certificateUniquenessCheckTestCases = [
         ...duplicatedMassIdAuditDocument,
         externalEvents: [
           ...(duplicatedMassIdAuditDocument.externalEvents?.filter(
-            (event) => !event.name.includes(RuleOutputStatus.APPROVED),
+            (event) => !event.name.includes(RuleOutputStatus.PASSED),
           ) ?? []),
         ],
       },
@@ -139,7 +139,7 @@ export const certificateUniquenessCheckTestCases = [
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
         BoldMethodologyName.RECYCLING,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'has an in-progress MassID audit document for the same methodology name',
   },
@@ -150,8 +150,8 @@ export const certificateUniquenessCheckTestCases = [
       massIdWithAuditDocumentsForDifferentMethodologies,
     ],
     massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'has an approved MassID Audit document for a different methodology',
   },
@@ -166,7 +166,7 @@ export const certificateUniquenessCheckTestCases = [
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
         DocumentType.RECYCLED_ID,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'has a valid certificate document of the specified type',
   },
   {
@@ -179,7 +179,7 @@ export const certificateUniquenessCheckTestCases = [
     massIdAuditDocument: massIdWithCreditsStubs.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'has a valid credit document',
   },
   {
@@ -192,8 +192,8 @@ export const certificateUniquenessCheckTestCases = [
       },
     ],
     massIdAuditDocument: massIdWithAuditStubs.massIdAuditDocument,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled certificate document',
   },
   {
@@ -210,8 +210,8 @@ export const certificateUniquenessCheckTestCases = [
       },
     ],
     massIdAuditDocument: massIdWithAuditStubs.massIdAuditDocument,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled credit document',
   },
 ];

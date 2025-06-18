@@ -56,7 +56,7 @@ export const documentManifestTestCases = [
       [documentManifestType]: undefined,
     },
     resultComment: RESULT_COMMENTS.MISSING_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document does not have a ${documentManifestType} event`,
   },
   ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
@@ -72,7 +72,7 @@ export const documentManifestTestCases = [
     },
     // eslint-disable-next-line security/detect-object-injection
     resultComment: attributeErrorMessages[attribute],
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event without a ${attribute}`,
   })),
   {
@@ -90,7 +90,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: `${RESULT_COMMENTS.MISSING_DOCUMENT_TYPE} ${RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER}`,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
   },
   {
@@ -109,7 +109,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event with a wrong attachment label`,
   },
   {
@@ -130,7 +130,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(CUBIC_METER),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event ${ISSUE_DATE} with a wrong format`,
   },
   {
@@ -152,7 +152,7 @@ export const documentManifestTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE('EMITIARE'),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event ${DOCUMENT_TYPE} with a wrong format`,
   },
   {
@@ -167,7 +167,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.INVALID_EVENT_VALUE('0'),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event with a value of 0`,
   },
   {
@@ -187,7 +187,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} and a attachment`,
   },
   {
@@ -203,7 +203,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.MISSING_ATTRIBUTES,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
   },
   {
@@ -212,7 +212,7 @@ export const documentManifestTestCases = [
       [`${ACTOR}-${RECYCLER}`]: undefined,
     },
     resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has no ${RECYCLER} event`,
   },
   {
@@ -227,7 +227,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} without attachment`,
   },
   {
@@ -261,7 +261,7 @@ export const documentManifestTestCases = [
       issueDate: '2025-03-20',
       value: 100,
     }),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a valid ${TRANSPORT_MANIFEST} event and attachment`,
   },
   {
@@ -325,7 +325,7 @@ export const documentManifestTestCases = [
       issueDate: '2025-03-18',
       value: 200,
     })}`,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has two valid ${documentManifestType} events and attachments`,
   },
   {
@@ -345,7 +345,7 @@ export const documentManifestTestCases = [
       ...defaultEvents,
     },
     resultComment: RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
   },
 ];
@@ -355,7 +355,7 @@ export const exceptionTestCases = [
     documentManifestType: RECYCLING_MANIFEST as DocumentManifestType,
     events: {},
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${RECYCLING_MANIFEST} event with a different address than the ${RECYCLER} event`,
   },
 ];

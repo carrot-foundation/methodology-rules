@@ -42,7 +42,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENT.MISSING_PICK_UP_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -52,7 +52,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     ) {
       return {
         resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATOR_EVENTS,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -66,27 +66,27 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (!isUnidentified && hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENT.WASTE_ORIGIN_IDENTIFIED,
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENT.UNIDENTIFIED_WASTE_ORIGIN,
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENT.MISSING_WASTE_GENERATOR_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
       resultComment: RESULT_COMMENT.WASTE_ORIGIN_CONFLICT,
-      resultStatus: RuleOutputStatus.REJECTED,
+      resultStatus: RuleOutputStatus.FAILED,
     };
   }
 

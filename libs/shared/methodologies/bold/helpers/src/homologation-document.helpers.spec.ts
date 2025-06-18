@@ -97,7 +97,7 @@ describe('Homologation Document Helpers', () => {
       expect(isHomologationValid(document)).toBe(expected);
     });
 
-    it('should return false if the document has a HOMOLOGATION_RESULT event but the status is not APPROVED', () => {
+    it('should return false if the document has a HOMOLOGATION_RESULT event but the status is not PASSED', () => {
       const document = stubParticipantHomologationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(

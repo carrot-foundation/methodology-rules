@@ -34,14 +34,14 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_PICK_UP_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (isNil(dropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -59,12 +59,12 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
         resultContent: {
           distance,
         },
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     } catch {
       return {
         resultComment: RESULT_COMMENTS.DISTANCE_CALCULATION_FAILED,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
   }

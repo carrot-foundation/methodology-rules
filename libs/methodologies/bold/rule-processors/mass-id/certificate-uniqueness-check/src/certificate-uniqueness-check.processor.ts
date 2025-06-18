@@ -46,7 +46,7 @@ interface RuleSubject {
 }
 
 export const RESULT_COMMENTS = {
-  APPROVED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+  PASSED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
 } as const;
 
 export class CertificateUniquenessCheck extends RuleDataProcessor {
@@ -78,7 +78,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -132,8 +132,8 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: RESULT_COMMENTS.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

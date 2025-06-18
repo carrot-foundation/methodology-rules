@@ -52,7 +52,7 @@ export const massIdSortingTestCases = [
       }),
     },
     resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the sorting description is missing',
   },
   {
@@ -93,8 +93,8 @@ export const massIdSortingTestCases = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.APPROVED(0),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED(0),
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the sorting value calculation difference is less or equal to 0.1',
   },
@@ -136,10 +136,10 @@ export const massIdSortingTestCases = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.REJECTED(
+    resultComment: RESULT_COMMENTS.FAILED(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the sorting value calculation difference is greater than 0.1',
   },
 ];
@@ -183,7 +183,7 @@ export const massIdSortingErrorTestCases = [
     documents: [...participantsHomologationDocuments.values()],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document does not exist',
   },
   {
@@ -196,7 +196,7 @@ export const massIdSortingErrorTestCases = [
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document does not contain external events',
   },
   {
@@ -204,7 +204,7 @@ export const massIdSortingErrorTestCases = [
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${RECYCLER} homologation does not exist`,
   },
   {
@@ -219,7 +219,7 @@ export const massIdSortingErrorTestCases = [
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document does not contain a ${SORTING} event`,
   },
   {
@@ -230,7 +230,7 @@ export const massIdSortingErrorTestCases = [
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the value after sorting is not valid`,
   },
   {
@@ -248,7 +248,7 @@ export const massIdSortingErrorTestCases = [
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${RECYCLER} homologation does not contain a ${SORTING_FACTOR} attribute`,
   },
   {
@@ -256,7 +256,7 @@ export const massIdSortingErrorTestCases = [
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(0),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `the value before sorting is not greater than 0`,
   },
 ];

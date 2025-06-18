@@ -12,7 +12,7 @@ export const recyclerIdentificationTestCases = [
   {
     events: new Map([[`${ACTOR}-${RECYCLER}`, undefined]]),
     resultComment: RESULT_COMMENT.NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `no ${RECYCLER} actor event found`,
   },
   {
@@ -20,7 +20,7 @@ export const recyclerIdentificationTestCases = [
       [`${ACTOR}-${RECYCLER}`, stubActorEventWithLabel(RECYCLER)],
     ]),
     resultComment: RESULT_COMMENT.SINGLE_EVENT,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `found ${RECYCLER} actor event`,
   },
   {
@@ -29,7 +29,7 @@ export const recyclerIdentificationTestCases = [
       [`${ACTOR}-${RECYCLER}-2`, stubActorEventWithLabel(RECYCLER)],
     ]),
     resultComment: RESULT_COMMENT.MULTIPLE_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `found multiple ${RECYCLER} actor events`,
   },
 ];

@@ -34,7 +34,7 @@ describe('Event getters', () => {
       expect(result).toBe(attribute.value);
     });
 
-    it('should return REJECTED if the event does not have attributes', () => {
+    it('should return FAILED if the event does not have attributes', () => {
       const event = stubDocumentEventWithMetadata([]);
 
       const result = getEventAttributeValue(event, faker.string.sample());
@@ -80,7 +80,7 @@ describe('Event getters', () => {
       expect(result).toEqual(attachment);
     });
 
-    it('should return REJECTED if the attachment does not exist', () => {
+    it('should return FAILED if the attachment does not exist', () => {
       const attachment = stubDocumentEventAttachment();
       const event = stubDocumentEvent({
         attachments: [attachment],
@@ -94,7 +94,7 @@ describe('Event getters', () => {
       expect(result).toBe(undefined);
     });
 
-    it('should return REJECTED if the event attachments is undefined', () => {
+    it('should return FAILED if the event attachments is undefined', () => {
       const event = stubDocumentEvent({
         attachments: undefined,
       });

@@ -39,9 +39,9 @@ interface RuleSubject {
 }
 
 export const RESULT_COMMENTS = {
-  APPROVED: 'All participant homologations are active and approved.',
   INVALID_HOMOLOGATION_DOCUMENTS: (documentIds: string[]) =>
     `These homologations are invalid: ${documentIds.join(', ')}`,
+  PASSED: 'All participant homologations are active and approved.',
 } as const;
 
 export class ParticipantHomologationsProcessor extends RuleDataProcessor {
@@ -59,7 +59,7 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -100,13 +100,13 @@ export class ParticipantHomologationsProcessor extends RuleDataProcessor {
         resultComment: RESULT_COMMENTS.INVALID_HOMOLOGATION_DOCUMENTS(
           invalidHomologationDocuments.map((document) => document.id),
         ),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: RESULT_COMMENTS.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

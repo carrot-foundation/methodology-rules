@@ -13,6 +13,7 @@ const { SORTING_FACTOR } = DocumentEventAttributeName;
 
 export class MassIdSortingProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
+    FAILED_BY_ERROR: 'Unable to validate the mass-id-sorting.',
     INVALID_VALUE_AFTER_SORTING: (valueAfterSorting: unknown) =>
       `The value after the "${SORTING}" must be greater than 0, but "${String(valueAfterSorting)}" was provided.`,
     INVALID_VALUE_BEFORE_SORTING: (valueBeforeSorting: unknown) =>
@@ -22,6 +23,5 @@ export class MassIdSortingProcessorErrors extends BaseProcessorErrors {
     MISSING_RECYCLER_HOMOLOGATION_DOCUMENT: `The "${RECYCLER}" homologation was not found.`,
     MISSING_SORTING_EVENT: `No "${SORTING}" event was found in the document.`,
     MISSING_SORTING_FACTOR: `The "${SORTING_FACTOR}" was not found in the "${RECYCLER}" homologation.`,
-    REJECTED_BY_ERROR: 'Unable to validate the mass-id-sorting.',
   } as const;
 }

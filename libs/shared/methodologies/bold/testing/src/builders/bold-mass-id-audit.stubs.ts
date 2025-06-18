@@ -19,9 +19,9 @@ import { mergeEventsMaps } from './bold.builder.helpers';
 import { type StubBoldDocumentParameters } from './bold.stubs.types';
 
 const { EVALUATION_RESULT } = DocumentEventAttributeName;
-const { APPROVED } = RuleOutputStatus;
+const { PASSED } = RuleOutputStatus;
 
-const resultEventName = `Result: MassID ${APPROVED}`;
+const resultEventName = `Result: MassID ${PASSED}`;
 
 const boldMassIdAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
   [
@@ -30,7 +30,7 @@ const boldMassIdAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
       {
         name: resultEventName,
       },
-      [[EVALUATION_RESULT, APPROVED]],
+      [[EVALUATION_RESULT, PASSED]],
     ),
   ],
 ]);

@@ -20,8 +20,6 @@ const { KG } = MeasurementUnit;
 const { ORGANIC } = DocumentType;
 
 export const RESULT_COMMENTS = {
-  APPROVED:
-    'The document category, measurement unit, subtype, type, and value are correctly defined.',
   INVALID_CATEGORY: (category: string): string =>
     `The document category must be "${MASS_ID}", but "${category}" was provided.`,
   INVALID_MEASUREMENT_UNIT: (measurementUnit: string): string =>
@@ -32,6 +30,8 @@ export const RESULT_COMMENTS = {
     `The document type must be "${ORGANIC}", but "${type}" was provided.`,
   INVALID_VALUE: (value: number): string =>
     `The document value must be greater than 0, but "${value}" was provided.`,
+  PASSED:
+    'The document category, measurement unit, subtype, type, and value are correctly defined.',
 } as const;
 
 export class MassIdDefinitionProcessor extends ParentDocumentRuleProcessor<Document> {
@@ -87,11 +87,9 @@ export class MassIdDefinitionProcessor extends ParentDocumentRuleProcessor<Docum
 
     return {
       resultComment: isValid
-        ? this.RESULT_COMMENT.APPROVED
+        ? this.RESULT_COMMENT.PASSED
         : errorMessages.join(' '),
-      resultStatus: isValid
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+      resultStatus: isValid ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };
   }
 
@@ -114,7 +112,7 @@ export class MassIdDefinitionProcessor extends ParentDocumentRuleProcessor<Docum
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -122,7 +120,7 @@ export class MassIdDefinitionProcessor extends ParentDocumentRuleProcessor<Docum
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 

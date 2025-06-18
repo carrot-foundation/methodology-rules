@@ -25,14 +25,14 @@ export const uniquenessCheckTestCases = [
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'the document is unique',
   },
   {
     newDuplicateDocuments: [{ status: CANCELLED }, { status: CANCELLED }],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.ONLY_CANCELLED_DUPLICATES(2, 2),
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'only cancelled duplicates are found',
   },
   {
@@ -43,21 +43,21 @@ export const uniquenessCheckTestCases = [
     ],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found',
   },
   {
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(2, 2),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found in old format',
   },
   {
     newDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     oldDuplicateDocuments: [{ status: CANCELLED }],
     resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found in both formats',
   },
 ];
@@ -74,7 +74,7 @@ export const uniquenessCheckErrorTestCases = [
     massIdAuditDocument,
     massIdDocument: undefined,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'when the MassID document is missing',
   },
   {
@@ -86,7 +86,7 @@ export const uniquenessCheckErrorTestCases = [
       ),
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_DROP_OFF_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `when the "${DROP_OFF}" event is missing`,
   },
   {
@@ -98,7 +98,7 @@ export const uniquenessCheckErrorTestCases = [
       ),
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_PICK_UP_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `when the "${PICK_UP}" event is missing`,
   },
   {
@@ -110,7 +110,7 @@ export const uniquenessCheckErrorTestCases = [
       ),
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_WASTE_GENERATOR_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `when the "${WASTE_GENERATOR}" event is missing`,
   },
   {
@@ -122,7 +122,7 @@ export const uniquenessCheckErrorTestCases = [
       ),
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_EVENT,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `when the "${RECYCLER}" event is missing`,
   },
   {
@@ -139,7 +139,7 @@ export const uniquenessCheckErrorTestCases = [
       ],
     },
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `when the "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
   },
 ];

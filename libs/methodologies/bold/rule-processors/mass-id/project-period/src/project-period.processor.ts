@@ -33,7 +33,7 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
     if (isNil(recycledEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -47,8 +47,8 @@ export class ProjectPeriodProcessor extends ParentDocumentRuleProcessor<RuleSubj
         ? RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE
         : RESULT_COMMENTS.INVALID_RECYCLED_EVENT_DATE,
       resultStatus: isEligible
-        ? RuleOutputStatus.APPROVED
-        : RuleOutputStatus.REJECTED,
+        ? RuleOutputStatus.PASSED
+        : RuleOutputStatus.FAILED,
     };
   }
 
