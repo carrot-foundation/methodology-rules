@@ -47,7 +47,7 @@ describe('RuleStandardDataProcessor', () => {
     ruleStandardDataProcessor = new TestRuleStandardDataProcessor();
   });
 
-  it('should return a result with a rejection comment when the document is not found', async () => {
+  it('should return a result with a fail comment when the document is not found', async () => {
     const ruleInput = random<RuleInput>();
     const parentDocumentId = 'invalid-id';
 
@@ -70,7 +70,7 @@ describe('RuleStandardDataProcessor', () => {
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultStatus FAILED if the rule is not applicable', async () => {
+  it('should return a resultStatus PASSED if the rule is not applicable', async () => {
     const ruleInput = random<RuleInput>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
