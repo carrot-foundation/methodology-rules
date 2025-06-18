@@ -71,7 +71,7 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
       const document = await this.loadDocument(ruleInput);
 
       if (isNil(document)) {
-        return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+        return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
           resultComment: this.errorProcessor.getResultCommentFromError(
             this.errorProcessor.getKnownError(
               this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -88,7 +88,7 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.REJECTED, {
+      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -105,7 +105,7 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
           totalDuplicates,
           validDuplicatesCount,
         ),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -115,13 +115,13 @@ export class UniquenessCheckProcessor extends ParentDocumentRuleProcessor<RuleSu
           totalDuplicates,
           cancelledCount,
         ),
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

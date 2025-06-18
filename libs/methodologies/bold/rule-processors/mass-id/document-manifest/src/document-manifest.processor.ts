@@ -68,8 +68,8 @@ type RuleSubject = {
 };
 
 interface ValidationResult {
-  approvedMessage?: string;
-  rejectedMessages: string[];
+  failMessages: string[];
+  passMessage?: string;
 }
 
 const DOCUMENT_TYPE_MAPPING = {
@@ -91,14 +91,14 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (isNil(ruleSubject.recyclerEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -109,23 +109,21 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
           ruleSubject.recyclerEvent as DocumentEvent,
         ),
     );
-    const allRejectedMessages = validationResults.flatMap(
-      (v) => v.rejectedMessages,
-    );
-    const approvedMessages = validationResults
-      .map((v) => v.approvedMessage)
+    const allFailMessages = validationResults.flatMap((v) => v.failMessages);
+    const passMessages = validationResults
+      .map((v) => v.passMessage)
       .filter(Boolean) as string[];
 
-    if (allRejectedMessages.length > 0) {
+    if (allFailMessages.length > 0) {
       return {
-        resultComment: allRejectedMessages.join(' '),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultComment: allFailMessages.join(' '),
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: approvedMessages.join(' '),
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: passMessages.join(' '),
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 
@@ -174,13 +172,13 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
     documentNumber: EventAttributeValueType,
     recyclerCountryCode: string | undefined,
   ): ValidationResult {
-    const rejectedMessages: string[] = [];
+    const failMessages: string[] = [];
 
     const documentTypeString = documentType?.toString();
     const documentNumberString = documentNumber?.toString();
 
     if (!isNonEmptyString(documentTypeString)) {
-      rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_TYPE);
+      failMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_TYPE);
     }
 
     if (
@@ -188,16 +186,16 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       recyclerCountryCode === 'BR' &&
       documentTypeString !== DOCUMENT_TYPE_MAPPING[this.documentManifestType]
     ) {
-      rejectedMessages.push(
+      failMessages.push(
         RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(documentTypeString),
       );
     }
 
     if (!isNonEmptyString(documentNumberString)) {
-      rejectedMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
+      failMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
     }
 
-    return { rejectedMessages };
+    return { failMessages };
   }
 
   private validateDocumentManifestEvents(
@@ -221,7 +219,7 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       this.documentManifestType === RECYCLING_MANIFEST
     ) {
       return {
-        rejectedMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
+        failMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
       };
     }
 
@@ -231,11 +229,11 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       hasWrongLabelAttachment,
     );
 
-    if (exemptionResult.approvedMessage) {
+    if (exemptionResult.passMessage) {
       return exemptionResult;
     }
 
-    if (exemptionResult.rejectedMessages.length > 0) {
+    if (exemptionResult.failMessages.length > 0) {
       return exemptionResult;
     }
 
@@ -250,33 +248,33 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
       this.validateEventValue(eventValue),
     ];
 
-    const rejectedMessages = validations.flatMap((v) => v.rejectedMessages);
+    const failMessages = validations.flatMap((v) => v.failMessages);
 
-    if (rejectedMessages.length > 0) {
-      return { rejectedMessages };
+    if (failMessages.length > 0) {
+      return { failMessages };
     }
 
     return {
-      approvedMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
+      failMessages: [],
+      passMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
         documentNumber: documentNumber as string,
         documentType: documentType as string,
         issueDate: issueDateAttribute?.value as string,
         value: getOrDefault(eventValue, 0),
       }),
-      rejectedMessages: [],
     };
   }
 
   private validateEventValue(eventValue: number | undefined): ValidationResult {
     if (eventValue === 0) {
       return {
-        rejectedMessages: [
+        failMessages: [
           RESULT_COMMENTS.INVALID_EVENT_VALUE(eventValue.toString()),
         ],
       };
     }
 
-    return { rejectedMessages: [] };
+    return { failMessages: [] };
   }
 
   private validateExemptionAndAttachment(
@@ -288,49 +286,47 @@ export class DocumentManifestProcessor extends ParentDocumentRuleProcessor<RuleS
 
     if (hasWrongLabelAttachment) {
       return {
-        rejectedMessages: [RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL],
+        failMessages: [RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL],
       };
     }
 
     if (isNil(attachment) && isNonEmptyString(justificationString)) {
       return {
-        approvedMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
-        rejectedMessages: [],
+        failMessages: [],
+        passMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
       };
     }
 
     if (isNil(attachment) && !isNonEmptyString(justificationString)) {
       return {
-        rejectedMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
+        failMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
       };
     }
 
     if (isNonEmptyString(justificationString) && !isNil(attachment)) {
       return {
-        rejectedMessages: [
-          RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
-        ],
+        failMessages: [RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED],
       };
     }
 
-    return { rejectedMessages: [] };
+    return { failMessages: [] };
   }
 
   private validateIssueDate(
     issueDateAttribute: MethodologyDocumentEventAttribute | undefined,
   ): ValidationResult {
-    const rejectedMessages: string[] = [];
+    const failMessages: string[] = [];
 
     if (!isNonEmptyString(issueDateAttribute?.name)) {
-      rejectedMessages.push(RESULT_COMMENTS.MISSING_ISSUE_DATE);
+      failMessages.push(RESULT_COMMENTS.MISSING_ISSUE_DATE);
     } else if (issueDateAttribute.format !== DATE) {
-      rejectedMessages.push(
+      failMessages.push(
         RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(
           issueDateAttribute.format as string,
         ),
       );
     }
 
-    return { rejectedMessages };
+    return { failMessages };
   }
 }

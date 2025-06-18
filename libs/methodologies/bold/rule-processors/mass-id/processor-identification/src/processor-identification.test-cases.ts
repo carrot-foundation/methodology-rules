@@ -12,7 +12,7 @@ export const processorIdentificationTestCases = [
   {
     events: new Map([[`${ACTOR}-${PROCESSOR}`, undefined]]),
     resultComment: RESULT_COMMENT.NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `no ${PROCESSOR} actor event found`,
   },
   {
@@ -20,7 +20,7 @@ export const processorIdentificationTestCases = [
       [`${ACTOR}-${PROCESSOR}`, stubActorEventWithLabel(PROCESSOR)],
     ]),
     resultComment: RESULT_COMMENT.SINGLE_EVENT,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: `found ${PROCESSOR} actor event`,
   },
   {
@@ -29,7 +29,7 @@ export const processorIdentificationTestCases = [
       [`${ACTOR}-${PROCESSOR}-2`, stubActorEventWithLabel(PROCESSOR)],
     ]),
     resultComment: RESULT_COMMENT.MULTIPLE_EVENTS,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: `found multiple ${PROCESSOR} actor events`,
   },
 ];

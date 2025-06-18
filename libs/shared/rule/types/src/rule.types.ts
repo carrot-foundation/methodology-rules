@@ -3,8 +3,8 @@ import type { AnyObject } from '@carrot-fndn/shared/types';
 import { tags } from 'typia';
 
 export enum RuleOutputStatus {
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
+  FAILED = 'FAILED',
+  PASSED = 'PASSED',
 }
 
 export interface IRuleDataProcessor {

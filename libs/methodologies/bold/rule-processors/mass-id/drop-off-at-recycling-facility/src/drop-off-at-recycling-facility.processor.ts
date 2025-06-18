@@ -26,9 +26,9 @@ const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${DROP_OFF}" event address does not match the "${RECYCLER}" event address.`,
-  APPROVED: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
   MISSING_DROP_OFF_EVENT: `No "${DROP_OFF}" event was found in the document.`,
   MISSING_RECEIVING_OPERATOR_IDENTIFIER: `The "${DROP_OFF}" event must include a "${RECEIVING_OPERATOR_IDENTIFIER}", but none was provided.`,
+  PASSED: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
 } as const;
 
 interface RuleSubject {
@@ -49,27 +49,27 @@ export class DropOffAtRecyclingFacilityProcessor extends ParentDocumentRuleProce
     if (isNil(lastDropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (!isNonEmptyString(receivingOperatorIdentifier)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (lastDropOffEvent.address.id !== recyclerEvent?.address.id) {
       return {
         resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: RESULT_COMMENTS.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: RESULT_COMMENTS.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

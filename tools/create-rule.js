@@ -109,8 +109,8 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { ${pascalCase}ProcessorErrors } from './${fileName}.errors';
 
 export const RESULT_COMMENTS = {
-  APPROVED: '${description}',
-  REJECTED: 'The rule validation failed.',
+  PASSED: '${description}',
+  FAILED: 'The rule validation failed.',
 } as const;
 
 export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document> {
@@ -127,7 +127,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -144,8 +144,8 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.APPROVED,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultComment: this.RESULT_COMMENT.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 
@@ -161,7 +161,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
 export class ${pascalCase}ProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     DOCUMENT_TYPE_NOT_FOUND: 'Document type not found.',
-    REJECTED_BY_ERROR: 'Unable to validate the ${ruleName}.',
+    FAILED_BY_ERROR: 'Unable to validate the ${ruleName}.',
   } as const;
 }\n`,
   },
@@ -229,8 +229,8 @@ const stubs = new BoldStubsBuilder().build();
 export const ${camelCase}TestCases = [
   {
     document: stubs.massIdDocumentStub,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario: 'all the criteria are met',
   },
   // Add more test cases as needed

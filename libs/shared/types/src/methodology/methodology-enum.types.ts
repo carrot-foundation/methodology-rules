@@ -80,7 +80,7 @@ export enum MethodologyDocumentStatus {
 }
 
 export enum MethodologyEvaluationResult {
-  APPROVED = 'APPROVED',
+  PASSED = 'PASSED',
 }
 
 export enum MethodologyParticipantType {

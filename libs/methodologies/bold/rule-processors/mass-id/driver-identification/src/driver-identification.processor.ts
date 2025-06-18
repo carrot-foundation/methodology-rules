@@ -54,21 +54,21 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     if (vehicleType === SLUDGE_PIPES) {
       return {
         resultComment: RESULT_COMMENTS.SLUDGE_PIPES,
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (hasDriverId && hasJustification) {
       return {
         resultComment: RESULT_COMMENTS.DRIVER_AND_JUSTIFICATION_PROVIDED,
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (!hasDriverId && !hasJustification) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(vehicleTypeString),
-        resultStatus: RuleOutputStatus.REJECTED,
+        resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
@@ -77,13 +77,13 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
         resultComment: RESULT_COMMENTS.JUSTIFICATION_PROVIDED(
           String(driverIdentifierExemptionJustification),
         ),
-        resultStatus: RuleOutputStatus.APPROVED,
+        resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.DRIVER_IDENTIFIER,
-      resultStatus: RuleOutputStatus.APPROVED,
+      resultStatus: RuleOutputStatus.PASSED,
     };
   }
 

@@ -59,8 +59,8 @@ export const participantHomologationsTestCases = [
       ...massIdAuditWithHomologations.participantsHomologationDocuments.values(),
     ],
     massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
-    resultComment: RESULT_COMMENTS.APPROVED,
-    resultStatus: RuleOutputStatus.APPROVED,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the participants homologation documents are found and the homologation is active',
   },
@@ -69,7 +69,7 @@ export const participantHomologationsTestCases = [
     massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.HOMOLOGATION_DOCUMENTS_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the participants homologation documents are not found',
   },
   {
@@ -84,7 +84,7 @@ export const participantHomologationsTestCases = [
       processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS([
         HAULER,
       ]),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'some participants homologation documents are not found',
   },
   {
@@ -93,7 +93,7 @@ export const participantHomologationsTestCases = [
     ],
     massIdAuditDocument: massIdAuditWithHomologations.massIdAuditDocument,
     resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the mass document does not exist',
   },
   {
@@ -109,7 +109,7 @@ export const participantHomologationsTestCases = [
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
         massIdAuditWithHomologations.massIdDocument.id,
       ),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the mass document does not contain events',
   },
   {
@@ -123,7 +123,7 @@ export const participantHomologationsTestCases = [
         HAULER,
       )!.id,
     ]),
-    resultStatus: RuleOutputStatus.REJECTED,
+    resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the participants homologation documents are found and the homologation is not active',
   },
