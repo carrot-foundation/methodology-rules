@@ -7,10 +7,10 @@ const prettierPluginRecommended = require('eslint-plugin-prettier/recommended');
 const promisePlugin = require('eslint-plugin-promise');
 const tsEslintPlugin = require('typescript-eslint');
 const sonarjsPlugin = require('eslint-plugin-sonarjs');
-const globals = require('globals');
 const unicornPlugin = require('eslint-plugin-unicorn');
 const commentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments/configs');
 const securityPlugin = require('eslint-plugin-security');
+const globals = require('globals');
 const jestFormattingPlugin = require('eslint-plugin-jest-formatting');
 const jestAsyncPlugin = require('eslint-plugin-jest-async');
 const ymlPlugin = require('eslint-plugin-yml');
@@ -98,15 +98,6 @@ const eslintJsConfigs = [
   },
 ];
 
-const configWithGlobals = {
-  languageOptions: {
-    globals: {
-      ...globals.node,
-      ...globals.jest,
-    },
-  },
-};
-
 const githubConfigs = [
   {
     files: ['**/*.{js,mjs,cjs,ts}'],
@@ -123,6 +114,11 @@ const tsFilesConfig = {
   files: ['**/*.ts'],
   plugins: {
     '@nx/typescript': nxPlugin,
+  },
+  languageOptions: {
+    globals: {
+      ...globals.node, // Adds process and other Node.js globals
+    },
   },
   rules: {
     // TODO: fix the no-unused-vars rule
@@ -224,7 +220,12 @@ const jsFilesConfigs = {
 const jestFilesConfigs = [
   {
     ...jestPlugin.configs['flat/recommended'],
-    files: ['**/*.spec.ts', '**/*.spec.js'],
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.js',
+      '**/typia.matchers.ts',
+      '**/testing.helpers.ts',
+    ],
     plugins: {
       'jest-formatting': jestFormattingPlugin,
       'jest-async': jestAsyncPlugin,
@@ -260,6 +261,11 @@ const jestFilesConfigs = [
   },
   {
     files: ['**/jest.config.ts'],
+    languageOptions: {
+      globals: {
+        __dirname: 'readonly',
+      },
+    },
     rules: {
       '@nx/enforce-module-boundaries': 'off',
       'import/no-relative-packages': 'off',
@@ -297,7 +303,6 @@ module.exports = defineConfig([
   promisePlugin.configs['flat/recommended'],
   sonarjsPlugin.configs.recommended,
   ...eslintJsConfigs,
-  configWithGlobals,
   unicornPlugin.default.configs.recommended,
   tsAndJsFilesConfigs,
   commentsPlugin.recommended,

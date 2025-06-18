@@ -153,5 +153,8 @@
       "{projectRoot}/jest.config.ts",
       "{projectRoot}/tsconfig.spec.json"
     ]
+  },
+  "tui": {
+    "enabled": false
   }
 }
