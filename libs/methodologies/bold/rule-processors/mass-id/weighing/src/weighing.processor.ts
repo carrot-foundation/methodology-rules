@@ -109,27 +109,26 @@ export class WeighingProcessor extends RuleDataProcessor {
       };
     }
 
-    let approvalMessage = '';
+    let passMessage = '';
 
     const isTransportManifest =
       weighingValues.weighingCaptureMethod ===
       DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
 
     if (isTransportManifest) {
-      approvalMessage = PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
+      passMessage = PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
     } else if (isTwoStepWeighingEvent) {
-      approvalMessage = PASSED_RESULT_COMMENTS.TWO_STEP;
+      passMessage = PASSED_RESULT_COMMENTS.TWO_STEP;
     } else {
-      approvalMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
+      passMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
     }
 
     if (!isNil(weighingValues.containerCapacityException)) {
-      approvalMessage =
-        PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(approvalMessage);
+      passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
     }
 
     return {
-      resultComment: approvalMessage,
+      resultComment: passMessage,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

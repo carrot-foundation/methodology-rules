@@ -136,7 +136,7 @@ describe('RuleStandardDataProcessor', () => {
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a result with an fail comment when the rule is applicable and failed', async () => {
+  it('should return a result with a fail comment when the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -161,7 +161,7 @@ describe('RuleStandardDataProcessor', () => {
     expect(result).toEqual(expectedRuleOutput);
   });
 
-  it('should return a resultContent when the rule is applicable and passed', async () => {
+  it('should return a resultContent when the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
     const resultContent = random<AnyObject>();
 

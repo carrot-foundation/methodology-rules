@@ -64,7 +64,7 @@ describe('ProjectPeriodProcessor', () => {
     },
   );
 
-  it('should REJECT the rule if the Recycled event is not found', async () => {
+  it('should FAIL the rule if the Recycled event is not found', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
     const document = stubBoldMassIdDocument({

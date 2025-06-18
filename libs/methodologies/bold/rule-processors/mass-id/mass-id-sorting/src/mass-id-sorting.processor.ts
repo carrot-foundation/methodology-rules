@@ -45,10 +45,10 @@ const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
   FAILED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value differs from the actual value by "${sortingValueCalculationDifference}" kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
+    `The calculated sorting value differs from the actual value by ${sortingValueCalculationDifference} kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
   MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
   PASSED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is "${sortingValueCalculationDifference}" kg.`,
+    `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
 } as const;
 
 interface DocumentPair {

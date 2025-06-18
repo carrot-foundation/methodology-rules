@@ -48,7 +48,7 @@ export const isMassIdAuditInProgress = (document: Document): boolean =>
       }),
   );
 
-export const hasApprovedOrInProgressMassIdAuditForTheSameMethodology = (
+export const hasPassedOrInProgressMassIdAuditForTheSameMethodology = (
   massIdAuditDocuments: Document[],
   methodologySlug: BoldMethodologySlug,
 ): boolean =>

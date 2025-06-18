@@ -32,7 +32,7 @@ import {
   METHODOLOGY_NAME_BY_SLUG,
 } from './certificate-uniqueness-check.constants';
 import {
-  hasApprovedOrInProgressMassIdAuditForTheSameMethodology,
+  hasPassedOrInProgressMassIdAuditForTheSameMethodology,
   hasNonCancelledDocuments,
 } from './certificate-uniqueness-check.helpers';
 import { CertificateUniquenessCheckProcessorErrors } from './certificate-uniqueness-check.processor.errors';
@@ -119,7 +119,7 @@ export class CertificateUniquenessCheck extends RuleDataProcessor {
     }
 
     if (
-      hasApprovedOrInProgressMassIdAuditForTheSameMethodology(
+      hasPassedOrInProgressMassIdAuditForTheSameMethodology(
         relatedMassIdAuditDocuments,
         this.methodologySlug,
       )

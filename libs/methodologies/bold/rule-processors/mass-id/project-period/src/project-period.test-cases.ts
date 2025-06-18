@@ -43,12 +43,6 @@ export const projectPeriodTestCases = [
     scenario: 'the Recycled event was created on the eligible date',
   },
   {
-    externalCreatedAt: getEligibleDate().toISOString(),
-    resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'the Recycled event was created on the eligible date',
-  },
-  {
     externalCreatedAt: createBRTDateString(subSeconds(getEligibleDate(), 1)),
     resultComment: RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE,
     resultStatus: RuleOutputStatus.PASSED,
