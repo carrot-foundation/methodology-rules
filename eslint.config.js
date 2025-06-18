@@ -224,6 +224,7 @@ const jestFilesConfigs = [
       '**/*.spec.ts',
       '**/*.spec.js',
       '**/typia.matchers.ts',
+      '**/helpers/rule-processor.helpers.ts',
       '**/testing.helpers.ts',
     ],
     plugins: {
