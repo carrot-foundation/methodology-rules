@@ -224,7 +224,13 @@ const jsFilesConfigs = {
 const jestFilesConfigs = [
   {
     ...jestPlugin.configs['flat/recommended'],
-    files: ['**/*.spec.ts', '**/*.spec.js'],
+    files: [
+      '**/*.spec.ts',
+      '**/*.spec.js',
+      '**/typia.matchers.ts',
+      '**/helpers/rule-processor.helpers.ts',
+      '**/testing.helpers.ts',
+    ],
     plugins: {
       'jest-formatting': jestFormattingPlugin,
       'jest-async': jestAsyncPlugin,
