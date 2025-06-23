@@ -28,38 +28,38 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/prevented-emissions": [
         "libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/certificate-uniqueness-check": [
-        "libs/methodologies/bold/rule-processors/mass-id/certificate-uniqueness-check/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit": [
+        "libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/composting-cycle-timeframe": [
         "libs/methodologies/bold/rule-processors/mass-id/composting-cycle-timeframe/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/document-manifest": [
-        "libs/methodologies/bold/rule-processors/mass-id/document-manifest/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/document-manifest-data": [
+        "libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/driver-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/driver-identification/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/drop-off-at-recycling-facility": [
-        "libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycling-facility/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler": [
+        "libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/geolocation-precision": [
-        "libs/methodologies/bold/rule-processors/mass-id/geolocation-precision/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision": [
+        "libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/hauler-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/hauler-identification/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/local-waste-classification": [
-        "libs/methodologies/bold/rule-processors/mass-id/local-waste-classification/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/regional-waste-classification": [
+        "libs/methodologies/bold/rule-processors/mass-id/regional-waste-classification/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-definition": [
-        "libs/methodologies/bold/rule-processors/mass-id/mass-id-definition/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-qualifications": [
+        "libs/methodologies/bold/rule-processors/mass-id/mass-id-qualifications/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-sorting": [
         "libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/participant-homologations": [
-        "libs/methodologies/bold/rule-processors/mass-id/participant-homologations/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/participant-homologations-requirements": [
+        "libs/methodologies/bold/rule-processors/mass-id/participant-homologations-requirements/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/processor-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/index.ts"
@@ -67,14 +67,14 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/project-boundary": [
         "libs/methodologies/bold/rule-processors/mass-id/project-boundary/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/project-period": [
-        "libs/methodologies/bold/rule-processors/mass-id/project-period/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/project-period-limit": [
+        "libs/methodologies/bold/rule-processors/mass-id/project-period-limit/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/recycler-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/recycler-identification/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/uniqueness-check": [
-        "libs/methodologies/bold/rule-processors/mass-id/uniqueness-check/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique": [
+        "libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/vehicle-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/vehicle-identification/src/index.ts"
