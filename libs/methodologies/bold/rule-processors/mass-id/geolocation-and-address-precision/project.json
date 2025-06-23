@@ -1,0 +1,18 @@
+{
+  "name": "methodologies-bold-rule-processors-mass-id-geolocation-and-address-precision",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "scope:mass-id",
+    "stack:any",
+    "type:library"
+  ],
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "type-check": {}
+  }
+}
