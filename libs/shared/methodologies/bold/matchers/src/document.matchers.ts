@@ -2,7 +2,7 @@ import { pick } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   DocumentCategory,
-  type DocumentReference,
+  type DocumentRelation,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -20,7 +20,7 @@ export class DocumentMatcher {
     this.match = match;
   }
 
-  matches(document: Omit<DocumentReference, 'id'>): boolean {
+  matches(document: Omit<DocumentRelation, 'id'>): boolean {
     const matchKeys = Object.keys(this.match) as Array<keyof DocumentMatch>;
 
     const objectToMatch = pick(document, ...matchKeys);

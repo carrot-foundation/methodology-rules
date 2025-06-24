@@ -28,7 +28,7 @@ import {
   DocumentEventName,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -139,16 +139,16 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
+      const documentRelation = mapDocumentRelation(document);
 
       if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference) &&
-        documentReference.subtype === DocumentSubtype.RECYCLER
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation) &&
+        documentRelation.subtype === DocumentSubtype.RECYCLER
       ) {
         recyclerHomologationDocument = document;
       }
 
-      if (MASS_ID.matches(documentReference)) {
+      if (MASS_ID.matches(documentRelation)) {
         massIdDocument = document;
       }
     });

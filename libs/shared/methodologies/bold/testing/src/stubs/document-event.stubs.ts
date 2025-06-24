@@ -5,7 +5,7 @@ import {
   type DocumentEventAttribute,
   DocumentEventAttributeName,
   DocumentEventName,
-  type DocumentReference,
+  type DocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type AnyObject,
@@ -32,22 +32,13 @@ export const stubDocumentEvent = (
   address: stubAddress(partialEvent.address),
   author: stubAuthor(partialEvent.author),
   participant: stubParticipant(partialEvent.participant),
-  referencedDocument: isPropertyOverridenWithUndefined(
-    partialEvent,
-    'referencedDocument',
-  )
-    ? undefined
-    : {
-        ...random<DocumentReference>(),
-        ...partialEvent.referencedDocument,
-      },
   relatedDocument: isPropertyOverridenWithUndefined(
     partialEvent,
     'relatedDocument',
   )
     ? undefined
     : {
-        ...random<DocumentReference>(),
+        ...random<DocumentRelation>(),
         ...partialEvent.relatedDocument,
       },
 });

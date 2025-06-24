@@ -11,7 +11,7 @@ import {
   DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -65,8 +65,7 @@ const massIdWithTwoAuditDocuments: Document = {
     ...(simpleMassIdStubs.massIdDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: RELATED,
-      referencedDocument: undefined,
-      relatedDocument: mapDocumentReference(duplicatedMassIdAuditDocument),
+      relatedDocument: mapDocumentRelation(duplicatedMassIdAuditDocument),
     }),
   ],
 };
@@ -92,8 +91,7 @@ const massIdWithAuditDocumentsForDifferentMethodologies: Document = {
     ...(simpleMassIdStubs.massIdDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: RELATED,
-      referencedDocument: undefined,
-      relatedDocument: mapDocumentReference(massIdAuditForOtherMethodology),
+      relatedDocument: mapDocumentRelation(massIdAuditForOtherMethodology),
     }),
   ],
 };

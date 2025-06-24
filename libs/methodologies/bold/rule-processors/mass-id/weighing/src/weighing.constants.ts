@@ -95,7 +95,7 @@ export const WRONG_FORMAT_RESULT_COMMENTS = {
 } as const;
 
 export const NOT_FOUND_RESULT_COMMENTS = {
-  HOMOLOGATION_EVENT: `The referenced "${SCALE_HOMOLOGATION}" event was not found.`,
+  HOMOLOGATION_EVENT: `The related "${SCALE_HOMOLOGATION}" event was not found.`,
   MORE_THAN_TWO_WEIGHING_EVENTS: `More than two "${WEIGHING}" events were found, which is not supported.`,
   NO_WEIGHING_EVENTS: `No "${WEIGHING}" events were found in the document.`,
 } as const;

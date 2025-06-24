@@ -1,7 +1,7 @@
 import type {
   Document,
   DocumentEvent,
-  DocumentReference,
+  DocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { DocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -23,7 +23,7 @@ import type {
 
 import { BaseDocumentQueryService } from './abstract-document-query.service';
 import {
-  isDocumentReference,
+  isDocumentRelation,
   isObject,
   isRelatedDocumentCriteria,
   validateDocument,
@@ -99,7 +99,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
           const relationship = this.getEventRelationship(event);
 
           if (
-            isDocumentReference(relationship) &&
+            isDocumentRelation(relationship) &&
             matcher.matches(relationship)
           ) {
             documentKeys.push(
@@ -168,15 +168,10 @@ export class DocumentQueryService extends BaseDocumentQueryService<
   }
 
   private getEventRelationship({
-    referencedDocument,
     relatedDocument,
-  }: DocumentEvent): DocumentReference | undefined {
-    if (isDocumentReference(relatedDocument)) {
+  }: DocumentEvent): DocumentRelation | undefined {
+    if (isDocumentRelation(relatedDocument)) {
       return relatedDocument;
-    }
-
-    if (isDocumentReference(referencedDocument)) {
-      return referencedDocument;
     }
 
     return undefined;

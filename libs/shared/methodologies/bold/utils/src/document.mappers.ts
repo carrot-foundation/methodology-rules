@@ -1,12 +1,10 @@
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  type DocumentReference,
+  type DocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-export const mapDocumentReference = (
-  document: Document,
-): DocumentReference => ({
+export const mapDocumentRelation = (document: Document): DocumentRelation => ({
   ...pick(document, 'category', 'subtype', 'type'),
   documentId: document.id,
 });

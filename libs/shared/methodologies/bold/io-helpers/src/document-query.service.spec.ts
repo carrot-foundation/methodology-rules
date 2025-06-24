@@ -6,7 +6,7 @@ import {
 import {
   stubDocument,
   stubDocumentEvent,
-  stubDocumentReference,
+  stubDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
@@ -348,13 +348,12 @@ describe('DocumenQueryService', () => {
     });
 
     it('should return array with relatedDocuments', async () => {
-      const { category, subtype, type } = stubDocumentReference();
+      const { category, subtype, type } = stubDocumentRelation();
       const relatedDocument = stubDocument();
       const document = stubDocument();
 
       document.externalEvents = [
         stubDocumentEvent({
-          referencedDocument: undefined,
           relatedDocument: { category, subtype, type },
         }),
       ];
@@ -392,15 +391,14 @@ describe('DocumenQueryService', () => {
       expect(result).toEqual([relatedDocument]);
     });
 
-    it('should return referencedDocuments in the relatedDocuments array', async () => {
-      const { category, subtype, type } = stubDocumentReference();
-      const referencedDocument = stubDocument();
+    it('should return relatedDocuments with bidirectional false in array', async () => {
+      const { category, subtype, type } = stubDocumentRelation();
+      const relatedDocument = stubDocument();
       const document = stubDocument();
 
       document.externalEvents = [
         stubDocumentEvent({
-          referencedDocument: { category, subtype, type },
-          relatedDocument: undefined,
+          relatedDocument: { bidirectional: false, category, subtype, type },
         }),
       ];
 
@@ -412,7 +410,7 @@ describe('DocumenQueryService', () => {
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
-          stubDocumentEntity({ document: referencedDocument }),
+          stubDocumentEntity({ document: relatedDocument }),
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -426,7 +424,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([referencedDocument]);
+      expect(result).toEqual([relatedDocument]);
     });
 
     it('should return empty array when relatedDocuments criteria is array empty', async () => {
@@ -579,7 +577,6 @@ describe('DocumenQueryService', () => {
     it('should return undefined', () => {
       const eventRelationship = loadDocuments['getEventRelationship'](
         stubDocumentEvent({
-          referencedDocument: undefined,
           relatedDocument: undefined,
         }),
       );
