@@ -1,4 +1,4 @@
-import { stubDocumentReference } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentCategory,
   DocumentSubtype,
@@ -25,11 +25,11 @@ describe('Document Matchers', () => {
         subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         type: DocumentType.ORGANIC,
       };
-      const documentReference = stubDocumentReference(documentMatch);
+      const documentRelation = stubDocumentRelation(documentMatch);
 
       const documentMatcher = new DocumentMatcher(documentMatch);
 
-      const matchesResult = documentMatcher.matches(documentReference);
+      const matchesResult = documentMatcher.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
@@ -40,14 +40,14 @@ describe('Document Matchers', () => {
         subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         type: DocumentType.ORGANIC,
       };
-      const documentReference = stubDocumentReference(documentMatch);
+      const documentRelation = stubDocumentRelation(documentMatch);
 
       const documentMatcher = new DocumentMatcher({
         ...documentMatch,
         type: DocumentType.MASS_ID_AUDIT,
       });
 
-      const matchesResult = documentMatcher.matches(documentReference);
+      const matchesResult = documentMatcher.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -55,21 +55,21 @@ describe('Document Matchers', () => {
 
   describe('MASS_ID', () => {
     it('should return true if the document category is Mass ID', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
       });
 
-      const matchesResult = MASS_ID.matches(documentReference);
+      const matchesResult = MASS_ID.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Mass ID', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
       });
 
-      const matchesResult = MASS_ID.matches(documentReference);
+      const matchesResult = MASS_ID.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -77,34 +77,34 @@ describe('Document Matchers', () => {
 
   describe('MASS_ID_AUDIT', () => {
     it('should return true if the document category is Methodology and type is Mass ID Audit', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.MASS_ID_AUDIT,
       });
 
-      const matchesResult = MASS_ID_AUDIT.matches(documentReference);
+      const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         type: DocumentType.MASS_ID_AUDIT,
       });
 
-      const matchesResult = MASS_ID_AUDIT.matches(documentReference);
+      const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
     it('should return false if the document type is not Mass ID Audit', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
       });
 
-      const matchesResult = MASS_ID_AUDIT.matches(documentReference);
+      const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -112,34 +112,34 @@ describe('Document Matchers', () => {
 
   describe('RECYCLED_ID', () => {
     it('should return true if the document category is Methodology and type is Recycled ID', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.RECYCLED_ID,
       });
 
-      const matchesResult = RECYCLED_ID.matches(documentReference);
+      const matchesResult = RECYCLED_ID.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         type: DocumentType.RECYCLED_ID,
       });
 
-      const matchesResult = RECYCLED_ID.matches(documentReference);
+      const matchesResult = RECYCLED_ID.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
     it('should return false if the document type is not Recycled ID', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
       });
 
-      const matchesResult = RECYCLED_ID.matches(documentReference);
+      const matchesResult = RECYCLED_ID.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -147,34 +147,34 @@ describe('Document Matchers', () => {
 
   describe('METHODOLOGY_DEFINITION', () => {
     it('should return true if the document category is Methodology and type is Definition', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.DEFINITION,
       });
 
-      const matchesResult = METHODOLOGY_DEFINITION.matches(documentReference);
+      const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         type: DocumentType.DEFINITION,
       });
 
-      const matchesResult = METHODOLOGY_DEFINITION.matches(documentReference);
+      const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
     it('should return false if the document type is not Definition', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
       });
 
-      const matchesResult = METHODOLOGY_DEFINITION.matches(documentReference);
+      const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -182,40 +182,40 @@ describe('Document Matchers', () => {
 
   describe('PARTICIPANT_HOMOLOGATION_GROUP', () => {
     it('should return true if document matches category, type and subtype', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.GROUP,
         type: DocumentType.PARTICIPANT_HOMOLOGATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         subtype: DocumentSubtype.GROUP,
         type: DocumentType.PARTICIPANT_HOMOLOGATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
     it('should return false if the document subtype is not Group', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TCC,
         type: DocumentType.PARTICIPANT_HOMOLOGATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -223,37 +223,37 @@ describe('Document Matchers', () => {
 
   describe('PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH', () => {
     it('should return true if document matches category and type', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.PARTICIPANT_HOMOLOGATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         type: DocumentType.PARTICIPANT_HOMOLOGATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
     it('should return false if the document type is not Participant Homologation', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentReference);
+        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -261,23 +261,23 @@ describe('Document Matchers', () => {
 
   describe('CREDIT_ORDER_MATCH', () => {
     it('should return true if document matches category and type', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.CREDIT_ORDER,
       });
 
-      const matchesResult = CREDIT_ORDER_MATCH.matches(documentReference);
+      const matchesResult = CREDIT_ORDER_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
 
     it('should return false if the document category is not Methodology', () => {
-      const documentReference = stubDocumentReference({
+      const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         type: DocumentType.CREDIT_ORDER,
       });
 
-      const matchesResult = CREDIT_ORDER_MATCH.matches(documentReference);
+      const matchesResult = CREDIT_ORDER_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });

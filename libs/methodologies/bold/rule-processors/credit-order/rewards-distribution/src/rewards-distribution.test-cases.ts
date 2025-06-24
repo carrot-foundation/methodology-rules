@@ -24,7 +24,7 @@ import {
   MethodologyDocumentActorType,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -342,7 +342,7 @@ const createTestDocuments = () => {
       ...(standardDocuments.creditOrderDocument.externalEvents ?? []),
       stubDocumentEvent({
         name: RELATED,
-        relatedDocument: mapDocumentReference(
+        relatedDocument: mapDocumentRelation(
           secondDocuments.massIdCertificateDocuments[0]!,
         ),
       }),

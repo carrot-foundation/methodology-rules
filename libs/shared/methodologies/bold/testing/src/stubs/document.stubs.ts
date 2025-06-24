@@ -4,7 +4,7 @@ import {
   type Document,
   DocumentCategory,
   type DocumentEvent,
-  type DocumentReference,
+  type DocumentRelation,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -38,10 +38,10 @@ export const stubDocument = (
   };
 };
 
-export const stubDocumentReference = (
-  partial?: Partial<DocumentReference>,
-): DocumentReference => ({
-  ...random<Required<DocumentReference>>(),
+export const stubDocumentRelation = (
+  partial?: Partial<DocumentRelation>,
+): DocumentRelation => ({
+  ...random<Required<DocumentRelation>>(),
   ...partial,
 });
 

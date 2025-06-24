@@ -17,7 +17,7 @@ import {
   type Document,
   DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -147,19 +147,19 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     const relatedMassIdAuditDocuments: Document[] = [];
 
     await documentQuery?.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
+      const documentRelation = mapDocumentRelation(document);
 
-      if (CREDIT_ORDER_MATCH.matches(documentReference)) {
+      if (CREDIT_ORDER_MATCH.matches(documentRelation)) {
         creditDocuments.push(document);
       }
 
-      if (this.massIdCertificateMatcher.matches(documentReference)) {
+      if (this.massIdCertificateMatcher.matches(documentRelation)) {
         massIdCertificateDocuments.push(document);
       }
 
       if (
-        MASS_ID_AUDIT.matches(documentReference) &&
-        documentReference.documentId !== ruleInput.documentId
+        MASS_ID_AUDIT.matches(documentRelation) &&
+        documentRelation.documentId !== ruleInput.documentId
       ) {
         relatedMassIdAuditDocuments.push(document);
       }

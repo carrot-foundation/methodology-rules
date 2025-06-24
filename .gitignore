@@ -41,3 +41,6 @@ Thumbs.db
 local/
 rules-metadata.json
 temp-rules-metadata.json
+
+# Windsurf
+.windsurf

@@ -1,12 +1,12 @@
-import type { DocumentReference } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { DocumentRelation } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { faker } from '@faker-js/faker';
 
-import { mapDocumentReference } from './document.mappers';
+import { mapDocumentRelation } from './document.mappers';
 
 describe('Document Mappers', () => {
-  describe('mapDocumentReference', () => {
+  describe('mapDocumentRelation', () => {
     it('should return id, category, type and subtype', () => {
       const document = stubDocument({
         category: faker.string.sample(),
@@ -15,9 +15,9 @@ describe('Document Mappers', () => {
         type: faker.string.sample(),
       });
 
-      const result = mapDocumentReference(document);
+      const result = mapDocumentRelation(document);
 
-      const expected: DocumentReference = {
+      const expected: DocumentRelation = {
         category: document.category,
         documentId: document.id,
         subtype: document.subtype,

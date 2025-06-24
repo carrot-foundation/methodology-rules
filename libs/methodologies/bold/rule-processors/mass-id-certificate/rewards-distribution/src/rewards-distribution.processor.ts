@@ -15,7 +15,7 @@ import {
   MassIdOrganicSubtype,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentReference } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -63,13 +63,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     let methodologyDocument: Document | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
-      const documentReference = mapDocumentReference(document);
+      const documentRelation = mapDocumentRelation(document);
 
-      if (MASS_ID.matches(documentReference)) {
+      if (MASS_ID.matches(documentRelation)) {
         massIdDocument = document;
       }
 
-      if (METHODOLOGY_DEFINITION.matches(documentReference)) {
+      if (METHODOLOGY_DEFINITION.matches(documentRelation)) {
         methodologyDocument = document;
       }
     });

@@ -46,8 +46,7 @@ export interface MethodologyDocumentEvent {
   preserveSensitiveData?: boolean | undefined;
   propagatedFrom?: undefined | UnknownObject;
   propagateEvent?: boolean | undefined;
-  referencedDocument?: MethodologyDocumentReference | undefined;
-  relatedDocument?: MethodologyDocumentReference | undefined;
+  relatedDocument?: MethodologyDocumentRelation | undefined;
   target?: undefined | UnknownObject;
   updates?: undefined | UnknownObject;
   value?: (number & tags.Minimum<0>) | undefined;
@@ -90,7 +89,7 @@ export interface MethodologyDocumentEventMetadata {
   attributes?: MethodologyDocumentEventAttribute[] | undefined;
 }
 
-export interface MethodologyDocumentReference {
+export interface MethodologyDocumentRelation {
   category?: string | undefined;
   documentId: string;
   subtype?: string | undefined;

@@ -2,7 +2,7 @@ import type {
   MethodologyDocumentEvent,
   MethodologyDocumentEventAttribute,
   MethodologyDocumentEventMetadata,
-  MethodologyDocumentReference,
+  MethodologyDocumentRelation,
 } from '@carrot-fndn/shared/types';
 
 import type {
@@ -16,8 +16,7 @@ import type {
 export interface DocumentEvent extends MethodologyDocumentEvent {
   metadata?: DocumentEventMetadata | undefined;
   name: DocumentEventName | string;
-  referencedDocument?: DocumentReference | undefined;
-  relatedDocument?: DocumentReference | undefined;
+  relatedDocument?: DocumentRelation | undefined;
 }
 
 export interface DocumentEventAttribute
@@ -30,7 +29,8 @@ export interface DocumentEventMetadata
   attributes?: DocumentEventAttribute[] | undefined;
 }
 
-export interface DocumentReference extends MethodologyDocumentReference {
+export interface DocumentRelation extends MethodologyDocumentRelation {
+  bidirectional?: boolean | undefined;
   category?: DocumentCategory | string | undefined;
   subtype?: DocumentSubtype | string | undefined;
   type?: DocumentType | string | undefined;
