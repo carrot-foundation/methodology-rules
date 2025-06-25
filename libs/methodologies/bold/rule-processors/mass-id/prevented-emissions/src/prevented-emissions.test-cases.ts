@@ -109,7 +109,7 @@ export const preventedEmissionsTestCases = [
       massIdDocumentValue,
     ),
     resultContent: {
-      preventedEmissions: expectedPreventedEmissions,
+      preventedCo2e: expectedPreventedEmissions,
       ruleSubject: {
         exceedingEmissionCoefficient,
         massIdDocumentValue,

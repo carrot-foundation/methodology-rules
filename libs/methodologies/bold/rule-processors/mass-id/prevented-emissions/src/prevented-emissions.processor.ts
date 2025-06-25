@@ -135,7 +135,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         massIdDocumentValue,
       ),
       resultContent: {
-        preventedEmissions,
+        preventedCo2e: preventedEmissions,
       },
       resultStatus: RuleOutputStatus.PASSED,
     };
