@@ -1,4 +1,5 @@
 import {
+  stubAddress,
   stubBoldHomologationDocument,
   stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
@@ -16,7 +17,8 @@ import {
   getHomologatedAddressByParticipantId,
 } from './geolocation-and-address-precision.helpers';
 
-const { HOMOLOGATION_CONTEXT } = DocumentEventName;
+const { FACILITY_ADDRESS, LEGAL_AND_ADMINISTRATIVE_COMPLIANCE } =
+  DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
@@ -24,13 +26,27 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getHomologatedAddressByParticipantId', () => {
     it('should return the homologated address by participant id', () => {
       const participantId = faker.string.uuid();
-      const homologationContextEvent = stubDocumentEvent({
-        name: HOMOLOGATION_CONTEXT,
+      const addressId = faker.string.uuid();
+
+      const legalAndAdministrativeComplianceEvent = stubDocumentEvent({
+        address: stubAddress({ id: addressId }),
+        name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
         participant: stubParticipant({ id: participantId }),
       });
+
       const documentStub = stubBoldHomologationDocument({
         externalEventsMap: new Map([
-          [HOMOLOGATION_CONTEXT, homologationContextEvent],
+          [
+            FACILITY_ADDRESS,
+            stubDocumentEvent({
+              address: stubAddress({ id: addressId }),
+              name: FACILITY_ADDRESS,
+            }),
+          ],
+          [
+            LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
+            legalAndAdministrativeComplianceEvent,
+          ],
         ]),
       });
 
@@ -40,15 +56,18 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
           stubBoldHomologationDocument({
             externalEventsMap: new Map([
               [
-                HOMOLOGATION_CONTEXT,
-                stubDocumentEvent({ name: HOMOLOGATION_CONTEXT }),
+                FACILITY_ADDRESS,
+                stubDocumentEvent({
+                  address: stubAddress({ id: addressId }),
+                  name: FACILITY_ADDRESS,
+                }),
               ],
             ]),
           }),
         ),
       ]);
 
-      expect(result?.id).toBe(homologationContextEvent.address.id);
+      expect(result?.id).toBe(legalAndAdministrativeComplianceEvent.address.id);
     });
 
     it('should return undefined if the participant has no homologated address', () => {
@@ -57,10 +76,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ...stubArray(() =>
           stubBoldHomologationDocument({
             externalEventsMap: new Map([
-              [
-                HOMOLOGATION_CONTEXT,
-                stubDocumentEvent({ name: HOMOLOGATION_CONTEXT }),
-              ],
+              [FACILITY_ADDRESS, stubDocumentEvent({ name: FACILITY_ADDRESS })],
             ]),
           }),
         ),

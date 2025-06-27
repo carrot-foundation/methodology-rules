@@ -30,12 +30,12 @@ export const getHomologatedAddressByParticipantId = (
     return undefined;
   }
 
-  const homologationContextEvent =
+  const facilityAddressEvent =
     participantHomologationDocument.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_CONTEXT]),
+      eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
     );
 
-  return homologationContextEvent?.address;
+  return facilityAddressEvent?.address;
 };
 
 export const getEventGpsGeolocation = (
