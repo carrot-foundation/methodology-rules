@@ -153,7 +153,7 @@ describe('Homologation Document Helpers', () => {
     it('should return the homologation document for the given participant id', () => {
       const participantId = faker.string.uuid();
       const homologationContextEvent = stubDocumentEvent({
-        name: DocumentEventName.HOMOLOGATION_CONTEXT,
+        name: DocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
       });
       const document = stubParticipantHomologationDocument({
         externalEvents: [

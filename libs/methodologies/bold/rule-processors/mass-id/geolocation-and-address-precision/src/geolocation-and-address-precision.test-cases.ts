@@ -23,7 +23,14 @@ import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.processor';
 
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
-const { ACTOR, DROP_OFF, HOMOLOGATION_CONTEXT, PICK_UP } = DocumentEventName;
+const {
+  ACTOR,
+  DROP_OFF,
+  FACILITY_ADDRESS,
+  HOMOLOGATION_CONTEXT,
+  LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
+  PICK_UP,
+} = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
@@ -90,9 +97,14 @@ const validHomologationDocuments = new Map([
     RECYCLER,
     {
       externalEventsMap: {
-        [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
+        [FACILITY_ADDRESS]: stubDocumentEvent({
           address: recyclerAddress,
-          name: HOMOLOGATION_CONTEXT,
+          name: FACILITY_ADDRESS,
+          participant: recyclerParticipant,
+        }),
+        [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
+          address: recyclerAddress,
+          name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
           participant: recyclerParticipant,
         }),
       },
@@ -102,9 +114,14 @@ const validHomologationDocuments = new Map([
     WASTE_GENERATOR,
     {
       externalEventsMap: {
-        [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
+        [FACILITY_ADDRESS]: stubDocumentEvent({
           address: wasteGeneratorAddress,
-          name: HOMOLOGATION_CONTEXT,
+          name: FACILITY_ADDRESS,
+          participant: wasteGeneratorParticipant,
+        }),
+        [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
+          address: wasteGeneratorAddress,
+          name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
           participant: wasteGeneratorParticipant,
         }),
       },

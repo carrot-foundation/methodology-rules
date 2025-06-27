@@ -19,7 +19,7 @@ export const getParticipantHomologationDocumentByParticipantId = ({
 }): Document | undefined =>
   homologationDocuments.find((document) => {
     const event = document.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_CONTEXT]),
+      eventNameIsAnyOf([DocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]),
     );
 
     return event?.participant.id === participantId;
