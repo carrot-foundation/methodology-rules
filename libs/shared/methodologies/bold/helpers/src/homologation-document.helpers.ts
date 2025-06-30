@@ -17,13 +17,9 @@ export const getParticipantHomologationDocumentByParticipantId = ({
   homologationDocuments: Document[];
   participantId: NonEmptyString;
 }): Document | undefined =>
-  homologationDocuments.find((document) => {
-    const event = document.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]),
-    );
-
-    return event?.participant.id === participantId;
-  });
+  homologationDocuments.find(
+    (document) => document.primaryParticipant.id === participantId,
+  );
 
 export const isHomologationValid = (document: Document): boolean => {
   const event = document.externalEvents?.find(

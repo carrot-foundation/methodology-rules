@@ -17,8 +17,7 @@ import {
   getHomologatedAddressByParticipantId,
 } from './geolocation-and-address-precision.helpers';
 
-const { FACILITY_ADDRESS, LEGAL_AND_ADMINISTRATIVE_COMPLIANCE } =
-  DocumentEventName;
+const { FACILITY_ADDRESS } = DocumentEventName;
 const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
@@ -27,12 +26,6 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return the homologated address by participant id', () => {
       const participantId = faker.string.uuid();
       const addressId = faker.string.uuid();
-
-      const legalAndAdministrativeComplianceEvent = stubDocumentEvent({
-        address: stubAddress({ id: addressId }),
-        name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-        participant: stubParticipant({ id: participantId }),
-      });
 
       const documentStub = stubBoldHomologationDocument({
         externalEventsMap: new Map([
@@ -43,31 +36,18 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
               name: FACILITY_ADDRESS,
             }),
           ],
-          [
-            LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-            legalAndAdministrativeComplianceEvent,
-          ],
         ]),
+        partialDocument: {
+          primaryParticipant: stubParticipant({ id: participantId }),
+        },
       });
 
       const result = getHomologatedAddressByParticipantId(participantId, [
         documentStub,
-        ...stubArray(() =>
-          stubBoldHomologationDocument({
-            externalEventsMap: new Map([
-              [
-                FACILITY_ADDRESS,
-                stubDocumentEvent({
-                  address: stubAddress({ id: addressId }),
-                  name: FACILITY_ADDRESS,
-                }),
-              ],
-            ]),
-          }),
-        ),
+        ...stubArray(() => stubBoldHomologationDocument()),
       ]);
 
-      expect(result?.id).toBe(legalAndAdministrativeComplianceEvent.address.id);
+      expect(result?.id).toBe(addressId);
     });
 
     it('should return undefined if the participant has no homologated address', () => {
