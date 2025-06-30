@@ -1,5 +1,4 @@
 import {
-  stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubParticipantHomologationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -152,19 +151,10 @@ describe('Homologation Document Helpers', () => {
   describe('getParticipantHomologationDocumentByParticipantId', () => {
     it('should return the homologation document for the given participant id', () => {
       const participantId = faker.string.uuid();
-      const homologationContextEvent = stubDocumentEvent({
-        name: DocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-      });
       const document = stubParticipantHomologationDocument({
-        externalEvents: [
-          {
-            ...homologationContextEvent,
-            participant: {
-              ...homologationContextEvent.participant,
-              id: participantId,
-            },
-          },
-        ],
+        primaryParticipant: {
+          id: participantId,
+        },
       });
 
       const result = getParticipantHomologationDocumentByParticipantId({
