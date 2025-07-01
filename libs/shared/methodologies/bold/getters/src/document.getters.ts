@@ -1,21 +1,52 @@
-import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import {
+  assertNonEmptyString,
+  isNonEmptyArray,
+} from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+
+import { getEventAttributeValue } from './event.getters';
 
 const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
   DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
-export const getEmissionAndCompostingMetricsEvent = (
+export const getLastEmissionAndCompostingMetricsEvent = (
   document: Document,
-): DocumentEvent | undefined =>
-  document.externalEvents?.find((event) =>
-    event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS),
+): DocumentEvent | undefined => {
+  const emissionAndCompostingMetricsEvents = document.externalEvents?.filter(
+    (event) => event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS),
   );
+
+  return emissionAndCompostingMetricsEvents
+    ?.sort((firstEvent, secondEvent) => {
+      const firstReferenceYear = getEventAttributeValue(
+        firstEvent,
+        DocumentEventAttributeName.REFERENCE_YEAR,
+      );
+
+      const numberFirstReferenceYear = Number.parseInt(
+        assertNonEmptyString(firstReferenceYear),
+      );
+
+      const secondReferenceYear = getEventAttributeValue(
+        secondEvent,
+        DocumentEventAttributeName.REFERENCE_YEAR,
+      );
+
+      const numberSecondReferenceYear = Number.parseInt(
+        assertNonEmptyString(secondReferenceYear),
+      );
+
+      return numberSecondReferenceYear - numberFirstReferenceYear;
+    })
+    .at(0);
+};
 
 export const getDocumentEventById = (
   document: Document,

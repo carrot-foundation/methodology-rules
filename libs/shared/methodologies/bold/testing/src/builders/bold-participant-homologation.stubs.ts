@@ -43,6 +43,7 @@ const {
   EXCEEDING_EMISSION_COEFFICIENT,
   EXPIRATION_DATE,
   HOMOLOGATION_STATUS,
+  REFERENCE_YEAR,
   SCALE_TYPE,
   SORTING_FACTOR,
 } = DocumentEventAttributeName;
@@ -83,6 +84,10 @@ const defaultEmissionAndCompostingMetricsEventMetadataAttributes: MetadataAttrib
       valueSuffix: 'tCO2e/ton',
     },
     [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
+    {
+      name: REFERENCE_YEAR,
+      value: getYear(new Date()),
+    },
   ];
 
 export const stubBoldEmissionAndCompostingMetricsEvent = ({

@@ -6,6 +6,7 @@ import {
   stubMassIdDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -14,7 +15,7 @@ import { getYear } from 'date-fns';
 
 import {
   getDocumentEventById,
-  getEmissionAndCompostingMetricsEvent,
+  getLastEmissionAndCompostingMetricsEvent,
   getParticipantActorType,
   getRulesMetadataEvent,
 } from './document.getters';
@@ -29,28 +30,51 @@ const {
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
-  describe('getEmissionAndCompostingMetricsEvent', () => {
-    it('should return the emission and composting metrics event', () => {
-      const emissionAndCompostingMetricsEvent = stubDocumentEvent({
+  describe('getLastEmissionAndCompostingMetricsEvent', () => {
+    it('should return last emission and composting metrics event', () => {
+      const firstEmissionAndCompostingMetricsEvent = stubDocumentEvent({
+        metadata: {
+          attributes: [
+            {
+              isPublic: true,
+              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              value: '2023',
+            },
+          ],
+        },
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      });
+
+      const secondEmissionAndCompostingMetricsEvent = stubDocumentEvent({
+        metadata: {
+          attributes: [
+            {
+              isPublic: true,
+              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              value: '2024',
+            },
+          ],
+        },
         name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
       });
 
       const document = stubDocument({
         externalEvents: [
           ...stubArray(() => stubDocumentEvent()),
-          emissionAndCompostingMetricsEvent,
+          firstEmissionAndCompostingMetricsEvent,
+          secondEmissionAndCompostingMetricsEvent,
         ],
       });
 
-      const result = getEmissionAndCompostingMetricsEvent(document);
+      const result = getLastEmissionAndCompostingMetricsEvent(document);
 
-      expect(result).toEqual(emissionAndCompostingMetricsEvent);
+      expect(result).toEqual(secondEmissionAndCompostingMetricsEvent);
     });
 
     it('should return undefined if the emission and composting metrics event is not found', () => {
       const document = stubDocument();
 
-      const result = getEmissionAndCompostingMetricsEvent(document);
+      const result = getLastEmissionAndCompostingMetricsEvent(document);
 
       expect(result).toBeUndefined();
     });
