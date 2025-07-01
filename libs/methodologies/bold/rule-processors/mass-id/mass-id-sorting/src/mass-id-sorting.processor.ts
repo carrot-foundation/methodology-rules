@@ -10,8 +10,8 @@ import {
   isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
 import {
-  getLastEmissionAndCompostingMetricsEvent,
   getEventAttributeValue,
+  getLastEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
