@@ -1,8 +1,4 @@
-import {
-  isNonEmptyArray,
-  isNonEmptyString,
-  isNonZeroPositiveInt,
-} from '@carrot-fndn/shared/helpers';
+import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
@@ -10,7 +6,7 @@ import {
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { getYear } from 'date-fns';
+import { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from './event.getters';
 
@@ -20,17 +16,16 @@ const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 interface LastYearEmissionAndCompostingMetricsEventParameters {
   documentWithEmissionAndCompostingMetricsEvent: Document;
-  documentWithYear: Document;
+  documentYear: NonZeroPositiveInt;
 }
 
 export const getLastYearEmissionAndCompostingMetricsEvent = ({
   documentWithEmissionAndCompostingMetricsEvent,
-  documentWithYear,
+  documentYear,
 }: LastYearEmissionAndCompostingMetricsEventParameters):
   | DocumentEvent
   | undefined => {
-  const currentYear = getYear(documentWithYear.externalCreatedAt);
-  const lastYear = currentYear - 1;
+  const lastDocumentYearYear = documentYear - 1;
 
   return documentWithEmissionAndCompostingMetricsEvent.externalEvents?.find(
     (event) => {
@@ -40,12 +35,7 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
           DocumentEventAttributeName.REFERENCE_YEAR,
         );
 
-        if (
-          isNonEmptyString(referenceYear) ||
-          isNonZeroPositiveInt(referenceYear)
-        ) {
-          return lastYear === Number.parseInt(String(referenceYear));
-        }
+        return referenceYear === lastDocumentYearYear;
       }
 
       return false;
