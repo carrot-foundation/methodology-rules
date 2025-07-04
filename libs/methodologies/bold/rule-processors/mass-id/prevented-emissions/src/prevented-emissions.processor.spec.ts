@@ -23,6 +23,7 @@ describe('PreventedEmissionsProcessor', () => {
     it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
+        externalCreatedAt,
         homologationDocuments,
         massIdDocumentValue,
         resultComment,
@@ -35,6 +36,7 @@ describe('PreventedEmissionsProcessor', () => {
           massIdDocumentsParams: {
             partialDocument: {
               currentValue: massIdDocumentValue as number,
+              ...(externalCreatedAt && { externalCreatedAt }),
               subtype,
             },
           },

@@ -26,6 +26,7 @@ describe('MassIdSortingProcessor', () => {
         actorParticipants,
         homologationDocuments,
         massIdEvents,
+        partialDocument,
         resultComment,
         resultStatus,
       }) => {
@@ -34,6 +35,7 @@ describe('MassIdSortingProcessor', () => {
           massIdActorParticipants: actorParticipants,
           massIdDocumentsParams: {
             externalEventsMap: massIdEvents,
+            partialDocument,
           },
           ruleDataProcessor,
           spyOnDocumentQueryServiceLoad,

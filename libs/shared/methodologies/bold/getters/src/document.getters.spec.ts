@@ -11,11 +11,11 @@ import {
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { getYear } from 'date-fns';
+import { addYears, getYear } from 'date-fns';
 
 import {
   getDocumentEventById,
-  getLastEmissionAndCompostingMetricsEvent,
+  getLastYearEmissionAndCompostingMetricsEvent,
   getParticipantActorType,
   getRulesMetadataEvent,
 } from './document.getters';
@@ -30,51 +30,167 @@ const {
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
 describe('Document getters', () => {
-  describe('getLastEmissionAndCompostingMetricsEvent', () => {
-    it('should return last emission and composting metrics event', () => {
-      const firstEmissionAndCompostingMetricsEvent = stubDocumentEvent({
+  describe('getLastYearEmissionAndCompostingMetricsEvent', () => {
+    it('should return correct emission and composting metrics event with string reference year', () => {
+      const targetEvent = stubDocumentEvent({
         metadata: {
           attributes: [
             {
               isPublic: true,
               name: DocumentEventAttributeName.REFERENCE_YEAR,
-              value: '2023',
+              value: getYear(new Date()).toString(),
             },
           ],
         },
         name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
       });
 
-      const secondEmissionAndCompostingMetricsEvent = stubDocumentEvent({
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument({
+        externalEvents: [...stubArray(() => stubDocumentEvent()), targetEvent],
+      });
+
+      const documentWithYear = stubDocument({
+        externalCreatedAt: addYears(new Date(), 1).toISOString(),
+      });
+
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
+
+      expect(result).toEqual(targetEvent);
+    });
+
+    it('should return correct emission and composting metrics event with integer reference year', () => {
+      const targetEvent = stubDocumentEvent({
         metadata: {
           attributes: [
             {
               isPublic: true,
               name: DocumentEventAttributeName.REFERENCE_YEAR,
-              value: '2024',
+              value: getYear(new Date()),
             },
           ],
         },
         name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
       });
 
-      const document = stubDocument({
-        externalEvents: [
-          ...stubArray(() => stubDocumentEvent()),
-          firstEmissionAndCompostingMetricsEvent,
-          secondEmissionAndCompostingMetricsEvent,
-        ],
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument({
+        externalEvents: [...stubArray(() => stubDocumentEvent()), targetEvent],
       });
 
-      const result = getLastEmissionAndCompostingMetricsEvent(document);
+      const documentWithYear = stubDocument({
+        externalCreatedAt: addYears(new Date(), 1).toISOString(),
+      });
 
-      expect(result).toEqual(secondEmissionAndCompostingMetricsEvent);
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
+
+      expect(result).toEqual(targetEvent);
+    });
+
+    it('should return undefined when reference year is empty string', () => {
+      const eventWithEmptyStringYear = stubDocumentEvent({
+        metadata: {
+          attributes: [
+            {
+              isPublic: true,
+              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              value: '',
+            },
+          ],
+        },
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      });
+
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument({
+        externalEvents: [eventWithEmptyStringYear],
+      });
+
+      const documentWithYear = stubDocument({
+        externalCreatedAt: new Date('2025-01-02').toISOString(),
+      });
+
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when reference year is zero', () => {
+      const eventWithZeroYear = stubDocumentEvent({
+        metadata: {
+          attributes: [
+            {
+              isPublic: true,
+              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              value: 0,
+            },
+          ],
+        },
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      });
+
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument({
+        externalEvents: [eventWithZeroYear],
+      });
+
+      const documentWithYear = stubDocument({
+        externalCreatedAt: new Date('2025-01-02').toISOString(),
+      });
+
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when reference year is negative', () => {
+      const eventWithNegativeYear = stubDocumentEvent({
+        metadata: {
+          attributes: [
+            {
+              isPublic: true,
+              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              value: -1,
+            },
+          ],
+        },
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      });
+
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument({
+        externalEvents: [eventWithNegativeYear],
+      });
+
+      const documentWithYear = stubDocument({
+        externalCreatedAt: new Date('2025-01-02').toISOString(),
+      });
+
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
+
+      expect(result).toBeUndefined();
     });
 
     it('should return undefined if the emission and composting metrics event is not found', () => {
-      const document = stubDocument();
+      const documentWithEmissionAndCompostingMetricsEvent = stubDocument();
+      const documentWithYear = stubDocument({
+        externalCreatedAt: new Date().toISOString(),
+      });
 
-      const result = getLastEmissionAndCompostingMetricsEvent(document);
+      const result = getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent,
+        documentWithYear,
+      });
 
       expect(result).toBeUndefined();
     });

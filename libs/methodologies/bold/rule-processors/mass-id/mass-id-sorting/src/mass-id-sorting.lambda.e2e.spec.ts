@@ -28,6 +28,7 @@ describe('MassIdSortingProcessor E2E', () => {
       actorParticipants,
       homologationDocuments,
       massIdEvents,
+      partialDocument,
       resultComment,
       resultStatus,
     }) => {
@@ -36,7 +37,10 @@ describe('MassIdSortingProcessor E2E', () => {
         massIdDocument,
         participantsHomologationDocuments,
       } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-        .createMassIdDocuments({ externalEventsMap: massIdEvents })
+        .createMassIdDocuments({
+          externalEventsMap: massIdEvents,
+          partialDocument,
+        })
         .createMassIdAuditDocuments()
         .createMethodologyDocument()
         .createParticipantHomologationDocuments(homologationDocuments)

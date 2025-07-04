@@ -1,6 +1,7 @@
 import {
-  assertNonEmptyString,
   isNonEmptyArray,
+  isNonEmptyString,
+  isNonZeroPositiveInt,
 } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
@@ -9,6 +10,7 @@ import {
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { getYear } from 'date-fns';
 
 import { getEventAttributeValue } from './event.getters';
 
@@ -16,36 +18,39 @@ const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
   DocumentEventName;
 const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 
-export const getLastEmissionAndCompostingMetricsEvent = (
-  document: Document,
-): DocumentEvent | undefined => {
-  const emissionAndCompostingMetricsEvents = document.externalEvents?.filter(
-    (event) => event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS),
+interface LastYearEmissionAndCompostingMetricsEventParameters {
+  documentWithEmissionAndCompostingMetricsEvent: Document;
+  documentWithYear: Document;
+}
+
+export const getLastYearEmissionAndCompostingMetricsEvent = ({
+  documentWithEmissionAndCompostingMetricsEvent,
+  documentWithYear,
+}: LastYearEmissionAndCompostingMetricsEventParameters):
+  | DocumentEvent
+  | undefined => {
+  const currentYear = getYear(documentWithYear.externalCreatedAt);
+  const lastYear = currentYear - 1;
+
+  return documentWithEmissionAndCompostingMetricsEvent.externalEvents?.find(
+    (event) => {
+      if (event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS)) {
+        const referenceYear = getEventAttributeValue(
+          event,
+          DocumentEventAttributeName.REFERENCE_YEAR,
+        );
+
+        if (
+          isNonEmptyString(referenceYear) ||
+          isNonZeroPositiveInt(referenceYear)
+        ) {
+          return lastYear === Number.parseInt(String(referenceYear));
+        }
+      }
+
+      return false;
+    },
   );
-
-  return emissionAndCompostingMetricsEvents
-    ?.sort((firstEvent, secondEvent) => {
-      const firstReferenceYear = getEventAttributeValue(
-        firstEvent,
-        DocumentEventAttributeName.REFERENCE_YEAR,
-      );
-
-      const numberFirstReferenceYear = Number.parseInt(
-        assertNonEmptyString(firstReferenceYear),
-      );
-
-      const secondReferenceYear = getEventAttributeValue(
-        secondEvent,
-        DocumentEventAttributeName.REFERENCE_YEAR,
-      );
-
-      const numberSecondReferenceYear = Number.parseInt(
-        assertNonEmptyString(secondReferenceYear),
-      );
-
-      return numberSecondReferenceYear - numberFirstReferenceYear;
-    })
-    .at(0);
 };
 
 export const getDocumentEventById = (
