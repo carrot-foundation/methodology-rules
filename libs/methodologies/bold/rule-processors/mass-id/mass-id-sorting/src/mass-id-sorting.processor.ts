@@ -36,6 +36,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import { getYear } from 'date-fns';
 
 import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
 
@@ -197,7 +198,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
           recyclerHomologationDocument,
-        documentWithYear: massIdDocument,
+        documentYear: getYear(massIdDocument.externalCreatedAt),
       });
     const sortingFactor = getEventAttributeValue(
       emissionAndCompostingMetricsEvent,
