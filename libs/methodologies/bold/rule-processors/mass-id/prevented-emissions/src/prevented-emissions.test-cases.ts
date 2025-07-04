@@ -12,6 +12,7 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { addYears } from 'date-fns';
 
 import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -31,6 +32,23 @@ const baselineValue =
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
 const expectedPreventedEmissions =
   (1 - exceedingEmissionCoefficient) * baselineValue * massIdDocumentValue;
+
+const processorErrors = new PreventedEmissionsProcessorErrors();
+
+const {
+  massIdAuditDocument,
+  massIdDocument,
+  participantsHomologationDocuments,
+} = new BoldStubsBuilder()
+  .createMassIdDocuments({
+    partialDocument: {
+      externalCreatedAt: addYears(new Date(), 1).toISOString(),
+    },
+  })
+  .createMassIdAuditDocuments()
+  .createMethodologyDocument()
+  .createParticipantHomologationDocuments()
+  .build();
 
 export const preventedEmissionsTestCases = [
   {
@@ -73,6 +91,7 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
+    externalCreatedAt: massIdDocument.externalCreatedAt,
     homologationDocuments: new Map([
       [
         RECYCLER,
@@ -122,6 +141,7 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
+    externalCreatedAt: massIdDocument.externalCreatedAt,
     homologationDocuments: new Map([
       [
         RECYCLER,
@@ -167,19 +187,6 @@ export const preventedEmissionsTestCases = [
     subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
   },
 ];
-
-const processorErrors = new PreventedEmissionsProcessorErrors();
-
-const {
-  massIdAuditDocument,
-  massIdDocument,
-  participantsHomologationDocuments,
-} = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
-  .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
-  .build();
 
 const wasteGeneratorHomologationDocument =
   participantsHomologationDocuments.get(WASTE_GENERATOR) as Document;

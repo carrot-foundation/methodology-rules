@@ -11,7 +11,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
-  getLastEmissionAndCompostingMetricsEvent,
+  getLastYearEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
@@ -194,7 +194,11 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     const valueBeforeSorting = eventBeforeSorting?.value;
     const valueAfterSorting = sortingEvent?.value;
     const emissionAndCompostingMetricsEvent =
-      getLastEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
+      getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent:
+          recyclerHomologationDocument,
+        documentWithYear: massIdDocument,
+      });
     const sortingFactor = getEventAttributeValue(
       emissionAndCompostingMetricsEvent,
       SORTING_FACTOR,

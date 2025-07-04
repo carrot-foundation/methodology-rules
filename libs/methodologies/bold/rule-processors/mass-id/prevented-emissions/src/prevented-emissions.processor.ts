@@ -9,7 +9,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
-  getLastEmissionAndCompostingMetricsEvent,
+  getLastYearEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
@@ -164,7 +164,11 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     wasteGeneratorHomologationDocument,
   }: Documents): RuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
-      getLastEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
+      getLastYearEmissionAndCompostingMetricsEvent({
+        documentWithEmissionAndCompostingMetricsEvent:
+          recyclerHomologationDocument,
+        documentWithYear: massIdDocument,
+      });
 
     if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
       throw this.processorErrors.getKnownError(

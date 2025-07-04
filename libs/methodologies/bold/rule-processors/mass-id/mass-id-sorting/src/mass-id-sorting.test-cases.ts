@@ -16,6 +16,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
+import { addYears } from 'date-fns';
 
 import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
 import { RESULT_COMMENTS } from './mass-id-sorting.processor';
@@ -43,6 +44,28 @@ const actorParticipants = new Map(
   ]),
 );
 
+const {
+  massIdAuditDocument,
+  massIdDocument,
+  participantsHomologationDocuments,
+} = new BoldStubsBuilder()
+  .createMassIdDocuments({
+    externalEventsMap: {
+      [DROP_OFF]: stubBoldMassIdDropOffEvent({
+        partialDocumentEvent: {
+          value: 0,
+        },
+      }),
+    },
+    partialDocument: {
+      externalCreatedAt: addYears(new Date(), 1).toISOString(),
+    },
+  })
+  .createMassIdAuditDocuments()
+  .createMethodologyDocument()
+  .createParticipantHomologationDocuments()
+  .build();
+
 export const massIdSortingTestCases = [
   {
     actorParticipants,
@@ -51,6 +74,7 @@ export const massIdSortingTestCases = [
         metadataAttributes: [[DESCRIPTION, undefined]],
       }),
     },
+    partialDocument: massIdDocument,
     resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the sorting description is missing',
@@ -93,6 +117,7 @@ export const massIdSortingTestCases = [
         },
       }),
     },
+    partialDocument: massIdDocument,
     resultComment: RESULT_COMMENTS.PASSED(0),
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -136,6 +161,7 @@ export const massIdSortingTestCases = [
         },
       }),
     },
+    partialDocument: massIdDocument,
     resultComment: RESULT_COMMENTS.FAILED(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
@@ -143,25 +169,6 @@ export const massIdSortingTestCases = [
     scenario: 'the sorting value calculation difference is greater than 0.1',
   },
 ];
-
-const {
-  massIdAuditDocument,
-  massIdDocument,
-  participantsHomologationDocuments,
-} = new BoldStubsBuilder()
-  .createMassIdDocuments({
-    externalEventsMap: {
-      [DROP_OFF]: stubBoldMassIdDropOffEvent({
-        partialDocumentEvent: {
-          value: 0,
-        },
-      }),
-    },
-  })
-  .createMassIdAuditDocuments()
-  .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
-  .build();
 
 const invalidSortingValue = new BoldStubsBuilder()
   .createMassIdDocuments({
@@ -171,6 +178,9 @@ const invalidSortingValue = new BoldStubsBuilder()
           value: 0,
         },
       }),
+    },
+    partialDocument: {
+      externalCreatedAt: addYears(new Date(), 1).toISOString(),
     },
   })
   .createMassIdAuditDocuments()
