@@ -8,8 +8,8 @@ import {
   isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
 import {
-  getEmissionAndCompostingMetricsEvent,
   getEventAttributeValue,
+  getLastEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
@@ -163,8 +163,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     recyclerHomologationDocument,
     wasteGeneratorHomologationDocument,
   }: Documents): RuleSubject {
-    const emissionAndCompostingMetricsEvent =
-      getEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
+    const lastEmissionAndCompostingMetricsEvent =
+      getLastEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
 
     if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
       throw this.processorErrors.getKnownError(
@@ -180,7 +180,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     return {
       exceedingEmissionCoefficient: getEventAttributeValue(
-        emissionAndCompostingMetricsEvent,
+        lastEmissionAndCompostingMetricsEvent,
         EXCEEDING_EMISSION_COEFFICIENT,
       ),
       massIdDocumentValue: massIdDocument.currentValue,

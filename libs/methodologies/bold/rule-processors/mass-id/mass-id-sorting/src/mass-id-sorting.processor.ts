@@ -10,8 +10,8 @@ import {
   isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
 import {
-  getEmissionAndCompostingMetricsEvent,
   getEventAttributeValue,
+  getLastEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
@@ -194,7 +194,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     const valueBeforeSorting = eventBeforeSorting?.value;
     const valueAfterSorting = sortingEvent?.value;
     const emissionAndCompostingMetricsEvent =
-      getEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
+      getLastEmissionAndCompostingMetricsEvent(recyclerHomologationDocument);
     const sortingFactor = getEventAttributeValue(
       emissionAndCompostingMetricsEvent,
       SORTING_FACTOR,

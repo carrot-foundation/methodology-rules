@@ -50,6 +50,7 @@ export enum DocumentEventAttributeName {
   METHODOLOGY_SLUG = 'Methodology Slug',
   RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
+  REFERENCE_YEAR = 'Reference Year',
   RULE_PROCESSOR_RESULT_CONTENT = 'Rule Processor Result Content',
   RULE_RESULT_DETAILS = 'Rule Result Details',
   SCALE_HOMOLOGATION = 'Scale Homologation',
