@@ -32,6 +32,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { getYear } from 'date-fns';
 import { is } from 'typia';
 
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -167,7 +168,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
           recyclerHomologationDocument,
-        documentWithYear: massIdDocument,
+        documentYear: getYear(massIdDocument.externalCreatedAt),
       });
 
     if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
