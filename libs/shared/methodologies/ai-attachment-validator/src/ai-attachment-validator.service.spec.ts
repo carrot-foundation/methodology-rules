@@ -4,8 +4,8 @@ import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import type { ApiAiValidationResponse } from './ai-attachment-validator.api.dto';
 
 import {
-  getAiAttachmentValidatorApiUri,
   FIELD_SEPARATOR,
+  getAiAttachmentValidatorApiUri,
   VALID_MESSAGE,
   VALIDATION_MODE,
   VALIDATION_UNAVAILABLE_MESSAGE,
@@ -137,7 +137,7 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(logger.debug).toHaveBeenCalledWith(
         'AI validation failed:',
-        JSON.stringify(error),
+        error.message,
       );
 
       expect(result).toEqual({

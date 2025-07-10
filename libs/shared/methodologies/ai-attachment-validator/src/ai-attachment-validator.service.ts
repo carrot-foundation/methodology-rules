@@ -41,7 +41,10 @@ export class AiAttachmentValidatorService extends AwsHttpService {
 
       return this.processValidationResult(aiValidationResult);
     } catch (error) {
-      logger.debug('AI validation failed:', JSON.stringify(error));
+      logger.debug(
+        'AI validation failed:',
+        error instanceof Error ? error.message : String(error),
+      );
 
       return {
         isValid: false,
