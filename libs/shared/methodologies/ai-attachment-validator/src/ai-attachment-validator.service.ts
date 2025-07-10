@@ -9,8 +9,8 @@ import type {
 } from './ai-attachment-validator.api.dto';
 
 import {
-  AI_ATTACHMENT_VALIDATOR_API_URI,
   FIELD_SEPARATOR,
+  getAiAttachmentValidatorApiUri,
   VALID_MESSAGE,
   VALIDATION_MODE,
   VALIDATION_UNAVAILABLE_MESSAGE,
@@ -35,7 +35,7 @@ export class AiAttachmentValidatorService extends AwsHttpService {
       const mappedDto = this.mapValidateAttachmentDto(dto);
 
       const aiValidationResult = await this.post<ApiAiValidationResponse>(
-        AI_ATTACHMENT_VALIDATOR_API_URI,
+        getAiAttachmentValidatorApiUri(),
         mappedDto,
       );
 

@@ -4,7 +4,7 @@ import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import type { ApiAiValidationResponse } from './ai-attachment-validator.api.dto';
 
 import {
-  AI_ATTACHMENT_VALIDATOR_API_URI,
+  getAiAttachmentValidatorApiUri,
   FIELD_SEPARATOR,
   VALID_MESSAGE,
   VALIDATION_MODE,
@@ -46,7 +46,7 @@ describe('AiAttachmentValidatorService', () => {
       const result = await service.validateAttachment(dto);
 
       expect(service['post']).toHaveBeenCalledWith(
-        AI_ATTACHMENT_VALIDATOR_API_URI,
+        getAiAttachmentValidatorApiUri(),
         {
           attachmentPaths: [dto.attachmentPath],
           documentJson: dto.document,
@@ -172,7 +172,7 @@ describe('AiAttachmentValidatorService', () => {
       await service.validateAttachment(dto);
 
       expect(service['post']).toHaveBeenCalledWith(
-        AI_ATTACHMENT_VALIDATOR_API_URI,
+        getAiAttachmentValidatorApiUri(),
         {
           attachmentPaths: [dto.attachmentPath],
           documentJson: document,
