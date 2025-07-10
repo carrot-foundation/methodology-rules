@@ -7,7 +7,7 @@ import {
 
 export const stubApiAiValidationResponse = (
   partial?: Partial<ApiAiValidationResponse>,
-) => [...random<ApiAiValidationResponse>(), ...(partial ? [...partial] : [])];
+) => partial || random<ApiAiValidationResponse>();
 
 export const stubAiValidateAttachmentDto = (
   partial?: Partial<AiValidateAttachmentDto>,

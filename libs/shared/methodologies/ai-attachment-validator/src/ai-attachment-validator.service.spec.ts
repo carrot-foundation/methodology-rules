@@ -1,6 +1,5 @@
 import { logger } from '@carrot-fndn/shared/helpers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { afterEach } from 'node:test';
 
 import type { ApiAiValidationResponse } from './ai-attachment-validator.api.dto';
 
