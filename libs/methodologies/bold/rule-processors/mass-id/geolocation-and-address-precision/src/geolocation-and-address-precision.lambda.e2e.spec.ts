@@ -25,8 +25,8 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
   it.each(geolocationAndAddressPrecisionTestCases)(
     'should return $resultStatus when $scenario',
     async ({
+      accreditationDocuments,
       actorParticipants,
-      homologationDocuments,
       massIdDocumentParameters,
       resultComment,
       resultStatus,
@@ -34,19 +34,19 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
       const {
         massIdAuditDocument,
         massIdDocument,
-        participantsHomologationDocuments,
+        participantsAccreditationDocuments,
       } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
         .createMassIdDocuments(massIdDocumentParameters)
         .createMassIdAuditDocuments()
         .createMethodologyDocument()
-        .createParticipantHomologationDocuments(homologationDocuments)
+        .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
           massIdAuditDocument,
-          ...participantsHomologationDocuments.values(),
+          ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
           documentKey: toDocumentKey({

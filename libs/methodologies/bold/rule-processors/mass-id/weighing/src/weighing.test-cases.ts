@@ -1,7 +1,7 @@
 import {
   BoldStubsBuilder,
   type MetadataAttributeParameter,
-  stubBoldHomologationResultEvent,
+  stubBoldAccreditationResultEvent,
   stubBoldMassIdWeighingEvent,
   stubBoldMonitoringSystemsAndEquipmentEvent,
   stubParticipant,
@@ -31,7 +31,7 @@ import {
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 
-const { HOMOLOGATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
+const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
 const {
   APPROVED_EXCEPTIONS,
@@ -54,7 +54,7 @@ const scaleTypeMismatch = faker.string.sample();
 const weighingCaptureMethodMismatch = faker.string.sample();
 const twoStepWeighingEventParticipant = stubParticipant();
 
-const stubBaseHomologationDocuments = ({
+const stubBaseAccreditationDocuments = ({
   scaleTypeValue = scaleType,
   withContainerCapacityException = false,
 }: {
@@ -66,7 +66,7 @@ const stubBaseHomologationDocuments = ({
       RECYCLER,
       {
         externalEventsMap: {
-          [HOMOLOGATION_RESULT]: stubBoldHomologationResultEvent({
+          [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
             metadataAttributes: withContainerCapacityException
               ? [
                   [
@@ -152,7 +152,7 @@ export const weighingTestCases = [
     scenario: `the MassID document has more than two ${WEIGHING} events`,
   },
   {
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
@@ -170,12 +170,12 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
+    resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Homologation document does not have a ${SCALE_TYPE} attribute`,
+    scenario: `the Recycler Accreditation document does not have a ${SCALE_TYPE} attribute`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -192,7 +192,7 @@ export const weighingTestCases = [
     scenario: `the ${CONTAINER_CAPACITY} attribute is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -210,12 +210,12 @@ export const weighingTestCases = [
     scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${CONTAINER_TYPE} is ${DocumentEventContainerType.BAG}`,
   },
   {
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
           externalEventsMap: {
-            [HOMOLOGATION_RESULT]: undefined,
+            [ACCREDITATION_RESULT]: undefined,
           },
         },
       ],
@@ -231,12 +231,12 @@ export const weighingTestCases = [
         },
       }),
     },
-    resultComment: NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT,
+    resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${HOMOLOGATION_RESULT} event is missing`,
+    scenario: `the ${ACCREDITATION_RESULT} event is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -254,7 +254,7 @@ export const weighingTestCases = [
     scenario: `the ${CONTAINER_QUANTITY} attribute is defined, but the ${CONTAINER_TYPE} is ${DocumentEventContainerType.TRUCK}`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -271,7 +271,7 @@ export const weighingTestCases = [
     scenario: `the ${GROSS_WEIGHT} attribute is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: validWeighingAttributes,
@@ -285,7 +285,7 @@ export const weighingTestCases = [
     scenario: `the event value field is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [...validWeighingAttributes, [TARE, undefined]],
@@ -299,7 +299,7 @@ export const weighingTestCases = [
     scenario: `the ${TARE} attribute is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -316,7 +316,7 @@ export const weighingTestCases = [
     scenario: `the ${DESCRIPTION} attribute is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [[DESCRIPTION, ''], ...validWeighingAttributes],
@@ -330,7 +330,7 @@ export const weighingTestCases = [
     scenario: `the ${DESCRIPTION} attribute is an empty string`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -348,10 +348,10 @@ export const weighingTestCases = [
       scaleType,
     )} ${INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleTypeMismatch)}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${SCALE_TYPE} attribute is not equal to the ${SCALE_TYPE} attribute in the Recycler Homologation document and is not supported by the methodology`,
+    scenario: `the ${SCALE_TYPE} attribute is not equal to the ${SCALE_TYPE} attribute in the Recycler Accreditation document and is not supported by the methodology`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -371,7 +371,7 @@ export const weighingTestCases = [
     scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is not supported by the methodology`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -388,7 +388,7 @@ export const weighingTestCases = [
     scenario: `the ${VEHICLE_LICENSE_PLATE} attribute is missing and is not sensitive`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: [
@@ -405,7 +405,7 @@ export const weighingTestCases = [
     scenario: `the ${CONTAINER_TYPE} attribute is missing`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: validWeighingAttributes,
@@ -419,7 +419,7 @@ export const weighingTestCases = [
     scenario: `the one step ${WEIGHING} event is valid`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       withContainerCapacityException: true,
     }),
     massIdDocumentEvents: {
@@ -440,7 +440,7 @@ export const weighingTestCases = [
     scenario: `the one step ${WEIGHING} event is valid with container capacity exception`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIdDocumentEvents: {
@@ -471,7 +471,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} event participant ids do not match`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
       withContainerCapacityException: true,
     }),
@@ -508,7 +508,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} events are valid with container capacity exception`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIdDocumentEvents: {
@@ -540,7 +540,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} events are valid`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIdDocumentEvents: {
@@ -581,7 +581,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} event ${CONTAINER_CAPACITY} attribute values do not match`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: DocumentEventScaleType.CONVEYOR_BELT_SCALE,
     }),
     massIdDocumentEvents: {
@@ -615,7 +615,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} event scale type is not ${DocumentEventScaleType.WEIGHBRIDGE}`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIdDocumentEvents: {
@@ -649,7 +649,7 @@ export const weighingTestCases = [
     scenario: `the two step ${WEIGHING} event container type is not ${DocumentEventContainerType.TRUCK}`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments({
+    accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: scaleType,
     }),
     massIdDocumentEvents: {
@@ -672,7 +672,7 @@ export const weighingTestCases = [
     scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is ${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST} and the ${WEIGHING} event is valid`,
   },
   {
-    homologationDocuments: stubBaseHomologationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments(),
     massIdDocumentEvents: {
       [WEIGHING]: stubBoldMassIdWeighingEvent({
         metadataAttributes: validWeighingAttributes,
@@ -698,17 +698,17 @@ const processorErrors = new WeighingProcessorErrors();
 const {
   massIdAuditDocument,
   massIdDocument,
-  participantsHomologationDocuments,
+  participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
   .createMassIdDocuments()
   .createMassIdAuditDocuments()
   .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
+  .createParticipantAccreditationDocuments()
   .build();
 
 export const weighingErrorTestCases = [
   {
-    documents: [...participantsHomologationDocuments.values()],
+    documents: [...participantsAccreditationDocuments.values()],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -718,8 +718,8 @@ export const weighingErrorTestCases = [
     documents: [massIdDocument],
     massIdAuditDocument,
     resultComment:
-      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Homologation document was not found`,
+    scenario: `the Recycler Accreditation document was not found`,
   },
 ];

@@ -8,17 +8,17 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { participantHomologationsRequirementsLambda } from './participant-homologations-requirements.lambda';
-import { participantHomologationsRequirementsTestCases } from './participant-homologations-requirements.test-cases';
+import { participantAccreditationsAndVerificationsRequirementsLambda } from './participant-accreditations-and-verifications-requirements.lambda';
+import { participantAccreditationsAndVerificationsRequirementsTestCases } from './participant-accreditations-and-verifications-requirements.test-cases';
 
-describe('ParticipantHomologationsRequirementsProcessor E2E', () => {
+describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(participantHomologationsRequirementsTestCases)(
+  it.each(participantAccreditationsAndVerificationsRequirementsTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
@@ -31,14 +31,15 @@ describe('ParticipantHomologationsRequirementsProcessor E2E', () => {
         })),
       );
 
-      const response = (await participantHomologationsRequirementsLambda(
-        stubRuleInput({
-          documentId: massIdAuditDocument.id,
-          documentKeyPrefix,
-        }),
-        stubContext(),
-        () => stubRuleResponse(),
-      )) as RuleOutput;
+      const response =
+        (await participantAccreditationsAndVerificationsRequirementsLambda(
+          stubRuleInput({
+            documentId: massIdAuditDocument.id,
+            documentKeyPrefix,
+          }),
+          stubContext(),
+          () => stubRuleResponse(),
+        )) as RuleOutput;
 
       expect(response.resultStatus).toBe(resultStatus);
     },

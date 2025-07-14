@@ -38,7 +38,7 @@ const processorErrors = new PreventedEmissionsProcessorErrors();
 const {
   massIdAuditDocument,
   massIdDocument,
-  participantsHomologationDocuments,
+  participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
   .createMassIdDocuments({
     partialDocument: {
@@ -47,12 +47,12 @@ const {
   })
   .createMassIdAuditDocuments()
   .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
+  .createParticipantAccreditationDocuments()
   .build();
 
 export const preventedEmissionsTestCases = [
   {
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
@@ -87,12 +87,11 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Homologation document does not have the "${EXCEEDING_EMISSION_COEFFICIENT}" attribute`,
+    scenario: `the Recycler Accreditation document does not have the "${EXCEEDING_EMISSION_COEFFICIENT}" attribute`,
     subtype,
   },
   {
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
@@ -120,6 +119,7 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
       expectedPreventedEmissions,
@@ -141,8 +141,7 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
@@ -170,6 +169,7 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
       MassIdOrganicSubtype.DOMESTIC_SLUDGE,
@@ -183,13 +183,13 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Waste Generator Homologation document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
+    scenario: `the Waste Generator Accreditation document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
     subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
   },
 ];
 
-const wasteGeneratorHomologationDocument =
-  participantsHomologationDocuments.get(WASTE_GENERATOR) as Document;
+const wasteGeneratorAccreditationDocument =
+  participantsAccreditationDocuments.get(WASTE_GENERATOR) as Document;
 
 export const preventedEmissionsErrorTestCases = [
   {
@@ -198,7 +198,7 @@ export const preventedEmissionsErrorTestCases = [
         ...massIdDocument,
         subtype: 'invalid' as MassIdOrganicSubtype,
       },
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment:
@@ -207,7 +207,7 @@ export const preventedEmissionsErrorTestCases = [
     scenario: 'the MassID document has an invalid subtype',
   },
   {
-    documents: [...participantsHomologationDocuments.values()],
+    documents: [...participantsAccreditationDocuments.values()],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
@@ -217,32 +217,32 @@ export const preventedEmissionsErrorTestCases = [
     documents: [massIdDocument],
     massIdAuditDocument,
     resultComment:
-      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Recycler Homologation document was not found',
+    scenario: 'the Recycler Accreditation document was not found',
   },
   {
     documents: [
       massIdDocument,
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ].filter((document) => document.subtype !== WASTE_GENERATOR),
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT,
+        .MISSING_WASTE_GENERATOR_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Waste Generator Homologation document was not found',
+    scenario: 'the Waste Generator Accreditation document was not found',
   },
   {
     documents: [
       massIdDocument,
-      ...[...participantsHomologationDocuments.values()].filter(
+      ...[...participantsAccreditationDocuments.values()].filter(
         (document) => document.subtype !== WASTE_GENERATOR,
       ),
       {
-        ...wasteGeneratorHomologationDocument,
+        ...wasteGeneratorAccreditationDocument,
         externalEvents: [
-          ...(wasteGeneratorHomologationDocument.externalEvents?.filter(
+          ...(wasteGeneratorAccreditationDocument.externalEvents?.filter(
             (event) => event.name !== RECYCLING_BASELINES.toString(),
           ) ?? []),
           stubBoldRecyclingBaselinesEvent({
@@ -256,6 +256,6 @@ export const preventedEmissionsErrorTestCases = [
       processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the Waste Generator Homologation document has no valid baselines',
+      'the Waste Generator Accreditation document has no valid baselines',
   },
 ];

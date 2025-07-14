@@ -25,8 +25,8 @@ describe('MassIdSortingProcessor E2E', () => {
   it.each(massIdSortingTestCases)(
     'should return $resultStatus when $scenario',
     async ({
+      accreditationDocuments,
       actorParticipants,
-      homologationDocuments,
       massIdEvents,
       partialDocument,
       resultComment,
@@ -35,7 +35,7 @@ describe('MassIdSortingProcessor E2E', () => {
       const {
         massIdAuditDocument,
         massIdDocument,
-        participantsHomologationDocuments,
+        participantsAccreditationDocuments,
       } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
         .createMassIdDocuments({
           externalEventsMap: massIdEvents,
@@ -43,14 +43,14 @@ describe('MassIdSortingProcessor E2E', () => {
         })
         .createMassIdAuditDocuments()
         .createMethodologyDocument()
-        .createParticipantHomologationDocuments(homologationDocuments)
+        .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
           massIdAuditDocument,
-          ...participantsHomologationDocuments.values(),
+          ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
           documentKey: toDocumentKey({

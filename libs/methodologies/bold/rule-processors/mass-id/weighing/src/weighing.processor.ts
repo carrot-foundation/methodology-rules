@@ -9,7 +9,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
@@ -39,11 +39,11 @@ import {
 
 interface DocumentPair {
   massIdDocument: Document;
-  recyclerHomologationDocument: Document;
+  recyclerAccreditationDocument: Document;
 }
 
 interface RuleSubject {
-  recyclerHomologationDocument: Document;
+  recyclerAccreditationDocument: Document;
   weighingEvents: DocumentEvent[];
 }
 
@@ -68,7 +68,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   protected evaluateResult({
-    recyclerHomologationDocument,
+    recyclerAccreditationDocument,
     weighingEvents,
   }: RuleSubject): EvaluateResultOutput {
     const initialValidation = this.validateWeighingEvents(weighingEvents);
@@ -94,7 +94,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const weighingEvent = weighingEvents[0] as DocumentEvent;
     const weighingValues = getValuesRelatedToWeighing(
       weighingEvent,
-      recyclerHomologationDocument,
+      recyclerAccreditationDocument,
     );
 
     const validationMessages = validateWeighingValues(
@@ -144,7 +144,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -152,12 +152,12 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   protected getRuleSubject({
     massIdDocument,
-    recyclerHomologationDocument,
+    recyclerAccreditationDocument,
   }: DocumentPair): RuleSubject {
     const weighingEvents = getWeighingEvents(massIdDocument);
 
     return {
-      recyclerHomologationDocument,
+      recyclerAccreditationDocument,
       weighingEvents,
     };
   }
@@ -165,17 +165,17 @@ export class WeighingProcessor extends RuleDataProcessor {
   private async collectDocuments(
     documentQuery: DocumentQuery<Document>,
   ): Promise<DocumentPair> {
-    let recyclerHomologationDocument: Document | undefined;
+    let recyclerAccreditationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation) &&
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
         documentRelation.subtype === DocumentSubtype.RECYCLER
       ) {
-        recyclerHomologationDocument = document;
+        recyclerAccreditationDocument = document;
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -184,8 +184,9 @@ export class WeighingProcessor extends RuleDataProcessor {
     });
 
     this.validateOrThrow(
-      isNil(recyclerHomologationDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      isNil(recyclerAccreditationDocument),
+      this.processorErrors.ERROR_MESSAGE
+        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     );
 
     this.validateOrThrow(
@@ -195,7 +196,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     return {
       massIdDocument: massIdDocument as Document,
-      recyclerHomologationDocument: recyclerHomologationDocument as Document,
+      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
     };
   }
 

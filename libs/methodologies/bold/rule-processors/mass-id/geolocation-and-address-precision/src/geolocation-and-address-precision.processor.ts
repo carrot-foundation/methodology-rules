@@ -19,7 +19,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
@@ -64,7 +64,7 @@ export const RESULT_COMMENTS = {
     `(${actorType}) The event address is ${addressDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
     `(${actorType}) The captured GPS location is ${gpsDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
-  MISSING_HOMOLOGATION_ADDRESS: (actorType: string): string =>
+  MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
     `No homologated address was found for the ${actorType} actor.`,
   PASSED_WITH_GPS: (
     actorType: string,
@@ -106,7 +106,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -134,7 +134,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private buildParticipantsAddressData(
     events: NonNullable<Document['externalEvents']>,
     massIdDocument: Document,
-    homologationDocuments: Document[],
+    accreditationDocuments: Document[],
   ) {
     const participantsAddressData = new Map<
       MassIdDocumentActorType,
@@ -158,7 +158,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         gpsGeolocation: getEventGpsGeolocation(event),
         homologatedAddress: getHomologatedAddressByParticipantId(
           event.participant.id,
-          homologationDocuments,
+          accreditationDocuments,
         ),
       });
     }
@@ -183,14 +183,14 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ) {
-    const homologationDocuments: Document[] = [];
+    const accreditationDocuments: Document[] = [];
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
-      if (PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation)) {
-        homologationDocuments.push(document);
+      if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
+        accreditationDocuments.push(document);
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -198,14 +198,14 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
     });
 
-    if (!isNonEmptyArray(homologationDocuments)) {
+    if (!isNonEmptyArray(accreditationDocuments)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE
-          .PARTICIPANT_HOMOLOGATION_DOCUMENTS_NOT_FOUND,
+          .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
       );
     }
 
-    return { homologationDocuments, massIdDocument };
+    return { accreditationDocuments, massIdDocument };
   }
 
   private evaluateAddressData(
@@ -218,7 +218,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       return [
         {
           resultComment:
-            RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(actorType),
+            RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(actorType),
           resultStatus: RuleOutputStatus.FAILED,
         },
       ];
@@ -328,7 +328,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
         massIdDocument,
-        documents.homologationDocuments,
+        documents.accreditationDocuments,
       ),
     };
   }

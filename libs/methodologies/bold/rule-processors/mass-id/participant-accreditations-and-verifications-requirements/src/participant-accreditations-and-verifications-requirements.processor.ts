@@ -7,14 +7,14 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
-import { isHomologationValid } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { isAccreditationValid } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -31,22 +31,23 @@ import {
 } from '@carrot-fndn/shared/types';
 import { assert } from 'typia';
 
-import { ParticipantHomologationsRequirementsProcessorErrors } from './participant-homologations-requirements.errors';
+import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
 interface RuleSubject {
-  homologationDocuments: Map<string, Document>;
+  accreditationDocuments: Map<string, Document>;
   massIdDocument: Document;
 }
 
 export const RESULT_COMMENTS = {
-  INVALID_HOMOLOGATION_DOCUMENTS: (documentIds: string[]) =>
-    `These homologations are invalid: ${documentIds.join(', ')}`,
-  PASSED: 'All participant homologations are active and approved.',
+  INVALID_ACCREDITATION_DOCUMENTS: (documentIds: string[]) =>
+    `These accreditations-and-verifications are invalid: ${documentIds.join(', ')}`,
+  PASSED:
+    'All participant accreditations-and-verifications are active and approved.',
 } as const;
 
-export class ParticipantHomologationsRequirementsProcessor extends RuleDataProcessor {
+export class ParticipantAccreditationsAndVerificationsRequirementsProcessor extends RuleDataProcessor {
   readonly errorProcessor =
-    new ParticipantHomologationsRequirementsProcessorErrors();
+    new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
@@ -77,29 +78,29 @@ export class ParticipantHomologationsRequirementsProcessor extends RuleDataProce
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
   }
 
   private evaluateResult({
-    homologationDocuments,
+    accreditationDocuments,
     massIdDocument,
   }: RuleSubject): EvaluateResultOutput {
-    this.verifyAllParticipantsHaveHomologationDocuments({
-      homologationDocuments,
+    this.verifyAllParticipantsHaveAccreditationDocuments({
+      accreditationDocuments,
       massIdDocument,
     });
 
-    const invalidHomologationDocuments = [
-      ...homologationDocuments.values(),
-    ].filter((document) => !isHomologationValid(document));
+    const invalidAccreditationDocuments = [
+      ...accreditationDocuments.values(),
+    ].filter((document) => !isAccreditationValid(document));
 
-    if (isNonEmptyArray(invalidHomologationDocuments)) {
+    if (isNonEmptyArray(invalidAccreditationDocuments)) {
       return {
-        resultComment: RESULT_COMMENTS.INVALID_HOMOLOGATION_DOCUMENTS(
-          invalidHomologationDocuments.map((document) => document.id),
+        resultComment: RESULT_COMMENTS.INVALID_ACCREDITATION_DOCUMENTS(
+          invalidAccreditationDocuments.map((document) => document.id),
         ),
         resultStatus: RuleOutputStatus.FAILED,
       };
@@ -114,7 +115,7 @@ export class ParticipantHomologationsRequirementsProcessor extends RuleDataProce
   private async getRuleSubject(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
-    const homologationDocuments: Map<string, Document> = new Map();
+    const accreditationDocuments: Map<string, Document> = new Map();
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
@@ -124,8 +125,8 @@ export class ParticipantHomologationsRequirementsProcessor extends RuleDataProce
         massIdDocument = document;
       }
 
-      if (PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation)) {
-        homologationDocuments.set(document.primaryParticipant.id, document);
+      if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
+        accreditationDocuments.set(document.primaryParticipant.id, document);
       }
     });
 
@@ -135,20 +136,20 @@ export class ParticipantHomologationsRequirementsProcessor extends RuleDataProce
       );
     }
 
-    if (homologationDocuments.size === 0) {
+    if (accreditationDocuments.size === 0) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.HOMOLOGATION_DOCUMENTS_NOT_FOUND,
+        this.errorProcessor.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
       );
     }
 
     return {
-      homologationDocuments,
+      accreditationDocuments,
       massIdDocument,
     };
   }
 
-  private verifyAllParticipantsHaveHomologationDocuments({
-    homologationDocuments,
+  private verifyAllParticipantsHaveAccreditationDocuments({
+    accreditationDocuments,
     massIdDocument,
   }: Omit<RuleSubject, 'massIdAuditDocument'>) {
     if (!isNonEmptyArray(massIdDocument.externalEvents)) {
@@ -175,14 +176,14 @@ export class ParticipantHomologationsRequirementsProcessor extends RuleDataProce
         ]),
     );
 
-    const participantsWithoutHomologationDocuments = [
+    const participantsWithoutAccreditationDocuments = [
       ...actorParticipants.entries(),
-    ].filter(([participantId]) => !homologationDocuments.has(participantId));
+    ].filter(([participantId]) => !accreditationDocuments.has(participantId));
 
-    if (isNonEmptyArray(participantsWithoutHomologationDocuments)) {
+    if (isNonEmptyArray(participantsWithoutAccreditationDocuments)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_HOMOLOGATION_DOCUMENTS(
-          participantsWithoutHomologationDocuments.map(
+        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+          participantsWithoutAccreditationDocuments.map(
             ([participantId]) => actorParticipants.get(participantId) as string,
           ),
         ),

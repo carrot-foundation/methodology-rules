@@ -58,8 +58,8 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-sorting": [
         "libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/participant-homologations-requirements": [
-        "libs/methodologies/bold/rule-processors/mass-id/participant-homologations-requirements/src/index.ts"
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements": [
+        "libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/index.ts"
       ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/processor-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/index.ts"

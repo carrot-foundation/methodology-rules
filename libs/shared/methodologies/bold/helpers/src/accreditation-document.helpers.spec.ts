@@ -1,10 +1,10 @@
 import {
   stubDocumentEventWithMetadataAttributes,
-  stubParticipantHomologationDocument,
+  stubParticipantAccreditationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentEventAccreditationStatus,
   DocumentEventAttributeName,
-  DocumentEventHomologationStatus,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
@@ -12,16 +12,16 @@ import { faker } from '@faker-js/faker';
 import { addDays, subDays } from 'date-fns';
 
 import {
-  getParticipantHomologationDocumentByParticipantId,
-  isHomologationValid,
-} from './homologation-document.helpers';
+  getParticipantAccreditationDocumentByParticipantId,
+  isAccreditationValid,
+} from './accreditation-document.helpers';
 
-const { EFFECTIVE_DATE, EXPIRATION_DATE, HOMOLOGATION_STATUS } =
+const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
-const { HOMOLOGATION_RESULT } = DocumentEventName;
+const { ACCREDITATION_RESULT } = DocumentEventName;
 
-describe('Homologation Document Helpers', () => {
-  describe('isHomologationValid', () => {
+describe('Accreditation Document Helpers', () => {
+  describe('isAccreditationValid', () => {
     it.each([
       {
         date: subDays(new Date(), 2),
@@ -80,29 +80,29 @@ describe('Homologation Document Helpers', () => {
           'should return false if the effective date is today and the expiration date is in the past',
       },
     ])('$scenario', ({ date, dueDate, expected }) => {
-      const document = stubParticipantHomologationDocument({
+      const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: HOMOLOGATION_RESULT },
+            { name: ACCREDITATION_RESULT },
             [
               [EXPIRATION_DATE, dueDate.toISOString()],
               [EFFECTIVE_DATE, date.toISOString()],
-              [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.APPROVED],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
             ],
           ),
         ],
       });
 
-      expect(isHomologationValid(document)).toBe(expected);
+      expect(isAccreditationValid(document)).toBe(expected);
     });
 
-    it('should return false if the document has a HOMOLOGATION_RESULT event but the status is not APPROVED', () => {
-      const document = stubParticipantHomologationDocument({
+    it('should return false if the document has a ACCREDITATION_RESULT event but the status is not APPROVED', () => {
+      const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: HOMOLOGATION_RESULT },
+            { name: ACCREDITATION_RESULT },
             [
-              [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.REJECTED],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.REJECTED],
               [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
               [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
             ],
@@ -110,56 +110,56 @@ describe('Homologation Document Helpers', () => {
         ],
       });
 
-      expect(isHomologationValid(document)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
-    it('should return false if the document has no HOMOLOGATION_RESULT event', () => {
-      const document = stubParticipantHomologationDocument({
+    it('should return false if the document has no ACCREDITATION_RESULT event', () => {
+      const document = stubParticipantAccreditationDocument({
         externalEvents: [],
       });
 
-      expect(isHomologationValid(document)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
-    it('should return false if the document has a HOMOLOGATION_RESULT event but no expiration date', () => {
-      const document = stubParticipantHomologationDocument({
+    it('should return false if the document has a ACCREDITATION_RESULT event but no expiration date', () => {
+      const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: HOMOLOGATION_RESULT },
+            { name: ACCREDITATION_RESULT },
             [[EFFECTIVE_DATE, addDays(new Date(), 5).toISOString()]],
           ),
         ],
       });
 
-      expect(isHomologationValid(document)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
-    it('should return false if the document has a HOMOLOGATION_RESULT event but no effective date', () => {
-      const document = stubParticipantHomologationDocument({
+    it('should return false if the document has a ACCREDITATION_RESULT event but no effective date', () => {
+      const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: HOMOLOGATION_RESULT },
+            { name: ACCREDITATION_RESULT },
             [[EXPIRATION_DATE, subDays(new Date(), 5).toISOString()]],
           ),
         ],
       });
 
-      expect(isHomologationValid(document)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
   });
 
-  describe('getParticipantHomologationDocumentByParticipantId', () => {
-    it('should return the homologation document for the given participant id', () => {
+  describe('getParticipantAccreditationDocumentByParticipantId', () => {
+    it('should return the accreditation document for the given participant id', () => {
       const participantId = faker.string.uuid();
-      const document = stubParticipantHomologationDocument({
+      const document = stubParticipantAccreditationDocument({
         primaryParticipant: {
           id: participantId,
         },
       });
 
-      const result = getParticipantHomologationDocumentByParticipantId({
-        homologationDocuments: [
-          ...stubArray(stubParticipantHomologationDocument),
+      const result = getParticipantAccreditationDocumentByParticipantId({
+        accreditationDocuments: [
+          ...stubArray(stubParticipantAccreditationDocument),
           document,
         ],
         participantId,
@@ -169,8 +169,8 @@ describe('Homologation Document Helpers', () => {
     });
 
     it('should return undefined if the participant id is not found', () => {
-      const result = getParticipantHomologationDocumentByParticipantId({
-        homologationDocuments: stubArray(stubParticipantHomologationDocument),
+      const result = getParticipantAccreditationDocumentByParticipantId({
+        accreditationDocuments: stubArray(stubParticipantAccreditationDocument),
         participantId: faker.string.uuid(),
       });
 

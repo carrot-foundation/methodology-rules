@@ -6,13 +6,14 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { ParticipantHomologationsRequirementsProcessor } from './participant-homologations-requirements.processor';
-import { participantHomologationsRequirementsTestCases } from './participant-homologations-requirements.test-cases';
+import { ParticipantAccreditationsAndVerificationsRequirementsProcessor } from './participant-accreditations-and-verifications-requirements.processor';
+import { participantAccreditationsAndVerificationsRequirementsTestCases } from './participant-accreditations-and-verifications-requirements.test-cases';
 
-describe('ParticipantHomologationsRequirementsProcessor', () => {
-  const ruleDataProcessor = new ParticipantHomologationsRequirementsProcessor();
+describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () => {
+  const ruleDataProcessor =
+    new ParticipantAccreditationsAndVerificationsRequirementsProcessor();
 
-  it.each(participantHomologationsRequirementsTestCases)(
+  it.each(participantAccreditationsAndVerificationsRequirementsTestCases)(
     'should return $resultStatus when $scenario',
     async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
       spyOnDocumentQueryServiceLoad(stubDocument(), [

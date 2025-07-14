@@ -25,9 +25,9 @@ const processorErrors = new MassIdSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const {
+  ACCREDITATION_CONTEXT,
   DROP_OFF,
   EMISSION_AND_COMPOSTING_METRICS,
-  HOMOLOGATION_CONTEXT,
   SORTING,
 } = DocumentEventName;
 const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
@@ -47,7 +47,7 @@ const actorParticipants = new Map(
 const {
   massIdAuditDocument,
   massIdDocument,
-  participantsHomologationDocuments,
+  participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
   .createMassIdDocuments({
     externalEventsMap: {
@@ -63,7 +63,7 @@ const {
   })
   .createMassIdAuditDocuments()
   .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
+  .createParticipantAccreditationDocuments()
   .build();
 
 export const massIdSortingTestCases = [
@@ -80,12 +80,17 @@ export const massIdSortingTestCases = [
     scenario: 'the sorting description is missing',
   },
   {
-    actorParticipants,
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
           externalEventsMap: {
+            [ACCREDITATION_CONTEXT]: stubDocumentEvent({
+              name: ACCREDITATION_CONTEXT,
+              participant: actorParticipants.get(
+                MassIdDocumentActorType.RECYCLER,
+              )!,
+            }),
             [EMISSION_AND_COMPOSTING_METRICS]:
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
@@ -95,16 +100,11 @@ export const massIdSortingTestCases = [
                   )!,
                 },
               }),
-            [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
-              name: HOMOLOGATION_CONTEXT,
-              participant: actorParticipants.get(
-                MassIdDocumentActorType.RECYCLER,
-              )!,
-            }),
           },
         },
       ],
     ]),
+    actorParticipants,
     massIdEvents: {
       [DROP_OFF]: stubBoldMassIdDropOffEvent({
         partialDocumentEvent: {
@@ -124,12 +124,17 @@ export const massIdSortingTestCases = [
       'the sorting value calculation difference is less or equal to 0.1',
   },
   {
-    actorParticipants,
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
           externalEventsMap: {
+            [ACCREDITATION_CONTEXT]: stubDocumentEvent({
+              name: ACCREDITATION_CONTEXT,
+              participant: actorParticipants.get(
+                MassIdDocumentActorType.RECYCLER,
+              )!,
+            }),
             [EMISSION_AND_COMPOSTING_METRICS]:
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
@@ -139,16 +144,11 @@ export const massIdSortingTestCases = [
                   )!,
                 },
               }),
-            [HOMOLOGATION_CONTEXT]: stubDocumentEvent({
-              name: HOMOLOGATION_CONTEXT,
-              participant: actorParticipants.get(
-                MassIdDocumentActorType.RECYCLER,
-              )!,
-            }),
           },
         },
       ],
     ]),
+    actorParticipants,
     massIdEvents: {
       [DROP_OFF]: stubBoldMassIdDropOffEvent({
         partialDocumentEvent: {
@@ -185,12 +185,12 @@ const invalidSortingValue = new BoldStubsBuilder()
   })
   .createMassIdAuditDocuments()
   .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
+  .createParticipantAccreditationDocuments()
   .build();
 
 export const massIdSortingErrorTestCases = [
   {
-    documents: [...participantsHomologationDocuments.values()],
+    documents: [...participantsAccreditationDocuments.values()],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -202,7 +202,7 @@ export const massIdSortingErrorTestCases = [
         ...massIdDocument,
         externalEvents: [],
       },
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
@@ -213,9 +213,9 @@ export const massIdSortingErrorTestCases = [
     documents: [massIdDocument],
     massIdAuditDocument,
     resultComment:
-      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${RECYCLER} homologation does not exist`,
+    scenario: `the ${RECYCLER} accreditation does not exist`,
   },
   {
     documents: [
@@ -225,7 +225,7 @@ export const massIdSortingErrorTestCases = [
           (event) => event.name !== SORTING.toString(),
         ),
       },
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
@@ -236,7 +236,7 @@ export const massIdSortingErrorTestCases = [
     documents: [
       invalidSortingValue.massIdDocument,
       invalidSortingValue.massIdAuditDocument,
-      ...invalidSortingValue.participantsHomologationDocuments.values(),
+      ...invalidSortingValue.participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
@@ -247,9 +247,9 @@ export const massIdSortingErrorTestCases = [
     documents: [
       massIdDocument,
       {
-        // TODO: it's temporary, we need to remove when the homologation document is defined
-        ...participantsHomologationDocuments.get(RECYCLER),
-        externalEvents: participantsHomologationDocuments
+        // TODO: it's temporary, we need to remove when the accreditation document is defined
+        ...participantsAccreditationDocuments.get(RECYCLER),
+        externalEvents: participantsAccreditationDocuments
           .get(RECYCLER)
           ?.externalEvents?.filter(
             (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
@@ -259,10 +259,10 @@ export const massIdSortingErrorTestCases = [
     massIdAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${RECYCLER} homologation does not contain a ${SORTING_FACTOR} attribute`,
+    scenario: `the ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
   },
   {
-    documents: [massIdDocument, ...participantsHomologationDocuments.values()],
+    documents: [massIdDocument, ...participantsAccreditationDocuments.values()],
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(0),

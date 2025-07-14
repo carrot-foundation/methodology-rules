@@ -18,12 +18,18 @@ export enum DocumentCategory {
   METHODOLOGY = 'Methodology',
 }
 
+export enum DocumentEventAccreditationStatus {
+  APPROVED = 'Approved',
+  REJECTED = 'Rejected',
+}
+
 export enum DocumentEventAttachmentLabel {
   RECYCLING_MANIFEST = 'Recycling Manifest',
   TRANSPORT_MANIFEST = 'Transport Manifest',
 }
 
 export enum DocumentEventAttributeName {
+  ACCREDITATION_STATUS = 'Accreditation Status',
   APPROVED_EXCEPTIONS = 'Approved Exceptions',
   BASELINES = 'Baselines',
   CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
@@ -43,7 +49,6 @@ export enum DocumentEventAttributeName {
   EXEMPTION_JUSTIFICATION = 'Exemption Justification',
   EXPIRATION_DATE = 'Expiration Date',
   GROSS_WEIGHT = 'Gross Weight',
-  HOMOLOGATION_STATUS = 'Homologation Status',
   ISSUE_DATE = 'Issue Date',
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION = 'Local Waste Classification Description',
   LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
@@ -53,7 +58,7 @@ export enum DocumentEventAttributeName {
   REFERENCE_YEAR = 'Reference Year',
   RULE_PROCESSOR_RESULT_CONTENT = 'Rule Processor Result Content',
   RULE_RESULT_DETAILS = 'Rule Result Details',
-  SCALE_HOMOLOGATION = 'Scale Homologation',
+  SCALE_ACCREDITATION = 'Scale Accreditation',
   SCALE_TYPE = 'Scale Type',
   SLUG = 'Slug',
   SORTING_FACTOR = 'Sorting Factor',
@@ -79,20 +84,15 @@ export enum DocumentEventContainerType {
   WASTE_BOX = 'Waste Box',
 }
 
-export enum DocumentEventHomologationStatus {
-  APPROVED = 'Approved',
-  REJECTED = 'Rejected',
-}
-
 export enum DocumentEventName {
+  ACCREDITATION_CONTEXT = MethodologyDocumentEventName.ACCREDITATION_CONTEXT,
+  ACCREDITATION_RESULT = MethodologyDocumentEventName.ACCREDITATION_RESULT,
   ACTOR = MethodologyDocumentEventName.ACTOR,
   CLOSE = MethodologyDocumentEventName.CLOSE,
   DROP_OFF = MethodologyDocumentEventName.DROP_OFF,
   EMISSION_AND_COMPOSTING_METRICS = MethodologyDocumentEventName.EMISSION_AND_COMPOSTING_METRICS,
   END = 'END',
   FACILITY_ADDRESS = MethodologyDocumentEventName.FACILITY_ADDRESS,
-  HOMOLOGATION_CONTEXT = MethodologyDocumentEventName.HOMOLOGATION_CONTEXT,
-  HOMOLOGATION_RESULT = MethodologyDocumentEventName.HOMOLOGATION_RESULT,
   LEGAL_AND_ADMINISTRATIVE_COMPLIANCE = MethodologyDocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
   LINK = MethodologyDocumentEventName.LINK,
   MONITORING_SYSTEMS_AND_EQUIPMENT = MethodologyDocumentEventName.MONITORING_SYSTEMS_AND_EQUIPMENT,
@@ -185,7 +185,7 @@ export enum DocumentType {
   GAS_ID = 'GasID',
   MASS_ID_AUDIT = 'MassID Audit',
   ORGANIC = 'Organic',
-  PARTICIPANT_HOMOLOGATION = 'Participant Homologation',
+  PARTICIPANT_ACCREDITATION = 'Participant Accreditation',
   RECYCLED_ID = 'RecycledID',
 }
 

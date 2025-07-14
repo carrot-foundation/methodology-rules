@@ -37,12 +37,12 @@ export const calculatePreventedEmissions = (
   massIdDocumentValue;
 
 export const getWasteGeneratorBaselineByWasteSubtype = (
-  wasteGeneratorHomologationDocument: Document,
+  wasteGeneratorAccreditationDocument: Document,
   wasteSubtype: MassIdOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
 ): MethodologyBaseline | undefined => {
   const recyclingBaselineEvent =
-    wasteGeneratorHomologationDocument.externalEvents?.find(
+    wasteGeneratorAccreditationDocument.externalEvents?.find(
       (event) => event.name === RECYCLING_BASELINES.toString(),
     );
 

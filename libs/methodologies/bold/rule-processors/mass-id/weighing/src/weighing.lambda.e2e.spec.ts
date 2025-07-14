@@ -25,7 +25,7 @@ describe('WeighingProcessor E2E', () => {
   it.each(weighingTestCases)(
     'should return $resultStatus when $scenario',
     async ({
-      homologationDocuments,
+      accreditationDocuments,
       massIdDocumentEvents,
       resultComment,
       resultStatus,
@@ -33,21 +33,21 @@ describe('WeighingProcessor E2E', () => {
       const {
         massIdAuditDocument,
         massIdDocument,
-        participantsHomologationDocuments,
+        participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
         .createMassIdDocuments({
           externalEventsMap: massIdDocumentEvents,
         })
         .createMassIdAuditDocuments()
         .createMethodologyDocument()
-        .createParticipantHomologationDocuments(homologationDocuments)
+        .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
           massIdAuditDocument,
-          ...participantsHomologationDocuments.values(),
+          ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
           documentKey: toDocumentKey({

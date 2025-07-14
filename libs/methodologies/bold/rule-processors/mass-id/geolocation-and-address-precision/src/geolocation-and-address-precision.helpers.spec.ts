@@ -1,6 +1,6 @@
 import {
   stubAddress,
-  stubBoldHomologationDocument,
+  stubBoldAccreditationDocument,
   stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
@@ -27,7 +27,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       const participantId = faker.string.uuid();
       const addressId = faker.string.uuid();
 
-      const documentStub = stubBoldHomologationDocument({
+      const documentStub = stubBoldAccreditationDocument({
         externalEventsMap: new Map([
           [
             FACILITY_ADDRESS,
@@ -44,7 +44,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getHomologatedAddressByParticipantId(participantId, [
         documentStub,
-        ...stubArray(() => stubBoldHomologationDocument()),
+        ...stubArray(() => stubBoldAccreditationDocument()),
       ]);
 
       expect(result?.id).toBe(addressId);
@@ -54,7 +54,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       const participantId = faker.string.uuid();
       const result = getHomologatedAddressByParticipantId(participantId, [
         ...stubArray(() =>
-          stubBoldHomologationDocument({
+          stubBoldAccreditationDocument({
             externalEventsMap: new Map([
               [FACILITY_ADDRESS, stubDocumentEvent({ name: FACILITY_ADDRESS })],
             ]),

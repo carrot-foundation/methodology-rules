@@ -23,13 +23,13 @@ describe('WeighingProcessor', () => {
     it.each(weighingTestCases)(
       'should return $resultStatus when $scenario',
       async ({
-        homologationDocuments,
+        accreditationDocuments,
         massIdDocumentEvents,
         resultComment,
         resultStatus,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
-          homologationDocuments,
+          accreditationDocuments,
           massIdDocumentsParams: {
             externalEventsMap: massIdDocumentEvents,
           },

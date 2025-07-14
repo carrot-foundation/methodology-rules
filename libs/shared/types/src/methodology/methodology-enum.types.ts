@@ -50,13 +50,13 @@ export enum MethodologyDocumentEventLabel {
 }
 
 export enum MethodologyDocumentEventName {
+  ACCREDITATION_CONTEXT = 'Accreditation Context',
+  ACCREDITATION_RESULT = 'Accreditation Result',
   ACTOR = 'ACTOR',
   CLOSE = 'CLOSE',
   DROP_OFF = 'Drop-off',
   EMISSION_AND_COMPOSTING_METRICS = 'Emissions & Composting Metrics',
   FACILITY_ADDRESS = 'Facility Address',
-  HOMOLOGATION_CONTEXT = 'Homologation Context',
-  HOMOLOGATION_RESULT = 'Homologation Result',
   LEGAL_AND_ADMINISTRATIVE_COMPLIANCE = 'Legal & Administrative Compliance',
   LINK = 'LINK',
   MONITORING_SYSTEMS_AND_EQUIPMENT = 'Monitoring Systems & Equipment',

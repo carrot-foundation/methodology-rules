@@ -14,7 +14,7 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
-  SCALE_HOMOLOGATION,
+  SCALE_ACCREDITATION,
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
@@ -30,7 +30,7 @@ const supportedFormats = Object.values(
 
 export const PASSED_RESULT_COMMENTS = {
   PASSED_WITH_EXCEPTION: (originalPassMessage: string) =>
-    `${originalPassMessage} The omission of the "${CONTAINER_CAPACITY}" is permitted under an approved exception granted to this recycler for the duration of the homologation period.`,
+    `${originalPassMessage} The omission of the "${CONTAINER_CAPACITY}" is permitted under an approved exception granted to this recycler for the duration of the accreditation period.`,
   SINGLE_STEP: `The weighing event was captured as a single-step process, and all required attributes are valid.`,
   TRANSPORT_MANIFEST: `The "${WEIGHING}" event was captured from the "${TRANSPORT_MANIFEST}", and all required attributes are valid.`,
   TWO_STEP: `The "${WEIGHING}" event was captured in two steps, and all required attributes are valid.`,
@@ -56,8 +56,8 @@ export const INVALID_RESULT_COMMENTS = {
     `The calculated net weight (${calculatedNetWeight}) differs from the declared "Event Value" (${eventValue}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE}kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
   SCALE_TYPE: (scaleType: unknown) =>
     `The "${SCALE_TYPE}" "${String(scaleType)}" is not supported by the methodology.`,
-  SCALE_TYPE_MISMATCH: (scaleType: unknown, homologationScaleType: unknown) =>
-    `The provided "${SCALE_TYPE}" "${String(scaleType)}" does not match the homologation scale type "${String(homologationScaleType)}".`,
+  SCALE_TYPE_MISMATCH: (scaleType: unknown, accreditationScaleType: unknown) =>
+    `The provided "${SCALE_TYPE}" "${String(scaleType)}" does not match the accreditation scale type "${String(accreditationScaleType)}".`,
   TARE_FORMAT: `The "${TARE}" format must be one of the supported formats.`,
   TWO_STEP_CONTAINER_TYPE: (containerType: unknown) =>
     `The "${CONTAINER_TYPE}" for two-step weighing must be ${DocumentEventContainerType.TRUCK}, but "${String(containerType)}" was provided.`,
@@ -95,7 +95,7 @@ export const WRONG_FORMAT_RESULT_COMMENTS = {
 } as const;
 
 export const NOT_FOUND_RESULT_COMMENTS = {
-  HOMOLOGATION_EVENT: `The related "${SCALE_HOMOLOGATION}" event was not found.`,
+  ACCREDITATION_EVENT: `The related "${SCALE_ACCREDITATION}" event was not found.`,
   MORE_THAN_TWO_WEIGHING_EVENTS: `More than two "${WEIGHING}" events were found, which is not supported.`,
   NO_WEIGHING_EVENTS: `No "${WEIGHING}" events were found in the document.`,
 } as const;

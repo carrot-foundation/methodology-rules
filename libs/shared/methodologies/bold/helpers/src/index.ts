@@ -1,1 +1,1 @@
-export * from './homologation-document.helpers';
+export * from './accreditation-document.helpers';

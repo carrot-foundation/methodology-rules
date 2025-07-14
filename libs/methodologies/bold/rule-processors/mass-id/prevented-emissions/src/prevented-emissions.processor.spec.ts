@@ -23,8 +23,8 @@ describe('PreventedEmissionsProcessor', () => {
     it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
+        accreditationDocuments,
         externalCreatedAt,
-        homologationDocuments,
         massIdDocumentValue,
         resultComment,
         resultContent,
@@ -32,7 +32,7 @@ describe('PreventedEmissionsProcessor', () => {
         subtype,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
-          homologationDocuments,
+          accreditationDocuments,
           massIdDocumentsParams: {
             partialDocument: {
               currentValue: massIdDocumentValue as number,

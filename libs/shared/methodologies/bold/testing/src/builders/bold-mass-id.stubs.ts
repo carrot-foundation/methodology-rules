@@ -68,7 +68,7 @@ const {
   LOCAL_WASTE_CLASSIFICATION_ID,
   RECEIVING_OPERATOR_IDENTIFIER,
   RECYCLER_OPERATOR_IDENTIFIER,
-  SCALE_HOMOLOGATION,
+  SCALE_ACCREDITATION,
   SCALE_TYPE,
   SORTING_FACTOR,
   TARE,
@@ -160,7 +160,7 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   [DESCRIPTION, faker.lorem.sentence()],
   [WEIGHING_CAPTURE_METHOD, random<DocumentEventWeighingCaptureMethod>()],
   [SCALE_TYPE, random<DocumentEventScaleType>()],
-  [SCALE_HOMOLOGATION, random<MethodologyDocumentEventAttributeReference>()],
+  [SCALE_ACCREDITATION, random<MethodologyDocumentEventAttributeReference>()],
   [
     CONTAINER_TYPE,
     faker.helpers.arrayElement(
