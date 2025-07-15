@@ -183,12 +183,12 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Waste Generator Accreditation document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
+    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
     subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
   },
 ];
 
-const wasteGeneratorAccreditationDocument =
+const wasteGeneratorVerificationDocument =
   participantsAccreditationDocuments.get(WASTE_GENERATOR) as Document;
 
 export const preventedEmissionsErrorTestCases = [
@@ -229,7 +229,7 @@ export const preventedEmissionsErrorTestCases = [
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_ACCREDITATION_DOCUMENT,
+        .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the Waste Generator Accreditation document was not found',
   },
@@ -240,9 +240,9 @@ export const preventedEmissionsErrorTestCases = [
         (document) => document.subtype !== WASTE_GENERATOR,
       ),
       {
-        ...wasteGeneratorAccreditationDocument,
+        ...wasteGeneratorVerificationDocument,
         externalEvents: [
-          ...(wasteGeneratorAccreditationDocument.externalEvents?.filter(
+          ...(wasteGeneratorVerificationDocument.externalEvents?.filter(
             (event) => event.name !== RECYCLING_BASELINES.toString(),
           ) ?? []),
           stubBoldRecyclingBaselinesEvent({

@@ -65,7 +65,7 @@ export const RESULT_COMMENTS = {
 interface Documents {
   massIdDocument: Document;
   recyclerAccreditationDocument: Document;
-  wasteGeneratorAccreditationDocument: Document;
+  wasteGeneratorVerificationDocument: Document;
 }
 
 export class PreventedEmissionsProcessor extends RuleDataProcessor {
@@ -162,7 +162,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIdDocument,
     recyclerAccreditationDocument,
-    wasteGeneratorAccreditationDocument,
+    wasteGeneratorVerificationDocument,
   }: Documents): RuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
@@ -178,7 +178,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
 
     const wasteGeneratorBaseline = getWasteGeneratorBaselineByWasteSubtype(
-      wasteGeneratorAccreditationDocument,
+      wasteGeneratorVerificationDocument,
       massIdDocument.subtype,
       this.processorErrors,
     );
@@ -199,7 +199,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   ): Promise<Documents> {
     let recyclerAccreditationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
-    let wasteGeneratorAccreditationDocument: Document | undefined;
+    let wasteGeneratorVerificationDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -215,7 +215,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
         documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
       ) {
-        wasteGeneratorAccreditationDocument = document;
+        wasteGeneratorVerificationDocument = document;
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -237,17 +237,17 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     throwIfMissing(
-      wasteGeneratorAccreditationDocument,
+      wasteGeneratorVerificationDocument,
       this.processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_ACCREDITATION_DOCUMENT,
+        .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
       this.processorErrors,
     );
 
     return {
       massIdDocument: massIdDocument as Document,
       recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
-      wasteGeneratorAccreditationDocument:
-        wasteGeneratorAccreditationDocument as Document,
+      wasteGeneratorVerificationDocument:
+        wasteGeneratorVerificationDocument as Document,
     };
   }
 }

@@ -10,7 +10,7 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
     MISSING_MASS_ID_DOCUMENT: 'The "MassID" document was not found.',
     MISSING_RECYCLER_ACCREDITATION_DOCUMENT:
       'The "Recycler accreditation" document was not found.',
-    MISSING_WASTE_GENERATOR_ACCREDITATION_DOCUMENT:
+    MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT:
       'The "Waste Generator accreditation" document was not found.',
   } as const;
 }
