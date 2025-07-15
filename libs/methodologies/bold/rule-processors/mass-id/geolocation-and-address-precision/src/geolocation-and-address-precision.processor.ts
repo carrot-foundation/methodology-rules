@@ -37,8 +37,8 @@ import {
 
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
+  getAccreditatedAddressByParticipantId,
   getEventGpsGeolocation,
-  getHomologatedAddressByParticipantId,
 } from './geolocation-and-address-precision.helpers';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
@@ -50,9 +50,9 @@ export interface RuleSubject {
 }
 
 interface ParticipantAddressData {
+  accreditatedAddress: MethodologyAddress | undefined;
   eventAddress: MethodologyAddress;
   gpsGeolocation: Geolocation | undefined;
-  homologatedAddress: MethodologyAddress | undefined;
 }
 
 export const RESULT_COMMENTS = {
@@ -61,19 +61,19 @@ export const RESULT_COMMENTS = {
     actorType: string,
     addressDistance: number,
   ): string =>
-    `(${actorType}) The event address is ${addressDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The event address is ${addressDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
-    `No homologated address was found for the ${actorType} actor.`,
+    `No accreditated address was found for the ${actorType} actor.`,
   PASSED_WITH_GPS: (
     actorType: string,
     addressDistance: number,
     gpsDistance: number,
   ): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
   PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m). No GPS data was provided.`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m). No GPS data was provided.`,
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
@@ -154,12 +154,12 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       participantsAddressData.set(actorType, {
-        eventAddress: event.address,
-        gpsGeolocation: getEventGpsGeolocation(event),
-        homologatedAddress: getHomologatedAddressByParticipantId(
+        accreditatedAddress: getAccreditatedAddressByParticipantId(
           event.participant.id,
           accreditationDocuments,
         ),
+        eventAddress: event.address,
+        gpsGeolocation: getEventGpsGeolocation(event),
       });
     }
 
@@ -168,16 +168,16 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private calculateAddressDistance(
     eventAddress: MethodologyAddress,
-    homologatedAddress: MethodologyAddress,
+    accreditatedAddress: MethodologyAddress,
   ): number {
-    return calculateDistance(eventAddress, homologatedAddress);
+    return calculateDistance(eventAddress, accreditatedAddress);
   }
 
   private calculateGpsDistance(
-    homologatedAddress: MethodologyAddress,
+    accreditatedAddress: MethodologyAddress,
     gpsGeolocation: Geolocation,
   ): number {
-    return calculateDistance(homologatedAddress, gpsGeolocation);
+    return calculateDistance(accreditatedAddress, gpsGeolocation);
   }
 
   private async collectDocuments(
@@ -212,9 +212,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     actorType: MassIdDocumentActorType,
     addressData: ParticipantAddressData,
   ): EvaluateResultOutput[] {
-    const { eventAddress, gpsGeolocation, homologatedAddress } = addressData;
+    const { accreditatedAddress, eventAddress, gpsGeolocation } = addressData;
 
-    if (isNil(homologatedAddress)) {
+    if (isNil(accreditatedAddress)) {
       return [
         {
           resultComment:
@@ -226,7 +226,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     const addressDistance = this.calculateAddressDistance(
       eventAddress,
-      homologatedAddress,
+      accreditatedAddress,
     );
 
     if (addressDistance > MAX_ALLOWED_DISTANCE) {
@@ -243,7 +243,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (!isNil(gpsGeolocation)) {
       const gpsDistance = this.calculateGpsDistance(
-        homologatedAddress,
+        accreditatedAddress,
         gpsGeolocation,
       );
 

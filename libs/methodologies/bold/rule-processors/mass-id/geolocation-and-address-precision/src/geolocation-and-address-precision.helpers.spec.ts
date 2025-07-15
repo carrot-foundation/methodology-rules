@@ -13,8 +13,8 @@ import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import {
+  getAccreditatedAddressByParticipantId,
   getEventGpsGeolocation,
-  getHomologatedAddressByParticipantId,
 } from './geolocation-and-address-precision.helpers';
 
 const { FACILITY_ADDRESS } = DocumentEventName;
@@ -22,8 +22,8 @@ const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 describe('GeolocationAndAddressPrecisionHelpers', () => {
-  describe('getHomologatedAddressByParticipantId', () => {
-    it('should return the homologated address by participant id', () => {
+  describe('getAccreditatedAddressByParticipantId', () => {
+    it('should return the accreditated address by participant id', () => {
       const participantId = faker.string.uuid();
       const addressId = faker.string.uuid();
 
@@ -42,7 +42,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         },
       });
 
-      const result = getHomologatedAddressByParticipantId(participantId, [
+      const result = getAccreditatedAddressByParticipantId(participantId, [
         documentStub,
         ...stubArray(() => stubBoldAccreditationDocument()),
       ]);
@@ -50,9 +50,9 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       expect(result?.id).toBe(addressId);
     });
 
-    it('should return undefined if the participant has no homologated address', () => {
+    it('should return undefined if the participant has no accreditated address', () => {
       const participantId = faker.string.uuid();
-      const result = getHomologatedAddressByParticipantId(participantId, [
+      const result = getAccreditatedAddressByParticipantId(participantId, [
         ...stubArray(() =>
           stubBoldAccreditationDocument({
             externalEventsMap: new Map([

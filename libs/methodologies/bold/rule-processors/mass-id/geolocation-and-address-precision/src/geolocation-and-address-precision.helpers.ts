@@ -16,7 +16,7 @@ import {
 } from '@carrot-fndn/shared/types';
 import { is } from 'typia';
 
-export const getHomologatedAddressByParticipantId = (
+export const getAccreditatedAddressByParticipantId = (
   participantId: string,
   accreditationDocuments: Document[],
 ): MethodologyAddress | undefined => {
