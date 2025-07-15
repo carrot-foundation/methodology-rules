@@ -7,13 +7,13 @@ import { random } from 'typia';
 import { BoldStubsBuilder, type StubBoldDocumentParameters } from '../builders';
 
 interface CreateBoldStubsParameters {
-  homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
   massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
 }
 
 interface ProcessRuleTestParameters {
-  homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
   massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
   ruleDataProcessor: RuleDataProcessor;
@@ -32,7 +32,7 @@ interface TestExpectedRuleOutputParameters {
 }
 
 export function createBoldStubsForMassIdProcessor({
-  homologationDocuments,
+  accreditationDocuments,
   massIdActorParticipants,
   massIdDocumentsParams,
 }: CreateBoldStubsParameters) {
@@ -42,12 +42,12 @@ export function createBoldStubsForMassIdProcessor({
     .createMassIdDocuments(massIdDocumentsParams)
     .createMassIdAuditDocuments()
     .createMethodologyDocument()
-    .createParticipantHomologationDocuments(homologationDocuments)
+    .createParticipantAccreditationDocuments(accreditationDocuments)
     .build();
 }
 
 export async function createRuleTestFixture({
-  homologationDocuments,
+  accreditationDocuments,
   massIdActorParticipants,
   massIdDocumentsParams,
   ruleDataProcessor,
@@ -59,9 +59,9 @@ export async function createRuleTestFixture({
   const {
     massIdAuditDocument,
     massIdDocument,
-    participantsHomologationDocuments,
+    participantsAccreditationDocuments,
   } = createBoldStubsForMassIdProcessor({
-    homologationDocuments,
+    accreditationDocuments,
     massIdActorParticipants,
     massIdDocumentsParams,
   });
@@ -69,7 +69,7 @@ export async function createRuleTestFixture({
   const allDocuments = [
     massIdDocument,
     massIdAuditDocument,
-    ...participantsHomologationDocuments.values(),
+    ...participantsAccreditationDocuments.values(),
   ];
 
   spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);

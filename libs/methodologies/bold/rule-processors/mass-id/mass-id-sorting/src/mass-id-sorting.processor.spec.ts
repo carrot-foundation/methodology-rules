@@ -23,15 +23,15 @@ describe('MassIdSortingProcessor', () => {
     it.each(massIdSortingTestCases)(
       'should return $resultStatus when $scenario',
       async ({
+        accreditationDocuments,
         actorParticipants,
-        homologationDocuments,
         massIdEvents,
         partialDocument,
         resultComment,
         resultStatus,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
-          homologationDocuments,
+          accreditationDocuments,
           massIdActorParticipants: actorParticipants,
           massIdDocumentsParams: {
             externalEventsMap: massIdEvents,

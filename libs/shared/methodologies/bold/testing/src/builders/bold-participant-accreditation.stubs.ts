@@ -1,7 +1,7 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentEventHomologationStatus,
+  DocumentEventAccreditationStatus,
   type DocumentEventScaleType,
   MassIdOrganicSubtype,
   MethodologyBaseline,
@@ -32,24 +32,24 @@ import {
 } from './bold.stubs.types';
 
 const {
+  ACCREDITATION_RESULT,
   EMISSION_AND_COMPOSTING_METRICS,
-  HOMOLOGATION_RESULT,
   MONITORING_SYSTEMS_AND_EQUIPMENT,
   RECYCLING_BASELINES,
 } = DocumentEventName;
 const {
+  ACCREDITATION_STATUS,
   BASELINES,
   EFFECTIVE_DATE,
   EXCEEDING_EMISSION_COEFFICIENT,
   EXPIRATION_DATE,
-  HOMOLOGATION_STATUS,
   REFERENCE_YEAR,
   SCALE_TYPE,
   SORTING_FACTOR,
 } = DocumentEventAttributeName;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
-const defaultHomologationResultEventMetadataAttributes: MetadataAttributeParameter[] =
+const defaultAccreditationResultEventMetadataAttributes: MetadataAttributeParameter[] =
   [
     {
       format: DATE,
@@ -61,17 +61,17 @@ const defaultHomologationResultEventMetadataAttributes: MetadataAttributeParamet
       name: EXPIRATION_DATE,
       value: addDays(new Date(), 2).toISOString(),
     },
-    [HOMOLOGATION_STATUS, DocumentEventHomologationStatus.APPROVED],
+    [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
   ];
 
-export const stubBoldHomologationResultEvent = ({
+export const stubBoldAccreditationResultEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
   stubDocumentEventWithMetadataAttributes(
-    { ...partialDocumentEvent, name: HOMOLOGATION_RESULT },
+    { ...partialDocumentEvent, name: ACCREDITATION_RESULT },
     mergeMetadataAttributes(
-      defaultHomologationResultEventMetadataAttributes,
+      defaultAccreditationResultEventMetadataAttributes,
       metadataAttributes,
     ),
   );
@@ -146,21 +146,21 @@ export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
     ),
   );
 
-const boldHomologationExternalEventsMap = new Map([
+const boldAccreditationExternalEventsMap = new Map([
+  [ACCREDITATION_RESULT, stubBoldAccreditationResultEvent()],
   [
     EMISSION_AND_COMPOSTING_METRICS,
     stubBoldEmissionAndCompostingMetricsEvent(),
   ],
-  [HOMOLOGATION_RESULT, stubBoldHomologationResultEvent()],
 ]);
 
-export const stubBoldHomologationDocument = ({
+export const stubBoldAccreditationDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters = {}): Document => {
   const mergedEventsMap = isNil(externalEventsMap)
-    ? boldHomologationExternalEventsMap
-    : mergeEventsMaps(boldHomologationExternalEventsMap, externalEventsMap);
+    ? boldAccreditationExternalEventsMap
+    : mergeEventsMaps(boldAccreditationExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(
@@ -171,7 +171,7 @@ export const stubBoldHomologationDocument = ({
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       },
       false,
     ),

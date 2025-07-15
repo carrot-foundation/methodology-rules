@@ -20,8 +20,8 @@ export class MassIdSortingProcessorErrors extends BaseProcessorErrors {
       `The value before the "${SORTING}" must be greater than 0, but "${String(valueBeforeSorting)}" was provided.`,
     MASS_ID_DOCUMENT_NOT_FOUND: `The "${MASS_ID}" document was not found.`,
     MISSING_EXTERNAL_EVENTS: `The "${MASS_ID}" document has no events.`,
-    MISSING_RECYCLER_HOMOLOGATION_DOCUMENT: `The "${RECYCLER}" homologation was not found.`,
+    MISSING_RECYCLER_ACCREDITATION_DOCUMENT: `The "${RECYCLER}" accreditation was not found.`,
     MISSING_SORTING_EVENT: `No "${SORTING}" event was found in the document.`,
-    MISSING_SORTING_FACTOR: `The "${SORTING_FACTOR}" was not found in the "${RECYCLER}" homologation.`,
+    MISSING_SORTING_FACTOR: `The "${SORTING_FACTOR}" was not found in the "${RECYCLER}" accreditation.`,
   } as const;
 }

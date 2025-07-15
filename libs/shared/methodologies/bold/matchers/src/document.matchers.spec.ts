@@ -12,8 +12,8 @@ import {
   MASS_ID,
   MASS_ID_AUDIT,
   METHODOLOGY_DEFINITION,
-  PARTICIPANT_HOMOLOGATION_GROUP,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_GROUP,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
   RECYCLED_ID,
 } from './document.matchers';
 
@@ -180,16 +180,16 @@ describe('Document Matchers', () => {
     });
   });
 
-  describe('PARTICIPANT_HOMOLOGATION_GROUP', () => {
+  describe('PARTICIPANT_ACCREDITATION_GROUP', () => {
     it('should return true if document matches category, type and subtype', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.GROUP,
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
@@ -198,11 +198,11 @@ describe('Document Matchers', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
         subtype: DocumentSubtype.GROUP,
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
@@ -211,25 +211,25 @@ describe('Document Matchers', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         subtype: DocumentSubtype.TCC,
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_GROUP.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_GROUP.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
   });
 
-  describe('PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH', () => {
+  describe('PARTICIPANT_ACCREDITATION_PARTIAL_MATCH', () => {
     it('should return true if document matches category and type', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(true);
     });
@@ -237,23 +237,23 @@ describe('Document Matchers', () => {
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
-        type: DocumentType.PARTICIPANT_HOMOLOGATION,
+        type: DocumentType.PARTICIPANT_ACCREDITATION,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Participant Homologation', () => {
+    it('should return false if the document type is not Participant Accreditation', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
       });
 
       const matchesResult =
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation);
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation);
 
       expect(matchesResult).toBe(false);
     });

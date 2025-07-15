@@ -17,7 +17,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
@@ -48,11 +48,11 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
-  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Homologation" document or it is invalid.`,
+  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
   MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
     wasteSubtype: MassIdOrganicSubtype,
   ) =>
-    `The "${BASELINES}" was not found in the "Waste Generator Homologation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+    `The "${BASELINES}" was not found in the "Waste Generator Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
   PASSED: (
     preventedEmissions: number,
     preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
@@ -64,8 +64,8 @@ export const RESULT_COMMENTS = {
 
 interface Documents {
   massIdDocument: Document;
-  recyclerHomologationDocument: Document;
-  wasteGeneratorHomologationDocument: Document;
+  recyclerAccreditationDocument: Document;
+  wasteGeneratorVerificationDocument: Document;
 }
 
 export class PreventedEmissionsProcessor extends RuleDataProcessor {
@@ -153,7 +153,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -161,13 +161,13 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
   protected getRuleSubject({
     massIdDocument,
-    recyclerHomologationDocument,
-    wasteGeneratorHomologationDocument,
+    recyclerAccreditationDocument,
+    wasteGeneratorVerificationDocument,
   }: Documents): RuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
-          recyclerHomologationDocument,
+          recyclerAccreditationDocument,
         documentYear: getYear(massIdDocument.externalCreatedAt),
       });
 
@@ -178,7 +178,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
 
     const wasteGeneratorBaseline = getWasteGeneratorBaselineByWasteSubtype(
-      wasteGeneratorHomologationDocument,
+      wasteGeneratorVerificationDocument,
       massIdDocument.subtype,
       this.processorErrors,
     );
@@ -197,25 +197,25 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<Documents> {
-    let recyclerHomologationDocument: Document | undefined;
+    let recyclerAccreditationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
-    let wasteGeneratorHomologationDocument: Document | undefined;
+    let wasteGeneratorVerificationDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation) &&
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
         documentRelation.subtype === DocumentSubtype.RECYCLER
       ) {
-        recyclerHomologationDocument = document;
+        recyclerAccreditationDocument = document;
       }
 
       if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation) &&
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
         documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
       ) {
-        wasteGeneratorHomologationDocument = document;
+        wasteGeneratorVerificationDocument = document;
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -224,8 +224,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     });
 
     throwIfMissing(
-      recyclerHomologationDocument,
-      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      recyclerAccreditationDocument,
+      this.processorErrors.ERROR_MESSAGE
+        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
       this.processorErrors,
     );
 
@@ -236,17 +237,17 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     throwIfMissing(
-      wasteGeneratorHomologationDocument,
+      wasteGeneratorVerificationDocument,
       this.processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT,
+        .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
       this.processorErrors,
     );
 
     return {
       massIdDocument: massIdDocument as Document,
-      recyclerHomologationDocument: recyclerHomologationDocument as Document,
-      wasteGeneratorHomologationDocument:
-        wasteGeneratorHomologationDocument as Document,
+      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
+      wasteGeneratorVerificationDocument:
+        wasteGeneratorVerificationDocument as Document,
     };
   }
 }

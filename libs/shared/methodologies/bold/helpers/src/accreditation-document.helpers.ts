@@ -2,28 +2,28 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
+  DocumentEventAccreditationStatus,
   DocumentEventAttributeName,
-  DocumentEventHomologationStatus,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type DateTime, type NonEmptyString } from '@carrot-fndn/shared/types';
 import { isAfter, isBefore, isToday } from 'date-fns';
 import { is } from 'typia';
 
-export const getParticipantHomologationDocumentByParticipantId = ({
-  homologationDocuments,
+export const getParticipantAccreditationDocumentByParticipantId = ({
+  accreditationDocuments,
   participantId,
 }: {
-  homologationDocuments: Document[];
+  accreditationDocuments: Document[];
   participantId: NonEmptyString;
 }): Document | undefined =>
-  homologationDocuments.find(
+  accreditationDocuments.find(
     (document) => document.primaryParticipant.id === participantId,
   );
 
-export const isHomologationValid = (document: Document): boolean => {
+export const isAccreditationValid = (document: Document): boolean => {
   const event = document.externalEvents?.find(
-    eventNameIsAnyOf([DocumentEventName.HOMOLOGATION_RESULT]),
+    eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),
   );
 
   if (!event) {
@@ -40,14 +40,14 @@ export const isHomologationValid = (document: Document): boolean => {
   );
   const status = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.HOMOLOGATION_STATUS,
+    DocumentEventAttributeName.ACCREDITATION_STATUS,
   );
 
   if (
     !is<DateTime>(effectiveDate) ||
     !is<DateTime>(expirationDate) ||
-    !is<DocumentEventHomologationStatus>(status) ||
-    status !== DocumentEventHomologationStatus.APPROVED
+    !is<DocumentEventAccreditationStatus>(status) ||
+    status !== DocumentEventAccreditationStatus.APPROVED
   ) {
     return false;
   }

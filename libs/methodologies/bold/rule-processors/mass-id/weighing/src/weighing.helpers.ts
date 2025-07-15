@@ -36,7 +36,7 @@ import {
 } from './weighing.constants';
 import { isApprovedExceptionAttributeValue } from './weighing.typia';
 
-const { HOMOLOGATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
+const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
 const {
   APPROVED_EXCEPTIONS,
@@ -54,6 +54,7 @@ const {
 export type ValidationResult = { errors: string[] };
 
 export interface WeighingValues {
+  accreditationScaleType: MethodologyDocumentEventAttributeValue | undefined;
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
   containerCapacityException: ApprovedException | undefined;
   containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
@@ -61,7 +62,6 @@ export interface WeighingValues {
   description: MethodologyDocumentEventAttributeValue | undefined;
   eventValue: number | undefined;
   grossWeight: MethodologyDocumentEventAttribute | undefined;
-  homologationScaleType: MethodologyDocumentEventAttributeValue | undefined;
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
@@ -76,21 +76,21 @@ const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
-export const getMandatoryFieldExceptionFromHomologationDocument = (
-  recyclerHomologationDocument: Document,
+export const getMandatoryFieldExceptionFromAccreditationDocument = (
+  recyclerAccreditationDocument: Document,
   fieldName: DocumentEventAttributeName,
 ): ApprovedException | undefined => {
-  const homologationResultEvent =
-    recyclerHomologationDocument.externalEvents?.find(
-      eventNameIsAnyOf([HOMOLOGATION_RESULT]),
+  const accreditationResultEvent =
+    recyclerAccreditationDocument.externalEvents?.find(
+      eventNameIsAnyOf([ACCREDITATION_RESULT]),
     );
 
-  if (!homologationResultEvent) {
+  if (!accreditationResultEvent) {
     return undefined;
   }
 
   const approvedExceptions = getEventAttributeValue(
-    homologationResultEvent,
+    accreditationResultEvent,
     APPROVED_EXCEPTIONS,
   );
 
@@ -105,11 +105,11 @@ export const getMandatoryFieldExceptionFromHomologationDocument = (
   );
 };
 
-export const getHomologationScaleType = (
-  recyclerHomologationDocument: Document,
+export const getAccreditationScaleType = (
+  recyclerAccreditationDocument: Document,
 ): MethodologyDocumentEventAttributeValue | undefined => {
   const monitoringSystemsAndEquipmentEvent =
-    recyclerHomologationDocument.externalEvents?.find(
+    recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),
     );
 
@@ -118,15 +118,18 @@ export const getHomologationScaleType = (
 
 export const getValuesRelatedToWeighing = (
   weighingEvent: DocumentEvent,
-  recyclerHomologationDocument: Document,
+  recyclerAccreditationDocument: Document,
 ): WeighingValues => ({
+  accreditationScaleType: getAccreditationScaleType(
+    recyclerAccreditationDocument,
+  ),
   containerCapacityAttribute: getEventAttributeByName(
     weighingEvent,
     CONTAINER_CAPACITY,
   ),
   containerCapacityException:
-    getMandatoryFieldExceptionFromHomologationDocument(
-      recyclerHomologationDocument,
+    getMandatoryFieldExceptionFromAccreditationDocument(
+      recyclerAccreditationDocument,
       CONTAINER_CAPACITY,
     ),
   containerQuantity: getEventAttributeValue(weighingEvent, CONTAINER_QUANTITY),
@@ -137,7 +140,6 @@ export const getValuesRelatedToWeighing = (
   description: getEventAttributeValue(weighingEvent, DESCRIPTION),
   eventValue: weighingEvent.value,
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
-  homologationScaleType: getHomologationScaleType(recyclerHomologationDocument),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
   tare: getEventAttributeByName(weighingEvent, TARE),
   vehicleLicensePlateAttribute: getEventAttributeByName(
@@ -286,15 +288,15 @@ const validators: Record<string, Validator> = {
   scaleType: (values, isTwoStep) => {
     const errors: string[] = [];
 
-    if (!isNonEmptyString(values.homologationScaleType)) {
-      return { errors: [NOT_FOUND_RESULT_COMMENTS.HOMOLOGATION_EVENT] };
+    if (!isNonEmptyString(values.accreditationScaleType)) {
+      return { errors: [NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT] };
     }
 
-    if (String(values.scaleType) !== String(values.homologationScaleType)) {
+    if (String(values.scaleType) !== String(values.accreditationScaleType)) {
       errors.push(
         INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
           values.scaleType,
-          values.homologationScaleType,
+          values.accreditationScaleType,
         ),
       );
     }

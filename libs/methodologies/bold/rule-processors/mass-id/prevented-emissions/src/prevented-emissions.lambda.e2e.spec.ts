@@ -25,8 +25,8 @@ describe('PreventedEmissionsProcessor E2E', () => {
   it.each(preventedEmissionsTestCases)(
     'should return $resultStatus when $scenario',
     async ({
+      accreditationDocuments,
       externalCreatedAt,
-      homologationDocuments,
       massIdDocumentValue,
       resultComment,
       resultStatus,
@@ -35,7 +35,7 @@ describe('PreventedEmissionsProcessor E2E', () => {
       const {
         massIdAuditDocument,
         massIdDocument,
-        participantsHomologationDocuments,
+        participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
         .createMassIdDocuments({
           partialDocument: {
@@ -46,14 +46,14 @@ describe('PreventedEmissionsProcessor E2E', () => {
         })
         .createMassIdAuditDocuments()
         .createMethodologyDocument()
-        .createParticipantHomologationDocuments(homologationDocuments)
+        .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
           massIdAuditDocument,
-          ...participantsHomologationDocuments.values(),
+          ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
           documentKey: toDocumentKey({

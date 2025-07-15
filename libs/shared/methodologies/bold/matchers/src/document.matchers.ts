@@ -54,15 +54,15 @@ export const METHODOLOGY_DEFINITION = new DocumentMatcher({
   type: DocumentType.DEFINITION,
 });
 
-export const PARTICIPANT_HOMOLOGATION_GROUP = new DocumentMatcher({
+export const PARTICIPANT_ACCREDITATION_GROUP = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
   subtype: DocumentSubtype.GROUP,
-  type: DocumentType.PARTICIPANT_HOMOLOGATION,
+  type: DocumentType.PARTICIPANT_ACCREDITATION,
 });
 
-export const PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH = new DocumentMatcher({
+export const PARTICIPANT_ACCREDITATION_PARTIAL_MATCH = new DocumentMatcher({
   category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.PARTICIPANT_HOMOLOGATION,
+  type: DocumentType.PARTICIPANT_ACCREDITATION,
 });
 
 export const CREDIT_ORDER_MATCH = new DocumentMatcher({

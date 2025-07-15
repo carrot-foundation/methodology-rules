@@ -19,7 +19,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
@@ -37,8 +37,8 @@ import {
 
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
+  getAccreditatedAddressByParticipantId,
   getEventGpsGeolocation,
-  getHomologatedAddressByParticipantId,
 } from './geolocation-and-address-precision.helpers';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
@@ -50,9 +50,9 @@ export interface RuleSubject {
 }
 
 interface ParticipantAddressData {
+  accreditatedAddress: MethodologyAddress | undefined;
   eventAddress: MethodologyAddress;
   gpsGeolocation: Geolocation | undefined;
-  homologatedAddress: MethodologyAddress | undefined;
 }
 
 export const RESULT_COMMENTS = {
@@ -61,19 +61,19 @@ export const RESULT_COMMENTS = {
     actorType: string,
     addressDistance: number,
   ): string =>
-    `(${actorType}) The event address is ${addressDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The event address is ${addressDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the homologated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
-  MISSING_HOMOLOGATION_ADDRESS: (actorType: string): string =>
-    `No homologated address was found for the ${actorType} actor.`,
+    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+  MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
+    `No accreditated address was found for the ${actorType} actor.`,
   PASSED_WITH_GPS: (
     actorType: string,
     addressDistance: number,
     gpsDistance: number,
   ): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
   PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the homologated address (${addressDistance}m). No GPS data was provided.`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m). No GPS data was provided.`,
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
@@ -106,7 +106,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -134,7 +134,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private buildParticipantsAddressData(
     events: NonNullable<Document['externalEvents']>,
     massIdDocument: Document,
-    homologationDocuments: Document[],
+    accreditationDocuments: Document[],
   ) {
     const participantsAddressData = new Map<
       MassIdDocumentActorType,
@@ -154,12 +154,12 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       participantsAddressData.set(actorType, {
+        accreditatedAddress: getAccreditatedAddressByParticipantId(
+          event.participant.id,
+          accreditationDocuments,
+        ),
         eventAddress: event.address,
         gpsGeolocation: getEventGpsGeolocation(event),
-        homologatedAddress: getHomologatedAddressByParticipantId(
-          event.participant.id,
-          homologationDocuments,
-        ),
       });
     }
 
@@ -168,29 +168,29 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private calculateAddressDistance(
     eventAddress: MethodologyAddress,
-    homologatedAddress: MethodologyAddress,
+    accreditatedAddress: MethodologyAddress,
   ): number {
-    return calculateDistance(eventAddress, homologatedAddress);
+    return calculateDistance(eventAddress, accreditatedAddress);
   }
 
   private calculateGpsDistance(
-    homologatedAddress: MethodologyAddress,
+    accreditatedAddress: MethodologyAddress,
     gpsGeolocation: Geolocation,
   ): number {
-    return calculateDistance(homologatedAddress, gpsGeolocation);
+    return calculateDistance(accreditatedAddress, gpsGeolocation);
   }
 
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ) {
-    const homologationDocuments: Document[] = [];
+    const accreditationDocuments: Document[] = [];
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
-      if (PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation)) {
-        homologationDocuments.push(document);
+      if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
+        accreditationDocuments.push(document);
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -198,27 +198,27 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
     });
 
-    if (!isNonEmptyArray(homologationDocuments)) {
+    if (!isNonEmptyArray(accreditationDocuments)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE
-          .PARTICIPANT_HOMOLOGATION_DOCUMENTS_NOT_FOUND,
+          .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
       );
     }
 
-    return { homologationDocuments, massIdDocument };
+    return { accreditationDocuments, massIdDocument };
   }
 
   private evaluateAddressData(
     actorType: MassIdDocumentActorType,
     addressData: ParticipantAddressData,
   ): EvaluateResultOutput[] {
-    const { eventAddress, gpsGeolocation, homologatedAddress } = addressData;
+    const { accreditatedAddress, eventAddress, gpsGeolocation } = addressData;
 
-    if (isNil(homologatedAddress)) {
+    if (isNil(accreditatedAddress)) {
       return [
         {
           resultComment:
-            RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(actorType),
+            RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(actorType),
           resultStatus: RuleOutputStatus.FAILED,
         },
       ];
@@ -226,7 +226,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     const addressDistance = this.calculateAddressDistance(
       eventAddress,
-      homologatedAddress,
+      accreditatedAddress,
     );
 
     if (addressDistance > MAX_ALLOWED_DISTANCE) {
@@ -243,7 +243,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (!isNil(gpsGeolocation)) {
       const gpsDistance = this.calculateGpsDistance(
-        homologatedAddress,
+        accreditatedAddress,
         gpsGeolocation,
       );
 
@@ -328,7 +328,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
         massIdDocument,
-        documents.homologationDocuments,
+        documents.accreditationDocuments,
       ),
     };
   }

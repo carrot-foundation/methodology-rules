@@ -24,10 +24,10 @@ import { RESULT_COMMENTS } from './geolocation-and-address-precision.processor';
 
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 const {
+  ACCREDITATION_CONTEXT,
   ACTOR,
   DROP_OFF,
   FACILITY_ADDRESS,
-  HOMOLOGATION_CONTEXT,
   LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
   PICK_UP,
 } = DocumentEventName;
@@ -92,7 +92,7 @@ const nearbyWasteGeneratorAddressDistance = calculateDistance(
   nearbyWasteGeneratorAddress,
 );
 
-const validHomologationDocuments = new Map([
+const validAccreditationDocuments = new Map([
   [
     RECYCLER,
     {
@@ -143,21 +143,20 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
 });
 
 export const geolocationAndAddressPrecisionTestCases: Array<{
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   actorParticipants: Map<string, MethodologyParticipant>;
-  homologationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIdDocumentParameters?: StubBoldDocumentParameters | undefined;
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
 }> = [
   {
-    actorParticipants,
-    homologationDocuments: new Map([
+    accreditationDocuments: new Map([
       [
         RECYCLER,
         {
           externalEventsMap: {
-            [HOMOLOGATION_CONTEXT]: undefined,
+            [ACCREDITATION_CONTEXT]: undefined,
           },
         },
       ],
@@ -165,18 +164,19 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         WASTE_GENERATOR,
         {
           externalEventsMap: {
-            [HOMOLOGATION_CONTEXT]: undefined,
+            [ACCREDITATION_CONTEXT]: undefined,
           },
         },
       ],
     ]),
-    resultComment: `${RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_HOMOLOGATION_ADDRESS(RECYCLER)}`,
+    actorParticipants,
+    resultComment: `${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the homologated address is not set',
+    scenario: 'the accreditated address is not set',
   },
   {
+    accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
@@ -209,8 +209,8 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       'the gps is set and both gps geolocation and event address are valid but nearby',
   },
   {
+    accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
@@ -242,8 +242,8 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     scenario: 'the address is valid but the gps geolocation is invalid',
   },
   {
+    accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
@@ -266,8 +266,8 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     scenario: 'the processor cannot extract the actor type',
   },
   {
+    accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
@@ -297,11 +297,11 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the gps is not set, but the homologated address is set and is valid',
+      'the gps is not set, but the accreditated address is set and is valid',
   },
   {
+    accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    homologationDocuments: validHomologationDocuments,
     massIdDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
@@ -331,7 +331,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the gps is not set, but the homologated address is set and not valid',
+      'the gps is not set, but the accreditated address is set and not valid',
   },
 ];
 
@@ -340,7 +340,7 @@ const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 const {
   massIdAuditDocument,
   massIdDocument,
-  participantsHomologationDocuments,
+  participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
   .createMassIdDocuments({
     externalEventsMap: {
@@ -350,14 +350,14 @@ const {
   })
   .createMassIdAuditDocuments()
   .createMethodologyDocument()
-  .createParticipantHomologationDocuments()
+  .createParticipantAccreditationDocuments()
   .build();
 
 export const geolocationAndAddressPrecisionErrorTestCases = [
   {
     documents: [
       massIdAuditDocument,
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -368,7 +368,7 @@ export const geolocationAndAddressPrecisionErrorTestCases = [
     documents: [
       massIdDocument,
       massIdAuditDocument,
-      ...participantsHomologationDocuments.values(),
+      ...participantsAccreditationDocuments.values(),
     ],
     massIdAuditDocument,
     resultComment:
@@ -383,8 +383,8 @@ export const geolocationAndAddressPrecisionErrorTestCases = [
     documents: [massIdDocument, massIdAuditDocument],
     massIdAuditDocument,
     resultComment:
-      errorMessage.ERROR_MESSAGE.PARTICIPANT_HOMOLOGATION_DOCUMENTS_NOT_FOUND,
+      errorMessage.ERROR_MESSAGE.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the homologation documents are not found',
+    scenario: 'the accreditation documents are not found',
   },
 ];

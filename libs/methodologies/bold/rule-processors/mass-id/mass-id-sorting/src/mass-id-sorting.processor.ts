@@ -19,7 +19,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
-  PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
@@ -54,7 +54,7 @@ export const RESULT_COMMENTS = {
 
 interface DocumentPair {
   massIdDocument: Document;
-  recyclerHomologationDocument: Document;
+  recyclerAccreditationDocument: Document;
 }
 
 interface SortingData {
@@ -127,7 +127,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       },
       criteria: {
         parentDocument: {},
-        relatedDocuments: [PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.match],
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
       },
       documentId: ruleInput.documentId,
     });
@@ -136,17 +136,17 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
   private async collectDocuments(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<DocumentPair> {
-    let recyclerHomologationDocument: Document | undefined;
+    let recyclerAccreditationDocument: Document | undefined;
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
-        PARTICIPANT_HOMOLOGATION_PARTIAL_MATCH.matches(documentRelation) &&
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
         documentRelation.subtype === DocumentSubtype.RECYCLER
       ) {
-        recyclerHomologationDocument = document;
+        recyclerAccreditationDocument = document;
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -155,8 +155,9 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     });
 
     this.validateOrThrow(
-      isNil(recyclerHomologationDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_HOMOLOGATION_DOCUMENT,
+      isNil(recyclerAccreditationDocument),
+      this.processorErrors.ERROR_MESSAGE
+        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     );
 
     this.validateOrThrow(
@@ -166,12 +167,12 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
 
     return {
       massIdDocument: massIdDocument!,
-      recyclerHomologationDocument: recyclerHomologationDocument!,
+      recyclerAccreditationDocument: recyclerAccreditationDocument!,
     };
   }
 
   private extractSortingData(documents: DocumentPair): SortingData {
-    const { massIdDocument, recyclerHomologationDocument } = documents;
+    const { massIdDocument, recyclerAccreditationDocument } = documents;
 
     this.validateOrThrow(
       !isNonEmptyArray(massIdDocument.externalEvents),
@@ -197,7 +198,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     const emissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
-          recyclerHomologationDocument,
+          recyclerAccreditationDocument,
         documentYear: getYear(massIdDocument.externalCreatedAt),
       });
     const sortingFactor = getEventAttributeValue(

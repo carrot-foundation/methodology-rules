@@ -6,11 +6,11 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
     INVALID_MASS_ID_DOCUMENT_SUBTYPE:
       'The "MassID" document has an invalid subtype.',
     INVALID_WASTE_GENERATOR_BASELINES:
-      'The "Waste Generator homologation" document has no valid baselines.',
+      'The "Waste Generator accreditation" document has no valid baselines.',
     MISSING_MASS_ID_DOCUMENT: 'The "MassID" document was not found.',
-    MISSING_RECYCLER_HOMOLOGATION_DOCUMENT:
-      'The "Recycler homologation" document was not found.',
-    MISSING_WASTE_GENERATOR_HOMOLOGATION_DOCUMENT:
-      'The "Waste Generator homologation" document was not found.',
+    MISSING_RECYCLER_ACCREDITATION_DOCUMENT:
+      'The "Recycler accreditation" document was not found.',
+    MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT:
+      'The "Waste Generator accreditation" document was not found.',
   } as const;
 }

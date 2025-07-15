@@ -22,14 +22,14 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   it.each(geolocationAndAddressPrecisionTestCases)(
     'should return $resultStatus when $scenario',
     async ({
+      accreditationDocuments,
       actorParticipants,
-      homologationDocuments,
       massIdDocumentParameters,
       resultComment,
       resultStatus,
     }) => {
       const { ruleInput, ruleOutput } = await createRuleTestFixture({
-        homologationDocuments,
+        accreditationDocuments,
         massIdActorParticipants: actorParticipants,
         massIdDocumentsParams: massIdDocumentParameters,
         ruleDataProcessor,

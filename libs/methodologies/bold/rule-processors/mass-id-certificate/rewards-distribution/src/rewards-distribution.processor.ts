@@ -327,7 +327,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       rewardDistributions,
     );
 
-    // TODO: Today all waste generators are eligible for the discount, but we need to apply it only to large source companies based on the homologation document
+    // TODO: Today all waste generators are eligible for the discount, but we need to apply it only to large source companies based on the accreditation document
     return fullPercentage.multipliedBy(1 - LARGE_REVENUE_BUSINESS_DISCOUNT);
   }
 }

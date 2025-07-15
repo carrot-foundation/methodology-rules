@@ -90,21 +90,21 @@ export const generateNearbyCoordinates = (options?: {
   };
 };
 
-export const stubParticipantHomologationGroupDocument = (
+export const stubParticipantAccreditationGroupDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
     subtype: DocumentSubtype.GROUP,
-    type: DocumentType.PARTICIPANT_HOMOLOGATION,
+    type: DocumentType.PARTICIPANT_ACCREDITATION,
   });
 
-export const stubParticipantHomologationDocument = (
+export const stubParticipantAccreditationDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.PARTICIPANT_HOMOLOGATION,
+    type: DocumentType.PARTICIPANT_ACCREDITATION,
   });

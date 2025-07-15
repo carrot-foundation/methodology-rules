@@ -21,9 +21,9 @@ import {
 } from './document.getters';
 
 const {
+  ACCREDITATION_CONTEXT,
   DROP_OFF,
   EMISSION_AND_COMPOSTING_METRICS,
-  HOMOLOGATION_CONTEXT,
   PICK_UP,
   RULES_METADATA,
 } = DocumentEventName;
@@ -381,7 +381,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the event is neither a pick-up nor a drop-off event', () => {
-      const otherEvent = stubDocumentEvent({ name: HOMOLOGATION_CONTEXT });
+      const otherEvent = stubDocumentEvent({ name: ACCREDITATION_CONTEXT });
       const document = stubMassIdDocument({
         externalEvents: [
           stubDocumentEvent({ name: PICK_UP }),

@@ -29,7 +29,7 @@ import {
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
   stubParticipant,
-  stubParticipantHomologationGroupDocument,
+  stubParticipantAccreditationGroupDocument,
 } from '../stubs';
 import { stubBoldCertificateDocument } from './bold-certificate.stubs';
 import { stubBoldCreditOrderDocument } from './bold-credit-order.stubs';
@@ -40,7 +40,7 @@ import {
   stubBoldMassIdPickUpEvent,
 } from './bold-mass-id.stubs';
 import { stubBoldMethodologyDefinitionDocument } from './bold-methodology-definition.stubs';
-import { stubBoldHomologationDocument } from './bold-participant-homologation.stubs';
+import { stubBoldAccreditationDocument } from './bold-participant-accreditation.stubs';
 
 const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
@@ -50,7 +50,7 @@ const {
   GAS_ID,
   MASS_ID_AUDIT,
   ORGANIC,
-  PARTICIPANT_HOMOLOGATION,
+  PARTICIPANT_ACCREDITATION,
   RECYCLED_ID,
 } = DocumentType;
 const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
@@ -81,7 +81,7 @@ export interface BoldStubsBuilderResult {
   massIdDocuments: Document[];
   methodologyActorParticipants: Map<string, MethodologyParticipant>;
   methodologyDocument: Document | undefined;
-  participantsHomologationDocuments: Map<string, Document>;
+  participantsAccreditationDocuments: Map<string, Document>;
 }
 
 export const MASS_ID_ACTOR_PARTICIPANTS = [
@@ -152,13 +152,13 @@ export class BoldStubsBuilder {
 
   private methodologyRelation?: DocumentRelation;
 
-  private participantHomologationGroupDocument?: Document;
+  private participantAccreditationGroupDocument?: Document;
 
-  private participantHomologationGroupRelation?: DocumentRelation;
+  private participantAccreditationGroupRelation?: DocumentRelation;
 
-  private participantsHomologationDocuments: Map<string, Document> = new Map();
+  private participantsAccreditationDocuments: Map<string, Document> = new Map();
 
-  private participantsHomologationRelations: Map<string, DocumentRelation> =
+  private participantsAccreditationRelations: Map<string, DocumentRelation> =
     new Map();
 
   constructor(options: BoldStubsBuilderOptions = {}) {
@@ -261,7 +261,8 @@ export class BoldStubsBuilder {
       massIdDocuments: _massIdDocuments,
       methodologyActorParticipants: this.methodologyActorParticipants,
       methodologyDocument: this.methodologyDocument,
-      participantsHomologationDocuments: this.participantsHomologationDocuments,
+      participantsAccreditationDocuments:
+        this.participantsAccreditationDocuments,
     };
   }
 
@@ -435,7 +436,7 @@ export class BoldStubsBuilder {
         OUTPUT,
         stubDocumentEvent({
           name: OUTPUT,
-          relatedDocument: this.participantHomologationGroupRelation!,
+          relatedDocument: this.participantAccreditationGroupRelation!,
         }),
       ],
     ]);
@@ -451,16 +452,16 @@ export class BoldStubsBuilder {
       type: DEFINITION,
     };
 
-    this.participantHomologationGroupRelation = {
+    this.participantAccreditationGroupRelation = {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
       subtype: GROUP,
-      type: PARTICIPANT_HOMOLOGATION,
+      type: PARTICIPANT_ACCREDITATION,
     };
 
-    this.participantHomologationGroupDocument =
-      stubParticipantHomologationGroupDocument({
-        id: this.participantHomologationGroupRelation.documentId,
+    this.participantAccreditationGroupDocument =
+      stubParticipantAccreditationGroupDocument({
+        id: this.participantAccreditationGroupRelation.documentId,
         parentDocumentId: this.methodologyRelation.documentId,
       });
 
@@ -486,50 +487,50 @@ export class BoldStubsBuilder {
     return this;
   }
 
-  createParticipantHomologationDocuments(
-    homologationDocuments?: Map<string, StubBoldDocumentParameters>,
+  createParticipantAccreditationDocuments(
+    accreditationDocuments?: Map<string, StubBoldDocumentParameters>,
   ): BoldStubsBuilder {
     this.validateMethodologyDocumentsExist();
 
     for (const subtype of MASS_ID_ACTOR_PARTICIPANTS) {
-      const relation = this.createParticipantHomologationRelation(subtype);
+      const relation = this.createParticipantAccreditationRelation(subtype);
       const primaryAddress =
         this.massIdActorParticipantsAddresses.get(subtype)!;
       const primaryParticipant = this.massIdActorParticipants.get(subtype)!;
 
       const defaultEventsMap = new Map([
         [
-          DocumentEventName.HOMOLOGATION_CONTEXT,
+          DocumentEventName.ACCREDITATION_CONTEXT,
           stubDocumentEvent({
             address: primaryAddress,
-            name: DocumentEventName.HOMOLOGATION_CONTEXT,
+            name: DocumentEventName.ACCREDITATION_CONTEXT,
             participant: primaryParticipant,
           }),
         ],
       ]);
 
       const externalEventsMap =
-        homologationDocuments?.get(subtype)?.externalEventsMap;
+        accreditationDocuments?.get(subtype)?.externalEventsMap;
       const mergedEventsMap = this.mergeEventsMaps(
         defaultEventsMap,
         externalEventsMap,
       );
 
-      const documentStub = stubBoldHomologationDocument({
+      const documentStub = stubBoldAccreditationDocument({
         externalEventsMap: mergedEventsMap,
         partialDocument: {
           id: relation.documentId,
           parentDocumentId:
-            this.participantHomologationGroupRelation!.documentId,
+            this.participantAccreditationGroupRelation!.documentId,
           primaryAddress,
           primaryParticipant,
           subtype,
         },
       });
 
-      this.participantHomologationGroupDocument =
+      this.participantAccreditationGroupDocument =
         this.addExternalEventToDocument(
-          this.participantHomologationGroupDocument!,
+          this.participantAccreditationGroupDocument!,
           stubDocumentEvent({
             address: primaryAddress,
             name: OUTPUT,
@@ -551,8 +552,8 @@ export class BoldStubsBuilder {
           ),
       );
 
-      this.participantsHomologationRelations.set(subtype, relation);
-      this.participantsHomologationDocuments.set(subtype, documentStub);
+      this.participantsAccreditationRelations.set(subtype, relation);
+      this.participantsAccreditationDocuments.set(subtype, documentStub);
     }
 
     return this;
@@ -759,14 +760,14 @@ export class BoldStubsBuilder {
     );
   }
 
-  private createParticipantHomologationRelation(
+  private createParticipantAccreditationRelation(
     subtype: string,
   ): DocumentRelation {
     return {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
       subtype,
-      type: PARTICIPANT_HOMOLOGATION,
+      type: PARTICIPANT_ACCREDITATION,
     };
   }
 
@@ -881,8 +882,8 @@ export class BoldStubsBuilder {
   private validateMethodologyDocumentsExist(): void {
     if (
       isNil(this.methodologyRelation) ||
-      isNil(this.participantHomologationGroupRelation) ||
-      isNil(this.participantHomologationGroupDocument)
+      isNil(this.participantAccreditationGroupRelation) ||
+      isNil(this.participantAccreditationGroupDocument)
     ) {
       throw new Error(
         'Methodology documents must be created first. Call createMethodologyDocuments() before this method.',

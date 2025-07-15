@@ -1,5 +1,5 @@
 {
-  "name": "methodologies-bold-rule-processors-mass-id-participant-homologations-requirements",
+  "name": "methodologies-bold-rule-processors-mass-id-participant-accreditations-and-verifications-requirements",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": [
     "app:any",
@@ -8,7 +8,7 @@
     "stack:any",
     "type:library"
   ],
-  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/participant-homologations-requirements/src",
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src",
   "projectType": "library",
   "targets": {
     "lint": {},

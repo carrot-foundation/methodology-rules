@@ -1,6 +1,6 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { getParticipantHomologationDocumentByParticipantId } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { getParticipantAccreditationDocumentByParticipantId } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
@@ -16,22 +16,22 @@ import {
 } from '@carrot-fndn/shared/types';
 import { is } from 'typia';
 
-export const getHomologatedAddressByParticipantId = (
+export const getAccreditatedAddressByParticipantId = (
   participantId: string,
-  homologationDocuments: Document[],
+  accreditationDocuments: Document[],
 ): MethodologyAddress | undefined => {
-  const participantHomologationDocument =
-    getParticipantHomologationDocumentByParticipantId({
-      homologationDocuments,
+  const participantAccreditationDocument =
+    getParticipantAccreditationDocumentByParticipantId({
+      accreditationDocuments,
       participantId,
     });
 
-  if (isNil(participantHomologationDocument)) {
+  if (isNil(participantAccreditationDocument)) {
     return undefined;
   }
 
   const facilityAddressEvent =
-    participantHomologationDocument.externalEvents?.find(
+    participantAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
     );
 
