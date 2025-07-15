@@ -219,7 +219,7 @@ export const preventedEmissionsErrorTestCases = [
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Recycler Accreditation document was not found',
+    scenario: 'the Recycler accreditation document was not found',
   },
   {
     documents: [
