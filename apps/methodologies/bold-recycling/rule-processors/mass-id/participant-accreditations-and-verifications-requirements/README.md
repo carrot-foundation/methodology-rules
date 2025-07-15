@@ -1,6 +1,6 @@
 <div align="center">
 
-# Participant AccreditationsAndVerifications
+# Participant Accreditations & Verifications Requirements
 
 Methodology: **BOLD-RECYCLING**
 
@@ -14,7 +14,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/index.ts)**
 
 ## 👥 Contributors
 
