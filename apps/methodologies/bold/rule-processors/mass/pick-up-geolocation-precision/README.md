@@ -10,7 +10,7 @@ Methodology: **BOLD**
 
 ## 📄 Description
 
-Ensure that the address of the event with 'move-type' declared as 'Pick-up' is the same address of the 'SOURCE' participant accreditation process and consider a 2km radius as the precision limit margin between the accreditated and reported geolocations.
+Ensure that the address of an event whose `move-type` is **Pick-up** matches the address recorded during the `SOURCE` participant's accreditation process, allowing a 2 km radius tolerance between the accredited and reported geolocations.
 
 ## 📂 Implementation
 
