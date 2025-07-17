@@ -20,7 +20,8 @@ else
   LAMBDA_NAME=$(echo "$ZIP_FILE_NAME" | sed 's/\.zip$//')
 fi
 
-if [ ${#LAMBDA_NAME} -gt 80 ]; then
+## set to 92 because we don't consider the "methodology-" prefix.
+if [ ${#LAMBDA_NAME} -gt 92 ]; then
   echo "Error: Resource name '$LAMBDA_NAME' is ${#LAMBDA_NAME} characters long."
   echo "Resource names must be 80 characters or less for SQS queue compatibility."
   exit 1
