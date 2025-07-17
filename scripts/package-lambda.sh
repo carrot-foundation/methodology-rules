@@ -15,15 +15,16 @@ ZIP_FILE_NAME=$(basename "$ZIP_PATH")
 
 # Use provided resource name or extract from zip file name
 if [ "$#" -eq 3 ]; then
-  LAMBDA_NAME=$3
+  RESOURCE_NAME=$3
 else
-  LAMBDA_NAME=$(echo "$ZIP_FILE_NAME" | sed 's/\.zip$//')
+  RESOURCE_NAME=$(echo "$ZIP_FILE_NAME" | sed 's/\.zip$//')
 fi
 
-if [ ${#LAMBDA_NAME} -gt 80 ]; then
-  echo "Error: Resource name '$LAMBDA_NAME' is ${#LAMBDA_NAME} characters long."
-  echo "Resource names must be 80 characters or less for SQS queue compatibility."
-  exit 1
+MAX_RESOURCE_NAME_LENGTH=107  # excludes mandatory 'methodology-' prefix and 'rule-processors' suffix
+if [ ${#RESOURCE_NAME} -gt $MAX_RESOURCE_NAME_LENGTH ]; then
+  echo "Error: Resource name '$RESOURCE_NAME' is ${#RESOURCE_NAME} characters long."
+  echo "Resource names must be $MAX_RESOURCE_NAME_LENGTH characters or less (after removing the 'methodology-' prefix and 'rule-processors) to stay within the 80-char SQS queue limit."
+   exit 1
 fi
 
 echo "Zipping $BUILD_PATH to $ZIP_PATH"

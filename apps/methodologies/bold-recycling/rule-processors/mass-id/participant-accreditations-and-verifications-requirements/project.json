@@ -7,7 +7,11 @@
   "targets": {
     "build-lambda": {},
     "lint": {},
-    "package-lambda": {},
+    "package-lambda": {
+      "options": {
+        "resourceName": "methodologies-bold-recycling-rule-processors-mass-id-participant-accreditations"
+      }
+    },
     "upload-lambda": {},
     "ts": {}
   }
