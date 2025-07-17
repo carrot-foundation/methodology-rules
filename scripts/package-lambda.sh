@@ -1,13 +1,30 @@
 #!/bin/sh
 
 # Check if the correct number of arguments are provided
-if [ "$#" -ne 2 ]; then
-  echo "Usage: $0 <build_path> <zip_path>"
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+  echo "Usage: $0 <build_path> <zip_path> [resource_name]"
   exit 1
 fi
 
 BUILD_PATH=$1
 ZIP_PATH=$2
+
+# Extract path components and validate resource name length
+ZIP_DIR=$(dirname "$ZIP_PATH")
+ZIP_FILE_NAME=$(basename "$ZIP_PATH")
+
+# Use provided resource name or extract from zip file name
+if [ "$#" -eq 3 ]; then
+  LAMBDA_NAME=$3
+else
+  LAMBDA_NAME=$(echo "$ZIP_FILE_NAME" | sed 's/\.zip$//')
+fi
+
+if [ ${#LAMBDA_NAME} -gt 80 ]; then
+  echo "Error: Resource name '$LAMBDA_NAME' is ${#LAMBDA_NAME} characters long."
+  echo "Resource names must be 80 characters or less for SQS queue compatibility."
+  exit 1
+fi
 
 echo "Zipping $BUILD_PATH to $ZIP_PATH"
 
@@ -24,8 +41,6 @@ then
   exit 1
 fi
 
-ZIP_DIR=$(dirname "$ZIP_PATH")
-
 # Create the zip folder if it doesn't exist
 if ! mkdir -p "$ZIP_DIR"
 then
@@ -34,8 +49,6 @@ then
 fi
 
 # IMPORTANT: change to the build path to create the zip file with the correct relative structure
-ZIP_DIR=$(dirname "$ZIP_PATH")
-ZIP_FILE_NAME=$(basename "$ZIP_PATH")
 ABSOLUTE_ZIP_PATH="$(realpath "$ZIP_DIR")/$ZIP_FILE_NAME"
 cd "$BUILD_PATH"
 
