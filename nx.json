@@ -87,8 +87,9 @@
       "dependsOn": ["build-lambda"],
       "outputs": ["{options.zipPath}"],
       "options": {
-        "command": "{workspaceRoot}/scripts/package-lambda.sh {args.buildPath} {args.zipPath}",
+        "command": "{workspaceRoot}/scripts/package-lambda.sh {args.buildPath} {args.zipPath} {args.resourceName}",
         "buildPath": "{workspaceRoot}/dist/.prod/{projectRoot}",
+        "resourceName": "{projectName}",
         "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
       }
     },
