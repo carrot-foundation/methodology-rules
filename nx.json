@@ -87,9 +87,8 @@
       "dependsOn": ["build-lambda"],
       "outputs": ["{options.zipPath}"],
       "options": {
-        "command": "{workspaceRoot}/scripts/package-lambda.sh {args.buildPath} {args.zipPath} {args.resourceName}",
+        "command": "{workspaceRoot}/scripts/package-lambda.sh {args.buildPath} {args.zipPath}",
         "buildPath": "{workspaceRoot}/dist/.prod/{projectRoot}",
-        "resourceName": "{projectName}",
         "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
       }
     },
@@ -105,12 +104,13 @@
       "dependsOn": ["package-lambda"],
       "options": {
         "commands": [
-          "{workspaceRoot}/scripts/upload-lambda.sh {projectRoot} {args.zipPath} {args.environment}",
+          "{workspaceRoot}/scripts/upload-lambda.sh {projectRoot} {args.zipPath} {args.environment} {args.resourceName}",
           "rm -rf {args.zipPath}"
         ],
+        "environment": "development",
         "parallel": false,
-        "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip",
-        "environment": "development"
+        "resourceName": "{projectRoot}",
+        "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
       }
     }
   },
