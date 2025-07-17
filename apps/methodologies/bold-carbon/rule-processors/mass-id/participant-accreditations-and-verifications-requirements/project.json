@@ -1,5 +1,5 @@
 {
-  "name": "methodologies-bold-carbon-rule-processors-mass-id-participant-accreditations-and-verifications-requirements",
+  "name": "methodologies-bold-carbon-rule-processors-mass-id-participant-accreditations",
   "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
   "tags": ["methodology:bold", "processor:mass-id", "type:app"],
   "sourceRoot": "apps/methodologies/bold-carbon/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src",
