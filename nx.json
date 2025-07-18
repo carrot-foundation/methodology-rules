@@ -109,7 +109,7 @@
         ],
         "environment": "development",
         "parallel": false,
-        "resourceName": "{projectRoot}",
+        "resourceName": "{projectName}",
         "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
       }
     }
