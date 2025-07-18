@@ -36,6 +36,8 @@ else
   RULE_NAME=$(echo "$S3_FOLDER" | sed 's/\//-/g')
 fi
 
+RULE_NAME=$(echo "$RULE_NAME" | sed 's/methodologies-//g' | sed 's/rule-processors-//g')
+
 GIT_REPO_URL=$(git config --get remote.origin.url | sed 's/\.git//g')
 GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
