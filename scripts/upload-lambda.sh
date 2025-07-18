@@ -42,8 +42,6 @@ GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 COMMIT_HASH=$(git rev-parse HEAD)
 SOURCE_CODE_URL=$GIT_REPO_URL/tree/$COMMIT_HASH/$PROJECT_FOLDER
 
-echo $RULE_NAME
-
 # Upload zip file to S3 bucket
 if aws s3 cp "$ZIP_PATH" "s3://$S3_BUCKET/$S3_KEY"
 then
