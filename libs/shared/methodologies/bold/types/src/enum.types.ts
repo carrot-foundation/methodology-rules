@@ -48,6 +48,7 @@ export enum DocumentEventAttributeName {
   EXCEEDING_EMISSION_COEFFICIENT = 'Exceeding Emission Coefficient (per ton)',
   EXEMPTION_JUSTIFICATION = 'Exemption Justification',
   EXPIRATION_DATE = 'Expiration Date',
+  GREENHOUSE_GAS_TYPE = 'Greenhouse Gas Type (GHG)',
   GROSS_WEIGHT = 'Gross Weight',
   ISSUE_DATE = 'Issue Date',
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION = 'Local Waste Classification Description',

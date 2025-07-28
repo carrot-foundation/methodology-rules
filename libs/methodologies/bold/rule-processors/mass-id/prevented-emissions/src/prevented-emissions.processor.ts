@@ -38,6 +38,7 @@ import { is } from 'typia';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   calculatePreventedEmissions,
+  getGasTypeFromEvent,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
   throwIfMissing,
@@ -136,6 +137,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         massIdDocumentValue,
       ),
       resultContent: {
+        gasType: ruleSubject.gasType,
         preventedCo2e: preventedEmissions,
       },
       resultStatus: RuleOutputStatus.PASSED,
@@ -171,6 +173,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         documentYear: getYear(massIdDocument.externalCreatedAt),
       });
 
+    const gasType = getGasTypeFromEvent(lastEmissionAndCompostingMetricsEvent);
+
     if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
@@ -188,6 +192,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         lastEmissionAndCompostingMetricsEvent,
         EXCEEDING_EMISSION_COEFFICIENT,
       ),
+      gasType,
       massIdDocumentValue: massIdDocument.currentValue,
       wasteGeneratorBaseline,
       wasteSubtype: massIdDocument.subtype,

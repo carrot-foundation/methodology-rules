@@ -18,7 +18,7 @@ import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './pre
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { RESULT_COMMENTS } from './prevented-emissions.processor';
 
-const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
+const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
   DocumentEventAttributeName;
 const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
 const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINES } =
@@ -61,6 +61,7 @@ export const preventedEmissionsTestCases = [
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [
                   [EXCEEDING_EMISSION_COEFFICIENT, undefined],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),
           },
@@ -77,17 +78,61 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient: undefined,
+        gasType: 'Methane (CH4)',
         massIdDocumentValue: 1,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Accreditation document does not have the "${EXCEEDING_EMISSION_COEFFICIENT}" attribute`,
+    scenario: `the exceeding emission coefficient is undefined (missing)`,
+    subtype,
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [EXCEEDING_EMISSION_COEFFICIENT, null], // null is not non-zero positive
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+          },
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
+              metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+            }),
+          },
+        },
+      ],
+    ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
+    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultContent: {
+      ruleSubject: {
+        exceedingEmissionCoefficient: null,
+        gasType: 'Methane (CH4)',
+        massIdDocumentValue: 1,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the exceeding emission coefficient is null (non-positive)`,
     subtype,
   },
   {
@@ -103,6 +148,7 @@ export const preventedEmissionsTestCases = [
                     EXCEEDING_EMISSION_COEFFICIENT,
                     exceedingEmissionCoefficient,
                   ],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),
           },
@@ -128,9 +174,11 @@ export const preventedEmissionsTestCases = [
       massIdDocumentValue,
     ),
     resultContent: {
+      gasType: 'Methane (CH4)',
       preventedCo2e: expectedPreventedEmissions,
       ruleSubject: {
         exceedingEmissionCoefficient,
+        gasType: 'Methane (CH4)',
         massIdDocumentValue,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
@@ -153,6 +201,7 @@ export const preventedEmissionsTestCases = [
                     EXCEEDING_EMISSION_COEFFICIENT,
                     exceedingEmissionCoefficient,
                   ],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),
           },
@@ -177,14 +226,101 @@ export const preventedEmissionsTestCases = [
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient,
+        gasType: 'Methane (CH4)',
         massIdDocumentValue,
         wasteGeneratorBaseline: undefined,
         wasteSubtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${subtype}"`,
+    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${MassIdOrganicSubtype.DOMESTIC_SLUDGE}"`,
     subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [EXCEEDING_EMISSION_COEFFICIENT, 0], // 0 is not non-zero positive
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+          },
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
+              metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+            }),
+          },
+        },
+      ],
+    ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
+    massIdDocumentValue,
+    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultContent: {
+      ruleSubject: {
+        exceedingEmissionCoefficient: 0,
+        gasType: 'Methane (CH4)',
+        massIdDocumentValue,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the exceeding emission coefficient is zero (non-positive)`,
+    subtype,
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [EXCEEDING_EMISSION_COEFFICIENT, -0.5], // negative is not non-zero positive
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+          },
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
+              metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+            }),
+          },
+        },
+      ],
+    ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
+    massIdDocumentValue,
+    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultContent: {
+      ruleSubject: {
+        exceedingEmissionCoefficient: -0.5,
+        gasType: 'Methane (CH4)',
+        massIdDocumentValue,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the exceeding emission coefficient is negative`,
+    subtype,
   },
 ];
 
@@ -196,15 +332,81 @@ export const preventedEmissionsErrorTestCases = [
     documents: [
       {
         ...massIdDocument,
-        subtype: 'invalid' as MassIdOrganicSubtype,
+        subtype: 'INVALID_SUBTYPE' as MassIdOrganicSubtype,
       },
-      ...participantsAccreditationDocuments.values(),
+      ...[...participantsAccreditationDocuments.values()].map((document) => {
+        if (document.subtype === RECYCLER) {
+          return {
+            ...document,
+            externalEvents: [
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [
+                    EXCEEDING_EMISSION_COEFFICIENT,
+                    exceedingEmissionCoefficient,
+                  ],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+            ],
+          };
+        }
+
+        if (document.subtype === WASTE_GENERATOR) {
+          return {
+            ...document,
+            externalEvents: [
+              ...(document.externalEvents?.filter(
+                (event) => event.name !== RECYCLING_BASELINES.toString(),
+              ) ?? []),
+              stubBoldRecyclingBaselinesEvent({
+                metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+              }),
+            ],
+          };
+        }
+
+        return document;
+      }),
     ],
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document has an invalid subtype',
+  },
+  {
+    documents: [
+      massIdDocument,
+      ...[...participantsAccreditationDocuments.values()].map((document) => {
+        if (document.subtype === RECYCLER) {
+          return {
+            ...document,
+            externalEvents: [
+              ...(document.externalEvents?.filter(
+                (event) =>
+                  event.name !== EMISSION_AND_COMPOSTING_METRICS.toString(),
+              ) ?? []),
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [
+                    EXCEEDING_EMISSION_COEFFICIENT,
+                    exceedingEmissionCoefficient,
+                  ],
+                ],
+              }),
+            ],
+          };
+        }
+
+        return document;
+      }),
+    ],
+    massIdAuditDocument,
+    resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario:
+      'the Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
   },
   {
     documents: [...participantsAccreditationDocuments.values()],
@@ -224,8 +426,33 @@ export const preventedEmissionsErrorTestCases = [
   {
     documents: [
       massIdDocument,
-      ...participantsAccreditationDocuments.values(),
-    ].filter((document) => document.subtype !== WASTE_GENERATOR),
+      ...[...participantsAccreditationDocuments.values()]
+        .filter((document) => document.subtype !== WASTE_GENERATOR)
+        .map((document) => {
+          if (document.subtype === RECYCLER) {
+            return {
+              ...document,
+              externalEvents: [
+                ...(document.externalEvents?.filter(
+                  (event) =>
+                    event.name !== EMISSION_AND_COMPOSTING_METRICS.toString(),
+                ) ?? []),
+                stubBoldEmissionAndCompostingMetricsEvent({
+                  metadataAttributes: [
+                    [
+                      EXCEEDING_EMISSION_COEFFICIENT,
+                      exceedingEmissionCoefficient,
+                    ],
+                    [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                  ],
+                }),
+              ],
+            };
+          }
+
+          return document;
+        }),
+    ],
     massIdAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE
@@ -236,15 +463,31 @@ export const preventedEmissionsErrorTestCases = [
   {
     documents: [
       massIdDocument,
-      ...[...participantsAccreditationDocuments.values()].filter(
-        (document) => document.subtype !== WASTE_GENERATOR,
-      ),
+      ...[...participantsAccreditationDocuments.values()]
+        .filter((document) => document.subtype !== WASTE_GENERATOR)
+        .map((document) => {
+          if (document.subtype === RECYCLER) {
+            return {
+              ...document,
+              externalEvents: [
+                stubBoldEmissionAndCompostingMetricsEvent({
+                  metadataAttributes: [
+                    [
+                      EXCEEDING_EMISSION_COEFFICIENT,
+                      exceedingEmissionCoefficient,
+                    ],
+                    [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                  ],
+                }),
+              ],
+            };
+          }
+
+          return document;
+        }),
       {
         ...wasteGeneratorVerificationDocument,
         externalEvents: [
-          ...(wasteGeneratorVerificationDocument.externalEvents?.filter(
-            (event) => event.name !== RECYCLING_BASELINES.toString(),
-          ) ?? []),
           stubBoldRecyclingBaselinesEvent({
             metadataAttributes: [[BASELINES, undefined]],
           }),
