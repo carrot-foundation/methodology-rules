@@ -225,4 +225,21 @@ export const rewardsDistributionProcessorErrors = [
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document has an unexpected subtype`,
   },
+  {
+    documents: [
+      massIdDocument,
+      {
+        ...methodologyDocument,
+        externalEvents: methodologyDocument?.externalEvents?.map((event) =>
+          event.name === String(DocumentEventName.ACTOR)
+            ? { ...event, address: undefined }
+            : event,
+        ),
+      } as Document,
+    ],
+    massIdAuditDocument,
+    resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${METHODOLOGY} document does not have the required address in actors`,
+  },
 ];

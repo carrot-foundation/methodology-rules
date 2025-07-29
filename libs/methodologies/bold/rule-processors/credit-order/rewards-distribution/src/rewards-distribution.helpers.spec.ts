@@ -267,6 +267,7 @@ describe('Rewards Distribution Helpers', () => {
 
       actors.set('OTHER-1', {
         actorType: RewardsDistributionActorType.HAULER,
+        address: { id: '1' },
         amount: '1',
         participant: { id: '1', name: 'A' },
         percentage: '1',
@@ -312,11 +313,13 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorsData[0]!.actorType,
+                  address: actorsData[0]!.address,
                   massIdPercentage: '20.1234567892',
                   participant: actorsData[0]!.participant,
                 },
                 {
                   actorType: actorsData[1]!.actorType,
+                  address: actorsData[1]!.address,
                   massIdPercentage: '79.8765432108',
                   participant: actorsData[1]!.participant,
                 },
@@ -330,11 +333,13 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorsData[2]!.actorType,
+                  address: actorsData[2]!.address,
                   massIdPercentage: '32.1238731924',
                   participant: actorsData[2]!.participant,
                 },
                 {
                   actorType: actorsData[3]!.actorType,
+                  address: actorsData[3]!.address,
                   massIdPercentage: '67.8761268076',
                   participant: actorsData[3]!.participant,
                 },
@@ -370,9 +375,15 @@ describe('Rewards Distribution Helpers', () => {
         id: faker.string.uuid(),
         name: faker.company.name(),
       };
+      const address1 = {
+        id: faker.string.uuid(),
+      };
       const participant2 = {
         id: faker.string.uuid(),
         name: faker.company.name(),
+      };
+      const address2 = {
+        id: faker.string.uuid(),
       };
 
       const actorType1 = RewardsDistributionActorType.WASTE_GENERATOR;
@@ -387,11 +398,13 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorType1,
+                  address: address1,
                   massIdPercentage: '40',
                   participant: participant1,
                 },
                 {
                   actorType: actorType2,
+                  address: address2,
                   massIdPercentage: '60',
                   participant: participant2,
                 },
@@ -405,11 +418,13 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorType1,
+                  address: address1,
                   massIdPercentage: '30',
                   participant: participant1,
                 },
                 {
                   actorType: actorType2,
+                  address: address2,
                   massIdPercentage: '70',
                   participant: participant2,
                 },
@@ -477,7 +492,9 @@ describe('Rewards Distribution Helpers', () => {
       );
 
       expect(actors.get(participantType1)?.participant).toEqual(participant1);
+      expect(actors.get(participantType1)?.address).toEqual(address1);
       expect(actors.get(participantType2)?.participant).toEqual(participant2);
+      expect(actors.get(participantType2)?.address).toEqual(address2);
 
       expect(actors.get(participantType1)?.actorType).toEqual(actorType1);
       expect(actors.get(participantType2)?.actorType).toEqual(actorType2);

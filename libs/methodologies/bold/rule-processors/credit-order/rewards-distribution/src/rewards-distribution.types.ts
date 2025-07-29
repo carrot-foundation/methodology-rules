@@ -1,5 +1,6 @@
 import type {
   CertificateRewardDistributionOutput,
+  RewardActorAddress,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type {
@@ -39,6 +40,7 @@ export interface RewardsDistribution {
 
 export interface RewardsDistributionActor {
   actorType: MethodologyActorType.REMAINDER | RewardsDistributionActorType;
+  address: RewardActorAddress;
   amount: NonEmptyString;
   participant: Participant;
   percentage: NonEmptyString;

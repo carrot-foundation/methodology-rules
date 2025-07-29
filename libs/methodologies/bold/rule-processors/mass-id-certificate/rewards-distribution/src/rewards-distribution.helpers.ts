@@ -16,6 +16,7 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
   type MassIdReward,
+  RewardActorAddress,
   type RewardActorParticipant,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -46,24 +47,28 @@ export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
 export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
-  participants.map(({ actorType, massIdPercentage, participant }) => ({
+  participants.map(({ actorType, address, massIdPercentage, participant }) => ({
     actorType,
+    address,
     massIdPercentage: formatPercentage(massIdPercentage),
     participant,
   }));
 
 export const mapActorReward = ({
   actorType,
+  address,
   massIdDocument,
   massIdPercentage,
   participant,
 }: {
   actorType: RewardsDistributionActorType;
+  address: RewardActorAddress;
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
 }): ActorReward => ({
   actorType,
+  address,
   massIdDocument,
   massIdPercentage,
   participant,
@@ -79,19 +84,31 @@ export const getActorsByType = ({
   methodologyDocument: Document;
 }): RewardsDistributionActor[] => {
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
-    const methodologyParticipant = methodologyDocument.externalEvents?.find(
+    const actorEvent = methodologyDocument.externalEvents?.find(
       and(
         eventNameIsAnyOf([DocumentEventName.ACTOR]),
         eventLabelIsAnyOf([actorType]),
       ),
-    )?.participant;
+    );
+
+    const methodologyParticipant = actorEvent?.participant;
+    const methodologyAddress = actorEvent?.address;
 
     if (isNil(methodologyParticipant)) {
       throw new Error(`${actorType} not found in the methodology document`);
     }
 
+    if (isNil(methodologyAddress)) {
+      throw new Error(
+        `${actorType} address not found in the methodology document`,
+      );
+    }
+
     return [
       {
+        address: {
+          id: methodologyAddress.id,
+        },
         participant: {
           id: methodologyParticipant.id,
           name: methodologyParticipant.name,
