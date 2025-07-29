@@ -150,7 +150,8 @@ export const aggregateMassIdCertificatesRewards = (
     resultContent: { massIdRewards },
   } of resultContentsWithMassIdCertificateValue) {
     for (const massIdReward of massIdRewards) {
-      const { actorType, massIdPercentage, participant } = massIdReward;
+      const { actorType, massIdPercentage, participant, address } =
+        massIdReward;
       const participantKey = getAggregateParticipantKey(
         actorType,
         participant.id,
@@ -174,6 +175,7 @@ export const aggregateMassIdCertificatesRewards = (
           amount: new BigNumber(amount),
           totalAmount: creditTotal,
         }),
+        address,
       });
     }
   }

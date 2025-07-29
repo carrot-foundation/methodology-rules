@@ -1,5 +1,6 @@
 import type {
   CertificateRewardDistributionOutput,
+  RewardActorAddress,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type {
@@ -42,6 +43,7 @@ export interface RewardsDistributionActor {
   amount: NonEmptyString;
   participant: Participant;
   percentage: NonEmptyString;
+  address: RewardActorAddress;
 }
 
 export interface RuleSubject {

@@ -140,6 +140,9 @@ const createStandardRewardsDistribution = (
       id: participant.id,
       name: participant.name,
     },
+    address: {
+      id: faker.string.uuid(),
+    },
   })) as unknown as NonEmptyArray<MassIdReward>,
 });
 
@@ -164,6 +167,9 @@ const createMethodologyActorReward = (
       id,
       name,
     },
+    address: {
+      id: faker.string.uuid(),
+    },
   };
 };
 
@@ -185,6 +191,9 @@ const createMassIdActorReward = (
     participant: {
       id,
       name,
+    },
+    address: {
+      id: faker.string.uuid(),
     },
   };
 };
@@ -218,6 +227,9 @@ const createMultiHaulerRewardsDistribution = (
       actorType: RewardsDistributionActorType.HAULER,
       massIdPercentage: percentage,
       participant: { id, name },
+      address: {
+        id: faker.string.uuid(),
+      },
     }));
 
   const massIdRewards = [

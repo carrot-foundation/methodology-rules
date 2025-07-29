@@ -38,6 +38,11 @@ export interface MassIdReward {
   // TODO: update with custom tag to validate BigNumber string
   massIdPercentage: NonEmptyString;
   participant: RewardActorParticipant;
+  address: RewardActorAddress;
+}
+
+export interface RewardActorAddress {
+  id: NonEmptyString;
 }
 
 export type RewardActorParticipant = Pick<

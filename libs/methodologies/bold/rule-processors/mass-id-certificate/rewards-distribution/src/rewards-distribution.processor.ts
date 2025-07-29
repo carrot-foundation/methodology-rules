@@ -222,12 +222,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           }).div(actorsByType.length);
 
           result.push(
-            ...actorsByType.map(({ participant, type }) =>
+            ...actorsByType.map(({ participant, type, address }) =>
               mapActorReward({
                 actorType: type,
                 massIdDocument,
                 massIdPercentage,
                 participant,
+                address,
               }),
             ),
           );
@@ -263,6 +264,9 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           participant: {
             id: event.participant.id,
             name: event.participant.name,
+          },
+          address: {
+            id: event.address.id,
           },
           type: actorType,
         });

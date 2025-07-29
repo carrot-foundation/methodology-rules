@@ -16,6 +16,7 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
   type MassIdReward,
+  RewardActorAddress,
   type RewardActorParticipant,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -46,10 +47,11 @@ export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
 export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
-  participants.map(({ actorType, massIdPercentage, participant }) => ({
+  participants.map(({ actorType, massIdPercentage, participant, address }) => ({
     actorType,
     massIdPercentage: formatPercentage(massIdPercentage),
     participant,
+    address,
   }));
 
 export const mapActorReward = ({
@@ -57,16 +59,19 @@ export const mapActorReward = ({
   massIdDocument,
   massIdPercentage,
   participant,
+  address,
 }: {
   actorType: RewardsDistributionActorType;
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
+  address: RewardActorAddress;
 }): ActorReward => ({
   actorType,
   massIdDocument,
   massIdPercentage,
   participant,
+  address,
 });
 
 export const getActorsByType = ({
@@ -79,15 +84,25 @@ export const getActorsByType = ({
   methodologyDocument: Document;
 }): RewardsDistributionActor[] => {
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
-    const methodologyParticipant = methodologyDocument.externalEvents?.find(
+    const actorEvent = methodologyDocument.externalEvents?.find(
       and(
         eventNameIsAnyOf([DocumentEventName.ACTOR]),
         eventLabelIsAnyOf([actorType]),
       ),
-    )?.participant;
+    );
+
+    const methodologyParticipant = actorEvent?.participant;
+    const methodologyAddress = actorEvent?.address;
 
     if (isNil(methodologyParticipant)) {
       throw new Error(`${actorType} not found in the methodology document`);
+    }
+
+    if (isNil(methodologyAddress)) {
+      console.log('TEEEST', actorEvent?.address);
+      throw new Error(
+        `${actorType} address not found in the methodology document`,
+      );
     }
 
     return [
@@ -95,6 +110,9 @@ export const getActorsByType = ({
         participant: {
           id: methodologyParticipant.id,
           name: methodologyParticipant.name,
+        },
+        address: {
+          id: methodologyAddress.id,
         },
         type: actorType,
       },
