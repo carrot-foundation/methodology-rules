@@ -267,10 +267,10 @@ describe('Rewards Distribution Helpers', () => {
 
       actors.set('OTHER-1', {
         actorType: RewardsDistributionActorType.HAULER,
+        address: { id: '1' },
         amount: '1',
         participant: { id: '1', name: 'A' },
         percentage: '1',
-        address: { id: '1' },
       });
       const remainder = {
         amount: new BigNumber(5),
@@ -313,15 +313,15 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorsData[0]!.actorType,
+                  address: actorsData[0]!.address,
                   massIdPercentage: '20.1234567892',
                   participant: actorsData[0]!.participant,
-                  address: actorsData[0]!.address,
                 },
                 {
                   actorType: actorsData[1]!.actorType,
+                  address: actorsData[1]!.address,
                   massIdPercentage: '79.8765432108',
                   participant: actorsData[1]!.participant,
-                  address: actorsData[1]!.address,
                 },
               ],
             },
@@ -333,15 +333,15 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorsData[2]!.actorType,
+                  address: actorsData[2]!.address,
                   massIdPercentage: '32.1238731924',
                   participant: actorsData[2]!.participant,
-                  address: actorsData[2]!.address,
                 },
                 {
                   actorType: actorsData[3]!.actorType,
+                  address: actorsData[3]!.address,
                   massIdPercentage: '67.8761268076',
                   participant: actorsData[3]!.participant,
-                  address: actorsData[3]!.address,
                 },
               ],
             },
@@ -398,15 +398,15 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorType1,
+                  address: address1,
                   massIdPercentage: '40',
                   participant: participant1,
-                  address: address1,
                 },
                 {
                   actorType: actorType2,
+                  address: address2,
                   massIdPercentage: '60',
                   participant: participant2,
-                  address: address2,
                 },
               ],
             },
@@ -418,15 +418,15 @@ describe('Rewards Distribution Helpers', () => {
               massIdRewards: [
                 {
                   actorType: actorType1,
+                  address: address1,
                   massIdPercentage: '30',
                   participant: participant1,
-                  address: address1,
                 },
                 {
                   actorType: actorType2,
+                  address: address2,
                   massIdPercentage: '70',
                   participant: participant2,
-                  address: address2,
                 },
               ],
             },

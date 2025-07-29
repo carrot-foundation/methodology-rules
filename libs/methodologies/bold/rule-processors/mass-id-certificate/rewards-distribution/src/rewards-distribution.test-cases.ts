@@ -227,15 +227,14 @@ export const rewardsDistributionProcessorErrors = [
   },
   {
     documents: [
-      massIdDocument as Document,
+      massIdDocument,
       {
         ...methodologyDocument,
-        externalEvents:
-          methodologyDocument?.externalEvents?.map((event) =>
-            event.name === DocumentEventName.ACTOR
-              ? { ...event, address: undefined }
-              : event,
-          ) ?? [],
+        externalEvents: methodologyDocument?.externalEvents?.map((event) =>
+          event.name === String(DocumentEventName.ACTOR)
+            ? { ...event, address: undefined }
+            : event,
+        ),
       } as Document,
     ],
     massIdAuditDocument,

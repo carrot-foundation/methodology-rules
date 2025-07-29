@@ -17,10 +17,10 @@ export interface ActorMassIdPercentageInputDto {
 
 export interface ActorReward {
   actorType: RewardsDistributionActorType;
+  address: RewardActorAddress;
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
-  address: RewardActorAddress;
 }
 
 export type RewardsDistribution = Record<

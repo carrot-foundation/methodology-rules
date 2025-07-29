@@ -35,10 +35,10 @@ export type CertificateRewardDistributionOutput =
 
 export interface MassIdReward {
   actorType: RewardsDistributionActorType;
+  address: RewardActorAddress;
   // TODO: update with custom tag to validate BigNumber string
   massIdPercentage: NonEmptyString;
   participant: RewardActorParticipant;
-  address: RewardActorAddress;
 }
 
 export interface RewardActorAddress {

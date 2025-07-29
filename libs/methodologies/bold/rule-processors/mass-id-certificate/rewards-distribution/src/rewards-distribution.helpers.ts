@@ -47,31 +47,31 @@ export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
 export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
-  participants.map(({ actorType, massIdPercentage, participant, address }) => ({
+  participants.map(({ actorType, address, massIdPercentage, participant }) => ({
     actorType,
+    address,
     massIdPercentage: formatPercentage(massIdPercentage),
     participant,
-    address,
   }));
 
 export const mapActorReward = ({
   actorType,
+  address,
   massIdDocument,
   massIdPercentage,
   participant,
-  address,
 }: {
   actorType: RewardsDistributionActorType;
+  address: RewardActorAddress;
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
-  address: RewardActorAddress;
 }): ActorReward => ({
   actorType,
+  address,
   massIdDocument,
   massIdPercentage,
   participant,
-  address,
 });
 
 export const getActorsByType = ({
@@ -99,7 +99,6 @@ export const getActorsByType = ({
     }
 
     if (isNil(methodologyAddress)) {
-      console.log('TEEEST', actorEvent?.address);
       throw new Error(
         `${actorType} address not found in the methodology document`,
       );
@@ -107,12 +106,12 @@ export const getActorsByType = ({
 
     return [
       {
+        address: {
+          id: methodologyAddress.id,
+        },
         participant: {
           id: methodologyParticipant.id,
           name: methodologyParticipant.name,
-        },
-        address: {
-          id: methodologyAddress.id,
         },
         type: actorType,
       },

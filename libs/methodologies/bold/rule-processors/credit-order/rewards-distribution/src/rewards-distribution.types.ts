@@ -40,10 +40,10 @@ export interface RewardsDistribution {
 
 export interface RewardsDistributionActor {
   actorType: MethodologyActorType.REMAINDER | RewardsDistributionActorType;
+  address: RewardActorAddress;
   amount: NonEmptyString;
   participant: Participant;
   percentage: NonEmptyString;
-  address: RewardActorAddress;
 }
 
 export interface RuleSubject {

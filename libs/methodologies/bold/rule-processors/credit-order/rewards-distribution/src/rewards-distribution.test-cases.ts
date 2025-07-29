@@ -135,13 +135,13 @@ const createStandardRewardsDistribution = (
     ...methodologyActorParticipants.entries(),
   ].map(([actorType, participant]) => ({
     actorType,
+    address: {
+      id: faker.string.uuid(),
+    },
     massIdPercentage: STANDARD_REWARDS_DISTRIBUTION[actorType],
     participant: {
       id: participant.id,
       name: participant.name,
-    },
-    address: {
-      id: faker.string.uuid(),
     },
   })) as unknown as NonEmptyArray<MassIdReward>,
 });
@@ -162,13 +162,13 @@ const createMethodologyActorReward = (
 
   return {
     actorType,
+    address: {
+      id: faker.string.uuid(),
+    },
     massIdPercentage: percentage,
     participant: {
       id,
       name,
-    },
-    address: {
-      id: faker.string.uuid(),
     },
   };
 };
@@ -187,13 +187,13 @@ const createMassIdActorReward = (
 
   return {
     actorType,
+    address: {
+      id: faker.string.uuid(),
+    },
     massIdPercentage: percentage,
     participant: {
       id,
       name,
-    },
-    address: {
-      id: faker.string.uuid(),
     },
   };
 };
@@ -225,11 +225,11 @@ const createMultiHaulerRewardsDistribution = (
   const createHaulerRewards = () =>
     haulerParticipants.map(({ id, name, percentage }) => ({
       actorType: RewardsDistributionActorType.HAULER,
-      massIdPercentage: percentage,
-      participant: { id, name },
       address: {
         id: faker.string.uuid(),
       },
+      massIdPercentage: percentage,
+      participant: { id, name },
     }));
 
   const massIdRewards = [
