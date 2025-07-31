@@ -40,7 +40,7 @@ describe('PreventedEmissionsProcessor E2E', () => {
         .createMassIdDocuments({
           partialDocument: {
             currentValue: massIdDocumentValue as number,
-            ...(externalCreatedAt && { externalCreatedAt }),
+            externalCreatedAt,
             subtype,
           },
         })
