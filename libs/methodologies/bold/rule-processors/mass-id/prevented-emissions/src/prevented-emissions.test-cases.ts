@@ -102,7 +102,7 @@ export const preventedEmissionsTestCases = [
             [EMISSION_AND_COMPOSTING_METRICS]:
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [
-                  [EXCEEDING_EMISSION_COEFFICIENT, null], // null is not non-zero positive
+                  [EXCEEDING_EMISSION_COEFFICIENT, null],
                   [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),
@@ -245,7 +245,7 @@ export const preventedEmissionsTestCases = [
             [EMISSION_AND_COMPOSTING_METRICS]:
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [
-                  [EXCEEDING_EMISSION_COEFFICIENT, 0], // 0 is not non-zero positive
+                  [EXCEEDING_EMISSION_COEFFICIENT, 0],
                   [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),
@@ -288,7 +288,7 @@ export const preventedEmissionsTestCases = [
             [EMISSION_AND_COMPOSTING_METRICS]:
               stubBoldEmissionAndCompostingMetricsEvent({
                 metadataAttributes: [
-                  [EXCEEDING_EMISSION_COEFFICIENT, -0.5], // negative is not non-zero positive
+                  [EXCEEDING_EMISSION_COEFFICIENT, -0.5],
                   [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
                 ],
               }),

@@ -65,7 +65,7 @@ describe('PreventedEmissionsHelpers', () => {
         massIdDocumentValue,
       );
 
-      expect(result).toBeCloseTo(30_000, 10); // Use toBeCloseTo for floating point
+      expect(result).toBeCloseTo(30_000, 10);
     });
 
     it('should calculate prevented emissions correctly with zero coefficient', () => {
@@ -79,7 +79,7 @@ describe('PreventedEmissionsHelpers', () => {
         massIdDocumentValue,
       );
 
-      expect(result).toBe(50_000); // (1 - 0) * 1000 * 50
+      expect(result).toBe(50_000);
     });
 
     it('should handle fractional values correctly', () => {
@@ -93,7 +93,7 @@ describe('PreventedEmissionsHelpers', () => {
         massIdDocumentValue,
       );
 
-      expect(result).toBe(6303.9375); // (1 - 0.25) * 800.5 * 10.5
+      expect(result).toBe(6303.9375);
     });
   });
 
@@ -216,7 +216,7 @@ describe('PreventedEmissionsHelpers', () => {
 
     it('should throw an error when recycling baselines event is not found', () => {
       const document = stubDocument({
-        externalEvents: [], // No events
+        externalEvents: [],
       });
 
       expect(() =>
