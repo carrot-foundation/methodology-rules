@@ -23,6 +23,8 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
   DocumentEventAttributeName;
 
 describe('PreventedEmissionsHelpers', () => {
+  const processorErrors = new PreventedEmissionsProcessorErrors();
+
   describe('getPreventedEmissionsFactor', () => {
     it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
       const result = getPreventedEmissionsFactor(
@@ -96,8 +98,6 @@ describe('PreventedEmissionsHelpers', () => {
   });
 
   describe('getWasteGeneratorBaselineByWasteSubtype', () => {
-    const processorErrors = new PreventedEmissionsProcessorErrors();
-
     it('should return the baseline for the specified waste subtype', () => {
       const document = stubDocument({
         externalEvents: [
@@ -232,7 +232,6 @@ describe('PreventedEmissionsHelpers', () => {
   });
 
   describe('throwIfMissing', () => {
-    const processorErrors = new PreventedEmissionsProcessorErrors();
     const errorMessage = 'Test error message';
 
     it('should not throw when value is defined', () => {
@@ -291,7 +290,7 @@ describe('PreventedEmissionsHelpers', () => {
       });
 
       expect(() => getGasTypeFromEvent(event)).toThrow(
-        'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
+        processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       );
     });
 
@@ -304,7 +303,7 @@ describe('PreventedEmissionsHelpers', () => {
       });
 
       expect(() => getGasTypeFromEvent(event)).toThrow(
-        'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
+        processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       );
     });
 
@@ -317,13 +316,13 @@ describe('PreventedEmissionsHelpers', () => {
       });
 
       expect(() => getGasTypeFromEvent(event)).toThrow(
-        'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
+        processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       );
     });
 
     it('should throw an error when the event is undefined', () => {
       expect(() => getGasTypeFromEvent(undefined)).toThrow(
-        'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
+        processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       );
     });
   });
