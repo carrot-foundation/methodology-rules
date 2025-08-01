@@ -35,7 +35,7 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
           DocumentEventAttributeName.REFERENCE_YEAR,
         );
 
-        return referenceYear === lastDocumentYearYear;
+        return referenceYear?.toString() === lastDocumentYearYear.toString();
       }
 
       return false;
