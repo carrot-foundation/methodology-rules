@@ -5,14 +5,8 @@ import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loade
 import {
   getOrUndefined,
   isNil,
-  isNonEmptyArray,
   isNonEmptyString,
-  isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
-import {
-  getEventAttributeValue,
-  getLastYearEmissionAndCompostingMetricsEvent,
-} from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -21,11 +15,9 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -36,17 +28,30 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
-import { getYear } from 'date-fns';
 
 import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
+import {
+  calculateSortingValues,
+  findSortingEvents,
+  getSortingDescription,
+  getSortingFactor,
+  getValidatedEventValues,
+  getValidatedExternalEvents,
+  getValidatedWeightAttributes,
+  type ValidationError,
+} from './mass-id-sorting.helpers';
 
-const { SORTING } = DocumentEventName;
-const { DESCRIPTION, SORTING_FACTOR } = DocumentEventAttributeName;
+const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
+  DocumentEventAttributeName;
 const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
+  DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
+    `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × (1 - ${SORTING_FACTOR}) (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
   FAILED: (sortingValueCalculationDifference: number) =>
     `The calculated sorting value differs from the actual value by ${sortingValueCalculationDifference} kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
+  GROSS_WEIGHT_MISMATCH: (gross: number, before: number) =>
+    `The "${GROSS_WEIGHT}" (${gross} kg) must match the previous event value (${before} kg) within ${SORTING_TOLERANCE} kg.`,
   MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
   PASSED: (sortingValueCalculationDifference: number) =>
     `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
@@ -59,6 +64,8 @@ interface DocumentPair {
 
 interface SortingData {
   calculatedSortingValue: number;
+  deductedWeight: number;
+  grossWeight: number;
   sortingDescription:
     | MethodologyDocumentEventAttributeValue
     | string
@@ -95,6 +102,36 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
+        resultStatus: RuleOutputStatus.FAILED,
+      };
+    }
+
+    const expectedDeducted =
+      sortingData.grossWeight * (1 - Number(sortingData.sortingFactor));
+    const deductedDiff = Math.abs(
+      sortingData.deductedWeight - expectedDeducted,
+    );
+
+    if (deductedDiff > SORTING_TOLERANCE) {
+      return {
+        resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
+          sortingData.deductedWeight,
+          Number(expectedDeducted.toFixed(3)),
+        ),
+        resultStatus: RuleOutputStatus.FAILED,
+      };
+    }
+
+    const grossMatchesPrevious =
+      Math.abs(sortingData.grossWeight - sortingData.valueBeforeSorting) <=
+      SORTING_TOLERANCE;
+
+    if (!grossMatchesPrevious) {
+      return {
+        resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
+          sortingData.grossWeight,
+          sortingData.valueBeforeSorting,
+        ),
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -174,75 +211,83 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
   private extractSortingData(documents: DocumentPair): SortingData {
     const { massIdDocument, recyclerAccreditationDocument } = documents;
 
-    this.validateOrThrow(
-      !isNonEmptyArray(massIdDocument.externalEvents),
+    const externalEvents = this.getHelperResult(
+      getValidatedExternalEvents(massIdDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
     );
 
-    const externalEvents = massIdDocument.externalEvents!;
-
-    const sortingEventIndex = externalEvents.findIndex(
-      eventNameIsAnyOf([SORTING]),
-    );
-
-    this.validateOrThrow(
-      sortingEventIndex === -1,
+    const { eventBeforeSorting, sortingEvent } = this.getHelperResult(
+      findSortingEvents(externalEvents),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
     );
 
-    const sortingEvent = externalEvents[sortingEventIndex];
-    const eventBeforeSorting = externalEvents[sortingEventIndex - 1];
-
-    const valueBeforeSorting = eventBeforeSorting?.value;
-    const valueAfterSorting = sortingEvent?.value;
-    const emissionAndCompostingMetricsEvent =
-      getLastYearEmissionAndCompostingMetricsEvent({
-        documentWithEmissionAndCompostingMetricsEvent:
-          recyclerAccreditationDocument,
-        documentYear: getYear(massIdDocument.externalCreatedAt),
-      });
-    const sortingFactor = getEventAttributeValue(
-      emissionAndCompostingMetricsEvent,
-      SORTING_FACTOR,
-    );
-    const sortingDescription = getEventAttributeValue(
-      sortingEvent,
-      DESCRIPTION,
-    );
-
-    this.validateOrThrow(
-      !isNonZeroPositive(sortingFactor),
+    const sortingFactor = this.getHelperResult(
+      getSortingFactor(recyclerAccreditationDocument, massIdDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
     );
 
-    this.validateOrThrow(
-      !isNonZeroPositive(valueBeforeSorting),
-      this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
-        valueBeforeSorting,
-      ),
+    const eventValues = this.getHelperResult(
+      getValidatedEventValues(eventBeforeSorting, sortingEvent),
+      (error: ValidationError) =>
+        error.message.includes('before')
+          ? this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
+              eventBeforeSorting?.value,
+            )
+          : this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(
+              sortingEvent.value,
+            ),
     );
 
-    this.validateOrThrow(
-      !isNonZeroPositive(valueAfterSorting),
-      this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(
-        valueAfterSorting,
-      ),
+    const weightAttributes = this.getHelperResult(
+      getValidatedWeightAttributes(sortingEvent),
+      (error: ValidationError) => {
+        if (error.message.includes('gross')) {
+          return error.message.includes('format')
+            ? this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT
+            : this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
+                error.message,
+              );
+        }
+
+        return error.message.includes('format')
+          ? this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT
+          : this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
+              error.message,
+            );
+      },
     );
 
-    const calculatedSortingValue =
-      Number(valueBeforeSorting) * Number(sortingFactor);
-    const sortingValueCalculationDifference = Math.abs(
-      calculatedSortingValue - Number(valueAfterSorting),
+    const sortingDescription = getSortingDescription(sortingEvent);
+    const calculations = calculateSortingValues(
+      weightAttributes,
+      eventValues.valueAfterSorting,
     );
 
     return {
-      calculatedSortingValue,
+      ...calculations,
       sortingDescription,
-      sortingFactor: Number(sortingFactor),
-      sortingValueCalculationDifference,
-      valueAfterSorting: Number(valueAfterSorting),
-      valueBeforeSorting: Number(valueBeforeSorting),
+      sortingFactor,
+      valueAfterSorting: eventValues.valueAfterSorting,
+      valueBeforeSorting: eventValues.valueBeforeSorting,
     };
+  }
+
+  private getHelperResult<T>(
+    result: T | ValidationError,
+    errorMessage: ((error: ValidationError) => string) | string,
+  ): T {
+    if (this.isValidationError(result)) {
+      const message =
+        typeof errorMessage === 'string' ? errorMessage : errorMessage(result);
+
+      throw this.processorErrors.getKnownError(message);
+    }
+
+    return result;
+  }
+
+  private isValidationError(result: unknown): result is ValidationError {
+    return typeof result === 'object' && result !== null && 'isError' in result;
   }
 
   private validateOrThrow(condition: boolean, errorMessage: string): void {
