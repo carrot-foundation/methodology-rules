@@ -7,6 +7,7 @@ import {
   isNil,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeByName } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -17,6 +18,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
+  type DocumentEvent,
   DocumentEventAttributeName,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -245,14 +247,14 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
           return error.message.includes('format')
             ? this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT
             : this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
-                error.message,
+                this.extractValueFromSortingEvent(sortingEvent, GROSS_WEIGHT),
               );
         }
 
         return error.message.includes('format')
           ? this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT
           : this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
-              error.message,
+              this.extractValueFromSortingEvent(sortingEvent, DEDUCTED_WEIGHT),
             );
       },
     );
@@ -270,6 +272,15 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       valueAfterSorting: eventValues.valueAfterSorting,
       valueBeforeSorting: eventValues.valueBeforeSorting,
     };
+  }
+
+  private extractValueFromSortingEvent(
+    sortingEvent: DocumentEvent,
+    attributeName: string,
+  ): unknown {
+    const attribute = getEventAttributeByName(sortingEvent, attributeName);
+
+    return attribute?.value;
   }
 
   private getHelperResult<T>(

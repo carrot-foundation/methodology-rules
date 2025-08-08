@@ -453,9 +453,7 @@ export const massIdSortingErrorTestCases = [
       }),
       ...participantsAccreditationDocuments.values(),
     ],
-    processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
-      'Invalid gross weight: 0',
-    ),
+    processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(0),
   ),
   createErrorTestCase(
     'the deducted weight is not greater than 0',
@@ -474,9 +472,7 @@ export const massIdSortingErrorTestCases = [
       }),
       ...participantsAccreditationDocuments.values(),
     ],
-    processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
-      'Invalid deducted weight: 0',
-    ),
+    processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(0),
   ),
   createErrorTestCase(
     'the gross weight has valid value but invalid format',
