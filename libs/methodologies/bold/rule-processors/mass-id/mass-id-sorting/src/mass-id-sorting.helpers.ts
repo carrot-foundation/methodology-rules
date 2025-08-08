@@ -120,7 +120,14 @@ export const getValidatedEventValues = (
   eventBeforeSorting: DocumentEvent | undefined,
   sortingEvent: DocumentEvent,
 ): EventValues | ValidationError => {
-  const valueBeforeSorting = eventBeforeSorting?.value;
+  if (!eventBeforeSorting) {
+    return {
+      isError: true,
+      message: 'Event before sorting is undefined',
+    };
+  }
+
+  const valueBeforeSorting = eventBeforeSorting.value;
   const valueAfterSorting = sortingEvent.value;
 
   if (!isNonZeroPositive(valueBeforeSorting)) {
@@ -137,9 +144,10 @@ export const getValidatedEventValues = (
     };
   }
 
+  // isNonZeroPositive acts as a type guard, so no casting needed
   return {
-    valueAfterSorting: valueAfterSorting as number,
-    valueBeforeSorting: valueBeforeSorting as number,
+    valueAfterSorting,
+    valueBeforeSorting,
   };
 };
 

@@ -1,7 +1,13 @@
-import { type DocumentEventAttribute } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  DocumentEvent,
+  type DocumentEventAttribute,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
-import { validateWeightAttribute } from './mass-id-sorting.helpers';
+import {
+  getValidatedEventValues,
+  validateWeightAttribute,
+} from './mass-id-sorting.helpers';
 
 describe('mass-id-sorting helpers', () => {
   describe('validateWeightAttribute', () => {
@@ -32,6 +38,21 @@ describe('mass-id-sorting helpers', () => {
       const result = validateWeightAttribute(attribute, 'test weight');
 
       expect(result).toBe(null);
+    });
+  });
+
+  describe('getValidatedEventValues', () => {
+    it('should return error when eventBeforeSorting is undefined', () => {
+      const sortingEvent = {
+        value: 10,
+      } as DocumentEvent;
+
+      const result = getValidatedEventValues(undefined, sortingEvent);
+
+      expect(result).toEqual({
+        isError: true,
+        message: 'Event before sorting is undefined',
+      });
     });
   });
 });
