@@ -254,12 +254,12 @@ export const massIdSortingTestCases = [
     massIdEvents: createMassIdEvents(
       valueBeforeSorting,
       grossWeight,
-      deductedWeight + 0.2,
+      Math.min(deductedWeight + 0.15, grossWeight - 0.01), // Ensure it's still less than grossWeight but different enough
       calculatedSortingValue,
     ),
     partialDocument: massIdDocument,
     resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
-      deductedWeight + 0.2,
+      Math.min(deductedWeight + 0.15, grossWeight - 0.01),
       Number((grossWeight * (1 - sortingFactor)).toFixed(3)),
     ),
     resultStatus: RuleOutputStatus.FAILED,
@@ -521,5 +521,24 @@ export const massIdSortingErrorTestCases = [
       ...participantsAccreditationDocuments.values(),
     ],
     processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT,
+  ),
+  createErrorTestCase(
+    'the deducted weight is greater than or equal to gross weight',
+    [
+      modifyDocumentEvents(massIdDocument, {
+        [String(DROP_OFF)]: {
+          ...massIdDocument.externalEvents?.find(
+            (e) => e.name === String(DROP_OFF),
+          ),
+          value: valueBeforeSorting,
+        },
+        [String(SORTING)]: stubBoldMassIdSortingEvent({
+          metadataAttributes: createWeightAttributes(5, 10),
+          partialDocumentEvent: { value: calculatedSortingValue },
+        }),
+      }),
+      ...participantsAccreditationDocuments.values(),
+    ],
+    processorErrors.ERROR_MESSAGE.INVALID_WEIGHT_COMPARISON(10, 5),
   ),
 ];

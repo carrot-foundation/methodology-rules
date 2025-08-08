@@ -194,9 +194,20 @@ export const getValidatedWeightAttributes = (
     return deductedWeightError;
   }
 
+  const grossWeight = Number(grossWeightAttribute?.value);
+  const deductedWeight = Number(deductedWeightAttribute?.value);
+
+  // Pairwise validation: deductedWeight must be less than grossWeight
+  if (deductedWeight >= grossWeight) {
+    return {
+      isError: true,
+      message: `Deducted weight (${deductedWeight}) must be less than gross weight (${grossWeight})`,
+    };
+  }
+
   return {
-    deductedWeight: Number(deductedWeightAttribute?.value),
-    grossWeight: Number(grossWeightAttribute?.value),
+    deductedWeight,
+    grossWeight,
   };
 };
 

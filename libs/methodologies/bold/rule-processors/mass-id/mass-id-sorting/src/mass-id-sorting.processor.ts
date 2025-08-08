@@ -243,6 +243,22 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     const weightAttributes = this.getHelperResult(
       getValidatedWeightAttributes(sortingEvent),
       (error: ValidationError) => {
+        if (error.message.includes('must be less than')) {
+          const grossWeight = this.extractValueFromSortingEvent(
+            sortingEvent,
+            GROSS_WEIGHT,
+          ) as number;
+          const deductedWeight = this.extractValueFromSortingEvent(
+            sortingEvent,
+            DEDUCTED_WEIGHT,
+          ) as number;
+
+          return this.processorErrors.ERROR_MESSAGE.INVALID_WEIGHT_COMPARISON(
+            deductedWeight,
+            grossWeight,
+          );
+        }
+
         if (error.message.includes('gross')) {
           return error.message.includes('format')
             ? this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT

@@ -29,6 +29,8 @@ export class MassIdSortingProcessorErrors extends BaseProcessorErrors {
       `The value after the "${SORTING}" must be greater than 0, but "${String(valueAfterSorting)}" was provided.`,
     INVALID_VALUE_BEFORE_SORTING: (valueBeforeSorting: unknown) =>
       `The value before the "${SORTING}" must be greater than 0, but "${String(valueBeforeSorting)}" was provided.`,
+    INVALID_WEIGHT_COMPARISON: (deductedWeight: number, grossWeight: number) =>
+      `The "${DEDUCTED_WEIGHT}" (${deductedWeight}) must be less than "${GROSS_WEIGHT}" (${grossWeight}).`,
     MASS_ID_DOCUMENT_NOT_FOUND: `The "${MASS_ID}" document was not found.`,
     MISSING_EXTERNAL_EVENTS: `The "${MASS_ID}" document has no events.`,
     MISSING_RECYCLER_ACCREDITATION_DOCUMENT: `The "${RECYCLER}" accreditation was not found.`,
