@@ -38,6 +38,7 @@ export enum DocumentEventAttributeName {
   CONTAINER_QUANTITY = 'Container Quantity',
   CONTAINER_TYPE = 'Container Type',
   CREDIT_UNIT_PRICE = 'Credit Unit Price',
+  DEDUCTED_WEIGHT = 'Deducted Weight',
   DESCRIPTION = 'Description',
   DOCUMENT_NUMBER = 'Document Number',
   DOCUMENT_TYPE = 'Document Type',
