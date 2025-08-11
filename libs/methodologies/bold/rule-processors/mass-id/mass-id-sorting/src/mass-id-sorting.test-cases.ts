@@ -218,10 +218,13 @@ export const massIdSortingTestCases = [
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
-      undefined,
+      calculatedSortingValue,
       false,
     ),
-    partialDocument: massIdDocument,
+    partialDocument: {
+      ...massIdDocument,
+      currentValue: calculatedSortingValue,
+    },
     resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the sorting description is missing',
@@ -235,7 +238,10 @@ export const massIdSortingTestCases = [
       deductedWeight,
       calculatedSortingValue,
     ),
-    partialDocument: massIdDocument,
+    partialDocument: {
+      ...massIdDocument,
+      currentValue: calculatedSortingValue,
+    },
     resultComment: RESULT_COMMENTS.PASSED(0),
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -248,9 +254,30 @@ export const massIdSortingTestCases = [
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
+      calculatedSortingValue,
+    ),
+    partialDocument: {
+      ...massIdDocument,
+      currentValue: calculatedSortingValue + 1,
+    },
+    resultComment: RESULT_COMMENTS.DOCUMENT_VALUE_MISMATCH(
+      calculatedSortingValue + 1,
+      calculatedSortingValue,
+    ),
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario:
+      'the document current value does not match the sorting event value',
+  },
+  {
+    accreditationDocuments: createAccreditationDocuments(sortingFactor),
+    actorParticipants,
+    massIdEvents: createMassIdEvents(
+      valueBeforeSorting,
+      grossWeight,
+      deductedWeight,
       wrongSortingValue,
     ),
-    partialDocument: massIdDocument,
+    partialDocument: { ...massIdDocument, currentValue: wrongSortingValue },
     resultComment: RESULT_COMMENTS.FAILED(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
@@ -266,7 +293,10 @@ export const massIdSortingTestCases = [
       mismatchedDeductedWeight,
       calculatedSortingValue,
     ),
-    partialDocument: massIdDocument,
+    partialDocument: {
+      ...massIdDocument,
+      currentValue: calculatedSortingValue,
+    },
     resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
       mismatchedDeductedWeight,
       Number((grossWeight * (1 - sortingFactor)).toFixed(3)),
@@ -284,7 +314,10 @@ export const massIdSortingTestCases = [
       (grossWeight + 0.2) * (1 - sortingFactor),
       calculatedSortingValue,
     ),
-    partialDocument: massIdDocument,
+    partialDocument: {
+      ...massIdDocument,
+      currentValue: calculatedSortingValue,
+    },
     resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
       grossWeight + 0.2,
       valueBeforeSorting,

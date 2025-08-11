@@ -52,6 +52,8 @@ export const SORTING_TOLERANCE = 0.1;
 export const RESULT_COMMENTS = {
   DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
     `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × (1 - ${SORTING_FACTOR}) (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
+  DOCUMENT_VALUE_MISMATCH: (documentValue: number, sortingValue: number) =>
+    `The MassID document current value (${documentValue} kg) must equal the sorting event value (${sortingValue} kg).`,
   FAILED: (sortingValueCalculationDifference: number) =>
     `The calculated sorting value differs from the actual value by ${sortingValueCalculationDifference} kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
   GROSS_WEIGHT_MISMATCH: (gross: number, before: number) =>
@@ -69,6 +71,7 @@ interface DocumentPair {
 interface SortingData {
   calculatedSortingValue: number;
   deductedWeight: number;
+  documentCurrentValue: number;
   grossWeight: number;
   sortingDescription:
     | MethodologyDocumentEventAttributeValue
@@ -134,6 +137,19 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
         resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
           sortingData.grossWeight,
           sortingData.valueBeforeSorting,
+        ),
+        resultStatus: RuleOutputStatus.FAILED,
+      };
+    }
+
+    const documentValueMatchesSorting =
+      sortingData.documentCurrentValue === sortingData.valueAfterSorting;
+
+    if (!documentValueMatchesSorting) {
+      return {
+        resultComment: RESULT_COMMENTS.DOCUMENT_VALUE_MISMATCH(
+          sortingData.documentCurrentValue,
+          sortingData.valueAfterSorting,
         ),
         resultStatus: RuleOutputStatus.FAILED,
       };
@@ -296,6 +312,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
 
     return {
       ...calculations,
+      documentCurrentValue: massIdDocument.currentValue,
       sortingDescription,
       sortingFactor,
       valueAfterSorting: eventValues.valueAfterSorting,
