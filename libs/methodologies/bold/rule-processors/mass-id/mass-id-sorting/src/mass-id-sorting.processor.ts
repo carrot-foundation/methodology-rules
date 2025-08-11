@@ -41,6 +41,7 @@ import {
   getValidatedExternalEvents,
   getValidatedWeightAttributes,
   type ValidationError,
+  ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
@@ -230,20 +231,41 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
 
     const eventValues = this.getHelperResult(
       getValidatedEventValues(eventBeforeSorting, sortingEvent),
-      (error: ValidationError) =>
-        error.message.includes('before')
-          ? this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
-              eventBeforeSorting?.value,
-            )
-          : this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(
-              sortingEvent.value,
-            ),
+      (error: ValidationError) => {
+        if (
+          error.code === ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED ||
+          error.code === ValidationErrorCode.INVALID_VALUE_BEFORE_SORTING
+        ) {
+          return this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
+            eventBeforeSorting?.value,
+          );
+        }
+
+        return this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(
+          sortingEvent.value,
+        );
+      },
     );
 
     const weightAttributes = this.getHelperResult(
       getValidatedWeightAttributes(sortingEvent),
       (error: ValidationError) => {
-        if (error.message.includes('must be less than')) {
+        if (error.code === ValidationErrorCode.INVALID_DEDUCTED_WEIGHT_FORMAT) {
+          return this.processorErrors.ERROR_MESSAGE
+            .INVALID_DEDUCTED_WEIGHT_FORMAT;
+        }
+
+        if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT) {
+          return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
+            this.extractValueFromSortingEvent(sortingEvent, GROSS_WEIGHT),
+          );
+        }
+
+        if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT_FORMAT) {
+          return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT;
+        }
+
+        if (error.code === ValidationErrorCode.INVALID_WEIGHT_COMPARISON) {
           const grossWeight = this.extractValueFromSortingEvent(
             sortingEvent,
             GROSS_WEIGHT,
@@ -259,19 +281,9 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
           );
         }
 
-        if (error.message.includes('gross')) {
-          return error.message.includes('format')
-            ? this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT
-            : this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
-                this.extractValueFromSortingEvent(sortingEvent, GROSS_WEIGHT),
-              );
-        }
-
-        return error.message.includes('format')
-          ? this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT
-          : this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
-              this.extractValueFromSortingEvent(sortingEvent, DEDUCTED_WEIGHT),
-            );
+        return this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
+          this.extractValueFromSortingEvent(sortingEvent, DEDUCTED_WEIGHT),
+        );
       },
     );
 

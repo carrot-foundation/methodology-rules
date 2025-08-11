@@ -10,6 +10,7 @@ import {
   getValidatedEventValues,
   getValidatedWeightAttributes,
   validateWeightAttribute,
+  ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
 describe('mass-id-sorting helpers', () => {
@@ -22,11 +23,11 @@ describe('mass-id-sorting helpers', () => {
         value: 10,
       };
 
-      const result = validateWeightAttribute(attribute, 'test weight');
+      const result = validateWeightAttribute(attribute, 'gross');
 
       expect(result).toEqual({
+        code: ValidationErrorCode.INVALID_GROSS_WEIGHT_FORMAT,
         isError: true,
-        message: 'Invalid test weight format',
       });
     });
 
@@ -38,7 +39,7 @@ describe('mass-id-sorting helpers', () => {
         value: 10,
       };
 
-      const result = validateWeightAttribute(attribute, 'test weight');
+      const result = validateWeightAttribute(attribute, 'gross');
 
       expect(result).toBe(null);
     });
@@ -53,8 +54,8 @@ describe('mass-id-sorting helpers', () => {
       const result = getValidatedEventValues(undefined, sortingEvent);
 
       expect(result).toEqual({
+        code: ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED,
         isError: true,
-        message: 'Event before sorting is undefined',
       });
     });
   });
@@ -79,8 +80,8 @@ describe('mass-id-sorting helpers', () => {
       const result = getValidatedWeightAttributes(sortingEvent);
 
       expect(result).toEqual({
+        code: ValidationErrorCode.INVALID_WEIGHT_COMPARISON,
         isError: true,
-        message: 'Deducted weight (15) must be less than gross weight (10)',
       });
     });
 
@@ -103,8 +104,8 @@ describe('mass-id-sorting helpers', () => {
       const result = getValidatedWeightAttributes(sortingEvent);
 
       expect(result).toEqual({
+        code: ValidationErrorCode.INVALID_WEIGHT_COMPARISON,
         isError: true,
-        message: 'Deducted weight (10) must be less than gross weight (10)',
       });
     });
   });

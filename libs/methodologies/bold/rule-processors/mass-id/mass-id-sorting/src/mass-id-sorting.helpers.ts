@@ -22,6 +22,20 @@ const { SORTING } = DocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
   DocumentEventAttributeName;
 
+export enum ValidationErrorCode {
+  EVENT_BEFORE_SORTING_UNDEFINED = 'EVENT_BEFORE_SORTING_UNDEFINED',
+  INVALID_DEDUCTED_WEIGHT = 'INVALID_DEDUCTED_WEIGHT',
+  INVALID_DEDUCTED_WEIGHT_FORMAT = 'INVALID_DEDUCTED_WEIGHT_FORMAT',
+  INVALID_GROSS_WEIGHT = 'INVALID_GROSS_WEIGHT',
+  INVALID_GROSS_WEIGHT_FORMAT = 'INVALID_GROSS_WEIGHT_FORMAT',
+  INVALID_VALUE_AFTER_SORTING = 'INVALID_VALUE_AFTER_SORTING',
+  INVALID_VALUE_BEFORE_SORTING = 'INVALID_VALUE_BEFORE_SORTING',
+  INVALID_WEIGHT_COMPARISON = 'INVALID_WEIGHT_COMPARISON',
+  MISSING_EXTERNAL_EVENTS = 'MISSING_EXTERNAL_EVENTS',
+  MISSING_SORTING_EVENT = 'MISSING_SORTING_EVENT',
+  MISSING_SORTING_FACTOR = 'MISSING_SORTING_FACTOR',
+}
+
 export interface EventValues {
   valueAfterSorting: number;
   valueBeforeSorting: number;
@@ -40,8 +54,8 @@ export interface SortingEvents {
 }
 
 export interface ValidationError {
+  code: ValidationErrorCode;
   isError: true;
-  message: string;
 }
 
 export interface WeightAttributes {
@@ -76,8 +90,8 @@ export const findSortingEvents = (
 
   if (sortingEventIndex === -1) {
     return {
+      code: ValidationErrorCode.MISSING_SORTING_EVENT,
       isError: true,
-      message: 'Missing sorting event',
     };
   }
 
@@ -108,8 +122,8 @@ export const getSortingFactor = (
 
   if (!isNonZeroPositive(sortingFactor)) {
     return {
+      code: ValidationErrorCode.MISSING_SORTING_FACTOR,
       isError: true,
-      message: 'Missing sorting factor',
     };
   }
 
@@ -122,8 +136,8 @@ export const getValidatedEventValues = (
 ): EventValues | ValidationError => {
   if (!eventBeforeSorting) {
     return {
+      code: ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED,
       isError: true,
-      message: 'Event before sorting is undefined',
     };
   }
 
@@ -132,15 +146,15 @@ export const getValidatedEventValues = (
 
   if (!isNonZeroPositive(valueBeforeSorting)) {
     return {
+      code: ValidationErrorCode.INVALID_VALUE_BEFORE_SORTING,
       isError: true,
-      message: `Invalid value before sorting: ${valueBeforeSorting}`,
     };
   }
 
   if (!isNonZeroPositive(valueAfterSorting)) {
     return {
+      code: ValidationErrorCode.INVALID_VALUE_AFTER_SORTING,
       isError: true,
-      message: `Invalid value after sorting: ${valueAfterSorting}`,
     };
   }
 
@@ -155,8 +169,8 @@ export const getValidatedExternalEvents = (
 ): DocumentEvent[] | ValidationError => {
   if (!isNonEmptyArray(massIdDocument.externalEvents)) {
     return {
+      code: ValidationErrorCode.MISSING_EXTERNAL_EVENTS,
       isError: true,
-      message: 'Missing external events',
     };
   }
 
@@ -177,7 +191,7 @@ export const getValidatedWeightAttributes = (
 
   const grossWeightError = validateWeightAttribute(
     grossWeightAttribute,
-    'gross weight',
+    'gross',
   );
 
   if (grossWeightError) {
@@ -186,7 +200,7 @@ export const getValidatedWeightAttributes = (
 
   const deductedWeightError = validateWeightAttribute(
     deductedWeightAttribute,
-    'deducted weight',
+    'deducted',
   );
 
   if (deductedWeightError) {
@@ -198,8 +212,8 @@ export const getValidatedWeightAttributes = (
 
   if (deductedWeight >= grossWeight) {
     return {
+      code: ValidationErrorCode.INVALID_WEIGHT_COMPARISON,
       isError: true,
-      message: `Deducted weight (${deductedWeight}) must be less than gross weight (${grossWeight})`,
     };
   }
 
@@ -211,19 +225,25 @@ export const getValidatedWeightAttributes = (
 
 export const validateWeightAttribute = (
   attribute: DocumentEventAttribute | undefined,
-  attributeName: string,
+  weightType: 'deducted' | 'gross',
 ): null | ValidationError => {
   if (!isNonZeroPositive(attribute?.value)) {
     return {
+      code:
+        weightType === 'gross'
+          ? ValidationErrorCode.INVALID_GROSS_WEIGHT
+          : ValidationErrorCode.INVALID_DEDUCTED_WEIGHT,
       isError: true,
-      message: `Invalid ${attributeName}: ${String(attribute?.value)}`,
     };
   }
 
   if (attribute.format !== MethodologyDocumentEventAttributeFormat.KILOGRAM) {
     return {
+      code:
+        weightType === 'gross'
+          ? ValidationErrorCode.INVALID_GROSS_WEIGHT_FORMAT
+          : ValidationErrorCode.INVALID_DEDUCTED_WEIGHT_FORMAT,
       isError: true,
-      message: `Invalid ${attributeName} format`,
     };
   }
 
