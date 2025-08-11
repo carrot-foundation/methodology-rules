@@ -144,7 +144,6 @@ export const getValidatedEventValues = (
     };
   }
 
-  // isNonZeroPositive acts as a type guard, so no casting needed
   return {
     valueAfterSorting,
     valueBeforeSorting,
@@ -197,7 +196,6 @@ export const getValidatedWeightAttributes = (
   const grossWeight = Number(grossWeightAttribute?.value);
   const deductedWeight = Number(deductedWeightAttribute?.value);
 
-  // Pairwise validation: deductedWeight must be less than grossWeight
   if (deductedWeight >= grossWeight) {
     return {
       isError: true,
