@@ -214,22 +214,22 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
   private extractSortingData(documents: DocumentPair): SortingData {
     const { massIdDocument, recyclerAccreditationDocument } = documents;
 
-    const externalEvents = this.getHelperResult(
+    const externalEvents = this.unwrapOrThrow(
       getValidatedExternalEvents(massIdDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
     );
 
-    const { eventBeforeSorting, sortingEvent } = this.getHelperResult(
+    const { eventBeforeSorting, sortingEvent } = this.unwrapOrThrow(
       findSortingEvents(externalEvents),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
     );
 
-    const sortingFactor = this.getHelperResult(
+    const sortingFactor = this.unwrapOrThrow(
       getSortingFactor(recyclerAccreditationDocument, massIdDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
     );
 
-    const eventValues = this.getHelperResult(
+    const eventValues = this.unwrapOrThrow(
       getValidatedEventValues(eventBeforeSorting, sortingEvent),
       (error: ValidationError) => {
         if (
@@ -247,7 +247,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       },
     );
 
-    const weightAttributes = this.getHelperResult(
+    const weightAttributes = this.unwrapOrThrow(
       getValidatedWeightAttributes(sortingEvent),
       (error: ValidationError) => {
         if (error.code === ValidationErrorCode.INVALID_DEDUCTED_WEIGHT_FORMAT) {
@@ -303,7 +303,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     };
   }
 
-  private getHelperResult<T>(
+  private unwrapOrThrow<T>(
     result: T | ValidationError,
     errorMessage: ((error: ValidationError) => string) | string,
   ): T {
