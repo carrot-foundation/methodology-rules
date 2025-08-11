@@ -24,7 +24,10 @@ import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
 
 import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
-import { RESULT_COMMENTS } from './mass-id-sorting.processor';
+import {
+  RESULT_COMMENTS,
+  SORTING_TOLERANCE,
+} from './mass-id-sorting.processor';
 
 const processorErrors = new MassIdSortingProcessorErrors();
 
@@ -152,9 +155,15 @@ const createWeightAttributesWithFormat = (
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
 const grossWeight = valueBeforeSorting;
-const deductedWeight = grossWeight * (1 - sortingFactor);
-const calculatedSortingValue = grossWeight - deductedWeight;
+const expectedDeductedWeight = grossWeight * (1 - sortingFactor);
+const deductedWeight = expectedDeductedWeight;
+const calculatedSortingValue = grossWeight - expectedDeductedWeight;
 const wrongSortingValue = calculatedSortingValue + 0.15;
+const delta = SORTING_TOLERANCE + 0.01;
+const mismatchedDeductedWeight =
+  expectedDeductedWeight > delta
+    ? expectedDeductedWeight - delta
+    : expectedDeductedWeight + delta;
 
 const actorParticipants = new Map(
   MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
@@ -254,12 +263,12 @@ export const massIdSortingTestCases = [
     massIdEvents: createMassIdEvents(
       valueBeforeSorting,
       grossWeight,
-      Math.min(deductedWeight + 0.15, grossWeight - 0.01), // Ensure it's still less than grossWeight but different enough
+      mismatchedDeductedWeight,
       calculatedSortingValue,
     ),
     partialDocument: massIdDocument,
     resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
-      Math.min(deductedWeight + 0.15, grossWeight - 0.01),
+      mismatchedDeductedWeight,
       Number((grossWeight * (1 - sortingFactor)).toFixed(3)),
     ),
     resultStatus: RuleOutputStatus.FAILED,

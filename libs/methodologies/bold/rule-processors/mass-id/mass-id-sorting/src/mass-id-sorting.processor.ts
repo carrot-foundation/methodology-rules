@@ -46,7 +46,8 @@ import {
 
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
   DocumentEventAttributeName;
-const SORTING_TOLERANCE = 0.1;
+
+export const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
   DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
