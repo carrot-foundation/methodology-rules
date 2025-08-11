@@ -7,7 +7,7 @@ import {
   isNil,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
-import { getEventAttributeByName } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -18,7 +18,6 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type Document,
-  type DocumentEvent,
   DocumentEventAttributeName,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -40,6 +39,7 @@ import {
   getValidatedEventValues,
   getValidatedExternalEvents,
   getValidatedWeightAttributes,
+  isValidationError,
   type ValidationError,
   ValidationErrorCode,
 } from './mass-id-sorting.helpers';
@@ -257,7 +257,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
 
         if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT) {
           return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
-            this.extractValueFromSortingEvent(sortingEvent, GROSS_WEIGHT),
+            getEventAttributeValue(sortingEvent, GROSS_WEIGHT),
           );
         }
 
@@ -266,11 +266,12 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
         }
 
         if (error.code === ValidationErrorCode.INVALID_WEIGHT_COMPARISON) {
-          const grossWeight = this.extractValueFromSortingEvent(
+          const grossWeight = getEventAttributeValue(
             sortingEvent,
             GROSS_WEIGHT,
           ) as number;
-          const deductedWeight = this.extractValueFromSortingEvent(
+
+          const deductedWeight = getEventAttributeValue(
             sortingEvent,
             DEDUCTED_WEIGHT,
           ) as number;
@@ -282,7 +283,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
         }
 
         return this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
-          this.extractValueFromSortingEvent(sortingEvent, DEDUCTED_WEIGHT),
+          getEventAttributeValue(sortingEvent, DEDUCTED_WEIGHT),
         );
       },
     );
@@ -302,20 +303,11 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     };
   }
 
-  private extractValueFromSortingEvent(
-    sortingEvent: DocumentEvent,
-    attributeName: string,
-  ): unknown {
-    const attribute = getEventAttributeByName(sortingEvent, attributeName);
-
-    return attribute?.value;
-  }
-
   private getHelperResult<T>(
     result: T | ValidationError,
     errorMessage: ((error: ValidationError) => string) | string,
   ): T {
-    if (this.isValidationError(result)) {
+    if (isValidationError(result)) {
       const message =
         typeof errorMessage === 'string' ? errorMessage : errorMessage(result);
 
@@ -323,10 +315,6 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     }
 
     return result;
-  }
-
-  private isValidationError(result: unknown): result is ValidationError {
-    return typeof result === 'object' && result !== null && 'isError' in result;
   }
 
   private validateOrThrow(condition: boolean, errorMessage: string): void {

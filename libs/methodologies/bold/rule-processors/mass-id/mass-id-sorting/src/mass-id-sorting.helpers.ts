@@ -63,6 +63,9 @@ export interface WeightAttributes {
   grossWeight: number;
 }
 
+export const isValidationError = (result: unknown): result is ValidationError =>
+  typeof result === 'object' && result !== null && 'isError' in result;
+
 export const calculateSortingValues = (
   weightAttributes: WeightAttributes,
   valueAfterSorting: number,
