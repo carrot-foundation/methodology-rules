@@ -219,7 +219,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
     );
 
-    const { eventBeforeSorting, sortingEvent } = this.unwrapOrThrow(
+    const { priorEventWithValue, sortingEvent } = this.unwrapOrThrow(
       findSortingEvents(externalEvents),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
     );
@@ -230,14 +230,14 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     );
 
     const eventValues = this.unwrapOrThrow(
-      getValidatedEventValues(eventBeforeSorting, sortingEvent),
+      getValidatedEventValues(priorEventWithValue, sortingEvent),
       (error: ValidationError) => {
         if (
           error.code === ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED ||
           error.code === ValidationErrorCode.INVALID_VALUE_BEFORE_SORTING
         ) {
           return this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
-            eventBeforeSorting?.value,
+            priorEventWithValue?.value,
           );
         }
 

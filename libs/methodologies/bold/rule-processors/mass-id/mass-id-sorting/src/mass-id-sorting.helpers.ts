@@ -49,7 +49,7 @@ export interface SortingCalculations {
 }
 
 export interface SortingEvents {
-  eventBeforeSorting: DocumentEvent | undefined;
+  priorEventWithValue: DocumentEvent | undefined;
   sortingEvent: DocumentEvent;
 }
 
@@ -98,10 +98,14 @@ export const findSortingEvents = (
     };
   }
 
-  const sortingEvent = externalEvents[sortingEventIndex]!;
-  const eventBeforeSorting = externalEvents[sortingEventIndex - 1];
+  const sortingEvent = externalEvents.at(sortingEventIndex) as DocumentEvent;
 
-  return { eventBeforeSorting, sortingEvent };
+  const priorEventWithValue = externalEvents
+    .slice(0, sortingEventIndex)
+    .reverse()
+    .find((event) => event.value !== undefined);
+
+  return { priorEventWithValue, sortingEvent };
 };
 
 export const getSortingDescription = (sortingEvent: DocumentEvent) =>
@@ -134,17 +138,17 @@ export const getSortingFactor = (
 };
 
 export const getValidatedEventValues = (
-  eventBeforeSorting: DocumentEvent | undefined,
+  priorEventWithValue: DocumentEvent | undefined,
   sortingEvent: DocumentEvent,
 ): EventValues | ValidationError => {
-  if (!eventBeforeSorting) {
+  if (!priorEventWithValue) {
     return {
       code: ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED,
       isError: true,
     };
   }
 
-  const valueBeforeSorting = eventBeforeSorting.value;
+  const valueBeforeSorting = priorEventWithValue.value;
   const valueAfterSorting = sortingEvent.value;
 
   if (!isNonZeroPositive(valueBeforeSorting)) {

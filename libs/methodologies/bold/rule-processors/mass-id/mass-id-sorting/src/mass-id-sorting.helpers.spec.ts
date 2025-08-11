@@ -7,6 +7,7 @@ import {
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 import {
+  findSortingEvents,
   getValidatedEventValues,
   getValidatedWeightAttributes,
   validateWeightAttribute,
@@ -46,7 +47,7 @@ describe('mass-id-sorting helpers', () => {
   });
 
   describe('getValidatedEventValues', () => {
-    it('should return error when eventBeforeSorting is undefined', () => {
+    it('should return error when priorEventWithValue is undefined', () => {
       const sortingEvent = {
         value: 10,
       } as unknown as DocumentEvent;
@@ -107,6 +108,28 @@ describe('mass-id-sorting helpers', () => {
         code: ValidationErrorCode.INVALID_WEIGHT_COMPARISON,
         isError: true,
       });
+    });
+  });
+
+  describe('findSortingEvents', () => {
+    it('should pick the last prior event with value as priorEventWithValue', () => {
+      const events = [
+        { name: 'ANY', value: undefined } as unknown as DocumentEvent,
+        { name: 'ANY', value: 5 } as unknown as DocumentEvent,
+        { name: 'ANY' } as unknown as DocumentEvent,
+        { name: 'ANY', value: 7 } as unknown as DocumentEvent,
+        { name: 'ANY' } as unknown as DocumentEvent,
+        { name: 'ANY' } as unknown as DocumentEvent,
+        stubBoldMassIdSortingEvent({ partialDocumentEvent: { value: 9 } }),
+      ];
+
+      const result = findSortingEvents(events as unknown as DocumentEvent[]);
+
+      if ('isError' in result) {
+        throw new Error('Expected SortingEvents, got ValidationError');
+      }
+
+      expect(result.priorEventWithValue?.value).toBe(7);
     });
   });
 });
