@@ -127,8 +127,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     }
 
     const grossMatchesPrevious =
-      Math.abs(sortingData.grossWeight - sortingData.valueBeforeSorting) <=
-      SORTING_TOLERANCE;
+      sortingData.grossWeight === sortingData.valueBeforeSorting;
 
     if (!grossMatchesPrevious) {
       return {
