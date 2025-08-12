@@ -85,6 +85,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/weighing": [
         "libs/methodologies/bold/rule-processors/mass-id/weighing/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/ai-attachment-validator": [
+        "libs/shared/methodologies/ai-attachment-validator/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/testing": [
         "libs/shared/methodologies/bold/testing/src/index.ts"
       ],
