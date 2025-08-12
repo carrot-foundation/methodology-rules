@@ -18,6 +18,14 @@ import {
 describe('DocumentManifestDataLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
+  beforeEach(() => {
+    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+  });
+
+  afterEach(() => {
+    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+  });
+
   it.each([...documentManifestDataTestCases, ...exceptionTestCases])(
     'should return $resultStatus when $scenario',
     async ({ documentManifestType, events, resultStatus }) => {

@@ -6,6 +6,7 @@ import {
   isNonEmptyArray,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
+import { AiAttachmentValidatorService } from '@carrot-fndn/shared/methodologies/ai-attachment-validator';
 import {
   getDocumentEventAttachmentByLabel,
   getEventAttributeByName,
@@ -31,6 +32,7 @@ import {
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
   MethodologyDocumentEventLabel,
+  NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
@@ -63,6 +65,8 @@ type EventAttributeValueType =
   | undefined;
 
 type RuleSubject = {
+  attachmentPaths: NonEmptyString[];
+  document: Document;
   documentManifestEvents: DocumentManifestEventSubject[];
   recyclerEvent: DocumentEvent | undefined;
 };
@@ -77,6 +81,8 @@ const DOCUMENT_TYPE_MAPPING = {
   [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
 } as const;
 
+const aiAttachmentValidatorService = new AiAttachmentValidatorService();
+
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   private readonly documentManifestType: DocumentManifestType;
 
@@ -85,9 +91,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     this.documentManifestType = documentManifestType;
   }
 
-  protected override evaluateResult(
+  protected override async evaluateResult(
     ruleSubject: RuleSubject,
-  ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+  ): Promise<EvaluateResultOutput> {
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EVENT,
@@ -121,6 +127,13 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       };
     }
 
+    if (this.shouldValidateAttachmentsConsistencyWithAI()) {
+      await this.validateAttachmentsConsistencyWithAI({
+        attachmentPaths: ruleSubject.attachmentPaths,
+        document: ruleSubject.document,
+      });
+    }
+
     return {
       resultComment: passMessages.join(' '),
       resultStatus: RuleOutputStatus.PASSED,
@@ -135,36 +148,92 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
     );
 
-    return {
-      documentManifestEvents: getOrDefault(
-        transportManifestEvents?.map((event) => {
-          const correctLabelAttachment = getDocumentEventAttachmentByLabel(
+    const documentManifestEvents = getOrDefault(
+      transportManifestEvents?.map((event) => {
+        const correctLabelAttachment = getDocumentEventAttachmentByLabel(
+          event,
+          this.documentManifestType,
+        );
+
+        const hasWrongLabelAttachment =
+          !correctLabelAttachment && isNonEmptyArray(event.attachments);
+
+        return {
+          attachment: correctLabelAttachment,
+          documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
+          documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+          eventAddressId: event.address.id,
+          eventValue: event.value,
+          exemptionJustification: getEventAttributeValue(
             event,
-            this.documentManifestType,
-          );
+            EXEMPTION_JUSTIFICATION,
+          ),
+          hasWrongLabelAttachment,
+          issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+          recyclerCountryCode: recyclerEvent?.address.countryCode,
+        };
+      }),
+      [],
+    );
 
-          const hasWrongLabelAttachment =
-            !correctLabelAttachment && isNonEmptyArray(event.attachments);
-
-          return {
-            attachment: correctLabelAttachment,
-            documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-            documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
-            eventAddressId: event.address.id,
-            eventValue: event.value,
-            exemptionJustification: getEventAttributeValue(
-              event,
-              EXEMPTION_JUSTIFICATION,
-            ),
-            hasWrongLabelAttachment,
-            issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
-            recyclerCountryCode: recyclerEvent?.address.countryCode,
-          };
-        }),
-        [],
-      ),
+    return {
+      attachmentPaths: this.getAttachmentPaths({
+        documentId: document.id,
+        events: documentManifestEvents,
+      }),
+      document,
+      documentManifestEvents,
       recyclerEvent,
     };
+  }
+
+  private getAttachmentPaths({
+    documentId,
+    events,
+  }: {
+    documentId: string;
+    events: DocumentManifestEventSubject[];
+  }): NonEmptyString[] {
+    const bucketName = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+
+    if (!bucketName) {
+      throw new Error(
+        'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is required',
+      );
+    }
+
+    return events.map(
+      (event) =>
+        `s3://${bucketName}/attachments/document/${documentId}/${event.attachment?.attachmentId || 'attachment'}.pdf`,
+    );
+  }
+
+  private shouldValidateAttachmentsConsistencyWithAI(): boolean {
+    const value = process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
+
+    return isNonEmptyString(value) && value.toLowerCase() === 'true';
+  }
+
+  private async validateAttachmentsConsistencyWithAI({
+    attachmentPaths,
+    document,
+  }: {
+    attachmentPaths: NonEmptyString[];
+    document: Document;
+  }): Promise<void> {
+    for (const attachmentPath of attachmentPaths) {
+      const aiValidationResult =
+        await aiAttachmentValidatorService.validateAttachment({
+          attachmentPath,
+          document,
+        });
+
+      if (aiValidationResult.isValid === false) {
+        console.warn(
+          `AI validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse}`,
+        );
+      }
+    }
   }
 
   private validateDocumentAttributes(

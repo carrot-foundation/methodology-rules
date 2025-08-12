@@ -1,5 +1,6 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -16,6 +17,14 @@ jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DocumentManifestDataProcessor', () => {
   const documentLoaderService = jest.mocked(loadDocument);
+
+  beforeEach(() => {
+    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+  });
+
+  afterEach(() => {
+    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+  });
 
   it.each([...exceptionTestCases, ...documentManifestDataTestCases])(
     'should return $resultStatus when $scenario',
@@ -47,4 +56,56 @@ describe('DocumentManifestDataProcessor', () => {
       expect(ruleOutput).toEqual(expectedRuleOutput);
     },
   );
+
+  describe('Error handling', () => {
+    it('should throw error when DOCUMENT_ATTACHMENT_BUCKET_NAME is not set', async () => {
+      delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+
+      const ruleDataProcessor = new DocumentManifestDataProcessor(
+        DocumentEventName.TRANSPORT_MANIFEST,
+      );
+      const ruleInput = random<Required<RuleInput>>();
+      const { massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocuments({
+          externalEventsMap: {},
+        })
+        .build();
+
+      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+
+      await expect(ruleDataProcessor.process(ruleInput)).rejects.toThrow(
+        'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is required',
+      );
+    });
+  });
+
+  describe('AI Validation', () => {
+    it('should call AI validation when enabled', async () => {
+      process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'] = 'true';
+
+      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      const ruleDataProcessor = new DocumentManifestDataProcessor(
+        DocumentEventName.TRANSPORT_MANIFEST,
+      );
+      const ruleInput = random<Required<RuleInput>>();
+      const { massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocuments({
+          externalEventsMap: {},
+        })
+        .build();
+
+      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      await ruleDataProcessor.process(ruleInput);
+
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'AI validation failed for document manifest type',
+        ),
+      );
+
+      consoleWarnSpy.mockRestore();
+      delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
+    });
+  });
 });
