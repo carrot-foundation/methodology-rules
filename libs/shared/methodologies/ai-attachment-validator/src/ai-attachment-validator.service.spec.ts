@@ -1,5 +1,6 @@
 import { logger } from '@carrot-fndn/shared/helpers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { TypeGuardError } from 'typia';
 
 import type { ApiAiValidationResponse } from './ai-attachment-validator.api.dto';
 
@@ -123,7 +124,7 @@ describe('AiAttachmentValidatorService', () => {
 
     it('should throw an error when the dto is invalid', async () => {
       await expect(service.validateAttachment({} as never)).rejects.toThrow(
-        'Error on createAssert()',
+        TypeGuardError,
       );
     });
 
