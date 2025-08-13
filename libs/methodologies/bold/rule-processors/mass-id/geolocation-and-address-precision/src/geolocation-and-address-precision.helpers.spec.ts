@@ -1,6 +1,7 @@
 import {
   stubAddress,
   stubBoldAccreditationDocument,
+  stubBoldMassIdAuditDocument,
   stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
@@ -8,12 +9,13 @@ import {
 import {
   DocumentEventAttributeName,
   DocumentEventName,
+  MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import {
-  getAccreditatedAddressByParticipantId,
+  getAccreditatedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -22,12 +24,13 @@ const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 describe('GeolocationAndAddressPrecisionHelpers', () => {
-  describe('getAccreditatedAddressByParticipantId', () => {
-    it('should return the accreditated address by participant id', () => {
+  describe('getAccreditatedAddressByParticipantIdAndActorType', () => {
+    it('should return the accreditated address by participant id and actor type', () => {
       const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.RECYCLER;
       const addressId = faker.string.uuid();
 
-      const documentStub = stubBoldAccreditationDocument({
+      const accreditationDocument = stubBoldAccreditationDocument({
         externalEventsMap: new Map([
           [
             FACILITY_ADDRESS,
@@ -37,30 +40,143 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
             }),
           ],
         ]),
-        partialDocument: {
-          primaryParticipant: stubParticipant({ id: participantId }),
-        },
       });
 
-      const result = getAccreditatedAddressByParticipantId(participantId, [
-        documentStub,
-        ...stubArray(() => stubBoldAccreditationDocument()),
-      ]);
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map([
+          [
+            'ACTOR',
+            stubDocumentEvent({
+              label: actorType,
+              name: DocumentEventName.ACTOR,
+              participant: stubParticipant({ id: participantId }),
+              relatedDocument: { documentId: accreditationDocument.id },
+            }),
+          ],
+        ]),
+      });
+
+      const result = getAccreditatedAddressByParticipantIdAndActorType(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [
+          accreditationDocument,
+          ...stubArray(() => stubBoldAccreditationDocument()),
+        ],
+      );
 
       expect(result?.id).toBe(addressId);
     });
 
-    it('should return undefined if the participant has no accreditated address', () => {
+    it('should return undefined when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const result = getAccreditatedAddressByParticipantId(participantId, [
-        ...stubArray(() =>
-          stubBoldAccreditationDocument({
-            externalEventsMap: new Map([
-              [FACILITY_ADDRESS, stubDocumentEvent({ name: FACILITY_ADDRESS })],
-            ]),
-          }),
-        ),
-      ]);
+      const actorType = MassIdDocumentActorType.HAULER;
+
+      const accreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map(),
+      });
+
+      const result = getAccreditatedAddressByParticipantIdAndActorType(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when accreditation document id is missing in actor event', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.PROCESSOR;
+
+      const accreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map([
+          [
+            'ACTOR',
+            stubDocumentEvent({
+              label: actorType,
+              name: DocumentEventName.ACTOR,
+              participant: stubParticipant({ id: participantId }),
+              relatedDocument: undefined,
+            }),
+          ],
+        ]),
+      });
+
+      const result = getAccreditatedAddressByParticipantIdAndActorType(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when accreditation document is not found', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.WASTE_GENERATOR;
+
+      const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map([
+          [
+            'ACTOR',
+            stubDocumentEvent({
+              label: actorType,
+              name: DocumentEventName.ACTOR,
+              participant: stubParticipant({ id: participantId }),
+              relatedDocument: { documentId: faker.string.uuid() },
+            }),
+          ],
+        ]),
+      });
+
+      const result = getAccreditatedAddressByParticipantIdAndActorType(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [unrelatedAccreditationDocument],
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when facility address event is not found in accreditation document', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.INTEGRATOR;
+
+      const accreditationDocument = stubBoldAccreditationDocument({
+        externalEventsMap: new Map(),
+      });
+
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map([
+          [
+            'ACTOR',
+            stubDocumentEvent({
+              label: actorType,
+              name: DocumentEventName.ACTOR,
+              participant: stubParticipant({ id: participantId }),
+              relatedDocument: { documentId: accreditationDocument.id },
+            }),
+          ],
+        ]),
+      });
+
+      const result = getAccreditatedAddressByParticipantIdAndActorType(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
 
       expect(result).toBeUndefined();
     });

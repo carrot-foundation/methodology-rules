@@ -1,5 +1,12 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  stubDocumentEvent,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  type Document,
+  DocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -42,6 +49,25 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
+      const auditActorEvents = [...actorParticipants.values()].map(
+        (participant) =>
+          stubDocumentEvent({
+            label: participant.type,
+            name: DocumentEventName.ACTOR,
+            participant,
+            relatedDocument: {
+              documentId: participantsAccreditationDocuments.get(
+                participant.type,
+              )!.id,
+            },
+          }),
+      );
+
+      massIdAuditDocument.externalEvents = [
+        ...(massIdAuditDocument.externalEvents ?? []),
+        ...auditActorEvents,
+      ];
+
       prepareEnvironmentTestE2E(
         [
           massIdDocument,
@@ -76,19 +102,23 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
     it.each(geolocationAndAddressPrecisionErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({ documents, massIdAuditDocument, resultStatus }) => {
-        prepareEnvironmentTestE2E(
-          [...documents, massIdAuditDocument].map((document) => ({
-            document,
-            documentKey: toDocumentKey({
-              documentId: document.id,
-              documentKeyPrefix,
-            }),
-          })),
-        );
+        const documentEntries = (
+          [...documents, massIdAuditDocument].filter(Boolean) as Document[]
+        ).map((document) => ({
+          document,
+          documentKey: toDocumentKey({
+            documentId: document.id,
+            documentKeyPrefix,
+          }),
+        }));
+
+        if (documentEntries.length > 0) {
+          prepareEnvironmentTestE2E(documentEntries);
+        }
 
         const response = (await geolocationAndAddressPrecisionLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIdAuditDocument?.id ?? faker.string.uuid(),
             documentKeyPrefix,
           }),
           stubContext(),

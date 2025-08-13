@@ -1,8 +1,16 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  createRuleTestFixture,
+  spyOnDocumentQueryServiceLoad,
+  spyOnLoadDocument,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  BoldStubsBuilder,
   expectRuleOutput,
+  stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  type Document,
+  DocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
@@ -28,13 +36,53 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       resultComment,
       resultStatus,
     }) => {
-      const { ruleInput, ruleOutput } = await createRuleTestFixture({
-        accreditationDocuments,
+      const {
+        massIdAuditDocument,
+        massIdDocument,
+        participantsAccreditationDocuments,
+      } = new BoldStubsBuilder({
         massIdActorParticipants: actorParticipants,
-        massIdDocumentsParams: massIdDocumentParameters,
-        ruleDataProcessor,
-        spyOnDocumentQueryServiceLoad,
-      });
+      })
+        .createMassIdDocuments(massIdDocumentParameters)
+        .createMassIdAuditDocuments()
+        .createMethodologyDocument()
+        .createParticipantAccreditationDocuments(accreditationDocuments)
+        .build();
+
+      const auditActorEvents = [...actorParticipants.values()].map(
+        (participant) =>
+          stubDocumentEvent({
+            label: participant.type,
+            name: DocumentEventName.ACTOR,
+            participant,
+            relatedDocument: {
+              documentId: participantsAccreditationDocuments.get(
+                participant.type,
+              )!.id,
+            },
+          }),
+      );
+
+      massIdAuditDocument.externalEvents = [
+        ...(massIdAuditDocument.externalEvents ?? []),
+        ...auditActorEvents,
+      ];
+
+      const allDocuments = [
+        massIdDocument,
+        massIdAuditDocument,
+        ...participantsAccreditationDocuments.values(),
+      ];
+
+      spyOnLoadDocument(massIdAuditDocument);
+      spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+
+      const ruleInput = {
+        ...random<Required<RuleInput>>(),
+        documentId: massIdAuditDocument.id,
+      };
+
+      const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
       expectRuleOutput({
         resultComment,
@@ -46,32 +94,59 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   );
 
   describe('GeolocationAndAddressPrecisionProcessorErrors', () => {
-    it.each(geolocationAndAddressPrecisionErrorTestCases)(
+    const allErrorCases = geolocationAndAddressPrecisionErrorTestCases.map(
+      (testCase) => ({
+        ...testCase,
+        hasDocuments: Boolean(
+          testCase.massIdAuditDocument && testCase.documents,
+        ),
+      }),
+    );
+
+    it.each(allErrorCases)(
       'should return $resultStatus when $scenario',
-      async ({
-        documents,
-        massIdAuditDocument,
-        resultComment,
-        resultStatus,
-      }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+      async (testCase) => {
+        if (testCase.hasDocuments) {
+          const { documents, massIdAuditDocument } = testCase as unknown as {
+            documents: Document[];
+            massIdAuditDocument: Document;
+          };
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+          spyOnLoadDocument(massIdAuditDocument);
+          spyOnDocumentQueryServiceLoad(massIdAuditDocument, [
+            massIdAuditDocument,
+            ...documents,
+          ]);
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
-        };
+          const ruleInput: Required<RuleInput> = {
+            ...random<Required<RuleInput>>(),
+            documentId: massIdAuditDocument.id,
+          };
 
-        const ruleOutput = await ruleDataProcessor.process(ruleInput);
+          const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        expect(ruleOutput).toEqual({
-          requestId: ruleInput.requestId,
-          responseToken: ruleInput.responseToken,
-          responseUrl: ruleInput.responseUrl,
-          resultComment,
-          resultStatus,
-        });
+          expect(ruleOutput).toEqual({
+            requestId: ruleInput.requestId,
+            responseToken: ruleInput.responseToken,
+            responseUrl: ruleInput.responseUrl,
+            resultComment: testCase.resultComment,
+            resultStatus: testCase.resultStatus,
+          });
+        } else {
+          spyOnLoadDocument(undefined);
+
+          const ruleInput = random<Required<RuleInput>>();
+
+          const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+          expect(ruleOutput).toEqual({
+            requestId: ruleInput.requestId,
+            responseToken: ruleInput.responseToken,
+            responseUrl: ruleInput.responseUrl,
+            resultComment: testCase.resultComment,
+            resultStatus: testCase.resultStatus,
+          });
+        }
       },
     );
   });

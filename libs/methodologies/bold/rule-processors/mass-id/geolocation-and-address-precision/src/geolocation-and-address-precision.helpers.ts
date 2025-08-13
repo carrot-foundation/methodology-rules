@@ -1,12 +1,16 @@
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { getParticipantAccreditationDocumentByParticipantId } from '@carrot-fndn/shared/methodologies/bold/helpers';
-import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import {
+  eventHasLabel,
+  eventNameIsAnyOf,
+  isActorEvent,
+} from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
+  MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type Geolocation,
@@ -16,17 +20,46 @@ import {
 } from '@carrot-fndn/shared/types';
 import { is } from 'typia';
 
-export const getAccreditatedAddressByParticipantId = (
+export const getAccreditatedAddressByParticipantIdAndActorType = (
+  massIdAuditDocument: Document,
   participantId: string,
+  actorType: MassIdDocumentActorType,
   accreditationDocuments: Document[],
 ): MethodologyAddress | undefined => {
-  const participantAccreditationDocument =
-    getParticipantAccreditationDocumentByParticipantId({
-      accreditationDocuments,
-      participantId,
-    });
+  const actorEvent = massIdAuditDocument.externalEvents?.find(
+    (event) =>
+      isActorEvent(event) &&
+      eventHasLabel(event, actorType) &&
+      event.participant.id === participantId,
+  );
+
+  if (isNil(actorEvent)) {
+    logger.debug(
+      `[MassID Audit Document${massIdAuditDocument.id}] Actor event not found for participant ${participantId} and actor type ${actorType}`,
+    );
+
+    return undefined;
+  }
+
+  const accreditationDocumentId = actorEvent.relatedDocument?.documentId;
+
+  if (isNil(accreditationDocumentId)) {
+    logger.debug(
+      `[MassID Audit Document${massIdAuditDocument.id}] Accreditation document ID not found for actor event ${actorEvent.id}`,
+    );
+
+    return undefined;
+  }
+
+  const participantAccreditationDocument = accreditationDocuments.find(
+    (document) => document.id === accreditationDocumentId,
+  );
 
   if (isNil(participantAccreditationDocument)) {
+    logger.debug(
+      `[MassID Audit Document${massIdAuditDocument.id}] Participant accreditation document not found for accreditation document ID ${accreditationDocumentId}`,
+    );
+
     return undefined;
   }
 
@@ -35,7 +68,15 @@ export const getAccreditatedAddressByParticipantId = (
       eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
     );
 
-  return facilityAddressEvent?.address;
+  if (!facilityAddressEvent) {
+    logger.debug(
+      `[MassID Audit Document${massIdAuditDocument.id}] Facility address event not found for participant ${participantId} and actor type ${actorType}`,
+    );
+
+    return undefined;
+  }
+
+  return facilityAddressEvent.address;
 };
 
 export const getEventGpsGeolocation = (

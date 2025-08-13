@@ -387,4 +387,11 @@ export const geolocationAndAddressPrecisionErrorTestCases = [
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the accreditation documents are not found',
   },
+  {
+    documents: [],
+    massIdAuditDocument: undefined,
+    resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: 'the MassID Audit document does not exist',
+  },
 ];
