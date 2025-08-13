@@ -17,8 +17,8 @@ import {
 } from './ai-attachment-validator.constants';
 import { formatInvalidField } from './ai-attachment-validator.helpers';
 import {
-  assertApiAiValidationResponse,
   assertAiValidateAttachmentDto,
+  assertApiAiValidationResponse,
 } from './ai-attachment-validator.typia';
 
 export class AiAttachmentValidatorService extends AwsHttpService {
