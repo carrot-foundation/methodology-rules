@@ -18,7 +18,7 @@ import {
 import { formatInvalidField } from './ai-attachment-validator.helpers';
 import {
   assertApiAiValidationResponse,
-  assertValidateAttachmentDto,
+  assertAiValidateAttachmentDto,
 } from './ai-attachment-validator.typia';
 
 export class AiAttachmentValidatorService extends AwsHttpService {
@@ -29,7 +29,7 @@ export class AiAttachmentValidatorService extends AwsHttpService {
   async validateAttachment(
     dto: AiValidateAttachmentDto,
   ): Promise<ApiValidateAttachmentResponse> {
-    assertValidateAttachmentDto(dto);
+    assertAiValidateAttachmentDto(dto);
 
     try {
       const mappedDto = this.mapValidateAttachmentDto(dto);
