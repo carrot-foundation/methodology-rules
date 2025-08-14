@@ -39,7 +39,7 @@ import {
 
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
-  getAccreditatedAddressByParticipantIdAndActorType,
+  getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -52,7 +52,7 @@ export interface RuleSubject {
 }
 
 interface ParticipantAddressData {
-  accreditatedAddress: MethodologyAddress | undefined;
+  accreditedAddress: MethodologyAddress | undefined;
   eventAddress: MethodologyAddress;
   gpsGeolocation: Geolocation | undefined;
 }
@@ -63,19 +63,19 @@ export const RESULT_COMMENTS = {
     actorType: string,
     addressDistance: number,
   ): string =>
-    `(${actorType}) The event address is ${addressDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The event address is ${addressDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the accreditated address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
-    `No accreditated address was found for the ${actorType} actor.`,
+    `No accredited address was found for the ${actorType} actor.`,
   PASSED_WITH_GPS: (
     actorType: string,
     addressDistance: number,
     gpsDistance: number,
   ): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
   PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accreditated address (${addressDistance}m). No GPS data was provided.`,
+    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m). No GPS data was provided.`,
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
@@ -174,7 +174,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       participantsAddressData.set(actorType, {
-        accreditatedAddress: getAccreditatedAddressByParticipantIdAndActorType(
+        accreditedAddress: getAccreditedAddressByParticipantIdAndActorType(
           massIdAuditDocument,
           event.participant.id,
           actorType,
@@ -190,16 +190,16 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private calculateAddressDistance(
     eventAddress: MethodologyAddress,
-    accreditatedAddress: MethodologyAddress,
+    accreditedAddress: MethodologyAddress,
   ): number {
-    return calculateDistance(eventAddress, accreditatedAddress);
+    return calculateDistance(eventAddress, accreditedAddress);
   }
 
   private calculateGpsDistance(
-    accreditatedAddress: MethodologyAddress,
+    accreditedAddress: MethodologyAddress,
     gpsGeolocation: Geolocation,
   ): number {
-    return calculateDistance(accreditatedAddress, gpsGeolocation);
+    return calculateDistance(accreditedAddress, gpsGeolocation);
   }
 
   private async collectDocuments(
@@ -234,9 +234,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     actorType: MassIdDocumentActorType,
     addressData: ParticipantAddressData,
   ): EvaluateResultOutput[] {
-    const { accreditatedAddress, eventAddress, gpsGeolocation } = addressData;
+    const { accreditedAddress, eventAddress, gpsGeolocation } = addressData;
 
-    if (isNil(accreditatedAddress)) {
+    if (isNil(accreditedAddress)) {
       return [
         {
           resultComment:
@@ -248,7 +248,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     const addressDistance = this.calculateAddressDistance(
       eventAddress,
-      accreditatedAddress,
+      accreditedAddress,
     );
 
     if (addressDistance > MAX_ALLOWED_DISTANCE) {
@@ -265,7 +265,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (!isNil(gpsGeolocation)) {
       const gpsDistance = this.calculateGpsDistance(
-        accreditatedAddress,
+        accreditedAddress,
         gpsGeolocation,
       );
 

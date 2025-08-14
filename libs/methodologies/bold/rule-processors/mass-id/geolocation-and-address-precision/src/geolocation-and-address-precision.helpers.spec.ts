@@ -15,7 +15,7 @@ import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import {
-  getAccreditatedAddressByParticipantIdAndActorType,
+  getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -24,8 +24,8 @@ const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 describe('GeolocationAndAddressPrecisionHelpers', () => {
-  describe('getAccreditatedAddressByParticipantIdAndActorType', () => {
-    it('should return the accreditated address by participant id and actor type', () => {
+  describe('getAccreditedAddressByParticipantIdAndActorType', () => {
+    it('should return the accredited address by participant id and actor type', () => {
       const participantId = faker.string.uuid();
       const actorType = MassIdDocumentActorType.RECYCLER;
       const addressId = faker.string.uuid();
@@ -56,7 +56,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const result = getAccreditatedAddressByParticipantIdAndActorType(
+      const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
         participantId,
         actorType,
@@ -79,7 +79,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         externalEventsMap: new Map(),
       });
 
-      const result = getAccreditatedAddressByParticipantIdAndActorType(
+      const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
         participantId,
         actorType,
@@ -109,7 +109,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const result = getAccreditatedAddressByParticipantIdAndActorType(
+      const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
         participantId,
         actorType,
@@ -139,7 +139,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const result = getAccreditatedAddressByParticipantIdAndActorType(
+      const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
         participantId,
         actorType,
@@ -171,7 +171,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const result = getAccreditatedAddressByParticipantIdAndActorType(
+      const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
         participantId,
         actorType,
