@@ -125,12 +125,11 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
 
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-          expect(ruleOutput).toEqual({
-            requestId: ruleInput.requestId,
-            responseToken: ruleInput.responseToken,
-            responseUrl: ruleInput.responseUrl,
+          expectRuleOutput({
             resultComment: testCase.resultComment,
             resultStatus: testCase.resultStatus,
+            ruleInput,
+            ruleOutput,
           });
         } else {
           spyOnLoadDocument(undefined);
@@ -139,12 +138,11 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
 
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-          expect(ruleOutput).toEqual({
-            requestId: ruleInput.requestId,
-            responseToken: ruleInput.responseToken,
-            responseUrl: ruleInput.responseUrl,
+          expectRuleOutput({
             resultComment: testCase.resultComment,
             resultStatus: testCase.resultStatus,
+            ruleInput,
+            ruleOutput,
           });
         }
       },
