@@ -20,7 +20,7 @@ import {
 } from '@carrot-fndn/shared/types';
 import { is } from 'typia';
 
-export const getAccreditatedAddressByParticipantIdAndActorType = (
+export const getAccreditedAddressByParticipantIdAndActorType = (
   massIdAuditDocument: Document,
   participantId: string,
   actorType: MassIdDocumentActorType,

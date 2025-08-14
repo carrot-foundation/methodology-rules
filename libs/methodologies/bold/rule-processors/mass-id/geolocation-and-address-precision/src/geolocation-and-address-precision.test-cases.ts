@@ -172,7 +172,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     actorParticipants,
     resultComment: `${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the accreditated address is not set',
+    scenario: 'the accredited address is not set',
   },
   {
     accreditationDocuments: validAccreditationDocuments,
@@ -297,7 +297,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the gps is not set, but the accreditated address is set and is valid',
+      'the gps is not set, but the accredited address is set and is valid',
   },
   {
     accreditationDocuments: validAccreditationDocuments,
@@ -331,7 +331,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the gps is not set, but the accreditated address is set and not valid',
+      'the gps is not set, but the accredited address is set and not valid',
   },
 ];
 
