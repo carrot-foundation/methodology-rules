@@ -11,11 +11,13 @@ import {
   getOrUndefined,
   isNil,
   isNonEmptyArray,
+  toDocumentKey,
 } from '@carrot-fndn/shared/helpers';
 import { getParticipantActorType } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentQuery,
   DocumentQueryService,
+  loadDocument,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
@@ -37,7 +39,7 @@ import {
 
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
-  getAccreditatedAddressByParticipantId,
+  getAccreditatedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -81,8 +83,25 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
+      const massIdAuditDocument = await loadDocument(
+        this.context.documentLoaderService,
+        toDocumentKey({
+          documentId: ruleInput.documentId,
+          documentKeyPrefix: ruleInput.documentKeyPrefix,
+        }),
+      );
+
+      if (isNil(massIdAuditDocument)) {
+        throw this.processorErrors.getKnownError(
+          this.processorErrors.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
+        );
+      }
+
       const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const ruleSubject = await this.getRuleSubject(documentsQuery);
+      const ruleSubject = await this.getRuleSubject(
+        massIdAuditDocument,
+        documentsQuery,
+      );
       const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
@@ -134,6 +153,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private buildParticipantsAddressData(
     events: NonNullable<Document['externalEvents']>,
     massIdDocument: Document,
+    massIdAuditDocument: Document,
     accreditationDocuments: Document[],
   ) {
     const participantsAddressData = new Map<
@@ -154,8 +174,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       participantsAddressData.set(actorType, {
-        accreditatedAddress: getAccreditatedAddressByParticipantId(
+        accreditatedAddress: getAccreditatedAddressByParticipantIdAndActorType(
+          massIdAuditDocument,
           event.participant.id,
+          actorType,
           accreditationDocuments,
         ),
         eventAddress: event.address,
@@ -316,6 +338,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private async getRuleSubject(
+    massIdAuditDocument: Document,
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
     const documents = await this.collectDocuments(documentQuery);
@@ -328,6 +351,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
         massIdDocument,
+        massIdAuditDocument,
         documents.accreditationDocuments,
       ),
     };
