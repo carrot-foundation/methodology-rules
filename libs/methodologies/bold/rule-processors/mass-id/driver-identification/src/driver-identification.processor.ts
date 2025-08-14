@@ -22,13 +22,13 @@ const { PICK_UP } = DocumentEventName;
 const { SLUDGE_PIPES } = DocumentEventVehicleType;
 
 export const RESULT_COMMENTS = {
-  DRIVER_AND_JUSTIFICATION_PROVIDED: `In the Pick-up event, both the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" and "${DRIVER_IDENTIFIER}" were provided, but only one is allowed.`,
-  DRIVER_IDENTIFIER: `In the Pick-up event, the "${DRIVER_IDENTIFIER}" was provided.`,
+  DRIVER_AND_JUSTIFICATION_PROVIDED: `In the ${PICK_UP} event, both the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" and "${DRIVER_IDENTIFIER}" were provided, but only one is allowed.`,
+  DRIVER_IDENTIFIER: `In the ${PICK_UP} event, the "${DRIVER_IDENTIFIER}" was provided.`,
   JUSTIFICATION_PROVIDED: (justification: string) =>
-    `In the Pick-up event, the "${DRIVER_IDENTIFIER}" was not provided, but a "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" was declared: ${justification}.`,
+    `In the ${PICK_UP} event, the "${DRIVER_IDENTIFIER}" was not provided, but a "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" was declared: ${justification}.`,
   MISSING_JUSTIFICATION: (vehicleType: string) =>
-    `In the Pick-up event, the vehicle "${vehicleType}" requires either a "${DRIVER_IDENTIFIER}" or an "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}".`,
-  SLUDGE_PIPES: `In the Pick-up event, the "${VEHICLE_TYPE}" is "${SLUDGE_PIPES}", so driver identification is not required.`,
+    `In the ${PICK_UP} event, the vehicle "${vehicleType}" requires either a "${DRIVER_IDENTIFIER}" or an "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}".`,
+  SLUDGE_PIPES: `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${SLUDGE_PIPES}", so driver identification is not required.`,
 } as const;
 
 interface RuleSubject {
