@@ -63,9 +63,9 @@ export const RESULT_COMMENTS = {
     actorType: string,
     addressDistance: number,
   ): string =>
-    `(${actorType}) The event address is ${addressDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `Non-compliant ${actorType} address: the event address is ${addressDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `(${actorType}) The captured GPS location is ${gpsDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
+    `Non-compliant ${actorType} address: the captured GPS location is ${gpsDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
     `No accredited address was found for the ${actorType} actor.`,
   PASSED_WITH_GPS: (
@@ -73,9 +73,9 @@ export const RESULT_COMMENTS = {
     addressDistance: number,
     gpsDistance: number,
   ): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
   PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `(${actorType}) The event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m). No GPS data was provided.`,
+    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m) (note: no GPS data was provided).`,
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {

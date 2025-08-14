@@ -33,18 +33,18 @@ export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
 ]);
 
 export const RESULT_COMMENTS = {
-  INVALID_LICENSE_PLATE_FORMAT: `The "${VEHICLE_LICENSE_PLATE}" format is invalid.`,
+  INVALID_LICENSE_PLATE_FORMAT: `In the ${PICK_UP} event, the "${VEHICLE_LICENSE_PLATE}" format is invalid.`,
   INVALID_VEHICLE_TYPE: (vehicleType: string) =>
-    `The "${VEHICLE_TYPE}" "${vehicleType}" is not supported by the methodology.`,
+    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" "${vehicleType}" is not supported by the methodology.`,
   LICENSE_PLATE_MISSING: (vehicleType: string) =>
-    `The "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_LICENSE_PLATE}", but none was provided.`,
+    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_LICENSE_PLATE}", but none was provided.`,
   PICK_UP_EVENT_MISSING: `Expected "${PICK_UP}" event to be declared.`,
   VEHICLE_DESCRIPTION_MISSING: (vehicleType: string) =>
-    `The "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_DESCRIPTION}", but none was provided.`,
+    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_DESCRIPTION}", but none was provided.`,
   VEHICLE_IDENTIFIED_WITH_DESCRIPTION: (vehicleType: string) =>
     `A "${VEHICLE_LICENSE_PLATE}" is not required for "${vehicleType}", and the "${VEHICLE_DESCRIPTION}" was provided.`,
-  VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE: `A valid "${VEHICLE_TYPE}" and correctly formatted "${VEHICLE_LICENSE_PLATE}" were provided.`,
-  VEHICLE_TYPE_MISSING: `The "${VEHICLE_TYPE}" was not provided.`,
+  VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE: `In the ${PICK_UP} event, a valid "${VEHICLE_TYPE}" and correctly formatted "${VEHICLE_LICENSE_PLATE}" were provided.`,
+  VEHICLE_TYPE_MISSING: `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" was not provided.`,
 } as const;
 
 interface RuleSubject {
