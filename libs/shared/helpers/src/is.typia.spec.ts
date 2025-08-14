@@ -43,6 +43,7 @@ describe('is.typia', () => {
         'ABCD1E23',
         'ABCD-1234',
         'ABC-12345',
+        'ABC\t1234',
         'A1C1D23',
         '1BC1D23',
         'ABCAD23',
