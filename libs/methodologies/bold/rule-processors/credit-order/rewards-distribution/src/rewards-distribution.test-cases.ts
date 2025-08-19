@@ -63,7 +63,7 @@ const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
 const { RELATED } = DocumentEventName;
 const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 const {
-  APPOINTED_NGO,
+  COMMUNITY_IMPACT_POOL,
   HAULER,
   INTEGRATOR,
   METHODOLOGY_AUTHOR,
@@ -77,7 +77,7 @@ const {
 const UNIT_PRICE_VALUE = 0.153_33;
 
 const DEFAULT_REWARDS = {
-  [APPOINTED_NGO]: '0',
+  [COMMUNITY_IMPACT_POOL]: '0',
   [INTEGRATOR]: '8',
   [METHODOLOGY_AUTHOR]: '1',
   [METHODOLOGY_DEVELOPER]: '1',
@@ -90,11 +90,11 @@ const STANDARD_REWARDS_DISTRIBUTION = {
   [RECYCLER]: '20',
   [WASTE_GENERATOR]: '15',
   ...DEFAULT_REWARDS,
-  [APPOINTED_NGO]: '15',
+  [COMMUNITY_IMPACT_POOL]: '15',
 };
 
 const MULTI_HAULER_REWARDS_DISTRIBUTION = {
-  [APPOINTED_NGO]: '0',
+  [COMMUNITY_IMPACT_POOL]: '0',
   [HAULER]: ['3.333333', '3.333333', '3.333334'],
   [INTEGRATOR]: '8',
   [METHODOLOGY_AUTHOR]: '1',
@@ -251,8 +251,8 @@ const createMultiHaulerRewardsDistribution = (
       MULTI_HAULER_REWARDS_DISTRIBUTION[INTEGRATOR],
     ),
     createMassIdActorReward(
-      APPOINTED_NGO,
-      MULTI_HAULER_REWARDS_DISTRIBUTION[APPOINTED_NGO],
+      COMMUNITY_IMPACT_POOL,
+      MULTI_HAULER_REWARDS_DISTRIBUTION[COMMUNITY_IMPACT_POOL],
     ),
     createMethodologyActorReward(
       METHODOLOGY_AUTHOR,
@@ -405,7 +405,7 @@ const expectedResults = {
       percentage: '15',
     },
     {
-      actorType: RewardsDistributionActorType.APPOINTED_NGO,
+      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
       amount: '34.49925',
       percentage: '15',
     },
@@ -468,7 +468,7 @@ const expectedResults = {
       percentage: '8',
     },
     {
-      actorType: RewardsDistributionActorType.APPOINTED_NGO,
+      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
       amount: '0',
       percentage: '0',
     },
@@ -521,7 +521,7 @@ const expectedResults = {
       percentage: '15',
     },
     {
-      actorType: RewardsDistributionActorType.APPOINTED_NGO,
+      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
       amount: '22.9995',
       percentage: '15',
     },

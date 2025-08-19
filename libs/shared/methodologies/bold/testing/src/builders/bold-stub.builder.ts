@@ -93,7 +93,7 @@ export const MASS_ID_ACTOR_PARTICIPANTS = [
 ] as const;
 
 export const METHODOLOGY_ACTOR_PARTICIPANTS = [
-  MethodologyDocumentActorType.APPOINTED_NGO,
+  MethodologyDocumentActorType.COMMUNITY_IMPACT_POOL,
   MethodologyDocumentActorType.NETWORK,
   MethodologyDocumentActorType.METHODOLOGY_AUTHOR,
   MethodologyDocumentActorType.METHODOLOGY_DEVELOPER,

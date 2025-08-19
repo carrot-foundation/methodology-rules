@@ -25,7 +25,7 @@ const { PICK_UP } = DocumentEventName;
 const { WASTE_ORIGIN } = DocumentEventAttributeName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 const {
-  APPOINTED_NGO,
+  COMMUNITY_IMPACT_POOL,
   HAULER,
   INTEGRATOR,
   METHODOLOGY_AUTHOR,
@@ -37,7 +37,7 @@ const {
 } = RewardsDistributionActorType;
 
 const DEFAULT_REWARDS = {
-  [APPOINTED_NGO]: '0',
+  [COMMUNITY_IMPACT_POOL]: '0',
   [INTEGRATOR]: '8',
   [METHODOLOGY_AUTHOR]: '1',
   [METHODOLOGY_DEVELOPER]: '1',
@@ -51,7 +51,7 @@ const EXPECTED_REWARDS = {
     [RECYCLER]: '20',
     [WASTE_GENERATOR]: '15',
     ...DEFAULT_REWARDS,
-    [APPOINTED_NGO]: '15',
+    [COMMUNITY_IMPACT_POOL]: '15',
   },
   [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
     [HAULER]: '5',
@@ -60,7 +60,7 @@ const EXPECTED_REWARDS = {
     [RECYCLER]: '30',
     [WASTE_GENERATOR]: '12.5',
     ...DEFAULT_REWARDS,
-    [APPOINTED_NGO]: '12.5',
+    [COMMUNITY_IMPACT_POOL]: '12.5',
   },
   [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
     [HAULER]: '5',
@@ -69,7 +69,7 @@ const EXPECTED_REWARDS = {
     [RECYCLER]: '30',
     [WASTE_GENERATOR]: '12.5',
     ...DEFAULT_REWARDS,
-    [APPOINTED_NGO]: '12.5',
+    [COMMUNITY_IMPACT_POOL]: '12.5',
   },
   WITHOUT_WASTE_GENERATOR: {
     WITH_HAULER: {

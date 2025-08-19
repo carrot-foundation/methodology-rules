@@ -157,7 +157,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       );
     }
 
-    if (actorType === RewardsDistributionActorType.APPOINTED_NGO) {
+    if (actorType === RewardsDistributionActorType.COMMUNITY_IMPACT_POOL) {
       const sourcePercentage = getNgoActorMassIdPercentage(
         massIdDocument,
         wasteGeneratorRewardDistribution,
