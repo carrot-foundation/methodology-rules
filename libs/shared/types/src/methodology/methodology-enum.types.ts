@@ -5,8 +5,8 @@ export enum DataSetName {
 }
 
 export enum MethodologyActorType {
-  COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
   AUDITOR = 'Auditor',
+  COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
   HAULER = 'Hauler',
   INTEGRATOR = 'Integrator',
   METHODOLOGY_AUTHOR = 'Methodology Author',
@@ -35,8 +35,8 @@ export enum MethodologyDocumentEventAttributeType {
 }
 
 export enum MethodologyDocumentEventLabel {
-  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
   AUDITOR = MethodologyActorType.AUDITOR,
+  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
   HAULER = MethodologyActorType.HAULER,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
   METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
