@@ -14,7 +14,7 @@ import BigNumber from 'bignumber.js';
 import { type RewardsDistribution } from './rewards-distribution.types';
 
 const {
-  APPOINTED_NGO,
+  COMMUNITY_IMPACT_POOL,
   HAULER,
   INTEGRATOR,
   METHODOLOGY_AUTHOR,
@@ -30,7 +30,7 @@ export const LARGE_REVENUE_BUSINESS_DISCOUNT = 0.5;
 export const REQUIRED_ACTOR_TYPES = {
   MASS_ID: [RECYCLER, PROCESSOR, INTEGRATOR],
   METHODOLOGY: [
-    APPOINTED_NGO,
+    COMMUNITY_IMPACT_POOL,
     METHODOLOGY_AUTHOR,
     METHODOLOGY_DEVELOPER,
     NETWORK,
@@ -39,7 +39,7 @@ export const REQUIRED_ACTOR_TYPES = {
 
 export const REWARDS_DISTRIBUTION: RewardsDistribution = {
   [RewardsDistributionWasteType.MIXED_ORGANIC_WASTE]: {
-    [APPOINTED_NGO]: BigNumber(0),
+    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
     [HAULER]: BigNumber(0.1),
     [INTEGRATOR]: BigNumber(0.08),
     [METHODOLOGY_AUTHOR]: BigNumber(0.01),
@@ -50,7 +50,7 @@ export const REWARDS_DISTRIBUTION: RewardsDistribution = {
     [WASTE_GENERATOR]: BigNumber(0.3),
   },
   [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
-    [APPOINTED_NGO]: BigNumber(0),
+    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
     [HAULER]: BigNumber(0.05),
     [INTEGRATOR]: BigNumber(0.08),
     [METHODOLOGY_AUTHOR]: BigNumber(0.01),
@@ -61,7 +61,7 @@ export const REWARDS_DISTRIBUTION: RewardsDistribution = {
     [WASTE_GENERATOR]: BigNumber(0.25),
   },
   [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
-    [APPOINTED_NGO]: BigNumber(0),
+    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
     [HAULER]: BigNumber(0.05),
     [INTEGRATOR]: BigNumber(0.08),
     [METHODOLOGY_AUTHOR]: BigNumber(0.01),

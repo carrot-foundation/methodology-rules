@@ -210,7 +210,7 @@ export enum MethodologyBaseline {
 }
 
 export enum MethodologyDocumentActorType {
-  APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
+  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
   METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
   METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
   NETWORK = MethodologyActorType.NETWORK,

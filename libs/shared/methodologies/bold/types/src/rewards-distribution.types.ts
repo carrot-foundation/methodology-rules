@@ -6,7 +6,7 @@ import {
 } from '@carrot-fndn/shared/types';
 
 export enum RewardsDistributionActorType {
-  APPOINTED_NGO = MethodologyActorType.APPOINTED_NGO,
+  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
   HAULER = MethodologyActorType.HAULER,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
   METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
