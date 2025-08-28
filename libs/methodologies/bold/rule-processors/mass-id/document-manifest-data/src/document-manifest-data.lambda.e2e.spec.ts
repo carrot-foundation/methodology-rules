@@ -29,7 +29,10 @@ describe('DocumentManifestDataLambda E2E', () => {
   it.each([...documentManifestDataTestCases, ...exceptionTestCases])(
     'should return $resultStatus when $scenario',
     async ({ documentManifestType, events, resultStatus }) => {
-      const lambda = documentManifestDataLambda(documentManifestType);
+      const lambda = documentManifestDataLambda({
+        aiParameters: {},
+        documentManifestType,
+      });
 
       const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
         .createMassIdDocuments({

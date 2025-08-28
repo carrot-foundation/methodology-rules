@@ -1,3 +1,4 @@
+import { logger } from '@carrot-fndn/shared/helpers';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -29,9 +30,10 @@ describe('DocumentManifestDataProcessor', () => {
   it.each([...exceptionTestCases, ...documentManifestDataTestCases])(
     'should return $resultStatus when $scenario',
     async ({ documentManifestType, events, resultComment, resultStatus }) => {
-      const ruleDataProcessor = new DocumentManifestDataProcessor(
+      const ruleDataProcessor = new DocumentManifestDataProcessor({
+        aiParameters: {},
         documentManifestType,
-      );
+      });
 
       const ruleInput = random<Required<RuleInput>>();
 
@@ -61,9 +63,10 @@ describe('DocumentManifestDataProcessor', () => {
     it('should throw error when DOCUMENT_ATTACHMENT_BUCKET_NAME is not set', async () => {
       delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
 
-      const ruleDataProcessor = new DocumentManifestDataProcessor(
-        DocumentEventName.TRANSPORT_MANIFEST,
-      );
+      const ruleDataProcessor = new DocumentManifestDataProcessor({
+        aiParameters: {},
+        documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
+      });
       const ruleInput = random<Required<RuleInput>>();
       const { massIdDocument } = new BoldStubsBuilder()
         .createMassIdDocuments({
@@ -83,11 +86,12 @@ describe('DocumentManifestDataProcessor', () => {
     it('should call AI validation when enabled', async () => {
       process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'] = 'true';
 
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
 
-      const ruleDataProcessor = new DocumentManifestDataProcessor(
-        DocumentEventName.TRANSPORT_MANIFEST,
-      );
+      const ruleDataProcessor = new DocumentManifestDataProcessor({
+        aiParameters: {},
+        documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
+      });
       const ruleInput = random<Required<RuleInput>>();
       const { massIdDocument } = new BoldStubsBuilder()
         .createMassIdDocuments({
@@ -98,13 +102,13 @@ describe('DocumentManifestDataProcessor', () => {
       documentLoaderService.mockResolvedValueOnce(massIdDocument);
       await ruleDataProcessor.process(ruleInput);
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining(
           'AI validation failed for document manifest type',
         ),
       );
 
-      consoleWarnSpy.mockRestore();
+      loggerWarnSpy.mockRestore();
       delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
     });
   });
