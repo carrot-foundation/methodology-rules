@@ -5,6 +5,7 @@ import {
   isNil,
   isNonEmptyArray,
   isNonEmptyString,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import { AiAttachmentValidatorService } from '@carrot-fndn/shared/methodologies/ai-attachment-validator';
 import {
@@ -42,6 +43,10 @@ const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
+
+export interface AIParameters {
+  additionalContext?: NonEmptyString;
+}
 
 export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
@@ -84,11 +89,19 @@ const DOCUMENT_TYPE_MAPPING = {
 const aiAttachmentValidatorService = new AiAttachmentValidatorService();
 
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
+  private readonly aiParameters: AIParameters;
   private readonly documentManifestType: DocumentManifestType;
 
-  constructor(documentManifestType: DocumentManifestType) {
+  constructor({
+    aiParameters,
+    documentManifestType,
+  }: {
+    aiParameters: AIParameters;
+    documentManifestType: DocumentManifestType;
+  }) {
     super();
     this.documentManifestType = documentManifestType;
+    this.aiParameters = aiParameters;
   }
 
   protected override async evaluateResult(
@@ -202,10 +215,12 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       );
     }
 
-    return events.map(
-      (event) =>
-        `s3://${bucketName}/attachments/document/${documentId}/${event.attachment?.attachmentId || 'attachment'}.pdf`,
-    );
+    return events
+      .filter((event) => event.attachment?.attachmentId !== undefined)
+      .map(
+        (event) =>
+          `s3://${bucketName}/attachments/document/${documentId}/${event.attachment?.attachmentId}`,
+      );
   }
 
   private shouldValidateAttachmentsConsistencyWithAI(): boolean {
@@ -224,12 +239,13 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     for (const attachmentPath of attachmentPaths) {
       const aiValidationResult =
         await aiAttachmentValidatorService.validateAttachment({
+          additionalContext: this.aiParameters.additionalContext,
           attachmentPath,
           document,
         });
 
       if (aiValidationResult.isValid === false) {
-        console.warn(
+        logger.warn(
           `AI validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse}`,
         );
       }
