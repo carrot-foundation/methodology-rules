@@ -216,11 +216,12 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     }
 
     return events
-      .filter((event) => event.attachment?.attachmentId !== undefined)
+      .map((event) => event.attachment?.attachmentId)
+      .filter(isNonEmptyString)
       .map(
-        (event) =>
-          `s3://${bucketName}/attachments/document/${documentId}/${event.attachment?.attachmentId}`,
-      );
+        (attachmentId) =>
+          `s3://${bucketName}/attachments/document/${documentId}/${attachmentId}`,
+      ) as NonEmptyString[];
   }
 
   private shouldValidateAttachmentsConsistencyWithAI(): boolean {
