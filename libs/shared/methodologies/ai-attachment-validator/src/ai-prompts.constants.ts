@@ -7,9 +7,6 @@ export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
   | typeof TRANSPORT_MANIFEST;
 
-/**
- * AI context prompt for recycling manifest (waste final destination certificate) validation
- */
 export const RECYCLING_MANIFEST_AI_CONTEXT: NonEmptyString = `You are analyzing a document that should be a waste final destination certificate. Look for these core indicators:
 
 DOCUMENT PURPOSE:
@@ -49,9 +46,6 @@ QUANTITY ANALYSIS CONSIDERATIONS:
 - The certificate serves as proof of proper disposal for multiple related waste batches
 - Cross-reference MassID values as partial components of larger waste treatment operations`;
 
-/**
- * AI context prompt for transport manifest validation
- */
 export const TRANSPORT_MANIFEST_AI_CONTEXT: NonEmptyString = `You are analyzing a document that should be a waste transport manifest. Look for these core indicators:
 
 DOCUMENT PURPOSE:
@@ -90,20 +84,12 @@ DISTINCTIVE LANGUAGE:
 - Focus on logistics rather than treatment or disposal
 - Transportation safety and packaging requirements`;
 
-/**
- * Map of document manifest types to their corresponding AI context prompts
- */
 export const AI_CONTEXT_PROMPTS: Record<DocumentManifestType, NonEmptyString> =
   {
     [RECYCLING_MANIFEST]: RECYCLING_MANIFEST_AI_CONTEXT,
     [TRANSPORT_MANIFEST]: TRANSPORT_MANIFEST_AI_CONTEXT,
   } as const;
 
-/**
- * Get the AI context prompt for a specific document manifest type
- * @param documentType - The document manifest type
- * @returns The corresponding AI context prompt
- */
 export const getAiContextForDocumentType = (
   documentType: DocumentManifestType,
 ): NonEmptyString => AI_CONTEXT_PROMPTS[documentType];
