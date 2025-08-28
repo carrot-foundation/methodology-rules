@@ -93,10 +93,11 @@ DISTINCTIVE LANGUAGE:
 /**
  * Map of document manifest types to their corresponding AI context prompts
  */
-export const AI_CONTEXT_PROMPTS: Record<DocumentManifestType, NonEmptyString> = {
-  [RECYCLING_MANIFEST]: RECYCLING_MANIFEST_AI_CONTEXT,
-  [TRANSPORT_MANIFEST]: TRANSPORT_MANIFEST_AI_CONTEXT,
-} as const;
+export const AI_CONTEXT_PROMPTS: Record<DocumentManifestType, NonEmptyString> =
+  {
+    [RECYCLING_MANIFEST]: RECYCLING_MANIFEST_AI_CONTEXT,
+    [TRANSPORT_MANIFEST]: TRANSPORT_MANIFEST_AI_CONTEXT,
+  } as const;
 
 /**
  * Get the AI context prompt for a specific document manifest type
@@ -105,6 +106,4 @@ export const AI_CONTEXT_PROMPTS: Record<DocumentManifestType, NonEmptyString> = 
  */
 export const getAiContextForDocumentType = (
   documentType: DocumentManifestType,
-): NonEmptyString => {
-  return AI_CONTEXT_PROMPTS[documentType];
-};
+): NonEmptyString => AI_CONTEXT_PROMPTS[documentType];

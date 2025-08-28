@@ -217,7 +217,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     return events
       .map((event) => event.attachment?.attachmentId)
-      .filter(isNonEmptyString)
+      .filter((attachmentId) => isNonEmptyString(attachmentId))
       .map(
         (attachmentId) =>
           `s3://${bucketName}/attachments/document/${documentId}/${attachmentId}`,
