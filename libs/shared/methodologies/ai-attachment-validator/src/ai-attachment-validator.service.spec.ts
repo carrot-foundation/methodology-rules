@@ -24,6 +24,7 @@ describe('AiAttachmentValidatorService', () => {
   beforeEach(() => {
     service = new AiAttachmentValidatorService();
     jest.spyOn(logger, 'debug').mockImplementation();
+    jest.spyOn(logger, 'warn').mockImplementation();
   });
 
   afterEach(() => {
@@ -33,7 +34,7 @@ describe('AiAttachmentValidatorService', () => {
   describe('validateAttachment', () => {
     it('should call the post method with the correct arguments and return valid response', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const apiResponse: ApiAiValidationResponse = [
+      const validationData: ApiAiValidationResponse = [
         {
           fieldName: 'testField',
           invalidReason: null,
@@ -41,6 +42,8 @@ describe('AiAttachmentValidatorService', () => {
           value: 'testValue',
         },
       ];
+
+      const apiResponse = { results: JSON.stringify(validationData) };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -64,7 +67,7 @@ describe('AiAttachmentValidatorService', () => {
 
     it('should return invalid response when AI validation finds invalid fields', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const apiResponse: ApiAiValidationResponse = [
+      const validationData: ApiAiValidationResponse = [
         {
           fieldName: 'field1',
           invalidReason: 'Field 1 is incosistent with the document',
@@ -85,6 +88,8 @@ describe('AiAttachmentValidatorService', () => {
         },
       ];
 
+      const apiResponse = { results: JSON.stringify(validationData) };
+
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
       const result = await service.validateAttachment(dto);
@@ -97,7 +102,7 @@ describe('AiAttachmentValidatorService', () => {
 
     it('should return valid response when all fields are valid', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const apiResponse: ApiAiValidationResponse = [
+      const validationData: ApiAiValidationResponse = [
         {
           fieldName: 'field1',
           invalidReason: null,
@@ -111,6 +116,8 @@ describe('AiAttachmentValidatorService', () => {
           value: 'valid-value-2',
         },
       ];
+
+      const apiResponse = { results: JSON.stringify(validationData) };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -136,7 +143,7 @@ describe('AiAttachmentValidatorService', () => {
 
       const result = await service.validateAttachment(dto);
 
-      expect(logger.debug).toHaveBeenCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         'AI validation failed:',
         error.message,
       );
@@ -166,7 +173,8 @@ describe('AiAttachmentValidatorService', () => {
 
       delete dto.additionalContext; // Ensure additionalContext is not included in the test
 
-      const apiResponse = stubApiAiValidationResponse();
+      const validationData = stubApiAiValidationResponse();
+      const apiResponse = { results: JSON.stringify(validationData) };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 

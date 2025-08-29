@@ -1,10 +1,10 @@
 import { AwsHttpService } from '@carrot-fndn/shared/aws-http';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { NonEmptyString } from '@carrot-fndn/shared/types';
 import axios from 'axios';
 
 import type {
   AiValidateAttachmentDto,
-  ApiAiValidationResponse,
   ApiValidateAttachmentResponse,
 } from './ai-attachment-validator.api.dto';
 
@@ -34,14 +34,14 @@ export class AiAttachmentValidatorService extends AwsHttpService {
     try {
       const mappedDto = this.mapValidateAttachmentDto(dto);
 
-      const aiValidationResult = await this.post<ApiAiValidationResponse>(
+      const { results } = await this.post<{ results: NonEmptyString }>(
         getAiAttachmentValidatorApiUri(),
         mappedDto,
       );
 
-      return this.processValidationResult(aiValidationResult);
+      return this.processValidationResult(JSON.parse(results));
     } catch (error) {
-      logger.debug(
+      logger.warn(
         'AI validation failed:',
         error instanceof Error ? error.message : String(error),
       );
@@ -65,11 +65,11 @@ export class AiAttachmentValidatorService extends AwsHttpService {
   }
 
   private processValidationResult(
-    validationResult: ApiAiValidationResponse,
+    validationResult: unknown,
   ): ApiValidateAttachmentResponse {
-    assertApiAiValidationResponse(validationResult);
+    const validatedResult = assertApiAiValidationResponse(validationResult);
 
-    const invalidFields = validationResult
+    const invalidFields = validatedResult
       .filter((field) => !field.isValid)
       .map((field) => formatInvalidField(field.fieldName, field.invalidReason))
       .join(FIELD_SEPARATOR);
