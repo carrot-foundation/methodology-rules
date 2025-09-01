@@ -1,5 +1,6 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
+import { CloudWatchMetricsService } from '@carrot-fndn/shared/cloudwatch-metrics';
 import {
   getOrDefault,
   isNil,
@@ -249,6 +250,17 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         logger.warn(
           `AI validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse}`,
         );
+
+        const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
+
+        if (cloudWatchMetricsService.isEnabled()) {
+          cloudWatchMetricsService.recordAIValidationFailure({
+            attachmentPath,
+            documentId: document.id,
+            documentManifestType: this.documentManifestType,
+            validationResponse: aiValidationResult.validationResponse,
+          });
+        }
       }
     }
   }

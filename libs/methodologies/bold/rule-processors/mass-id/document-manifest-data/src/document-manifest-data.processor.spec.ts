@@ -1,3 +1,11 @@
+import {
+  CloudWatchClient,
+  PutMetricDataCommand,
+} from '@aws-sdk/client-cloudwatch';
+import {
+  CLOUDWATCH_CONSTANTS,
+  CloudWatchMetricsService,
+} from '@carrot-fndn/shared/cloudwatch-metrics';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -6,6 +14,8 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
+import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
 import { random } from 'typia';
 
 import { DocumentManifestDataProcessor } from './document-manifest-data.processor';
@@ -21,10 +31,13 @@ describe('DocumentManifestDataProcessor', () => {
 
   beforeEach(() => {
     process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
   });
 
   afterEach(() => {
     delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+    jest.useRealTimers();
   });
 
   it.each([...exceptionTestCases, ...documentManifestDataTestCases])(
@@ -109,6 +122,51 @@ describe('DocumentManifestDataProcessor', () => {
       );
 
       loggerWarnSpy.mockRestore();
+      delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
+    });
+
+    it('should put metric to cloud watch service when validation fails', async () => {
+      jest
+        .spyOn(CloudWatchMetricsService.prototype, 'isEnabled')
+        .mockReturnValue(true);
+      const cloudWatchMock = mockClient(CloudWatchClient);
+
+      cloudWatchMock.on(PutMetricDataCommand).resolves({});
+
+      process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'] = 'true';
+
+      const ruleDataProcessor = new DocumentManifestDataProcessor({
+        aiParameters: {},
+        documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
+      });
+      const ruleInput = random<Required<RuleInput>>();
+      const { massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocuments({
+          externalEventsMap: {},
+        })
+        .build();
+
+      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      await ruleDataProcessor.process(ruleInput);
+
+      expect(cloudWatchMock).toHaveReceivedCommandWith(PutMetricDataCommand, {
+        MetricData: [
+          {
+            Dimensions: [
+              {
+                Name: CLOUDWATCH_CONSTANTS.DIMENSION_NAME,
+                Value: DocumentEventName.TRANSPORT_MANIFEST,
+              },
+            ],
+            MetricName: CLOUDWATCH_CONSTANTS.METRIC_NAME,
+            Timestamp: new Date('2025-01-01T00:00:00Z'),
+            Unit: CLOUDWATCH_CONSTANTS.METRIC_UNIT,
+            Value: CLOUDWATCH_CONSTANTS.METRIC_VALUE,
+          },
+        ],
+        Namespace: CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
+      });
+
       delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
     });
   });
