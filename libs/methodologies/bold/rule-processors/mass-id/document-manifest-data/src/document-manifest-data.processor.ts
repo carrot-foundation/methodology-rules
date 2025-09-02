@@ -254,7 +254,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
 
         if (cloudWatchMetricsService.isEnabled()) {
-          cloudWatchMetricsService.recordAIValidationFailure({
+          await cloudWatchMetricsService.recordAIValidationFailure({
             attachmentPath,
             documentId: document.id,
             documentManifestType: this.documentManifestType,
