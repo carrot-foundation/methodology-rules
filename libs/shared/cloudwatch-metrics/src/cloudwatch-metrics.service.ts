@@ -2,7 +2,7 @@ import {
   CloudWatchClient,
   PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
-import { getNonEmptyStringOrDefault } from '@carrot-fndn/shared/helpers';
+import { getNonEmptyStringOrDefault, isNil } from '@carrot-fndn/shared/helpers';
 import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
@@ -79,11 +79,7 @@ export class CloudWatchMetricsService {
 
     const value = process.env['ENABLE_CLOUDWATCH_METRICS'];
 
-    if (!value) {
-      return true;
-    }
-
-    return value.toLowerCase() === 'true';
+    return !isNil(value) && value.trim().toLowerCase() === 'true';
   }
 
   private async putMetric(data: CloudWatchMetricData): Promise<void> {

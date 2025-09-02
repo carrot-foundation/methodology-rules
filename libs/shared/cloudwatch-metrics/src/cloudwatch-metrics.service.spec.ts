@@ -88,7 +88,7 @@ describe('CloudWatchMetricsService', () => {
       const config = instance['config'];
 
       expect(config.namespace).toBe(CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE);
-      expect(config.enabled).toBe(true);
+      expect(config.enabled).toBe(false);
     });
 
     it('should use custom CLOUDWATCH_METRICS_NAMESPACE when provided', () => {
@@ -162,7 +162,7 @@ describe('CloudWatchMetricsService', () => {
       expect(typeof jest).toBe('object');
     });
 
-    it('should be enabled when ENABLE_CLOUDWATCH_METRICS is undefined and not in test env', () => {
+    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is undefined and not in test env', () => {
       setEnvironmentVariables({
         ENABLE_CLOUDWATCH_METRICS: undefined,
         NODE_ENV: 'production',
@@ -170,7 +170,7 @@ describe('CloudWatchMetricsService', () => {
 
       const instance = CloudWatchMetricsService.getInstance();
 
-      expect(instance.isEnabled()).toBe(true);
+      expect(instance.isEnabled()).toBe(false);
     });
 
     it('should respect ENABLE_CLOUDWATCH_METRICS=true (case insensitive)', () => {
