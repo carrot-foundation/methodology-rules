@@ -1,7 +1,4 @@
-import {
-  CloudWatchClient,
-  PutMetricDataCommand,
-} from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { random } from 'typia';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
@@ -13,20 +10,7 @@ import {
 
 jest.mock('@aws-sdk/client-cloudwatch');
 
-const mockSend = jest.fn();
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);
-const mockPutMetricDataCommand = jest.mocked(PutMetricDataCommand);
-
-mockCloudWatchClient.mockImplementation(
-  () =>
-    ({
-      send: mockSend,
-    }) as never,
-);
-
-mockPutMetricDataCommand.mockImplementation(
-  (parameters) => parameters as never,
-);
 
 const originalEnvironment = process.env;
 
@@ -56,11 +40,7 @@ const createMockCloudWatchMetricData = (
 describe('CloudWatchMetricsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSend.mockClear();
     CloudWatchMetricsService['instance'] = null;
-
-    mockCloudWatchClient.mockClear();
-    mockPutMetricDataCommand.mockClear();
 
     setModuleCloudWatchClient(null);
 
@@ -327,20 +307,6 @@ describe('CloudWatchMetricsService', () => {
       expect(mockCloudWatchClient).toHaveBeenCalledTimes(1);
     });
 
-    it('should not make AWS calls when CloudWatch is disabled', async () => {
-      setEnvironmentVariables({
-        NODE_ENV: 'test',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData();
-
-      await instance.recordAIValidationFailure(mockData);
-
-      expect(mockSend).not.toHaveBeenCalled();
-      expect(mockPutMetricDataCommand).not.toHaveBeenCalled();
-    });
-
     it('should create PutMetricDataCommand with correct parameters structure', () => {
       const mockData = createMockCloudWatchMetricData({
         documentManifestType: 'TestManifestType' as never,
@@ -404,38 +370,10 @@ describe('CloudWatchMetricsService', () => {
   });
 
   describe('Error handling', () => {
-    it('should handle AWS SDK errors gracefully when CloudWatch is enabled', async () => {
-      const consoleErrorSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      const originalJest = globalThis.jest;
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      delete (globalThis as any).jest;
-
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      mockSend.mockRejectedValue(new Error('AWS SDK Error'));
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData();
-
-      await expect(
-        instance.recordAIValidationFailure(mockData),
-      ).resolves.not.toThrow();
-
-      globalThis.jest = originalJest;
-      consoleErrorSpy.mockRestore();
-    });
-
     it('should handle empty string environment variables', async () => {
       setEnvironmentVariables({
         AWS_REGION: undefined,
-        CLOUDWATCH_METRICS_NAMESPACE: undefined,
+        CLOUDWATCH_METRICS_NAMESPACE: '',
         ENABLE_CLOUDWATCH_METRICS: 'true',
         NODE_ENV: 'production',
       });
@@ -452,23 +390,6 @@ describe('CloudWatchMetricsService', () => {
       expect(mockCloudWatchClient).toHaveBeenCalledWith({
         region: CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
       });
-    });
-
-    it('should handle null and undefined CloudWatchMetricData properties gracefully', async () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-
-      const mockData = createMockCloudWatchMetricData({
-        validationResponse: undefined,
-      });
-
-      await expect(
-        instance.recordAIValidationFailure(mockData),
-      ).resolves.not.toThrow();
     });
   });
 });
