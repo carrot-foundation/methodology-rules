@@ -12,7 +12,7 @@ jest.mock('@aws-sdk/client-cloudwatch');
 
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);
 
-const originalEnvironment = process.env;
+const originalEnvironment = { ...process.env };
 
 const setEnvironmentVariables = (
   environmentVariables: Record<string, string | undefined>,
