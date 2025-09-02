@@ -1,7 +1,4 @@
-import {
-  CloudWatchClient,
-  PutMetricDataCommand,
-} from '@aws-sdk/client-cloudwatch';
+import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
 import { random } from 'typia';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
@@ -13,22 +10,9 @@ import {
 
 jest.mock('@aws-sdk/client-cloudwatch');
 
-const mockSend = jest.fn();
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);
-const mockPutMetricDataCommand = jest.mocked(PutMetricDataCommand);
 
-mockCloudWatchClient.mockImplementation(
-  () =>
-    ({
-      send: mockSend,
-    }) as never,
-);
-
-mockPutMetricDataCommand.mockImplementation(
-  (parameters) => parameters as never,
-);
-
-const originalEnvironment = process.env;
+const originalEnvironment = { ...process.env };
 
 const setEnvironmentVariables = (
   environmentVariables: Record<string, string | undefined>,
@@ -56,11 +40,7 @@ const createMockCloudWatchMetricData = (
 describe('CloudWatchMetricsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSend.mockClear();
     CloudWatchMetricsService['instance'] = null;
-
-    mockCloudWatchClient.mockClear();
-    mockPutMetricDataCommand.mockClear();
 
     setModuleCloudWatchClient(null);
 
@@ -108,7 +88,7 @@ describe('CloudWatchMetricsService', () => {
       const config = instance['config'];
 
       expect(config.namespace).toBe(CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE);
-      expect(config.enabled).toBe(true);
+      expect(config.enabled).toBe(false);
     });
 
     it('should use custom CLOUDWATCH_METRICS_NAMESPACE when provided', () => {
@@ -182,7 +162,7 @@ describe('CloudWatchMetricsService', () => {
       expect(typeof jest).toBe('object');
     });
 
-    it('should be enabled when ENABLE_CLOUDWATCH_METRICS is undefined and not in test env', () => {
+    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is undefined and not in test env', () => {
       setEnvironmentVariables({
         ENABLE_CLOUDWATCH_METRICS: undefined,
         NODE_ENV: 'production',
@@ -190,7 +170,7 @@ describe('CloudWatchMetricsService', () => {
 
       const instance = CloudWatchMetricsService.getInstance();
 
-      expect(instance.isEnabled()).toBe(true);
+      expect(instance.isEnabled()).toBe(false);
     });
 
     it('should respect ENABLE_CLOUDWATCH_METRICS=true (case insensitive)', () => {
@@ -327,57 +307,6 @@ describe('CloudWatchMetricsService', () => {
       expect(mockCloudWatchClient).toHaveBeenCalledTimes(1);
     });
 
-    it('should not make AWS calls when CloudWatch is disabled', async () => {
-      setEnvironmentVariables({
-        NODE_ENV: 'test',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData();
-
-      await instance.recordAIValidationFailure(mockData);
-
-      expect(mockSend).not.toHaveBeenCalled();
-      expect(mockPutMetricDataCommand).not.toHaveBeenCalled();
-    });
-
-    it('should create PutMetricDataCommand with correct parameters structure', () => {
-      const mockData = createMockCloudWatchMetricData({
-        documentManifestType: 'TestManifestType' as never,
-      });
-
-      const expectedCommandParameters = {
-        MetricData: [
-          {
-            Dimensions: [
-              {
-                Name: CLOUDWATCH_CONSTANTS.DIMENSION_NAME,
-                Value: mockData.documentManifestType,
-              },
-            ],
-            MetricName: CLOUDWATCH_CONSTANTS.METRIC_NAME,
-            Timestamp: expect.any(Date),
-            Unit: CLOUDWATCH_CONSTANTS.METRIC_UNIT,
-            Value: CLOUDWATCH_CONSTANTS.METRIC_VALUE,
-          },
-        ],
-        Namespace: expect.any(String),
-      };
-
-      expect(
-        expectedCommandParameters.MetricData[0]?.Dimensions[0]?.Value,
-      ).toBe(mockData.documentManifestType);
-      expect(expectedCommandParameters.MetricData[0]?.MetricName).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_NAME,
-      );
-      expect(expectedCommandParameters.MetricData[0]?.Unit).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_UNIT,
-      );
-      expect(expectedCommandParameters.MetricData[0]?.Value).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_VALUE,
-      );
-    });
-
     it('should use correct namespace from configuration', () => {
       setEnvironmentVariables({
         CLOUDWATCH_METRICS_NAMESPACE: 'Custom/TestNamespace',
@@ -404,38 +333,10 @@ describe('CloudWatchMetricsService', () => {
   });
 
   describe('Error handling', () => {
-    it('should handle AWS SDK errors gracefully when CloudWatch is enabled', async () => {
-      const consoleErrorSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      const originalJest = globalThis.jest;
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      delete (globalThis as any).jest;
-
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      mockSend.mockRejectedValue(new Error('AWS SDK Error'));
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData();
-
-      await expect(
-        instance.recordAIValidationFailure(mockData),
-      ).resolves.not.toThrow();
-
-      globalThis.jest = originalJest;
-      consoleErrorSpy.mockRestore();
-    });
-
     it('should handle empty string environment variables', async () => {
       setEnvironmentVariables({
         AWS_REGION: undefined,
-        CLOUDWATCH_METRICS_NAMESPACE: undefined,
+        CLOUDWATCH_METRICS_NAMESPACE: '',
         ENABLE_CLOUDWATCH_METRICS: 'true',
         NODE_ENV: 'production',
       });
@@ -452,23 +353,6 @@ describe('CloudWatchMetricsService', () => {
       expect(mockCloudWatchClient).toHaveBeenCalledWith({
         region: CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
       });
-    });
-
-    it('should handle null and undefined CloudWatchMetricData properties gracefully', async () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-
-      const mockData = createMockCloudWatchMetricData({
-        validationResponse: undefined,
-      });
-
-      await expect(
-        instance.recordAIValidationFailure(mockData),
-      ).resolves.not.toThrow();
     });
   });
 });

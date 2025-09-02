@@ -2,7 +2,7 @@ import {
   CloudWatchClient,
   PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
-import { getOrDefault } from '@carrot-fndn/shared/helpers';
+import { getNonEmptyStringOrDefault, isNil } from '@carrot-fndn/shared/helpers';
 import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
@@ -24,7 +24,7 @@ let cloudWatchClient: CloudWatchClient | null = null;
 const getCloudWatchClient = (): CloudWatchClient => {
   if (!cloudWatchClient) {
     cloudWatchClient = new CloudWatchClient({
-      region: getOrDefault(
+      region: getNonEmptyStringOrDefault(
         process.env['AWS_REGION'],
         CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
       ),
@@ -47,7 +47,7 @@ export class CloudWatchMetricsService {
   private constructor() {
     this.config = {
       enabled: this.isCloudWatchMetricsEnabled(),
-      namespace: getOrDefault(
+      namespace: getNonEmptyStringOrDefault(
         process.env['CLOUDWATCH_METRICS_NAMESPACE'],
         CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
       ),
@@ -79,11 +79,7 @@ export class CloudWatchMetricsService {
 
     const value = process.env['ENABLE_CLOUDWATCH_METRICS'];
 
-    if (!value) {
-      return true;
-    }
-
-    return value.toLowerCase() === 'true';
+    return !isNil(value) && value.trim().toLowerCase() === 'true';
   }
 
   private async putMetric(data: CloudWatchMetricData): Promise<void> {
