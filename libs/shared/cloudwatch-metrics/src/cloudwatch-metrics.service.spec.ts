@@ -307,43 +307,6 @@ describe('CloudWatchMetricsService', () => {
       expect(mockCloudWatchClient).toHaveBeenCalledTimes(1);
     });
 
-    it('should create PutMetricDataCommand with correct parameters structure', () => {
-      const mockData = createMockCloudWatchMetricData({
-        documentManifestType: 'TestManifestType' as never,
-      });
-
-      const expectedCommandParameters = {
-        MetricData: [
-          {
-            Dimensions: [
-              {
-                Name: CLOUDWATCH_CONSTANTS.DIMENSION_NAME,
-                Value: mockData.documentManifestType,
-              },
-            ],
-            MetricName: CLOUDWATCH_CONSTANTS.METRIC_NAME,
-            Timestamp: expect.any(Date),
-            Unit: CLOUDWATCH_CONSTANTS.METRIC_UNIT,
-            Value: CLOUDWATCH_CONSTANTS.METRIC_VALUE,
-          },
-        ],
-        Namespace: expect.any(String),
-      };
-
-      expect(
-        expectedCommandParameters.MetricData[0]?.Dimensions[0]?.Value,
-      ).toBe(mockData.documentManifestType);
-      expect(expectedCommandParameters.MetricData[0]?.MetricName).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_NAME,
-      );
-      expect(expectedCommandParameters.MetricData[0]?.Unit).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_UNIT,
-      );
-      expect(expectedCommandParameters.MetricData[0]?.Value).toBe(
-        CLOUDWATCH_CONSTANTS.METRIC_VALUE,
-      );
-    });
-
     it('should use correct namespace from configuration', () => {
       setEnvironmentVariables({
         CLOUDWATCH_METRICS_NAMESPACE: 'Custom/TestNamespace',
