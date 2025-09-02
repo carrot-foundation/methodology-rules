@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import {
+  getNonEmptyStringOrDefault,
   getOrDefault,
   getOrUndefined,
   isNil,
@@ -54,6 +55,68 @@ describe('common helpers', () => {
         expect(result).toBe(expected);
       },
     );
+  });
+
+  describe('getNonEmptyStringOrDefault', () => {
+    const defaultValue = 'default-value';
+
+    it('should return defaultValue for null input', () => {
+      expect(getNonEmptyStringOrDefault(null, defaultValue)).toBe(defaultValue);
+    });
+
+    it('should return defaultValue for undefined input', () => {
+      expect(getNonEmptyStringOrDefault(undefined, defaultValue)).toBe(
+        defaultValue,
+      );
+    });
+
+    it('should return defaultValue for empty string input', () => {
+      expect(getNonEmptyStringOrDefault('', defaultValue)).toBe(defaultValue);
+    });
+
+    it('should return defaultValue for whitespace-only string', () => {
+      expect(getNonEmptyStringOrDefault('   ', defaultValue)).toBe(
+        defaultValue,
+      );
+    });
+
+    it('should return defaultValue for mixed whitespace string', () => {
+      expect(getNonEmptyStringOrDefault('  \t\n\r  ', defaultValue)).toBe(
+        defaultValue,
+      );
+    });
+
+    it('should return trimmed value for string with leading whitespace', () => {
+      expect(getNonEmptyStringOrDefault('  hello', defaultValue)).toBe('hello');
+    });
+
+    it('should return trimmed value for string with trailing whitespace', () => {
+      expect(getNonEmptyStringOrDefault('hello  ', defaultValue)).toBe('hello');
+    });
+
+    it('should return trimmed value for string with both leading and trailing whitespace', () => {
+      expect(getNonEmptyStringOrDefault('  hello  ', defaultValue)).toBe(
+        'hello',
+      );
+    });
+
+    it('should return original value for string without whitespace', () => {
+      expect(getNonEmptyStringOrDefault('hello', defaultValue)).toBe('hello');
+    });
+
+    it('should handle very long whitespace strings', () => {
+      const longWhitespace = ' '.repeat(1000);
+
+      expect(getNonEmptyStringOrDefault(longWhitespace, defaultValue)).toBe(
+        defaultValue,
+      );
+    });
+
+    it('should handle normal strings with various whitespace characters', () => {
+      expect(getNonEmptyStringOrDefault('\thello\nworld\r', defaultValue)).toBe(
+        'hello\nworld',
+      );
+    });
   });
 
   describe('isObject', () => {
