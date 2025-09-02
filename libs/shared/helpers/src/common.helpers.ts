@@ -1,4 +1,9 @@
-import type { NonNullableOrNullOrUndefined } from '@carrot-fndn/shared/types';
+import type {
+  NonEmptyString,
+  NonNullableOrNullOrUndefined,
+} from '@carrot-fndn/shared/types';
+
+import { isNonEmptyString } from './string.helpers';
 
 export const isNil = (value: unknown): value is null | undefined =>
   value === null || value === undefined;
@@ -57,6 +62,17 @@ export const getOrDefault = <T, D extends NonNullableOrNullOrUndefined<T>>(
   }
 
   return value as NonNullableOrNullOrUndefined<T>;
+};
+
+export const getNonEmptyStringOrDefault = (
+  value: unknown,
+  defaultValue: NonEmptyString,
+): NonEmptyString => {
+  if (isNonEmptyString(value)) {
+    return value.trim();
+  }
+
+  return defaultValue;
 };
 
 export const getOrUndefined = <T>(
