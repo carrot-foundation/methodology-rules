@@ -254,9 +254,16 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
 
         if (cloudWatchMetricsService.isEnabled()) {
-          await cloudWatchMetricsService.recordAIValidationFailure({
-            documentManifestType: this.documentManifestType,
-          });
+          try {
+            await cloudWatchMetricsService.recordAIValidationFailure({
+              documentManifestType: this.documentManifestType,
+            });
+          } catch (error) {
+            logger.warn(
+              `Failed to record CloudWatch metric for AI validation failure (${this.documentManifestType})`,
+              error instanceof Error ? error.message : String(error),
+            );
+          }
         }
       }
     }
