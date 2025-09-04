@@ -5,7 +5,6 @@ import { assert } from 'typia';
 export const getAiAttachmentValidatorApiUri = (): Uri =>
   assert<Uri>(process.env['AI_ATTACHMENT_VALIDATOR_API_URI']);
 
-export const VALIDATION_MODE = 'flexible' as const;
 export const VALID_MESSAGE = 'Attachment is valid';
 export const FIELD_SEPARATOR = '; ';
 export const VALIDATION_UNAVAILABLE_MESSAGE =

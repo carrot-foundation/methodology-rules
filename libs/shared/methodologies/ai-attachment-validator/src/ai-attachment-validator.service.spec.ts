@@ -8,7 +8,6 @@ import {
   FIELD_SEPARATOR,
   getAiAttachmentValidatorApiUri,
   VALID_MESSAGE,
-  VALIDATION_MODE,
   VALIDATION_UNAVAILABLE_MESSAGE,
 } from './ai-attachment-validator.constants';
 import { formatInvalidField } from './ai-attachment-validator.helpers';
@@ -34,16 +33,26 @@ describe('AiAttachmentValidatorService', () => {
   describe('validateAttachment', () => {
     it('should call the post method with the correct arguments and return valid response', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const validationData: ApiAiValidationResponse = [
-        {
-          fieldName: 'testField',
-          invalidReason: null,
-          isValid: true,
-          value: 'testValue',
+      const validationData: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
         },
-      ];
+        validation: {
+          fields: [
+            {
+              fieldName: 'testField',
+              invalidReason: null,
+              isValid: true,
+              value: 'testValue',
+            },
+          ],
+          reasoning: 'All fields are valid',
+        },
+      };
 
-      const apiResponse = { results: JSON.stringify(validationData) };
+      const apiResponse = { results: validationData };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -54,41 +63,56 @@ describe('AiAttachmentValidatorService', () => {
         {
           attachmentPaths: [dto.attachmentPath],
           documentJson: dto.document,
-          mode: VALIDATION_MODE,
-          ...(dto.additionalContext && { context: dto.additionalContext }),
+          ...(dto.systemPrompt && { systemPrompt: dto.systemPrompt }),
         },
       );
 
       expect(result).toEqual({
         isValid: true,
+        reasoning: 'All fields are valid',
+        usage: {
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        },
         validationResponse: VALID_MESSAGE,
       });
     });
 
     it('should return invalid response when AI validation finds invalid fields', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const validationData: ApiAiValidationResponse = [
-        {
-          fieldName: 'field1',
-          invalidReason: 'Field 1 is incosistent with the document',
-          isValid: false,
-          value: null,
+      const validationData: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 150,
+          outputTokens: 75,
+          totalTokens: 225,
         },
-        {
-          fieldName: 'field2',
-          invalidReason: 'Invalid format',
-          isValid: false,
-          value: 'invalid-value',
+        validation: {
+          fields: [
+            {
+              fieldName: 'field1',
+              invalidReason: 'Field 1 is incosistent with the document',
+              isValid: false,
+              value: null,
+            },
+            {
+              fieldName: 'field2',
+              invalidReason: 'Invalid format',
+              isValid: false,
+              value: 'invalid-value',
+            },
+            {
+              fieldName: 'field3',
+              invalidReason: null,
+              isValid: true,
+              value: 'valid-value',
+            },
+          ],
+          reasoning: 'Some fields contain invalid data',
         },
-        {
-          fieldName: 'field3',
-          invalidReason: null,
-          isValid: true,
-          value: 'valid-value',
-        },
-      ];
+      };
 
-      const apiResponse = { results: JSON.stringify(validationData) };
+      const apiResponse = { results: validationData };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -96,28 +120,44 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(result).toEqual({
         isValid: false,
+        reasoning: 'Some fields contain invalid data',
+        usage: {
+          inputTokens: 150,
+          outputTokens: 75,
+          totalTokens: 225,
+        },
         validationResponse: `field1: Field 1 is incosistent with the document${FIELD_SEPARATOR}field2: Invalid format`,
       });
     });
 
     it('should return valid response when all fields are valid', async () => {
       const dto = stubAiValidateAttachmentDto();
-      const validationData: ApiAiValidationResponse = [
-        {
-          fieldName: 'field1',
-          invalidReason: null,
-          isValid: true,
-          value: 'valid-value-1',
+      const validationData: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 120,
+          outputTokens: 60,
+          totalTokens: 180,
         },
-        {
-          fieldName: 'field2',
-          invalidReason: null,
-          isValid: true,
-          value: 'valid-value-2',
+        validation: {
+          fields: [
+            {
+              fieldName: 'field1',
+              invalidReason: null,
+              isValid: true,
+              value: 'valid-value-1',
+            },
+            {
+              fieldName: 'field2',
+              invalidReason: null,
+              isValid: true,
+              value: 'valid-value-2',
+            },
+          ],
+          reasoning: 'All fields passed validation',
         },
-      ];
+      };
 
-      const apiResponse = { results: JSON.stringify(validationData) };
+      const apiResponse = { results: validationData };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -125,6 +165,12 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(result).toEqual({
         isValid: true,
+        reasoning: 'All fields passed validation',
+        usage: {
+          inputTokens: 120,
+          outputTokens: 60,
+          totalTokens: 180,
+        },
         validationResponse: VALID_MESSAGE,
       });
     });
@@ -150,6 +196,11 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(result).toEqual({
         isValid: false,
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        },
         validationResponse: VALIDATION_UNAVAILABLE_MESSAGE,
       });
     });
@@ -161,6 +212,11 @@ describe('AiAttachmentValidatorService', () => {
 
       await expect(service.validateAttachment(dto)).resolves.toEqual({
         isValid: false,
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          totalTokens: 0,
+        },
         validationResponse: VALIDATION_UNAVAILABLE_MESSAGE,
       });
     });
@@ -171,10 +227,10 @@ describe('AiAttachmentValidatorService', () => {
         document,
       });
 
-      delete dto.additionalContext; // Ensure additionalContext is not included in the test
+      delete dto.systemPrompt; // Ensure systemPrompt is not included in the test
 
       const validationData = stubApiAiValidationResponse();
-      const apiResponse = { results: JSON.stringify(validationData) };
+      const apiResponse = { results: validationData };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(apiResponse);
 
@@ -185,7 +241,6 @@ describe('AiAttachmentValidatorService', () => {
         {
           attachmentPaths: [dto.attachmentPath],
           documentJson: document,
-          mode: VALIDATION_MODE,
         },
       );
     });
@@ -193,102 +248,148 @@ describe('AiAttachmentValidatorService', () => {
 
   describe('processValidationResult', () => {
     it('should return valid response when all fields are valid', () => {
-      const validationResult: ApiAiValidationResponse = [
-        {
-          fieldName: 'field1',
-          invalidReason: null,
-          isValid: true,
-          value: 'valid-value',
+      const validationResult: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
         },
-      ];
+        validation: {
+          fields: [
+            {
+              fieldName: 'field1',
+              invalidReason: null,
+              isValid: true,
+              value: 'valid-value',
+            },
+          ],
+          reasoning: 'All fields are valid',
+        },
+      };
 
       const result = service['processValidationResult'](validationResult);
 
       expect(result).toEqual({
         isValid: true,
+        reasoning: 'All fields are valid',
+        usage: {
+          inputTokens: 100,
+          outputTokens: 50,
+          totalTokens: 150,
+        },
         validationResponse: VALID_MESSAGE,
       });
     });
 
     it('should return invalid response with formatted field errors', () => {
-      const validationResult: ApiAiValidationResponse = [
-        {
-          fieldName: 'field1',
-          invalidReason: 'Error message 1',
-          isValid: false,
-          value: 'invalid-value',
+      const validationResult: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 150,
+          outputTokens: 75,
+          totalTokens: 225,
         },
-        {
-          fieldName: 'field2',
-          invalidReason: 'Error message 2',
-          isValid: false,
-          value: 'invalid-value',
+        validation: {
+          fields: [
+            {
+              fieldName: 'field1',
+              invalidReason: 'Error message 1',
+              isValid: false,
+              value: 'invalid-value',
+            },
+            {
+              fieldName: 'field2',
+              invalidReason: 'Error message 2',
+              isValid: false,
+              value: 'invalid-value',
+            },
+          ],
+          reasoning: 'Multiple fields have errors',
         },
-      ];
+      };
 
       const result = service['processValidationResult'](validationResult);
 
       expect(result).toEqual({
         isValid: false,
+        reasoning: 'Multiple fields have errors',
+        usage: {
+          inputTokens: 150,
+          outputTokens: 75,
+          totalTokens: 225,
+        },
         validationResponse: `field1: Error message 1${FIELD_SEPARATOR}field2: Error message 2`,
       });
     });
 
     it('should filter out valid fields and only show invalid ones', () => {
-      const validationResult: ApiAiValidationResponse = [
-        {
-          fieldName: 'validField',
-          invalidReason: null,
-          isValid: true,
-          value: 'valid-value',
+      const validationResult: ApiAiValidationResponse = {
+        usage: {
+          inputTokens: 120,
+          outputTokens: 60,
+          totalTokens: 180,
         },
-        {
-          fieldName: 'invalidField',
-          invalidReason: 'Error message',
-          isValid: false,
-          value: 'invalid-value',
+        validation: {
+          fields: [
+            {
+              fieldName: 'validField',
+              invalidReason: null,
+              isValid: true,
+              value: 'valid-value',
+            },
+            {
+              fieldName: 'invalidField',
+              invalidReason: 'Error message',
+              isValid: false,
+              value: 'invalid-value',
+            },
+          ],
+          reasoning: 'One field is invalid',
         },
-      ];
+      };
 
       const result = service['processValidationResult'](validationResult);
 
       expect(result).toEqual({
         isValid: false,
+        reasoning: 'One field is invalid',
+        usage: {
+          inputTokens: 120,
+          outputTokens: 60,
+          totalTokens: 180,
+        },
         validationResponse: 'invalidField: Error message',
       });
     });
   });
 
   describe('mapValidateAttachmentDto', () => {
-    it('should correctly map the DTO with additional context', () => {
+    it('should correctly map the DTO with systemPrompt', () => {
       const dto = stubAiValidateAttachmentDto();
 
-      dto.additionalContext = 'Some additional context here';
+      dto.systemPrompt = 'Custom system prompt';
 
       // Access the private method for testing
       const mappedDto = service['mapValidateAttachmentDto'](dto);
 
       expect(mappedDto).toEqual({
         attachmentPaths: [dto.attachmentPath],
-        context: dto.additionalContext,
         documentJson: dto.document,
-        mode: VALIDATION_MODE,
+        systemPrompt: dto.systemPrompt,
       });
     });
 
-    it('should correctly map the DTO without additional context', () => {
+    it('should correctly map the DTO without systemPrompt', () => {
       const dto = stubAiValidateAttachmentDto();
 
-      delete dto.additionalContext;
+      delete dto.systemPrompt;
 
       const mappedDto = service['mapValidateAttachmentDto'](dto);
 
       expect(mappedDto).toEqual({
         attachmentPaths: [dto.attachmentPath],
         documentJson: dto.document,
-        mode: VALIDATION_MODE,
       });
-      expect(mappedDto).not.toHaveProperty('context');
+      expect(mappedDto).not.toHaveProperty('systemPrompt');
     });
   });
 });
