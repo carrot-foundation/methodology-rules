@@ -44,7 +44,14 @@ QUANTITY ANALYSIS CONSIDERATIONS:
 - Individual MassID values being analyzed may not match the total quantities shown in the certificate
 - A single MassID weight often represents only a fraction of the total quantities documented
 - The certificate serves as proof of proper disposal for multiple related waste batches
-- Cross-reference MassID values as partial components of larger waste treatment operations`;
+- Cross-reference MassID values as partial components of larger waste treatment operations
+
+QUANTITY VALIDATION FOR CERTIFICATES:
+- Certificates often aggregate quantities from multiple MassID batches
+- When validating quantities, accept that certificate totals will typically be larger than individual MassID values
+- A certificate total that exceeds the JSON MassID currentValue is valid if the certificate represents grouped waste processing
+- Only mark quantity fields as invalid if the JSON MassID value exceeds the certificate total, or if units are incompatible
+`;
 
 export const TRANSPORT_MANIFEST_AI_CONTEXT: NonEmptyString = `You are analyzing a document that should be a waste transport manifest. Look for these core indicators:
 

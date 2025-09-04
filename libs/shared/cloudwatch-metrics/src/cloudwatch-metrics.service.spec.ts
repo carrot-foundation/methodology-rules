@@ -246,26 +246,7 @@ describe('CloudWatchMetricsService', () => {
 
       const instance = CloudWatchMetricsService.getInstance();
       const mockData = createMockCloudWatchMetricData({
-        attachmentPath: 'custom/path/file.pdf',
-        documentId: 'custom-doc-id',
         documentManifestType: 'custom-manifest',
-        validationResponse: 'custom-response',
-      });
-
-      await expect(
-        instance.recordAIValidationFailure(mockData),
-      ).resolves.not.toThrow();
-    });
-
-    it('should handle missing optional validationResponse', async () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData({
-        validationResponse: undefined,
       });
 
       await expect(

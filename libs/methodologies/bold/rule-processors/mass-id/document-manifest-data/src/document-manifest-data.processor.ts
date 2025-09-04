@@ -248,17 +248,14 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
       if (aiValidationResult.isValid === false) {
         logger.warn(
-          `AI validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse}`,
+          `AI attachment validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse} - ${aiValidationResult.validationResponse}`,
         );
 
         const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
 
         if (cloudWatchMetricsService.isEnabled()) {
           await cloudWatchMetricsService.recordAIValidationFailure({
-            attachmentPath,
-            documentId: document.id,
             documentManifestType: this.documentManifestType,
-            validationResponse: aiValidationResult.validationResponse,
           });
         }
       }

@@ -117,7 +117,7 @@ describe('DocumentManifestDataProcessor', () => {
 
       expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining(
-          'AI validation failed for document manifest type',
+          'AI attachment validation failed for document manifest type',
         ),
       );
 
