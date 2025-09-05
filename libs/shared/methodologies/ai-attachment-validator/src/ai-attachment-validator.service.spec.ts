@@ -190,8 +190,7 @@ describe('AiAttachmentValidatorService', () => {
       const result = await service.validateAttachment(dto);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'AI validation failed:',
-        error.message,
+        `AI validation failed: ${error.message}`,
       );
 
       expect(result).toEqual({

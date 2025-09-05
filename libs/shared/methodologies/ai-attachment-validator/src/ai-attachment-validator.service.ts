@@ -91,7 +91,7 @@ export class AiAttachmentValidatorService extends AwsHttpService {
   private logValidationError(error: unknown): void {
     const errorMessage = error instanceof Error ? error.message : String(error);
 
-    logger.warn('AI validation failed:', errorMessage);
+    logger.warn(`AI validation failed: ${errorMessage}`);
   }
 
   private mapValidateAttachmentDto(
