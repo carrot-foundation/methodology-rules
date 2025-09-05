@@ -107,6 +107,10 @@ export class AiAttachmentValidatorService extends AwsHttpService {
   private processValidationResult(
     validationResult: unknown,
   ): ApiValidateAttachmentResponse {
+    logger.info(
+      `Processing validation result. JSON: ${JSON.stringify(validationResult)}`,
+    );
+
     const validatedResult = assertApiAiValidationResponse(validationResult);
     const invalidFields = this.extractInvalidFields(validatedResult);
 
