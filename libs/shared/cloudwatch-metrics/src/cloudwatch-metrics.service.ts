@@ -13,10 +13,7 @@ export interface CloudWatchConfig {
 }
 
 export interface CloudWatchMetricData {
-  attachmentPath: NonEmptyString;
-  documentId: NonEmptyString;
   documentManifestType: NonEmptyString;
-  validationResponse?: NonEmptyString | undefined;
 }
 
 let cloudWatchClient: CloudWatchClient | null = null;

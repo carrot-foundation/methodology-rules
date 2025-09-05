@@ -6,7 +6,7 @@ const { TRANSPORT_MANIFEST } = DocumentEventName;
 
 export const handler = documentManifestDataLambda({
   aiParameters: {
-    additionalContext: TRANSPORT_MANIFEST_AI_CONTEXT,
+    systemPrompt: TRANSPORT_MANIFEST_AI_CONTEXT,
   },
   documentManifestType: TRANSPORT_MANIFEST,
 });

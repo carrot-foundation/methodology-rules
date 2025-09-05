@@ -116,9 +116,7 @@ describe('DocumentManifestDataProcessor', () => {
       await ruleDataProcessor.process(ruleInput);
 
       expect(loggerWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining(
-          'AI validation failed for document manifest type',
-        ),
+        expect.stringContaining('AI Attachment Validation failed'),
       );
 
       loggerWarnSpy.mockRestore();
@@ -167,6 +165,42 @@ describe('DocumentManifestDataProcessor', () => {
         Namespace: CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
       });
 
+      delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
+    });
+
+    it('should log error when recordAIValidationFailure fails to put metric', async () => {
+      jest
+        .spyOn(CloudWatchMetricsService.prototype, 'isEnabled')
+        .mockReturnValue(true);
+      const cloudWatchMock = mockClient(CloudWatchClient);
+      const loggerErrorSpy = jest.spyOn(logger, 'error').mockImplementation();
+
+      const mockError = new Error('CloudWatch service unavailable');
+
+      cloudWatchMock.on(PutMetricDataCommand).rejects(mockError);
+
+      process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'] = 'true';
+
+      const ruleDataProcessor = new DocumentManifestDataProcessor({
+        aiParameters: {},
+        documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
+      });
+      const ruleInput = random<Required<RuleInput>>();
+      const { massIdDocument } = new BoldStubsBuilder()
+        .createMassIdDocuments({
+          externalEventsMap: {},
+        })
+        .build();
+
+      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      await ruleDataProcessor.process(ruleInput);
+
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        'Failed to record CloudWatch metric for AI validation failure (Transport Manifest)',
+        mockError,
+      );
+
+      loggerErrorSpy.mockRestore();
       delete process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
     });
   });

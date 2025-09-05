@@ -6,7 +6,7 @@ const { RECYCLING_MANIFEST } = DocumentEventName;
 
 export const handler = documentManifestDataLambda({
   aiParameters: {
-    additionalContext: RECYCLING_MANIFEST_AI_CONTEXT,
+    systemPrompt: RECYCLING_MANIFEST_AI_CONTEXT,
   },
   documentManifestType: RECYCLING_MANIFEST,
 });
