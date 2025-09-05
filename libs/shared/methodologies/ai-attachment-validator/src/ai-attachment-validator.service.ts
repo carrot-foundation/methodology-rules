@@ -1,10 +1,10 @@
 import { AwsHttpService } from '@carrot-fndn/shared/aws-http';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { NonEmptyString } from '@carrot-fndn/shared/types';
 import axios from 'axios';
 
 import type {
   AiValidateAttachmentDto,
+  ApiAiValidationResponse,
   ApiValidateAttachmentResponse,
 } from './ai-attachment-validator.api.dto';
 
@@ -12,7 +12,6 @@ import {
   FIELD_SEPARATOR,
   getAiAttachmentValidatorApiUri,
   VALID_MESSAGE,
-  VALIDATION_MODE,
   VALIDATION_UNAVAILABLE_MESSAGE,
 } from './ai-attachment-validator.constants';
 import { formatInvalidField } from './ai-attachment-validator.helpers';
@@ -33,24 +32,66 @@ export class AiAttachmentValidatorService extends AwsHttpService {
 
     try {
       const mappedDto = this.mapValidateAttachmentDto(dto);
-
-      const { results } = await this.post<{ results: NonEmptyString }>(
+      const { results } = await this.post<{ results: unknown }>(
         getAiAttachmentValidatorApiUri(),
         mappedDto,
       );
 
-      return this.processValidationResult(JSON.parse(results));
+      return this.processValidationResult(results);
     } catch (error) {
-      logger.warn(
-        'AI validation failed:',
-        error instanceof Error ? error.message : String(error),
-      );
+      this.logValidationError(error);
 
-      return {
-        isValid: false,
-        validationResponse: VALIDATION_UNAVAILABLE_MESSAGE,
-      };
+      return this.createFailureResponse();
     }
+  }
+
+  private buildValidationResponse(
+    validatedResult: ApiAiValidationResponse,
+    invalidFields: string,
+  ): ApiValidateAttachmentResponse {
+    const baseResponse = {
+      reasoning: validatedResult.validation.reasoning,
+      usage: validatedResult.usage,
+    };
+
+    return invalidFields.length > 0
+      ? {
+          isValid: false,
+          ...baseResponse,
+          validationResponse: invalidFields,
+        }
+      : {
+          isValid: true,
+          ...baseResponse,
+          validationResponse: VALID_MESSAGE,
+        };
+  }
+
+  private createFailureResponse(): ApiValidateAttachmentResponse {
+    return {
+      isValid: false,
+      usage: {
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+      },
+      validationResponse: VALIDATION_UNAVAILABLE_MESSAGE,
+    };
+  }
+
+  private extractInvalidFields(
+    validatedResult: ApiAiValidationResponse,
+  ): string {
+    return validatedResult.validation.fields
+      .filter((field) => !field.isValid)
+      .map((field) => formatInvalidField(field.fieldName, field.invalidReason))
+      .join(FIELD_SEPARATOR);
+  }
+
+  private logValidationError(error: unknown): void {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    logger.warn('AI validation failed:', errorMessage);
   }
 
   private mapValidateAttachmentDto(
@@ -59,8 +100,7 @@ export class AiAttachmentValidatorService extends AwsHttpService {
     return {
       attachmentPaths: [dto.attachmentPath],
       documentJson: dto.document,
-      mode: VALIDATION_MODE,
-      ...(dto.additionalContext && { context: dto.additionalContext }),
+      ...(dto.systemPrompt && { systemPrompt: dto.systemPrompt }),
     };
   }
 
@@ -68,20 +108,8 @@ export class AiAttachmentValidatorService extends AwsHttpService {
     validationResult: unknown,
   ): ApiValidateAttachmentResponse {
     const validatedResult = assertApiAiValidationResponse(validationResult);
+    const invalidFields = this.extractInvalidFields(validatedResult);
 
-    const invalidFields = validatedResult
-      .filter((field) => !field.isValid)
-      .map((field) => formatInvalidField(field.fieldName, field.invalidReason))
-      .join(FIELD_SEPARATOR);
-
-    return invalidFields.length > 0
-      ? {
-          isValid: false,
-          validationResponse: invalidFields,
-        }
-      : {
-          isValid: true,
-          validationResponse: VALID_MESSAGE,
-        };
+    return this.buildValidationResponse(validatedResult, invalidFields);
   }
 }

@@ -46,7 +46,7 @@ const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
 export interface AIParameters {
-  additionalContext?: NonEmptyString;
+  systemPrompt?: NonEmptyString;
 }
 
 export type DocumentManifestType =
@@ -241,17 +241,25 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     for (const attachmentPath of attachmentPaths) {
       const aiValidationResult =
         await aiAttachmentValidatorService.validateAttachment({
-          additionalContext: this.aiParameters.additionalContext,
           attachmentPath,
           document,
+          systemPrompt: this.aiParameters.systemPrompt,
         });
 
-      if (aiValidationResult.isValid === false) {
-        logger.warn(
-          `AI attachment validation failed for document manifest type ${this.documentManifestType} (${attachmentPath}): ${aiValidationResult.validationResponse}`,
-        );
+      const baseLogInfo = {
+        reasoning: aiValidationResult.reasoning,
+        validationResponse: aiValidationResult.validationResponse,
+      };
 
-        const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
+      logger.warn(
+        'AI Attachment Validation performed',
+        JSON.stringify(baseLogInfo),
+      );
+
+      const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
+
+      if (aiValidationResult.isValid === false) {
+        logger.warn('AI Attachment Validation failed');
 
         if (cloudWatchMetricsService.isEnabled()) {
           try {
@@ -259,9 +267,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
               documentManifestType: this.documentManifestType,
             });
           } catch (error) {
-            logger.warn(
+            logger.error(
               `Failed to record CloudWatch metric for AI validation failure (${this.documentManifestType})`,
-              error instanceof Error ? error.message : String(error),
+              error,
             );
           }
         }

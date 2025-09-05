@@ -1,20 +1,38 @@
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
-import { NonEmptyArray, NonEmptyString } from '@carrot-fndn/shared/types';
+import { NonEmptyString, NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 export interface AiValidateAttachmentDto {
-  additionalContext?: NonEmptyString | undefined;
   attachmentPath: NonEmptyString;
   document: Document;
+  systemPrompt?: NonEmptyString | undefined;
 }
 
-export type ApiAiValidationResponse = NonEmptyArray<{
+export interface ApiAiValidationResponse {
+  usage: TokenUsage;
+  validation: ValidationResult;
+}
+
+export interface ApiValidateAttachmentResponse {
+  isValid: boolean;
+  reasoning?: NonEmptyString;
+  usage: TokenUsage;
+  validationResponse: NonEmptyString;
+}
+
+export interface TokenUsage {
+  inputTokens: NonZeroPositiveInt;
+  outputTokens: NonZeroPositiveInt;
+  totalTokens: NonZeroPositiveInt;
+}
+
+export interface ValidationField {
   fieldName: NonEmptyString;
   invalidReason: NonEmptyString | null;
   isValid: boolean;
   value: unknown;
-}>;
+}
 
-export interface ApiValidateAttachmentResponse {
-  isValid: boolean;
-  validationResponse: NonEmptyString;
+export interface ValidationResult {
+  fields: ValidationField[];
+  reasoning: NonEmptyString;
 }
