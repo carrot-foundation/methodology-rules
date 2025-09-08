@@ -26,7 +26,6 @@ const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINES } =
 
 const subtype = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
-// Use a small exceeding factor to yield positive results with the new formula
 const exceedingEmissionCoefficient = 0.02;
 const massIdDocumentValue = 100;
 const baselineValue =

@@ -65,7 +65,6 @@ describe('PreventedEmissionsHelpers', () => {
         massIdDocumentValue,
       );
 
-      // New formula => (mass * factor) - (mass * exceeding)
       expect(result).toBeCloseTo(149_920, 10);
     });
 
@@ -94,7 +93,6 @@ describe('PreventedEmissionsHelpers', () => {
         massIdDocumentValue,
       );
 
-      // (10.5*800.5) - (10.5*0.25) = 8402.625
       expect(result).toBe(8402.625);
     });
   });
