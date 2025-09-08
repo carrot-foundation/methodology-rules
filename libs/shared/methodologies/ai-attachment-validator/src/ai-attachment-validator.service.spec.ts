@@ -406,6 +406,6 @@ describe('formatInvalidField helper', () => {
   it('should handle null reason', () => {
     const result = formatInvalidField('testField', null);
 
-    expect(result).toBe('testField: null');
+    expect(result).toBe('testField');
   });
 });

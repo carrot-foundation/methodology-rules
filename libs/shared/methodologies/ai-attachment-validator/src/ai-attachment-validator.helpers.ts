@@ -104,7 +104,8 @@ function optimizeParticipants(
 export const formatInvalidField = (
   fieldName: NonEmptyString,
   reason: NonEmptyString | null,
-): string => `${fieldName}: ${reason}`;
+): string =>
+  reason && reason.trim().length > 0 ? `${fieldName}: ${reason}` : fieldName;
 
 export function optimizeDocumentJsonForValidation(
   documentJson: Document,
