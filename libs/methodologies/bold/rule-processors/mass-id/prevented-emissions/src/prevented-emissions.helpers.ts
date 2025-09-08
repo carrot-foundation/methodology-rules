@@ -34,9 +34,13 @@ export const calculatePreventedEmissions = (
   preventedEmissionsByMaterialAndBaselinePerTon: number,
   massIdDocumentValue: number,
 ): number =>
-  (1 - exceedingEmissionCoefficient) *
-  preventedEmissionsByMaterialAndBaselinePerTon *
-  massIdDocumentValue;
+  // New formula: credits = weight * emissionFactor
+  // adjustedCredits = credits - (weight * exceedingFactor)
+  // => adjustedCredits = (weight * emissionFactor) - (weight * exceedingFactor)
+  // => weight * (emissionFactor - exceedingFactor)
+  massIdDocumentValue *
+  (preventedEmissionsByMaterialAndBaselinePerTon -
+    exceedingEmissionCoefficient);
 
 export const getWasteGeneratorBaselineByWasteSubtype = (
   wasteGeneratorAccreditationDocument: Document,
