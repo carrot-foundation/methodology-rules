@@ -33,6 +33,8 @@ const baselineValue =
 const expectedPreventedEmissions =
   massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient);
 
+const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
+
 const processorErrors = new PreventedEmissionsProcessorErrors();
 
 const {
@@ -91,6 +93,61 @@ export const preventedEmissionsTestCases = [
     },
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the exceeding emission coefficient is undefined (missing)`,
+    subtype,
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [
+                    EXCEEDING_EMISSION_COEFFICIENT,
+                    exceedingEmissionCoefficientExceedingBaseline,
+                  ],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+          },
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
+              metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+            }),
+          },
+        },
+      ],
+    ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
+    massIdDocumentValue,
+    resultComment: RESULT_COMMENTS.PASSED(
+      0,
+      baselineValue,
+      exceedingEmissionCoefficientExceedingBaseline,
+      massIdDocumentValue,
+    ),
+    resultContent: {
+      gasType: 'Methane (CH4)',
+      preventedCo2e: 0,
+      ruleSubject: {
+        exceedingEmissionCoefficient:
+          exceedingEmissionCoefficientExceedingBaseline,
+        gasType: 'Methane (CH4)',
+        massIdDocumentValue,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the calculated prevented emissions would be negative, so they are clamped to zero',
     subtype,
   },
   {

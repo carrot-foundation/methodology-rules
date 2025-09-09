@@ -95,6 +95,20 @@ describe('PreventedEmissionsHelpers', () => {
 
       expect(result).toBe(8402.625);
     });
+
+    it('should clamp to zero when exceedingEmissionCoefficient >= preventedEmissionsByMaterialAndBaselinePerTon', () => {
+      const exceedingEmissionCoefficient = 2000;
+      const preventedEmissionsByMaterialAndBaselinePerTon = 1500;
+      const massIdDocumentValue = 100;
+
+      const result = calculatePreventedEmissions(
+        exceedingEmissionCoefficient,
+        preventedEmissionsByMaterialAndBaselinePerTon,
+        massIdDocumentValue,
+      );
+
+      expect(result).toBe(0);
+    });
   });
 
   describe('getWasteGeneratorBaselineByWasteSubtype', () => {
