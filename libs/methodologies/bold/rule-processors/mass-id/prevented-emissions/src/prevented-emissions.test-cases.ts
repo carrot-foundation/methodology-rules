@@ -26,12 +26,14 @@ const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINES } =
 
 const subtype = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
-const exceedingEmissionCoefficient = 0.8;
+const exceedingEmissionCoefficient = 0.02;
 const massIdDocumentValue = 100;
 const baselineValue =
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
 const expectedPreventedEmissions =
-  (1 - exceedingEmissionCoefficient) * baselineValue * massIdDocumentValue;
+  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient);
+
+const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
 const processorErrors = new PreventedEmissionsProcessorErrors();
 
@@ -91,6 +93,61 @@ export const preventedEmissionsTestCases = [
     },
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the exceeding emission coefficient is undefined (missing)`,
+    subtype,
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        {
+          externalEventsMap: {
+            [EMISSION_AND_COMPOSTING_METRICS]:
+              stubBoldEmissionAndCompostingMetricsEvent({
+                metadataAttributes: [
+                  [
+                    EXCEEDING_EMISSION_COEFFICIENT,
+                    exceedingEmissionCoefficientExceedingBaseline,
+                  ],
+                  [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+                ],
+              }),
+          },
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
+              metadataAttributes: [[BASELINES, { [subtype]: baseline }]],
+            }),
+          },
+        },
+      ],
+    ]),
+    externalCreatedAt: massIdDocument.externalCreatedAt,
+    massIdDocumentValue,
+    resultComment: RESULT_COMMENTS.PASSED(
+      0,
+      baselineValue,
+      exceedingEmissionCoefficientExceedingBaseline,
+      massIdDocumentValue,
+    ),
+    resultContent: {
+      gasType: 'Methane (CH4)',
+      preventedCo2e: 0,
+      ruleSubject: {
+        exceedingEmissionCoefficient:
+          exceedingEmissionCoefficientExceedingBaseline,
+        gasType: 'Methane (CH4)',
+        massIdDocumentValue,
+        wasteGeneratorBaseline: baseline,
+        wasteSubtype: subtype,
+      },
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the calculated prevented emissions would be negative, so they are clamped to zero',
     subtype,
   },
   {

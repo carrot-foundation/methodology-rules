@@ -33,10 +33,13 @@ export const calculatePreventedEmissions = (
   exceedingEmissionCoefficient: number,
   preventedEmissionsByMaterialAndBaselinePerTon: number,
   massIdDocumentValue: number,
-): number =>
-  (1 - exceedingEmissionCoefficient) *
-  preventedEmissionsByMaterialAndBaselinePerTon *
-  massIdDocumentValue;
+): number => {
+  const computedValue =
+    massIdDocumentValue * preventedEmissionsByMaterialAndBaselinePerTon -
+    massIdDocumentValue * exceedingEmissionCoefficient;
+
+  return Math.max(0, computedValue);
+};
 
 export const getWasteGeneratorBaselineByWasteSubtype = (
   wasteGeneratorAccreditationDocument: Document,

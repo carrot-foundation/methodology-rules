@@ -60,7 +60,7 @@ export const RESULT_COMMENTS = {
     exceedingEmissionCoefficient: number,
     currentValue: number,
   ) =>
-    `The prevented emissions were calculated as ${preventedEmissions} kg CO₂e using the formula (1 - ${exceedingEmissionCoefficient}) x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon} x ${currentValue} = ${preventedEmissions} [formula: (1 - exceeding_emission_coefficient) x prevented_emissions_by_waste_subtype_and_baseline_per_ton x current_value = prevented_emissions].`,
+    `The prevented emissions were calculated as ${preventedEmissions} kg CO₂e using the formula (${currentValue} x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon}) - (${currentValue} x ${exceedingEmissionCoefficient}) = ${preventedEmissions} [formula: (current_value x prevented_emissions_by_waste_subtype_and_baseline_per_ton) - (current_value x exceeding_emission_coefficient) = prevented_emissions].`,
 } as const;
 
 interface Documents {
