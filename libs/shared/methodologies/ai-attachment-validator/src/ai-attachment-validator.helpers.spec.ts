@@ -54,12 +54,16 @@ describe('optimizeDocumentJsonForValidation', () => {
       expect(result.events?.length).toBeGreaterThan(0);
 
       const event = result.events?.[0];
+      const source = documentWithEvents.externalEvents[0];
 
       expect(event).toBeDefined();
       expect(event?.id).toBeDefined();
       expect(event?.name).toBeDefined();
       expect(event?.addressId).toBeDefined();
       expect(event?.participantId).toBeDefined();
+
+      expect(event?.addressId).toBe(source?.address.id);
+      expect(event?.participantId).toBe(source?.participant.id);
     }
   });
 
