@@ -36,47 +36,47 @@ export interface OptimizedAddress {
 }
 
 export interface OptimizedAttachment {
-  file: NonEmptyString;
+  file: string;
   size: number;
 }
 
 export interface OptimizedDocumentEvent {
-  aId: NonEmptyString; // address ID
+  addressId: NonEmptyString;
   attachment?: OptimizedAttachment | undefined;
   externalCreatedAt: DateTime;
-  externalId?: NonEmptyString | undefined;
-  id: NonEmptyString;
-  label?: NonEmptyString | undefined;
-  meta?: // shorter metadata -> properties
-  | undefined
+  externalId?: string | undefined;
+  id: string;
+  label?: string | undefined;
+  meta?:
+    | undefined
     | {
         [key: string]: unknown;
       };
-  name: NonEmptyString;
-  pId: NonEmptyString; // participant ID
+  name: string;
+  participantId: string;
   value?: number | undefined;
 }
 
 export interface OptimizedDocumentJson {
-  addresses: Record<NonEmptyString, OptimizedAddress>;
-  category: NonEmptyString;
+  addresses: Record<string, OptimizedAddress>;
+  category: string;
   currentValue: number & tags.Minimum<0> & tags.Type<'float'>;
   events?: OptimizedDocumentEvent[] | undefined;
   externalCreatedAt: DateTime;
-  externalId?: NonEmptyString | undefined;
-  id: NonEmptyString;
-  measurementUnit: NonEmptyString;
-  participants: Record<NonEmptyString, OptimizedParticipant>;
-  status: NonEmptyString;
-  subtype?: NonEmptyString | undefined;
-  type?: NonEmptyString | undefined;
+  externalId?: string | undefined;
+  id: string;
+  measurementUnit: string;
+  participants: Record<string, OptimizedParticipant>;
+  status: string;
+  subtype?: string | undefined;
+  type?: string | undefined;
 }
 
 export interface OptimizedParticipant {
-  country: NonEmptyString;
-  name: NonEmptyString;
-  taxId: NonEmptyString;
-  type: NonEmptyString;
+  country: string;
+  name: string;
+  taxId: string;
+  type: string;
 }
 
 export interface TokenUsage {
@@ -86,13 +86,13 @@ export interface TokenUsage {
 }
 
 export interface ValidationField {
-  fieldName: NonEmptyString;
-  invalidReason: NonEmptyString | null;
+  fieldName: string;
+  invalidReason: null | string;
   isValid: boolean;
   value: unknown;
 }
 
 export interface ValidationResult {
   fields: ValidationField[];
-  reasoning: NonEmptyString;
+  reasoning: string;
 }

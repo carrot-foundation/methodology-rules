@@ -10,6 +10,7 @@ import {
   OptimizedDocumentJson,
   OptimizedParticipant,
 } from './ai-attachment-validator.api.dto';
+import { assertOptimizedDocumentJson } from './ai-attachment-validator.typia';
 
 function optimizeAddresses(
   primaryAddress: Document['primaryAddress'],
@@ -50,7 +51,7 @@ function optimizeAddresses(
 
 function optimizeExternalEvent(event: DocumentEvent): OptimizedDocumentEvent {
   return {
-    aId: event.author.participantId,
+    addressId: event.author.participantId,
     ...(event.attachments?.[0] && {
       attachment: {
         file: event.attachments[0].attachmentId,
@@ -63,11 +64,19 @@ function optimizeExternalEvent(event: DocumentEvent): OptimizedDocumentEvent {
     }),
     id: event.id,
     ...(event.label && { label: event.label }),
-    ...(event.metadata && {
-      meta: event.metadata as { [key: string]: unknown },
+    ...(event.metadata?.attributes && {
+      // eslint-disable-next-line unicorn/no-array-reduce
+      meta: event.metadata.attributes.reduce<{ [key: string]: unknown }>(
+        (accumulator, attribute) => {
+          accumulator[attribute.name] = attribute.value;
+
+          return accumulator;
+        },
+        {},
+      ),
     }),
     name: event.name,
-    pId: event.participant.id,
+    participantId: event.participant.id,
     ...(event.value !== undefined && { value: event.value }),
   };
 }
@@ -78,22 +87,22 @@ function optimizeParticipants(
 ): Record<NonEmptyString, OptimizedParticipant> {
   const participants: Record<NonEmptyString, OptimizedParticipant> = {};
 
-  participants[primaryParticipant.id as NonEmptyString] = {
-    country: primaryParticipant.countryCode as NonEmptyString,
-    name: primaryParticipant.name as NonEmptyString,
-    taxId: primaryParticipant.piiSnapshotId as NonEmptyString,
-    type: primaryParticipant.type as NonEmptyString,
+  participants[primaryParticipant.id] = {
+    country: primaryParticipant.countryCode,
+    name: primaryParticipant.name,
+    taxId: primaryParticipant.piiSnapshotId,
+    type: primaryParticipant.type,
   };
 
   if (events) {
     for (const event of events) {
       const { participant } = event;
 
-      participants[participant.id as NonEmptyString] = {
-        country: participant.countryCode as NonEmptyString,
-        name: participant.name as NonEmptyString,
-        taxId: participant.piiSnapshotId as NonEmptyString,
-        type: participant.type as NonEmptyString,
+      participants[participant.id] = {
+        country: participant.countryCode,
+        name: participant.name,
+        taxId: participant.piiSnapshotId,
+        type: participant.type,
       };
     }
   }
@@ -136,7 +145,7 @@ export function optimizeDocumentJsonForValidation(
     optimizeExternalEvent(externalEvent),
   );
 
-  return {
+  return assertOptimizedDocumentJson({
     addresses,
     category,
     currentValue,
@@ -149,5 +158,5 @@ export function optimizeDocumentJsonForValidation(
     status,
     subtype,
     type,
-  };
+  });
 }

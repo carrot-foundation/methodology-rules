@@ -58,8 +58,8 @@ describe('optimizeDocumentJsonForValidation', () => {
       expect(event).toBeDefined();
       expect(event?.id).toBeDefined();
       expect(event?.name).toBeDefined();
-      expect(event?.aId).toBeDefined();
-      expect(event?.pId).toBeDefined();
+      expect(event?.addressId).toBeDefined();
+      expect(event?.participantId).toBeDefined();
     }
   });
 
