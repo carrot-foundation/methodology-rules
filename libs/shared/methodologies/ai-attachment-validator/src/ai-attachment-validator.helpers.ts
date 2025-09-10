@@ -51,7 +51,7 @@ function optimizeAddresses(
 
 function optimizeExternalEvent(event: DocumentEvent): OptimizedDocumentEvent {
   return {
-    addressId: event.author.participantId,
+    addressId: event.address.id,
     ...(event.attachments?.[0] && {
       attachment: {
         file: event.attachments[0].attachmentId,
