@@ -41,19 +41,19 @@ export interface OptimizedAttachment {
 }
 
 export interface OptimizedDocumentEvent {
-  aId: NonEmptyString;
+  aId: NonEmptyString; // address ID
   attachment?: OptimizedAttachment | undefined;
   externalCreatedAt: DateTime;
   externalId?: NonEmptyString | undefined;
   id: NonEmptyString;
   label?: NonEmptyString | undefined;
-  meta?:
-    | undefined
+  meta?: // shorter metadata -> properties
+  | undefined
     | {
         [key: string]: unknown;
       };
   name: NonEmptyString;
-  pId: NonEmptyString;
+  pId: NonEmptyString; // participant ID
   value?: number | undefined;
 }
 
