@@ -16,6 +16,7 @@ import { addYears } from 'date-fns';
 
 import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { formatNumber } from './prevented-emissions.helpers';
 import { RESULT_COMMENTS } from './prevented-emissions.processor';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
@@ -30,8 +31,9 @@ const exceedingEmissionCoefficient = 0.02;
 const massIdDocumentValue = 100;
 const baselineValue =
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
-const expectedPreventedEmissions =
-  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient);
+const expectedPreventedEmissions = formatNumber(
+  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient),
+);
 
 const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
@@ -128,14 +130,14 @@ export const preventedEmissionsTestCases = [
     externalCreatedAt: massIdDocument.externalCreatedAt,
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
-      0,
+      formatNumber(0),
       baselineValue,
       exceedingEmissionCoefficientExceedingBaseline,
       massIdDocumentValue,
     ),
     resultContent: {
       gasType: 'Methane (CH4)',
-      preventedCo2e: 0,
+      preventedCo2e: formatNumber(0),
       ruleSubject: {
         exceedingEmissionCoefficient:
           exceedingEmissionCoefficientExceedingBaseline,

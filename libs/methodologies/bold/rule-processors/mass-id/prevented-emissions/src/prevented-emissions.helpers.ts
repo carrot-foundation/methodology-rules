@@ -90,3 +90,6 @@ export const getGasTypeFromEvent = (
 
   return gasType;
 };
+
+export const formatNumber = (number_: number): number =>
+  Math.floor(number_ * 1000) / 1000;
