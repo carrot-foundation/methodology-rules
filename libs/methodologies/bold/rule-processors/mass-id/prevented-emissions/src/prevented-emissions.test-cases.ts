@@ -31,8 +31,10 @@ const exceedingEmissionCoefficient = 0.02;
 const massIdDocumentValue = 100;
 const baselineValue =
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
+const expectedPreventedEmissionsValue =
+  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient);
 const expectedPreventedEmissions = formatNumber(
-  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient),
+  expectedPreventedEmissionsValue,
 );
 
 const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
@@ -130,7 +132,7 @@ export const preventedEmissionsTestCases = [
     externalCreatedAt: massIdDocument.externalCreatedAt,
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
-      formatNumber(0),
+      0,
       baselineValue,
       exceedingEmissionCoefficientExceedingBaseline,
       massIdDocumentValue,
@@ -227,7 +229,7 @@ export const preventedEmissionsTestCases = [
     externalCreatedAt: massIdDocument.externalCreatedAt,
     massIdDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
-      expectedPreventedEmissions,
+      expectedPreventedEmissionsValue,
       baselineValue,
       exceedingEmissionCoefficient,
       massIdDocumentValue,

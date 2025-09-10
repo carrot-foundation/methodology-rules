@@ -13,6 +13,7 @@ import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './pre
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   calculatePreventedEmissions,
+  formatNumber,
   getGasTypeFromEvent,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
@@ -338,6 +339,72 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() => getGasTypeFromEvent(undefined)).toThrow(
         processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       );
+    });
+  });
+
+  describe('formatNumber', () => {
+    it.each([
+      {
+        description:
+          'should format number with floor rounding to 3 decimal places',
+        expected: '43.915',
+        input: 43.9159,
+      },
+      {
+        description: 'should floor round down when 4th decimal is 9',
+        expected: '1006.312',
+        input: 1006.312_230_000_001,
+      },
+      {
+        description: 'should handle exact 3 decimal places',
+        expected: '123.456',
+        input: 123.456,
+      },
+      {
+        description: 'should pad with zeros if fewer than 3 decimals',
+        expected: '42',
+        input: 42,
+      },
+      {
+        description: 'should handle very small numbers',
+        expected: '0.001',
+        input: 0.0019,
+      },
+      {
+        description:
+          'should floor to zero when result would be less than 0.001',
+        expected: '0',
+        input: 0.0009,
+      },
+      {
+        description: 'should handle negative numbers with floor rounding',
+        expected: '-43.916',
+        input: -43.9159,
+      },
+      {
+        description: 'should handle large numbers',
+        expected: '12345.678',
+        input: 12_345.6789,
+      },
+      {
+        description: 'should handle zero',
+        expected: '0',
+        input: 0,
+      },
+      {
+        description: 'should handle numbers with trailing zeros',
+        expected: '123.45',
+        input: 123.4501,
+      },
+      {
+        description: 'should handle numbers already at 3 decimal precision',
+        expected: '999.999',
+        input: 999.9999,
+      },
+    ])('$description', ({ expected, input }) => {
+      const result = formatNumber(input);
+
+      expect(result).toBe(expected);
     });
   });
 });
