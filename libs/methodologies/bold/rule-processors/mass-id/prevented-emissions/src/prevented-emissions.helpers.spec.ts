@@ -392,6 +392,11 @@ describe('PreventedEmissionsHelpers', () => {
         input: 0,
       },
       {
+        description: 'should handle numbers with trailing zeros',
+        expected: 123.45,
+        input: 123.4501,
+      },
+      {
         description: 'should handle numbers already at 3 decimal precision',
         expected: 999.999,
         input: 999.9999,
