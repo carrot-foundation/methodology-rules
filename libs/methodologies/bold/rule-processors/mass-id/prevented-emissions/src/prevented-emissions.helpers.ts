@@ -91,5 +91,13 @@ export const getGasTypeFromEvent = (
   return gasType;
 };
 
-export const formatNumber = (number_: number): number =>
-  Math.floor(number_ * 1000) / 1000;
+export const formatNumber = (number_: number): number => {
+  const formatter = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 3,
+    minimumFractionDigits: 3,
+    roundingMode: 'floor',
+    useGrouping: false,
+  });
+
+  return Number.parseFloat(formatter.format(number_));
+};
