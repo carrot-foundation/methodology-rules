@@ -19,7 +19,6 @@ const { RECYCLING_BASELINES } = DocumentEventName;
 
 const formatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 3,
-  minimumFractionDigits: 3,
   roundingMode: 'floor',
   useGrouping: false,
 });
@@ -98,5 +97,5 @@ export const getGasTypeFromEvent = (
   return gasType;
 };
 
-export const formatNumber = (number_: number): number =>
-  Number.parseFloat(formatter.format(number_));
+export const formatNumber = (number_: number): string =>
+  formatter.format(number_);
