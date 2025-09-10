@@ -10,7 +10,10 @@ import {
   VALID_MESSAGE,
   VALIDATION_UNAVAILABLE_MESSAGE,
 } from './ai-attachment-validator.constants';
-import { formatInvalidField } from './ai-attachment-validator.helpers';
+import {
+  formatInvalidField,
+  optimizeDocumentJsonForValidation,
+} from './ai-attachment-validator.helpers';
 import { AiAttachmentValidatorService } from './ai-attachment-validator.service';
 import {
   stubAiValidateAttachmentDto,
@@ -62,7 +65,7 @@ describe('AiAttachmentValidatorService', () => {
         getAiAttachmentValidatorApiUri(),
         {
           attachmentPaths: [dto.attachmentPath],
-          documentJson: dto.document,
+          documentJson: optimizeDocumentJsonForValidation(dto.document),
           ...(dto.systemPrompt && { systemPrompt: dto.systemPrompt }),
         },
       );
@@ -239,7 +242,7 @@ describe('AiAttachmentValidatorService', () => {
         getAiAttachmentValidatorApiUri(),
         {
           attachmentPaths: [dto.attachmentPath],
-          documentJson: document,
+          documentJson: optimizeDocumentJsonForValidation(document),
         },
       );
     });
@@ -372,7 +375,7 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(mappedDto).toEqual({
         attachmentPaths: [dto.attachmentPath],
-        documentJson: dto.document,
+        documentJson: optimizeDocumentJsonForValidation(dto.document),
         systemPrompt: dto.systemPrompt,
       });
     });
@@ -386,7 +389,7 @@ describe('AiAttachmentValidatorService', () => {
 
       expect(mappedDto).toEqual({
         attachmentPaths: [dto.attachmentPath],
-        documentJson: dto.document,
+        documentJson: optimizeDocumentJsonForValidation(dto.document),
       });
       expect(mappedDto).not.toHaveProperty('systemPrompt');
     });
@@ -403,6 +406,6 @@ describe('formatInvalidField helper', () => {
   it('should handle null reason', () => {
     const result = formatInvalidField('testField', null);
 
-    expect(result).toBe('testField: null');
+    expect(result).toBe('testField');
   });
 });

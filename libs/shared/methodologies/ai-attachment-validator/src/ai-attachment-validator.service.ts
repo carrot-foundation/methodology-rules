@@ -14,7 +14,10 @@ import {
   VALID_MESSAGE,
   VALIDATION_UNAVAILABLE_MESSAGE,
 } from './ai-attachment-validator.constants';
-import { formatInvalidField } from './ai-attachment-validator.helpers';
+import {
+  formatInvalidField,
+  optimizeDocumentJsonForValidation,
+} from './ai-attachment-validator.helpers';
 import {
   assertAiValidateAttachmentDto,
   assertApiAiValidationResponse,
@@ -99,7 +102,7 @@ export class AiAttachmentValidatorService extends AwsHttpService {
   ): Record<string, unknown> {
     return {
       attachmentPaths: [dto.attachmentPath],
-      documentJson: dto.document,
+      documentJson: optimizeDocumentJsonForValidation(dto.document),
       ...(dto.systemPrompt && { systemPrompt: dto.systemPrompt }),
     };
   }
