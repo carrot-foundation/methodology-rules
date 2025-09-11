@@ -139,7 +139,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ),
       resultContent: {
         gasType: ruleSubject.gasType,
-        preventedCo2e: formatNumber(preventedEmissions),
+        preventedCo2e: preventedEmissions,
       },
       resultStatus: RuleOutputStatus.PASSED,
     };
