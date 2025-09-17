@@ -43,9 +43,11 @@ export const isAccreditationValid = (document: Document): boolean => {
     DocumentEventAttributeName.ACCREDITATION_STATUS,
   );
 
+  const expirationDateExists = expirationDate !== undefined;
+
   if (
     !is<DateTime>(effectiveDate) ||
-    !is<DateTime>(expirationDate) ||
+    (expirationDateExists && !is<DateTime>(expirationDate)) ||
     !is<DocumentEventAccreditationStatus>(status) ||
     status !== DocumentEventAccreditationStatus.APPROVED
   ) {
@@ -54,7 +56,9 @@ export const isAccreditationValid = (document: Document): boolean => {
 
   const today = new Date();
   const effectiveDateObject = new Date(effectiveDate);
-  const expirationDateObject = new Date(expirationDate);
+  const expirationDateObject = expirationDateExists
+    ? new Date(expirationDate)
+    : new Date();
 
   const isEffectiveValid =
     isToday(effectiveDateObject) || isBefore(effectiveDateObject, today);
