@@ -62,34 +62,60 @@ DOCUMENT PURPOSE:
 - Transit authorization or shipping documentation format
 
 ENTITY RELATIONSHIPS:
-- Three distinct entities: waste generator, transporter, and receiver/destination
-- Transportation company identification with vehicle details
-- Driver information and transportation credentials
-- Logistics chain documentation (pickup, transport, delivery)
+**CRITICAL - ALL THREE ENTITIES MUST BE PRESENT AND CLEARLY IDENTIFIED:**
+- **Waste Generator**: Company generating the waste (razão social, CNPJ/tax ID, address, responsible person)
+- **Transporter/Hauler**: Transportation company (razão social, CNPJ/tax ID, address, vehicle details, driver information)
+- **Receiver/Processor**: Destination company (razão social, CNPJ/tax ID, address, receiving responsible person)
+
+**MANDATORY TRANSPORT ENTITY VALIDATION:**
+- Transportation company identification with complete credentials (name, tax ID, address)
+- Vehicle details (license plates, truck numbers, vehicle type)
+- Driver information and identification (name, credentials, contact)
+- Logistics chain documentation showing clear handoff points (pickup, transport, delivery)
 
 TRANSPORT LOGISTICS DATA:
 - Vehicle identification (license plates, truck numbers)
 - Transport dates and scheduling information
-- Driver names and identification
+- Driver names and identification numbers
 - Route or transportation method details
 - Packaging and transport safety certifications
+- Transport authorization signatures and timestamps
 
 WASTE MOVEMENT TRACKING:
-- Waste quantities being transported (not processed)
-- Waste classification codes for transport purposes
-- Packaging and containment specifications for transit
+- Waste quantities being transported (not processed) with specific weights/volumes
+- Waste classification codes for transport purposes (IBAMA codes, hazard classifications)
+- Packaging and containment specifications for transit (containers, drums, bulk transport)
 - Loading and transport safety compliance statements
+- Chain of custody documentation with signatures at each handoff
 
 REGULATORY FRAMEWORK:
-- Transport permits and environmental agency oversight
-- Movement authorization numbers
-- Transit safety regulations compliance
-- Chain of custody for transportation phase
+- Transport permits and environmental agency oversight (FEPAM, IBAMA authorization)
+- Movement authorization numbers (MTR numbers, permit IDs)
+- Transit safety regulations compliance certificates
+- Chain of custody for transportation phase with regulatory compliance statements
+- Environmental agency logos and official formatting
 
 DISTINCTIVE LANGUAGE:
-- References to "transport," "movement," "shipment," or "transit"
-- Focus on logistics rather than treatment or disposal
-- Transportation safety and packaging requirements`;
+- References to "transport," "movement," "shipment," "transit," or "manifesto de transporte"
+- Focus on logistics rather than treatment or disposal operations
+- Transportation safety and packaging requirements rather than processing methods
+- Pickup/delivery terminology rather than treatment/disposal completion
+
+**CRITICAL VALIDATION REQUIREMENTS:**
+- **EXACT COMPANY MATCHING**: Company names and tax IDs must match precisely between document sections
+- **COMPLETE TRANSPORT CHAIN**: All three entities (Generator → Transporter → Receiver) must be fully documented
+- **VEHICLE-DRIVER CONSISTENCY**: Vehicle license plates and driver information must be consistent throughout document
+- **QUANTITY CONSISTENCY**: Waste quantities must match across all document sections
+- **DATE ALIGNMENT**: Transport, pickup, and delivery dates must be logically sequential
+- **REGULATORY COMPLIANCE**: All required signatures, stamps, and authorization numbers must be present
+
+**RED FLAGS FOR INVALID TRANSPORT MANIFESTS:**
+- Missing transporter entity or incomplete transporter identification
+- Company name discrepancies between sections
+- Tax ID mismatches for any transport chain participant
+- Vehicle or driver information inconsistencies
+- Missing or misaligned transport dates
+- Incomplete chain of custody signatures`;
 
 export const AI_CONTEXT_PROMPTS: Record<DocumentManifestType, NonEmptyString> =
   {
