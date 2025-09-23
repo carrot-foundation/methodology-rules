@@ -146,6 +146,22 @@ describe('Accreditation Document Helpers', () => {
 
       expect(isAccreditationValid(document)).toBe(false);
     });
+
+    it('should return true if the document has a ACCREDITATION_RESULT event with valid effective date but no expiration date', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValid(document)).toBe(true);
+    });
   });
 
   describe('getParticipantAccreditationDocumentByParticipantId', () => {
