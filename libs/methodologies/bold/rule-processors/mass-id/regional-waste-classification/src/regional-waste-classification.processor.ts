@@ -23,6 +23,8 @@ import {
 import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 
+const isAlphaNumericUnicode = (ch: string): boolean => /\p{L}|\p{N}/u.test(ch);
+
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
@@ -89,7 +91,12 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
         normalizedId as keyof typeof WASTE_CLASSIFICATION_CODES.BR
       ].description;
 
-    if (description.trim() !== expectedDescription.trim()) {
+    const normalizedProvidedDescription =
+      this.normalizeDescriptionForComparison(description);
+    const normalizedExpectedDescription =
+      this.normalizeDescriptionForComparison(expectedDescription);
+
+    if (normalizedProvidedDescription !== normalizedExpectedDescription) {
       return this.isFailed(
         RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
         subject,
@@ -130,5 +137,22 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       ...(resultContent && { resultContent }),
       resultStatus: RuleOutputStatus.FAILED,
     };
+  }
+
+  private normalizeDescriptionForComparison(value: string): string {
+    const normalized = value.normalize('NFKC').trim();
+
+    let start = 0;
+    let end = normalized.length - 1;
+
+    while (start <= end && !isAlphaNumericUnicode(normalized.charAt(start))) {
+      start += 1;
+    }
+
+    while (end >= start && !isAlphaNumericUnicode(normalized.charAt(end))) {
+      end -= 1;
+    }
+
+    return normalized.slice(start, end + 1);
   }
 }

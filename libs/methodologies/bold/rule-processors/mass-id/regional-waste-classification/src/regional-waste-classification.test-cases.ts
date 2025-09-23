@@ -91,6 +91,29 @@ export const regionalWasteClassificationTestCases = [
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
       [PICK_UP]: stubBoldMassIdPickUpEvent({
         metadataAttributes: [
+          [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+          [
+            LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+            `***${WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description} - (*)`,
+          ],
+        ],
+      }),
+    },
+    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultContent: {
+      description: `***${WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description} - (*)`,
+      id: '02 01 01',
+      recyclerCountryCode: 'BR',
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the local waste classification description has leading/trailing special characters but matches after normalization.',
+  },
+  {
+    events: {
+      [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+      [PICK_UP]: stubBoldMassIdPickUpEvent({
+        metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
           [
             LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
