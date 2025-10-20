@@ -27,7 +27,7 @@
     "upload-lambdas-and-metadata": "./scripts/upload-lambdas-and-metadata.sh"
   },
   "private": true,
-  "packageManager": "pnpm@10.9.0",
+  "packageManager": "pnpm@10.18.3",
   "engines": {
     "node": "22.15.0"
   },
