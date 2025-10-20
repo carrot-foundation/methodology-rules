@@ -26,6 +26,7 @@ import {
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
+import { isAfter, isValid, parseISO } from 'date-fns';
 import { is } from 'typia';
 
 import {
@@ -64,6 +65,7 @@ export interface WeighingValues {
   grossWeight: MethodologyDocumentEventAttribute | undefined;
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
+  tareException: ApprovedException | undefined;
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
   weighingCaptureMethod: string | undefined;
 }
@@ -105,6 +107,28 @@ export const getMandatoryFieldExceptionFromAccreditationDocument = (
   );
 };
 
+export const isExceptionValid = (
+  exception: ApprovedException | undefined,
+): boolean => {
+  if (isNil(exception)) {
+    return false;
+  }
+
+  const validUntil = exception['Valid Until'];
+
+  if (!validUntil) {
+    return true;
+  }
+
+  const validUntilDate = parseISO(validUntil);
+
+  if (!isValid(validUntilDate)) {
+    return false;
+  }
+
+  return !isAfter(new Date(), validUntilDate);
+};
+
 export const getAccreditationScaleType = (
   recyclerAccreditationDocument: Document,
 ): MethodologyDocumentEventAttributeValue | undefined => {
@@ -142,6 +166,10 @@ export const getValuesRelatedToWeighing = (
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
   tare: getEventAttributeByName(weighingEvent, TARE),
+  tareException: getMandatoryFieldExceptionFromAccreditationDocument(
+    recyclerAccreditationDocument,
+    TARE,
+  ),
   vehicleLicensePlateAttribute: getEventAttributeByName(
     weighingEvent,
     VEHICLE_LICENSE_PLATE,
@@ -321,6 +349,14 @@ const validators: Record<string, Validator> = {
 
   tare: (values) => {
     const errors: string[] = [];
+
+    if (
+      values.containerType === DocumentEventContainerType.TRUCK.toString() &&
+      isExceptionValid(values.tareException) &&
+      !hasPositiveFloatAttributeValue(values.tare)
+    ) {
+      return { errors: [] };
+    }
 
     if (!hasPositiveFloatAttributeValue(values.tare)) {
       errors.push(WRONG_FORMAT_RESULT_COMMENTS.TARE(values.tare?.value));

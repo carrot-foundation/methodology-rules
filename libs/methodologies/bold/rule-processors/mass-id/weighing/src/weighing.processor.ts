@@ -127,6 +127,14 @@ export class WeighingProcessor extends RuleDataProcessor {
       passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
     }
 
+    if (
+      !isNil(weighingValues.tareException) &&
+      isNil(weighingValues.tare?.value)
+    ) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(passMessage);
+    }
+
     return {
       resultComment: passMessage,
       resultStatus: RuleOutputStatus.PASSED,

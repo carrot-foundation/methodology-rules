@@ -17,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
+  ApprovedException,
   MethodologyApprovedExceptionType,
   MethodologyDocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
@@ -56,39 +57,60 @@ const twoStepWeighingEventParticipant = stubParticipant();
 
 const stubBaseAccreditationDocuments = ({
   scaleTypeValue = scaleType,
+  tareExceptionValidUntil,
   withContainerCapacityException = false,
+  withTareException = false,
 }: {
   scaleTypeValue?: DocumentEventScaleType;
+  tareExceptionValidUntil?: string;
   withContainerCapacityException?: boolean;
-} = {}) =>
-  new Map([
+  withTareException?: boolean;
+} = {}) => {
+  const exceptions = [];
+
+  if (withContainerCapacityException) {
+    exceptions.push({
+      'Attribute Location': {
+        Asset: {
+          Category: DocumentCategory.MASS_ID,
+        },
+        Event: WEIGHING,
+      },
+      'Attribute Name': CONTAINER_CAPACITY,
+      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      Reason: 'The container capacity is not required for this event',
+    });
+  }
+
+  if (withTareException) {
+    const tareException: ApprovedException = {
+      'Attribute Location': {
+        Asset: {
+          Category: DocumentCategory.MASS_ID,
+        },
+        Event: WEIGHING,
+      },
+      'Attribute Name': TARE,
+      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      Reason:
+        'Legacy manual weighing system only captured net weight for TRUCK containers',
+    };
+
+    if (tareExceptionValidUntil) {
+      tareException['Valid Until'] = tareExceptionValidUntil;
+    }
+
+    exceptions.push(tareException);
+  }
+
+  return new Map([
     [
       RECYCLER,
       {
         externalEventsMap: {
           [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
-            metadataAttributes: withContainerCapacityException
-              ? [
-                  [
-                    APPROVED_EXCEPTIONS,
-                    [
-                      {
-                        'Attribute Location': {
-                          Asset: {
-                            Category: DocumentCategory.MASS_ID,
-                          },
-                          Event: WEIGHING,
-                        },
-                        'Attribute Name': CONTAINER_CAPACITY,
-                        'Exception Type':
-                          MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-                        Reason:
-                          'The container capacity is not required for this event',
-                      },
-                    ],
-                  ],
-                ]
-              : [],
+            metadataAttributes:
+              exceptions.length > 0 ? [[APPROVED_EXCEPTIONS, exceptions]] : [],
           }),
           [MONITORING_SYSTEMS_AND_EQUIPMENT]:
             stubBoldMonitoringSystemsAndEquipmentEvent({
@@ -98,6 +120,7 @@ const stubBaseAccreditationDocuments = ({
       },
     ],
   ]);
+};
 
 const eventValue = 99;
 const validWeighingAttributes: MetadataAttributeParameter[] = [
@@ -690,6 +713,174 @@ export const weighingTestCases = [
     }),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the calculated net weight is not equal to the mass net weight',
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          [CONTAINER_QUANTITY, undefined],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          [TARE, undefined],
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    ),
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and missing Tare`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments(),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          [CONTAINER_QUANTITY, undefined],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          [TARE, undefined],
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined' as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${WEIGHING} event fails for TRUCK container without tareException and missing Tare`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.BIN],
+          [CONTAINER_QUANTITY, 1],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          [TARE, undefined],
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException and missing Tare`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          [CONTAINER_QUANTITY, undefined],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          {
+            format: KILOGRAM,
+            name: TARE,
+            value: 1,
+          },
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and Tare provided`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      tareExceptionValidUntil: '2020-01-01T00:00:00Z',
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          [CONTAINER_QUANTITY, undefined],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          [TARE, undefined],
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${WEIGHING} event fails for TRUCK container with expired tareException (Valid Until in past) and missing Tare`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      tareExceptionValidUntil: 'invalid-date-format',
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: stubBoldMassIdWeighingEvent({
+        metadataAttributes: [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          [CONTAINER_QUANTITY, undefined],
+          {
+            format: KILOGRAM,
+            name: GROSS_WEIGHT,
+            value: 100,
+          },
+          [TARE, undefined],
+        ],
+        partialDocumentEvent: {
+          value: eventValue,
+        },
+      }),
+    },
+    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${WEIGHING} event fails for TRUCK container with invalid tareException Valid Until date format and missing Tare`,
   },
 ];
 
