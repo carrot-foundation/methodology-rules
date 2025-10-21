@@ -33,6 +33,7 @@ import { WeighingProcessorErrors } from './weighing.errors';
 import {
   getValuesRelatedToWeighing,
   getWeighingEvents,
+  isExceptionValid,
   validateTwoStepWeighingEvents,
   validateWeighingValues,
 } from './weighing.helpers';
@@ -123,12 +124,12 @@ export class WeighingProcessor extends RuleDataProcessor {
       passMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
     }
 
-    if (!isNil(weighingValues.containerCapacityException)) {
+    if (isExceptionValid(weighingValues.containerCapacityException)) {
       passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
     }
 
     if (
-      !isNil(weighingValues.tareException) &&
+      isExceptionValid(weighingValues.tareException) &&
       isNil(weighingValues.tare?.value)
     ) {
       passMessage =
