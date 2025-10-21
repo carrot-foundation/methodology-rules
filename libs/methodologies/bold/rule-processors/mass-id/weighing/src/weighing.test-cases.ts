@@ -183,33 +183,8 @@ const validWeighingAttributesWithoutQuantity: MetadataAttributeParameter[] = [
 const createTwoStepWeighingEvents = (
   scaleTypeValue: DocumentEventScaleType,
   participant: ReturnType<typeof stubParticipant>,
-  overrideAttributes: MetadataAttributeParameter[] = [],
-) => ({
-  [`${WEIGHING}-2`]: createWeighingEvent(
-    mergeAttributes(validWeighingAttributesWithoutQuantity, [
-      [SCALE_TYPE, scaleTypeValue],
-      [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-      ...overrideAttributes,
-    ]),
-    eventValue,
-    participant,
-  ),
-  [WEIGHING]: createWeighingEvent(
-    mergeAttributes(validWeighingAttributesWithoutQuantity, [
-      [SCALE_TYPE, scaleTypeValue],
-      [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-      ...overrideAttributes,
-    ]),
-    eventValue,
-    participant,
-  ),
-});
-
-const createTwoStepWeighingEventsWithDifferentAttributes = (
-  scaleTypeValue: DocumentEventScaleType,
-  participant: ReturnType<typeof stubParticipant>,
   firstEventOverrides: MetadataAttributeParameter[] = [],
-  secondEventOverrides: MetadataAttributeParameter[] = [],
+  secondEventOverrides: MetadataAttributeParameter[] = firstEventOverrides,
 ) => ({
   [`${WEIGHING}-2`]: createWeighingEvent(
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
@@ -531,7 +506,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
-    massIdDocumentEvents: createTwoStepWeighingEventsWithDifferentAttributes(
+    massIdDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
       [],
