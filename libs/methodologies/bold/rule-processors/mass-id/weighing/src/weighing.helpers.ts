@@ -350,10 +350,14 @@ const validators: Record<string, Validator> = {
   tare: (values) => {
     const errors: string[] = [];
 
+    const isTareOmitted = isNil(values.tare?.value) || values.tare.value === '';
+    const isTruckContainer =
+      values.containerType === DocumentEventContainerType.TRUCK.toString();
+
     if (
-      values.containerType === DocumentEventContainerType.TRUCK.toString() &&
+      isTruckContainer &&
       isExceptionValid(values.tareException) &&
-      !hasPositiveFloatAttributeValue(values.tare)
+      isTareOmitted
     ) {
       return { errors: [] };
     }
