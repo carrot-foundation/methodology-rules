@@ -26,6 +26,7 @@ import {
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
+import { isAfter, isValid, parseISO } from 'date-fns';
 import { is } from 'typia';
 
 import {
@@ -34,7 +35,15 @@ import {
   NOT_FOUND_RESULT_COMMENTS,
   WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
-import { isApprovedExceptionAttributeValue } from './weighing.typia';
+import {
+  type ContainerCapacityApprovedException,
+  type TareApprovedException,
+} from './weighing.types';
+import {
+  isApprovedExceptionAttributeValue,
+  isContainerCapacityApprovedException,
+  isTareApprovedException,
+} from './weighing.typia';
 
 const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
@@ -56,7 +65,7 @@ export type ValidationResult = { errors: string[] };
 export interface WeighingValues {
   accreditationScaleType: MethodologyDocumentEventAttributeValue | undefined;
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
-  containerCapacityException: ApprovedException | undefined;
+  containerCapacityException: ContainerCapacityApprovedException | undefined;
   containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
   containerType: string | undefined;
   description: MethodologyDocumentEventAttributeValue | undefined;
@@ -64,6 +73,7 @@ export interface WeighingValues {
   grossWeight: MethodologyDocumentEventAttribute | undefined;
   scaleType: MethodologyDocumentEventAttributeValue | undefined;
   tare: MethodologyDocumentEventAttribute | undefined;
+  tareException: TareApprovedException | undefined;
   vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
   weighingCaptureMethod: string | undefined;
 }
@@ -76,10 +86,9 @@ const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
-export const getMandatoryFieldExceptionFromAccreditationDocument = (
+const getApprovedExceptions = (
   recyclerAccreditationDocument: Document,
-  fieldName: DocumentEventAttributeName,
-): ApprovedException | undefined => {
+): ApprovedException[] | undefined => {
   const accreditationResultEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([ACCREDITATION_RESULT]),
@@ -98,11 +107,74 @@ export const getMandatoryFieldExceptionFromAccreditationDocument = (
     return undefined;
   }
 
-  return approvedExceptions.find(
+  return approvedExceptions;
+};
+
+export const getTareExceptionFromAccreditationDocument = (
+  recyclerAccreditationDocument: Document,
+): TareApprovedException | undefined => {
+  const exceptions = getApprovedExceptions(recyclerAccreditationDocument);
+
+  if (!exceptions) {
+    return undefined;
+  }
+
+  const tareException = exceptions.find(
     (exception) =>
       exception['Attribute Location'].Event === WEIGHING.toString() &&
-      exception['Attribute Name'] === fieldName.toString(),
+      exception['Attribute Name'] === TARE.toString(),
   );
+
+  return isTareApprovedException(tareException) ? tareException : undefined;
+};
+
+export const getContainerCapacityExceptionFromAccreditationDocument = (
+  recyclerAccreditationDocument: Document,
+): ContainerCapacityApprovedException | undefined => {
+  const exceptions = getApprovedExceptions(recyclerAccreditationDocument);
+
+  if (!exceptions) {
+    return undefined;
+  }
+
+  const containerCapacityException = exceptions.find(
+    (exception) =>
+      exception['Attribute Location'].Event === WEIGHING.toString() &&
+      exception['Attribute Name'] === CONTAINER_CAPACITY.toString(),
+  );
+
+  return isContainerCapacityApprovedException(containerCapacityException)
+    ? containerCapacityException
+    : undefined;
+};
+
+export const isExceptionValid = (
+  exception:
+    | ContainerCapacityApprovedException
+    | TareApprovedException
+    | undefined,
+): boolean => {
+  const isValidException =
+    isTareApprovedException(exception) ||
+    isContainerCapacityApprovedException(exception);
+
+  if (!isValidException) {
+    return false;
+  }
+
+  const validUntil = exception['Valid Until'];
+
+  if (!validUntil) {
+    return true;
+  }
+
+  const validUntilDate = parseISO(validUntil);
+
+  if (!isValid(validUntilDate)) {
+    return false;
+  }
+
+  return !isAfter(new Date(), validUntilDate);
 };
 
 export const getAccreditationScaleType = (
@@ -128,9 +200,8 @@ export const getValuesRelatedToWeighing = (
     CONTAINER_CAPACITY,
   ),
   containerCapacityException:
-    getMandatoryFieldExceptionFromAccreditationDocument(
+    getContainerCapacityExceptionFromAccreditationDocument(
       recyclerAccreditationDocument,
-      CONTAINER_CAPACITY,
     ),
   containerQuantity: getEventAttributeValue(weighingEvent, CONTAINER_QUANTITY),
   containerType: getEventAttributeValue(
@@ -142,6 +213,9 @@ export const getValuesRelatedToWeighing = (
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
   tare: getEventAttributeByName(weighingEvent, TARE),
+  tareException: getTareExceptionFromAccreditationDocument(
+    recyclerAccreditationDocument,
+  ),
   vehicleLicensePlateAttribute: getEventAttributeByName(
     weighingEvent,
     VEHICLE_LICENSE_PLATE,
@@ -167,7 +241,7 @@ type Validator = (
 
 const validators: Record<string, Validator> = {
   containerCapacity: (values) => {
-    if (!isNil(values.containerCapacityException)) {
+    if (isExceptionValid(values.containerCapacityException)) {
       return { errors: [] };
     }
 
@@ -321,6 +395,18 @@ const validators: Record<string, Validator> = {
 
   tare: (values) => {
     const errors: string[] = [];
+
+    const isTareOmitted = isNil(values.tare?.value) || values.tare.value === '';
+    const isTruckContainer =
+      values.containerType === DocumentEventContainerType.TRUCK.toString();
+
+    if (
+      isTruckContainer &&
+      isExceptionValid(values.tareException) &&
+      isTareOmitted
+    ) {
+      return { errors: [] };
+    }
 
     if (!hasPositiveFloatAttributeValue(values.tare)) {
       errors.push(WRONG_FORMAT_RESULT_COMMENTS.TARE(values.tare?.value));

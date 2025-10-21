@@ -25,6 +25,7 @@ export interface ApprovedException {
   'Attribute Name': NonEmptyString;
   'Exception Type': NonEmptyString;
   Reason: NonEmptyString;
+  'Valid Until'?: string;
 }
 
 export type ApprovedExceptionAttributeValue = ApprovedException[];
