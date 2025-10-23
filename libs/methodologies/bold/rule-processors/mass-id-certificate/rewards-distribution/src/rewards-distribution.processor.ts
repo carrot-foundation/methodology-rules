@@ -222,14 +222,16 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
           }).div(actorsByType.length);
 
           result.push(
-            ...actorsByType.map(({ address, participant, type }) =>
-              mapActorReward({
-                actorType: type,
-                address,
-                massIdDocument,
-                massIdPercentage,
-                participant,
-              }),
+            ...actorsByType.map(
+              ({ address, participant, preserveSensitiveData, type }) =>
+                mapActorReward({
+                  actorType: type,
+                  address,
+                  massIdDocument,
+                  massIdPercentage,
+                  participant,
+                  preserveSensitiveData,
+                }),
             ),
           );
         }
@@ -268,6 +270,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
             id: event.participant.id,
             name: event.participant.name,
           },
+          preserveSensitiveData: event.preserveSensitiveData,
           type: actorType,
         });
       }
