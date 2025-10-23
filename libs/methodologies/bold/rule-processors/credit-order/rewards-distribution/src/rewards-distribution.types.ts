@@ -44,6 +44,7 @@ export interface RewardsDistributionActor {
   amount: NonEmptyString;
   participant: Participant;
   percentage: NonEmptyString;
+  preserveSensitiveData: boolean | undefined;
 }
 
 export interface RuleSubject {

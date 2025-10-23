@@ -47,12 +47,21 @@ export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
 export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
-  participants.map(({ actorType, address, massIdPercentage, participant }) => ({
-    actorType,
-    address,
-    massIdPercentage: formatPercentage(massIdPercentage),
-    participant,
-  }));
+  participants.map(
+    ({
+      actorType,
+      address,
+      massIdPercentage,
+      participant,
+      preserveSensitiveData,
+    }) => ({
+      actorType,
+      address,
+      massIdPercentage: formatPercentage(massIdPercentage),
+      participant,
+      preserveSensitiveData,
+    }),
+  );
 
 export const mapActorReward = ({
   actorType,
@@ -60,18 +69,21 @@ export const mapActorReward = ({
   massIdDocument,
   massIdPercentage,
   participant,
+  preserveSensitiveData,
 }: {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
+  preserveSensitiveData: boolean | undefined;
 }): ActorReward => ({
   actorType,
   address,
   massIdDocument,
   massIdPercentage,
   participant,
+  preserveSensitiveData,
 });
 
 export const getActorsByType = ({
@@ -113,6 +125,7 @@ export const getActorsByType = ({
           id: methodologyParticipant.id,
           name: methodologyParticipant.name,
         },
+        preserveSensitiveData: actorEvent?.preserveSensitiveData,
         type: actorType,
       },
     ];

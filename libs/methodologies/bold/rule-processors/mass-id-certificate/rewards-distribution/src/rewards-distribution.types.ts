@@ -21,6 +21,7 @@ export interface ActorReward {
   massIdDocument: Document;
   massIdPercentage: BigNumber;
   participant: RewardActorParticipant;
+  preserveSensitiveData: boolean | undefined;
 }
 
 export type RewardsDistribution = Record<
@@ -31,6 +32,7 @@ export type RewardsDistribution = Record<
 export interface RewardsDistributionActor {
   address: RewardActorAddress;
   participant: RewardActorParticipant;
+  preserveSensitiveData: boolean | undefined;
   type: RewardsDistributionActorType;
 }
 

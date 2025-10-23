@@ -39,6 +39,7 @@ export interface MassIdReward {
   // TODO: update with custom tag to validate BigNumber string
   massIdPercentage: NonEmptyString;
   participant: RewardActorParticipant;
+  preserveSensitiveData: boolean | undefined;
 }
 
 export interface RewardActorAddress {
