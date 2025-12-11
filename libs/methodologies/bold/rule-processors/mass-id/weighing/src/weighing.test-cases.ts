@@ -655,6 +655,33 @@ export const weighingTestCases = [
       withTareException: true,
     }),
     massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(
+        [
+          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+          [SCALE_TYPE, scaleType],
+          [CONTAINER_TYPE, DocumentEventContainerType.BIN],
+          [CONTAINER_QUANTITY, 1],
+          { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
+          { format: KILOGRAM, name: TARE, value: 1 },
+        ],
+        98,
+      ),
+    },
+    resultComment: INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
+      calculatedNetWeight: 99,
+      containerQuantity: 1,
+      eventValue: 98,
+      grossWeight: 100,
+      tare: 1,
+    }),
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException when net weight calculation fails (tare exception does not apply to non-TRUCK containers)`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -667,6 +694,44 @@ export const weighingTestCases = [
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and Tare provided`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent([
+        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+        [SCALE_TYPE, scaleType],
+        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+        [CONTAINER_QUANTITY, undefined],
+        [GROSS_WEIGHT, undefined],
+        { format: KILOGRAM, name: TARE, value: 1 },
+      ]),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and missing Gross Weight`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withTareException: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent([
+        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+        [SCALE_TYPE, scaleType],
+        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+        [CONTAINER_QUANTITY, undefined],
+        [GROSS_WEIGHT, undefined],
+        [TARE, undefined],
+      ]),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    ),
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and both Tare and Gross Weight missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -705,6 +770,22 @@ export const weighingTestCases = [
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${WEIGHING} event fails for TRUCK container with invalid tareException Valid Until date format and missing Tare`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments(),
+    massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent([
+        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+        [SCALE_TYPE, scaleType],
+        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+        [CONTAINER_QUANTITY, undefined],
+        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
+        { format: KILOGRAM, name: TARE, value: 1 },
+      ]),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for TRUCK container without tareException and both Tare and Gross Weight provided`,
   },
 ];
 
