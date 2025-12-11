@@ -86,6 +86,28 @@ const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
+const isTruckContainer = (values: WeighingValues): boolean =>
+  values.containerType === DocumentEventContainerType.TRUCK.toString();
+
+const isAttributeOmitted = (
+  attribute?: MethodologyDocumentEventAttribute,
+): boolean => isNil(attribute?.value) || attribute.value === '';
+
+const shouldSkipValidationWithTareException = (
+  values: WeighingValues,
+  isOmitted: boolean,
+): boolean =>
+  isTruckContainer(values) &&
+  isExceptionValid(values.tareException) &&
+  isOmitted;
+
+const shouldSkipNetWeightCalculationWithTareException = (
+  values: WeighingValues,
+): boolean =>
+  isTruckContainer(values) &&
+  isExceptionValid(values.tareException) &&
+  (isAttributeOmitted(values.grossWeight) || isAttributeOmitted(values.tare));
+
 const getApprovedExceptions = (
   recyclerAccreditationDocument: Document,
 ): ApprovedException[] | undefined => {
@@ -260,7 +282,7 @@ const validators: Record<string, Validator> = {
 
   containerQuantity: (values) => {
     const errors: string[] = [];
-    const isTruck = values.containerType === DocumentEventContainerType.TRUCK;
+    const isTruck = isTruckContainer(values);
 
     if (isTruck && isNonZeroPositiveInt(values.containerQuantity)) {
       errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
@@ -310,6 +332,15 @@ const validators: Record<string, Validator> = {
   grossWeight: (values) => {
     const errors: string[] = [];
 
+    if (
+      shouldSkipValidationWithTareException(
+        values,
+        isAttributeOmitted(values.grossWeight),
+      )
+    ) {
+      return { errors: [] };
+    }
+
     if (!hasPositiveFloatAttributeValue(values.grossWeight)) {
       errors.push(
         WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(values.grossWeight?.value),
@@ -324,6 +355,10 @@ const validators: Record<string, Validator> = {
   },
 
   netWeightCalculation: (values) => {
+    if (shouldSkipNetWeightCalculationWithTareException(values)) {
+      return { errors: [] };
+    }
+
     if (
       isNil(values.grossWeight?.value) ||
       isNil(values.tare?.value) ||
@@ -396,14 +431,11 @@ const validators: Record<string, Validator> = {
   tare: (values) => {
     const errors: string[] = [];
 
-    const isTareOmitted = isNil(values.tare?.value) || values.tare.value === '';
-    const isTruckContainer =
-      values.containerType === DocumentEventContainerType.TRUCK.toString();
-
     if (
-      isTruckContainer &&
-      isExceptionValid(values.tareException) &&
-      isTareOmitted
+      shouldSkipValidationWithTareException(
+        values,
+        isAttributeOmitted(values.tare),
+      )
     ) {
       return { errors: [] };
     }
