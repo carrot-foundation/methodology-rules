@@ -6,6 +6,7 @@ import {
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
+import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification';
 import { WeighingProcessor } from './weighing.processor';
 import {
   weighingErrorTestCases,
@@ -17,17 +18,31 @@ describe('WeighingProcessor', () => {
 
   beforeEach(() => {
     jest.restoreAllMocks();
+
+    jest
+      .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
+      .mockResolvedValue({ errors: [] });
   });
 
   describe('WeighingProcessor', () => {
     it.each(weighingTestCases)(
       'should return $resultStatus when $scenario',
-      async ({
-        accreditationDocuments,
-        massIdDocumentEvents,
-        resultComment,
-        resultStatus,
-      }) => {
+      async (testCase) => {
+        const {
+          accreditationDocuments,
+          massIdDocumentEvents,
+          resultComment,
+          resultStatus,
+        } = testCase;
+
+        if ('scaleTicketVerificationError' in testCase) {
+          jest
+            .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
+            .mockResolvedValueOnce({
+              errors: [testCase.scaleTicketVerificationError],
+            });
+        }
+
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
           massIdDocumentsParams: {

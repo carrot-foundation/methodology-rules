@@ -40,6 +40,7 @@ import {
   type TareApprovedException,
 } from './weighing.types';
 import {
+  isAdditionalVerificationAttributeValue,
   isApprovedExceptionAttributeValue,
   isContainerCapacityApprovedException,
   isTareApprovedException,
@@ -54,6 +55,7 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
+  REQUIRED_ADDITIONAL_VERIFICATIONS,
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
@@ -130,6 +132,30 @@ const getApprovedExceptions = (
   }
 
   return approvedExceptions;
+};
+
+export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
+  recyclerAccreditationDocument: Document,
+) => {
+  const accreditationResultEvent =
+    recyclerAccreditationDocument.externalEvents?.find(
+      eventNameIsAnyOf([ACCREDITATION_RESULT]),
+    );
+
+  if (!accreditationResultEvent) {
+    return;
+  }
+
+  const additionalVerifications = getEventAttributeValue(
+    accreditationResultEvent,
+    REQUIRED_ADDITIONAL_VERIFICATIONS,
+  );
+
+  if (!isAdditionalVerificationAttributeValue(additionalVerifications)) {
+    return;
+  }
+
+  return additionalVerifications;
 };
 
 export const getTareExceptionFromAccreditationDocument = (

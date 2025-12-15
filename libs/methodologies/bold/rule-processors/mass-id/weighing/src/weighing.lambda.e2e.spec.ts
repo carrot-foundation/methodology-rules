@@ -9,6 +9,7 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
+import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification';
 import { weighingLambda } from './weighing.lambda';
 import {
   weighingErrorTestCases,
@@ -18,18 +19,32 @@ import {
 describe('WeighingProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+
+    jest
+      .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
+      .mockResolvedValue({ errors: [] });
   });
 
   const documentKeyPrefix = faker.string.uuid();
 
   it.each(weighingTestCases)(
     'should return $resultStatus when $scenario',
-    async ({
-      accreditationDocuments,
-      massIdDocumentEvents,
-      resultComment,
-      resultStatus,
-    }) => {
+    async (testCase) => {
+      const {
+        accreditationDocuments,
+        massIdDocumentEvents,
+        resultComment,
+        resultStatus,
+      } = testCase;
+
+      if ('scaleTicketVerificationError' in testCase) {
+        jest
+          .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
+          .mockResolvedValueOnce({
+            errors: [testCase.scaleTicketVerificationError],
+          });
+      }
+
       const {
         massIdAuditDocument,
         massIdDocument,

@@ -25,6 +25,7 @@ export enum DocumentEventAccreditationStatus {
 
 export enum DocumentEventAttachmentLabel {
   RECYCLING_MANIFEST = 'Recycling Manifest',
+  SCALE_TICKET = 'Scale Ticket',
   TRANSPORT_MANIFEST = 'Transport Manifest',
 }
 
@@ -58,6 +59,7 @@ export enum DocumentEventAttributeName {
   RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
   RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
   REFERENCE_YEAR = 'Reference Year',
+  REQUIRED_ADDITIONAL_VERIFICATIONS = 'Required Additional Verifications',
   RULE_PROCESSOR_RESULT_CONTENT = 'Rule Processor Result Content',
   RULE_RESULT_DETAILS = 'Rule Result Details',
   SCALE_TYPE = 'Scale Type',

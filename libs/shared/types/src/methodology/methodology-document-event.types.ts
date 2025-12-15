@@ -30,6 +30,14 @@ export interface ApprovedException {
 
 export type ApprovedExceptionAttributeValue = ApprovedException[];
 
+export interface MethodologyAdditionalVerification {
+  scaleTicketLayout: 'layout1';
+  verificationType: 'scaleTicket';
+}
+
+export type MethodologyAdditionalVerificationAttributeValue =
+  MethodologyAdditionalVerification[];
+
 export interface MethodologyDocumentEvent {
   address: MethodologyAddress;
   attachments?: MethodologyDocumentEventAttachment[] | undefined;
@@ -79,6 +87,7 @@ export interface MethodologyDocumentEventAttributeReference {
 export type MethodologyDocumentEventAttributeValue =
   | ApprovedExceptionAttributeValue
   | boolean
+  | MethodologyAdditionalVerificationAttributeValue
   | MethodologyDocumentEventAttributeReference
   | null
   | number

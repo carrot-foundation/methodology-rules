@@ -56,6 +56,22 @@ export const INVALID_RESULT_COMMENTS = {
     tare: number;
   }) =>
     `The calculated net weight (${calculatedNetWeight}) differs from the declared "Event Value" (${eventValue}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE}kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
+  SCALE_TICKET_EXTRACTION_FAILED:
+    'The scale ticket could not be processed for verification.',
+  SCALE_TICKET_MISSING_SOURCE:
+    'Scale ticket verification was required but no valid source for the scale ticket file could be determined.',
+  SCALE_TICKET_NET_WEIGHT_MISMATCH: ({
+    expectedNetWeight,
+    ticketNetWeight,
+  }: {
+    expectedNetWeight: number;
+    ticketNetWeight: number;
+  }) =>
+    `The net weight extracted from the scale ticket (${ticketNetWeight}) does not match the "Event Value" (${expectedNetWeight}).`,
+  SCALE_TICKET_UNSUPPORTED_LAYOUT: (layout: unknown) =>
+    `The scale ticket layout "${String(
+      layout,
+    )}" specified in "${DocumentEventAttributeName.REQUIRED_ADDITIONAL_VERIFICATIONS}" is not supported.`,
   SCALE_TYPE: (scaleType: unknown) =>
     `The "${SCALE_TYPE}" "${String(scaleType)}" is not supported by the methodology.`,
   SCALE_TYPE_MISMATCH: (scaleType: unknown, accreditationScaleType: unknown) =>

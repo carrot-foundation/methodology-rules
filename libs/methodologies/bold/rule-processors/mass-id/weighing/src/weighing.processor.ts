@@ -1,4 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+import type { TextractServiceInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -14,6 +15,7 @@ import {
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttachmentLabel,
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,11 +28,16 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
+  isScaleTicketVerificationConfig,
+  verifyScaleTicketNetWeight,
+} from './scale-ticket-verification/scale-ticket-verification';
+import {
   NOT_FOUND_RESULT_COMMENTS,
   PASSED_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 import {
+  getRequiredAdditionalVerificationsFromAccreditationDocument,
   getValuesRelatedToWeighing,
   getWeighingEvents,
   isExceptionValid,
@@ -56,7 +63,10 @@ export class WeighingProcessor extends RuleDataProcessor {
       const documentQuery = await this.generateDocumentQuery(ruleInput);
       const documentPair = await this.collectDocuments(documentQuery);
       const ruleSubject = this.getRuleSubject(documentPair);
-      const evaluationResult = this.evaluateResult(ruleSubject);
+      const evaluationResult = await this.evaluateResult(
+        ruleSubject,
+        ruleInput,
+      );
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
@@ -68,10 +78,10 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
   }
 
-  protected evaluateResult({
-    recyclerAccreditationDocument,
-    weighingEvents,
-  }: RuleSubject): EvaluateResultOutput {
+  protected async evaluateResult(
+    { recyclerAccreditationDocument, weighingEvents }: RuleSubject,
+    ruleInput: RuleInput,
+  ): Promise<EvaluateResultOutput> {
     const initialValidation = this.validateWeighingEvents(weighingEvents);
 
     if (initialValidation) {
@@ -108,6 +118,35 @@ export class WeighingProcessor extends RuleDataProcessor {
         resultComment: validationMessages.errors.join(' '),
         resultStatus: RuleOutputStatus.FAILED,
       };
+    }
+
+    const additionalVerifications =
+      getRequiredAdditionalVerificationsFromAccreditationDocument(
+        recyclerAccreditationDocument,
+      );
+
+    const scaleTicketConfig = additionalVerifications?.find(
+      isScaleTicketVerificationConfig,
+    );
+
+    if (scaleTicketConfig) {
+      const textExtractorInput = this.buildScaleTicketTextExtractorInput(
+        weighingEvent,
+        ruleInput,
+      );
+
+      const scaleTicketValidation = await verifyScaleTicketNetWeight({
+        config: scaleTicketConfig,
+        expectedNetWeight: weighingValues.eventValue,
+        textExtractorInput,
+      });
+
+      if (scaleTicketValidation.errors.length > 0) {
+        return {
+          resultComment: scaleTicketValidation.errors.join(' '),
+          resultStatus: RuleOutputStatus.FAILED,
+        };
+      }
     }
 
     let passMessage = '';
@@ -168,6 +207,34 @@ export class WeighingProcessor extends RuleDataProcessor {
     return {
       recyclerAccreditationDocument,
       weighingEvents,
+    };
+  }
+
+  private buildScaleTicketTextExtractorInput(
+    weighingEvent: DocumentEvent,
+    ruleInput: RuleInput,
+  ): TextractServiceInput | undefined {
+    const scaleTicketAttachment = weighingEvent.attachments?.find(
+      (attachment) =>
+        String(attachment.label) ===
+        String(DocumentEventAttachmentLabel.SCALE_TICKET),
+    );
+
+    if (!scaleTicketAttachment) {
+      return undefined;
+    }
+
+    const bucket = process.env['SCALE_TICKET_S3_BUCKET'];
+
+    if (!bucket) {
+      return undefined;
+    }
+
+    const key = `${ruleInput.documentKeyPrefix}/attachments/${scaleTicketAttachment.attachmentId}`;
+
+    return {
+      s3Bucket: bucket,
+      s3Key: key,
     };
   }
 
