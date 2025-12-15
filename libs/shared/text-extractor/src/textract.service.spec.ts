@@ -83,7 +83,7 @@ describe('TextractService', () => {
         { blockType: 'LINE', id: '1', text: 'Hello' },
         { blockType: 'LINE', id: '2', text: 'World' },
       ],
-      rawText: 'Hello\nWorld',
+      rawText: 'Hello\nWorld' as TextractExtractionResult['rawText'],
     };
 
     expect(result).toEqual(expected);

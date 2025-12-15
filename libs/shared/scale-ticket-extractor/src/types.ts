@@ -3,6 +3,7 @@ import type {
   Parser,
   TextractExtractionResult,
 } from '@carrot-fndn/shared/text-extractor';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 export interface ScaleTicketData extends ExtractedData {
   finalWeight:
@@ -17,13 +18,13 @@ export interface ScaleTicketData extends ExtractedData {
     | undefined
     | {
         timestamp?: Date;
-        unit: string;
+      unit: NonEmptyString;
         value: number;
       };
   isValid: boolean | undefined;
-  netWeight: { unit: string; value: number };
+  netWeight: { unit: NonEmptyString; value: number };
 
-  ticketNumber: string | undefined;
+  ticketNumber: NonEmptyString | undefined;
 }
 
 export interface ScaleTicketParser<T extends ScaleTicketData = ScaleTicketData>

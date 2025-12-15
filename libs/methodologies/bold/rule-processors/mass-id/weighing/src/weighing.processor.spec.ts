@@ -39,7 +39,7 @@ describe('WeighingProcessor', () => {
           jest
             .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
             .mockResolvedValueOnce({
-              errors: [testCase.scaleTicketVerificationError],
+              errors: [testCase.scaleTicketVerificationError as string],
             });
         }
 

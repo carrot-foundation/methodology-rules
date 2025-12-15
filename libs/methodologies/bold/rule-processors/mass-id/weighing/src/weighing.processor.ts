@@ -233,8 +233,8 @@ export class WeighingProcessor extends RuleDataProcessor {
     const key = `${ruleInput.documentKeyPrefix}/attachments/${scaleTicketAttachment.attachmentId}`;
 
     return {
-      s3Bucket: bucket,
-      s3Key: key,
+      s3Bucket: bucket as TextractServiceInput['s3Bucket'],
+      s3Key: key as TextractServiceInput['s3Key'],
     };
   }
 

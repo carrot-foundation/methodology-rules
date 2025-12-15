@@ -4,14 +4,15 @@ import {
   TextractClient,
 } from '@aws-sdk/client-textract';
 import { logger } from '@carrot-fndn/shared/helpers';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import { readFileSync } from 'node:fs';
 
 import type { TextractExtractionResult } from './types';
 
 export interface TextractServiceInput {
-  filePath?: string;
-  s3Bucket?: string;
-  s3Key?: string;
+  filePath?: NonEmptyString;
+  s3Bucket?: NonEmptyString;
+  s3Key?: NonEmptyString;
 }
 
 export class TextractService {
@@ -38,7 +39,7 @@ export class TextractService {
   }
 
   private async extractFromLocalFile(
-    filePath: string,
+    filePath: NonEmptyString,
   ): Promise<TextractExtractionResult> {
     logger.debug(`Extracting text from local file: ${filePath}`);
 
@@ -95,8 +96,8 @@ export class TextractService {
   }
 
   private async extractFromS3(
-    bucket: string,
-    key: string,
+    bucket: NonEmptyString,
+    key: NonEmptyString,
   ): Promise<TextractExtractionResult> {
     logger.debug(`Extracting text from S3: s3://${bucket}/${key}`);
 

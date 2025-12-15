@@ -1,7 +1,9 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
+
 export interface ExtractedData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
-  rawText: string | undefined;
+  rawText: NonEmptyString | undefined;
 }
 
 export interface ExtractionError {
@@ -19,5 +21,5 @@ export interface TextractExtractionResult {
     id: string;
     text?: string;
   }>;
-  rawText: string;
+  rawText: NonEmptyString;
 }
