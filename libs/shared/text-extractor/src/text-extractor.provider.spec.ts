@@ -9,10 +9,8 @@ describe('text-extractor.provider', () => {
   });
 
   it('should create service with TextractClient dependency', () => {
-    const typedService = provideTextractService as unknown as {
-      textractClient: TextractClient;
-    };
-
-    expect(typedService.textractClient).toBeInstanceOf(TextractClient);
+    expect(provideTextractService['textractClient']).toBeInstanceOf(
+      TextractClient,
+    );
   });
 });

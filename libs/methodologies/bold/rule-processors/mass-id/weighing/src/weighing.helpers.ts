@@ -22,6 +22,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type ApprovedException,
+  type MethodologyAdditionalVerificationAttributeValue,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
@@ -136,7 +137,7 @@ const getApprovedExceptions = (
 
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
   recyclerAccreditationDocument: Document,
-) => {
+): MethodologyAdditionalVerificationAttributeValue | undefined => {
   const accreditationResultEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([ACCREDITATION_RESULT]),

@@ -20,26 +20,17 @@ export const parseDate = (
     return undefined;
   }
 
-  const [day, month, year] = dateParts;
-  const [hour, minute] = timeParts;
+  const [day, month, year] = dateParts as [number, number, number];
+  const [hour, minute] = timeParts as [number, number];
 
-  if (
-    day === undefined ||
-    month === undefined ||
-    year === undefined ||
-    hour === undefined ||
-    minute === undefined ||
-    Number.isNaN(day) ||
-    Number.isNaN(month) ||
-    Number.isNaN(year) ||
-    Number.isNaN(hour) ||
-    Number.isNaN(minute)
-  ) {
+  if ([day, month, year, hour, minute].some((value) => Number.isNaN(value))) {
     return undefined;
   }
 
   return new Date(year, month - 1, day, hour, minute);
 };
+
+const WEIGHT_VALIDATION_TOLERANCE = 1;
 
 export const validateWeights = (
   initialWeight?: { timestamp?: Date; unit: string; value: number },
@@ -51,7 +42,9 @@ export const validateWeights = (
   }
 
   const calculatedNetWeight = initialWeight.value - finalWeight.value;
-  const tolerance = 1;
 
-  return Math.abs(calculatedNetWeight - netWeight.value) < tolerance;
+  return (
+    Math.abs(calculatedNetWeight - netWeight.value) <
+    WEIGHT_VALIDATION_TOLERANCE
+  );
 };

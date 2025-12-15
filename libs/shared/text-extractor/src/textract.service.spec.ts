@@ -11,8 +11,8 @@ import type { TextractExtractionResult } from './types';
 
 import { TextractService } from './textract.service';
 
-jest.mock('node:fs', () => ({
-  readFileSync: jest.fn().mockReturnValue(Buffer.from('test')),
+jest.mock('node:fs/promises', () => ({
+  readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
 }));
 
 describe('TextractService', () => {
@@ -190,6 +190,9 @@ describe('TextractService', () => {
       {
         BlockType: BlockType.LINE,
       } as Block,
+      {
+        Text: 'No type',
+      } as Block,
     ];
 
     textractClientMock
@@ -203,6 +206,7 @@ describe('TextractService', () => {
     expect(result.blocks).toEqual([
       { blockType: 'LINE', id: '', text: 'Has text' },
       { blockType: 'LINE', id: '' },
+      { id: '', text: 'No type' },
     ]);
   });
 });

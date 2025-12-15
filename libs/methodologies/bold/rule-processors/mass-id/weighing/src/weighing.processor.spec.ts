@@ -16,10 +16,14 @@ import {
 describe('WeighingProcessor', () => {
   const ruleDataProcessor = new WeighingProcessor();
 
+  let verifyScaleTicketNetWeightSpy: jest.SpiedFunction<
+    typeof scaleTicketVerification.verifyScaleTicketNetWeight
+  >;
+
   beforeEach(() => {
     jest.restoreAllMocks();
 
-    jest
+    verifyScaleTicketNetWeightSpy = jest
       .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
       .mockResolvedValue({ errors: [] });
   });
@@ -36,11 +40,9 @@ describe('WeighingProcessor', () => {
         } = testCase;
 
         if ('scaleTicketVerificationError' in testCase) {
-          jest
-            .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
-            .mockResolvedValueOnce({
-              errors: [testCase.scaleTicketVerificationError],
-            });
+          verifyScaleTicketNetWeightSpy.mockResolvedValueOnce({
+            errors: [testCase.scaleTicketVerificationError],
+          });
         }
 
         const { ruleInput, ruleOutput } = await createRuleTestFixture({

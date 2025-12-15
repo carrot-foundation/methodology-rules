@@ -92,7 +92,7 @@ export const extractWeightWithTimestamp = (
 ): undefined | { timestamp?: Date; unit: string; value: number } => {
   const weightMatch = weightPattern.exec(text);
 
-  if (!weightMatch || !weightMatch[1]) {
+  if (!weightMatch || !weightMatch[1] || !weightMatch[2]) {
     return undefined;
   }
 
@@ -105,7 +105,7 @@ export const extractWeightWithTimestamp = (
   const timestamp = extractTimestamp(text, weightPattern, dateTimePattern);
 
   const result: { timestamp?: Date; unit: string; value: number } = {
-    unit: weightMatch[2] ?? 'kg',
+    unit: weightMatch[2],
     value,
   };
 

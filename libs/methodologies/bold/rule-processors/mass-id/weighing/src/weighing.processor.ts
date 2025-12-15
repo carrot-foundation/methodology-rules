@@ -3,7 +3,7 @@ import type { TextractServiceInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -227,6 +227,10 @@ export class WeighingProcessor extends RuleDataProcessor {
     const bucket = process.env['SCALE_TICKET_S3_BUCKET'];
 
     if (!bucket) {
+      logger.warn(
+        'SCALE_TICKET_S3_BUCKET environment variable is not configured',
+      );
+
       return undefined;
     }
 

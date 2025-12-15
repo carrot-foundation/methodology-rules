@@ -1,10 +1,18 @@
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
-
+import {
+  type DocumentEvent,
+  DocumentEventAttachmentLabel,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { WeighingProcessor } from './weighing.processor';
 
 describe('WeighingProcessor helpers', () => {
+  const originalScaleTicketBucket = process.env['SCALE_TICKET_S3_BUCKET'];
+
+  afterEach(() => {
+    process.env['SCALE_TICKET_S3_BUCKET'] = originalScaleTicketBucket;
+  });
+
   it('should build a text extractor input when attachment and bucket are present', () => {
     const processor = new WeighingProcessor();
 
@@ -14,7 +22,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: 'Scale Ticket',
+          label: DocumentEventAttachmentLabel.SCALE_TICKET,
         },
       ],
     } as unknown as DocumentEvent;
@@ -46,7 +54,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: 'Scale Ticket',
+          label: DocumentEventAttachmentLabel.SCALE_TICKET,
         },
       ],
     } as unknown as DocumentEvent;

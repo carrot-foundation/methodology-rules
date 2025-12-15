@@ -31,8 +31,6 @@ describe('scale-ticket-verification', () => {
       textExtractorInput,
     });
 
-    // We cannot assert on internal parsing here without mocking Textract,
-    // but we can ensure the function returns a shaped result.
     expect(result).toHaveProperty('errors');
   });
 

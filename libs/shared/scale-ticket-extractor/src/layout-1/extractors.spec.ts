@@ -155,7 +155,7 @@ describe('layout-1 extractors', () => {
     expect(result).toBeUndefined();
   });
 
-  it('should default unit to kg when not captured in weight pattern', () => {
+  it('should return undefined when unit is not captured in weight pattern', () => {
     // Pattern without unit capture group
     const result = extractWeightWithTimestamp(
       'Pesagem Inicial: 500,00',
@@ -163,6 +163,6 @@ describe('layout-1 extractors', () => {
       /Data \/ Hora:\s*(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2})/,
     );
 
-    expect(result).toEqual({ unit: 'kg', value: 500 });
+    expect(result).toBeUndefined();
   });
 });

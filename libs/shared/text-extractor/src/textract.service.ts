@@ -4,7 +4,7 @@ import {
   TextractClient,
 } from '@aws-sdk/client-textract';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { readFileSync } from 'node:fs';
+import { readFile } from 'node:fs/promises';
 
 import type { TextractExtractionResult } from './types';
 
@@ -42,7 +42,7 @@ export class TextractService {
   ): Promise<TextractExtractionResult> {
     logger.debug(`Extracting text from local file: ${filePath}`);
 
-    const fileBuffer = readFileSync(filePath);
+    const fileBuffer = await readFile(filePath);
 
     const command = new DetectDocumentTextCommand({
       Document: {
@@ -58,21 +58,7 @@ export class TextractService {
       }
 
       const rawText = this.extractRawText(response.Blocks);
-      const blocks = response.Blocks.map((block) => {
-        const result: { blockType?: string; id: string; text?: string } = {
-          id: block.Id ?? '',
-        };
-
-        if (block.Text !== undefined) {
-          result.text = block.Text;
-        }
-
-        if (block.BlockType !== undefined) {
-          result.blockType = block.BlockType;
-        }
-
-        return result;
-      });
+      const blocks = this.mapBlocks(response.Blocks);
 
       logger.debug(
         `Extracted ${blocks.length} blocks from local file: ${filePath}`,
@@ -117,25 +103,7 @@ export class TextractService {
       }
 
       const rawText = this.extractRawText(response.Blocks);
-      const blocks = response.Blocks.map((block) => {
-        const result: { blockType?: string; id: string; text?: string } = {
-          id: block.Id ?? '',
-        };
-
-        if (block.Text !== undefined) {
-          result.text = block.Text;
-        }
-
-        if (block.BlockType !== undefined) {
-          result.blockType = block.BlockType;
-        }
-
-        if (block.BlockType !== undefined) {
-          result.blockType = block.BlockType;
-        }
-
-        return result;
-      });
+      const blocks = this.mapBlocks(response.Blocks);
 
       logger.debug(
         `Extracted ${blocks.length} blocks from S3 object: s3://${bucket}/${key}`,
@@ -163,5 +131,25 @@ export class TextractService {
       .filter((block) => block.BlockType === 'LINE')
       .map((block) => block.Text ?? '')
       .join('\n');
+  }
+
+  private mapBlocks(
+    blocks: Block[],
+  ): Array<{ blockType?: string; id: string; text?: string }> {
+    return blocks.map((block) => {
+      const result: { blockType?: string; id: string; text?: string } = {
+        id: block.Id ?? '',
+      };
+
+      if (block.Text !== undefined) {
+        result.text = block.Text;
+      }
+
+      if (block.BlockType !== undefined) {
+        result.blockType = block.BlockType;
+      }
+
+      return result;
+    });
   }
 }
