@@ -138,7 +138,13 @@
       ],
       "@carrot-fndn/shared/rule/types": ["libs/shared/rule/types/src/index.ts"],
       "@carrot-fndn/shared/s3-bucket": ["libs/shared/s3-bucket/src/index.ts"],
+      "@carrot-fndn/shared/scale-ticket-extractor": [
+        "libs/shared/scale-ticket-extractor/src/index.ts"
+      ],
       "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
+      "@carrot-fndn/shared/text-extractor": [
+        "libs/shared/text-extractor/src/index.ts"
+      ],
       "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"]
     }
   }
