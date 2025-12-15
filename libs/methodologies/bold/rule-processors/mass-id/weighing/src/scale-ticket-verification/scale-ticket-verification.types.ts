@@ -1,5 +1,5 @@
 import type { ScaleTicketData } from '@carrot-fndn/shared/scale-ticket-extractor';
-import type { TextractServiceInput } from '@carrot-fndn/shared/text-extractor';
+import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 import type {
   MethodologyAdditionalVerification,
   MethodologyAdditionalVerificationAttributeValue,
@@ -19,7 +19,7 @@ export interface ScaleTicketVerificationContext {
 }
 
 export interface ScaleTicketVerificationDependencies {
-  textractServiceInput: TextractServiceInput | undefined;
+  textExtractionInput: TextExtractionInput | undefined;
 }
 
 export interface ScaleTicketVerificationResult {

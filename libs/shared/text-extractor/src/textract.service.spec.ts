@@ -7,7 +7,7 @@ import {
 import { logger } from '@carrot-fndn/shared/helpers';
 import { type AwsClientStub, mockClient } from 'aws-sdk-client-mock';
 
-import type { TextractExtractionResult } from './types';
+import type { TextExtractionResult } from './types';
 
 import { TextractService } from './textract.service';
 
@@ -78,12 +78,12 @@ describe('TextractService', () => {
       filePath: 'file.pdf',
     });
 
-    const expected: TextractExtractionResult = {
+    const expected: TextExtractionResult = {
       blocks: [
         { blockType: 'LINE', id: '1', text: 'Hello' },
         { blockType: 'LINE', id: '2', text: 'World' },
       ],
-      rawText: 'Hello\nWorld' as TextractExtractionResult['rawText'],
+      rawText: 'Hello\nWorld' as TextExtractionResult['rawText'],
     };
 
     expect(result).toEqual(expected);

@@ -1,7 +1,9 @@
 import { TextractClient } from '@aws-sdk/client-textract';
 
+import type { TextExtractor } from './types';
+
 import { TextractService } from './textract.service';
 
 const textractClient = new TextractClient();
 
-export const provideTextractService = new TextractService(textractClient);
+export const textExtractor: TextExtractor = new TextractService(textractClient);

@@ -1,5 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { TextractServiceInput } from '@carrot-fndn/shared/text-extractor';
+import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -213,7 +213,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   private buildScaleTicketTextExtractorInput(
     weighingEvent: DocumentEvent,
     ruleInput: RuleInput,
-  ): TextractServiceInput | undefined {
+  ): TextExtractionInput | undefined {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
         String(attachment.label) ===
@@ -236,10 +236,10 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     const key = `${ruleInput.documentKeyPrefix}/attachments/${scaleTicketAttachment.attachmentId}`;
 
-    const textExtractorInput: TextractServiceInput = {} as TextractServiceInput;
-
-    textExtractorInput.s3Bucket = bucket;
-    textExtractorInput.s3Key = key;
+    const textExtractorInput: TextExtractionInput = {
+      s3Bucket: bucket,
+      s3Key: key,
+    };
 
     return textExtractorInput;
   }

@@ -1,7 +1,7 @@
 import type {
   ExtractedData,
   Parser,
-  TextractExtractionResult,
+  TextExtractionResult,
 } from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
@@ -29,5 +29,5 @@ export interface ScaleTicketData extends ExtractedData {
 
 export interface ScaleTicketParser<T extends ScaleTicketData = ScaleTicketData>
   extends Parser<T> {
-  parse(extractionResult: TextractExtractionResult): T;
+  parse(extractionResult: TextExtractionResult): T;
 }

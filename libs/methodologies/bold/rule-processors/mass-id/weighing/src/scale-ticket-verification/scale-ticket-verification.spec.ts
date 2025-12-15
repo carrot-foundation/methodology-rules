@@ -1,5 +1,5 @@
 import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
-import { provideTextractService } from '@carrot-fndn/shared/text-extractor';
+import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import {
   buildScaleTicketVerificationContext,
@@ -11,7 +11,7 @@ describe('scale-ticket-verification', () => {
     const textExtractorInput = { filePath: 'dummy-path' };
     const expectedNetWeight = 200.25;
 
-    jest.spyOn(provideTextractService, 'extractText').mockResolvedValue({
+    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
@@ -93,7 +93,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return a mismatch error when ticket net weight differs from event value', async () => {
-    jest.spyOn(provideTextractService, 'extractText').mockResolvedValue({
+    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
@@ -119,7 +119,7 @@ describe('scale-ticket-verification', () => {
 
   it('should return an extraction failed error when text extractor throws', async () => {
     jest
-      .spyOn(provideTextractService, 'extractText')
+      .spyOn(textExtractor, 'extractText')
       .mockRejectedValue(new Error('boom'));
 
     const result = await verifyScaleTicketNetWeight({
@@ -153,7 +153,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should build an unsupported layout error message', async () => {
-    jest.spyOn(provideTextractService, 'extractText').mockResolvedValue({
+    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);

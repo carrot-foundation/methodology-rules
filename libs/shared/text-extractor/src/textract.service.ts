@@ -6,13 +6,7 @@ import {
 import { logger } from '@carrot-fndn/shared/helpers';
 import { readFile } from 'node:fs/promises';
 
-import type { TextractExtractionResult } from './types';
-
-export interface TextractServiceInput {
-  filePath?: string;
-  s3Bucket?: string;
-  s3Key?: string;
-}
+import type { TextExtractionInput, TextExtractionResult } from './types';
 
 export class TextractService {
   private readonly textractClient: TextractClient;
@@ -21,9 +15,7 @@ export class TextractService {
     this.textractClient = textractClient ?? new TextractClient();
   }
 
-  async extractText(
-    input: TextractServiceInput,
-  ): Promise<TextractExtractionResult> {
+  async extractText(input: TextExtractionInput): Promise<TextExtractionResult> {
     if (input.filePath) {
       return this.extractFromLocalFile(input.filePath);
     }
@@ -39,7 +31,7 @@ export class TextractService {
 
   private async extractFromLocalFile(
     filePath: string,
-  ): Promise<TextractExtractionResult> {
+  ): Promise<TextExtractionResult> {
     logger.debug(`Extracting text from local file: ${filePath}`);
 
     const fileBuffer = await readFile(filePath);
@@ -83,7 +75,7 @@ export class TextractService {
   private async extractFromS3(
     bucket: string,
     key: string,
-  ): Promise<TextractExtractionResult> {
+  ): Promise<TextExtractionResult> {
     logger.debug(`Extracting text from S3: s3://${bucket}/${key}`);
 
     const command = new DetectDocumentTextCommand({
@@ -126,7 +118,7 @@ export class TextractService {
     }
   }
 
-  private extractRawText(blocks: Block[]): TextractExtractionResult['rawText'] {
+  private extractRawText(blocks: Block[]): TextExtractionResult['rawText'] {
     const text = blocks
       .filter((block) => block.BlockType === 'LINE')
       .map((block) => block.Text ?? '')
@@ -137,7 +129,7 @@ export class TextractService {
       throw new Error('No LINE blocks returned from Textract');
     }
 
-    return text as TextractExtractionResult['rawText'];
+    return text as TextExtractionResult['rawText'];
   }
 
   private mapBlocks(

@@ -1,4 +1,4 @@
-import type { TextractExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import type { ScaleTicketParser } from '../types';
 
@@ -16,7 +16,7 @@ import { Layout1ScaleTicketData } from './types';
 export class Layout1ScaleTicketParser
   implements ScaleTicketParser<Layout1ScaleTicketData>
 {
-  parse(extractionResult: TextractExtractionResult): Layout1ScaleTicketData {
+  parse(extractionResult: TextExtractionResult): Layout1ScaleTicketData {
     const { rawText } = extractionResult;
 
     const netWeight = extractNetWeight(rawText);

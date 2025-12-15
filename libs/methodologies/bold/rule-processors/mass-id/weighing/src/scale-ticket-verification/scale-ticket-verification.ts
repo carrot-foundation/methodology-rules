@@ -1,13 +1,13 @@
 import type { ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
 import type {
-  TextractExtractionResult,
-  TextractServiceInput,
+  TextExtractionInput,
+  TextExtractionResult,
 } from '@carrot-fndn/shared/text-extractor';
 import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
 
 import { logger } from '@carrot-fndn/shared/helpers';
 import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
-import { provideTextractService } from '@carrot-fndn/shared/text-extractor';
+import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import type {
   ScaleTicketLayout,
@@ -40,7 +40,7 @@ export const isScaleTicketVerificationConfig = (
 
 const extractScaleTicketData = (
   layout: ScaleTicketLayout,
-  extractionResult: TextractExtractionResult,
+  extractionResult: TextExtractionResult,
 ) => {
   const parser = getParser(layout);
 
@@ -60,7 +60,7 @@ export const verifyScaleTicketNetWeight = async ({
 }: {
   config: MethodologyAdditionalVerification | undefined;
   expectedNetWeight: number | undefined;
-  textExtractorInput: TextractServiceInput | undefined;
+  textExtractorInput: TextExtractionInput | undefined;
 }): Promise<ScaleTicketVerificationResult> => {
   if (!config || !isScaleTicketVerificationConfig(config)) {
     return { errors: [] };
@@ -78,7 +78,7 @@ export const verifyScaleTicketNetWeight = async ({
 
   try {
     const extractionResult =
-      await provideTextractService.extractText(textExtractorInput);
+      await textExtractor.extractText(textExtractorInput);
     const scaleTicketData = extractScaleTicketData(
       config.scaleTicketLayout,
       extractionResult,

@@ -12,14 +12,24 @@ export interface ExtractionError {
 }
 
 export interface Parser<T> {
-  parse(extractionResult: TextractExtractionResult): T;
+  parse(extractionResult: TextExtractionResult): T;
 }
 
-export interface TextractExtractionResult {
+export interface TextExtractionInput {
+  filePath?: string;
+  s3Bucket?: string;
+  s3Key?: string;
+}
+
+export interface TextExtractionResult {
   blocks: Array<{
     blockType?: string;
     id: string;
     text?: string;
   }>;
   rawText: NonEmptyString;
+}
+
+export interface TextExtractor {
+  extractText(input: TextExtractionInput): Promise<TextExtractionResult>;
 }

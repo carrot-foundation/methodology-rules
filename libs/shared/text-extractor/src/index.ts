@@ -1,3 +1,2 @@
-export * from './text-extractor.provider';
-export * from './textract.service';
+export { textExtractor } from './text-extractor.provider';
 export * from './types';
