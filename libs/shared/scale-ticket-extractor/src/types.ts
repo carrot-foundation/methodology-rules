@@ -18,7 +18,7 @@ export interface ScaleTicketData extends ExtractedData {
     | undefined
     | {
         timestamp?: Date;
-      unit: NonEmptyString;
+        unit: NonEmptyString;
         value: number;
       };
   isValid: boolean | undefined;
