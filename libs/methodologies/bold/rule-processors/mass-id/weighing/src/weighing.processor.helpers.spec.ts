@@ -7,10 +7,11 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { WeighingProcessor } from './weighing.processor';
 
 describe('WeighingProcessor helpers', () => {
-  const originalScaleTicketBucket = process.env['SCALE_TICKET_S3_BUCKET'];
+  const originalScaleTicketBucket =
+    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
 
   afterEach(() => {
-    process.env['SCALE_TICKET_S3_BUCKET'] = originalScaleTicketBucket;
+    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = originalScaleTicketBucket;
   });
 
   it('should build a text extractor input when attachment and bucket are present', () => {
@@ -32,7 +33,7 @@ describe('WeighingProcessor helpers', () => {
       documentKeyPrefix: 'prefix',
     });
 
-    process.env['SCALE_TICKET_S3_BUCKET'] = 'bucket-name';
+    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'bucket-name';
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,
@@ -41,7 +42,7 @@ describe('WeighingProcessor helpers', () => {
 
     expect(input).toEqual({
       s3Bucket: 'bucket-name',
-      s3Key: 'prefix/attachments/attachment-1',
+      s3Key: 'attachments/document/doc-1/attachment-1',
     });
   });
 
@@ -64,7 +65,7 @@ describe('WeighingProcessor helpers', () => {
       documentKeyPrefix: 'prefix',
     });
 
-    delete process.env['SCALE_TICKET_S3_BUCKET'];
+    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,

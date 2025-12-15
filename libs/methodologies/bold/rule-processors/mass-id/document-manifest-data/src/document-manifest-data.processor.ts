@@ -27,6 +27,7 @@ import {
   DocumentEventName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type MethodologyDocumentEventAttachment,
@@ -221,7 +222,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       .filter((attachmentId) => isNonEmptyString(attachmentId))
       .map(
         (attachmentId) =>
-          `s3://${bucketName}/attachments/document/${documentId}/${attachmentId}`,
+          `s3://${bucketName}/${getAttachmentS3Key(documentId, attachmentId)}`,
       ) as NonEmptyString[];
   }
 

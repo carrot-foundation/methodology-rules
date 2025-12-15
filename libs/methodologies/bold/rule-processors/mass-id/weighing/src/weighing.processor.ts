@@ -19,7 +19,10 @@ import {
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  getAttachmentS3Key,
+  mapDocumentRelation,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -224,17 +227,20 @@ export class WeighingProcessor extends RuleDataProcessor {
       return undefined;
     }
 
-    const bucket = process.env['SCALE_TICKET_S3_BUCKET'];
+    const bucket = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
 
     if (!bucket) {
       logger.warn(
-        'SCALE_TICKET_S3_BUCKET environment variable is not configured',
+        'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is not configured',
       );
 
       return undefined;
     }
 
-    const key = `${ruleInput.documentKeyPrefix}/attachments/${scaleTicketAttachment.attachmentId}`;
+    const key = getAttachmentS3Key(
+      ruleInput.documentId,
+      scaleTicketAttachment.attachmentId,
+    );
 
     const textExtractorInput: TextExtractionInput = {
       s3Bucket: bucket,
