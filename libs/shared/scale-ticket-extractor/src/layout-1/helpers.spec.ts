@@ -75,5 +75,15 @@ describe('layout-1 helpers', () => {
 
       expect(result).toBe(false);
     });
+
+    it('should return undefined when units are inconsistent', () => {
+      const result = validateWeights(
+        { unit: 'kg', value: 1000 },
+        { unit: 'lb', value: 800 },
+        { unit: 'kg', value: 200 },
+      );
+
+      expect(result).toBeUndefined();
+    });
   });
 });

@@ -209,4 +209,24 @@ describe('TextractService', () => {
       { id: '', text: 'No type' },
     ]);
   });
+
+  it('should throw when no LINE blocks are returned', async () => {
+    const blocks: Block[] = [
+      {
+        BlockType: BlockType.WORD,
+        Id: '1',
+        Text: 'Word-only block',
+      },
+    ];
+
+    textractClientMock
+      .on(DetectDocumentTextCommand)
+      .resolves({ Blocks: blocks });
+
+    await expect(
+      service.extractText({
+        filePath: 'no-line-blocks.pdf',
+      }),
+    ).rejects.toThrow('No LINE blocks returned from Textract');
+  });
 });

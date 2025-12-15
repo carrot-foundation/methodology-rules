@@ -126,11 +126,18 @@ export class TextractService {
     }
   }
 
-  private extractRawText(blocks: Block[]): string {
-    return blocks
+  private extractRawText(blocks: Block[]): TextractExtractionResult['rawText'] {
+    const text = blocks
       .filter((block) => block.BlockType === 'LINE')
       .map((block) => block.Text ?? '')
-      .join('\n');
+      .join('\n')
+      .trim();
+
+    if (text.length === 0) {
+      throw new Error('No LINE blocks returned from Textract');
+    }
+
+    return text as TextractExtractionResult['rawText'];
   }
 
   private mapBlocks(

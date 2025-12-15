@@ -1,3 +1,5 @@
+import { isValid, parse } from 'date-fns';
+
 export const parseNumber = (value: string): number | undefined => {
   const cleaned = value.replaceAll('.', '').replace(',', '.');
   const parsed = Number.parseFloat(cleaned);
@@ -13,21 +15,17 @@ export const parseDate = (
   dateString: string,
   timeString: string,
 ): Date | undefined => {
-  const dateParts = dateString.split('/').map(Number);
-  const timeParts = timeString.split(':').map(Number);
+  const parsed = parse(
+    `${dateString} ${timeString}`,
+    'dd/MM/yyyy HH:mm',
+    new Date(),
+  );
 
-  if (dateParts.length !== 3 || timeParts.length !== 2) {
+  if (!isValid(parsed)) {
     return undefined;
   }
 
-  const [day, month, year] = dateParts as [number, number, number];
-  const [hour, minute] = timeParts as [number, number];
-
-  if ([day, month, year, hour, minute].some((value) => Number.isNaN(value))) {
-    return undefined;
-  }
-
-  return new Date(year, month - 1, day, hour, minute);
+  return parsed;
 };
 
 const WEIGHT_VALIDATION_TOLERANCE = 1;
@@ -38,6 +36,13 @@ export const validateWeights = (
   netWeight?: { unit: string; value: number },
 ): boolean | undefined => {
   if (!initialWeight || !finalWeight || !netWeight) {
+    return undefined;
+  }
+
+  if (
+    initialWeight.unit !== finalWeight.unit ||
+    initialWeight.unit !== netWeight.unit
+  ) {
     return undefined;
   }
 
