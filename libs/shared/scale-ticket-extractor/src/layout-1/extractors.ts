@@ -5,7 +5,7 @@ export const extractStringField = (
   text: string,
   pattern: RegExp,
 ): string | undefined => {
-  const match = new RegExp(pattern).exec(text);
+  const match = pattern.exec(text);
 
   return match?.[1] ?? undefined;
 };
@@ -24,9 +24,7 @@ export const extractTransporter = (
       code: string;
       name: string;
     } => {
-  const match = new RegExp(LAYOUT_1_SCALE_TICKET_PATTERNS.transporter).exec(
-    text,
-  );
+  const match = LAYOUT_1_SCALE_TICKET_PATTERNS.transporter.exec(text);
 
   if (!match || !match[1] || !match[2]) {
     return undefined;
@@ -48,7 +46,7 @@ export const extractTransporter = (
 export const extractNetWeight = (
   text: string,
 ): undefined | { unit: string; value: number } => {
-  const match = new RegExp(LAYOUT_1_SCALE_TICKET_PATTERNS.netWeight).exec(text);
+  const match = LAYOUT_1_SCALE_TICKET_PATTERNS.netWeight.exec(text);
 
   if (!match || !match[1] || !match[2]) {
     return undefined;
@@ -71,14 +69,14 @@ export const extractTimestamp = (
   anchorPattern: RegExp,
   dateTimePattern: RegExp,
 ): Date | undefined => {
-  const anchorMatch = new RegExp(anchorPattern).exec(text);
+  const anchorMatch = anchorPattern.exec(text);
 
   if (!anchorMatch || !anchorMatch[0]) {
     return undefined;
   }
 
   const textAfterAnchor = text.slice(anchorMatch.index);
-  const dateTimeMatch = new RegExp(dateTimePattern).exec(textAfterAnchor);
+  const dateTimeMatch = dateTimePattern.exec(textAfterAnchor);
 
   if (!dateTimeMatch || !dateTimeMatch[1] || !dateTimeMatch[2]) {
     return undefined;
@@ -92,7 +90,7 @@ export const extractWeightWithTimestamp = (
   weightPattern: RegExp,
   dateTimePattern: RegExp,
 ): undefined | { timestamp?: Date; unit: string; value: number } => {
-  const weightMatch = new RegExp(weightPattern).exec(text);
+  const weightMatch = weightPattern.exec(text);
 
   if (!weightMatch || !weightMatch[1]) {
     return undefined;

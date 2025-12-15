@@ -7,11 +7,7 @@ import type {
 
 export type ScaleTicketLayout = 'layout1';
 
-export interface ScaleTicketVerificationConfig
-  extends MethodologyAdditionalVerification {
-  scaleTicketLayout: ScaleTicketLayout;
-  verificationType: 'scaleTicket';
-}
+export type ScaleTicketVerificationConfig = MethodologyAdditionalVerification;
 
 export type ScaleTicketVerificationConfigAttributeValue =
   MethodologyAdditionalVerificationAttributeValue;

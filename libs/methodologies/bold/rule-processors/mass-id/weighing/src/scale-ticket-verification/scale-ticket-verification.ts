@@ -5,6 +5,7 @@ import type {
 } from '@carrot-fndn/shared/text-extractor';
 import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
 
+import { logger } from '@carrot-fndn/shared/helpers';
 import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
 import { provideTextractService } from '@carrot-fndn/shared/text-extractor';
 
@@ -97,7 +98,15 @@ export const verifyScaleTicketNetWeight = async ({
     }
 
     return { errors: [] };
-  } catch {
+  } catch (error) {
+    logger.error(
+      {
+        err: error,
+        expectedNetWeight,
+      },
+      'Scale ticket verification failed',
+    );
+
     return {
       errors: [INVALID_RESULT_COMMENTS.SCALE_TICKET_EXTRACTION_FAILED],
     };
