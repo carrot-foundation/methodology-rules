@@ -25,8 +25,8 @@ export enum DocumentEventAccreditationStatus {
 
 export enum DocumentEventAttachmentLabel {
   RECYCLING_MANIFEST = 'Recycling Manifest',
-  SCALE_TICKET = 'Scale Ticket',
   TRANSPORT_MANIFEST = 'Transport Manifest',
+  WEIGHING_TICKET = 'Weighing Ticket',
 }
 
 export enum DocumentEventAttributeName {

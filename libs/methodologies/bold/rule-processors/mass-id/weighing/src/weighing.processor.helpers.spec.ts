@@ -23,7 +23,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.SCALE_TICKET,
+          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
         },
       ],
     } as unknown as DocumentEvent;
@@ -55,7 +55,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.SCALE_TICKET,
+          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
         },
       ],
     } as unknown as DocumentEvent;

@@ -220,7 +220,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
         String(attachment.label) ===
-        String(DocumentEventAttachmentLabel.SCALE_TICKET),
+        String(DocumentEventAttachmentLabel.WEIGHING_TICKET),
     );
 
     if (!scaleTicketAttachment) {
