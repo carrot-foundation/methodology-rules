@@ -1,0 +1,12 @@
+{
+  "name": "shared-text-extractor",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
+  "sourceRoot": "libs/shared/text-extractor/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

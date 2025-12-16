@@ -236,6 +236,8 @@ const jestFilesConfigs = [
       'sonarjs/no-nested-functions': 'off',
       'jest-async/expect-return': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
       'global-require': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/consistent-type-assertions': 'off',

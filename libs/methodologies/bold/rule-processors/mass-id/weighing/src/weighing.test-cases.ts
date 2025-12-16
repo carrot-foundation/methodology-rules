@@ -42,6 +42,7 @@ const {
   CONTAINER_TYPE,
   DESCRIPTION,
   GROSS_WEIGHT,
+  REQUIRED_ADDITIONAL_VERIFICATIONS,
   SCALE_TYPE,
   TARE,
   VEHICLE_LICENSE_PLATE,
@@ -60,14 +61,17 @@ const stubBaseAccreditationDocuments = ({
   scaleTypeValue = scaleType,
   tareExceptionValidUntil,
   withContainerCapacityException = false,
+  withScaleTicketVerification = false,
   withTareException = false,
 }: {
   scaleTypeValue?: DocumentEventScaleType;
   tareExceptionValidUntil?: string;
   withContainerCapacityException?: boolean;
+  withScaleTicketVerification?: boolean;
   withTareException?: boolean;
 } = {}) => {
   const exceptions = [];
+  const additionalVerifications = [];
 
   if (withContainerCapacityException) {
     exceptions.push({
@@ -104,14 +108,34 @@ const stubBaseAccreditationDocuments = ({
     exceptions.push(tareException);
   }
 
+  if (withScaleTicketVerification) {
+    additionalVerifications.push({
+      scaleTicketLayout: 'layout1',
+      verificationType: 'scaleTicket',
+    });
+  }
+
   return new Map([
     [
       RECYCLER,
       {
         externalEventsMap: {
           [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
-            metadataAttributes:
-              exceptions.length > 0 ? [[APPROVED_EXCEPTIONS, exceptions]] : [],
+            metadataAttributes: [
+              ...(exceptions.length > 0
+                ? ([
+                    [APPROVED_EXCEPTIONS, exceptions],
+                  ] as MetadataAttributeParameter[])
+                : []),
+              ...(additionalVerifications.length > 0
+                ? ([
+                    [
+                      REQUIRED_ADDITIONAL_VERIFICATIONS,
+                      additionalVerifications,
+                    ],
+                  ] as MetadataAttributeParameter[])
+                : []),
+            ],
           }),
           [MONITORING_SYSTEMS_AND_EQUIPMENT]:
             stubBoldMonitoringSystemsAndEquipmentEvent({
@@ -429,6 +453,31 @@ export const weighingTestCases = [
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the one step ${WEIGHING} event is valid`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withScaleTicketVerification: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    // The actual result comment will still be the standard single-step message
+    // when the scale ticket verification passes.
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the one step ${WEIGHING} event is valid with scale ticket verification configured`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withScaleTicketVerification: true,
+    }),
+    massIdDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: 'Scale ticket mismatch',
+    resultStatus: RuleOutputStatus.FAILED,
+    scaleTicketVerificationError: 'Scale ticket mismatch',
+    scenario: `scale ticket verification fails for ${WEIGHING} event`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({

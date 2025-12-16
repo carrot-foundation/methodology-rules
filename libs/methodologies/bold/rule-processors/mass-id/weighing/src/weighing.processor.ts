@@ -1,8 +1,9 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil } from '@carrot-fndn/shared/helpers';
+import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -14,10 +15,14 @@ import {
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventAttachmentLabel,
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  getAttachmentS3Key,
+  mapDocumentRelation,
+} from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -26,11 +31,16 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
+  isScaleTicketVerificationConfig,
+  verifyScaleTicketNetWeight,
+} from './scale-ticket-verification/scale-ticket-verification.helpers';
+import {
   NOT_FOUND_RESULT_COMMENTS,
   PASSED_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 import {
+  getRequiredAdditionalVerificationsFromAccreditationDocument,
   getValuesRelatedToWeighing,
   getWeighingEvents,
   isExceptionValid,
@@ -56,7 +66,10 @@ export class WeighingProcessor extends RuleDataProcessor {
       const documentQuery = await this.generateDocumentQuery(ruleInput);
       const documentPair = await this.collectDocuments(documentQuery);
       const ruleSubject = this.getRuleSubject(documentPair);
-      const evaluationResult = this.evaluateResult(ruleSubject);
+      const evaluationResult = await this.evaluateResult(
+        ruleSubject,
+        ruleInput,
+      );
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
@@ -68,10 +81,10 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
   }
 
-  protected evaluateResult({
-    recyclerAccreditationDocument,
-    weighingEvents,
-  }: RuleSubject): EvaluateResultOutput {
+  protected async evaluateResult(
+    { recyclerAccreditationDocument, weighingEvents }: RuleSubject,
+    ruleInput: RuleInput,
+  ): Promise<EvaluateResultOutput> {
     const initialValidation = this.validateWeighingEvents(weighingEvents);
 
     if (initialValidation) {
@@ -108,6 +121,35 @@ export class WeighingProcessor extends RuleDataProcessor {
         resultComment: validationMessages.errors.join(' '),
         resultStatus: RuleOutputStatus.FAILED,
       };
+    }
+
+    const additionalVerifications =
+      getRequiredAdditionalVerificationsFromAccreditationDocument(
+        recyclerAccreditationDocument,
+      );
+
+    const scaleTicketConfig = additionalVerifications?.find(
+      isScaleTicketVerificationConfig,
+    );
+
+    if (scaleTicketConfig) {
+      const textExtractorInput = this.buildScaleTicketTextExtractorInput(
+        weighingEvent,
+        ruleInput,
+      );
+
+      const scaleTicketValidation = await verifyScaleTicketNetWeight({
+        config: scaleTicketConfig,
+        expectedNetWeight: weighingValues.eventValue,
+        textExtractorInput,
+      });
+
+      if (scaleTicketValidation.errors.length > 0) {
+        return {
+          resultComment: scaleTicketValidation.errors.join(' '),
+          resultStatus: RuleOutputStatus.FAILED,
+        };
+      }
     }
 
     let passMessage = '';
@@ -169,6 +211,43 @@ export class WeighingProcessor extends RuleDataProcessor {
       recyclerAccreditationDocument,
       weighingEvents,
     };
+  }
+
+  private buildScaleTicketTextExtractorInput(
+    weighingEvent: DocumentEvent,
+    ruleInput: RuleInput,
+  ): TextExtractionInput | undefined {
+    const scaleTicketAttachment = weighingEvent.attachments?.find(
+      (attachment) =>
+        String(attachment.label) ===
+        String(DocumentEventAttachmentLabel.SCALE_TICKET),
+    );
+
+    if (!scaleTicketAttachment) {
+      return undefined;
+    }
+
+    const bucket = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+
+    if (!bucket) {
+      logger.warn(
+        'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is not configured',
+      );
+
+      return undefined;
+    }
+
+    const key = getAttachmentS3Key(
+      ruleInput.documentId,
+      scaleTicketAttachment.attachmentId,
+    );
+
+    const textExtractorInput: TextExtractionInput = {
+      s3Bucket: bucket,
+      s3Key: key,
+    };
+
+    return textExtractorInput;
   }
 
   private async collectDocuments(
