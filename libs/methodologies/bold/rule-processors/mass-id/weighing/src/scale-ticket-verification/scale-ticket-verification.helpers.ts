@@ -11,7 +11,6 @@ import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import type {
   ScaleTicketLayout,
-  ScaleTicketVerificationConfig,
   ScaleTicketVerificationContext,
   ScaleTicketVerificationResult,
 } from './scale-ticket-verification.types';
@@ -30,13 +29,7 @@ const getParser = (layout: ScaleTicketLayout): ScaleTicketParser | undefined =>
 
 export const isScaleTicketVerificationConfig = (
   config: MethodologyAdditionalVerification,
-): config is ScaleTicketVerificationConfig => {
-  // Cast to a looser shape so the check remains meaningful even as more
-  // verification types are added in the future.
-  const { verificationType } = config as { verificationType?: string };
-
-  return verificationType === 'scaleTicket';
-};
+): boolean => config.verificationType === 'scaleTicket';
 
 const extractScaleTicketData = (
   layout: ScaleTicketLayout,
@@ -117,7 +110,7 @@ export const buildScaleTicketVerificationContext = ({
   config,
   expectedNetWeight,
 }: {
-  config: ScaleTicketVerificationConfig | undefined;
+  config: MethodologyAdditionalVerification | undefined;
   expectedNetWeight: number | undefined;
 }): ScaleTicketVerificationContext => ({
   config,

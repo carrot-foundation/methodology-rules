@@ -32,7 +32,7 @@ export type ApprovedExceptionAttributeValue = ApprovedException[];
 
 export interface MethodologyAdditionalVerification {
   scaleTicketLayout: 'layout1';
-  verificationType: 'scaleTicket';
+  verificationType: 'scaleTicket' | NonEmptyString;
 }
 
 export type MethodologyAdditionalVerificationAttributeValue =

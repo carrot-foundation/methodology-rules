@@ -11,6 +11,11 @@ import type {
   TextExtractionResult,
 } from './text-extractor.types';
 
+import {
+  assertTextExtractionInput,
+  assertTextExtractionResultRawText,
+} from './text-extractor.typia';
+
 export class TextractService {
   private readonly textractClient: TextractClient;
 
@@ -19,6 +24,8 @@ export class TextractService {
   }
 
   async extractText(input: TextExtractionInput): Promise<TextExtractionResult> {
+    assertTextExtractionInput(input);
+
     if (input.filePath) {
       return this.extractFromLocalFile(input.filePath);
     }
@@ -132,7 +139,7 @@ export class TextractService {
       throw new Error('No LINE blocks returned from Textract');
     }
 
-    return text as TextExtractionResult['rawText'];
+    return assertTextExtractionResultRawText(text);
   }
 
   private mapBlocks(

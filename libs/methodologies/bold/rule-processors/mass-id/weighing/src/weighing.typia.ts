@@ -1,5 +1,6 @@
 import {
   type ApprovedExceptionAttributeValue,
+  type MethodologyAdditionalVerification,
   type MethodologyAdditionalVerificationAttributeValue,
 } from '@carrot-fndn/shared/types';
 import { createIs } from 'typia';
@@ -19,3 +20,6 @@ export const isContainerCapacityApprovedException =
 
 export const isAdditionalVerificationAttributeValue =
   createIs<MethodologyAdditionalVerificationAttributeValue>();
+
+export const isMethodologyAdditionalVerification =
+  createIs<MethodologyAdditionalVerification>();
