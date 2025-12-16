@@ -27,29 +27,3 @@ export const parseDate = (
 
   return parsed;
 };
-
-const WEIGHT_VALIDATION_TOLERANCE = 1;
-
-export const validateWeights = (
-  initialWeight?: { timestamp?: Date; unit: string; value: number },
-  finalWeight?: { timestamp?: Date; unit: string; value: number },
-  netWeight?: { unit: string; value: number },
-): boolean | undefined => {
-  if (!initialWeight || !finalWeight || !netWeight) {
-    return undefined;
-  }
-
-  if (
-    initialWeight.unit !== finalWeight.unit ||
-    initialWeight.unit !== netWeight.unit
-  ) {
-    return undefined;
-  }
-
-  const calculatedNetWeight = initialWeight.value - finalWeight.value;
-
-  return (
-    Math.abs(calculatedNetWeight - netWeight.value) <
-    WEIGHT_VALIDATION_TOLERANCE
-  );
-};

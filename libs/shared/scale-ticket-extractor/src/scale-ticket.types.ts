@@ -21,7 +21,6 @@ export interface ScaleTicketData extends ExtractedData {
         unit: NonEmptyString;
         value: number;
       };
-  isValid: boolean | undefined;
   netWeight: { unit: NonEmptyString; value: number };
 
   ticketNumber: NonEmptyString | undefined;

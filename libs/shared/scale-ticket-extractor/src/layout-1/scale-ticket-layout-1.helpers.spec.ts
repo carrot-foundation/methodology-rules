@@ -1,8 +1,4 @@
-import {
-  parseDate,
-  parseNumber,
-  validateWeights,
-} from './scale-ticket-layout-1.helpers';
+import { parseDate, parseNumber } from './scale-ticket-layout-1.helpers';
 
 describe('layout-1 helpers', () => {
   describe('parseNumber', () => {
@@ -46,48 +42,5 @@ describe('layout-1 helpers', () => {
         expect(parseDate(date, time)).toBeUndefined();
       },
     );
-  });
-
-  describe('validateWeights', () => {
-    const baseInitial = { unit: 'kg' as const, value: 1000 };
-    const baseFinal = { unit: 'kg' as const, value: 800 };
-
-    it('should return undefined if any weight is missing', () => {
-      expect(
-        validateWeights(undefined, baseFinal, { unit: 'kg', value: 200 }),
-      ).toBeUndefined();
-      expect(
-        validateWeights(baseInitial, undefined, { unit: 'kg', value: 200 }),
-      ).toBeUndefined();
-      expect(validateWeights(baseInitial, baseFinal)).toBeUndefined();
-    });
-
-    it('should return true when calculated net weight is within tolerance', () => {
-      const result = validateWeights(baseInitial, baseFinal, {
-        unit: 'kg',
-        value: 200.5,
-      });
-
-      expect(result).toBe(true);
-    });
-
-    it('should return false when calculated net weight is outside tolerance', () => {
-      const result = validateWeights(baseInitial, baseFinal, {
-        unit: 'kg',
-        value: 210,
-      });
-
-      expect(result).toBe(false);
-    });
-
-    it('should return undefined when units are inconsistent', () => {
-      const result = validateWeights(
-        { unit: 'kg', value: 1000 },
-        { unit: 'lb', value: 800 },
-        { unit: 'kg', value: 200 },
-      );
-
-      expect(result).toBeUndefined();
-    });
   });
 });

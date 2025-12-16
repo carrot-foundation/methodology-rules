@@ -10,7 +10,6 @@ import {
   extractTransporter,
   extractVehiclePlate,
 } from './scale-ticket-layout-1.extractors';
-import { validateWeights } from './scale-ticket-layout-1.helpers';
 import { Layout1ScaleTicketData } from './scale-ticket-layout-1.types';
 
 export class Layout1ScaleTicketParser
@@ -31,12 +30,9 @@ export class Layout1ScaleTicketParser
     const initialWeight = extractInitialWeight(rawText);
     const finalWeight = extractFinalWeight(rawText);
 
-    const isValid = validateWeights(initialWeight, finalWeight, netWeight);
-
     return {
       finalWeight,
       initialWeight,
-      isValid,
       netWeight,
       rawText,
       ticketNumber,

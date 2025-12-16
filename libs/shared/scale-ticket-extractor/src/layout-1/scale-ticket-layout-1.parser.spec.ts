@@ -33,7 +33,6 @@ describe('Layout1ScaleTicketParser', () => {
     });
     expect(result.initialWeight?.value).toBeCloseTo(1000.5);
     expect(result.finalWeight?.value).toBeCloseTo(800.25);
-    expect(result.isValid).toBe(true);
     expect(result.rawText).toContain('Ticket de pesagem');
   });
 
