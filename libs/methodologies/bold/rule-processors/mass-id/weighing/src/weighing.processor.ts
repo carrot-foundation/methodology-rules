@@ -29,6 +29,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   isScaleTicketVerificationConfig,
@@ -54,6 +55,7 @@ interface DocumentPair {
 }
 
 interface RuleSubject {
+  massIdDocumentId: NonEmptyString;
   recyclerAccreditationDocument: Document;
   weighingEvents: DocumentEvent[];
 }
@@ -66,10 +68,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       const documentQuery = await this.generateDocumentQuery(ruleInput);
       const documentPair = await this.collectDocuments(documentQuery);
       const ruleSubject = this.getRuleSubject(documentPair);
-      const evaluationResult = await this.evaluateResult(
-        ruleSubject,
-        ruleInput,
-      );
+      const evaluationResult = await this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
@@ -81,10 +80,11 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
   }
 
-  protected async evaluateResult(
-    { recyclerAccreditationDocument, weighingEvents }: RuleSubject,
-    ruleInput: RuleInput,
-  ): Promise<EvaluateResultOutput> {
+  protected async evaluateResult({
+    massIdDocumentId,
+    recyclerAccreditationDocument,
+    weighingEvents,
+  }: RuleSubject): Promise<EvaluateResultOutput> {
     const initialValidation = this.validateWeighingEvents(weighingEvents);
 
     if (initialValidation) {
@@ -135,7 +135,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (scaleTicketConfig) {
       const textExtractorInput = this.buildScaleTicketTextExtractorInput(
         weighingEvent,
-        ruleInput,
+        massIdDocumentId,
       );
 
       const scaleTicketValidation = await verifyScaleTicketNetWeight({
@@ -208,6 +208,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const weighingEvents = getWeighingEvents(massIdDocument);
 
     return {
+      massIdDocumentId: massIdDocument.id,
       recyclerAccreditationDocument,
       weighingEvents,
     };
@@ -215,7 +216,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   private buildScaleTicketTextExtractorInput(
     weighingEvent: DocumentEvent,
-    ruleInput: RuleInput,
+    massIdDocumentId: NonEmptyString,
   ): TextExtractionInput | undefined {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
@@ -238,7 +239,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
 
     const key = getAttachmentS3Key(
-      ruleInput.documentId,
+      massIdDocumentId,
       scaleTicketAttachment.attachmentId,
     );
 

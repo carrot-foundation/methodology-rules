@@ -2,7 +2,6 @@ import {
   type DocumentEvent,
   DocumentEventAttachmentLabel,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { WeighingProcessor } from './weighing.processor';
 
@@ -28,16 +27,11 @@ describe('WeighingProcessor helpers', () => {
       ],
     } as unknown as DocumentEvent;
 
-    const ruleInput = stubRuleInput({
-      documentId: 'doc-1',
-      documentKeyPrefix: 'prefix',
-    });
-
     process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'bucket-name';
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,
-      ruleInput,
+      'doc-1',
     );
 
     expect(input).toEqual({
@@ -60,16 +54,11 @@ describe('WeighingProcessor helpers', () => {
       ],
     } as unknown as DocumentEvent;
 
-    const ruleInput = stubRuleInput({
-      documentId: 'doc-1',
-      documentKeyPrefix: 'prefix',
-    });
-
     delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,
-      ruleInput,
+      'doc-1',
     );
 
     expect(input).toBeUndefined();
