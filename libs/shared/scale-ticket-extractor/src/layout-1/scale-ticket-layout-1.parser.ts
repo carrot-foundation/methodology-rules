@@ -1,6 +1,6 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
-import type { ScaleTicketParser } from '../types';
+import type { ScaleTicketParser } from '../scale-ticket.types';
 
 import {
   extractFinalWeight,
@@ -9,9 +9,9 @@ import {
   extractTicketNumber,
   extractTransporter,
   extractVehiclePlate,
-} from './extractors';
-import { validateWeights } from './helpers';
-import { Layout1ScaleTicketData } from './types';
+} from './scale-ticket-layout-1.extractors';
+import { validateWeights } from './scale-ticket-layout-1.helpers';
+import { Layout1ScaleTicketData } from './scale-ticket-layout-1.types';
 
 export class Layout1ScaleTicketParser
   implements ScaleTicketParser<Layout1ScaleTicketData>

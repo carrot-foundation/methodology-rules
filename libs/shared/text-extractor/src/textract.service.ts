@@ -6,7 +6,10 @@ import {
 import { logger } from '@carrot-fndn/shared/helpers';
 import { readFile } from 'node:fs/promises';
 
-import type { TextExtractionInput, TextExtractionResult } from './types';
+import type {
+  TextExtractionInput,
+  TextExtractionResult,
+} from './text-extractor.types';
 
 export class TextractService {
   private readonly textractClient: TextractClient;

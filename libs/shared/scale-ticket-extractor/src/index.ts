@@ -1,2 +1,2 @@
 export * from './layout-1';
-export * from './types';
+export * from './scale-ticket.types';

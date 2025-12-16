@@ -1,6 +1,6 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
-import { Layout1ScaleTicketParser } from './parser';
+import { Layout1ScaleTicketParser } from './scale-ticket-layout-1.parser';
 
 const buildExtractionResult = (rawText: string): TextExtractionResult => ({
   blocks: [],

@@ -33,7 +33,7 @@ import {
 import {
   isScaleTicketVerificationConfig,
   verifyScaleTicketNetWeight,
-} from './scale-ticket-verification/scale-ticket-verification';
+} from './scale-ticket-verification/scale-ticket-verification.helpers';
 import {
   NOT_FOUND_RESULT_COMMENTS,
   PASSED_RESULT_COMMENTS,

@@ -4,9 +4,13 @@ import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 import {
   buildScaleTicketVerificationContext,
   verifyScaleTicketNetWeight,
-} from './scale-ticket-verification';
+} from './scale-ticket-verification.helpers';
 
 describe('scale-ticket-verification', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should pass when extracted net weight matches the event value', async () => {
     const textExtractorInput = { filePath: 'dummy-path' };
     const expectedNetWeight = 200.25;
@@ -31,7 +35,7 @@ describe('scale-ticket-verification', () => {
       textExtractorInput,
     });
 
-    expect(result).toHaveProperty('errors');
+    expect(result.errors).toHaveLength(0);
   });
 
   it('should return no errors when no config is provided', async () => {
@@ -46,7 +50,10 @@ describe('scale-ticket-verification', () => {
 
   it('should return no errors when verificationType is not scaleTicket', async () => {
     const result = await verifyScaleTicketNetWeight({
-      config: undefined as unknown as {
+      config: {
+        scaleTicketLayout: 'layout1',
+        verificationType: 'otherType',
+      } as unknown as {
         scaleTicketLayout: 'layout1';
         verificationType: 'scaleTicket';
       },

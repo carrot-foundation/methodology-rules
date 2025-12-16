@@ -7,7 +7,7 @@ import {
 import { logger } from '@carrot-fndn/shared/helpers';
 import { type AwsClientStub, mockClient } from 'aws-sdk-client-mock';
 
-import type { TextExtractionResult } from './types';
+import type { TextExtractionResult } from './text-extractor.types';
 
 import { TextractService } from './textract.service';
 

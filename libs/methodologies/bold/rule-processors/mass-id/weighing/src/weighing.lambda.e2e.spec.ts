@@ -9,7 +9,7 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification';
+import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification.helpers';
 import { weighingLambda } from './weighing.lambda';
 import {
   weighingErrorTestCases,

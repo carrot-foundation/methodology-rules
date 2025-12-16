@@ -1,5 +1,5 @@
-import { LAYOUT_1_SCALE_TICKET_PATTERNS } from './constants';
-import { parseDate, parseNumber } from './helpers';
+import { LAYOUT_1_SCALE_TICKET_PATTERNS } from './scale-ticket-layout-1.constants';
+import { parseDate, parseNumber } from './scale-ticket-layout-1.helpers';
 
 export const extractStringField = (
   text: string,

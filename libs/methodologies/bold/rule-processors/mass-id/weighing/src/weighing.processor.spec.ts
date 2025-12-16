@@ -6,7 +6,7 @@ import {
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification';
+import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification.helpers';
 import { WeighingProcessor } from './weighing.processor';
 import {
   weighingErrorTestCases,

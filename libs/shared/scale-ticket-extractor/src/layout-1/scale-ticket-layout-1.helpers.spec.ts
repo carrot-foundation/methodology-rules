@@ -1,4 +1,8 @@
-import { parseDate, parseNumber, validateWeights } from './helpers';
+import {
+  parseDate,
+  parseNumber,
+  validateWeights,
+} from './scale-ticket-layout-1.helpers';
 
 describe('layout-1 helpers', () => {
   describe('parseNumber', () => {

@@ -7,7 +7,7 @@ import {
   extractTransporter,
   extractVehiclePlate,
   extractWeightWithTimestamp,
-} from './extractors';
+} from './scale-ticket-layout-1.extractors';
 
 describe('layout-1 extractors', () => {
   const baseText = `

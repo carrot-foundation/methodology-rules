@@ -1,6 +1,6 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
-import type { ScaleTicketData } from '../types';
+import type { ScaleTicketData } from '../scale-ticket.types';
 
 export interface Layout1ScaleTicketData extends ScaleTicketData {
   transporter:
