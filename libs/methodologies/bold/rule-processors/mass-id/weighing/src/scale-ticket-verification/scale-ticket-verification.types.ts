@@ -7,7 +7,7 @@ export type ScaleTicketLayout = 'layout1';
 export interface ScaleTicketVerificationContext {
   config: MethodologyAdditionalVerification | undefined;
   expectedNetWeight: number | undefined;
-  scaleTicketData?: ScaleTicketData;
+  scaleTicketData?: ScaleTicketData | undefined;
 }
 
 export interface ScaleTicketVerificationDependencies {
