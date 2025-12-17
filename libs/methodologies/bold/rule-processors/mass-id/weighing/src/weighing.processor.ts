@@ -132,6 +132,8 @@ export class WeighingProcessor extends RuleDataProcessor {
       isScaleTicketVerificationConfig,
     );
 
+    let scaleTicketValidated = false;
+
     if (scaleTicketConfig) {
       const textExtractorInput = this.buildScaleTicketTextExtractorInput(
         weighingEvent,
@@ -150,6 +152,8 @@ export class WeighingProcessor extends RuleDataProcessor {
           resultStatus: RuleOutputStatus.FAILED,
         };
       }
+
+      scaleTicketValidated = true;
     }
 
     let passMessage = '';
@@ -176,6 +180,11 @@ export class WeighingProcessor extends RuleDataProcessor {
     ) {
       passMessage =
         PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(passMessage);
+    }
+
+    if (scaleTicketValidated) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(passMessage);
     }
 
     return {

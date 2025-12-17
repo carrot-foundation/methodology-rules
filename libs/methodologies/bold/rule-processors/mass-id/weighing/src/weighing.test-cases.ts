@@ -461,9 +461,9 @@ export const weighingTestCases = [
     massIdDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
-    // The actual result comment will still be the standard single-step message
-    // when the scale ticket verification passes.
-    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    ),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the one step ${WEIGHING} event is valid with scale ticket verification configured`,
   },
