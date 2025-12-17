@@ -51,15 +51,11 @@ export const verifyScaleTicketNetWeight = async ({
   expectedNetWeight,
   textExtractorInput,
 }: {
-  config: MethodologyAdditionalVerification | undefined;
-  expectedNetWeight: number | undefined;
+  config: MethodologyAdditionalVerification;
+  expectedNetWeight: number;
   textExtractorInput: TextExtractionInput | undefined;
 }): Promise<ScaleTicketVerificationResult> => {
-  if (!config || !isScaleTicketVerificationConfig(config)) {
-    return { errors: [] };
-  }
-
-  if (expectedNetWeight === undefined || expectedNetWeight === 0) {
+  if (!isScaleTicketVerificationConfig(config)) {
     return { errors: [] };
   }
 

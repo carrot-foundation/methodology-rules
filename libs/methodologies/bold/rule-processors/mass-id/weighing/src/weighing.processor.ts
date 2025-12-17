@@ -29,7 +29,10 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { NonEmptyString } from '@carrot-fndn/shared/types';
+import {
+  MethodologyAdditionalVerification,
+  NonEmptyString,
+} from '@carrot-fndn/shared/types';
 
 import {
   isScaleTicketVerificationConfig,
@@ -47,6 +50,7 @@ import {
   isExceptionValid,
   validateTwoStepWeighingEvents,
   validateWeighingValues,
+  type WeighingValues,
 } from './weighing.helpers';
 
 interface DocumentPair {
@@ -74,10 +78,58 @@ export class WeighingProcessor extends RuleDataProcessor {
         resultComment: evaluationResult.resultComment,
       });
     } catch (error) {
+      logger.error({
+        error,
+        message: `Error in weighing processor for document ${ruleInput.documentId}`,
+      });
+
       return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
+  }
+
+  protected buildPassMessage({
+    isTwoStepWeighingEvent,
+    scaleTicketValidated,
+    weighingValues,
+  }: {
+    isTwoStepWeighingEvent: boolean;
+    scaleTicketValidated: boolean;
+    weighingValues: WeighingValues;
+  }): string {
+    const isTransportManifest =
+      weighingValues.weighingCaptureMethod ===
+      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
+
+    let passMessage = '';
+
+    if (isTransportManifest) {
+      passMessage = PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
+    } else if (isTwoStepWeighingEvent) {
+      passMessage = PASSED_RESULT_COMMENTS.TWO_STEP;
+    } else {
+      passMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
+    }
+
+    if (isExceptionValid(weighingValues.containerCapacityException)) {
+      passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
+    }
+
+    if (
+      isExceptionValid(weighingValues.tareException) &&
+      isNil(weighingValues.tare?.value)
+    ) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(passMessage);
+    }
+
+    if (scaleTicketValidated) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(passMessage);
+    }
+
+    return passMessage;
   }
 
   protected async evaluateResult({
@@ -132,60 +184,24 @@ export class WeighingProcessor extends RuleDataProcessor {
       isScaleTicketVerificationConfig,
     );
 
-    let scaleTicketValidated = false;
+    const scaleTicketValidationResult = await this.validateScaleTicket({
+      expectedNetWeight: weighingValues.eventValue,
+      massIdDocumentId,
+      scaleTicketConfig,
+      weighingEvent,
+    });
 
-    if (scaleTicketConfig) {
-      const textExtractorInput = this.buildScaleTicketTextExtractorInput(
-        weighingEvent,
-        massIdDocumentId,
-      );
-
-      const scaleTicketValidation = await verifyScaleTicketNetWeight({
-        config: scaleTicketConfig,
-        expectedNetWeight: weighingValues.eventValue,
-        textExtractorInput,
-      });
-
-      if (scaleTicketValidation.errors.length > 0) {
-        return {
-          resultComment: scaleTicketValidation.errors.join(' '),
-          resultStatus: RuleOutputStatus.FAILED,
-        };
-      }
-
-      scaleTicketValidated = true;
+    if (scaleTicketValidationResult.errorResult) {
+      return scaleTicketValidationResult.errorResult;
     }
 
-    let passMessage = '';
+    const scaleTicketValidated = scaleTicketValidationResult.validated;
 
-    const isTransportManifest =
-      weighingValues.weighingCaptureMethod ===
-      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
-
-    if (isTransportManifest) {
-      passMessage = PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST;
-    } else if (isTwoStepWeighingEvent) {
-      passMessage = PASSED_RESULT_COMMENTS.TWO_STEP;
-    } else {
-      passMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
-    }
-
-    if (isExceptionValid(weighingValues.containerCapacityException)) {
-      passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
-    }
-
-    if (
-      isExceptionValid(weighingValues.tareException) &&
-      isNil(weighingValues.tare?.value)
-    ) {
-      passMessage =
-        PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(passMessage);
-    }
-
-    if (scaleTicketValidated) {
-      passMessage =
-        PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(passMessage);
-    }
+    const passMessage = this.buildPassMessage({
+      isTwoStepWeighingEvent,
+      scaleTicketValidated,
+      weighingValues,
+    });
 
     return {
       resultComment: passMessage,
@@ -221,6 +237,48 @@ export class WeighingProcessor extends RuleDataProcessor {
       recyclerAccreditationDocument,
       weighingEvents,
     };
+  }
+
+  protected async validateScaleTicket({
+    expectedNetWeight,
+    massIdDocumentId,
+    scaleTicketConfig,
+    weighingEvent,
+  }: {
+    expectedNetWeight: number | undefined;
+    massIdDocumentId: NonEmptyString;
+    scaleTicketConfig: MethodologyAdditionalVerification | undefined;
+    weighingEvent: DocumentEvent;
+  }): Promise<{
+    errorResult?: EvaluateResultOutput;
+    validated: boolean;
+  }> {
+    if (!scaleTicketConfig || expectedNetWeight === undefined) {
+      return { validated: false };
+    }
+
+    const textExtractorInput = this.buildScaleTicketTextExtractorInput(
+      weighingEvent,
+      massIdDocumentId,
+    );
+
+    const scaleTicketValidation = await verifyScaleTicketNetWeight({
+      config: scaleTicketConfig,
+      expectedNetWeight,
+      textExtractorInput,
+    });
+
+    if (scaleTicketValidation.errors.length > 0) {
+      return {
+        errorResult: {
+          resultComment: scaleTicketValidation.errors.join(' '),
+          resultStatus: RuleOutputStatus.FAILED,
+        },
+        validated: false,
+      };
+    }
+
+    return { validated: true };
   }
 
   private buildScaleTicketTextExtractorInput(

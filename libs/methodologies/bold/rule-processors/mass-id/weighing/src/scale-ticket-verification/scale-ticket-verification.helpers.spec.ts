@@ -1,3 +1,5 @@
+import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
+
 import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
@@ -38,9 +40,11 @@ describe('scale-ticket-verification', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('should return no errors when no config is provided', async () => {
+  it('should return no errors when config verificationType is not scaleTicket', async () => {
     const result = await verifyScaleTicketNetWeight({
-      config: undefined,
+      config: {
+        verificationType: 'otherType',
+      } as MethodologyAdditionalVerification,
       expectedNetWeight: 100,
       textExtractorInput: undefined,
     });
@@ -64,17 +68,22 @@ describe('scale-ticket-verification', () => {
     expect(result.errors).toHaveLength(0);
   });
 
-  it('should return no errors when expected net weight is undefined or zero', async () => {
+  it('should return no errors when expected net weight is zero and matches the ticket net weight', async () => {
     const baseConfig = {
       scaleTicketLayout: 'layout1' as const,
       verificationType: 'scaleTicket' as const,
     };
 
-    const undefinedResult = await verifyScaleTicketNetWeight({
-      config: baseConfig,
-      expectedNetWeight: undefined,
-      textExtractorInput: { filePath: 'dummy-path' },
-    });
+    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
+      blocks: [],
+      rawText: '',
+    } as never);
+
+    jest.spyOn(Layout1ScaleTicketParser.prototype, 'parse').mockReturnValue({
+      isValid: true,
+      netWeight: { unit: 'kg', value: 0 },
+      rawText: '',
+    } as never);
 
     const zeroResult = await verifyScaleTicketNetWeight({
       config: baseConfig,
@@ -82,7 +91,6 @@ describe('scale-ticket-verification', () => {
       textExtractorInput: { filePath: 'dummy-path' },
     });
 
-    expect(undefinedResult.errors).toHaveLength(0);
     expect(zeroResult.errors).toHaveLength(0);
   });
 
