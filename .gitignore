@@ -44,3 +44,8 @@ temp-rules-metadata.json
 
 # Windsurf
 .windsurf
+
+# Cursor
+.cursor/plans
+.cursor/rules/specify-rules.mdc
+.cursor/rules/user-*.mdc

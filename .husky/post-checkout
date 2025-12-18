@@ -1,0 +1,49 @@
+#!/bin/sh
+
+mkdir -p .ai
+
+base_url="https://raw.githubusercontent.com/carrot-foundation/middle-earth/main/.ai"
+
+# Check if jq is available
+if ! command -v jq >/dev/null 2>&1; then
+  echo "Warning: jq is not installed. Cannot parse manifest.json. Please install jq: brew install jq"
+  exit 0
+fi
+
+# Fetch manifest.json
+manifest_json=$(curl -sf --max-time 10 "$base_url/manifest.json")
+
+if [ -z "$manifest_json" ]; then
+  echo "Warning: Failed to fetch AI instructions manifest.json"
+  exit 0
+fi
+
+# Download root files
+for file in README.md instructions.md manifest.json; do
+  curl -sf --max-time 10 "$base_url/$file" -o ".ai/$file" || echo "Warning: Failed to fetch $file"
+done
+
+# Download meta files
+mkdir -p .ai/meta
+for file in how-to-use.md project-extensions.md project-overrides.md tool-integration.md versioning.md; do
+  curl -sf --max-time 10 "$base_url/meta/$file" -o ".ai/meta/$file" || echo "Warning: Failed to fetch meta/$file"
+done
+
+# Extract file paths from manifest.json and download them
+echo "$manifest_json" | jq -r '.. | .file? // empty' | sort -u | while read -r file; do
+  [ -z "$file" ] && continue
+
+  # Validate file path to prevent directory traversal
+  case "$file" in
+    *..* | /*)
+      echo "Warning: Skipping unsafe file path: $file"
+      continue
+      ;;
+  esac
+
+  # Create subdirectory if needed
+  dir=$(dirname "$file")
+  [ "$dir" != "." ] && mkdir -p ".ai/$dir"
+
+  curl -sf --max-time 10 "$base_url/$file" -o ".ai/$file" || echo "Warning: Failed to fetch $file"
+done
