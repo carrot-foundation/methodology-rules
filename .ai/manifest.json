@@ -1,0 +1,184 @@
+{
+  "version": "1.1.1",
+  "lastUpdated": "2025-12-05",
+  "extensionPatterns": [
+    ".cursor/rules/*-project.mdc",
+    ".cursor/rules/*-extensions.mdc",
+    "CLAUDE.md",
+    ".github/copilot-instructions.md",
+    "PROJECT.md"
+  ],
+  "rules": {
+    "code-quality": {
+      "code-style": {
+        "file": "categories/code-quality/code-style.md",
+        "priority": "required",
+        "appliesTo": [
+          "typescript",
+          "javascript",
+          "all"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "typescript.md"
+        ]
+      },
+      "typescript": {
+        "file": "categories/code-quality/typescript.md",
+        "priority": "required",
+        "appliesTo": [
+          "typescript"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "code-style.md"
+        ]
+      },
+      "testing": {
+        "file": "categories/code-quality/testing.md",
+        "priority": "required",
+        "appliesTo": [
+          "typescript",
+          "javascript"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "code-style.md",
+          "typescript.md"
+        ]
+      },
+      "code-comments": {
+        "file": "categories/code-quality/code-comments.md",
+        "priority": "recommended",
+        "appliesTo": [
+          "typescript",
+          "javascript"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "code-style.md"
+        ]
+      }
+    },
+    "workflow": {
+      "commit": {
+        "file": "categories/workflow/commit.md",
+        "priority": "required",
+        "appliesTo": [
+          "all"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "branch-naming.md",
+          "pull-request.md"
+        ]
+      },
+      "pull-request": {
+        "file": "categories/workflow/pull-request.md",
+        "priority": "required",
+        "appliesTo": [
+          "all"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "commit.md",
+          "branch-naming.md"
+        ]
+      },
+      "branch-naming": {
+        "file": "categories/workflow/branch-naming.md",
+        "priority": "required",
+        "appliesTo": [
+          "all"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "commit.md",
+          "pull-request.md"
+        ]
+      },
+      "clickup-task": {
+        "file": "categories/workflow/clickup-task.md",
+        "priority": "required",
+        "appliesTo": [
+          "all"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": [
+          "commit.md",
+          "pull-request.md"
+        ]
+      }
+    },
+    "documentation": {
+      "markdown": {
+        "file": "categories/documentation/markdown.md",
+        "priority": "recommended",
+        "appliesTo": [
+          "markdown"
+        ],
+        "tools": [
+          "cursor",
+          "claude",
+          "copilot",
+          "all"
+        ],
+        "version": "1.1.1",
+        "relatedRules": []
+      }
+    }
+  },
+  "categories": {
+    "code-quality": "Code style, TypeScript, testing standards",
+    "workflow": "Git workflow, PRs, task management",
+    "documentation": "Documentation standards"
+  }
+}
