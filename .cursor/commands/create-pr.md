@@ -20,7 +20,7 @@ Create PR following project conventions with critical analysis.
 
 ### 2. Critical Analysis
 
-Output analysis per `@pull-request.mdc`:
+Output analysis per `@pull-request-rules.mdc`:
 
 **Size assessment:**
 
