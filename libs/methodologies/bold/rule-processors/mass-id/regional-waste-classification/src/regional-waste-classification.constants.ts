@@ -849,7 +849,8 @@ export const WASTE_CLASSIFICATION_CODES = {
     },
     '20 01 08': {
       CDM_CODE: '8.3',
-      description: 'Resíduos biodegradáveis de cozinhas e cantias',
+      // TODO: Update in the future to include the correct description, it was changed due the EloVerde issues.
+      description: 'Resíduos biodegradáveis de cozinha e cantinas',
     },
     '20 01 10': {
       CDM_CODE: '8.4',
