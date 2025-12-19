@@ -1,7 +1,11 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
-import { getOrDefault, isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  getOrDefault,
+  isNil,
+  isNonEmptyString,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
@@ -45,7 +49,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     driverIdentifierExemptionJustification,
     vehicleType,
   }: RuleSubject): EvaluateResultOutput {
-    const hasDriverId = isNonEmptyString(driverIdentifier);
+    const hasDriverId = !isNil(driverIdentifier);
     const hasJustification = isNonEmptyString(
       driverIdentifierExemptionJustification,
     );
