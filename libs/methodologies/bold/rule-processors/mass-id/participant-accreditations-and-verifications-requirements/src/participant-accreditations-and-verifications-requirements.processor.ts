@@ -20,7 +20,10 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
-import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  type Document,
+  DocumentSubtype,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -196,7 +199,15 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     }>,
     isValidAccreditation: (document: Document) => boolean,
   ): void {
-    const validAccreditations = participantDocuments.filter((document) =>
+    const documentsForActorType = participantDocuments.filter((document) => {
+      const documentRelation = mapDocumentRelation(document);
+
+      return (
+        documentRelation.subtype === (actorType as unknown as DocumentSubtype)
+      );
+    });
+
+    const validAccreditations = documentsForActorType.filter((document) =>
       isValidAccreditation(document),
     );
 
