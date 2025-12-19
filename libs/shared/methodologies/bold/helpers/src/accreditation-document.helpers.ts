@@ -67,3 +67,19 @@ export const isAccreditationValid = (document: Document): boolean => {
 
   return isEffectiveValid && isExpirationValid;
 };
+
+export const isAccreditationValidWithOptionalDates = (
+  document: Document,
+): boolean => {
+  const event = document.externalEvents?.find(
+    eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),
+  );
+
+  // If no ACCREDITATION_RESULT event exists, the accreditation is valid
+  if (!event) {
+    return true;
+  }
+
+  // If ACCREDITATION_RESULT exists, use the same validation as isAccreditationValid
+  return isAccreditationValid(document);
+};

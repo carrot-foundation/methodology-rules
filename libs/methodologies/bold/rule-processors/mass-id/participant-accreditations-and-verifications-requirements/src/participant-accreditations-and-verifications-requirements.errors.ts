@@ -11,6 +11,11 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessorError
     MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS: (
       participantNames: string[],
     ) =>
-      `No accreditation documents were found for these participants: ${participantNames.join(', ')}`,
+      `No valid accreditation found for these participants: ${participantNames.join(', ')}`,
+    MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT: (
+      participantId: string,
+      actorType: string,
+    ) =>
+      `Multiple valid accreditations found for ${actorType} participant ${participantId}`,
   } as const;
 }
