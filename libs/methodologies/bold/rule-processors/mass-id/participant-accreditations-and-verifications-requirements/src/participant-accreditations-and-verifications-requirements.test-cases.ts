@@ -20,13 +20,8 @@ import { addDays, subDays } from 'date-fns';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.processor';
 
-const {
-  HAULER,
-  INTEGRATOR,
-  PROCESSOR,
-  RECYCLER,
-  WASTE_GENERATOR,
-} = MassIdDocumentActorType;
+const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
+  MassIdDocumentActorType;
 const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } = DocumentEventName;
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
@@ -452,8 +447,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
       massIdWithParticipantMultipleRoles.massIdDocument,
       ...massIdWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdWithParticipantMultipleRoles.massIdAuditDocument,
+    massIdAuditDocument: massIdWithParticipantMultipleRoles.massIdAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
