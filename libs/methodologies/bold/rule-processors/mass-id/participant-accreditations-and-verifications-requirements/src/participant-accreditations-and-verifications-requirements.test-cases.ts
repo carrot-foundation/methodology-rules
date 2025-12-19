@@ -3,6 +3,7 @@ import {
   stubBoldAccreditationResultEvent,
   stubDocument,
   stubDocumentEvent,
+  stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentCategory,
@@ -19,7 +20,13 @@ import { addDays, subDays } from 'date-fns';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.processor';
 
-const { INTEGRATOR, WASTE_GENERATOR } = MassIdDocumentActorType;
+const {
+  HAULER,
+  INTEGRATOR,
+  PROCESSOR,
+  RECYCLER,
+  WASTE_GENERATOR,
+} = MassIdDocumentActorType;
 const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } = DocumentEventName;
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
@@ -200,6 +207,100 @@ const wasteGeneratorSecondAccreditation = stubDocument(
   false, // stubExternalEvents = false to avoid random events
 );
 
+// Create a participant that has both PROCESSOR and RECYCLER roles
+const sharedParticipant = stubParticipant({ type: PROCESSOR });
+
+const massIdWithParticipantMultipleRoles = new BoldStubsBuilder({
+  massIdActorParticipants: new Map([
+    [HAULER, stubParticipant({ type: HAULER })],
+    [INTEGRATOR, stubParticipant({ type: INTEGRATOR })],
+    [PROCESSOR, sharedParticipant],
+    [RECYCLER, sharedParticipant],
+    [WASTE_GENERATOR, stubParticipant({ type: WASTE_GENERATOR })],
+  ]),
+})
+  .createMassIdDocuments()
+  .createMassIdAuditDocuments()
+  .createMethodologyDocument()
+  .createParticipantAccreditationDocuments(
+    new Map([
+      [
+        INTEGRATOR,
+        {
+          externalEventsMap: new Map([
+            [
+              ACCREDITATION_RESULT,
+              stubBoldAccreditationResultEvent({
+                metadataAttributes: [
+                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
+                  [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+                  [
+                    ACCREDITATION_STATUS,
+                    DocumentEventAccreditationStatus.APPROVED,
+                  ],
+                ],
+              }),
+            ],
+          ]),
+        },
+      ],
+      [
+        PROCESSOR,
+        {
+          externalEventsMap: new Map([
+            [
+              ACCREDITATION_RESULT,
+              stubBoldAccreditationResultEvent({
+                metadataAttributes: [
+                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
+                  [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+                  [
+                    ACCREDITATION_STATUS,
+                    DocumentEventAccreditationStatus.APPROVED,
+                  ],
+                ],
+              }),
+            ],
+          ]),
+        },
+      ],
+      [
+        RECYCLER,
+        {
+          externalEventsMap: new Map([
+            [
+              ACCREDITATION_RESULT,
+              stubBoldAccreditationResultEvent({
+                metadataAttributes: [
+                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
+                  [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+                  [
+                    ACCREDITATION_STATUS,
+                    DocumentEventAccreditationStatus.APPROVED,
+                  ],
+                ],
+              }),
+            ],
+          ]),
+        },
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: new Map([
+            [
+              ACCREDITATION_CONTEXT,
+              stubDocumentEvent({
+                name: ACCREDITATION_CONTEXT,
+              }),
+            ],
+          ]),
+        },
+      ],
+    ]),
+  )
+  .build();
+
 export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   {
     documents: [
@@ -345,5 +446,17 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
       ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'WASTE_GENERATOR has multiple valid accreditations (should fail)',
+  },
+  {
+    documents: [
+      massIdWithParticipantMultipleRoles.massIdDocument,
+      ...massIdWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
+    ],
+    massIdAuditDocument:
+      massIdWithParticipantMultipleRoles.massIdAuditDocument,
+    resultComment: RESULT_COMMENTS.PASSED,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
   },
 ];
