@@ -14,6 +14,7 @@ import { addDays, subDays } from 'date-fns';
 import {
   getParticipantAccreditationDocumentByParticipantId,
   isAccreditationValid,
+  isAccreditationValidWithOptionalDates,
 } from './accreditation-document.helpers';
 
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
@@ -191,6 +192,75 @@ describe('Accreditation Document Helpers', () => {
       });
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('isAccreditationValidWithOptionalDates', () => {
+    it('should return true if the document has no ACCREDITATION_RESULT event', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [],
+      });
+
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
+    });
+
+    it('should return true if the document has no externalEvents', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: undefined,
+      });
+
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
+    });
+
+    it('should return true if the document has a valid ACCREDITATION_RESULT event', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
+    });
+
+    it('should return false if the document has an invalid ACCREDITATION_RESULT event', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, addDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(false);
+    });
+
+    it('should return false if the document has ACCREDITATION_RESULT event with invalid status', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.REJECTED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(false);
     });
   });
 });

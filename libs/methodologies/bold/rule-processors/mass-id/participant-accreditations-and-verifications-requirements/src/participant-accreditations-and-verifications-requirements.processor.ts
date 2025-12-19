@@ -7,7 +7,10 @@ import {
   isNil,
   isNonEmptyArray,
 } from '@carrot-fndn/shared/helpers';
-import { isAccreditationValid } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import {
+  isAccreditationValid,
+  isAccreditationValidWithOptionalDates,
+} from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -33,14 +36,22 @@ import { assert } from 'typia';
 
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
+const ACTORS_REQUIRING_DATES = new Set([
+  MethodologyDocumentEventLabel.INTEGRATOR,
+  MethodologyDocumentEventLabel.PROCESSOR,
+  MethodologyDocumentEventLabel.RECYCLER,
+]);
+
+const ACTORS_WITH_OPTIONAL_DATES = new Set([
+  MethodologyDocumentEventLabel.WASTE_GENERATOR,
+]);
+
 interface RuleSubject {
-  accreditationDocuments: Map<string, Document>;
+  accreditationDocuments: Map<string, Document[]>;
   massIdDocument: Document;
 }
 
 export const RESULT_COMMENTS = {
-  INVALID_ACCREDITATION_DOCUMENTS: (documentIds: string[]) =>
-    `These accreditations-and-verifications are invalid: ${documentIds.join(', ')}`,
   PASSED:
     'All participant accreditations-and-verifications are active and approved.',
 } as const;
@@ -93,17 +104,15 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIdDocument,
     });
 
-    const invalidAccreditationDocuments = [
-      ...accreditationDocuments.values(),
-    ].filter((document) => !isAccreditationValid(document));
+    const actorParticipants = this.getActorParticipants(massIdDocument);
 
-    if (isNonEmptyArray(invalidAccreditationDocuments)) {
-      return {
-        resultComment: RESULT_COMMENTS.INVALID_ACCREDITATION_DOCUMENTS(
-          invalidAccreditationDocuments.map((document) => document.id),
-        ),
-        resultStatus: RuleOutputStatus.FAILED,
-      };
+    const validationError = this.validateAllActors(
+      actorParticipants,
+      accreditationDocuments,
+    );
+
+    if (validationError) {
+      throw validationError;
     }
 
     return {
@@ -112,10 +121,31 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     };
   }
 
+  private getActorParticipants(
+    massIdDocument: Document,
+  ): Map<string, MethodologyDocumentEventLabel> {
+    // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
+    return new Map(
+      massIdDocument
+        .externalEvents!.filter(
+          eventLabelIsAnyOf([
+            MethodologyDocumentEventLabel.INTEGRATOR,
+            MethodologyDocumentEventLabel.PROCESSOR,
+            MethodologyDocumentEventLabel.RECYCLER,
+            MethodologyDocumentEventLabel.WASTE_GENERATOR,
+          ]),
+        )
+        .map((event) => [
+          event.participant.id,
+          assert<MethodologyDocumentEventLabel>(event.label),
+        ]),
+    );
+  }
+
   private async getRuleSubject(
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
-    const accreditationDocuments: Map<string, Document> = new Map();
+    const accreditationDocuments: Map<string, Document[]> = new Map();
     let massIdDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
@@ -126,7 +156,14 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       }
 
       if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
-        accreditationDocuments.set(document.primaryParticipant.id, document);
+        const participantId = document.primaryParticipant.id;
+        const existingDocuments =
+          accreditationDocuments.get(participantId) ?? [];
+
+        accreditationDocuments.set(participantId, [
+          ...existingDocuments,
+          document,
+        ]);
       }
     });
 
@@ -148,6 +185,88 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     };
   }
 
+  private validateActor(
+    participantId: string,
+    actorType: MethodologyDocumentEventLabel,
+    participantDocuments: Document[],
+    missingParticipants: string[],
+    participantsWithMultipleValid: Array<{
+      actorType: string;
+      participantId: string;
+    }>,
+    isValidAccreditation: (document: Document) => boolean,
+  ): void {
+    const validAccreditations = participantDocuments.filter((document) =>
+      isValidAccreditation(document),
+    );
+
+    if (validAccreditations.length === 0) {
+      missingParticipants.push(actorType);
+    } else if (validAccreditations.length > 1) {
+      participantsWithMultipleValid.push({ actorType, participantId });
+    }
+  }
+
+  private validateAllActors(
+    actorParticipants: Map<string, MethodologyDocumentEventLabel>,
+    accreditationDocuments: Map<string, Document[]>,
+  ): Error | undefined {
+    const missingParticipants: string[] = [];
+    const participantsWithMultipleValid: Array<{
+      actorType: string;
+      participantId: string;
+    }> = [];
+
+    for (const [participantId, actorType] of actorParticipants.entries()) {
+      // Documents are guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
+      const participantDocuments = accreditationDocuments.get(participantId)!;
+
+      if (ACTORS_REQUIRING_DATES.has(actorType)) {
+        this.validateActor(
+          participantId,
+          actorType,
+          participantDocuments,
+          missingParticipants,
+          participantsWithMultipleValid,
+          isAccreditationValid,
+        );
+      } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
+        this.validateActor(
+          participantId,
+          actorType,
+          participantDocuments,
+          missingParticipants,
+          participantsWithMultipleValid,
+          isAccreditationValidWithOptionalDates,
+        );
+      }
+    }
+
+    if (isNonEmptyArray(missingParticipants)) {
+      return this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+          missingParticipants,
+        ),
+      );
+    }
+
+    if (isNonEmptyArray(participantsWithMultipleValid)) {
+      const firstParticipant = participantsWithMultipleValid[0] as {
+        actorType: string;
+        participantId: string;
+      };
+
+      return this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
+          firstParticipant.participantId,
+          firstParticipant.actorType,
+        ),
+      );
+    }
+
+    return undefined;
+  }
+
   private verifyAllParticipantsHaveAccreditationDocuments({
     accreditationDocuments,
     massIdDocument,
@@ -164,7 +283,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIdDocument.externalEvents
         .filter(
           eventLabelIsAnyOf([
-            MethodologyDocumentEventLabel.HAULER,
+            MethodologyDocumentEventLabel.INTEGRATOR,
             MethodologyDocumentEventLabel.PROCESSOR,
             MethodologyDocumentEventLabel.RECYCLER,
             MethodologyDocumentEventLabel.WASTE_GENERATOR,
@@ -178,7 +297,11 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     const participantsWithoutAccreditationDocuments = [
       ...actorParticipants.entries(),
-    ].filter(([participantId]) => !accreditationDocuments.has(participantId));
+    ].filter(
+      ([participantId]) =>
+        !accreditationDocuments.has(participantId) ||
+        accreditationDocuments.get(participantId)!.length === 0,
+    );
 
     if (isNonEmptyArray(participantsWithoutAccreditationDocuments)) {
       throw this.errorProcessor.getKnownError(
