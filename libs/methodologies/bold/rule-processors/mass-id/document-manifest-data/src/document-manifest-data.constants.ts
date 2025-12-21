@@ -22,8 +22,6 @@ export const RESULT_COMMENTS = {
   INCORRECT_ATTACHMENT_LABEL: `Expected an attachment with the "${TRANSPORT_MANIFEST}" label, but no one was found.`,
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "${DOCUMENT_TYPE}" must be "${MTR}" for recyclers in Brazil, but "${documentType}" was provided.`,
-  INVALID_EVENT_VALUE: (event: string) =>
-    `The event value must be defined and greater than 0, but "${event}" was provided.`,
   INVALID_ISSUE_DATE_FORMAT: (dateFormat: string) =>
     `The "${ISSUE_DATE}" format must be "${DATE}", but the declared format is "${dateFormat}".`,
   MISSING_ATTRIBUTES: `Either the "${TRANSPORT_MANIFEST}" attachment or an "${EXEMPTION_JUSTIFICATION}" must be provided.`,

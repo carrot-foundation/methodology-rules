@@ -356,7 +356,6 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         recyclerCountryCode,
       ),
       this.validateIssueDate(issueDateAttribute),
-      this.validateEventValue(eventValue),
     ];
 
     const failMessages = validations.flatMap((v) => v.failMessages);
@@ -374,18 +373,6 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         value: getOrDefault(eventValue, 0),
       }),
     };
-  }
-
-  private validateEventValue(eventValue: number | undefined): ValidationResult {
-    if (eventValue === 0) {
-      return {
-        failMessages: [
-          RESULT_COMMENTS.INVALID_EVENT_VALUE(eventValue.toString()),
-        ],
-      };
-    }
-
-    return { failMessages: [] };
   }
 
   private validateExemptionAndAttachment(

@@ -161,21 +161,6 @@ export const documentManifestDataTestCases = [
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         partialDocumentEvent: {
           address: sameAddress,
-          value: 0,
-        },
-      }),
-      ...defaultEvents,
-    },
-    resultComment: RESULT_COMMENTS.INVALID_EVENT_VALUE('0'),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event with a value of 0`,
-  },
-  {
-    documentManifestType,
-    events: {
-      [documentManifestType]: documentManifestTypeStub[documentManifestType]({
-        partialDocumentEvent: {
-          address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
               label: documentManifestType,
