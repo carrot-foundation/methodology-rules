@@ -16,16 +16,16 @@ The CDM_CODE values represent mappings to waste types according to the Clean Dev
 
 The CDM codes follow this classification structure:
 
-| CDM_CODE | Description                                                 |
-| -------- | ----------------------------------------------------------- |
-| 8.1      | Wood and wood products                                      |
-| 8.2      | Pulp, paper and cardboard (other than sludge)               |
-| 8.3      | Food, food waste, beverages and tobacco (other than sludge) |
-| 8.4      | Textiles                                                    |
-| 8.5      | Garden, yard and park waste                                 |
-| 8.6      | Glass, plastic, metal, other inert waste                    |
-| 8.7      | Others not classified above                                 |
-| 8.7 (A)  | EFB similar to Garden, yard and park waste                  |
-| 8.7 (B)  | Industrial Sludge                                           |
-| 8.7 (C)  | Domestic Sludge                                             |
-| 8.7 (D)  | Others (if organic)                                         |
+| CDM_CODE | Description                                   |
+| -------- | --------------------------------------------- |
+| 8.1      | Wood and Wood Products                        |
+| 8.2      | Pulp, paper and cardboard (other than sludge) |
+| 8.3      | Food, Food Waste and Beverages                |
+| 8.4      | Textiles                                      |
+| 8.5      | Garden, Yard and Park Waste                   |
+| 8.6      | Glass, plastic, metal, other inert waste      |
+| 8.7      | Others not classified above                   |
+| 8.7 (A)  | EFB similar to Garden, Yard and Park Waste    |
+| 8.7 (B)  | Industrial Sludge                             |
+| 8.7 (C)  | Domestic Sludge                               |
+| 8.7 (D)  | Others (if organic)                           |
