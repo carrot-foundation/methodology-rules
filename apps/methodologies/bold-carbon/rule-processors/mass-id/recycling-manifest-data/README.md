@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates recycling manifest events in MassID documents, ensuring they contain required attributes (document number, document type, issue date) and proper attachments. The rule validates that issue dates are in DATE format, that the recycling manifest event address matches the recycler event address, and that either a recycling manifest attachment or an exemption justification is provided.
 
 ## 📂 Implementation
 

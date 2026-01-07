@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates local waste classification for recyclers in Brazil. The rule checks that both the local waste classification ID and description are provided, and that they match a valid IBAMA code from the Brazilian List of Solid Waste. The classification ID and description must correspond to an accepted IBAMA code in the methodology's classification constants.
 
 ## 📂 Implementation
 

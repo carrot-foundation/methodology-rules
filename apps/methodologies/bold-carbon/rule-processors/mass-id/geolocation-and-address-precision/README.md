@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that event addresses for all participants (integrator, hauler, recycler, processor, waste generator) are within 2000 meters of their accredited addresses. If GPS geolocation data is provided in events, it must also be within 2000 meters of the accredited address. The rule ensures geographic consistency between declared event locations and participant accreditations.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates vehicle identification in the PICK_UP event. The rule ensures that a valid vehicle type is provided, and that the appropriate identification method is used: license plate for most vehicle types (truck, boat, etc.), description for "OTHERS" type, or no identification required for bicycle, cart, or sludge pipes. License plates must be in a valid format.
 
 ## 📂 Implementation
 

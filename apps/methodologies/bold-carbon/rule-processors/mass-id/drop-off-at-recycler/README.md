@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates that the DROP_OFF event includes a receiving operator identifier and that the drop-off address matches the recycler event address. The rule ensures proper tracking of waste delivery to recycling facilities by verifying both the operator identification and address consistency.
 
 ## 📂 Implementation
 
