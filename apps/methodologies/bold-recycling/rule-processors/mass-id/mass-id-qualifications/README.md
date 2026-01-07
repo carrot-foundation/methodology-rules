@@ -1,6 +1,6 @@
 <div align="center">
 
-# Mass Definition
+# Mass ID Qualifications
 
 Methodology: **BOLD-RECYCLING**
 
@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that the MassID document has the correct qualifications: category must be "MassID", type must be "Organic", measurement unit must be "kg", current value must be greater than 0, and subtype must be a valid organic waste subtype from the allowed enumeration values.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that the RECYCLED event occurred on or after the first day of the previous year (January 1st) in UTC time. The rule ensures that only recent recycling events are eligible for credit generation, preventing the use of historical data that may not meet current methodology requirements.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that the time between DROP_OFF and RECYCLED events is within the acceptable range of 60-180 days for composting cycles. The rule calculates the difference in days between these two events and ensures it falls within the specified timeframe to maintain proper composting cycle validation.
 
 ## 📂 Implementation
 
