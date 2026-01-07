@@ -1,6 +1,6 @@
 <div align="center">
 
-# Mtr Reason Dismissal
+# MTR Reason Dismissal
 
 Methodology: **BOLD**
 
@@ -14,7 +14,7 @@ If the MTR does not exist for the OPEN event, check if the justification field f
 
 ## 📂 Implementation
 
-- **[Last Version Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/mtr-reason-dismissal)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/mtr-reason-dismissal)**
 
 ## 👥 Contributors
 

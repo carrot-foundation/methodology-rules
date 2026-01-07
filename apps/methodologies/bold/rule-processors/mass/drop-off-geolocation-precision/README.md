@@ -12,11 +12,11 @@ Methodology: **BOLD**
 
 Ensure that the address of the 'MOVE' event, with 'move-type' declared as 'Drop-off', is the same address as the participant's accreditation process, and consider a radius of 2km as the limit margin of accuracy between the approved and reported geolocations either at the address or in the 'gps-app' fields declared in the metadata.
 
-### 📂 Implementation
+## 📂 Implementation
 
-- **[Last Version Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/drop-off-geolocation-precision)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/drop-off-geolocation-precision)**
 
-### 👥 Contributors
+## 👥 Contributors
 
 [![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
 [![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
