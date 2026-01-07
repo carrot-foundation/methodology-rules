@@ -14,7 +14,7 @@ Perform the function [net cargo weight = vehicle gross weight - vehicle tare] an
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/net-weight-verification)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/net-weight-verification/README.md)**
 
 ## 👥 Contributors
 

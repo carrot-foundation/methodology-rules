@@ -14,7 +14,7 @@ In the case of the vehicle type indicated as 'Other' in any event, when the 'mov
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/vehicle-description)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-description/README.md)**
 
 ## 👥 Contributors
 

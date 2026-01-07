@@ -14,7 +14,7 @@ Check if the document value is greater than 0
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/document-value)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-value/README.md)**
 
 ## 👥 Contributors
 

@@ -14,7 +14,7 @@ Verify if the address of the participant identified in the MOVE event with 'move
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/same-recycler-and-drop-off-addresses)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/same-recycler-and-drop-off-addresses/README.md)**
 
 ## 👥 Contributors
 

@@ -14,7 +14,7 @@ Ensure there is one and only one actor identified as RECYCLER.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/recycler-actor)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/recycler-actor/README.md)**
 
 ## 👥 Contributors
 

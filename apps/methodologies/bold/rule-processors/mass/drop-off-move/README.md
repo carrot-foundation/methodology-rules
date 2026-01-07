@@ -14,7 +14,7 @@ Confirm if at least one MOVE event has the 'move-type' metadata field declared a
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/drop-off-move)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/drop-off-move/README.md)**
 
 ## 👥 Contributors
 

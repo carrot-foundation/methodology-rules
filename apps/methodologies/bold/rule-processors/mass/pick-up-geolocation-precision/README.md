@@ -14,7 +14,7 @@ Ensure that the address of an event whose `move-type` is **Pick-up** matches the
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/pick-up-geolocation-precision)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/pick-up-geolocation-precision/README.md)**
 
 ## 👥 Contributors
 

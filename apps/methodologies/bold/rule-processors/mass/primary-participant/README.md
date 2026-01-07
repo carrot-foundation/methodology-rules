@@ -14,7 +14,7 @@ Check if the participant declared as SOURCE is the same participant listed as th
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/primary-participant)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/primary-participant/README.md)**
 
 ## 👥 Contributors
 

@@ -14,7 +14,7 @@ Verify if the addresses declared for the SOURCE type actor and the Primary Parti
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/primary-participant-address)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/primary-participant-address/README.md)**
 
 ## 👥 Contributors
 

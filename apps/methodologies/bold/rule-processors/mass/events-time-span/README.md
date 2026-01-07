@@ -14,7 +14,7 @@ Verify if the time interval between the Event with the metadata 'move-type' equa
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/events-time-span)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/events-time-span/README.md)**
 
 ## 👥 Contributors
 

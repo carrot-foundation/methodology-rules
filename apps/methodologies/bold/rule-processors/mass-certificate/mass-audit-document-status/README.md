@@ -14,7 +14,7 @@ Verify if all mass audit documents that make up the mass certificate have an app
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document-status)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document-status/README.md)**
 
 ## 👥 Contributors
 

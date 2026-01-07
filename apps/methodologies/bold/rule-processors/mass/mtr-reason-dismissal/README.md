@@ -14,7 +14,7 @@ If the MTR does not exist for the OPEN event, check if the justification field f
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/mtr-reason-dismissal)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mtr-reason-dismissal/README.md)**
 
 ## 👥 Contributors
 

@@ -14,7 +14,7 @@ In an event, when there is a report identified as CDF, verify if the report numb
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/cdf-fields)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-fields/README.md)**
 
 ## 👥 Contributors
 

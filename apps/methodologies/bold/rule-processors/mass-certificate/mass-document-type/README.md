@@ -14,7 +14,7 @@ Verify if all masses that make up the mass certificate have 'Organic' declared i
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-document-type)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-document-type/README.md)**
 
 ## 👥 Contributors
 

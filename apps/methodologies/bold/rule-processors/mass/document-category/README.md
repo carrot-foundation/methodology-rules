@@ -14,7 +14,7 @@ Check if the document category is declared as 'Mass'.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/document-category)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-category/README.md)**
 
 ## 👥 Contributors
 

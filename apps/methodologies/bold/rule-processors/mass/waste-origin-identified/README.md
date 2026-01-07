@@ -14,7 +14,7 @@ Check if the mass origin identification field is declared as true or false.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/waste-origin-identified)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/waste-origin-identified/README.md)**
 
 ## 👥 Contributors
 

@@ -14,7 +14,7 @@ Verify if the internal driver identification is declared in an event when the 'm
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/driver-internal-id)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/driver-internal-id/README.md)**
 
 ## 👥 Contributors
 

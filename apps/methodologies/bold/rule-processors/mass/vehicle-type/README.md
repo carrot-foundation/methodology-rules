@@ -14,7 +14,7 @@ Check if the vehicle type is identified in events when the 'move-type' is identi
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/vehicle-type)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-type/README.md)**
 
 ## 👥 Contributors
 

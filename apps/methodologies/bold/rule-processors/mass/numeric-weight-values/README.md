@@ -14,7 +14,7 @@ Verify if all the values declared in a MOVE event, with the 'move-type' declared
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/numeric-weight-values)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/numeric-weight-values/README.md)**
 
 ## 👥 Contributors
 

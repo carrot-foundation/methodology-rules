@@ -14,7 +14,7 @@ If an MTR is declared in an event, check if the event contains a mandatory attac
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/mtr-attachment-verification)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mtr-attachment-verification/README.md)**
 
 ## 👥 Contributors
 

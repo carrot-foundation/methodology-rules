@@ -14,7 +14,7 @@ If the CDF exists for the END event, check if there is an attachment named 'CDF'
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-name)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-name/README.md)**
 
 ## 👥 Contributors
 

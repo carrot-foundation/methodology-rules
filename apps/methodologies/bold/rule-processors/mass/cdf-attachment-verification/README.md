@@ -14,7 +14,7 @@ If a CDF is declared in an event, check if the event contains a mandatory attach
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-verification)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-attachment-verification/README.md)**
 
 ## 👥 Contributors
 

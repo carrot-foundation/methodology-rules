@@ -14,7 +14,7 @@ In an event, when there is a report identified as CDF, verify if the declared ad
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/cdf-address)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-address/README.md)**
 
 ## 👥 Contributors
 

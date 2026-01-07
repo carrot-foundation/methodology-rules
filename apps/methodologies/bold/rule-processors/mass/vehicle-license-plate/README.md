@@ -14,7 +14,7 @@ When the vehicle type is different from 'Sludge Pipes', 'Cart', or 'Bicycle', ch
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/vehicle-license-plate)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/vehicle-license-plate/README.md)**
 
 ## 👥 Contributors
 

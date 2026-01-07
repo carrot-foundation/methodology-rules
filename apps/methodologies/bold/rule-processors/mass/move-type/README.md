@@ -14,7 +14,7 @@ Verify if the 'move-type' metadata field is declared in all events labeled as MO
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/move-type)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/move-type/README.md)**
 
 ## 👥 Contributors
 

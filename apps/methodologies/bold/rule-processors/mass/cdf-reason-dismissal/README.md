@@ -14,7 +14,7 @@ If the CDF does not exist for any event, check if the justification field for di
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/cdf-reason-dismissal)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/cdf-reason-dismissal/README.md)**
 
 ## 👥 Contributors
 

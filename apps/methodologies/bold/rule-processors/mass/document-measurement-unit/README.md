@@ -14,7 +14,7 @@ Check if the unit of measurement declared in the document is kg
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/document-measurement-unit)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-measurement-unit/README.md)**
 
 ## 👥 Contributors
 

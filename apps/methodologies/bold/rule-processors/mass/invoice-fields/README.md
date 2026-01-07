@@ -14,7 +14,7 @@ Check, in a MOVE event, when there is metadata declared as 'invoice number', if 
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass/invoice-fields)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/invoice-fields/README.md)**
 
 ## 👥 Contributors
 

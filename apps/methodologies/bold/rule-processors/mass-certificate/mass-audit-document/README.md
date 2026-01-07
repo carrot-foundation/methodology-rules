@@ -14,7 +14,7 @@ Check if all mass audit documents that make up the mass certificate are linked t
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass-certificate/mass-audit-document/README.md)**
 
 ## 👥 Contributors
 

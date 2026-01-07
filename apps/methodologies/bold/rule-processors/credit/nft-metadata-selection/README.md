@@ -14,7 +14,7 @@ Collect and aggregate information that is added to the NFT metadata.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/apps/methodologies/bold/rule-processors/credit/nft-metadata-selection)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/credit/nft-metadata-selection/README.md)**
 
 ## 👥 Contributors
 
