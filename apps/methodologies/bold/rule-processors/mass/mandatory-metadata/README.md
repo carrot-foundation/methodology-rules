@@ -14,7 +14,7 @@ Check if at least one 'OPEN' or 'MOVE' event has the 'move-type' metadata field 
 
 ## 📂 Implementation
 
-- **[Last Version Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/mandatory-metadata)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/mandatory-metadata/README.md)**
 
 ## 👥 Contributors
 

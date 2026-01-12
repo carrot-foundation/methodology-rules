@@ -12,11 +12,11 @@ Methodology: **BOLD**
 
 Check if the document value is greater than 0
 
-### 📂 Implementation
+## 📂 Implementation
 
-- **[Last Version Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/e4b1c8c7f3a717c764f3d1da08638b5cd2e6e423/apps/methodologies/bold/rule-processors/mass/document-value)**
+- **[Documentation (README.md)](https://github.com/carrot-foundation/methodology-rules/blob/main/apps/methodologies/bold/rule-processors/mass/document-value/README.md)**
 
-### 👥 Contributors
+## 👥 Contributors
 
 [![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
 [![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
