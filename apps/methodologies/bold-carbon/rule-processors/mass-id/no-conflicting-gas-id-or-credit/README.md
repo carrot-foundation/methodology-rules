@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that the MassID document is not already linked to a valid GasID certificate or credit order document. The rule also ensures there is no existing MassID audit for the same methodology that has passed or is in progress. This prevents duplicate credit generation from the same waste mass.
 
 ## 📂 Implementation
 

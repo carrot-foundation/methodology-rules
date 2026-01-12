@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates that no duplicate MassID documents exist with the same combination of drop-off event, pick-up event, recycler event, waste generator event, and vehicle license plate. The rule queries the audit API to find similar MassIDs and ensures that any duplicates found are cancelled. If non-cancelled duplicates exist, the validation fails.
 
 ## 📂 Implementation
 

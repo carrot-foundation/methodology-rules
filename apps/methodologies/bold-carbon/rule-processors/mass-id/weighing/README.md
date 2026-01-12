@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates weighing events in MassID documents, including event values, container types, capture methods, scale types, and scale ticket verification when required by recycler accreditation. The rule supports both single-step and two-step weighing processes, validates net weight calculations, and ensures all mandatory weighing fields are present and correctly formatted.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates hauler identification based on the vehicle type in the PICK_UP event. For most vehicle types (truck, boat, etc.), a hauler actor event is required. For certain vehicle types (sludge pipes, cart), the hauler is optional. The rule ensures proper identification of the transportation provider when required by the vehicle type.
 
 ## 📂 Implementation
 

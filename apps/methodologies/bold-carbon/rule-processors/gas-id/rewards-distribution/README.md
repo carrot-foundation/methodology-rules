@@ -10,11 +10,11 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Calculates rewards rights, in USDC, for participants that contributed to the Circular Economy cycle in GasID certificate documents. The rule distributes rewards based on predefined percentages for different actor types (waste generator, recycler, hauler, processor, integrator, network, methodology author, methodology developer) according to the waste type and methodology configuration.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id-certificate/src/rewards-distribution/src/rewards-distribution.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src/rewards-distribution.processor.ts)**
 
 ## 👥 Contributors
 

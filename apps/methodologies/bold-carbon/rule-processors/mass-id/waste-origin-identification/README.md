@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates waste origin identification in the MassID document. If the waste origin is identified (not UNIDENTIFIED), exactly one waste generator actor event must be present. If the waste origin is UNIDENTIFIED, no waste generator event should be present. The rule ensures consistency between the waste origin attribute and the presence of waste generator events.
 
 ## 📂 Implementation
 

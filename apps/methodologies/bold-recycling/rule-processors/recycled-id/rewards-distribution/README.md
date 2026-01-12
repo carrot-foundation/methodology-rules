@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Calculates rewards rights, in USDC, for participants that contributed to the Circular Economy cycle in RecycledID certificate documents. The rule distributes rewards based on predefined percentages for different actor types (waste generator, recycler, hauler, processor, integrator, network, methodology author, methodology developer) according to the waste type and methodology configuration.
 
 ## 📂 Implementation
 

@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates driver identification in the PICK_UP event. For most vehicle types, either a driver identifier or an exemption justification must be provided. For SLUDGE_PIPES vehicle type, driver identification is not required. The rule ensures that both driver identifier and exemption justification are not provided simultaneously, and that one is present when required.
 
 ## 📂 Implementation
 

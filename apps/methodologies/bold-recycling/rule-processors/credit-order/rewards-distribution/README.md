@@ -1,6 +1,6 @@
 <div align="center">
 
-# RewardsDistribution
+# Rewards Distribution
 
 Methodology: **BOLD-RECYCLING**
 
@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Calculates rewards rights, in USDC, for participants that contributed to the Circular Economy cycle in credit order documents. The rule aggregates rewards from related MassID certificates, distributes them based on predefined percentages for different actor types, and calculates the total rewards and any remainder amounts according to the methodology configuration.
 
 ## 📂 Implementation
 
