@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions <https://app.clickup.com/t/3005225/CARROT-1943> -->
+Validates that all participants in the MassID document (integrator, waste generator, hauler, recycler, processor) have valid accreditation documents. For integrator, processor, and recycler, the accreditations must have valid dates. For waste generator, dates are optional. The rule ensures no participant has multiple valid accreditations and that all required accreditations are present and active.
 
 ## 📂 Implementation
 

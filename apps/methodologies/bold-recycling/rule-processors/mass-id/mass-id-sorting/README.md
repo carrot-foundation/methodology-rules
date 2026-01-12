@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates sorting events in MassID documents, ensuring that gross weight, deducted weight, sorting factor, and event values are correctly calculated and formatted. The rule verifies that the deducted weight equals gross weight multiplied by (1 - sorting factor) within tolerance, that the document current value matches the sorting event value, and that all weight attributes are in kilogram format.
 
 ## 📂 Implementation
 

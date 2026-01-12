@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-<!-- TODO: Update README rule descriptions -->
+Validates transport manifest events in MassID documents, ensuring they contain required attributes (document number, document type, issue date) and proper attachments. For recyclers in Brazil, the document type must be "MTR". The rule also validates that issue dates are in DATE format and that either a transport manifest attachment or an exemption justification is provided.
 
 ## 📂 Implementation
 
