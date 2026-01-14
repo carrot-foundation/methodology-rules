@@ -159,6 +159,7 @@ export enum MassIdOrganicSubtype {
   FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
   GARDEN_YARD_AND_PARK_WASTE = 'Garden, Yard and Park Waste',
   INDUSTRIAL_SLUDGE = 'Industrial Sludge',
+  OTHERS_IF_ORGANIC = 'Others (if organic)',
   TOBACCO = 'Tobacco',
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
@@ -172,6 +173,7 @@ export enum DocumentSubtype {
   HAULER = MethodologyActorType.HAULER,
   INDUSTRIAL_SLUDGE = MassIdOrganicSubtype.INDUSTRIAL_SLUDGE,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
+  OTHERS_IF_ORGANIC = MassIdOrganicSubtype.OTHERS_IF_ORGANIC,
   PROCESS = 'Process',
   PROCESSOR = MethodologyActorType.PROCESSOR,
   RECYCLER = MethodologyActorType.RECYCLER,

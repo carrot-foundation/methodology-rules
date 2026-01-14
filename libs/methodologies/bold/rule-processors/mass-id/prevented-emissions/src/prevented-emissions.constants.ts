@@ -35,6 +35,11 @@ export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
     [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.512_684,
     [MethodologyBaseline.OPEN_AIR_DUMP]: 0.384_207,
   },
+  [MassIdOrganicSubtype.OTHERS_IF_ORGANIC]: {
+    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459_152,
+    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.940_301,
+    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.726_812,
+  },
   [MassIdOrganicSubtype.TOBACCO]: {
     [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459_152,
     [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.940_301,
