@@ -40,13 +40,12 @@ import { assert } from 'typia';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
 const ACTORS_REQUIRING_DATES = new Set([
-  MethodologyDocumentEventLabel.INTEGRATOR,
   MethodologyDocumentEventLabel.PROCESSOR,
   MethodologyDocumentEventLabel.RECYCLER,
 ]);
 
 const ACTORS_WITH_OPTIONAL_DATES = new Set([
-  MethodologyDocumentEventLabel.WASTE_GENERATOR,
+  MethodologyDocumentEventLabel.INTEGRATOR,
 ]);
 
 interface RuleSubject {
@@ -135,7 +134,6 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
             MethodologyDocumentEventLabel.INTEGRATOR,
             MethodologyDocumentEventLabel.PROCESSOR,
             MethodologyDocumentEventLabel.RECYCLER,
-            MethodologyDocumentEventLabel.WASTE_GENERATOR,
           ]),
         )
         .map((event) => [
@@ -297,7 +295,6 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
             MethodologyDocumentEventLabel.INTEGRATOR,
             MethodologyDocumentEventLabel.PROCESSOR,
             MethodologyDocumentEventLabel.RECYCLER,
-            MethodologyDocumentEventLabel.WASTE_GENERATOR,
           ]),
         )
         .map((event) => [
