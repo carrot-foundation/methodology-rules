@@ -29,6 +29,68 @@ const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
 const processorError =
   new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors();
 
+const createMultipleValidAccreditationsTestData = (
+  actorType: MassIdDocumentActorType,
+) => {
+  const massIdWithMultipleValid = new BoldStubsBuilder()
+    .createMassIdDocuments()
+    .createMassIdAuditDocuments()
+    .createMethodologyDocument()
+    .createParticipantAccreditationDocuments(
+      new Map([
+        [
+          actorType,
+          {
+            externalEventsMap: new Map([
+              [
+                ACCREDITATION_RESULT,
+                stubBoldAccreditationResultEvent({
+                  metadataAttributes: [
+                    [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
+                    [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+                    [
+                      ACCREDITATION_STATUS,
+                      DocumentEventAccreditationStatus.APPROVED,
+                    ],
+                  ],
+                }),
+              ],
+            ]),
+          },
+        ],
+      ]),
+    )
+    .build();
+
+  const originalAccreditation =
+    massIdWithMultipleValid.participantsAccreditationDocuments.get(actorType)!;
+
+  const secondAccreditation = stubDocument(
+    {
+      category: DocumentCategory.METHODOLOGY,
+      externalEvents: [
+        stubBoldAccreditationResultEvent({
+          metadataAttributes: [
+            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+            [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+          ],
+        }),
+      ],
+      primaryParticipant: originalAccreditation.primaryParticipant,
+      subtype: actorType,
+      type: DocumentType.PARTICIPANT_ACCREDITATION,
+    },
+    false, // stubExternalEvents = false to avoid random events
+  );
+
+  return {
+    massIdWithMultipleValid,
+    originalAccreditation,
+    secondAccreditation,
+  };
+};
+
 const massIdAuditWithAccreditationsAndVerifications = new BoldStubsBuilder()
   .createMassIdDocuments()
   .createMassIdAuditDocuments()
@@ -146,115 +208,16 @@ const massIdWithWasteGeneratorInvalidResult = new BoldStubsBuilder()
   )
   .build();
 
-const massIdWithWasteGeneratorMultipleValid = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
-  .createMethodologyDocument()
-  .createParticipantAccreditationDocuments(
-    new Map([
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: new Map([
-            [
-              ACCREDITATION_RESULT,
-              stubBoldAccreditationResultEvent({
-                metadataAttributes: [
-                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
-                  [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
-                  [
-                    ACCREDITATION_STATUS,
-                    DocumentEventAccreditationStatus.APPROVED,
-                  ],
-                ],
-              }),
-            ],
-          ]),
-        },
-      ],
-    ]),
-  )
-  .build();
+const {
+  massIdWithMultipleValid: massIdWithWasteGeneratorMultipleValid,
+  secondAccreditation: wasteGeneratorSecondAccreditation,
+} = createMultipleValidAccreditationsTestData(WASTE_GENERATOR);
 
-const wasteGeneratorOriginalAccreditation =
-  massIdWithWasteGeneratorMultipleValid.participantsAccreditationDocuments.get(
-    WASTE_GENERATOR,
-  )!;
-
-// Create a second valid accreditation document with same participant but different ID
-// Use stubDocument with stubExternalEvents = false to avoid random events
-const wasteGeneratorSecondAccreditation = stubDocument(
-  {
-    category: DocumentCategory.METHODOLOGY,
-    externalEvents: [
-      stubBoldAccreditationResultEvent({
-        metadataAttributes: [
-          [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-          [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-          [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
-        ],
-      }),
-    ],
-    primaryParticipant: wasteGeneratorOriginalAccreditation.primaryParticipant,
-    subtype: WASTE_GENERATOR,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
-  },
-  false, // stubExternalEvents = false to avoid random events
-);
-
-const massIdWithProcessorMultipleValid = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
-  .createMethodologyDocument()
-  .createParticipantAccreditationDocuments(
-    new Map([
-      [
-        PROCESSOR,
-        {
-          externalEventsMap: new Map([
-            [
-              ACCREDITATION_RESULT,
-              stubBoldAccreditationResultEvent({
-                metadataAttributes: [
-                  [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
-                  [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
-                  [
-                    ACCREDITATION_STATUS,
-                    DocumentEventAccreditationStatus.APPROVED,
-                  ],
-                ],
-              }),
-            ],
-          ]),
-        },
-      ],
-    ]),
-  )
-  .build();
-
-const processorOriginalAccreditation =
-  massIdWithProcessorMultipleValid.participantsAccreditationDocuments.get(
-    PROCESSOR,
-  )!;
-
-const processorSecondAccreditation = stubDocument(
-  {
-    category: DocumentCategory.METHODOLOGY,
-    externalEvents: [
-      stubBoldAccreditationResultEvent({
-        metadataAttributes: [
-          [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-          [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-          [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
-        ],
-      }),
-    ],
-    primaryParticipant: processorOriginalAccreditation.primaryParticipant,
-    subtype: PROCESSOR,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
-  },
-  false, // stubExternalEvents = false to avoid random events
-);
+const {
+  massIdWithMultipleValid: massIdWithProcessorMultipleValid,
+  originalAccreditation: processorOriginalAccreditation,
+  secondAccreditation: processorSecondAccreditation,
+} = createMultipleValidAccreditationsTestData(PROCESSOR);
 
 // Create a participant that has both PROCESSOR and RECYCLER roles
 const sharedParticipant = stubParticipant({ type: PROCESSOR });
