@@ -289,7 +289,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
     }
 
-    // If verification document exists but address is missing, fail validation
     if (isNil(accreditedAddress)) {
       return [
         {
@@ -433,7 +432,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     );
     const pickUpAndDropOffEvents = this.extractRequiredEvents(massIdDocument);
 
-    // Find Recycler Accreditation document
     const recyclerAccreditationDocument = documents.accreditationDocuments.find(
       (document) => {
         const relation = mapDocumentRelation(document);
