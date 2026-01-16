@@ -248,7 +248,7 @@ describe('Approved Exception Helpers', () => {
       expect(isApprovedExceptionValid(exception)).toBe(false);
     });
 
-    it('should return false when Valid Until date is today (edge case - should be invalid)', () => {
+    it('should return true when Valid Until date is today (edge case - not yet expired)', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
@@ -262,16 +262,7 @@ describe('Approved Exception Helpers', () => {
         'Valid Until': new Date().toISOString(),
       };
 
-      // The function uses isAfter which checks if current date is after validUntil
-      // If validUntil is today, isAfter(new Date(), validUntil) should be false
-      // So the exception should be valid (not expired)
-      // But let's test the actual behavior
-
-      const result = isApprovedExceptionValid(exception);
-      // Since we're comparing with isAfter, if validUntil is exactly now,
-      // it should be valid (not expired yet)
-
-      expect(typeof result).toBe('boolean');
+      expect(isApprovedExceptionValid(exception)).toBe(true);
     });
 
     it('should return true when Valid Until date is exactly one day in the future', () => {
