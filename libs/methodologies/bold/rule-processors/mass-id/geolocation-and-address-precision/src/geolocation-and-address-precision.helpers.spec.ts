@@ -100,10 +100,31 @@ const createMassIdAuditDocumentWithActor = (
   actorType: MassIdDocumentActorType,
   participantId: string,
   relatedDocumentId?: string,
-) =>
-  stubBoldMassIdAuditDocument({
+  options?: {
+    createWithUndefinedRelatedDocument?: boolean;
+    relatedDocument?: { documentId: string };
+  },
+) => {
+  const shouldCreateActor =
+    relatedDocumentId !== undefined ||
+    options?.createWithUndefinedRelatedDocument === true ||
+    options?.relatedDocument !== undefined;
+
+  let relatedDocument: undefined | { documentId: string };
+
+  if (options?.createWithUndefinedRelatedDocument === true) {
+    relatedDocument = undefined;
+  } else if (options?.relatedDocument) {
+    relatedDocument = options.relatedDocument;
+  } else if (relatedDocumentId) {
+    relatedDocument = { documentId: relatedDocumentId };
+  } else {
+    relatedDocument = undefined;
+  }
+
+  return stubBoldMassIdAuditDocument({
     externalEventsMap: new Map(
-      relatedDocumentId
+      shouldCreateActor
         ? [
             [
               'ACTOR',
@@ -111,13 +132,14 @@ const createMassIdAuditDocumentWithActor = (
                 label: actorType,
                 name: DocumentEventName.ACTOR,
                 participant: stubParticipant({ id: participantId }),
-                relatedDocument: { documentId: relatedDocumentId },
+                relatedDocument,
               }),
             ],
           ]
         : [],
     ),
   });
+};
 
 describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getAccreditedAddressByParticipantIdAndActorType', () => {
@@ -184,19 +206,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map([
-          [
-            'ACTOR',
-            stubDocumentEvent({
-              label: actorType,
-              name: DocumentEventName.ACTOR,
-              participant: stubParticipant({ id: participantId }),
-              relatedDocument: undefined,
-            }),
-          ],
-        ]),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        undefined,
+        { createWithUndefinedRelatedDocument: true },
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -306,10 +321,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         DocumentEventName.DROP_OFF,
       );
 
-      expect(result).toEqual({
-        latitudeException: undefined,
-        longitudeException: undefined,
-      });
+      expect(result.latitudeException).toBeUndefined();
+      expect(result.longitudeException).toBeUndefined();
     });
 
     it('should return undefined exceptions when document has no ACCREDITATION_RESULT event', () => {
@@ -322,10 +335,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         DocumentEventName.DROP_OFF,
       );
 
-      expect(result).toEqual({
-        latitudeException: undefined,
-        longitudeException: undefined,
-      });
+      expect(result.latitudeException).toBeUndefined();
+      expect(result.longitudeException).toBeUndefined();
     });
 
     it('should return undefined exceptions when document has no approved exceptions', () => {
@@ -345,10 +356,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         DocumentEventName.DROP_OFF,
       );
 
-      expect(result).toEqual({
-        latitudeException: undefined,
-        longitudeException: undefined,
-      });
+      expect(result.latitudeException).toBeUndefined();
+      expect(result.longitudeException).toBeUndefined();
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for DROP_OFF', () => {
