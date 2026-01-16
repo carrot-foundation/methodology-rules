@@ -42,32 +42,33 @@ const {
 
 const createWasteGeneratorVerificationDocument = (
   businessSize: DocumentEventAttributeValue,
-): Document => ({
-  ...new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
-    .createMethodologyDocument()
-    .createParticipantAccreditationDocuments(
-      new Map([
-        [
-          WASTE_GENERATOR_SUBTYPE,
-          {
-            externalEventsMap: {
-              [ONBOARDING_DECLARATION]:
-                stubDocumentEventWithMetadataAttributes(
-                  {
-                    name: ONBOARDING_DECLARATION,
-                  },
-                  [[BUSINESS_SIZE_DECLARATION, businessSize]],
-                ),
+): Document =>
+  ({
+    ...new BoldStubsBuilder()
+      .createMassIdDocuments()
+      .createMassIdAuditDocuments()
+      .createMethodologyDocument()
+      .createParticipantAccreditationDocuments(
+        new Map([
+          [
+            WASTE_GENERATOR_SUBTYPE,
+            {
+              externalEventsMap: {
+                [ONBOARDING_DECLARATION]:
+                  stubDocumentEventWithMetadataAttributes(
+                    {
+                      name: ONBOARDING_DECLARATION,
+                    },
+                    [[BUSINESS_SIZE_DECLARATION, businessSize]],
+                  ),
+              },
             },
-          },
-        ],
-      ]),
-    )
-    .build()
-    .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
-} as Document);
+          ],
+        ]),
+      )
+      .build()
+      .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
+  }) as Document;
 
 const DEFAULT_REWARDS = {
   [COMMUNITY_IMPACT_POOL]: '0',
