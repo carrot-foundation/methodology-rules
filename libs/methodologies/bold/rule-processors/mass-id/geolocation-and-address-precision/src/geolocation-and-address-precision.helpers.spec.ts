@@ -22,6 +22,7 @@ import {
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
   getGpsExceptionsFromRecyclerAccreditation,
+  hasVerificationDocument,
 } from './geolocation-and-address-precision.helpers';
 
 const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = DocumentEventName;
@@ -311,6 +312,95 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       const result = getEventGpsGeolocation(event);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('hasVerificationDocument', () => {
+    it('should return true when verification document exists', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.WASTE_GENERATOR;
+
+      const accreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        accreditationDocument.id,
+      );
+
+      const result = hasVerificationDocument(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when actor event is not found', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.RECYCLER;
+
+      const accreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map(),
+      });
+
+      const result = hasVerificationDocument(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when accreditation document id is missing in actor event', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.PROCESSOR;
+
+      const accreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        undefined,
+        { createWithUndefinedRelatedDocument: true },
+      );
+
+      const result = hasVerificationDocument(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [accreditationDocument],
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should return false when accreditation document is not found', () => {
+      const participantId = faker.string.uuid();
+      const actorType = MassIdDocumentActorType.HAULER;
+
+      const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
+
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        faker.string.uuid(),
+      );
+
+      const result = hasVerificationDocument(
+        massIdAuditDocument,
+        participantId,
+        actorType,
+        [unrelatedAccreditationDocument],
+      );
+
+      expect(result).toBe(false);
     });
   });
 

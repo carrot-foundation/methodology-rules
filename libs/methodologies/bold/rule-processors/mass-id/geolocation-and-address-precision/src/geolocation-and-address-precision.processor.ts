@@ -43,6 +43,7 @@ import {
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
   getGpsExceptionsFromRecyclerAccreditation,
+  hasVerificationDocument,
   shouldSkipGpsValidation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -51,6 +52,8 @@ const { DROP_OFF, PICK_UP } = DocumentEventName;
 const MAX_ALLOWED_DISTANCE = 2000;
 
 export interface RuleSubject {
+  accreditationDocuments: Document[];
+  massIdAuditDocument: Document;
   participantsAddressData: Map<MassIdDocumentActorType, ParticipantAddressData>;
   recyclerAccreditationDocument: Document | undefined;
 }
@@ -61,6 +64,7 @@ interface ParticipantAddressData {
   eventAddress: MethodologyAddress;
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
   gpsGeolocation: Geolocation | undefined;
+  participantId: string;
 }
 
 export const RESULT_COMMENTS = {
@@ -200,6 +204,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           | DocumentEventName.DROP_OFF
           | DocumentEventName.PICK_UP,
         gpsGeolocation: getEventGpsGeolocation(event),
+        participantId: event.participant.id,
       });
     }
 
@@ -252,22 +257,39 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     actorType: MassIdDocumentActorType,
     addressData: ParticipantAddressData,
     recyclerAccreditationDocument: Document | undefined,
+    massIdAuditDocument: Document,
+    accreditationDocuments: Document[],
   ): EvaluateResultOutput[] {
-    const { accreditedAddress, eventAddress, eventName, gpsGeolocation } =
-      addressData;
+    const {
+      accreditedAddress,
+      eventAddress,
+      eventName,
+      gpsGeolocation,
+      participantId,
+    } = addressData;
 
-    if (
-      actorType === MassIdDocumentActorType.WASTE_GENERATOR &&
-      isNil(accreditedAddress)
-    ) {
-      return [
-        {
-          resultComment: RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(actorType),
-          resultStatus: RuleOutputStatus.PASSED,
-        },
-      ];
+    if (actorType === MassIdDocumentActorType.WASTE_GENERATOR) {
+      const verificationDocumentExists: boolean = Boolean(
+        hasVerificationDocument(
+          massIdAuditDocument,
+          participantId,
+          actorType,
+          accreditationDocuments,
+        ),
+      );
+
+      if (!verificationDocumentExists || isNil(accreditedAddress)) {
+        return [
+          {
+            resultComment:
+              RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(actorType),
+            resultStatus: RuleOutputStatus.PASSED,
+          },
+        ];
+      }
     }
 
+    // If verification document exists but address is missing, fail validation
     if (isNil(accreditedAddress)) {
       return [
         {
@@ -360,6 +382,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private evaluateResult({
+    accreditationDocuments,
+    massIdAuditDocument,
     participantsAddressData,
     recyclerAccreditationDocument,
   }: RuleSubject): EvaluateResultOutput {
@@ -373,6 +397,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         actorType,
         addressData,
         recyclerAccreditationDocument,
+        massIdAuditDocument,
+        accreditationDocuments,
       );
 
       actorResults.set(actorType, results);
@@ -420,6 +446,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     );
 
     return {
+      accreditationDocuments: documents.accreditationDocuments,
+      massIdAuditDocument,
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
         massIdDocument,

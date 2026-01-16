@@ -34,6 +34,36 @@ import {
   isGpsLongitudeApprovedException,
 } from './geolocation-and-address-precision.typia';
 
+export const hasVerificationDocument = (
+  massIdAuditDocument: Document,
+  participantId: string,
+  actorType: MassIdDocumentActorType,
+  accreditationDocuments: Document[],
+): boolean => {
+  const actorEvent = massIdAuditDocument.externalEvents?.find(
+    (event) =>
+      isActorEvent(event) &&
+      eventHasLabel(event, actorType) &&
+      event.participant.id === participantId,
+  );
+
+  if (isNil(actorEvent)) {
+    return false;
+  }
+
+  const accreditationDocumentId = actorEvent.relatedDocument?.documentId;
+
+  if (isNil(accreditationDocumentId)) {
+    return false;
+  }
+
+  const participantAccreditationDocument = accreditationDocuments.find(
+    (document) => document.id === accreditationDocumentId,
+  );
+
+  return !isNil(participantAccreditationDocument);
+};
+
 export const getAccreditedAddressByParticipantIdAndActorType = (
   massIdAuditDocument: Document,
   participantId: string,
