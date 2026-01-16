@@ -28,6 +28,97 @@ const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = DocumentEventName;
 const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
+const createGpsException = (
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  attributeName:
+    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
+    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+  reason: string,
+  exceptionType: string = MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+) => ({
+  'Attribute Location': {
+    Asset: {
+      Category: DocumentCategory.MASS_ID,
+    },
+    Event: eventName.toString(),
+  },
+  'Attribute Name': attributeName.toString(),
+  'Exception Type': exceptionType,
+  Reason: reason,
+});
+
+const createGpsExceptions = (
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  includeLatitude = true,
+  includeLongitude = true,
+  exceptionType?: string,
+) => {
+  const exceptions = [];
+
+  if (includeLatitude) {
+    exceptions.push(
+      createGpsException(
+        eventName,
+        CAPTURED_GPS_LATITUDE,
+        `GPS latitude exception for ${eventName}`,
+        exceptionType,
+      ),
+    );
+  }
+
+  if (includeLongitude) {
+    exceptions.push(
+      createGpsException(
+        eventName,
+        CAPTURED_GPS_LONGITUDE,
+        `GPS longitude exception for ${eventName}`,
+        exceptionType,
+      ),
+    );
+  }
+
+  return exceptions;
+};
+
+const createDocumentWithExceptions = (
+  exceptions: Array<ReturnType<typeof createGpsException>>,
+) =>
+  stubBoldAccreditationDocument({
+    externalEventsMap: new Map([
+      [
+        ACCREDITATION_RESULT,
+        stubBoldAccreditationResultEvent({
+          metadataAttributes: [
+            [APPROVED_EXCEPTIONS, exceptions],
+          ] as MetadataAttributeParameter[],
+        }),
+      ],
+    ]),
+  });
+
+const createMassIdAuditDocumentWithActor = (
+  actorType: MassIdDocumentActorType,
+  participantId: string,
+  relatedDocumentId?: string,
+) =>
+  stubBoldMassIdAuditDocument({
+    externalEventsMap: new Map(
+      relatedDocumentId
+        ? [
+            [
+              'ACTOR',
+              stubDocumentEvent({
+                label: actorType,
+                name: DocumentEventName.ACTOR,
+                participant: stubParticipant({ id: participantId }),
+                relatedDocument: { documentId: relatedDocumentId },
+              }),
+            ],
+          ]
+        : [],
+    ),
+  });
+
 describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getAccreditedAddressByParticipantIdAndActorType', () => {
     it('should return the accredited address by participant id and actor type', () => {
@@ -47,19 +138,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map([
-          [
-            'ACTOR',
-            stubDocumentEvent({
-              label: actorType,
-              name: DocumentEventName.ACTOR,
-              participant: stubParticipant({ id: participantId }),
-              relatedDocument: { documentId: accreditationDocument.id },
-            }),
-          ],
-        ]),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        accreditationDocument.id,
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -80,9 +163,10 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map(),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -100,19 +184,10 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map([
-          [
-            'ACTOR',
-            stubDocumentEvent({
-              label: actorType,
-              name: DocumentEventName.ACTOR,
-              participant: stubParticipant({ id: participantId }),
-              relatedDocument: undefined,
-            }),
-          ],
-        ]),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -130,19 +205,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map([
-          [
-            'ACTOR',
-            stubDocumentEvent({
-              label: actorType,
-              name: DocumentEventName.ACTOR,
-              participant: stubParticipant({ id: participantId }),
-              relatedDocument: { documentId: faker.string.uuid() },
-            }),
-          ],
-        ]),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        faker.string.uuid(),
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -162,19 +229,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         externalEventsMap: new Map(),
       });
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
-        externalEventsMap: new Map([
-          [
-            'ACTOR',
-            stubDocumentEvent({
-              label: actorType,
-              name: DocumentEventName.ACTOR,
-              participant: stubParticipant({ id: participantId }),
-              relatedDocument: { documentId: accreditationDocument.id },
-            }),
-          ],
-        ]),
-      });
+      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+        actorType,
+        participantId,
+        accreditationDocument.id,
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
@@ -284,45 +343,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for DROP_OFF', () => {
-      const exceptions = [
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.DROP_OFF.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS latitude exception for DROP_OFF',
-        },
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.DROP_OFF.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS longitude exception for DROP_OFF',
-        },
-      ];
-
-      const document = stubBoldAccreditationDocument({
-        externalEventsMap: new Map([
-          [
-            ACCREDITATION_RESULT,
-            stubBoldAccreditationResultEvent({
-              metadataAttributes: [
-                [APPROVED_EXCEPTIONS, exceptions],
-              ] as MetadataAttributeParameter[],
-            }),
-          ],
-        ]),
-      });
+      const exceptions = createGpsExceptions(DocumentEventName.DROP_OFF);
+      const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
@@ -340,45 +362,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for PICK_UP', () => {
-      const exceptions = [
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.PICK_UP.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS latitude exception for PICK_UP',
-        },
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.PICK_UP.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS longitude exception for PICK_UP',
-        },
-      ];
-
-      const document = stubBoldAccreditationDocument({
-        externalEventsMap: new Map([
-          [
-            ACCREDITATION_RESULT,
-            stubBoldAccreditationResultEvent({
-              metadataAttributes: [
-                [APPROVED_EXCEPTIONS, exceptions],
-              ] as MetadataAttributeParameter[],
-            }),
-          ],
-        ]),
-      });
+      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
@@ -396,45 +381,8 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return undefined for exceptions that do not match the event name', () => {
-      const exceptions = [
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.PICK_UP.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS latitude exception for PICK_UP',
-        },
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.PICK_UP.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS longitude exception for PICK_UP',
-        },
-      ];
-
-      const document = stubBoldAccreditationDocument({
-        externalEventsMap: new Map([
-          [
-            ACCREDITATION_RESULT,
-            stubBoldAccreditationResultEvent({
-              metadataAttributes: [
-                [APPROVED_EXCEPTIONS, exceptions],
-              ] as MetadataAttributeParameter[],
-            }),
-          ],
-        ]),
-      });
+      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
@@ -460,19 +408,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
           Reason: 'Tare exception (not GPS)',
         },
       ];
-
-      const document = stubBoldAccreditationDocument({
-        externalEventsMap: new Map([
-          [
-            ACCREDITATION_RESULT,
-            stubBoldAccreditationResultEvent({
-              metadataAttributes: [
-                [APPROVED_EXCEPTIONS, exceptions],
-              ] as MetadataAttributeParameter[],
-            }),
-          ],
-        ]),
-      });
+      const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
@@ -485,52 +421,26 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined for latitude when exception does not pass type guard', () => {
       const exceptions = [
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.DROP_OFF.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
-          'Exception Type': 'INVALID_TYPE',
-          Reason: 'Invalid exception type',
-        },
-        {
-          'Attribute Location': {
-            Asset: {
-              Category: DocumentCategory.MASS_ID,
-            },
-            Event: DocumentEventName.DROP_OFF.toString(),
-          },
-          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-          Reason: 'GPS longitude exception for DROP_OFF',
-        },
+        createGpsException(
+          DocumentEventName.DROP_OFF,
+          CAPTURED_GPS_LATITUDE,
+          'Invalid exception type',
+          'INVALID_TYPE',
+        ),
+        createGpsException(
+          DocumentEventName.DROP_OFF,
+          CAPTURED_GPS_LONGITUDE,
+          'GPS longitude exception for DROP_OFF',
+        ),
       ];
-
-      const document = stubBoldAccreditationDocument({
-        externalEventsMap: new Map([
-          [
-            ACCREDITATION_RESULT,
-            stubBoldAccreditationResultEvent({
-              metadataAttributes: [
-                [APPROVED_EXCEPTIONS, exceptions],
-              ] as MetadataAttributeParameter[],
-            }),
-          ],
-        ]),
-      });
+      const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
         DocumentEventName.DROP_OFF,
       );
 
-      // Latitude exception should be undefined because it doesn't pass the type guard
       expect(result.latitudeException).toBeUndefined();
-      // Longitude exception should be defined because it's valid
       expect(result.longitudeException).toBeDefined();
     });
   });
