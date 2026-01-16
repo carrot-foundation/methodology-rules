@@ -40,6 +40,35 @@ const {
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
 
+const createWasteGeneratorVerificationDocument = (
+  businessSize: DocumentEventAttributeValue,
+): Document => ({
+  ...new BoldStubsBuilder()
+    .createMassIdDocuments()
+    .createMassIdAuditDocuments()
+    .createMethodologyDocument()
+    .createParticipantAccreditationDocuments(
+      new Map([
+        [
+          WASTE_GENERATOR_SUBTYPE,
+          {
+            externalEventsMap: {
+              [ONBOARDING_DECLARATION]:
+                stubDocumentEventWithMetadataAttributes(
+                  {
+                    name: ONBOARDING_DECLARATION,
+                  },
+                  [[BUSINESS_SIZE_DECLARATION, businessSize]],
+                ),
+            },
+          },
+        ],
+      ]),
+    )
+    .build()
+    .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
+} as Document);
+
 const DEFAULT_REWARDS = {
   [COMMUNITY_IMPACT_POOL]: '0',
   [INTEGRATOR]: '8',
@@ -196,32 +225,8 @@ export const rewardsDistributionProcessorTestCases: Array<{
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
-    wasteGeneratorVerificationDocument: {
-      ...new BoldStubsBuilder()
-        .createMassIdDocuments()
-        .createMassIdAuditDocuments()
-        .createMethodologyDocument()
-        .createParticipantAccreditationDocuments(
-          new Map([
-            [
-              WASTE_GENERATOR_SUBTYPE,
-              {
-                externalEventsMap: {
-                  [ONBOARDING_DECLARATION]:
-                    stubDocumentEventWithMetadataAttributes(
-                      {
-                        name: ONBOARDING_DECLARATION,
-                      },
-                      [[BUSINESS_SIZE_DECLARATION, LARGE_BUSINESS]],
-                    ),
-                },
-              },
-            ],
-          ]),
-        )
-        .build()
-        .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
-    } as Document,
+    wasteGeneratorVerificationDocument:
+      createWasteGeneratorVerificationDocument(LARGE_BUSINESS),
   },
   {
     expectedRewards:
@@ -234,32 +239,8 @@ export const rewardsDistributionProcessorTestCases: Array<{
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
-    wasteGeneratorVerificationDocument: {
-      ...new BoldStubsBuilder()
-        .createMassIdDocuments()
-        .createMassIdAuditDocuments()
-        .createMethodologyDocument()
-        .createParticipantAccreditationDocuments(
-          new Map([
-            [
-              WASTE_GENERATOR_SUBTYPE,
-              {
-                externalEventsMap: {
-                  [ONBOARDING_DECLARATION]:
-                    stubDocumentEventWithMetadataAttributes(
-                      {
-                        name: ONBOARDING_DECLARATION,
-                      },
-                      [[BUSINESS_SIZE_DECLARATION, SMALL_BUSINESS]],
-                    ),
-                },
-              },
-            ],
-          ]),
-        )
-        .build()
-        .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
-    } as Document,
+    wasteGeneratorVerificationDocument:
+      createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
   },
 ];
 
