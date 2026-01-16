@@ -33,6 +33,7 @@ export enum DocumentEventAttributeName {
   ACCREDITATION_STATUS = 'Accreditation Status',
   APPROVED_EXCEPTIONS = 'Approved Exceptions',
   BASELINES = 'Baselines',
+  BUSINESS_SIZE_DECLARATION = 'Business Size Declaration',
   CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
   CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
   CONTAINER_CAPACITY = 'Container Capacity',
@@ -75,6 +76,8 @@ export enum DocumentEventAttributeName {
 }
 
 export enum DocumentEventAttributeValue {
+  LARGE_BUSINESS = 'Large Business',
+  SMALL_BUSINESS = 'Small Business',
   UNIDENTIFIED = 'Unidentified',
 }
 
@@ -102,6 +105,7 @@ export enum DocumentEventName {
   MONITORING_SYSTEMS_AND_EQUIPMENT = MethodologyDocumentEventName.MONITORING_SYSTEMS_AND_EQUIPMENT,
   MOVE = 'MOVE',
   NOTICE = MethodologyDocumentEventName.NOTICE,
+  ONBOARDING_DECLARATION = 'Onboarding Declaration',
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
   PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,

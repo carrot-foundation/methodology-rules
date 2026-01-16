@@ -216,6 +216,65 @@ export const getWasteGeneratorAdditionalPercentage = (
   return new BigNumber(0);
 };
 
+export const isLargeBusiness = (
+  wasteGeneratorVerificationDocument: Document,
+): boolean => {
+  const onboardingDeclarationEvent =
+    wasteGeneratorVerificationDocument.externalEvents?.find(
+      (event) =>
+        event.name === String(DocumentEventName.ONBOARDING_DECLARATION),
+    );
+
+  if (isNil(onboardingDeclarationEvent)) {
+    return true;
+  }
+
+  const businessSize = getEventAttributeValue(
+    onboardingDeclarationEvent,
+    DocumentEventAttributeName.BUSINESS_SIZE_DECLARATION,
+  );
+
+  if (isNil(businessSize)) {
+    return true;
+  }
+
+  return (
+    String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
+  );
+};
+
+export const shouldApplyLargeBusinessDiscount = (
+  wasteGeneratorVerificationDocument: Document | undefined,
+): boolean => {
+  if (isNil(wasteGeneratorVerificationDocument)) {
+    return true;
+  }
+
+  return isLargeBusiness(wasteGeneratorVerificationDocument);
+};
+
+export const applyLargeBusinessDiscount = (
+  fullPercentage: BigNumber,
+  shouldApplyDiscount: boolean,
+): BigNumber => {
+  if (shouldApplyDiscount) {
+    return fullPercentage.multipliedBy(1 - LARGE_REVENUE_BUSINESS_DISCOUNT);
+  }
+
+  return fullPercentage;
+};
+
+export const calculateCommunityImpactPoolShare = (
+  fullPercentage: BigNumber,
+  shouldApplyDiscount: boolean,
+): BigNumber => {
+  if (!shouldApplyDiscount) {
+    return new BigNumber(0);
+  }
+
+  return fullPercentage.multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
+};
+
 export const getNgoActorMassIdPercentage = (
   massIdDocument: Document,
   actorMassIdPercentage: BigNumber,
@@ -227,13 +286,21 @@ export const getNgoActorMassIdPercentage = (
     targetActors: RewardsDistributionActor[],
     targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
-): BigNumber =>
-  getWasteGeneratorFullPercentage(
+  wasteGeneratorVerificationDocument: Document | undefined,
+): BigNumber => {
+  const fullPercentage = getWasteGeneratorFullPercentage(
     massIdDocument,
     actorMassIdPercentage,
     actors,
     rewardDistributions,
-  ).multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
+  );
+
+  const shouldApplyDiscount = shouldApplyLargeBusinessDiscount(
+    wasteGeneratorVerificationDocument,
+  );
+
+  return calculateCommunityImpactPoolShare(fullPercentage, shouldApplyDiscount);
+};
 
 export const checkIfHasRequiredActorTypes = ({
   actors,
