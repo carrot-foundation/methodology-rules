@@ -249,6 +249,11 @@ describe('Approved Exception Helpers', () => {
     });
 
     it('should return true when Valid Until date is today (edge case - not yet expired)', () => {
+      const fixedDate = new Date('2024-01-15T12:00:00.000Z');
+
+      jest.useFakeTimers();
+      jest.setSystemTime(fixedDate);
+
       const exception = {
         'Attribute Location': {
           Asset: {
@@ -259,10 +264,12 @@ describe('Approved Exception Helpers', () => {
         'Attribute Name': DocumentEventAttributeName.TARE,
         'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
-        'Valid Until': new Date().toISOString(),
+        'Valid Until': fixedDate.toISOString(),
       };
 
       expect(isApprovedExceptionValid(exception)).toBe(true);
+
+      jest.useRealTimers();
     });
 
     it('should return true when Valid Until date is exactly one day in the future', () => {
