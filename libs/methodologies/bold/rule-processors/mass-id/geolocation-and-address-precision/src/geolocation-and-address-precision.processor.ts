@@ -92,7 +92,8 @@ export const RESULT_COMMENTS = {
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
-  private processorErrors = new GeolocationAndAddressPrecisionProcessorErrors();
+  private readonly processorErrors =
+    new GeolocationAndAddressPrecisionProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
