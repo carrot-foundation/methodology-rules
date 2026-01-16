@@ -1,26 +1,31 @@
 import {
+  type MetadataAttributeParameter,
   stubAddress,
   stubBoldAccreditationDocument,
+  stubBoldAccreditationResultEvent,
   stubBoldMassIdAuditDocument,
   stubBoldMassIdPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIdDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
+import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
+  getGpsExceptionsFromRecyclerAccreditation,
 } from './geolocation-and-address-precision.helpers';
 
-const { FACILITY_ADDRESS } = DocumentEventName;
-const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
+const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = DocumentEventName;
+const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 describe('GeolocationAndAddressPrecisionHelpers', () => {
@@ -223,6 +228,310 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       const result = getEventGpsGeolocation(event);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getGpsExceptionsFromRecyclerAccreditation', () => {
+    it('should return undefined exceptions when recyclerAccreditationDocument is undefined', () => {
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        undefined,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result).toEqual({
+        latitudeException: undefined,
+        longitudeException: undefined,
+      });
+    });
+
+    it('should return undefined exceptions when document has no ACCREDITATION_RESULT event', () => {
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map(),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result).toEqual({
+        latitudeException: undefined,
+        longitudeException: undefined,
+      });
+    });
+
+    it('should return undefined exceptions when document has no approved exceptions', () => {
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result).toEqual({
+        latitudeException: undefined,
+        longitudeException: undefined,
+      });
+    });
+
+    it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for DROP_OFF', () => {
+      const exceptions = [
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.DROP_OFF.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS latitude exception for DROP_OFF',
+        },
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.DROP_OFF.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS longitude exception for DROP_OFF',
+        },
+      ];
+
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [
+                [APPROVED_EXCEPTIONS, exceptions],
+              ] as MetadataAttributeParameter[],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result.latitudeException).toBeDefined();
+      expect(result.latitudeException?.['Attribute Name']).toBe(
+        CAPTURED_GPS_LATITUDE.toString(),
+      );
+      expect(result.longitudeException).toBeDefined();
+      expect(result.longitudeException?.['Attribute Name']).toBe(
+        CAPTURED_GPS_LONGITUDE.toString(),
+      );
+    });
+
+    it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for PICK_UP', () => {
+      const exceptions = [
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.PICK_UP.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS latitude exception for PICK_UP',
+        },
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.PICK_UP.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS longitude exception for PICK_UP',
+        },
+      ];
+
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [
+                [APPROVED_EXCEPTIONS, exceptions],
+              ] as MetadataAttributeParameter[],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.PICK_UP,
+      );
+
+      expect(result.latitudeException).toBeDefined();
+      expect(result.latitudeException?.['Attribute Name']).toBe(
+        CAPTURED_GPS_LATITUDE.toString(),
+      );
+      expect(result.longitudeException).toBeDefined();
+      expect(result.longitudeException?.['Attribute Name']).toBe(
+        CAPTURED_GPS_LONGITUDE.toString(),
+      );
+    });
+
+    it('should return undefined for exceptions that do not match the event name', () => {
+      const exceptions = [
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.PICK_UP.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS latitude exception for PICK_UP',
+        },
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.PICK_UP.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS longitude exception for PICK_UP',
+        },
+      ];
+
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [
+                [APPROVED_EXCEPTIONS, exceptions],
+              ] as MetadataAttributeParameter[],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result.latitudeException).toBeUndefined();
+      expect(result.longitudeException).toBeUndefined();
+    });
+
+    it('should return undefined for exceptions that do not match the GPS attribute names', () => {
+      const exceptions = [
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.DROP_OFF.toString(),
+          },
+          'Attribute Name': DocumentEventAttributeName.TARE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'Tare exception (not GPS)',
+        },
+      ];
+
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [
+                [APPROVED_EXCEPTIONS, exceptions],
+              ] as MetadataAttributeParameter[],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      expect(result.latitudeException).toBeUndefined();
+      expect(result.longitudeException).toBeUndefined();
+    });
+
+    it('should return undefined for latitude when exception does not pass type guard', () => {
+      const exceptions = [
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.DROP_OFF.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LATITUDE.toString(),
+          'Exception Type': 'INVALID_TYPE',
+          Reason: 'Invalid exception type',
+        },
+        {
+          'Attribute Location': {
+            Asset: {
+              Category: DocumentCategory.MASS_ID,
+            },
+            Event: DocumentEventName.DROP_OFF.toString(),
+          },
+          'Attribute Name': CAPTURED_GPS_LONGITUDE.toString(),
+          'Exception Type':
+            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          Reason: 'GPS longitude exception for DROP_OFF',
+        },
+      ];
+
+      const document = stubBoldAccreditationDocument({
+        externalEventsMap: new Map([
+          [
+            ACCREDITATION_RESULT,
+            stubBoldAccreditationResultEvent({
+              metadataAttributes: [
+                [APPROVED_EXCEPTIONS, exceptions],
+              ] as MetadataAttributeParameter[],
+            }),
+          ],
+        ]),
+      });
+
+      const result = getGpsExceptionsFromRecyclerAccreditation(
+        document,
+        DocumentEventName.DROP_OFF,
+      );
+
+      // Latitude exception should be undefined because it doesn't pass the type guard
+      expect(result.latitudeException).toBeUndefined();
+      // Longitude exception should be defined because it's valid
+      expect(result.longitudeException).toBeDefined();
     });
   });
 });

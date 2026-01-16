@@ -1,0 +1,12 @@
+refactor(rule): further reduce test case duplication with additional helpers
+
+Add helper functions to consolidate repeated patterns in test data creation:
+- createValidAccreditationResultEvent for valid accreditation events
+- createExpiredAccreditationResultEvent for expired accreditation events
+- createMassIdWithActorAccreditation for single actor test builders
+- createMassIdWithMultipleActorAccreditations for multiple actor builders
+- createMassIdAuditWithLinkEvent for LINK event creation
+
+This reduces the file by 118 lines and addresses remaining SonarCloud
+duplication warnings by eliminating repeated accreditation event configurations
+and test data builder patterns.
