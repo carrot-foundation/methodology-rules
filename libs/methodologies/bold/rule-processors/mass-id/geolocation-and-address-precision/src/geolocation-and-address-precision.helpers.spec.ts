@@ -184,10 +184,19 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
-        actorType,
-        participantId,
-      );
+      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+        externalEventsMap: new Map([
+          [
+            'ACTOR',
+            stubDocumentEvent({
+              label: actorType,
+              name: DocumentEventName.ACTOR,
+              participant: stubParticipant({ id: participantId }),
+              relatedDocument: undefined,
+            }),
+          ],
+        ]),
+      });
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIdAuditDocument,
