@@ -105,7 +105,7 @@ export enum DocumentEventName {
   MONITORING_SYSTEMS_AND_EQUIPMENT = MethodologyDocumentEventName.MONITORING_SYSTEMS_AND_EQUIPMENT,
   MOVE = 'MOVE',
   NOTICE = MethodologyDocumentEventName.NOTICE,
-  ONBOARDING_DECLARATION = 'Onboarding Declaration',
+  ONBOARDING_DECLARATION = MethodologyDocumentEventName.ONBOARDING_DECLARATION,
   OUTPUT = MethodologyDocumentEventName.OUTPUT,
   PICK_UP = MethodologyDocumentEventName.PICK_UP,
   RECYCLED = MethodologyDocumentEventName.RECYCLED,

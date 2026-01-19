@@ -216,9 +216,13 @@ export const getWasteGeneratorAdditionalPercentage = (
   return new BigNumber(0);
 };
 
-export const isLargeBusiness = (
-  wasteGeneratorVerificationDocument: Document,
+export const shouldApplyLargeBusinessDiscount = (
+  wasteGeneratorVerificationDocument: Document | undefined,
 ): boolean => {
+  if (isNil(wasteGeneratorVerificationDocument)) {
+    return true;
+  }
+
   const onboardingDeclarationEvent =
     wasteGeneratorVerificationDocument.externalEvents?.find(
       (event) =>
@@ -241,16 +245,6 @@ export const isLargeBusiness = (
   return (
     String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
   );
-};
-
-export const shouldApplyLargeBusinessDiscount = (
-  wasteGeneratorVerificationDocument: Document | undefined,
-): boolean => {
-  if (isNil(wasteGeneratorVerificationDocument)) {
-    return true;
-  }
-
-  return isLargeBusiness(wasteGeneratorVerificationDocument);
 };
 
 export const applyLargeBusinessDiscount = (
