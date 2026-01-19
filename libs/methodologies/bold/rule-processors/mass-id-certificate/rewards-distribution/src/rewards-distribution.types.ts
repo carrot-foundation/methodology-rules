@@ -13,6 +13,7 @@ export interface ActorMassIdPercentageInputDto {
   actorType: RewardsDistributionActorType;
   massIdDocument: Document;
   rewardDistribution: BigNumber;
+  wasteGeneratorVerificationDocument: Document | undefined;
 }
 
 export interface ActorReward {

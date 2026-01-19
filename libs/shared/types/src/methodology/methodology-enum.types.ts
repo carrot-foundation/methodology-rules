@@ -61,6 +61,7 @@ export enum MethodologyDocumentEventName {
   LINK = 'LINK',
   MONITORING_SYSTEMS_AND_EQUIPMENT = 'Monitoring Systems & Equipment',
   NOTICE = 'NOTICE',
+  ONBOARDING_DECLARATION = 'Onboarding Declaration',
   OUTPUT = 'OUTPUT',
   PICK_UP = 'Pick-up',
   RECYCLED = 'Recycled',

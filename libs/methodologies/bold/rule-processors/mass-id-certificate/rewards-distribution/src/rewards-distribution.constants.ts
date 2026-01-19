@@ -3,6 +3,7 @@ import type { DocumentCriteria } from '@carrot-fndn/shared/methodologies/bold/io
 import {
   MASS_ID,
   METHODOLOGY_DEFINITION,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   MassIdOrganicSubtype,
@@ -94,5 +95,9 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
-  relatedDocuments: [METHODOLOGY_DEFINITION.match, MASS_ID.match],
+  relatedDocuments: [
+    METHODOLOGY_DEFINITION.match,
+    MASS_ID.match,
+    PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match,
+  ],
 };
