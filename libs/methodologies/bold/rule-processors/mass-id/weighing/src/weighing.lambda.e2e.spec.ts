@@ -36,7 +36,7 @@ describe('WeighingProcessor E2E', () => {
     async (testCase) => {
       const {
         accreditationDocuments,
-        massIdDocumentEvents,
+        massIDDocumentEvents,
         resultComment,
         resultStatus,
       } = testCase;
@@ -48,22 +48,22 @@ describe('WeighingProcessor E2E', () => {
       }
 
       const {
-        massIdAuditDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDDocument,
         participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
-        .createMassIdDocuments({
-          externalEventsMap: massIdDocumentEvents,
+        .createMassIDDocuments({
+          externalEventsMap: massIDDocumentEvents,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
-          massIdDocument,
-          massIdAuditDocument,
+          massIDDocument,
+          massIDAuditDocument,
           ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
@@ -76,7 +76,7 @@ describe('WeighingProcessor E2E', () => {
 
       const response = (await weighingLambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
@@ -93,9 +93,9 @@ describe('WeighingProcessor E2E', () => {
   describe('WeighingProcessorErrors', () => {
     it.each(weighingErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIdAuditDocument, resultStatus }) => {
+      async ({ documents, massIDAuditDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
-          [...documents, massIdAuditDocument].map((document) => ({
+          [...documents, massIDAuditDocument].map((document) => ({
             document,
             documentKey: toDocumentKey({
               documentId: document.id,
@@ -106,7 +106,7 @@ describe('WeighingProcessor E2E', () => {
 
         const response = (await weighingLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),

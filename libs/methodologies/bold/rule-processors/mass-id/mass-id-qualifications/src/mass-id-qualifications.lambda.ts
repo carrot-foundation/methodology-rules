@@ -1,7 +1,7 @@
 import { wrapRuleIntoLambdaHandler } from '@carrot-fndn/shared/lambda/wrapper';
 
-import { MassIdQualificationsProcessor } from './mass-id-qualifications.processor';
+import { MassIDQualificationsProcessor } from './mass-id-qualifications.processor';
 
-const instance = new MassIdQualificationsProcessor();
+const instance = new MassIDQualificationsProcessor();
 
-export const massIdQualificationsLambda = wrapRuleIntoLambdaHandler(instance);
+export const massIDQualificationsLambda = wrapRuleIntoLambdaHandler(instance);

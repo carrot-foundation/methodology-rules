@@ -1,5 +1,5 @@
 import {
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -32,7 +32,7 @@ export const haulerIdentificationTestCases = [
       ],
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, TRUCK]],
         }),
       ],
@@ -48,7 +48,7 @@ export const haulerIdentificationTestCases = [
       [`${ACTOR}-${HAULER}`, undefined],
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, TRUCK]],
         }),
       ],
@@ -64,7 +64,7 @@ export const haulerIdentificationTestCases = [
       [`${ACTOR}-${HAULER}`, undefined],
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, DocumentEventVehicleType.CART]],
         }),
       ],

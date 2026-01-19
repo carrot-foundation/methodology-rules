@@ -30,7 +30,7 @@ import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
 import type {
-  ResultContentsWithMassIdCertificateValue,
+  ResultContentsWithMassIDCertificateValue,
   RuleSubject,
 } from './rewards-distribution.types';
 
@@ -98,10 +98,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   getRewardsDistributionRuleValue(
-    massIdCertificateDocument: Document,
+    massIDCertificateDocument: Document,
   ): CertificateRewardDistributionOutput {
     const rewardsDistributionRuleEvent =
-      massIdCertificateDocument.externalEvents?.find((event) =>
+      massIDCertificateDocument.externalEvents?.find((event) =>
         eventHasMetadataAttribute({
           event,
           metadataName: DocumentEventAttributeName.SLUG,
@@ -120,7 +120,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     ) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND(
-          massIdCertificateDocument.id,
+          massIDCertificateDocument.id,
         ),
       );
     }
@@ -132,15 +132,15 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const certificateDocumentsQuery =
       await this.generateCertificateDocumentsQuery(ruleInput);
 
-    const resultContentsWithMassIdCertificateValue =
+    const resultContentsWithMassIDCertificateValue =
       await certificateDocumentsQuery?.iterator().map(
-        ({ document }): ResultContentsWithMassIdCertificateValue => ({
-          massIdCertificateValue: new BigNumber(document.currentValue),
+        ({ document }): ResultContentsWithMassIDCertificateValue => ({
+          massIDCertificateValue: new BigNumber(document.currentValue),
           resultContent: this.getRewardsDistributionRuleValue(document),
         }),
       );
 
-    if (!isNonEmptyArray(resultContentsWithMassIdCertificateValue)) {
+    if (!isNonEmptyArray(resultContentsWithMassIDCertificateValue)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.CERTIFICATE_DOCUMENT_NOT_FOUND(
           this.certificateMatch.match.type,
@@ -150,7 +150,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
     return {
       creditUnitPrice: new BigNumber(await this.getCreditUnitPrice(ruleInput)),
-      resultContentsWithMassIdCertificateValue,
+      resultContentsWithMassIDCertificateValue,
     };
   }
 

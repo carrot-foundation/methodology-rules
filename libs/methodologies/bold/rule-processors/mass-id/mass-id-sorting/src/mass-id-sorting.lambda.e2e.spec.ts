@@ -9,47 +9,47 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { massIdSortingLambda } from './mass-id-sorting.lambda';
+import { massIDSortingLambda } from './mass-id-sorting.lambda';
 import {
-  massIdSortingErrorTestCases,
-  massIdSortingTestCases,
+  massIDSortingErrorTestCases,
+  massIDSortingTestCases,
 } from './mass-id-sorting.test-cases';
 
-describe('MassIdSortingProcessor E2E', () => {
+describe('MassIDSortingProcessor E2E', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(massIdSortingTestCases)(
+  it.each(massIDSortingTestCases)(
     'should return $resultStatus when $scenario',
     async ({
       accreditationDocuments,
       actorParticipants,
-      massIdEvents,
+      massIDEvents,
       partialDocument,
       resultComment,
       resultStatus,
     }) => {
       const {
-        massIdAuditDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDDocument,
         participantsAccreditationDocuments,
-      } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-        .createMassIdDocuments({
-          externalEventsMap: massIdEvents,
+      } = new BoldStubsBuilder({ massIDActorParticipants: actorParticipants })
+        .createMassIDDocuments({
+          externalEventsMap: massIDEvents,
           partialDocument,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
-          massIdDocument,
-          massIdAuditDocument,
+          massIDDocument,
+          massIDAuditDocument,
           ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
@@ -60,9 +60,9 @@ describe('MassIdSortingProcessor E2E', () => {
         })),
       );
 
-      const response = (await massIdSortingLambda(
+      const response = (await massIDSortingLambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
@@ -76,12 +76,12 @@ describe('MassIdSortingProcessor E2E', () => {
     },
   );
 
-  describe('MassIdSortingProcessorErrors', () => {
-    it.each(massIdSortingErrorTestCases)(
+  describe('MassIDSortingProcessorErrors', () => {
+    it.each(massIDSortingErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIdAuditDocument, resultStatus }) => {
+      async ({ documents, massIDAuditDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
-          [...documents, massIdAuditDocument].map((document) => ({
+          [...documents, massIDAuditDocument].map((document) => ({
             document,
             documentKey: toDocumentKey({
               documentId: document.id,
@@ -90,9 +90,9 @@ describe('MassIdSortingProcessor E2E', () => {
           })),
         );
 
-        const response = (await massIdSortingLambda(
+        const response = (await massIDSortingLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),

@@ -50,7 +50,7 @@ export const createLicensePlateRegex = (
 export const createAuditApiService = (): AuditApiService =>
   new AuditApiService();
 
-export const mapMassIdV2Query = (
+export const mapMassIDV2Query = (
   document: Document,
   requiredData: EventsData,
 ) => {
@@ -119,7 +119,7 @@ export const mapMassIdV2Query = (
   };
 };
 
-export const mapMassIdV1Query = (document: Document, events: EventsData) => {
+export const mapMassIDV1Query = (document: Document, events: EventsData) => {
   const {
     dropOffEvent,
     pickUpEvent,
@@ -201,7 +201,7 @@ export const mapMassIdV1Query = (document: Document, events: EventsData) => {
   };
 };
 
-export const fetchSimilarMassIdDocuments = async ({
+export const fetchSimilarMassIDDocuments = async ({
   auditApiService,
   document,
   eventsData,
@@ -210,8 +210,8 @@ export const fetchSimilarMassIdDocuments = async ({
   document: Document;
   eventsData: EventsData;
 }): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
-  const v2FormatQuery = mapMassIdV2Query(document, eventsData);
-  const v1FormatQuery = mapMassIdV1Query(document, eventsData);
+  const v2FormatQuery = mapMassIDV2Query(document, eventsData);
+  const v1FormatQuery = mapMassIDV1Query(document, eventsData);
 
   const [v2FormattedDuplicates, v1FormattedDuplicates] = await Promise.all([
     auditApiService.checkDuplicateDocuments(v2FormatQuery),

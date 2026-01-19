@@ -1,6 +1,6 @@
 import {
   stubAddress,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -43,7 +43,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [
@@ -66,7 +66,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '020101'],
           [
@@ -89,7 +89,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [
@@ -112,7 +112,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
           [
@@ -134,7 +134,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, undefined],
@@ -153,7 +153,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
@@ -173,7 +173,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: americanRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
@@ -192,7 +192,7 @@ export const regionalWasteClassificationTestCases = [
   {
     events: {
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, randomId],
           [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],

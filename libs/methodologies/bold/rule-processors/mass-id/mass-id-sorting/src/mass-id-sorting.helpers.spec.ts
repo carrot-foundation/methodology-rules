@@ -1,4 +1,4 @@
-import { stubBoldMassIdSortingEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIDSortingEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEvent,
   type DocumentEventAttribute,
@@ -63,7 +63,7 @@ describe('mass-id-sorting helpers', () => {
 
   describe('getValidatedWeightAttributes', () => {
     it('should return error when deductedWeight is greater than or equal to grossWeight', () => {
-      const sortingEvent = stubBoldMassIdSortingEvent({
+      const sortingEvent = stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
             format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
@@ -87,7 +87,7 @@ describe('mass-id-sorting helpers', () => {
     });
 
     it('should return error when deductedWeight equals grossWeight', () => {
-      const sortingEvent = stubBoldMassIdSortingEvent({
+      const sortingEvent = stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
             format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
@@ -120,7 +120,7 @@ describe('mass-id-sorting helpers', () => {
         { name: 'ANY', value: 7 } as unknown as DocumentEvent,
         { name: 'ANY' } as unknown as DocumentEvent,
         { name: 'ANY' } as unknown as DocumentEvent,
-        stubBoldMassIdSortingEvent({ partialDocumentEvent: { value: 9 } }),
+        stubBoldMassIDSortingEvent({ partialDocumentEvent: { value: 9 } }),
       ];
 
       const result = findSortingEvents(events as unknown as DocumentEvent[]);

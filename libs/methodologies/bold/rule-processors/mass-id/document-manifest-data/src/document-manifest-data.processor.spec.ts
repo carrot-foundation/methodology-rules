@@ -50,13 +50,13 @@ describe('DocumentManifestDataProcessor', () => {
 
       const ruleInput = random<Required<RuleInput>>();
 
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -81,13 +81,13 @@ describe('DocumentManifestDataProcessor', () => {
         documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
       });
       const ruleInput = random<Required<RuleInput>>();
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {},
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       await expect(ruleDataProcessor.process(ruleInput)).rejects.toThrow(
         'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is required',
@@ -106,13 +106,13 @@ describe('DocumentManifestDataProcessor', () => {
         documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
       });
       const ruleInput = random<Required<RuleInput>>();
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {},
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
       await ruleDataProcessor.process(ruleInput);
 
       expect(loggerWarnSpy).toHaveBeenCalledWith(
@@ -138,13 +138,13 @@ describe('DocumentManifestDataProcessor', () => {
         documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
       });
       const ruleInput = random<Required<RuleInput>>();
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {},
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
       await ruleDataProcessor.process(ruleInput);
 
       expect(cloudWatchMock).toHaveReceivedCommandWith(PutMetricDataCommand, {
@@ -186,13 +186,13 @@ describe('DocumentManifestDataProcessor', () => {
         documentManifestType: DocumentEventName.TRANSPORT_MANIFEST,
       });
       const ruleInput = random<Required<RuleInput>>();
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {},
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
       await ruleDataProcessor.process(ruleInput);
 
       expect(loggerErrorSpy).toHaveBeenCalledWith(

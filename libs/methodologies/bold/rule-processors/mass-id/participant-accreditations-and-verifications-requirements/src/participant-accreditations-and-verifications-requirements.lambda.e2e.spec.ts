@@ -20,9 +20,9 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', (
 
   it.each(participantAccreditationsAndVerificationsRequirementsTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocument, resultStatus }) => {
+    async ({ documents, massIDAuditDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [...documents, massIdAuditDocument].map((document) => ({
+        [...documents, massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -34,7 +34,7 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', (
       const response =
         (await participantAccreditationsAndVerificationsRequirementsLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),

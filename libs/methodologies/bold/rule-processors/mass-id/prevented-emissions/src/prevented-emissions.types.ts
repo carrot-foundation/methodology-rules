@@ -1,5 +1,5 @@
 import {
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -12,11 +12,11 @@ export interface RuleSubject {
     | MethodologyDocumentEventAttributeValue
     | undefined;
   gasType: NonEmptyString;
-  massIdDocumentValue: number;
+  massIDDocumentValue: number;
   wasteGeneratorBaseline: MethodologyBaseline | undefined;
-  wasteSubtype: MassIdOrganicSubtype;
+  wasteSubtype: MassIDOrganicSubtype;
 }
 
 export type WasteGeneratorBaselineValues = Partial<
-  Record<MassIdOrganicSubtype, MethodologyBaseline>
+  Record<MassIDOrganicSubtype, MethodologyBaseline>
 >;

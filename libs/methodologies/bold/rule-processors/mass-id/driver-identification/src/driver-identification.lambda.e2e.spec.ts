@@ -21,17 +21,17 @@ describe('DriverIdentificationLambda E2E', () => {
   it.each(driverIdentificationTestCases)(
     'should return $resultStatus when $scenario',
     async ({ pickUpEvent, resultStatus }) => {
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {
             [PICK_UP]: pickUpEvent,
           },
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massIdDocument, massIdAuditDocument].map((document) => ({
+        [massIDDocument, massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -43,7 +43,7 @@ describe('DriverIdentificationLambda E2E', () => {
       const response = (await driverIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

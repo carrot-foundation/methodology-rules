@@ -54,12 +54,12 @@ import {
 } from './weighing.helpers';
 
 interface DocumentPair {
-  massIdDocument: Document;
+  massIDDocument: Document;
   recyclerAccreditationDocument: Document;
 }
 
 interface RuleSubject {
-  massIdDocumentId: NonEmptyString;
+  massIDDocumentId: NonEmptyString;
   recyclerAccreditationDocument: Document;
   weighingEvents: DocumentEvent[];
 }
@@ -133,7 +133,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   protected async evaluateResult({
-    massIdDocumentId,
+    massIDDocumentId,
     recyclerAccreditationDocument,
     weighingEvents,
   }: RuleSubject): Promise<EvaluateResultOutput> {
@@ -186,7 +186,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     const scaleTicketValidationResult = await this.validateScaleTicket({
       expectedNetWeight: weighingValues.eventValue,
-      massIdDocumentId,
+      massIDDocumentId,
       scaleTicketConfig,
       weighingEvent,
     });
@@ -227,13 +227,13 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   protected getRuleSubject({
-    massIdDocument,
+    massIDDocument,
     recyclerAccreditationDocument,
   }: DocumentPair): RuleSubject {
-    const weighingEvents = getWeighingEvents(massIdDocument);
+    const weighingEvents = getWeighingEvents(massIDDocument);
 
     return {
-      massIdDocumentId: massIdDocument.id,
+      massIDDocumentId: massIDDocument.id,
       recyclerAccreditationDocument,
       weighingEvents,
     };
@@ -241,12 +241,12 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   protected async validateScaleTicket({
     expectedNetWeight,
-    massIdDocumentId,
+    massIDDocumentId,
     scaleTicketConfig,
     weighingEvent,
   }: {
     expectedNetWeight: number | undefined;
-    massIdDocumentId: NonEmptyString;
+    massIDDocumentId: NonEmptyString;
     scaleTicketConfig: MethodologyAdditionalVerification | undefined;
     weighingEvent: DocumentEvent;
   }): Promise<{
@@ -259,7 +259,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     const textExtractorInput = this.buildScaleTicketTextExtractorInput(
       weighingEvent,
-      massIdDocumentId,
+      massIDDocumentId,
     );
 
     const scaleTicketValidation = await verifyScaleTicketNetWeight({
@@ -283,7 +283,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   private buildScaleTicketTextExtractorInput(
     weighingEvent: DocumentEvent,
-    massIdDocumentId: NonEmptyString,
+    massIDDocumentId: NonEmptyString,
   ): TextExtractionInput | undefined {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
@@ -306,7 +306,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
 
     const key = getAttachmentS3Key(
-      massIdDocumentId,
+      massIDDocumentId,
       scaleTicketAttachment.attachmentId,
     );
 
@@ -322,7 +322,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document>,
   ): Promise<DocumentPair> {
     let recyclerAccreditationDocument: Document | undefined;
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -335,7 +335,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       }
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
     });
 
@@ -346,12 +346,12 @@ export class WeighingProcessor extends RuleDataProcessor {
     );
 
     this.validateOrThrow(
-      isNil(massIdDocument),
+      isNil(massIDDocument),
       this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     );
 
     return {
-      massIdDocument: massIdDocument as Document,
+      massIDDocument: massIDDocument as Document,
       recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
     };
   }

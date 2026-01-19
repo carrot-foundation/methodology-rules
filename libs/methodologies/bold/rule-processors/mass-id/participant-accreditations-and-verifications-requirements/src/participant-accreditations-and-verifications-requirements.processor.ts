@@ -50,7 +50,7 @@ const ACTORS_WITH_OPTIONAL_DATES = new Set([
 
 interface RuleSubject {
   accreditationDocuments: Map<string, Document[]>;
-  massIdDocument: Document;
+  massIDDocument: Document;
 }
 
 export const RESULT_COMMENTS = {
@@ -99,14 +99,14 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private evaluateResult({
     accreditationDocuments,
-    massIdDocument,
+    massIDDocument,
   }: RuleSubject): EvaluateResultOutput {
     this.verifyAllParticipantsHaveAccreditationDocuments({
       accreditationDocuments,
-      massIdDocument,
+      massIDDocument,
     });
 
-    const actorParticipants = this.getActorParticipants(massIdDocument);
+    const actorParticipants = this.getActorParticipants(massIDDocument);
 
     const validationError = this.validateAllActors(
       actorParticipants,
@@ -124,11 +124,11 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private getActorParticipants(
-    massIdDocument: Document,
+    massIDDocument: Document,
   ): Map<string, MethodologyDocumentEventLabel> {
     // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
     return new Map(
-      massIdDocument
+      massIDDocument
         .externalEvents!.filter(
           eventLabelIsAnyOf([
             MethodologyDocumentEventLabel.INTEGRATOR,
@@ -147,13 +147,13 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
     const accreditationDocuments: Map<string, Document[]> = new Map();
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
 
       if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
@@ -168,7 +168,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       }
     });
 
-    if (isNil(massIdDocument)) {
+    if (isNil(massIDDocument)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
@@ -182,7 +182,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     return {
       accreditationDocuments,
-      massIdDocument,
+      massIDDocument,
     };
   }
 
@@ -278,18 +278,18 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private verifyAllParticipantsHaveAccreditationDocuments({
     accreditationDocuments,
-    massIdDocument,
-  }: Omit<RuleSubject, 'massIdAuditDocument'>) {
-    if (!isNonEmptyArray(massIdDocument.externalEvents)) {
+    massIDDocument,
+  }: Omit<RuleSubject, 'massIDAuditDocument'>) {
+    if (!isNonEmptyArray(massIDDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
-          massIdDocument.id,
+          massIDDocument.id,
         ),
       );
     }
 
     const actorParticipants: Map<string, string> = new Map(
-      massIdDocument.externalEvents
+      massIDDocument.externalEvents
         .filter(
           eventLabelIsAnyOf([
             MethodologyDocumentEventLabel.INTEGRATOR,

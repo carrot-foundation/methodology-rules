@@ -1,6 +1,6 @@
 import {
   stubAddress,
-  stubBoldMassIdDropOffEvent,
+  stubBoldMassIDDropOffEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -27,7 +27,7 @@ export const dropOffAtRecyclerTestCases = [
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIdDropOffEvent({
+      [DROP_OFF]: stubBoldMassIDDropOffEvent({
         metadataAttributes: [[RECEIVING_OPERATOR_IDENTIFIER, undefined]],
       }),
     },
@@ -37,7 +37,7 @@ export const dropOffAtRecyclerTestCases = [
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIdDropOffEvent(),
+      [DROP_OFF]: stubBoldMassIDDropOffEvent(),
     },
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
     resultStatus: RuleOutputStatus.FAILED,
@@ -50,7 +50,7 @@ export const dropOffAtRecyclerTestCases = [
         label: RECYCLER,
         name: ACTOR,
       }),
-      [DROP_OFF]: stubBoldMassIdDropOffEvent({
+      [DROP_OFF]: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           address: sameRecyclerAndDropOffAddress,
         },

@@ -1,7 +1,7 @@
 import { wrapRuleIntoLambdaHandler } from '@carrot-fndn/shared/lambda/wrapper';
 
-import { MassIdSortingProcessor } from './mass-id-sorting.processor';
+import { MassIDSortingProcessor } from './mass-id-sorting.processor';
 
-const instance = new MassIdSortingProcessor();
+const instance = new MassIDSortingProcessor();
 
-export const massIdSortingLambda = wrapRuleIntoLambdaHandler(instance);
+export const massIDSortingLambda = wrapRuleIntoLambdaHandler(instance);

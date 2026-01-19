@@ -5,7 +5,7 @@ import {
   METHODOLOGY_DEFINITION,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -74,22 +74,22 @@ export const REWARDS_DISTRIBUTION: RewardsDistribution = {
 };
 
 export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   RewardsDistributionWasteType
 > = {
-  [MassIdOrganicSubtype.DOMESTIC_SLUDGE]:
+  [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
     RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT,
-  [MassIdOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE]:
+  [MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE]:
     RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
+  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
     RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIdOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE]:
+  [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE]:
     RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIdOrganicSubtype.INDUSTRIAL_SLUDGE]:
+  [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE]:
     RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT,
-  [MassIdOrganicSubtype.TOBACCO]:
+  [MassIDOrganicSubtype.TOBACCO]:
     RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES,
-  [MassIdOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]:
+  [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]:
     RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
 };
 

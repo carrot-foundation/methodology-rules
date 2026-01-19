@@ -1,25 +1,25 @@
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { MassIdQualificationsProcessorErrors } from './mass-id-qualifications.errors';
+import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
 import { RESULT_COMMENTS } from './mass-id-qualifications.processor';
 
-const massIdStubs = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
+const massIDStubs = new BoldStubsBuilder()
+  .createMassIDDocuments()
+  .createMassIDAuditDocuments()
   .build();
-const processorErrors = new MassIdQualificationsProcessorErrors();
+const processorErrors = new MassIDQualificationsProcessorErrors();
 
-export const massIdQualificationsTestCases = [
+export const massIDQualificationsTestCases = [
   {
-    massIdDocument: massIdStubs.massIdDocument,
+    massIDDocument: massIDStubs.massIDDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'all the criteria are met',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       category: 'INVALID_CATEGORY',
     },
     resultComment: RESULT_COMMENTS.INVALID_CATEGORY('INVALID_CATEGORY'),
@@ -27,8 +27,8 @@ export const massIdQualificationsTestCases = [
     scenario: 'category does not match',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       type: 'INVALID_TYPE',
     },
     resultComment: RESULT_COMMENTS.INVALID_TYPE('INVALID_TYPE'),
@@ -36,8 +36,8 @@ export const massIdQualificationsTestCases = [
     scenario: 'type is not ORGANIC',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       measurementUnit: 'INVALID_UNIT',
     },
     resultComment: RESULT_COMMENTS.INVALID_MEASUREMENT_UNIT('INVALID_UNIT'),
@@ -45,8 +45,8 @@ export const massIdQualificationsTestCases = [
     scenario: 'measurement unit is not "kg"',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       currentValue: 0,
     },
     resultComment: RESULT_COMMENTS.INVALID_VALUE(0),
@@ -54,8 +54,8 @@ export const massIdQualificationsTestCases = [
     scenario: 'current value is not greater than 0',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
     },
     resultComment: RESULT_COMMENTS.INVALID_SUBTYPE(
@@ -65,20 +65,20 @@ export const massIdQualificationsTestCases = [
     scenario: 'subtype is defined but not in the allowed list',
   },
   {
-    massIdDocument: { ...massIdStubs.massIdDocument, type: undefined },
+    massIDDocument: { ...massIDStubs.massIDDocument, type: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'document type is not found',
   },
   {
-    massIdDocument: { ...massIdStubs.massIdDocument, subtype: undefined },
+    massIDDocument: { ...massIDStubs.massIDDocument, subtype: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'document subtype is not found',
   },
   {
-    massIdDocument: {
-      ...massIdStubs.massIdDocument,
+    massIDDocument: {
+      ...massIDStubs.massIDDocument,
       subtype: 'INVALID_SUBTYPE',
       type: 'INVALID_TYPE',
     },

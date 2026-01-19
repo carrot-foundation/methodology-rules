@@ -15,15 +15,15 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
 
   it.each(participantAccreditationsAndVerificationsRequirementsTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
+    async ({ documents, massIDAuditDocument, resultComment, resultStatus }) => {
       spyOnDocumentQueryServiceLoad(stubDocument(), [
-        massIdAuditDocument,
+        massIDAuditDocument,
         ...documents,
       ]);
 
       const ruleInput = {
         ...random<Required<RuleInput>>(),
-        documentId: massIdAuditDocument.id,
+        documentId: massIDAuditDocument.id,
       };
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);

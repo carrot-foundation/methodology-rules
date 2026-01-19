@@ -11,9 +11,9 @@ import type BigNumber from 'bignumber.js';
 
 export type ActorsByType = Map<string, RewardsDistributionActor>;
 
-export interface AggregateMassIdCertificateRewards {
+export interface AggregateMassIDCertificateRewards {
   actors: ActorsByType;
-  massIdCertificateTotalValue: BigNumber;
+  massIDCertificateTotalValue: BigNumber;
 }
 
 export interface Participant {
@@ -26,15 +26,15 @@ export interface Remainder<T = BigNumber> {
   percentage: T;
 }
 
-export interface ResultContentsWithMassIdCertificateValue {
-  massIdCertificateValue: BigNumber;
+export interface ResultContentsWithMassIDCertificateValue {
+  massIDCertificateValue: BigNumber;
   resultContent: CertificateRewardDistributionOutput;
 }
 
 export interface RewardsDistribution {
   actors: RewardsDistributionActor[];
   creditUnitPrice: NonEmptyString;
-  massIdCertificateTotalValue: NonEmptyString;
+  massIDCertificateTotalValue: NonEmptyString;
   remainder: Remainder<string>;
 }
 
@@ -49,5 +49,5 @@ export interface RewardsDistributionActor {
 
 export interface RuleSubject {
   creditUnitPrice: BigNumber;
-  resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[];
+  resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[];
 }

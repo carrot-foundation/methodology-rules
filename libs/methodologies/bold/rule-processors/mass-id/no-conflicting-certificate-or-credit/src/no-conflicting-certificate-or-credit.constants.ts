@@ -11,14 +11,14 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const buildDocumentsCriteria = (
-  massIdCertificateMatcher: DocumentMatcher,
+  massIDCertificateMatcher: DocumentMatcher,
 ): DocumentCriteria => ({
   parentDocument: {
     omit: true,
     relatedDocuments: [
       MASS_ID_AUDIT.match,
       {
-        ...massIdCertificateMatcher.match,
+        ...massIDCertificateMatcher.match,
         relatedDocuments: [CREDIT_ORDER_MATCH.match],
       },
     ],

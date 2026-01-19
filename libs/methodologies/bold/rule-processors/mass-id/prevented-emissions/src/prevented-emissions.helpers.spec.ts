@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
@@ -29,26 +29,26 @@ describe('PreventedEmissionsHelpers', () => {
   describe('getPreventedEmissionsFactor', () => {
     it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
       const result = getPreventedEmissionsFactor(
-        MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
-          MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
         ][MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
       );
     });
 
     it('should return the correct prevented emissions factor for domestic sludge and open air dump', () => {
       const result = getPreventedEmissionsFactor(
-        MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
         MethodologyBaseline.OPEN_AIR_DUMP,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
-          MassIdOrganicSubtype.DOMESTIC_SLUDGE
+          MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][MethodologyBaseline.OPEN_AIR_DUMP],
       );
     });
@@ -58,12 +58,12 @@ describe('PreventedEmissionsHelpers', () => {
     it('should calculate prevented emissions correctly with positive values', () => {
       const exceedingEmissionCoefficient = 0.8;
       const preventedEmissionsByMaterialAndBaselinePerTon = 1500;
-      const massIdDocumentValue = 100;
+      const massIDDocumentValue = 100;
 
       const result = calculatePreventedEmissions(
         exceedingEmissionCoefficient,
         preventedEmissionsByMaterialAndBaselinePerTon,
-        massIdDocumentValue,
+        massIDDocumentValue,
       );
 
       expect(result).toBeCloseTo(149_920, 10);
@@ -72,12 +72,12 @@ describe('PreventedEmissionsHelpers', () => {
     it('should calculate prevented emissions correctly with zero coefficient', () => {
       const exceedingEmissionCoefficient = 0;
       const preventedEmissionsByMaterialAndBaselinePerTon = 1000;
-      const massIdDocumentValue = 50;
+      const massIDDocumentValue = 50;
 
       const result = calculatePreventedEmissions(
         exceedingEmissionCoefficient,
         preventedEmissionsByMaterialAndBaselinePerTon,
-        massIdDocumentValue,
+        massIDDocumentValue,
       );
 
       expect(result).toBe(50_000);
@@ -86,12 +86,12 @@ describe('PreventedEmissionsHelpers', () => {
     it('should handle fractional values correctly', () => {
       const exceedingEmissionCoefficient = 0.25;
       const preventedEmissionsByMaterialAndBaselinePerTon = 800.5;
-      const massIdDocumentValue = 10.5;
+      const massIDDocumentValue = 10.5;
 
       const result = calculatePreventedEmissions(
         exceedingEmissionCoefficient,
         preventedEmissionsByMaterialAndBaselinePerTon,
-        massIdDocumentValue,
+        massIDDocumentValue,
       );
 
       expect(result).toBe(8402.625);
@@ -100,12 +100,12 @@ describe('PreventedEmissionsHelpers', () => {
     it('should clamp to zero when exceedingEmissionCoefficient >= preventedEmissionsByMaterialAndBaselinePerTon', () => {
       const exceedingEmissionCoefficient = 2000;
       const preventedEmissionsByMaterialAndBaselinePerTon = 1500;
-      const massIdDocumentValue = 100;
+      const massIDDocumentValue = 100;
 
       const result = calculatePreventedEmissions(
         exceedingEmissionCoefficient,
         preventedEmissionsByMaterialAndBaselinePerTon,
-        massIdDocumentValue,
+        massIDDocumentValue,
       );
 
       expect(result).toBe(0);
@@ -121,9 +121,9 @@ describe('PreventedEmissionsHelpers', () => {
               [
                 BASELINES,
                 {
-                  [MassIdOrganicSubtype.DOMESTIC_SLUDGE]:
+                  [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
                     MethodologyBaseline.OPEN_AIR_DUMP,
-                  [MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
+                  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
                     MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
                 },
               ],
@@ -134,7 +134,7 @@ describe('PreventedEmissionsHelpers', () => {
 
       const result = getWasteGeneratorBaselineByWasteSubtype(
         document,
-        MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         processorErrors,
       );
 
@@ -151,7 +151,7 @@ describe('PreventedEmissionsHelpers', () => {
               [
                 BASELINES,
                 {
-                  [MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
+                  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
                     MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
                 },
               ],
@@ -162,7 +162,7 @@ describe('PreventedEmissionsHelpers', () => {
 
       const result = getWasteGeneratorBaselineByWasteSubtype(
         document,
-        MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
         processorErrors,
       );
 
@@ -181,7 +181,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getWasteGeneratorBaselineByWasteSubtype(
           document,
-          MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
       ).toThrow(
@@ -201,7 +201,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getWasteGeneratorBaselineByWasteSubtype(
           document,
-          MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
       ).toThrow(
@@ -221,7 +221,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getWasteGeneratorBaselineByWasteSubtype(
           document,
-          MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
       ).toThrow(
@@ -237,7 +237,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getWasteGeneratorBaselineByWasteSubtype(
           document,
-          MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
       ).toThrow(

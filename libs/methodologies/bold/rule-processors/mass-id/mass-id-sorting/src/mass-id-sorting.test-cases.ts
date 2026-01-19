@@ -3,8 +3,8 @@ import {
   BoldStubsBuilder,
   MASS_ID_ACTOR_PARTICIPANTS,
   stubBoldEmissionAndCompostingMetricsEvent,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdSortingEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDSortingEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -13,7 +13,7 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -23,13 +23,13 @@ import {
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
 
-import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
+import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 import {
   RESULT_COMMENTS,
   SORTING_TOLERANCE,
 } from './mass-id-sorting.processor';
 
-const processorErrors = new MassIdSortingProcessorErrors();
+const processorErrors = new MassIDSortingProcessorErrors();
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const {
@@ -52,7 +52,7 @@ const createAccreditationDocuments = (sortingFactor: number) =>
           [ACCREDITATION_CONTEXT]: stubDocumentEvent({
             name: ACCREDITATION_CONTEXT,
             participant: actorParticipants.get(
-              MassIdDocumentActorType.RECYCLER,
+              MassIDDocumentActorType.RECYCLER,
             )!,
           }),
           [EMISSION_AND_COMPOSTING_METRICS]:
@@ -60,7 +60,7 @@ const createAccreditationDocuments = (sortingFactor: number) =>
               metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
               partialDocumentEvent: {
                 participant: actorParticipants.get(
-                  MassIdDocumentActorType.RECYCLER,
+                  MassIDDocumentActorType.RECYCLER,
                 )!,
               },
             }),
@@ -85,17 +85,17 @@ const createWeightAttributes = (
   },
 ];
 
-const createMassIdEvents = (
+const createMassIDEvents = (
   valueBeforeSorting: number,
   grossWeight: number,
   deductedWeight: number,
   sortingValue?: number,
   includeDescription = true,
 ) => ({
-  [DROP_OFF]: stubBoldMassIdDropOffEvent({
+  [DROP_OFF]: stubBoldMassIDDropOffEvent({
     partialDocumentEvent: { value: valueBeforeSorting },
   }),
-  [SORTING]: stubBoldMassIdSortingEvent({
+  [SORTING]: stubBoldMassIDSortingEvent({
     metadataAttributes: [
       ...createWeightAttributes(grossWeight, deductedWeight),
       ...(includeDescription
@@ -128,7 +128,7 @@ const createErrorTestCase = (
   resultComment: string,
 ) => ({
   documents,
-  massIdAuditDocument,
+  massIDAuditDocument,
   resultComment,
   resultStatus: RuleOutputStatus.FAILED,
   scenario,
@@ -173,18 +173,18 @@ const actorParticipants = new Map(
 );
 
 const {
-  massIdAuditDocument,
-  massIdDocument,
+  massIDAuditDocument,
+  massIDDocument,
   participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocuments({
+  .createMassIDDocuments({
     externalEventsMap: {
-      [DROP_OFF]: stubBoldMassIdDropOffEvent({
+      [DROP_OFF]: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           value: 0,
         },
       }),
-      [SORTING]: stubBoldMassIdSortingEvent({
+      [SORTING]: stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
             format: KILOGRAM,
@@ -206,15 +206,15 @@ const {
       externalCreatedAt: addYears(new Date(), 1).toISOString(),
     },
   })
-  .createMassIdAuditDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
-export const massIdSortingTestCases = [
+export const massIDSortingTestCases = [
   {
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
@@ -222,7 +222,7 @@ export const massIdSortingTestCases = [
       false,
     ),
     partialDocument: {
-      ...massIdDocument,
+      ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
@@ -232,14 +232,14 @@ export const massIdSortingTestCases = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
       calculatedSortingValue,
     ),
     partialDocument: {
-      ...massIdDocument,
+      ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.PASSED(0),
@@ -250,14 +250,14 @@ export const massIdSortingTestCases = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
       calculatedSortingValue,
     ),
     partialDocument: {
-      ...massIdDocument,
+      ...massIDDocument,
       currentValue: calculatedSortingValue + 1,
     },
     resultComment: RESULT_COMMENTS.DOCUMENT_VALUE_MISMATCH(
@@ -271,13 +271,13 @@ export const massIdSortingTestCases = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
       deductedWeight,
       wrongSortingValue,
     ),
-    partialDocument: { ...massIdDocument, currentValue: wrongSortingValue },
+    partialDocument: { ...massIDDocument, currentValue: wrongSortingValue },
     resultComment: RESULT_COMMENTS.FAILED(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
@@ -287,14 +287,14 @@ export const massIdSortingTestCases = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
       mismatchedDeductedWeight,
       calculatedSortingValue,
     ),
     partialDocument: {
-      ...massIdDocument,
+      ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
@@ -308,14 +308,14 @@ export const massIdSortingTestCases = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
-    massIdEvents: createMassIdEvents(
+    massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight + 0.2,
       (grossWeight + 0.2) * (1 - sortingFactor),
       calculatedSortingValue,
     ),
     partialDocument: {
-      ...massIdDocument,
+      ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
@@ -328,9 +328,9 @@ export const massIdSortingTestCases = [
 ];
 
 const invalidSortingValue = new BoldStubsBuilder()
-  .createMassIdDocuments({
+  .createMassIDDocuments({
     externalEventsMap: {
-      [SORTING]: stubBoldMassIdSortingEvent({
+      [SORTING]: stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
             format: KILOGRAM,
@@ -352,12 +352,12 @@ const invalidSortingValue = new BoldStubsBuilder()
       externalCreatedAt: addYears(new Date(), 1).toISOString(),
     },
   })
-  .createMassIdAuditDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
-export const massIdSortingErrorTestCases = [
+export const massIDSortingErrorTestCases = [
   createErrorTestCase(
     'the MassID document does not exist',
     [...participantsAccreditationDocuments.values()],
@@ -366,22 +366,22 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the MassID document does not contain external events',
     [
-      { ...massIdDocument, externalEvents: [] },
+      { ...massIDDocument, externalEvents: [] },
       ...participantsAccreditationDocuments.values(),
     ],
     processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
   ),
   createErrorTestCase(
     `the ${RECYCLER} accreditation does not exist`,
-    [massIdDocument],
+    [massIDDocument],
     processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
   ),
   createErrorTestCase(
     `the MassID document does not contain a ${SORTING} event`,
     [
       {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
+        ...massIDDocument,
+        externalEvents: massIDDocument.externalEvents?.filter(
           (event) => event.name !== SORTING.toString(),
         ),
       },
@@ -392,8 +392,8 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the value after sorting is not valid',
     [
-      invalidSortingValue.massIdDocument,
-      invalidSortingValue.massIdAuditDocument,
+      invalidSortingValue.massIDDocument,
+      invalidSortingValue.massIDAuditDocument,
       ...invalidSortingValue.participantsAccreditationDocuments.values(),
     ],
     processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
@@ -401,14 +401,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     `the ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
     [
-      modifyDocumentEvents(massIdDocument, {
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+      modifyDocumentEvents(massIDDocument, {
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(
             valueBeforeSorting,
             deductedWeight,
           ),
           partialDocumentEvent: {
-            value: massIdDocument.externalEvents?.find(
+            value: massIDDocument.externalEvents?.find(
               eventNameIsAnyOf([DROP_OFF]),
             )?.value,
           },
@@ -427,20 +427,20 @@ export const massIdSortingErrorTestCases = [
   ),
   createErrorTestCase(
     'the value before sorting is not greater than 0',
-    [massIdDocument, ...participantsAccreditationDocuments.values()],
+    [massIDDocument, ...participantsAccreditationDocuments.values()],
     processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(0),
   ),
   createErrorTestCase(
     'the gross weight has invalid format',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             10,
             deductedWeight,
@@ -457,14 +457,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the deducted weight has invalid format',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             valueBeforeSorting,
             5,
@@ -481,14 +481,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the gross weight is not greater than 0',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(0, deductedWeight),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -500,14 +500,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the deducted weight is not greater than 0',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(valueBeforeSorting, 0),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -519,14 +519,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the gross weight has valid value but invalid format',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             15,
             8,
@@ -543,14 +543,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the deducted weight has valid value but invalid format',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             15,
             8,
@@ -567,14 +567,14 @@ export const massIdSortingErrorTestCases = [
   createErrorTestCase(
     'the deducted weight is greater than or equal to gross weight',
     [
-      modifyDocumentEvents(massIdDocument, {
+      modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
-          ...massIdDocument.externalEvents?.find(
+          ...massIDDocument.externalEvents?.find(
             (e) => e.name === String(DROP_OFF),
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIdSortingEvent({
+        [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(5, 10),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),

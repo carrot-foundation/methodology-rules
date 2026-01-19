@@ -8,18 +8,18 @@ import {
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-export interface ActorMassIdPercentageInputDto {
+export interface ActorMassIDPercentageInputDto {
   actors: RewardsDistributionActor[];
   actorType: RewardsDistributionActorType;
-  massIdDocument: Document;
+  massIDDocument: Document;
   rewardDistribution: BigNumber;
 }
 
 export interface ActorReward {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
-  massIdDocument: Document;
-  massIdPercentage: BigNumber;
+  massIDDocument: Document;
+  massIDPercentage: BigNumber;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }

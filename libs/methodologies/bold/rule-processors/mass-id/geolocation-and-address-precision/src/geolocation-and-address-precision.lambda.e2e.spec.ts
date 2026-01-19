@@ -34,17 +34,17 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
     async ({
       accreditationDocuments,
       actorParticipants,
-      massIdDocumentParameters,
+      massIDDocumentParameters,
       resultComment,
       resultStatus,
     }) => {
       const {
-        massIdAuditDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDDocument,
         participantsAccreditationDocuments,
-      } = new BoldStubsBuilder({ massIdActorParticipants: actorParticipants })
-        .createMassIdDocuments(massIdDocumentParameters)
-        .createMassIdAuditDocuments()
+      } = new BoldStubsBuilder({ massIDActorParticipants: actorParticipants })
+        .createMassIDDocuments(massIDDocumentParameters)
+        .createMassIDAuditDocuments()
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
@@ -63,15 +63,15 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
           }),
       );
 
-      massIdAuditDocument.externalEvents = [
-        ...(massIdAuditDocument.externalEvents ?? []),
+      massIDAuditDocument.externalEvents = [
+        ...(massIDAuditDocument.externalEvents ?? []),
         ...auditActorEvents,
       ];
 
       prepareEnvironmentTestE2E(
         [
-          massIdDocument,
-          massIdAuditDocument,
+          massIDDocument,
+          massIDAuditDocument,
           ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
@@ -84,7 +84,7 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
 
       const response = (await geolocationAndAddressPrecisionLambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
@@ -101,9 +101,9 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
   describe('GeolocationAndAddressPrecisionProcessorErrors', () => {
     it.each(geolocationAndAddressPrecisionErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIdAuditDocument, resultStatus }) => {
+      async ({ documents, massIDAuditDocument, resultStatus }) => {
         const documentEntries = (
-          [...documents, massIdAuditDocument].filter(Boolean) as Document[]
+          [...documents, massIDAuditDocument].filter(Boolean) as Document[]
         ).map((document) => ({
           document,
           documentKey: toDocumentKey({
@@ -118,7 +118,7 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
 
         const response = (await geolocationAndAddressPrecisionLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument?.id ?? faker.string.uuid(),
+            documentId: massIDAuditDocument?.id ?? faker.string.uuid(),
             documentKeyPrefix,
           }),
           stubContext(),

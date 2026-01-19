@@ -23,7 +23,7 @@ export const hasMethodologySlugAttribute = (
     }),
   );
 
-const isMassIdAuditPassed = (document: Document): boolean =>
+const isMassIDAuditPassed = (document: Document): boolean =>
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
@@ -38,7 +38,7 @@ const isDocumentCancelled = (document: Document): boolean =>
 export const hasNonCancelledDocuments = (documents: Document[]): boolean =>
   documents.some((document) => !isDocumentCancelled(document));
 
-export const isMassIdAuditInProgress = (document: Document): boolean =>
+export const isMassIDAuditInProgress = (document: Document): boolean =>
   !isDocumentCancelled(document) &&
   getOrDefault(document.externalEvents, []).some(
     (event) =>
@@ -48,12 +48,12 @@ export const isMassIdAuditInProgress = (document: Document): boolean =>
       }),
   );
 
-export const hasPassedOrInProgressMassIdAuditForTheSameMethodology = (
-  massIdAuditDocuments: Document[],
+export const hasPassedOrInProgressMassIDAuditForTheSameMethodology = (
+  massIDAuditDocuments: Document[],
   methodologySlug: BoldMethodologySlug,
 ): boolean =>
-  massIdAuditDocuments.some(
+  massIDAuditDocuments.some(
     (document) =>
       hasMethodologySlugAttribute(document, methodologySlug) &&
-      (isMassIdAuditPassed(document) || isMassIdAuditInProgress(document)),
+      (isMassIDAuditPassed(document) || isMassIDAuditInProgress(document)),
   );

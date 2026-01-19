@@ -1,7 +1,7 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
-  stubBoldMassIdDocument,
-  stubBoldMassIdRecycledEvent,
+  stubBoldMassIDDocument,
+  stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
@@ -28,11 +28,11 @@ describe('ProjectPeriodLimitLambda E2E', () => {
   it.each(projectPeriodLimitTestCases)(
     'should return $resultStatus when $scenario',
     async ({ externalCreatedAt, resultComment, resultStatus }) => {
-      const massIdDocument = stubBoldMassIdDocument({
+      const massIDDocument = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
             RECYCLED,
-            stubBoldMassIdRecycledEvent({
+            stubBoldMassIDRecycledEvent({
               partialDocumentEvent: externalCreatedAt
                 ? { externalCreatedAt }
                 : {},
@@ -42,7 +42,7 @@ describe('ProjectPeriodLimitLambda E2E', () => {
       });
 
       prepareEnvironmentTestE2E(
-        [massIdDocument].map((document) => ({
+        [massIDDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -54,7 +54,7 @@ describe('ProjectPeriodLimitLambda E2E', () => {
       const response = (await projectPeriodLimitLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

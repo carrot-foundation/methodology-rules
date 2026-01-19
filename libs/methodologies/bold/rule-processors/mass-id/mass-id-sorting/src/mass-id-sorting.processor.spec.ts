@@ -6,35 +6,35 @@ import {
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import { MassIdSortingProcessor } from './mass-id-sorting.processor';
+import { MassIDSortingProcessor } from './mass-id-sorting.processor';
 import {
-  massIdSortingErrorTestCases,
-  massIdSortingTestCases,
+  massIDSortingErrorTestCases,
+  massIDSortingTestCases,
 } from './mass-id-sorting.test-cases';
 
-describe('MassIdSortingProcessor', () => {
-  const ruleDataProcessor = new MassIdSortingProcessor();
+describe('MassIDSortingProcessor', () => {
+  const ruleDataProcessor = new MassIDSortingProcessor();
 
   beforeEach(() => {
     jest.restoreAllMocks();
   });
 
-  describe('MassIdSortingProcessor', () => {
-    it.each(massIdSortingTestCases)(
+  describe('MassIDSortingProcessor', () => {
+    it.each(massIDSortingTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         accreditationDocuments,
         actorParticipants,
-        massIdEvents,
+        massIDEvents,
         partialDocument,
         resultComment,
         resultStatus,
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
-          massIdActorParticipants: actorParticipants,
-          massIdDocumentsParams: {
-            externalEventsMap: massIdEvents,
+          massIDActorParticipants: actorParticipants,
+          massIDDocumentsParams: {
+            externalEventsMap: massIDEvents,
             partialDocument,
           },
           ruleDataProcessor,
@@ -51,22 +51,22 @@ describe('MassIdSortingProcessor', () => {
     );
   });
 
-  describe('MassIdSortingProcessorErrors', () => {
-    it.each(massIdSortingErrorTestCases)(
+  describe('MassIDSortingProcessorErrors', () => {
+    it.each(massIDSortingErrorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         documents,
-        massIdAuditDocument,
+        massIDAuditDocument,
         resultComment,
         resultStatus,
       }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+        const allDocuments = [massIDAuditDocument, ...documents];
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
         const ruleInput = {
           ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
         };
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);

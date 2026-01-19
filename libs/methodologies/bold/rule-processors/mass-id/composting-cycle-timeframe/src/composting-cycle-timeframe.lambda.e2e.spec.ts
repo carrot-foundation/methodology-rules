@@ -1,8 +1,8 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import {
   BoldStubsBuilder,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdRecycledEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
@@ -33,7 +33,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
       if (dropOffEventDate) {
         externalEvents.set(
           DROP_OFF,
-          stubBoldMassIdDropOffEvent({
+          stubBoldMassIDDropOffEvent({
             partialDocumentEvent: {
               externalCreatedAt: dropOffEventDate,
             },
@@ -44,7 +44,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
       if (recycledEventDate) {
         externalEvents.set(
           RECYCLED,
-          stubBoldMassIdRecycledEvent({
+          stubBoldMassIDRecycledEvent({
             partialDocumentEvent: {
               externalCreatedAt: recycledEventDate,
             },
@@ -52,15 +52,15 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
         );
       }
 
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: externalEvents,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massIdDocument, massIdAuditDocument].map((document) => ({
+        [massIDDocument, massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -72,7 +72,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
       const response = (await compostingCycleTimeframeLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

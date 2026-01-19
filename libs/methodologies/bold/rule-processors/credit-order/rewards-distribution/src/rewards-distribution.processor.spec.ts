@@ -36,13 +36,13 @@ describe('RewardsDistributionProcessor', () => {
         creditOrderDocument,
         expectedActorsResult,
         expectedCertificateTotalValue,
-        massIdCertificateDocuments,
+        massIDCertificateDocuments,
         unitPrice,
       }) => {
         spyOnLoadDocument(creditOrderDocument);
         spyOnDocumentQueryServiceLoad(
           creditOrderDocument,
-          massIdCertificateDocuments,
+          massIDCertificateDocuments,
         );
 
         const ruleInput = stubRuleInput({
@@ -54,7 +54,7 @@ describe('RewardsDistributionProcessor', () => {
         const {
           actors,
           creditUnitPrice,
-          massIdCertificateTotalValue,
+          massIDCertificateTotalValue,
           remainder,
         } = ruleOutput.resultContent as RewardsDistribution;
 
@@ -77,7 +77,7 @@ describe('RewardsDistributionProcessor', () => {
           actorsResult.map((actor) => BigNumber(actor.amount)),
         );
         const totalCreditPrice = BigNumber(creditUnitPrice).multipliedBy(
-          massIdCertificateTotalValue,
+          massIDCertificateTotalValue,
         );
 
         expect(
@@ -87,7 +87,7 @@ describe('RewardsDistributionProcessor', () => {
           Math.abs(totalAmount.minus(totalCreditPrice).toNumber()) < 0.000_005,
         ).toBeTruthy();
         expect(creditUnitPrice).toBe(String(unitPrice));
-        expect(massIdCertificateTotalValue).toBe(
+        expect(massIDCertificateTotalValue).toBe(
           String(expectedCertificateTotalValue),
         );
 
@@ -117,7 +117,7 @@ describe('RewardsDistributionProcessor', () => {
       'should return $resultStatus when $scenario',
       async ({
         creditOrderDocument,
-        massIdCertificateDocuments,
+        massIDCertificateDocuments,
         resultComment,
         resultStatus,
       }) => {
@@ -127,7 +127,7 @@ describe('RewardsDistributionProcessor', () => {
 
         spyOnDocumentQueryServiceLoad(
           stubDocument(),
-          massIdCertificateDocuments,
+          massIDCertificateDocuments,
         );
 
         const ruleInput = {

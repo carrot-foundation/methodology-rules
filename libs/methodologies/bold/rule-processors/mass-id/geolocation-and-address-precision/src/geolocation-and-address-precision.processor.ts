@@ -27,7 +27,7 @@ import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predica
 import {
   type Document,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -48,7 +48,7 @@ const { DROP_OFF, PICK_UP } = DocumentEventName;
 const MAX_ALLOWED_DISTANCE = 2000;
 
 export interface RuleSubject {
-  participantsAddressData: Map<MassIdDocumentActorType, ParticipantAddressData>;
+  participantsAddressData: Map<MassIDDocumentActorType, ParticipantAddressData>;
 }
 
 interface ParticipantAddressData {
@@ -83,7 +83,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
-      const massIdAuditDocument = await loadDocument(
+      const massIDAuditDocument = await loadDocument(
         this.context.documentLoaderService,
         toDocumentKey({
           documentId: ruleInput.documentId,
@@ -91,7 +91,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         }),
       );
 
-      if (isNil(massIdAuditDocument)) {
+      if (isNil(massIDAuditDocument)) {
         throw this.processorErrors.getKnownError(
           this.processorErrors.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
         );
@@ -99,7 +99,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       const documentsQuery = await this.generateDocumentQuery(ruleInput);
       const ruleSubject = await this.getRuleSubject(
-        massIdAuditDocument,
+        massIDAuditDocument,
         documentsQuery,
       );
       const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
@@ -132,7 +132,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private aggregateResults(
-    actorResults: Map<MassIdDocumentActorType, EvaluateResultOutput[]>,
+    actorResults: Map<MassIDDocumentActorType, EvaluateResultOutput[]>,
   ): EvaluateResultOutput {
     const allResults = [...actorResults.values()].flat();
 
@@ -152,18 +152,18 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private buildParticipantsAddressData(
     events: NonNullable<Document['externalEvents']>,
-    massIdDocument: Document,
-    massIdAuditDocument: Document,
+    massIDDocument: Document,
+    massIDAuditDocument: Document,
     accreditationDocuments: Document[],
   ) {
     const participantsAddressData = new Map<
-      MassIdDocumentActorType,
+      MassIDDocumentActorType,
       ParticipantAddressData
     >();
 
     for (const event of events) {
       const actorType = getParticipantActorType({
-        document: massIdDocument,
+        document: massIDDocument,
         event,
       });
 
@@ -175,7 +175,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       participantsAddressData.set(actorType, {
         accreditedAddress: getAccreditedAddressByParticipantIdAndActorType(
-          massIdAuditDocument,
+          massIDAuditDocument,
           event.participant.id,
           actorType,
           accreditationDocuments,
@@ -206,7 +206,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document> | undefined,
   ) {
     const accreditationDocuments: Document[] = [];
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -216,7 +216,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
     });
 
@@ -227,11 +227,11 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       );
     }
 
-    return { accreditationDocuments, massIdDocument };
+    return { accreditationDocuments, massIDDocument };
   }
 
   private evaluateAddressData(
-    actorType: MassIdDocumentActorType,
+    actorType: MassIDDocumentActorType,
     addressData: ParticipantAddressData,
   ): EvaluateResultOutput[] {
     const { accreditedAddress, eventAddress, gpsGeolocation } = addressData;
@@ -308,7 +308,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     participantsAddressData,
   }: RuleSubject): EvaluateResultOutput {
     const actorResults = new Map<
-      MassIdDocumentActorType,
+      MassIDDocumentActorType,
       EvaluateResultOutput[]
     >();
 
@@ -321,15 +321,15 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return this.aggregateResults(actorResults);
   }
 
-  private extractRequiredEvents(massIdDocument: Document) {
-    const events = massIdDocument.externalEvents?.filter(
+  private extractRequiredEvents(massIDDocument: Document) {
+    const events = massIDDocument.externalEvents?.filter(
       eventNameIsAnyOf([DROP_OFF, PICK_UP]),
     );
 
     if (!isNonEmptyArray(events)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
-          massIdDocument.id,
+          massIDDocument.id,
         ),
       );
     }
@@ -338,34 +338,34 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private async getRuleSubject(
-    massIdAuditDocument: Document,
+    massIDAuditDocument: Document,
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
     const documents = await this.collectDocuments(documentQuery);
-    const massIdDocument = this.validateMassIdDocument(
-      documents.massIdDocument,
+    const massIDDocument = this.validateMassIDDocument(
+      documents.massIDDocument,
     );
-    const pickUpAndDropOffEvents = this.extractRequiredEvents(massIdDocument);
+    const pickUpAndDropOffEvents = this.extractRequiredEvents(massIDDocument);
 
     return {
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
-        massIdDocument,
-        massIdAuditDocument,
+        massIDDocument,
+        massIDAuditDocument,
         documents.accreditationDocuments,
       ),
     };
   }
 
-  private validateMassIdDocument(
-    massIdDocument: Document | undefined,
+  private validateMassIDDocument(
+    massIDDocument: Document | undefined,
   ): Document {
-    if (isNil(massIdDocument)) {
+    if (isNil(massIDDocument)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
     }
 
-    return massIdDocument;
+    return massIDDocument;
   }
 }

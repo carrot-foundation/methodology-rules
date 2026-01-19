@@ -1,5 +1,5 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,11 +20,11 @@ describe('ProcessorIdentificationProcessor', () => {
     `should return $resultStatus when $scenario`,
     async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const massIdDocumentStub = stubBoldMassIdDocument({
+      const massIDDocumentStub = stubBoldMassIDDocument({
         externalEventsMap: events,
       });
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocumentStub);
+      documentLoaderService.mockResolvedValueOnce(massIDDocumentStub);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

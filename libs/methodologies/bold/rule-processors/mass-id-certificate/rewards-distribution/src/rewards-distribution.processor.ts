@@ -12,7 +12,7 @@ import {
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -37,14 +37,14 @@ import {
   calculatePercentageForUnidentifiedWasteOrigin,
   checkIfHasRequiredActorTypes,
   getActorsByType,
-  getNgoActorMassIdPercentage,
+  getNgoActorMassIDPercentage,
   getWasteGeneratorAdditionalPercentage,
   isWasteOriginIdentified,
   mapActorReward,
-  mapMassIdRewards,
+  mapMassIDRewards,
 } from './rewards-distribution.helpers';
 import {
-  type ActorMassIdPercentageInputDto,
+  type ActorMassIDPercentageInputDto,
   type ActorReward,
   type RewardsDistributionActor,
   type RewardsDistributionActorTypePercentage,
@@ -56,17 +56,17 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
-    massIdDocument: Document | undefined;
+    massIDDocument: Document | undefined;
     methodologyDocument: Document | undefined;
   }> {
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
     let methodologyDocument: Document | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
 
       if (METHODOLOGY_DEFINITION.matches(documentRelation)) {
@@ -75,7 +75,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     });
 
     return {
-      massIdDocument,
+      massIDDocument,
       methodologyDocument,
     };
   }
@@ -92,10 +92,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         documentId: String(ruleInput.documentId),
       });
 
-      const { massIdDocument, methodologyDocument } =
+      const { massIDDocument, methodologyDocument } =
         await this.getRuleDocuments(documentLoader);
 
-      if (isNil(massIdDocument)) {
+      if (isNil(massIDDocument)) {
         throw this.errorProcessor.getKnownError(
           this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
         );
@@ -108,14 +108,14 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       }
 
       const actorRewards = this.getActorRewards({
-        massIdDocument,
+        massIDDocument,
         methodologyDocument,
       });
 
       return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
         resultContent: {
-          massIdDocumentId: massIdDocument.id,
-          massIdRewards: mapMassIdRewards(actorRewards),
+          massIDDocumentId: massIDDocument.id,
+          massIDRewards: mapMassIDRewards(actorRewards),
         },
       });
     } catch (error: unknown) {
@@ -125,8 +125,8 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
   }
 
-  private extractMassIdSubtype(document: Document): MassIdOrganicSubtype {
-    if (!is<MassIdOrganicSubtype>(document.subtype)) {
+  private extractMassIDSubtype(document: Document): MassIDOrganicSubtype {
+    if (!is<MassIDOrganicSubtype>(document.subtype)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.UNEXPECTED_DOCUMENT_SUBTYPE(
           String(document.subtype),
@@ -137,20 +137,20 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     return document.subtype;
   }
 
-  private getActorMassIdPercentage(
-    dto: ActorMassIdPercentageInputDto,
+  private getActorMassIDPercentage(
+    dto: ActorMassIDPercentageInputDto,
   ): BigNumber {
-    const { actors, actorType, massIdDocument, rewardDistribution } = dto;
+    const { actors, actorType, massIDDocument, rewardDistribution } = dto;
 
-    let actorMassIdPercentage = rewardDistribution;
+    let actorMassIDPercentage = rewardDistribution;
     const rewardDistributions =
-      this.getRewardsDistributionActorTypePercentages(massIdDocument);
+      this.getRewardsDistributionActorTypePercentages(massIDDocument);
     const wasteGeneratorRewardDistribution =
       rewardDistributions['Waste Generator'];
 
     if (actorType === RewardsDistributionActorType.WASTE_GENERATOR) {
-      actorMassIdPercentage = this.getWasteGeneratorActorMassIdPercentage(
-        massIdDocument,
+      actorMassIDPercentage = this.getWasteGeneratorActorMassIDPercentage(
+        massIDDocument,
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
@@ -158,47 +158,47 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
 
     if (actorType === RewardsDistributionActorType.COMMUNITY_IMPACT_POOL) {
-      const sourcePercentage = getNgoActorMassIdPercentage(
-        massIdDocument,
+      const sourcePercentage = getNgoActorMassIDPercentage(
+        massIDDocument,
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
-        this.getWasteGeneratorActorMassIdFullPercentage.bind(this),
+        this.getWasteGeneratorActorMassIDFullPercentage.bind(this),
       );
 
-      actorMassIdPercentage = actorMassIdPercentage.plus(sourcePercentage);
+      actorMassIDPercentage = actorMassIDPercentage.plus(sourcePercentage);
     }
 
-    if (!isWasteOriginIdentified(massIdDocument)) {
+    if (!isWasteOriginIdentified(massIDDocument)) {
       const additionalPercentage = getWasteGeneratorAdditionalPercentage(
         actors,
         rewardDistributions,
       );
 
-      actorMassIdPercentage = calculatePercentageForUnidentifiedWasteOrigin({
+      actorMassIDPercentage = calculatePercentageForUnidentifiedWasteOrigin({
         actors,
         actorType,
         additionalPercentage,
-        basePercentage: actorMassIdPercentage,
+        basePercentage: actorMassIDPercentage,
         rewardDistributions,
         wasteGeneratorPercentage: wasteGeneratorRewardDistribution,
       });
     }
 
-    return actorMassIdPercentage;
+    return actorMassIDPercentage;
   }
 
   private getActorRewards({
-    massIdDocument,
+    massIDDocument,
     methodologyDocument,
   }: {
-    massIdDocument: Document;
+    massIDDocument: Document;
     methodologyDocument: Document;
   }): ActorReward[] {
     const result: ActorReward[] = [];
-    const actors = this.getRewardsDistributionActors(massIdDocument);
+    const actors = this.getRewardsDistributionActors(massIDDocument);
     const distributions =
-      this.getRewardsDistributionActorTypePercentages(massIdDocument);
+      this.getRewardsDistributionActorTypePercentages(massIDDocument);
 
     for (const [actorType, rewardDistribution] of Object.entries(
       distributions,
@@ -214,10 +214,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         });
 
         if (isNonEmptyArray(actorsByType)) {
-          const massIdPercentage = this.getActorMassIdPercentage({
+          const massIDPercentage = this.getActorMassIDPercentage({
             actors,
             actorType,
-            massIdDocument,
+            massIDDocument,
             rewardDistribution,
           }).div(actorsByType.length);
 
@@ -227,8 +227,8 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
                 mapActorReward({
                   actorType: type,
                   address,
-                  massIdDocument,
-                  massIdPercentage,
+                  massIDDocument,
+                  massIDPercentage,
                   participant,
                   preserveSensitiveData,
                 }),
@@ -300,20 +300,20 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   private getRewardsDistributionActorTypePercentages(
     document: Document,
   ): RewardsDistributionActorTypePercentage {
-    const documentSubtype = this.extractMassIdSubtype(document);
+    const documentSubtype = this.extractMassIDSubtype(document);
     const wasteType = REWARDS_DISTRIBUTION_BY_WASTE_TYPE[documentSubtype];
 
     return REWARDS_DISTRIBUTION[wasteType];
   }
 
-  private getWasteGeneratorActorMassIdFullPercentage(
+  private getWasteGeneratorActorMassIDFullPercentage(
     document: Document,
-    actorMassIdPercentage: BigNumber,
+    actorMassIDPercentage: BigNumber,
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
     if (isWasteOriginIdentified(document)) {
-      return actorMassIdPercentage.plus(
+      return actorMassIDPercentage.plus(
         getWasteGeneratorAdditionalPercentage(actors, rewardDistributions),
       );
     }
@@ -321,15 +321,15 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     return new BigNumber(0);
   }
 
-  private getWasteGeneratorActorMassIdPercentage(
+  private getWasteGeneratorActorMassIDPercentage(
     document: Document,
-    actorMassIdPercentage: BigNumber,
+    actorMassIDPercentage: BigNumber,
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
   ): BigNumber {
-    const fullPercentage = this.getWasteGeneratorActorMassIdFullPercentage(
+    const fullPercentage = this.getWasteGeneratorActorMassIDFullPercentage(
       document,
-      actorMassIdPercentage,
+      actorMassIDPercentage,
       actors,
       rewardDistributions,
     );

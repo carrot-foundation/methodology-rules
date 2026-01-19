@@ -2,8 +2,8 @@ import { seedDocument } from '@carrot-fndn/shared/document/seeds';
 import { AuditApiService } from '@carrot-fndn/shared/methodologies/audit-api';
 import {
   BoldStubsBuilder,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocument,
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
@@ -22,7 +22,7 @@ import { random } from 'typia';
 
 import {
   type EventsData,
-  fetchSimilarMassIdDocuments,
+  fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
 const { ACTOR } = DocumentEventName;
@@ -37,8 +37,8 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
 
   const vehicleLicensePlate = random<LicensePlate>();
   const eventsData: EventsData = {
-    dropOffEvent: stubBoldMassIdDropOffEvent(),
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    dropOffEvent: stubBoldMassIDDropOffEvent(),
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         {
           name: VEHICLE_LICENSE_PLATE,
@@ -60,8 +60,8 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
   beforeAll(async () => {
     auditApiService = new AuditApiService();
 
-    const { massIdDocument } = new BoldStubsBuilder()
-      .createMassIdDocuments({
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments({
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: eventsData.recyclerEvent,
           [`${ACTOR}-${WASTE_GENERATOR}`]: eventsData.wasteGeneratorEvent,
@@ -71,25 +71,25 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
       })
       .build();
 
-    v2DocumentStub = massIdDocument;
+    v2DocumentStub = massIDDocument;
 
     v2DocumentId = await seedDocument({
       partialDocument: v2DocumentStub,
     });
   });
 
-  describe('fetchSimilarMassIdDocuments', () => {
+  describe('fetchSimilarMassIDDocuments', () => {
     it('should return an empty array when no similar documents are found', async () => {
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments()
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments()
         .build();
 
-      const result = await fetchSimilarMassIdDocuments({
+      const result = await fetchSimilarMassIDDocuments({
         auditApiService,
-        document: massIdDocument,
+        document: massIDDocument,
         eventsData: {
-          dropOffEvent: stubBoldMassIdDropOffEvent(),
-          pickUpEvent: stubBoldMassIdPickUpEvent(),
+          dropOffEvent: stubBoldMassIDDropOffEvent(),
+          pickUpEvent: stubBoldMassIDPickUpEvent(),
           recyclerEvent: stubDocumentEvent({
             label: RECYCLER,
             name: ACTOR,
@@ -110,7 +110,7 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
         partialDocument: v2DocumentStub,
       });
 
-      const result = await fetchSimilarMassIdDocuments({
+      const result = await fetchSimilarMassIDDocuments({
         auditApiService,
         document: v2DocumentStub,
         eventsData,
@@ -173,7 +173,7 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
         partialDocument: v1DocumentStub,
       });
 
-      const result = await fetchSimilarMassIdDocuments({
+      const result = await fetchSimilarMassIDDocuments({
         auditApiService,
         document: v2DocumentStub,
         eventsData,

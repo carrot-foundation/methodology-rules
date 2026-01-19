@@ -11,7 +11,7 @@ import {
   DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
   DocumentType,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -100,7 +100,7 @@ const defaultPickUpAttributes: MetadataAttributeParameter[] = [
   [VEHICLE_TYPE, random<DocumentEventVehicleType>()],
 ];
 
-export const stubBoldMassIdPickUpEvent = ({
+export const stubBoldMassIDPickUpEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -126,7 +126,7 @@ const defaultTransportManifestAttributes: MetadataAttributeParameter[] = [
   },
 ];
 
-export const stubBoldMassIdTransportManifestEvent = ({
+export const stubBoldMassIDTransportManifestEvent = ({
   metadataAttributes,
   partialDocumentEvent,
   withExemptionJustification,
@@ -192,7 +192,7 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   },
 ];
 
-export const stubBoldMassIdWeighingEvent = ({
+export const stubBoldMassIDWeighingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -213,7 +213,7 @@ const defaultDropOffAttributes: MetadataAttributeParameter[] = [
   [CAPTURED_GPS_LONGITUDE, faker.location.longitude()],
 ];
 
-export const stubBoldMassIdDropOffEvent = ({
+export const stubBoldMassIDDropOffEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -239,7 +239,7 @@ const defaultRecyclingManifestAttributes: MetadataAttributeParameter[] = [
   },
 ];
 
-export const stubBoldMassIdRecyclingManifestEvent = ({
+export const stubBoldMassIDRecyclingManifestEvent = ({
   metadataAttributes,
   partialDocumentEvent,
   withExemptionJustification,
@@ -269,7 +269,7 @@ export const stubBoldMassIdRecyclingManifestEvent = ({
   );
 };
 
-export const stubBoldMassIdRecycledEvent = ({
+export const stubBoldMassIDRecycledEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -287,7 +287,7 @@ const defaultSortingAttributes: MetadataAttributeParameter[] = [
   [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
 ];
 
-export const stubBoldMassIdSortingEvent = ({
+export const stubBoldMassIDSortingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
@@ -300,51 +300,51 @@ export const stubBoldMassIdSortingEvent = ({
     mergeMetadataAttributes(defaultSortingAttributes, metadataAttributes),
   );
 
-export type BoldMassIdExternalEventsMap = Map<
+export type BoldMassIDExternalEventsMap = Map<
   DocumentEventName | string,
   DocumentEvent
 >;
-export type BoldMassIdExternalEventsObject = Partial<
+export type BoldMassIDExternalEventsObject = Partial<
   Record<DocumentEventName, DocumentEvent>
 >;
 
-export const boldMassIdExternalEventsMap: BoldMassIdExternalEventsMap = new Map(
+export const boldMassIDExternalEventsMap: BoldMassIDExternalEventsMap = new Map(
   [
-    [PICK_UP, stubBoldMassIdPickUpEvent()],
+    [PICK_UP, stubBoldMassIDPickUpEvent()],
     [
       TRANSPORT_MANIFEST,
-      stubBoldMassIdTransportManifestEvent({
+      stubBoldMassIDTransportManifestEvent({
         withExemptionJustification: false,
       }),
     ],
-    [WEIGHING, stubBoldMassIdWeighingEvent()],
+    [WEIGHING, stubBoldMassIDWeighingEvent()],
     // eslint-disable-next-line perfectionist/sort-maps
-    [DROP_OFF, stubBoldMassIdDropOffEvent()],
-    [SORTING, stubBoldMassIdSortingEvent()],
+    [DROP_OFF, stubBoldMassIDDropOffEvent()],
+    [SORTING, stubBoldMassIDSortingEvent()],
     // eslint-disable-next-line perfectionist/sort-maps
     [
       RECYCLING_MANIFEST,
-      stubBoldMassIdRecyclingManifestEvent({
+      stubBoldMassIDRecyclingManifestEvent({
         withExemptionJustification: false,
       }),
     ],
     // eslint-disable-next-line perfectionist/sort-maps
-    [RECYCLED, stubBoldMassIdRecycledEvent()],
+    [RECYCLED, stubBoldMassIDRecycledEvent()],
   ],
 );
 
-export const stubBoldMassIdDocument = ({
+export const stubBoldMassIDDocument = ({
   externalEventsMap,
   partialDocument,
 }: StubBoldDocumentParameters = {}): Document => {
   const mergedEventsMap = isNil(externalEventsMap)
-    ? boldMassIdExternalEventsMap
-    : mergeEventsMaps(boldMassIdExternalEventsMap, externalEventsMap);
+    ? boldMassIDExternalEventsMap
+    : mergeEventsMaps(boldMassIDExternalEventsMap, externalEventsMap);
 
   return {
     ...stubDocument(
       {
-        subtype: stubEnumValue(MassIdOrganicSubtype),
+        subtype: stubEnumValue(MassIDOrganicSubtype),
         ...partialDocument,
         category: MASS_ID,
         currentValue: isNil(partialDocument?.currentValue)

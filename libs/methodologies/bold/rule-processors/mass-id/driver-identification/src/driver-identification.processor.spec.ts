@@ -24,15 +24,15 @@ describe('DriverIdentificationProcessor', () => {
     async ({ pickUpEvent, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {
             [PICK_UP]: pickUpEvent,
           },
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

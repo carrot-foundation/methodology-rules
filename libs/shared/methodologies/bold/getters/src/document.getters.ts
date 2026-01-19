@@ -4,7 +4,7 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
@@ -12,7 +12,7 @@ import { getEventAttributeValue } from './event.getters';
 
 const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
   DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 
 interface LastYearEmissionAndCompostingMetricsEventParameters {
   documentWithEmissionAndCompostingMetricsEvent: Document;
@@ -62,7 +62,7 @@ export const getParticipantActorType = ({
 }: {
   document: Document;
   event: DocumentEvent;
-}): MassIdDocumentActorType | undefined => {
+}): MassIDDocumentActorType | undefined => {
   const events = document.externalEvents;
 
   if (!isNonEmptyArray(events)) {
