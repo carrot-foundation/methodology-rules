@@ -1,6 +1,10 @@
 import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  getApprovedExceptions,
+  isApprovedExceptionValid,
+} from '@carrot-fndn/shared/methodologies/bold/helpers';
+import {
   eventHasLabel,
   eventNameIsAnyOf,
   isActorEvent,
@@ -19,6 +23,46 @@ import {
   type MethodologyAddress,
 } from '@carrot-fndn/shared/types';
 import { is } from 'typia';
+
+import type {
+  GpsLatitudeApprovedException,
+  GpsLongitudeApprovedException,
+} from './geolocation-and-address-precision.types';
+
+import {
+  isGpsLatitudeApprovedException,
+  isGpsLongitudeApprovedException,
+} from './geolocation-and-address-precision.typia';
+
+export const hasVerificationDocument = (
+  massIDAuditDocument: Document,
+  participantId: string,
+  actorType: MassIDDocumentActorType,
+  accreditationDocuments: Document[],
+): boolean => {
+  const actorEvent = massIDAuditDocument.externalEvents?.find(
+    (event) =>
+      isActorEvent(event) &&
+      eventHasLabel(event, actorType) &&
+      event.participant.id === participantId,
+  );
+
+  if (isNil(actorEvent)) {
+    return false;
+  }
+
+  const accreditationDocumentId = actorEvent.relatedDocument?.documentId;
+
+  if (isNil(accreditationDocumentId)) {
+    return false;
+  }
+
+  const participantAccreditationDocument = accreditationDocuments.find(
+    (document) => document.id === accreditationDocumentId,
+  );
+
+  return !isNil(participantAccreditationDocument);
+};
 
 export const getAccreditedAddressByParticipantIdAndActorType = (
   massIDAuditDocument: Document,
@@ -99,4 +143,76 @@ export const getEventGpsGeolocation = (
   }
 
   return undefined;
+};
+
+export const getGpsExceptionsFromRecyclerAccreditation = (
+  recyclerAccreditationDocument: Document | undefined,
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+): {
+  latitudeException: GpsLatitudeApprovedException | undefined;
+  longitudeException: GpsLongitudeApprovedException | undefined;
+} => {
+  if (isNil(recyclerAccreditationDocument)) {
+    return { latitudeException: undefined, longitudeException: undefined };
+  }
+
+  const { ACCREDITATION_RESULT } = DocumentEventName;
+  const approvedExceptions = getApprovedExceptions(
+    recyclerAccreditationDocument,
+    ACCREDITATION_RESULT,
+  );
+
+  if (!approvedExceptions) {
+    return { latitudeException: undefined, longitudeException: undefined };
+  }
+
+  const latitudeException = approvedExceptions.find(
+    (exception) =>
+      exception['Attribute Location'].Event === eventName.toString() &&
+      exception['Attribute Name'] ===
+        DocumentEventAttributeName.CAPTURED_GPS_LATITUDE.toString(),
+  );
+
+  const longitudeException = approvedExceptions.find(
+    (exception) =>
+      exception['Attribute Location'].Event === eventName.toString() &&
+      exception['Attribute Name'] ===
+        DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
+  );
+
+  return {
+    latitudeException: isGpsLatitudeApprovedException(latitudeException)
+      ? latitudeException
+      : undefined,
+    longitudeException: isGpsLongitudeApprovedException(longitudeException)
+      ? longitudeException
+      : undefined,
+  };
+};
+
+export const isGpsExceptionValid = (
+  exception:
+    | GpsLatitudeApprovedException
+    | GpsLongitudeApprovedException
+    | undefined,
+): boolean => {
+  const isValidException =
+    isGpsLatitudeApprovedException(exception) ||
+    isGpsLongitudeApprovedException(exception);
+
+  if (!isValidException) {
+    return false;
+  }
+
+  return isApprovedExceptionValid(exception);
+};
+
+export const shouldSkipGpsValidation = (
+  latitudeException: GpsLatitudeApprovedException | undefined,
+  longitudeException: GpsLongitudeApprovedException | undefined,
+): boolean => {
+  const hasValidLatitudeException = isGpsExceptionValid(latitudeException);
+  const hasValidLongitudeException = isGpsExceptionValid(longitudeException);
+
+  return hasValidLatitudeException && hasValidLongitudeException;
 };
