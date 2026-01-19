@@ -254,6 +254,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         externalEventsMap: new Map(),
       });
 
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
+        actorType,
+        participantId,
+        accreditationDocument.id,
+      );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
         massIDAuditDocument,
