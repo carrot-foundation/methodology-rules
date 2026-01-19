@@ -8,10 +8,12 @@ import {
 import {
   MASS_ID,
   METHODOLOGY_DEFINITION,
+  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
+  DocumentSubtype,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,7 +28,6 @@ import BigNumber from 'bignumber.js';
 import { is } from 'typia';
 
 import {
-  LARGE_REVENUE_BUSINESS_DISCOUNT,
   REQUIRED_ACTOR_TYPES,
   REWARDS_DISTRIBUTION,
   REWARDS_DISTRIBUTION_BY_WASTE_TYPE,
@@ -34,6 +35,7 @@ import {
 } from './rewards-distribution.constants';
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import {
+  applyLargeBusinessDiscount,
   calculatePercentageForUnidentifiedWasteOrigin,
   checkIfHasRequiredActorTypes,
   getActorsByType,
@@ -42,6 +44,7 @@ import {
   isWasteOriginIdentified,
   mapActorReward,
   mapMassIDRewards,
+  shouldApplyLargeBusinessDiscount,
 } from './rewards-distribution.helpers';
 import {
   type ActorMassIDPercentageInputDto,
@@ -58,9 +61,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
     massIDDocument: Document | undefined;
     methodologyDocument: Document | undefined;
+    wasteGeneratorVerificationDocument: Document | undefined;
   }> {
     let massIDDocument: Document | undefined;
     let methodologyDocument: Document | undefined;
+    let wasteGeneratorVerificationDocument: Document | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -72,11 +77,19 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       if (METHODOLOGY_DEFINITION.matches(documentRelation)) {
         methodologyDocument = document;
       }
+
+      if (
+        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
+        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
+      ) {
+        wasteGeneratorVerificationDocument = document;
+      }
     });
 
     return {
       massIDDocument,
       methodologyDocument,
+      wasteGeneratorVerificationDocument,
     };
   }
 
@@ -92,8 +105,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         documentId: String(ruleInput.documentId),
       });
 
-      const { massIDDocument, methodologyDocument } =
-        await this.getRuleDocuments(documentLoader);
+      const {
+        massIDDocument,
+        methodologyDocument,
+        wasteGeneratorVerificationDocument,
+      } = await this.getRuleDocuments(documentLoader);
 
       if (isNil(massIDDocument)) {
         throw this.errorProcessor.getKnownError(
@@ -110,6 +126,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       const actorRewards = this.getActorRewards({
         massIDDocument,
         methodologyDocument,
+        wasteGeneratorVerificationDocument,
       });
 
       return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
@@ -140,7 +157,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   private getActorMassIDPercentage(
     dto: ActorMassIDPercentageInputDto,
   ): BigNumber {
-    const { actors, actorType, massIDDocument, rewardDistribution } = dto;
+    const {
+      actors,
+      actorType,
+      massIDDocument,
+      rewardDistribution,
+      wasteGeneratorVerificationDocument,
+    } = dto;
 
     let actorMassIDPercentage = rewardDistribution;
     const rewardDistributions =
@@ -154,6 +177,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         wasteGeneratorRewardDistribution,
         actors,
         rewardDistributions,
+        wasteGeneratorVerificationDocument,
       );
     }
 
@@ -164,6 +188,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         actors,
         rewardDistributions,
         this.getWasteGeneratorActorMassIDFullPercentage.bind(this),
+        wasteGeneratorVerificationDocument,
       );
 
       actorMassIDPercentage = actorMassIDPercentage.plus(sourcePercentage);
@@ -191,9 +216,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   private getActorRewards({
     massIDDocument,
     methodologyDocument,
+    wasteGeneratorVerificationDocument,
   }: {
     massIDDocument: Document;
     methodologyDocument: Document;
+    wasteGeneratorVerificationDocument: Document | undefined;
   }): ActorReward[] {
     const result: ActorReward[] = [];
     const actors = this.getRewardsDistributionActors(massIDDocument);
@@ -219,6 +246,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
             actorType,
             massIDDocument,
             rewardDistribution,
+            wasteGeneratorVerificationDocument,
           }).div(actorsByType.length);
 
           result.push(
@@ -326,6 +354,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     actorMassIDPercentage: BigNumber,
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
+    wasteGeneratorVerificationDocument: Document | undefined,
   ): BigNumber {
     const fullPercentage = this.getWasteGeneratorActorMassIDFullPercentage(
       document,
@@ -334,7 +363,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       rewardDistributions,
     );
 
-    // TODO: Today all waste generators are eligible for the discount, but we need to apply it only to large source companies based on the accreditation document
-    return fullPercentage.multipliedBy(1 - LARGE_REVENUE_BUSINESS_DISCOUNT);
+    const shouldApplyDiscount = shouldApplyLargeBusinessDiscount(
+      wasteGeneratorVerificationDocument,
+    );
+
+    return applyLargeBusinessDiscount(fullPercentage, shouldApplyDiscount);
   }
 }

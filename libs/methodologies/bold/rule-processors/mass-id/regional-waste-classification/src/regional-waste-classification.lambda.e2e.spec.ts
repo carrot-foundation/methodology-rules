@@ -17,10 +17,11 @@ describe('RegionalWasteClassificationLambda E2E', () => {
 
   it.each(regionalWasteClassificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultComment, resultStatus }) => {
+    async ({ events, partialDocument, resultComment, resultStatus }) => {
       const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({
           externalEventsMap: events,
+          partialDocument,
         })
         .createMassIDAuditDocuments()
         .build();

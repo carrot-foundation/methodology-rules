@@ -4,6 +4,7 @@ import {
   type BoldExternalEventsObject,
   BoldStubsBuilder,
   stubBoldMassIDPickUpEvent,
+  stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
@@ -11,6 +12,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
+  DocumentSubtype,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
@@ -21,9 +23,11 @@ import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.const
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { PICK_UP } = DocumentEventName;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
+const { ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
+const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = DocumentEventAttributeName;
+const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } =
+  DocumentEventAttributeValue;
+const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = DocumentSubtype;
 const {
   COMMUNITY_IMPACT_POOL,
   HAULER,
@@ -35,6 +39,36 @@ const {
   RECYCLER,
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
+
+const createWasteGeneratorVerificationDocument = (
+  businessSize: DocumentEventAttributeValue,
+): Document =>
+  ({
+    ...new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
+      .createMethodologyDocument()
+      .createParticipantAccreditationDocuments(
+        new Map([
+          [
+            WASTE_GENERATOR_SUBTYPE,
+            {
+              externalEventsMap: {
+                [ONBOARDING_DECLARATION]:
+                  stubDocumentEventWithMetadataAttributes(
+                    {
+                      name: ONBOARDING_DECLARATION,
+                    },
+                    [[BUSINESS_SIZE_DECLARATION, businessSize]],
+                  ),
+              },
+            },
+          ],
+        ]),
+      )
+      .build()
+      .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
+  }) as Document;
 
 const DEFAULT_REWARDS = {
   [COMMUNITY_IMPACT_POOL]: '0',
@@ -71,6 +105,35 @@ const EXPECTED_REWARDS = {
     ...DEFAULT_REWARDS,
     [COMMUNITY_IMPACT_POOL]: '12.5',
   },
+  SMALL_BUSINESS: {
+    [RewardsDistributionWasteType.MIXED_ORGANIC_WASTE]: {
+      [HAULER]: '10',
+      [NETWORK]: '20',
+      [PROCESSOR]: '10',
+      [RECYCLER]: '20',
+      [WASTE_GENERATOR]: '30',
+      ...DEFAULT_REWARDS,
+      [COMMUNITY_IMPACT_POOL]: '0',
+    },
+    [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
+      [HAULER]: '5',
+      [NETWORK]: '20',
+      [PROCESSOR]: '10',
+      [RECYCLER]: '30',
+      [WASTE_GENERATOR]: '25',
+      ...DEFAULT_REWARDS,
+      [COMMUNITY_IMPACT_POOL]: '0',
+    },
+    [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
+      [HAULER]: '5',
+      [NETWORK]: '20',
+      [PROCESSOR]: '10',
+      [RECYCLER]: '30',
+      [WASTE_GENERATOR]: '25',
+      ...DEFAULT_REWARDS,
+      [COMMUNITY_IMPACT_POOL]: '0',
+    },
+  },
   WITHOUT_WASTE_GENERATOR: {
     WITH_HAULER: {
       [HAULER]: '7.5',
@@ -94,6 +157,7 @@ export const rewardsDistributionProcessorTestCases: Array<{
   massIDPartialDocument: PartialDeep<Document>;
   resultStatus: RuleOutputStatus;
   scenario: string;
+  wasteGeneratorVerificationDocument?: Document | undefined;
 }> = [
   ...Object.entries(REWARDS_DISTRIBUTION_BY_WASTE_TYPE).map(
     ([wasteType, expectedRewards]) => ({
@@ -144,6 +208,40 @@ export const rewardsDistributionProcessorTestCases: Array<{
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `all rewards are applied for the ${REWARDS_DISTRIBUTION_BY_WASTE_TYPE['Food, Food Waste and Beverages']}`,
+  },
+  {
+    expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `Large Business discount is applied when Waste Generator Verification Document is missing (defaults to Large Business)`,
+  },
+  {
+    expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
+    wasteGeneratorVerificationDocument:
+      createWasteGeneratorVerificationDocument(LARGE_BUSINESS),
+  },
+  {
+    expectedRewards:
+      EXPECTED_REWARDS.SMALL_BUSINESS[
+        RewardsDistributionWasteType.MIXED_ORGANIC_WASTE
+      ],
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
+    wasteGeneratorVerificationDocument:
+      createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
   },
 ];
 

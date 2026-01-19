@@ -32,6 +32,7 @@ describe('RewardsDistributionProcessor', () => {
         expectedRewards,
         massIDDocumentEvents,
         massIDPartialDocument,
+        wasteGeneratorVerificationDocument,
       }) => {
         const {
           massIDAuditDocument,
@@ -55,6 +56,9 @@ describe('RewardsDistributionProcessor', () => {
           massIDDocument,
           massIDCertificateDocument,
           methodologyDocument as Document,
+          ...(wasteGeneratorVerificationDocument
+            ? [wasteGeneratorVerificationDocument]
+            : []),
         ];
 
         spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
