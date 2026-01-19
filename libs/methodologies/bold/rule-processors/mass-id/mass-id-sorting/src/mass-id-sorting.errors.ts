@@ -16,7 +16,7 @@ const { DEDUCTED_WEIGHT, GROSS_WEIGHT, SORTING_FACTOR } =
   DocumentEventAttributeName;
 const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
-export class MassIdSortingProcessorErrors extends BaseProcessorErrors {
+export class MassIDSortingProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     FAILED_BY_ERROR: 'Unable to validate the mass-id-sorting.',
     INVALID_DEDUCTED_WEIGHT: (deductedWeight: unknown) =>

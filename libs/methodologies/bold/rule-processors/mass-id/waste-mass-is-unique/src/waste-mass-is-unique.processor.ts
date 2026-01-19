@@ -35,7 +35,7 @@ import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors'
 import {
   createAuditApiService,
   type EventsData,
-  fetchSimilarMassIdDocuments,
+  fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
 const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
@@ -128,7 +128,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   protected async getRuleSubject(document: Document): Promise<RuleSubject> {
     const eventsData = this.collectRequiredEventsData(document);
 
-    const duplicateDocuments = await fetchSimilarMassIdDocuments({
+    const duplicateDocuments = await fetchSimilarMassIDDocuments({
       auditApiService: createAuditApiService(),
       document,
       eventsData,

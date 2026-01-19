@@ -2,8 +2,8 @@ import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   BoldStubsBuilder,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -41,13 +41,13 @@ describe('ProjectBoundaryProcessor', () => {
     async ({ events, resultComment, resultContent, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       if (resultContent && typeof resultContent.distance === 'number') {
         const distanceInMeters = resultContent.distance * 1000;
@@ -84,16 +84,16 @@ describe('ProjectBoundaryProcessor', () => {
     it('should return FAILED when the distance is not calculated', async () => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: {
-            [DocumentEventName.DROP_OFF]: stubBoldMassIdDropOffEvent(),
-            [DocumentEventName.PICK_UP]: stubBoldMassIdPickUpEvent(),
+            [DocumentEventName.DROP_OFF]: stubBoldMassIDDropOffEvent(),
+            [DocumentEventName.PICK_UP]: stubBoldMassIDPickUpEvent(),
           },
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

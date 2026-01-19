@@ -26,8 +26,8 @@ describe('NoConflictingCertificateOrCreditProcessor E2E', () => {
 
   it.each(noConflictingCertificateOrCreditTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
-      const allDocuments = [...documents, massIdAuditDocument];
+    async ({ documents, massIDAuditDocument, resultComment, resultStatus }) => {
+      const allDocuments = [...documents, massIDAuditDocument];
 
       prepareEnvironmentTestE2E(
         allDocuments.map((document) => ({
@@ -41,7 +41,7 @@ describe('NoConflictingCertificateOrCreditProcessor E2E', () => {
 
       const response = (await lambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),

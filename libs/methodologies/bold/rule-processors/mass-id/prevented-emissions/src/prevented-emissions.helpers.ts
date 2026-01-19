@@ -5,7 +5,7 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
@@ -24,7 +24,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 export const getPreventedEmissionsFactor = (
-  wasteSubtype: MassIdOrganicSubtype,
+  wasteSubtype: MassIDOrganicSubtype,
   wasteGeneratorBaseline: MethodologyBaseline,
 ): number => {
   const factor =
@@ -38,18 +38,18 @@ export const getPreventedEmissionsFactor = (
 export const calculatePreventedEmissions = (
   exceedingEmissionCoefficient: number,
   preventedEmissionsByMaterialAndBaselinePerTon: number,
-  massIdDocumentValue: number,
+  massIDDocumentValue: number,
 ): number => {
   const computedValue =
-    massIdDocumentValue * preventedEmissionsByMaterialAndBaselinePerTon -
-    massIdDocumentValue * exceedingEmissionCoefficient;
+    massIDDocumentValue * preventedEmissionsByMaterialAndBaselinePerTon -
+    massIDDocumentValue * exceedingEmissionCoefficient;
 
   return Math.max(0, computedValue);
 };
 
 export const getWasteGeneratorBaselineByWasteSubtype = (
   wasteGeneratorAccreditationDocument: Document,
-  wasteSubtype: MassIdOrganicSubtype,
+  wasteSubtype: MassIDOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
 ): MethodologyBaseline | undefined => {
   const recyclingBaselineEvent =

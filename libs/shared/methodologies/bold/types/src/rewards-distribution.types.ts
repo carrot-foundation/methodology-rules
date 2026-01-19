@@ -33,11 +33,11 @@ export interface CertificateReward {
 export type CertificateRewardDistributionOutput =
   RewardDistributionResultContent;
 
-export interface MassIdReward {
+export interface MassIDReward {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
   // TODO: update with custom tag to validate BigNumber string
-  massIdPercentage: NonEmptyString;
+  massIDPercentage: NonEmptyString;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }
@@ -52,6 +52,6 @@ export type RewardActorParticipant = Pick<
 >;
 
 export interface RewardDistributionResultContent {
-  massIdDocumentId: NonEmptyString;
-  massIdRewards: NonEmptyArray<MassIdReward>;
+  massIDDocumentId: NonEmptyString;
+  massIDRewards: NonEmptyArray<MassIDReward>;
 }

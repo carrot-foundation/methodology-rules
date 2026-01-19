@@ -34,15 +34,15 @@ describe('DocumentManifestDataLambda E2E', () => {
         documentManifestType,
       });
 
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massIdDocument, massIdAuditDocument].map((document) => ({
+        [massIDDocument, massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -54,7 +54,7 @@ describe('DocumentManifestDataLambda E2E', () => {
       const response = (await lambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

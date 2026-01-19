@@ -3,7 +3,7 @@ import {
   type Document,
   DocumentEventAccreditationStatus,
   type DocumentEventScaleType,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -109,7 +109,7 @@ const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParamet
   [
     [
       BASELINES,
-      { [random<MassIdOrganicSubtype>()]: random<MethodologyBaseline>() },
+      { [random<MassIDOrganicSubtype>()]: random<MethodologyBaseline>() },
     ],
   ];
 

@@ -41,9 +41,9 @@ describe('WasteMassIsUniqueLambda E2E', () => {
         oldDuplicateDocuments,
         resultStatus,
       }) => {
-        const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-          .createMassIdDocuments()
-          .createMassIdAuditDocuments()
+        const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+          .createMassIDDocuments()
+          .createMassIDAuditDocuments()
           .build();
 
         mockCheckDuplicateDocuments
@@ -51,7 +51,7 @@ describe('WasteMassIsUniqueLambda E2E', () => {
           .mockResolvedValueOnce(oldDuplicateDocuments);
 
         prepareEnvironmentTestE2E(
-          [massIdAuditDocument, massIdDocument].map((_document) => ({
+          [massIDAuditDocument, massIDDocument].map((_document) => ({
             document: _document,
             documentKey: toDocumentKey({
               documentId: _document.id,
@@ -63,7 +63,7 @@ describe('WasteMassIsUniqueLambda E2E', () => {
         const response = (await wasteMassIsUniqueLambda(
           stubRuleInput({
             documentKeyPrefix,
-            parentDocumentId: massIdDocument.id,
+            parentDocumentId: massIDDocument.id,
           }),
           stubContext(),
           () => stubRuleResponse(),
@@ -77,9 +77,9 @@ describe('WasteMassIsUniqueLambda E2E', () => {
   describe('wasteMassIsUniqueErrorTestCases', () => {
     it.each(wasteMassIsUniqueErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ massIdAuditDocument, massIdDocument, resultStatus }) => {
+      async ({ massIDAuditDocument, massIDDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
-          [massIdAuditDocument, massIdDocument].map((_document) => ({
+          [massIDAuditDocument, massIDDocument].map((_document) => ({
             document: _document,
             documentKey: toDocumentKey({
               documentId: _document?.id,
@@ -91,7 +91,7 @@ describe('WasteMassIsUniqueLambda E2E', () => {
         const response = (await wasteMassIsUniqueLambda(
           stubRuleInput({
             documentKeyPrefix,
-            parentDocumentId: massIdDocument?.id ?? faker.string.uuid(),
+            parentDocumentId: massIDDocument?.id ?? faker.string.uuid(),
           }),
           stubContext(),
           () => stubRuleResponse(),

@@ -261,7 +261,7 @@ describe('${pascalCase}Lambda E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ document, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [document, stubs.massIdAuditDocumentStub].map((_document) => ({
+        [document, stubs.massIDAuditDocumentStub].map((_document) => ({
           document: _document,
           documentKey: toDocumentKey({
             documentId: _document.id,

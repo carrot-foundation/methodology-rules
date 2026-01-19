@@ -33,7 +33,7 @@ import {
 } from './no-conflicting-certificate-or-credit.constants';
 import {
   hasNonCancelledDocuments,
-  hasPassedOrInProgressMassIdAuditForTheSameMethodology,
+  hasPassedOrInProgressMassIDAuditForTheSameMethodology,
 } from './no-conflicting-certificate-or-credit.helpers';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
@@ -41,8 +41,8 @@ const { MASS_ID } = DocumentCategory;
 
 interface RuleSubject {
   creditDocuments: Document[];
-  massIdCertificateDocuments: Document[];
-  relatedMassIdAuditDocuments: Document[];
+  massIDCertificateDocuments: Document[];
+  relatedMassIDAuditDocuments: Document[];
 }
 
 export const RESULT_COMMENTS = {
@@ -53,17 +53,17 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
   readonly errorProcessor =
     new NoConflictingCertificateOrCreditProcessorErrors();
 
-  private readonly massIdCertificateMatcher: DocumentMatcher;
+  private readonly massIDCertificateMatcher: DocumentMatcher;
 
   private readonly methodologySlug: BoldMethodologySlug;
 
   constructor(
-    massIdCertificateMatcher: DocumentMatcher,
+    massIDCertificateMatcher: DocumentMatcher,
     methodologySlug: BoldMethodologySlug,
   ) {
     super();
 
-    this.massIdCertificateMatcher = massIdCertificateMatcher;
+    this.massIDCertificateMatcher = massIDCertificateMatcher;
     this.methodologySlug = methodologySlug;
   }
 
@@ -94,15 +94,15 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
       context: {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
-      criteria: buildDocumentsCriteria(this.massIdCertificateMatcher),
+      criteria: buildDocumentsCriteria(this.massIDCertificateMatcher),
       documentId: ruleInput.documentId,
     });
   }
 
   private evaluateResult({
     creditDocuments,
-    massIdCertificateDocuments,
-    relatedMassIdAuditDocuments,
+    massIDCertificateDocuments,
+    relatedMassIDAuditDocuments,
   }: RuleSubject): EvaluateResultOutput {
     if (hasNonCancelledDocuments(creditDocuments)) {
       throw this.errorProcessor.getKnownError(
@@ -111,17 +111,17 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
       );
     }
 
-    if (hasNonCancelledDocuments(massIdCertificateDocuments)) {
+    if (hasNonCancelledDocuments(massIDCertificateDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
-          assert<NonEmptyString>(this.massIdCertificateMatcher.match.type),
+          assert<NonEmptyString>(this.massIDCertificateMatcher.match.type),
         ),
       );
     }
 
     if (
-      hasPassedOrInProgressMassIdAuditForTheSameMethodology(
-        relatedMassIdAuditDocuments,
+      hasPassedOrInProgressMassIDAuditForTheSameMethodology(
+        relatedMassIDAuditDocuments,
         this.methodologySlug,
       )
     ) {
@@ -143,8 +143,8 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     ruleInput: RuleInput,
   ): Promise<RuleSubject> {
     const creditDocuments: Document[] = [];
-    const massIdCertificateDocuments: Document[] = [];
-    const relatedMassIdAuditDocuments: Document[] = [];
+    const massIDCertificateDocuments: Document[] = [];
+    const relatedMassIDAuditDocuments: Document[] = [];
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -153,22 +153,22 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
         creditDocuments.push(document);
       }
 
-      if (this.massIdCertificateMatcher.matches(documentRelation)) {
-        massIdCertificateDocuments.push(document);
+      if (this.massIDCertificateMatcher.matches(documentRelation)) {
+        massIDCertificateDocuments.push(document);
       }
 
       if (
         MASS_ID_AUDIT.matches(documentRelation) &&
         documentRelation.documentId !== ruleInput.documentId
       ) {
-        relatedMassIdAuditDocuments.push(document);
+        relatedMassIDAuditDocuments.push(document);
       }
     });
 
     return {
       creditDocuments,
-      massIdCertificateDocuments,
-      relatedMassIdAuditDocuments,
+      massIDCertificateDocuments,
+      relatedMassIDAuditDocuments,
     };
   }
 }

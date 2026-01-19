@@ -19,8 +19,8 @@ import {
   DocumentEventName,
   DocumentSubtype,
   DocumentType,
-  MassIdDocumentActorType,
-  type MassIdReward,
+  MassIDDocumentActorType,
+  type MassIDReward,
   MethodologyDocumentActorType,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -42,7 +42,7 @@ type CreditOrderDocument = Document;
 
 type ErrorTestCase = {
   creditOrderDocument: CreditOrderDocument | undefined;
-  massIdCertificateDocuments: CertificateDocument[];
+  massIDCertificateDocuments: CertificateDocument[];
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
@@ -52,7 +52,7 @@ type TestCase = {
   creditOrderDocument: CreditOrderDocument;
   expectedActorsResult: ActorResult[];
   expectedCertificateTotalValue: number;
-  massIdCertificateDocuments: CertificateDocument[];
+  massIDCertificateDocuments: CertificateDocument[];
   resultStatus: RuleOutputStatus;
   scenario: string;
   unitPrice: number;
@@ -106,7 +106,7 @@ const MULTI_HAULER_REWARDS_DISTRIBUTION = {
 };
 
 const generateParticipants = () => {
-  const massIdActorParticipants = new Map(
+  const massIDActorParticipants = new Map(
     MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
       subtype,
       stubParticipant({ id: faker.string.uuid(), type: subtype }),
@@ -120,30 +120,30 @@ const generateParticipants = () => {
     ]),
   );
 
-  return { massIdActorParticipants, methodologyActorParticipants };
+  return { massIDActorParticipants, methodologyActorParticipants };
 };
 
-const { massIdActorParticipants, methodologyActorParticipants } =
+const { massIDActorParticipants, methodologyActorParticipants } =
   generateParticipants();
 
 const createStandardRewardsDistribution = (
   documentId: string,
 ): CertificateRewardDistributionOutput => ({
-  massIdDocumentId: documentId,
-  massIdRewards: [
-    ...massIdActorParticipants.entries(),
+  massIDDocumentId: documentId,
+  massIDRewards: [
+    ...massIDActorParticipants.entries(),
     ...methodologyActorParticipants.entries(),
   ].map(([actorType, participant]) => ({
     actorType,
     address: {
       id: faker.string.uuid(),
     },
-    massIdPercentage: STANDARD_REWARDS_DISTRIBUTION[actorType],
+    massIDPercentage: STANDARD_REWARDS_DISTRIBUTION[actorType],
     participant: {
       id: participant.id,
       name: participant.name,
     },
-  })) as unknown as NonEmptyArray<MassIdReward>,
+  })) as unknown as NonEmptyArray<MassIDReward>,
 });
 
 const createMethodologyActorReward = (
@@ -165,7 +165,7 @@ const createMethodologyActorReward = (
     address: {
       id: faker.string.uuid(),
     },
-    massIdPercentage: percentage,
+    massIDPercentage: percentage,
     participant: {
       id,
       name,
@@ -173,16 +173,16 @@ const createMethodologyActorReward = (
   };
 };
 
-const createMassIdActorReward = (
+const createMassIDActorReward = (
   actorType: RewardsDistributionActorType,
   percentage: string,
 ) => {
   const id =
-    massIdActorParticipants.get(actorType as unknown as MassIdDocumentActorType)
+    massIDActorParticipants.get(actorType as unknown as MassIDDocumentActorType)
       ?.id || faker.string.uuid();
 
   const name =
-    massIdActorParticipants.get(actorType as unknown as MassIdDocumentActorType)
+    massIDActorParticipants.get(actorType as unknown as MassIDDocumentActorType)
       ?.name || `${actorType} Participant`;
 
   return {
@@ -190,7 +190,7 @@ const createMassIdActorReward = (
     address: {
       id: faker.string.uuid(),
     },
-    massIdPercentage: percentage,
+    massIDPercentage: percentage,
     participant: {
       id,
       name,
@@ -204,8 +204,8 @@ const createMultiHaulerRewardsDistribution = (
   const haulerParticipants = [
     {
       id:
-        massIdActorParticipants.get(
-          HAULER as unknown as MassIdDocumentActorType,
+        massIDActorParticipants.get(
+          HAULER as unknown as MassIDDocumentActorType,
         )?.id ?? '',
       name: 'Tera',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION[HAULER][0],
@@ -228,29 +228,29 @@ const createMultiHaulerRewardsDistribution = (
       address: {
         id: faker.string.uuid(),
       },
-      massIdPercentage: percentage,
+      massIDPercentage: percentage,
       participant: { id, name },
     }));
 
-  const massIdRewards = [
+  const massIDRewards = [
     ...createHaulerRewards(),
-    createMassIdActorReward(
+    createMassIDActorReward(
       WASTE_GENERATOR,
       MULTI_HAULER_REWARDS_DISTRIBUTION[WASTE_GENERATOR],
     ),
-    createMassIdActorReward(
+    createMassIDActorReward(
       PROCESSOR,
       MULTI_HAULER_REWARDS_DISTRIBUTION[PROCESSOR],
     ),
-    createMassIdActorReward(
+    createMassIDActorReward(
       RECYCLER,
       MULTI_HAULER_REWARDS_DISTRIBUTION[RECYCLER],
     ),
-    createMassIdActorReward(
+    createMassIDActorReward(
       INTEGRATOR,
       MULTI_HAULER_REWARDS_DISTRIBUTION[INTEGRATOR],
     ),
-    createMassIdActorReward(
+    createMassIDActorReward(
       COMMUNITY_IMPACT_POOL,
       MULTI_HAULER_REWARDS_DISTRIBUTION[COMMUNITY_IMPACT_POOL],
     ),
@@ -266,33 +266,33 @@ const createMultiHaulerRewardsDistribution = (
       NETWORK,
       MULTI_HAULER_REWARDS_DISTRIBUTION[NETWORK],
     ),
-  ] as unknown as NonEmptyArray<MassIdReward>;
+  ] as unknown as NonEmptyArray<MassIDReward>;
 
   return {
-    massIdDocumentId: documentId,
-    massIdRewards,
+    massIDDocumentId: documentId,
+    massIDRewards,
   };
 };
 
 const buildCertificateDocuments = (options: {
-  massIdDocumentId: string;
+  massIDDocumentId: string;
   rewardsDistribution: CertificateRewardDistributionOutput;
   value: number;
 }) => {
-  const { massIdDocumentId, rewardsDistribution, value } = options;
+  const { massIDDocumentId, rewardsDistribution, value } = options;
 
   return new BoldStubsBuilder({
-    massIdActorParticipants,
-    massIdDocumentIds: [massIdDocumentId],
+    massIDActorParticipants,
+    massIDDocumentIds: [massIDDocumentId],
     methodologyName: BoldMethodologyName.RECYCLING,
   })
-    .createMassIdDocuments({
+    .createMassIDDocuments({
       partialDocument: {
         subtype: FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
     })
-    .createMassIdAuditDocuments()
-    .createMassIdCertificateDocuments({
+    .createMassIDAuditDocuments()
+    .createMassIDCertificateDocuments({
       externalEventsMap: {
         [REWARDS_DISTRIBUTION_RULE_SLUG]:
           stubBoldCertificateRewardsDistributionMetadataEvent({
@@ -317,35 +317,35 @@ const buildCertificateDocuments = (options: {
 };
 
 const createTestDocuments = () => {
-  const massId1Value = 1000;
-  const massId1DocumentId = faker.string.uuid();
+  const massID1Value = 1000;
+  const massID1DocumentId = faker.string.uuid();
 
   const standardDocuments = buildCertificateDocuments({
-    massIdDocumentId: massId1DocumentId,
-    rewardsDistribution: createStandardRewardsDistribution(massId1DocumentId),
-    value: massId1Value,
+    massIDDocumentId: massID1DocumentId,
+    rewardsDistribution: createStandardRewardsDistribution(massID1DocumentId),
+    value: massID1Value,
   });
 
   const multiHaulerDocuments = buildCertificateDocuments({
-    massIdDocumentId: massId1DocumentId,
+    massIDDocumentId: massID1DocumentId,
     rewardsDistribution:
-      createMultiHaulerRewardsDistribution(massId1DocumentId),
-    value: massId1Value,
+      createMultiHaulerRewardsDistribution(massID1DocumentId),
+    value: massID1Value,
   });
 
-  const massId2Value = 500;
-  const massId2DocumentId = faker.string.uuid();
+  const massID2Value = 500;
+  const massID2DocumentId = faker.string.uuid();
   const secondDocuments = buildCertificateDocuments({
-    massIdDocumentId: massId2DocumentId,
-    rewardsDistribution: createStandardRewardsDistribution(massId2DocumentId),
-    value: massId2Value,
+    massIDDocumentId: massID2DocumentId,
+    rewardsDistribution: createStandardRewardsDistribution(massID2DocumentId),
+    value: massID2Value,
   });
 
-  const combinedValue = massId1Value + massId2Value;
+  const combinedValue = massID1Value + massID2Value;
 
   const multipleCertificateDocuments = [
-    ...standardDocuments.massIdCertificateDocuments,
-    ...secondDocuments.massIdCertificateDocuments,
+    ...standardDocuments.massIDCertificateDocuments,
+    ...secondDocuments.massIDCertificateDocuments,
   ];
 
   const multipleCertificatesCreditOrderDocument = {
@@ -355,19 +355,19 @@ const createTestDocuments = () => {
       stubDocumentEvent({
         name: RELATED,
         relatedDocument: mapDocumentRelation(
-          secondDocuments.massIdCertificateDocuments[0]!,
+          secondDocuments.massIDCertificateDocuments[0]!,
         ),
       }),
     ],
   };
 
   return {
-    massId1Value,
-    massId2Value,
+    massID1Value,
+    massID2Value,
     multiHauler: multiHaulerDocuments,
     multipleCertificates: {
       creditOrderDocument: multipleCertificatesCreditOrderDocument,
-      massIdCertificateDocuments: multipleCertificateDocuments,
+      massIDCertificateDocuments: multipleCertificateDocuments,
       totalValue: combinedValue,
     },
     secondDocument: secondDocuments,
@@ -552,8 +552,8 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
   {
     creditOrderDocument: documents.standard.creditOrderDocument,
     expectedActorsResult: expectedResults.singleCertificateStandard,
-    expectedCertificateTotalValue: documents.massId1Value,
-    massIdCertificateDocuments: documents.standard.massIdCertificateDocuments,
+    expectedCertificateTotalValue: documents.massID1Value,
+    massIDCertificateDocuments: documents.standard.massIDCertificateDocuments,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
@@ -561,9 +561,9 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
   {
     creditOrderDocument: documents.multiHauler.creditOrderDocument,
     expectedActorsResult: expectedResults.multipleHaulers,
-    expectedCertificateTotalValue: documents.massId1Value,
-    massIdCertificateDocuments:
-      documents.multiHauler.massIdCertificateDocuments,
+    expectedCertificateTotalValue: documents.massID1Value,
+    massIDCertificateDocuments:
+      documents.multiHauler.massIDCertificateDocuments,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
@@ -572,8 +572,8 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     creditOrderDocument: documents.multipleCertificates.creditOrderDocument,
     expectedActorsResult: expectedResults.multipleCertificates,
     expectedCertificateTotalValue: documents.multipleCertificates.totalValue,
-    massIdCertificateDocuments:
-      documents.multipleCertificates.massIdCertificateDocuments,
+    massIDCertificateDocuments:
+      documents.multipleCertificates.massIDCertificateDocuments,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
@@ -582,9 +582,9 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
 
 const createErrorTestCases = () => {
   const errorStubs = new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
-    .createMassIdCertificateDocuments({
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
+    .createMassIDCertificateDocuments({
       partialDocument: {
         type: RECYCLED_ID,
       },
@@ -600,9 +600,9 @@ const createErrorTestCases = () => {
   };
 
   const certificateDocumentWithoutRuleEvent = {
-    ...errorStubs.massIdCertificateDocuments[0]!,
+    ...errorStubs.massIDCertificateDocuments[0]!,
     externalEvents:
-      errorStubs.massIdCertificateDocuments[0]!.externalEvents?.filter(
+      errorStubs.massIDCertificateDocuments[0]!.externalEvents?.filter(
         (event) => event.name !== REWARDS_DISTRIBUTION_RULE_SLUG,
       ),
   };
@@ -621,15 +621,15 @@ const errorTestData = createErrorTestCases();
 export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   {
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
-    massIdCertificateDocuments: [],
+    massIDCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND(RECYCLED_ID),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${RECYCLED_ID} documents is not found`,
   },
   {
     creditOrderDocument: undefined,
-    massIdCertificateDocuments: [
-      ...errorTestData.errorStubs.massIdCertificateDocuments,
+    massIDCertificateDocuments: [
+      ...errorTestData.errorStubs.massIDCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -637,8 +637,8 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   },
   {
     creditOrderDocument: errorTestData.creditOrderDocumentWithoutRulesMetadata,
-    massIdCertificateDocuments: [
-      ...errorTestData.errorStubs.massIdCertificateDocuments,
+    massIDCertificateDocuments: [
+      ...errorTestData.errorStubs.massIDCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.INVALID_CREDIT_UNIT_PRICE,
     resultStatus: RuleOutputStatus.FAILED,
@@ -646,12 +646,12 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   },
   {
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
-    massIdCertificateDocuments: [
+    massIDCertificateDocuments: [
       errorTestData.certificateDocumentWithoutRulesMetadata,
     ],
     resultComment:
       ERROR_MESSAGES.REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND(
-        errorTestData.errorStubs.massIdCertificateDocuments[0]!.id,
+        errorTestData.errorStubs.massIDCertificateDocuments[0]!.id,
       ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `a certificate document has no "${RULE_RESULT_DETAILS}" attribute`,

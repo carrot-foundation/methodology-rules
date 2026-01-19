@@ -1,7 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  stubBoldMassIdDocument,
-  stubBoldMassIdRecycledEvent,
+  stubBoldMassIDDocument,
+  stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -35,11 +35,11 @@ describe('ProjectPeriodLimitProcessor', () => {
     async ({ externalCreatedAt, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const document = stubBoldMassIdDocument({
+      const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
             RECYCLED,
-            stubBoldMassIdRecycledEvent({
+            stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt,
               },
@@ -67,7 +67,7 @@ describe('ProjectPeriodLimitProcessor', () => {
   it('should FAIL the rule if the Recycled event is not found', async () => {
     const ruleInput = random<Required<RuleInput>>();
 
-    const document = stubBoldMassIdDocument({
+    const document = stubBoldMassIDDocument({
       externalEventsMap: new Map([[RECYCLED, undefined]]),
     });
 

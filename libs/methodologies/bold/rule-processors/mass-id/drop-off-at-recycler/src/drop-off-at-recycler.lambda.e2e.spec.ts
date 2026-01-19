@@ -18,15 +18,15 @@ describe('DropOffAtRecyclerLambda E2E', () => {
   it.each(dropOffAtRecyclerTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massIdAuditDocument, massIdDocument].map((document) => ({
+        [massIDAuditDocument, massIDDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -38,7 +38,7 @@ describe('DropOffAtRecyclerLambda E2E', () => {
       const response = (await dropOffAtRecyclerLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

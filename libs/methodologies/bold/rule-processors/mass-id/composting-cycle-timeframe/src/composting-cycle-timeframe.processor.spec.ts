@@ -1,8 +1,8 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
-  stubBoldMassIdDocument,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdRecycledEvent,
+  stubBoldMassIDDocument,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
@@ -64,11 +64,11 @@ describe('CompostingCycleTimeframeProcessor', () => {
       resultStatus,
     }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const document = stubBoldMassIdDocument({
+      const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
             DROP_OFF,
-            stubBoldMassIdDropOffEvent({
+            stubBoldMassIDDropOffEvent({
               partialDocumentEvent: {
                 externalCreatedAt:
                   dropOffEventDate as DocumentEvent['externalCreatedAt'],
@@ -77,7 +77,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
           ],
           [
             RECYCLED,
-            stubBoldMassIdRecycledEvent({
+            stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt:
                   recycledEventDate as DocumentEvent['externalCreatedAt'],

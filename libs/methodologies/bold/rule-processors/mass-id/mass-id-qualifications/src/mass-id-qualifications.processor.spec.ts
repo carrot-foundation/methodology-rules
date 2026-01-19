@@ -1,7 +1,7 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { MassIdOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleInput,
   type RuleOutput,
@@ -10,13 +10,13 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { random } from 'typia';
 
-import { MassIdQualificationsProcessor } from './mass-id-qualifications.processor';
-import { massIdQualificationsTestCases } from './mass-id-qualifications.test-cases';
+import { MassIDQualificationsProcessor } from './mass-id-qualifications.processor';
+import { massIDQualificationsTestCases } from './mass-id-qualifications.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-describe('MassIdQualificationsProcessor', () => {
-  const ruleDataProcessor = new MassIdQualificationsProcessor();
+describe('MassIDQualificationsProcessor', () => {
+  const ruleDataProcessor = new MassIDQualificationsProcessor();
 
   const documentLoaderService = jest.mocked(loadDocument);
 
@@ -27,14 +27,14 @@ describe('MassIdQualificationsProcessor', () => {
       expect(result).toBe(false);
     });
 
-    it('should return true when subtype is in MassIdOrganicSubtype enum', () => {
-      const validSubtype = stubEnumValue(MassIdOrganicSubtype);
+    it('should return true when subtype is in MassIDOrganicSubtype enum', () => {
+      const validSubtype = stubEnumValue(MassIDOrganicSubtype);
       const result = ruleDataProcessor['isValidSubtype'](validSubtype);
 
       expect(result).toBe(true);
     });
 
-    it('should return false when subtype is not in MassIdOrganicSubtype enum', () => {
+    it('should return false when subtype is not in MassIDOrganicSubtype enum', () => {
       const result = ruleDataProcessor['isValidSubtype'](
         'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
       );
@@ -43,20 +43,20 @@ describe('MassIdQualificationsProcessor', () => {
     });
   });
 
-  it.each(massIdQualificationsTestCases)(
+  it.each(massIDQualificationsTestCases)(
     'should return $resultStatus when $scenario',
     async ({
-      massIdDocument,
+      massIDDocument,
       resultComment,
       resultStatus,
     }: {
-      massIdDocument: Document;
+      massIDDocument: Document;
       resultComment: string;
       resultStatus: RuleOutputStatus;
     }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

@@ -6,9 +6,9 @@ import BigNumber from 'bignumber.js';
 
 import type {
   ActorsByType,
-  AggregateMassIdCertificateRewards,
+  AggregateMassIDCertificateRewards,
   Remainder,
-  ResultContentsWithMassIdCertificateValue,
+  ResultContentsWithMassIDCertificateValue,
   RewardsDistribution,
   RuleSubject,
 } from './rewards-distribution.types';
@@ -32,11 +32,11 @@ export const calculateCreditPercentage = ({
   ).toString();
 
 export const calculateAbsoluteValue = (options: {
-  massIdCertificateValue: BigNumber;
+  massIDCertificateValue: BigNumber;
   percentage: BigNumber;
 }): NonEmptyString =>
   formatPercentage(options.percentage)
-    .multipliedBy(options.massIdCertificateValue)
+    .multipliedBy(options.massIDCertificateValue)
     .toString();
 
 export const addAmount = (options: {
@@ -53,14 +53,14 @@ export const addAmount = (options: {
 
 export const calculateAmount = (options: {
   creditUnitPrice: BigNumber;
-  massIdCertificateValue: BigNumber;
-  massIdPercentage: BigNumber;
+  massIDCertificateValue: BigNumber;
+  massIDPercentage: BigNumber;
   previousParticipantAmount: BigNumber;
 }): NonEmptyString => {
   const value = new BigNumber(
     calculateAbsoluteValue({
-      massIdCertificateValue: options.massIdCertificateValue,
-      percentage: options.massIdPercentage,
+      massIDCertificateValue: options.massIDCertificateValue,
+      percentage: options.massIDPercentage,
     }),
   );
 
@@ -74,9 +74,9 @@ export const calculateAmount = (options: {
 export const calculateRemainder = (options: {
   actors: ActorsByType;
   creditUnitPrice: BigNumber;
-  massIdCertificateTotalValue: BigNumber;
+  massIDCertificateTotalValue: BigNumber;
 }): Remainder => {
-  const { actors, creditUnitPrice, massIdCertificateTotalValue } = options;
+  const { actors, creditUnitPrice, massIDCertificateTotalValue } = options;
 
   let participantsAmount = new BigNumber(0);
   let participantsPercentage = new BigNumber(0);
@@ -85,7 +85,7 @@ export const calculateRemainder = (options: {
     participantsAmount = participantsAmount.plus(actor.amount);
     participantsPercentage = participantsPercentage.plus(actor.percentage);
   }
-  const rawAmount = massIdCertificateTotalValue
+  const rawAmount = massIDCertificateTotalValue
     .multipliedBy(creditUnitPrice)
     .minus(participantsAmount);
   const rawPercentage = new BigNumber(100).minus(participantsPercentage);
@@ -129,34 +129,34 @@ export const getAggregateParticipantKey = (
   return `${actorType}-${participantId}`;
 };
 
-export const aggregateMassIdCertificatesRewards = (
+export const aggregateMassIDCertificatesRewards = (
   creditUnitPrice: BigNumber,
-  resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[],
-): AggregateMassIdCertificateRewards => {
+  resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[],
+): AggregateMassIDCertificateRewards => {
   const actors: ActorsByType = new Map();
 
-  const massIdCertificateTotalValue = calculateCertificateTotalValue(
-    resultContentsWithMassIdCertificateValue.map(
-      ({ massIdCertificateValue }) => massIdCertificateValue,
+  const massIDCertificateTotalValue = calculateCertificateTotalValue(
+    resultContentsWithMassIDCertificateValue.map(
+      ({ massIDCertificateValue }) => massIDCertificateValue,
     ),
   );
 
   const creditTotal = formatDecimalPlaces(
-    massIdCertificateTotalValue.multipliedBy(creditUnitPrice),
+    massIDCertificateTotalValue.multipliedBy(creditUnitPrice),
   );
 
   for (const {
-    massIdCertificateValue,
-    resultContent: { massIdRewards },
-  } of resultContentsWithMassIdCertificateValue) {
-    for (const massIdReward of massIdRewards) {
+    massIDCertificateValue,
+    resultContent: { massIDRewards },
+  } of resultContentsWithMassIDCertificateValue) {
+    for (const massIDReward of massIDRewards) {
       const {
         actorType,
         address,
-        massIdPercentage,
+        massIDPercentage,
         participant,
         preserveSensitiveData,
-      } = massIdReward;
+      } = massIDReward;
       const participantKey = getAggregateParticipantKey(
         actorType,
         participant.id,
@@ -165,8 +165,8 @@ export const aggregateMassIdCertificatesRewards = (
 
       const amount = calculateAmount({
         creditUnitPrice,
-        massIdCertificateValue,
-        massIdPercentage: new BigNumber(massIdPercentage),
+        massIDCertificateValue,
+        massIDPercentage: new BigNumber(massIDPercentage),
         previousParticipantAmount: actor?.amount
           ? new BigNumber(actor.amount)
           : new BigNumber(0),
@@ -188,7 +188,7 @@ export const aggregateMassIdCertificatesRewards = (
 
   return {
     actors,
-    massIdCertificateTotalValue,
+    massIDCertificateTotalValue,
   };
 };
 
@@ -197,24 +197,24 @@ export const calculateRewardsDistribution = (
 ): RewardsDistribution => {
   const { creditUnitPrice } = ruleSubject;
 
-  const resultContentsWithMassIdCertificateValue =
-    ruleSubject.resultContentsWithMassIdCertificateValue.map(
-      ({ massIdCertificateValue, resultContent }) => ({
-        massIdCertificateValue,
+  const resultContentsWithMassIDCertificateValue =
+    ruleSubject.resultContentsWithMassIDCertificateValue.map(
+      ({ massIDCertificateValue, resultContent }) => ({
+        massIDCertificateValue,
         resultContent,
       }),
     );
 
-  const { actors, massIdCertificateTotalValue } =
-    aggregateMassIdCertificatesRewards(
+  const { actors, massIDCertificateTotalValue } =
+    aggregateMassIDCertificatesRewards(
       creditUnitPrice,
-      resultContentsWithMassIdCertificateValue,
+      resultContentsWithMassIDCertificateValue,
     );
 
   const remainder = calculateRemainder({
     actors,
     creditUnitPrice,
-    massIdCertificateTotalValue,
+    massIDCertificateTotalValue,
   });
 
   addParticipantRemainder({
@@ -225,7 +225,7 @@ export const calculateRewardsDistribution = (
   return {
     actors: [...actors.values()],
     creditUnitPrice: creditUnitPrice.toString(),
-    massIdCertificateTotalValue: massIdCertificateTotalValue.toString(),
+    massIDCertificateTotalValue: massIDCertificateTotalValue.toString(),
     remainder: {
       amount: remainder.amount.toString(),
       percentage: remainder.percentage.toString(),

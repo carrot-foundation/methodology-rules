@@ -6,14 +6,14 @@ import {
   type Document,
   DocumentCategory,
   DocumentType,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-import { MassIdQualificationsProcessorErrors } from './mass-id-qualifications.errors';
+import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
 
-const ALLOWED_SUBTYPES: string[] = Object.values(MassIdOrganicSubtype);
+const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
 
 const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;
@@ -34,9 +34,9 @@ export const RESULT_COMMENTS = {
     'The document category, measurement unit, subtype, type, and value are correctly defined.',
 } as const;
 
-export class MassIdQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
+export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
   protected readonly processorErrors =
-    new MassIdQualificationsProcessorErrors();
+    new MassIDQualificationsProcessorErrors();
 
   private get RESULT_COMMENT() {
     return RESULT_COMMENTS;

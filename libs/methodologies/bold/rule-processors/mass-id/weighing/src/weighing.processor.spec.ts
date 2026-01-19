@@ -34,7 +34,7 @@ describe('WeighingProcessor', () => {
       async (testCase) => {
         const {
           accreditationDocuments,
-          massIdDocumentEvents,
+          massIDDocumentEvents,
           resultComment,
           resultStatus,
         } = testCase;
@@ -47,8 +47,8 @@ describe('WeighingProcessor', () => {
 
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
-          massIdDocumentsParams: {
-            externalEventsMap: massIdDocumentEvents,
+          massIDDocumentsParams: {
+            externalEventsMap: massIDDocumentEvents,
           },
           ruleDataProcessor,
           spyOnDocumentQueryServiceLoad,
@@ -69,17 +69,17 @@ describe('WeighingProcessor', () => {
       'should return $resultStatus when $scenario',
       async ({
         documents,
-        massIdAuditDocument,
+        massIDAuditDocument,
         resultComment,
         resultStatus,
       }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+        const allDocuments = [massIDAuditDocument, ...documents];
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
         const ruleInput = {
           ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
         };
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);

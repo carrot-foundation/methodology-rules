@@ -3,35 +3,42 @@ import {
   BoldStubsBuilder,
   generateNearbyCoordinates,
   MASS_ID_ACTOR_PARTICIPANTS,
+  type MetadataAttributeParameter,
   stubAddress,
+  stubBoldAccreditationResultEvent,
   type StubBoldDocumentParameters,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { type MethodologyParticipant } from '@carrot-fndn/shared/types';
+import {
+  MethodologyApprovedExceptionType,
+  type MethodologyParticipant,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.processor';
 
-const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
+const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 const {
   ACCREDITATION_CONTEXT,
+  ACCREDITATION_RESULT,
   ACTOR,
   DROP_OFF,
   FACILITY_ADDRESS,
   LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
   PICK_UP,
 } = DocumentEventName;
-const { CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
+const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
   DocumentEventAttributeName;
 
 const actorParticipants = new Map(
@@ -92,40 +99,150 @@ const nearbyWasteGeneratorAddressDistance = calculateDistance(
   nearbyWasteGeneratorAddress,
 );
 
+const createGpsException = (
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  attributeName:
+    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
+    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+  reason: string,
+  validUntil?: string,
+) => ({
+  'Attribute Location': {
+    Asset: {
+      Category: DocumentCategory.MASS_ID,
+    },
+    Event: eventName.toString(),
+  },
+  'Attribute Name': attributeName.toString(),
+  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  Reason: reason,
+  ...(validUntil && { 'Valid Until': validUntil }),
+});
+
+const createGpsExceptions = (
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  includeLatitude = true,
+  includeLongitude = true,
+  validUntil?: string,
+) => {
+  const exceptions = [];
+
+  if (includeLatitude) {
+    exceptions.push(
+      createGpsException(
+        eventName,
+        CAPTURED_GPS_LATITUDE,
+        `GPS latitude exception for ${eventName} event`,
+        validUntil,
+      ),
+    );
+  }
+
+  if (includeLongitude) {
+    exceptions.push(
+      createGpsException(
+        eventName,
+        CAPTURED_GPS_LONGITUDE,
+        `GPS longitude exception for ${eventName} event`,
+        validUntil,
+      ),
+    );
+  }
+
+  return exceptions;
+};
+
+const createAccreditationDocumentWithAddress = (
+  address: ReturnType<typeof stubAddress>,
+  participant: MethodologyParticipant,
+): StubBoldDocumentParameters => ({
+  externalEventsMap: {
+    [FACILITY_ADDRESS]: stubDocumentEvent({
+      address,
+      name: FACILITY_ADDRESS,
+      participant,
+    }),
+    [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
+      address,
+      name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
+      participant,
+    }),
+  },
+});
+
+const createAccreditationDocumentWithGpsExceptions = (
+  address: ReturnType<typeof stubAddress>,
+  participant: MethodologyParticipant,
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  includeLatitude = true,
+  includeLongitude = true,
+  validUntil?: string,
+): StubBoldDocumentParameters => ({
+  externalEventsMap: {
+    [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
+      metadataAttributes: [
+        [
+          APPROVED_EXCEPTIONS,
+          createGpsExceptions(
+            eventName,
+            includeLatitude,
+            includeLongitude,
+            validUntil,
+          ),
+        ],
+      ] as MetadataAttributeParameter[],
+    }),
+    [FACILITY_ADDRESS]: stubDocumentEvent({
+      address,
+      name: FACILITY_ADDRESS,
+      participant,
+    }),
+    [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
+      address,
+      name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
+      participant,
+    }),
+  },
+});
+
+const createMassIDEvent = (
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  address: ReturnType<typeof stubAddress>,
+  participant: MethodologyParticipant,
+  gpsLatitude?: number,
+  gpsLongitude?: number,
+) => {
+  const createEvent =
+    eventName === DROP_OFF
+      ? stubBoldMassIDDropOffEvent
+      : stubBoldMassIDPickUpEvent;
+
+  return createEvent({
+    metadataAttributes: [
+      [CAPTURED_GPS_LATITUDE, gpsLatitude],
+      [CAPTURED_GPS_LONGITUDE, gpsLongitude],
+    ],
+    partialDocumentEvent: {
+      address,
+      participant,
+    },
+  });
+};
+
 const validAccreditationDocuments = new Map([
   [
     RECYCLER,
-    {
-      externalEventsMap: {
-        [FACILITY_ADDRESS]: stubDocumentEvent({
-          address: recyclerAddress,
-          name: FACILITY_ADDRESS,
-          participant: recyclerParticipant,
-        }),
-        [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
-          address: recyclerAddress,
-          name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-          participant: recyclerParticipant,
-        }),
-      },
-    },
+    createAccreditationDocumentWithAddress(
+      recyclerAddress,
+      recyclerParticipant,
+    ),
   ],
   [
     WASTE_GENERATOR,
-    {
-      externalEventsMap: {
-        [FACILITY_ADDRESS]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          name: FACILITY_ADDRESS,
-          participant: wasteGeneratorParticipant,
-        }),
-        [LEGAL_AND_ADMINISTRATIVE_COMPLIANCE]: stubDocumentEvent({
-          address: wasteGeneratorAddress,
-          name: LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-          participant: wasteGeneratorParticipant,
-        }),
-      },
-    },
+    createAccreditationDocumentWithAddress(
+      wasteGeneratorAddress,
+      wasteGeneratorParticipant,
+    ),
   ],
 ]);
 
@@ -145,7 +262,7 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
 export const geolocationAndAddressPrecisionTestCases: Array<{
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   actorParticipants: Map<string, MethodologyParticipant>;
-  massIdDocumentParameters?: StubBoldDocumentParameters | undefined;
+  massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
@@ -170,37 +287,31 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    resultComment: `${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
+    resultComment: `${RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the accredited address is not set',
   },
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, nearbyRecyclerAddress.latitude],
-            [CAPTURED_GPS_LONGITUDE, nearbyRecyclerAddress.longitude],
-          ],
-          partialDocumentEvent: {
-            address: nearbyRecyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, nearbyWasteGeneratorAddress.latitude],
-            [CAPTURED_GPS_LONGITUDE, nearbyWasteGeneratorAddress.longitude],
-          ],
-          partialDocumentEvent: {
-            address: nearbyWasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          nearbyRecyclerAddress.latitude,
+          nearbyRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          nearbyWasteGeneratorAddress,
+          wasteGeneratorParticipant,
+          nearbyWasteGeneratorAddress.latitude,
+          nearbyWasteGeneratorAddress.longitude,
+        ),
       },
     },
     resultComment: `${RESULT_COMMENTS.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
@@ -211,30 +322,24 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, invalidRecyclerAddress.latitude],
-            [CAPTURED_GPS_LONGITUDE, invalidRecyclerAddress.longitude],
-          ],
-          partialDocumentEvent: {
-            address: nearbyRecyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, invalidWasteGeneratorAddress.latitude],
-            [CAPTURED_GPS_LONGITUDE, invalidWasteGeneratorAddress.longitude],
-          ],
-          partialDocumentEvent: {
-            address: nearbyWasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          nearbyWasteGeneratorAddress,
+          wasteGeneratorParticipant,
+          invalidWasteGeneratorAddress.latitude,
+          invalidWasteGeneratorAddress.longitude,
+        ),
       },
     },
     resultComment: `${RESULT_COMMENTS.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
@@ -244,20 +349,17 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, invalidRecyclerAddress.latitude],
-            [CAPTURED_GPS_LONGITUDE, invalidRecyclerAddress.longitude],
-          ],
-          partialDocumentEvent: {
-            address: nearbyRecyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
         [PICK_UP]: undefined,
       },
     },
@@ -268,30 +370,20 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: recyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: wasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          recyclerAddress,
+          recyclerParticipant,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
       },
     },
     resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
@@ -302,30 +394,20 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: stubBoldMassIdDropOffEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: invalidRecyclerAddress,
-            participant: recyclerParticipant,
-          },
-        }),
-        [PICK_UP]: stubBoldMassIdPickUpEvent({
-          metadataAttributes: [
-            [CAPTURED_GPS_LATITUDE, undefined],
-            [CAPTURED_GPS_LONGITUDE, undefined],
-          ],
-          partialDocumentEvent: {
-            address: invalidWasteGeneratorAddress,
-            participant: wasteGeneratorParticipant,
-          },
-        }),
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          invalidRecyclerAddress,
+          recyclerParticipant,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          invalidWasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
       },
     },
     resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
@@ -333,22 +415,235 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
     scenario:
       'the gps is not set, but the accredited address is set and not valid',
   },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        createAccreditationDocumentWithAddress(
+          recyclerAddress,
+          recyclerParticipant,
+        ),
+      ],
+      [
+        WASTE_GENERATOR,
+        {
+          externalEventsMap: {
+            [ACCREDITATION_CONTEXT]: undefined,
+          },
+        },
+      ],
+    ]),
+    actorParticipants,
+    massIDDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          recyclerAddress,
+          recyclerParticipant,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the Waste Generator verification document is missing (should pass, not fail)',
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        createAccreditationDocumentWithGpsExceptions(
+          recyclerAddress,
+          recyclerParticipant,
+          DROP_OFF,
+        ),
+      ],
+      [
+        WASTE_GENERATOR,
+        createAccreditationDocumentWithAddress(
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      ],
+    ]),
+    actorParticipants,
+    massIDDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        createAccreditationDocumentWithGpsExceptions(
+          recyclerAddress,
+          recyclerParticipant,
+          DROP_OFF,
+        ),
+      ],
+      [
+        WASTE_GENERATOR,
+        createAccreditationDocumentWithAddress(
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      ],
+    ]),
+    actorParticipants,
+    massIDDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        createAccreditationDocumentWithGpsExceptions(
+          recyclerAddress,
+          recyclerParticipant,
+          DROP_OFF,
+          true, // includeLatitude
+          false, // includeLongitude - missing longitude exception
+        ),
+      ],
+      [
+        WASTE_GENERATOR,
+        createAccreditationDocumentWithAddress(
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      ],
+    ]),
+    actorParticipants,
+    massIDDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario:
+      'the Recycler has only latitude GPS exception (should NOT skip GPS validation)',
+  },
+  {
+    accreditationDocuments: new Map([
+      [
+        RECYCLER,
+        createAccreditationDocumentWithGpsExceptions(
+          recyclerAddress,
+          recyclerParticipant,
+          DROP_OFF,
+          true, // includeLatitude
+          true, // includeLongitude
+          '2020-01-01', // validUntil - expired exception
+        ),
+      ],
+      [
+        WASTE_GENERATOR,
+        createAccreditationDocumentWithAddress(
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      ],
+    ]),
+    actorParticipants,
+    massIDDocumentParameters: {
+      externalEventsMap: {
+        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+        [DROP_OFF]: createMassIDEvent(
+          DROP_OFF,
+          nearbyRecyclerAddress,
+          recyclerParticipant,
+          invalidRecyclerAddress.latitude,
+          invalidRecyclerAddress.longitude,
+        ),
+        [PICK_UP]: createMassIDEvent(
+          PICK_UP,
+          wasteGeneratorAddress,
+          wasteGeneratorParticipant,
+        ),
+      },
+    },
+    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario:
+      'the Recycler has expired GPS exceptions (should NOT skip GPS validation)',
+  },
 ];
 
 const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 
 const {
-  massIdAuditDocument,
-  massIdDocument,
+  massIDAuditDocument,
+  massIDDocument,
   participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocuments({
+  .createMassIDDocuments({
     externalEventsMap: {
       [DROP_OFF]: undefined,
       [PICK_UP]: undefined,
     },
   })
-  .createMassIdAuditDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
@@ -356,32 +651,32 @@ const {
 export const geolocationAndAddressPrecisionErrorTestCases = [
   {
     documents: [
-      massIdAuditDocument,
+      massIDAuditDocument,
       ...participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document does not exist',
   },
   {
     documents: [
-      massIdDocument,
-      massIdAuditDocument,
+      massIDDocument,
+      massIDAuditDocument,
       ...participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment:
       errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
-        massIdDocument.id,
+        massIDDocument.id,
       ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the MassId document does not contain a DROP_OFF or PICK_UP event',
+      'the MassID document does not contain a DROP_OFF or PICK_UP event',
   },
   {
-    documents: [massIdDocument, massIdAuditDocument],
-    massIdAuditDocument,
+    documents: [massIDDocument, massIDAuditDocument],
+    massIDAuditDocument,
     resultComment:
       errorMessage.ERROR_MESSAGE.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -389,7 +684,7 @@ export const geolocationAndAddressPrecisionErrorTestCases = [
   },
   {
     documents: [],
-    massIdAuditDocument: undefined,
+    massIDAuditDocument: undefined,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID Audit document does not exist',

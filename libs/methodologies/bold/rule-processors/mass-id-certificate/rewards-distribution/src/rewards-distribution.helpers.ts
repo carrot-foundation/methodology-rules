@@ -15,7 +15,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
-  type MassIdReward,
+  type MassIDReward,
   RewardActorAddress,
   type RewardActorParticipant,
   RewardsDistributionActorType,
@@ -46,18 +46,18 @@ export const isHaulerActorDefined = (
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
-export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
+export const mapMassIDRewards = (participants: ActorReward[]): MassIDReward[] =>
   participants.map(
     ({
       actorType,
       address,
-      massIdPercentage,
+      massIDPercentage,
       participant,
       preserveSensitiveData,
     }) => ({
       actorType,
       address,
-      massIdPercentage: formatPercentage(massIdPercentage),
+      massIDPercentage: formatPercentage(massIDPercentage),
       participant,
       preserveSensitiveData,
     }),
@@ -66,22 +66,22 @@ export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
 export const mapActorReward = ({
   actorType,
   address,
-  massIdDocument,
-  massIdPercentage,
+  massIDDocument,
+  massIDPercentage,
   participant,
   preserveSensitiveData,
 }: {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
-  massIdDocument: Document;
-  massIdPercentage: BigNumber;
+  massIDDocument: Document;
+  massIDPercentage: BigNumber;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }): ActorReward => ({
   actorType,
   address,
-  massIdDocument,
-  massIdPercentage,
+  massIDDocument,
+  massIDPercentage,
   participant,
   preserveSensitiveData,
 });
@@ -216,24 +216,85 @@ export const getWasteGeneratorAdditionalPercentage = (
   return new BigNumber(0);
 };
 
-export const getNgoActorMassIdPercentage = (
-  massIdDocument: Document,
-  actorMassIdPercentage: BigNumber,
+export const shouldApplyLargeBusinessDiscount = (
+  wasteGeneratorVerificationDocument: Document | undefined,
+): boolean => {
+  if (isNil(wasteGeneratorVerificationDocument)) {
+    return true;
+  }
+
+  const onboardingDeclarationEvent =
+    wasteGeneratorVerificationDocument.externalEvents?.find(
+      (event) =>
+        event.name === String(DocumentEventName.ONBOARDING_DECLARATION),
+    );
+
+  if (isNil(onboardingDeclarationEvent)) {
+    return true;
+  }
+
+  const businessSize = getEventAttributeValue(
+    onboardingDeclarationEvent,
+    DocumentEventAttributeName.BUSINESS_SIZE_DECLARATION,
+  );
+
+  if (isNil(businessSize)) {
+    return true;
+  }
+
+  return (
+    String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
+  );
+};
+
+export const applyLargeBusinessDiscount = (
+  fullPercentage: BigNumber,
+  shouldApplyDiscount: boolean,
+): BigNumber => {
+  if (shouldApplyDiscount) {
+    return fullPercentage.multipliedBy(1 - LARGE_REVENUE_BUSINESS_DISCOUNT);
+  }
+
+  return fullPercentage;
+};
+
+export const calculateCommunityImpactPoolShare = (
+  fullPercentage: BigNumber,
+  shouldApplyDiscount: boolean,
+): BigNumber => {
+  if (!shouldApplyDiscount) {
+    return new BigNumber(0);
+  }
+
+  return fullPercentage.multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
+};
+
+export const getNgoActorMassIDPercentage = (
+  massIDDocument: Document,
+  actorMassIDPercentage: BigNumber,
   actors: RewardsDistributionActor[],
   rewardDistributions: RewardsDistributionActorTypePercentage,
   getWasteGeneratorFullPercentage: (
     targetDocument: Document,
-    targetActorMassIdPercentage: BigNumber,
+    targetActorMassIDPercentage: BigNumber,
     targetActors: RewardsDistributionActor[],
     targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
-): BigNumber =>
-  getWasteGeneratorFullPercentage(
-    massIdDocument,
-    actorMassIdPercentage,
+  wasteGeneratorVerificationDocument: Document | undefined,
+): BigNumber => {
+  const fullPercentage = getWasteGeneratorFullPercentage(
+    massIDDocument,
+    actorMassIDPercentage,
     actors,
     rewardDistributions,
-  ).multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
+  );
+
+  const shouldApplyDiscount = shouldApplyLargeBusinessDiscount(
+    wasteGeneratorVerificationDocument,
+  );
+
+  return calculateCommunityImpactPoolShare(fullPercentage, shouldApplyDiscount);
+};
 
 export const checkIfHasRequiredActorTypes = ({
   actors,

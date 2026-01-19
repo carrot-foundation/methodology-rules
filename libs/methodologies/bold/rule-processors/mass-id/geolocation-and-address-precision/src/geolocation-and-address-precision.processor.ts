@@ -27,7 +27,8 @@ import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predica
 import {
   type Document,
   DocumentEventName,
-  MassIdDocumentActorType,
+  DocumentSubtype,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -41,6 +42,9 @@ import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and
 import {
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
+  getGpsExceptionsFromRecyclerAccreditation,
+  hasVerificationDocument,
+  shouldSkipGpsValidation,
 } from './geolocation-and-address-precision.helpers';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
@@ -48,13 +52,19 @@ const { DROP_OFF, PICK_UP } = DocumentEventName;
 const MAX_ALLOWED_DISTANCE = 2000;
 
 export interface RuleSubject {
-  participantsAddressData: Map<MassIdDocumentActorType, ParticipantAddressData>;
+  accreditationDocuments: Document[];
+  massIDAuditDocument: Document;
+  participantsAddressData: Map<MassIDDocumentActorType, ParticipantAddressData>;
+  recyclerAccreditationDocument: Document | undefined;
 }
 
 interface ParticipantAddressData {
   accreditedAddress: MethodologyAddress | undefined;
+  actorType: MassIDDocumentActorType;
   eventAddress: MethodologyAddress;
+  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
   gpsGeolocation: Geolocation | undefined;
+  participantId: string;
 }
 
 export const RESULT_COMMENTS = {
@@ -68,22 +78,30 @@ export const RESULT_COMMENTS = {
     `Non-compliant ${actorType} address: the captured GPS location is ${gpsDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
   MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
     `No accredited address was found for the ${actorType} actor.`,
+  OPTIONAL_VALIDATION_SKIPPED: (actorType: string): string =>
+    `Optional validation skipped for ${actorType} (verification document not found).`,
   PASSED_WITH_GPS: (
     actorType: string,
     addressDistance: number,
     gpsDistance: number,
   ): string =>
     `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
+  PASSED_WITH_GPS_EXCEPTION: (
+    actorType: string,
+    addressDistance: number,
+  ): string =>
+    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m). GPS validation skipped due to approved exception.`,
   PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
     `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m) (note: no GPS data was provided).`,
 } as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
-  private processorErrors = new GeolocationAndAddressPrecisionProcessorErrors();
+  private readonly processorErrors =
+    new GeolocationAndAddressPrecisionProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
-      const massIdAuditDocument = await loadDocument(
+      const massIDAuditDocument = await loadDocument(
         this.context.documentLoaderService,
         toDocumentKey({
           documentId: ruleInput.documentId,
@@ -91,7 +109,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         }),
       );
 
-      if (isNil(massIdAuditDocument)) {
+      if (isNil(massIDAuditDocument)) {
         throw this.processorErrors.getKnownError(
           this.processorErrors.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
         );
@@ -99,7 +117,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       const documentsQuery = await this.generateDocumentQuery(ruleInput);
       const ruleSubject = await this.getRuleSubject(
-        massIdAuditDocument,
+        massIDAuditDocument,
         documentsQuery,
       );
       const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
@@ -132,7 +150,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private aggregateResults(
-    actorResults: Map<MassIdDocumentActorType, EvaluateResultOutput[]>,
+    actorResults: Map<MassIDDocumentActorType, EvaluateResultOutput[]>,
   ): EvaluateResultOutput {
     const allResults = [...actorResults.values()].flat();
 
@@ -152,18 +170,18 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private buildParticipantsAddressData(
     events: NonNullable<Document['externalEvents']>,
-    massIdDocument: Document,
-    massIdAuditDocument: Document,
+    massIDDocument: Document,
+    massIDAuditDocument: Document,
     accreditationDocuments: Document[],
   ) {
     const participantsAddressData = new Map<
-      MassIdDocumentActorType,
+      MassIDDocumentActorType,
       ParticipantAddressData
     >();
 
     for (const event of events) {
       const actorType = getParticipantActorType({
-        document: massIdDocument,
+        document: massIDDocument,
         event,
       });
 
@@ -175,13 +193,18 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       participantsAddressData.set(actorType, {
         accreditedAddress: getAccreditedAddressByParticipantIdAndActorType(
-          massIdAuditDocument,
+          massIDAuditDocument,
           event.participant.id,
           actorType,
           accreditationDocuments,
         ),
+        actorType,
         eventAddress: event.address,
+        eventName: event.name as
+          | DocumentEventName.DROP_OFF
+          | DocumentEventName.PICK_UP,
         gpsGeolocation: getEventGpsGeolocation(event),
+        participantId: event.participant.id,
       });
     }
 
@@ -206,7 +229,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document> | undefined,
   ) {
     const accreditationDocuments: Document[] = [];
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -216,7 +239,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       }
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
     });
 
@@ -227,14 +250,44 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       );
     }
 
-    return { accreditationDocuments, massIdDocument };
+    return { accreditationDocuments, massIDDocument };
   }
 
   private evaluateAddressData(
-    actorType: MassIdDocumentActorType,
+    actorType: MassIDDocumentActorType,
     addressData: ParticipantAddressData,
+    recyclerAccreditationDocument: Document | undefined,
+    massIDAuditDocument: Document,
+    accreditationDocuments: Document[],
   ): EvaluateResultOutput[] {
-    const { accreditedAddress, eventAddress, gpsGeolocation } = addressData;
+    const {
+      accreditedAddress,
+      eventAddress,
+      eventName,
+      gpsGeolocation,
+      participantId,
+    } = addressData;
+
+    if (actorType === MassIDDocumentActorType.WASTE_GENERATOR) {
+      const verificationDocumentExists: boolean = Boolean(
+        hasVerificationDocument(
+          massIDAuditDocument,
+          participantId,
+          actorType,
+          accreditationDocuments,
+        ),
+      );
+
+      if (!verificationDocumentExists || isNil(accreditedAddress)) {
+        return [
+          {
+            resultComment:
+              RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(actorType),
+            resultStatus: RuleOutputStatus.PASSED,
+          },
+        ];
+      }
+    }
 
     if (isNil(accreditedAddress)) {
       return [
@@ -261,6 +314,29 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           resultStatus: RuleOutputStatus.FAILED,
         },
       ];
+    }
+
+    if (
+      !isNil(gpsGeolocation) &&
+      actorType === MassIDDocumentActorType.RECYCLER
+    ) {
+      const { latitudeException, longitudeException } =
+        getGpsExceptionsFromRecyclerAccreditation(
+          recyclerAccreditationDocument,
+          eventName,
+        );
+
+      if (shouldSkipGpsValidation(latitudeException, longitudeException)) {
+        return [
+          {
+            resultComment: RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(
+              actorType,
+              addressDistance,
+            ),
+            resultStatus: RuleOutputStatus.PASSED,
+          },
+        ];
+      }
     }
 
     if (!isNil(gpsGeolocation)) {
@@ -305,15 +381,24 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private evaluateResult({
+    accreditationDocuments,
+    massIDAuditDocument,
     participantsAddressData,
+    recyclerAccreditationDocument,
   }: RuleSubject): EvaluateResultOutput {
     const actorResults = new Map<
-      MassIdDocumentActorType,
+      MassIDDocumentActorType,
       EvaluateResultOutput[]
     >();
 
     for (const [actorType, addressData] of participantsAddressData) {
-      const results = this.evaluateAddressData(actorType, addressData);
+      const results = this.evaluateAddressData(
+        actorType,
+        addressData,
+        recyclerAccreditationDocument,
+        massIDAuditDocument,
+        accreditationDocuments,
+      );
 
       actorResults.set(actorType, results);
     }
@@ -321,15 +406,15 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return this.aggregateResults(actorResults);
   }
 
-  private extractRequiredEvents(massIdDocument: Document) {
-    const events = massIdDocument.externalEvents?.filter(
+  private extractRequiredEvents(massIDDocument: Document) {
+    const events = massIDDocument.externalEvents?.filter(
       eventNameIsAnyOf([DROP_OFF, PICK_UP]),
     );
 
     if (!isNonEmptyArray(events)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
-          massIdDocument.id,
+          massIDDocument.id,
         ),
       );
     }
@@ -338,34 +423,48 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private async getRuleSubject(
-    massIdAuditDocument: Document,
+    massIDAuditDocument: Document,
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<RuleSubject> {
     const documents = await this.collectDocuments(documentQuery);
-    const massIdDocument = this.validateMassIdDocument(
-      documents.massIdDocument,
+    const massIDDocument = this.validateMassIDDocument(
+      documents.massIDDocument,
     );
-    const pickUpAndDropOffEvents = this.extractRequiredEvents(massIdDocument);
+    const pickUpAndDropOffEvents = this.extractRequiredEvents(massIDDocument);
+
+    const recyclerAccreditationDocument = documents.accreditationDocuments.find(
+      (document) => {
+        const relation = mapDocumentRelation(document);
+
+        return (
+          PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
+          relation.subtype === DocumentSubtype.RECYCLER
+        );
+      },
+    );
 
     return {
+      accreditationDocuments: documents.accreditationDocuments,
+      massIDAuditDocument,
       participantsAddressData: this.buildParticipantsAddressData(
         pickUpAndDropOffEvents,
-        massIdDocument,
-        massIdAuditDocument,
+        massIDDocument,
+        massIDAuditDocument,
         documents.accreditationDocuments,
       ),
+      recyclerAccreditationDocument,
     };
   }
 
-  private validateMassIdDocument(
-    massIdDocument: Document | undefined,
+  private validateMassIDDocument(
+    massIDDocument: Document | undefined,
   ): Document {
-    if (isNil(massIdDocument)) {
+    if (isNil(massIDDocument)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       );
     }
 
-    return massIdDocument;
+    return massIDDocument;
   }
 }

@@ -18,16 +18,23 @@ describe('RegionalWasteClassificationProcessor', () => {
 
   it.each(regionalWasteClassificationTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ events, resultComment, resultContent, resultStatus }) => {
+    async ({
+      events,
+      partialDocument,
+      resultComment,
+      resultContent,
+      resultStatus,
+    }) => {
       const ruleInput = random<Required<RuleInput>>();
 
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
+          partialDocument,
         })
         .build();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

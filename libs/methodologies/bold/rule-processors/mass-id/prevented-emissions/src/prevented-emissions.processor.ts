@@ -23,7 +23,7 @@ import {
   type Document,
   DocumentEventAttributeName,
   DocumentSubtype,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -52,7 +52,7 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
 export const RESULT_COMMENTS = {
   MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
   MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
-    wasteSubtype: MassIdOrganicSubtype,
+    wasteSubtype: MassIDOrganicSubtype,
   ) =>
     `The "${BASELINES}" was not found in the "Waste Generator Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
   PASSED: (
@@ -65,7 +65,7 @@ export const RESULT_COMMENTS = {
 } as const;
 
 interface Documents {
-  massIdDocument: Document;
+  massIDDocument: Document;
   recyclerAccreditationDocument: Document;
   wasteGeneratorVerificationDocument: Document;
 }
@@ -99,7 +99,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
     const {
       exceedingEmissionCoefficient,
-      massIdDocumentValue,
+      massIDDocumentValue,
       wasteGeneratorBaseline,
       wasteSubtype,
     } = ruleSubject;
@@ -127,7 +127,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     const preventedEmissions = calculatePreventedEmissions(
       exceedingEmissionCoefficient,
       preventedEmissionsByWasteSubtypeAndBaselinePerTon,
-      massIdDocumentValue,
+      massIDDocumentValue,
     );
 
     return {
@@ -135,7 +135,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         preventedEmissions,
         preventedEmissionsByWasteSubtypeAndBaselinePerTon,
         exceedingEmissionCoefficient,
-        massIdDocumentValue,
+        massIDDocumentValue,
       ),
       resultContent: {
         gasType: ruleSubject.gasType,
@@ -163,7 +163,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   }
 
   protected getRuleSubject({
-    massIdDocument,
+    massIDDocument,
     recyclerAccreditationDocument,
     wasteGeneratorVerificationDocument,
   }: Documents): RuleSubject {
@@ -171,12 +171,12 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
           recyclerAccreditationDocument,
-        documentYear: getYear(massIdDocument.externalCreatedAt),
+        documentYear: getYear(massIDDocument.externalCreatedAt),
       });
 
     const gasType = getGasTypeFromEvent(lastEmissionAndCompostingMetricsEvent);
 
-    if (!is<MassIdOrganicSubtype>(massIdDocument.subtype)) {
+    if (!is<MassIDOrganicSubtype>(massIDDocument.subtype)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
       );
@@ -184,7 +184,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     const wasteGeneratorBaseline = getWasteGeneratorBaselineByWasteSubtype(
       wasteGeneratorVerificationDocument,
-      massIdDocument.subtype,
+      massIDDocument.subtype,
       this.processorErrors,
     );
 
@@ -194,9 +194,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         EXCEEDING_EMISSION_COEFFICIENT,
       ),
       gasType,
-      massIdDocumentValue: massIdDocument.currentValue,
+      massIDDocumentValue: massIDDocument.currentValue,
       wasteGeneratorBaseline,
-      wasteSubtype: massIdDocument.subtype,
+      wasteSubtype: massIDDocument.subtype,
     };
   }
 
@@ -204,7 +204,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<Documents> {
     let recyclerAccreditationDocument: Document | undefined;
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
     let wasteGeneratorVerificationDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
@@ -225,7 +225,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       }
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
     });
 
@@ -237,7 +237,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     throwIfMissing(
-      massIdDocument,
+      massIDDocument,
       this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
       this.processorErrors,
     );
@@ -250,7 +250,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIdDocument: massIdDocument as Document,
+      massIDDocument: massIDDocument as Document,
       recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
       wasteGeneratorVerificationDocument:
         wasteGeneratorVerificationDocument as Document,

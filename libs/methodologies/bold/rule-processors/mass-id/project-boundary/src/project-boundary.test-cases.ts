@@ -2,8 +2,8 @@ import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
   generateNearbyCoordinates,
   stubAddress,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -43,7 +43,7 @@ export const projectBoundaryTestCases = [
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIdDropOffEvent({
+      [DROP_OFF]: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           address: {
             ...stubAddress(),
@@ -51,7 +51,7 @@ export const projectBoundaryTestCases = [
           },
         },
       }),
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         partialDocumentEvent: {
           address: {
             ...stubAddress(),

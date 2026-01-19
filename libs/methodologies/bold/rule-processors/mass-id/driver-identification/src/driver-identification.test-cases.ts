@@ -1,4 +1,4 @@
-import { stubBoldMassIdPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventVehicleType,
@@ -19,7 +19,7 @@ const someJustification = faker.lorem.sentence();
 
 export const driverIdentificationTestCases = [
   {
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, faker.lorem.sentence()],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
@@ -31,7 +31,7 @@ export const driverIdentificationTestCases = [
     scenario: `the ${DRIVER_IDENTIFIER} is provided`,
   },
   {
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, undefined],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, someJustification],
@@ -43,7 +43,7 @@ export const driverIdentificationTestCases = [
     scenario: `the ${DRIVER_IDENTIFIER} is not provided, but the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is provided`,
   },
   {
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, undefined],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
@@ -55,7 +55,7 @@ export const driverIdentificationTestCases = [
     scenario: `the ${DRIVER_IDENTIFIER} is not provided and the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is not provided`,
   },
   {
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, undefined],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
@@ -67,7 +67,7 @@ export const driverIdentificationTestCases = [
     scenario: `the vehicle type is ${SLUDGE_PIPES}`,
   },
   {
-    pickUpEvent: stubBoldMassIdPickUpEvent({
+    pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, faker.lorem.sentence()],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, someJustification],

@@ -1,6 +1,6 @@
 import type { LicensePlate } from '@carrot-fndn/shared/types';
 
-import { stubBoldMassIdPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   DocumentEventName,
@@ -24,7 +24,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, 'INVALID_VEHICLE_TYPE']],
         }),
       ],
@@ -37,7 +37,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, undefined]],
         }),
       ],
@@ -50,7 +50,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, OTHERS],
             [VEHICLE_DESCRIPTION, undefined],
@@ -66,7 +66,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, OTHERS],
             [VEHICLE_DESCRIPTION, 'VEHICLE_DESCRIPTION'],
@@ -88,7 +88,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_TYPE, vehicleType]],
         }),
       ],
@@ -101,7 +101,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, TRUCK],
             [VEHICLE_LICENSE_PLATE, undefined],
@@ -117,7 +117,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, TRUCK],
             [VEHICLE_LICENSE_PLATE, random<LicensePlate>()],
@@ -133,7 +133,7 @@ export const vehicleIdentificationTestCases = [
     events: new Map([
       [
         PICK_UP,
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, TRUCK],
             [VEHICLE_LICENSE_PLATE, 'INVALID_LICENSE_PLATE'],

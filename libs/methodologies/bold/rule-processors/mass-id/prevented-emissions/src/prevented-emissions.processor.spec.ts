@@ -25,7 +25,7 @@ describe('PreventedEmissionsProcessor', () => {
       async ({
         accreditationDocuments,
         externalCreatedAt,
-        massIdDocumentValue,
+        massIDDocumentValue,
         resultComment,
         resultContent,
         resultStatus,
@@ -33,9 +33,9 @@ describe('PreventedEmissionsProcessor', () => {
       }) => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
-          massIdDocumentsParams: {
+          massIDDocumentsParams: {
             partialDocument: {
-              currentValue: massIdDocumentValue as number,
+              currentValue: massIDDocumentValue as number,
               externalCreatedAt,
               subtype,
             },
@@ -60,17 +60,17 @@ describe('PreventedEmissionsProcessor', () => {
       'should return $resultStatus when $scenario',
       async ({
         documents,
-        massIdAuditDocument,
+        massIDAuditDocument,
         resultComment,
         resultStatus,
       }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+        const allDocuments = [massIDAuditDocument, ...documents];
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
         const ruleInput = {
           ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
         };
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);

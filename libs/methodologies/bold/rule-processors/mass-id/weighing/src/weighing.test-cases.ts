@@ -2,7 +2,7 @@ import {
   BoldStubsBuilder,
   type MetadataAttributeParameter,
   stubBoldAccreditationResultEvent,
-  stubBoldMassIdWeighingEvent,
+  stubBoldMassIDWeighingEvent,
   stubBoldMonitoringSystemsAndEquipmentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -14,7 +14,7 @@ import {
   DocumentEventName,
   DocumentEventScaleType,
   DocumentEventWeighingCaptureMethod,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -48,7 +48,7 @@ const {
   VEHICLE_LICENSE_PLATE,
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
-const { RECYCLER } = MassIdDocumentActorType;
+const { RECYCLER } = MassIDDocumentActorType;
 const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
 const scaleType = random<DocumentEventScaleType>();
@@ -154,7 +154,7 @@ const createWeighingEvent = (
   eventValueOverride: number = eventValue,
   participant?: ReturnType<typeof stubParticipant>,
 ): DocumentEvent =>
-  stubBoldMassIdWeighingEvent({
+  stubBoldMassIDWeighingEvent({
     metadataAttributes: overrideAttributes,
     partialDocumentEvent: {
       ...(participant && { participant }),
@@ -232,7 +232,7 @@ const createTwoStepWeighingEvents = (
 
 export const weighingTestCases = [
   {
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: undefined,
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
@@ -240,10 +240,10 @@ export const weighingTestCases = [
     scenario: `the MassID document does not have ${WEIGHING} events`,
   },
   {
-    massIdDocumentEvents: {
-      [`${WEIGHING}-1`]: stubBoldMassIdWeighingEvent(),
-      [`${WEIGHING}-2`]: stubBoldMassIdWeighingEvent(),
-      [`${WEIGHING}-3`]: stubBoldMassIdWeighingEvent(),
+    massIDDocumentEvents: {
+      [`${WEIGHING}-1`]: stubBoldMassIDWeighingEvent(),
+      [`${WEIGHING}-2`]: stubBoldMassIDWeighingEvent(),
+      [`${WEIGHING}-3`]: stubBoldMassIDWeighingEvent(),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
     resultStatus: RuleOutputStatus.FAILED,
@@ -260,8 +260,8 @@ export const weighingTestCases = [
         },
       ],
     ]),
-    massIdDocumentEvents: {
-      [WEIGHING]: stubBoldMassIdWeighingEvent({
+    massIDDocumentEvents: {
+      [WEIGHING]: stubBoldMassIDWeighingEvent({
         metadataAttributes: validWeighingAttributes,
         partialDocumentEvent: {
           value: eventValue,
@@ -274,7 +274,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [CONTAINER_CAPACITY, undefined],
@@ -287,7 +287,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [CONTAINER_TYPE, DocumentEventContainerType.BAG],
@@ -310,7 +310,7 @@ export const weighingTestCases = [
         },
       ],
     ]),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [CONTAINER_TYPE, DocumentEventContainerType.BAG],
@@ -323,7 +323,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [CONTAINER_QUANTITY, 1],
@@ -337,7 +337,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [[GROSS_WEIGHT, undefined]]),
       ),
@@ -348,7 +348,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes, 0),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
@@ -357,7 +357,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [[TARE, undefined]]),
       ),
@@ -368,7 +368,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [[DESCRIPTION, undefined]]),
       ),
@@ -379,7 +379,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [[DESCRIPTION, '']]),
       ),
@@ -390,7 +390,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
@@ -407,7 +407,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [WEIGHING_CAPTURE_METHOD, weighingCaptureMethodMismatch],
@@ -423,7 +423,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [VEHICLE_LICENSE_PLATE, undefined],
@@ -436,7 +436,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [[CONTAINER_TYPE, undefined]]),
       ),
@@ -447,7 +447,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
@@ -458,7 +458,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withScaleTicketVerification: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(
@@ -471,7 +471,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withScaleTicketVerification: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: 'Scale ticket mismatch',
@@ -483,7 +483,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withContainerCapacityException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [CONTAINER_CAPACITY, undefined],
@@ -500,7 +500,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [`${WEIGHING}-2`]: createWeighingEvent(
         mergeAttributes(validWeighingAttributesWithoutQuantity, [
           [SCALE_TYPE, twoStepScaleType],
@@ -528,7 +528,7 @@ export const weighingTestCases = [
       scaleTypeValue: twoStepScaleType,
       withContainerCapacityException: true,
     }),
-    massIdDocumentEvents: createTwoStepWeighingEvents(
+    massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
       [[CONTAINER_CAPACITY, undefined]],
@@ -543,7 +543,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
-    massIdDocumentEvents: createTwoStepWeighingEvents(
+    massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
     ),
@@ -555,7 +555,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
-    massIdDocumentEvents: createTwoStepWeighingEvents(
+    massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
       [],
@@ -573,7 +573,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: DocumentEventScaleType.CONVEYOR_BELT_SCALE,
     }),
-    massIdDocumentEvents: createTwoStepWeighingEvents(
+    massIDDocumentEvents: createTwoStepWeighingEvents(
       DocumentEventScaleType.CONVEYOR_BELT_SCALE,
       twoStepWeighingEventParticipant,
     ),
@@ -587,7 +587,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [`${WEIGHING}-2`]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [SCALE_TYPE, twoStepScaleType],
@@ -615,7 +615,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: scaleType,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [
@@ -632,7 +632,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes, 98),
     },
     resultComment: INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
@@ -649,7 +649,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -667,7 +667,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -685,7 +685,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -703,7 +703,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
         [
           [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
@@ -730,7 +730,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -748,7 +748,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -766,7 +766,7 @@ export const weighingTestCases = [
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -787,7 +787,7 @@ export const weighingTestCases = [
       tareExceptionValidUntil: '2020-01-01T00:00:00Z',
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -806,7 +806,7 @@ export const weighingTestCases = [
       tareExceptionValidUntil: 'invalid-date-format',
       withTareException: true,
     }),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -822,7 +822,7 @@ export const weighingTestCases = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent([
         [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
         [SCALE_TYPE, scaleType],
@@ -841,12 +841,12 @@ export const weighingTestCases = [
 const processorErrors = new WeighingProcessorErrors();
 
 const {
-  massIdAuditDocument,
-  massIdDocument,
+  massIDAuditDocument,
+  massIDDocument,
   participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
+  .createMassIDDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
@@ -854,14 +854,14 @@ const {
 export const weighingErrorTestCases = [
   {
     documents: [...participantsAccreditationDocuments.values()],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document was not found`,
   },
   {
-    documents: [massIdDocument],
-    massIdAuditDocument,
+    documents: [massIDDocument],
+    massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,

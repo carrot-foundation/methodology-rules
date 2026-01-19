@@ -27,32 +27,32 @@ describe('PreventedEmissionsProcessor E2E', () => {
     async ({
       accreditationDocuments,
       externalCreatedAt,
-      massIdDocumentValue,
+      massIDDocumentValue,
       resultComment,
       resultStatus,
       subtype,
     }) => {
       const {
-        massIdAuditDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDDocument,
         participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+        .createMassIDDocuments({
           partialDocument: {
-            currentValue: massIdDocumentValue as number,
+            currentValue: massIDDocumentValue as number,
             externalCreatedAt,
             subtype,
           },
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
 
       prepareEnvironmentTestE2E(
         [
-          massIdDocument,
-          massIdAuditDocument,
+          massIDDocument,
+          massIDAuditDocument,
           ...participantsAccreditationDocuments.values(),
         ].map((document) => ({
           document,
@@ -65,7 +65,7 @@ describe('PreventedEmissionsProcessor E2E', () => {
 
       const response = (await preventedEmissionsLambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
@@ -82,9 +82,9 @@ describe('PreventedEmissionsProcessor E2E', () => {
   describe('PreventedEmissionsProcessorErrors', () => {
     it.each(preventedEmissionsErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIdAuditDocument, resultStatus }) => {
+      async ({ documents, massIDAuditDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
-          [...documents, massIdAuditDocument].map((document) => ({
+          [...documents, massIDAuditDocument].map((document) => ({
             document,
             documentKey: toDocumentKey({
               documentId: document.id,
@@ -95,7 +95,7 @@ describe('PreventedEmissionsProcessor E2E', () => {
 
         const response = (await preventedEmissionsLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),

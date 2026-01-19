@@ -1,3 +1,5 @@
+import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
+
 // Common descriptions
 const OTHER_WASTE = 'Outros resíduos não anteriormente especificados';
 const EFFLUENT_TREATMENT_SLUDGE = 'Lodos do tratamento local de efluentes';
@@ -923,3 +925,18 @@ export const WASTE_CLASSIFICATION_CODES = {
     },
   },
 } as const;
+
+/**
+ * Maps MassIDOrganicSubtype values to their corresponding CDM_CODE values.
+ * Based on CDM_CODE mapping from README.md
+ */
+export const SUBTYPE_TO_CDM_CODE_MAP: Map<string, string | undefined> = new Map(
+  [
+    [MassIDOrganicSubtype.DOMESTIC_SLUDGE, '8.7C'],
+    [MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE, '8.7A'],
+    [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES, '8.3'],
+    [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE, '8.5'],
+    [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE, '8.7B'],
+    [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS, '8.1'],
+  ],
+);

@@ -8,14 +8,14 @@ import { BoldStubsBuilder, type StubBoldDocumentParameters } from '../builders';
 
 interface CreateBoldStubsParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
-  massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
+  massIDActorParticipants?: Map<string, MethodologyParticipant> | undefined;
+  massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
 }
 
 interface ProcessRuleTestParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  massIdActorParticipants?: Map<string, MethodologyParticipant> | undefined;
-  massIdDocumentsParams?: StubBoldDocumentParameters | undefined;
+  massIDActorParticipants?: Map<string, MethodologyParticipant> | undefined;
+  massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
   ruleDataProcessor: RuleDataProcessor;
   spyOnDocumentQueryServiceLoad: (
     rootDocument: Document,
@@ -31,16 +31,16 @@ interface TestExpectedRuleOutputParameters {
   ruleOutput: RuleOutput;
 }
 
-export function createBoldStubsForMassIdProcessor({
+export function createBoldStubsForMassIDProcessor({
   accreditationDocuments,
-  massIdActorParticipants,
-  massIdDocumentsParams,
+  massIDActorParticipants,
+  massIDDocumentsParams,
 }: CreateBoldStubsParameters) {
   return new BoldStubsBuilder({
-    ...(massIdActorParticipants && { massIdActorParticipants }),
+    ...(massIDActorParticipants && { massIDActorParticipants }),
   })
-    .createMassIdDocuments(massIdDocumentsParams)
-    .createMassIdAuditDocuments()
+    .createMassIDDocuments(massIDDocumentsParams)
+    .createMassIDAuditDocuments()
     .createMethodologyDocument()
     .createParticipantAccreditationDocuments(accreditationDocuments)
     .build();
@@ -48,8 +48,8 @@ export function createBoldStubsForMassIdProcessor({
 
 export async function createRuleTestFixture({
   accreditationDocuments,
-  massIdActorParticipants,
-  massIdDocumentsParams,
+  massIDActorParticipants,
+  massIDDocumentsParams,
   ruleDataProcessor,
   spyOnDocumentQueryServiceLoad,
 }: ProcessRuleTestParameters): Promise<{
@@ -57,26 +57,26 @@ export async function createRuleTestFixture({
   ruleOutput: RuleOutput;
 }> {
   const {
-    massIdAuditDocument,
-    massIdDocument,
+    massIDAuditDocument,
+    massIDDocument,
     participantsAccreditationDocuments,
-  } = createBoldStubsForMassIdProcessor({
+  } = createBoldStubsForMassIDProcessor({
     accreditationDocuments,
-    massIdActorParticipants,
-    massIdDocumentsParams,
+    massIDActorParticipants,
+    massIDDocumentsParams,
   });
 
   const allDocuments = [
-    massIdDocument,
-    massIdAuditDocument,
+    massIDDocument,
+    massIDAuditDocument,
     ...participantsAccreditationDocuments.values(),
   ];
 
-  spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+  spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
   const ruleInput = {
     ...random<Required<RuleInput>>(),
-    documentId: massIdAuditDocument.id,
+    documentId: massIDAuditDocument.id,
   };
 
   return { ruleInput, ruleOutput: await ruleDataProcessor.process(ruleInput) };
