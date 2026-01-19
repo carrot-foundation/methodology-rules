@@ -22,8 +22,11 @@ import {
 
 import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
-
-const isAlphaNumericUnicode = (ch: string): boolean => /\p{L}|\p{N}/u.test(ch);
+import {
+  getCdmCodeFromSubtype,
+  normalizeClassificationId,
+  normalizeDescriptionForComparison,
+} from './regional-waste-classification.helpers';
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -37,16 +40,18 @@ export const RESULT_COMMENTS = {
   CLASSIFICATION_ID_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" was not provided.`,
   INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" does not match the expected IBAMA code description.`,
   INVALID_CLASSIFICATION_ID: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" does not match an IBAMA code accepted by the methodology.`,
+  INVALID_SUBTYPE_CDM_CODE_MISMATCH: `The subtype does not match the CDM code for the provided "${LOCAL_WASTE_CLASSIFICATION_ID}".`,
+  INVALID_SUBTYPE_MAPPING: `The provided subtype does not map to a valid CDM code.`,
   UNSUPPORTED_COUNTRY: (recyclerCountryCode: string) =>
     `Local waste classification is only validated for recyclers in Brazil, but the recycler country is ${recyclerCountryCode}.`,
-  VALID_CLASSIFICATION:
-    'The local waste classification ID and description match an IBAMA code.',
+  VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" match an IBAMA code.`,
 } as const;
 
 type Subject = {
   description: MethodologyDocumentEventAttributeValue | string | undefined;
   id: MethodologyDocumentEventAttributeValue | string | undefined;
   recyclerCountryCode: string;
+  subtype: string;
 };
 
 export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -56,7 +61,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
   protected override evaluateResult(
     subject: Subject,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
-    const { description, id, recyclerCountryCode } = subject;
+    const { description, id, recyclerCountryCode, subtype } = subject;
 
     if (recyclerCountryCode !== 'BR') {
       return this.isFailed(
@@ -79,22 +84,38 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     const validClassificationIds = Object.keys(WASTE_CLASSIFICATION_CODES.BR);
 
     const normalizedId = validClassificationIds.find(
-      (validId) => validId.replaceAll(/\s+/g, '') === id.replaceAll(/\s+/g, ''),
+      (validId) =>
+        normalizeClassificationId(validId) === normalizeClassificationId(id),
     );
 
     if (!normalizedId) {
       return this.isFailed(RESULT_COMMENTS.INVALID_CLASSIFICATION_ID, subject);
     }
 
-    const expectedDescription =
+    const expectedCdmCode = getCdmCodeFromSubtype(subtype);
+
+    if (!expectedCdmCode) {
+      return this.isFailed(RESULT_COMMENTS.INVALID_SUBTYPE_MAPPING, subject);
+    }
+
+    const classificationEntry =
       WASTE_CLASSIFICATION_CODES.BR[
         normalizedId as keyof typeof WASTE_CLASSIFICATION_CODES.BR
-      ].description;
+      ];
+
+    if (classificationEntry.CDM_CODE !== expectedCdmCode) {
+      return this.isFailed(
+        RESULT_COMMENTS.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
+        subject,
+      );
+    }
+
+    const expectedDescription = classificationEntry.description;
 
     const normalizedProvidedDescription =
-      this.normalizeDescriptionForComparison(description);
+      normalizeDescriptionForComparison(description);
     const normalizedExpectedDescription =
-      this.normalizeDescriptionForComparison(expectedDescription);
+      normalizeDescriptionForComparison(expectedDescription);
 
     if (normalizedProvidedDescription !== normalizedExpectedDescription) {
       return this.isFailed(
@@ -118,6 +139,10 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
     );
 
+    if (!document.subtype) {
+      return undefined;
+    }
+
     return {
       description: getEventAttributeValue(
         pickUpEvent,
@@ -125,6 +150,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       ),
       id: getEventAttributeValue(pickUpEvent, LOCAL_WASTE_CLASSIFICATION_ID),
       recyclerCountryCode: getOrDefault(recyclerEvent?.address.countryCode, ''),
+      subtype: document.subtype,
     };
   }
 
@@ -137,22 +163,5 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
       ...(resultContent && { resultContent }),
       resultStatus: RuleOutputStatus.FAILED,
     };
-  }
-
-  private normalizeDescriptionForComparison(value: string): string {
-    const normalized = value.normalize('NFKC').trim();
-
-    let start = 0;
-    let end = normalized.length - 1;
-
-    while (start <= end && !isAlphaNumericUnicode(normalized.charAt(start))) {
-      start += 1;
-    }
-
-    while (end >= start && !isAlphaNumericUnicode(normalized.charAt(end))) {
-      end -= 1;
-    }
-
-    return normalized.slice(start, end + 1);
   }
 }
