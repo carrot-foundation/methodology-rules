@@ -7,8 +7,8 @@ import {
   Document,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
-  MassIdOrganicSubtype,
+  MassIDDocumentActorType,
+  MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -20,34 +20,34 @@ import { RESULT_COMMENTS } from './prevented-emissions.processor';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
   DocumentEventAttributeName;
-const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
+const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 const { EMISSION_AND_COMPOSTING_METRICS, RECYCLING_BASELINES } =
   DocumentEventName;
 
-const subtype = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
+const subtype = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
 const exceedingEmissionCoefficient = 0.02;
-const massIdDocumentValue = 100;
+const massIDDocumentValue = 100;
 const baselineValue =
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[subtype][baseline];
 const expectedPreventedEmissionsValue =
-  massIdDocumentValue * (baselineValue - exceedingEmissionCoefficient);
+  massIDDocumentValue * (baselineValue - exceedingEmissionCoefficient);
 
 const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
 const processorErrors = new PreventedEmissionsProcessorErrors();
 
 const {
-  massIdAuditDocument,
-  massIdDocument,
+  massIDAuditDocument,
+  massIDDocument,
   participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocuments({
+  .createMassIDDocuments({
     partialDocument: {
       externalCreatedAt: addYears(new Date(), 1).toISOString(),
     },
   })
-  .createMassIdAuditDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
@@ -80,13 +80,13 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient: undefined,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue: 1,
+        massIDDocumentValue: 1,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -125,13 +125,13 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    massIdDocumentValue,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
       0,
       baselineValue,
       exceedingEmissionCoefficientExceedingBaseline,
-      massIdDocumentValue,
+      massIDDocumentValue,
     ),
     resultContent: {
       gasType: 'Methane (CH4)',
@@ -140,7 +140,7 @@ export const preventedEmissionsTestCases = [
         exceedingEmissionCoefficient:
           exceedingEmissionCoefficientExceedingBaseline,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue,
+        massIDDocumentValue,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -177,13 +177,13 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient: null,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue: 1,
+        massIDDocumentValue: 1,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -222,13 +222,13 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    massIdDocumentValue,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
       expectedPreventedEmissionsValue,
       baselineValue,
       exceedingEmissionCoefficient,
-      massIdDocumentValue,
+      massIDDocumentValue,
     ),
     resultContent: {
       gasType: 'Methane (CH4)',
@@ -236,7 +236,7 @@ export const preventedEmissionsTestCases = [
       ruleSubject: {
         exceedingEmissionCoefficient,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue,
+        massIDDocumentValue,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -275,23 +275,23 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    massIdDocumentValue,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
-      MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+      MassIDOrganicSubtype.DOMESTIC_SLUDGE,
     ),
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue,
+        massIDDocumentValue,
         wasteGeneratorBaseline: undefined,
-        wasteSubtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+        wasteSubtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${MassIdOrganicSubtype.DOMESTIC_SLUDGE}"`,
-    subtype: MassIdOrganicSubtype.DOMESTIC_SLUDGE,
+    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
+    subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   },
   {
     accreditationDocuments: new Map([
@@ -320,14 +320,14 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    massIdDocumentValue,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient: 0,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue,
+        massIDDocumentValue,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -363,14 +363,14 @@ export const preventedEmissionsTestCases = [
         },
       ],
     ]),
-    externalCreatedAt: massIdDocument.externalCreatedAt,
-    massIdDocumentValue,
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         exceedingEmissionCoefficient: -0.5,
         gasType: 'Methane (CH4)',
-        massIdDocumentValue,
+        massIDDocumentValue,
         wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
@@ -388,8 +388,8 @@ export const preventedEmissionsErrorTestCases = [
   {
     documents: [
       {
-        ...massIdDocument,
-        subtype: 'INVALID_SUBTYPE' as MassIdOrganicSubtype,
+        ...massIDDocument,
+        subtype: 'INVALID_SUBTYPE' as MassIDOrganicSubtype,
       },
       ...[...participantsAccreditationDocuments.values()].map((document) => {
         if (document.subtype === RECYCLER) {
@@ -426,7 +426,7 @@ export const preventedEmissionsErrorTestCases = [
         return document;
       }),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
     resultStatus: RuleOutputStatus.FAILED,
@@ -434,7 +434,7 @@ export const preventedEmissionsErrorTestCases = [
   },
   {
     documents: [
-      massIdDocument,
+      massIDDocument,
       ...[...participantsAccreditationDocuments.values()].map((document) => {
         if (document.subtype === RECYCLER) {
           return {
@@ -459,7 +459,7 @@ export const preventedEmissionsErrorTestCases = [
         return document;
       }),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
@@ -467,14 +467,14 @@ export const preventedEmissionsErrorTestCases = [
   },
   {
     documents: [...participantsAccreditationDocuments.values()],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document was not found',
   },
   {
-    documents: [massIdDocument],
-    massIdAuditDocument,
+    documents: [massIDDocument],
+    massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
@@ -482,7 +482,7 @@ export const preventedEmissionsErrorTestCases = [
   },
   {
     documents: [
-      massIdDocument,
+      massIDDocument,
       ...[...participantsAccreditationDocuments.values()]
         .filter((document) => document.subtype !== WASTE_GENERATOR)
         .map((document) => {
@@ -510,7 +510,7 @@ export const preventedEmissionsErrorTestCases = [
           return document;
         }),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE
         .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
@@ -519,7 +519,7 @@ export const preventedEmissionsErrorTestCases = [
   },
   {
     documents: [
-      massIdDocument,
+      massIDDocument,
       ...[...participantsAccreditationDocuments.values()]
         .filter((document) => document.subtype !== WASTE_GENERATOR)
         .map((document) => {
@@ -551,7 +551,7 @@ export const preventedEmissionsErrorTestCases = [
         ],
       },
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
     resultStatus: RuleOutputStatus.FAILED,

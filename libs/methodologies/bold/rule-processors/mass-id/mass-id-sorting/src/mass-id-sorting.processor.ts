@@ -30,7 +30,7 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
-import { MassIdSortingProcessorErrors } from './mass-id-sorting.errors';
+import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 import {
   calculateSortingValues,
   findSortingEvents,
@@ -64,7 +64,7 @@ export const RESULT_COMMENTS = {
 } as const;
 
 interface DocumentPair {
-  massIdDocument: Document;
+  massIDDocument: Document;
   recyclerAccreditationDocument: Document;
 }
 
@@ -83,8 +83,8 @@ interface SortingData {
   valueBeforeSorting: number;
 }
 
-export class MassIdSortingProcessor extends RuleDataProcessor {
-  protected readonly processorErrors = new MassIdSortingProcessorErrors();
+export class MassIDSortingProcessor extends RuleDataProcessor {
+  protected readonly processorErrors = new MassIDSortingProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
     try {
@@ -193,7 +193,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     documentQuery: DocumentQuery<Document> | undefined,
   ): Promise<DocumentPair> {
     let recyclerAccreditationDocument: Document | undefined;
-    let massIdDocument: Document | undefined;
+    let massIDDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -206,7 +206,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
       }
 
       if (MASS_ID.matches(documentRelation)) {
-        massIdDocument = document;
+        massIDDocument = document;
       }
     });
 
@@ -217,21 +217,21 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     );
 
     this.validateOrThrow(
-      isNil(massIdDocument),
+      isNil(massIDDocument),
       this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     );
 
     return {
-      massIdDocument: massIdDocument!,
+      massIDDocument: massIDDocument!,
       recyclerAccreditationDocument: recyclerAccreditationDocument!,
     };
   }
 
   private extractSortingData(documents: DocumentPair): SortingData {
-    const { massIdDocument, recyclerAccreditationDocument } = documents;
+    const { massIDDocument, recyclerAccreditationDocument } = documents;
 
     const externalEvents = this.unwrapOrThrow(
-      getValidatedExternalEvents(massIdDocument),
+      getValidatedExternalEvents(massIDDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
     );
 
@@ -241,7 +241,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
     );
 
     const sortingFactor = this.unwrapOrThrow(
-      getSortingFactor(recyclerAccreditationDocument, massIdDocument),
+      getSortingFactor(recyclerAccreditationDocument, massIDDocument),
       this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
     );
 
@@ -312,7 +312,7 @@ export class MassIdSortingProcessor extends RuleDataProcessor {
 
     return {
       ...calculations,
-      documentCurrentValue: massIdDocument.currentValue,
+      documentCurrentValue: massIDDocument.currentValue,
       sortingDescription,
       sortingFactor,
       valueAfterSorting: eventValues.valueAfterSorting,

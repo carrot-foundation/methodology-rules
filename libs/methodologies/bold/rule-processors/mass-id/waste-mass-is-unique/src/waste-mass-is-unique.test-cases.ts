@@ -1,6 +1,6 @@
 import {
   BoldStubsBuilder,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
@@ -64,24 +64,24 @@ export const wasteMassIsUniqueTestCases = [
 
 const processorErrors = new WasteMassIsUniqueProcessorErrors();
 
-const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
+const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+  .createMassIDDocuments()
+  .createMassIDAuditDocuments()
   .build();
 
 export const wasteMassIsUniqueErrorTestCases = [
   {
-    massIdAuditDocument,
-    massIdDocument: undefined,
+    massIDAuditDocument,
+    massIDDocument: undefined,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'when the MassID document is missing',
   },
   {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
-      externalEvents: massIdDocument.externalEvents?.filter(
+    massIDAuditDocument,
+    massIDDocument: {
+      ...massIDDocument,
+      externalEvents: massIDDocument.externalEvents?.filter(
         (event) => event.name !== DROP_OFF.toString(),
       ),
     },
@@ -90,10 +90,10 @@ export const wasteMassIsUniqueErrorTestCases = [
     scenario: `when the "${DROP_OFF}" event is missing`,
   },
   {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
-      externalEvents: massIdDocument.externalEvents?.filter(
+    massIDAuditDocument,
+    massIDDocument: {
+      ...massIDDocument,
+      externalEvents: massIDDocument.externalEvents?.filter(
         (event) => event.name !== PICK_UP.toString(),
       ),
     },
@@ -102,10 +102,10 @@ export const wasteMassIsUniqueErrorTestCases = [
     scenario: `when the "${PICK_UP}" event is missing`,
   },
   {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
-      externalEvents: massIdDocument.externalEvents?.filter(
+    massIDAuditDocument,
+    massIDDocument: {
+      ...massIDDocument,
+      externalEvents: massIDDocument.externalEvents?.filter(
         (event) => event.label !== WASTE_GENERATOR.toString(),
       ),
     },
@@ -114,10 +114,10 @@ export const wasteMassIsUniqueErrorTestCases = [
     scenario: `when the "${WASTE_GENERATOR}" event is missing`,
   },
   {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
-      externalEvents: massIdDocument.externalEvents?.filter(
+    massIDAuditDocument,
+    massIDDocument: {
+      ...massIDDocument,
+      externalEvents: massIDDocument.externalEvents?.filter(
         (event) => event.label !== RECYCLER.toString(),
       ),
     },
@@ -126,14 +126,14 @@ export const wasteMassIsUniqueErrorTestCases = [
     scenario: `when the "${RECYCLER}" event is missing`,
   },
   {
-    massIdAuditDocument,
-    massIdDocument: {
-      ...massIdDocument,
+    massIDAuditDocument,
+    massIDDocument: {
+      ...massIDDocument,
       externalEvents: [
-        ...(massIdDocument.externalEvents ?? []).filter(
+        ...(massIDDocument.externalEvents ?? []).filter(
           (event) => event.name !== PICK_UP.toString(),
         ),
-        stubBoldMassIdPickUpEvent({
+        stubBoldMassIDPickUpEvent({
           metadataAttributes: [[VEHICLE_LICENSE_PLATE, undefined]],
         }),
       ],

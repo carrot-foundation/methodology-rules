@@ -30,67 +30,67 @@ describe('RewardsDistributionProcessor', () => {
       'should return $resultStatus when $scenario',
       async ({
         expectedRewards,
-        massIdDocumentEvents,
-        massIdPartialDocument,
+        massIDDocumentEvents,
+        massIDPartialDocument,
         wasteGeneratorVerificationDocument,
       }) => {
         const {
-          massIdAuditDocument,
-          massIdCertificateDocument,
-          massIdDocument,
+          massIDAuditDocument,
+          massIDCertificateDocument,
+          massIDDocument,
           methodologyDocument,
         } = new BoldStubsBuilder({
           methodologyName: BoldMethodologyName.RECYCLING,
         })
-          .createMassIdDocuments({
-            externalEventsMap: massIdDocumentEvents,
-            partialDocument: massIdPartialDocument,
+          .createMassIDDocuments({
+            externalEventsMap: massIDDocumentEvents,
+            partialDocument: massIDPartialDocument,
           })
-          .createMassIdAuditDocuments()
-          .createMassIdCertificateDocuments()
+          .createMassIDAuditDocuments()
+          .createMassIDCertificateDocuments()
           .createMethodologyDocument()
           .build();
 
         const allDocuments = [
-          massIdAuditDocument,
-          massIdDocument,
-          massIdCertificateDocument,
+          massIDAuditDocument,
+          massIDDocument,
+          massIDCertificateDocument,
           methodologyDocument as Document,
           ...(wasteGeneratorVerificationDocument
             ? [wasteGeneratorVerificationDocument]
             : []),
         ];
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
         const ruleInput = stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
         });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        const { massIdRewards } =
+        const { massIDRewards } =
           ruleOutput.resultContent as RewardDistributionResultContent;
 
         const totalPercentage = sumBigNumbers(
-          massIdRewards.map(
-            ({ massIdPercentage }) => new BigNumber(massIdPercentage),
+          massIDRewards.map(
+            ({ massIDPercentage }) => new BigNumber(massIDPercentage),
           ),
         );
 
         expect(ruleOutput.resultContent).toMatchObject({
-          massIdDocumentId: massIdDocument.id,
+          massIDDocumentId: massIDDocument.id,
         });
 
         for (const actorType of Object.keys(expectedRewards)) {
-          const reward = massIdRewards.find(
-            (massIdReward) =>
-              massIdReward.actorType ===
+          const reward = massIDRewards.find(
+            (massIDReward) =>
+              massIDReward.actorType ===
               (actorType as RewardsDistributionActorType),
           );
 
           expect(reward).toBeDefined();
-          expect(reward?.massIdPercentage).toBe(expectedRewards[actorType]);
+          expect(reward?.massIDPercentage).toBe(expectedRewards[actorType]);
         }
 
         expect(totalPercentage.eq(BigNumber(100))).toBeTruthy();
@@ -103,17 +103,17 @@ describe('RewardsDistributionProcessor', () => {
       'should return $resultStatus when $scenario',
       async ({
         documents,
-        massIdAuditDocument,
+        massIDAuditDocument,
         resultComment,
         resultStatus,
       }) => {
-        const allDocuments = [massIdAuditDocument, ...documents];
+        const allDocuments = [massIDAuditDocument, ...documents];
 
-        spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
         const ruleInput = {
           ...random<Required<RuleInput>>(),
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
         };
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);

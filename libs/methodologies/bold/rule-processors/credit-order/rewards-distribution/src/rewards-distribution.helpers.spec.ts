@@ -7,14 +7,14 @@ import { random } from 'typia';
 
 import type {
   ActorsByType,
-  ResultContentsWithMassIdCertificateValue,
+  ResultContentsWithMassIDCertificateValue,
   RewardsDistributionActor,
 } from './rewards-distribution.types';
 
 import {
   addAmount,
   addParticipantRemainder,
-  aggregateMassIdCertificatesRewards,
+  aggregateMassIDCertificatesRewards,
   calculateAbsoluteValue,
   calculateAmount,
   calculateCreditPercentage,
@@ -66,7 +66,7 @@ describe('Rewards Distribution Helpers', () => {
   describe('calculateAbsoluteValue', () => {
     it('should calculate absolute value correctly', () => {
       const result = calculateAbsoluteValue({
-        massIdCertificateValue: new BigNumber(2000),
+        massIDCertificateValue: new BigNumber(2000),
         percentage: new BigNumber(10),
       });
 
@@ -75,14 +75,14 @@ describe('Rewards Distribution Helpers', () => {
 
     it('should handle zero values correctly', () => {
       const resultZeroPercentage = calculateAbsoluteValue({
-        massIdCertificateValue: new BigNumber(1000),
+        massIDCertificateValue: new BigNumber(1000),
         percentage: new BigNumber(0),
       });
 
       expect(resultZeroPercentage).toBe('0');
 
       const resultZeroCertificateValue = calculateAbsoluteValue({
-        massIdCertificateValue: new BigNumber(0),
+        massIDCertificateValue: new BigNumber(0),
         percentage: new BigNumber(50),
       });
 
@@ -175,8 +175,8 @@ describe('Rewards Distribution Helpers', () => {
     it('should return the correct amount of the participant', () => {
       const amount = calculateAmount({
         creditUnitPrice,
-        massIdCertificateValue: new BigNumber(1500),
-        massIdPercentage: new BigNumber('30.1234567892'),
+        massIDCertificateValue: new BigNumber(1500),
+        massIDPercentage: new BigNumber('30.1234567892'),
         previousParticipantAmount: new BigNumber(0),
       });
 
@@ -186,8 +186,8 @@ describe('Rewards Distribution Helpers', () => {
     it('should return the correct amount of the participant when the same participant already exists', () => {
       const amount = calculateAmount({
         creditUnitPrice,
-        massIdCertificateValue: new BigNumber(1500),
-        massIdPercentage: new BigNumber('30.1234567892'),
+        massIDCertificateValue: new BigNumber(1500),
+        massIDPercentage: new BigNumber('30.1234567892'),
         previousParticipantAmount: new BigNumber('3.223669'),
       });
 
@@ -197,8 +197,8 @@ describe('Rewards Distribution Helpers', () => {
     it('should handle undefined participantAmount', () => {
       const amount = calculateAmount({
         creditUnitPrice,
-        massIdCertificateValue: new BigNumber(100),
-        massIdPercentage: new BigNumber('10'),
+        massIDCertificateValue: new BigNumber(100),
+        massIDPercentage: new BigNumber('10'),
         previousParticipantAmount: new BigNumber(0),
       });
 
@@ -208,7 +208,7 @@ describe('Rewards Distribution Helpers', () => {
 
   describe('calculateRemainder', () => {
     it('should return the correct remainder of the credit', () => {
-      const massIdCertificateTotalValue = new BigNumber(2500);
+      const massIDCertificateTotalValue = new BigNumber(2500);
 
       const actors = new Map(
         Array.from({ length: 3 }).map(() => [
@@ -224,7 +224,7 @@ describe('Rewards Distribution Helpers', () => {
       const { amount, percentage } = calculateRemainder({
         actors,
         creditUnitPrice,
-        massIdCertificateTotalValue,
+        massIDCertificateTotalValue,
       });
 
       expect(amount.toString()).toEqual('13037.488054');
@@ -305,24 +305,24 @@ describe('Rewards Distribution Helpers', () => {
           actorsData[index]?.participant.id,
         );
 
-      const resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[] =
+      const resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[] =
         [
           {
-            massIdCertificateValue: new BigNumber(900),
+            massIDCertificateValue: new BigNumber(900),
             resultContent: {
-              massIdDocumentId: faker.string.uuid(),
-              massIdRewards: [
+              massIDDocumentId: faker.string.uuid(),
+              massIDRewards: [
                 {
                   actorType: actorsData[0]!.actorType,
                   address: actorsData[0]!.address,
-                  massIdPercentage: '20.1234567892',
+                  massIDPercentage: '20.1234567892',
                   participant: actorsData[0]!.participant,
                   preserveSensitiveData: actorsData[0]!.preserveSensitiveData,
                 },
                 {
                   actorType: actorsData[1]!.actorType,
                   address: actorsData[1]!.address,
-                  massIdPercentage: '79.8765432108',
+                  massIDPercentage: '79.8765432108',
                   participant: actorsData[1]!.participant,
                   preserveSensitiveData: actorsData[1]!.preserveSensitiveData,
                 },
@@ -330,21 +330,21 @@ describe('Rewards Distribution Helpers', () => {
             },
           },
           {
-            massIdCertificateValue: new BigNumber(900),
+            massIDCertificateValue: new BigNumber(900),
             resultContent: {
-              massIdDocumentId: faker.string.uuid(),
-              massIdRewards: [
+              massIDDocumentId: faker.string.uuid(),
+              massIDRewards: [
                 {
                   actorType: actorsData[2]!.actorType,
                   address: actorsData[2]!.address,
-                  massIdPercentage: '32.1238731924',
+                  massIDPercentage: '32.1238731924',
                   participant: actorsData[2]!.participant,
                   preserveSensitiveData: actorsData[2]!.preserveSensitiveData,
                 },
                 {
                   actorType: actorsData[3]!.actorType,
                   address: actorsData[3]!.address,
-                  massIdPercentage: '67.8761268076',
+                  massIDPercentage: '67.8761268076',
                   participant: actorsData[3]!.participant,
                   preserveSensitiveData: actorsData[3]!.preserveSensitiveData,
                 },
@@ -353,13 +353,13 @@ describe('Rewards Distribution Helpers', () => {
           },
         ];
 
-      const { actors, massIdCertificateTotalValue } =
-        aggregateMassIdCertificatesRewards(
+      const { actors, massIDCertificateTotalValue } =
+        aggregateMassIDCertificatesRewards(
           creditUnitPrice,
-          resultContentsWithMassIdCertificateValue,
+          resultContentsWithMassIDCertificateValue,
         );
 
-      expect(massIdCertificateTotalValue.toString()).toEqual('1800');
+      expect(massIDCertificateTotalValue.toString()).toEqual('1800');
 
       expect(actors.get(getActorKeyByIndex(0))).toMatchObject({
         amount: '947.211111',
@@ -394,24 +394,24 @@ describe('Rewards Distribution Helpers', () => {
       const actorType1 = RewardsDistributionActorType.WASTE_GENERATOR;
       const actorType2 = RewardsDistributionActorType.HAULER;
 
-      const resultContentsWithMassIdCertificateValue: ResultContentsWithMassIdCertificateValue[] =
+      const resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[] =
         [
           {
-            massIdCertificateValue: new BigNumber(1000),
+            massIDCertificateValue: new BigNumber(1000),
             resultContent: {
-              massIdDocumentId: faker.string.uuid(),
-              massIdRewards: [
+              massIDDocumentId: faker.string.uuid(),
+              massIDRewards: [
                 {
                   actorType: actorType1,
                   address: address1,
-                  massIdPercentage: '40',
+                  massIDPercentage: '40',
                   participant: participant1,
                   preserveSensitiveData: false,
                 },
                 {
                   actorType: actorType2,
                   address: address2,
-                  massIdPercentage: '60',
+                  massIDPercentage: '60',
                   participant: participant2,
                   preserveSensitiveData: false,
                 },
@@ -419,21 +419,21 @@ describe('Rewards Distribution Helpers', () => {
             },
           },
           {
-            massIdCertificateValue: new BigNumber(500),
+            massIDCertificateValue: new BigNumber(500),
             resultContent: {
-              massIdDocumentId: faker.string.uuid(),
-              massIdRewards: [
+              massIDDocumentId: faker.string.uuid(),
+              massIDRewards: [
                 {
                   actorType: actorType1,
                   address: address1,
-                  massIdPercentage: '30',
+                  massIDPercentage: '30',
                   participant: participant1,
                   preserveSensitiveData: false,
                 },
                 {
                   actorType: actorType2,
                   address: address2,
-                  massIdPercentage: '70',
+                  massIDPercentage: '70',
                   participant: participant2,
                   preserveSensitiveData: false,
                 },
@@ -442,10 +442,10 @@ describe('Rewards Distribution Helpers', () => {
           },
         ];
 
-      const { actors, massIdCertificateTotalValue } =
-        aggregateMassIdCertificatesRewards(
+      const { actors, massIDCertificateTotalValue } =
+        aggregateMassIDCertificatesRewards(
           creditUnitPrice,
-          resultContentsWithMassIdCertificateValue,
+          resultContentsWithMassIDCertificateValue,
         );
 
       const expectedAmount1 = formatDecimalPlaces(
@@ -488,7 +488,7 @@ describe('Rewards Distribution Helpers', () => {
         totalAmount: new BigNumber('7845'),
       });
 
-      expect(massIdCertificateTotalValue.toString()).toEqual('1500');
+      expect(massIDCertificateTotalValue.toString()).toEqual('1500');
 
       expect(actors.get(participantType1)?.amount).toEqual(expectedAmount1);
       expect(actors.get(participantType2)?.amount).toEqual(expectedAmount2);

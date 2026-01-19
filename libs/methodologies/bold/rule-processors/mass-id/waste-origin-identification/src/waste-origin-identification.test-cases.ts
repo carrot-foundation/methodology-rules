@@ -1,5 +1,5 @@
 import {
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -29,7 +29,7 @@ export const wasteOriginIdentificationTestCases = [
   {
     events: {
       [`${ACTOR}-${WASTE_GENERATOR}`]: undefined,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
       }),
     },
@@ -43,7 +43,7 @@ export const wasteOriginIdentificationTestCases = [
         label: WASTE_GENERATOR,
         name: ACTOR,
       }),
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
       }),
     },
@@ -57,7 +57,7 @@ export const wasteOriginIdentificationTestCases = [
         label: WASTE_GENERATOR,
         name: ACTOR,
       }),
-      [PICK_UP]: stubBoldMassIdPickUpEvent(),
+      [PICK_UP]: stubBoldMassIDPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.WASTE_ORIGIN_IDENTIFIED,
     resultStatus: RuleOutputStatus.PASSED,
@@ -66,7 +66,7 @@ export const wasteOriginIdentificationTestCases = [
   {
     events: {
       [`${ACTOR}-${WASTE_GENERATOR}`]: undefined,
-      [PICK_UP]: stubBoldMassIdPickUpEvent(),
+      [PICK_UP]: stubBoldMassIDPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.MISSING_WASTE_GENERATOR_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
@@ -82,7 +82,7 @@ export const wasteOriginIdentificationTestCases = [
         label: WASTE_GENERATOR,
         name: ACTOR,
       }),
-      [PICK_UP]: stubBoldMassIdPickUpEvent(),
+      [PICK_UP]: stubBoldMassIDPickUpEvent(),
     },
     resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATOR_EVENTS,
     resultStatus: RuleOutputStatus.FAILED,

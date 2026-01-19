@@ -113,13 +113,13 @@ export const getSortingDescription = (sortingEvent: DocumentEvent) =>
 
 export const getSortingFactor = (
   recyclerAccreditationDocument: Document,
-  massIdDocument: Document,
+  massIDDocument: Document,
 ): number | ValidationError => {
   const emissionAndCompostingMetricsEvent =
     getLastYearEmissionAndCompostingMetricsEvent({
       documentWithEmissionAndCompostingMetricsEvent:
         recyclerAccreditationDocument,
-      documentYear: getYear(massIdDocument.externalCreatedAt),
+      documentYear: getYear(massIDDocument.externalCreatedAt),
     });
 
   const sortingFactor = getEventAttributeValue(
@@ -172,16 +172,16 @@ export const getValidatedEventValues = (
 };
 
 export const getValidatedExternalEvents = (
-  massIdDocument: Document,
+  massIDDocument: Document,
 ): DocumentEvent[] | ValidationError => {
-  if (!isNonEmptyArray(massIdDocument.externalEvents)) {
+  if (!isNonEmptyArray(massIDDocument.externalEvents)) {
     return {
       code: ValidationErrorCode.MISSING_EXTERNAL_EVENTS,
       isError: true,
     };
   }
 
-  return massIdDocument.externalEvents;
+  return massIDDocument.externalEvents;
 };
 
 export const getValidatedWeightAttributes = (

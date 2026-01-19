@@ -23,14 +23,14 @@ describe('NoConflictingCertificateOrCreditProcessor', () => {
 
   it.each(noConflictingCertificateOrCreditTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIdAuditDocument, resultComment, resultStatus }) => {
-      const allDocuments = [...documents, massIdAuditDocument];
+    async ({ documents, massIDAuditDocument, resultComment, resultStatus }) => {
+      const allDocuments = [...documents, massIDAuditDocument];
 
       spyOnDocumentQueryServiceLoad(stubDocument(), allDocuments);
 
       const ruleInput = {
         ...random<Required<RuleInput>>(),
-        documentId: massIdAuditDocument.id,
+        documentId: massIDAuditDocument.id,
       };
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);

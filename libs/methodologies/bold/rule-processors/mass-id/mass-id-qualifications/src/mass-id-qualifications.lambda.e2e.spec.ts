@@ -9,22 +9,22 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { massIdQualificationsLambda } from './mass-id-qualifications.lambda';
-import { massIdQualificationsTestCases } from './mass-id-qualifications.test-cases';
+import { massIDQualificationsLambda } from './mass-id-qualifications.lambda';
+import { massIDQualificationsTestCases } from './mass-id-qualifications.test-cases';
 
-describe('MassIdQualificationsLambda E2E', () => {
+describe('MassIDQualificationsLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
-  const massId = new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
+  const massID = new BoldStubsBuilder()
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
     .build();
 
-  it.each(massIdQualificationsTestCases)(
+  it.each(massIDQualificationsTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ massIdDocument, resultStatus }) => {
+    async ({ massIDDocument, resultStatus }) => {
       prepareEnvironmentTestE2E(
-        [massIdDocument, massId.massIdAuditDocument].map((document) => ({
+        [massIDDocument, massID.massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -33,10 +33,10 @@ describe('MassIdQualificationsLambda E2E', () => {
         })),
       );
 
-      const response = (await massIdQualificationsLambda(
+      const response = (await massIDQualificationsLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

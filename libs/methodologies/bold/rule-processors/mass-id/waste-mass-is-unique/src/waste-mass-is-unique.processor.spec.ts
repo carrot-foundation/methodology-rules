@@ -40,15 +40,15 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
       }) => {
         const ruleInput = random<Required<RuleInput>>();
 
-        const { massIdDocument } = new BoldStubsBuilder()
-          .createMassIdDocuments()
+        const { massIDDocument } = new BoldStubsBuilder()
+          .createMassIDDocuments()
           .build();
 
         mockCheckDuplicateDocuments
           .mockResolvedValueOnce(newDuplicateDocuments)
           .mockResolvedValueOnce(oldDuplicateDocuments);
 
-        documentLoaderService.mockResolvedValueOnce(massIdDocument);
+        documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -68,10 +68,10 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
   describe('WasteMassIsUniqueProcessor Errors', () => {
     it.each(wasteMassIsUniqueErrorTestCases)(
       `should return $resultStatus when $scenario`,
-      async ({ massIdDocument, resultComment, resultStatus }) => {
+      async ({ massIDDocument, resultComment, resultStatus }) => {
         const ruleInput = random<Required<RuleInput>>();
 
-        documentLoaderService.mockResolvedValueOnce(massIdDocument);
+        documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

@@ -18,15 +18,15 @@ describe('VehicleIdentificationLambda E2E', () => {
   it.each(vehicleIdentificationTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
-      const { massIdAuditDocument, massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
-        .createMassIdAuditDocuments()
+        .createMassIDAuditDocuments()
         .build();
 
       prepareEnvironmentTestE2E(
-        [massIdDocument, massIdAuditDocument].map((document) => ({
+        [massIDDocument, massIDAuditDocument].map((document) => ({
           document,
           documentKey: toDocumentKey({
             documentId: document.id,
@@ -38,7 +38,7 @@ describe('VehicleIdentificationLambda E2E', () => {
       const response = (await vehicleIdentificationLambda(
         stubRuleInput({
           documentKeyPrefix,
-          parentDocumentId: massIdDocument.id,
+          parentDocumentId: massIDDocument.id,
         }),
         stubContext(),
         () => stubRuleResponse(),

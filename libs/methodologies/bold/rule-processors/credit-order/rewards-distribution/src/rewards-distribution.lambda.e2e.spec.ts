@@ -36,10 +36,10 @@ describe('RewardsDistributionProcessor E2E', () => {
       async ({
         creditOrderDocument,
         expectedActorsResult,
-        massIdCertificateDocuments,
+        massIDCertificateDocuments,
       }) => {
         prepareEnvironmentTestE2E(
-          [...massIdCertificateDocuments, creditOrderDocument].map(
+          [...massIDCertificateDocuments, creditOrderDocument].map(
             (document) => ({
               document,
               documentKey: toDocumentKey({
@@ -98,11 +98,11 @@ describe('RewardsDistributionProcessor E2E', () => {
       'should return $resultStatus when $scenario',
       async ({
         creditOrderDocument,
-        massIdCertificateDocuments,
+        massIDCertificateDocuments,
         resultStatus,
       }) => {
         prepareEnvironmentTestE2E(
-          [...massIdCertificateDocuments, creditOrderDocument].map(
+          [...massIDCertificateDocuments, creditOrderDocument].map(
             (document) => ({
               document,
               documentKey: toDocumentKey({

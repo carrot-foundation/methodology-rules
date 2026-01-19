@@ -5,12 +5,12 @@ import type {
   DocumentCategory,
   DocumentSubtype,
   DocumentType,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
 } from './enum.types';
 
 export interface Document extends MethodologyDocument {
   category: DocumentCategory | string;
   externalEvents?: DocumentEvent[] | undefined;
-  subtype?: DocumentSubtype | MassIdOrganicSubtype | string | undefined;
+  subtype?: DocumentSubtype | MassIDOrganicSubtype | string | undefined;
   type?: DocumentType | string | undefined;
 }

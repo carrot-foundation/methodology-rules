@@ -3,8 +3,8 @@ import {
   stubAddress,
   stubBoldAccreditationDocument,
   stubBoldAccreditationResultEvent,
-  stubBoldMassIdAuditDocument,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDAuditDocument,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -12,7 +12,7 @@ import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
@@ -97,8 +97,8 @@ const createDocumentWithExceptions = (
     ]),
   });
 
-const createMassIdAuditDocumentWithActor = (
-  actorType: MassIdDocumentActorType,
+const createMassIDAuditDocumentWithActor = (
+  actorType: MassIDDocumentActorType,
   participantId: string,
   relatedDocumentId?: string,
   options?: {
@@ -123,7 +123,7 @@ const createMassIdAuditDocumentWithActor = (
     relatedDocument = undefined;
   }
 
-  return stubBoldMassIdAuditDocument({
+  return stubBoldMassIDAuditDocument({
     externalEventsMap: new Map(
       shouldCreateActor
         ? [
@@ -146,7 +146,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getAccreditedAddressByParticipantIdAndActorType', () => {
     it('should return the accredited address by participant id and actor type', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.RECYCLER;
+      const actorType = MassIDDocumentActorType.RECYCLER;
       const addressId = faker.string.uuid();
 
       const accreditationDocument = stubBoldAccreditationDocument({
@@ -161,14 +161,14 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         ]),
       });
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         accreditationDocument.id,
       );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [
@@ -182,17 +182,17 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.HAULER;
+      const actorType = MassIDDocumentActorType.HAULER;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
       );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -203,11 +203,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.PROCESSOR;
+      const actorType = MassIDDocumentActorType.PROCESSOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         undefined,
@@ -215,7 +215,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -226,18 +226,18 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.WASTE_GENERATOR;
+      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         faker.string.uuid(),
       );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [unrelatedAccreditationDocument],
@@ -248,20 +248,20 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when facility address event is not found in accreditation document', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.INTEGRATOR;
+      const actorType = MassIDDocumentActorType.INTEGRATOR;
 
       const accreditationDocument = stubBoldAccreditationDocument({
         externalEventsMap: new Map(),
       });
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         accreditationDocument.id,
       );
 
       const result = getAccreditedAddressByParticipantIdAndActorType(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -275,7 +275,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return the gps geolocation of the event', () => {
       const latitude = faker.location.latitude();
       const longitude = faker.location.longitude();
-      const event = stubBoldMassIdPickUpEvent({
+      const event = stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [CAPTURED_GPS_LATITUDE, latitude],
           [CAPTURED_GPS_LONGITUDE, longitude],
@@ -289,7 +289,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return undefined if the event has no gps geolocation metadata', () => {
-      const event = stubBoldMassIdPickUpEvent({
+      const event = stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [CAPTURED_GPS_LATITUDE, undefined],
           [CAPTURED_GPS_LONGITUDE, undefined],
@@ -302,7 +302,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return undefined if the latitude and longitude are not valid', () => {
-      const event = stubBoldMassIdPickUpEvent({
+      const event = stubBoldMassIDPickUpEvent({
         metadataAttributes: [
           [CAPTURED_GPS_LATITUDE, 'invalid'],
           [CAPTURED_GPS_LONGITUDE, 'invalid'],
@@ -318,18 +318,18 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('hasVerificationDocument', () => {
     it('should return true when verification document exists', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.WASTE_GENERATOR;
+      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         accreditationDocument.id,
       );
 
       const result = hasVerificationDocument(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -340,16 +340,16 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.RECYCLER;
+      const actorType = MassIDDocumentActorType.RECYCLER;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = stubBoldMassIdAuditDocument({
+      const massIDAuditDocument = stubBoldMassIDAuditDocument({
         externalEventsMap: new Map(),
       });
 
       const result = hasVerificationDocument(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -360,11 +360,11 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.PROCESSOR;
+      const actorType = MassIDDocumentActorType.PROCESSOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         undefined,
@@ -372,7 +372,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
       );
 
       const result = hasVerificationDocument(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [accreditationDocument],
@@ -383,18 +383,18 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIdDocumentActorType.HAULER;
+      const actorType = MassIDDocumentActorType.HAULER;
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
-      const massIdAuditDocument = createMassIdAuditDocumentWithActor(
+      const massIDAuditDocument = createMassIDAuditDocumentWithActor(
         actorType,
         participantId,
         faker.string.uuid(),
       );
 
       const result = hasVerificationDocument(
-        massIdAuditDocument,
+        massIDAuditDocument,
         participantId,
         actorType,
         [unrelatedAccreditationDocument],

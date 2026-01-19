@@ -3,7 +3,7 @@ import type { PartialDeep } from 'type-fest';
 import {
   type BoldExternalEventsObject,
   BoldStubsBuilder,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -13,7 +13,7 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
   DocumentSubtype,
-  MassIdOrganicSubtype,
+  MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -45,8 +45,8 @@ const createWasteGeneratorVerificationDocument = (
 ): Document =>
   ({
     ...new BoldStubsBuilder()
-      .createMassIdDocuments()
-      .createMassIdAuditDocuments()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
         new Map([
@@ -153,8 +153,8 @@ const EXPECTED_REWARDS = {
 
 export const rewardsDistributionProcessorTestCases: Array<{
   expectedRewards: Record<string, string>;
-  massIdDocumentEvents?: BoldExternalEventsObject | undefined;
-  massIdPartialDocument: PartialDeep<Document>;
+  massIDDocumentEvents?: BoldExternalEventsObject | undefined;
+  massIDPartialDocument: PartialDeep<Document>;
   resultStatus: RuleOutputStatus;
   scenario: string;
   wasteGeneratorVerificationDocument?: Document | undefined;
@@ -163,8 +163,8 @@ export const rewardsDistributionProcessorTestCases: Array<{
     ([wasteType, expectedRewards]) => ({
       // eslint-disable-next-line security/detect-object-injection
       expectedRewards: EXPECTED_REWARDS[expectedRewards],
-      massIdDocumentEvents: {},
-      massIdPartialDocument: {
+      massIDDocumentEvents: {},
+      massIDPartialDocument: {
         subtype: wasteType,
       },
       resultStatus: RuleOutputStatus.PASSED,
@@ -173,56 +173,56 @@ export const rewardsDistributionProcessorTestCases: Array<{
   ),
   {
     expectedRewards: EXPECTED_REWARDS.WITHOUT_WASTE_GENERATOR.WITHOUT_HAULER,
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [`ACTOR-${HAULER}`]: undefined,
       [`ACTOR-${WASTE_GENERATOR}`]: undefined,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
       }),
     },
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is not present`,
   },
   {
     expectedRewards: EXPECTED_REWARDS.WITHOUT_WASTE_GENERATOR.WITH_HAULER,
-    massIdDocumentEvents: {
+    massIDDocumentEvents: {
       [`ACTOR-${WASTE_GENERATOR}`]: undefined,
-      [PICK_UP]: stubBoldMassIdPickUpEvent({
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
       }),
     },
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is present`,
   },
   {
     expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
-    massIdDocumentEvents: {},
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `all rewards are applied for the ${REWARDS_DISTRIBUTION_BY_WASTE_TYPE['Food, Food Waste and Beverages']}`,
   },
   {
     expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
-    massIdDocumentEvents: {},
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `Large Business discount is applied when Waste Generator Verification Document is missing (defaults to Large Business)`,
   },
   {
     expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
-    massIdDocumentEvents: {},
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
@@ -234,9 +234,9 @@ export const rewardsDistributionProcessorTestCases: Array<{
       EXPECTED_REWARDS.SMALL_BUSINESS[
         RewardsDistributionWasteType.MIXED_ORGANIC_WASTE
       ],
-    massIdDocumentEvents: {},
-    massIdPartialDocument: {
-      subtype: MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    massIDDocumentEvents: {},
+    massIDPartialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
@@ -245,24 +245,24 @@ export const rewardsDistributionProcessorTestCases: Array<{
   },
 ];
 
-const { massIdAuditDocument, massIdDocument, methodologyDocument } =
+const { massIDAuditDocument, massIDDocument, methodologyDocument } =
   new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
     .createMethodologyDocument()
     .build();
 
 export const rewardsDistributionProcessorErrors = [
   {
     documents: [],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `${MASS_ID} document is not found`,
   },
   {
-    documents: [massIdDocument],
-    massIdAuditDocument,
+    documents: [massIDDocument],
+    massIDAuditDocument,
     resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `${METHODOLOGY} document is not found`,
@@ -270,15 +270,15 @@ export const rewardsDistributionProcessorErrors = [
   {
     documents: [
       {
-        ...massIdDocument,
-        externalEvents: massIdDocument.externalEvents?.filter(
+        ...massIDDocument,
+        externalEvents: massIDDocument.externalEvents?.filter(
           ({ label }) => label !== RewardsDistributionActorType.INTEGRATOR,
         ),
       },
       methodologyDocument as Document,
     ],
-    massIdAuditDocument,
-    resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIdDocument.id, [
+    massIDAuditDocument,
+    resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIDDocument.id, [
       RewardsDistributionActorType.INTEGRATOR,
     ]),
     resultStatus: RuleOutputStatus.FAILED,
@@ -290,9 +290,9 @@ export const rewardsDistributionProcessorErrors = [
         ...methodologyDocument,
         externalEvents: [],
       } as Document,
-      massIdDocument,
+      massIDDocument,
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${METHODOLOGY} document does not have the required actors`,
@@ -300,32 +300,32 @@ export const rewardsDistributionProcessorErrors = [
   {
     documents: [
       {
-        ...massIdDocument,
+        ...massIDDocument,
         externalEvents: [],
       } as Document,
       methodologyDocument as Document,
     ],
-    massIdAuditDocument,
-    resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(massIdDocument.id),
+    massIDAuditDocument,
+    resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(massIDDocument.id),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document does not have external events`,
   },
   {
     documents: [
       {
-        ...massIdDocument,
+        ...massIDDocument,
         subtype: 'unknown',
       } as Document,
       methodologyDocument as Document,
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${MASS_ID} document has an unexpected subtype`,
   },
   {
     documents: [
-      massIdDocument,
+      massIDDocument,
       {
         ...methodologyDocument,
         externalEvents: methodologyDocument?.externalEvents?.map((event) =>
@@ -335,7 +335,7 @@ export const rewardsDistributionProcessorErrors = [
         ),
       } as Document,
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${METHODOLOGY} document does not have the required address in actors`,

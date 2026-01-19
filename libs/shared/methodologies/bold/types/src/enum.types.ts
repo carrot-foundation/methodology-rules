@@ -157,7 +157,7 @@ export enum DocumentEventWeighingCaptureMethod {
   TRANSPORT_MANIFEST = 'Transport Manifest',
 }
 
-export enum MassIdOrganicSubtype {
+export enum MassIDOrganicSubtype {
   DOMESTIC_SLUDGE = 'Domestic Sludge',
   EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = 'EFB similar to Garden, Yard and Park Waste',
   FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
@@ -168,23 +168,23 @@ export enum MassIdOrganicSubtype {
 }
 
 export enum DocumentSubtype {
-  DOMESTIC_SLUDGE = MassIdOrganicSubtype.DOMESTIC_SLUDGE,
-  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIdOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
-  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIdOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-  GARDEN_YARD_AND_PARK_WASTE = MassIdOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE,
+  DOMESTIC_SLUDGE = MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
+  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+  GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE,
   GROUP = 'Group',
   HAULER = MethodologyActorType.HAULER,
-  INDUSTRIAL_SLUDGE = MassIdOrganicSubtype.INDUSTRIAL_SLUDGE,
+  INDUSTRIAL_SLUDGE = MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
   PROCESS = 'Process',
   PROCESSOR = MethodologyActorType.PROCESSOR,
   RECYCLER = MethodologyActorType.RECYCLER,
   SOURCE = 'Source',
   TCC = 'TCC',
-  TOBACCO = MassIdOrganicSubtype.TOBACCO,
+  TOBACCO = MassIDOrganicSubtype.TOBACCO,
   TRC = 'TRC',
   WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
-  WOOD_AND_WOOD_PRODUCTS = MassIdOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
+  WOOD_AND_WOOD_PRODUCTS = MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
 export enum DocumentType {
@@ -197,7 +197,7 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
-export enum MassIdDocumentActorType {
+export enum MassIDDocumentActorType {
   HAULER = MethodologyActorType.HAULER,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
   PROCESSOR = MethodologyActorType.PROCESSOR,

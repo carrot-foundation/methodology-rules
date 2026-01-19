@@ -45,7 +45,7 @@ export const stubDocumentRelation = (
   ...partial,
 });
 
-export const stubMassIdDocument = (
+export const stubMassIDDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({

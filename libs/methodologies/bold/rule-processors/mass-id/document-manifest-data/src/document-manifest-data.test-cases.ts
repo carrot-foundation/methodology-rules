@@ -1,7 +1,7 @@
 import {
   stubAddress,
-  stubBoldMassIdRecyclingManifestEvent,
-  stubBoldMassIdTransportManifestEvent,
+  stubBoldMassIDRecyclingManifestEvent,
+  stubBoldMassIDTransportManifestEvent,
   stubDocumentEvent,
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -35,8 +35,8 @@ const attributeErrorMessages: Record<string, string> = {
 const documentManifestType = random<DocumentManifestType>();
 
 const documentManifestTypeStub = {
-  [RECYCLING_MANIFEST]: stubBoldMassIdRecyclingManifestEvent,
-  [TRANSPORT_MANIFEST]: stubBoldMassIdTransportManifestEvent,
+  [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent,
+  [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent,
 };
 
 const sameAddress = stubAddress();

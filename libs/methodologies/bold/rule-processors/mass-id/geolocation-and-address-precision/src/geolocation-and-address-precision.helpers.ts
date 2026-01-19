@@ -14,7 +14,7 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type Geolocation,
@@ -35,12 +35,12 @@ import {
 } from './geolocation-and-address-precision.typia';
 
 export const hasVerificationDocument = (
-  massIdAuditDocument: Document,
+  massIDAuditDocument: Document,
   participantId: string,
-  actorType: MassIdDocumentActorType,
+  actorType: MassIDDocumentActorType,
   accreditationDocuments: Document[],
 ): boolean => {
-  const actorEvent = massIdAuditDocument.externalEvents?.find(
+  const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
       isActorEvent(event) &&
       eventHasLabel(event, actorType) &&
@@ -65,12 +65,12 @@ export const hasVerificationDocument = (
 };
 
 export const getAccreditedAddressByParticipantIdAndActorType = (
-  massIdAuditDocument: Document,
+  massIDAuditDocument: Document,
   participantId: string,
-  actorType: MassIdDocumentActorType,
+  actorType: MassIDDocumentActorType,
   accreditationDocuments: Document[],
 ): MethodologyAddress | undefined => {
-  const actorEvent = massIdAuditDocument.externalEvents?.find(
+  const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
       isActorEvent(event) &&
       eventHasLabel(event, actorType) &&
@@ -79,7 +79,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   if (isNil(actorEvent)) {
     logger.debug(
-      `[MassID Audit Document ${massIdAuditDocument.id}] Actor event not found for participant ${participantId} and actor type ${actorType}`,
+      `[MassID Audit Document ${massIDAuditDocument.id}] Actor event not found for participant ${participantId} and actor type ${actorType}`,
     );
 
     return undefined;
@@ -89,7 +89,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   if (isNil(accreditationDocumentId)) {
     logger.debug(
-      `[MassID Audit Document ${massIdAuditDocument.id}] Accreditation document ID not found for actor event ${actorEvent.id}`,
+      `[MassID Audit Document ${massIDAuditDocument.id}] Accreditation document ID not found for actor event ${actorEvent.id}`,
     );
 
     return undefined;
@@ -101,7 +101,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   if (isNil(participantAccreditationDocument)) {
     logger.debug(
-      `[MassID Audit Document ${massIdAuditDocument.id}] Participant accreditation document not found for accreditation document ID ${accreditationDocumentId}`,
+      `[MassID Audit Document ${massIDAuditDocument.id}] Participant accreditation document not found for accreditation document ID ${accreditationDocumentId}`,
     );
 
     return undefined;
@@ -114,7 +114,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   if (!facilityAddressEvent) {
     logger.debug(
-      `[MassID Audit Document ${massIdAuditDocument.id}] Facility address event not found for participant ${participantId} and actor type ${actorType}`,
+      `[MassID Audit Document ${massIDAuditDocument.id}] Facility address event not found for participant ${participantId} and actor type ${actorType}`,
     );
 
     return undefined;

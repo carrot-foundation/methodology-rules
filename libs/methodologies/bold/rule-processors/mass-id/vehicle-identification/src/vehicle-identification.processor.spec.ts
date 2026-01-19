@@ -1,5 +1,5 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubBoldMassIdDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   type RuleOutput,
@@ -20,7 +20,7 @@ describe('VehicleIdentificationProcessor', () => {
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
       const ruleInput = random<Required<RuleInput>>();
-      const document = stubBoldMassIdDocument({
+      const document = stubBoldMassIDDocument({
         externalEventsMap: events,
       });
 

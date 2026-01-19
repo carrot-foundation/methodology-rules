@@ -31,50 +31,50 @@ const openDocumentField = {
   },
 };
 
-const simpleMassIdStubs = new BoldStubsBuilder({
+const simpleMassIDStubs = new BoldStubsBuilder({
   methodologyName: RECYCLING,
 })
-  .createMassIdDocuments(openDocumentField)
-  .createMassIdAuditDocuments(openDocumentField)
+  .createMassIDDocuments(openDocumentField)
+  .createMassIDAuditDocuments(openDocumentField)
   .build();
-const massIdWithAuditStubs = new BoldStubsBuilder({
+const massIDWithAuditStubs = new BoldStubsBuilder({
   methodologyName: RECYCLING,
 })
-  .createMassIdDocuments(openDocumentField)
-  .createMassIdAuditDocuments(openDocumentField)
-  .createMassIdCertificateDocuments(openDocumentField)
+  .createMassIDDocuments(openDocumentField)
+  .createMassIDAuditDocuments(openDocumentField)
+  .createMassIDCertificateDocuments(openDocumentField)
   .build();
 
-const massIdWithCreditsStubs = new BoldStubsBuilder({
+const massIDWithCreditsStubs = new BoldStubsBuilder({
   methodologyName: RECYCLING,
 })
-  .createMassIdDocuments(openDocumentField)
-  .createMassIdAuditDocuments(openDocumentField)
-  .createMassIdCertificateDocuments(openDocumentField)
+  .createMassIDDocuments(openDocumentField)
+  .createMassIDAuditDocuments(openDocumentField)
+  .createMassIDCertificateDocuments(openDocumentField)
   .createCreditOrderDocument(openDocumentField)
   .build();
 
-const duplicatedMassIdAuditDocument: Document = {
-  ...simpleMassIdStubs.massIdAuditDocument,
+const duplicatedMassIDAuditDocument: Document = {
+  ...simpleMassIDStubs.massIDAuditDocument,
   id: faker.string.uuid(),
 };
 
-const massIdWithTwoAuditDocuments: Document = {
-  ...simpleMassIdStubs.massIdDocument,
+const massIDWithTwoAuditDocuments: Document = {
+  ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
-    ...(simpleMassIdStubs.massIdDocument.externalEvents ?? []),
+    ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: RELATED,
-      relatedDocument: mapDocumentRelation(duplicatedMassIdAuditDocument),
+      relatedDocument: mapDocumentRelation(duplicatedMassIDAuditDocument),
     }),
   ],
 };
 
 const boldCarbonEventName = `${CARBON} Methodology`;
-const massIdAuditForOtherMethodology: Document = {
-  ...duplicatedMassIdAuditDocument,
+const massIDAuditForOtherMethodology: Document = {
+  ...duplicatedMassIDAuditDocument,
   externalEvents: [
-    ...(duplicatedMassIdAuditDocument.externalEvents?.filter(
+    ...(duplicatedMassIDAuditDocument.externalEvents?.filter(
       (event) => !event.name.includes(RECYCLING),
     ) ?? []),
     stubDocumentEventWithMetadataAttributes(
@@ -85,32 +85,32 @@ const massIdAuditForOtherMethodology: Document = {
     ),
   ],
 };
-const massIdWithAuditDocumentsForDifferentMethodologies: Document = {
-  ...simpleMassIdStubs.massIdDocument,
+const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
+  ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
-    ...(simpleMassIdStubs.massIdDocument.externalEvents ?? []),
+    ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: RELATED,
-      relatedDocument: mapDocumentRelation(massIdAuditForOtherMethodology),
+      relatedDocument: mapDocumentRelation(massIDAuditForOtherMethodology),
     }),
   ],
 };
 
 export const noConflictingCertificateOrCreditTestCases = [
   {
-    documents: [simpleMassIdStubs.massIdDocument],
-    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    documents: [simpleMassIDStubs.massIDDocument],
+    massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'no Credit is linked to the MassID',
   },
   {
     documents: [
-      massIdWithTwoAuditDocuments,
-      simpleMassIdStubs.massIdAuditDocument,
-      duplicatedMassIdAuditDocument,
+      massIDWithTwoAuditDocuments,
+      simpleMassIDStubs.massIDAuditDocument,
+      duplicatedMassIDAuditDocument,
     ],
-    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
         BoldMethodologyName.RECYCLING,
@@ -121,18 +121,18 @@ export const noConflictingCertificateOrCreditTestCases = [
   },
   {
     documents: [
-      massIdWithTwoAuditDocuments,
-      simpleMassIdStubs.massIdAuditDocument,
+      massIDWithTwoAuditDocuments,
+      simpleMassIDStubs.massIDAuditDocument,
       {
-        ...duplicatedMassIdAuditDocument,
+        ...duplicatedMassIDAuditDocument,
         externalEvents: [
-          ...(duplicatedMassIdAuditDocument.externalEvents?.filter(
+          ...(duplicatedMassIDAuditDocument.externalEvents?.filter(
             (event) => !event.name.includes(RuleOutputStatus.PASSED),
           ) ?? []),
         ],
       },
     ],
-    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
         BoldMethodologyName.RECYCLING,
@@ -143,11 +143,11 @@ export const noConflictingCertificateOrCreditTestCases = [
   },
   {
     documents: [
-      massIdAuditForOtherMethodology,
-      simpleMassIdStubs.massIdAuditDocument,
-      massIdWithAuditDocumentsForDifferentMethodologies,
+      massIDAuditForOtherMethodology,
+      simpleMassIDStubs.massIDAuditDocument,
+      massIDWithAuditDocumentsForDifferentMethodologies,
     ],
-    massIdAuditDocument: simpleMassIdStubs.massIdAuditDocument,
+    massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -155,11 +155,11 @@ export const noConflictingCertificateOrCreditTestCases = [
   },
   {
     documents: [
-      massIdWithAuditStubs.massIdDocument,
-      massIdWithAuditStubs.massIdAuditDocument,
-      massIdWithAuditStubs.massIdCertificateDocument,
+      massIDWithAuditStubs.massIDDocument,
+      massIDWithAuditStubs.massIDAuditDocument,
+      massIDWithAuditStubs.massIDCertificateDocument,
     ],
-    massIdAuditDocument: massIdWithAuditStubs.massIdAuditDocument,
+    massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
         DocumentType.RECYCLED_ID,
@@ -169,12 +169,12 @@ export const noConflictingCertificateOrCreditTestCases = [
   },
   {
     documents: [
-      massIdWithCreditsStubs.massIdDocument,
-      massIdWithCreditsStubs.massIdAuditDocument,
-      massIdWithCreditsStubs.massIdCertificateDocument,
-      massIdWithCreditsStubs.creditOrderDocument,
+      massIDWithCreditsStubs.massIDDocument,
+      massIDWithCreditsStubs.massIDAuditDocument,
+      massIDWithCreditsStubs.massIDCertificateDocument,
+      massIDWithCreditsStubs.creditOrderDocument,
     ],
-    massIdAuditDocument: massIdWithCreditsStubs.massIdAuditDocument,
+    massIDAuditDocument: massIDWithCreditsStubs.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
@@ -182,32 +182,32 @@ export const noConflictingCertificateOrCreditTestCases = [
   },
   {
     documents: [
-      massIdWithAuditStubs.massIdDocument,
-      massIdWithAuditStubs.massIdAuditDocument,
+      massIDWithAuditStubs.massIDDocument,
+      massIDWithAuditStubs.massIDAuditDocument,
       {
-        ...massIdWithAuditStubs.massIdCertificateDocument,
+        ...massIDWithAuditStubs.massIDCertificateDocument,
         status: MethodologyDocumentStatus.CANCELLED,
       },
     ],
-    massIdAuditDocument: massIdWithAuditStubs.massIdAuditDocument,
+    massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled certificate document',
   },
   {
     documents: [
-      massIdWithAuditStubs.massIdDocument,
-      massIdWithAuditStubs.massIdAuditDocument,
+      massIDWithAuditStubs.massIDDocument,
+      massIDWithAuditStubs.massIDAuditDocument,
       {
-        ...massIdWithAuditStubs.massIdCertificateDocument,
+        ...massIDWithAuditStubs.massIDCertificateDocument,
         status: MethodologyDocumentStatus.CANCELLED,
       },
       {
-        ...massIdWithCreditsStubs.creditOrderDocument,
+        ...massIDWithCreditsStubs.creditOrderDocument,
         status: MethodologyDocumentStatus.CANCELLED,
       },
     ],
-    massIdAuditDocument: massIdWithAuditStubs.massIdAuditDocument,
+    massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled credit document',

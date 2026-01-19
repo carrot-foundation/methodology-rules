@@ -23,8 +23,8 @@ describe('shouldApplyLargeBusinessDiscount', () => {
 
   it('should return true when document exists but has no ONBOARDING_DECLARATION event', () => {
     const document = new BoldStubsBuilder()
-      .createMassIdDocuments()
-      .createMassIdAuditDocuments()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
         new Map([[WASTE_GENERATOR, { externalEventsMap: {} }]]),
@@ -37,8 +37,8 @@ describe('shouldApplyLargeBusinessDiscount', () => {
 
   it('should return true when document has ONBOARDING_DECLARATION event with Large Business', () => {
     const document = new BoldStubsBuilder()
-      .createMassIdDocuments()
-      .createMassIdAuditDocuments()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
         new Map([
@@ -66,8 +66,8 @@ describe('shouldApplyLargeBusinessDiscount', () => {
 
   it('should return false when document has ONBOARDING_DECLARATION event with Small Business', () => {
     const document = new BoldStubsBuilder()
-      .createMassIdDocuments()
-      .createMassIdAuditDocuments()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
         new Map([
@@ -95,8 +95,8 @@ describe('shouldApplyLargeBusinessDiscount', () => {
 
   it('should return true when document has ONBOARDING_DECLARATION event but BUSINESS_SIZE_DECLARATION is missing', () => {
     const document = new BoldStubsBuilder()
-      .createMassIdDocuments()
-      .createMassIdAuditDocuments()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
         new Map([

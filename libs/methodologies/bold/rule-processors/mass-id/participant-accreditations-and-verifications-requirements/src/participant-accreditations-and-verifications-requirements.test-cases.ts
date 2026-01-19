@@ -11,7 +11,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -21,7 +21,7 @@ import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.processor';
 
 const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
-  MassIdDocumentActorType;
+  MassIDDocumentActorType;
 const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } = DocumentEventName;
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
@@ -47,25 +47,25 @@ const createExpiredAccreditationResultEvent = () =>
     ],
   });
 
-const createMassIdWithActorAccreditation = (
-  actorType: MassIdDocumentActorType,
+const createMassIDWithActorAccreditation = (
+  actorType: MassIDDocumentActorType,
   externalEventsMap: Map<
     DocumentEventName,
     ReturnType<typeof stubBoldAccreditationResultEvent>
   >,
 ) =>
   new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
     .createMethodologyDocument()
     .createParticipantAccreditationDocuments(
       new Map([[actorType, { externalEventsMap }]]),
     )
     .build();
 
-const createMassIdWithMultipleActorAccreditations = (
+const createMassIDWithMultipleActorAccreditations = (
   actorAccreditations: Map<
-    MassIdDocumentActorType,
+    MassIDDocumentActorType,
     {
       externalEventsMap: Map<
         DocumentEventName,
@@ -73,32 +73,32 @@ const createMassIdWithMultipleActorAccreditations = (
       >;
     }
   >,
-  massIdActorParticipants?: Map<
-    MassIdDocumentActorType,
+  massIDActorParticipants?: Map<
+    MassIDDocumentActorType,
     ReturnType<typeof stubParticipant>
   >,
 ) => {
-  const builder = massIdActorParticipants
-    ? new BoldStubsBuilder({ massIdActorParticipants })
+  const builder = massIDActorParticipants
+    ? new BoldStubsBuilder({ massIDActorParticipants })
     : new BoldStubsBuilder();
 
   return builder
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
     .createMethodologyDocument()
     .createParticipantAccreditationDocuments(actorAccreditations)
     .build();
 };
 
-const createMassIdAuditWithLinkEvent = (
-  massIdAuditDocument: ReturnType<
-    typeof createMassIdWithActorAccreditation
-  >['massIdAuditDocument'],
+const createMassIDAuditWithLinkEvent = (
+  massIDAuditDocument: ReturnType<
+    typeof createMassIDWithActorAccreditation
+  >['massIDAuditDocument'],
   secondAccreditation: ReturnType<typeof stubDocument>,
 ) => ({
-  ...massIdAuditDocument,
+  ...massIDAuditDocument,
   externalEvents: [
-    ...(massIdAuditDocument.externalEvents ?? []),
+    ...(massIDAuditDocument.externalEvents ?? []),
     stubDocumentEvent({
       name: LINK,
       relatedDocument: {
@@ -110,11 +110,11 @@ const createMassIdAuditWithLinkEvent = (
 });
 
 const createMultipleValidAccreditationsTestData = (
-  actorType: MassIdDocumentActorType,
+  actorType: MassIDDocumentActorType,
 ) => {
-  const massIdWithMultipleValid = new BoldStubsBuilder()
-    .createMassIdDocuments()
-    .createMassIdAuditDocuments()
+  const massIDWithMultipleValid = new BoldStubsBuilder()
+    .createMassIDDocuments()
+    .createMassIDAuditDocuments()
     .createMethodologyDocument()
     .createParticipantAccreditationDocuments(
       new Map([
@@ -131,7 +131,7 @@ const createMultipleValidAccreditationsTestData = (
     .build();
 
   const originalAccreditation =
-    massIdWithMultipleValid.participantsAccreditationDocuments.get(actorType)!;
+    massIDWithMultipleValid.participantsAccreditationDocuments.get(actorType)!;
 
   const secondAccreditation = stubDocument(
     {
@@ -153,25 +153,25 @@ const createMultipleValidAccreditationsTestData = (
   );
 
   return {
-    massIdWithMultipleValid,
+    massIDWithMultipleValid,
     originalAccreditation,
     secondAccreditation,
   };
 };
 
-const massIdAuditWithAccreditationsAndVerifications = new BoldStubsBuilder()
-  .createMassIdDocuments()
-  .createMassIdAuditDocuments()
+const massIDAuditWithAccreditationsAndVerifications = new BoldStubsBuilder()
+  .createMassIDDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
-const massIdWithExpiredAccreditation = createMassIdWithActorAccreditation(
+const massIDWithExpiredAccreditation = createMassIDWithActorAccreditation(
   INTEGRATOR,
   new Map([[ACCREDITATION_RESULT, createExpiredAccreditationResultEvent()]]),
 );
 
-const massIdWithWasteGeneratorNoResult = createMassIdWithActorAccreditation(
+const massIDWithWasteGeneratorNoResult = createMassIDWithActorAccreditation(
   WASTE_GENERATOR,
   new Map([
     [
@@ -183,24 +183,24 @@ const massIdWithWasteGeneratorNoResult = createMassIdWithActorAccreditation(
   ]),
 );
 
-const massIdWithWasteGeneratorValidResult = createMassIdWithActorAccreditation(
+const massIDWithWasteGeneratorValidResult = createMassIDWithActorAccreditation(
   WASTE_GENERATOR,
   new Map([[ACCREDITATION_RESULT, createValidAccreditationResultEvent()]]),
 );
 
-const massIdWithWasteGeneratorInvalidResult =
-  createMassIdWithActorAccreditation(
+const massIDWithWasteGeneratorInvalidResult =
+  createMassIDWithActorAccreditation(
     WASTE_GENERATOR,
     new Map([[ACCREDITATION_RESULT, createExpiredAccreditationResultEvent()]]),
   );
 
 const {
-  massIdWithMultipleValid: massIdWithWasteGeneratorMultipleValid,
+  massIDWithMultipleValid: massIDWithWasteGeneratorMultipleValid,
   secondAccreditation: wasteGeneratorSecondAccreditation,
 } = createMultipleValidAccreditationsTestData(WASTE_GENERATOR);
 
 const {
-  massIdWithMultipleValid: massIdWithProcessorMultipleValid,
+  massIDWithMultipleValid: massIDWithProcessorMultipleValid,
   originalAccreditation: processorOriginalAccreditation,
   secondAccreditation: processorSecondAccreditation,
 } = createMultipleValidAccreditationsTestData(PROCESSOR);
@@ -208,8 +208,8 @@ const {
 // Create a participant that has both PROCESSOR and RECYCLER roles
 const sharedParticipant = stubParticipant({ type: PROCESSOR });
 
-const massIdWithParticipantMultipleRoles =
-  createMassIdWithMultipleActorAccreditations(
+const massIDWithParticipantMultipleRoles =
+  createMassIDWithMultipleActorAccreditations(
     new Map([
       [
         INTEGRATOR,
@@ -258,8 +258,8 @@ const massIdWithParticipantMultipleRoles =
     ]),
   );
 
-const massIdWithWasteGeneratorButNoAccreditation =
-  createMassIdWithMultipleActorAccreditations(
+const massIDWithWasteGeneratorButNoAccreditation =
+  createMassIDWithMultipleActorAccreditations(
     new Map([
       [
         INTEGRATOR,
@@ -297,20 +297,20 @@ const massIdWithWasteGeneratorButNoAccreditation =
 export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   {
     documents: [
-      massIdAuditWithAccreditationsAndVerifications.massIdDocument,
-      ...massIdAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      massIDAuditWithAccreditationsAndVerifications.massIDDocument,
+      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdAuditWithAccreditationsAndVerifications.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the participants accreditation documents are found and the accreditation is active',
   },
   {
-    documents: [massIdAuditWithAccreditationsAndVerifications.massIdDocument],
-    massIdAuditDocument:
-      massIdAuditWithAccreditationsAndVerifications.massIdAuditDocument,
+    documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
+    massIDAuditDocument:
+      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -318,13 +318,13 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdAuditWithAccreditationsAndVerifications.massIdDocument,
+      massIDAuditWithAccreditationsAndVerifications.massIDDocument,
       ...[
-        ...massIdAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+        ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
       ].filter((document) => document.subtype !== INTEGRATOR),
     ],
-    massIdAuditDocument:
-      massIdAuditWithAccreditationsAndVerifications.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
         [INTEGRATOR],
@@ -334,10 +334,10 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      ...massIdAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdAuditWithAccreditationsAndVerifications.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
     resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the mass document does not exist',
@@ -345,26 +345,26 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   {
     documents: [
       {
-        ...massIdAuditWithAccreditationsAndVerifications.massIdDocument,
+        ...massIDAuditWithAccreditationsAndVerifications.massIDDocument,
         externalEvents: [],
       },
-      ...massIdAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdAuditWithAccreditationsAndVerifications.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
-        massIdAuditWithAccreditationsAndVerifications.massIdDocument.id,
+        massIDAuditWithAccreditationsAndVerifications.massIDDocument.id,
       ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the mass document does not contain events',
   },
   {
     documents: [
-      massIdWithExpiredAccreditation.massIdDocument,
-      ...massIdWithExpiredAccreditation.participantsAccreditationDocuments.values(),
+      massIDWithExpiredAccreditation.massIDDocument,
+      ...massIDWithExpiredAccreditation.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument: massIdWithExpiredAccreditation.massIdAuditDocument,
+    massIDAuditDocument: massIDWithExpiredAccreditation.massIDAuditDocument,
     resultComment:
       processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
         [INTEGRATOR],
@@ -375,10 +375,10 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithWasteGeneratorNoResult.massIdDocument,
-      ...massIdWithWasteGeneratorNoResult.participantsAccreditationDocuments.values(),
+      massIDWithWasteGeneratorNoResult.massIDDocument,
+      ...massIDWithWasteGeneratorNoResult.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument: massIdWithWasteGeneratorNoResult.massIdAuditDocument,
+    massIDAuditDocument: massIDWithWasteGeneratorNoResult.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -386,11 +386,11 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithWasteGeneratorValidResult.massIdDocument,
-      ...massIdWithWasteGeneratorValidResult.participantsAccreditationDocuments.values(),
+      massIDWithWasteGeneratorValidResult.massIDDocument,
+      ...massIDWithWasteGeneratorValidResult.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdWithWasteGeneratorValidResult.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDWithWasteGeneratorValidResult.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -398,11 +398,11 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithWasteGeneratorInvalidResult.massIdDocument,
-      ...massIdWithWasteGeneratorInvalidResult.participantsAccreditationDocuments.values(),
+      massIDWithWasteGeneratorInvalidResult.massIDDocument,
+      ...massIDWithWasteGeneratorInvalidResult.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdWithWasteGeneratorInvalidResult.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDWithWasteGeneratorInvalidResult.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -410,12 +410,12 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithWasteGeneratorMultipleValid.massIdDocument,
-      ...massIdWithWasteGeneratorMultipleValid.participantsAccreditationDocuments.values(),
+      massIDWithWasteGeneratorMultipleValid.massIDDocument,
+      ...massIDWithWasteGeneratorMultipleValid.participantsAccreditationDocuments.values(),
       wasteGeneratorSecondAccreditation,
     ],
-    massIdAuditDocument: createMassIdAuditWithLinkEvent(
-      massIdWithWasteGeneratorMultipleValid.massIdAuditDocument,
+    massIDAuditDocument: createMassIDAuditWithLinkEvent(
+      massIDWithWasteGeneratorMultipleValid.massIDAuditDocument,
       wasteGeneratorSecondAccreditation,
     ),
     resultComment: RESULT_COMMENTS.PASSED,
@@ -425,10 +425,10 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithParticipantMultipleRoles.massIdDocument,
-      ...massIdWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
+      massIDWithParticipantMultipleRoles.massIDDocument,
+      ...massIDWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument: massIdWithParticipantMultipleRoles.massIdAuditDocument,
+    massIDAuditDocument: massIDWithParticipantMultipleRoles.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -436,11 +436,11 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithWasteGeneratorButNoAccreditation.massIdDocument,
-      ...massIdWithWasteGeneratorButNoAccreditation.participantsAccreditationDocuments.values(),
+      massIDWithWasteGeneratorButNoAccreditation.massIDDocument,
+      ...massIDWithWasteGeneratorButNoAccreditation.participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument:
-      massIdWithWasteGeneratorButNoAccreditation.massIdAuditDocument,
+    massIDAuditDocument:
+      massIDWithWasteGeneratorButNoAccreditation.massIDAuditDocument,
     resultComment: RESULT_COMMENTS.PASSED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
@@ -448,12 +448,12 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
   },
   {
     documents: [
-      massIdWithProcessorMultipleValid.massIdDocument,
-      ...massIdWithProcessorMultipleValid.participantsAccreditationDocuments.values(),
+      massIDWithProcessorMultipleValid.massIDDocument,
+      ...massIDWithProcessorMultipleValid.participantsAccreditationDocuments.values(),
       processorSecondAccreditation,
     ],
-    massIdAuditDocument: createMassIdAuditWithLinkEvent(
-      massIdWithProcessorMultipleValid.massIdAuditDocument,
+    massIDAuditDocument: createMassIDAuditWithLinkEvent(
+      massIDWithProcessorMultipleValid.massIDAuditDocument,
       processorSecondAccreditation,
     ),
     resultComment:

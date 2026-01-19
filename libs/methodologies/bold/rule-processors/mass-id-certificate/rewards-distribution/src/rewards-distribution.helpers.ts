@@ -15,7 +15,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
-  type MassIdReward,
+  type MassIDReward,
   RewardActorAddress,
   type RewardActorParticipant,
   RewardsDistributionActorType,
@@ -46,18 +46,18 @@ export const isHaulerActorDefined = (
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
-export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
+export const mapMassIDRewards = (participants: ActorReward[]): MassIDReward[] =>
   participants.map(
     ({
       actorType,
       address,
-      massIdPercentage,
+      massIDPercentage,
       participant,
       preserveSensitiveData,
     }) => ({
       actorType,
       address,
-      massIdPercentage: formatPercentage(massIdPercentage),
+      massIDPercentage: formatPercentage(massIDPercentage),
       participant,
       preserveSensitiveData,
     }),
@@ -66,22 +66,22 @@ export const mapMassIdRewards = (participants: ActorReward[]): MassIdReward[] =>
 export const mapActorReward = ({
   actorType,
   address,
-  massIdDocument,
-  massIdPercentage,
+  massIDDocument,
+  massIDPercentage,
   participant,
   preserveSensitiveData,
 }: {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
-  massIdDocument: Document;
-  massIdPercentage: BigNumber;
+  massIDDocument: Document;
+  massIDPercentage: BigNumber;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }): ActorReward => ({
   actorType,
   address,
-  massIdDocument,
-  massIdPercentage,
+  massIDDocument,
+  massIDPercentage,
   participant,
   preserveSensitiveData,
 });
@@ -269,22 +269,22 @@ export const calculateCommunityImpactPoolShare = (
   return fullPercentage.multipliedBy(LARGE_REVENUE_BUSINESS_DISCOUNT);
 };
 
-export const getNgoActorMassIdPercentage = (
-  massIdDocument: Document,
-  actorMassIdPercentage: BigNumber,
+export const getNgoActorMassIDPercentage = (
+  massIDDocument: Document,
+  actorMassIDPercentage: BigNumber,
   actors: RewardsDistributionActor[],
   rewardDistributions: RewardsDistributionActorTypePercentage,
   getWasteGeneratorFullPercentage: (
     targetDocument: Document,
-    targetActorMassIdPercentage: BigNumber,
+    targetActorMassIDPercentage: BigNumber,
     targetActors: RewardsDistributionActor[],
     targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
   wasteGeneratorVerificationDocument: Document | undefined,
 ): BigNumber => {
   const fullPercentage = getWasteGeneratorFullPercentage(
-    massIdDocument,
-    actorMassIdPercentage,
+    massIDDocument,
+    actorMassIDPercentage,
     actors,
     rewardDistributions,
   );

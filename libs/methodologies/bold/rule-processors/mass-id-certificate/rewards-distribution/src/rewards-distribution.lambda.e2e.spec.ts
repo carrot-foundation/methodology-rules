@@ -26,27 +26,27 @@ describe('RewardsDistributionProcessor E2E', () => {
 
   it.each(rewardsDistributionProcessorTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ massIdDocumentEvents, massIdPartialDocument, resultStatus }) => {
+    async ({ massIDDocumentEvents, massIDPartialDocument, resultStatus }) => {
       const {
-        massIdAuditDocument,
-        massIdCertificateDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDCertificateDocument,
+        massIDDocument,
         methodologyDocument,
       } = new BoldStubsBuilder()
-        .createMassIdDocuments({
-          externalEventsMap: massIdDocumentEvents,
-          partialDocument: massIdPartialDocument,
+        .createMassIDDocuments({
+          externalEventsMap: massIDDocumentEvents,
+          partialDocument: massIDPartialDocument,
         })
-        .createMassIdAuditDocuments()
-        .createMassIdCertificateDocuments()
+        .createMassIDAuditDocuments()
+        .createMassIDCertificateDocuments()
         .createMethodologyDocument()
         .build();
 
       prepareEnvironmentTestE2E(
         [
-          massIdDocument,
-          massIdAuditDocument,
-          massIdCertificateDocument,
+          massIDDocument,
+          massIDAuditDocument,
+          massIDCertificateDocument,
           methodologyDocument as Document,
         ].map((document) => ({
           document,
@@ -59,7 +59,7 @@ describe('RewardsDistributionProcessor E2E', () => {
 
       const response = (await rewardsDistributionLambda(
         stubRuleInput({
-          documentId: massIdAuditDocument.id,
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
         }),
         stubContext(),
@@ -75,9 +75,9 @@ describe('RewardsDistributionProcessor E2E', () => {
   describe('RewardsDistributionProcessorErrors', () => {
     it.each(rewardsDistributionProcessorErrors)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIdAuditDocument, resultStatus }) => {
+      async ({ documents, massIDAuditDocument, resultStatus }) => {
         prepareEnvironmentTestE2E(
-          [...documents, massIdAuditDocument].map((document) => ({
+          [...documents, massIDAuditDocument].map((document) => ({
             document,
             documentKey: toDocumentKey({
               documentId: document.id,
@@ -88,7 +88,7 @@ describe('RewardsDistributionProcessor E2E', () => {
 
         const response = (await rewardsDistributionLambda(
           stubRuleInput({
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),

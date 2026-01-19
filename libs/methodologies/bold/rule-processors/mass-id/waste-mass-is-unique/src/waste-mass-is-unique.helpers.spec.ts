@@ -2,8 +2,8 @@ import type { AuditApiService } from '@carrot-fndn/shared/methodologies/audit-ap
 
 import {
   BoldStubsBuilder,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -30,46 +30,46 @@ describe('waste-mass-is-unique.helpers', () => {
     mockCheckDuplicateDocuments.mockReset();
   });
 
-  describe('mapMassIdV2Query', () => {
+  describe('mapMassIDV2Query', () => {
     it('should create a valid query object with proper structure', () => {
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments()
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments()
         .build();
 
       const eventsData: helpers.EventsData = {
-        dropOffEvent: stubBoldMassIdDropOffEvent(),
-        pickUpEvent: stubBoldMassIdPickUpEvent(),
+        dropOffEvent: stubBoldMassIDDropOffEvent(),
+        pickUpEvent: stubBoldMassIDPickUpEvent(),
         recyclerEvent: stubDocumentEvent(),
         vehicleLicensePlate: 'ABC123',
         wasteGeneratorEvent: stubDocumentEvent(),
       };
 
-      const query = helpers.mapMassIdV2Query(massIdDocument, eventsData);
+      const query = helpers.mapMassIDV2Query(massIDDocument, eventsData);
 
       expect(query).toHaveProperty('match.$and');
       expect(query.match.$and).toBeInstanceOf(Array);
       expect(query.match.$and).toHaveLength(4);
       expect(query.match).toHaveProperty('category', MASS_ID);
-      expect(query.match).toHaveProperty('type', massIdDocument.type);
-      expect(query.match).toHaveProperty('subtype', massIdDocument.subtype);
+      expect(query.match).toHaveProperty('type', massIDDocument.type);
+      expect(query.match).toHaveProperty('subtype', massIDDocument.subtype);
     });
   });
 
   describe('createOldFormatQuery', () => {
     it('should create a valid query object with proper structure', () => {
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments()
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments()
         .build();
 
       const eventsData: helpers.EventsData = {
-        dropOffEvent: stubBoldMassIdDropOffEvent(),
-        pickUpEvent: stubBoldMassIdPickUpEvent(),
+        dropOffEvent: stubBoldMassIDDropOffEvent(),
+        pickUpEvent: stubBoldMassIDPickUpEvent(),
         recyclerEvent: stubDocumentEvent(),
         vehicleLicensePlate: 'ABC123',
         wasteGeneratorEvent: stubDocumentEvent(),
       };
 
-      const query = helpers.mapMassIdV1Query(massIdDocument, eventsData);
+      const query = helpers.mapMassIDV1Query(massIDDocument, eventsData);
 
       expect(query).toHaveProperty('match.$and');
       expect(query.match.category).toBe('Mass');
@@ -78,10 +78,10 @@ describe('waste-mass-is-unique.helpers', () => {
     });
   });
 
-  describe('fetchSimilarMassIdDocuments', () => {
+  describe('fetchSimilarMassIDDocuments', () => {
     it('should call API with both new and old format queries and combine results', async () => {
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments()
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments()
         .build();
 
       const newFormatDuplicates = [
@@ -97,16 +97,16 @@ describe('waste-mass-is-unique.helpers', () => {
         .mockResolvedValueOnce(oldFormatDuplicates);
 
       const eventsData: helpers.EventsData = {
-        dropOffEvent: stubBoldMassIdDropOffEvent(),
-        pickUpEvent: stubBoldMassIdPickUpEvent(),
+        dropOffEvent: stubBoldMassIDDropOffEvent(),
+        pickUpEvent: stubBoldMassIDPickUpEvent(),
         recyclerEvent: stubDocumentEvent(),
         vehicleLicensePlate: 'ABC123',
         wasteGeneratorEvent: stubDocumentEvent(),
       };
 
-      const result = await helpers.fetchSimilarMassIdDocuments({
+      const result = await helpers.fetchSimilarMassIDDocuments({
         auditApiService: mockAuditApiService as unknown as AuditApiService,
-        document: massIdDocument,
+        document: massIDDocument,
         eventsData,
       });
 

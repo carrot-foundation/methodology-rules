@@ -7,8 +7,8 @@ import {
   stubAddress,
   stubBoldAccreditationResultEvent,
   type StubBoldDocumentParameters,
-  stubBoldMassIdDropOffEvent,
-  stubBoldMassIdPickUpEvent,
+  stubBoldMassIDDropOffEvent,
+  stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -16,7 +16,7 @@ import {
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIdDocumentActorType,
+  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -28,7 +28,7 @@ import { faker } from '@faker-js/faker';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.processor';
 
-const { RECYCLER, WASTE_GENERATOR } = MassIdDocumentActorType;
+const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 const {
   ACCREDITATION_CONTEXT,
   ACCREDITATION_RESULT,
@@ -205,7 +205,7 @@ const createAccreditationDocumentWithGpsExceptions = (
   },
 });
 
-const createMassIdEvent = (
+const createMassIDEvent = (
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
   address: ReturnType<typeof stubAddress>,
   participant: MethodologyParticipant,
@@ -214,8 +214,8 @@ const createMassIdEvent = (
 ) => {
   const createEvent =
     eventName === DROP_OFF
-      ? stubBoldMassIdDropOffEvent
-      : stubBoldMassIdPickUpEvent;
+      ? stubBoldMassIDDropOffEvent
+      : stubBoldMassIDPickUpEvent;
 
   return createEvent({
     metadataAttributes: [
@@ -262,7 +262,7 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
 export const geolocationAndAddressPrecisionTestCases: Array<{
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   actorParticipants: Map<string, MethodologyParticipant>;
-  massIdDocumentParameters?: StubBoldDocumentParameters | undefined;
+  massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
   resultComment: string;
   resultStatus: RuleOutputStatus;
   scenario: string;
@@ -294,18 +294,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           nearbyRecyclerAddress.latitude,
           nearbyRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           nearbyWasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -322,18 +322,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           invalidRecyclerAddress.latitude,
           invalidRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           nearbyWasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -349,11 +349,11 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
@@ -370,16 +370,16 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           recyclerAddress,
           recyclerParticipant,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -394,16 +394,16 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
   {
     accreditationDocuments: validAccreditationDocuments,
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           invalidRecyclerAddress,
           recyclerParticipant,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           invalidWasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -434,16 +434,16 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           recyclerAddress,
           recyclerParticipant,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -474,18 +474,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           invalidRecyclerAddress.latitude,
           invalidRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -516,18 +516,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           invalidRecyclerAddress.latitude,
           invalidRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -560,18 +560,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           invalidRecyclerAddress.latitude,
           invalidRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -605,18 +605,18 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    massIdDocumentParameters: {
+    massIDDocumentParameters: {
       externalEventsMap: {
         [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
         [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIdEvent(
+        [DROP_OFF]: createMassIDEvent(
           DROP_OFF,
           nearbyRecyclerAddress,
           recyclerParticipant,
           invalidRecyclerAddress.latitude,
           invalidRecyclerAddress.longitude,
         ),
-        [PICK_UP]: createMassIdEvent(
+        [PICK_UP]: createMassIDEvent(
           PICK_UP,
           wasteGeneratorAddress,
           wasteGeneratorParticipant,
@@ -633,17 +633,17 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
 const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 
 const {
-  massIdAuditDocument,
-  massIdDocument,
+  massIDAuditDocument,
+  massIDDocument,
   participantsAccreditationDocuments,
 } = new BoldStubsBuilder()
-  .createMassIdDocuments({
+  .createMassIDDocuments({
     externalEventsMap: {
       [DROP_OFF]: undefined,
       [PICK_UP]: undefined,
     },
   })
-  .createMassIdAuditDocuments()
+  .createMassIDAuditDocuments()
   .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
@@ -651,32 +651,32 @@ const {
 export const geolocationAndAddressPrecisionErrorTestCases = [
   {
     documents: [
-      massIdAuditDocument,
+      massIDAuditDocument,
       ...participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID document does not exist',
   },
   {
     documents: [
-      massIdDocument,
-      massIdAuditDocument,
+      massIDDocument,
+      massIDAuditDocument,
       ...participantsAccreditationDocuments.values(),
     ],
-    massIdAuditDocument,
+    massIDAuditDocument,
     resultComment:
       errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
-        massIdDocument.id,
+        massIDDocument.id,
       ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the MassId document does not contain a DROP_OFF or PICK_UP event',
+      'the MassID document does not contain a DROP_OFF or PICK_UP event',
   },
   {
-    documents: [massIdDocument, massIdAuditDocument],
-    massIdAuditDocument,
+    documents: [massIDDocument, massIDAuditDocument],
+    massIDAuditDocument,
     resultComment:
       errorMessage.ERROR_MESSAGE.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
@@ -684,7 +684,7 @@ export const geolocationAndAddressPrecisionErrorTestCases = [
   },
   {
     documents: [],
-    massIdAuditDocument: undefined,
+    massIDAuditDocument: undefined,
     resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the MassID Audit document does not exist',

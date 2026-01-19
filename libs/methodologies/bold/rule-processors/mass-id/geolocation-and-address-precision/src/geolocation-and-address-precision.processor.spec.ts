@@ -32,19 +32,19 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
     async ({
       accreditationDocuments,
       actorParticipants,
-      massIdDocumentParameters,
+      massIDDocumentParameters,
       resultComment,
       resultStatus,
     }) => {
       const {
-        massIdAuditDocument,
-        massIdDocument,
+        massIDAuditDocument,
+        massIDDocument,
         participantsAccreditationDocuments,
       } = new BoldStubsBuilder({
-        massIdActorParticipants: actorParticipants,
+        massIDActorParticipants: actorParticipants,
       })
-        .createMassIdDocuments(massIdDocumentParameters)
-        .createMassIdAuditDocuments()
+        .createMassIDDocuments(massIDDocumentParameters)
+        .createMassIDAuditDocuments()
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
@@ -63,23 +63,23 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
           }),
       );
 
-      massIdAuditDocument.externalEvents = [
-        ...(massIdAuditDocument.externalEvents ?? []),
+      massIDAuditDocument.externalEvents = [
+        ...(massIDAuditDocument.externalEvents ?? []),
         ...auditActorEvents,
       ];
 
       const allDocuments = [
-        massIdDocument,
-        massIdAuditDocument,
+        massIDDocument,
+        massIDAuditDocument,
         ...participantsAccreditationDocuments.values(),
       ];
 
-      spyOnLoadDocument(massIdAuditDocument);
-      spyOnDocumentQueryServiceLoad(massIdAuditDocument, allDocuments);
+      spyOnLoadDocument(massIDAuditDocument);
+      spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
       const ruleInput = {
         ...random<Required<RuleInput>>(),
-        documentId: massIdAuditDocument.id,
+        documentId: massIDAuditDocument.id,
       };
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
@@ -98,7 +98,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       (testCase) => ({
         ...testCase,
         hasDocuments: Boolean(
-          testCase.massIdAuditDocument && testCase.documents,
+          testCase.massIDAuditDocument && testCase.documents,
         ),
       }),
     );
@@ -107,20 +107,20 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       'should return $resultStatus when $scenario',
       async (testCase) => {
         if (testCase.hasDocuments) {
-          const { documents, massIdAuditDocument } = testCase as unknown as {
+          const { documents, massIDAuditDocument } = testCase as unknown as {
             documents: Document[];
-            massIdAuditDocument: Document;
+            massIDAuditDocument: Document;
           };
 
-          spyOnLoadDocument(massIdAuditDocument);
-          spyOnDocumentQueryServiceLoad(massIdAuditDocument, [
-            massIdAuditDocument,
+          spyOnLoadDocument(massIDAuditDocument);
+          spyOnDocumentQueryServiceLoad(massIDAuditDocument, [
+            massIDAuditDocument,
             ...documents,
           ]);
 
           const ruleInput: Required<RuleInput> = {
             ...random<Required<RuleInput>>(),
-            documentId: massIdAuditDocument.id,
+            documentId: massIDAuditDocument.id,
           };
 
           const ruleOutput = await ruleDataProcessor.process(ruleInput);

@@ -19,15 +19,15 @@ describe('DropOffAtRecyclerProcessor', () => {
   it.each(dropOffAtRecyclerTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultStatus }) => {
-      const { massIdDocument } = new BoldStubsBuilder()
-        .createMassIdDocuments({
+      const { massIDDocument } = new BoldStubsBuilder()
+        .createMassIDDocuments({
           externalEventsMap: events,
         })
         .build();
 
       const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.mockResolvedValueOnce(massIdDocument);
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
