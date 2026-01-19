@@ -10,6 +10,10 @@ import {
   getEventAttributeByName,
   getEventAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
+import {
+  getApprovedExceptions,
+  isApprovedExceptionValid,
+} from '@carrot-fndn/shared/methodologies/bold/helpers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
@@ -21,13 +25,11 @@ import {
   DocumentEventWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type ApprovedException,
   type MethodologyAdditionalVerificationAttributeValue,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
-import { isAfter, isValid, parseISO } from 'date-fns';
 import { is } from 'typia';
 
 import {
@@ -42,7 +44,6 @@ import {
 } from './weighing.types';
 import {
   isAdditionalVerificationAttributeValue,
-  isApprovedExceptionAttributeValue,
   isContainerCapacityApprovedException,
   isTareApprovedException,
 } from './weighing.typia';
@@ -50,7 +51,6 @@ import {
 const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
 const {
-  APPROVED_EXCEPTIONS,
   CONTAINER_CAPACITY,
   CONTAINER_QUANTITY,
   CONTAINER_TYPE,
@@ -111,30 +111,6 @@ const shouldSkipNetWeightCalculationWithTareException = (
   isExceptionValid(values.tareException) &&
   (isAttributeOmitted(values.grossWeight) || isAttributeOmitted(values.tare));
 
-const getApprovedExceptions = (
-  recyclerAccreditationDocument: Document,
-): ApprovedException[] | undefined => {
-  const accreditationResultEvent =
-    recyclerAccreditationDocument.externalEvents?.find(
-      eventNameIsAnyOf([ACCREDITATION_RESULT]),
-    );
-
-  if (!accreditationResultEvent) {
-    return undefined;
-  }
-
-  const approvedExceptions = getEventAttributeValue(
-    accreditationResultEvent,
-    APPROVED_EXCEPTIONS,
-  );
-
-  if (!isApprovedExceptionAttributeValue(approvedExceptions)) {
-    return undefined;
-  }
-
-  return approvedExceptions;
-};
-
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
   recyclerAccreditationDocument: Document,
 ): MethodologyAdditionalVerificationAttributeValue | undefined => {
@@ -162,7 +138,10 @@ export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
 export const getTareExceptionFromAccreditationDocument = (
   recyclerAccreditationDocument: Document,
 ): TareApprovedException | undefined => {
-  const exceptions = getApprovedExceptions(recyclerAccreditationDocument);
+  const exceptions = getApprovedExceptions(
+    recyclerAccreditationDocument,
+    ACCREDITATION_RESULT,
+  );
 
   if (!exceptions) {
     return undefined;
@@ -180,7 +159,10 @@ export const getTareExceptionFromAccreditationDocument = (
 export const getContainerCapacityExceptionFromAccreditationDocument = (
   recyclerAccreditationDocument: Document,
 ): ContainerCapacityApprovedException | undefined => {
-  const exceptions = getApprovedExceptions(recyclerAccreditationDocument);
+  const exceptions = getApprovedExceptions(
+    recyclerAccreditationDocument,
+    ACCREDITATION_RESULT,
+  );
 
   if (!exceptions) {
     return undefined;
@@ -211,19 +193,7 @@ export const isExceptionValid = (
     return false;
   }
 
-  const validUntil = exception['Valid Until'];
-
-  if (!validUntil) {
-    return true;
-  }
-
-  const validUntilDate = parseISO(validUntil);
-
-  if (!isValid(validUntilDate)) {
-    return false;
-  }
-
-  return !isAfter(new Date(), validUntilDate);
+  return isApprovedExceptionValid(exception);
 };
 
 export const getAccreditationScaleType = (

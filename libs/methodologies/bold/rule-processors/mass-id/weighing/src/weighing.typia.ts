@@ -1,5 +1,4 @@
 import {
-  type ApprovedExceptionAttributeValue,
   type MethodologyAdditionalVerification,
   type MethodologyAdditionalVerificationAttributeValue,
 } from '@carrot-fndn/shared/types';
@@ -9,9 +8,6 @@ import {
   type ContainerCapacityApprovedException,
   type TareApprovedException,
 } from './weighing.types';
-
-export const isApprovedExceptionAttributeValue =
-  createIs<ApprovedExceptionAttributeValue>();
 
 export const isTareApprovedException = createIs<TareApprovedException>();
 
