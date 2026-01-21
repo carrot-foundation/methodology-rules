@@ -141,8 +141,7 @@ describe('PreventedEmissionsHelpers', () => {
 
     it('should throw when IBAMA code exists but entry is undefined (defensive branch)', () => {
       const canonicalIbamaCode = '02 01 06';
-      const carbonMap =
-        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE as OthersIfOrganicCarbonFractionByCanonicalIbamaCode;
+      const carbonMap = OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE;
       const original = carbonMap[canonicalIbamaCode];
 
       try {

@@ -2,9 +2,9 @@ import {
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { type OthersIfOrganicCarbonEntry } from './prevented-emissions.types';
-import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 export const CDM_CODE_OTHERS_IF_ORGANIC = '8.7D';
 
