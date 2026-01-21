@@ -171,8 +171,7 @@ describe('PreventedEmissionsHelpers', () => {
       ).toEqual({
         canonicalIbamaCode: '02 01 06',
         carbonFraction: 0.15,
-        computedFactor:
-          Number.parseFloat('5.521373') * 0.15 - Number.parseFloat('0.1297013'),
+        computedFactor: Number.parseFloat('0.698505'),
         formulaCoeffs: {
           intercept: Number.parseFloat('-0.1297013'),
           slope: Number.parseFloat('5.521373'),
@@ -480,7 +479,7 @@ describe('PreventedEmissionsHelpers', () => {
       {
         description: 'should floor round down when 4th decimal is 9',
         expected: '1006.312',
-        input: 1006.312_230_000_001,
+        input: Number.parseFloat('1006.312230000001'),
       },
       {
         description: 'should handle exact 3 decimal places',
@@ -511,7 +510,7 @@ describe('PreventedEmissionsHelpers', () => {
       {
         description: 'should handle large numbers',
         expected: '12345.678',
-        input: 12_345.6789,
+        input: Number.parseFloat('12345.6789'),
       },
       {
         description: 'should handle zero',

@@ -62,19 +62,19 @@ export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
 
 export const OTHERS_IF_ORGANIC_BASELINE_FORMULA: Record<
   MethodologyBaseline,
-  { intercept: number; slope: number }
+  { intercept: string; slope: string }
 > = {
   [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: {
-    intercept: Number.parseFloat('-0.129701'),
-    slope: Number.parseFloat('3.795947'),
+    intercept: '-0.129701',
+    slope: '3.795947',
   },
   [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: {
-    intercept: Number.parseFloat('-0.1297012'),
-    slope: Number.parseFloat('6.901715'),
+    intercept: '-0.1297003',
+    slope: '6.901715',
   },
   [MethodologyBaseline.OPEN_AIR_DUMP]: {
-    intercept: Number.parseFloat('-0.1297013'),
-    slope: Number.parseFloat('5.521373'),
+    intercept: '-0.1297013',
+    slope: '5.521373',
   },
 };
 

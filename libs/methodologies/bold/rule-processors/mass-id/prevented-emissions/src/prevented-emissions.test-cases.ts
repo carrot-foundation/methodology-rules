@@ -64,23 +64,15 @@ const computeOthersIfOrganicFactor = (
   if (
     baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
   ) {
-    return (
-      Number.parseFloat('6.901715') * othersIfOrganicCarbonFraction -
-      Number.parseFloat('0.1297012')
-    );
+    // Coefficients aligned with internal calculator, rounded to 6 decimals.
+    return Number.parseFloat('0.905557');
   }
 
   if (baseline_ === MethodologyBaseline.OPEN_AIR_DUMP) {
-    return (
-      Number.parseFloat('5.521373') * othersIfOrganicCarbonFraction -
-      Number.parseFloat('0.1297013')
-    );
+    return Number.parseFloat('0.698505');
   }
 
-  return (
-    Number.parseFloat('3.795947') * othersIfOrganicCarbonFraction -
-    Number.parseFloat('0.129701')
-  );
+  return Number.parseFloat('0.439691');
 };
 
 const getOthersIfOrganicFormulaCoeffs = (
@@ -90,7 +82,7 @@ const getOthersIfOrganicFormulaCoeffs = (
     baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
   ) {
     return {
-      intercept: Number.parseFloat('-0.1297012'),
+      intercept: Number.parseFloat('-0.1297003'),
       slope: Number.parseFloat('6.901715'),
     };
   }

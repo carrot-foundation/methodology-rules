@@ -14,6 +14,7 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
+import BigNumber from 'bignumber.js';
 
 import {
   CDM_CODE_OTHERS_IF_ORGANIC,
@@ -83,7 +84,11 @@ export const calculateOthersIfOrganicFactor = (
 ): number => {
   const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
 
-  return slope * carbonFraction + intercept;
+  return new BigNumber(slope)
+    .multipliedBy(new BigNumber(carbonFraction.toString()))
+    .plus(intercept)
+    .decimalPlaces(6, BigNumber.ROUND_HALF_UP)
+    .toNumber();
 };
 
 export const getPreventedEmissionsFactor = (
@@ -183,7 +188,11 @@ export const getOthersIfOrganicAuditDetails = (
     );
   }
 
-  const formulaCoeffs = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
+  const formulaCoeffsRaw = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
+  const formulaCoeffs = {
+    intercept: Number.parseFloat(formulaCoeffsRaw.intercept),
+    slope: Number.parseFloat(formulaCoeffsRaw.slope),
+  };
   const computedFactor = calculateOthersIfOrganicFactor(
     baseline,
     entry.carbonFraction,
