@@ -177,7 +177,7 @@ export enum DocumentSubtype {
   HAULER = MethodologyActorType.HAULER,
   INDUSTRIAL_SLUDGE = MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
   INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  OTHERS_IF_ORGANIC = MassIdOrganicSubtype.OTHERS_IF_ORGANIC,
+  OTHERS_IF_ORGANIC = MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
   PROCESS = 'Process',
   PROCESSOR = MethodologyActorType.PROCESSOR,
   RECYCLER = MethodologyActorType.RECYCLER,

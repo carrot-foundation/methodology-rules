@@ -1,6 +1,10 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getOrDefault, isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  getOrDefault,
+  isNonEmptyString,
+  normalizeString,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   and,
@@ -24,7 +28,6 @@ import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.cons
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import {
   getCdmCodeFromSubtype,
-  normalizeClassificationId,
   normalizeDescriptionForComparison,
 } from './regional-waste-classification.helpers';
 
@@ -84,8 +87,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     const validClassificationIds = Object.keys(WASTE_CLASSIFICATION_CODES.BR);
 
     const normalizedId = validClassificationIds.find(
-      (validId) =>
-        normalizeClassificationId(validId) === normalizeClassificationId(id),
+      (validId) => normalizeString(validId) === normalizeString(id),
     );
 
     if (!normalizedId) {

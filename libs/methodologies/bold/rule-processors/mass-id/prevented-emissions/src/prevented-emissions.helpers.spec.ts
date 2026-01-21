@@ -9,14 +9,20 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import {
+  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE,
+  OthersIfOrganicCarbonFractionByCanonicalIbamaCode,
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
+} from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   calculatePreventedEmissions,
   formatNumber,
   getGasTypeFromEvent,
+  getOthersIfOrganicAuditDetails,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
+  resolveCanonicalIbamaId,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
@@ -26,11 +32,18 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
 
+  describe('resolveCanonicalIbamaId', () => {
+    it('should return empty ids when localWasteClassificationIdRaw is undefined', () => {
+      expect(resolveCanonicalIbamaId(undefined)).toStrictEqual({});
+    });
+  });
+
   describe('getPreventedEmissionsFactor', () => {
     it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        processorErrors,
       );
 
       expect(result).toBe(
@@ -44,6 +57,7 @@ describe('PreventedEmissionsHelpers', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.DOMESTIC_SLUDGE,
         MethodologyBaseline.OPEN_AIR_DUMP,
+        processorErrors,
       );
 
       expect(result).toBe(
@@ -51,6 +65,120 @@ describe('PreventedEmissionsHelpers', () => {
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][MethodologyBaseline.OPEN_AIR_DUMP],
       );
+    });
+
+    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized IBAMA code is missing', () => {
+      expect(() =>
+        getPreventedEmissionsFactor(
+          MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          MethodologyBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+          {},
+        ),
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
+    });
+
+    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized IBAMA code is unknown', () => {
+      expect(() =>
+        getPreventedEmissionsFactor(
+          MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          MethodologyBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+          { normalizedLocalWasteClassificationId: '00 00 00' },
+        ),
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
+    });
+
+    it('should throw SUBTYPE_CDM_CODE_MISMATCH for Others (if organic) when IBAMA code is not 8.7D', () => {
+      expect(() =>
+        getPreventedEmissionsFactor(
+          MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          MethodologyBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+          { normalizedLocalWasteClassificationId: '02 01 01' },
+        ),
+      ).toThrow(processorErrors.ERROR_MESSAGE.SUBTYPE_CDM_CODE_MISMATCH);
+    });
+
+    it('should throw when carbon entry exists but is undefined (defensive branch)', () => {
+      const canonicalIbamaCode = '02 01 06';
+      const carbonMap: OthersIfOrganicCarbonFractionByCanonicalIbamaCode =
+        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE;
+      const original = carbonMap[canonicalIbamaCode];
+
+      try {
+        // @ts-expect-error - we want to test the defensive branch
+        carbonMap[canonicalIbamaCode] = undefined;
+
+        expect(() =>
+          getPreventedEmissionsFactor(
+            MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+            MethodologyBaseline.OPEN_AIR_DUMP,
+            processorErrors,
+            { normalizedLocalWasteClassificationId: canonicalIbamaCode },
+          ),
+        ).toThrow(
+          `The carbon fraction for the "Others (if organic)" IBAMA code "${canonicalIbamaCode}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE.`,
+        );
+      } finally {
+        // @ts-expect-error - we want to test the defensive branch
+        carbonMap[canonicalIbamaCode] = original;
+      }
+    });
+  });
+
+  describe('getOthersIfOrganicAuditDetails', () => {
+    it('should throw when IBAMA code is not configured', () => {
+      expect(() =>
+        getOthersIfOrganicAuditDetails(
+          '00 00 00',
+          MethodologyBaseline.OPEN_AIR_DUMP,
+        ),
+      ).toThrow(
+        'getOthersIfOrganicAuditDetails: no carbon entry for "00 00 00"',
+      );
+    });
+
+    it('should throw when IBAMA code exists but entry is undefined (defensive branch)', () => {
+      const canonicalIbamaCode = '02 01 06';
+      const carbonMap =
+        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE as OthersIfOrganicCarbonFractionByCanonicalIbamaCode;
+      const original = carbonMap[canonicalIbamaCode];
+
+      try {
+        // @ts-expect-error - we want to test the defensive branch
+        carbonMap[canonicalIbamaCode] = undefined;
+
+        expect(() =>
+          getOthersIfOrganicAuditDetails(
+            canonicalIbamaCode,
+            MethodologyBaseline.OPEN_AIR_DUMP,
+          ),
+        ).toThrow(
+          `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalIbamaCode}"`,
+        );
+      } finally {
+        // @ts-expect-error - we want to test the defensive branch
+        carbonMap[canonicalIbamaCode] = original;
+      }
+    });
+
+    it('should return audit details without sources', () => {
+      expect(
+        getOthersIfOrganicAuditDetails(
+          '02 01 06',
+          MethodologyBaseline.OPEN_AIR_DUMP,
+        ),
+      ).toEqual({
+        canonicalIbamaCode: '02 01 06',
+        carbonFraction: 0.15,
+        computedFactor:
+          Number.parseFloat('5.521373') * 0.15 - Number.parseFloat('0.1297013'),
+        formulaCoeffs: {
+          intercept: Number.parseFloat('-0.1297013'),
+          slope: Number.parseFloat('5.521373'),
+        },
+      });
     });
   });
 

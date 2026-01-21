@@ -7,12 +7,18 @@ import {
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
+export interface OthersIfOrganicCarbonEntry {
+  carbonFraction: number;
+}
+
 export interface RuleSubject {
   exceedingEmissionCoefficient:
     | MethodologyDocumentEventAttributeValue
     | undefined;
   gasType: NonEmptyString;
+  localWasteClassificationId?: string;
   massIDDocumentValue: number;
+  normalizedLocalWasteClassificationId?: string;
   wasteGeneratorBaseline: MethodologyBaseline | undefined;
   wasteSubtype: MassIDOrganicSubtype;
 }
