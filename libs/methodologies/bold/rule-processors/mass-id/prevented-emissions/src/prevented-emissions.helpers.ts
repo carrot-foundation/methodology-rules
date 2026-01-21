@@ -14,15 +14,16 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
-import BigNumber from 'bignumber.js';
+
+import type { OthersIfOrganicContext } from './prevented-emissions.others-organic.helpers';
 
 import {
   CDM_CODE_OTHERS_IF_ORGANIC,
-  OTHERS_IF_ORGANIC_BASELINE_FORMULA,
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { calculateOthersIfOrganicFactor } from './prevented-emissions.others-organic.helpers';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.typia';
 
 const { BASELINES } = DocumentEventAttributeName;
@@ -33,63 +34,6 @@ const formatter = new Intl.NumberFormat('en-US', {
   roundingMode: 'floor',
   useGrouping: false,
 });
-
-export interface OthersIfOrganicAuditDetails {
-  canonicalLocalWasteClassificationCode: string;
-  carbonFraction: number;
-  computedFactor: number;
-  formulaCoeffs: { intercept: number; slope: number };
-}
-
-export interface OthersIfOrganicContext {
-  localWasteClassificationId?: string;
-  normalizedLocalWasteClassificationId?: string;
-}
-
-export interface ResolvedLocalWasteClassificationIds {
-  localWasteClassificationId?: string;
-  normalizedLocalWasteClassificationId?: string;
-}
-
-export const resolveCanonicalLocalWasteClassificationId = (
-  localWasteClassificationIdRaw: NonEmptyString | undefined,
-): ResolvedLocalWasteClassificationIds => {
-  const localWasteClassificationId = isNonEmptyString(
-    localWasteClassificationIdRaw,
-  )
-    ? localWasteClassificationIdRaw
-    : undefined;
-
-  if (isNil(localWasteClassificationId)) {
-    return {};
-  }
-
-  const validClassificationIds = Object.keys(WASTE_CLASSIFICATION_CODES.BR);
-  const normalizedLocalWasteClassificationId = validClassificationIds.find(
-    (validId) =>
-      normalizeString(validId) === normalizeString(localWasteClassificationId),
-  );
-
-  return {
-    ...(!isNil(localWasteClassificationId) && { localWasteClassificationId }),
-    ...(!isNil(normalizedLocalWasteClassificationId) && {
-      normalizedLocalWasteClassificationId,
-    }),
-  };
-};
-
-export const calculateOthersIfOrganicFactor = (
-  baseline: MethodologyBaseline,
-  carbonFraction: number,
-): number => {
-  const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
-
-  return new BigNumber(slope)
-    .multipliedBy(new BigNumber(carbonFraction.toString()))
-    .plus(intercept)
-    .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN)
-    .toNumber();
-};
 
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
@@ -162,50 +106,6 @@ export const getPreventedEmissionsFactor = (
     wasteGeneratorBaseline,
     carbonEntry.carbonFraction,
   );
-};
-
-export const getOthersIfOrganicAuditDetails = (
-  normalizedLocalWasteClassificationId: string,
-  baseline: MethodologyBaseline,
-): OthersIfOrganicAuditDetails => {
-  if (
-    !Object.prototype.hasOwnProperty.call(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
-      normalizedLocalWasteClassificationId,
-    )
-  ) {
-    throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
-    );
-  }
-
-  const entry =
-    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
-      normalizedLocalWasteClassificationId
-    ];
-
-  if (!entry) {
-    throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
-    );
-  }
-
-  const formulaCoeffsRaw = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
-  const formulaCoeffs = {
-    intercept: Number.parseFloat(formulaCoeffsRaw.intercept),
-    slope: Number.parseFloat(formulaCoeffsRaw.slope),
-  };
-  const computedFactor = calculateOthersIfOrganicFactor(
-    baseline,
-    entry.carbonFraction,
-  );
-
-  return {
-    canonicalLocalWasteClassificationCode: normalizedLocalWasteClassificationId,
-    carbonFraction: entry.carbonFraction,
-    computedFactor,
-    formulaCoeffs,
-  };
 };
 
 export const calculatePreventedEmissions = (

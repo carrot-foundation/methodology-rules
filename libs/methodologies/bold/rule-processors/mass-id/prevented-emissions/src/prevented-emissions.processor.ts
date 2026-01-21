@@ -20,11 +20,9 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
   DocumentEventAttributeName,
-  DocumentEventName,
   DocumentSubtype,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -43,19 +41,20 @@ import {
   calculatePreventedEmissions,
   formatNumber,
   getGasTypeFromEvent,
-  getOthersIfOrganicAuditDetails,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
-  type OthersIfOrganicAuditDetails,
-  resolveCanonicalLocalWasteClassificationId,
   throwIfMissing,
 } from './prevented-emissions.helpers';
+import {
+  buildOthersIfOrganicContext,
+  getOthersIfOrganicAuditDetails,
+  getOthersIfOrganicContextFromMassIdDocument,
+  OthersIfOrganicAuditDetails,
+} from './prevented-emissions.others-organic.helpers';
 import { type RuleSubject } from './prevented-emissions.types';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
-const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
 
 export const RESULT_COMMENTS = {
   MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
@@ -129,7 +128,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       };
     }
 
-    const othersIfOrganicContext = this.getOthersIfOrganicSubject(ruleSubject);
+    const othersIfOrganicContext = buildOthersIfOrganicContext(ruleSubject);
 
     const preventedEmissionsByWasteSubtypeAndBaselinePerTon =
       getPreventedEmissionsFactor(
@@ -217,7 +216,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     const { localWasteClassificationId, normalizedLocalWasteClassificationId } =
-      this.getOthersIfOrganicIds(massIDDocument);
+      getOthersIfOrganicContextFromMassIdDocument(massIDDocument);
 
     return {
       exceedingEmissionCoefficient: getEventAttributeValue(
@@ -291,59 +290,6 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
       wasteGeneratorVerificationDocument:
         wasteGeneratorVerificationDocument as Document,
-    };
-  }
-
-  private getOthersIfOrganicIds(
-    massIDDocument: Document,
-  ): Pick<
-    RuleSubject,
-    'localWasteClassificationId' | 'normalizedLocalWasteClassificationId'
-  > {
-    if (massIDDocument.subtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
-      return {};
-    }
-
-    const pickUpEvent = massIDDocument.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
-    );
-    const localWasteClassificationIdRaw = getEventAttributeValue(
-      pickUpEvent,
-      LOCAL_WASTE_CLASSIFICATION_ID,
-    );
-
-    if (!isNonEmptyString(localWasteClassificationIdRaw)) {
-      return {};
-    }
-
-    return resolveCanonicalLocalWasteClassificationId(
-      localWasteClassificationIdRaw,
-    );
-  }
-
-  private getOthersIfOrganicSubject(
-    ruleSubject: RuleSubject,
-  ):
-    | Pick<
-        RuleSubject,
-        'localWasteClassificationId' | 'normalizedLocalWasteClassificationId'
-      >
-    | undefined {
-    if (
-      isNil(ruleSubject.localWasteClassificationId) &&
-      isNil(ruleSubject.normalizedLocalWasteClassificationId)
-    ) {
-      return undefined;
-    }
-
-    return {
-      ...(!isNil(ruleSubject.localWasteClassificationId) && {
-        localWasteClassificationId: ruleSubject.localWasteClassificationId,
-      }),
-      ...(!isNil(ruleSubject.normalizedLocalWasteClassificationId) && {
-        normalizedLocalWasteClassificationId:
-          ruleSubject.normalizedLocalWasteClassificationId,
-      }),
     };
   }
 }

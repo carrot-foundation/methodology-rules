@@ -11,14 +11,17 @@ export interface OthersIfOrganicCarbonEntry {
   carbonFraction: number;
 }
 
-export interface RuleSubject {
+export type OthersIfOrganicRuleSubjectIds = {
+  localWasteClassificationId?: string;
+  normalizedLocalWasteClassificationId?: string;
+};
+
+export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
   exceedingEmissionCoefficient:
     | MethodologyDocumentEventAttributeValue
     | undefined;
   gasType: NonEmptyString;
-  localWasteClassificationId?: string;
   massIDDocumentValue: number;
-  normalizedLocalWasteClassificationId?: string;
   wasteGeneratorBaseline: MethodologyBaseline | undefined;
   wasteSubtype: MassIDOrganicSubtype;
 }
