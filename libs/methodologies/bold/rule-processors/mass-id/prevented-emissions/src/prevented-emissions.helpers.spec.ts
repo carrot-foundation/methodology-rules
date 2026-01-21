@@ -10,8 +10,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
-  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE,
-  OthersIfOrganicCarbonFractionByCanonicalIbamaCode,
+  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
+  OthersIfOrganicCarbonFractionsByCode,
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -22,7 +22,7 @@ import {
   getOthersIfOrganicAuditDetails,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
-  resolveCanonicalIbamaId,
+  resolveCanonicalLocalWasteClassificationId,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
@@ -32,9 +32,11 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
 
-  describe('resolveCanonicalIbamaId', () => {
+  describe('resolveCanonicalLocalWasteClassificationId', () => {
     it('should return empty ids when localWasteClassificationIdRaw is undefined', () => {
-      expect(resolveCanonicalIbamaId(undefined)).toStrictEqual({});
+      expect(
+        resolveCanonicalLocalWasteClassificationId(undefined),
+      ).toStrictEqual({});
     });
   });
 
@@ -67,7 +69,7 @@ describe('PreventedEmissionsHelpers', () => {
       );
     });
 
-    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized IBAMA code is missing', () => {
+    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized local waste classification code is missing', () => {
       expect(() =>
         getPreventedEmissionsFactor(
           MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
@@ -78,7 +80,7 @@ describe('PreventedEmissionsHelpers', () => {
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
     });
 
-    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized IBAMA code is unknown', () => {
+    it('should throw INVALID_CLASSIFICATION_ID for Others (if organic) when normalized local waste classification code is unknown', () => {
       expect(() =>
         getPreventedEmissionsFactor(
           MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
@@ -89,7 +91,7 @@ describe('PreventedEmissionsHelpers', () => {
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
     });
 
-    it('should throw SUBTYPE_CDM_CODE_MISMATCH for Others (if organic) when IBAMA code is not 8.7D', () => {
+    it('should throw SUBTYPE_CDM_CODE_MISMATCH for Others (if organic) when local waste classification code is not 8.7D', () => {
       expect(() =>
         getPreventedEmissionsFactor(
           MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
@@ -101,34 +103,37 @@ describe('PreventedEmissionsHelpers', () => {
     });
 
     it('should throw when carbon entry exists but is undefined (defensive branch)', () => {
-      const canonicalIbamaCode = '02 01 06';
-      const carbonMap: OthersIfOrganicCarbonFractionByCanonicalIbamaCode =
-        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE;
-      const original = carbonMap[canonicalIbamaCode];
+      const canonicalLocalWasteClassificationCode = '02 01 06';
+      const carbonMap: OthersIfOrganicCarbonFractionsByCode =
+        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE;
+      const original = carbonMap[canonicalLocalWasteClassificationCode];
 
       try {
         // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalIbamaCode] = undefined;
+        carbonMap[canonicalLocalWasteClassificationCode] = undefined;
 
         expect(() =>
           getPreventedEmissionsFactor(
             MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
             MethodologyBaseline.OPEN_AIR_DUMP,
             processorErrors,
-            { normalizedLocalWasteClassificationId: canonicalIbamaCode },
+            {
+              normalizedLocalWasteClassificationId:
+                canonicalLocalWasteClassificationCode,
+            },
           ),
         ).toThrow(
-          `The carbon fraction for the "Others (if organic)" IBAMA code "${canonicalIbamaCode}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE.`,
+          `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${canonicalLocalWasteClassificationCode}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
         );
       } finally {
         // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalIbamaCode] = original;
+        carbonMap[canonicalLocalWasteClassificationCode] = original;
       }
     });
   });
 
   describe('getOthersIfOrganicAuditDetails', () => {
-    it('should throw when IBAMA code is not configured', () => {
+    it('should throw when local waste classification code is not configured', () => {
       expect(() =>
         getOthersIfOrganicAuditDetails(
           '00 00 00',
@@ -139,26 +144,26 @@ describe('PreventedEmissionsHelpers', () => {
       );
     });
 
-    it('should throw when IBAMA code exists but entry is undefined (defensive branch)', () => {
-      const canonicalIbamaCode = '02 01 06';
-      const carbonMap = OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE;
-      const original = carbonMap[canonicalIbamaCode];
+    it('should throw when local waste classification code exists but entry is undefined (defensive branch)', () => {
+      const canonicalLocalWasteClassificationCode = '02 01 06';
+      const carbonMap = OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE;
+      const original = carbonMap[canonicalLocalWasteClassificationCode];
 
       try {
         // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalIbamaCode] = undefined;
+        carbonMap[canonicalLocalWasteClassificationCode] = undefined;
 
         expect(() =>
           getOthersIfOrganicAuditDetails(
-            canonicalIbamaCode,
+            canonicalLocalWasteClassificationCode,
             MethodologyBaseline.OPEN_AIR_DUMP,
           ),
         ).toThrow(
-          `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalIbamaCode}"`,
+          `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalLocalWasteClassificationCode}"`,
         );
       } finally {
         // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalIbamaCode] = original;
+        carbonMap[canonicalLocalWasteClassificationCode] = original;
       }
     });
 
@@ -169,7 +174,7 @@ describe('PreventedEmissionsHelpers', () => {
           MethodologyBaseline.OPEN_AIR_DUMP,
         ),
       ).toEqual({
-        canonicalIbamaCode: '02 01 06',
+        canonicalLocalWasteClassificationCode: '02 01 06',
         carbonFraction: 0.15,
         computedFactor: Number.parseFloat('0.698505'),
         formulaCoeffs: {

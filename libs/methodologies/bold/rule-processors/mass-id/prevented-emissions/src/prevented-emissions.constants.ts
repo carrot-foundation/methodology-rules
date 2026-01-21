@@ -17,7 +17,7 @@ export type StaticFactorSubtype = Exclude<
 /**
  * Read the file README.md for more information about the constants in this file.
  * OTHERS_IF_ORGANIC is excluded; its factor is computed via baseline-specific
- * linear formulas from carbon fraction per IBAMA code.
+ * linear formulas from carbon fraction per local waste classification code.
  */
 export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
   StaticFactorSubtype,
@@ -78,22 +78,22 @@ export const OTHERS_IF_ORGANIC_BASELINE_FORMULA: Record<
   },
 };
 
-export type OthersIfOrganicCarbonFractionByCanonicalIbamaCode = Record<
+export type OthersIfOrganicCarbonFractionsByCode = Record<
   NonEmptyString,
   OthersIfOrganicCarbonEntry
 >;
 
 /**
- * Carbon fractions per IBAMA waste classification code for subtype
+ * Carbon fractions per local waste classification code (Ibama, Brazil) for subtype
  * "Others (if organic)" (CDM 8.7D).
  *
- * Keys MUST be the canonical IBAMA code as it appears in
+ * Keys MUST be the canonical local waste classification code as it appears in
  * `WASTE_CLASSIFICATION_CODES.BR` (e.g. '02 01 06').
  */
-export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE: OthersIfOrganicCarbonFractionByCanonicalIbamaCode =
+export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCarbonFractionsByCode =
   {
     /**
-     * IBAMA: 02 01 06
+     * Local waste classification (Ibama, Brazil): 02 01 06
      * Carbon fraction: 15% -> 0.15
      */
     '02 01 06': {

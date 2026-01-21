@@ -19,7 +19,7 @@ import BigNumber from 'bignumber.js';
 import {
   CDM_CODE_OTHERS_IF_ORGANIC,
   OTHERS_IF_ORGANIC_BASELINE_FORMULA,
-  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE,
+  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
   PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -35,7 +35,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 export interface OthersIfOrganicAuditDetails {
-  canonicalIbamaCode: string;
+  canonicalLocalWasteClassificationCode: string;
   carbonFraction: number;
   computedFactor: number;
   formulaCoeffs: { intercept: number; slope: number };
@@ -46,14 +46,14 @@ export interface OthersIfOrganicContext {
   normalizedLocalWasteClassificationId?: string;
 }
 
-export interface ResolvedIbamaIds {
+export interface ResolvedLocalWasteClassificationIds {
   localWasteClassificationId?: string;
   normalizedLocalWasteClassificationId?: string;
 }
 
-export const resolveCanonicalIbamaId = (
+export const resolveCanonicalLocalWasteClassificationId = (
   localWasteClassificationIdRaw: NonEmptyString | undefined,
-): ResolvedIbamaIds => {
+): ResolvedLocalWasteClassificationIds => {
   const localWasteClassificationId = isNonEmptyString(
     localWasteClassificationIdRaw,
   )
@@ -138,23 +138,23 @@ export const getPreventedEmissionsFactor = (
 
   if (
     !Object.prototype.hasOwnProperty.call(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE,
+      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
       normalizedLocalWasteClassificationId,
     )
   ) {
     throw processorErrors.getKnownError(
-      `The carbon fraction for the "Others (if organic)" IBAMA code "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE.`,
+      `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
     );
   }
 
   const carbonEntry =
-    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE[
+    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
       normalizedLocalWasteClassificationId
     ];
 
   if (!carbonEntry) {
     throw processorErrors.getKnownError(
-      `The carbon fraction for the "Others (if organic)" IBAMA code "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE.`,
+      `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
     );
   }
 
@@ -165,26 +165,28 @@ export const getPreventedEmissionsFactor = (
 };
 
 export const getOthersIfOrganicAuditDetails = (
-  normalizedIbamaCode: string,
+  normalizedLocalWasteClassificationId: string,
   baseline: MethodologyBaseline,
 ): OthersIfOrganicAuditDetails => {
   if (
     !Object.prototype.hasOwnProperty.call(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE,
-      normalizedIbamaCode,
+      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
+      normalizedLocalWasteClassificationId,
     )
   ) {
     throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedIbamaCode}"`,
+      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
     );
   }
 
   const entry =
-    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE[normalizedIbamaCode];
+    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
+      normalizedLocalWasteClassificationId
+    ];
 
   if (!entry) {
     throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedIbamaCode}"`,
+      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
     );
   }
 
@@ -199,7 +201,7 @@ export const getOthersIfOrganicAuditDetails = (
   );
 
   return {
-    canonicalIbamaCode: normalizedIbamaCode,
+    canonicalLocalWasteClassificationCode: normalizedLocalWasteClassificationId,
     carbonFraction: entry.carbonFraction,
     computedFactor,
     formulaCoeffs,

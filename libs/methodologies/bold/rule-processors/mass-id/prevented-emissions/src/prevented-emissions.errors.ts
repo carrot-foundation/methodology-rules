@@ -4,7 +4,7 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     FAILED_BY_ERROR: 'Unable to validate the prevented-emissions process.',
     INVALID_CLASSIFICATION_ID:
-      'The "Local Waste Classification ID" does not match an IBAMA code accepted by the methodology.',
+      'The "Local Waste Classification ID" does not match the local waste classification code accepted by the methodology.',
     INVALID_MASS_ID_DOCUMENT_SUBTYPE:
       'The "MassID" document has an invalid subtype.',
     INVALID_WASTE_GENERATOR_BASELINES:

@@ -6,7 +6,7 @@ This directory contains constants related to waste classification used in the BO
 
 The waste classification codes in `local-waste-classification.constants.ts` are populated based on data from:
 
-- [IBAMA - Brazilian List of Solid Waste](https://www.ibama.gov.br/phocadownload/emissoeseresiduos/residuos/ibama-lista-brasileira-de-residuos-solidos.xls)
+- [Ibama - Brazilian List of Solid Waste](https://www.ibama.gov.br/phocadownload/emissoeseresiduos/residuos/ibama-lista-brasileira-de-residuos-solidos.xls)
 
 The CDM_CODE values represent mappings to waste types according to the Clean Development Mechanism (CDM) categorization found in:
 

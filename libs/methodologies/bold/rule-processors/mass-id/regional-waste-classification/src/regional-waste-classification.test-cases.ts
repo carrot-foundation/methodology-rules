@@ -66,7 +66,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the local waste classification ID and description match an IBAMA code with matching subtype.',
+      'the local waste classification ID and description match a local waste classification code with matching subtype.',
   },
   {
     events: {
@@ -93,7 +93,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the local waste classification ID and description match the IBAMA code without spaces with matching subtype.',
+      'the local waste classification ID and description match the local waste classification code without spaces with matching subtype.',
   },
   {
     events: {
@@ -193,7 +193,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the local waste classification description does not match the expected IBAMA code.',
+      'the local waste classification description does not match the expected local waste classification code.',
   },
   {
     events: {

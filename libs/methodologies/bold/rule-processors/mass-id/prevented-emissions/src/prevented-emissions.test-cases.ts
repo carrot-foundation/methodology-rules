@@ -55,7 +55,7 @@ const expectedPreventedEmissionsValue =
 
 const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
-const othersIfOrganicIbamaCode = '02 01 06';
+const othersIfOrganicLocalWasteClassificationCode = '02 01 06';
 const othersIfOrganicCarbonFraction = 0.15;
 
 const computeOthersIfOrganicFactor = (
@@ -136,12 +136,14 @@ const makeAccreditationDocuments = ({
     ],
   ]);
 
-const makeMassIdPickUpParametersWithIbamaCode = (
-  ibamaCode: string | undefined,
+const makeMassIdPickUpParametersWithLocalWasteClassificationCode = (
+  localWasteClassificationCode: string | undefined,
 ): StubBoldDocumentParameters => ({
   externalEventsMap: {
     [PICK_UP]: stubBoldMassIDPickUpEvent({
-      metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, ibamaCode]],
+      metadataAttributes: [
+        [LOCAL_WASTE_CLASSIFICATION_ID, localWasteClassificationCode],
+      ],
     }),
   },
 });
@@ -298,9 +300,10 @@ export const preventedEmissionsTestCases = [
         },
       }),
       externalCreatedAt: massIDDocument.externalCreatedAt,
-      massIDDocumentsParams: makeMassIdPickUpParametersWithIbamaCode(
-        othersIfOrganicIbamaCode,
-      ),
+      massIDDocumentsParams:
+        makeMassIdPickUpParametersWithLocalWasteClassificationCode(
+          othersIfOrganicLocalWasteClassificationCode,
+        ),
       massIDDocumentValue,
       resultComment: RESULT_COMMENTS.PASSED(
         expectedOthersPreventedEmissions,
@@ -311,7 +314,8 @@ export const preventedEmissionsTestCases = [
       resultContent: {
         gasType: 'Methane (CH4)',
         othersIfOrganicAudit: {
-          canonicalIbamaCode: othersIfOrganicIbamaCode,
+          canonicalLocalWasteClassificationCode:
+            othersIfOrganicLocalWasteClassificationCode,
           carbonFraction: othersIfOrganicCarbonFraction,
           computedFactor: othersFactor,
           formulaCoeffs,
@@ -320,15 +324,17 @@ export const preventedEmissionsTestCases = [
         ruleSubject: {
           exceedingEmissionCoefficient,
           gasType: 'Methane (CH4)',
-          localWasteClassificationId: othersIfOrganicIbamaCode,
+          localWasteClassificationId:
+            othersIfOrganicLocalWasteClassificationCode,
           massIDDocumentValue,
-          normalizedLocalWasteClassificationId: othersIfOrganicIbamaCode,
+          normalizedLocalWasteClassificationId:
+            othersIfOrganicLocalWasteClassificationCode,
           wasteGeneratorBaseline: othersBaseline,
           wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
         },
       },
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: `Others (if organic) calculates factor dynamically for baseline "${othersBaseline}" and IBAMA "${othersIfOrganicIbamaCode}"`,
+      scenario: `Others (if organic) calculates factor dynamically for baseline "${othersBaseline}" and local waste classification "${othersIfOrganicLocalWasteClassificationCode}"`,
       subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
     };
   }),
@@ -644,7 +650,7 @@ export const preventedEmissionsErrorTestCases = [
     resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'Others (if organic) has an unknown Local Waste Classification ID (not an accepted IBAMA code)',
+      'Others (if organic) has an unknown Local Waste Classification ID (not an accepted local waste classification code (Ibama, Brazil))',
   },
   {
     documents: [
@@ -674,9 +680,9 @@ export const preventedEmissionsErrorTestCases = [
     ],
     massIDAuditDocument,
     resultComment:
-      'The carbon fraction for the "Others (if organic)" IBAMA code "02 02 99" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_IBAMA_CODE.',
+      'The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "02 02 99" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.',
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'Others (if organic) has a valid 8.7D IBAMA code but carbon fraction is not configured',
+      'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
   },
 ];

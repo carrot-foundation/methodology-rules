@@ -47,7 +47,7 @@ import {
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
   type OthersIfOrganicAuditDetails,
-  resolveCanonicalIbamaId,
+  resolveCanonicalLocalWasteClassificationId,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 import { type RuleSubject } from './prevented-emissions.types';
@@ -316,7 +316,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       return {};
     }
 
-    return resolveCanonicalIbamaId(localWasteClassificationIdRaw);
+    return resolveCanonicalLocalWasteClassificationId(
+      localWasteClassificationIdRaw,
+    );
   }
 
   private getOthersIfOrganicSubject(

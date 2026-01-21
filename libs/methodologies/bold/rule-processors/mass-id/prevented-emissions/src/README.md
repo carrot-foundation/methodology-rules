@@ -7,7 +7,8 @@ the **BOLD Carbon (CH₄)** methodology, using:
 
 - Static prevented-emissions factors for most organic subtypes
 - A dynamic factor for subtype **Others (if organic)** (CDM **8.7D**) based on
-  the IBAMA waste classification code and a configured carbon fraction
+  the local waste classification code (Ibama, Brazil) and a configured carbon
+  fraction
 
 The baseline framing and emission-factor approach are aligned with **UNFCCC
 AMS-III.F v12.0** and **IPCC standards**, as referenced by the BOLD Carbon (CH₄)
@@ -33,14 +34,14 @@ factor per baseline.
 ### Dynamic factor for Others (if organic) (CDM 8.7D)
 
 For **Others (if organic)**, the factor is not fixed. It varies depending on
-the waste type (as identified by its IBAMA code) and the baseline selected by
-the waste generator.
+the waste type (as identified by its local waste classification code) and the
+baseline selected by the waste generator.
 
 The baseline coefficients below are derived from an internal Carrot calculator.
 
 At a high level, the rule:
 
-- Identifies the IBAMA waste code recorded for the pickup
+- Identifies the local waste classification code recorded for the pickup
 - Looks up the configured carbon fraction for that code
 - Applies the baseline-specific coefficients to derive the factor
 
