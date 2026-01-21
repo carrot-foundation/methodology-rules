@@ -87,7 +87,7 @@ export const calculateOthersIfOrganicFactor = (
   return new BigNumber(slope)
     .multipliedBy(new BigNumber(carbonFraction.toString()))
     .plus(intercept)
-    .decimalPlaces(6, BigNumber.ROUND_HALF_UP)
+    .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN)
     .toNumber();
 };
 
