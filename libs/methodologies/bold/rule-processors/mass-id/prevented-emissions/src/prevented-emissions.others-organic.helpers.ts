@@ -120,11 +120,12 @@ export const calculateOthersIfOrganicFactor = (
 ): NonNegativeFloat => {
   const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
 
-  return new BigNumber(slope)
+  const computed = new BigNumber(slope)
     .multipliedBy(new BigNumber(carbonFraction))
     .plus(intercept)
-    .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN)
-    .toNumber();
+    .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN);
+
+  return BigNumber.max(computed, 0).toNumber();
 };
 
 export const getCarbonFractionForOthersIfOrganic = (

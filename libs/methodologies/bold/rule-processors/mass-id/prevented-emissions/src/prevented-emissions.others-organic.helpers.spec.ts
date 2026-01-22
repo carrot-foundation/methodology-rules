@@ -206,6 +206,44 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
       expect(result.toString()).toMatch(/^\d+\.\d{6}$/);
     });
+
+    it('should clamp negative results to zero when carbonFraction is 0', () => {
+      const resultFlaring = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        '0',
+      );
+      const resultWithoutFlaring = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        '0',
+      );
+      const resultDump = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.OPEN_AIR_DUMP,
+        '0',
+      );
+
+      expect(resultFlaring).toBe(0);
+      expect(resultWithoutFlaring).toBe(0);
+      expect(resultDump).toBe(0);
+    });
+
+    it('should clamp negative results to zero when carbonFraction is 1%', () => {
+      const resultFlaring = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        '0.01',
+      );
+      const resultWithoutFlaring = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        '0.01',
+      );
+      const resultDump = calculateOthersIfOrganicFactor(
+        MethodologyBaseline.OPEN_AIR_DUMP,
+        '0.01',
+      );
+
+      expect(resultFlaring).toBe(0);
+      expect(resultWithoutFlaring).toBe(0);
+      expect(resultDump).toBe(0);
+    });
   });
 
   describe('getCarbonFractionForOthersIfOrganic', () => {
