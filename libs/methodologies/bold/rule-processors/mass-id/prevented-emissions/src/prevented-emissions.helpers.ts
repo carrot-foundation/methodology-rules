@@ -87,7 +87,9 @@ export const getPreventedEmissionsFactor = (
     )
   ) {
     throw processorErrors.getKnownError(
-      `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
+      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+        normalizedLocalWasteClassificationId,
+      ),
     );
   }
 
@@ -98,7 +100,9 @@ export const getPreventedEmissionsFactor = (
 
   if (!carbonEntry) {
     throw processorErrors.getKnownError(
-      `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${normalizedLocalWasteClassificationId}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
+      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+        normalizedLocalWasteClassificationId,
+      ),
     );
   }
 

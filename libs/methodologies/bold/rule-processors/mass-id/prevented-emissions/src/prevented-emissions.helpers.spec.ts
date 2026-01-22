@@ -19,12 +19,14 @@ import {
   calculatePreventedEmissions,
   formatNumber,
   getGasTypeFromEvent,
-  getOthersIfOrganicAuditDetails,
   getPreventedEmissionsFactor,
   getWasteGeneratorBaselineByWasteSubtype,
-  resolveCanonicalLocalWasteClassificationId,
   throwIfMissing,
 } from './prevented-emissions.helpers';
+import {
+  getOthersIfOrganicAuditDetails,
+  resolveCanonicalLocalWasteClassificationId,
+} from './prevented-emissions.others-organic.helpers';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
   DocumentEventAttributeName;
@@ -123,7 +125,9 @@ describe('PreventedEmissionsHelpers', () => {
             },
           ),
         ).toThrow(
-          `The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "${canonicalLocalWasteClassificationCode}" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.`,
+          processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+            canonicalLocalWasteClassificationCode,
+          ),
         );
       } finally {
         // @ts-expect-error - we want to test the defensive branch
@@ -134,12 +138,12 @@ describe('PreventedEmissionsHelpers', () => {
 
   describe('getOthersIfOrganicAuditDetails', () => {
     it('should throw when local waste classification code is not configured', () => {
-      expect(() =>
+      expect(() => {
         getOthersIfOrganicAuditDetails(
           '00 00 00',
           MethodologyBaseline.OPEN_AIR_DUMP,
-        ),
-      ).toThrow(
+        );
+      }).toThrow(
         'getOthersIfOrganicAuditDetails: no carbon entry for "00 00 00"',
       );
     });
@@ -153,12 +157,12 @@ describe('PreventedEmissionsHelpers', () => {
         // @ts-expect-error - we want to test the defensive branch
         carbonMap[canonicalLocalWasteClassificationCode] = undefined;
 
-        expect(() =>
+        expect(() => {
           getOthersIfOrganicAuditDetails(
             canonicalLocalWasteClassificationCode,
             MethodologyBaseline.OPEN_AIR_DUMP,
-          ),
-        ).toThrow(
+          );
+        }).toThrow(
           `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalLocalWasteClassificationCode}"`,
         );
       } finally {

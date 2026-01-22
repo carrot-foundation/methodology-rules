@@ -9,6 +9,10 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
       'The "MassID" document has an invalid subtype.',
     INVALID_WASTE_GENERATOR_BASELINES:
       'The "Waste Generator accreditation" document has no valid baselines.',
+    MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE: (
+      normalizedLocalWasteClassificationId: string,
+    ) =>
+      `The carbon fraction for the "Others (if organic)" local waste classification code "${normalizedLocalWasteClassificationId}" is not configured.`,
     MISSING_GREENHOUSE_GAS_TYPE:
       'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
     MISSING_MASS_ID_DOCUMENT: 'The "MassID" document was not found.',

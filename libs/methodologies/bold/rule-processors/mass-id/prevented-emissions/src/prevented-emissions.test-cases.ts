@@ -680,7 +680,9 @@ export const preventedEmissionsErrorTestCases = [
     ],
     massIDAuditDocument,
     resultComment:
-      'The carbon fraction for the "Others (if organic)" local waste classification code (Ibama, Brazil) "02 02 99" is not configured. Add it to OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE.',
+      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+        '02 02 99',
+      ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
