@@ -7,8 +7,11 @@ the **BOLD Carbon (CH₄)** methodology, using:
 
 - Static prevented-emissions factors for most organic subtypes
 - A dynamic factor for subtype **Others (if organic)** (CDM **8.7D**) based on
-  the local waste classification code (Ibama, Brazil) and a configured carbon
-  fraction
+  the local waste classification code and a configured carbon fraction
+
+  > **Note**: The local waste classification codes referenced here (Ibama) are
+  > specific to Brazil operations. For other regions, different classification
+  > systems may apply.
 
 The baseline framing and emission-factor approach are aligned with **UNFCCC
 AMS-III.F v12.0** and **IPCC standards**, as referenced by the BOLD Carbon (CH₄)
@@ -37,7 +40,8 @@ For **Others (if organic)**, the factor is not fixed. It varies depending on
 the waste type (as identified by its local waste classification code) and the
 baseline selected by the waste generator.
 
-The baseline coefficients below are derived from an internal Carrot calculator.
+The baseline coefficients are derived from methodology-aligned calculations
+that follow the BOLD Carbon (CH₄) methodology framework.
 
 At a high level, the rule:
 
@@ -45,11 +49,9 @@ At a high level, the rule:
 - Looks up the configured carbon fraction for that code
 - Applies the baseline-specific coefficients to derive the factor
 
-Baseline-specific coefficients:
-
-- Landfills without methane flaring: multiplier **6.901715**, offset **-0.1297012**
-- Open-air dumps: multiplier **5.521373**, offset **-0.1297013**
-- Landfills with flaring/capture: multiplier **3.795947**, offset **-0.129701**
+The baseline-specific coefficients (slope and intercept values) are defined in
+`prevented-emissions.constants.ts` as `OTHERS_IF_ORGANIC_BASELINE_FORMULA`. Each
+baseline uses a linear formula: `factor = slope × carbonFraction + intercept`.
 
 ## References
 
