@@ -12,7 +12,11 @@ import {
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type NonEmptyString } from '@carrot-fndn/shared/types';
+import {
+  type NonEmptyString,
+  NonNegativeFloat,
+  Percentage,
+} from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import {
@@ -25,17 +29,17 @@ const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
 const { PICK_UP } = DocumentEventName;
 
 export interface OthersIfOrganicAuditDetails {
-  canonicalLocalWasteClassificationCode: string;
-  carbonFraction: number;
-  computedFactor: number;
+  canonicalLocalWasteClassificationCode: NonEmptyString;
+  carbonFraction: Percentage;
+  computedFactor: NonNegativeFloat;
   formulaCoeffs: { intercept: number; slope: number };
 }
 
 export type OthersIfOrganicContext = OthersIfOrganicRuleSubjectIds;
 
 export interface ResolvedLocalWasteClassificationIds {
-  localWasteClassificationId?: string;
-  normalizedLocalWasteClassificationId?: string;
+  localWasteClassificationId?: NonEmptyString | undefined;
+  normalizedLocalWasteClassificationId?: NonEmptyString | undefined;
 }
 
 export const resolveCanonicalLocalWasteClassificationId = (
@@ -110,8 +114,8 @@ export const buildOthersIfOrganicContext = (
 
 export const calculateOthersIfOrganicFactor = (
   baseline: MethodologyBaseline,
-  carbonFraction: number,
-): number => {
+  carbonFraction: Percentage,
+): NonNegativeFloat => {
   const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
 
   return new BigNumber(slope)
@@ -122,7 +126,7 @@ export const calculateOthersIfOrganicFactor = (
 };
 
 export const getOthersIfOrganicAuditDetails = (
-  normalizedLocalWasteClassificationId: string,
+  normalizedLocalWasteClassificationId: NonEmptyString,
   baseline: MethodologyBaseline,
 ): OthersIfOrganicAuditDetails => {
   if (

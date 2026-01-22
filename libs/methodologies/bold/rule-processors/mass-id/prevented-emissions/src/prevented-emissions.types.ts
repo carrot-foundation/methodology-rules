@@ -5,15 +5,17 @@ import {
 import {
   MethodologyDocumentEventAttributeValue,
   NonEmptyString,
+  NonNegativeFloat,
+  Percentage,
 } from '@carrot-fndn/shared/types';
 
 export interface OthersIfOrganicCarbonEntry {
-  carbonFraction: number;
+  carbonFraction: Percentage;
 }
 
 export type OthersIfOrganicRuleSubjectIds = {
-  localWasteClassificationId?: string;
-  normalizedLocalWasteClassificationId?: string;
+  localWasteClassificationId?: NonEmptyString | undefined;
+  normalizedLocalWasteClassificationId?: NonEmptyString | undefined;
 };
 
 export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
@@ -21,7 +23,7 @@ export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
     | MethodologyDocumentEventAttributeValue
     | undefined;
   gasType: NonEmptyString;
-  massIDDocumentValue: number;
+  massIDDocumentValue: NonNegativeFloat;
   wasteGeneratorBaseline: MethodologyBaseline | undefined;
   wasteSubtype: MassIDOrganicSubtype;
 }
