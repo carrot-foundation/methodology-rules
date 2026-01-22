@@ -149,8 +149,8 @@ export const getOthersIfOrganicAuditDetails = (
 
   const formulaCoeffsRaw = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
   const formulaCoeffs = {
-    intercept: Number.parseFloat(formulaCoeffsRaw.intercept),
-    slope: Number.parseFloat(formulaCoeffsRaw.slope),
+    intercept: new BigNumber(formulaCoeffsRaw.intercept).toNumber(),
+    slope: new BigNumber(formulaCoeffsRaw.slope).toNumber(),
   };
   const computedFactor = calculateOthersIfOrganicFactor(
     baseline,
