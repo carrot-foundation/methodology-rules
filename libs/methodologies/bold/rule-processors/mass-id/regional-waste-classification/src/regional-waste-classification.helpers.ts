@@ -1,4 +1,4 @@
-import { SUBTYPE_TO_CDM_CODE_MAP } from './regional-waste-classification.constants';
+import { SUBTYPE_TO_CDM_CODE_MAP } from '@carrot-fndn/shared/methodologies/bold/utils';
 
 const isAlphaNumericUnicode = (ch: string): boolean => /\p{L}|\p{N}/u.test(ch);
 

@@ -4,7 +4,6 @@ import {
   normalizeString,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/regional-waste-classification';
 import {
   type Document,
   DocumentEventAttributeName,
@@ -12,6 +11,7 @@ import {
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type NonEmptyString,
   NonNegativeFloat,
@@ -20,9 +20,11 @@ import {
 import BigNumber from 'bignumber.js';
 
 import {
+  CDM_CODE_OTHERS_IF_ORGANIC,
   OTHERS_IF_ORGANIC_BASELINE_FORMULA,
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
 } from './prevented-emissions.constants';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { type OthersIfOrganicRuleSubjectIds } from './prevented-emissions.types';
 
 const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
@@ -123,6 +125,72 @@ export const calculateOthersIfOrganicFactor = (
     .plus(intercept)
     .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN)
     .toNumber();
+};
+
+export const getCarbonFractionForOthersIfOrganic = (
+  othersIfOrganicContext: OthersIfOrganicContext | undefined,
+  processorErrors: PreventedEmissionsProcessorErrors,
+): PercentageString => {
+  const { normalizedLocalWasteClassificationId } = othersIfOrganicContext ?? {};
+
+  if (!isNonEmptyString(normalizedLocalWasteClassificationId)) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+    );
+  }
+
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      WASTE_CLASSIFICATION_CODES.BR,
+      normalizedLocalWasteClassificationId,
+    )
+  ) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+    );
+  }
+
+  const classificationEntry =
+    WASTE_CLASSIFICATION_CODES.BR[
+      normalizedLocalWasteClassificationId as keyof typeof WASTE_CLASSIFICATION_CODES.BR
+    ];
+
+  if (
+    normalizeString(classificationEntry.CDM_CODE) !==
+    normalizeString(CDM_CODE_OTHERS_IF_ORGANIC)
+  ) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.SUBTYPE_CDM_CODE_MISMATCH,
+    );
+  }
+
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
+      normalizedLocalWasteClassificationId,
+    )
+  ) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+        normalizedLocalWasteClassificationId,
+      ),
+    );
+  }
+
+  const carbonEntry =
+    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
+      normalizedLocalWasteClassificationId
+    ];
+
+  if (!carbonEntry) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+        normalizedLocalWasteClassificationId,
+      ),
+    );
+  }
+
+  return carbonEntry.carbonFraction;
 };
 
 export const getOthersIfOrganicAuditDetails = (

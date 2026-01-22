@@ -17,6 +17,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type AnyObject,
@@ -24,7 +25,6 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
-import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import {
   getCdmCodeFromSubtype,

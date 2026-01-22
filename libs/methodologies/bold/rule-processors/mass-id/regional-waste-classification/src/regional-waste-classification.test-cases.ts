@@ -8,11 +8,11 @@ import {
   DocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RESULT_COMMENTS } from './regional-waste-classification.processor';
 
 const {
