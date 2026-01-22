@@ -97,6 +97,6 @@ export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCar
      * Carbon fraction: 15% -> 0.15
      */
     '02 01 06': {
-      carbonFraction: 0.15,
+      carbonFraction: '0.15',
     },
   };

@@ -19,5 +19,3 @@ export type NonZeroPositive = number &
 export type NonZeroPositiveInt = number &
   tags.ExclusiveMinimum<0> &
   tags.Type<'int64'>;
-
-export type Percentage = NonNegativeFloat & tags.Maximum<1>;

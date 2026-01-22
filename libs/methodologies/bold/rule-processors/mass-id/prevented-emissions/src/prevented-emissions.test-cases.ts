@@ -56,7 +56,7 @@ const expectedPreventedEmissionsValue =
 const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
 const othersIfOrganicLocalWasteClassificationCode = '02 01 06';
-const othersIfOrganicCarbonFraction = 0.15;
+const othersIfOrganicCarbonFraction = '0.15';
 
 const computeOthersIfOrganicFactor = (
   baseline_: MethodologyBaseline,

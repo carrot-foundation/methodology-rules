@@ -179,7 +179,7 @@ describe('PreventedEmissionsHelpers', () => {
         ),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
-        carbonFraction: 0.15,
+        carbonFraction: '0.15',
         computedFactor: Number.parseFloat('0.698505'),
         formulaCoeffs: {
           intercept: Number.parseFloat('-0.1297013'),

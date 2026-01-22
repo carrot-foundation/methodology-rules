@@ -6,11 +6,11 @@ import {
   MethodologyDocumentEventAttributeValue,
   NonEmptyString,
   NonNegativeFloat,
-  Percentage,
+  PercentageString,
 } from '@carrot-fndn/shared/types';
 
 export interface OthersIfOrganicCarbonEntry {
-  carbonFraction: Percentage;
+  carbonFraction: PercentageString;
 }
 
 export type OthersIfOrganicRuleSubjectIds = {

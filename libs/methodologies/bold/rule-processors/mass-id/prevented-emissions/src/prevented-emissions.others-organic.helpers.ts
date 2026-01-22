@@ -15,7 +15,7 @@ import {
 import {
   type NonEmptyString,
   NonNegativeFloat,
-  Percentage,
+  PercentageString,
 } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
@@ -30,7 +30,7 @@ const { PICK_UP } = DocumentEventName;
 
 export interface OthersIfOrganicAuditDetails {
   canonicalLocalWasteClassificationCode: NonEmptyString;
-  carbonFraction: Percentage;
+  carbonFraction: PercentageString;
   computedFactor: NonNegativeFloat;
   formulaCoeffs: { intercept: number; slope: number };
 }
@@ -114,12 +114,12 @@ export const buildOthersIfOrganicContext = (
 
 export const calculateOthersIfOrganicFactor = (
   baseline: MethodologyBaseline,
-  carbonFraction: Percentage,
+  carbonFraction: PercentageString,
 ): NonNegativeFloat => {
   const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
 
   return new BigNumber(slope)
-    .multipliedBy(new BigNumber(carbonFraction.toString()))
+    .multipliedBy(new BigNumber(carbonFraction))
     .plus(intercept)
     .decimalPlaces(6, BigNumber.ROUND_HALF_DOWN)
     .toNumber();
