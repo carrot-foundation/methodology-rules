@@ -1,6 +1,10 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { getOrDefault, isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  getOrDefault,
+  isNonEmptyString,
+  normalizeString,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   and,
@@ -13,6 +17,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type AnyObject,
@@ -20,11 +25,9 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
-import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import {
   getCdmCodeFromSubtype,
-  normalizeClassificationId,
   normalizeDescriptionForComparison,
 } from './regional-waste-classification.helpers';
 
@@ -38,13 +41,13 @@ const { RECYCLER } = MethodologyDocumentEventLabel;
 export const RESULT_COMMENTS = {
   CLASSIFICATION_DESCRIPTION_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" was not provided.`,
   CLASSIFICATION_ID_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" was not provided.`,
-  INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" does not match the expected IBAMA code description.`,
-  INVALID_CLASSIFICATION_ID: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" does not match an IBAMA code accepted by the methodology.`,
+  INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" does not match the expected local waste classification code description.`,
+  INVALID_CLASSIFICATION_ID: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" does not match the local waste classification code accepted by the methodology.`,
   INVALID_SUBTYPE_CDM_CODE_MISMATCH: `The subtype does not match the CDM code for the provided "${LOCAL_WASTE_CLASSIFICATION_ID}".`,
   INVALID_SUBTYPE_MAPPING: `The provided subtype does not map to a valid CDM code.`,
   UNSUPPORTED_COUNTRY: (recyclerCountryCode: string) =>
     `Local waste classification is only validated for recyclers in Brazil, but the recycler country is ${recyclerCountryCode}.`,
-  VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" match an IBAMA code.`,
+  VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" match an Ibama code.`,
 } as const;
 
 type Subject = {
@@ -84,8 +87,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     const validClassificationIds = Object.keys(WASTE_CLASSIFICATION_CODES.BR);
 
     const normalizedId = validClassificationIds.find(
-      (validId) =>
-        normalizeClassificationId(validId) === normalizeClassificationId(id),
+      (validId) => normalizeString(validId) === normalizeString(id),
     );
 
     if (!normalizedId) {

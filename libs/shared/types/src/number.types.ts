@@ -10,6 +10,8 @@ export type Longitude = number &
   tags.Minimum<-180> &
   tags.Type<'float'>;
 
+export type NonNegativeFloat = number & tags.Minimum<0>;
+
 export type NonZeroPositive = number &
   tags.ExclusiveMinimum<0> &
   tags.Type<'float'>;

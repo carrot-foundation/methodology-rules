@@ -31,6 +31,7 @@ describe('PreventedEmissionsHelpers', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        processorErrors,
       );
 
       expect(result).toBe(
@@ -44,6 +45,7 @@ describe('PreventedEmissionsHelpers', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.DOMESTIC_SLUDGE,
         MethodologyBaseline.OPEN_AIR_DUMP,
+        processorErrors,
       );
 
       expect(result).toBe(
@@ -51,6 +53,17 @@ describe('PreventedEmissionsHelpers', () => {
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][MethodologyBaseline.OPEN_AIR_DUMP],
       );
+    });
+
+    it('should calculate factor for Others (if organic) when valid context is provided', () => {
+      const result = getPreventedEmissionsFactor(
+        MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        MethodologyBaseline.OPEN_AIR_DUMP,
+        processorErrors,
+        { normalizedLocalWasteClassificationId: '02 01 06' },
+      );
+
+      expect(result).toBe(0.698_505);
     });
   });
 
@@ -353,7 +366,7 @@ describe('PreventedEmissionsHelpers', () => {
       {
         description: 'should floor round down when 4th decimal is 9',
         expected: '1006.312',
-        input: 1006.312_230_000_001,
+        input: Number.parseFloat('1006.312230000001'),
       },
       {
         description: 'should handle exact 3 decimal places',
@@ -384,7 +397,7 @@ describe('PreventedEmissionsHelpers', () => {
       {
         description: 'should handle large numbers',
         expected: '12345.678',
-        input: 12_345.6789,
+        input: Number.parseFloat('12345.6789'),
       },
       {
         description: 'should handle zero',

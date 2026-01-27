@@ -78,3 +78,6 @@ export const getNonEmptyStringOrDefault = (
 export const getOrUndefined = <T>(
   value: null | T | undefined,
 ): NonNullable<T> | undefined => value ?? undefined;
+
+export const normalizeString = (string: string): string =>
+  string.replaceAll(/\s+/g, '');

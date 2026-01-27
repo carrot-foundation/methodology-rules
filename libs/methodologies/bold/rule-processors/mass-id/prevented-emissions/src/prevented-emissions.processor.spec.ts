@@ -9,6 +9,7 @@ import { random } from 'typia';
 import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
   preventedEmissionsErrorTestCases,
+  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -20,11 +21,12 @@ describe('PreventedEmissionsProcessor', () => {
   });
 
   describe('PreventedEmissionsProcessor', () => {
-    it.each(preventedEmissionsTestCases)(
+    it.each<PreventedEmissionsTestCase>(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         accreditationDocuments,
         externalCreatedAt,
+        massIDDocumentsParams,
         massIDDocumentValue,
         resultComment,
         resultContent,
@@ -34,7 +36,9 @@ describe('PreventedEmissionsProcessor', () => {
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
           massIDDocumentsParams: {
+            ...massIDDocumentsParams,
             partialDocument: {
+              ...massIDDocumentsParams?.partialDocument,
               currentValue: massIDDocumentValue as number,
               externalCreatedAt,
               subtype,

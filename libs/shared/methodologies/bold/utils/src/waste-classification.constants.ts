@@ -928,7 +928,8 @@ export const WASTE_CLASSIFICATION_CODES = {
 
 /**
  * Maps MassIDOrganicSubtype values to their corresponding CDM_CODE values.
- * Based on CDM_CODE mapping from README.md
+ * Based on CDM_CODE mapping documented in the Regional Waste Classification rule processor README:
+ * @see {@link ../../../../../methodologies/bold/rule-processors/mass-id/regional-waste-classification/src/README.md | Regional Waste Classification README}
  */
 export const SUBTYPE_TO_CDM_CODE_MAP: Map<string, string | undefined> = new Map(
   [
@@ -937,6 +938,7 @@ export const SUBTYPE_TO_CDM_CODE_MAP: Map<string, string | undefined> = new Map(
     [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES, '8.3'],
     [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE, '8.5'],
     [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE, '8.7B'],
+    [MassIDOrganicSubtype.OTHERS_IF_ORGANIC, '8.7D'],
     [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS, '8.1'],
   ],
 );

@@ -12,6 +12,7 @@ import { faker } from '@faker-js/faker';
 import { preventedEmissionsLambda } from './prevented-emissions.lambda';
 import {
   preventedEmissionsErrorTestCases,
+  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -22,11 +23,12 @@ describe('PreventedEmissionsProcessor E2E', () => {
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each(preventedEmissionsTestCases)(
+  it.each<PreventedEmissionsTestCase>(preventedEmissionsTestCases)(
     'should return $resultStatus when $scenario',
     async ({
       accreditationDocuments,
       externalCreatedAt,
+      massIDDocumentsParams,
       massIDDocumentValue,
       resultComment,
       resultStatus,
@@ -38,7 +40,9 @@ describe('PreventedEmissionsProcessor E2E', () => {
         participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
         .createMassIDDocuments({
+          ...massIDDocumentsParams,
           partialDocument: {
+            ...massIDDocumentsParams?.partialDocument,
             currentValue: massIDDocumentValue as number,
             externalCreatedAt,
             subtype,

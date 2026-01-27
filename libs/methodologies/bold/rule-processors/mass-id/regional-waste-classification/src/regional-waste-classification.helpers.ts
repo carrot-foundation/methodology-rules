@@ -1,12 +1,9 @@
-import { SUBTYPE_TO_CDM_CODE_MAP } from './regional-waste-classification.constants';
+import { SUBTYPE_TO_CDM_CODE_MAP } from '@carrot-fndn/shared/methodologies/bold/utils';
 
 const isAlphaNumericUnicode = (ch: string): boolean => /\p{L}|\p{N}/u.test(ch);
 
 export const getCdmCodeFromSubtype = (subtype: string): string | undefined =>
   SUBTYPE_TO_CDM_CODE_MAP.get(subtype);
-
-export const normalizeClassificationId = (id: string): string =>
-  id.replaceAll(/\s+/g, '');
 
 export const normalizeDescriptionForComparison = (value: string): string => {
   const normalized = value.normalize('NFKC').trim();

@@ -88,6 +88,8 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
     RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
   [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE]:
     RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT,
+  [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]:
+    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
   [MassIDOrganicSubtype.TOBACCO]:
     RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES,
   [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]:

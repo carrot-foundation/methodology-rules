@@ -5,6 +5,7 @@ import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loade
 import {
   getOrUndefined,
   isNil,
+  isNonEmptyString,
   isNonZeroPositive,
 } from '@carrot-fndn/shared/helpers';
 import {
@@ -44,6 +45,12 @@ import {
   getWasteGeneratorBaselineByWasteSubtype,
   throwIfMissing,
 } from './prevented-emissions.helpers';
+import {
+  buildOthersIfOrganicContext,
+  getOthersIfOrganicAuditDetails,
+  getOthersIfOrganicContextFromMassIdDocument,
+  OthersIfOrganicAuditDetails,
+} from './prevented-emissions.others-organic.helpers';
 import { type RuleSubject } from './prevented-emissions.types';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
@@ -121,14 +128,33 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       };
     }
 
+    const othersIfOrganicContext = buildOthersIfOrganicContext(ruleSubject);
+
     const preventedEmissionsByWasteSubtypeAndBaselinePerTon =
-      getPreventedEmissionsFactor(wasteSubtype, wasteGeneratorBaseline);
+      getPreventedEmissionsFactor(
+        wasteSubtype,
+        wasteGeneratorBaseline,
+        this.processorErrors,
+        othersIfOrganicContext,
+      );
 
     const preventedEmissions = calculatePreventedEmissions(
       exceedingEmissionCoefficient,
       preventedEmissionsByWasteSubtypeAndBaselinePerTon,
       massIDDocumentValue,
     );
+
+    let othersIfOrganicAudit: OthersIfOrganicAuditDetails | undefined;
+
+    if (
+      wasteSubtype === MassIDOrganicSubtype.OTHERS_IF_ORGANIC &&
+      isNonEmptyString(ruleSubject.normalizedLocalWasteClassificationId)
+    ) {
+      othersIfOrganicAudit = getOthersIfOrganicAuditDetails(
+        ruleSubject.normalizedLocalWasteClassificationId,
+        wasteGeneratorBaseline,
+      );
+    }
 
     return {
       resultComment: RESULT_COMMENTS.PASSED(
@@ -139,6 +165,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ),
       resultContent: {
         gasType: ruleSubject.gasType,
+        ...(othersIfOrganicAudit && { othersIfOrganicAudit }),
         preventedCo2e: preventedEmissions,
       },
       resultStatus: RuleOutputStatus.PASSED,
@@ -188,6 +215,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       this.processorErrors,
     );
 
+    const { localWasteClassificationId, normalizedLocalWasteClassificationId } =
+      getOthersIfOrganicContextFromMassIdDocument(massIDDocument);
+
     return {
       exceedingEmissionCoefficient: getEventAttributeValue(
         lastEmissionAndCompostingMetricsEvent,
@@ -195,6 +225,12 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ),
       gasType,
       massIDDocumentValue: massIDDocument.currentValue,
+      ...(!isNil(localWasteClassificationId) && {
+        localWasteClassificationId,
+      }),
+      ...(!isNil(normalizedLocalWasteClassificationId) && {
+        normalizedLocalWasteClassificationId,
+      }),
       wasteGeneratorBaseline,
       wasteSubtype: massIDDocument.subtype,
     };
@@ -212,14 +248,14 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === DocumentSubtype.RECYCLER.toString()
       ) {
         recyclerAccreditationDocument = document;
       }
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
+        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR.toString()
       ) {
         wasteGeneratorVerificationDocument = document;
       }

@@ -8,11 +8,11 @@ import {
   DocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { WASTE_CLASSIFICATION_CODES } from './regional-waste-classification.constants';
 import { RESULT_COMMENTS } from './regional-waste-classification.processor';
 
 const {
@@ -66,7 +66,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the local waste classification ID and description match an IBAMA code with matching subtype.',
+      'the local waste classification ID and description match a local waste classification code with matching subtype.',
   },
   {
     events: {
@@ -93,7 +93,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the local waste classification ID and description match the IBAMA code without spaces with matching subtype.',
+      'the local waste classification ID and description match the local waste classification code without spaces with matching subtype.',
   },
   {
     events: {
@@ -193,7 +193,7 @@ export const regionalWasteClassificationTestCases = [
     },
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the local waste classification description does not match the expected IBAMA code.',
+      'the local waste classification description does not match the expected local waste classification code.',
   },
   {
     events: {

@@ -2,12 +2,25 @@ import {
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { NonEmptyString } from '@carrot-fndn/shared/types';
+
+import { type OthersIfOrganicCarbonEntry } from './prevented-emissions.types';
+
+export const CDM_CODE_OTHERS_IF_ORGANIC = '8.7D';
+
+/** Subtypes that use static factors. OTHERS_IF_ORGANIC is computed by formula. */
+export type StaticFactorSubtype = Exclude<
+  MassIDOrganicSubtype,
+  MassIDOrganicSubtype.OTHERS_IF_ORGANIC
+>;
 
 /**
  * Read the file README.md for more information about the constants in this file.
+ * OTHERS_IF_ORGANIC is excluded; its factor is computed via baseline-specific
+ * linear formulas from carbon fraction per local waste classification code.
  */
 export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
-  MassIDOrganicSubtype,
+  StaticFactorSubtype,
   Record<MethodologyBaseline, number>
 > = {
   [MassIDOrganicSubtype.DOMESTIC_SLUDGE]: {
@@ -46,3 +59,44 @@ export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
     [MethodologyBaseline.OPEN_AIR_DUMP]: 1.106_767,
   },
 };
+
+export const OTHERS_IF_ORGANIC_BASELINE_FORMULA: Record<
+  MethodologyBaseline,
+  { intercept: string; slope: string }
+> = {
+  [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: {
+    intercept: '-0.129701',
+    slope: '3.795947',
+  },
+  [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: {
+    intercept: '-0.1297003',
+    slope: '6.901715',
+  },
+  [MethodologyBaseline.OPEN_AIR_DUMP]: {
+    intercept: '-0.1297013',
+    slope: '5.521373',
+  },
+};
+
+export type OthersIfOrganicCarbonFractionsByCode = Record<
+  NonEmptyString,
+  OthersIfOrganicCarbonEntry
+>;
+
+/**
+ * Carbon fractions per local waste classification code (Ibama, Brazil) for subtype
+ * "Others (if organic)" (CDM 8.7D).
+ *
+ * Keys MUST be the canonical local waste classification code as it appears in
+ * `WASTE_CLASSIFICATION_CODES.BR` (e.g. '02 01 06').
+ */
+export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCarbonFractionsByCode =
+  {
+    /**
+     * Local waste classification (Ibama, Brazil): 02 01 06
+     * Carbon fraction: 15% -> 0.15
+     */
+    '02 01 06': {
+      carbonFraction: '0.15',
+    },
+  };

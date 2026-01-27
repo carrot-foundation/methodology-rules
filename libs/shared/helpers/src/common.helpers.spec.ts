@@ -8,6 +8,7 @@ import {
   isNonEmptyObject,
   isObject,
   isPlainObject,
+  normalizeString,
   pick,
 } from './common.helpers';
 
@@ -116,6 +117,17 @@ describe('common helpers', () => {
       expect(getNonEmptyStringOrDefault('\thello\nworld\r', defaultValue)).toBe(
         'hello\nworld',
       );
+    });
+  });
+
+  describe('normalizeString', () => {
+    it('should remove all whitespace characters', () => {
+      expect(normalizeString('02 01 06')).toBe('020106');
+      expect(normalizeString(' 02\t01\n06\r')).toBe('020106');
+    });
+
+    it('should keep non-whitespace characters unchanged', () => {
+      expect(normalizeString('A-B_C')).toBe('A-B_C');
     });
   });
 
