@@ -44,7 +44,7 @@ describe('DocumentManifestDataProcessor', () => {
 
     if ('crossValidationFailMessages' in testCase) {
       crossValidateWithTextractMock.mockResolvedValueOnce({
-        failMessages: testCase.crossValidationFailMessages as string[],
+        failMessages: testCase.crossValidationFailMessages,
         reviewReasons: [],
         reviewRequired: false,
       });
