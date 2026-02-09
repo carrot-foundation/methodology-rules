@@ -333,6 +333,9 @@ export const documentManifestDataTestCases = [
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
   },
+];
+
+export const crossValidationTestCases = [
   {
     crossValidationFailMessages: ['Document number mismatch'],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,

@@ -6,6 +6,7 @@ import { random } from 'typia';
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import { DocumentManifestDataProcessor } from './document-manifest-data.processor';
 import {
+  crossValidationTestCases,
   documentManifestDataTestCases,
   exceptionTestCases,
 } from './document-manifest-data.test-cases';
@@ -33,43 +34,44 @@ describe('DocumentManifestDataProcessor', () => {
     jest.useRealTimers();
   });
 
-  it.each([...exceptionTestCases, ...documentManifestDataTestCases])(
-    'should return $resultStatus when $scenario',
-    async (testCase) => {
-      const { documentManifestType, events, resultComment, resultStatus } =
-        testCase;
+  it.each([
+    ...exceptionTestCases,
+    ...documentManifestDataTestCases,
+    ...crossValidationTestCases,
+  ])('should return $resultStatus when $scenario', async (testCase) => {
+    const { documentManifestType, events, resultComment, resultStatus } =
+      testCase;
 
-      if ('crossValidationFailMessages' in testCase) {
-        crossValidateWithTextractMock.mockResolvedValueOnce({
-          failMessages: testCase.crossValidationFailMessages,
-          reviewReasons: [],
-          reviewRequired: false,
-        });
-      }
-
-      const ruleDataProcessor = new DocumentManifestDataProcessor({
-        documentManifestType,
+    if ('crossValidationFailMessages' in testCase) {
+      crossValidateWithTextractMock.mockResolvedValueOnce({
+        failMessages: testCase.crossValidationFailMessages as string[],
+        reviewReasons: [],
+        reviewRequired: false,
       });
+    }
 
-      const ruleInput = random<Required<RuleInput>>();
+    const ruleDataProcessor = new DocumentManifestDataProcessor({
+      documentManifestType,
+    });
 
-      const { massIDDocument } = new BoldStubsBuilder()
-        .createMassIDDocuments({
-          externalEventsMap: events,
-        })
-        .build();
+    const ruleInput = random<Required<RuleInput>>();
 
-      documentLoaderService.mockResolvedValueOnce(massIDDocument);
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments({
+        externalEventsMap: events,
+      })
+      .build();
 
-      const ruleOutput = await ruleDataProcessor.process(ruleInput);
+    documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
-      expect(ruleOutput.requestId).toBe(ruleInput.requestId);
-      expect(ruleOutput.responseToken).toBe(ruleInput.responseToken);
-      expect(ruleOutput.responseUrl).toBe(ruleInput.responseUrl);
-      expect(ruleOutput.resultStatus).toBe(resultStatus);
-      expect(ruleOutput.resultComment).toContain(
-        resultComment?.split('.')[0] ?? '',
-      );
-    },
-  );
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+    expect(ruleOutput.requestId).toBe(ruleInput.requestId);
+    expect(ruleOutput.responseToken).toBe(ruleInput.responseToken);
+    expect(ruleOutput.responseUrl).toBe(ruleInput.responseUrl);
+    expect(ruleOutput.resultStatus).toBe(resultStatus);
+    expect(ruleOutput.resultComment).toContain(
+      resultComment?.split('.')[0] ?? '',
+    );
+  });
 });
