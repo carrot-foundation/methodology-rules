@@ -45,10 +45,11 @@ import {
 // Import parsers to register them
 import '@carrot-fndn/shared/document-extractor';
 
-const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
+const { ACTOR, DROP_OFF, PICK_UP, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } =
+  DocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
 export type DocumentManifestType =
@@ -59,7 +60,11 @@ type RuleSubject = {
   attachmentInfos: AttachmentInfo[];
   document: Document;
   documentManifestEvents: DocumentManifestEventSubject[];
+  dropOffEvent: DocumentEvent | undefined;
+  haulerEvent: DocumentEvent | undefined;
+  pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
+  wasteGeneratorEvent: DocumentEvent | undefined;
 };
 
 const DOCUMENT_TYPE_MAPPING = {
@@ -118,6 +123,11 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     const crossValidationResult = await crossValidateWithTextract({
       attachmentInfos: ruleSubject.attachmentInfos,
       documentManifestEvents: ruleSubject.documentManifestEvents,
+      dropOffEvent: ruleSubject.dropOffEvent,
+      haulerEvent: ruleSubject.haulerEvent,
+      pickUpEvent: ruleSubject.pickUpEvent,
+      recyclerEvent: ruleSubject.recyclerEvent,
+      wasteGeneratorEvent: ruleSubject.wasteGeneratorEvent,
     });
 
     if (crossValidationResult.failMessages.length > 0) {
@@ -152,6 +162,18 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     );
     const recyclerEvent = document.externalEvents?.find(
       and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+    );
+    const wasteGeneratorEvent = document.externalEvents?.find(
+      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
+    );
+    const haulerEvent = document.externalEvents?.find(
+      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([HAULER])),
+    );
+    const pickUpEvent = document.externalEvents?.find(
+      eventNameIsAnyOf([PICK_UP]),
+    );
+    const dropOffEvent = document.externalEvents?.find(
+      eventNameIsAnyOf([DROP_OFF]),
     );
 
     const documentManifestEvents = getOrDefault(
@@ -189,7 +211,11 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       }),
       document,
       documentManifestEvents,
+      dropOffEvent,
+      haulerEvent,
+      pickUpEvent,
       recyclerEvent,
+      wasteGeneratorEvent,
     };
   }
 

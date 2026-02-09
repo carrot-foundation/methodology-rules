@@ -1,3 +1,5 @@
+import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+
 import {
   createDocumentExtractor,
   crossValidateAttachments,
@@ -10,35 +12,73 @@ import {
   type AttachmentInfo,
   type DocumentManifestEventSubject,
   getExtractorConfig,
-  validateExtractedDataAgainstEvent,
+  type MtrCrossValidationEventData,
+  validateBasicExtractedData,
+  validateMtrExtractedData,
 } from './document-manifest-data.helpers';
 
 const documentExtractor = createDocumentExtractor(textExtractor);
 
+const isMtrEventData = (
+  eventData: DocumentManifestEventSubject,
+): eventData is MtrCrossValidationEventData => 'pickUpEvent' in eventData;
+
 export const crossValidateWithTextract = async ({
   attachmentInfos,
   documentManifestEvents,
+  dropOffEvent,
+  haulerEvent,
+  pickUpEvent,
+  recyclerEvent,
+  wasteGeneratorEvent,
 }: {
   attachmentInfos: AttachmentInfo[];
   documentManifestEvents: DocumentManifestEventSubject[];
+  dropOffEvent: DocumentEvent | undefined;
+  haulerEvent: DocumentEvent | undefined;
+  pickUpEvent: DocumentEvent | undefined;
+  recyclerEvent: DocumentEvent | undefined;
+  wasteGeneratorEvent: DocumentEvent | undefined;
 }): Promise<CrossValidationResult> => {
-  const inputs: CrossValidationInput<DocumentManifestEventSubject>[] =
-    attachmentInfos
-      .map((attachmentInfo, index) => ({
-        attachmentInfo,
-        // eslint-disable-next-line security/detect-object-injection
-        eventData: documentManifestEvents[index],
-      }))
-      .filter(
-        (input): input is CrossValidationInput<DocumentManifestEventSubject> =>
-          input.eventData !== undefined,
-      );
+  const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
+
+  for (const [index, attachmentInfo] of attachmentInfos.entries()) {
+    // eslint-disable-next-line security/detect-object-injection
+    const baseEvent = documentManifestEvents[index];
+
+    if (!baseEvent) {
+      continue;
+    }
+
+    const isMtr = baseEvent.documentType?.toString() === 'MTR';
+
+    if (isMtr) {
+      const mtrEventData: MtrCrossValidationEventData = {
+        ...baseEvent,
+        dropOffEvent,
+        haulerEvent,
+        pickUpEvent,
+        recyclerEvent,
+        wasteGeneratorEvent,
+      };
+
+      inputs.push({ attachmentInfo, eventData: mtrEventData });
+    } else {
+      inputs.push({ attachmentInfo, eventData: baseEvent });
+    }
+  }
 
   return crossValidateAttachments(
     inputs,
     {
       getExtractorConfig: (event) => getExtractorConfig(event.documentType),
-      validate: validateExtractedDataAgainstEvent,
+      validate: (extractionResult, eventData) => {
+        if (isMtrEventData(eventData)) {
+          return validateMtrExtractedData(extractionResult, eventData);
+        }
+
+        return validateBasicExtractedData(extractionResult, eventData);
+      },
     },
     documentExtractor,
   );

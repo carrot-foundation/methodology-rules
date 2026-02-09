@@ -1,3 +1,5 @@
+import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+
 import type {
   AttachmentInfo,
   DocumentManifestEventSubject,
@@ -18,6 +20,14 @@ jest.mock('@carrot-fndn/shared/document-extractor', () =>
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 
+const noRelatedEvents = {
+  dropOffEvent: undefined,
+  haulerEvent: undefined,
+  pickUpEvent: undefined,
+  recyclerEvent: undefined,
+  wasteGeneratorEvent: undefined,
+} as const;
+
 describe('crossValidateWithTextract', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -27,6 +37,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos: [],
       documentManifestEvents: [],
+      ...noRelatedEvents,
     });
 
     expect(result).toEqual({
@@ -45,6 +56,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents: [],
+      ...noRelatedEvents,
     });
 
     expect(result).toEqual({
@@ -76,6 +88,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents,
+      ...noRelatedEvents,
     });
 
     expect(result.reviewRequired).toBe(true);
@@ -118,6 +131,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents,
+      ...noRelatedEvents,
     });
 
     expect(result.failMessages.length).toBeGreaterThan(0);
@@ -158,6 +172,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents,
+      ...noRelatedEvents,
     });
 
     expect(result.reviewRequired).toBe(true);
@@ -187,6 +202,7 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents,
+      ...noRelatedEvents,
     });
 
     expect(result.reviewRequired).toBe(true);
@@ -218,9 +234,118 @@ describe('crossValidateWithTextract', () => {
     const result = await crossValidateWithTextract({
       attachmentInfos,
       documentManifestEvents,
+      ...noRelatedEvents,
     });
 
     expect(result.reviewRequired).toBe(true);
     expect(result.reviewReasons[0]).toContain('Unknown error');
+  });
+
+  it('should enrich MTR events with related events for cross-validation', async () => {
+    const attachmentInfos: AttachmentInfo[] = [
+      { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
+    ];
+    const documentManifestEvents: DocumentManifestEventSubject[] = [
+      {
+        attachment: { attachmentId: 'att-1' } as never,
+        documentNumber: '12345',
+        documentType: 'MTR',
+        eventAddressId: 'addr-1',
+        eventValue: 100,
+        exemptionJustification: undefined,
+        hasWrongLabelAttachment: false,
+        issueDateAttribute: {
+          name: 'Issue Date',
+          value: '2024-01-01',
+        } as never,
+        recyclerCountryCode: 'BR',
+      },
+    ];
+
+    const pickUpEvent = {
+      externalCreatedAt: '2024-01-01',
+      metadata: { attributes: [] },
+    } as unknown as DocumentEvent;
+
+    const dropOffEvent = {
+      externalCreatedAt: '2024-01-01',
+    } as unknown as DocumentEvent;
+
+    const recyclerEvent = {
+      participant: { name: 'Recycler Corp' },
+    } as unknown as DocumentEvent;
+
+    mockExtract.mockResolvedValue({
+      data: {
+        documentNumber: { confidence: 'high', parsed: '12345' },
+        extractionConfidence: 'high',
+        issueDate: { confidence: 'high', parsed: '2024-01-01' },
+      },
+      reviewReasons: [],
+      reviewRequired: false,
+    });
+
+    const result = await crossValidateWithTextract({
+      attachmentInfos,
+      documentManifestEvents,
+      dropOffEvent,
+      haulerEvent: undefined,
+      pickUpEvent,
+      recyclerEvent,
+      wasteGeneratorEvent: undefined,
+    });
+
+    expect(mockExtract).toHaveBeenCalledTimes(1);
+    expect(result.failMessages).toHaveLength(0);
+  });
+
+  it('should use basic validation for CDF events even when related events are provided', async () => {
+    const attachmentInfos: AttachmentInfo[] = [
+      { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
+    ];
+    const documentManifestEvents: DocumentManifestEventSubject[] = [
+      {
+        attachment: { attachmentId: 'att-1' } as never,
+        documentNumber: '12345',
+        documentType: 'CDF',
+        eventAddressId: 'addr-1',
+        eventValue: 100,
+        exemptionJustification: undefined,
+        hasWrongLabelAttachment: false,
+        issueDateAttribute: {
+          name: 'Issue Date',
+          value: '2024-01-01',
+        } as never,
+        recyclerCountryCode: 'BR',
+      },
+    ];
+
+    const pickUpEvent = {
+      externalCreatedAt: '2024-01-01',
+      metadata: { attributes: [] },
+    } as unknown as DocumentEvent;
+
+    mockExtract.mockResolvedValue({
+      data: {
+        documentNumber: { confidence: 'high', parsed: '12345' },
+        extractionConfidence: 'high',
+        issueDate: { confidence: 'high', parsed: '2024-01-01' },
+      },
+      reviewReasons: [],
+      reviewRequired: false,
+    });
+
+    const result = await crossValidateWithTextract({
+      attachmentInfos,
+      documentManifestEvents,
+      dropOffEvent: undefined,
+      haulerEvent: undefined,
+      pickUpEvent,
+      recyclerEvent: undefined,
+      wasteGeneratorEvent: undefined,
+    });
+
+    expect(mockExtract).toHaveBeenCalledTimes(1);
+    expect(result.failMessages).toHaveLength(0);
   });
 });
