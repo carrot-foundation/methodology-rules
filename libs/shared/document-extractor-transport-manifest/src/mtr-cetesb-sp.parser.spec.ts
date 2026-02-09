@@ -19,6 +19,8 @@ describe('MtrCetesbSpParser', () => {
     'Razão Social: Ajinomoto do Brasil Indústria e Comércio de Alimentos Ltda 2845',
     'CPF/CNPJ: 46.344.354/0005-88',
     'Data da emissão: 08/07/2024',
+    'Data do transporte: 09/07/2024',
+    'Data do recebimento: 10/07/2024',
     '',
     'Identificação do Transportador',
     'Razão Social: RECICLADOS LIMEIRA LTDA 5193',
@@ -53,19 +55,22 @@ describe('MtrCetesbSpParser', () => {
       );
       expect(result.data.generator.parsed.taxId).toBe('46.344.354/0005-88');
       expect(result.data.generator.confidence).toBe('high');
-      expect(result.data.transporter.parsed.name).toBe(
-        'RECICLADOS LIMEIRA LTDA',
-      );
-      expect(result.data.transporter.parsed.taxId).toBe('04.359.529/0001-57');
+      expect(result.data.hauler.parsed.name).toBe('RECICLADOS LIMEIRA LTDA');
+      expect(result.data.hauler.parsed.taxId).toBe('04.359.529/0001-57');
       expect(result.data.receiver.parsed.name).toBe('TERA AMBIENTAL LTDA.');
       expect(result.data.receiver.parsed.taxId).toBe('59.591.115/0003-02');
       expect(result.data.driverName?.parsed).toBe('GERSON PEREIRA DA SILVA');
       expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');
-      expect(result.data.wasteType?.parsed).toBe(
-        '190812-Lodos de tratamento biológico de águas residuárias',
-      );
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          code: '190812',
+          description: 'Lodos de tratamento biológico de águas residuárias',
+        },
+      ]);
       expect(result.data.wasteClassification?.parsed).toBe('IIA');
       expect(result.data.wasteQuantity?.parsed).toBe(13.47);
+      expect(result.data.transportDate?.parsed).toBe('09/07/2024');
+      expect(result.data.receivingDate?.parsed).toBe('10/07/2024');
       expect(result.data.documentType).toBe('transportManifest');
       expect(result.reviewRequired).toBe(false);
     });
@@ -105,7 +110,7 @@ describe('MtrCetesbSpParser', () => {
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
       expect(result.data.generator.confidence).toBe('low');
-      expect(result.data.transporter.confidence).toBe('low');
+      expect(result.data.hauler.confidence).toBe('low');
       expect(result.data.receiver.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
@@ -135,7 +140,7 @@ describe('MtrCetesbSpParser', () => {
       );
 
       expect(result.data.generator.parsed.name).toBe('Empresa Alpha Ltda');
-      expect(result.data.transporter.parsed.name).toBe('Beta Transportes SA');
+      expect(result.data.hauler.parsed.name).toBe('Beta Transportes SA');
       expect(result.data.receiver.parsed.name).toBe('Gama Reciclagem LTDA.');
     });
 
@@ -336,14 +341,45 @@ describe('MtrCetesbSpParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noWasteSectionText));
 
-      expect(result.data.wasteType?.parsed).toBe(
-        '190812-Lodos de tratamento biológico',
-      );
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          code: '190812',
+          description: 'Lodos de tratamento biológico',
+        },
+      ]);
       expect(result.data.wasteClassification?.parsed).toBe('IIB');
       expect(result.data.wasteQuantity?.parsed).toBe(5);
     });
 
-    it('should not extract transporter fields when transporter section is missing', () => {
+    it('should extract multiple waste types from document', () => {
+      const multiWasteText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+        '',
+        'Identificação dos Resíduos',
+        '190812-Lodos de tratamento biológico de águas residuárias',
+        '020101-Lodos provenientes da lavagem e limpeza',
+        'CLASSE',
+        'IIA',
+        '5,0000 TON',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(multiWasteText));
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          code: '190812',
+          description: 'Lodos de tratamento biológico de águas residuárias',
+        },
+        {
+          code: '020101',
+          description: 'Lodos provenientes da lavagem e limpeza',
+        },
+      ]);
+    });
+
+    it('should not extract hauler fields when hauler section is missing', () => {
       const noTransporterText = [
         'MTR n° 123456',
         'Data da emissão: 01/01/2024',

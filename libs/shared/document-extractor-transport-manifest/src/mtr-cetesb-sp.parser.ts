@@ -18,6 +18,7 @@ import {
   MTR_ALL_FIELDS,
   MTR_REQUIRED_FIELDS,
   type MtrExtractedData,
+  type WasteTypeEntry,
 } from './transport-manifest.types';
 
 const SECTION_PATTERNS = {
@@ -37,6 +38,10 @@ const MTR_PATTERNS = {
   razaoSocial:
     // eslint-disable-next-line sonarjs/slow-regex
     /Raz[ãa]o\s*Social\s*:?\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  receivingDate: /Data\s*(?:do\s*)?recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  transportDate: /Data\s*(?:do\s*)?transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   vehiclePlateFormat: /^[A-Z]{3}[-\s]?\d[A-Z0-9]\d{2}$/i,
   // eslint-disable-next-line sonarjs/slow-regex
   wasteQuantity: /([\d.,]+)\s*(TON|KG|T|M³)/i,
@@ -176,8 +181,10 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
 
     this.extractDocumentNumber(rawText, partialData);
     this.extractIssueDate(rawText, partialData);
+    this.extractTransportDate(rawText, partialData);
+    this.extractReceivingDate(rawText, partialData);
     this.extractEntities(rawText, partialData);
-    this.extractTransporterFields(rawText, partialData);
+    this.extractHaulerFields(rawText, partialData);
     this.extractWasteFields(rawText, partialData);
 
     return finalizeExtraction<MtrExtractedData>({
@@ -186,7 +193,7 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
         partialData.documentNumber,
         partialData.issueDate,
         partialData.generator,
-        partialData.transporter,
+        partialData.hauler,
         partialData.receiver,
       ],
       documentType: 'transportManifest',
@@ -222,12 +229,12 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
 
     partialData.generator = entityFieldOrEmpty(generatorExtracted);
 
-    const transporterExtracted = extractEntityFromCetesbSection(
+    const haulerExtracted = extractEntityFromCetesbSection(
       rawText,
       SECTION_PATTERNS.transportador,
     );
 
-    partialData.transporter = entityFieldOrEmpty(transporterExtracted);
+    partialData.hauler = entityFieldOrEmpty(haulerExtracted);
 
     const receiverExtracted = extractEntityFromCetesbSection(
       rawText,
@@ -237,36 +244,21 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     partialData.receiver = entityFieldOrEmpty(receiverExtracted);
   }
 
-  private extractIssueDate(
+  private extractHaulerFields(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const match = MTR_PATTERNS.issueDate.exec(rawText);
-
-    if (match?.[1]) {
-      partialData.issueDate = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
-    }
-  }
-
-  private extractTransporterFields(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-  ): void {
-    const transporterSection = extractSection(
+    const haulerSection = extractSection(
       rawText,
       SECTION_PATTERNS.transportador,
       ALL_SECTION_PATTERNS,
     );
 
-    if (!transporterSection) {
+    if (!haulerSection) {
       return;
     }
 
-    const { driverName, vehiclePlate } =
-      extractDriverAndVehicle(transporterSection);
+    const { driverName, vehiclePlate } = extractDriverAndVehicle(haulerSection);
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
@@ -283,6 +275,48 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     }
   }
 
+  private extractIssueDate(
+    rawText: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const match = MTR_PATTERNS.issueDate.exec(rawText);
+
+    if (match?.[1]) {
+      partialData.issueDate = createHighConfidenceField(
+        match[1] as NonEmptyString,
+        match[0],
+      );
+    }
+  }
+
+  private extractReceivingDate(
+    rawText: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const match = MTR_PATTERNS.receivingDate.exec(rawText);
+
+    if (match?.[1]) {
+      partialData.receivingDate = createHighConfidenceField(
+        match[1] as NonEmptyString,
+        match[0],
+      );
+    }
+  }
+
+  private extractTransportDate(
+    rawText: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const match = MTR_PATTERNS.transportDate.exec(rawText);
+
+    if (match?.[1]) {
+      partialData.transportDate = createHighConfidenceField(
+        match[1] as NonEmptyString,
+        match[0],
+      );
+    }
+  }
+
   private extractWasteFields(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
@@ -294,14 +328,24 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     );
     const searchText = wasteSection ?? rawText;
 
-    const wasteTypeMatch = MTR_PATTERNS.wasteType.exec(searchText);
+    const wasteTypePattern = new RegExp(MTR_PATTERNS.wasteType.source, 'gi');
+    const entries: WasteTypeEntry[] = [];
+    const rawMatches: string[] = [];
 
-    if (wasteTypeMatch?.[1] && wasteTypeMatch[2]) {
-      const wasteTypeValue = `${wasteTypeMatch[1]}-${wasteTypeMatch[2].trim()}`;
+    for (const match of searchText.matchAll(wasteTypePattern)) {
+      if (match[1] && match[2]) {
+        entries.push({
+          code: match[1],
+          description: match[2].trim(),
+        });
+        rawMatches.push(match[0]);
+      }
+    }
 
-      partialData.wasteType = createHighConfidenceField(
-        wasteTypeValue as NonEmptyString,
-        wasteTypeMatch[0],
+    if (entries.length > 0) {
+      partialData.wasteTypes = createHighConfidenceField(
+        entries,
+        rawMatches.join('\n'),
       );
     }
 

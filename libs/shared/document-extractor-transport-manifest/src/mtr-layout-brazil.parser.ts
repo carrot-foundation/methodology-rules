@@ -6,6 +6,7 @@ import {
   createHighConfidenceField,
   type DocumentParser,
   entityFieldOrEmpty,
+  extractAllStringFields,
   extractEntityFromSection,
   type ExtractionOutput,
   extractStringField,
@@ -18,6 +19,7 @@ import {
   MTR_ALL_FIELDS,
   MTR_REQUIRED_FIELDS,
   type MtrExtractedData,
+  type WasteTypeEntry,
 } from './transport-manifest.types';
 
 const MTR_PATTERNS = {
@@ -29,6 +31,10 @@ const MTR_PATTERNS = {
   driverName: /Motorista\s*:?\s*([A-Za-z\u00C0-\u017F\s]+?)(?=\n|CPF|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   issueDate: /Data\s*(?:de\s*)?Emiss[ãa]o\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  receivingDate: /Data\s*(?:de\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  transportDate: /Data\s*(?:de\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   vehiclePlate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Placa\s*(?:do\s*)?Ve[ií]culo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i,
@@ -82,13 +88,21 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       rawText,
       MTR_PATTERNS.issueDate,
     );
+    const transportDateExtracted = extractStringField(
+      rawText,
+      MTR_PATTERNS.transportDate,
+    );
+    const receivingDateExtracted = extractStringField(
+      rawText,
+      MTR_PATTERNS.receivingDate,
+    );
     const generatorExtracted = extractEntityFromSection(
       rawText,
       SECTION_PATTERNS.gerador,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.cnpj,
     );
-    const transporterExtracted = extractEntityFromSection(
+    const haulerExtracted = extractEntityFromSection(
       rawText,
       SECTION_PATTERNS.transportador,
       ALL_SECTION_PATTERNS,
@@ -108,7 +122,7 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       rawText,
       MTR_PATTERNS.driverName,
     );
-    const wasteTypeExtracted = extractStringField(
+    const wasteTypeMatches = extractAllStringFields(
       rawText,
       MTR_PATTERNS.wasteType,
     );
@@ -140,8 +154,22 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
+    if (transportDateExtracted) {
+      partialData.transportDate = createHighConfidenceField(
+        transportDateExtracted.value as NonEmptyString,
+        transportDateExtracted.rawMatch,
+      );
+    }
+
+    if (receivingDateExtracted) {
+      partialData.receivingDate = createHighConfidenceField(
+        receivingDateExtracted.value as NonEmptyString,
+        receivingDateExtracted.rawMatch,
+      );
+    }
+
     partialData.generator = entityFieldOrEmpty(generatorExtracted);
-    partialData.transporter = entityFieldOrEmpty(transporterExtracted);
+    partialData.hauler = entityFieldOrEmpty(haulerExtracted);
     partialData.receiver = entityFieldOrEmpty(receiverExtracted);
 
     if (vehiclePlateExtracted) {
@@ -158,10 +186,14 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
-    if (wasteTypeExtracted) {
-      partialData.wasteType = createHighConfidenceField(
-        wasteTypeExtracted.value as NonEmptyString,
-        wasteTypeExtracted.rawMatch,
+    if (wasteTypeMatches.length > 0) {
+      const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => ({
+        description: m.value,
+      }));
+
+      partialData.wasteTypes = createHighConfidenceField(
+        entries,
+        wasteTypeMatches.map((m) => m.rawMatch).join('\n'),
       );
     }
 
@@ -189,7 +221,7 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
         partialData.documentNumber,
         partialData.issueDate,
         partialData.generator,
-        partialData.transporter,
+        partialData.hauler,
         partialData.receiver,
       ],
       documentType: 'transportManifest',

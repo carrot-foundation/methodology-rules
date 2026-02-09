@@ -13,6 +13,8 @@ describe('MtrLayoutBrazilParser', () => {
   const validMtrText = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
+Data de Transporte: 16/03/2024
+Data de Recebimento: 18/03/2024
 
 Gerador
 Razão Social: EMPRESA GERADORA LTDA
@@ -43,19 +45,23 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       expect(result.data.issueDate.parsed).toBe('15/03/2024');
       expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
       expect(result.data.generator.parsed.taxId).toBe('12.345.678/0001-90');
-      expect(result.data.transporter.parsed.name).toBe(
+      expect(result.data.hauler.parsed.name).toBe(
         'TRANSPORTES AMBIENTAIS S.A.',
       );
-      expect(result.data.transporter.parsed.taxId).toBe('98.765.432/0001-10');
+      expect(result.data.hauler.parsed.taxId).toBe('98.765.432/0001-10');
       expect(result.data.receiver.parsed.name).toBe(
         'RECICLAGEM SUSTENTÁVEL LTDA',
       );
       expect(result.data.receiver.parsed.taxId).toBe('11.222.333/0001-44');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
       expect(result.data.driverName?.parsed).toBe('João da Silva');
-      expect(result.data.wasteType?.parsed).toBe('Plástico');
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        { description: 'Plástico' },
+      ]);
       expect(result.data.wasteClassification?.parsed).toBe('II - Não Perigoso');
       expect(result.data.wasteQuantity?.parsed).toBe(1500.5);
+      expect(result.data.transportDate?.parsed).toBe('16/03/2024');
+      expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
       expect(result.reviewRequired).toBe(false);
     });
@@ -95,7 +101,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       const result = parser.parse(stubTextExtractionResult(noEntityCnpjText));
 
       expect(result.data.generator.confidence).toBe('low');
-      expect(result.data.transporter.confidence).toBe('low');
+      expect(result.data.hauler.confidence).toBe('low');
       expect(result.data.receiver.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
