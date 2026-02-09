@@ -1,13 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { ScaleTicketLayout1Parser } from './layout-1.parser';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 describe('ScaleTicketLayout1Parser', () => {
   const parser = new ScaleTicketLayout1Parser();
@@ -29,7 +23,7 @@ describe('ScaleTicketLayout1Parser', () => {
 
   describe('parse', () => {
     it('should parse a valid extraction result with high confidence', () => {
-      const result = parser.parse(buildExtractionResult(validRawText));
+      const result = parser.parse(stubTextExtractionResult(validRawText));
 
       expect(result.data.netWeight.parsed).toEqual({
         unit: 'kg',
@@ -56,7 +50,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Transportadora: 987 - TRANSPORTES TESTE LTDA
       `;
 
-      const result = parser.parse(buildExtractionResult(noNetWeightText));
+      const result = parser.parse(stubTextExtractionResult(noNetWeightText));
 
       expect(result.data.netWeight).toBeUndefined();
       expect(result.data.missingRequiredFields).toContain('netWeight');
@@ -73,7 +67,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Liquido: 150,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(accentedText));
+      const result = parser.parse(stubTextExtractionResult(accentedText));
 
       expect(result.data.netWeight.parsed).toEqual({ unit: 'kg', value: 150 });
       expect(result.data.ticketNumber?.parsed).toBe('99999');
@@ -81,7 +75,7 @@ describe('ScaleTicketLayout1Parser', () => {
     });
 
     it('should track extraction confidence', () => {
-      const result = parser.parse(buildExtractionResult(validRawText));
+      const result = parser.parse(stubTextExtractionResult(validRawText));
 
       expect(result.data.extractionConfidence).toBe('high');
       expect(result.data.lowConfidenceFields).toEqual([]);
@@ -93,7 +87,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: invalid kg
       `;
 
-      const result = parser.parse(buildExtractionResult(invalidWeightText));
+      const result = parser.parse(stubTextExtractionResult(invalidWeightText));
 
       expect(result.data.netWeight).toBeUndefined();
       expect(result.data.missingRequiredFields).toContain('netWeight');
@@ -107,7 +101,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(noDateTimeText));
+      const result = parser.parse(stubTextExtractionResult(noDateTimeText));
 
       expect(result.data.initialWeight?.parsed.value).toBe(500);
       expect(result.data.initialWeight?.parsed.timestamp).toBeUndefined();
@@ -121,7 +115,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(invalidNumberText));
+      const result = parser.parse(stubTextExtractionResult(invalidNumberText));
 
       expect(result.data.initialWeight).toBeUndefined();
       expect(result.data.netWeight.parsed.value).toBe(100);
@@ -135,7 +129,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(newlineNameText));
+      const result = parser.parse(stubTextExtractionResult(newlineNameText));
 
       // The parser takes only the first line of the name
       expect(result.data.transporter?.parsed.name).toBe('NOME');
@@ -149,7 +143,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(malformedDateText));
+      const result = parser.parse(stubTextExtractionResult(malformedDateText));
 
       expect(result.data.initialWeight?.parsed.timestamp).toBeUndefined();
     });
@@ -162,7 +156,7 @@ describe('ScaleTicketLayout1Parser', () => {
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(incompleteDateText));
+      const result = parser.parse(stubTextExtractionResult(incompleteDateText));
 
       expect(result.data.initialWeight?.parsed.timestamp).toBeUndefined();
     });
@@ -176,7 +170,7 @@ describe('ScaleTicketLayout1Parser', () => {
       `;
 
       const result = parser.parse(
-        buildExtractionResult(transporterEmptyNameText),
+        stubTextExtractionResult(transporterEmptyNameText),
       );
 
       // Due to regex, name won't be exactly empty but will be captured
@@ -191,7 +185,7 @@ describe('ScaleTicketLayout1Parser', () => {
       `;
 
       const result = parser.parse(
-        buildExtractionResult(netWeightInvalidValueText),
+        stubTextExtractionResult(netWeightInvalidValueText),
       );
 
       expect(result.data.netWeight).toBeUndefined();
@@ -206,7 +200,7 @@ describe('ScaleTicketLayout1Parser', () => {
       `;
 
       const result = parser.parse(
-        buildExtractionResult(invalidInitialWeightText),
+        stubTextExtractionResult(invalidInitialWeightText),
       );
 
       expect(result.data.initialWeight).toBeUndefined();
@@ -217,7 +211,7 @@ describe('ScaleTicketLayout1Parser', () => {
       const emptyNameText = `Ticket de pesagem   12345
 Transportadora: 987 -   `;
 
-      const result = parser.parse(buildExtractionResult(emptyNameText));
+      const result = parser.parse(stubTextExtractionResult(emptyNameText));
 
       expect(result.data.transporter).toBeUndefined();
     });
@@ -232,7 +226,7 @@ Transportadora: 987 -   `;
       `;
 
       const result = parser.parse(
-        buildExtractionResult(invalidInitialWeightNaNText),
+        stubTextExtractionResult(invalidInitialWeightNaNText),
       );
 
       expect(result.data.initialWeight).toBeUndefined();
@@ -247,7 +241,7 @@ Transportadora: 987 -   `;
         Peso Líquido: 100,00 kg
       `;
 
-      const result = parser.parse(buildExtractionResult(missingTimeText));
+      const result = parser.parse(stubTextExtractionResult(missingTimeText));
 
       expect(result.data.initialWeight?.parsed.timestamp).toBeUndefined();
     });
@@ -262,7 +256,7 @@ Transportadora: 987 -   `;
       `;
 
       const result = parser.parse(
-        buildExtractionResult(incompleteDatePartsText),
+        stubTextExtractionResult(incompleteDatePartsText),
       );
 
       expect(result.data.initialWeight?.parsed.timestamp).toBeUndefined();
@@ -271,14 +265,18 @@ Transportadora: 987 -   `;
 
   describe('getMatchScore', () => {
     it('should return high score for valid scale ticket text', () => {
-      const score = parser.getMatchScore(buildExtractionResult(validRawText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(validRawText),
+      );
 
       expect(score).toBeGreaterThan(0.5);
     });
 
     it('should return low score for non-scale-ticket text', () => {
       const irrelevantText = 'This is just random text with no patterns';
-      const score = parser.getMatchScore(buildExtractionResult(irrelevantText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(irrelevantText),
+      );
 
       expect(score).toBeLessThan(0.3);
     });

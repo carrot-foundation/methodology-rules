@@ -1,13 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { CdfCustom1Parser } from './cdf-custom-1.parser';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 describe('CdfCustom1Parser', () => {
   const parser = new CdfCustom1Parser();
@@ -43,7 +37,7 @@ describe('CdfCustom1Parser', () => {
 
   describe('parse', () => {
     it('should parse a valid custom CDF document with high confidence', () => {
-      const result = parser.parse(buildExtractionResult(validCustomCdfText));
+      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
 
       expect(result.data.documentNumber.parsed).toBe('50193/24');
       expect(result.data.documentNumber.confidence).toBe('high');
@@ -73,7 +67,7 @@ describe('CdfCustom1Parser', () => {
         'Empresa Recebedora: Some Company',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(incompleteText));
+      const result = parser.parse(stubTextExtractionResult(incompleteText));
 
       expect(result.reviewRequired).toBe(true);
       expect(result.data.missingRequiredFields).toContain('documentNumber');
@@ -94,7 +88,7 @@ describe('CdfCustom1Parser', () => {
         'Quantidade Total Tratado',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noCnpjText));
+      const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
       expect(result.data.processor.confidence).toBe('low');
       expect(result.data.generator.confidence).toBe('low');
@@ -111,7 +105,7 @@ describe('CdfCustom1Parser', () => {
 
       for (const { expected, text } of variations) {
         const fullText = `${text}\nJundiaí, 01 de Janeiro de 2024.`;
-        const result = parser.parse(buildExtractionResult(fullText));
+        const result = parser.parse(stubTextExtractionResult(fullText));
 
         expect(result.data.documentNumber.parsed).toBe(expected);
       }
@@ -127,7 +121,7 @@ describe('CdfCustom1Parser', () => {
 
       for (const { expected, name } of months) {
         const text = `CDF 100/24\nCity, 15 de ${name} de 2024.`;
-        const result = parser.parse(buildExtractionResult(text));
+        const result = parser.parse(stubTextExtractionResult(text));
 
         expect(result.data.issueDate.parsed).toBe(`15/${expected}/2024`);
       }
@@ -139,7 +133,7 @@ describe('CdfCustom1Parser', () => {
         'City, 15 de InvalidMonth de 2024.',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(invalidMonthText));
+      const result = parser.parse(stubTextExtractionResult(invalidMonthText));
 
       expect(result.data.missingRequiredFields).toContain('issueDate');
     });
@@ -151,7 +145,7 @@ describe('CdfCustom1Parser', () => {
         'conformidade com a licença nº: 36013428 de 25/06/2024.',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(licenseText));
+      const result = parser.parse(stubTextExtractionResult(licenseText));
 
       expect(result.data.environmentalLicense?.parsed).toBe('36013428');
     });
@@ -163,7 +157,7 @@ describe('CdfCustom1Parser', () => {
         'através da compostagem de lodo de esgoto, certifica que',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(treatmentText));
+      const result = parser.parse(stubTextExtractionResult(treatmentText));
 
       expect(result.data.treatmentMethod?.parsed).toBe(
         'compostagem de lodo de esgoto',
@@ -178,7 +172,7 @@ describe('CdfCustom1Parser', () => {
         '1.377,59',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(quantityText));
+      const result = parser.parse(stubTextExtractionResult(quantityText));
 
       expect(result.data.wasteQuantity?.parsed).toBe(1377.59);
     });
@@ -191,7 +185,7 @@ describe('CdfCustom1Parser', () => {
         '...',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(nanQuantityText));
+      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -204,7 +198,7 @@ describe('CdfCustom1Parser', () => {
         'CNPJ: 59.591.115/0003-02',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(shortNameText));
+      const result = parser.parse(stubTextExtractionResult(shortNameText));
 
       expect(result.data.processor.confidence).toBe('low');
     });
@@ -216,7 +210,7 @@ describe('CdfCustom1Parser', () => {
         'Quantidade Total Tratado 500,00',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(sameLineText));
+      const result = parser.parse(stubTextExtractionResult(sameLineText));
 
       expect(result.data.wasteQuantity?.parsed).toBe(500);
     });
@@ -225,7 +219,7 @@ describe('CdfCustom1Parser', () => {
   describe('getMatchScore', () => {
     it('should return high score for valid custom CDF text', () => {
       const score = parser.getMatchScore(
-        buildExtractionResult(validCustomCdfText),
+        stubTextExtractionResult(validCustomCdfText),
       );
 
       expect(score).toBeGreaterThanOrEqual(0.7);
@@ -233,7 +227,9 @@ describe('CdfCustom1Parser', () => {
 
     it('should return low score for non-CDF text', () => {
       const irrelevantText = 'This is a random document with no CDF patterns';
-      const score = parser.getMatchScore(buildExtractionResult(irrelevantText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(irrelevantText),
+      );
 
       expect(score).toBeLessThan(0.3);
     });

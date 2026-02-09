@@ -1,4 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import {
+  stubTextExtractionResult,
+  type TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 
 import type {
   BaseExtractedData,
@@ -16,11 +19,6 @@ import {
   registerParser,
   selectBestParser,
 } from './layout-registry.helpers';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 const buildMockExtractionOutput = (
   documentType: DocumentType,
@@ -194,7 +192,7 @@ describe('layout-registry', () => {
 
     it('should select the best matching parser from provided layouts', () => {
       const result = selectBestParser(
-        buildExtractionResult('This is a scale ticket'),
+        stubTextExtractionResult('This is a scale ticket'),
         'scaleTicket',
         ['mock-layout', 'layout-2'],
       );
@@ -207,7 +205,7 @@ describe('layout-registry', () => {
 
     it('should select better scoring layout when both match', () => {
       const result = selectBestParser(
-        buildExtractionResult('This is a scale ticket layout2'),
+        stubTextExtractionResult('This is a scale ticket layout2'),
         'scaleTicket',
         ['mock-layout', 'layout-2'],
       );
@@ -219,7 +217,7 @@ describe('layout-registry', () => {
 
     it('should return undefined when no layouts match above threshold', () => {
       const result = selectBestParser(
-        buildExtractionResult('random text'),
+        stubTextExtractionResult('random text'),
         'scaleTicket',
         ['mock-layout', 'layout-2'],
       );
@@ -229,7 +227,7 @@ describe('layout-registry', () => {
 
     it('should skip unregistered layouts', () => {
       const result = selectBestParser(
-        buildExtractionResult('This is a scale ticket'),
+        stubTextExtractionResult('This is a scale ticket'),
         'scaleTicket',
         ['unknown-layout', 'mock-layout'],
       );
@@ -240,7 +238,7 @@ describe('layout-registry', () => {
 
     it('should return undefined when all layouts are unregistered', () => {
       const result = selectBestParser(
-        buildExtractionResult('This is a scale ticket'),
+        stubTextExtractionResult('This is a scale ticket'),
         'scaleTicket',
         ['unknown-1', 'unknown-2'],
       );

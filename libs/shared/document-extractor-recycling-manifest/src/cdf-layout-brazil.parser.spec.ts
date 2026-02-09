@@ -1,13 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { CdfLayoutBrazilParser } from './cdf-layout-brazil.parser';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 describe('CdfLayoutBrazilParser', () => {
   const parser = new CdfLayoutBrazilParser();
@@ -37,7 +31,7 @@ Resíduo processado conforme legislação ambiental vigente.`;
 
   describe('parse', () => {
     it('should parse a valid CDF document with high confidence', () => {
-      const result = parser.parse(buildExtractionResult(validCdfText));
+      const result = parser.parse(stubTextExtractionResult(validCdfText));
 
       expect(result.data.documentNumber.parsed).toBe('987654321');
       expect(result.data.documentNumber.confidence).toBe('high');
@@ -69,7 +63,7 @@ Resíduo processado conforme legislação ambiental vigente.`;
         EMPRESA SEM CNPJ
       `;
 
-      const result = parser.parse(buildExtractionResult(incompleteCdfText));
+      const result = parser.parse(stubTextExtractionResult(incompleteCdfText));
 
       expect(result.reviewRequired).toBe(true);
       expect(result.data.missingRequiredFields).toContain('documentNumber');
@@ -89,7 +83,7 @@ Resíduo processado conforme legislação ambiental vigente.`;
         PROCESSADOR SEM CNPJ
       `;
 
-      const result = parser.parse(buildExtractionResult(noEntityCnpjText));
+      const result = parser.parse(stubTextExtractionResult(noEntityCnpjText));
 
       expect(result.data.generator.confidence).toBe('low');
       expect(result.data.processor.confidence).toBe('low');
@@ -108,7 +102,7 @@ Resíduo processado conforme legislação ambiental vigente.`;
 
       for (const variation of variations) {
         const text = `${variation}\nData de Emissão: 01/01/2024`;
-        const result = parser.parse(buildExtractionResult(text));
+        const result = parser.parse(stubTextExtractionResult(text));
 
         expect(result.data.documentNumber.parsed).toBe('123456');
       }
@@ -127,7 +121,7 @@ TRATADOR AMBIENTAL S.A.
 CNPJ: 22.222.222/0001-22`;
 
       const result = parser.parse(
-        buildExtractionResult(alternativeSectionsText),
+        stubTextExtractionResult(alternativeSectionsText),
       );
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA ORIGEM LTDA');
@@ -146,7 +140,7 @@ CNPJ: 12.345.678/0001-90
 `;
 
       const result = parser.parse(
-        buildExtractionResult(cnpjInDifferentLineText),
+        stubTextExtractionResult(cnpjInDifferentLineText),
       );
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA REAL NAME LTDA');
@@ -164,7 +158,7 @@ CNPJ: 12.345.678/0001-90
 EMPRESA VALID NAME LTDA
 `;
 
-      const result = parser.parse(buildExtractionResult(shortLinesText));
+      const result = parser.parse(stubTextExtractionResult(shortLinesText));
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA VALID NAME LTDA');
     });
@@ -180,7 +174,7 @@ AB
 CNPJ: 12.345.678/0001-90
 `;
 
-      const result = parser.parse(buildExtractionResult(noValidNameText));
+      const result = parser.parse(stubTextExtractionResult(noValidNameText));
 
       expect(result.data.generator.confidence).toBe('low');
     });
@@ -192,7 +186,9 @@ Data de Emissão: 15/03/2024
 Quantidade Total: invalid kg
 `;
 
-      const result = parser.parse(buildExtractionResult(invalidQuantityText));
+      const result = parser.parse(
+        stubTextExtractionResult(invalidQuantityText),
+      );
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -205,7 +201,7 @@ Data de Emissão: 15/03/2024
 Quantidade Total: ... kg
 `;
 
-      const result = parser.parse(buildExtractionResult(nanQuantityText));
+      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -223,7 +219,7 @@ Processador
 `;
 
       const result = parser.parse(
-        buildExtractionResult(consecutiveSectionsText),
+        stubTextExtractionResult(consecutiveSectionsText),
       );
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
@@ -232,14 +228,18 @@ Processador
 
   describe('getMatchScore', () => {
     it('should return high score for valid CDF text', () => {
-      const score = parser.getMatchScore(buildExtractionResult(validCdfText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(validCdfText),
+      );
 
       expect(score).toBeGreaterThan(0.5);
     });
 
     it('should return low score for non-CDF text', () => {
       const irrelevantText = 'This is a random document with no CDF patterns';
-      const score = parser.getMatchScore(buildExtractionResult(irrelevantText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(irrelevantText),
+      );
 
       expect(score).toBeLessThan(0.3);
     });
@@ -249,7 +249,9 @@ Processador
         Certificado de Destinação
         Resíduo tratado
       `;
-      const score = parser.getMatchScore(buildExtractionResult(partialCdfText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(partialCdfText),
+      );
 
       expect(score).toBeGreaterThanOrEqual(0.1);
       expect(score).toBeLessThan(0.6);

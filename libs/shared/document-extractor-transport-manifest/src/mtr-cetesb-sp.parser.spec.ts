@@ -1,13 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { MtrCetesbSpParser } from './mtr-cetesb-sp.parser';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 describe('MtrCetesbSpParser', () => {
   const parser = new MtrCetesbSpParser();
@@ -48,7 +42,7 @@ describe('MtrCetesbSpParser', () => {
 
   describe('parse', () => {
     it('should parse a valid CETESB MTR document with high confidence', () => {
-      const result = parser.parse(buildExtractionResult(validCetesbText));
+      const result = parser.parse(stubTextExtractionResult(validCetesbText));
 
       expect(result.data.documentNumber.parsed).toBe('240001460711');
       expect(result.data.documentNumber.confidence).toBe('high');
@@ -84,7 +78,7 @@ describe('MtrCetesbSpParser', () => {
         'Razão Social: Some Company',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(incompleteText));
+      const result = parser.parse(stubTextExtractionResult(incompleteText));
 
       expect(result.reviewRequired).toBe(true);
       expect(result.data.missingRequiredFields).toContain('documentNumber');
@@ -108,7 +102,7 @@ describe('MtrCetesbSpParser', () => {
         'Razão Social: DESTINO SEM CNPJ',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noCnpjText));
+      const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
       expect(result.data.generator.confidence).toBe('low');
       expect(result.data.transporter.confidence).toBe('low');
@@ -137,7 +131,7 @@ describe('MtrCetesbSpParser', () => {
       ].join('\n');
 
       const result = parser.parse(
-        buildExtractionResult(textWithRegistrationNumbers),
+        stubTextExtractionResult(textWithRegistrationNumbers),
       );
 
       expect(result.data.generator.parsed.name).toBe('Empresa Alpha Ltda');
@@ -168,7 +162,7 @@ describe('MtrCetesbSpParser', () => {
         'CPF/CNPJ: 11.222.333/0001-44',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(labelValueText));
+      const result = parser.parse(stubTextExtractionResult(labelValueText));
 
       expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
       expect(result.data.vehiclePlate?.parsed).toBe('BRA2E19');
@@ -188,7 +182,7 @@ describe('MtrCetesbSpParser', () => {
         '',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noValueText));
+      const result = parser.parse(stubTextExtractionResult(noValueText));
 
       expect(result.data.driverName).toBeUndefined();
       expect(result.data.vehiclePlate).toBeUndefined();
@@ -209,7 +203,7 @@ describe('MtrCetesbSpParser', () => {
         'NOT A PLATE',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(invalidPlateText));
+      const result = parser.parse(stubTextExtractionResult(invalidPlateText));
 
       expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
       expect(result.data.vehiclePlate).toBeUndefined();
@@ -228,7 +222,7 @@ describe('MtrCetesbSpParser', () => {
         'MARIA SANTOS',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(onlyDriverText));
+      const result = parser.parse(stubTextExtractionResult(onlyDriverText));
 
       expect(result.data.driverName?.parsed).toBe('MARIA SANTOS');
     });
@@ -246,7 +240,7 @@ describe('MtrCetesbSpParser', () => {
         'BRA2E19',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(onlyPlateText));
+      const result = parser.parse(stubTextExtractionResult(onlyPlateText));
 
       expect(result.data.vehiclePlate?.parsed).toBe('BRA2E19');
       expect(result.data.driverName).toBeUndefined();
@@ -262,7 +256,7 @@ describe('MtrCetesbSpParser', () => {
         'CPF/CNPJ: 12.345.678/0001-90',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noCnpjNoRazaoText));
+      const result = parser.parse(stubTextExtractionResult(noCnpjNoRazaoText));
 
       expect(result.data.generator.confidence).toBe('low');
     });
@@ -278,7 +272,7 @@ describe('MtrCetesbSpParser', () => {
         'IIA',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(splitClassText));
+      const result = parser.parse(stubTextExtractionResult(splitClassText));
 
       expect(result.data.wasteClassification?.parsed).toBe('IIA');
     });
@@ -293,7 +287,7 @@ describe('MtrCetesbSpParser', () => {
         '13,4700 TON',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(quantityText));
+      const result = parser.parse(stubTextExtractionResult(quantityText));
 
       expect(result.data.wasteQuantity?.parsed).toBe(13.47);
     });
@@ -308,7 +302,7 @@ describe('MtrCetesbSpParser', () => {
         '... TON',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(nanQuantityText));
+      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -324,7 +318,7 @@ describe('MtrCetesbSpParser', () => {
         'CPF/CNPJ: 12.345.678/0001-90',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(shortNameText));
+      const result = parser.parse(stubTextExtractionResult(shortNameText));
 
       expect(result.data.generator.confidence).toBe('low');
     });
@@ -340,7 +334,7 @@ describe('MtrCetesbSpParser', () => {
         '5,0000 TON',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noWasteSectionText));
+      const result = parser.parse(stubTextExtractionResult(noWasteSectionText));
 
       expect(result.data.wasteType?.parsed).toBe(
         '190812-Lodos de tratamento biológico',
@@ -360,7 +354,7 @@ describe('MtrCetesbSpParser', () => {
         'CPF/CNPJ: 12.345.678/0001-90',
       ].join('\n');
 
-      const result = parser.parse(buildExtractionResult(noTransporterText));
+      const result = parser.parse(stubTextExtractionResult(noTransporterText));
 
       expect(result.data.driverName).toBeUndefined();
       expect(result.data.vehiclePlate).toBeUndefined();
@@ -370,7 +364,7 @@ describe('MtrCetesbSpParser', () => {
   describe('getMatchScore', () => {
     it('should return high score for valid CETESB MTR text', () => {
       const score = parser.getMatchScore(
-        buildExtractionResult(validCetesbText),
+        stubTextExtractionResult(validCetesbText),
       );
 
       expect(score).toBeGreaterThanOrEqual(0.8);
@@ -378,7 +372,9 @@ describe('MtrCetesbSpParser', () => {
 
     it('should return low score for non-MTR text', () => {
       const irrelevantText = 'This is a random document with no MTR patterns';
-      const score = parser.getMatchScore(buildExtractionResult(irrelevantText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(irrelevantText),
+      );
 
       expect(score).toBeLessThan(0.3);
     });

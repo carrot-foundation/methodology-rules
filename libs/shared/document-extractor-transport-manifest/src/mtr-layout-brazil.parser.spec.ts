@@ -1,13 +1,7 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
 import { MtrLayoutBrazilParser } from './mtr-layout-brazil.parser';
-
-const buildExtractionResult = (rawText: string): TextExtractionResult => ({
-  blocks: [],
-  rawText,
-});
 
 describe('MtrLayoutBrazilParser', () => {
   const parser = new MtrLayoutBrazilParser();
@@ -42,7 +36,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
   describe('parse', () => {
     it('should parse a valid MTR document with high confidence', () => {
-      const result = parser.parse(buildExtractionResult(validMtrText));
+      const result = parser.parse(stubTextExtractionResult(validMtrText));
 
       expect(result.data.documentNumber.parsed).toBe('123456789');
       expect(result.data.documentNumber.confidence).toBe('high');
@@ -75,7 +69,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
         EMPRESA GERADORA LTDA
       `;
 
-      const result = parser.parse(buildExtractionResult(incompleteMtrText));
+      const result = parser.parse(stubTextExtractionResult(incompleteMtrText));
 
       expect(result.reviewRequired).toBe(true);
       expect(result.data.missingRequiredFields).toContain('documentNumber');
@@ -98,7 +92,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
         DESTINO SEM CNPJ
       `;
 
-      const result = parser.parse(buildExtractionResult(noEntityCnpjText));
+      const result = parser.parse(stubTextExtractionResult(noEntityCnpjText));
 
       expect(result.data.generator.confidence).toBe('low');
       expect(result.data.transporter.confidence).toBe('low');
@@ -118,7 +112,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
       for (const variation of variations) {
         const text = `${variation}\nData de Emissão: 01/01/2024`;
-        const result = parser.parse(buildExtractionResult(text));
+        const result = parser.parse(stubTextExtractionResult(text));
 
         expect(result.data.documentNumber.parsed).toBe('123456');
       }
@@ -136,7 +130,7 @@ CNPJ: 12.345.678/0001-90
 `;
 
       const result = parser.parse(
-        buildExtractionResult(cnpjInDifferentLineText),
+        stubTextExtractionResult(cnpjInDifferentLineText),
       );
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA REAL NAME LTDA');
@@ -154,7 +148,7 @@ CNPJ: 12.345.678/0001-90
 EMPRESA VALID NAME LTDA
 `;
 
-      const result = parser.parse(buildExtractionResult(shortLinesText));
+      const result = parser.parse(stubTextExtractionResult(shortLinesText));
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA VALID NAME LTDA');
     });
@@ -170,7 +164,7 @@ AB
 CNPJ: 12.345.678/0001-90
 `;
 
-      const result = parser.parse(buildExtractionResult(noValidNameText));
+      const result = parser.parse(stubTextExtractionResult(noValidNameText));
 
       expect(result.data.generator.confidence).toBe('low');
     });
@@ -182,7 +176,9 @@ Data de Emissão: 15/03/2024
 Quantidade: invalid kg
 `;
 
-      const result = parser.parse(buildExtractionResult(invalidQuantityText));
+      const result = parser.parse(
+        stubTextExtractionResult(invalidQuantityText),
+      );
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -195,7 +191,7 @@ Data de Emissão: 15/03/2024
 Quantidade: ... kg
 `;
 
-      const result = parser.parse(buildExtractionResult(nanQuantityText));
+      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
       expect(result.data.wasteQuantity).toBeUndefined();
     });
@@ -212,7 +208,7 @@ CNPJ: 12.345.678/0001-90
 Transportador
 `;
 
-      const result = parser.parse(buildExtractionResult(minimalSectionText));
+      const result = parser.parse(stubTextExtractionResult(minimalSectionText));
 
       expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
     });
@@ -220,14 +216,18 @@ Transportador
 
   describe('getMatchScore', () => {
     it('should return high score for valid MTR text', () => {
-      const score = parser.getMatchScore(buildExtractionResult(validMtrText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(validMtrText),
+      );
 
       expect(score).toBeGreaterThan(0.5);
     });
 
     it('should return low score for non-MTR text', () => {
       const irrelevantText = 'This is a random document with no MTR patterns';
-      const score = parser.getMatchScore(buildExtractionResult(irrelevantText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(irrelevantText),
+      );
 
       expect(score).toBeLessThan(0.3);
     });
@@ -237,7 +237,9 @@ Transportador
         MTR - Manifesto de Transporte
         Resíduo sólido
       `;
-      const score = parser.getMatchScore(buildExtractionResult(partialMtrText));
+      const score = parser.getMatchScore(
+        stubTextExtractionResult(partialMtrText),
+      );
 
       expect(score).toBeGreaterThanOrEqual(0.2);
       expect(score).toBeLessThan(0.6);
