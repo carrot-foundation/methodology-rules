@@ -118,9 +118,8 @@ describe('waste-mass-is-unique.helpers', () => {
 
       expect(calls.length).toBeGreaterThanOrEqual(2);
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       expect(calls[0][0].match.category).toBe(MASS_ID);
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
       expect(calls[1][0].match.category).toBe('Mass');
     });
   });

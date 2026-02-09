@@ -110,7 +110,7 @@ const stubBaseAccreditationDocuments = ({
 
   if (withScaleTicketVerification) {
     additionalVerifications.push({
-      scaleTicketLayout: 'layout1',
+      layoutIds: ['layout-1'],
       verificationType: 'scaleTicket',
     });
   }
@@ -181,7 +181,7 @@ const mergeAttributes = (
     if (existingIndex === -1) {
       result.push(override);
     } else {
-      result[existingIndex] = override;
+      result.splice(existingIndex, 1, override);
     }
   }
 
