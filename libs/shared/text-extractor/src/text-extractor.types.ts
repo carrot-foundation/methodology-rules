@@ -24,6 +24,7 @@ export interface TextExtractionInput {
 export interface TextExtractionResult {
   blocks: Array<{
     blockType?: string;
+    confidence?: number;
     id: string;
     text?: string;
   }>;

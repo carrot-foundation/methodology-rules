@@ -1,3 +1,4 @@
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   type Block,
   BlockType,
@@ -5,30 +6,44 @@ import {
   TextractClient,
 } from '@aws-sdk/client-textract';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { sdkStreamMixin } from '@smithy/util-stream';
 import { type AwsClientStub, mockClient } from 'aws-sdk-client-mock';
+import { Readable } from 'node:stream';
 
 import type { TextExtractionResult } from './text-extractor.types';
 
+import { splitPdfPages } from './pdf-splitter.helpers';
 import { TextractService } from './textract.service';
 
 jest.mock('node:fs/promises', () => ({
   readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
 }));
 
+jest.mock('./pdf-splitter.helpers', () => ({
+  splitPdfPages: jest.fn(),
+}));
+
+const mockSplitPdfPages = jest.mocked(splitPdfPages);
+
 describe('TextractService', () => {
   let textractClientMock: AwsClientStub<TextractClient>;
+  let s3ClientMock: AwsClientStub<S3Client>;
   let service: TextractService;
 
   beforeEach(() => {
     textractClientMock = mockClient(TextractClient);
-    service = new TextractService(new TextractClient({}));
+    s3ClientMock = mockClient(S3Client);
+    service = new TextractService(new TextractClient({}), new S3Client({}));
 
     jest.spyOn(logger, 'debug').mockImplementation();
+    jest.spyOn(logger, 'info').mockImplementation();
     jest.spyOn(logger, 'error').mockImplementation();
+    jest.spyOn(logger, 'warn').mockImplementation();
   });
 
   afterEach(() => {
     textractClientMock.reset();
+    s3ClientMock.reset();
     jest.clearAllMocks();
   });
 
@@ -38,7 +53,7 @@ describe('TextractService', () => {
     );
   });
 
-  it('should construct with default TextractClient when none is provided', async () => {
+  it('should construct with default clients when none are provided', async () => {
     const defaultService = new TextractService();
     const blocks: Block[] = [
       {
@@ -60,11 +75,13 @@ describe('TextractService', () => {
     const blocks: Block[] = [
       {
         BlockType: BlockType.LINE,
+        Confidence: 99.5,
         Id: '1',
         Text: 'Hello',
       },
       {
         BlockType: BlockType.LINE,
+        Confidence: 95.2,
         Id: '2',
         Text: 'World',
       },
@@ -80,8 +97,8 @@ describe('TextractService', () => {
 
     const expected: TextExtractionResult = {
       blocks: [
-        { blockType: 'LINE', id: '1', text: 'Hello' },
-        { blockType: 'LINE', id: '2', text: 'World' },
+        { blockType: 'LINE', confidence: 99.5, id: '1', text: 'Hello' },
+        { blockType: 'LINE', confidence: 95.2, id: '2', text: 'World' },
       ],
       rawText: 'Hello\nWorld' as TextExtractionResult['rawText'],
     };
@@ -228,5 +245,133 @@ describe('TextractService', () => {
         filePath: 'no-line-blocks.pdf',
       }),
     ).rejects.toThrow('No LINE blocks returned from Textract');
+  });
+
+  describe('page-splitting fallback on UnsupportedDocumentException', () => {
+    const unsupportedError = new Error('Unsupported document');
+
+    beforeEach(() => {
+      unsupportedError.name = 'UnsupportedDocumentException';
+      mockSplitPdfPages.mockResolvedValue([
+        Buffer.from('page-1'),
+        Buffer.from('page-2'),
+      ]);
+    });
+
+    const page1Blocks: Block[] = [
+      { BlockType: BlockType.LINE, Id: '1', Text: 'Page 1 line' },
+    ];
+    const page2Blocks: Block[] = [
+      { BlockType: BlockType.LINE, Id: '2', Text: 'Page 2 line' },
+    ];
+
+    it('should fallback to page splitting for local file input', async () => {
+      let callCount = 0;
+
+      textractClientMock.on(DetectDocumentTextCommand).callsFake(() => {
+        callCount++;
+
+        if (callCount === 1) {
+          throw unsupportedError;
+        }
+
+        return { Blocks: callCount === 2 ? page1Blocks : page2Blocks };
+      });
+
+      const result = await service.extractText({
+        filePath: 'multi-page.pdf',
+      });
+
+      expect(result.rawText).toBe('Page 1 line\nPage 2 line');
+      expect(result.blocks).toHaveLength(2);
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('falling back to page splitting'),
+      );
+    });
+
+    it('should fallback to page splitting for S3 input', async () => {
+      let callCount = 0;
+
+      textractClientMock.on(DetectDocumentTextCommand).callsFake(() => {
+        callCount++;
+
+        if (callCount === 1) {
+          throw unsupportedError;
+        }
+
+        return { Blocks: callCount === 2 ? page1Blocks : page2Blocks };
+      });
+
+      const stream = sdkStreamMixin(
+        Readable.from([Buffer.from('mock-pdf-bytes')]),
+      );
+
+      s3ClientMock.on(GetObjectCommand).resolves({ Body: stream });
+
+      const result = await service.extractText({
+        s3Bucket: 'bucket',
+        s3Key: 'multi-page.pdf',
+      });
+
+      expect(result.rawText).toBe('Page 1 line\nPage 2 line');
+      expect(result.blocks).toHaveLength(2);
+      expect(s3ClientMock.commandCalls(GetObjectCommand)).toHaveLength(1);
+    });
+
+    it('should handle pages with no blocks', async () => {
+      let callCount = 0;
+
+      textractClientMock.on(DetectDocumentTextCommand).callsFake(() => {
+        callCount++;
+
+        if (callCount === 1) {
+          throw unsupportedError;
+        }
+
+        return callCount === 2 ? { Blocks: page1Blocks } : {};
+      });
+
+      const result = await service.extractText({
+        filePath: 'multi-page.pdf',
+      });
+
+      expect(result.rawText).toBe('Page 1 line');
+      expect(result.blocks).toHaveLength(1);
+    });
+
+    it('should throw when S3 download returns empty body', async () => {
+      textractClientMock
+        .on(DetectDocumentTextCommand)
+        .rejects(unsupportedError);
+      s3ClientMock.on(GetObjectCommand).resolves({});
+
+      await expect(
+        service.extractText({ s3Bucket: 'bucket', s3Key: 'file.pdf' }),
+      ).rejects.toThrow('Empty response body from S3');
+    });
+
+    it('should not fallback for other errors on local file', async () => {
+      const otherError = new Error('Network error');
+
+      textractClientMock.on(DetectDocumentTextCommand).rejects(otherError);
+
+      await expect(
+        service.extractText({ filePath: 'file.pdf' }),
+      ).rejects.toThrow('Network error');
+
+      expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should not fallback for other errors on S3', async () => {
+      const otherError = new Error('Access denied');
+
+      textractClientMock.on(DetectDocumentTextCommand).rejects(otherError);
+
+      await expect(
+        service.extractText({ s3Bucket: 'bucket', s3Key: 'key' }),
+      ).rejects.toThrow('Access denied');
+
+      expect(logger.error).toHaveBeenCalled();
+    });
   });
 });

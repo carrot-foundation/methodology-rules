@@ -1,3 +1,4 @@
+import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import {
   type Block,
   DetectDocumentTextCommand,
@@ -11,32 +12,69 @@ import type {
   TextExtractionResult,
 } from './text-extractor.types';
 
+import { splitPdfPages } from './pdf-splitter.helpers';
 import {
   assertTextExtractionInput,
   assertTextExtractionResultRawText,
 } from './text-extractor.typia';
 
+const isUnsupportedDocumentException = (error: unknown): boolean => {
+  /* istanbul ignore next -- defensive: AWS SDK always throws Error objects */
+  if (typeof error !== 'object' || error === null) {
+    return false;
+  }
+
+  return (error as { name?: string }).name === 'UnsupportedDocumentException';
+};
+
 export class TextractService {
+  private readonly s3Client: S3Client;
   private readonly textractClient: TextractClient;
 
-  constructor(textractClient?: TextractClient) {
+  constructor(textractClient?: TextractClient, s3Client?: S3Client) {
     this.textractClient = textractClient ?? new TextractClient();
+    this.s3Client = s3Client ?? new S3Client();
   }
 
   async extractText(input: TextExtractionInput): Promise<TextExtractionResult> {
     assertTextExtractionInput(input);
 
-    if (input.filePath) {
-      return this.extractFromLocalFile(input.filePath);
+    const startTime = Date.now();
+    const source = input.filePath ?? `s3://${input.s3Bucket}/${input.s3Key}`;
+
+    try {
+      if (input.filePath) {
+        return await this.extractFromLocalFile(input.filePath);
+      }
+
+      if (input.s3Bucket && input.s3Key) {
+        return await this.extractFromS3(input.s3Bucket, input.s3Key);
+      }
+
+      throw new Error(
+        'Either filePath or both s3Bucket and s3Key must be provided',
+      );
+    } finally {
+      const durationMs = Date.now() - startTime;
+
+      logger.info(
+        `Text extraction completed in ${(durationMs / 1000).toFixed(1)}s for ${source}`,
+      );
+    }
+  }
+
+  private async downloadFromS3(
+    bucket: string,
+    key: string,
+  ): Promise<Uint8Array> {
+    const command = new GetObjectCommand({ Bucket: bucket, Key: key });
+    const response = await this.s3Client.send(command);
+
+    if (!response.Body) {
+      throw new Error(`Empty response body from S3 for s3://${bucket}/${key}`);
     }
 
-    if (input.s3Bucket && input.s3Key) {
-      return this.extractFromS3(input.s3Bucket, input.s3Key);
-    }
-
-    throw new Error(
-      'Either filePath or both s3Bucket and s3Key must be provided',
-    );
+    return response.Body.transformToByteArray();
   }
 
   private async extractFromLocalFile(
@@ -71,6 +109,14 @@ export class TextractService {
         rawText,
       };
     } catch (error) {
+      if (isUnsupportedDocumentException(error)) {
+        logger.info(
+          `Sync extraction unsupported for ${filePath}, falling back to page splitting`,
+        );
+
+        return this.extractWithPageSplitting(fileBuffer);
+      }
+
       logger.error(
         {
           err: error,
@@ -116,6 +162,16 @@ export class TextractService {
         rawText,
       };
     } catch (error) {
+      if (isUnsupportedDocumentException(error)) {
+        logger.info(
+          `Sync extraction unsupported for s3://${bucket}/${key}, falling back to page splitting`,
+        );
+
+        const pdfBytes = await this.downloadFromS3(bucket, key);
+
+        return this.extractWithPageSplitting(pdfBytes);
+      }
+
       logger.error(
         {
           bucket,
@@ -142,11 +198,40 @@ export class TextractService {
     return assertTextExtractionResultRawText(text);
   }
 
-  private mapBlocks(
-    blocks: Block[],
-  ): Array<{ blockType?: string; id: string; text?: string }> {
+  private async extractWithPageSplitting(
+    pdfBytes: Uint8Array,
+  ): Promise<TextExtractionResult> {
+    const pages = await splitPdfPages(pdfBytes);
+
+    const pageResults = await Promise.all(
+      pages.map(async (pageBytes, index) => {
+        logger.debug(`Extracting text from page ${index + 1}/${pages.length}`);
+
+        const command = new DetectDocumentTextCommand({
+          Document: { Bytes: pageBytes },
+        });
+
+        const response = await this.textractClient.send(command);
+
+        return response.Blocks ?? [];
+      }),
+    );
+
+    const allBlocks = pageResults.flat();
+
+    logger.info(
+      `Extracted ${allBlocks.length} blocks from ${pages.length} pages using parallel sync`,
+    );
+
+    const rawText = this.extractRawText(allBlocks);
+    const blocks = this.mapBlocks(allBlocks);
+
+    return { blocks, rawText };
+  }
+
+  private mapBlocks(blocks: Block[]): TextExtractionResult['blocks'] {
     return blocks.map((block) => {
-      const result: { blockType?: string; id: string; text?: string } = {
+      const result: TextExtractionResult['blocks'][number] = {
         id: block.Id ?? '',
       };
 
@@ -156,6 +241,10 @@ export class TextractService {
 
       if (block.BlockType !== undefined) {
         result.blockType = block.BlockType;
+      }
+
+      if (block.Confidence !== undefined) {
+        result.confidence = block.Confidence;
       }
 
       return result;
