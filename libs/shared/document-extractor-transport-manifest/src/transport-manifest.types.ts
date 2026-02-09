@@ -10,20 +10,27 @@ export interface MtrExtractedData extends BaseExtractedData {
   documentType: 'transportManifest';
   driverName?: ExtractedField<NonEmptyString>;
   generator: ExtractedField<EntityInfo>;
+  hauler: ExtractedField<EntityInfo>;
   issueDate: ExtractedField<NonEmptyString>;
   receiver: ExtractedField<EntityInfo>;
-  transporter: ExtractedField<EntityInfo>;
+  receivingDate?: ExtractedField<NonEmptyString>;
+  transportDate?: ExtractedField<NonEmptyString>;
   vehiclePlate?: ExtractedField<NonEmptyString>;
   wasteClassification?: ExtractedField<NonEmptyString>;
   wasteQuantity?: ExtractedField<number>;
-  wasteType?: ExtractedField<NonEmptyString>;
+  wasteTypes?: ExtractedField<WasteTypeEntry[]>;
+}
+
+export interface WasteTypeEntry {
+  code?: string;
+  description: string;
 }
 
 export const MTR_REQUIRED_FIELDS = [
   'documentNumber',
   'issueDate',
   'generator',
-  'transporter',
+  'hauler',
   'receiver',
 ] as const;
 
@@ -31,11 +38,13 @@ export const MTR_ALL_FIELDS = [
   'documentNumber',
   'issueDate',
   'generator',
-  'transporter',
+  'hauler',
   'receiver',
+  'transportDate',
+  'receivingDate',
   'vehiclePlate',
   'driverName',
-  'wasteType',
+  'wasteTypes',
   'wasteQuantity',
   'wasteClassification',
 ] as const;
