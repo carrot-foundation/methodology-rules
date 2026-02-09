@@ -277,6 +277,30 @@ describe('crossValidateAttachments', () => {
     expect(validateFunction).toHaveBeenCalledTimes(1);
   });
 
+  it('should collect reviewReasons from validate callback', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        failMessages: [],
+        reviewReasons: ['Name similarity low: 45%'],
+        reviewRequired: true,
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.reviewRequired).toBe(true);
+    expect(result.reviewReasons).toContain('Name similarity low: 45%');
+    expect(result.failMessages).toHaveLength(0);
+  });
+
   it('should continue processing after extraction error', async () => {
     const extractionOutput = createExtractionOutput();
     const extractor = createMockExtractor(extractionOutput);

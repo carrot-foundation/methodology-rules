@@ -8,6 +8,64 @@ import type {
 import type { DocumentExtractorService } from './document-extractor.service';
 import type { BaseExtractedData } from './document-extractor.types';
 
+const processInput = async <
+  TEventData,
+  TExtractedData extends BaseExtractedData,
+>(
+  input: CrossValidationInput<TEventData>,
+  config: CrossValidationConfig<TEventData, TExtractedData>,
+  extractor: DocumentExtractorService,
+  result: CrossValidationResult,
+): Promise<void> => {
+  const { attachmentInfo, eventData } = input;
+
+  try {
+    const extractorConfig = config.getExtractorConfig(eventData);
+
+    if (!extractorConfig) {
+      result.reviewRequired = true;
+      result.reviewReasons.push(
+        `Unknown document type, cannot perform cross-validation for attachment ${attachmentInfo.attachmentId}`,
+      );
+
+      return;
+    }
+
+    const extractionResult = await extractor.extract<TExtractedData>(
+      { s3Bucket: attachmentInfo.s3Bucket, s3Key: attachmentInfo.s3Key },
+      extractorConfig,
+    );
+
+    const validationResult = config.validate(extractionResult, eventData);
+
+    if (validationResult.failMessages.length > 0) {
+      result.failMessages.push(...validationResult.failMessages);
+    }
+
+    if (validationResult.reviewRequired === true) {
+      result.reviewRequired = true;
+
+      if (validationResult.reviewReasons) {
+        result.reviewReasons.push(...validationResult.reviewReasons);
+      }
+    }
+
+    if (extractionResult.reviewRequired) {
+      result.reviewRequired = true;
+      result.reviewReasons.push(...extractionResult.reviewReasons);
+    }
+  } catch (error) {
+    logger.error(
+      { attachmentInfo, error },
+      'Failed to extract document for cross-validation',
+    );
+    result.reviewRequired = true;
+    result.reviewReasons.push(
+      `Document extraction failed for attachment ${attachmentInfo.attachmentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
+  }
+};
+
 export const crossValidateAttachments = async <
   TEventData,
   TExtractedData extends BaseExtractedData,
@@ -22,49 +80,8 @@ export const crossValidateAttachments = async <
     reviewRequired: false,
   };
 
-  if (inputs.length === 0) {
-    return result;
-  }
-
   for (const input of inputs) {
-    const { attachmentInfo, eventData } = input;
-
-    try {
-      const extractorConfig = config.getExtractorConfig(eventData);
-
-      if (!extractorConfig) {
-        result.reviewRequired = true;
-        result.reviewReasons.push(
-          `Unknown document type, cannot perform cross-validation for attachment ${attachmentInfo.attachmentId}`,
-        );
-        continue;
-      }
-
-      const extractionResult = await extractor.extract<TExtractedData>(
-        { s3Bucket: attachmentInfo.s3Bucket, s3Key: attachmentInfo.s3Key },
-        extractorConfig,
-      );
-
-      const validationResult = config.validate(extractionResult, eventData);
-
-      if (validationResult.failMessages.length > 0) {
-        result.failMessages.push(...validationResult.failMessages);
-      }
-
-      if (extractionResult.reviewRequired) {
-        result.reviewRequired = true;
-        result.reviewReasons.push(...extractionResult.reviewReasons);
-      }
-    } catch (error) {
-      logger.error(
-        { attachmentInfo, error },
-        'Failed to extract document for cross-validation',
-      );
-      result.reviewRequired = true;
-      result.reviewReasons.push(
-        `Document extraction failed for attachment ${attachmentInfo.attachmentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
-      );
-    }
+    await processInput(input, config, extractor, result);
   }
 
   return result;

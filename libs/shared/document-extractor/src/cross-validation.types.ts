@@ -20,7 +20,7 @@ export interface CrossValidationConfig<
   validate: (
     extractedData: ExtractionOutput<TExtractedData>,
     eventData: TEventData,
-  ) => { failMessages: string[] };
+  ) => CrossValidationValidateResult;
 }
 
 export interface CrossValidationInput<TEventData> {
@@ -32,4 +32,10 @@ export interface CrossValidationResult {
   failMessages: string[];
   reviewReasons: string[];
   reviewRequired: boolean;
+}
+
+export interface CrossValidationValidateResult {
+  failMessages: string[];
+  reviewReasons?: string[];
+  reviewRequired?: boolean;
 }

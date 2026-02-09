@@ -21,6 +21,25 @@ export const extractStringField = (
   return { rawMatch: match[0], value: match[1].trim() };
 };
 
+export const extractAllStringFields = (
+  text: string,
+  pattern: RegExp,
+): Array<{ rawMatch: string; value: string }> => {
+  const globalPattern = pattern.global
+    ? pattern
+    : new RegExp(pattern.source, `${pattern.flags}g`);
+
+  const results: Array<{ rawMatch: string; value: string }> = [];
+
+  for (const match of text.matchAll(globalPattern)) {
+    if (match[1]) {
+      results.push({ rawMatch: match[0], value: match[1].trim() });
+    }
+  }
+
+  return results;
+};
+
 export const parseBrazilianNumber = (value: string): number | undefined => {
   const cleaned = value.replaceAll('.', '').replace(',', '.');
   const parsed = Number.parseFloat(cleaned);

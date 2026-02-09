@@ -2,6 +2,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   entityFieldOrEmpty,
+  extractAllStringFields,
   extractEntityFromSection,
   extractSection,
   extractStringField,
@@ -32,6 +33,52 @@ describe('text-parsing.helpers', () => {
       const result = extractStringField('Ticket:', /Ticket:\s*(\d+)?/);
 
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('extractAllStringFields', () => {
+    it('should return all matches for a global pattern', () => {
+      const text = 'Item: apple\nItem: banana\nItem: cherry';
+      const result = extractAllStringFields(text, /Item:\s*(.+)/g);
+
+      expect(result).toEqual([
+        { rawMatch: 'Item: apple', value: 'apple' },
+        { rawMatch: 'Item: banana', value: 'banana' },
+        { rawMatch: 'Item: cherry', value: 'cherry' },
+      ]);
+    });
+
+    it('should add global flag when pattern is not global', () => {
+      const text = 'Item: apple\nItem: banana';
+      const result = extractAllStringFields(text, /Item:\s*(.+)/);
+
+      expect(result).toEqual([
+        { rawMatch: 'Item: apple', value: 'apple' },
+        { rawMatch: 'Item: banana', value: 'banana' },
+      ]);
+    });
+
+    it('should return empty array when no matches found', () => {
+      const result = extractAllStringFields('no match here', /Item:\s*(.+)/);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should skip matches where capture group is empty', () => {
+      const text = 'Item: | Item: banana';
+      const result = extractAllStringFields(text, /Item: (\w+)?/g);
+
+      expect(result).toEqual([{ rawMatch: 'Item: banana', value: 'banana' }]);
+    });
+
+    it('should trim whitespace from captured values', () => {
+      const text = 'Name:  hello world  \nName:  foo bar  ';
+      const result = extractAllStringFields(text, /Name:\s*(.+)/g);
+
+      expect(result).toEqual([
+        { rawMatch: 'Name:  hello world  ', value: 'hello world' },
+        { rawMatch: 'Name:  foo bar  ', value: 'foo bar' },
+      ]);
     });
   });
 
