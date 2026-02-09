@@ -30,7 +30,6 @@ describe('DocumentManifestDataLambda E2E', () => {
     'should return $resultStatus when $scenario',
     async ({ documentManifestType, events, resultStatus }) => {
       const lambda = documentManifestDataLambda({
-        aiParameters: {},
         documentManifestType,
       });
 

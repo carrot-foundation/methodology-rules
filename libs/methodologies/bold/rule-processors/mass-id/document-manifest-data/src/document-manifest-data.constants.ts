@@ -19,11 +19,27 @@ const { MTR } = ReportType;
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" event address.`,
   ATTACHMENT_AND_JUSTIFICATION_PROVIDED: `The "${EXEMPTION_JUSTIFICATION}" should not be provided when a "${TRANSPORT_MANIFEST}" attachment is present.`,
+  DOCUMENT_NUMBER_MISMATCH: ({
+    eventDocumentNumber,
+    extractedDocumentNumber,
+  }: {
+    eventDocumentNumber: string;
+    extractedDocumentNumber: string;
+  }) =>
+    `The "${DOCUMENT_NUMBER}" declared in the event ("${eventDocumentNumber}") does not match the extracted value from the document ("${extractedDocumentNumber}").`,
   INCORRECT_ATTACHMENT_LABEL: `Expected an attachment with the "${TRANSPORT_MANIFEST}" label, but no one was found.`,
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "${DOCUMENT_TYPE}" must be "${MTR}" for recyclers in Brazil, but "${documentType}" was provided.`,
   INVALID_ISSUE_DATE_FORMAT: (dateFormat: string) =>
     `The "${ISSUE_DATE}" format must be "${DATE}", but the declared format is "${dateFormat}".`,
+  ISSUE_DATE_MISMATCH: ({
+    eventIssueDate,
+    extractedIssueDate,
+  }: {
+    eventIssueDate: string;
+    extractedIssueDate: string;
+  }) =>
+    `The "${ISSUE_DATE}" declared in the event ("${eventIssueDate}") does not match the extracted value from the document ("${extractedIssueDate}").`,
   MISSING_ATTRIBUTES: `Either the "${TRANSPORT_MANIFEST}" attachment or an "${EXEMPTION_JUSTIFICATION}" must be provided.`,
   MISSING_DOCUMENT_NUMBER: `The "${DOCUMENT_NUMBER}" was not provided.`,
   MISSING_DOCUMENT_TYPE: `The "${DOCUMENT_TYPE}" was not provided.`,

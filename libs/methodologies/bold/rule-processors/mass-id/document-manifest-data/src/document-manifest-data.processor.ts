@@ -1,14 +1,11 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
-import { CloudWatchMetricsService } from '@carrot-fndn/shared/cloudwatch-metrics';
 import {
   getOrDefault,
   isNil,
   isNonEmptyArray,
   isNonEmptyString,
-  logger,
 } from '@carrot-fndn/shared/helpers';
-import { AiAttachmentValidatorService } from '@carrot-fndn/shared/methodologies/ai-attachment-validator';
 import {
   getDocumentEventAttachmentByLabel,
   getEventAttributeByName,
@@ -27,18 +24,26 @@ import {
   DocumentEventName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttribute,
   MethodologyDocumentEventAttributeFormat,
-  type MethodologyDocumentEventAttributeValue,
   MethodologyDocumentEventLabel,
-  NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
+import { crossValidateWithTextract } from './document-manifest-data.extractor';
+import {
+  type AttachmentInfo,
+  type DocumentManifestEventSubject,
+  type EventAttributeValueType,
+  getAttachmentInfos,
+  type ValidationResult,
+} from './document-manifest-data.helpers';
+
+// Import parsers to register them
+import '@carrot-fndn/shared/document-extractor';
 
 const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
@@ -46,64 +51,32 @@ const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
-export interface AIParameters {
-  systemPrompt?: NonEmptyString;
-}
-
 export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
   | typeof TRANSPORT_MANIFEST;
 
-interface DocumentManifestEventSubject {
-  attachment: MethodologyDocumentEventAttachment | undefined;
-  documentNumber: EventAttributeValueType;
-  documentType: EventAttributeValueType;
-  eventAddressId: string | undefined;
-  eventValue: number | undefined;
-  exemptionJustification: EventAttributeValueType;
-  hasWrongLabelAttachment: boolean;
-  issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
-  recyclerCountryCode: string | undefined;
-}
-
-type EventAttributeValueType =
-  | MethodologyDocumentEventAttributeValue
-  | string
-  | undefined;
-
 type RuleSubject = {
-  attachmentPaths: NonEmptyString[];
+  attachmentInfos: AttachmentInfo[];
   document: Document;
   documentManifestEvents: DocumentManifestEventSubject[];
   recyclerEvent: DocumentEvent | undefined;
 };
-
-interface ValidationResult {
-  failMessages: string[];
-  passMessage?: string;
-}
 
 const DOCUMENT_TYPE_MAPPING = {
   [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
   [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
 } as const;
 
-const aiAttachmentValidatorService = new AiAttachmentValidatorService();
-
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
-  private readonly aiParameters: AIParameters;
   private readonly documentManifestType: DocumentManifestType;
 
   constructor({
-    aiParameters,
     documentManifestType,
   }: {
-    aiParameters: AIParameters;
     documentManifestType: DocumentManifestType;
   }) {
     super();
     this.documentManifestType = documentManifestType;
-    this.aiParameters = aiParameters;
   }
 
   protected override async evaluateResult(
@@ -142,15 +115,33 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       };
     }
 
-    if (this.shouldValidateAttachmentsConsistencyWithAI()) {
-      await this.validateAttachmentsConsistencyWithAI({
-        attachmentPaths: ruleSubject.attachmentPaths,
-        document: ruleSubject.document,
-      });
+    const crossValidationResult = await crossValidateWithTextract({
+      attachmentInfos: ruleSubject.attachmentInfos,
+      documentManifestEvents: ruleSubject.documentManifestEvents,
+    });
+
+    if (crossValidationResult.failMessages.length > 0) {
+      return {
+        resultComment: crossValidationResult.failMessages.join(' '),
+        resultStatus: RuleOutputStatus.FAILED,
+      };
+    }
+
+    const resultComment = passMessages.join(' ');
+
+    if (crossValidationResult.reviewRequired) {
+      return {
+        resultComment: `${resultComment} Review required: ${crossValidationResult.reviewReasons.join('; ')}`,
+        resultContent: {
+          reviewReasons: crossValidationResult.reviewReasons,
+          reviewRequired: true,
+        },
+        resultStatus: RuleOutputStatus.PASSED,
+      };
     }
 
     return {
-      resultComment: passMessages.join(' '),
+      resultComment,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }
@@ -192,7 +183,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     );
 
     return {
-      attachmentPaths: this.getAttachmentPaths({
+      attachmentInfos: getAttachmentInfos({
         documentId: document.id,
         events: documentManifestEvents,
       }),
@@ -200,82 +191,6 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       documentManifestEvents,
       recyclerEvent,
     };
-  }
-
-  private getAttachmentPaths({
-    documentId,
-    events,
-  }: {
-    documentId: string;
-    events: DocumentManifestEventSubject[];
-  }): NonEmptyString[] {
-    const bucketName = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
-
-    if (!bucketName) {
-      throw new Error(
-        'DOCUMENT_ATTACHMENT_BUCKET_NAME environment variable is required',
-      );
-    }
-
-    return events
-      .map((event) => event.attachment?.attachmentId)
-      .filter((attachmentId) => isNonEmptyString(attachmentId))
-      .map(
-        (attachmentId) =>
-          `s3://${bucketName}/${getAttachmentS3Key(documentId, attachmentId)}`,
-      ) as NonEmptyString[];
-  }
-
-  private shouldValidateAttachmentsConsistencyWithAI(): boolean {
-    const value = process.env['VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI'];
-
-    return isNonEmptyString(value) && value.toLowerCase() === 'true';
-  }
-
-  private async validateAttachmentsConsistencyWithAI({
-    attachmentPaths,
-    document,
-  }: {
-    attachmentPaths: NonEmptyString[];
-    document: Document;
-  }): Promise<void> {
-    for (const attachmentPath of attachmentPaths) {
-      const aiValidationResult =
-        await aiAttachmentValidatorService.validateAttachment({
-          attachmentPath,
-          document,
-          systemPrompt: this.aiParameters.systemPrompt,
-        });
-
-      const baseLogInfo = {
-        reasoning: aiValidationResult.reasoning,
-        validationResponse: aiValidationResult.validationResponse,
-      };
-
-      logger.warn(
-        'AI Attachment Validation performed',
-        JSON.stringify(baseLogInfo),
-      );
-
-      const cloudWatchMetricsService = CloudWatchMetricsService.getInstance();
-
-      if (aiValidationResult.isValid === false) {
-        logger.warn('AI Attachment Validation failed');
-
-        if (cloudWatchMetricsService.isEnabled()) {
-          try {
-            await cloudWatchMetricsService.recordAIValidationFailure({
-              documentManifestType: this.documentManifestType,
-            });
-          } catch (error) {
-            logger.error(
-              `Failed to record CloudWatch metric for AI validation failure (${this.documentManifestType})`,
-              error,
-            );
-          }
-        }
-      }
-    }
   }
 
   private validateDocumentAttributes(
