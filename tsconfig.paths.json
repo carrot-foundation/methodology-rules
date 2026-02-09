@@ -138,8 +138,17 @@
       ],
       "@carrot-fndn/shared/rule/types": ["libs/shared/rule/types/src/index.ts"],
       "@carrot-fndn/shared/s3-bucket": ["libs/shared/s3-bucket/src/index.ts"],
-      "@carrot-fndn/shared/scale-ticket-extractor": [
-        "libs/shared/scale-ticket-extractor/src/index.ts"
+      "@carrot-fndn/shared/document-extractor": [
+        "libs/shared/document-extractor/src/index.ts"
+      ],
+      "@carrot-fndn/shared/document-extractor-scale-ticket": [
+        "libs/shared/document-extractor-scale-ticket/src/index.ts"
+      ],
+      "@carrot-fndn/shared/document-extractor-transport-manifest": [
+        "libs/shared/document-extractor-transport-manifest/src/index.ts"
+      ],
+      "@carrot-fndn/shared/document-extractor-recycling-manifest": [
+        "libs/shared/document-extractor-recycling-manifest/src/index.ts"
       ],
       "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
       "@carrot-fndn/shared/text-extractor": [

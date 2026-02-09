@@ -1,0 +1,47 @@
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
+
+export interface BaseExtractedData {
+  documentType: DocumentType;
+  extractionConfidence: ExtractionConfidence;
+  lowConfidenceFields: string[];
+  missingRequiredFields: string[];
+  rawText: NonEmptyString;
+}
+
+export interface DocumentExtractorConfig {
+  documentType: DocumentType;
+  layouts: string[];
+}
+
+export interface DocumentParser<T extends BaseExtractedData> {
+  readonly documentType: DocumentType;
+  getMatchScore(extractionResult: TextExtractionResult): number;
+  readonly layoutId: string;
+  parse(extractionResult: TextExtractionResult): ExtractionOutput<T>;
+  readonly textractMode?: 'analyze' | 'detect';
+}
+
+export type DocumentType =
+  | 'recyclingManifest'
+  | 'scaleTicket'
+  | 'transportManifest';
+
+export interface ExtractedField<T> {
+  confidence: ExtractionConfidence;
+  parsed: T;
+  rawMatch?: string;
+}
+
+export type ExtractionConfidence = 'high' | 'low';
+
+export interface ExtractionOutput<T extends BaseExtractedData> {
+  data: T;
+  reviewReasons: string[];
+  reviewRequired: boolean;
+}
+
+export interface LayoutConfig {
+  documentType: DocumentType;
+  layoutId: string;
+}

@@ -1,0 +1,12 @@
+{
+  "name": "shared-document-extractor-scale-ticket",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
+  "sourceRoot": "libs/shared/document-extractor-scale-ticket/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}
