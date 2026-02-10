@@ -179,7 +179,7 @@ describe('crossValidateWithTextract', () => {
     expect(result.reviewReasons).toContain('Some review reason');
   });
 
-  it('should handle extraction errors gracefully', async () => {
+  it('should fail when extraction errors occur', async () => {
     const attachmentInfos: AttachmentInfo[] = [
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
@@ -205,13 +205,12 @@ describe('crossValidateWithTextract', () => {
       ...noRelatedEvents,
     });
 
-    expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons[0]).toContain(
+    expect(result.failMessages[0]).toContain(
       'Document extraction failed for attachment att-1: Extraction failed',
     );
   });
 
-  it('should handle non-Error exceptions', async () => {
+  it('should fail with unknown error for non-Error exceptions', async () => {
     const attachmentInfos: AttachmentInfo[] = [
       { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
     ];
@@ -237,8 +236,7 @@ describe('crossValidateWithTextract', () => {
       ...noRelatedEvents,
     });
 
-    expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons[0]).toContain('Unknown error');
+    expect(result.failMessages[0]).toContain('Unknown error');
   });
 
   it('should enrich MTR events with related events for cross-validation', async () => {

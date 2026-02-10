@@ -182,7 +182,7 @@ describe('crossValidateAttachments', () => {
     expect(result.reviewReasons).toContain('Low confidence extraction');
   });
 
-  it('should handle extraction errors gracefully', async () => {
+  it('should fail when extraction errors occur', async () => {
     const extractor = createMockExtractor(
       undefined,
       new Error('Extraction failed'),
@@ -197,13 +197,12 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons[0]).toContain(
+    expect(result.failMessages[0]).toContain(
       'Document extraction failed for attachment att-1: Extraction failed',
     );
   });
 
-  it('should handle non-Error exceptions', async () => {
+  it('should fail with unknown error for non-Error exceptions', async () => {
     const extractor = createMockExtractor();
 
     (extractor.extract as jest.Mock).mockRejectedValue('string error');
@@ -217,8 +216,7 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons[0]).toContain('Unknown error');
+    expect(result.failMessages[0]).toContain('Unknown error');
   });
 
   it('should process multiple inputs and aggregate results', async () => {
@@ -330,8 +328,7 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons[0]).toContain('First extraction failed');
+    expect(result.failMessages[0]).toContain('First extraction failed');
     expect(extractor.extract).toHaveBeenCalledTimes(2);
     expect(validateFunction).toHaveBeenCalledTimes(1);
   });

@@ -9,17 +9,25 @@ import {
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
+import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import { documentManifestDataLambda } from './document-manifest-data.lambda';
 import {
   documentManifestDataTestCases,
   exceptionTestCases,
 } from './document-manifest-data.test-cases';
 
+jest.mock('./document-manifest-data.extractor');
+
 describe('DocumentManifestDataLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   beforeEach(() => {
     process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+    jest.mocked(crossValidateWithTextract).mockResolvedValue({
+      failMessages: [],
+      reviewReasons: [],
+      reviewRequired: false,
+    });
   });
 
   afterEach(() => {

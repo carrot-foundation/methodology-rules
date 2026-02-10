@@ -59,6 +59,14 @@ describe('DocumentManifestDataProcessor', () => {
       });
     }
 
+    if ('crossValidationReviewReasons' in testCase) {
+      crossValidateWithTextractMock.mockResolvedValueOnce({
+        failMessages: [],
+        reviewReasons: testCase.crossValidationReviewReasons,
+        reviewRequired: true,
+      });
+    }
+
     const ruleDataProcessor = new DocumentManifestDataProcessor({
       documentManifestType,
     });

@@ -372,6 +372,36 @@ export const crossValidationTestCases = [
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'cross-validation finds mismatches in the document',
   },
+  {
+    crossValidationReviewReasons: ['Low confidence extraction'],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: {
+      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+        metadataAttributes: [
+          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_NUMBER, '123'],
+          {
+            format: DATE,
+            name: ISSUE_DATE,
+            value: '2025-01-01',
+          },
+        ],
+        partialDocumentEvent: {
+          address: sameAddress,
+          attachments: [
+            stubDocumentEventAttachment({
+              label: TRANSPORT_MANIFEST,
+            }),
+          ],
+          value: 100,
+        },
+      }),
+      ...defaultEvents,
+    },
+    resultComment: 'Review required: Low confidence extraction',
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: 'cross-validation requires review',
+  },
 ];
 
 export const exceptionTestCases = [

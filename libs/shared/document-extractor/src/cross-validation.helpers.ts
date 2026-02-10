@@ -59,8 +59,7 @@ const processInput = async <
       { attachmentInfo, error },
       'Failed to extract document for cross-validation',
     );
-    result.reviewRequired = true;
-    result.reviewReasons.push(
+    result.failMessages.push(
       `Document extraction failed for attachment ${attachmentInfo.attachmentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
     );
   }
