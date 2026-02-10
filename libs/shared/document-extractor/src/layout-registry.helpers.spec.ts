@@ -18,6 +18,7 @@ import {
   getRegisteredLayouts,
   registerParser,
   selectBestParser,
+  selectBestParserGlobal,
 } from './layout-registry.helpers';
 
 const buildMockExtractionOutput = (
@@ -241,6 +242,57 @@ describe('layout-registry', () => {
         stubTextExtractionResult('This is a scale ticket'),
         'scaleTicket',
         ['unknown-1', 'unknown-2'],
+      );
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('selectBestParserGlobal', () => {
+    beforeEach(() => {
+      registerParser('scaleTicket', 'mock-layout', MockScaleTicketParser);
+      registerParser('scaleTicket', 'layout-2', MockScaleTicketLayout2Parser);
+      registerParser(
+        'transportManifest',
+        'mock-transport-layout',
+        MockTransportManifestParser,
+      );
+    });
+
+    it('should select the best parser across all document types', () => {
+      const result = selectBestParserGlobal(
+        stubTextExtractionResult('This contains MTR data'),
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.parser.documentType).toBe('transportManifest');
+      expect(result?.parser.layoutId).toBe('mock-transport-layout');
+      expect(result?.score).toBe(0.9);
+    });
+
+    it('should select the highest scoring parser when multiple types match', () => {
+      const result = selectBestParserGlobal(
+        stubTextExtractionResult('This has scale and layout2 text'),
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.parser.layoutId).toBe('layout-2');
+      expect(result?.score).toBe(0.95);
+    });
+
+    it('should return undefined when no parser matches above threshold', () => {
+      const result = selectBestParserGlobal(
+        stubTextExtractionResult('random text with no keywords'),
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when no parsers are registered', () => {
+      clearRegistry();
+
+      const result = selectBestParserGlobal(
+        stubTextExtractionResult('This contains MTR data'),
       );
 
       expect(result).toBeUndefined();

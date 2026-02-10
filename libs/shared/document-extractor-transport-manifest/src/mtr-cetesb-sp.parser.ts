@@ -8,9 +8,11 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import {
   calculateMatchScore,
   createHighConfidenceField,
+  createLowConfidenceField,
   type DocumentParser,
   entityFieldOrEmpty,
   type EntityInfo,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
   finalizeExtraction,
@@ -38,7 +40,7 @@ const SECTION_PATTERNS = {
 
 const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
-  cnpj: /CPF\/CNPJ\s*:?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/gi,
+  cnpj: /CPF\/CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi,
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
@@ -65,6 +67,14 @@ const SIGNATURE_PATTERNS = [
   /IBAMA/i,
   /Res[ií]duo/i,
 ];
+
+const LABEL_PATTERNS = {
+  driverName: /nome\s*do\s*motorista/i,
+  issueDate: /Data\s*da\s*emiss[ãa]o/i,
+  receivingDate: /Data\s*(?:do\s*)?recebimento/i,
+  transportDate: /Data\s*(?:do\s*)?transporte/i,
+  vehiclePlate: /placa\s*do\s*ve[ií]culo/i,
+} as const;
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
@@ -331,6 +341,8 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
         driverName as NonEmptyString,
         `Nome do Motorista\n${driverName}`,
       );
+    } else if (LABEL_PATTERNS.driverName.test(haulerSection)) {
+      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
     }
 
     if (vehiclePlate && MTR_PATTERNS.vehiclePlateFormat.test(vehiclePlate)) {
@@ -338,6 +350,8 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
         vehiclePlate as NonEmptyString,
         `Placa do Veículo\n${vehiclePlate}`,
       );
+    } else if (LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
+      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
     }
   }
 
@@ -345,13 +359,14 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     rawText: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const match = MTR_PATTERNS.issueDate.exec(rawText);
+    const issueDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.issueDate,
+      LABEL_PATTERNS.issueDate,
+    );
 
-    if (match?.[1]) {
-      partialData.issueDate = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
+    if (issueDate) {
+      partialData.issueDate = issueDate;
     }
   }
 
@@ -359,13 +374,14 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     rawText: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const match = MTR_PATTERNS.receivingDate.exec(rawText);
+    const receivingDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.receivingDate,
+      LABEL_PATTERNS.receivingDate,
+    );
 
-    if (match?.[1]) {
-      partialData.receivingDate = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
+    if (receivingDate) {
+      partialData.receivingDate = receivingDate;
     }
   }
 
@@ -373,13 +389,14 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     rawText: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const match = MTR_PATTERNS.transportDate.exec(rawText);
+    const transportDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.transportDate,
+      LABEL_PATTERNS.transportDate,
+    );
 
-    if (match?.[1]) {
-      partialData.transportDate = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
+    if (transportDate) {
+      partialData.transportDate = transportDate;
     }
   }
 

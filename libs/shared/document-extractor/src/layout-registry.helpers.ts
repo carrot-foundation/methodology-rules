@@ -1,5 +1,7 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
+import { logger } from '@carrot-fndn/shared/helpers';
+
 import type {
   BaseExtractedData,
   DocumentParser,
@@ -82,12 +84,51 @@ export const selectBestParser = <T extends BaseExtractedData>(
 
     const score = parser.getMatchScore(extractionResult);
 
+    logger.debug(`Layout "${layoutId}" match score: ${score.toFixed(3)}`);
+
     if (
       isAboveMatchThreshold(score) &&
       (!bestMatch || score > bestMatch.score)
     ) {
       bestMatch = { parser, score };
     }
+  }
+
+  if (bestMatch) {
+    logger.debug(
+      `Selected layout: "${bestMatch.parser.layoutId}" (score: ${bestMatch.score.toFixed(3)})`,
+    );
+  }
+
+  return bestMatch;
+};
+
+export const selectBestParserGlobal = <T extends BaseExtractedData>(
+  extractionResult: TextExtractionResult,
+): ParserMatchResult<T> | undefined => {
+  const allParsers = getAllParsers();
+
+  let bestMatch: ParserMatchResult<T> | undefined;
+
+  for (const parser of allParsers) {
+    const score = parser.getMatchScore(extractionResult);
+
+    logger.debug(
+      `[auto-detect] "${parser.documentType}/${parser.layoutId}" match score: ${score.toFixed(3)}`,
+    );
+
+    if (
+      isAboveMatchThreshold(score) &&
+      (!bestMatch || score > bestMatch.score)
+    ) {
+      bestMatch = { parser: parser as DocumentParser<T>, score };
+    }
+  }
+
+  if (bestMatch) {
+    logger.debug(
+      `[auto-detect] Selected: "${bestMatch.parser.documentType}/${bestMatch.parser.layoutId}" (score: ${bestMatch.score.toFixed(3)})`,
+    );
   }
 
   return bestMatch;

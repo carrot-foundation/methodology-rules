@@ -8,6 +8,7 @@ import {
   entityFieldOrEmpty,
   extractAllStringFields,
   extractEntityFromSection,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractStringField,
   finalizeExtraction,
@@ -24,17 +25,22 @@ import {
 
 const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
-  cnpj: /CNPJ\s*:?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/gi,
+  cnpj: /CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi,
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-  driverName: /Motorista\s*:?\s*([A-Za-z\u00C0-\u017F\s]+?)(?=\n|CPF|$)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  issueDate: /Data\s*(?:de\s*)?Emiss[ãa]o\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  receivingDate: /Data\s*(?:de\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  transportDate: /Data\s*(?:de\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+
+  driverName:
+    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
+    /Motorista[^\S\n]*:?[^\S\n]*([A-Za-z\u00C0-\u017F ]+?)(?=\n|CPF|$)/i,
+  issueDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Emiss[ãa]o\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  receivingDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  transportDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   vehiclePlate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Placa\s*(?:do\s*)?Ve[ií]culo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i,
@@ -47,10 +53,23 @@ const MTR_PATTERNS = {
     /Tipo\s*(?:de\s*)?Res[ií]duo\s*:?\s*([A-Za-z\u00C0-\u017F\s]+?)(?=\n|Classe|$)/i,
 } as const;
 
+const LABEL_PATTERNS = {
+  driverName: /Motorista/i,
+  issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emiss[ãa]o/i,
+  receivingDate: /Data\s*(?:(?:de|da|do)\s*)?Recebimento/i,
+  transportDate: /Data\s*(?:(?:de|da|do)\s*)?Transporte/i,
+  vehiclePlate: /Placa\s*(?:do\s*)?Ve[ií]culo/i,
+} as const;
+
+const stripTrailingRegistrationNumber = (name: string): string =>
+  // eslint-disable-next-line sonarjs/slow-regex
+  name.replace(/\s+[-–]?\s*\d{1,7}$/, '').trim();
+
 const SECTION_PATTERNS = {
-  destinatario: /^\s*(?:Destinat[áa]rio|Receptor)\s*$/i,
-  gerador: /^\s*(?:Gerador|Origem)\s*$/i,
-  transportador: /^\s*(?:Transportador)\s*$/i,
+  destinatario:
+    /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Destinat[áa]rio|Destinador|Receptor)\s*$/i,
+  gerador: /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+  transportador: /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Transportador)\s*$/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -58,7 +77,7 @@ const SIGNATURE_PATTERNS = [
   /Manifesto\s*de\s*Transporte/i,
   /Gerador/i,
   /Transportador/i,
-  /Destinat[áa]rio/i,
+  /Destinat[áa]rio|Destinador/i,
   /IBAMA/i,
   /Res[ií]duo/i,
 ];
@@ -84,18 +103,6 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       rawText,
       MTR_PATTERNS.documentNumber,
     );
-    const issueDateExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.issueDate,
-    );
-    const transportDateExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.transportDate,
-    );
-    const receivingDateExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.receivingDate,
-    );
     const generatorExtracted = extractEntityFromSection(
       rawText,
       SECTION_PATTERNS.gerador,
@@ -113,14 +120,6 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       SECTION_PATTERNS.destinatario,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.cnpj,
-    );
-    const vehiclePlateExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.vehiclePlate,
-    );
-    const driverNameExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.driverName,
     );
     const wasteTypeMatches = extractAllStringFields(
       rawText,
@@ -150,43 +149,94 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
-    if (issueDateExtracted) {
-      partialData.issueDate = createHighConfidenceField(
-        issueDateExtracted.value as NonEmptyString,
-        issueDateExtracted.rawMatch,
-      );
+    const issueDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.issueDate,
+      LABEL_PATTERNS.issueDate,
+    );
+
+    if (issueDate) {
+      partialData.issueDate = issueDate;
     }
 
-    if (transportDateExtracted) {
-      partialData.transportDate = createHighConfidenceField(
-        transportDateExtracted.value as NonEmptyString,
-        transportDateExtracted.rawMatch,
-      );
+    const transportDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.transportDate,
+      LABEL_PATTERNS.transportDate,
+    );
+
+    if (transportDate) {
+      partialData.transportDate = transportDate;
     }
 
-    if (receivingDateExtracted) {
-      partialData.receivingDate = createHighConfidenceField(
-        receivingDateExtracted.value as NonEmptyString,
-        receivingDateExtracted.rawMatch,
-      );
+    const receivingDate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.receivingDate,
+      LABEL_PATTERNS.receivingDate,
+    );
+
+    if (receivingDate) {
+      partialData.receivingDate = receivingDate;
     }
 
-    partialData.generator = entityFieldOrEmpty(generatorExtracted);
-    partialData.hauler = entityFieldOrEmpty(haulerExtracted);
-    partialData.receiver = entityFieldOrEmpty(receiverExtracted);
+    partialData.generator = entityFieldOrEmpty(
+      generatorExtracted
+        ? {
+            rawMatch: generatorExtracted.rawMatch,
+            value: {
+              ...generatorExtracted.value,
+              name: stripTrailingRegistrationNumber(
+                generatorExtracted.value.name,
+              ) as NonEmptyString,
+            },
+          }
+        : undefined,
+    );
+    partialData.hauler = entityFieldOrEmpty(
+      haulerExtracted
+        ? {
+            rawMatch: haulerExtracted.rawMatch,
+            value: {
+              ...haulerExtracted.value,
+              name: stripTrailingRegistrationNumber(
+                haulerExtracted.value.name,
+              ) as NonEmptyString,
+            },
+          }
+        : undefined,
+    );
+    partialData.receiver = entityFieldOrEmpty(
+      receiverExtracted
+        ? {
+            rawMatch: receiverExtracted.rawMatch,
+            value: {
+              ...receiverExtracted.value,
+              name: stripTrailingRegistrationNumber(
+                receiverExtracted.value.name,
+              ) as NonEmptyString,
+            },
+          }
+        : undefined,
+    );
 
-    if (vehiclePlateExtracted) {
-      partialData.vehiclePlate = createHighConfidenceField(
-        vehiclePlateExtracted.value as NonEmptyString,
-        vehiclePlateExtracted.rawMatch,
-      );
+    const vehiclePlate = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.vehiclePlate,
+      LABEL_PATTERNS.vehiclePlate,
+    );
+
+    if (vehiclePlate) {
+      partialData.vehiclePlate = vehiclePlate;
     }
 
-    if (driverNameExtracted) {
-      partialData.driverName = createHighConfidenceField(
-        driverNameExtracted.value as NonEmptyString,
-        driverNameExtracted.rawMatch,
-      );
+    const driverName = extractFieldWithLabelFallback(
+      rawText,
+      MTR_PATTERNS.driverName,
+      LABEL_PATTERNS.driverName,
+    );
+
+    if (driverName) {
+      partialData.driverName = driverName;
     }
 
     if (wasteTypeMatches.length > 0) {

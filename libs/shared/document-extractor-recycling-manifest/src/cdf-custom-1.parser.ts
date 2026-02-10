@@ -4,9 +4,11 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import {
   calculateMatchScore,
   createHighConfidenceField,
+  createLowConfidenceField,
   type DocumentParser,
   entityFieldOrEmpty,
   type EntityInfo,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
   finalizeExtraction,
   parseBrazilianNumber,
@@ -65,6 +67,12 @@ const SIGNATURE_PATTERNS = [
   /CADRI/i,
   /matérias?-primas?/i,
 ];
+
+const LABEL_PATTERNS = {
+  documentNumber: /(?:CDF|N[°º])/i,
+  environmentalLicense: /licen[çc]a\s+n[°º]/i,
+  wasteQuantity: /Quantidade\s+Total\s+Tratad/i,
+} as const;
 
 const parseLongDate = (
   day: string,
@@ -135,10 +143,28 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       rawText,
     };
 
-    this.extractDocumentNumber(rawText, partialData);
+    const documentNumber = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.documentNumber,
+      LABEL_PATTERNS.documentNumber,
+    );
+
+    if (documentNumber) {
+      partialData.documentNumber = documentNumber;
+    }
+
     this.extractIssueDate(rawText, partialData);
     this.extractEntities(rawText, partialData);
-    this.extractEnvironmentalLicense(rawText, partialData);
+
+    const environmentalLicense = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.environmentalLicense,
+      LABEL_PATTERNS.environmentalLicense,
+    );
+
+    if (environmentalLicense) {
+      partialData.environmentalLicense = environmentalLicense;
+    }
     this.extractTreatmentMethod(rawText, partialData);
     this.extractWasteQuantity(rawText, partialData);
 
@@ -158,20 +184,6 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     });
   }
 
-  private extractDocumentNumber(
-    rawText: string,
-    partialData: Partial<CdfExtractedData>,
-  ): void {
-    const match = CDF_PATTERNS.documentNumber.exec(rawText);
-
-    if (match?.[1]) {
-      partialData.documentNumber = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
-    }
-  }
-
   private extractEntities(
     rawText: string,
     partialData: Partial<CdfExtractedData>,
@@ -189,20 +201,6 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     );
 
     partialData.generator = entityFieldOrEmpty(generatorExtracted);
-  }
-
-  private extractEnvironmentalLicense(
-    rawText: string,
-    partialData: Partial<CdfExtractedData>,
-  ): void {
-    const match = CDF_PATTERNS.environmentalLicense.exec(rawText);
-
-    if (match?.[1]) {
-      partialData.environmentalLicense = createHighConfidenceField(
-        match[1] as NonEmptyString,
-        match[0],
-      );
-    }
   }
 
   private extractIssueDate(
@@ -252,6 +250,8 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
           match[0],
         );
       }
+    } else if (LABEL_PATTERNS.wasteQuantity.test(rawText)) {
+      partialData.wasteQuantity = createLowConfidenceField(0);
     }
   }
 }

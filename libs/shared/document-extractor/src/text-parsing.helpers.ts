@@ -78,6 +78,27 @@ export const extractSection = (
   return lines.slice(sectionStartIndex, sectionEndIndex).join('\n');
 };
 
+export const extractFieldWithLabelFallback = (
+  text: string,
+  valuePattern: RegExp,
+  labelPattern: RegExp,
+): ExtractedField<NonEmptyString> | undefined => {
+  const extracted = extractStringField(text, valuePattern);
+
+  if (extracted) {
+    return createHighConfidenceField(
+      extracted.value as NonEmptyString,
+      extracted.rawMatch,
+    );
+  }
+
+  if (labelPattern.test(text)) {
+    return createLowConfidenceField('' as NonEmptyString);
+  }
+
+  return undefined;
+};
+
 export const entityFieldOrEmpty = (
   extracted: undefined | { rawMatch: string; value: EntityInfo },
 ): ExtractedField<EntityInfo> =>

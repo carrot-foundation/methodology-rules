@@ -10,8 +10,8 @@ export interface BaseExtractedData {
 }
 
 export interface DocumentExtractorConfig {
-  documentType: DocumentType;
-  layouts: string[];
+  documentType?: DocumentType | undefined;
+  layouts?: string[] | undefined;
 }
 
 export interface DocumentParser<T extends BaseExtractedData> {
@@ -37,6 +37,7 @@ export type ExtractionConfidence = 'high' | 'low';
 
 export interface ExtractionOutput<T extends BaseExtractedData> {
   data: T;
+  layoutId?: string;
   reviewReasons: string[];
   reviewRequired: boolean;
 }

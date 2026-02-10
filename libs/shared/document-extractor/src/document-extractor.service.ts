@@ -9,7 +9,12 @@ import type {
   ExtractionOutput,
 } from './document-extractor.types';
 
-import { getParser, selectBestParser } from './layout-registry.helpers';
+import {
+  getParser,
+  getRegisteredLayouts,
+  selectBestParser,
+  selectBestParserGlobal,
+} from './layout-registry.helpers';
 
 export interface DocumentExtractorService {
   extract<T extends BaseExtractedData>(
@@ -27,14 +32,33 @@ export class DocumentExtractor implements DocumentExtractorService {
   ): Promise<ExtractionOutput<T>> {
     const { documentType, layouts } = config;
 
-    if (layouts.length === 0) {
-      throw new Error('At least one layout must be provided');
-    }
-
     const extractionResult = await this.textExtractor.extractText(input);
 
-    if (layouts.length === 1) {
-      const layoutId = layouts[0];
+    if (!documentType) {
+      const bestMatch = selectBestParserGlobal<T>(extractionResult);
+
+      if (!bestMatch) {
+        throw new Error('No matching parser found across any document type');
+      }
+
+      const result = bestMatch.parser.parse(extractionResult);
+
+      return { ...result, layoutId: bestMatch.parser.layoutId };
+    }
+
+    const resolvedLayouts =
+      layouts && layouts.length > 0
+        ? layouts
+        : getRegisteredLayouts()
+            .filter((l) => l.documentType === documentType)
+            .map((l) => l.layoutId);
+
+    if (resolvedLayouts.length === 0) {
+      throw new Error(`No layouts found for document type "${documentType}"`);
+    }
+
+    if (resolvedLayouts.length === 1) {
+      const layoutId = resolvedLayouts[0];
 
       if (layoutId === undefined) {
         throw new Error('At least one layout must be provided');
@@ -48,22 +72,26 @@ export class DocumentExtractor implements DocumentExtractorService {
         );
       }
 
-      return parser.parse(extractionResult);
+      const result = parser.parse(extractionResult);
+
+      return { ...result, layoutId: parser.layoutId };
     }
 
     const bestMatch = selectBestParser<T>(
       extractionResult,
       documentType,
-      layouts,
+      resolvedLayouts,
     );
 
     if (!bestMatch) {
       throw new Error(
-        `No matching parser found for document type "${documentType}" among layouts: ${layouts.join(', ')}`,
+        `No matching parser found for document type "${documentType}" among layouts: ${resolvedLayouts.join(', ')}`,
       );
     }
 
-    return bestMatch.parser.parse(extractionResult);
+    const result = bestMatch.parser.parse(extractionResult);
+
+    return { ...result, layoutId: bestMatch.parser.layoutId };
   }
 }
 

@@ -4,6 +4,7 @@ import {
   entityFieldOrEmpty,
   extractAllStringFields,
   extractEntityFromSection,
+  extractFieldWithLabelFallback,
   extractSection,
   extractStringField,
   parseBrazilianNumber,
@@ -155,6 +156,44 @@ describe('text-parsing.helpers', () => {
     });
   });
 
+  describe('extractFieldWithLabelFallback', () => {
+    const valuePattern = /Data\s*:\s*(\d{2}\/\d{2}\/\d{4})/;
+    const labelPattern = /Data\s*:/i;
+
+    it('should return high confidence field when value pattern matches', () => {
+      const result = extractFieldWithLabelFallback(
+        'Data: 15/03/2024',
+        valuePattern,
+        labelPattern,
+      );
+
+      expect(result?.confidence).toBe('high');
+      expect(result?.parsed).toBe('15/03/2024');
+      expect(result?.rawMatch).toBe('Data: 15/03/2024');
+    });
+
+    it('should return low confidence empty field when only label is present', () => {
+      const result = extractFieldWithLabelFallback(
+        'Data:\nOther content',
+        valuePattern,
+        labelPattern,
+      );
+
+      expect(result?.confidence).toBe('low');
+      expect(result?.parsed).toBe('');
+    });
+
+    it('should return undefined when neither value nor label is found', () => {
+      const result = extractFieldWithLabelFallback(
+        'No relevant content',
+        valuePattern,
+        labelPattern,
+      );
+
+      expect(result).toBeUndefined();
+    });
+  });
+
   describe('entityFieldOrEmpty', () => {
     it('should return high confidence field when extraction is provided', () => {
       const extracted = {
@@ -271,6 +310,25 @@ describe('text-parsing.helpers', () => {
       );
 
       expect(result?.value.name).toBe('Company XYZ');
+    });
+
+    it('should extract entity with unformatted CNPJ (raw 14 digits)', () => {
+      const unformattedCnpjPattern =
+        // eslint-disable-next-line sonarjs/slow-regex
+        /CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi;
+      const text =
+        'Gerador\nCompany ABC LTDA\nCNPJ: 28324667000169\nDestinador\nOther';
+
+      const result = extractEntityFromSection(
+        text,
+        /^\s*Gerador\s*$/i,
+        sectionPatterns,
+        unformattedCnpjPattern,
+      );
+
+      expect(result).toBeDefined();
+      expect(result?.value.name).toBe('Company ABC LTDA');
+      expect(result?.value.taxId).toBe('28324667000169');
     });
   });
 });

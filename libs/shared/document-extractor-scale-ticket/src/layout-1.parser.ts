@@ -5,8 +5,8 @@ import {
   calculateMatchScore,
   createHighConfidenceField,
   type DocumentParser,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
-  extractStringField,
   finalizeExtraction,
   parseBrazilianNumber,
   registerParser,
@@ -36,6 +36,11 @@ const SIGNATURE_PATTERNS = [
   /Pesagem/i,
   /kg/i,
 ];
+
+const LABEL_PATTERNS = {
+  ticketNumber: /Ticket de pesagem/i,
+  vehiclePlate: /Placa Ve[ií]culo/i,
+} as const;
 
 const REQUIRED_FIELDS = ['netWeight'] as const;
 const ALL_FIELDS = [
@@ -190,14 +195,6 @@ export class ScaleTicketLayout1Parser
     const matchScore = this.getMatchScore(extractionResult);
 
     const netWeightExtracted = extractNetWeight(rawText);
-    const ticketNumberExtracted = extractStringField(
-      rawText,
-      LAYOUT_1_PATTERNS.ticketNumber,
-    );
-    const vehiclePlateExtracted = extractStringField(
-      rawText,
-      LAYOUT_1_PATTERNS.vehiclePlate,
-    );
     const transporterExtracted = extractTransporter(rawText);
     const initialWeightExtracted = extractWeightWithTimestamp(
       rawText,
@@ -222,18 +219,24 @@ export class ScaleTicketLayout1Parser
       );
     }
 
-    if (ticketNumberExtracted) {
-      partialData.ticketNumber = createHighConfidenceField(
-        ticketNumberExtracted.value as NonEmptyString,
-        ticketNumberExtracted.rawMatch,
-      );
+    const ticketNumber = extractFieldWithLabelFallback(
+      rawText,
+      LAYOUT_1_PATTERNS.ticketNumber,
+      LABEL_PATTERNS.ticketNumber,
+    );
+
+    if (ticketNumber) {
+      partialData.ticketNumber = ticketNumber;
     }
 
-    if (vehiclePlateExtracted) {
-      partialData.vehiclePlate = createHighConfidenceField(
-        vehiclePlateExtracted.value as NonEmptyString,
-        vehiclePlateExtracted.rawMatch,
-      );
+    const vehiclePlate = extractFieldWithLabelFallback(
+      rawText,
+      LAYOUT_1_PATTERNS.vehiclePlate,
+      LABEL_PATTERNS.vehiclePlate,
+    );
+
+    if (vehiclePlate) {
+      partialData.vehiclePlate = vehiclePlate;
     }
 
     if (transporterExtracted) {

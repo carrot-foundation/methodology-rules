@@ -7,6 +7,7 @@ import {
   type DocumentParser,
   entityFieldOrEmpty,
   extractEntityFromSection,
+  extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractStringField,
   finalizeExtraction,
@@ -55,6 +56,16 @@ const SIGNATURE_PATTERNS = [
   /Res[ií]duo/i,
 ];
 
+const LABEL_PATTERNS = {
+  environmentalLicense: /Licen[çc]a\s*Ambiental/i,
+  issueDate: /Data\s*(?:de\s*)?Emiss[ãa]o/i,
+  processingPeriod: /Per[ií]odo\s*(?:de\s*)?(?:Processamento|Tratamento)/i,
+  treatmentMethod:
+    /(?:M[ée]todo|Tipo)\s*(?:de\s*)?(?:Tratamento|Processamento)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  wasteQuantity: /Quantidade\s*(?:Total)?\s*:/i,
+} as const;
+
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
 export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
@@ -76,10 +87,6 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       rawText,
       CDF_PATTERNS.documentNumber,
     );
-    const issueDateExtracted = extractStringField(
-      rawText,
-      CDF_PATTERNS.issueDate,
-    );
     const generatorExtracted = extractEntityFromSection(
       rawText,
       SECTION_PATTERNS.gerador,
@@ -91,18 +98,6 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       SECTION_PATTERNS.destinador,
       ALL_SECTION_PATTERNS,
       CDF_PATTERNS.cnpj,
-    );
-    const environmentalLicenseExtracted = extractStringField(
-      rawText,
-      CDF_PATTERNS.environmentalLicense,
-    );
-    const treatmentMethodExtracted = extractStringField(
-      rawText,
-      CDF_PATTERNS.treatmentMethod,
-    );
-    const processingPeriodExtracted = extractStringField(
-      rawText,
-      CDF_PATTERNS.processingPeriod,
     );
     const wasteQuantityExtracted = extractStringField(
       rawText,
@@ -121,35 +116,47 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    if (issueDateExtracted) {
-      partialData.issueDate = createHighConfidenceField(
-        issueDateExtracted.value as NonEmptyString,
-        issueDateExtracted.rawMatch,
-      );
+    const issueDate = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.issueDate,
+      LABEL_PATTERNS.issueDate,
+    );
+
+    if (issueDate) {
+      partialData.issueDate = issueDate;
     }
 
     partialData.generator = entityFieldOrEmpty(generatorExtracted);
     partialData.processor = entityFieldOrEmpty(processorExtracted);
 
-    if (environmentalLicenseExtracted) {
-      partialData.environmentalLicense = createHighConfidenceField(
-        environmentalLicenseExtracted.value as NonEmptyString,
-        environmentalLicenseExtracted.rawMatch,
-      );
+    const environmentalLicense = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.environmentalLicense,
+      LABEL_PATTERNS.environmentalLicense,
+    );
+
+    if (environmentalLicense) {
+      partialData.environmentalLicense = environmentalLicense;
     }
 
-    if (treatmentMethodExtracted) {
-      partialData.treatmentMethod = createHighConfidenceField(
-        treatmentMethodExtracted.value as NonEmptyString,
-        treatmentMethodExtracted.rawMatch,
-      );
+    const treatmentMethod = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.treatmentMethod,
+      LABEL_PATTERNS.treatmentMethod,
+    );
+
+    if (treatmentMethod) {
+      partialData.treatmentMethod = treatmentMethod;
     }
 
-    if (processingPeriodExtracted) {
-      partialData.processingPeriod = createHighConfidenceField(
-        processingPeriodExtracted.value as NonEmptyString,
-        processingPeriodExtracted.rawMatch,
-      );
+    const processingPeriod = extractFieldWithLabelFallback(
+      rawText,
+      CDF_PATTERNS.processingPeriod,
+      LABEL_PATTERNS.processingPeriod,
+    );
+
+    if (processingPeriod) {
+      partialData.processingPeriod = processingPeriod;
     }
 
     if (wasteQuantityExtracted) {

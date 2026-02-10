@@ -27,7 +27,9 @@ const formatField = (name: string, field: unknown, indent = '  '): string => {
         ? JSON.stringify(field.parsed)
         : String(field.parsed);
 
-    return `${indent}${name}: ${value} [${confidence} ${field.confidence}]`;
+    const displayValue = value === '' ? '(empty in document)' : value;
+
+    return `${indent}${name}: ${displayValue} [${confidence} ${field.confidence}]`;
   }
 
   return `${indent}${name}: ${JSON.stringify(field)}`;
@@ -48,6 +50,7 @@ export const formatAsHuman = <T extends BaseExtractedData>(
   const lines: string[] = [
     '\n=== Document Extraction Result ===\n',
     `Document Type: ${result.data.documentType}`,
+    `Layout: ${result.layoutId ?? 'N/A'}`,
     `Extraction Confidence: ${result.data.extractionConfidence}`,
     `Review Required: ${result.reviewRequired ? 'YES' : 'NO'}`,
   ];

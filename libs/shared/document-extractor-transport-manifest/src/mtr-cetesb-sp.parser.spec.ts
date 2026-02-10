@@ -228,8 +228,10 @@ describe('MtrCetesbSpParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noValueText));
 
-      expect(result.data.driverName).toBeUndefined();
-      expect(result.data.vehiclePlate).toBeUndefined();
+      expect(result.data.driverName?.parsed).toBe('');
+      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.vehiclePlate?.parsed).toBe('');
+      expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
     it('should not extract vehicle plate when value is not a valid plate format', () => {
@@ -250,7 +252,8 @@ describe('MtrCetesbSpParser', () => {
       const result = parser.parse(stubTextExtractionResult(invalidPlateText));
 
       expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
-      expect(result.data.vehiclePlate).toBeUndefined();
+      expect(result.data.vehiclePlate?.parsed).toBe('');
+      expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
     it('should extract driver name when only driver label is present', () => {
@@ -319,6 +322,25 @@ describe('MtrCetesbSpParser', () => {
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
       expect(result.data.generator.confidence).toBe('low');
+    });
+
+    it('should mark date fields as low confidence when label is present but value is empty', () => {
+      const emptyDatesText = [
+        'MTR n° 123456',
+        'Data da emissão:',
+        'Data do transporte:',
+        'Data do recebimento:',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(emptyDatesText));
+
+      expect(result.data.issueDate.parsed).toBe('');
+      expect(result.data.issueDate.confidence).toBe('low');
+      expect(result.data.transportDate?.parsed).toBe('');
+      expect(result.data.transportDate?.confidence).toBe('low');
+      expect(result.data.receivingDate?.parsed).toBe('');
+      expect(result.data.receivingDate?.confidence).toBe('low');
     });
 
     it('should not extract hauler fields when hauler section is missing', () => {
