@@ -1,6 +1,6 @@
 import './utils/parser-imports';
 
-import { logger } from '@carrot-fndn/shared/helpers';
+import { runProgram } from '@carrot-fndn/shared/cli';
 import { Command } from '@commander-js/extra-typings';
 
 import { extractCommand } from './commands/extract.command';
@@ -13,11 +13,4 @@ const program = new Command('document-extractor')
 program.addCommand(extractCommand, { isDefault: true });
 program.addCommand(listLayoutsCommand);
 
-void (async () => {
-  try {
-    await program.parseAsync();
-  } catch (error) {
-    logger.fatal(error, 'Fatal error');
-    process.exitCode = 1;
-  }
-})();
+void runProgram(program);

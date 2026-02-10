@@ -1,7 +1,5 @@
-import { logger } from '@carrot-fndn/shared/helpers';
+import { loadEnvironment, runProgram } from '@carrot-fndn/shared/cli';
 import { Command } from '@commander-js/extra-typings';
-
-import { loadEnvironment } from './utils/environment-loader';
 
 // Load environment BEFORE importing modules that read env vars at import time
 // (e.g., DocumentRepository captures DOCUMENT_BUCKET_NAME in its constructor)
@@ -16,10 +14,5 @@ void (async () => {
 
   program.addCommand(runCommand, { isDefault: true });
 
-  try {
-    await program.parseAsync();
-  } catch (error) {
-    logger.fatal(error, 'Fatal error');
-    process.exitCode = 1;
-  }
+  await runProgram(program);
 })();

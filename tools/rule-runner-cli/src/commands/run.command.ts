@@ -1,4 +1,4 @@
-import { logger } from '@carrot-fndn/shared/helpers';
+import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { Argument, Command, Option } from '@commander-js/extra-typings';
 
 import { handleRun } from './run.handler';
@@ -47,12 +47,6 @@ export const runCommand = new Command('run')
     try {
       await handleRun(processorPath, options);
     } catch (error) {
-      logger.error(error instanceof Error ? error.message : error, 'Error');
-
-      if (options.debug && error instanceof Error) {
-        logger.error(error.stack, 'Stack trace');
-      }
-
-      process.exitCode = 1;
+      handleCommandError(error, { verbose: options.debug });
     }
   });

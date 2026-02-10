@@ -1,4 +1,10 @@
-import { bold, green, red, yellow } from '@carrot-fndn/shared/cli';
+import {
+  bold,
+  formatAsJson,
+  green,
+  red,
+  yellow,
+} from '@carrot-fndn/shared/cli';
 import {
   type BaseExtractedData,
   createDocumentExtractor,
@@ -13,7 +19,6 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { formatAsHuman } from '../formatters/human.formatter';
-import { formatAsJson } from '../formatters/json.formatter';
 import { resolveFilePaths } from '../utils/file-resolver';
 import { parseS3Uri } from '../utils/s3-uri.parser';
 import { promptForDocumentType, promptForFilePath } from './extract.prompts';

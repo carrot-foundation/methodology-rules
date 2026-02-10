@@ -1,12 +1,12 @@
 import type { MethodologyDocument } from '@carrot-fndn/shared/types';
 
+import { formatAsJson } from '@carrot-fndn/shared/cli';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { logger, toDocumentKey } from '@carrot-fndn/shared/helpers';
 
 import type { RunOptions } from './run.command';
 
 import { formatAsHuman } from '../formatters/human.formatter';
-import { formatAsJson } from '../formatters/json.formatter';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 

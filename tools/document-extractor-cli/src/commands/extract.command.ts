@@ -1,4 +1,4 @@
-import { logger } from '@carrot-fndn/shared/helpers';
+import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { Argument, Command, Option } from '@commander-js/extra-typings';
 
 import { EXTRACT_OPTIONS } from './extract.constants';
@@ -46,12 +46,6 @@ export const extractCommand = new Command('extract')
         verbose,
       });
     } catch (error) {
-      logger.error(error instanceof Error ? error.message : error, 'Error');
-
-      if (verbose && error instanceof Error) {
-        logger.error(error.stack, 'Stack trace');
-      }
-
-      process.exitCode = 1;
+      handleCommandError(error, { verbose });
     }
   });
