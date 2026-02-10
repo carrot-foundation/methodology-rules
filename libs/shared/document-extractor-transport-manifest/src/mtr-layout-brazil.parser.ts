@@ -134,6 +134,9 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       rawText,
       MTR_PATTERNS.wasteQuantity,
     );
+    const wasteQuantity = wasteQuantityExtracted
+      ? parseBrazilianNumber(wasteQuantityExtracted.value)
+      : undefined;
 
     const partialData: Partial<MtrExtractedData> = {
       documentType: 'transportManifest',
@@ -187,32 +190,24 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
     }
 
     if (wasteTypeMatches.length > 0) {
-      const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => ({
-        description: m.value,
-      }));
+      const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => {
+        const entry: WasteTypeEntry = { description: m.value };
+
+        if (wasteClassificationExtracted) {
+          entry.classification = wasteClassificationExtracted.value;
+        }
+
+        if (wasteQuantity !== undefined) {
+          entry.quantity = wasteQuantity;
+        }
+
+        return entry;
+      });
 
       partialData.wasteTypes = createHighConfidenceField(
         entries,
         wasteTypeMatches.map((m) => m.rawMatch).join('\n'),
       );
-    }
-
-    if (wasteClassificationExtracted) {
-      partialData.wasteClassification = createHighConfidenceField(
-        wasteClassificationExtracted.value as NonEmptyString,
-        wasteClassificationExtracted.rawMatch,
-      );
-    }
-
-    if (wasteQuantityExtracted) {
-      const quantity = parseBrazilianNumber(wasteQuantityExtracted.value);
-
-      if (quantity !== undefined) {
-        partialData.wasteQuantity = createHighConfidenceField(
-          quantity,
-          wasteQuantityExtracted.rawMatch,
-        );
-      }
     }
 
     return finalizeExtraction<MtrExtractedData>({

@@ -56,10 +56,12 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
       expect(result.data.driverName?.parsed).toBe('João da Silva');
       expect(result.data.wasteTypes?.parsed).toEqual([
-        { description: 'Plástico' },
+        {
+          classification: 'II - Não Perigoso',
+          description: 'Plástico',
+          quantity: 1500.5,
+        },
       ]);
-      expect(result.data.wasteClassification?.parsed).toBe('II - Não Perigoso');
-      expect(result.data.wasteQuantity?.parsed).toBe(1500.5);
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
@@ -179,6 +181,7 @@ CNPJ: 12.345.678/0001-90
       const invalidQuantityText = `
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
+Tipo de Resíduo: Plástico
 Quantidade: invalid kg
 `;
 
@@ -186,7 +189,7 @@ Quantidade: invalid kg
         stubTextExtractionResult(invalidQuantityText),
       );
 
-      expect(result.data.wasteQuantity).toBeUndefined();
+      expect(result.data.wasteTypes?.parsed[0]?.quantity).toBeUndefined();
     });
 
     it('should handle waste quantity with NaN result', () => {
@@ -194,12 +197,13 @@ Quantidade: invalid kg
       const nanQuantityText = `
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
+Tipo de Resíduo: Plástico
 Quantidade: ... kg
 `;
 
       const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
-      expect(result.data.wasteQuantity).toBeUndefined();
+      expect(result.data.wasteTypes?.parsed[0]?.quantity).toBeUndefined();
     });
 
     it('should handle section extraction with empty lines array', () => {

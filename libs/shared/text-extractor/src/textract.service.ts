@@ -247,6 +247,22 @@ export class TextractService {
         result.confidence = block.Confidence;
       }
 
+      const bb = block.Geometry?.BoundingBox;
+
+      if (
+        bb?.Left !== undefined &&
+        bb.Top !== undefined &&
+        bb.Width !== undefined &&
+        bb.Height !== undefined
+      ) {
+        result.boundingBox = {
+          height: bb.Height,
+          left: bb.Left,
+          top: bb.Top,
+          width: bb.Width,
+        };
+      }
+
       return result;
     });
   }

@@ -1,7 +1,17 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
-import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import {
+  stubTextExtractionResult,
+  stubTextExtractionResultWithBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import { MtrCetesbSpParser } from './mtr-cetesb-sp.parser';
+
+const stubBoundingBox = (left: number, top: number) => ({
+  height: 0.015,
+  left,
+  top,
+  width: 0.1,
+});
 
 describe('MtrCetesbSpParser', () => {
   const parser = new MtrCetesbSpParser();
@@ -44,7 +54,35 @@ describe('MtrCetesbSpParser', () => {
 
   describe('parse', () => {
     it('should parse a valid CETESB MTR document with high confidence', () => {
-      const result = parser.parse(stubTextExtractionResult(validCetesbText));
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validCetesbText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190812-Lodos de tratamento biológico de águas residuárias',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.4), text: 'SEMISSÓLIDO' },
+          { boundingBox: stubBoundingBox(0.567, 0.4), text: 'CLASSE IIA' },
+          { boundingBox: stubBoundingBox(0.624, 0.4), text: 'CAÇAMBA ABERTA' },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '13,4700' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          { boundingBox: stubBoundingBox(0.886, 0.4), text: 'Compostagem' },
+        ]),
+      );
 
       expect(result.data.documentNumber.parsed).toBe('240001460711');
       expect(result.data.documentNumber.confidence).toBe('high');
@@ -63,12 +101,13 @@ describe('MtrCetesbSpParser', () => {
       expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');
       expect(result.data.wasteTypes?.parsed).toEqual([
         {
+          classification: 'CLASSE IIA',
           code: '190812',
           description: 'Lodos de tratamento biológico de águas residuárias',
+          quantity: 13.47,
+          unit: 'TON',
         },
       ]);
-      expect(result.data.wasteClassification?.parsed).toBe('IIA');
-      expect(result.data.wasteQuantity?.parsed).toBe(13.47);
       expect(result.data.transportDate?.parsed).toBe('09/07/2024');
       expect(result.data.receivingDate?.parsed).toBe('10/07/2024');
       expect(result.data.documentType).toBe('transportManifest');
@@ -266,52 +305,6 @@ describe('MtrCetesbSpParser', () => {
       expect(result.data.generator.confidence).toBe('low');
     });
 
-    it('should extract waste classification split across lines', () => {
-      const splitClassText = [
-        'MTR n° 123456',
-        'Data da emissão: 01/01/2024',
-        'CETESB',
-        '',
-        'Identificação dos Resíduos',
-        'CLASSE',
-        'IIA',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(splitClassText));
-
-      expect(result.data.wasteClassification?.parsed).toBe('IIA');
-    });
-
-    it('should convert Brazilian number format for waste quantity', () => {
-      const quantityText = [
-        'MTR n° 123456',
-        'Data da emissão: 01/01/2024',
-        'CETESB',
-        '',
-        'Identificação dos Resíduos',
-        '13,4700 TON',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(quantityText));
-
-      expect(result.data.wasteQuantity?.parsed).toBe(13.47);
-    });
-
-    it('should not extract waste quantity when value is NaN', () => {
-      const nanQuantityText = [
-        'MTR n° 123456',
-        'Data da emissão: 01/01/2024',
-        'CETESB',
-        '',
-        'Identificação dos Resíduos',
-        '... TON',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
-
-      expect(result.data.wasteQuantity).toBeUndefined();
-    });
-
     it('should handle entity with Razão Social but no valid name after stripping', () => {
       const shortNameText = [
         'MTR n° 123456',
@@ -326,57 +319,6 @@ describe('MtrCetesbSpParser', () => {
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
       expect(result.data.generator.confidence).toBe('low');
-    });
-
-    it('should extract waste fields from full text when waste section is missing', () => {
-      const noWasteSectionText = [
-        'MTR n° 123456',
-        'Data da emissão: 01/01/2024',
-        'CETESB',
-        '190812-Lodos de tratamento biológico',
-        'CLASSE',
-        'IIB',
-        '5,0000 TON',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(noWasteSectionText));
-
-      expect(result.data.wasteTypes?.parsed).toEqual([
-        {
-          code: '190812',
-          description: 'Lodos de tratamento biológico',
-        },
-      ]);
-      expect(result.data.wasteClassification?.parsed).toBe('IIB');
-      expect(result.data.wasteQuantity?.parsed).toBe(5);
-    });
-
-    it('should extract multiple waste types from document', () => {
-      const multiWasteText = [
-        'MTR n° 123456',
-        'Data da emissão: 01/01/2024',
-        'CETESB',
-        '',
-        'Identificação dos Resíduos',
-        '190812-Lodos de tratamento biológico de águas residuárias',
-        '020101-Lodos provenientes da lavagem e limpeza',
-        'CLASSE',
-        'IIA',
-        '5,0000 TON',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(multiWasteText));
-
-      expect(result.data.wasteTypes?.parsed).toEqual([
-        {
-          code: '190812',
-          description: 'Lodos de tratamento biológico de águas residuárias',
-        },
-        {
-          code: '020101',
-          description: 'Lodos provenientes da lavagem e limpeza',
-        },
-      ]);
     });
 
     it('should not extract hauler fields when hauler section is missing', () => {
@@ -394,6 +336,290 @@ describe('MtrCetesbSpParser', () => {
 
       expect(result.data.driverName).toBeUndefined();
       expect(result.data.vehiclePlate).toBeUndefined();
+    });
+  });
+
+  describe('coordinate-based waste extraction', () => {
+    it('should extract waste fields with continuation rows', () => {
+      const rawText = [
+        'MTR n° 240001460711',
+        'Data da emissão: 08/07/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190812-Lodos de tratamento biológico de efluentes industriais não',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.4), text: 'SEMISSÓLIDO' },
+          { boundingBox: stubBoundingBox(0.567, 0.4), text: 'CLASSE' },
+          { boundingBox: stubBoundingBox(0.624, 0.4), text: 'CAÇAMBA ABERTA' },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '13,4700' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          { boundingBox: stubBoundingBox(0.886, 0.4), text: 'Compostagem' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.42),
+            text: 'abrangidos em 08 11 (*)',
+          },
+          { boundingBox: stubBoundingBox(0.567, 0.42), text: 'IIA' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          classification: 'CLASSE IIA',
+          code: '190812',
+          description:
+            'Lodos de tratamento biológico de efluentes industriais não abrangidos em 08 11 (*)',
+          quantity: 13.47,
+          unit: 'TON',
+        },
+      ]);
+    });
+
+    it('should extract multiple waste rows', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190812-Lodos de tratamento',
+          },
+          { boundingBox: stubBoundingBox(0.567, 0.4), text: 'CLASSE IIA' },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '13,4700' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          { boundingBox: stubBoundingBox(0.048, 0.45), text: '2' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.45),
+            text: '020101-Lodos de lavagem',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.45), text: '5,0000' },
+          { boundingBox: stubBoundingBox(0.823, 0.45), text: 'KG' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          classification: 'CLASSE IIA',
+          code: '190812',
+          description: 'Lodos de tratamento',
+          quantity: 13.47,
+          unit: 'TON',
+        },
+        {
+          code: '020101',
+          description: 'Lodos de lavagem',
+          quantity: 5,
+          unit: 'KG',
+        },
+      ]);
+    });
+
+    it('should dynamically detect column positions from header blocks', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      // Use non-standard X positions to prove dynamic detection works
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          // Header row
+          { boundingBox: stubBoundingBox(0.03, 0.2), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.08, 0.2),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.4, 0.2), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.52, 0.2), text: 'Classe' },
+          { boundingBox: stubBoundingBox(0.6, 0.2), text: 'Acondicionamento' },
+          { boundingBox: stubBoundingBox(0.72, 0.2), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.8, 0.2), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.88, 0.2), text: 'Tratamento' },
+          // Data row with matching shifted X positions
+          { boundingBox: stubBoundingBox(0.03, 0.3), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.08, 0.3),
+            text: '190812-Lodos de tratamento',
+          },
+          { boundingBox: stubBoundingBox(0.52, 0.3), text: 'CLASSE IIA' },
+          { boundingBox: stubBoundingBox(0.72, 0.3), text: '7,5000' },
+          { boundingBox: stubBoundingBox(0.8, 0.3), text: 'KG' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          classification: 'CLASSE IIA',
+          code: '190812',
+          description: 'Lodos de tratamento',
+          quantity: 7.5,
+          unit: 'KG',
+        },
+      ]);
+    });
+
+    it('should not extract waste fields when table has no data rows', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes).toBeUndefined();
+    });
+
+    it('should not extract waste fields when headers are not detected', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.9, 0.1), text: 'Random text' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes).toBeUndefined();
+    });
+
+    it('should handle description without waste code pattern', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'Resíduo genérico sem código',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '10,0000' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          description: 'Resíduo genérico sem código',
+          quantity: 10,
+          unit: 'TON',
+        },
+      ]);
+    });
+
+    it('should skip rows without description column', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '10,0000' },
+          { boundingBox: stubBoundingBox(0.048, 0.45), text: '2' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.45),
+            text: '190812-Lodos de tratamento',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        { code: '190812', description: 'Lodos de tratamento' },
+      ]);
     });
   });
 

@@ -198,6 +198,79 @@ describe('TextractService', () => {
     expect(logger.error).toHaveBeenCalled();
   });
 
+  it('should preserve BoundingBox geometry when complete', async () => {
+    const blocks: Block[] = [
+      {
+        BlockType: BlockType.LINE,
+        Geometry: {
+          BoundingBox: {
+            Height: 0.02,
+            Left: 0.05,
+            Top: 0.1,
+            Width: 0.4,
+          },
+        },
+        Id: '1',
+        Text: 'With geometry',
+      },
+    ];
+
+    textractClientMock
+      .on(DetectDocumentTextCommand)
+      .resolves({ Blocks: blocks });
+
+    const result = await service.extractText({ filePath: 'file.pdf' });
+
+    expect(result.blocks[0]!.boundingBox).toEqual({
+      height: 0.02,
+      left: 0.05,
+      top: 0.1,
+      width: 0.4,
+    });
+  });
+
+  it('should omit boundingBox when BoundingBox is partial', async () => {
+    const blocks: Block[] = [
+      {
+        BlockType: BlockType.LINE,
+        Geometry: {
+          BoundingBox: {
+            Left: 0.05,
+            Top: 0.1,
+          },
+        },
+        Id: '1',
+        Text: 'Partial geometry',
+      },
+    ];
+
+    textractClientMock
+      .on(DetectDocumentTextCommand)
+      .resolves({ Blocks: blocks });
+
+    const result = await service.extractText({ filePath: 'file.pdf' });
+
+    expect(result.blocks[0]!.boundingBox).toBeUndefined();
+  });
+
+  it('should omit boundingBox when Geometry is missing', async () => {
+    const blocks: Block[] = [
+      {
+        BlockType: BlockType.LINE,
+        Id: '1',
+        Text: 'No geometry',
+      },
+    ];
+
+    textractClientMock
+      .on(DetectDocumentTextCommand)
+      .resolves({ Blocks: blocks });
+
+    const result = await service.extractText({ filePath: 'file.pdf' });
+
+    expect(result.blocks[0]!.boundingBox).toBeUndefined();
+  });
+
   it('should handle blocks without text or blockType', async () => {
     const blocks: Block[] = [
       {

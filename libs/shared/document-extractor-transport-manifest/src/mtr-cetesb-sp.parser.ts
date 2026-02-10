@@ -1,4 +1,8 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type {
+  HeaderColumnDefinition,
+  TableColumnConfig,
+  TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
@@ -13,6 +17,10 @@ import {
   parseBrazilianNumber,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  detectTableColumns,
+  extractTableFromBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   MTR_ALL_FIELDS,
@@ -43,10 +51,6 @@ const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   transportDate: /Data\s*(?:do\s*)?transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   vehiclePlateFormat: /^[A-Z]{3}[-\s]?\d[A-Z0-9]\d{2}$/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  wasteQuantity: /([\d.,]+)\s*(TON|KG|T|M³)/i,
-  // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-  wasteType: /(\d{6})\s*[-–]\s*([A-Za-z\u00C0-\u017F\s].+?)(?=\n|$)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -159,6 +163,68 @@ const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   return result;
 };
 
+type CetesbWasteColumn =
+  | 'classification'
+  | 'description'
+  | 'item'
+  | 'packaging'
+  | 'physicalState'
+  | 'quantity'
+  | 'treatment'
+  | 'unit';
+
+const CETESB_HEADER_DEFS: [
+  HeaderColumnDefinition<CetesbWasteColumn>,
+  ...Array<HeaderColumnDefinition<CetesbWasteColumn>>,
+] = [
+  { headerPattern: /^Item$/i, name: 'item' },
+  { headerPattern: /^C[oó]digo\s+IBAMA/i, name: 'description' },
+  { headerPattern: /^Estado\s+F[ií]sico$/i, name: 'physicalState' },
+  { headerPattern: /^Classe$/i, name: 'classification' },
+  { headerPattern: /^Acondicionamento$/i, name: 'packaging' },
+  { headerPattern: /^Qtde$/i, name: 'quantity' },
+  { headerPattern: /^Unidade$/i, name: 'unit' },
+  { headerPattern: /^Tratamento$/i, name: 'treatment' },
+];
+
+const CETESB_ANCHOR_COLUMN: CetesbWasteColumn = 'item';
+
+const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
+
+const parseWasteRow = (
+  row: Record<string, string | undefined>,
+): undefined | WasteTypeEntry => {
+  const rawDescription = row['description'];
+
+  if (!rawDescription) {
+    return undefined;
+  }
+
+  const codeMatch = WASTE_CODE_PATTERN.exec(rawDescription);
+
+  const entry: WasteTypeEntry = codeMatch?.[1]
+    ? { code: codeMatch[1], description: codeMatch[2]!.trim() }
+    : { description: rawDescription.trim() };
+
+  if (row['classification']) {
+    entry.classification = row['classification'];
+  }
+
+  if (row['quantity']) {
+    const quantity = parseBrazilianNumber(row['quantity']);
+
+    if (quantity !== undefined) {
+      entry.quantity = quantity;
+    }
+  }
+
+  if (row['unit']) {
+    entry.unit = row['unit'];
+  }
+
+  return entry;
+};
+
 export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
   readonly layoutId = 'mtr-cetesb-sp';
@@ -185,7 +251,7 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     this.extractReceivingDate(rawText, partialData);
     this.extractEntities(rawText, partialData);
     this.extractHaulerFields(rawText, partialData);
-    this.extractWasteFields(rawText, partialData);
+    this.extractWasteFields(extractionResult, partialData);
 
     return finalizeExtraction<MtrExtractedData>({
       allFields: [...MTR_ALL_FIELDS],
@@ -318,64 +384,40 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
   }
 
   private extractWasteFields(
-    rawText: string,
+    extractionResult: TextExtractionResult,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const wasteSection = extractSection(
-      rawText,
-      SECTION_PATTERNS.residuos,
-      ALL_SECTION_PATTERNS,
+    const detected = detectTableColumns(
+      extractionResult.blocks,
+      CETESB_HEADER_DEFS,
     );
-    const searchText = wasteSection ?? rawText;
 
-    const wasteTypePattern = new RegExp(MTR_PATTERNS.wasteType.source, 'gi');
-    const entries: WasteTypeEntry[] = [];
-    const rawMatches: string[] = [];
-
-    for (const match of searchText.matchAll(wasteTypePattern)) {
-      if (match[1] && match[2]) {
-        entries.push({
-          code: match[1],
-          description: match[2].trim(),
-        });
-        rawMatches.push(match[0]);
-      }
+    if (!detected) {
+      return;
     }
+
+    const { rows } = extractTableFromBlocks(extractionResult.blocks, {
+      anchorColumn: CETESB_ANCHOR_COLUMN,
+      columns: detected.columns as [
+        TableColumnConfig<CetesbWasteColumn>,
+        ...Array<TableColumnConfig<CetesbWasteColumn>>,
+      ],
+      maxRowGap: 0.03,
+      yRange: { max: 1, min: detected.headerTop + 0.01 },
+    });
+
+    const entries = rows
+      .map((row) => parseWasteRow(row))
+      .filter((entry): entry is WasteTypeEntry => entry !== undefined);
 
     if (entries.length > 0) {
       partialData.wasteTypes = createHighConfidenceField(
         entries,
-        rawMatches.join('\n'),
+        rows
+          .map((row) => row.description)
+          .filter(Boolean)
+          .join('\n'),
       );
-    }
-
-    const quantityMatch = MTR_PATTERNS.wasteQuantity.exec(searchText);
-
-    if (quantityMatch?.[1]) {
-      const quantity = parseBrazilianNumber(quantityMatch[1]);
-
-      if (quantity !== undefined) {
-        partialData.wasteQuantity = createHighConfidenceField(
-          quantity,
-          quantityMatch[0],
-        );
-      }
-    }
-
-    const classificationLines = searchText.split('\n');
-    const classeIndex = classificationLines.findIndex((line) =>
-      /^\s*CLASSE\s*$/i.test(line),
-    );
-
-    if (classeIndex !== -1) {
-      const nextLine = classificationLines[classeIndex + 1]?.trim();
-
-      if (nextLine && nextLine.length > 0) {
-        partialData.wasteClassification = createHighConfidenceField(
-          nextLine as NonEmptyString,
-          `CLASSE\n${nextLine}`,
-        );
-      }
     }
   }
 }

@@ -24,6 +24,7 @@ export interface TextExtractionInput {
 export interface TextExtractionResult {
   blocks: Array<{
     blockType?: string;
+    boundingBox?: { height: number; left: number; top: number; width: number };
     confidence?: number;
     id: string;
     text?: string;

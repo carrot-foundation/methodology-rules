@@ -16,14 +16,15 @@ export interface MtrExtractedData extends BaseExtractedData {
   receivingDate?: ExtractedField<NonEmptyString>;
   transportDate?: ExtractedField<NonEmptyString>;
   vehiclePlate?: ExtractedField<NonEmptyString>;
-  wasteClassification?: ExtractedField<NonEmptyString>;
-  wasteQuantity?: ExtractedField<number>;
   wasteTypes?: ExtractedField<WasteTypeEntry[]>;
 }
 
 export interface WasteTypeEntry {
+  classification?: string;
   code?: string;
   description: string;
+  quantity?: number;
+  unit?: string;
 }
 
 export const MTR_REQUIRED_FIELDS = [
@@ -45,6 +46,4 @@ export const MTR_ALL_FIELDS = [
   'vehiclePlate',
   'driverName',
   'wasteTypes',
-  'wasteQuantity',
-  'wasteClassification',
 ] as const;
