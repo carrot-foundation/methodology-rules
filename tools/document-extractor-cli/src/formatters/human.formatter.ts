@@ -3,6 +3,8 @@ import type {
   ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
 
+import { blue, bold, green, red, yellow } from '@carrot-fndn/shared/cli';
+
 interface HumanFormatOptions {
   verbose?: boolean;
 }
@@ -15,13 +17,19 @@ const isExtractedField = (
   'parsed' in value &&
   'confidence' in value;
 
+const formatConfidence = (confidence: string): string => {
+  const icon = confidence === 'high' ? '✓' : '⚠';
+  const text = `${icon} ${confidence}`;
+
+  return confidence === 'high' ? green(text) : yellow(text);
+};
+
 const formatField = (name: string, field: unknown, indent = '  '): string => {
   if (field === undefined || field === null) {
-    return `${indent}${name}: (not extracted)`;
+    return `${indent}${bold(name)}: (not extracted)`;
   }
 
   if (isExtractedField(field)) {
-    const confidence = field.confidence === 'high' ? '✓' : '⚠';
     const value =
       typeof field.parsed === 'object'
         ? JSON.stringify(field.parsed)
@@ -29,10 +37,10 @@ const formatField = (name: string, field: unknown, indent = '  '): string => {
 
     const displayValue = value === '' ? '(empty in document)' : value;
 
-    return `${indent}${name}: ${displayValue} [${confidence} ${field.confidence}]`;
+    return `${indent}${bold(name)}: ${displayValue} [${formatConfidence(field.confidence)}]`;
   }
 
-  return `${indent}${name}: ${JSON.stringify(field)}`;
+  return `${indent}${bold(name)}: ${JSON.stringify(field)}`;
 };
 
 const METADATA_FIELDS = new Set([
@@ -48,38 +56,38 @@ export const formatAsHuman = <T extends BaseExtractedData>(
   options: HumanFormatOptions = {},
 ): string => {
   const lines: string[] = [
-    '\n=== Document Extraction Result ===\n',
-    `Document Type: ${result.data.documentType}`,
-    `Layout: ${result.layoutId ?? 'N/A'}`,
-    `Extraction Confidence: ${result.data.extractionConfidence}`,
-    `Review Required: ${result.reviewRequired ? 'YES' : 'NO'}`,
+    `\n${bold(blue('=== Document Extraction Result ==='))}\n`,
+    `${bold('Document Type:')} ${result.data.documentType}`,
+    `${bold('Layout:')} ${result.layoutId ?? 'N/A'}`,
+    `${bold('Extraction Confidence:')} ${result.data.extractionConfidence}`,
+    `${bold('Review Required:')} ${result.reviewRequired ? red(bold('YES')) : green('NO')}`,
   ];
 
   if (result.reviewReasons.length > 0) {
-    lines.push('\nReview Reasons:');
+    lines.push(`\n${bold('Review Reasons:')}`);
 
     for (const reason of result.reviewReasons) {
-      lines.push(`  - ${reason}`);
+      lines.push(`  - ${yellow(reason)}`);
     }
   }
 
   if (result.data.missingRequiredFields.length > 0) {
-    lines.push('\nMissing Required Fields:');
+    lines.push(`\n${bold('Missing Required Fields:')}`);
 
     for (const field of result.data.missingRequiredFields) {
-      lines.push(`  - ${field}`);
+      lines.push(`  - ${red(field)}`);
     }
   }
 
   if (result.data.lowConfidenceFields.length > 0) {
-    lines.push('\nLow Confidence Fields:');
+    lines.push(`\n${bold('Low Confidence Fields:')}`);
 
     for (const field of result.data.lowConfidenceFields) {
-      lines.push(`  - ${field}`);
+      lines.push(`  - ${yellow(field)}`);
     }
   }
 
-  lines.push('\nExtracted Fields:');
+  lines.push(`\n${bold('Extracted Fields:')}`);
 
   for (const [key, value] of Object.entries(result.data)) {
     if (!METADATA_FIELDS.has(key)) {
@@ -88,7 +96,7 @@ export const formatAsHuman = <T extends BaseExtractedData>(
   }
 
   if (options.verbose === true) {
-    lines.push('\n=== Raw Text ===\n', result.data.rawText);
+    lines.push(`\n${bold(blue('=== Raw Text ==='))}\n`, result.data.rawText);
   }
 
   lines.push('');

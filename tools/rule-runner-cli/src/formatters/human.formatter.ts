@@ -1,18 +1,12 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
+import { blue, bold, gray, green, red, yellow } from '@carrot-fndn/shared/cli';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 interface HumanFormatOptions {
   debug?: boolean;
   elapsedMs?: number;
 }
-
-const bold = (text: string) => `\u001B[1m${text}\u001B[22m`;
-const gray = (text: string) => `\u001B[90m${text}\u001B[39m`;
-const green = (text: string) => `\u001B[92m${text}\u001B[39m`;
-const red = (text: string) => `\u001B[91m${text}\u001B[39m`;
-const blue = (text: string) => `\u001B[94m${text}\u001B[39m`;
-const yellow = (text: string) => `\u001B[93m${text}\u001B[39m`;
 
 export const formatAsHuman = (
   result: RuleOutput,

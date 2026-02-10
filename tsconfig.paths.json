@@ -147,6 +147,7 @@
       "@carrot-fndn/shared/document-extractor-recycling-manifest": [
         "libs/shared/document-extractor-recycling-manifest/src/index.ts"
       ],
+      "@carrot-fndn/shared/cli": ["libs/shared/cli/src/index.ts"],
       "@carrot-fndn/shared/testing": ["libs/shared/testing/src/index.ts"],
       "@carrot-fndn/shared/text-extractor": [
         "libs/shared/text-extractor/src/index.ts"
