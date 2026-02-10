@@ -17,6 +17,7 @@
     "pkgJsonLint": "npmPkgJsonLint .",
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky && ts-patch install && typia patch",
+    "run-rule": "nx run rule-runner-cli:run --",
     "test": "nx test",
     "test:affected": "nx affected --target test",
     "test:all": "nx run-many --target test",
