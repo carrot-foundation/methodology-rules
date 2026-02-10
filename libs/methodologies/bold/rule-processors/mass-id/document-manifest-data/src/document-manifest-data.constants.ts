@@ -11,26 +11,31 @@ import {
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
-const { RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
+const { RECYCLING_MANIFEST } = DocumentEventName;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { MTR } = ReportType;
 
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" event address.`,
-  ATTACHMENT_AND_JUSTIFICATION_PROVIDED: `The "${EXEMPTION_JUSTIFICATION}" should not be provided when a "${TRANSPORT_MANIFEST}" attachment is present.`,
-  INCORRECT_ATTACHMENT_LABEL: `Expected an attachment with the "${TRANSPORT_MANIFEST}" label, but no one was found.`,
+  ATTACHMENT_AND_JUSTIFICATION_PROVIDED: (manifestType: string) =>
+    `The "${EXEMPTION_JUSTIFICATION}" should not be provided when a "${manifestType}" attachment is present.`,
+  INCORRECT_ATTACHMENT_LABEL: (manifestType: string) =>
+    `Expected an attachment with the "${manifestType}" label, but no one was found.`,
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "${DOCUMENT_TYPE}" must be "${MTR}" for recyclers in Brazil, but "${documentType}" was provided.`,
   INVALID_ISSUE_DATE_FORMAT: (dateFormat: string) =>
     `The "${ISSUE_DATE}" format must be "${DATE}", but the declared format is "${dateFormat}".`,
-  MISSING_ATTRIBUTES: `Either the "${TRANSPORT_MANIFEST}" attachment or an "${EXEMPTION_JUSTIFICATION}" must be provided.`,
+  MISSING_ATTRIBUTES: (manifestType: string) =>
+    `Either the "${manifestType}" attachment or an "${EXEMPTION_JUSTIFICATION}" must be provided.`,
   MISSING_DOCUMENT_NUMBER: `The "${DOCUMENT_NUMBER}" was not provided.`,
   MISSING_DOCUMENT_TYPE: `The "${DOCUMENT_TYPE}" was not provided.`,
-  MISSING_EVENT: `At least one "${TRANSPORT_MANIFEST}" event must be provided.`,
+  MISSING_EVENT: (manifestType: string) =>
+    `At least one "${manifestType}" event must be provided.`,
   MISSING_ISSUE_DATE: `The "${ISSUE_DATE}" was not provided.`,
   MISSING_RECYCLER_EVENT: `The "${RECYCLER}" event was not provided.`,
-  PROVIDE_EXEMPTION_JUSTIFICATION: `The "${TRANSPORT_MANIFEST}" attachment was not provided, but an "${EXEMPTION_JUSTIFICATION}" was declared.`,
+  PROVIDE_EXEMPTION_JUSTIFICATION: (manifestType: string) =>
+    `The "${manifestType}" attachment was not provided, but an "${EXEMPTION_JUSTIFICATION}" was declared.`,
   VALID_ATTACHMENT_DECLARATION: ({
     documentNumber,
     documentType,

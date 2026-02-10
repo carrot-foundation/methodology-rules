@@ -34,6 +34,15 @@ describe('DocumentManifestDataProcessor', () => {
     jest.useRealTimers();
   });
 
+  it('should throw when documentManifestType is invalid', () => {
+    expect(
+      () =>
+        new DocumentManifestDataProcessor({
+          documentManifestType: 'INVALID' as never,
+        }),
+    ).toThrow('Invalid documentManifestType "INVALID"');
+  });
+
   it.each([
     ...exceptionTestCases,
     ...documentManifestDataTestCases,

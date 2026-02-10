@@ -56,6 +56,11 @@ export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
   | typeof TRANSPORT_MANIFEST;
 
+const VALID_MANIFEST_TYPES: ReadonlySet<string> = new Set<string>([
+  RECYCLING_MANIFEST,
+  TRANSPORT_MANIFEST,
+]);
+
 type RuleSubject = {
   attachmentInfos: AttachmentInfo[];
   document: Document;
@@ -81,6 +86,15 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     documentManifestType: DocumentManifestType;
   }) {
     super();
+
+    if (!VALID_MANIFEST_TYPES.has(documentManifestType)) {
+      const accepted = [...VALID_MANIFEST_TYPES].join(', ');
+
+      throw new Error(
+        `Invalid documentManifestType "${String(documentManifestType)}". Accepted values: ${accepted}`,
+      );
+    }
+
     this.documentManifestType = documentManifestType;
   }
 
@@ -89,7 +103,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   ): Promise<EvaluateResultOutput> {
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_EVENT,
+        resultComment: RESULT_COMMENTS.MISSING_EVENT(this.documentManifestType),
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -325,26 +339,36 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     if (hasWrongLabelAttachment) {
       return {
-        failMessages: [RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL],
+        failMessages: [
+          RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(this.documentManifestType),
+        ],
       };
     }
 
     if (isNil(attachment) && isNonEmptyString(justificationString)) {
       return {
         failMessages: [],
-        passMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
+        passMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION(
+          this.documentManifestType,
+        ),
       };
     }
 
     if (isNil(attachment) && !isNonEmptyString(justificationString)) {
       return {
-        failMessages: [RESULT_COMMENTS.MISSING_ATTRIBUTES],
+        failMessages: [
+          RESULT_COMMENTS.MISSING_ATTRIBUTES(this.documentManifestType),
+        ],
       };
     }
 
     if (isNonEmptyString(justificationString) && !isNil(attachment)) {
       return {
-        failMessages: [RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED],
+        failMessages: [
+          RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(
+            this.documentManifestType,
+          ),
+        ],
       };
     }
 
