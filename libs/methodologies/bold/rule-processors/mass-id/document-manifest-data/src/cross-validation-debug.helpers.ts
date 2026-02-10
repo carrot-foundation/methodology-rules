@@ -3,7 +3,10 @@ import type {
   ExtractedField,
   ExtractionConfidence,
 } from '@carrot-fndn/shared/document-extractor';
-import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import type {
+  MtrExtractedData,
+  WasteTypeEntry,
+} from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import {
   dateDifferenceInDays,
@@ -14,12 +17,13 @@ import {
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import type { MtrCrossValidationEventData } from './document-manifest-data.helpers';
+import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
 
+import { normalizeTaxId } from './cross-validation.helpers';
 import {
   matchWasteTypeEntry,
-  normalizeTaxId,
-} from './document-manifest-data.helpers';
+  normalizeQuantityToKg,
+} from './transport-manifest-cross-validation.helpers';
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -173,6 +177,51 @@ export const logCrossValidationComparison = (
             extracted: extractedData.vehiclePlate?.parsed ?? null,
           }),
         },
+        wasteQuantityWeight: (() => {
+          const entries = extractedData.wasteTypes?.parsed;
+
+          if (!entries) {
+            return null;
+          }
+
+          const matchedEntry: undefined | WasteTypeEntry = entries.find(
+            (entry) =>
+              matchWasteTypeEntry(entry, eventWasteCode, eventWasteDescription)
+                .isMatch,
+          );
+
+          if (matchedEntry?.quantity === undefined) {
+            return null;
+          }
+
+          const normalizedKg = normalizeQuantityToKg(
+            matchedEntry.quantity,
+            matchedEntry.unit,
+          );
+
+          const weighingEvent = eventData.weighingEvents.find(
+            (event) => event.value !== undefined && event.value > 0,
+          );
+
+          const weighingValue = weighingEvent?.value;
+          const discrepancy =
+            normalizedKg !== undefined &&
+            weighingValue !== undefined &&
+            weighingValue > 0
+              ? Math.abs(normalizedKg - weighingValue) / weighingValue
+              : null;
+
+          return {
+            discrepancyPercentage:
+              discrepancy === null
+                ? null
+                : `${(discrepancy * 100).toFixed(1)}%`,
+            extractedQuantity: matchedEntry.quantity,
+            extractedUnit: matchedEntry.unit ?? null,
+            normalizedKg: normalizedKg ?? null,
+            weighingValue: weighingValue ?? null,
+          };
+        })(),
         wasteType: {
           confidence: extractedData.wasteTypes?.confidence ?? null,
           entries:

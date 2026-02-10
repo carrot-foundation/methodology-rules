@@ -11,14 +11,16 @@ import '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
+import { validateBasicExtractedData } from './cross-validation.helpers';
 import {
   type AttachmentInfo,
   type DocumentManifestEventSubject,
   getExtractorConfig,
-  type MtrCrossValidationEventData,
-  validateBasicExtractedData,
-  validateMtrExtractedData,
 } from './document-manifest-data.helpers';
+import {
+  type MtrCrossValidationEventData,
+  validateMtrExtractedData,
+} from './transport-manifest-cross-validation.helpers';
 
 const documentExtractor = createDocumentExtractor(textExtractor);
 
@@ -34,6 +36,7 @@ export const crossValidateWithTextract = async ({
   pickUpEvent,
   recyclerEvent,
   wasteGeneratorEvent,
+  weighingEvents,
 }: {
   attachmentInfos: AttachmentInfo[];
   documentManifestEvents: DocumentManifestEventSubject[];
@@ -42,6 +45,7 @@ export const crossValidateWithTextract = async ({
   pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
+  weighingEvents: DocumentEvent[];
 }): Promise<CrossValidationResult> => {
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
@@ -63,6 +67,7 @@ export const crossValidateWithTextract = async ({
         pickUpEvent,
         recyclerEvent,
         wasteGeneratorEvent,
+        weighingEvents,
       };
 
       inputs.push({ attachmentInfo, eventData: mtrEventData });

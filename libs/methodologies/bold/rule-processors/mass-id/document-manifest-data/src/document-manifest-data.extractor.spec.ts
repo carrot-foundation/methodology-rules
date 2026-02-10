@@ -20,13 +20,21 @@ jest.mock('@carrot-fndn/shared/document-extractor', () =>
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 
-const noRelatedEvents = {
+const noRelatedEvents: {
+  dropOffEvent: undefined;
+  haulerEvent: undefined;
+  pickUpEvent: undefined;
+  recyclerEvent: undefined;
+  wasteGeneratorEvent: undefined;
+  weighingEvents: DocumentEvent[];
+} = {
   dropOffEvent: undefined,
   haulerEvent: undefined,
   pickUpEvent: undefined,
   recyclerEvent: undefined,
   wasteGeneratorEvent: undefined,
-} as const;
+  weighingEvents: [],
+};
 
 describe('crossValidateWithTextract', () => {
   beforeEach(() => {
@@ -291,6 +299,7 @@ describe('crossValidateWithTextract', () => {
       pickUpEvent,
       recyclerEvent,
       wasteGeneratorEvent: undefined,
+      weighingEvents: [],
     });
 
     expect(mockExtract).toHaveBeenCalledTimes(1);
@@ -341,6 +350,7 @@ describe('crossValidateWithTextract', () => {
       pickUpEvent,
       recyclerEvent: undefined,
       wasteGeneratorEvent: undefined,
+      weighingEvents: [],
     });
 
     expect(mockExtract).toHaveBeenCalledTimes(1);

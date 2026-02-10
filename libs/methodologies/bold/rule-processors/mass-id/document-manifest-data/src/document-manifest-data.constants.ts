@@ -122,6 +122,18 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedPlate: string;
   }) =>
     `The vehicle plate extracted from the document ("${extractedPlate}") does not match the Pick-up event value ("${eventPlate}").`,
+  WASTE_QUANTITY_WEIGHT_MISMATCH: ({
+    discrepancyPercentage,
+    extractedQuantity,
+    unit,
+    weighingWeight,
+  }: {
+    discrepancyPercentage: string;
+    extractedQuantity: string;
+    unit: string;
+    weighingWeight: string;
+  }) =>
+    `The waste quantity extracted from the document (${extractedQuantity} ${unit}) differs from the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) by ${discrepancyPercentage}%.`,
   WASTE_TYPE_MISMATCH: ({
     eventClassification,
     extractedEntries,

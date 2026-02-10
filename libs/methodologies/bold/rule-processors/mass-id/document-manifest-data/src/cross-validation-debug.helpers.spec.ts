@@ -3,7 +3,7 @@ import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types
 
 import { logger } from '@carrot-fndn/shared/helpers';
 
-import type { MtrCrossValidationEventData } from './document-manifest-data.helpers';
+import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
 
 import { logCrossValidationComparison } from './cross-validation-debug.helpers';
 
@@ -45,6 +45,7 @@ const baseEventData: MtrCrossValidationEventData = {
   recyclerCountryCode: 'BR',
   recyclerEvent: undefined,
   wasteGeneratorEvent: undefined,
+  weighingEvents: [],
 };
 
 describe('cross-validation-debug.helpers', () => {

@@ -45,8 +45,14 @@ import {
 // Import parsers to register them
 import '@carrot-fndn/shared/document-extractor';
 
-const { ACTOR, DROP_OFF, PICK_UP, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } =
-  DocumentEventName;
+const {
+  ACTOR,
+  DROP_OFF,
+  PICK_UP,
+  RECYCLING_MANIFEST,
+  TRANSPORT_MANIFEST,
+  WEIGHING,
+} = DocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
 const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
@@ -70,6 +76,7 @@ type RuleSubject = {
   pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
+  weighingEvents: DocumentEvent[];
 };
 
 const DOCUMENT_TYPE_MAPPING = {
@@ -142,6 +149,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       pickUpEvent: ruleSubject.pickUpEvent,
       recyclerEvent: ruleSubject.recyclerEvent,
       wasteGeneratorEvent: ruleSubject.wasteGeneratorEvent,
+      weighingEvents: ruleSubject.weighingEvents,
     });
 
     if (crossValidationResult.failMessages.length > 0) {
@@ -189,6 +197,10 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     const dropOffEvent = document.externalEvents?.find(
       eventNameIsAnyOf([DROP_OFF]),
     );
+    const weighingEvents = getOrDefault(
+      document.externalEvents?.filter(eventNameIsAnyOf([WEIGHING])),
+      [],
+    );
 
     const documentManifestEvents = getOrDefault(
       transportManifestEvents?.map((event) => {
@@ -230,6 +242,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       pickUpEvent,
       recyclerEvent,
       wasteGeneratorEvent,
+      weighingEvents,
     };
   }
 
