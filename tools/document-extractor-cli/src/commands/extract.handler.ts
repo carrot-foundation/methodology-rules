@@ -1,3 +1,4 @@
+import { bold, green, red, yellow } from '@carrot-fndn/shared/cli';
 import {
   type BaseExtractedData,
   createDocumentExtractor,
@@ -8,7 +9,7 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { formatAsHuman } from '../formatters/human.formatter';
@@ -16,6 +17,8 @@ import { formatAsJson } from '../formatters/json.formatter';
 import { resolveFilePaths } from '../utils/file-resolver';
 import { parseS3Uri } from '../utils/s3-uri.parser';
 import { promptForDocumentType, promptForFilePath } from './extract.prompts';
+
+const LOGS_DIR = path.resolve(__dirname, '../../logs');
 
 interface ExtractOptions {
   concurrency: number;
@@ -90,27 +93,73 @@ const resolveInputFilePaths = async (
   return resolveFilePaths(inputPath);
 };
 
-const writeFailuresFile = async (
+const groupByTypeAndLayout = (items: FileSuccess[]): Map<string, number> => {
+  const counts = new Map<string, number>();
+
+  for (const item of items) {
+    const type = item.result.data.documentType;
+    const layout = item.result.layoutId ?? 'unknown';
+    const key = `${type} / ${layout}`;
+
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+
+  return counts;
+};
+
+const groupReviewReasons = (items: FileSuccess[]): Map<string, number> => {
+  const counts = new Map<string, number>();
+
+  for (const item of items) {
+    for (const reason of item.result.reviewReasons) {
+      counts.set(reason, (counts.get(reason) ?? 0) + 1);
+    }
+  }
+
+  return counts;
+};
+
+const writeFailuresJson = async (
   failures: FileFailure[],
   outputPath: string | undefined,
 ): Promise<void> => {
   const timestamp = new Date().toISOString().replaceAll(':', '-');
+
+  await mkdir(LOGS_DIR, { recursive: true });
+
   const failurePath =
-    outputPath ?? path.resolve(`extraction-failures-${timestamp}.txt`);
+    outputPath ?? path.join(LOGS_DIR, `extraction-failures-${timestamp}.json`);
 
-  const lines = [
-    `# Extraction failures - ${new Date().toISOString()}`,
-    `# Re-run: pnpm extract-document extract ${failurePath}`,
-    '',
-  ];
+  const data = failures.map((f) => ({
+    error: f.error,
+    filePath: f.filePath,
+  }));
 
-  for (const failure of failures) {
-    lines.push(`# ${failure.filePath} — ${failure.error}`, failure.filePath);
-  }
+  await writeFile(failurePath, JSON.stringify(data, null, 2), 'utf8');
 
-  await writeFile(failurePath, `${lines.join('\n')}\n`, 'utf8');
+  logger.info(`Failures JSON written to: ${failurePath}`);
+};
 
-  logger.info(`Failed file list written to: ${failurePath}`);
+const writeReviewRequiredJson = async (items: FileSuccess[]): Promise<void> => {
+  const timestamp = new Date().toISOString().replaceAll(':', '-');
+
+  await mkdir(LOGS_DIR, { recursive: true });
+
+  const filePath = path.join(
+    LOGS_DIR,
+    `extraction-review-required-${timestamp}.json`,
+  );
+
+  const data = items.map((item) => ({
+    documentType: item.result.data.documentType,
+    filePath: item.filePath,
+    layoutId: item.result.layoutId,
+    reviewReasons: item.result.reviewReasons,
+  }));
+
+  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+
+  logger.info(`Review-required JSON written to: ${filePath}`);
 };
 
 const logFileResult = (
@@ -159,24 +208,50 @@ const processBatchResults = (
   }
 };
 
+const formatBreakdown = (items: FileSuccess[]): string => {
+  const lines: string[] = [];
+
+  for (const [key, count] of groupByTypeAndLayout(items)) {
+    lines.push(`  ${key}: ${String(count)}`);
+  }
+
+  return lines.join('\n');
+};
+
 const logSummary = (
   totalFiles: number,
   successes: FileSuccess[],
   failures: FileFailure[],
 ): void => {
-  const highConfidence = successes.filter(
-    (s) => !s.result.reviewRequired,
-  ).length;
-  const reviewRequired = successes.filter(
-    (s) => s.result.reviewRequired,
-  ).length;
+  const highConfidence = successes.filter((s) => !s.result.reviewRequired);
+  const reviewRequired = successes.filter((s) => s.result.reviewRequired);
 
-  logger.info('\n=== Extraction Summary ===');
-  logger.info(`Total files: ${String(totalFiles)}`);
-  logger.info(`Successful: ${String(successes.length)}`);
-  logger.info(`  - High confidence: ${String(highConfidence)}`);
-  logger.info(`  - Review required: ${String(reviewRequired)}`);
-  logger.info(`Failed: ${String(failures.length)}`);
+  const lines: string[] = [
+    bold('=== Extraction Summary ==='),
+    `Total files: ${String(totalFiles)}`,
+    '',
+    green(`Successful (high confidence): ${String(highConfidence.length)}`),
+    formatBreakdown(highConfidence),
+    '',
+    yellow(`Review required: ${String(reviewRequired.length)}`),
+    formatBreakdown(reviewRequired),
+  ];
+
+  if (reviewRequired.length > 0) {
+    const reasons = [...groupReviewReasons(reviewRequired)].sort(
+      (a, b) => b[1] - a[1],
+    );
+
+    lines.push('  Reasons:');
+
+    for (const [reason, count] of reasons) {
+      lines.push(`    ${String(count)} × ${reason}`);
+    }
+  }
+
+  lines.push('', red(`Failed: ${String(failures.length)}`));
+
+  logger.info(`\n${lines.join('\n')}`);
 };
 
 export const handleExtract = async (
@@ -255,11 +330,17 @@ export const handleExtract = async (
     logSummary(resolvedPaths.length, successes, failures);
   }
 
-  if (failures.length > 0) {
-    await writeFailuresFile(failures, options.outputFailures);
+  if (isBatch && failures.length > 0) {
+    await writeFailuresJson(failures, options.outputFailures);
   }
 
-  if (successes.some((s) => s.result.reviewRequired)) {
+  const reviewRequiredItems = successes.filter((s) => s.result.reviewRequired);
+
+  if (isBatch && reviewRequiredItems.length > 0) {
+    await writeReviewRequiredJson(reviewRequiredItems);
+  }
+
+  if (reviewRequiredItems.length > 0) {
     process.exitCode = 2;
   }
 
