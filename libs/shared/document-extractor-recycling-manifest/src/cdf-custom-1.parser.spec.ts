@@ -43,9 +43,9 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.documentNumber.confidence).toBe('high');
       expect(result.data.issueDate.parsed).toBe('07/08/2024');
       expect(result.data.issueDate.confidence).toBe('high');
-      expect(result.data.processor.parsed.name).toBe('Tera Ambiental Ltda.');
-      expect(result.data.processor.parsed.taxId).toBe('59.591.115/0003-02');
-      expect(result.data.processor.confidence).toBe('high');
+      expect(result.data.recycler.parsed.name).toBe('Tera Ambiental Ltda.');
+      expect(result.data.recycler.parsed.taxId).toBe('59.591.115/0003-02');
+      expect(result.data.recycler.confidence).toBe('high');
       expect(result.data.generator.parsed.name).toBe(
         'AJINOMOTO DO BRASIL INDÚSTRIA E COMÉRCIO DE ALIMENTOS LTDA.',
       );
@@ -55,7 +55,7 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.treatmentMethod?.parsed).toBe(
         'compostagem de lodo de esgoto',
       );
-      expect(result.data.wasteQuantity?.parsed).toBe(377.59);
+      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(377.59);
       expect(result.data.documentType).toBe('recyclingManifest');
       expect(result.reviewRequired).toBe(false);
     });
@@ -90,7 +90,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
-      expect(result.data.processor.confidence).toBe('low');
+      expect(result.data.recycler.confidence).toBe('low');
       expect(result.data.generator.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
@@ -174,7 +174,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(quantityText));
 
-      expect(result.data.wasteQuantity?.parsed).toBe(1377.59);
+      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(1377.59);
     });
 
     it('should not extract waste quantity when value is NaN', () => {
@@ -187,7 +187,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
-      expect(result.data.wasteQuantity).toBeUndefined();
+      expect(result.data.wasteEntries).toBeUndefined();
     });
 
     it('should handle entity with short name after label', () => {
@@ -200,7 +200,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
-      expect(result.data.processor.confidence).toBe('low');
+      expect(result.data.recycler.confidence).toBe('low');
     });
 
     it('should handle quantity on the same line as label', () => {
@@ -212,7 +212,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(sameLineText));
 
-      expect(result.data.wasteQuantity?.parsed).toBe(500);
+      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(500);
     });
   });
 

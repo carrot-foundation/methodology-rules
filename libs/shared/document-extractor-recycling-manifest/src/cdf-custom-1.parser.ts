@@ -174,7 +174,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
         partialData.documentNumber,
         partialData.issueDate,
         partialData.generator,
-        partialData.processor,
+        partialData.recycler,
       ],
       documentType: 'recyclingManifest',
       matchScore,
@@ -193,7 +193,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       CDF_PATTERNS.empresaRecebedora,
     );
 
-    partialData.processor = entityFieldOrEmpty(processorExtracted);
+    partialData.recycler = entityFieldOrEmpty(processorExtracted);
 
     const generatorExtracted = extractEntityByLabel(
       rawText,
@@ -245,13 +245,15 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       const quantity = parseBrazilianNumber(match[1]);
 
       if (quantity !== undefined) {
-        partialData.wasteQuantity = createHighConfidenceField(
-          quantity,
+        partialData.wasteEntries = createHighConfidenceField(
+          [{ description: '', quantity }],
           match[0],
         );
       }
     } else if (LABEL_PATTERNS.wasteQuantity.test(rawText)) {
-      partialData.wasteQuantity = createLowConfidenceField(0);
+      partialData.wasteEntries = createLowConfidenceField([
+        { description: '', quantity: 0 },
+      ]);
     }
   }
 }

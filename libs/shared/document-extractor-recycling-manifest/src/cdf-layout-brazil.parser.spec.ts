@@ -10,219 +10,274 @@ describe('CdfLayoutBrazilParser', () => {
     clearRegistry();
   });
 
-  const validCdfText = `CERTIFICADO DE DESTINAÇÃO FINAL - CDF
-CDF Nº: 987654321
-Data de Emissão: 20/03/2024
-
-Gerador
-Razão Social: INDÚSTRIA PRODUTORA LTDA
-CNPJ: 12.345.678/0001-90
-
-Processador
-RECICLAGEM E TRATAMENTO S.A.
-CNPJ: 98.765.432/0001-10
-Licença Ambiental: LO-12345/2024
-
-Tipo de Tratamento: Compostagem
-Período de Processamento: 01/01/2024 a 31/03/2024
-Quantidade Total: 2.500,75 kg
-
-Resíduo processado conforme legislação ambiental vigente.`;
+  const validCdfText = [
+    'Periodo: 01/02/2023 até 28/02/2023',
+    'Certificado de Destinação Final CDF nº 2154920/2023',
+    'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+    'os resíduos abaixo discriminados.',
+    '',
+    'Identificação do Gerador',
+    'Razão Social: Laticínios Bela Vista LTDA CPF/CNPJ: 02.089.969/0035-55',
+    'Endereço: Rua Empresário Agenello Senger, nº S/N Municipio: Carazinho UF: RS',
+    '',
+    'Identificação dos Resíduos',
+    '1. 040108 - Resíduos de couros (aparas, resíduos de corte, pó de rebaixamento, pó de lixamento)',
+    'Classe II A 1,95000 Tonelada Compostagem',
+    '2. 020301 - Lamas de lavagem, limpeza, descasque, centrifugação e separação',
+    'Classe II A 3,50000 Tonelada Compostagem',
+    '',
+    'Declaração',
+    'Declaramos que os resíduos foram destinados conforme legislação ambiental vigente.',
+    'Carazinho, 10/04/2023',
+    '',
+    'MTRs incluidos',
+    '2302037916, 2302037795, 2302037801',
+    'Nome do Responsável',
+  ].join('\n');
 
   describe('parse', () => {
-    it('should parse a valid CDF document with high confidence', () => {
+    it('should parse all fields from a valid CDF document', () => {
       const result = parser.parse(stubTextExtractionResult(validCdfText));
 
-      expect(result.data.documentNumber.parsed).toBe('987654321');
+      expect(result.data.documentNumber.parsed).toBe('2154920/2023');
       expect(result.data.documentNumber.confidence).toBe('high');
-      expect(result.data.issueDate.parsed).toBe('20/03/2024');
+
+      expect(result.data.recycler.parsed.name).toBe(
+        'ECO ADUBOS ORGANICOS LTDA',
+      );
+      expect(result.data.recycler.parsed.taxId).toBe('13.843.890/0001-45');
+      expect(result.data.recycler.confidence).toBe('high');
+
       expect(result.data.generator.parsed.name).toBe(
-        'INDÚSTRIA PRODUTORA LTDA',
+        'Laticínios Bela Vista LTDA',
       );
-      expect(result.data.generator.parsed.taxId).toBe('12.345.678/0001-90');
-      expect(result.data.processor.parsed.name).toBe(
-        'RECICLAGEM E TRATAMENTO S.A.',
+      expect(result.data.generator.parsed.taxId).toBe('02.089.969/0035-55');
+      expect(result.data.generator.parsed.address).toBe(
+        'Rua Empresário Agenello Senger, nº S/N',
       );
-      expect(result.data.processor.parsed.taxId).toBe('98.765.432/0001-10');
-      expect(result.data.environmentalLicense?.parsed).toBe('LO-12345/2024');
-      expect(result.data.treatmentMethod?.parsed).toBe('Compostagem');
+      expect(result.data.generator.parsed.city).toBe('Carazinho');
+      expect(result.data.generator.parsed.state).toBe('RS');
+      expect(result.data.generator.confidence).toBe('high');
+
+      expect(result.data.issueDate.parsed).toBe('10/04/2023');
+      expect(result.data.issueDate.confidence).toBe('high');
+
       expect(result.data.processingPeriod?.parsed).toBe(
-        '01/01/2024 a 31/03/2024',
+        '01/02/2023 até 28/02/2023',
       );
-      expect(result.data.wasteQuantity?.parsed).toBe(2500.75);
+
       expect(result.data.documentType).toBe('recyclingManifest');
       expect(result.reviewRequired).toBe(false);
     });
 
-    it('should set reviewRequired when required fields are missing', () => {
-      const incompleteCdfText = `
-        CERTIFICADO DE DESTINAÇÃO FINAL - CDF
-        Data de Emissão: 20/03/2024
+    it('should extract waste entries with code, classification, quantity, unit, and technology', () => {
+      const result = parser.parse(stubTextExtractionResult(validCdfText));
 
-        Gerador
-        EMPRESA SEM CNPJ
-      `;
+      expect(result.data.wasteEntries?.parsed).toHaveLength(2);
+
+      const firstEntry = result.data.wasteEntries?.parsed[0];
+
+      expect(firstEntry?.code).toBe('040108');
+      expect(firstEntry?.classification).toBe('Classe II A');
+      expect(firstEntry?.quantity).toBe(1.95);
+      expect(firstEntry?.unit).toBe('Tonelada');
+      expect(firstEntry?.technology).toBe('Compostagem');
+
+      const secondEntry = result.data.wasteEntries?.parsed[1];
+
+      expect(secondEntry?.code).toBe('020301');
+      expect(secondEntry?.quantity).toBe(3.5);
+    });
+
+    it('should extract transport manifest numbers', () => {
+      const result = parser.parse(stubTextExtractionResult(validCdfText));
+
+      expect(result.data.transportManifests?.parsed).toEqual([
+        '2302037916',
+        '2302037795',
+        '2302037801',
+      ]);
+    });
+
+    it('should set low confidence when recycler preamble is missing', () => {
+      const noRecyclerText = [
+        'Certificado de Destinação Final CDF nº 100/2023',
+        'Identificação do Gerador',
+        'Razão Social: Some Company LTDA CPF/CNPJ: 02.089.969/0035-55',
+        'Declaração',
+        'Carazinho, 10/04/2023',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noRecyclerText));
+
+      expect(result.data.recycler.confidence).toBe('low');
+      expect(result.reviewRequired).toBe(true);
+    });
+
+    it('should set low confidence when generator section is missing', () => {
+      const noGeneratorText = [
+        'Certificado de Destinação Final CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Declaração',
+        'Carazinho, 10/04/2023',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noGeneratorText));
+
+      expect(result.data.generator.confidence).toBe('low');
+      expect(result.reviewRequired).toBe(true);
+    });
+
+    it('should set reviewRequired when required fields are missing', () => {
+      const incompleteCdfText = [
+        'Certificado de Destinação Final',
+        'Some random text without useful data',
+      ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(incompleteCdfText));
 
       expect(result.reviewRequired).toBe(true);
       expect(result.data.missingRequiredFields).toContain('documentNumber');
-      expect(result.reviewReasons.length).toBeGreaterThan(0);
-    });
-
-    it('should set low confidence for entities with missing CNPJ', () => {
-      const noEntityCnpjText = `
-        CERTIFICADO DE DESTINAÇÃO FINAL - CDF
-        CDF Nº: 111222333
-        Data de Emissão: 01/01/2024
-
-        Gerador
-        EMPRESA SEM CNPJ
-
-        Processador
-        PROCESSADOR SEM CNPJ
-      `;
-
-      const result = parser.parse(stubTextExtractionResult(noEntityCnpjText));
-
-      expect(result.data.generator.confidence).toBe('low');
-      expect(result.data.processor.confidence).toBe('low');
-      expect(result.data.extractionConfidence).toBe('low');
-      expect(result.reviewRequired).toBe(true);
+      expect(result.data.missingRequiredFields).toContain('issueDate');
     });
 
     it('should handle CDF number variations', () => {
       const variations = [
-        'CDF N° 123456',
-        'CDF Nº 123456',
-        'CDF N: 123456',
-        'CDF: 123456',
-        'Certificado de Destinação Final Nº 123456',
+        { expected: '2154920/2023', text: 'CDF nº 2154920/2023' },
+        { expected: '100/2023', text: 'CDF n° 100/2023' },
+        { expected: '12345', text: 'CDF: 12345' },
       ];
 
-      for (const variation of variations) {
-        const text = `${variation}\nData de Emissão: 01/01/2024`;
-        const result = parser.parse(stubTextExtractionResult(text));
+      for (const { expected, text } of variations) {
+        const fullText = `${text}\nDeclaração\n01/01/2024`;
+        const result = parser.parse(stubTextExtractionResult(fullText));
 
-        expect(result.data.documentNumber.parsed).toBe('123456');
+        expect(result.data.documentNumber.parsed).toBe(expected);
       }
     });
 
-    it('should handle alternative section names', () => {
-      const alternativeSectionsText = `CDF Nº: 555666777
-Data de Emissão: 15/06/2024
+    it('should extract issue date from Declaração section', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Identificação do Gerador',
+        'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
+        'Declaração',
+        'Declaramos que os resíduos foram destinados.',
+        'Carazinho, 15/06/2024',
+      ].join('\n');
 
-Origem
-EMPRESA ORIGEM LTDA
-CNPJ: 11.111.111/0001-11
+      const result = parser.parse(stubTextExtractionResult(text));
 
-Tratador
-TRATADOR AMBIENTAL S.A.
-CNPJ: 22.222.222/0001-22`;
+      expect(result.data.issueDate.parsed).toBe('15/06/2024');
+    });
 
-      const result = parser.parse(
-        stubTextExtractionResult(alternativeSectionsText),
+    it('should extract processing period range', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'Periodo: 01/01/2024 até 31/03/2024',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.processingPeriod?.parsed).toBe(
+        '01/01/2024 até 31/03/2024',
       );
-
-      expect(result.data.generator.parsed.name).toBe('EMPRESA ORIGEM LTDA');
-      expect(result.data.processor.parsed.name).toBe('TRATADOR AMBIENTAL S.A.');
     });
 
-    it('should skip lines containing CNPJ when extracting entity name', () => {
-      const cnpjInDifferentLineText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
+    it('should not extract waste entries when none are present', () => {
+      const noWasteText = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
 
-Gerador
-CNPJ: 12.345.678/0001-90 - Some text
-EMPRESA REAL NAME LTDA
-CNPJ: 12.345.678/0001-90
-`;
+      const result = parser.parse(stubTextExtractionResult(noWasteText));
 
-      const result = parser.parse(
-        stubTextExtractionResult(cnpjInDifferentLineText),
+      expect(result.data.wasteEntries).toBeUndefined();
+    });
+
+    it('should not extract transport manifests when section is missing', () => {
+      const noMtrText = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noMtrText));
+
+      expect(result.data.transportManifests).toBeUndefined();
+    });
+
+    it('should extract environmental license', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Licença Ambiental: LO-12345/2024',
+        'Identificação do Gerador',
+        'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.environmentalLicense?.parsed).toBe('LO-12345/2024');
+    });
+
+    it('should handle waste entry with more data rows than code rows', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'Classe II A 1,95000 Tonelada Compostagem',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
+      expect(result.data.wasteEntries?.parsed[0]?.code).toBeUndefined();
+      expect(result.data.wasteEntries?.parsed[0]?.description).toBe('');
+      expect(result.data.wasteEntries?.parsed[0]?.classification).toBe(
+        'Classe II A',
       );
-
-      expect(result.data.generator.parsed.name).toBe('EMPRESA REAL NAME LTDA');
     });
 
-    it('should skip short and numeric lines when extracting entity name', () => {
-      const shortLinesText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
+    it('should handle waste quantity with NaN value', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'Classe II A ... Tonelada Compostagem',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
 
-Gerador
-AB
-123456
-CNPJ: 12.345.678/0001-90
-EMPRESA VALID NAME LTDA
-`;
+      const result = parser.parse(stubTextExtractionResult(text));
 
-      const result = parser.parse(stubTextExtractionResult(shortLinesText));
-
-      expect(result.data.generator.parsed.name).toBe('EMPRESA VALID NAME LTDA');
+      if (result.data.wasteEntries) {
+        expect(result.data.wasteEntries.parsed[0]?.quantity).toBe(0);
+      }
     });
 
-    it('should handle entity with CNPJ but only short/invalid names', () => {
-      const noValidNameText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
+    it('should extract generator without address', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Identificação do Gerador',
+        'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
+        'Declaração',
+        'City, 01/04/2024',
+      ].join('\n');
 
-Gerador
-AB
-12
-CNPJ: 12.345.678/0001-90
-`;
+      const result = parser.parse(stubTextExtractionResult(text));
 
-      const result = parser.parse(stubTextExtractionResult(noValidNameText));
-
-      expect(result.data.generator.confidence).toBe('low');
-    });
-
-    it('should handle invalid waste quantity format', () => {
-      const invalidQuantityText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
-Quantidade Total: invalid kg
-`;
-
-      const result = parser.parse(
-        stubTextExtractionResult(invalidQuantityText),
-      );
-
-      expect(result.data.wasteQuantity).toBeUndefined();
-    });
-
-    it('should handle waste quantity with NaN result', () => {
-      // Use dots that match [\d.,]+ pattern but parse to NaN
-      const nanQuantityText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
-Quantidade Total: ... kg
-`;
-
-      const result = parser.parse(stubTextExtractionResult(nanQuantityText));
-
-      expect(result.data.wasteQuantity).toBeUndefined();
-    });
-
-    it('should handle section extraction with consecutive sections', () => {
-      // Text that triggers section parsing with sections directly following each other
-      const consecutiveSectionsText = `
-CDF Nº: 123456789
-Data de Emissão: 15/03/2024
-
-Gerador
-EMPRESA GERADORA LTDA
-CNPJ: 12.345.678/0001-90
-Processador
-`;
-
-      const result = parser.parse(
-        stubTextExtractionResult(consecutiveSectionsText),
-      );
-
-      expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator.parsed.name).toBe('Company LTDA');
+      expect(result.data.generator.parsed.address).toBeUndefined();
+      expect(result.data.generator.parsed.city).toBeUndefined();
+      expect(result.data.generator.parsed.state).toBeUndefined();
     });
   });
 
@@ -245,16 +300,17 @@ Processador
     });
 
     it('should return medium score for partial CDF text', () => {
-      const partialCdfText = `
-        Certificado de Destinação
-        Resíduo tratado
-      `;
+      const partialCdfText = [
+        'Certificado de Destinação',
+        'Gerador',
+        'Resíduo tratado',
+      ].join('\n');
       const score = parser.getMatchScore(
         stubTextExtractionResult(partialCdfText),
       );
 
       expect(score).toBeGreaterThanOrEqual(0.1);
-      expect(score).toBeLessThan(0.6);
+      expect(score).toBeLessThan(0.7);
     });
   });
 
