@@ -49,7 +49,7 @@ export const diceCoefficient = (a: string, b: string): number => {
   return (2 * intersection) / (a.length - 1 + (b.length - 1));
 };
 
-const DEFAULT_NAME_MATCH_THRESHOLD = 0.6;
+const DEFAULT_NAME_MATCH_THRESHOLD = 0.75;
 
 /**
  * Checks whether two names match using aggressive normalization and Dice coefficient.

@@ -13,7 +13,7 @@ const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
 const { RECYCLING_MANIFEST } = DocumentEventName;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { MTR } = ReportType;
 
 export const RESULT_COMMENTS = {
@@ -60,15 +60,23 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The "${DOCUMENT_NUMBER}" declared in the event ("${eventDocumentNumber}") does not match the extracted value from the document ("${extractedDocumentNumber}").`,
   GENERATOR_NAME_MISMATCH: ({
-    eventName,
-    extractedName,
     score,
   }: {
     eventName: string;
     extractedName: string;
     score: number;
   }) =>
-    `The generator name extracted from the document ("${extractedName}") does not match the "${WASTE_GENERATOR}" participant name ("${eventName}"). Similarity: ${(score * 100).toFixed(0)}%.`,
+    `The generator name extracted from the document does not match the "${WASTE_GENERATOR}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
+  GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
+  HAULER_NAME_MISMATCH: ({
+    score,
+  }: {
+    eventName: string;
+    extractedName: string;
+    score: number;
+  }) =>
+    `The hauler name extracted from the document does not match the "${HAULER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
+  HAULER_TAX_ID_MISMATCH: `The hauler tax ID extracted from the document does not match the "${HAULER}" participant tax ID.`,
   ISSUE_DATE_MISMATCH: ({
     eventIssueDate,
     extractedIssueDate,
@@ -78,15 +86,14 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The "${ISSUE_DATE}" declared in the event ("${eventIssueDate}") does not match the extracted value from the document ("${extractedIssueDate}").`,
   RECEIVER_NAME_MISMATCH: ({
-    eventName,
-    extractedName,
     score,
   }: {
     eventName: string;
     extractedName: string;
     score: number;
   }) =>
-    `The receiver name extracted from the document ("${extractedName}") does not match the "${RECYCLER}" participant name ("${eventName}"). Similarity: ${(score * 100).toFixed(0)}%.`,
+    `The receiver name extracted from the document does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
+  RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,
     eventDate,

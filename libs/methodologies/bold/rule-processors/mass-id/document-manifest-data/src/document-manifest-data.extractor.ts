@@ -6,6 +6,9 @@ import {
   type CrossValidationInput,
   type CrossValidationResult,
 } from '@carrot-fndn/shared/document-extractor';
+// Side-effect imports: parsers self-register via registerParser() at module load
+import '@carrot-fndn/shared/document-extractor-recycling-manifest';
+import '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import {

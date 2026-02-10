@@ -14,11 +14,35 @@ import {
   validateMtrExtractedData,
 } from './document-manifest-data.helpers';
 
+const stubEntity = (name: string, taxId: string) => ({
+  confidence: 'high' as const,
+  parsed: { name, taxId },
+  rawMatch: name,
+});
+
+const baseMtrData = {
+  documentNumber: {
+    confidence: 'high' as const,
+    parsed: '12345',
+    rawMatch: '12345',
+  },
+  documentType: 'transportManifest' as const,
+  generator: stubEntity('Generator Co', '11.111.111/0001-11'),
+  hauler: stubEntity('Hauler Co', '22.222.222/0001-22'),
+  issueDate: {
+    confidence: 'high' as const,
+    parsed: '2024-01-01',
+    rawMatch: '01/01/2024',
+  },
+  receiver: stubEntity('Receiver Co', '33.333.333/0001-33'),
+};
+
 const createExtractionResult = (
   data: Partial<MtrExtractedData>,
 ): ExtractionOutput<BaseExtractedData> =>
   ({
     data: {
+      ...baseMtrData,
       extractionConfidence: 'high',
       ...data,
     },
@@ -122,7 +146,7 @@ describe('document-manifest-data.helpers', () => {
 
       expect(result).toEqual({
         documentType: 'transportManifest',
-        layouts: ['mtr-brazil'],
+        layouts: ['mtr-brazil', 'mtr-cetesb-sp'],
       });
     });
 
@@ -388,10 +412,8 @@ describe('document-manifest-data.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain(
-        'COMPLETELY DIFFERENT COMPANY',
-      );
-      expect(result.reviewReasons?.[0]).toContain('Original Recycler Corp');
+      expect(result.reviewReasons?.[0]).toContain('receiver name');
+      expect(result.reviewReasons?.[0]).toContain('Similarity:');
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -420,9 +442,120 @@ describe('document-manifest-data.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain(
-        'COMPLETELY DIFFERENT GENERATOR',
-      );
+      expect(result.reviewReasons?.[0]).toContain('generator name');
+      expect(result.reviewReasons?.[0]).toContain('Similarity:');
+      expect(result.failMessages).toHaveLength(0);
+    });
+
+    it('should set reviewRequired when hauler name does not match', () => {
+      const extractionResult = createExtractionResult({
+        hauler: {
+          confidence: 'high',
+          parsed: {
+            name: 'COMPLETELY DIFFERENT HAULER' as never,
+            taxId: '12.345.678/0001-90' as never,
+          },
+          rawMatch: 'some raw text',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        haulerEvent: {
+          participant: {
+            name: 'Original Hauler Corp',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+      expect(result.reviewReasons?.[0]).toContain('hauler name');
+      expect(result.reviewReasons?.[0]).toContain('Similarity:');
+      expect(result.failMessages).toHaveLength(0);
+    });
+
+    it('should fail when receiver tax ID does not match with high confidence', () => {
+      const extractionResult = createExtractionResult({
+        receiver: {
+          confidence: 'high',
+          parsed: {
+            name: 'Receiver Co' as never,
+            taxId: '99.999.999/0001-99' as never,
+          },
+          rawMatch: 'some raw text',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          participant: {
+            name: 'Receiver Co',
+            taxId: '11.111.111/0001-11',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(1);
+      expect(result.failMessages[0]).toContain('receiver tax ID');
+    });
+
+    it('should not fail when tax IDs match after normalization', () => {
+      const extractionResult = createExtractionResult({
+        receiver: {
+          confidence: 'high',
+          parsed: {
+            name: 'Receiver Co' as never,
+            taxId: '11111111000111' as never,
+          },
+          rawMatch: 'some raw text',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          participant: {
+            name: 'Receiver Co',
+            taxId: '11.111.111/0001-11',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+    });
+
+    it('should skip tax ID validation when confidence is not high', () => {
+      const extractionResult = createExtractionResult({
+        receiver: {
+          confidence: 'low',
+          parsed: {
+            name: 'Receiver Co' as never,
+            taxId: '99.999.999/0001-99' as never,
+          },
+          rawMatch: 'some raw text',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          participant: {
+            name: 'Receiver Co',
+            taxId: '11.111.111/0001-11',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
       expect(result.failMessages).toHaveLength(0);
     });
 
