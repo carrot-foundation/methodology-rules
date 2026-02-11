@@ -1,11 +1,79 @@
 import type {
   BaseExtractedData,
+  ExtractedEntityWithAddressInfo,
+  ExtractedField,
   ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
+import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
 import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
 
-import { validateBasicExtractedData } from './cross-validation.helpers';
+import {
+  DATE_TOLERANCE_DAYS,
+  matchWasteTypeEntry,
+  normalizeQuantityToKg,
+  parsePeriodRange,
+  validateBasicExtractedData,
+  validateDateField,
+  validateDateWithinPeriod,
+  validateEntityAddress,
+  WEIGHT_DISCREPANCY_THRESHOLD,
+} from './cross-validation.helpers';
+
+const makeEntity = (
+  address: string,
+  city: string,
+  state: string,
+  confidence: 'high' | 'low' = 'high',
+): ExtractedEntityWithAddressInfo =>
+  ({
+    address: { confidence, parsed: address },
+    city: { confidence, parsed: city },
+    name: { confidence: 'high', parsed: 'Test Entity' },
+    state: { confidence, parsed: state },
+    taxId: { confidence: 'high', parsed: '12345678000190' },
+  }) as unknown as ExtractedEntityWithAddressInfo;
+
+const makeAddress = (
+  street: string,
+  number: string,
+  city: string,
+  countryState: string,
+): MethodologyAddress =>
+  ({
+    city,
+    countryState,
+    number,
+    street,
+  }) as unknown as MethodologyAddress;
+
+const addressCommentFunction = ({
+  score,
+}: {
+  eventAddress: string;
+  extractedAddress: string;
+  score: number;
+}) => `Address mismatch: ${(score * 100).toFixed(0)}%`;
+
+const dateCommentFunction = ({
+  daysDiff,
+  eventDate,
+  extractedDate,
+}: {
+  daysDiff: number;
+  eventDate: string;
+  extractedDate: string;
+}) => `Date differs by ${daysDiff} days: ${extractedDate} vs ${eventDate}`;
+
+const periodCommentFunction = ({
+  dropOffDate,
+  periodEnd,
+  periodStart,
+}: {
+  dropOffDate: string;
+  periodEnd: string;
+  periodStart: string;
+}) => `Date ${dropOffDate} outside period ${periodStart}-${periodEnd}`;
 
 describe('cross-validation.helpers', () => {
   describe('validateBasicExtractedData', () => {
@@ -131,6 +199,412 @@ describe('cross-validation.helpers', () => {
       const result = validateBasicExtractedData(extractionResult, eventSubject);
 
       expect(result.failMessages).toHaveLength(0);
+    });
+  });
+
+  describe('validateEntityAddress', () => {
+    it('should return empty when addresses match', () => {
+      const entity = makeEntity('Rua das Flores 123', 'Sao Paulo', 'SP');
+      const address = makeAddress('Rua das Flores', '123', 'Sao Paulo', 'SP');
+
+      const result = validateEntityAddress(
+        entity,
+        address,
+        addressCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return reviewReason when addresses do not match', () => {
+      const entity = makeEntity(
+        'Rua Completamente Diferente 999',
+        'Rio de Janeiro',
+        'RJ',
+      );
+      const address = makeAddress('Av Brasil', '100', 'Curitiba', 'PR');
+
+      const result = validateEntityAddress(
+        entity,
+        address,
+        addressCommentFunction,
+      );
+
+      expect(result.reviewReason).toContain('Address mismatch');
+    });
+
+    it('should skip when extractedEntity is undefined', () => {
+      const address = makeAddress('Rua Test', '1', 'City', 'ST');
+
+      const result = validateEntityAddress(
+        undefined,
+        address,
+        addressCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when eventAddress is undefined', () => {
+      const entity = makeEntity('Rua Test', 'City', 'ST');
+
+      const result = validateEntityAddress(
+        entity,
+        undefined,
+        addressCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when address confidence is low', () => {
+      const entity = makeEntity(
+        'Completely Different Address',
+        'Different City',
+        'XX',
+        'low',
+      );
+      const address = makeAddress('Rua Test', '1', 'City', 'ST');
+
+      const result = validateEntityAddress(
+        entity,
+        address,
+        addressCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('validateDateField', () => {
+    it('should return empty when dates match (same day)', () => {
+      const field: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '2024-01-15',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(
+        field,
+        '2024-01-15',
+        dateCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return reviewReason when within tolerance (1-3 days)', () => {
+      const field: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(
+        field,
+        '2024-01-03',
+        dateCommentFunction,
+      );
+
+      expect(result.reviewReason).toContain('Date differs by');
+      expect(result.failMessage).toBeUndefined();
+    });
+
+    it('should return failMessage when beyond tolerance (>3 days)', () => {
+      const field: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(
+        field,
+        '2024-01-10',
+        dateCommentFunction,
+      );
+
+      expect(result.failMessage).toContain('Date differs by');
+      expect(result.reviewReason).toBeUndefined();
+    });
+
+    it('should skip when confidence is not high', () => {
+      const field: ExtractedField<string> = {
+        confidence: 'low',
+        parsed: '01/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(
+        field,
+        '2024-06-15',
+        dateCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when extractedDate is undefined', () => {
+      const result = validateDateField(
+        undefined,
+        '2024-01-15',
+        dateCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when eventDateString is undefined', () => {
+      const field: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '2024-01-15',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(field, undefined, dateCommentFunction);
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('matchWasteTypeEntry', () => {
+    it('should match when code and description both match', () => {
+      const result = matchWasteTypeEntry(
+        { code: '190812', description: 'Lodos de tratamento' },
+        '190812',
+        'Lodos de tratamento',
+      );
+
+      expect(result.isMatch).toBe(true);
+      expect(result.isCodeMatch).toBe(true);
+    });
+
+    it('should match by description only when no code on either side', () => {
+      const result = matchWasteTypeEntry(
+        { description: 'Plastico' },
+        undefined,
+        'Plastico',
+      );
+
+      expect(result.isMatch).toBe(true);
+      expect(result.isCodeMatch).toBeNull();
+    });
+
+    it('should not match when codes differ', () => {
+      const result = matchWasteTypeEntry(
+        { code: '020101', description: 'Lodos' },
+        '190812',
+        'Lodos de tratamento',
+      );
+
+      expect(result.isMatch).toBe(false);
+      expect(result.isCodeMatch).toBe(false);
+    });
+
+    it('should not match when no event description or code', () => {
+      const result = matchWasteTypeEntry(
+        { code: '190812', description: 'Lodos' },
+        undefined,
+        undefined,
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should normalize waste codes with spaces', () => {
+      const result = matchWasteTypeEntry(
+        { code: '19 08 12', description: 'Lodos de tratamento' },
+        '190812',
+        'Lodos de tratamento',
+      );
+
+      expect(result.isMatch).toBe(true);
+      expect(result.isCodeMatch).toBe(true);
+    });
+  });
+
+  describe('normalizeQuantityToKg', () => {
+    it('should return quantity as-is when unit is undefined', () => {
+      expect(normalizeQuantityToKg(100, undefined)).toBe(100);
+    });
+
+    it('should return quantity as-is when unit is kg', () => {
+      expect(normalizeQuantityToKg(100, 'kg')).toBe(100);
+    });
+
+    it('should multiply by 1000 when unit is ton', () => {
+      expect(normalizeQuantityToKg(2, 'ton')).toBe(2000);
+    });
+
+    it('should multiply by 1000 when unit is t', () => {
+      expect(normalizeQuantityToKg(3, 't')).toBe(3000);
+    });
+
+    it('should return undefined for unknown units', () => {
+      expect(normalizeQuantityToKg(5, 'm³')).toBeUndefined();
+    });
+  });
+
+  describe('parsePeriodRange', () => {
+    it('should parse "ate" separator', () => {
+      const result = parsePeriodRange('01/01/2024 ate 31/01/2024');
+
+      expect(result).toEqual({ end: '31/01/2024', start: '01/01/2024' });
+    });
+
+    it('should parse "a" separator', () => {
+      const result = parsePeriodRange('01/02/2024 a 28/02/2024');
+
+      expect(result).toEqual({ end: '28/02/2024', start: '01/02/2024' });
+    });
+
+    it('should return undefined for invalid format', () => {
+      const result = parsePeriodRange('January 2024');
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should be case-insensitive', () => {
+      const result = parsePeriodRange('01/01/2024 ATE 31/01/2024');
+
+      expect(result).toEqual({ end: '31/01/2024', start: '01/01/2024' });
+    });
+  });
+
+  describe('validateDateWithinPeriod', () => {
+    it('should return empty when date is within period', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024 ate 31/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return failMessage when date is before period (high confidence)', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/02/2024 ate 28/02/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result.failMessage).toContain('outside period');
+    });
+
+    it('should return failMessage when date is after period (high confidence)', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024 ate 31/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-03-01',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result.failMessage).toContain('outside period');
+    });
+
+    it('should return reviewReason when confidence is low', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'low',
+        parsed: '01/02/2024 ate 28/02/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result.reviewReason).toContain('outside period');
+      expect(result.failMessage).toBeUndefined();
+    });
+
+    it('should skip when eventDateString is undefined', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024 ate 31/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        undefined,
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when periodField is undefined', () => {
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        undefined,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should skip when period format is invalid', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: 'invalid period',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when date is on the start boundary', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '15/01/2024 ate 31/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when date is on the end boundary', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/01/2024 ate 15/01/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('constants', () => {
+    it('should have DATE_TOLERANCE_DAYS as 3', () => {
+      expect(DATE_TOLERANCE_DAYS).toBe(3);
+    });
+
+    it('should have WEIGHT_DISCREPANCY_THRESHOLD as 0.1', () => {
+      expect(WEIGHT_DISCREPANCY_THRESHOLD).toBe(0.1);
     });
   });
 });

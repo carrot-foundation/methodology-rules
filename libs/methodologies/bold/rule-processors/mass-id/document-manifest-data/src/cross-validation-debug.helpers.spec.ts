@@ -1,11 +1,16 @@
+import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { logger } from '@carrot-fndn/shared/helpers';
 
+import type { CdfCrossValidationEventData } from './recycling-manifest-cross-validation.helpers';
 import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
 
-import { logCrossValidationComparison } from './cross-validation-debug.helpers';
+import {
+  logCdfCrossValidationComparison,
+  logCrossValidationComparison,
+} from './cross-validation-debug.helpers';
 
 const stubEntity = (name: string, taxId: string) => ({
   name: { confidence: 'high' as const, parsed: name, rawMatch: name },
@@ -47,6 +52,11 @@ const baseEventData: MtrCrossValidationEventData = {
   weighingEvents: [],
 };
 
+const stubCdfEntity = (name: string, taxId: string) => ({
+  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
+  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
+});
+
 describe('cross-validation-debug.helpers', () => {
   const originalEnvironment = process.env;
   let debugSpy: jest.SpyInstance;
@@ -75,7 +85,7 @@ describe('cross-validation-debug.helpers', () => {
           }),
           extractionConfidence: 'high',
         }),
-        'Cross-validation field comparison',
+        'Cross-validation field comparison (MTR)',
       );
 
       const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
@@ -345,6 +355,293 @@ describe('cross-validation-debug.helpers', () => {
       >;
 
       expect(crossValidation['documentNumber']?.['isMatch']).toBe(false);
+    });
+  });
+
+  describe('logCdfCrossValidationComparison', () => {
+    const stubCdfEntityWithAddress = (
+      name: string,
+      taxId: string,
+      address: string,
+      city: string,
+      state: string,
+    ) => ({
+      ...stubCdfEntity(name, taxId),
+      address: {
+        confidence: 'high' as const,
+        parsed: address,
+        rawMatch: address,
+      },
+      city: { confidence: 'high' as const, parsed: city, rawMatch: city },
+      state: { confidence: 'high' as const, parsed: state, rawMatch: state },
+    });
+
+    const baseCdfExtractedData: CdfExtractedData = {
+      documentNumber: {
+        confidence: 'high',
+        parsed: 'CDF-001',
+        rawMatch: 'CDF-001',
+      },
+      documentType: 'recyclingManifest',
+      generator: stubCdfEntityWithAddress(
+        'Generator Co',
+        '11.111.111/0001-11',
+        'Rua Test',
+        'Sao Paulo',
+        'SP',
+      ),
+      issueDate: {
+        confidence: 'high',
+        parsed: '2024-01-01',
+        rawMatch: '01/01/2024',
+      },
+      recycler: stubCdfEntity('Recycler Corp', '33.333.333/0001-33'),
+    } as unknown as CdfExtractedData;
+
+    const baseCdfEventData: CdfCrossValidationEventData = {
+      attachment: undefined,
+      documentNumber: 'CDF-001',
+      documentType: 'CDF',
+      dropOffEvent: undefined,
+      eventAddressId: 'addr-1',
+      eventValue: 100,
+      exemptionJustification: undefined,
+      hasWrongLabelAttachment: false,
+      issueDateAttribute: undefined,
+      mtrDocumentNumbers: [],
+      recyclerCountryCode: 'BR',
+      recyclerEvent: undefined,
+      wasteGeneratorEvent: undefined,
+      weighingEvents: [],
+    };
+
+    it('should log CDF metadata without values when DEBUG is not set', () => {
+      const extractedDataWithEntries: CdfExtractedData = {
+        ...baseCdfExtractedData,
+        wasteEntries: {
+          confidence: 'high',
+          parsed: [
+            {
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 1000,
+              unit: 'kg',
+            },
+          ],
+          rawMatch: '190812-Lodos',
+        },
+      } as unknown as CdfExtractedData;
+
+      logCdfCrossValidationComparison(
+        extractedDataWithEntries,
+        baseCdfEventData,
+        'high',
+      );
+
+      expect(debugSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          crossValidation: expect.objectContaining({
+            documentNumber: expect.objectContaining({
+              confidence: 'high',
+              isMatch: true,
+            }),
+            mtrNumbers: expect.objectContaining({
+              eventMtrNumbers: [],
+            }),
+          }),
+          extractionConfidence: 'high',
+        }),
+        'Cross-validation field comparison (CDF)',
+      );
+
+      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+      const crossValidation = logged['crossValidation'] as Record<
+        string,
+        Record<string, unknown>
+      >;
+
+      expect(crossValidation['documentNumber']).not.toHaveProperty('event');
+      expect(crossValidation['documentNumber']).not.toHaveProperty('extracted');
+    });
+
+    it('should include values when DEBUG=true', () => {
+      process.env['DEBUG'] = 'true';
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseCdfEventData,
+        recyclerEvent: {
+          participant: { name: 'Recycler Corp', taxId: '33.333.333/0001-33' },
+        } as unknown as DocumentEvent,
+        wasteGeneratorEvent: {
+          participant: {
+            name: 'Generator Co',
+            taxId: '11.111.111/0001-11',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      logCdfCrossValidationComparison(baseCdfExtractedData, eventData, 'high');
+
+      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+      const crossValidation = logged['crossValidation'] as Record<
+        string,
+        Record<string, unknown>
+      >;
+
+      expect(crossValidation['documentNumber']).toHaveProperty(
+        'event',
+        'CDF-001',
+      );
+      expect(crossValidation['documentNumber']).toHaveProperty(
+        'extracted',
+        'CDF-001',
+      );
+    });
+
+    it('should handle null fallbacks when DEBUG=true with minimal CDF event data', () => {
+      process.env['DEBUG'] = 'true';
+
+      const extractedData: CdfExtractedData = {
+        ...baseCdfExtractedData,
+        wasteEntries: {
+          confidence: 'high',
+          parsed: [{ description: 'Lodos de tratamento' }],
+          rawMatch: 'Lodos',
+        },
+      } as unknown as CdfExtractedData;
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseCdfEventData,
+        documentNumber: undefined,
+      };
+
+      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+
+      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+      const crossValidation = logged['crossValidation'] as Record<
+        string,
+        Record<string, unknown>
+      >;
+
+      expect(crossValidation['documentNumber']).toHaveProperty('event', null);
+
+      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
+
+      expect(entries[0]).toHaveProperty('extracted', 'Lodos de tratamento');
+    });
+
+    it('should log processing period and MTR numbers', () => {
+      const extractedData: CdfExtractedData = {
+        ...baseCdfExtractedData,
+        processingPeriod: {
+          confidence: 'high',
+          parsed: '01/01/2024 ate 31/01/2024',
+          rawMatch: '01/01/2024 ate 31/01/2024',
+        },
+        transportManifests: {
+          confidence: 'high',
+          parsed: ['MTR-001', 'MTR-002'],
+          rawMatch: 'MTR-001, MTR-002',
+        },
+      } as unknown as CdfExtractedData;
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseCdfEventData,
+        dropOffEvent: {
+          externalCreatedAt: '2024-01-15',
+        } as unknown as DocumentEvent,
+        mtrDocumentNumbers: ['MTR-001'],
+      };
+
+      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+
+      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+      const crossValidation = logged['crossValidation'] as Record<
+        string,
+        Record<string, unknown>
+      >;
+
+      expect(crossValidation['mtrNumbers']).toEqual({
+        eventMtrNumbers: ['MTR-001'],
+        extractedManifests: ['MTR-001', 'MTR-002'],
+      });
+
+      const period = crossValidation['processingPeriod'] as Record<
+        string,
+        unknown
+      >;
+
+      expect(period['confidence']).toBe('high');
+      expect(period['dropOffDate']).toBe('2024-01-15');
+      expect(period['start']).toBe('01/01/2024');
+      expect(period['end']).toBe('31/01/2024');
+    });
+
+    it('should log waste type and quantity with full event data', () => {
+      process.env['DEBUG'] = 'true';
+
+      const extractedData: CdfExtractedData = {
+        ...baseCdfExtractedData,
+        wasteEntries: {
+          confidence: 'high',
+          parsed: [
+            {
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 1000,
+              unit: 'kg',
+            },
+          ],
+          rawMatch: '190812-Lodos',
+        },
+      } as unknown as CdfExtractedData;
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseCdfEventData,
+        dropOffEvent: {
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: 'Local Waste Classification ID',
+                value: '190812',
+              },
+              {
+                isPublic: true,
+                name: 'Local Waste Classification Description',
+                value: 'Lodos de tratamento',
+              },
+            ],
+          },
+        } as unknown as DocumentEvent,
+        weighingEvents: [{ value: 1000 } as unknown as DocumentEvent],
+      };
+
+      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+
+      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
+      const crossValidation = logged['crossValidation'] as Record<
+        string,
+        Record<string, unknown>
+      >;
+
+      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+
+      expect(wasteType['confidence']).toBe('high');
+      expect(wasteType['eventCode']).toBe('190812');
+
+      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
+
+      expect(entries[0]?.['isMatch']).toBe(true);
+
+      const quantityWeight = crossValidation['wasteQuantityWeight'] as Record<
+        string,
+        unknown
+      >;
+
+      expect(quantityWeight['normalizedKg']).toBe(1000);
+      expect(quantityWeight['weighingValue']).toBe(1000);
     });
   });
 });

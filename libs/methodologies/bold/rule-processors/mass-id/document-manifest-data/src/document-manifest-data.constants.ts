@@ -59,6 +59,24 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDocumentNumber: string;
   }) =>
     `The "${DOCUMENT_NUMBER}" declared in the event ("${eventDocumentNumber}") does not match the extracted value from the document ("${extractedDocumentNumber}").`,
+  DROP_OFF_DATE_OUTSIDE_PERIOD: ({
+    dropOffDate,
+    periodEnd,
+    periodStart,
+  }: {
+    dropOffDate: string;
+    periodEnd: string;
+    periodStart: string;
+  }) =>
+    `The Drop-off event date ("${dropOffDate}") falls outside the recycling manifest processing period ("${periodStart}" to "${periodEnd}").`,
+  GENERATOR_ADDRESS_MISMATCH: ({
+    score,
+  }: {
+    eventAddress: string;
+    extractedAddress: string;
+    score: number;
+  }) =>
+    `The generator address extracted from the document does not match the "${WASTE_GENERATOR}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_NAME_MISMATCH: ({
     score,
   }: {
@@ -68,6 +86,14 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The generator name extracted from the document does not match the "${WASTE_GENERATOR}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
+  HAULER_ADDRESS_MISMATCH: ({
+    score,
+  }: {
+    eventAddress: string;
+    extractedAddress: string;
+    score: number;
+  }) =>
+    `The hauler address extracted from the document does not match the "${HAULER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   HAULER_NAME_MISMATCH: ({
     score,
   }: {
@@ -85,6 +111,16 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedIssueDate: string;
   }) =>
     `The "${ISSUE_DATE}" declared in the event ("${eventIssueDate}") does not match the extracted value from the document ("${extractedIssueDate}").`,
+  MTR_NUMBER_NOT_IN_CDF: ({ mtrNumber }: { mtrNumber: string }) =>
+    `The MTR number ("${mtrNumber}") from this mass-id was not found in the CDF's transport manifests list.`,
+  RECEIVER_ADDRESS_MISMATCH: ({
+    score,
+  }: {
+    eventAddress: string;
+    extractedAddress: string;
+    score: number;
+  }) =>
+    `The receiver address extracted from the document does not match the "${RECYCLER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECEIVER_NAME_MISMATCH: ({
     score,
   }: {
@@ -94,6 +130,7 @@ export const CROSS_VALIDATION_COMMENTS = {
   }) =>
     `The receiver name extracted from the document does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
+
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,
     eventDate,
@@ -104,6 +141,35 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s).`,
+  RECYCLER_NAME_MISMATCH: ({
+    score,
+  }: {
+    eventName: string;
+    extractedName: string;
+    score: number;
+  }) =>
+    `The recycler name extracted from the recycling manifest does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
+  RECYCLER_TAX_ID_MISMATCH: `The recycler tax ID extracted from the recycling manifest does not match the "${RECYCLER}" participant tax ID.`,
+  RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: ({
+    discrepancyPercentage,
+    extractedQuantity,
+    unit,
+    weighingWeight,
+  }: {
+    discrepancyPercentage: string;
+    extractedQuantity: string;
+    unit: string;
+    weighingWeight: string;
+  }) =>
+    `The waste quantity extracted from the recycling manifest (${extractedQuantity} ${unit}) differs from the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) by ${discrepancyPercentage}%.`,
+  RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH: ({
+    eventClassification,
+    extractedEntries,
+  }: {
+    eventClassification: string;
+    extractedEntries: string;
+  }) =>
+    `None of the waste types extracted from the recycling manifest (${extractedEntries}) match the event's waste classification (${eventClassification}).`,
   TRANSPORT_DATE_MISMATCH: ({
     daysDiff,
     eventDate,

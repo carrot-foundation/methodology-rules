@@ -11,12 +11,17 @@ import '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
-import { validateBasicExtractedData } from './cross-validation.helpers';
 import {
   type AttachmentInfo,
   type DocumentManifestEventSubject,
   getExtractorConfig,
 } from './document-manifest-data.helpers';
+import {
+  type CdfCrossValidationEventData,
+  collectMtrDocumentNumbers,
+  isCdfEventData,
+  validateCdfExtractedData,
+} from './recycling-manifest-cross-validation.helpers';
 import {
   type MtrCrossValidationEventData,
   validateMtrExtractedData,
@@ -49,6 +54,8 @@ export const crossValidateWithTextract = async ({
 }): Promise<CrossValidationResult> => {
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
+  const mtrDocumentNumbers = collectMtrDocumentNumbers(documentManifestEvents);
+
   for (const [index, attachmentInfo] of attachmentInfos.entries()) {
     // eslint-disable-next-line security/detect-object-injection
     const baseEvent = documentManifestEvents[index];
@@ -72,7 +79,16 @@ export const crossValidateWithTextract = async ({
 
       inputs.push({ attachmentInfo, eventData: mtrEventData });
     } else {
-      inputs.push({ attachmentInfo, eventData: baseEvent });
+      const cdfEventData: CdfCrossValidationEventData = {
+        ...baseEvent,
+        dropOffEvent,
+        mtrDocumentNumbers,
+        recyclerEvent,
+        wasteGeneratorEvent,
+        weighingEvents,
+      };
+
+      inputs.push({ attachmentInfo, eventData: cdfEventData });
     }
   }
 
@@ -85,7 +101,12 @@ export const crossValidateWithTextract = async ({
           return validateMtrExtractedData(extractionResult, eventData);
         }
 
-        return validateBasicExtractedData(extractionResult, eventData);
+        if (isCdfEventData(eventData)) {
+          return validateCdfExtractedData(extractionResult, eventData);
+        }
+
+        // istanbul ignore next -- all events are enriched as MTR or CDF above
+        return { failMessages: [] };
       },
     },
     documentExtractor,

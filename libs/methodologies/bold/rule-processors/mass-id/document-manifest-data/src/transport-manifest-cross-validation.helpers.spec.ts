@@ -6,6 +6,7 @@ import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-tr
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
+  matchWasteTypeEntry,
   type MtrCrossValidationEventData,
   normalizeQuantityToKg,
   validateMtrExtractedData,
@@ -17,6 +18,20 @@ const stubEntity = (name: string, taxId: string) => ({
   city: { confidence: 'low' as const, parsed: '' },
   name: { confidence: 'high' as const, parsed: name, rawMatch: name },
   state: { confidence: 'low' as const, parsed: '' },
+  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
+});
+
+const stubEntityWithHighAddress = (
+  name: string,
+  taxId: string,
+  address: string,
+  city: string,
+  state: string,
+) => ({
+  address: { confidence: 'high' as const, parsed: address },
+  city: { confidence: 'high' as const, parsed: city },
+  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
+  state: { confidence: 'high' as const, parsed: state },
   taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
 });
 
@@ -1326,6 +1341,196 @@ describe('transport-manifest-cross-validation.helpers', () => {
   describe('WEIGHT_DISCREPANCY_THRESHOLD', () => {
     it('should be 0.1 (10%)', () => {
       expect(WEIGHT_DISCREPANCY_THRESHOLD).toBe(0.1);
+    });
+  });
+
+  describe('address validation in validateMtrExtractedData', () => {
+    const baseEventData: MtrCrossValidationEventData = {
+      attachment: undefined,
+      documentNumber: '12345',
+      documentType: 'MTR',
+      dropOffEvent: undefined,
+      eventAddressId: 'addr-1',
+      eventValue: 100,
+      exemptionJustification: undefined,
+      hasWrongLabelAttachment: false,
+      haulerEvent: undefined,
+      issueDateAttribute: undefined,
+      pickUpEvent: undefined,
+      recyclerCountryCode: 'BR',
+      recyclerEvent: undefined,
+      wasteGeneratorEvent: undefined,
+      weighingEvents: [],
+    };
+
+    it('should set reviewRequired when receiver address does not match', () => {
+      const extractionResult = createExtractionResult({
+        receiver: stubEntityWithHighAddress(
+          'Receiver Co',
+          '33.333.333/0001-33',
+          'Rua Completamente Diferente 999',
+          'Rio de Janeiro',
+          'RJ',
+        ),
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          address: {
+            city: 'Curitiba',
+            countryState: 'PR',
+            number: '100',
+            street: 'Av Brasil',
+          },
+          participant: {
+            name: 'Receiver Co',
+            taxId: '33.333.333/0001-33',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+
+      const addressReason = result.reviewReasons?.find((r) =>
+        r.includes('receiver address'),
+      );
+
+      expect(addressReason).toBeDefined();
+    });
+
+    it('should set reviewRequired when generator address does not match', () => {
+      const extractionResult = createExtractionResult({
+        generator: stubEntityWithHighAddress(
+          'Generator Co',
+          '11.111.111/0001-11',
+          'Rua Totalmente Diferente 888',
+          'Porto Alegre',
+          'RS',
+        ),
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        wasteGeneratorEvent: {
+          address: {
+            city: 'Belo Horizonte',
+            countryState: 'MG',
+            number: '200',
+            street: 'Av Amazonas',
+          },
+          participant: {
+            name: 'Generator Co',
+            taxId: '11.111.111/0001-11',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+
+      const addressReason = result.reviewReasons?.find((r) =>
+        r.includes('generator address'),
+      );
+
+      expect(addressReason).toBeDefined();
+    });
+
+    it('should set reviewRequired when hauler address does not match', () => {
+      const extractionResult = createExtractionResult({
+        hauler: stubEntityWithHighAddress(
+          'Hauler Co',
+          '22.222.222/0001-22',
+          'Rua Outra Endereco 777',
+          'Salvador',
+          'BA',
+        ),
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        haulerEvent: {
+          address: {
+            city: 'Recife',
+            countryState: 'PE',
+            number: '300',
+            street: 'Av Boa Viagem',
+          },
+          participant: {
+            name: 'Hauler Co',
+            taxId: '22.222.222/0001-22',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+
+      const addressReason = result.reviewReasons?.find((r) =>
+        r.includes('hauler address'),
+      );
+
+      expect(addressReason).toBeDefined();
+    });
+
+    it('should skip address validation when address confidence is low', () => {
+      const extractionResult = createExtractionResult({
+        receiver: {
+          address: { confidence: 'low', parsed: 'Different Address' as never },
+          city: { confidence: 'low', parsed: 'Different City' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'Receiver Co' as never,
+            rawMatch: 'Receiver Co',
+          },
+          state: { confidence: 'low', parsed: 'XX' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '33.333.333/0001-33' as never,
+            rawMatch: '33.333.333/0001-33',
+          },
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          address: {
+            city: 'Curitiba',
+            countryState: 'PR',
+            number: '100',
+            street: 'Av Brasil',
+          },
+          participant: {
+            name: 'Receiver Co',
+            taxId: '33.333.333/0001-33',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
+    });
+  });
+
+  describe('re-exported helpers', () => {
+    it('should re-export matchWasteTypeEntry from shared helpers', () => {
+      const result = matchWasteTypeEntry(
+        { code: '01 01 01', description: 'Waste', quantity: 100 },
+        '01 01 01',
+        'Waste',
+      );
+
+      expect(result.isMatch).toBe(true);
     });
   });
 });

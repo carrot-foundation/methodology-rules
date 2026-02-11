@@ -1,17 +1,10 @@
-import type {
-  MtrExtractedData,
-  WasteTypeEntry,
-} from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import {
   type BaseExtractedData,
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
-import {
-  dateDifferenceInDays,
-  isNameMatch,
-  normalizeVehiclePlate,
-} from '@carrot-fndn/shared/helpers';
+import { normalizeVehiclePlate } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
@@ -27,12 +20,23 @@ import { logCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
   collectResults,
   type FieldValidationResult,
+  matchWasteTypeEntry,
+  normalizeQuantityToKg,
   routeByConfidence,
   validateBasicExtractedData,
+  validateDateField,
+  validateEntityAddress,
   validateEntityName,
   validateEntityTaxId,
+  WEIGHT_DISCREPANCY_THRESHOLD,
 } from './cross-validation.helpers';
 import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
+
+export {
+  matchWasteTypeEntry,
+  normalizeQuantityToKg,
+  WEIGHT_DISCREPANCY_THRESHOLD,
+} from './cross-validation.helpers';
 
 export interface MtrCrossValidationEventData
   extends DocumentManifestEventSubject {
@@ -43,8 +47,6 @@ export interface MtrCrossValidationEventData
   wasteGeneratorEvent: DocumentEvent | undefined;
   weighingEvents: DocumentEvent[];
 }
-
-const DATE_TOLERANCE_DAYS = 3;
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -84,99 +86,6 @@ const validateVehiclePlate = (
   });
 
   return routeByConfidence(extractedData.vehiclePlate.confidence, message);
-};
-
-const validateDateField = (
-  extractedDate: MtrExtractedData['transportDate'],
-  eventDateString: string | undefined,
-  commentFunction: (parameters: {
-    daysDiff: number;
-    eventDate: string;
-    extractedDate: string;
-  }) => string,
-): FieldValidationResult => {
-  if (!extractedDate || !eventDateString) {
-    return {};
-  }
-
-  if (extractedDate.confidence !== 'high') {
-    return {};
-  }
-
-  const daysDiff = dateDifferenceInDays(extractedDate.parsed, eventDateString);
-
-  if (daysDiff === undefined || daysDiff === 0) {
-    return {};
-  }
-
-  const message = commentFunction({
-    daysDiff,
-    eventDate: eventDateString,
-    extractedDate: extractedDate.parsed,
-  });
-
-  return daysDiff > DATE_TOLERANCE_DAYS
-    ? { failMessage: message }
-    : { reviewReason: message };
-};
-
-export const WEIGHT_DISCREPANCY_THRESHOLD = 0.1;
-
-export const normalizeQuantityToKg = (
-  quantity: number,
-  unit: string | undefined,
-): number | undefined => {
-  if (unit === undefined) {
-    return quantity;
-  }
-
-  const normalized = unit.toLowerCase();
-
-  if (normalized === 'kg') {
-    return quantity;
-  }
-
-  if (normalized === 'ton' || normalized === 't') {
-    return quantity * 1000;
-  }
-
-  return undefined;
-};
-
-const normalizeWasteCode = (code: string): string =>
-  code.replaceAll(/\s+/g, '').toLowerCase();
-
-interface WasteTypeMatchResult {
-  descriptionSimilarity: null | number;
-  isCodeMatch: boolean | null;
-  isMatch: boolean;
-}
-
-export const matchWasteTypeEntry = (
-  entry: WasteTypeEntry,
-  eventCode: string | undefined,
-  eventDescription: string | undefined,
-): WasteTypeMatchResult => {
-  if (entry.code && eventCode && eventCode.length > 0) {
-    const isCodeMatch =
-      normalizeWasteCode(eventCode) === normalizeWasteCode(entry.code);
-
-    if (!isCodeMatch || eventDescription === undefined) {
-      return { descriptionSimilarity: null, isCodeMatch, isMatch: false };
-    }
-
-    const { isMatch, score } = isNameMatch(entry.description, eventDescription);
-
-    return { descriptionSimilarity: score, isCodeMatch, isMatch };
-  }
-
-  if (eventDescription) {
-    const { isMatch, score } = isNameMatch(entry.description, eventDescription);
-
-    return { descriptionSimilarity: score, isCodeMatch: null, isMatch };
-  }
-
-  return { descriptionSimilarity: null, isCodeMatch: null, isMatch: false };
 };
 
 const validateWasteQuantity = (
@@ -319,6 +228,11 @@ export const validateMtrExtractedData = (
       eventData.recyclerEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
     ),
+    validateEntityAddress(
+      extractedData.receiver,
+      eventData.recyclerEvent?.address,
+      CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
+    ),
     validateEntityName(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
@@ -329,6 +243,11 @@ export const validateMtrExtractedData = (
       eventData.wasteGeneratorEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
     ),
+    validateEntityAddress(
+      extractedData.generator,
+      eventData.wasteGeneratorEvent?.address,
+      CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
+    ),
     validateEntityName(
       extractedData.hauler,
       eventData.haulerEvent?.participant.name,
@@ -338,6 +257,11 @@ export const validateMtrExtractedData = (
       extractedData.hauler,
       eventData.haulerEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
+    ),
+    validateEntityAddress(
+      extractedData.hauler,
+      eventData.haulerEvent?.address,
+      CROSS_VALIDATION_COMMENTS.HAULER_ADDRESS_MISMATCH,
     ),
     validateDateField(
       extractedData.transportDate,
