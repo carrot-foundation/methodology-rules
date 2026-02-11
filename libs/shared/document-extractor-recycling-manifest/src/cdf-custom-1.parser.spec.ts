@@ -30,7 +30,11 @@ describe('CdfCustom1Parser', () => {
     'Endereço: RODOVIA ANHANGUERA (SP 330) KM 131',
     'CNPJ: 46.344.354/0005-88 IE: 417325212115',
     'LODO SÓLIDO - SANITÁRIO: LODO GERADO NA ESTAÇÃO DE TRATAMENTO DE ÁGUA',
-    'CADRI',
+    'Descrição: Tipo de Matéria-Prima CADRI Data do Recebimento Quantidade (ton)',
+    'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
+    'LODO SÓLIDO - SANITÁRIO 42003189 02/07/2024 90,50',
+    'LODO SÓLIDO - SANITÁRIO 42003189 15/07/2024 201,97',
+    'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 377,59',
     'Quantidade Total Tratado',
     '377,59',
   ].join('\n');
@@ -55,7 +59,13 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.treatmentMethod?.parsed).toBe(
         'compostagem de lodo de esgoto',
       );
-      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(377.59);
+      expect(result.data.wasteEntries?.parsed).toEqual([
+        {
+          description: 'LODO GERADO NA ESTAÇÃO DE TRATAMENTO DE ÁGUA',
+          quantity: 377.59,
+          unit: 'ton',
+        },
+      ]);
       expect(result.data.documentType).toBe('recyclingManifest');
       expect(result.data.generator.address.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
@@ -211,7 +221,7 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.recycler.name.confidence).toBe('low');
     });
 
-    it('should handle quantity on the same line as label', () => {
+    it('should handle quantity on the same line as label (fallback)', () => {
       const sameLineText = [
         'CDF 100/24',
         'Jundiaí, 01 de Janeiro de 2024.',
@@ -221,6 +231,78 @@ describe('CdfCustom1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(sameLineText));
 
       expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(500);
+    });
+
+    it('should extract receipt table entries', () => {
+      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
+
+      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
+      expect(result.data.receiptEntries?.confidence).toBe('high');
+      expect(result.data.receiptEntries?.parsed[0]).toEqual({
+        cadri: '42003189',
+        quantity: 85.12,
+        receiptDate: '01/07/2024',
+        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+      });
+    });
+
+    it('should extract CADRI as transport manifests', () => {
+      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
+
+      expect(result.data.transportManifests?.parsed).toEqual(['42003189']);
+      expect(result.data.transportManifests?.confidence).toBe('high');
+    });
+
+    it('should not extract transport manifests when all CADRIs are dashes', () => {
+      const noCadriText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
+        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
+        'Descrição: Tipo de Matéria-Prima CADRI',
+        'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12',
+        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 85,12',
+        'Quantidade Total Tratado',
+        '85,12',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noCadriText));
+
+      expect(result.data.receiptEntries?.parsed).toHaveLength(1);
+      expect(result.data.receiptEntries?.parsed[0]?.cadri).toBeUndefined();
+      expect(result.data.transportManifests).toBeUndefined();
+    });
+
+    it('should fall back to total quantity when no table rows or subtotals are present', () => {
+      const fallbackText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+        'Quantidade Total Tratado',
+        '1.234,56',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(fallbackText));
+
+      expect(result.data.receiptEntries).toBeUndefined();
+      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(1234.56);
+      expect(result.data.wasteEntries?.parsed[0]?.description).toBe('');
     });
   });
 

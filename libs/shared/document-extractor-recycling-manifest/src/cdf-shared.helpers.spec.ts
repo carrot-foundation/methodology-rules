@@ -1,12 +1,18 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 
 import {
+  buildWasteEntriesFromSubtotals,
   createRecyclerEntity,
+  extractCadriNumbers,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
   extractWasteClassificationData,
+  extractWasteSubtotals,
+  extractWasteTypeDescriptions,
   finalizeCdfExtraction,
   mergeWasteEntries,
+  parseReceiptTableRows,
+  type ReceiptTableRow,
   type WasteCodeInfo,
   type WasteDataInfo,
 } from './cdf-shared.helpers';
@@ -221,6 +227,241 @@ describe('CDF shared helpers', () => {
       const pattern = /MTRs?\s+incluidos\s*\n([\s\S]*?)$/i;
 
       expect(extractMtrNumbers('No MTR section', pattern, 10)).toEqual([]);
+    });
+  });
+
+  describe('parseReceiptTableRows', () => {
+    it('should parse rows with CADRI numbers', () => {
+      const text = [
+        'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
+        'LODO SÓLIDO - SANITÁRIO 42003189 02/07/2024 90,50',
+      ].join('\n');
+
+      const result = parseReceiptTableRows(text);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({
+        cadri: '42003189',
+        quantity: 85.12,
+        receiptDate: '01/07/2024',
+        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+      });
+      expect(result[1]?.quantity).toBe(90.5);
+    });
+
+    it('should parse rows without CADRI (dash)', () => {
+      const text = 'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12';
+
+      const result = parseReceiptTableRows(text);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({
+        quantity: 85.12,
+        receiptDate: '01/07/2024',
+        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+      });
+      expect(result[0]?.cadri).toBeUndefined();
+    });
+
+    it('should handle Brazilian number format with thousands separator', () => {
+      const text = 'RESÍDUO 12345678 15/08/2024 1.234,56';
+
+      const result = parseReceiptTableRows(text);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.quantity).toBe(1234.56);
+    });
+
+    it('should ignore subtotal and total lines', () => {
+      const text = [
+        'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12',
+        'Subtotal LODO SÓLIDO - SANITÁRIO 85,12',
+        'Quantidade Total Tratado 85,12',
+      ].join('\n');
+
+      const result = parseReceiptTableRows(text);
+
+      expect(result).toHaveLength(1);
+    });
+
+    it('should skip rows with unparseable quantity', () => {
+      const text = 'RESÍDUO - 01/07/2024 ...';
+
+      expect(parseReceiptTableRows(text)).toEqual([]);
+    });
+
+    it('should return empty array for text without table rows', () => {
+      const text = 'Some random text without any table data';
+
+      expect(parseReceiptTableRows(text)).toEqual([]);
+    });
+  });
+
+  describe('extractWasteTypeDescriptions', () => {
+    it('should extract waste type descriptions from section between IE and table header', () => {
+      const text = [
+        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE (TORTA)',
+        'Descrição: Tipo de Matéria-Prima',
+      ].join('\n');
+
+      const result = extractWasteTypeDescriptions(text);
+
+      expect(result).toEqual([
+        {
+          description: 'LODO DE ETE (TORTA)',
+          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        },
+      ]);
+    });
+
+    it('should extract multiple waste type descriptions', () => {
+      const text = [
+        'IE: 417325212115',
+        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE (TORTA)',
+        'OUTROS RESÍDUOS: RESÍDUO DO FLOTADOR (GORDURA)',
+        'Tipo de Matéria-Prima: whatever',
+      ].join('\n');
+
+      const result = extractWasteTypeDescriptions(text);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]?.description).toBe('LODO DE ETE (TORTA)');
+      expect(result[1]?.description).toBe('RESÍDUO DO FLOTADOR (GORDURA)');
+    });
+
+    it('should return empty when section markers are missing', () => {
+      const text = 'Some text without IE or Descrição markers';
+
+      expect(extractWasteTypeDescriptions(text)).toEqual([]);
+    });
+  });
+
+  describe('extractWasteSubtotals', () => {
+    it('should extract single subtotal', () => {
+      const text = 'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 2.538,34';
+
+      const result = extractWasteSubtotals(text);
+
+      expect(result).toEqual([
+        {
+          quantity: 2538.34,
+          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        },
+      ]);
+    });
+
+    it('should extract multiple subtotals', () => {
+      const text = [
+        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 2.538,34',
+        'Quantidade Tratada de OUTROS RESÍDUOS 17,12',
+      ].join('\n');
+
+      const result = extractWasteSubtotals(text);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]?.wasteType).toBe('LODO SÓLIDO - SANITÁRIO');
+      expect(result[1]?.wasteType).toBe('OUTROS RESÍDUOS');
+      expect(result[1]?.quantity).toBe(17.12);
+    });
+
+    it('should skip subtotals with unparseable quantity', () => {
+      const text = 'Quantidade Tratada de TIPO ...';
+
+      expect(extractWasteSubtotals(text)).toEqual([]);
+    });
+
+    it('should return empty array when no subtotals found', () => {
+      expect(extractWasteSubtotals('No subtotals here')).toEqual([]);
+    });
+  });
+
+  describe('buildWasteEntriesFromSubtotals', () => {
+    it('should build waste entries with descriptions from mapping', () => {
+      const subtotals = [
+        { quantity: 2538.34, wasteType: 'LODO SÓLIDO - SANITÁRIO' },
+      ];
+      const descriptions = [
+        {
+          description: 'LODO DE ETE (TORTA)',
+          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        },
+      ];
+
+      const result = buildWasteEntriesFromSubtotals(subtotals, descriptions);
+
+      expect(result).toEqual([
+        {
+          description: 'LODO DE ETE (TORTA)',
+          quantity: 2538.34,
+          unit: 'ton',
+        },
+      ]);
+    });
+
+    it('should fall back to waste type name when no description found', () => {
+      const subtotals = [{ quantity: 100, wasteType: 'UNKNOWN TYPE' }];
+
+      const result = buildWasteEntriesFromSubtotals(subtotals, []);
+
+      expect(result[0]?.description).toBe('UNKNOWN TYPE');
+    });
+
+    it('should match descriptions case-insensitively', () => {
+      const subtotals = [
+        { quantity: 10, wasteType: 'lodo sólido - sanitário' },
+      ];
+      const descriptions = [
+        {
+          description: 'LODO DE ETE',
+          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        },
+      ];
+
+      const result = buildWasteEntriesFromSubtotals(subtotals, descriptions);
+
+      expect(result[0]?.description).toBe('LODO DE ETE');
+    });
+  });
+
+  describe('extractCadriNumbers', () => {
+    it('should extract unique CADRI numbers', () => {
+      const rows: ReceiptTableRow[] = [
+        {
+          cadri: '42003189',
+          quantity: 85,
+          receiptDate: '01/07/2024',
+          wasteType: 'LODO',
+        },
+        {
+          cadri: '42003189',
+          quantity: 90,
+          receiptDate: '02/07/2024',
+          wasteType: 'LODO',
+        },
+        {
+          cadri: '42003200',
+          quantity: 50,
+          receiptDate: '03/07/2024',
+          wasteType: 'LODO',
+        },
+      ];
+
+      const result = extractCadriNumbers(rows);
+
+      expect(result).toEqual(['42003189', '42003200']);
+    });
+
+    it('should return empty array when all rows have no CADRI', () => {
+      const rows: ReceiptTableRow[] = [
+        {
+          quantity: 85,
+          receiptDate: '01/07/2024',
+          wasteType: 'LODO',
+        },
+      ];
+
+      expect(extractCadriNumbers(rows)).toEqual([]);
     });
   });
 

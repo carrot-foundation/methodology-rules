@@ -11,16 +11,20 @@ import {
   type EntityInfo,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
-  finalizeExtraction,
   parseBrazilianNumber,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
-  CDF_ALL_FIELDS,
-  CDF_REQUIRED_FIELDS,
-  type CdfExtractedData,
-} from './recycling-manifest.types';
+  buildWasteEntriesFromSubtotals,
+  extractCadriNumbers,
+  extractWasteSubtotals,
+  extractWasteTypeDescriptions,
+  finalizeCdfExtraction,
+  parseReceiptTableRows,
+  toReceiptEntries,
+} from './cdf-shared.helpers';
+import { type CdfExtractedData } from './recycling-manifest.types';
 
 const MONTHS: Record<string, string> = {
   abril: '04',
@@ -167,26 +171,9 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       partialData.environmentalLicense = environmentalLicense;
     }
     this.extractTreatmentMethod(rawText, partialData);
-    this.extractWasteQuantity(rawText, partialData);
+    this.extractTableData(rawText, partialData);
 
-    return finalizeExtraction<CdfExtractedData>({
-      allFields: [...CDF_ALL_FIELDS],
-
-      confidenceFields: [
-        partialData.documentNumber,
-        partialData.issueDate,
-        partialData.generator?.name,
-        partialData.generator?.taxId,
-        partialData.recycler?.name,
-        partialData.recycler?.taxId,
-      ],
-
-      documentType: 'recyclingManifest',
-      matchScore,
-      partialData,
-      rawText,
-      requiredFields: [...CDF_REQUIRED_FIELDS],
-    });
+    return finalizeCdfExtraction(partialData, matchScore, rawText);
   }
 
   private extractEntities(
@@ -227,6 +214,50 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     }
   }
 
+  private extractTableData(
+    rawText: string,
+    partialData: Partial<CdfExtractedData>,
+  ): void {
+    const rows = parseReceiptTableRows(rawText);
+
+    if (rows.length > 0) {
+      partialData.receiptEntries = createHighConfidenceField(
+        toReceiptEntries(rows),
+        `${String(rows.length)} receipt table rows`,
+      );
+
+      const cadriNumbers = extractCadriNumbers(rows);
+
+      if (cadriNumbers.length > 0) {
+        partialData.transportManifests = createHighConfidenceField(
+          cadriNumbers,
+          cadriNumbers.join(', '),
+        );
+      }
+    }
+
+    const subtotals = extractWasteSubtotals(rawText);
+
+    if (subtotals.length > 0) {
+      const descriptions = extractWasteTypeDescriptions(rawText);
+      const wasteEntries = buildWasteEntriesFromSubtotals(
+        subtotals,
+        descriptions,
+      );
+
+      partialData.wasteEntries = createHighConfidenceField(
+        wasteEntries,
+        subtotals
+          .map((s) => `${s.wasteType}: ${String(s.quantity)}`)
+          .join('; '),
+      );
+
+      return;
+    }
+
+    this.extractWasteQuantityFallback(rawText, partialData);
+  }
+
   private extractTreatmentMethod(
     rawText: string,
     partialData: Partial<CdfExtractedData>,
@@ -241,7 +272,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     }
   }
 
-  private extractWasteQuantity(
+  private extractWasteQuantityFallback(
     rawText: string,
     partialData: Partial<CdfExtractedData>,
   ): void {

@@ -13,10 +13,18 @@ export interface CdfExtractedData extends BaseExtractedData {
   generator: ExtractedEntityWithAddressInfo;
   issueDate: ExtractedField<NonEmptyString>;
   processingPeriod?: ExtractedField<NonEmptyString>;
+  receiptEntries?: ExtractedField<ReceiptEntry[]>;
   recycler: ExtractedEntityInfo;
   transportManifests?: ExtractedField<string[]>;
   treatmentMethod?: ExtractedField<NonEmptyString>;
   wasteEntries?: ExtractedField<WasteEntry[]>;
+}
+
+export interface ReceiptEntry {
+  cadri?: string;
+  quantity: number;
+  receiptDate: string;
+  wasteType: string;
 }
 
 export interface WasteEntry {
@@ -45,4 +53,5 @@ export const CDF_ALL_FIELDS = [
   'treatmentMethod',
   'processingPeriod',
   'transportManifests',
+  'receiptEntries',
 ] as const;
