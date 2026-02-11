@@ -1,3 +1,5 @@
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+
 import {
   bold,
   formatAsJson,
@@ -21,11 +23,19 @@ import path from 'node:path';
 import { formatAsHuman } from '../formatters/human.formatter';
 import { resolveFilePaths } from '../utils/file-resolver';
 import { parseS3Uri } from '../utils/s3-uri.parser';
+import {
+  computeFileHash,
+  computeStringHash,
+  loadCachedResult,
+  saveCachedResult,
+} from '../utils/textract-cache';
 import { promptForDocumentType, promptForFilePath } from './extract.prompts';
 
 const LOGS_DIR = path.resolve(__dirname, '../../logs');
+const CACHE_DIR = path.resolve(__dirname, '../../data/cache');
 
 interface ExtractOptions {
+  cache?: boolean | undefined;
   concurrency: number;
   debug?: boolean | undefined;
   documentType?: DocumentType | undefined;
@@ -281,11 +291,28 @@ export const handleExtract = async (
   const successes: FileSuccess[] = [];
   const failures: FileFailure[] = [];
 
+  const cacheEnabled = options.cache !== false;
+
   const processSingleFile = async (filePath: string): Promise<FileSuccess> => {
     const s3Uri = parseS3Uri(filePath);
     const textExtractionInput = s3Uri
       ? { s3Bucket: s3Uri.bucket, s3Key: s3Uri.key }
       : { filePath };
+
+    let textExtractionResult: TextExtractionResult | undefined;
+    let cacheHash: string | undefined;
+
+    if (cacheEnabled) {
+      cacheHash = s3Uri
+        ? computeStringHash(`s3://${s3Uri.bucket}/${s3Uri.key}`)
+        : await computeFileHash(filePath);
+
+      textExtractionResult = await loadCachedResult(CACHE_DIR, cacheHash);
+
+      if (textExtractionResult) {
+        logger.info(`Using cached Textract output (...${cacheHash.slice(-8)})`);
+      }
+    }
 
     if (documentType === undefined) {
       logger.info(`Extracting (auto-detect): ${filePath}`);
@@ -298,7 +325,18 @@ export const handleExtract = async (
     const result = await documentExtractor.extract(textExtractionInput, {
       documentType,
       layouts,
+      textExtractionResult,
     });
+
+    if (
+      cacheEnabled &&
+      !textExtractionResult &&
+      result.textExtractionResult &&
+      cacheHash
+    ) {
+      await saveCachedResult(CACHE_DIR, cacheHash, result.textExtractionResult);
+      logger.info(`Cached Textract output (...${cacheHash.slice(-8)})`);
+    }
 
     if (result.layoutId) {
       logger.info(`Selected layout: ${result.layoutId}`);

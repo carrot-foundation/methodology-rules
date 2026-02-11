@@ -31,6 +31,7 @@ export const extractCommand = new Command('extract')
     '--output-failures <path>',
     'Path to write failed file list (defaults to ./extraction-failures-<timestamp>.txt)',
   )
+  .option('--no-cache', 'Disable Textract output caching')
   .option('--debug', 'Show raw text and detailed info', false)
   .option('--json', 'Output as JSON', false)
   .action(async (filePaths, options) => {
@@ -38,6 +39,7 @@ export const extractCommand = new Command('extract')
 
     try {
       await handleExtract(filePaths, {
+        cache: options.cache,
         concurrency: Number(options.concurrency) || 10,
         debug,
         documentType: options.documentType,

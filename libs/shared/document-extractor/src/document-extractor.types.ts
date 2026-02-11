@@ -12,6 +12,7 @@ export interface BaseExtractedData {
 export interface DocumentExtractorConfig {
   documentType?: DocumentType | undefined;
   layouts?: string[] | undefined;
+  textExtractionResult?: TextExtractionResult | undefined;
 }
 
 export interface DocumentParser<T extends BaseExtractedData> {
@@ -40,6 +41,7 @@ export interface ExtractionOutput<T extends BaseExtractedData> {
   layoutId?: string;
   reviewReasons: string[];
   reviewRequired: boolean;
+  textExtractionResult?: TextExtractionResult;
 }
 
 export interface LayoutConfig {

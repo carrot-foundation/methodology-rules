@@ -30,9 +30,10 @@ export class DocumentExtractor implements DocumentExtractorService {
     input: TextExtractionInput,
     config: DocumentExtractorConfig,
   ): Promise<ExtractionOutput<T>> {
-    const { documentType, layouts } = config;
+    const { documentType, layouts, textExtractionResult } = config;
 
-    const extractionResult = await this.textExtractor.extractText(input);
+    const extractionResult =
+      textExtractionResult ?? (await this.textExtractor.extractText(input));
 
     if (!documentType) {
       const bestMatch = selectBestParserGlobal<T>(extractionResult);
@@ -43,7 +44,11 @@ export class DocumentExtractor implements DocumentExtractorService {
 
       const result = bestMatch.parser.parse(extractionResult);
 
-      return { ...result, layoutId: bestMatch.parser.layoutId };
+      return {
+        ...result,
+        layoutId: bestMatch.parser.layoutId,
+        textExtractionResult: extractionResult,
+      };
     }
 
     const resolvedLayouts =
@@ -60,6 +65,7 @@ export class DocumentExtractor implements DocumentExtractorService {
     if (resolvedLayouts.length === 1) {
       const layoutId = resolvedLayouts[0];
 
+      /* istanbul ignore next -- unreachable: guarded by length === 1 check */
       if (layoutId === undefined) {
         throw new Error('At least one layout must be provided');
       }
@@ -74,7 +80,11 @@ export class DocumentExtractor implements DocumentExtractorService {
 
       const result = parser.parse(extractionResult);
 
-      return { ...result, layoutId: parser.layoutId };
+      return {
+        ...result,
+        layoutId: parser.layoutId,
+        textExtractionResult: extractionResult,
+      };
     }
 
     const bestMatch = selectBestParser<T>(
@@ -91,7 +101,11 @@ export class DocumentExtractor implements DocumentExtractorService {
 
     const result = bestMatch.parser.parse(extractionResult);
 
-    return { ...result, layoutId: bestMatch.parser.layoutId };
+    return {
+      ...result,
+      layoutId: bestMatch.parser.layoutId,
+      textExtractionResult: extractionResult,
+    };
   }
 }
 
