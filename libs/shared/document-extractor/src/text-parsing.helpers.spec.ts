@@ -9,9 +9,42 @@ import {
   extractSection,
   extractStringField,
   parseBrazilianNumber,
+  stripAccents,
 } from './text-parsing.helpers';
 
 describe('text-parsing.helpers', () => {
+  describe('stripAccents', () => {
+    it('should strip Portuguese accents from text', () => {
+      expect(stripAccents('Licença Ambiental')).toBe('Licenca Ambiental');
+      expect(stripAccents('Município')).toBe('Municipio');
+      expect(stripAccents('Razão Social')).toBe('Razao Social');
+      expect(stripAccents('Período')).toBe('Periodo');
+      expect(stripAccents('Resíduos')).toBe('Residuos');
+      expect(stripAccents('Declaração')).toBe('Declaracao');
+      expect(stripAccents('Responsável')).toBe('Responsavel');
+      expect(stripAccents('através')).toBe('atraves');
+    });
+
+    it('should preserve text length for single-codepoint accented chars', () => {
+      const input = 'São Paulo';
+      const result = stripAccents(input);
+
+      expect(result).toBe('Sao Paulo');
+      expect(result.length).toBe(input.length);
+    });
+
+    it('should pass through text without accents unchanged', () => {
+      const input = 'CNPJ: 12.345.678/0001-90';
+
+      expect(stripAccents(input)).toBe(input);
+    });
+
+    it('should preserve special characters like degree and ordinal', () => {
+      expect(stripAccents('n° 123')).toBe('n° 123');
+      expect(stripAccents('nº 456')).toBe('nº 456');
+    });
+  });
+
   describe('extractStringField', () => {
     it('should return rawMatch and trimmed value when pattern matches', () => {
       const result = extractStringField('Ticket: 12345', /Ticket:\s*(\d+)/);
@@ -373,7 +406,7 @@ describe('text-parsing.helpers', () => {
 
     it('should clean common prefixes from entity name', () => {
       const text =
-        'Gerador\nRazão Social: Company XYZ\nCNPJ: 12.345.678/0001-90\nDestinador';
+        'Gerador\nRazao Social: Company XYZ\nCNPJ: 12.345.678/0001-90\nDestinador';
 
       const result = extractEntityFromSection(
         text,

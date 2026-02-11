@@ -10,6 +10,7 @@ import {
   type ExtractionOutput,
   extractStringField,
   registerParser,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
@@ -28,21 +29,21 @@ import {
 const CDF_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /CDF\s*(?:n[°º])?\s*:?\s*(\d+(?:\/\d{2,4})?)/i,
-  // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-  environmentalLicense: /Licen[çc]a\s*Ambiental\s*:?\s*([A-Za-z0-9\-/]+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  environmentalLicense: /Licenca\s*Ambiental\s*:?\s*([a-z0-9\-/]+)/i,
 
   generatorAddress:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Endere[çc]o\s*:\s*(.+?)\s+Munic[ií]pio\s*:\s*(\S.+?)\s+UF\s*:\s*(\w{2})/i,
+    /Endereco\s*:\s*(.+?)\s+Municipio\s*:\s*(\S.+?)\s+UF\s*:\s*(\w{2})/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  generatorName: /Raz[ãa]o\s*Social\s*:\s*(.+?)\s+CPF\/CNPJ/is,
+  generatorName: /Razao\s*Social\s*:\s*(.+?)\s+CPF\/CNPJ/is,
   generatorTaxId:
-    /Raz[ãa]o\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2})/i,
+    /Razao\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2})/i,
 
-  issueDateDeclaracao: /Declara[çc][ãa]o[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
+  issueDateDeclaracao: /Declaracao[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
 
   processingPeriod:
-    /Per[ií]odo\s*:\s*(\d{2}\/\d{2}\/\d{4}\s+at[ée]\s+\d{2}\/\d{2}\/\d{4})/is,
+    /Periodo\s*:\s*(\d{2}\/\d{2}\/\d{4}\s+ate\s+\d{2}\/\d{2}\/\d{4})/is,
 
   recyclerPreamble:
     /^(.+?),\s*CPF\/CNPJ\s+(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})\s+certifica/m,
@@ -50,12 +51,12 @@ const CDF_PATTERNS = {
 
 const SIGNATURE_PATTERNS = [
   /CDF/i,
-  /Certificado\s*de\s*Destina[çc][ãa]o/i,
-  /Destina[çc][ãa]o\s*Final/i,
+  /Certificado\s*de\s*Destinacao/i,
+  /Destinacao\s*Final/i,
   /Gerador/i,
-  /Identifica[çc][ãa]o\s+dos?\s+Res[ií]duos/i,
+  /Identificacao\s+dos?\s+Residuos/i,
   /MTRs?\s+incluidos/i,
-  /Declara[çc][ãa]o/i,
+  /Declaracao/i,
 ];
 
 const WASTE_CODE_PATTERN =
@@ -64,7 +65,7 @@ const WASTE_CODE_PATTERN =
 
 const MTR_SECTION_PATTERN =
   // eslint-disable-next-line sonarjs/slow-regex
-  /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Respons[áa]vel|$)/i;
+  /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Responsavel|$)/i;
 
 const extractGenerator = (
   rawText: string,
@@ -129,13 +130,17 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
-    return calculateMatchScore(extractionResult.rawText, SIGNATURE_PATTERNS);
+    return calculateMatchScore(
+      stripAccents(extractionResult.rawText),
+      SIGNATURE_PATTERNS,
+    );
   }
 
   parse(
     extractionResult: TextExtractionResult,
   ): ExtractionOutput<CdfExtractedData> {
     const { rawText } = extractionResult;
+    const text = stripAccents(rawText);
     const matchScore = this.getMatchScore(extractionResult);
 
     const partialData: Partial<CdfExtractedData> = {
@@ -144,7 +149,7 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
     };
 
     const documentNumberExtracted = extractStringField(
-      rawText,
+      text,
       CDF_PATTERNS.documentNumber,
     );
 
@@ -156,18 +161,18 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
     }
 
     const recyclerExtracted = extractRecyclerFromPreamble(
-      rawText,
+      text,
       CDF_PATTERNS.recyclerPreamble,
     );
 
     partialData.recycler = createRecyclerEntity(recyclerExtracted);
 
-    const generatorExtracted = extractGenerator(rawText);
+    const generatorExtracted = extractGenerator(text);
 
     partialData.generator =
       createExtractedEntityWithAddress(generatorExtracted);
 
-    const issueDateMatch = CDF_PATTERNS.issueDateDeclaracao.exec(rawText);
+    const issueDateMatch = CDF_PATTERNS.issueDateDeclaracao.exec(text);
 
     if (issueDateMatch?.[1]) {
       partialData.issueDate = createHighConfidenceField(
@@ -177,7 +182,7 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
     }
 
     const processingPeriodExtracted = extractStringField(
-      rawText,
+      text,
       CDF_PATTERNS.processingPeriod,
     );
 
@@ -193,7 +198,7 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
     }
 
     const environmentalLicenseExtracted = extractStringField(
-      rawText,
+      text,
       CDF_PATTERNS.environmentalLicense,
     );
 
@@ -204,17 +209,13 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    const wasteEntries = extractWasteEntries(rawText);
+    const wasteEntries = extractWasteEntries(text);
 
     if (wasteEntries.length > 0) {
       partialData.wasteEntries = createHighConfidenceField(wasteEntries);
     }
 
-    const transportManifests = extractMtrNumbers(
-      rawText,
-      MTR_SECTION_PATTERN,
-      10,
-    );
+    const transportManifests = extractMtrNumbers(text, MTR_SECTION_PATTERN, 10);
 
     if (transportManifests.length > 0) {
       partialData.transportManifests =

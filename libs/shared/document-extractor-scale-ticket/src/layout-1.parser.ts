@@ -10,6 +10,7 @@ import {
   finalizeExtraction,
   parseBrazilianNumber,
   registerParser,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 
 import type {
@@ -23,23 +24,23 @@ const LAYOUT_1_PATTERNS = {
   finalWeight: /Pesagem Final:\s*([\d.,]+)\s*(kg)/i,
   initialDateTime: /Data \/ Hora:\s*(\d{2}\/\d{2}\/\d{4})\s+(\d{2}:\d{2})/,
   initialWeight: /Pesagem Inicial:\s*([\d.,]+)\s*(kg)/i,
-  netWeight: /Peso L[ií]quido:\s*([\d.,]+)\s*(kg)/i,
+  netWeight: /Peso Liquido:\s*([\d.,]+)\s*(kg)/i,
   ticketNumber: /Ticket de pesagem\s+(\d+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   transporter: /Transportadora:\s*(\d+)\s*-?\s*([\s\S]+?)(?=Peso|$)/i,
-  vehiclePlate: /Placa Ve[ií]culo\s+([A-Z0-9]+)/i,
+  vehiclePlate: /Placa Veiculo\s+([A-Z0-9]+)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
   /Ticket de pesagem/i,
-  /Peso L[ií]quido/i,
+  /Peso Liquido/i,
   /Pesagem/i,
   /kg/i,
 ];
 
 const LABEL_PATTERNS = {
   ticketNumber: /Ticket de pesagem/i,
-  vehiclePlate: /Placa Ve[ií]culo/i,
+  vehiclePlate: /Placa Veiculo/i,
 } as const;
 
 const REQUIRED_FIELDS = ['netWeight'] as const;
@@ -185,24 +186,28 @@ export class ScaleTicketLayout1Parser
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
-    return calculateMatchScore(extractionResult.rawText, SIGNATURE_PATTERNS);
+    return calculateMatchScore(
+      stripAccents(extractionResult.rawText),
+      SIGNATURE_PATTERNS,
+    );
   }
 
   parse(
     extractionResult: TextExtractionResult,
   ): ExtractionOutput<ScaleTicketExtractedData> {
     const { rawText } = extractionResult;
+    const text = stripAccents(rawText);
     const matchScore = this.getMatchScore(extractionResult);
 
-    const netWeightExtracted = extractNetWeight(rawText);
-    const transporterExtracted = extractTransporter(rawText);
+    const netWeightExtracted = extractNetWeight(text);
+    const transporterExtracted = extractTransporter(text);
     const initialWeightExtracted = extractWeightWithTimestamp(
-      rawText,
+      text,
       LAYOUT_1_PATTERNS.initialWeight,
       LAYOUT_1_PATTERNS.initialDateTime,
     );
     const finalWeightExtracted = extractWeightWithTimestamp(
-      rawText,
+      text,
       LAYOUT_1_PATTERNS.finalWeight,
       LAYOUT_1_PATTERNS.finalDateTime,
     );
@@ -220,7 +225,7 @@ export class ScaleTicketLayout1Parser
     }
 
     const ticketNumber = extractFieldWithLabelFallback(
-      rawText,
+      text,
       LAYOUT_1_PATTERNS.ticketNumber,
       LABEL_PATTERNS.ticketNumber,
     );
@@ -230,7 +235,7 @@ export class ScaleTicketLayout1Parser
     }
 
     const vehiclePlate = extractFieldWithLabelFallback(
-      rawText,
+      text,
       LAYOUT_1_PATTERNS.vehiclePlate,
       LABEL_PATTERNS.vehiclePlate,
     );

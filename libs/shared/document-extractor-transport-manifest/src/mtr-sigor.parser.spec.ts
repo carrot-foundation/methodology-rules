@@ -98,7 +98,7 @@ describe('MtrSigorParser', () => {
       expect(result.data.issueDate.parsed).toBe('08/07/2024');
       expect(result.data.issueDate.confidence).toBe('high');
       expect(result.data.generator.name.parsed).toBe(
-        'Ajinomoto do Brasil Indústria e Comércio de Alimentos Ltda',
+        'Ajinomoto do Brasil Industria e Comercio de Alimentos Ltda',
       );
       expect(result.data.generator.taxId.parsed).toBe('46.344.354/0005-88');
       expect(result.data.generator.address.parsed).toBe('Rua Vergueiro, 1855');
@@ -108,12 +108,12 @@ describe('MtrSigorParser', () => {
       expect(result.data.hauler.name.parsed).toBe('RECICLADOS LIMEIRA LTDA');
       expect(result.data.hauler.taxId.parsed).toBe('04.359.529/0001-57');
       expect(result.data.hauler.address.parsed).toBe('Av. Paulista, 1000');
-      expect(result.data.hauler.city.parsed).toBe('São Paulo');
+      expect(result.data.hauler.city.parsed).toBe('Sao Paulo');
       expect(result.data.hauler.state.parsed).toBe('SP');
       expect(result.data.receiver.name.parsed).toBe('TERA AMBIENTAL LTDA.');
       expect(result.data.receiver.taxId.parsed).toBe('59.591.115/0003-02');
       expect(result.data.receiver.address.parsed).toBe('Rod. SP-101, Km 5');
-      expect(result.data.receiver.city.parsed).toBe('Paulínia');
+      expect(result.data.receiver.city.parsed).toBe('Paulinia');
       expect(result.data.receiver.state.parsed).toBe('SP');
       expect(result.data.driverName?.parsed).toBe('GERSON PEREIRA DA SILVA');
       expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');

@@ -17,6 +17,7 @@ import {
   extractSection,
   parseBrazilianNumber,
   registerParser,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 import {
   detectTableColumns,
@@ -34,10 +35,10 @@ import {
 } from './transport-manifest.types';
 
 const SECTION_PATTERNS = {
-  destinador: /^\s*Identifica[çc][ãa]o\s+do\s+Destinador\s*$/i,
-  gerador: /^\s*Identifica[çc][ãa]o\s+do\s+Gerador\s*$/i,
-  residuos: /^\s*Identifica[çc][ãa]o\s+dos\s+Res[ií]duos\s*$/i,
-  transportador: /^\s*Identifica[çc][ãa]o\s+do\s+Transportador\s*$/i,
+  destinador: /^\s*Identificacao\s+do\s+Destinador\s*$/i,
+  gerador: /^\s*Identificacao\s+do\s+Gerador\s*$/i,
+  residuos: /^\s*Identificacao\s+dos\s+Residuos\s*$/i,
+  transportador: /^\s*Identificacao\s+do\s+Transportador\s*$/i,
 } as const;
 
 const MTR_PATTERNS = {
@@ -46,10 +47,10 @@ const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  issueDate: /Data\s*da\s*emiss[ãa]o\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  issueDate: /Data\s*da\s*emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   razaoSocial:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Raz[ãa]o\s*Social\s*:?\s*(.+)/i,
+    /Razao\s*Social\s*:?\s*(.+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   receivingDate: /Data\s*(?:do\s*)?recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   // eslint-disable-next-line sonarjs/slow-regex
@@ -61,21 +62,21 @@ const SIGNATURE_PATTERNS = [
   /MTR/i,
   /CETESB/i,
   /Manifesto\s*de\s*Transporte/i,
-  /Identifica[çc][ãa]o\s+do\s+Gerador/i,
-  /Identifica[çc][ãa]o\s+do\s+Transportador/i,
-  /Identifica[çc][ãa]o\s+do\s+Destinador/i,
+  /Identificacao\s+do\s+Gerador/i,
+  /Identificacao\s+do\s+Transportador/i,
+  /Identificacao\s+do\s+Destinador/i,
   /CPF\/CNPJ/i,
-  /Raz[ãa]o\s*Social/i,
+  /Razao\s*Social/i,
   /IBAMA/i,
-  /Res[ií]duo/i,
+  /Residuo/i,
 ];
 
 const LABEL_PATTERNS = {
   driverName: /nome\s*do\s*motorista/i,
-  issueDate: /Data\s*da\s*emiss[ãa]o/i,
+  issueDate: /Data\s*da\s*emissao/i,
   receivingDate: /Data\s*(?:do\s*)?recebimento/i,
   transportDate: /Data\s*(?:do\s*)?transporte/i,
-  vehiclePlate: /placa\s*do\s*ve[ií]culo/i,
+  vehiclePlate: /placa\s*do\s*veiculo/i,
 } as const;
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
@@ -124,7 +125,7 @@ const extractEntityFromSigorSection = (
 };
 
 const DRIVER_LABEL = 'nome do motorista';
-const PLATE_LABEL = 'placa do veículo';
+const PLATE_LABEL = 'placa do veiculo';
 
 interface DriverAndVehicle {
   driverName?: string;
@@ -242,13 +243,17 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
-    return calculateMatchScore(extractionResult.rawText, SIGNATURE_PATTERNS);
+    return calculateMatchScore(
+      stripAccents(extractionResult.rawText),
+      SIGNATURE_PATTERNS,
+    );
   }
 
   parse(
     extractionResult: TextExtractionResult,
   ): ExtractionOutput<MtrExtractedData> {
     const { rawText } = extractionResult;
+    const text = stripAccents(rawText);
     const matchScore = this.getMatchScore(extractionResult);
 
     const partialData: Partial<MtrExtractedData> = {
@@ -256,12 +261,12 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
       rawText,
     };
 
-    this.extractDocumentNumber(rawText, partialData);
-    this.extractIssueDate(rawText, partialData);
-    this.extractTransportDate(rawText, partialData);
-    this.extractReceivingDate(rawText, partialData);
-    this.extractEntities(rawText, partialData);
-    this.extractHaulerFields(rawText, partialData);
+    this.extractDocumentNumber(text, partialData);
+    this.extractIssueDate(text, partialData);
+    this.extractTransportDate(text, partialData);
+    this.extractReceivingDate(text, partialData);
+    this.extractEntities(text, partialData);
+    this.extractHaulerFields(text, partialData);
     this.extractWasteFields(extractionResult, partialData);
 
     return finalizeMtrExtraction(partialData, matchScore, rawText);
@@ -336,7 +341,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     if (vehiclePlate && MTR_PATTERNS.vehiclePlateFormat.test(vehiclePlate)) {
       partialData.vehiclePlate = createHighConfidenceField(
         vehiclePlate as NonEmptyString,
-        `Placa do Veículo\n${vehiclePlate}`,
+        `Placa do Veiculo\n${vehiclePlate}`,
       );
     } else if (LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
       partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);

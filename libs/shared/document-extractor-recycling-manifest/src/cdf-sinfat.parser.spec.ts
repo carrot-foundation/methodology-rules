@@ -49,11 +49,11 @@ describe('CdfSinfatParser', () => {
       expect(result.data.recycler.name.confidence).toBe('high');
 
       expect(result.data.generator.name.parsed).toBe(
-        'Laticínios Bela Vista LTDA',
+        'Laticinios Bela Vista LTDA',
       );
       expect(result.data.generator.taxId.parsed).toBe('02.089.969/0035-55');
       expect(result.data.generator.address.parsed).toBe(
-        'Rua Empresário Agenello Senger, nº S/N',
+        'Rua Empresario Agenello Senger, nº S/N',
       );
       expect(result.data.generator.city.parsed).toBe('Carazinho');
       expect(result.data.generator.state.parsed).toBe('RS');
@@ -63,7 +63,7 @@ describe('CdfSinfatParser', () => {
       expect(result.data.issueDate.confidence).toBe('high');
 
       expect(result.data.processingPeriod?.parsed).toBe(
-        '01/02/2023 até 28/02/2023',
+        '01/02/2023 ate 28/02/2023',
       );
 
       expect(result.data.documentType).toBe('recyclingManifest');
@@ -183,7 +183,7 @@ describe('CdfSinfatParser', () => {
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.processingPeriod?.parsed).toBe(
-        '01/01/2024 até 31/03/2024',
+        '01/01/2024 ate 31/03/2024',
       );
     });
 

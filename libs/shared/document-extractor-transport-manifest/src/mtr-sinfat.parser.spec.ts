@@ -55,7 +55,7 @@ Tecnologia: Compostagem`;
       expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
       expect(result.data.generator.taxId.parsed).toBe('12.345.678/0001-90');
       expect(result.data.generator.address.parsed).toBe(
-        'Rua Empresário Agenello Senger, nº S/N',
+        'Rua Empresario Agenello Senger, nº S/N',
       );
       expect(result.data.generator.city.parsed).toBe('Carazinho');
       expect(result.data.generator.state.parsed).toBe('RS');
@@ -64,11 +64,11 @@ Tecnologia: Compostagem`;
       );
       expect(result.data.hauler.taxId.parsed).toBe('98.765.432/0001-10');
       expect(result.data.receiver.name.parsed).toBe(
-        'RECICLAGEM SUSTENTÁVEL LTDA',
+        'RECICLAGEM SUSTENTAVEL LTDA',
       );
       expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
-      expect(result.data.driverName?.parsed).toBe('João da Silva');
+      expect(result.data.driverName?.parsed).toBe('Joao da Silva');
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');

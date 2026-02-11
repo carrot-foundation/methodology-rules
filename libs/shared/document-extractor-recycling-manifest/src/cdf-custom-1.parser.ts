@@ -9,10 +9,12 @@ import {
   createLowConfidenceField,
   type DocumentParser,
   type EntityInfo,
+  type EntityWithAddressInfo,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
   parseBrazilianNumber,
   registerParser,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
@@ -35,7 +37,7 @@ const MONTHS: Record<string, string> = {
   julho: '07',
   junho: '06',
   maio: '05',
-  março: '03',
+  marco: '03',
   novembro: '11',
   outubro: '10',
   setembro: '09',
@@ -52,30 +54,29 @@ const CDF_PATTERNS = {
     // eslint-disable-next-line sonarjs/slow-regex
     /Empresa\s+Recebedora\s*:\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  environmentalLicense: /licen[çc]a\s+n[°º]\s*:?\s*(\d+)/i,
-  // eslint-disable-next-line sonarjs/duplicates-in-character-class
-  issueDate: /(\d{1,2})\s+de\s+([A-Za-z\u00C0-\u017F]+)\s+de\s+(\d{4})/i,
+  environmentalLicense: /licenca\s+n[°º]\s*:?\s*(\d+)/i,
+  issueDate: /(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(\d{4})/i,
   // eslint-disable-next-line sonarjs/slow-regex
   totalQuantity: /Quantidade\s+Total\s+Tratad[oa]\s*\n?\s*([\d.,]+)/i,
   treatmentMethod:
     // eslint-disable-next-line sonarjs/slow-regex
-    /atrav[ée]s\s+d[aeo]\s+(.+?),?\s+certifica/i,
+    /atraves\s+d[aeo]\s+(.+?),?\s+certifica/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
   /CDF/i,
-  /Certificado\s*de\s*Destina[çc][ãa]o\s*Final/i,
+  /Certificado\s*de\s*Destinacao\s*Final/i,
   /Empresa\s+Recebedora/i,
   /Empresa\s+Geradora/i,
   /Quantidade\s+Total\s+Tratad/i,
   /Cadastro\s+na\s+Cetesb/i,
   /CADRI/i,
-  /matérias?-primas?/i,
+  /materias?-primas?/i,
 ];
 
 const LABEL_PATTERNS = {
   documentNumber: /(?:CDF|N[°º])/i,
-  environmentalLicense: /licen[çc]a\s+n[°º]/i,
+  environmentalLicense: /licenca\s+n[°º]/i,
   wasteQuantity: /Quantidade\s+Total\s+Tratad/i,
 } as const;
 
@@ -128,19 +129,55 @@ const extractEntityByLabel = (
   };
 };
 
+const GENERATOR_ADDRESS_PATTERN =
+  // eslint-disable-next-line sonarjs/slow-regex
+  /Endereco\s*:\s*(.+),\s*(.+?)\s*\/\s*(\w{2})(?:\s+CEP)?/i;
+
+const extractGeneratorWithAddress = (
+  rawText: string,
+  entity: undefined | { rawMatch: string; value: EntityInfo },
+): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
+  if (!entity) {
+    return undefined;
+  }
+
+  const textAfterGenerator = rawText.slice(
+    Math.max(0, rawText.search(/Empresa\s+Geradora/i)),
+  );
+  const addressMatch = GENERATOR_ADDRESS_PATTERN.exec(textAfterGenerator);
+
+  if (!addressMatch?.[1] || !addressMatch[2] || !addressMatch[3]) {
+    return entity;
+  }
+
+  return {
+    rawMatch: entity.rawMatch,
+    value: {
+      ...entity.value,
+      address: addressMatch[1].trim(),
+      city: addressMatch[2].trim(),
+      state: addressMatch[3].trim(),
+    },
+  };
+};
+
 export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
   readonly layoutId = 'cdf-custom-1';
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
-    return calculateMatchScore(extractionResult.rawText, SIGNATURE_PATTERNS);
+    return calculateMatchScore(
+      stripAccents(extractionResult.rawText),
+      SIGNATURE_PATTERNS,
+    );
   }
 
   parse(
     extractionResult: TextExtractionResult,
   ): ExtractionOutput<CdfExtractedData> {
     const { rawText } = extractionResult;
+    const text = stripAccents(rawText);
     const matchScore = this.getMatchScore(extractionResult);
 
     const partialData: Partial<CdfExtractedData> = {
@@ -149,7 +186,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     };
 
     const documentNumber = extractFieldWithLabelFallback(
-      rawText,
+      text,
       CDF_PATTERNS.documentNumber,
       LABEL_PATTERNS.documentNumber,
     );
@@ -158,11 +195,11 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       partialData.documentNumber = documentNumber;
     }
 
-    this.extractIssueDate(rawText, partialData);
-    this.extractEntities(rawText, partialData);
+    this.extractIssueDate(text, partialData);
+    this.extractEntities(text, partialData);
 
     const environmentalLicense = extractFieldWithLabelFallback(
-      rawText,
+      text,
       CDF_PATTERNS.environmentalLicense,
       LABEL_PATTERNS.environmentalLicense,
     );
@@ -170,8 +207,8 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     if (environmentalLicense) {
       partialData.environmentalLicense = environmentalLicense;
     }
-    this.extractTreatmentMethod(rawText, partialData);
-    this.extractTableData(rawText, partialData);
+    this.extractTreatmentMethod(text, partialData);
+    this.extractTableData(text, partialData);
 
     return finalizeCdfExtraction(partialData, matchScore, rawText);
   }
@@ -187,9 +224,9 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
 
     partialData.recycler = createExtractedEntity(processorExtracted);
 
-    const generatorExtracted = extractEntityByLabel(
+    const generatorExtracted = extractGeneratorWithAddress(
       rawText,
-      CDF_PATTERNS.empresaGeradora,
+      extractEntityByLabel(rawText, CDF_PATTERNS.empresaGeradora),
     );
 
     partialData.generator =

@@ -13,6 +13,9 @@ import {
   createLowConfidenceField,
 } from './confidence.helpers';
 
+export const stripAccents = (text: string): string =>
+  text.normalize('NFD').replaceAll(/[\u0300-\u036F]/g, '');
+
 export const extractStringField = (
   text: string,
   pattern: RegExp,
@@ -195,7 +198,7 @@ export const extractEntityFromSection = (
     }
 
     const cleanedLine = line
-      .replace(/Raz[ãa]o\s*Social\s*:?\s*/i, '')
+      .replace(/Razao\s*Social\s*:?\s*/i, '')
       .replace(/Nome\s*:?\s*/i, '')
       .trim();
 

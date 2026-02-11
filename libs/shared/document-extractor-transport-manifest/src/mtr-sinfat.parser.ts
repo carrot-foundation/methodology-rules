@@ -11,6 +11,7 @@ import {
   extractStringField,
   parseBrazilianNumber,
   registerParser,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
@@ -29,11 +30,11 @@ const MTR_PATTERNS = {
   documentNumber: /MTR\s*(?:n[°º])?\s*(\d{10})\b/i,
 
   driverName:
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-    /Motorista[^\S\n]*:?[^\S\n]*([A-Za-z\u00C0-\u017F ]+?)(?=\n|CPF|$)/i,
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Motorista[^\S\n]*:?[^\S\n]*([a-z ]+?)(?=\n|CPF|$)/i,
   issueDate:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Data\s*(?:(?:de|da|do)\s*)?Emiss[ãa]o\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+    /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   receivingDate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Data\s*(?:(?:de|da|do)\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
@@ -42,40 +43,40 @@ const MTR_PATTERNS = {
     /Data\s*(?:(?:de|da|do)\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   vehiclePlate:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Placa\s*(?:do\s*)?Ve[ií]culo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i,
+    /Placa\s*(?:do\s*)?Veiculo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i,
   // eslint-disable-next-line sonarjs/slow-regex
   wasteClassification: /Classe\s*:?\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   wasteQuantity: /Quantidade\s*:?\s*([\d.,]+)\s*(kg|ton|t|m³)?/i,
   wasteType:
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-    /Tipo\s*(?:de\s*)?Res[ií]duo\s*:?\s*([A-Za-z\u00C0-\u017F\s]+?)(?=\n|Classe|$)/i,
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Tipo\s*(?:de\s*)?Residuo\s*:?\s*([a-z\s]+?)(?=\n|Classe|$)/i,
 } as const;
 
 const LABEL_PATTERNS = {
   driverName: /Motorista/i,
-  issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emiss[ãa]o/i,
+  issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emissao/i,
   receivingDate: /Data\s*(?:(?:de|da|do)\s*)?Recebimento/i,
   transportDate: /Data\s*(?:(?:de|da|do)\s*)?Transporte/i,
-  vehiclePlate: /Placa\s*(?:do\s*)?Ve[ií]culo/i,
+  vehiclePlate: /Placa\s*(?:do\s*)?Veiculo/i,
 } as const;
 
 const SECTION_PATTERNS = {
   destinatario:
-    /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Destinat[áa]rio|Destinador|Receptor)\s*$/i,
-  gerador: /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Gerador|Origem)\s*$/i,
-  transportador: /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Transportador)\s*$/i,
+    /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
+  gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+  transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
   /MTR/i,
-  /Manifesto\s*de\s*Transporte\s*de\s*Res[ií]duos/i,
-  /Funda[çc][ãa]o\s+Estadual|Secretaria\s+de\s+Estado/i,
+  /Manifesto\s*de\s*Transporte\s*de\s*Residuos/i,
+  /Fundacao\s+Estadual|Secretaria\s+de\s+Estado/i,
   /Gerador/i,
   /Transportador/i,
-  /Destinat[áa]rio|Destinador/i,
+  /Destinatario|Destinador/i,
   /Tecnologia/i,
-  /Res[ií]duo/i,
+  /Residuo/i,
 ];
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
@@ -86,13 +87,17 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
-    return calculateMatchScore(extractionResult.rawText, SIGNATURE_PATTERNS);
+    return calculateMatchScore(
+      stripAccents(extractionResult.rawText),
+      SIGNATURE_PATTERNS,
+    );
   }
 
   parse(
     extractionResult: TextExtractionResult,
   ): ExtractionOutput<MtrExtractedData> {
     const { rawText } = extractionResult;
+    const text = stripAccents(rawText);
     const matchScore = this.getMatchScore(extractionResult);
 
     const partialData: Partial<MtrExtractedData> = {
@@ -101,7 +106,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     };
 
     const documentNumberExtracted = extractStringField(
-      rawText,
+      text,
       MTR_PATTERNS.documentNumber,
     );
 
@@ -113,7 +118,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     const issueDate = extractFieldWithLabelFallback(
-      rawText,
+      text,
       MTR_PATTERNS.issueDate,
       LABEL_PATTERNS.issueDate,
     );
@@ -123,7 +128,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     const transportDate = extractFieldWithLabelFallback(
-      rawText,
+      text,
       MTR_PATTERNS.transportDate,
       LABEL_PATTERNS.transportDate,
     );
@@ -133,7 +138,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     const receivingDate = extractFieldWithLabelFallback(
-      rawText,
+      text,
       MTR_PATTERNS.receivingDate,
       LABEL_PATTERNS.receivingDate,
     );
@@ -143,28 +148,28 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     partialData.generator = extractMtrEntityWithAddress(
-      rawText,
+      text,
       SECTION_PATTERNS.gerador,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.cnpj,
     );
 
     partialData.hauler = extractMtrEntityWithAddress(
-      rawText,
+      text,
       SECTION_PATTERNS.transportador,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.cnpj,
     );
 
     partialData.receiver = extractMtrEntityWithAddress(
-      rawText,
+      text,
       SECTION_PATTERNS.destinatario,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.cnpj,
     );
 
     const vehiclePlate = extractFieldWithLabelFallback(
-      rawText,
+      text,
       MTR_PATTERNS.vehiclePlate,
       LABEL_PATTERNS.vehiclePlate,
     );
@@ -174,7 +179,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     const driverName = extractFieldWithLabelFallback(
-      rawText,
+      text,
       MTR_PATTERNS.driverName,
       LABEL_PATTERNS.driverName,
     );
@@ -184,15 +189,15 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     }
 
     const wasteTypeMatches = extractAllStringFields(
-      rawText,
+      text,
       MTR_PATTERNS.wasteType,
     );
     const wasteClassificationExtracted = extractStringField(
-      rawText,
+      text,
       MTR_PATTERNS.wasteClassification,
     );
     const wasteQuantityExtracted = extractStringField(
-      rawText,
+      text,
       MTR_PATTERNS.wasteQuantity,
     );
     const wasteQuantity = wasteQuantityExtracted

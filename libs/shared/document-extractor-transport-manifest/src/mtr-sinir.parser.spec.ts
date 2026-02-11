@@ -55,7 +55,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
       expect(result.data.generator.taxId.parsed).toBe('12.345.678/0001-90');
       expect(result.data.generator.address.parsed).toBe(
-        'Rua Empresário Agenello Senger, nº S/N',
+        'Rua Empresario Agenello Senger, nº S/N',
       );
       expect(result.data.generator.city.parsed).toBe('Carazinho');
       expect(result.data.generator.state.parsed).toBe('RS');
@@ -64,21 +64,21 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       );
       expect(result.data.hauler.taxId.parsed).toBe('98.765.432/0001-10');
       expect(result.data.hauler.address.parsed).toBe('Av. Brasil, 500');
-      expect(result.data.hauler.city.parsed).toBe('São Paulo');
+      expect(result.data.hauler.city.parsed).toBe('Sao Paulo');
       expect(result.data.hauler.state.parsed).toBe('SP');
       expect(result.data.receiver.name.parsed).toBe(
-        'RECICLAGEM SUSTENTÁVEL LTDA',
+        'RECICLAGEM SUSTENTAVEL LTDA',
       );
       expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
       expect(result.data.receiver.address.parsed).toBe('Rod. BR-116, Km 20');
       expect(result.data.receiver.city.parsed).toBe('Curitiba');
       expect(result.data.receiver.state.parsed).toBe('PR');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
-      expect(result.data.driverName?.parsed).toBe('João da Silva');
+      expect(result.data.driverName?.parsed).toBe('Joao da Silva');
       expect(result.data.wasteTypes?.parsed).toEqual([
         {
-          classification: 'II - Não Perigoso',
-          description: 'Plástico',
+          classification: 'II - Nao Perigoso',
+          description: 'Plastico',
           quantity: 1500.5,
         },
       ]);
@@ -323,7 +323,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       );
       expect(result.data.hauler.name.confidence).toBe('high');
       expect(result.data.receiver.name.parsed).toBe(
-        'RECICLAGEM SUSTENTÁVEL LTDA',
+        'RECICLAGEM SUSTENTAVEL LTDA',
       );
       expect(result.data.receiver.name.confidence).toBe('high');
     });
@@ -350,7 +350,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       const result = parser.parse(stubTextExtractionResult(destinadorText));
 
       expect(result.data.receiver.name.parsed).toBe(
-        'RECICLAGEM SUSTENTÁVEL LTDA',
+        'RECICLAGEM SUSTENTAVEL LTDA',
       );
       expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
       expect(result.data.receiver.name.confidence).toBe('high');
@@ -390,7 +390,7 @@ IBAMA`;
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.generator.name.parsed).toBe(
-        'BODY FOOD FABRICANTES DE ALIMENTOS SAUDÁVEIS',
+        'BODY FOOD FABRICANTES DE ALIMENTOS SAUDAVEIS',
       );
       expect(result.data.hauler.name.parsed).toBe('COMPOSTAMAIS LTDA.');
     });
@@ -429,7 +429,7 @@ IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName?.parsed).not.toBe('Placa do Veículo');
+      expect(result.data.driverName?.parsed).not.toBe('Placa do Veiculo');
       expect(result.data.driverName?.confidence).toBe('low');
     });
 

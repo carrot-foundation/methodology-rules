@@ -51,7 +51,7 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.recycler.taxId.parsed).toBe('59.591.115/0003-02');
       expect(result.data.recycler.name.confidence).toBe('high');
       expect(result.data.generator.name.parsed).toBe(
-        'AJINOMOTO DO BRASIL INDÚSTRIA E COMÉRCIO DE ALIMENTOS LTDA.',
+        'AJINOMOTO DO BRASIL INDUSTRIA E COMERCIO DE ALIMENTOS LTDA.',
       );
       expect(result.data.generator.taxId.parsed).toBe('46.344.354/0005-88');
       expect(result.data.generator.name.confidence).toBe('high');
@@ -61,7 +61,7 @@ describe('CdfCustom1Parser', () => {
       );
       expect(result.data.wasteEntries?.parsed).toEqual([
         {
-          description: 'LODO GERADO NA ESTAÇÃO DE TRATAMENTO DE ÁGUA',
+          description: 'LODO GERADO NA ESTACAO DE TRATAMENTO DE AGUA',
           quantity: 377.59,
           unit: 'ton',
         },
@@ -76,6 +76,40 @@ describe('CdfCustom1Parser', () => {
           'generator.state',
         ]),
       );
+    });
+
+    it('should extract generator address when Endereço line has city/state format', () => {
+      const text = [
+        'CDF 31014/21',
+        'Jundiaí, 10 de Fevereiro de 2021.',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'N°31014/21',
+        'certifica que as matérias-primas',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'Endereço: Estrada Municipal do Varjão, 4.520 Bairro Varjão Jundiaí/SP CEP: 13212-590',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: COMPANHIA SANEAMENTO DE JUNDIAI',
+        'Endereço: ESTRADA MUNICIPAL DO VARJÃO, 4.520 JD. NOVO HORIZONTE, JUNDIAI /SP CEP: 13212-590',
+        'CNPJ: 01.201.289/0001-70 IE: ISENTO',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+        'Quantidade Total Tratado',
+        '2.606,23',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator.name.parsed).toBe(
+        'COMPANHIA SANEAMENTO DE JUNDIAI',
+      );
+      expect(result.data.generator.taxId.parsed).toBe('01.201.289/0001-70');
+      expect(result.data.generator.address.parsed).toBe(
+        'ESTRADA MUNICIPAL DO VARJAO, 4.520 JD. NOVO HORIZONTE',
+      );
+      expect(result.data.generator.city.parsed).toBe('JUNDIAI');
+      expect(result.data.generator.state.parsed).toBe('SP');
+      expect(result.data.generator.address.confidence).toBe('high');
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -242,7 +276,7 @@ describe('CdfCustom1Parser', () => {
         cadri: '42003189',
         quantity: 85.12,
         receiptDate: '01/07/2024',
-        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        wasteType: 'LODO SOLIDO - SANITARIO',
       });
     });
 

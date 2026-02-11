@@ -128,7 +128,7 @@ describe('CDF shared helpers', () => {
   describe('mergeWasteEntries', () => {
     it('should merge codes with data entries by index', () => {
       const codes: WasteCodeInfo[] = [
-        { code: '040108', description: 'Resíduos de couros' },
+        { code: '040108', description: 'Residuos de couros' },
         { code: '020301', description: 'Lamas de lavagem' },
       ];
       const data: WasteDataInfo[] = [
@@ -152,7 +152,7 @@ describe('CDF shared helpers', () => {
       expect(result[0]).toEqual({
         classification: 'Classe II A',
         code: '040108',
-        description: 'Resíduos de couros',
+        description: 'Residuos de couros',
         quantity: 1.95,
         technology: 'Compostagem',
         unit: 'Tonelada',
@@ -179,7 +179,7 @@ describe('CDF shared helpers', () => {
 
     it('should handle more codes than data entries', () => {
       const codes: WasteCodeInfo[] = [
-        { code: '040108', description: 'Resíduos de couros' },
+        { code: '040108', description: 'Residuos de couros' },
       ];
       const data: WasteDataInfo[] = [];
 
@@ -196,12 +196,12 @@ describe('CDF shared helpers', () => {
       const text = [
         'MTRs incluidos',
         '2302037916, 2302037795, 2302037801',
-        'Nome do Responsável',
+        'Nome do Responsavel',
       ].join('\n');
 
       const pattern =
         // eslint-disable-next-line sonarjs/slow-regex
-        /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Respons[áa]vel|$)/i;
+        /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Responsavel|$)/i;
 
       const result = extractMtrNumbers(text, pattern, 10);
 
@@ -209,13 +209,13 @@ describe('CDF shared helpers', () => {
     });
 
     it('should extract 12-digit MTR numbers', () => {
-      const text = ['Manifestos Incluídos:', '240001460711, 240001460712'].join(
+      const text = ['Manifestos Incluidos:', '240001460711, 240001460712'].join(
         '\n',
       );
 
       const pattern =
         // eslint-disable-next-line sonarjs/slow-regex
-        /Manifestos\s+Inclu[ií]dos\s*:?\s*\n?([\s\S]*?)(?=\nNome|$)/i;
+        /Manifestos\s+Incluidos\s*:?\s*\n?([\s\S]*?)(?=\nNome|$)/i;
 
       const result = extractMtrNumbers(text, pattern, 12);
 
@@ -233,8 +233,8 @@ describe('CDF shared helpers', () => {
   describe('parseReceiptTableRows', () => {
     it('should parse rows with CADRI numbers', () => {
       const text = [
-        'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
-        'LODO SÓLIDO - SANITÁRIO 42003189 02/07/2024 90,50',
+        'LODO SOLIDO - SANITARIO 42003189 01/07/2024 85,12',
+        'LODO SOLIDO - SANITARIO 42003189 02/07/2024 90,50',
       ].join('\n');
 
       const result = parseReceiptTableRows(text);
@@ -244,13 +244,13 @@ describe('CDF shared helpers', () => {
         cadri: '42003189',
         quantity: 85.12,
         receiptDate: '01/07/2024',
-        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        wasteType: 'LODO SOLIDO - SANITARIO',
       });
       expect(result[1]?.quantity).toBe(90.5);
     });
 
     it('should parse rows without CADRI (dash)', () => {
-      const text = 'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12';
+      const text = 'LODO SOLIDO - SANITARIO - 01/07/2024 85,12';
 
       const result = parseReceiptTableRows(text);
 
@@ -258,13 +258,13 @@ describe('CDF shared helpers', () => {
       expect(result[0]).toEqual({
         quantity: 85.12,
         receiptDate: '01/07/2024',
-        wasteType: 'LODO SÓLIDO - SANITÁRIO',
+        wasteType: 'LODO SOLIDO - SANITARIO',
       });
       expect(result[0]?.cadri).toBeUndefined();
     });
 
     it('should handle Brazilian number format with thousands separator', () => {
-      const text = 'RESÍDUO 12345678 15/08/2024 1.234,56';
+      const text = 'RESIDUO 12345678 15/08/2024 1.234,56';
 
       const result = parseReceiptTableRows(text);
 
@@ -274,8 +274,8 @@ describe('CDF shared helpers', () => {
 
     it('should ignore subtotal and total lines', () => {
       const text = [
-        'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12',
-        'Subtotal LODO SÓLIDO - SANITÁRIO 85,12',
+        'LODO SOLIDO - SANITARIO - 01/07/2024 85,12',
+        'Subtotal LODO SOLIDO - SANITARIO 85,12',
         'Quantidade Total Tratado 85,12',
       ].join('\n');
 
@@ -285,7 +285,7 @@ describe('CDF shared helpers', () => {
     });
 
     it('should skip rows with unparseable quantity', () => {
-      const text = 'RESÍDUO - 01/07/2024 ...';
+      const text = 'RESIDUO - 01/07/2024 ...';
 
       expect(parseReceiptTableRows(text)).toEqual([]);
     });
@@ -301,8 +301,8 @@ describe('CDF shared helpers', () => {
     it('should extract waste type descriptions from section between IE and table header', () => {
       const text = [
         'CNPJ: 46.344.354/0005-88 IE: 417325212115',
-        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE (TORTA)',
-        'Descrição: Tipo de Matéria-Prima',
+        'LODO SOLIDO - SANITARIO: LODO DE ETE (TORTA)',
+        'Descricao: Tipo de Materia-Prima',
       ].join('\n');
 
       const result = extractWasteTypeDescriptions(text);
@@ -310,7 +310,7 @@ describe('CDF shared helpers', () => {
       expect(result).toEqual([
         {
           description: 'LODO DE ETE (TORTA)',
-          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+          wasteType: 'LODO SOLIDO - SANITARIO',
         },
       ]);
     });
@@ -318,20 +318,20 @@ describe('CDF shared helpers', () => {
     it('should extract multiple waste type descriptions', () => {
       const text = [
         'IE: 417325212115',
-        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE (TORTA)',
-        'OUTROS RESÍDUOS: RESÍDUO DO FLOTADOR (GORDURA)',
-        'Tipo de Matéria-Prima: whatever',
+        'LODO SOLIDO - SANITARIO: LODO DE ETE (TORTA)',
+        'OUTROS RESIDUOS: RESIDUO DO FLOTADOR (GORDURA)',
+        'Tipo de Materia-Prima: whatever',
       ].join('\n');
 
       const result = extractWasteTypeDescriptions(text);
 
       expect(result).toHaveLength(2);
       expect(result[0]?.description).toBe('LODO DE ETE (TORTA)');
-      expect(result[1]?.description).toBe('RESÍDUO DO FLOTADOR (GORDURA)');
+      expect(result[1]?.description).toBe('RESIDUO DO FLOTADOR (GORDURA)');
     });
 
     it('should return empty when section markers are missing', () => {
-      const text = 'Some text without IE or Descrição markers';
+      const text = 'Some text without IE or Descricao markers';
 
       expect(extractWasteTypeDescriptions(text)).toEqual([]);
     });
@@ -339,29 +339,29 @@ describe('CDF shared helpers', () => {
 
   describe('extractWasteSubtotals', () => {
     it('should extract single subtotal', () => {
-      const text = 'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 2.538,34';
+      const text = 'Quantidade Tratada de LODO SOLIDO - SANITARIO 2.538,34';
 
       const result = extractWasteSubtotals(text);
 
       expect(result).toEqual([
         {
           quantity: 2538.34,
-          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+          wasteType: 'LODO SOLIDO - SANITARIO',
         },
       ]);
     });
 
     it('should extract multiple subtotals', () => {
       const text = [
-        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 2.538,34',
-        'Quantidade Tratada de OUTROS RESÍDUOS 17,12',
+        'Quantidade Tratada de LODO SOLIDO - SANITARIO 2.538,34',
+        'Quantidade Tratada de OUTROS RESIDUOS 17,12',
       ].join('\n');
 
       const result = extractWasteSubtotals(text);
 
       expect(result).toHaveLength(2);
-      expect(result[0]?.wasteType).toBe('LODO SÓLIDO - SANITÁRIO');
-      expect(result[1]?.wasteType).toBe('OUTROS RESÍDUOS');
+      expect(result[0]?.wasteType).toBe('LODO SOLIDO - SANITARIO');
+      expect(result[1]?.wasteType).toBe('OUTROS RESIDUOS');
       expect(result[1]?.quantity).toBe(17.12);
     });
 
@@ -379,12 +379,12 @@ describe('CDF shared helpers', () => {
   describe('buildWasteEntriesFromSubtotals', () => {
     it('should build waste entries with descriptions from mapping', () => {
       const subtotals = [
-        { quantity: 2538.34, wasteType: 'LODO SÓLIDO - SANITÁRIO' },
+        { quantity: 2538.34, wasteType: 'LODO SOLIDO - SANITARIO' },
       ];
       const descriptions = [
         {
           description: 'LODO DE ETE (TORTA)',
-          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+          wasteType: 'LODO SOLIDO - SANITARIO',
         },
       ];
 
@@ -409,12 +409,12 @@ describe('CDF shared helpers', () => {
 
     it('should match descriptions case-insensitively', () => {
       const subtotals = [
-        { quantity: 10, wasteType: 'lodo sólido - sanitário' },
+        { quantity: 10, wasteType: 'lodo solido - sanitario' },
       ];
       const descriptions = [
         {
           description: 'LODO DE ETE',
-          wasteType: 'LODO SÓLIDO - SANITÁRIO',
+          wasteType: 'LODO SOLIDO - SANITARIO',
         },
       ];
 

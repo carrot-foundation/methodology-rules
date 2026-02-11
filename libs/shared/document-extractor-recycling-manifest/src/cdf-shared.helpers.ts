@@ -70,8 +70,8 @@ export const extractWasteClassificationData = (
   const dataEntries: WasteDataInfo[] = [];
 
   const dataPattern =
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-    /Classe\s+([\w\s]+?)\s+([\d.,]+)\s+(Tonelada|kg|ton|t|m³)\s+([A-Za-z\u00C0-\u017F]+)/gi;
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Classe\s+([\w\s]+?)\s+([\d.,]+)\s+(Tonelada|kg|ton|t|m³)\s+([a-z]+)/gi;
 
   for (const match of rawText.matchAll(dataPattern)) {
     if (match[1] && match[2] && match[3] && match[4]) {
@@ -199,7 +199,7 @@ export const extractWasteTypeDescriptions = (
 ): WasteTypeDescription[] => {
   const descriptions: WasteTypeDescription[] = [];
 
-  const sectionEnd = /(?:Descrição|Tipo\s+de\s+Mat[ée]ria-Prima)\s*:/i.exec(
+  const sectionEnd = /(?:Descricao|Tipo\s+de\s+Materia-Prima)\s*:/i.exec(
     rawText,
   );
   const sectionStart = /IE\s*:\s*[\d.]+/i.exec(rawText);

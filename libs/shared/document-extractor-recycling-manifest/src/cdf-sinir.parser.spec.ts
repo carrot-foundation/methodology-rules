@@ -53,13 +53,13 @@ describe('CdfSinirParser', () => {
       expect(result.data.recycler.name.confidence).toBe('high');
 
       expect(result.data.generator.name.parsed).toBe(
-        'LATICÍNIOS BELA VISTA LTDA',
+        'LATICINIOS BELA VISTA LTDA',
       );
       expect(result.data.generator.taxId.parsed).toBe('02089969003555');
       expect(result.data.generator.name.confidence).toBe('high');
 
       expect(result.data.generator.address.parsed).toBe(
-        'Rua Empresário Agenello Senger, nº S/N',
+        'Rua Empresario Agenello Senger, nº S/N',
       );
       expect(result.data.generator.city.parsed).toBe('Carazinho');
       expect(result.data.generator.state.parsed).toBe('RS');
@@ -134,6 +134,57 @@ describe('CdfSinirParser', () => {
 
       expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
       expect(result.data.generator.taxId.parsed).toBe('12345678000190');
+    });
+
+    it('should extract generator with same-line labels and CNPJ/CPF format', () => {
+      const text = [
+        'CDF n° 2834634/2024',
+        'Período : 20/03/2024 até 30/04/2024',
+        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que',
+        'recebeu, em sua unidade de Araucária PR',
+        'Identificação do Gerador',
+        'Razão Social :Brasturinvest Investimentos Turistico SA',
+        'CNPJ/CPF : 03422594000540',
+        'Endereço :',
+        'Comendador Araújo,499 Pestana Curitiba Hotel Centro',
+        'Munícipio :',
+        'Curitiba',
+        'UF PR',
+        'Identificação dos Resíduos',
+        'Araucária, 06/05/2024',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator.name.parsed).toBe(
+        'Brasturinvest Investimentos Turistico SA',
+      );
+      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.generator.taxId.parsed).toBe('03422594000540');
+      expect(result.data.generator.address.parsed).toBe(
+        'Comendador Araujo,499 Pestana Curitiba Hotel Centro',
+      );
+      expect(result.data.generator.city.parsed).toBe('Curitiba');
+      expect(result.data.generator.state.parsed).toBe('PR');
+      expect(result.data.issueDate.parsed).toBe('06/05/2024');
+      expect(result.data.issueDate.confidence).toBe('high');
+    });
+
+    it('should extract issue date before Responsável when Declaração is absent', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'Araucária, 18/02/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.issueDate.parsed).toBe('18/02/2025');
+      expect(result.data.issueDate.confidence).toBe('high');
     });
 
     it('should set low confidence when recycler preamble is missing', () => {

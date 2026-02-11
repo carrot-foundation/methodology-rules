@@ -47,14 +47,14 @@ describe('MTR shared helpers', () => {
   describe('extractAddressFields', () => {
     it('should extract address, city, and state from section text', () => {
       const section = [
-        'Razão Social: Test Company',
-        'Endereço: Rua Empresário Agenello Senger, nº S/N',
-        'Município: Carazinho',
+        'Razao Social: Test Company',
+        'Endereco: Rua Empresario Agenello Senger, nº S/N',
+        'Municipio: Carazinho',
         'UF: RS',
       ].join('\n');
 
       expect(extractAddressFields(section)).toEqual({
-        address: 'Rua Empresário Agenello Senger, nº S/N',
+        address: 'Rua Empresario Agenello Senger, nº S/N',
         city: 'Carazinho',
         state: 'RS',
       });
@@ -62,31 +62,31 @@ describe('MTR shared helpers', () => {
 
     it('should handle Estado variant for state', () => {
       const section = [
-        'Endereço: Av. Brasil, 500',
-        'Município: São Paulo',
+        'Endereco: Av. Brasil, 500',
+        'Municipio: Sao Paulo',
         'Estado: SP',
       ].join('\n');
 
       expect(extractAddressFields(section)).toEqual({
         address: 'Av. Brasil, 500',
-        city: 'São Paulo',
+        city: 'Sao Paulo',
         state: 'SP',
       });
     });
 
     it('should return undefined when address is missing', () => {
-      expect(extractAddressFields('Município: City\nUF: SP')).toBeUndefined();
+      expect(extractAddressFields('Municipio: City\nUF: SP')).toBeUndefined();
     });
 
     it('should return undefined when city is missing', () => {
       expect(
-        extractAddressFields('Endereço: Rua Test\nUF: SP'),
+        extractAddressFields('Endereco: Rua Test\nUF: SP'),
       ).toBeUndefined();
     });
 
     it('should return undefined when state is missing', () => {
       expect(
-        extractAddressFields('Endereço: Rua Test\nMunicípio: City'),
+        extractAddressFields('Endereco: Rua Test\nMunicipio: City'),
       ).toBeUndefined();
     });
   });
@@ -94,10 +94,9 @@ describe('MTR shared helpers', () => {
   describe('extractMtrEntityWithAddress', () => {
     const sectionPatterns = {
       destinatario:
-        /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Destinat[áa]rio|Destinador|Receptor)\s*$/i,
-      gerador: /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Gerador|Origem)\s*$/i,
-      transportador:
-        /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Transportador)\s*$/i,
+        /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
+      gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+      transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
     };
     const allSectionPatterns = Object.values(sectionPatterns);
     // eslint-disable-next-line sonarjs/slow-regex
@@ -108,8 +107,8 @@ describe('MTR shared helpers', () => {
         'Gerador',
         'EMPRESA GERADORA LTDA 262960',
         'CNPJ: 12.345.678/0001-90',
-        'Endereço: Rua Test, 100',
-        'Município: Carazinho',
+        'Endereco: Rua Test, 100',
+        'Municipio: Carazinho',
         'UF: RS',
         '',
         'Transportador',
