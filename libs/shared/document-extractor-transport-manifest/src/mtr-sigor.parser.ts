@@ -15,7 +15,6 @@ import {
   extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
-  finalizeExtraction,
   parseBrazilianNumber,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
@@ -25,8 +24,11 @@ import {
 } from '@carrot-fndn/shared/text-extractor';
 
 import {
-  MTR_ALL_FIELDS,
-  MTR_REQUIRED_FIELDS,
+  extractAddressFields,
+  finalizeMtrExtraction,
+  stripTrailingRegistrationNumber,
+} from './mtr-shared.helpers';
+import {
   type MtrExtractedData,
   type WasteTypeEntry,
 } from './transport-manifest.types';
@@ -36,15 +38,6 @@ const SECTION_PATTERNS = {
   gerador: /^\s*Identifica[çc][ãa]o\s+do\s+Gerador\s*$/i,
   residuos: /^\s*Identifica[çc][ãa]o\s+dos\s+Res[ií]duos\s*$/i,
   transportador: /^\s*Identifica[çc][ãa]o\s+do\s+Transportador\s*$/i,
-} as const;
-
-const ADDRESS_PATTERNS = {
-  // eslint-disable-next-line sonarjs/slow-regex
-  address: /Endere[çc]o\s*:?\s*(.+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  city: /Munic[ií]pio\s*:?\s*(.+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  state: /(?:UF|Estado)\s*:?\s*(\w{2})/i,
 } as const;
 
 const MTR_PATTERNS = {
@@ -87,29 +80,7 @@ const LABEL_PATTERNS = {
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
-const stripTrailingRegistrationNumber = (name: string): string =>
-  // eslint-disable-next-line sonarjs/slow-regex
-  name.replace(/\s+[-–]?\s*\d{1,5}$/, '').trim();
-
-const extractAddressFromSection = (
-  section: string,
-): undefined | { address: string; city: string; state: string } => {
-  const addressMatch = ADDRESS_PATTERNS.address.exec(section);
-  const cityMatch = ADDRESS_PATTERNS.city.exec(section);
-  const stateMatch = ADDRESS_PATTERNS.state.exec(section);
-
-  if (!addressMatch?.[1] || !cityMatch?.[1] || !stateMatch?.[1]) {
-    return undefined;
-  }
-
-  return {
-    address: addressMatch[1].trim(),
-    city: cityMatch[1].trim(),
-    state: stateMatch[1].trim(),
-  };
-};
-
-const extractEntityFromCetesbSection = (
+const extractEntityFromSigorSection = (
   text: string,
   sectionPattern: RegExp,
 ): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
@@ -140,14 +111,14 @@ const extractEntityFromCetesbSection = (
     return undefined;
   }
 
-  const addressFields = extractAddressFromSection(section);
+  const addressData = extractAddressFields(section);
 
   return {
     rawMatch: section,
     value: {
       name: name as NonEmptyString,
       taxId: cnpjMatch[1] as NonEmptyString,
-      ...addressFields,
+      ...addressData,
     },
   };
 };
@@ -203,7 +174,7 @@ const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   return result;
 };
 
-type CetesbWasteColumn =
+type SigorWasteColumn =
   | 'classification'
   | 'description'
   | 'item'
@@ -213,9 +184,9 @@ type CetesbWasteColumn =
   | 'treatment'
   | 'unit';
 
-const CETESB_HEADER_DEFS: [
-  HeaderColumnDefinition<CetesbWasteColumn>,
-  ...Array<HeaderColumnDefinition<CetesbWasteColumn>>,
+const SIGOR_HEADER_DEFS: [
+  HeaderColumnDefinition<SigorWasteColumn>,
+  ...Array<HeaderColumnDefinition<SigorWasteColumn>>,
 ] = [
   { headerPattern: /^Item$/i, name: 'item' },
   { headerPattern: /^C[oó]digo\s+IBAMA/i, name: 'description' },
@@ -227,7 +198,7 @@ const CETESB_HEADER_DEFS: [
   { headerPattern: /^Tratamento$/i, name: 'treatment' },
 ];
 
-const CETESB_ANCHOR_COLUMN: CetesbWasteColumn = 'item';
+const SIGOR_ANCHOR_COLUMN: SigorWasteColumn = 'item';
 
 const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
 
@@ -265,9 +236,9 @@ const parseWasteRow = (
   return entry;
 };
 
-export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
+export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mtr-cetesb-sp';
+  readonly layoutId = 'mtr-sigor';
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -293,26 +264,7 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     this.extractHaulerFields(rawText, partialData);
     this.extractWasteFields(extractionResult, partialData);
 
-    return finalizeExtraction<MtrExtractedData>({
-      allFields: [...MTR_ALL_FIELDS],
-
-      confidenceFields: [
-        partialData.documentNumber,
-        partialData.issueDate,
-        partialData.generator?.name,
-        partialData.generator?.taxId,
-        partialData.hauler?.name,
-        partialData.hauler?.taxId,
-        partialData.receiver?.name,
-        partialData.receiver?.taxId,
-      ],
-
-      documentType: 'transportManifest',
-      matchScore,
-      partialData,
-      rawText,
-      requiredFields: [...MTR_REQUIRED_FIELDS],
-    });
+    return finalizeMtrExtraction(partialData, matchScore, rawText);
   }
 
   private extractDocumentNumber(
@@ -333,7 +285,7 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     rawText: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const generatorExtracted = extractEntityFromCetesbSection(
+    const generatorExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.gerador,
     );
@@ -341,14 +293,14 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     partialData.generator =
       createExtractedEntityWithAddress(generatorExtracted);
 
-    const haulerExtracted = extractEntityFromCetesbSection(
+    const haulerExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.transportador,
     );
 
     partialData.hauler = createExtractedEntityWithAddress(haulerExtracted);
 
-    const receiverExtracted = extractEntityFromCetesbSection(
+    const receiverExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.destinador,
     );
@@ -442,7 +394,7 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
   ): void {
     const detected = detectTableColumns(
       extractionResult.blocks,
-      CETESB_HEADER_DEFS,
+      SIGOR_HEADER_DEFS,
     );
 
     if (!detected) {
@@ -450,10 +402,10 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
     }
 
     const { rows } = extractTableFromBlocks(extractionResult.blocks, {
-      anchorColumn: CETESB_ANCHOR_COLUMN,
+      anchorColumn: SIGOR_ANCHOR_COLUMN,
       columns: detected.columns as [
-        TableColumnConfig<CetesbWasteColumn>,
-        ...Array<TableColumnConfig<CetesbWasteColumn>>,
+        TableColumnConfig<SigorWasteColumn>,
+        ...Array<TableColumnConfig<SigorWasteColumn>>,
       ],
       maxRowGap: 0.03,
       yRange: { max: 1, min: detected.headerTop + 0.01 },
@@ -475,4 +427,4 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
   }
 }
 
-registerParser('transportManifest', 'mtr-cetesb-sp', MtrCetesbSpParser);
+registerParser('transportManifest', 'mtr-sigor', MtrSigorParser);

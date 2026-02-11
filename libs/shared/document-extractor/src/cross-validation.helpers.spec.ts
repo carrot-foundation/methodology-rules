@@ -41,11 +41,17 @@ const createConfig = (
     eventData: TestEventData,
   ): DocumentExtractorConfig | undefined => {
     if (eventData.documentType === 'CDF') {
-      return { documentType: 'recyclingManifest', layouts: ['cdf-brazil'] };
+      return {
+        documentType: 'recyclingManifest',
+        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+      };
     }
 
     if (eventData.documentType === 'MTR') {
-      return { documentType: 'transportManifest', layouts: ['mtr-brazil'] };
+      return {
+        documentType: 'transportManifest',
+        layouts: ['mtr-sinir', 'mtr-sigor', 'mtr-sinfat'],
+      };
     }
 
     return undefined;
@@ -135,7 +141,10 @@ describe('crossValidateAttachments', () => {
 
     expect(extractor.extract).toHaveBeenCalledWith(
       { s3Bucket: 'test-bucket', s3Key: 'test-key-att-1' },
-      { documentType: 'recyclingManifest', layouts: ['cdf-brazil'] },
+      {
+        documentType: 'recyclingManifest',
+        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+      },
     );
     expect(validateFunction).toHaveBeenCalledWith(extractionOutput, eventData);
     expect(result.failMessages).toEqual([]);

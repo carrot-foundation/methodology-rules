@@ -1,10 +1,10 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
-import { CdfLayoutBrazilParser } from './cdf-layout-brazil.parser';
+import { CdfSinfatParser } from './cdf-sinfat.parser';
 
-describe('CdfLayoutBrazilParser', () => {
-  const parser = new CdfLayoutBrazilParser();
+describe('CdfSinfatParser', () => {
+  const parser = new CdfSinfatParser();
 
   beforeEach(() => {
     clearRegistry();
@@ -320,7 +320,7 @@ describe('CdfLayoutBrazilParser', () => {
   describe('metadata', () => {
     it('should have correct document type and layout id', () => {
       expect(parser.documentType).toBe('recyclingManifest');
-      expect(parser.layoutId).toBe('cdf-brazil');
+      expect(parser.layoutId).toBe('cdf-sinfat');
       expect(parser.textractMode).toBe('detect');
     });
   });

@@ -3,20 +3,25 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
-  createExtractedEntity,
   createExtractedEntityWithAddress,
   createHighConfidenceField,
   type DocumentParser,
   type EntityWithAddressInfo,
   type ExtractionOutput,
   extractStringField,
-  finalizeExtraction,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
-  CDF_ALL_FIELDS,
-  CDF_REQUIRED_FIELDS,
+  createRecyclerEntity,
+  extractMtrNumbers,
+  extractRecyclerFromPreamble,
+  extractWasteClassificationData,
+  finalizeCdfExtraction,
+  mergeWasteEntries,
+  type WasteCodeInfo,
+} from './cdf-shared.helpers';
+import {
   type CdfExtractedData,
   type WasteEntry,
 } from './recycling-manifest.types';
@@ -30,52 +35,42 @@ const CDF_PATTERNS = {
   generatorAddress:
     // eslint-disable-next-line sonarjs/slow-regex
     /Endere[çc]o\s*:\s*(.+?)\s+Munic[ií]pio\s*:\s*(\S.+?)\s+UF\s*:\s*(\w{2})/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  generatorName: /Raz[ãa]o\s*Social\s*:\s*(.+?)\s+CPF\/CNPJ/is,
+
+  generatorName:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /(?:Raz[ãa]o\s*Social|Nome)\s*:?\s*\n\s*(.+?)(?=\n|$)/im,
   generatorTaxId:
-    /Raz[ãa]o\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2})/i,
+    // eslint-disable-next-line sonarjs/slow-regex
+    /(?:CPF\/CNPJ|CNPJ)\s*:\s*\n?\s*(\d{14}|\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/i,
 
   issueDateDeclaracao: /Declara[çc][ãa]o[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
 
   processingPeriod:
-    /Per[ií]odo\s*:\s*(\d{2}\/\d{2}\/\d{4}\s+at[ée]\s+\d{2}\/\d{2}\/\d{4})/is,
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Per[ií]odo\s*:?\s*(\d{2}\/\d{2}\/\d{4}\s+(?:a|at[ée])\s+\d{2}\/\d{2}\/\d{4})/is,
 
   recyclerPreamble:
-    /^(.+?),\s*CPF\/CNPJ\s+(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})\s+certifica/m,
-  wasteData:
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-    /Classe\s+([\w\s]+?)\s+([\d.,]+)\s+(Tonelada|kg|ton|t|m³)\s+([A-Za-z\u00C0-\u017F]+)/gi,
-  // eslint-disable-next-line sonarjs/slow-regex
-  wasteRow: /\d+\.\s*(\d{6})\s*-\s*/g,
+    /^(.+?),\s*CPF\/CNPJ\s+(\d{14}|\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})\s+certifica/m,
 } as const;
 
 const SIGNATURE_PATTERNS = [
   /CDF/i,
-  /Certificado\s*de\s*Destina[çc][ãa]o/i,
-  /Destina[çc][ãa]o\s*Final/i,
+  /CERTIFICADO\s*DE\s*DESTINA/i,
+  /Sistema\s+MTR\s+do\s+Sinir/i,
   /Gerador/i,
   /Identifica[çc][ãa]o\s+dos?\s+Res[ií]duos/i,
-  /MTRs?\s+incluidos/i,
+  /Manifestos?\s+Inclu[ií]dos/i,
   /Declara[çc][ãa]o/i,
+  /Tratamento/i,
 ];
 
-const extractRecycler = (
-  rawText: string,
-): undefined | { rawMatch: string; value: { name: string; taxId: string } } => {
-  const match = CDF_PATTERNS.recyclerPreamble.exec(rawText);
+const UNNUMBERED_WASTE_CODE_PATTERN =
+  // eslint-disable-next-line sonarjs/slow-regex
+  /^(\d{6})\s*-\s*(.+?)(?=\n\d{6}\s*-|Classe|$)/gm;
 
-  if (!match?.[1] || !match[2]) {
-    return undefined;
-  }
-
-  return {
-    rawMatch: match[0],
-    value: {
-      name: match[1].trim(),
-      taxId: match[2],
-    },
-  };
-};
+const MTR_SECTION_PATTERN =
+  // eslint-disable-next-line sonarjs/slow-regex, sonarjs/regex-complexity
+  /Manifestos?\s+Inclu[ií]dos\s*:?\s*\n?([\s\S]*?)(?=\nNome\s+do\s+Respons[áa]vel|Declara[çc][ãa]o|$)/i;
 
 const extractGenerator = (
   rawText: string,
@@ -110,26 +105,10 @@ const extractGenerator = (
   return { rawMatch, value: entity };
 };
 
-interface WasteCodeInfo {
-  code: string;
-  description: string;
-}
-
-interface WasteDataInfo {
-  classification: string;
-  quantity: number;
-  technology: string;
-  unit: string;
-}
-
 const extractWasteCodes = (rawText: string): WasteCodeInfo[] => {
   const codes: WasteCodeInfo[] = [];
 
-  const codePattern =
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/regex-complexity
-    /\d+\.\s*(\d{6})\s*-\s*(.+?)(?=\d+\.\s*\d{6}\s*-|Classe|$)/gs;
-
-  for (const match of rawText.matchAll(codePattern)) {
+  for (const match of rawText.matchAll(UNNUMBERED_WASTE_CODE_PATTERN)) {
     if (match[1] && match[2]) {
       codes.push({
         code: match[1],
@@ -141,93 +120,16 @@ const extractWasteCodes = (rawText: string): WasteCodeInfo[] => {
   return codes;
 };
 
-const extractWasteData = (rawText: string): WasteDataInfo[] => {
-  const dataEntries: WasteDataInfo[] = [];
-
-  const dataPattern =
-    // eslint-disable-next-line sonarjs/slow-regex, sonarjs/duplicates-in-character-class
-    /Classe\s+([\w\s]+?)\s+([\d.,]+)\s+(Tonelada|kg|ton|t|m³)\s+([A-Za-z\u00C0-\u017F]+)/gi;
-
-  for (const match of rawText.matchAll(dataPattern)) {
-    if (match[1] && match[2] && match[3] && match[4]) {
-      const cleaned = match[2].replaceAll('.', '').replace(',', '.');
-      const quantity = Number.parseFloat(cleaned);
-
-      dataEntries.push({
-        classification: `Classe ${match[1].trim()}`,
-        quantity: Number.isNaN(quantity) ? 0 : quantity,
-        technology: match[4].trim(),
-        unit: match[3].trim(),
-      });
-    }
-  }
-
-  return dataEntries;
-};
-
-const mergeWasteEntries = (
-  codes: WasteCodeInfo[],
-  dataEntries: WasteDataInfo[],
-): WasteEntry[] => {
-  const entries: WasteEntry[] = [];
-
-  for (
-    let index = 0;
-    index < Math.max(codes.length, dataEntries.length);
-    index++
-  ) {
-    // eslint-disable-next-line security/detect-object-injection
-    const code = codes[index];
-    // eslint-disable-next-line security/detect-object-injection
-    const data = dataEntries[index];
-
-    const entry: WasteEntry = {
-      description: code?.description ?? '',
-    };
-
-    if (code?.code) {
-      entry.code = code.code;
-    }
-
-    if (data) {
-      entry.classification = data.classification;
-      entry.quantity = data.quantity;
-      entry.unit = data.unit;
-      entry.technology = data.technology;
-    }
-
-    entries.push(entry);
-  }
-
-  return entries;
-};
-
 const extractWasteEntries = (rawText: string): WasteEntry[] => {
   const codes = extractWasteCodes(rawText);
-  const dataEntries = extractWasteData(rawText);
+  const dataEntries = extractWasteClassificationData(rawText);
 
   return mergeWasteEntries(codes, dataEntries);
 };
 
-const MTR_SECTION_PATTERN =
-  // eslint-disable-next-line sonarjs/slow-regex
-  /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Respons[áa]vel|$)/i;
-
-const extractTransportManifests = (rawText: string): string[] => {
-  const sectionMatch = MTR_SECTION_PATTERN.exec(rawText);
-
-  if (!sectionMatch?.[1]) {
-    return [];
-  }
-
-  return [...sectionMatch[1].matchAll(/(\d{10})/g)].map(
-    (match) => match[1] as string,
-  );
-};
-
-export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
+export class CdfSinirParser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
-  readonly layoutId = 'cdf-brazil';
+  readonly layoutId = 'cdf-sinir';
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -257,19 +159,12 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    const recyclerExtracted = extractRecycler(rawText);
-
-    partialData.recycler = createExtractedEntity(
-      recyclerExtracted
-        ? {
-            rawMatch: recyclerExtracted.rawMatch,
-            value: {
-              name: recyclerExtracted.value.name as NonEmptyString,
-              taxId: recyclerExtracted.value.taxId as NonEmptyString,
-            },
-          }
-        : undefined,
+    const recyclerExtracted = extractRecyclerFromPreamble(
+      rawText,
+      CDF_PATTERNS.recyclerPreamble,
     );
+
+    partialData.recycler = createRecyclerEntity(recyclerExtracted);
 
     const generatorExtracted = extractGenerator(rawText);
 
@@ -319,30 +214,19 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       partialData.wasteEntries = createHighConfidenceField(wasteEntries);
     }
 
-    const transportManifests = extractTransportManifests(rawText);
+    const transportManifests = extractMtrNumbers(
+      rawText,
+      MTR_SECTION_PATTERN,
+      12,
+    );
 
     if (transportManifests.length > 0) {
       partialData.transportManifests =
         createHighConfidenceField(transportManifests);
     }
 
-    return finalizeExtraction<CdfExtractedData>({
-      allFields: [...CDF_ALL_FIELDS],
-      confidenceFields: [
-        partialData.documentNumber,
-        partialData.issueDate,
-        partialData.generator.name,
-        partialData.generator.taxId,
-        partialData.recycler.name,
-        partialData.recycler.taxId,
-      ],
-      documentType: 'recyclingManifest',
-      matchScore,
-      partialData,
-      rawText,
-      requiredFields: [...CDF_REQUIRED_FIELDS],
-    });
+    return finalizeCdfExtraction(partialData, matchScore, rawText);
   }
 }
 
-registerParser('recyclingManifest', 'cdf-brazil', CdfLayoutBrazilParser);
+registerParser('recyclingManifest', 'cdf-sinir', CdfSinirParser);

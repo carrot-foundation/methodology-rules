@@ -1,10 +1,10 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
-import { MtrLayoutBrazilParser } from './mtr-layout-brazil.parser';
+import { MtrSinirParser } from './mtr-sinir.parser';
 
-describe('MtrLayoutBrazilParser', () => {
-  const parser = new MtrLayoutBrazilParser();
+describe('MtrSinirParser', () => {
+  const parser = new MtrSinirParser();
 
   beforeEach(() => {
     clearRegistry();
@@ -486,7 +486,7 @@ Transportador
   describe('metadata', () => {
     it('should have correct document type and layout id', () => {
       expect(parser.documentType).toBe('transportManifest');
-      expect(parser.layoutId).toBe('mtr-brazil');
+      expect(parser.layoutId).toBe('mtr-sinir');
       expect(parser.textractMode).toBe('detect');
     });
   });

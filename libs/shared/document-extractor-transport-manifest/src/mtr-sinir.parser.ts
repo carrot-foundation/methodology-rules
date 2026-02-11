@@ -3,35 +3,24 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
-  createExtractedEntityWithAddress,
   createHighConfidenceField,
   type DocumentParser,
   extractAllStringFields,
-  extractEntityFromSection,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
-  extractSection,
   extractStringField,
-  finalizeExtraction,
   parseBrazilianNumber,
   registerParser,
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
-  MTR_ALL_FIELDS,
-  MTR_REQUIRED_FIELDS,
+  extractMtrEntityWithAddress,
+  finalizeMtrExtraction,
+} from './mtr-shared.helpers';
+import {
   type MtrExtractedData,
   type WasteTypeEntry,
 } from './transport-manifest.types';
-
-const ADDRESS_PATTERNS = {
-  // eslint-disable-next-line sonarjs/slow-regex
-  address: /Endere[çc]o\s*:?\s*(.+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  city: /Munic[ií]pio\s*:?\s*(.+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  state: /(?:UF|Estado)\s*:?\s*(\w{2})/i,
-} as const;
 
 const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
@@ -71,10 +60,6 @@ const LABEL_PATTERNS = {
   vehiclePlate: /Placa\s*(?:do\s*)?Ve[ií]culo/i,
 } as const;
 
-const stripTrailingRegistrationNumber = (name: string): string =>
-  // eslint-disable-next-line sonarjs/slow-regex
-  name.replace(/\s+[-–]?\s*\d{1,7}$/, '').trim();
-
 const SECTION_PATTERNS = {
   destinatario:
     /^\s*(?:Identifica[çc][ãa]o\s+do\s+)?(?:Destinat[áa]rio|Destinador|Receptor)\s*$/i,
@@ -94,34 +79,9 @@ const SIGNATURE_PATTERNS = [
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
-const extractAddressFromSection = (
-  text: string,
-  sectionPattern: RegExp,
-): undefined | { address: string; city: string; state: string } => {
-  const section = extractSection(text, sectionPattern, ALL_SECTION_PATTERNS);
-
-  if (!section) {
-    return undefined;
-  }
-
-  const addressMatch = ADDRESS_PATTERNS.address.exec(section);
-  const cityMatch = ADDRESS_PATTERNS.city.exec(section);
-  const stateMatch = ADDRESS_PATTERNS.state.exec(section);
-
-  if (!addressMatch?.[1] || !cityMatch?.[1] || !stateMatch?.[1]) {
-    return undefined;
-  }
-
-  return {
-    address: addressMatch[1].trim(),
-    city: cityMatch[1].trim(),
-    state: stateMatch[1].trim(),
-  };
-};
-
-export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
+export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mtr-brazil';
+  readonly layoutId = 'mtr-sinir';
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -134,48 +94,15 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
     const { rawText } = extractionResult;
     const matchScore = this.getMatchScore(extractionResult);
 
-    const documentNumberExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.documentNumber,
-    );
-    const generatorExtracted = extractEntityFromSection(
-      rawText,
-      SECTION_PATTERNS.gerador,
-      ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
-    );
-    const haulerExtracted = extractEntityFromSection(
-      rawText,
-      SECTION_PATTERNS.transportador,
-      ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
-    );
-    const receiverExtracted = extractEntityFromSection(
-      rawText,
-      SECTION_PATTERNS.destinatario,
-      ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
-    );
-    const wasteTypeMatches = extractAllStringFields(
-      rawText,
-      MTR_PATTERNS.wasteType,
-    );
-    const wasteClassificationExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.wasteClassification,
-    );
-    const wasteQuantityExtracted = extractStringField(
-      rawText,
-      MTR_PATTERNS.wasteQuantity,
-    );
-    const wasteQuantity = wasteQuantityExtracted
-      ? parseBrazilianNumber(wasteQuantityExtracted.value)
-      : undefined;
-
     const partialData: Partial<MtrExtractedData> = {
       documentType: 'transportManifest',
       rawText,
     };
+
+    const documentNumberExtracted = extractStringField(
+      rawText,
+      MTR_PATTERNS.documentNumber,
+    );
 
     if (documentNumberExtracted) {
       partialData.documentNumber = createHighConfidenceField(
@@ -214,64 +141,25 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       partialData.receivingDate = receivingDate;
     }
 
-    const generatorAddress = extractAddressFromSection(
+    partialData.generator = extractMtrEntityWithAddress(
       rawText,
       SECTION_PATTERNS.gerador,
+      ALL_SECTION_PATTERNS,
+      MTR_PATTERNS.cnpj,
     );
 
-    partialData.generator = createExtractedEntityWithAddress(
-      generatorExtracted
-        ? {
-            rawMatch: generatorExtracted.rawMatch,
-            value: {
-              ...generatorExtracted.value,
-              name: stripTrailingRegistrationNumber(
-                generatorExtracted.value.name,
-              ) as NonEmptyString,
-              ...generatorAddress,
-            },
-          }
-        : undefined,
-    );
-
-    const haulerAddress = extractAddressFromSection(
+    partialData.hauler = extractMtrEntityWithAddress(
       rawText,
       SECTION_PATTERNS.transportador,
+      ALL_SECTION_PATTERNS,
+      MTR_PATTERNS.cnpj,
     );
 
-    partialData.hauler = createExtractedEntityWithAddress(
-      haulerExtracted
-        ? {
-            rawMatch: haulerExtracted.rawMatch,
-            value: {
-              ...haulerExtracted.value,
-              name: stripTrailingRegistrationNumber(
-                haulerExtracted.value.name,
-              ) as NonEmptyString,
-              ...haulerAddress,
-            },
-          }
-        : undefined,
-    );
-
-    const receiverAddress = extractAddressFromSection(
+    partialData.receiver = extractMtrEntityWithAddress(
       rawText,
       SECTION_PATTERNS.destinatario,
-    );
-
-    partialData.receiver = createExtractedEntityWithAddress(
-      receiverExtracted
-        ? {
-            rawMatch: receiverExtracted.rawMatch,
-            value: {
-              ...receiverExtracted.value,
-              name: stripTrailingRegistrationNumber(
-                receiverExtracted.value.name,
-              ) as NonEmptyString,
-              ...receiverAddress,
-            },
-          }
-        : undefined,
+      ALL_SECTION_PATTERNS,
+      MTR_PATTERNS.cnpj,
     );
 
     const vehiclePlate = extractFieldWithLabelFallback(
@@ -294,6 +182,22 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       partialData.driverName = driverName;
     }
 
+    const wasteTypeMatches = extractAllStringFields(
+      rawText,
+      MTR_PATTERNS.wasteType,
+    );
+    const wasteClassificationExtracted = extractStringField(
+      rawText,
+      MTR_PATTERNS.wasteClassification,
+    );
+    const wasteQuantityExtracted = extractStringField(
+      rawText,
+      MTR_PATTERNS.wasteQuantity,
+    );
+    const wasteQuantity = wasteQuantityExtracted
+      ? parseBrazilianNumber(wasteQuantityExtracted.value)
+      : undefined;
+
     if (wasteTypeMatches.length > 0) {
       const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => {
         const entry: WasteTypeEntry = { description: m.value };
@@ -315,25 +219,8 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       );
     }
 
-    return finalizeExtraction<MtrExtractedData>({
-      allFields: [...MTR_ALL_FIELDS],
-      confidenceFields: [
-        partialData.documentNumber,
-        partialData.issueDate,
-        partialData.generator.name,
-        partialData.generator.taxId,
-        partialData.hauler.name,
-        partialData.hauler.taxId,
-        partialData.receiver.name,
-        partialData.receiver.taxId,
-      ],
-      documentType: 'transportManifest',
-      matchScore,
-      partialData,
-      rawText,
-      requiredFields: [...MTR_REQUIRED_FIELDS],
-    });
+    return finalizeMtrExtraction(partialData, matchScore, rawText);
   }
 }
 
-registerParser('transportManifest', 'mtr-brazil', MtrLayoutBrazilParser);
+registerParser('transportManifest', 'mtr-sinir', MtrSinirParser);

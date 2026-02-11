@@ -4,7 +4,7 @@ import {
   stubTextExtractionResultWithBlocks,
 } from '@carrot-fndn/shared/text-extractor';
 
-import { MtrCetesbSpParser } from './mtr-cetesb-sp.parser';
+import { MtrSigorParser } from './mtr-sigor.parser';
 
 const stubBoundingBox = (left: number, top: number) => ({
   height: 0.015,
@@ -13,8 +13,8 @@ const stubBoundingBox = (left: number, top: number) => ({
   width: 0.1,
 });
 
-describe('MtrCetesbSpParser', () => {
-  const parser = new MtrCetesbSpParser();
+describe('MtrSigorParser', () => {
+  const parser = new MtrSigorParser();
 
   beforeEach(() => {
     clearRegistry();
@@ -719,7 +719,7 @@ describe('MtrCetesbSpParser', () => {
   describe('metadata', () => {
     it('should have correct document type and layout id', () => {
       expect(parser.documentType).toBe('transportManifest');
-      expect(parser.layoutId).toBe('mtr-cetesb-sp');
+      expect(parser.layoutId).toBe('mtr-sigor');
       expect(parser.textractMode).toBe('detect');
     });
   });

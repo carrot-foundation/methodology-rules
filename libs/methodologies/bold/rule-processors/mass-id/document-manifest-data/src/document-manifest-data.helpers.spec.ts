@@ -91,7 +91,7 @@ describe('document-manifest-data.helpers', () => {
 
       expect(result).toEqual({
         documentType: 'recyclingManifest',
-        layouts: ['cdf-brazil'],
+        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
       });
     });
 
@@ -100,7 +100,7 @@ describe('document-manifest-data.helpers', () => {
 
       expect(result).toEqual({
         documentType: 'transportManifest',
-        layouts: ['mtr-brazil', 'mtr-cetesb-sp'],
+        layouts: ['mtr-sinir', 'mtr-sigor', 'mtr-sinfat'],
       });
     });
 

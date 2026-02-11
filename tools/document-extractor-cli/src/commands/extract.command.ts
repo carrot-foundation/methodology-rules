@@ -24,7 +24,7 @@ export const extractCommand = new Command('extract')
   )
   .option(
     EXTRACT_OPTIONS.layout,
-    'Layout ID (e.g., layout-1, mtr-brazil, cdf-brazil)',
+    'Layout ID (e.g., layout-1, mtr-sinir, cdf-sinfat)',
   )
   .option('--concurrency <n>', 'Number of files to process in parallel', '10')
   .option(
