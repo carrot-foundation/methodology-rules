@@ -286,8 +286,8 @@ describe('MtrSigorParser', () => {
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should not extract vehicle plate when value is not a valid plate format', () => {
-      const invalidPlateText = [
+    it('should extract OCR-mangled plate when driver name is identified', () => {
+      const ocrMangledPlateText = [
         'MTR n° 123456',
         'Data da emissão: 01/01/2024',
         'CETESB',
@@ -298,14 +298,16 @@ describe('MtrSigorParser', () => {
         'Nome do Motorista',
         'Placa do Veículo',
         'CARLOS SILVA',
-        'NOT A PLATE',
+        'NKW 1/62',
       ].join('\n');
 
-      const result = parser.parse(stubTextExtractionResult(invalidPlateText));
+      const result = parser.parse(
+        stubTextExtractionResult(ocrMangledPlateText),
+      );
 
       expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
-      expect(result.data.vehiclePlate?.parsed).toBe('');
-      expect(result.data.vehiclePlate?.confidence).toBe('low');
+      expect(result.data.vehiclePlate?.parsed).toBe('NKW 1/62');
+      expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
 
     it('should extract driver name when only driver label is present', () => {

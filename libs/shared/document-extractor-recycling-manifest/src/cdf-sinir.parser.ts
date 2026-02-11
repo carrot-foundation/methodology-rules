@@ -35,7 +35,7 @@ const CDF_PATTERNS = {
 
   generatorAddress:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Endereco\s*:\s*(.+?)\s+Municipio\s*:\s*(\S.+?)\s+UF\s*:?\s*(\w{2})/i,
+    /Endereco\s*:?\s*(.+?)\s+Municipio\s*:?\s*(\S.+?)\s+UF\s*:?\s*(\w{2})/is,
 
   generatorName:
     // eslint-disable-next-line sonarjs/slow-regex

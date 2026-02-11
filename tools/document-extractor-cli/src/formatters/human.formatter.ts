@@ -6,7 +6,7 @@ import type {
 import { blue, bold, green, red, yellow } from '@carrot-fndn/shared/cli';
 
 interface HumanFormatOptions {
-  verbose?: boolean;
+  debug?: boolean;
 }
 
 const isExtractedField = (
@@ -249,7 +249,7 @@ export const formatAsHuman = <T extends BaseExtractedData>(
     ...formatExtractedFields(result.data as unknown as Record<string, unknown>),
   );
 
-  if (options.verbose === true) {
+  if (options.debug === true) {
     lines.push(`\n${bold(blue('=== Raw Text ==='))}\n`, result.data.rawText);
   }
 

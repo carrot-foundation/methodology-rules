@@ -4,10 +4,12 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import {
   calculateMatchScore,
   createHighConfidenceField,
+  createLowConfidenceField,
   type DocumentParser,
   extractAllStringFields,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
+  extractSection,
   extractStringField,
   parseBrazilianNumber,
   registerParser,
@@ -15,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
+  extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
 } from './mtr-shared.helpers';
@@ -28,10 +31,6 @@ const MTR_PATTERNS = {
   cnpj: /CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi,
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
-
-  driverName:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Motorista[^\S\n]*:?[^\S\n]*([a-z ]+?)(?=\n|CPF|$)/i,
   issueDate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
@@ -41,9 +40,6 @@ const MTR_PATTERNS = {
   transportDate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Data\s*(?:(?:de|da|do)\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  vehiclePlate:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Placa\s*(?:do\s*)?Veiculo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i,
   // eslint-disable-next-line sonarjs/slow-regex
   wasteClassification: /Classe\s*:?\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
@@ -54,11 +50,11 @@ const MTR_PATTERNS = {
 } as const;
 
 const LABEL_PATTERNS = {
-  driverName: /Motorista/i,
+  driverName: /nome\s*do\s*motorista|motorista/i,
   issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emissao/i,
   receivingDate: /Data\s*(?:(?:de|da|do)\s*)?Recebimento/i,
   transportDate: /Data\s*(?:(?:de|da|do)\s*)?Transporte/i,
-  vehiclePlate: /Placa\s*(?:do\s*)?Veiculo/i,
+  vehiclePlate: /placa\s*(?:do\s*)?veiculo/i,
 } as const;
 
 const SECTION_PATTERNS = {
@@ -167,25 +163,7 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
       MTR_PATTERNS.cnpj,
     );
 
-    const vehiclePlate = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.vehiclePlate,
-      LABEL_PATTERNS.vehiclePlate,
-    );
-
-    if (vehiclePlate) {
-      partialData.vehiclePlate = vehiclePlate;
-    }
-
-    const driverName = extractFieldWithLabelFallback(
-      text,
-      MTR_PATTERNS.driverName,
-      LABEL_PATTERNS.driverName,
-    );
-
-    if (driverName) {
-      partialData.driverName = driverName;
-    }
+    this.extractHaulerFields(text, partialData);
 
     const wasteTypeMatches = extractAllStringFields(
       text,
@@ -225,6 +203,52 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
     }
 
     return finalizeMtrExtraction(partialData, matchScore, rawText);
+  }
+
+  private extractHaulerFields(
+    rawText: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const haulerSection = extractSection(
+      rawText,
+      SECTION_PATTERNS.transportador,
+      ALL_SECTION_PATTERNS,
+    );
+
+    if (haulerSection) {
+      const { driverName, vehiclePlate } =
+        extractDriverAndVehicle(haulerSection);
+
+      if (driverName) {
+        partialData.driverName = createHighConfidenceField(
+          driverName as NonEmptyString,
+          `Nome do Motorista\n${driverName}`,
+        );
+      } else if (LABEL_PATTERNS.driverName.test(rawText)) {
+        partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+      }
+
+      if (vehiclePlate) {
+        partialData.vehiclePlate = createHighConfidenceField(
+          vehiclePlate as NonEmptyString,
+          `Placa do Veiculo\n${vehiclePlate}`,
+        );
+      } else if (LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+        partialData.vehiclePlate = createLowConfidenceField(
+          '' as NonEmptyString,
+        );
+      }
+
+      return;
+    }
+
+    if (LABEL_PATTERNS.driverName.test(rawText)) {
+      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+    }
+
+    if (LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+    }
   }
 }
 

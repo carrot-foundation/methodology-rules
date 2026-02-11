@@ -2,6 +2,7 @@ import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 
 import {
   extractAddressFields,
+  extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
   stripTrailingRegistrationNumber,
@@ -88,6 +89,138 @@ describe('MTR shared helpers', () => {
       expect(
         extractAddressFields('Endereco: Rua Test\nMunicipio: City'),
       ).toBeUndefined();
+    });
+  });
+
+  describe('extractDriverAndVehicle', () => {
+    it('should extract driver name and plate when both labels present (driver first, then plate)', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'GERSON PEREIRA DA SILVA',
+        'AUP5E49',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'GERSON PEREIRA DA SILVA',
+        vehiclePlate: 'AUP5E49',
+      });
+    });
+
+    it('should extract when plate appears before driver name in values', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'NKW1862',
+        'Rafael Silva',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'Rafael Silva',
+        vehiclePlate: 'NKW1862',
+      });
+    });
+
+    it('should filter boilerplate lines', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'CARLOS SILVA',
+        'BRA2E19',
+        'nome e assinatura do responsavel',
+        'cargo',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'CARLOS SILVA',
+        vehiclePlate: 'BRA2E19',
+      });
+    });
+
+    it('should extract only driver name when only driver label is present', () => {
+      const section = ['Nome do Motorista', 'MARIA SANTOS'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'MARIA SANTOS',
+      });
+    });
+
+    it('should extract only plate when only plate label is present', () => {
+      const section = ['Placa do Veiculo', 'BRA2E19'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        vehiclePlate: 'BRA2E19',
+      });
+    });
+
+    it('should return empty when no labels are found', () => {
+      expect(extractDriverAndVehicle('Random text')).toEqual({});
+    });
+
+    it('should return empty when labels have no following values', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo', ''].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
+    });
+
+    it('should handle Mercosul plate format', () => {
+      const section = ['Placa do Veiculo', 'ABC1D23'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        vehiclePlate: 'ABC1D23',
+      });
+    });
+
+    it('should accept OCR-mangled plate when driver name is identified', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'CARLOS SILVA',
+        'NKW 1/62',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'CARLOS SILVA',
+        vehiclePlate: 'NKW 1/62',
+      });
+    });
+
+    it('should extract inline values (label: value on same line)', () => {
+      const section = [
+        'Motorista: Joao da Silva',
+        'Placa do Veiculo: ABC1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'Joao da Silva',
+        vehiclePlate: 'ABC1D23',
+      });
+    });
+
+    it('should extract inline driver with "Motorista" label variant', () => {
+      const section = 'Motorista: Carlos Santos';
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'Carlos Santos',
+      });
+    });
+
+    it('should extract only plate when both labels present but no name-like value', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo', 'BRA2E19'].join(
+        '\n',
+      );
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        vehiclePlate: 'BRA2E19',
+      });
+    });
+
+    it('should return empty when both labels present but only non-name non-plate values', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo', '12345'].join(
+        '\n',
+      );
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
     });
   });
 

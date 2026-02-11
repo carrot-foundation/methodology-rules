@@ -26,6 +26,7 @@ import {
 
 import {
   extractAddressFields,
+  extractDriverAndVehicle,
   finalizeMtrExtraction,
   stripTrailingRegistrationNumber,
 } from './mtr-shared.helpers';
@@ -55,7 +56,6 @@ const MTR_PATTERNS = {
   receivingDate: /Data\s*(?:do\s*)?recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
   // eslint-disable-next-line sonarjs/slow-regex
   transportDate: /Data\s*(?:do\s*)?transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  vehiclePlateFormat: /^[A-Z]{3}[-\s]?\d[A-Z0-9]\d{2}$/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -122,57 +122,6 @@ const extractEntityFromSigorSection = (
       ...addressData,
     },
   };
-};
-
-const DRIVER_LABEL = 'nome do motorista';
-const PLATE_LABEL = 'placa do veiculo';
-
-interface DriverAndVehicle {
-  driverName?: string;
-  vehiclePlate?: string;
-}
-
-const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
-  const lines = section.split('\n').map((line) => line.trim());
-  const result: DriverAndVehicle = {};
-
-  const driverLabelIndex = lines.findIndex((line) =>
-    line.toLowerCase().startsWith(DRIVER_LABEL),
-  );
-  const plateLabelIndex = lines.findIndex((line) =>
-    line.toLowerCase().startsWith(PLATE_LABEL),
-  );
-
-  if (driverLabelIndex === -1 && plateLabelIndex === -1) {
-    return result;
-  }
-
-  // Find the last label index to determine where values start
-  const lastLabelIndex = Math.max(driverLabelIndex, plateLabelIndex);
-
-  // Values appear after all labels, in the same order as labels
-  const valueLines = lines
-    .slice(lastLabelIndex + 1)
-    .filter((line) => line.length > 0);
-
-  if (driverLabelIndex !== -1 && plateLabelIndex !== -1) {
-    // Both labels present — first value is driver, second is vehicle
-    if (valueLines[0]) {
-      result.driverName = valueLines[0];
-    }
-
-    if (valueLines[1]) {
-      result.vehiclePlate = valueLines[1];
-    }
-  } else if (driverLabelIndex !== -1) {
-    if (valueLines[0]) {
-      result.driverName = valueLines[0];
-    }
-  } else if (valueLines[0]) {
-    result.vehiclePlate = valueLines[0];
-  }
-
-  return result;
 };
 
 type SigorWasteColumn =
@@ -338,7 +287,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
       partialData.driverName = createLowConfidenceField('' as NonEmptyString);
     }
 
-    if (vehiclePlate && MTR_PATTERNS.vehiclePlateFormat.test(vehiclePlate)) {
+    if (vehiclePlate) {
       partialData.vehiclePlate = createHighConfidenceField(
         vehiclePlate as NonEmptyString,
         `Placa do Veiculo\n${vehiclePlate}`,

@@ -27,11 +27,11 @@ const LOGS_DIR = path.resolve(__dirname, '../../logs');
 
 interface ExtractOptions {
   concurrency: number;
+  debug?: boolean | undefined;
   documentType?: DocumentType | undefined;
   json?: boolean | undefined;
   layout?: string | undefined;
   outputFailures?: string | undefined;
-  verbose?: boolean | undefined;
 }
 
 interface FileFailure {
@@ -181,7 +181,7 @@ const logFileResult = (
   } else {
     logger.info(
       formatAsHuman(fileResult.result, {
-        verbose: options.verbose === true,
+        debug: options.debug === true,
       }),
     );
   }

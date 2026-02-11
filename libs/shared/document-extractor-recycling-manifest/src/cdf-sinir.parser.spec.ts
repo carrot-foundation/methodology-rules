@@ -172,6 +172,35 @@ describe('CdfSinirParser', () => {
       expect(result.data.issueDate.confidence).toBe('high');
     });
 
+    it('should extract generator address from multi-line OCR layout', () => {
+      const text = [
+        'CDF n° 2834634/2024',
+        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que',
+        'recebeu, em sua unidade de Araucária PR',
+        'Razão Social :Empresa Geradora LTDA',
+        'CNPJ/CPF : 03422594000540',
+        'Endereço :',
+        'Rua Santa Catarina, 1575 Guaíra',
+        'Munícipio',
+        'Curitiba',
+        'UF PR',
+        'Identificação dos Resíduos',
+        'Declaração',
+        'Araucária, 06/05/2024',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator.address.parsed).toBe(
+        'Rua Santa Catarina, 1575 Guaira',
+      );
+      expect(result.data.generator.address.confidence).toBe('high');
+      expect(result.data.generator.city.parsed).toBe('Curitiba');
+      expect(result.data.generator.state.parsed).toBe('PR');
+    });
+
     it('should extract issue date before Responsável when Declaração is absent', () => {
       const text = [
         'CDF nº 100/2023',

@@ -31,21 +31,21 @@ export const extractCommand = new Command('extract')
     '--output-failures <path>',
     'Path to write failed file list (defaults to ./extraction-failures-<timestamp>.txt)',
   )
-  .option('--verbose', 'Show raw text and detailed info', false)
+  .option('--debug', 'Show raw text and detailed info', false)
   .option('--json', 'Output as JSON', false)
   .action(async (filePaths, options) => {
-    const verbose = options.verbose;
+    const debug = options.debug;
 
     try {
       await handleExtract(filePaths, {
         concurrency: Number(options.concurrency) || 10,
+        debug,
         documentType: options.documentType,
         json: options.json,
         layout: options.layout,
         outputFailures: options.outputFailures,
-        verbose,
       });
     } catch (error) {
-      handleCommandError(error, { verbose });
+      handleCommandError(error, { verbose: debug });
     }
   });

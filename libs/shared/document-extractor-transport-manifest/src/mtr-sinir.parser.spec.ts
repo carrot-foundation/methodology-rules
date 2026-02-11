@@ -419,18 +419,55 @@ IBAMA`;
       expect(result.data.vehiclePlate?.confidence).toBe('low');
     });
 
-    it('should not extract driver name across newlines into labels', () => {
+    it('should set low confidence when labels exist but no valid values follow', () => {
       const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 123456789
 Data de Emissão: 15/03/2024
-Motorista
-Placa do Veículo: ABC1D23
+
+Transportador
+TRANSPORTES LTDA
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+
+Destinatário
+RECICLAGEM LTDA
+CNPJ: 11.222.333/0001-44
 IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName?.parsed).not.toBe('Placa do Veiculo');
+      expect(result.data.driverName?.parsed).toBe('');
       expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.vehiclePlate?.parsed).toBe('');
+      expect(result.data.vehiclePlate?.confidence).toBe('low');
+    });
+
+    it('should extract driver and plate from multi-line section layout', () => {
+      const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
+MTR Nº: 123456789
+Data de Emissão: 15/03/2024
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+Rafael Silva
+NKW1862
+nome e assinatura do responsável
+
+Destinatário
+RECICLAGEM LTDA
+CNPJ: 11.222.333/0001-44
+IBAMA`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.driverName?.parsed).toBe('Rafael Silva');
+      expect(result.data.driverName?.confidence).toBe('high');
+      expect(result.data.vehiclePlate?.parsed).toBe('NKW1862');
+      expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
 
     it('should handle section extraction with empty lines array', () => {

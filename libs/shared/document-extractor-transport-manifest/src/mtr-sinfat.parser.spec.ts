@@ -142,6 +142,74 @@ CNPJ: 11222333000144`;
       expect(result.data.generator.name.parsed).toBe('BODY FOOD FABRICANTES');
       expect(result.data.hauler.name.parsed).toBe('COMPOSTAMAIS LTDA.');
     });
+
+    it('should extract driver and plate from multi-line section layout', () => {
+      const text = `Manifesto de Transporte de Resíduos
+Fundação Estadual de Proteção Ambiental
+MTR nº 0124048986
+Data de Emissão: 15/03/2024
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+Rafael Silva
+NKW1862
+nome e assinatura do responsável
+
+Destinatário
+RECICLAGEM SUSTENTÁVEL LTDA
+CNPJ: 11.222.333/0001-44
+Tecnologia: Compostagem`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.driverName?.parsed).toBe('Rafael Silva');
+      expect(result.data.driverName?.confidence).toBe('high');
+      expect(result.data.vehiclePlate?.parsed).toBe('NKW1862');
+      expect(result.data.vehiclePlate?.confidence).toBe('high');
+    });
+
+    it('should set low confidence when driver/plate labels are outside any section', () => {
+      const text = `Manifesto de Transporte de Resíduos
+MTR nº 0124048986
+Data de Emissão: 15/03/2024
+Motorista
+Placa do Veículo
+Tecnologia: Compostagem`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.driverName?.parsed).toBe('');
+      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.vehiclePlate?.parsed).toBe('');
+      expect(result.data.vehiclePlate?.confidence).toBe('low');
+    });
+
+    it('should set low confidence when driver/plate labels exist but no values', () => {
+      const text = `Manifesto de Transporte de Resíduos
+MTR nº 0124048986
+Data de Emissão: 15/03/2024
+
+Transportador
+TRANSPORTES LTDA
+CNPJ: 98.765.432/0001-10
+Nome do Motorista
+Placa do Veículo
+
+Destinatário
+RECICLAGEM LTDA
+CNPJ: 11.222.333/0001-44
+Tecnologia: Compostagem`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.driverName?.parsed).toBe('');
+      expect(result.data.driverName?.confidence).toBe('low');
+      expect(result.data.vehiclePlate?.parsed).toBe('');
+      expect(result.data.vehiclePlate?.confidence).toBe('low');
+    });
   });
 
   describe('getMatchScore', () => {
