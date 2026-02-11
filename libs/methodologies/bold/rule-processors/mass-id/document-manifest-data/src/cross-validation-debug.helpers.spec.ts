@@ -8,9 +8,8 @@ import type { MtrCrossValidationEventData } from './transport-manifest-cross-val
 import { logCrossValidationComparison } from './cross-validation-debug.helpers';
 
 const stubEntity = (name: string, taxId: string) => ({
-  confidence: 'high' as const,
-  parsed: { name, taxId },
-  rawMatch: name,
+  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
+  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
 });
 
 const baseExtractedData: MtrExtractedData = {

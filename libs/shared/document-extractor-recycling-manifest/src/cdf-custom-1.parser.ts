@@ -3,10 +3,11 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
+  createExtractedEntity,
+  createExtractedEntityWithAddress,
   createHighConfidenceField,
   createLowConfidenceField,
   type DocumentParser,
-  entityFieldOrEmpty,
   type EntityInfo,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
@@ -170,12 +171,16 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
 
     return finalizeExtraction<CdfExtractedData>({
       allFields: [...CDF_ALL_FIELDS],
+
       confidenceFields: [
         partialData.documentNumber,
         partialData.issueDate,
-        partialData.generator,
-        partialData.recycler,
+        partialData.generator?.name,
+        partialData.generator?.taxId,
+        partialData.recycler?.name,
+        partialData.recycler?.taxId,
       ],
+
       documentType: 'recyclingManifest',
       matchScore,
       partialData,
@@ -193,14 +198,15 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       CDF_PATTERNS.empresaRecebedora,
     );
 
-    partialData.recycler = entityFieldOrEmpty(processorExtracted);
+    partialData.recycler = createExtractedEntity(processorExtracted);
 
     const generatorExtracted = extractEntityByLabel(
       rawText,
       CDF_PATTERNS.empresaGeradora,
     );
 
-    partialData.generator = entityFieldOrEmpty(generatorExtracted);
+    partialData.generator =
+      createExtractedEntityWithAddress(generatorExtracted);
   }
 
   private extractIssueDate(

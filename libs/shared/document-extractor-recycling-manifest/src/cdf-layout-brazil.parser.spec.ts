@@ -42,22 +42,22 @@ describe('CdfLayoutBrazilParser', () => {
       expect(result.data.documentNumber.parsed).toBe('2154920/2023');
       expect(result.data.documentNumber.confidence).toBe('high');
 
-      expect(result.data.recycler.parsed.name).toBe(
+      expect(result.data.recycler.name.parsed).toBe(
         'ECO ADUBOS ORGANICOS LTDA',
       );
-      expect(result.data.recycler.parsed.taxId).toBe('13.843.890/0001-45');
-      expect(result.data.recycler.confidence).toBe('high');
+      expect(result.data.recycler.taxId.parsed).toBe('13.843.890/0001-45');
+      expect(result.data.recycler.name.confidence).toBe('high');
 
-      expect(result.data.generator.parsed.name).toBe(
+      expect(result.data.generator.name.parsed).toBe(
         'Laticínios Bela Vista LTDA',
       );
-      expect(result.data.generator.parsed.taxId).toBe('02.089.969/0035-55');
-      expect(result.data.generator.parsed.address).toBe(
+      expect(result.data.generator.taxId.parsed).toBe('02.089.969/0035-55');
+      expect(result.data.generator.address.parsed).toBe(
         'Rua Empresário Agenello Senger, nº S/N',
       );
-      expect(result.data.generator.parsed.city).toBe('Carazinho');
-      expect(result.data.generator.parsed.state).toBe('RS');
-      expect(result.data.generator.confidence).toBe('high');
+      expect(result.data.generator.city.parsed).toBe('Carazinho');
+      expect(result.data.generator.state.parsed).toBe('RS');
+      expect(result.data.generator.name.confidence).toBe('high');
 
       expect(result.data.issueDate.parsed).toBe('10/04/2023');
       expect(result.data.issueDate.confidence).toBe('high');
@@ -110,7 +110,7 @@ describe('CdfLayoutBrazilParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noRecyclerText));
 
-      expect(result.data.recycler.confidence).toBe('low');
+      expect(result.data.recycler.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 
@@ -124,7 +124,7 @@ describe('CdfLayoutBrazilParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noGeneratorText));
 
-      expect(result.data.generator.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 
@@ -274,10 +274,13 @@ describe('CdfLayoutBrazilParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.parsed.name).toBe('Company LTDA');
-      expect(result.data.generator.parsed.address).toBeUndefined();
-      expect(result.data.generator.parsed.city).toBeUndefined();
-      expect(result.data.generator.parsed.state).toBeUndefined();
+      expect(result.data.generator.name.parsed).toBe('Company LTDA');
+      expect(result.data.generator.address.parsed).toBe('');
+      expect(result.data.generator.address.confidence).toBe('low');
+      expect(result.data.generator.city.parsed).toBe('');
+      expect(result.data.generator.city.confidence).toBe('low');
+      expect(result.data.generator.state.parsed).toBe('');
+      expect(result.data.generator.state.confidence).toBe('low');
     });
   });
 

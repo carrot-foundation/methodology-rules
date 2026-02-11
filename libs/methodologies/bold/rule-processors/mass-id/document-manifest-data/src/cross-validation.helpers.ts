@@ -3,7 +3,7 @@ import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-tr
 
 import {
   type BaseExtractedData,
-  type EntityInfo,
+  type ExtractedEntityInfo,
   type ExtractedField,
   type ExtractionConfidence,
   type ExtractionOutput,
@@ -131,7 +131,7 @@ export const normalizeTaxId = (taxId: string): string =>
   taxId.replaceAll(/[\s./-]/g, '').toLowerCase();
 
 export const validateEntityName = (
-  extractedEntity: MtrExtractedData['generator'] | undefined,
+  extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantName: string | undefined,
   commentFunction: (parameters: {
     eventName: string;
@@ -143,11 +143,11 @@ export const validateEntityName = (
     return {};
   }
 
-  if (extractedEntity.confidence !== 'high') {
+  if (extractedEntity.name.confidence !== 'high') {
     return {};
   }
 
-  const extractedName = extractedEntity.parsed.name;
+  const extractedName = extractedEntity.name.parsed;
   const { isMatch, score } = isNameMatch(extractedName, eventParticipantName);
 
   return isMatch
@@ -162,7 +162,7 @@ export const validateEntityName = (
 };
 
 export const validateEntityTaxId = (
-  extractedEntity: ExtractedField<EntityInfo> | undefined,
+  extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantTaxId: string | undefined,
   mismatchComment: string,
 ): FieldValidationResult => {
@@ -170,11 +170,11 @@ export const validateEntityTaxId = (
     return {};
   }
 
-  if (extractedEntity.confidence !== 'high') {
+  if (extractedEntity.taxId.confidence !== 'high') {
     return {};
   }
 
-  const extractedTaxId = extractedEntity.parsed.taxId;
+  const extractedTaxId = extractedEntity.taxId.parsed;
 
   if (
     normalizeTaxId(extractedTaxId) === normalizeTaxId(eventParticipantTaxId)
@@ -182,5 +182,5 @@ export const validateEntityTaxId = (
     return {};
   }
 
-  return routeByConfidence(extractedEntity.confidence, mismatchComment);
+  return routeByConfidence(extractedEntity.taxId.confidence, mismatchComment);
 };

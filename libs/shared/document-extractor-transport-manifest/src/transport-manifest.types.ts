@@ -1,6 +1,6 @@
 import type {
   BaseExtractedData,
-  EntityInfo,
+  ExtractedEntityWithAddressInfo,
   ExtractedField,
 } from '@carrot-fndn/shared/document-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
@@ -9,10 +9,10 @@ export interface MtrExtractedData extends BaseExtractedData {
   documentNumber: ExtractedField<NonEmptyString>;
   documentType: 'transportManifest';
   driverName?: ExtractedField<NonEmptyString>;
-  generator: ExtractedField<EntityInfo>;
-  hauler: ExtractedField<EntityInfo>;
+  generator: ExtractedEntityWithAddressInfo;
+  hauler: ExtractedEntityWithAddressInfo;
   issueDate: ExtractedField<NonEmptyString>;
-  receiver: ExtractedField<EntityInfo>;
+  receiver: ExtractedEntityWithAddressInfo;
   receivingDate?: ExtractedField<NonEmptyString>;
   transportDate?: ExtractedField<NonEmptyString>;
   vehiclePlate?: ExtractedField<NonEmptyString>;

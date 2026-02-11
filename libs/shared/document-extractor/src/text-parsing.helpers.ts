@@ -1,7 +1,12 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import type { ExtractedField } from './document-extractor.types';
-import type { EntityInfo } from './extraction-result.types';
+import type {
+  EntityInfo,
+  EntityWithAddressInfo,
+  ExtractedEntityInfo,
+  ExtractedEntityWithAddressInfo,
+} from './extraction-result.types';
 
 import {
   createHighConfidenceField,
@@ -99,15 +104,55 @@ export const extractFieldWithLabelFallback = (
   return undefined;
 };
 
-export const entityFieldOrEmpty = (
+export const createExtractedEntity = (
   extracted: undefined | { rawMatch: string; value: EntityInfo },
-): ExtractedField<EntityInfo> =>
+): ExtractedEntityInfo =>
   extracted
-    ? createHighConfidenceField(extracted.value, extracted.rawMatch)
-    : createLowConfidenceField({
-        name: '' as NonEmptyString,
-        taxId: '' as NonEmptyString,
-      });
+    ? {
+        name: createHighConfidenceField(
+          extracted.value.name,
+          extracted.rawMatch,
+        ),
+        taxId: createHighConfidenceField(
+          extracted.value.taxId,
+          extracted.rawMatch,
+        ),
+      }
+    : {
+        name: createLowConfidenceField('' as NonEmptyString),
+        taxId: createLowConfidenceField('' as NonEmptyString),
+      };
+
+export const createExtractedEntityWithAddress = (
+  extracted: undefined | { rawMatch: string; value: EntityWithAddressInfo },
+): ExtractedEntityWithAddressInfo => {
+  const base = createExtractedEntity(extracted);
+
+  if (extracted?.value.address) {
+    return {
+      ...base,
+      address: createHighConfidenceField(
+        extracted.value.address as NonEmptyString,
+        extracted.rawMatch,
+      ),
+      city: createHighConfidenceField(
+        (extracted.value.city ?? '') as NonEmptyString,
+        extracted.rawMatch,
+      ),
+      state: createHighConfidenceField(
+        (extracted.value.state ?? '') as NonEmptyString,
+        extracted.rawMatch,
+      ),
+    };
+  }
+
+  return {
+    ...base,
+    address: createLowConfidenceField('' as NonEmptyString),
+    city: createLowConfidenceField('' as NonEmptyString),
+    state: createLowConfidenceField('' as NonEmptyString),
+  };
+};
 
 export const extractEntityFromSection = (
   text: string,

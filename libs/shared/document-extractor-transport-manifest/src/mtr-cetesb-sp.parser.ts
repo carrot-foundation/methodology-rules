@@ -7,11 +7,11 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
+  createExtractedEntityWithAddress,
   createHighConfidenceField,
   createLowConfidenceField,
   type DocumentParser,
-  entityFieldOrEmpty,
-  type EntityInfo,
+  type EntityWithAddressInfo,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
@@ -36,6 +36,15 @@ const SECTION_PATTERNS = {
   gerador: /^\s*Identifica[çc][ãa]o\s+do\s+Gerador\s*$/i,
   residuos: /^\s*Identifica[çc][ãa]o\s+dos\s+Res[ií]duos\s*$/i,
   transportador: /^\s*Identifica[çc][ãa]o\s+do\s+Transportador\s*$/i,
+} as const;
+
+const ADDRESS_PATTERNS = {
+  // eslint-disable-next-line sonarjs/slow-regex
+  address: /Endere[çc]o\s*:?\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  city: /Munic[ií]pio\s*:?\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  state: /(?:UF|Estado)\s*:?\s*(\w{2})/i,
 } as const;
 
 const MTR_PATTERNS = {
@@ -82,10 +91,28 @@ const stripTrailingRegistrationNumber = (name: string): string =>
   // eslint-disable-next-line sonarjs/slow-regex
   name.replace(/\s+[-–]?\s*\d{1,5}$/, '').trim();
 
+const extractAddressFromSection = (
+  section: string,
+): undefined | { address: string; city: string; state: string } => {
+  const addressMatch = ADDRESS_PATTERNS.address.exec(section);
+  const cityMatch = ADDRESS_PATTERNS.city.exec(section);
+  const stateMatch = ADDRESS_PATTERNS.state.exec(section);
+
+  if (!addressMatch?.[1] || !cityMatch?.[1] || !stateMatch?.[1]) {
+    return undefined;
+  }
+
+  return {
+    address: addressMatch[1].trim(),
+    city: cityMatch[1].trim(),
+    state: stateMatch[1].trim(),
+  };
+};
+
 const extractEntityFromCetesbSection = (
   text: string,
   sectionPattern: RegExp,
-): undefined | { rawMatch: string; value: EntityInfo } => {
+): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
   const section = extractSection(text, sectionPattern, ALL_SECTION_PATTERNS);
 
   if (!section) {
@@ -113,11 +140,14 @@ const extractEntityFromCetesbSection = (
     return undefined;
   }
 
+  const addressFields = extractAddressFromSection(section);
+
   return {
     rawMatch: section,
     value: {
       name: name as NonEmptyString,
       taxId: cnpjMatch[1] as NonEmptyString,
+      ...addressFields,
     },
   };
 };
@@ -265,13 +295,18 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
 
     return finalizeExtraction<MtrExtractedData>({
       allFields: [...MTR_ALL_FIELDS],
+
       confidenceFields: [
         partialData.documentNumber,
         partialData.issueDate,
-        partialData.generator,
-        partialData.hauler,
-        partialData.receiver,
+        partialData.generator?.name,
+        partialData.generator?.taxId,
+        partialData.hauler?.name,
+        partialData.hauler?.taxId,
+        partialData.receiver?.name,
+        partialData.receiver?.taxId,
       ],
+
       documentType: 'transportManifest',
       matchScore,
       partialData,
@@ -303,21 +338,22 @@ export class MtrCetesbSpParser implements DocumentParser<MtrExtractedData> {
       SECTION_PATTERNS.gerador,
     );
 
-    partialData.generator = entityFieldOrEmpty(generatorExtracted);
+    partialData.generator =
+      createExtractedEntityWithAddress(generatorExtracted);
 
     const haulerExtracted = extractEntityFromCetesbSection(
       rawText,
       SECTION_PATTERNS.transportador,
     );
 
-    partialData.hauler = entityFieldOrEmpty(haulerExtracted);
+    partialData.hauler = createExtractedEntityWithAddress(haulerExtracted);
 
     const receiverExtracted = extractEntityFromCetesbSection(
       rawText,
       SECTION_PATTERNS.destinador,
     );
 
-    partialData.receiver = entityFieldOrEmpty(receiverExtracted);
+    partialData.receiver = createExtractedEntityWithAddress(receiverExtracted);
   }
 
   private extractHaulerFields(

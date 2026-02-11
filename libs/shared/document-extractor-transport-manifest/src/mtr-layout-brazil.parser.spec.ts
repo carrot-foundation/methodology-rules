@@ -19,16 +19,25 @@ Data de Recebimento: 18/03/2024
 Gerador
 Razão Social: EMPRESA GERADORA LTDA
 CNPJ: 12.345.678/0001-90
+Endereço: Rua Empresário Agenello Senger, nº S/N
+Município: Carazinho
+UF: RS
 
 Transportador
 TRANSPORTES AMBIENTAIS S.A.
 CNPJ: 98.765.432/0001-10
+Endereço: Av. Brasil, 500
+Município: São Paulo
+Estado: SP
 Placa do Veículo: ABC-1D23
 Motorista: João da Silva
 
 Destinatário
 RECICLAGEM SUSTENTÁVEL LTDA
 CNPJ: 11.222.333/0001-44
+Endereço: Rod. BR-116, Km 20
+Município: Curitiba
+UF: PR
 
 Tipo de Resíduo: Plástico
 Classe: II - Não Perigoso
@@ -43,16 +52,27 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       expect(result.data.documentNumber.parsed).toBe('123456789');
       expect(result.data.documentNumber.confidence).toBe('high');
       expect(result.data.issueDate.parsed).toBe('15/03/2024');
-      expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
-      expect(result.data.generator.parsed.taxId).toBe('12.345.678/0001-90');
-      expect(result.data.hauler.parsed.name).toBe(
+      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator.taxId.parsed).toBe('12.345.678/0001-90');
+      expect(result.data.generator.address.parsed).toBe(
+        'Rua Empresário Agenello Senger, nº S/N',
+      );
+      expect(result.data.generator.city.parsed).toBe('Carazinho');
+      expect(result.data.generator.state.parsed).toBe('RS');
+      expect(result.data.hauler.name.parsed).toBe(
         'TRANSPORTES AMBIENTAIS S.A.',
       );
-      expect(result.data.hauler.parsed.taxId).toBe('98.765.432/0001-10');
-      expect(result.data.receiver.parsed.name).toBe(
+      expect(result.data.hauler.taxId.parsed).toBe('98.765.432/0001-10');
+      expect(result.data.hauler.address.parsed).toBe('Av. Brasil, 500');
+      expect(result.data.hauler.city.parsed).toBe('São Paulo');
+      expect(result.data.hauler.state.parsed).toBe('SP');
+      expect(result.data.receiver.name.parsed).toBe(
         'RECICLAGEM SUSTENTÁVEL LTDA',
       );
-      expect(result.data.receiver.parsed.taxId).toBe('11.222.333/0001-44');
+      expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
+      expect(result.data.receiver.address.parsed).toBe('Rod. BR-116, Km 20');
+      expect(result.data.receiver.city.parsed).toBe('Curitiba');
+      expect(result.data.receiver.state.parsed).toBe('PR');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
       expect(result.data.driverName?.parsed).toBe('João da Silva');
       expect(result.data.wasteTypes?.parsed).toEqual([
@@ -102,11 +122,45 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
       const result = parser.parse(stubTextExtractionResult(noEntityCnpjText));
 
-      expect(result.data.generator.confidence).toBe('low');
-      expect(result.data.hauler.confidence).toBe('low');
-      expect(result.data.receiver.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
+      expect(result.data.hauler.name.confidence).toBe('low');
+      expect(result.data.receiver.name.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
+    });
+
+    it('should parse entities without address fields', () => {
+      const noAddressText = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
+MTR Nº: 123456789
+Data de Emissão: 15/03/2024
+
+Gerador
+EMPRESA GERADORA LTDA
+CNPJ: 12.345.678/0001-90
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+
+Destinatário
+RECICLAGEM SUSTENTÁVEL LTDA
+CNPJ: 11.222.333/0001-44
+
+IBAMA`;
+
+      const result = parser.parse(stubTextExtractionResult(noAddressText));
+
+      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator.address.parsed).toBe('');
+      expect(result.data.generator.address.confidence).toBe('low');
+      expect(result.data.generator.city.parsed).toBe('');
+      expect(result.data.generator.city.confidence).toBe('low');
+      expect(result.data.generator.state.parsed).toBe('');
+      expect(result.data.generator.state.confidence).toBe('low');
+      expect(result.data.hauler.address.parsed).toBe('');
+      expect(result.data.hauler.address.confidence).toBe('low');
+      expect(result.data.receiver.address.parsed).toBe('');
+      expect(result.data.receiver.address.confidence).toBe('low');
     });
 
     it('should handle MTR number variations', () => {
@@ -141,7 +195,7 @@ CNPJ: 12.345.678/0001-90
         stubTextExtractionResult(cnpjInDifferentLineText),
       );
 
-      expect(result.data.generator.parsed.name).toBe('EMPRESA REAL NAME LTDA');
+      expect(result.data.generator.name.parsed).toBe('EMPRESA REAL NAME LTDA');
     });
 
     it('should skip short and numeric lines when extracting entity name', () => {
@@ -158,7 +212,7 @@ EMPRESA VALID NAME LTDA
 
       const result = parser.parse(stubTextExtractionResult(shortLinesText));
 
-      expect(result.data.generator.parsed.name).toBe('EMPRESA VALID NAME LTDA');
+      expect(result.data.generator.name.parsed).toBe('EMPRESA VALID NAME LTDA');
     });
 
     it('should handle entity with CNPJ but only short/invalid names', () => {
@@ -174,7 +228,7 @@ CNPJ: 12.345.678/0001-90
 
       const result = parser.parse(stubTextExtractionResult(noValidNameText));
 
-      expect(result.data.generator.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
     });
 
     it('should handle invalid waste quantity format', () => {
@@ -229,15 +283,15 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
         stubTextExtractionResult(unformattedCnpjText),
       );
 
-      expect(result.data.generator.parsed.taxId).toBe('28324667000169');
-      expect(result.data.generator.parsed.name).toBe(
+      expect(result.data.generator.taxId.parsed).toBe('28324667000169');
+      expect(result.data.generator.name.parsed).toBe(
         'BODY FOOD FABRICANTES DE ALIMENTOS SAUDAVEIS',
       );
-      expect(result.data.generator.confidence).toBe('high');
-      expect(result.data.hauler.parsed.taxId).toBe('33545743000104');
-      expect(result.data.hauler.confidence).toBe('high');
-      expect(result.data.receiver.parsed.taxId).toBe('11222333000144');
-      expect(result.data.receiver.confidence).toBe('high');
+      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.hauler.taxId.parsed).toBe('33545743000104');
+      expect(result.data.hauler.name.confidence).toBe('high');
+      expect(result.data.receiver.taxId.parsed).toBe('11222333000144');
+      expect(result.data.receiver.name.confidence).toBe('high');
     });
 
     it('should parse entities with "Identificação do ..." section headers', () => {
@@ -261,17 +315,17 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
       const result = parser.parse(stubTextExtractionResult(identSectionText));
 
-      expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
-      expect(result.data.generator.parsed.taxId).toBe('12.345.678/0001-90');
-      expect(result.data.generator.confidence).toBe('high');
-      expect(result.data.hauler.parsed.name).toBe(
+      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator.taxId.parsed).toBe('12.345.678/0001-90');
+      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.hauler.name.parsed).toBe(
         'TRANSPORTES AMBIENTAIS S.A.',
       );
-      expect(result.data.hauler.confidence).toBe('high');
-      expect(result.data.receiver.parsed.name).toBe(
+      expect(result.data.hauler.name.confidence).toBe('high');
+      expect(result.data.receiver.name.parsed).toBe(
         'RECICLAGEM SUSTENTÁVEL LTDA',
       );
-      expect(result.data.receiver.confidence).toBe('high');
+      expect(result.data.receiver.name.confidence).toBe('high');
     });
 
     it('should parse entities with "Identificação do Destinador" header', () => {
@@ -295,11 +349,11 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
       const result = parser.parse(stubTextExtractionResult(destinadorText));
 
-      expect(result.data.receiver.parsed.name).toBe(
+      expect(result.data.receiver.name.parsed).toBe(
         'RECICLAGEM SUSTENTÁVEL LTDA',
       );
-      expect(result.data.receiver.parsed.taxId).toBe('11.222.333/0001-44');
-      expect(result.data.receiver.confidence).toBe('high');
+      expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
+      expect(result.data.receiver.name.confidence).toBe('high');
     });
 
     it('should parse "Data da Emissão" variant', () => {
@@ -335,10 +389,10 @@ IBAMA`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.parsed.name).toBe(
+      expect(result.data.generator.name.parsed).toBe(
         'BODY FOOD FABRICANTES DE ALIMENTOS SAUDÁVEIS',
       );
-      expect(result.data.hauler.parsed.name).toBe('COMPOSTAMAIS LTDA.');
+      expect(result.data.hauler.name.parsed).toBe('COMPOSTAMAIS LTDA.');
     });
 
     it('should mark fields as low confidence when label is present but value is empty', () => {
@@ -393,7 +447,7 @@ Transportador
 
       const result = parser.parse(stubTextExtractionResult(minimalSectionText));
 
-      expect(result.data.generator.parsed.name).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
     });
   });
 

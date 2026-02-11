@@ -1,7 +1,7 @@
 import type {
   BaseExtractedData,
-  EntityInfo,
-  EntityWithAddressInfo,
+  ExtractedEntityInfo,
+  ExtractedEntityWithAddressInfo,
   ExtractedField,
 } from '@carrot-fndn/shared/document-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
@@ -10,10 +10,10 @@ export interface CdfExtractedData extends BaseExtractedData {
   documentNumber: ExtractedField<NonEmptyString>;
   documentType: 'recyclingManifest';
   environmentalLicense?: ExtractedField<NonEmptyString>;
-  generator: ExtractedField<EntityWithAddressInfo>;
+  generator: ExtractedEntityWithAddressInfo;
   issueDate: ExtractedField<NonEmptyString>;
   processingPeriod?: ExtractedField<NonEmptyString>;
-  recycler: ExtractedField<EntityInfo>;
+  recycler: ExtractedEntityInfo;
   transportManifests?: ExtractedField<string[]>;
   treatmentMethod?: ExtractedField<NonEmptyString>;
   wasteEntries?: ExtractedField<WasteEntry[]>;

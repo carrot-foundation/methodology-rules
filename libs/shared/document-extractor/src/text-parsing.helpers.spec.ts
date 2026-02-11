@@ -1,7 +1,8 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
-  entityFieldOrEmpty,
+  createExtractedEntity,
+  createExtractedEntityWithAddress,
   extractAllStringFields,
   extractEntityFromSection,
   extractFieldWithLabelFallback,
@@ -194,8 +195,8 @@ describe('text-parsing.helpers', () => {
     });
   });
 
-  describe('entityFieldOrEmpty', () => {
-    it('should return high confidence field when extraction is provided', () => {
+  describe('createExtractedEntity', () => {
+    it('should return high confidence fields when extraction is provided', () => {
       const extracted = {
         rawMatch: 'raw section text',
         value: {
@@ -204,21 +205,93 @@ describe('text-parsing.helpers', () => {
         },
       };
 
-      const result = entityFieldOrEmpty(extracted);
+      const result = createExtractedEntity(extracted);
 
-      expect(result.confidence).toBe('high');
-      expect(result.parsed).toEqual(extracted.value);
-      expect(result.rawMatch).toBe('raw section text');
+      expect(result.name.confidence).toBe('high');
+      expect(result.name.parsed).toBe('Company Name');
+      expect(result.name.rawMatch).toBe('raw section text');
+      expect(result.taxId.confidence).toBe('high');
+      expect(result.taxId.parsed).toBe('12.345.678/0001-90');
     });
 
-    it('should return low confidence empty field when extraction is undefined', () => {
-      const result = entityFieldOrEmpty(undefined);
+    it('should return low confidence empty fields when extraction is undefined', () => {
+      const result = createExtractedEntity(undefined);
 
-      expect(result.confidence).toBe('low');
-      expect(result.parsed).toEqual({
-        name: '',
-        taxId: '',
-      });
+      expect(result.name.confidence).toBe('low');
+      expect(result.name.parsed).toBe('');
+      expect(result.taxId.confidence).toBe('low');
+      expect(result.taxId.parsed).toBe('');
+    });
+  });
+
+  describe('createExtractedEntityWithAddress', () => {
+    it('should return high confidence address fields when address is present', () => {
+      const extracted = {
+        rawMatch: 'raw section text',
+        value: {
+          address: 'Rua das Flores, 123',
+          city: 'Curitiba',
+          name: 'Company Name' as NonEmptyString,
+          state: 'PR',
+          taxId: '12.345.678/0001-90' as NonEmptyString,
+        },
+      };
+
+      const result = createExtractedEntityWithAddress(extracted);
+
+      expect(result.name.confidence).toBe('high');
+      expect(result.address.confidence).toBe('high');
+      expect(result.address.parsed).toBe('Rua das Flores, 123');
+      expect(result.city.parsed).toBe('Curitiba');
+      expect(result.state.parsed).toBe('PR');
+    });
+
+    it('should default city and state to empty when address is present but they are missing', () => {
+      const extracted = {
+        rawMatch: 'raw section text',
+        value: {
+          address: 'Rua das Flores, 123',
+          name: 'Company Name' as NonEmptyString,
+          taxId: '12.345.678/0001-90' as NonEmptyString,
+        },
+      };
+
+      const result = createExtractedEntityWithAddress(extracted);
+
+      expect(result.address.confidence).toBe('high');
+      expect(result.address.parsed).toBe('Rua das Flores, 123');
+      expect(result.city.confidence).toBe('high');
+      expect(result.city.parsed).toBe('');
+      expect(result.state.confidence).toBe('high');
+      expect(result.state.parsed).toBe('');
+    });
+
+    it('should return low confidence empty address fields when address is missing', () => {
+      const extracted = {
+        rawMatch: 'raw section text',
+        value: {
+          name: 'Company Name' as NonEmptyString,
+          taxId: '12.345.678/0001-90' as NonEmptyString,
+        },
+      };
+
+      const result = createExtractedEntityWithAddress(extracted);
+
+      expect(result.name.confidence).toBe('high');
+      expect(result.address.confidence).toBe('low');
+      expect(result.address.parsed).toBe('');
+      expect(result.city.confidence).toBe('low');
+      expect(result.state.confidence).toBe('low');
+    });
+
+    it('should return all low confidence fields when extraction is undefined', () => {
+      const result = createExtractedEntityWithAddress(undefined);
+
+      expect(result.name.confidence).toBe('low');
+      expect(result.taxId.confidence).toBe('low');
+      expect(result.address.confidence).toBe('low');
+      expect(result.city.confidence).toBe('low');
+      expect(result.state.confidence).toBe('low');
     });
   });
 

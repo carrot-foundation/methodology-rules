@@ -17,6 +17,16 @@ const isExtractedField = (
   'parsed' in value &&
   'confidence' in value;
 
+const isExtractedEntityGroup = (
+  value: unknown,
+): value is Record<string, unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  !('parsed' in value) &&
+  Object.values(value as Record<string, unknown>).some((v) =>
+    isExtractedField(v),
+  );
+
 const formatConfidence = (confidence: string): string => {
   const icon = confidence === 'high' ? '✓' : '⚠';
   const text = `${icon} ${confidence}`;
@@ -51,6 +61,33 @@ const METADATA_FIELDS = new Set([
   'rawText',
 ]);
 
+const formatBulletList = (
+  items: string[],
+  colorFunction: (text: string) => string,
+): string[] => items.map((item) => `  - ${colorFunction(item)}`);
+
+const formatExtractedFields = (data: Record<string, unknown>): string[] => {
+  const lines: string[] = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    if (METADATA_FIELDS.has(key)) {
+      continue;
+    }
+
+    if (isExtractedEntityGroup(value)) {
+      lines.push(`  ${bold(key)}:`);
+
+      for (const [subKey, subField] of Object.entries(value)) {
+        lines.push(formatField(subKey, subField, '    '));
+      }
+    } else {
+      lines.push(formatField(key, value));
+    }
+  }
+
+  return lines;
+};
+
 export const formatAsHuman = <T extends BaseExtractedData>(
   result: ExtractionOutput<T>,
   options: HumanFormatOptions = {},
@@ -64,36 +101,30 @@ export const formatAsHuman = <T extends BaseExtractedData>(
   ];
 
   if (result.reviewReasons.length > 0) {
-    lines.push(`\n${bold('Review Reasons:')}`);
-
-    for (const reason of result.reviewReasons) {
-      lines.push(`  - ${yellow(reason)}`);
-    }
+    lines.push(
+      `\n${bold('Review Reasons:')}`,
+      ...formatBulletList(result.reviewReasons, yellow),
+    );
   }
 
   if (result.data.missingRequiredFields.length > 0) {
-    lines.push(`\n${bold('Missing Required Fields:')}`);
-
-    for (const field of result.data.missingRequiredFields) {
-      lines.push(`  - ${red(field)}`);
-    }
+    lines.push(
+      `\n${bold('Missing Required Fields:')}`,
+      ...formatBulletList(result.data.missingRequiredFields, red),
+    );
   }
 
   if (result.data.lowConfidenceFields.length > 0) {
-    lines.push(`\n${bold('Low Confidence Fields:')}`);
-
-    for (const field of result.data.lowConfidenceFields) {
-      lines.push(`  - ${yellow(field)}`);
-    }
+    lines.push(
+      `\n${bold('Low Confidence Fields:')}`,
+      ...formatBulletList(result.data.lowConfidenceFields, yellow),
+    );
   }
 
-  lines.push(`\n${bold('Extracted Fields:')}`);
-
-  for (const [key, value] of Object.entries(result.data)) {
-    if (!METADATA_FIELDS.has(key)) {
-      lines.push(formatField(key, value));
-    }
-  }
+  lines.push(
+    `\n${bold('Extracted Fields:')}`,
+    ...formatExtractedFields(result.data as unknown as Record<string, unknown>),
+  );
 
   if (options.verbose === true) {
     lines.push(`\n${bold(blue('=== Raw Text ==='))}\n`, result.data.rawText);

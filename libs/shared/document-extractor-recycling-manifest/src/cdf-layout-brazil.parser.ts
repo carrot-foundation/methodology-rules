@@ -3,8 +3,9 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
+  createExtractedEntity,
+  createExtractedEntityWithAddress,
   createHighConfidenceField,
-  createLowConfidenceField,
   type DocumentParser,
   type EntityWithAddressInfo,
   type ExtractionOutput,
@@ -258,30 +259,22 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
 
     const recyclerExtracted = extractRecycler(rawText);
 
-    partialData.recycler = recyclerExtracted
-      ? createHighConfidenceField(
-          {
-            name: recyclerExtracted.value.name as NonEmptyString,
-            taxId: recyclerExtracted.value.taxId as NonEmptyString,
-          },
-          recyclerExtracted.rawMatch,
-        )
-      : createLowConfidenceField({
-          name: '' as NonEmptyString,
-          taxId: '' as NonEmptyString,
-        });
+    partialData.recycler = createExtractedEntity(
+      recyclerExtracted
+        ? {
+            rawMatch: recyclerExtracted.rawMatch,
+            value: {
+              name: recyclerExtracted.value.name as NonEmptyString,
+              taxId: recyclerExtracted.value.taxId as NonEmptyString,
+            },
+          }
+        : undefined,
+    );
 
     const generatorExtracted = extractGenerator(rawText);
 
-    partialData.generator = generatorExtracted
-      ? createHighConfidenceField(
-          generatorExtracted.value,
-          generatorExtracted.rawMatch,
-        )
-      : createLowConfidenceField({
-          name: '' as NonEmptyString,
-          taxId: '' as NonEmptyString,
-        });
+    partialData.generator =
+      createExtractedEntityWithAddress(generatorExtracted);
 
     const issueDateMatch = CDF_PATTERNS.issueDateDeclaracao.exec(rawText);
 
@@ -338,8 +331,10 @@ export class CdfLayoutBrazilParser implements DocumentParser<CdfExtractedData> {
       confidenceFields: [
         partialData.documentNumber,
         partialData.issueDate,
-        partialData.generator,
-        partialData.recycler,
+        partialData.generator.name,
+        partialData.generator.taxId,
+        partialData.recycler.name,
+        partialData.recycler.taxId,
       ],
       documentType: 'recyclingManifest',
       matchScore,

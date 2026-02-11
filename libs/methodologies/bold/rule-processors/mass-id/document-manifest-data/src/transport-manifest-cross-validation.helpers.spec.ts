@@ -13,9 +13,11 @@ import {
 } from './transport-manifest-cross-validation.helpers';
 
 const stubEntity = (name: string, taxId: string) => ({
-  confidence: 'high' as const,
-  parsed: { name, taxId },
-  rawMatch: name,
+  address: { confidence: 'low' as const, parsed: '' },
+  city: { confidence: 'low' as const, parsed: '' },
+  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
+  state: { confidence: 'low' as const, parsed: '' },
+  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
 });
 
 const baseMtrData = {
@@ -191,12 +193,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should set reviewRequired when receiver name does not match', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'high',
-          parsed: {
-            name: 'COMPLETELY DIFFERENT COMPANY' as never,
-            taxId: '12.345.678/0001-90' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'COMPLETELY DIFFERENT COMPANY' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '12.345.678/0001-90' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -221,12 +230,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should set reviewRequired when generator name does not match', () => {
       const extractionResult = createExtractionResult({
         generator: {
-          confidence: 'high',
-          parsed: {
-            name: 'COMPLETELY DIFFERENT GENERATOR' as never,
-            taxId: '12.345.678/0001-90' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'COMPLETELY DIFFERENT GENERATOR' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '12.345.678/0001-90' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -251,12 +267,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should set reviewRequired when hauler name does not match', () => {
       const extractionResult = createExtractionResult({
         hauler: {
-          confidence: 'high',
-          parsed: {
-            name: 'COMPLETELY DIFFERENT HAULER' as never,
-            taxId: '12.345.678/0001-90' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'COMPLETELY DIFFERENT HAULER' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '12.345.678/0001-90' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -281,12 +304,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should fail when receiver tax ID does not match with high confidence', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'high',
-          parsed: {
-            name: 'Receiver Co' as never,
-            taxId: '99.999.999/0001-99' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'Receiver Co' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '99.999.999/0001-99' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -309,12 +339,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should not fail when tax IDs match after normalization', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'high',
-          parsed: {
-            name: 'Receiver Co' as never,
-            taxId: '11111111000111' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'Receiver Co' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '11111111000111' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -336,12 +373,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should skip tax ID validation when confidence is not high', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'low',
-          parsed: {
-            name: 'Receiver Co' as never,
-            taxId: '99.999.999/0001-99' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'low',
+            parsed: 'Receiver Co' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'low',
+            parsed: '99.999.999/0001-99' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -363,12 +407,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should skip entity name validation when confidence is not high', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'low',
-          parsed: {
-            name: 'Different Company' as never,
-            taxId: '12.345.678/0001-90' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'low',
+            parsed: 'Different Company' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'low',
+            parsed: '12.345.678/0001-90' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 
@@ -390,12 +441,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
     it('should not flag when entity names match', () => {
       const extractionResult = createExtractionResult({
         receiver: {
-          confidence: 'high',
-          parsed: {
-            name: 'Recycler Corp' as never,
-            taxId: '12.345.678/0001-90' as never,
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'Recycler Corp' as never,
+            rawMatch: 'some raw text',
           },
-          rawMatch: 'some raw text',
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '12.345.678/0001-90' as never,
+            rawMatch: 'some raw text',
+          },
         },
       });
 

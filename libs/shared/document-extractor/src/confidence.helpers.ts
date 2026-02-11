@@ -82,15 +82,46 @@ export const calculateOverallConfidence = (
   return hasLowConfidence ? 'low' : 'high';
 };
 
+const isExtractedField = (value: unknown): value is ExtractedField<unknown> =>
+  typeof value === 'object' &&
+  value !== null &&
+  'parsed' in value &&
+  'confidence' in value;
+
+const isExtractedEntityGroup = (
+  value: unknown,
+): value is Record<string, ExtractedField<unknown>> =>
+  typeof value === 'object' &&
+  value !== null &&
+  !('parsed' in value) &&
+  Object.values(value as Record<string, unknown>).some((v) =>
+    isExtractedField(v),
+  );
+
 export const collectLowConfidenceFields = (
   data: Record<string, unknown>,
   fieldNames: string[],
-): string[] =>
-  fieldNames.filter((fieldName) => {
-    const field = data[fieldName] as ExtractedField<unknown> | undefined;
+): string[] => {
+  const result: string[] = [];
 
-    return field?.confidence === 'low';
-  });
+  for (const fieldName of fieldNames) {
+    const field = data[fieldName];
+
+    if (isExtractedField(field)) {
+      if (field.confidence === 'low') {
+        result.push(fieldName);
+      }
+    } else if (isExtractedEntityGroup(field)) {
+      for (const [subKey, subField] of Object.entries(field)) {
+        if (isExtractedField(subField) && subField.confidence === 'low') {
+          result.push(`${fieldName}.${subKey}`);
+        }
+      }
+    }
+  }
+
+  return result;
+};
 
 export const collectMissingRequiredFields = (
   data: Record<string, unknown>,

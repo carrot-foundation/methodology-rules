@@ -112,6 +112,43 @@ describe('confidence.helpers', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should return dot-notation entries for entity groups with low confidence sub-fields', () => {
+      const data = {
+        generator: {
+          address: createLowConfidenceField(''),
+          city: createLowConfidenceField(''),
+          name: createHighConfidenceField('EMPRESA LTDA'),
+          state: createLowConfidenceField(''),
+          taxId: createHighConfidenceField('12.345.678/0001-90'),
+        },
+        issueDate: createHighConfidenceField('01/01/2024'),
+      };
+
+      const result = collectLowConfidenceFields(data, [
+        'issueDate',
+        'generator',
+      ]);
+
+      expect(result).toEqual([
+        'generator.address',
+        'generator.city',
+        'generator.state',
+      ]);
+    });
+
+    it('should return empty array for entity groups with all high confidence', () => {
+      const data = {
+        recycler: {
+          name: createHighConfidenceField('RECICLAGEM LTDA'),
+          taxId: createHighConfidenceField('98.765.432/0001-10'),
+        },
+      };
+
+      const result = collectLowConfidenceFields(data, ['recycler']);
+
+      expect(result).toEqual([]);
+    });
   });
 
   describe('collectMissingRequiredFields', () => {

@@ -28,6 +28,9 @@ describe('MtrCetesbSpParser', () => {
     'Identificação do Gerador',
     'Razão Social: Ajinomoto do Brasil Indústria e Comércio de Alimentos Ltda 2845',
     'CPF/CNPJ: 46.344.354/0005-88',
+    'Endereço: Rua Vergueiro, 1855',
+    'Município: Limeira',
+    'UF: SP',
     'Data da emissão: 08/07/2024',
     'Data do transporte: 09/07/2024',
     'Data do recebimento: 10/07/2024',
@@ -35,6 +38,9 @@ describe('MtrCetesbSpParser', () => {
     'Identificação do Transportador',
     'Razão Social: RECICLADOS LIMEIRA LTDA 5193',
     'CPF/CNPJ: 04.359.529/0001-57',
+    'Endereço: Av. Paulista, 1000',
+    'Município: São Paulo',
+    'Estado: SP',
     'Nome do Motorista',
     'Placa do Veículo',
     'GERSON PEREIRA DA SILVA',
@@ -43,6 +49,9 @@ describe('MtrCetesbSpParser', () => {
     'Identificação do Destinador',
     'Razão Social: TERA AMBIENTAL LTDA. - 596',
     'CPF/CNPJ: 59.591.115/0003-02',
+    'Endereço: Rod. SP-101, Km 5',
+    'Município: Paulínia',
+    'UF: SP',
     '',
     'Identificação dos Resíduos',
     'IBAMA',
@@ -88,15 +97,24 @@ describe('MtrCetesbSpParser', () => {
       expect(result.data.documentNumber.confidence).toBe('high');
       expect(result.data.issueDate.parsed).toBe('08/07/2024');
       expect(result.data.issueDate.confidence).toBe('high');
-      expect(result.data.generator.parsed.name).toBe(
+      expect(result.data.generator.name.parsed).toBe(
         'Ajinomoto do Brasil Indústria e Comércio de Alimentos Ltda',
       );
-      expect(result.data.generator.parsed.taxId).toBe('46.344.354/0005-88');
-      expect(result.data.generator.confidence).toBe('high');
-      expect(result.data.hauler.parsed.name).toBe('RECICLADOS LIMEIRA LTDA');
-      expect(result.data.hauler.parsed.taxId).toBe('04.359.529/0001-57');
-      expect(result.data.receiver.parsed.name).toBe('TERA AMBIENTAL LTDA.');
-      expect(result.data.receiver.parsed.taxId).toBe('59.591.115/0003-02');
+      expect(result.data.generator.taxId.parsed).toBe('46.344.354/0005-88');
+      expect(result.data.generator.address.parsed).toBe('Rua Vergueiro, 1855');
+      expect(result.data.generator.city.parsed).toBe('Limeira');
+      expect(result.data.generator.state.parsed).toBe('SP');
+      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.hauler.name.parsed).toBe('RECICLADOS LIMEIRA LTDA');
+      expect(result.data.hauler.taxId.parsed).toBe('04.359.529/0001-57');
+      expect(result.data.hauler.address.parsed).toBe('Av. Paulista, 1000');
+      expect(result.data.hauler.city.parsed).toBe('São Paulo');
+      expect(result.data.hauler.state.parsed).toBe('SP');
+      expect(result.data.receiver.name.parsed).toBe('TERA AMBIENTAL LTDA.');
+      expect(result.data.receiver.taxId.parsed).toBe('59.591.115/0003-02');
+      expect(result.data.receiver.address.parsed).toBe('Rod. SP-101, Km 5');
+      expect(result.data.receiver.city.parsed).toBe('Paulínia');
+      expect(result.data.receiver.state.parsed).toBe('SP');
       expect(result.data.driverName?.parsed).toBe('GERSON PEREIRA DA SILVA');
       expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');
       expect(result.data.wasteTypes?.parsed).toEqual([
@@ -112,6 +130,40 @@ describe('MtrCetesbSpParser', () => {
       expect(result.data.receivingDate?.parsed).toBe('10/07/2024');
       expect(result.data.documentType).toBe('transportManifest');
       expect(result.reviewRequired).toBe(false);
+    });
+
+    it('should parse entities without address fields', () => {
+      const noAddressText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+        '',
+        'Identificação do Gerador',
+        'Razão Social: Test Company',
+        'CPF/CNPJ: 12.345.678/0001-90',
+        '',
+        'Identificação do Transportador',
+        'Razão Social: Transport Co',
+        'CPF/CNPJ: 98.765.432/0001-10',
+        '',
+        'Identificação do Destinador',
+        'Razão Social: Receiver Co',
+        'CPF/CNPJ: 11.222.333/0001-44',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noAddressText));
+
+      expect(result.data.generator.name.parsed).toBe('Test Company');
+      expect(result.data.generator.address.parsed).toBe('');
+      expect(result.data.generator.address.confidence).toBe('low');
+      expect(result.data.generator.city.parsed).toBe('');
+      expect(result.data.generator.city.confidence).toBe('low');
+      expect(result.data.generator.state.parsed).toBe('');
+      expect(result.data.generator.state.confidence).toBe('low');
+      expect(result.data.hauler.address.parsed).toBe('');
+      expect(result.data.hauler.address.confidence).toBe('low');
+      expect(result.data.receiver.address.parsed).toBe('');
+      expect(result.data.receiver.address.confidence).toBe('low');
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -148,9 +200,9 @@ describe('MtrCetesbSpParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
-      expect(result.data.generator.confidence).toBe('low');
-      expect(result.data.hauler.confidence).toBe('low');
-      expect(result.data.receiver.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
+      expect(result.data.hauler.name.confidence).toBe('low');
+      expect(result.data.receiver.name.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
@@ -178,9 +230,9 @@ describe('MtrCetesbSpParser', () => {
         stubTextExtractionResult(textWithRegistrationNumbers),
       );
 
-      expect(result.data.generator.parsed.name).toBe('Empresa Alpha Ltda');
-      expect(result.data.hauler.parsed.name).toBe('Beta Transportes SA');
-      expect(result.data.receiver.parsed.name).toBe('Gama Reciclagem LTDA.');
+      expect(result.data.generator.name.parsed).toBe('Empresa Alpha Ltda');
+      expect(result.data.hauler.name.parsed).toBe('Beta Transportes SA');
+      expect(result.data.receiver.name.parsed).toBe('Gama Reciclagem LTDA.');
     });
 
     it('should extract driver name and vehicle plate from grouped label-value pattern', () => {
@@ -305,7 +357,7 @@ describe('MtrCetesbSpParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noCnpjNoRazaoText));
 
-      expect(result.data.generator.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
     });
 
     it('should handle entity with Razão Social but no valid name after stripping', () => {
@@ -321,7 +373,7 @@ describe('MtrCetesbSpParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
-      expect(result.data.generator.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
     });
 
     it('should mark date fields as low confidence when label is present but value is empty', () => {

@@ -43,21 +43,29 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.documentNumber.confidence).toBe('high');
       expect(result.data.issueDate.parsed).toBe('07/08/2024');
       expect(result.data.issueDate.confidence).toBe('high');
-      expect(result.data.recycler.parsed.name).toBe('Tera Ambiental Ltda.');
-      expect(result.data.recycler.parsed.taxId).toBe('59.591.115/0003-02');
-      expect(result.data.recycler.confidence).toBe('high');
-      expect(result.data.generator.parsed.name).toBe(
+      expect(result.data.recycler.name.parsed).toBe('Tera Ambiental Ltda.');
+      expect(result.data.recycler.taxId.parsed).toBe('59.591.115/0003-02');
+      expect(result.data.recycler.name.confidence).toBe('high');
+      expect(result.data.generator.name.parsed).toBe(
         'AJINOMOTO DO BRASIL INDÚSTRIA E COMÉRCIO DE ALIMENTOS LTDA.',
       );
-      expect(result.data.generator.parsed.taxId).toBe('46.344.354/0005-88');
-      expect(result.data.generator.confidence).toBe('high');
+      expect(result.data.generator.taxId.parsed).toBe('46.344.354/0005-88');
+      expect(result.data.generator.name.confidence).toBe('high');
       expect(result.data.environmentalLicense?.parsed).toBe('36013428');
       expect(result.data.treatmentMethod?.parsed).toBe(
         'compostagem de lodo de esgoto',
       );
       expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(377.59);
       expect(result.data.documentType).toBe('recyclingManifest');
-      expect(result.reviewRequired).toBe(false);
+      expect(result.data.generator.address.confidence).toBe('low');
+      expect(result.reviewRequired).toBe(true);
+      expect(result.data.lowConfidenceFields).toEqual(
+        expect.arrayContaining([
+          'generator.address',
+          'generator.city',
+          'generator.state',
+        ]),
+      );
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -90,8 +98,8 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
-      expect(result.data.recycler.confidence).toBe('low');
-      expect(result.data.generator.confidence).toBe('low');
+      expect(result.data.recycler.name.confidence).toBe('low');
+      expect(result.data.generator.name.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
@@ -200,7 +208,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
-      expect(result.data.recycler.confidence).toBe('low');
+      expect(result.data.recycler.name.confidence).toBe('low');
     });
 
     it('should handle quantity on the same line as label', () => {

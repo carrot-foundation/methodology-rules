@@ -1,6 +1,5 @@
 import type {
-  EntityInfo,
-  ExtractedField,
+  ExtractedEntityInfo,
   ExtractionConfidence,
 } from '@carrot-fndn/shared/document-extractor';
 import type {
@@ -32,7 +31,7 @@ const {
 } = DocumentEventAttributeName;
 
 const entityDebugInfo = (
-  entity: ExtractedField<EntityInfo> | undefined,
+  entity: ExtractedEntityInfo | undefined,
   eventName: string | undefined,
   eventTaxId: string | undefined,
   showValues: boolean,
@@ -44,22 +43,22 @@ const entityDebugInfo = (
   const nameSimilarity =
     eventName === undefined
       ? null
-      : `${(isNameMatch(entity.parsed.name, eventName).score * 100).toFixed(0)}%`;
+      : `${(isNameMatch(entity.name.parsed, eventName).score * 100).toFixed(0)}%`;
 
   const taxIdMatch =
     eventTaxId === undefined
       ? null
-      : normalizeTaxId(entity.parsed.taxId) === normalizeTaxId(eventTaxId);
+      : normalizeTaxId(entity.taxId.parsed) === normalizeTaxId(eventTaxId);
 
   return {
-    confidence: entity.confidence,
+    confidence: entity.name.confidence,
     nameSimilarity,
     taxIdMatch,
     ...(showValues && {
       eventName: eventName ?? null,
       eventTaxId: eventTaxId ?? null,
-      extractedName: entity.parsed.name,
-      extractedTaxId: entity.parsed.taxId,
+      extractedName: entity.name.parsed,
+      extractedTaxId: entity.taxId.parsed,
     }),
   };
 };

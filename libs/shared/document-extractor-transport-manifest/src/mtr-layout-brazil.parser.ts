@@ -3,13 +3,14 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   calculateMatchScore,
+  createExtractedEntityWithAddress,
   createHighConfidenceField,
   type DocumentParser,
-  entityFieldOrEmpty,
   extractAllStringFields,
   extractEntityFromSection,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
+  extractSection,
   extractStringField,
   finalizeExtraction,
   parseBrazilianNumber,
@@ -22,6 +23,15 @@ import {
   type MtrExtractedData,
   type WasteTypeEntry,
 } from './transport-manifest.types';
+
+const ADDRESS_PATTERNS = {
+  // eslint-disable-next-line sonarjs/slow-regex
+  address: /Endere[çc]o\s*:?\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  city: /Munic[ií]pio\s*:?\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  state: /(?:UF|Estado)\s*:?\s*(\w{2})/i,
+} as const;
 
 const MTR_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
@@ -83,6 +93,31 @@ const SIGNATURE_PATTERNS = [
 ];
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
+
+const extractAddressFromSection = (
+  text: string,
+  sectionPattern: RegExp,
+): undefined | { address: string; city: string; state: string } => {
+  const section = extractSection(text, sectionPattern, ALL_SECTION_PATTERNS);
+
+  if (!section) {
+    return undefined;
+  }
+
+  const addressMatch = ADDRESS_PATTERNS.address.exec(section);
+  const cityMatch = ADDRESS_PATTERNS.city.exec(section);
+  const stateMatch = ADDRESS_PATTERNS.state.exec(section);
+
+  if (!addressMatch?.[1] || !cityMatch?.[1] || !stateMatch?.[1]) {
+    return undefined;
+  }
+
+  return {
+    address: addressMatch[1].trim(),
+    city: cityMatch[1].trim(),
+    state: stateMatch[1].trim(),
+  };
+};
 
 export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
@@ -179,7 +214,12 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       partialData.receivingDate = receivingDate;
     }
 
-    partialData.generator = entityFieldOrEmpty(
+    const generatorAddress = extractAddressFromSection(
+      rawText,
+      SECTION_PATTERNS.gerador,
+    );
+
+    partialData.generator = createExtractedEntityWithAddress(
       generatorExtracted
         ? {
             rawMatch: generatorExtracted.rawMatch,
@@ -188,11 +228,18 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
               name: stripTrailingRegistrationNumber(
                 generatorExtracted.value.name,
               ) as NonEmptyString,
+              ...generatorAddress,
             },
           }
         : undefined,
     );
-    partialData.hauler = entityFieldOrEmpty(
+
+    const haulerAddress = extractAddressFromSection(
+      rawText,
+      SECTION_PATTERNS.transportador,
+    );
+
+    partialData.hauler = createExtractedEntityWithAddress(
       haulerExtracted
         ? {
             rawMatch: haulerExtracted.rawMatch,
@@ -201,11 +248,18 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
               name: stripTrailingRegistrationNumber(
                 haulerExtracted.value.name,
               ) as NonEmptyString,
+              ...haulerAddress,
             },
           }
         : undefined,
     );
-    partialData.receiver = entityFieldOrEmpty(
+
+    const receiverAddress = extractAddressFromSection(
+      rawText,
+      SECTION_PATTERNS.destinatario,
+    );
+
+    partialData.receiver = createExtractedEntityWithAddress(
       receiverExtracted
         ? {
             rawMatch: receiverExtracted.rawMatch,
@@ -214,6 +268,7 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
               name: stripTrailingRegistrationNumber(
                 receiverExtracted.value.name,
               ) as NonEmptyString,
+              ...receiverAddress,
             },
           }
         : undefined,
@@ -265,9 +320,12 @@ export class MtrLayoutBrazilParser implements DocumentParser<MtrExtractedData> {
       confidenceFields: [
         partialData.documentNumber,
         partialData.issueDate,
-        partialData.generator,
-        partialData.hauler,
-        partialData.receiver,
+        partialData.generator.name,
+        partialData.generator.taxId,
+        partialData.hauler.name,
+        partialData.hauler.taxId,
+        partialData.receiver.name,
+        partialData.receiver.taxId,
       ],
       documentType: 'transportManifest',
       matchScore,
