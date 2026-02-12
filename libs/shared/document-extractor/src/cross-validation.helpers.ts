@@ -38,6 +38,10 @@ const processInput = async <
 
     const validationResult = config.validate(extractionResult, eventData);
 
+    if (validationResult.crossValidation) {
+      Object.assign(result.crossValidation, validationResult.crossValidation);
+    }
+
     if (validationResult.failMessages.length > 0) {
       result.failMessages.push(...validationResult.failMessages);
     }
@@ -74,6 +78,7 @@ export const crossValidateAttachments = async <
   extractor: DocumentExtractorService,
 ): Promise<CrossValidationResult> => {
   const result: CrossValidationResult = {
+    crossValidation: {},
     failMessages: [],
     reviewReasons: [],
     reviewRequired: false,

@@ -141,7 +141,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
     });
 
-    it('should fail when vehicle plate does not match with high confidence', () => {
+    it('should set reviewRequired when vehicle plate does not match with high confidence', () => {
       const extractionResult = createExtractionResult({
         vehiclePlate: {
           confidence: 'high',
@@ -167,9 +167,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.failMessages).toHaveLength(1);
-      expect(result.failMessages[0]).toContain('ABC1234');
-      expect(result.failMessages[0]).toContain('XYZ9876');
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+      expect(result.reviewReasons?.[0]).toContain('vehicle plate');
+      expect(result.reviewReasons?.[0]).not.toContain('ABC1234');
+      expect(result.reviewReasons?.[0]).not.toContain('XYZ9876');
     });
 
     it('should set reviewRequired when vehicle plate does not match with low confidence', () => {
@@ -201,7 +204,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('ABC1234');
+      expect(result.reviewReasons?.[0]).toContain('vehicle plate');
     });
 
     it('should skip vehicle plate validation when pickUpEvent is missing', () => {

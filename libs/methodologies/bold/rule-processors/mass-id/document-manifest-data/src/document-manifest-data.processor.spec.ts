@@ -23,6 +23,7 @@ describe('DocumentManifestDataProcessor', () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
     crossValidateWithTextractMock.mockResolvedValue({
+      crossValidation: {},
       failMessages: [],
       reviewReasons: [],
       reviewRequired: false,
@@ -53,6 +54,7 @@ describe('DocumentManifestDataProcessor', () => {
 
     if ('crossValidationFailMessages' in testCase) {
       crossValidateWithTextractMock.mockResolvedValueOnce({
+        crossValidation: {},
         failMessages: testCase.crossValidationFailMessages,
         reviewReasons: [],
         reviewRequired: false,
@@ -61,6 +63,7 @@ describe('DocumentManifestDataProcessor', () => {
 
     if ('crossValidationReviewReasons' in testCase) {
       crossValidateWithTextractMock.mockResolvedValueOnce({
+        crossValidation: {},
         failMessages: [],
         reviewReasons: testCase.crossValidationReviewReasons,
         reviewRequired: true,

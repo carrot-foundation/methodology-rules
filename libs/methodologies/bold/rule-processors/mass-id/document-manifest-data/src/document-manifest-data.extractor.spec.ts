@@ -49,6 +49,7 @@ describe('crossValidateWithTextract', () => {
     });
 
     expect(result).toEqual({
+      crossValidation: {},
       failMessages: [],
       reviewReasons: [],
       reviewRequired: false,
@@ -68,6 +69,7 @@ describe('crossValidateWithTextract', () => {
     });
 
     expect(result).toEqual({
+      crossValidation: {},
       failMessages: [],
       reviewReasons: [],
       reviewRequired: false,

@@ -9,8 +9,8 @@ import type { CdfCrossValidationEventData } from './recycling-manifest-cross-val
 import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
 
 import {
-  logCdfCrossValidationComparison,
-  logCrossValidationComparison,
+  buildCdfCrossValidationComparison,
+  buildCrossValidationComparison,
 } from './cross-validation-debug.helpers';
 
 const stubEntity = (name: string, taxId: string) => ({
@@ -59,23 +59,25 @@ const stubCdfEntity = (name: string, taxId: string) => ({
 });
 
 describe('cross-validation-debug.helpers', () => {
-  const originalEnvironment = process.env;
   let debugSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    process.env = { ...originalEnvironment };
     debugSpy = jest.spyOn(logger, 'debug').mockImplementation();
   });
 
   afterEach(() => {
-    process.env = originalEnvironment;
     debugSpy.mockRestore();
   });
 
-  describe('logCrossValidationComparison', () => {
-    it('should log metadata without values when DEBUG is not set', () => {
-      logCrossValidationComparison(baseExtractedData, baseEventData, 'high');
+  describe('buildCrossValidationComparison', () => {
+    it('should return crossValidation object and log it', () => {
+      const result = buildCrossValidationComparison(
+        baseExtractedData,
+        baseEventData,
+        'high',
+      );
 
+      expect(result).toBeDefined();
       expect(debugSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           crossValidation: expect.objectContaining({
@@ -88,20 +90,9 @@ describe('cross-validation-debug.helpers', () => {
         }),
         'Cross-validation field comparison (MTR)',
       );
-
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
-        string,
-        Record<string, unknown>
-      >;
-
-      expect(crossValidation['documentNumber']).not.toHaveProperty('event');
-      expect(crossValidation['documentNumber']).not.toHaveProperty('extracted');
     });
 
-    it('should include values when DEBUG=true', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should always include values in the returned object', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         haulerEvent: {
@@ -115,24 +106,21 @@ describe('cross-validation-debug.helpers', () => {
         } as unknown as DocumentEvent,
       };
 
-      logCrossValidationComparison(baseExtractedData, eventData, 'high');
+      const result = buildCrossValidationComparison(
+        baseExtractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']).toHaveProperty(
-        'event',
-        '12345',
-      );
-      expect(crossValidation['documentNumber']).toHaveProperty(
-        'extracted',
-        '12345',
-      );
+      expect(documentNumber).toHaveProperty('event', '12345');
+      expect(documentNumber).toHaveProperty('extracted', '12345');
 
-      const generator = crossValidation['generator'] as Record<string, unknown>;
+      const generator = result['generator'] as Record<string, unknown>;
 
       expect(generator).toHaveProperty('extractedName', 'Generator Co');
       expect(generator).toHaveProperty('eventName', 'Generator Co');
@@ -140,9 +128,7 @@ describe('cross-validation-debug.helpers', () => {
       expect(generator).toHaveProperty('eventTaxId', '11.111.111/0001-11');
     });
 
-    it('should handle null fallbacks when DEBUG=true with minimal event data', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should handle null fallbacks with minimal event data', () => {
       const extractedData: MtrExtractedData = {
         ...baseExtractedData,
         wasteTypes: [
@@ -155,36 +141,33 @@ describe('cross-validation-debug.helpers', () => {
         documentNumber: undefined,
       };
 
-      logCrossValidationComparison(extractedData, eventData, 'high');
+      const result = buildCrossValidationComparison(
+        extractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']).toHaveProperty('event', null);
+      expect(documentNumber).toHaveProperty('event', null);
 
-      const generator = crossValidation['generator'] as Record<string, unknown>;
+      const generator = result['generator'] as Record<string, unknown>;
 
       expect(generator).toHaveProperty('eventName', null);
       expect(generator).toHaveProperty('eventTaxId', null);
       expect(generator).toHaveProperty('extractedName', 'Generator Co');
 
-      expect(crossValidation['receivingDate']).toHaveProperty('event', null);
-      expect(crossValidation['receivingDate']).toHaveProperty(
-        'extracted',
-        null,
-      );
-      expect(crossValidation['transportDate']).toHaveProperty('event', null);
-      expect(crossValidation['transportDate']).toHaveProperty(
-        'extracted',
-        null,
-      );
-      expect(crossValidation['vehiclePlate']).toHaveProperty('event', null);
-      expect(crossValidation['vehiclePlate']).toHaveProperty('extracted', null);
+      expect(result['receivingDate']).toHaveProperty('event', null);
+      expect(result['receivingDate']).toHaveProperty('extracted', null);
+      expect(result['transportDate']).toHaveProperty('event', null);
+      expect(result['transportDate']).toHaveProperty('extracted', null);
+      expect(result['vehiclePlate']).toHaveProperty('event', null);
+      expect(result['vehiclePlate']).toHaveProperty('extracted', null);
 
-      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+      const wasteType = result['wasteType'] as Record<string, unknown>;
 
       expect(wasteType).toHaveProperty('eventCode', null);
       expect(wasteType).toHaveProperty('eventDescription', null);
@@ -194,9 +177,7 @@ describe('cross-validation-debug.helpers', () => {
       expect(entries[0]).toHaveProperty('extracted', 'Lodos de tratamento');
     });
 
-    it('should include all fields when DEBUG=true with full event data', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should include all fields with full event data', () => {
       const extractedData: MtrExtractedData = {
         ...baseExtractedData,
         receivingDate: {
@@ -260,34 +241,20 @@ describe('cross-validation-debug.helpers', () => {
         } as unknown as DocumentEvent,
       };
 
-      logCrossValidationComparison(extractedData, eventData, 'high');
+      const result = buildCrossValidationComparison(
+        extractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
-        string,
-        Record<string, unknown>
-      >;
+      expect(result['issueDate']).toHaveProperty('event', null);
+      expect(result['issueDate']).toHaveProperty('extracted', '2024-01-01');
+      expect(result['receivingDate']).toHaveProperty('event', '2024-01-15');
+      expect(result['transportDate']).toHaveProperty('event', '2024-01-10');
+      expect(result['vehiclePlate']).toHaveProperty('event', 'ABC1234');
+      expect(result['vehiclePlate']).toHaveProperty('isMatch', true);
 
-      expect(crossValidation['issueDate']).toHaveProperty('event', null);
-      expect(crossValidation['issueDate']).toHaveProperty(
-        'extracted',
-        '2024-01-01',
-      );
-      expect(crossValidation['receivingDate']).toHaveProperty(
-        'event',
-        '2024-01-15',
-      );
-      expect(crossValidation['transportDate']).toHaveProperty(
-        'event',
-        '2024-01-10',
-      );
-      expect(crossValidation['vehiclePlate']).toHaveProperty(
-        'event',
-        'ABC1234',
-      );
-      expect(crossValidation['vehiclePlate']).toHaveProperty('isMatch', true);
-
-      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+      const wasteType = result['wasteType'] as Record<string, unknown>;
       const entries = wasteType['entries'] as Array<Record<string, unknown>>;
 
       expect(entries[0]).toHaveProperty(
@@ -301,7 +268,7 @@ describe('cross-validation-debug.helpers', () => {
       );
     });
 
-    it('should log entity similarity and taxId match metadata', () => {
+    it('should return entity similarity and taxId match metadata', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         recyclerEvent: {
@@ -315,25 +282,23 @@ describe('cross-validation-debug.helpers', () => {
         } as unknown as DocumentEvent,
       };
 
-      logCrossValidationComparison(baseExtractedData, eventData, 'high');
+      const result = buildCrossValidationComparison(
+        baseExtractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
-        string,
-        Record<string, unknown>
-      >;
-
-      const receiver = crossValidation['receiver'] as Record<string, unknown>;
+      const receiver = result['receiver'] as Record<string, unknown>;
 
       expect(receiver['nameSimilarity']).toBe('100%');
       expect(receiver['taxIdMatch']).toBe(true);
 
-      const generator = crossValidation['generator'] as Record<string, unknown>;
+      const generator = result['generator'] as Record<string, unknown>;
 
       expect(generator['taxIdMatch']).toBe(false);
       expect(generator['nameSimilarity']).not.toBe('100%');
 
-      const hauler = crossValidation['hauler'] as Record<string, unknown>;
+      const hauler = result['hauler'] as Record<string, unknown>;
 
       expect(hauler['confidence']).toBe('high');
       expect(hauler['nameSimilarity']).toBeNull();
@@ -346,19 +311,22 @@ describe('cross-validation-debug.helpers', () => {
         documentNumber: undefined,
       };
 
-      logCrossValidationComparison(baseExtractedData, eventData, 'high');
+      const result = buildCrossValidationComparison(
+        baseExtractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']?.['isMatch']).toBe(false);
+      expect(documentNumber['isMatch']).toBe(false);
     });
   });
 
-  describe('logCdfCrossValidationComparison', () => {
+  describe('buildCdfCrossValidationComparison', () => {
     const stubCdfEntityWithAddress = (
       name: string,
       taxId: string,
@@ -415,7 +383,7 @@ describe('cross-validation-debug.helpers', () => {
       weighingEvents: [],
     };
 
-    it('should log CDF metadata without values when DEBUG is not set', () => {
+    it('should return crossValidation object and log it', () => {
       const extractedDataWithEntries: CdfExtractedData = {
         ...baseCdfExtractedData,
         wasteEntries: {
@@ -432,12 +400,13 @@ describe('cross-validation-debug.helpers', () => {
         },
       } as unknown as CdfExtractedData;
 
-      logCdfCrossValidationComparison(
+      const result = buildCdfCrossValidationComparison(
         extractedDataWithEntries,
         baseCdfEventData,
         'high',
       );
 
+      expect(result).toBeDefined();
       expect(debugSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           crossValidation: expect.objectContaining({
@@ -454,19 +423,16 @@ describe('cross-validation-debug.helpers', () => {
         'Cross-validation field comparison (CDF)',
       );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']).not.toHaveProperty('event');
-      expect(crossValidation['documentNumber']).not.toHaveProperty('extracted');
+      expect(documentNumber).toHaveProperty('event', 'CDF-001');
+      expect(documentNumber).toHaveProperty('extracted', 'CDF-001');
     });
 
-    it('should include values when DEBUG=true', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should always include values in the returned object', () => {
       const eventData: CdfCrossValidationEventData = {
         ...baseCdfEventData,
         recyclerEvent: {
@@ -480,27 +446,22 @@ describe('cross-validation-debug.helpers', () => {
         } as unknown as DocumentEvent,
       };
 
-      logCdfCrossValidationComparison(baseCdfExtractedData, eventData, 'high');
+      const result = buildCdfCrossValidationComparison(
+        baseCdfExtractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']).toHaveProperty(
-        'event',
-        'CDF-001',
-      );
-      expect(crossValidation['documentNumber']).toHaveProperty(
-        'extracted',
-        'CDF-001',
-      );
+      expect(documentNumber).toHaveProperty('event', 'CDF-001');
+      expect(documentNumber).toHaveProperty('extracted', 'CDF-001');
     });
 
-    it('should handle null fallbacks when DEBUG=true with minimal CDF event data', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should handle null fallbacks with minimal CDF event data', () => {
       const extractedData: CdfExtractedData = {
         ...baseCdfExtractedData,
         wasteEntries: {
@@ -515,23 +476,26 @@ describe('cross-validation-debug.helpers', () => {
         documentNumber: undefined,
       };
 
-      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
+      const documentNumber = result['documentNumber'] as Record<
         string,
-        Record<string, unknown>
+        unknown
       >;
 
-      expect(crossValidation['documentNumber']).toHaveProperty('event', null);
+      expect(documentNumber).toHaveProperty('event', null);
 
-      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+      const wasteType = result['wasteType'] as Record<string, unknown>;
       const entries = wasteType['entries'] as Array<Record<string, unknown>>;
 
       expect(entries[0]).toHaveProperty('extracted', 'Lodos de tratamento');
     });
 
-    it('should log processing period and MTR numbers', () => {
+    it('should include processing period and MTR numbers', () => {
       const extractedData: CdfExtractedData = {
         ...baseCdfExtractedData,
         processingPeriod: {
@@ -554,23 +518,18 @@ describe('cross-validation-debug.helpers', () => {
         mtrDocumentNumbers: ['MTR-001'],
       };
 
-      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
-        string,
-        Record<string, unknown>
-      >;
-
-      expect(crossValidation['mtrNumbers']).toEqual({
+      expect(result['mtrNumbers']).toEqual({
         eventMtrNumbers: ['MTR-001'],
         extractedManifests: ['MTR-001', 'MTR-002'],
       });
 
-      const period = crossValidation['processingPeriod'] as Record<
-        string,
-        unknown
-      >;
+      const period = result['processingPeriod'] as Record<string, unknown>;
 
       expect(period['confidence']).toBe('high');
       expect(period['dropOffDate']).toBe('2024-01-15');
@@ -578,9 +537,7 @@ describe('cross-validation-debug.helpers', () => {
       expect(period['end']).toBe('31/01/2024');
     });
 
-    it('should log waste type and quantity with full event data', () => {
-      process.env['DEBUG'] = 'true';
-
+    it('should include waste type and quantity with full event data', () => {
       const extractedData: CdfExtractedData = {
         ...baseCdfExtractedData,
         wasteEntries: {
@@ -618,15 +575,13 @@ describe('cross-validation-debug.helpers', () => {
         weighingEvents: [{ value: 1000 } as unknown as DocumentEvent],
       };
 
-      logCdfCrossValidationComparison(extractedData, eventData, 'high');
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        eventData,
+        'high',
+      );
 
-      const logged = debugSpy.mock.calls[0]?.[0] as Record<string, unknown>;
-      const crossValidation = logged['crossValidation'] as Record<
-        string,
-        Record<string, unknown>
-      >;
-
-      const wasteType = crossValidation['wasteType'] as Record<string, unknown>;
+      const wasteType = result['wasteType'] as Record<string, unknown>;
 
       expect(wasteType['confidence']).toBe('high');
       expect(wasteType['eventCode']).toBe('190812');
@@ -635,7 +590,7 @@ describe('cross-validation-debug.helpers', () => {
 
       expect(entries[0]?.['isMatch']).toBe(true);
 
-      const quantityWeight = crossValidation['wasteQuantityWeight'] as Record<
+      const quantityWeight = result['wasteQuantityWeight'] as Record<
         string,
         unknown
       >;

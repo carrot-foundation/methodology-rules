@@ -17,13 +17,12 @@ import type {
   ValidationResult,
 } from './document-manifest-data.helpers';
 
-import { logCrossValidationComparison } from './cross-validation-debug.helpers';
+import { buildCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
   collectResults,
   type FieldValidationResult,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
-  routeByConfidence,
   validateBasicExtractedData,
   validateDateField,
   validateEntityAddress,
@@ -93,12 +92,9 @@ const validateVehiclePlate = (
     return {};
   }
 
-  const message = CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH({
-    eventPlate,
-    extractedPlate: extractedData.vehiclePlate.parsed,
-  });
-
-  return routeByConfidence(extractedData.vehiclePlate.confidence, message);
+  return {
+    reviewReason: CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
+  };
 };
 
 const validateWasteQuantity = (
@@ -235,7 +231,10 @@ const validateWasteType = (
 export const validateMtrExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: MtrCrossValidationEventData,
-): ValidationResult & { reviewReasons?: string[] } => {
+): ValidationResult & {
+  crossValidation?: Record<string, unknown>;
+  reviewReasons?: string[];
+} => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
   if (basicResult.reviewRequired === true) {
@@ -244,7 +243,7 @@ export const validateMtrExtractedData = (
 
   const extractedData = extractionResult.data as MtrExtractedData;
 
-  logCrossValidationComparison(
+  const crossValidation = buildCrossValidationComparison(
     extractedData,
     eventData,
     extractionResult.data.extractionConfidence,
@@ -353,6 +352,7 @@ export const validateMtrExtractedData = (
 
   if (reviewReasons.length > 0) {
     return {
+      crossValidation,
       failMessages: allFailMessages,
       reviewReasons,
       reviewRequired: true,
@@ -360,6 +360,7 @@ export const validateMtrExtractedData = (
   }
 
   return {
+    crossValidation,
     failMessages: allFailMessages,
     reviewRequired: false,
   };

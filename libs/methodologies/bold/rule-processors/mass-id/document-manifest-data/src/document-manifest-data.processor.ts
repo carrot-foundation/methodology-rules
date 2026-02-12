@@ -155,6 +155,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     if (crossValidationResult.failMessages.length > 0) {
       return {
         resultComment: crossValidationResult.failMessages.join(' '),
+        resultContent: {
+          crossValidation: crossValidationResult.crossValidation,
+        },
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -165,6 +168,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       return {
         resultComment: `${resultComment} Review required: ${crossValidationResult.reviewReasons.join('; ')}`,
         resultContent: {
+          crossValidation: crossValidationResult.crossValidation,
           reviewReasons: crossValidationResult.reviewReasons,
           reviewRequired: true,
         },
@@ -174,6 +178,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     return {
       resultComment,
+      resultContent: {
+        crossValidation: crossValidationResult.crossValidation,
+      },
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

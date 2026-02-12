@@ -138,11 +138,7 @@ export const normalizeTaxId = (taxId: string): string =>
 export const validateEntityName = (
   extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantName: string | undefined,
-  commentFunction: (parameters: {
-    eventName: string;
-    extractedName: string;
-    score: number;
-  }) => string,
+  commentFunction: (parameters: { score: number }) => string,
   notExtractedComment?: string,
 ): FieldValidationResult => {
   if (!extractedEntity) {
@@ -166,11 +162,7 @@ export const validateEntityName = (
   return isMatch
     ? {}
     : {
-        reviewReason: commentFunction({
-          eventName: eventParticipantName,
-          extractedName,
-          score,
-        }),
+        reviewReason: commentFunction({ score }),
       };
 };
 
@@ -209,11 +201,7 @@ export const validateEntityTaxId = (
 export const validateEntityAddress = (
   extractedEntity: ExtractedEntityWithAddressInfo | undefined,
   eventAddress: MethodologyAddress | undefined,
-  commentFunction: (parameters: {
-    eventAddress: string;
-    extractedAddress: string;
-    score: number;
-  }) => string,
+  commentFunction: (parameters: { score: number }) => string,
   notExtractedComment?: string,
 ): FieldValidationResult => {
   if (!extractedEntity) {
@@ -252,11 +240,7 @@ export const validateEntityAddress = (
   return isMatch
     ? {}
     : {
-        reviewReason: commentFunction({
-          eventAddress: eventAddressString,
-          extractedAddress,
-          score,
-        }),
+        reviewReason: commentFunction({ score }),
       };
 };
 

@@ -98,6 +98,7 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments([], config, extractor);
 
     expect(result).toEqual({
+      crossValidation: {},
       failMessages: [],
       reviewReasons: [],
       reviewRequired: false,
@@ -149,6 +150,29 @@ describe('crossValidateAttachments', () => {
     expect(validateFunction).toHaveBeenCalledWith(extractionOutput, eventData);
     expect(result.failMessages).toEqual([]);
     expect(result.reviewRequired).toBe(false);
+  });
+
+  it('should merge crossValidation data from validate into result', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        crossValidation: { documentNumber: { event: '123', extracted: '456' } },
+        failMessages: [],
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.crossValidation).toEqual({
+      documentNumber: { event: '123', extracted: '456' },
+    });
   });
 
   it('should collect fail messages from validation', async () => {

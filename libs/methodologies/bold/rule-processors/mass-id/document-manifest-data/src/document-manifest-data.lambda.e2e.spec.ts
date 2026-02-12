@@ -24,6 +24,7 @@ describe('DocumentManifestDataLambda E2E', () => {
   beforeEach(() => {
     process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
     jest.mocked(crossValidateWithTextract).mockResolvedValue({
+      crossValidation: {},
       failMessages: [],
       reviewReasons: [],
       reviewRequired: false,

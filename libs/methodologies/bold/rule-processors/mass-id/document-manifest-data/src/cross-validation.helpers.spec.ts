@@ -13,6 +13,7 @@ import {
   matchWasteTypeEntry,
   normalizeQuantityToKg,
   parsePeriodRange,
+  routeByConfidence,
   validateBasicExtractedData,
   validateDateField,
   validateDateWithinPeriod,
@@ -49,13 +50,8 @@ const makeAddress = (
     street,
   }) as unknown as MethodologyAddress;
 
-const addressCommentFunction = ({
-  score,
-}: {
-  eventAddress: string;
-  extractedAddress: string;
-  score: number;
-}) => `Address mismatch: ${(score * 100).toFixed(0)}%`;
+const addressCommentFunction = ({ score }: { score: number }) =>
+  `Address mismatch: ${(score * 100).toFixed(0)}%`;
 
 const dateCommentFunction = ({
   daysDiff,
@@ -755,6 +751,18 @@ describe('cross-validation.helpers', () => {
       );
 
       expect(result).toEqual({});
+    });
+  });
+
+  describe('routeByConfidence', () => {
+    it('should return failMessage when confidence is high', () => {
+      expect(routeByConfidence('high', 'msg')).toEqual({ failMessage: 'msg' });
+    });
+
+    it('should return reviewReason when confidence is not high', () => {
+      expect(routeByConfidence('low', 'msg')).toEqual({
+        reviewReason: 'msg',
+      });
     });
   });
 

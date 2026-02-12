@@ -80,38 +80,14 @@ export const CROSS_VALIDATION_COMMENTS = {
 
     return `The ${field} could not be extracted from the document for cross-validation${suffix}.`;
   },
-  GENERATOR_ADDRESS_MISMATCH: ({
-    score,
-  }: {
-    eventAddress: string;
-    extractedAddress: string;
-    score: number;
-  }) =>
+  GENERATOR_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The generator address extracted from the document does not match the "${WASTE_GENERATOR}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
-  GENERATOR_NAME_MISMATCH: ({
-    score,
-  }: {
-    eventName: string;
-    extractedName: string;
-    score: number;
-  }) =>
+  GENERATOR_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The generator name extracted from the document does not match the "${WASTE_GENERATOR}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
-  HAULER_ADDRESS_MISMATCH: ({
-    score,
-  }: {
-    eventAddress: string;
-    extractedAddress: string;
-    score: number;
-  }) =>
+  HAULER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The hauler address extracted from the document does not match the "${HAULER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
-  HAULER_NAME_MISMATCH: ({
-    score,
-  }: {
-    eventName: string;
-    extractedName: string;
-    score: number;
-  }) =>
+  HAULER_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The hauler name extracted from the document does not match the "${HAULER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   HAULER_TAX_ID_MISMATCH: `The hauler tax ID extracted from the document does not match the "${HAULER}" participant tax ID.`,
   ISSUE_DATE_MISMATCH: ({
@@ -124,21 +100,9 @@ export const CROSS_VALIDATION_COMMENTS = {
     `The "${ISSUE_DATE}" declared in the event ("${eventIssueDate}") does not match the extracted value from the document ("${extractedIssueDate}").`,
   MTR_NUMBER_NOT_IN_CDF: ({ mtrNumber }: { mtrNumber: string }) =>
     `The MTR number ("${mtrNumber}") from this mass-id was not found in the CDF's transport manifests list.`,
-  RECEIVER_ADDRESS_MISMATCH: ({
-    score,
-  }: {
-    eventAddress: string;
-    extractedAddress: string;
-    score: number;
-  }) =>
+  RECEIVER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The receiver address extracted from the document does not match the "${RECYCLER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
-  RECEIVER_NAME_MISMATCH: ({
-    score,
-  }: {
-    eventName: string;
-    extractedName: string;
-    score: number;
-  }) =>
+  RECEIVER_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The receiver name extracted from the document does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
 
   RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
@@ -152,13 +116,7 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s).`,
-  RECYCLER_NAME_MISMATCH: ({
-    score,
-  }: {
-    eventName: string;
-    extractedName: string;
-    score: number;
-  }) =>
+  RECYCLER_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The recycler name extracted from the recycling manifest does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECYCLER_TAX_ID_MISMATCH: `The recycler tax ID extracted from the recycling manifest does not match the "${RECYCLER}" participant tax ID.`,
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: ({
@@ -191,14 +149,7 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s).`,
-  VEHICLE_PLATE_MISMATCH: ({
-    eventPlate,
-    extractedPlate,
-  }: {
-    eventPlate: string;
-    extractedPlate: string;
-  }) =>
-    `The vehicle plate extracted from the document ("${extractedPlate}") does not match the Pick-up event value ("${eventPlate}").`,
+  VEHICLE_PLATE_MISMATCH: `The vehicle plate extracted from the document does not match the Pick-up event value.`,
   WASTE_QUANTITY_WEIGHT_MISMATCH: ({
     discrepancyPercentage,
     extractedQuantity,

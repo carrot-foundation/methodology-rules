@@ -16,7 +16,7 @@ import type {
   ValidationResult,
 } from './document-manifest-data.helpers';
 
-import { logCdfCrossValidationComparison } from './cross-validation-debug.helpers';
+import { buildCdfCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
   collectResults,
   type FieldValidationResult,
@@ -230,7 +230,10 @@ export const collectMtrDocumentNumbers = (
 export const validateCdfExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: CdfCrossValidationEventData,
-): ValidationResult & { reviewReasons?: string[] } => {
+): ValidationResult & {
+  crossValidation?: Record<string, unknown>;
+  reviewReasons?: string[];
+} => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
   if (basicResult.reviewRequired === true) {
@@ -239,7 +242,7 @@ export const validateCdfExtractedData = (
 
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  logCdfCrossValidationComparison(
+  const crossValidation = buildCdfCrossValidationComparison(
     extractedData,
     eventData,
     extractionResult.data.extractionConfidence,
@@ -312,6 +315,7 @@ export const validateCdfExtractedData = (
 
   if (reviewReasons.length > 0) {
     return {
+      crossValidation,
       failMessages: allFailMessages,
       reviewReasons,
       reviewRequired: true,
@@ -319,6 +323,7 @@ export const validateCdfExtractedData = (
   }
 
   return {
+    crossValidation,
     failMessages: allFailMessages,
     reviewRequired: false,
   };
