@@ -19,6 +19,7 @@ export interface RunOptions {
   inputFile?: string | undefined;
   json: boolean;
   methodologyExecutionId?: string | undefined;
+  outputFailures?: string | undefined;
 }
 
 const parseConcurrency = (value: string): number => {
@@ -72,6 +73,12 @@ export const runCommand = new Command('run')
       .argParser(parseConcurrency),
   )
   .addOption(new Option('--config <json>', 'Processor config as JSON string'))
+  .addOption(
+    new Option(
+      '--output-failures <path>',
+      'Custom path for the errors JSON file (batch mode only)',
+    ),
+  )
   .addOption(
     new Option(
       '--env-file <path>',

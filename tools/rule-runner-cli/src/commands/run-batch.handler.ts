@@ -10,7 +10,8 @@ import {
 } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import path from 'node:path';
 
 import type { RunOptions } from './run.command';
 
@@ -18,6 +19,12 @@ import { formatAsHuman } from '../formatters/human.formatter';
 import { parseConfig } from '../utils/config-parser';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
+
+interface EntryRuleFailure {
+  entry: InputEntry;
+  resultComment?: string | undefined;
+  resultStatus: string;
+}
 
 interface InputEntry {
   auditDocumentId: string;
@@ -29,6 +36,53 @@ interface ProcessResult {
   elapsedMs: number;
   output: RuleOutput;
 }
+
+const LOGS_DIR = path.resolve(__dirname, '../../logs');
+
+const writeErrorsJson = async (
+  failures: Array<{ error: string; item: InputEntry }>,
+  outputPath: string | undefined,
+): Promise<void> => {
+  const timestamp = new Date().toISOString().replaceAll(':', '-');
+
+  await mkdir(LOGS_DIR, { recursive: true });
+
+  const filePath =
+    outputPath ?? path.join(LOGS_DIR, `rule-errors-${timestamp}.json`);
+
+  const data = failures.map((f) => ({
+    auditDocumentId: f.item.auditDocumentId,
+    auditedDocumentId: f.item.auditedDocumentId,
+    error: f.error,
+    methodologyExecutionId: f.item.methodologyExecutionId,
+  }));
+
+  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+
+  logger.info(`Errors JSON written to: ${filePath}`);
+};
+
+const writeRuleFailuresJson = async (
+  ruleFailures: EntryRuleFailure[],
+): Promise<void> => {
+  const timestamp = new Date().toISOString().replaceAll(':', '-');
+
+  await mkdir(LOGS_DIR, { recursive: true });
+
+  const filePath = path.join(LOGS_DIR, `rule-failures-${timestamp}.json`);
+
+  const data = ruleFailures.map((f) => ({
+    auditDocumentId: f.entry.auditDocumentId,
+    auditedDocumentId: f.entry.auditedDocumentId,
+    methodologyExecutionId: f.entry.methodologyExecutionId,
+    resultComment: f.resultComment,
+    resultStatus: f.resultStatus,
+  }));
+
+  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
+
+  logger.info(`Rule failures JSON written to: ${filePath}`);
+};
 
 const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
   const content = await readFile(filePath, 'utf8');
@@ -109,6 +163,7 @@ export const handleRunBatch = async (
 
   let passedCount = 0;
   let failedRuleCount = 0;
+  const ruleFailures: EntryRuleFailure[] = [];
 
   const { failures } = await processBatch<InputEntry, ProcessResult>({
     concurrency: options.concurrency,
@@ -126,6 +181,11 @@ export const handleRunBatch = async (
         passedCount++;
       } else {
         failedRuleCount++;
+        ruleFailures.push({
+          entry,
+          resultComment: output.resultComment,
+          resultStatus: output.resultStatus,
+        });
       }
 
       if (options.json) {
@@ -165,6 +225,14 @@ export const handleRunBatch = async (
     failedRuleCount,
     failures.length,
   );
+
+  if (failures.length > 0) {
+    await writeErrorsJson(failures, options.outputFailures);
+  }
+
+  if (ruleFailures.length > 0) {
+    await writeRuleFailuresJson(ruleFailures);
+  }
 
   if (failures.length > 0 || failedRuleCount > 0) {
     process.exitCode = 1;
