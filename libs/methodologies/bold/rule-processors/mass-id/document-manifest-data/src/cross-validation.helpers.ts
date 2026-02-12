@@ -25,10 +25,8 @@ import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
 export interface FieldValidationResult {
   failMessage?: string;
   reviewReason?: string;
+  reviewReasonCode?: string;
 }
-
-export const formatReviewReason = (code: string, message: string): string =>
-  `[${code}] ${message}`;
 
 export const routeByConfidence = (
   confidence: ExtractionConfidence,
@@ -38,21 +36,27 @@ export const routeByConfidence = (
 
 export const collectResults = (
   results: FieldValidationResult[],
-): { failMessages: string[]; reviewReasons: string[] } => {
+): {
+  failMessages: string[];
+  reviewReasonCodes: string[];
+  reviewReasons: string[];
+} => {
   const failMessages: string[] = [];
   const reviewReasons: string[] = [];
+  const reviewReasonCodes: string[] = [];
 
-  for (const { failMessage, reviewReason } of results) {
+  for (const { failMessage, reviewReason, reviewReasonCode } of results) {
     if (failMessage) {
       failMessages.push(failMessage);
     }
 
     if (reviewReason) {
       reviewReasons.push(reviewReason);
+      reviewReasonCodes.push(reviewReasonCode ?? 'UNKNOWN');
     }
   }
 
-  return { failMessages, reviewReasons };
+  return { failMessages, reviewReasonCodes, reviewReasons };
 };
 
 export const validateHighConfidenceField = (
@@ -151,10 +155,8 @@ export const validateEntityName = (
       notExtractedComment !== undefined &&
       notExtractedCode !== undefined
       ? {
-          reviewReason: formatReviewReason(
-            notExtractedCode,
-            notExtractedComment,
-          ),
+          reviewReason: notExtractedComment,
+          reviewReasonCode: notExtractedCode,
         }
       : {};
   }
@@ -173,13 +175,15 @@ export const validateEntityName = (
   return isMatch
     ? {}
     : {
-        reviewReason: formatReviewReason(code, commentFunction({ score })),
+        reviewReason: commentFunction({ score }),
+        reviewReasonCode: code,
       };
 };
 
 export const validateEntityTaxId = (
   extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantTaxId: string | undefined,
+  _code: string,
   mismatchComment: string,
   notExtractedComment?: string,
   notExtractedCode?: string,
@@ -189,10 +193,8 @@ export const validateEntityTaxId = (
       notExtractedComment !== undefined &&
       notExtractedCode !== undefined
       ? {
-          reviewReason: formatReviewReason(
-            notExtractedCode,
-            notExtractedComment,
-          ),
+          reviewReason: notExtractedComment,
+          reviewReasonCode: notExtractedCode,
         }
       : {};
   }
@@ -214,7 +216,7 @@ export const validateEntityTaxId = (
   }
 
   // At this point we know confidence is 'high' (due to check on line 205)
-  // High confidence mismatches are failMessages
+  // High confidence mismatches are failMessages (not reviewReasons), so code is not used
   return { failMessage: mismatchComment };
 };
 
@@ -231,10 +233,8 @@ export const validateEntityAddress = (
       notExtractedComment !== undefined &&
       notExtractedCode !== undefined
       ? {
-          reviewReason: formatReviewReason(
-            notExtractedCode,
-            notExtractedComment,
-          ),
+          reviewReason: notExtractedComment,
+          reviewReasonCode: notExtractedCode,
         }
       : {};
   }
@@ -269,7 +269,8 @@ export const validateEntityAddress = (
   return isMatch
     ? {}
     : {
-        reviewReason: formatReviewReason(code, commentFunction({ score })),
+        reviewReason: commentFunction({ score }),
+        reviewReasonCode: code,
       };
 };
 
@@ -292,10 +293,8 @@ export const validateDateField = (
       notExtractedComment !== undefined &&
       notExtractedCode !== undefined
       ? {
-          reviewReason: formatReviewReason(
-            notExtractedCode,
-            notExtractedComment,
-          ),
+          reviewReason: notExtractedComment,
+          reviewReasonCode: notExtractedCode,
         }
       : {};
   }
@@ -322,7 +321,7 @@ export const validateDateField = (
 
   return daysDiff > DATE_TOLERANCE_DAYS
     ? { failMessage: message }
-    : { reviewReason: formatReviewReason(code, message) };
+    : { reviewReason: message, reviewReasonCode: code };
 };
 
 export const WEIGHT_DISCREPANCY_THRESHOLD = 0.1;
@@ -425,10 +424,8 @@ export const validateDateWithinPeriod = (
       notExtractedComment !== undefined &&
       notExtractedCode !== undefined
       ? {
-          reviewReason: formatReviewReason(
-            notExtractedCode,
-            notExtractedComment,
-          ),
+          reviewReason: notExtractedComment,
+          reviewReasonCode: notExtractedCode,
         }
       : {};
   }
@@ -464,5 +461,5 @@ export const validateDateWithinPeriod = (
 
   return periodField.confidence === 'high'
     ? { failMessage: message }
-    : { reviewReason: formatReviewReason(code, message) };
+    : { reviewReason: message, reviewReasonCode: code };
 };

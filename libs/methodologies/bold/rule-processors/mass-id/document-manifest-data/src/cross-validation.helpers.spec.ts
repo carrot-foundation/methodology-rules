@@ -210,7 +210,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
       );
 
@@ -228,11 +228,12 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
       );
 
       expect(result.reviewReason).toContain('Address mismatch');
+      expect(result.reviewReasonCode).toBe('ADDRESS_MISMATCH');
     });
 
     it('should skip when extractedEntity is undefined', () => {
@@ -241,7 +242,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         undefined,
         address,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
       );
 
@@ -254,7 +255,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         undefined,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
       );
 
@@ -273,7 +274,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
       );
 
@@ -286,14 +287,15 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         undefined,
         address,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
         'Address not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({
-        reviewReason: '[NOT_EXTRACTED_CODE] Address not extracted',
+        reviewReason: 'Address not extracted',
+        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
       });
     });
 
@@ -301,10 +303,10 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         undefined,
         undefined,
-        'TEST_CODE',
+        'ADDRESS_MISMATCH',
         addressCommentFunction,
         'Address not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({});
@@ -316,14 +318,15 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityName(
         undefined,
         'Some Company',
-        'TEST_CODE',
+        'NAME_MISMATCH',
         nameCommentFunction,
         'Name not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({
-        reviewReason: '[NOT_EXTRACTED_CODE] Name not extracted',
+        reviewReason: 'Name not extracted',
+        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
       });
     });
 
@@ -331,10 +334,10 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityName(
         undefined,
         undefined,
-        'TEST_CODE',
+        'NAME_MISMATCH',
         nameCommentFunction,
         'Name not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({});
@@ -344,7 +347,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityName(
         undefined,
         'Some Company',
-        'TEST_CODE',
+        'NAME_MISMATCH',
         nameCommentFunction,
       );
 
@@ -357,13 +360,15 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         undefined,
         '12.345.678/0001-90',
+        'TAX_ID_MISMATCH',
         'Tax ID mismatch',
         'Tax ID not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({
-        reviewReason: '[NOT_EXTRACTED_CODE] Tax ID not extracted',
+        reviewReason: 'Tax ID not extracted',
+        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
       });
     });
 
@@ -371,9 +376,10 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         undefined,
         undefined,
+        'TAX_ID_MISMATCH',
         'Tax ID mismatch',
         'Tax ID not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({});
@@ -383,6 +389,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         undefined,
         '12.345.678/0001-90',
+        'TAX_ID_MISMATCH',
         'Tax ID mismatch',
       );
 
@@ -398,6 +405,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         entity,
         '12.345.678/0001-90',
+        'TAX_ID_MISMATCH',
         'Tax ID mismatch',
       );
 
@@ -415,7 +423,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-15',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -431,11 +439,12 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-03',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
       expect(result.reviewReason).toContain('Date differs by');
+      expect(result.reviewReasonCode).toBe('DATE_MISMATCH');
       expect(result.failMessage).toBeUndefined();
     });
 
@@ -448,7 +457,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-10',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -465,7 +474,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-06-15',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -476,7 +485,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -492,7 +501,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         undefined,
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -503,14 +512,15 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
         'Date not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({
-        reviewReason: '[NOT_EXTRACTED_CODE] Date not extracted',
+        reviewReason: 'Date not extracted',
+        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
       });
     });
 
@@ -518,10 +528,10 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         undefined,
         undefined,
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
         'Date not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({});
@@ -531,7 +541,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'TEST_CODE',
+        'DATE_MISMATCH',
         dateCommentFunction,
       );
 
@@ -653,7 +663,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -669,7 +679,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -685,7 +695,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-03-01',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -701,11 +711,12 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
       expect(result.reviewReason).toContain('outside period');
+      expect(result.reviewReasonCode).toBe('DATE_OUTSIDE_PERIOD');
       expect(result.failMessage).toBeUndefined();
     });
 
@@ -718,7 +729,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         undefined,
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -729,7 +740,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -740,14 +751,15 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
         'Period not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({
-        reviewReason: '[NOT_EXTRACTED_CODE] Period not extracted',
+        reviewReason: 'Period not extracted',
+        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
       });
     });
 
@@ -755,10 +767,10 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         undefined,
         undefined,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
         'Period not extracted',
-        'NOT_EXTRACTED_CODE',
+        'FIELD_NOT_EXTRACTED',
       );
 
       expect(result).toEqual({});
@@ -768,7 +780,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -784,7 +796,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -800,7 +812,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 
@@ -816,7 +828,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'TEST_CODE',
+        'DATE_OUTSIDE_PERIOD',
         periodCommentFunction,
       );
 

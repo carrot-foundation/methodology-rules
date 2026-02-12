@@ -21,7 +21,6 @@ import { buildCrossValidationComparison } from './cross-validation-debug.helpers
 import {
   collectResults,
   type FieldValidationResult,
-  formatReviewReason,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
   validateBasicExtractedData,
@@ -65,12 +64,10 @@ const validateVehiclePlate = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: formatReviewReason(
-            'FIELD_NOT_EXTRACTED',
-            CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
-              field: 'vehicle plate',
-            }),
-          ),
+          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+            field: 'vehicle plate',
+          }),
+          reviewReasonCode: 'FIELD_NOT_EXTRACTED',
         };
   }
 
@@ -97,10 +94,8 @@ const validateVehiclePlate = (
   }
 
   return {
-    reviewReason: formatReviewReason(
-      'VEHICLE_PLATE_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
-    ),
+    reviewReason: CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
+    reviewReasonCode: 'VEHICLE_PLATE_MISMATCH',
   };
 };
 
@@ -160,15 +155,13 @@ const validateWasteQuantity = (
 
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
-      reviewReason: formatReviewReason(
-        'WASTE_QUANTITY_WEIGHT_MISMATCH',
-        CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH({
-          discrepancyPercentage: (discrepancy * 100).toFixed(1),
-          extractedQuantity: matchedEntry.quantity.toString(),
-          unit: matchedEntry.unit ?? 'kg',
-          weighingWeight: weighingValue.toString(),
-        }),
-      ),
+      reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH({
+        discrepancyPercentage: (discrepancy * 100).toFixed(1),
+        extractedQuantity: matchedEntry.quantity.toString(),
+        unit: matchedEntry.unit ?? 'kg',
+        weighingWeight: weighingValue.toString(),
+      }),
+      reviewReasonCode: 'WASTE_QUANTITY_WEIGHT_MISMATCH',
     };
   }
 
@@ -186,12 +179,10 @@ const validateWasteType = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: formatReviewReason(
-            'FIELD_NOT_EXTRACTED',
-            CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
-              field: 'waste type entries',
-            }),
-          ),
+          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+            field: 'waste type entries',
+          }),
+          reviewReasonCode: 'FIELD_NOT_EXTRACTED',
         };
   }
 
@@ -234,13 +225,11 @@ const validateWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason: formatReviewReason(
-      'WASTE_TYPE_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH({
-        eventClassification: eventSummary,
-        extractedEntries: extractedSummary,
-      }),
-    ),
+    reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH({
+      eventClassification: eventSummary,
+      extractedEntries: extractedSummary,
+    }),
+    reviewReasonCode: 'WASTE_TYPE_MISMATCH',
   };
 };
 
@@ -265,7 +254,7 @@ export const validateMtrExtractedData = (
     extractionResult.data.extractionConfidence,
   );
 
-  const { failMessages, reviewReasons } = collectResults([
+  const { failMessages, reviewReasonCodes, reviewReasons } = collectResults([
     validateVehiclePlate(extractedData, eventData.pickUpEvent),
     validateEntityName(
       extractedData.receiver,
@@ -281,6 +270,7 @@ export const validateMtrExtractedData = (
     validateEntityTaxId(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.taxId,
+      'RECEIVER_TAX_ID_MISMATCH',
       CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
       NOT_EXTRACTED({
         context: '"Recycler" participant',
@@ -313,6 +303,7 @@ export const validateMtrExtractedData = (
     validateEntityTaxId(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.taxId,
+      'GENERATOR_TAX_ID_MISMATCH',
       CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
       NOT_EXTRACTED({
         context: '"Waste Generator" participant',
@@ -345,6 +336,7 @@ export const validateMtrExtractedData = (
     validateEntityTaxId(
       extractedData.hauler,
       eventData.haulerEvent?.participant.taxId,
+      'HAULER_TAX_ID_MISMATCH',
       CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
       NOT_EXTRACTED({
         context: '"Hauler" participant',
@@ -376,7 +368,7 @@ export const validateMtrExtractedData = (
 
   if (reviewReasons.length > 0) {
     return {
-      crossValidation,
+      crossValidation: { ...crossValidation, reviewReasonCodes },
       failMessages: allFailMessages,
       reviewReasons,
       reviewRequired: true,
