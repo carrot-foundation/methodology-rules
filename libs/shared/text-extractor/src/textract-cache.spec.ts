@@ -1,8 +1,8 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+
+import type { TextExtractionResult } from './text-extractor.types';
 
 import {
   computeFileHash,

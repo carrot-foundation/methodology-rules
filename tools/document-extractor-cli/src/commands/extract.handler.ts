@@ -17,19 +17,19 @@ import {
   getRegisteredLayouts,
 } from '@carrot-fndn/shared/document-extractor';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { textExtractor } from '@carrot-fndn/shared/text-extractor';
+import {
+  computeFileHash,
+  computeStringHash,
+  loadCachedResult,
+  saveCachedResult,
+  textExtractor,
+} from '@carrot-fndn/shared/text-extractor';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { formatAsHuman } from '../formatters/human.formatter';
 import { resolveFilePaths } from '../utils/file-resolver';
 import { parseS3Uri } from '../utils/s3-uri.parser';
-import {
-  computeFileHash,
-  computeStringHash,
-  loadCachedResult,
-  saveCachedResult,
-} from '../utils/textract-cache';
 import { promptForDocumentType, promptForFilePath } from './extract.prompts';
 
 const LOGS_DIR = path.resolve(__dirname, '../../logs');

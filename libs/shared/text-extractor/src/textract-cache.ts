@@ -1,8 +1,8 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-
 import { createHash } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+
+import type { TextExtractionResult } from './text-extractor.types';
 
 export const computeFileHash = async (filePath: string): Promise<string> => {
   const content = await readFile(filePath);
