@@ -3,6 +3,7 @@ import type { MethodologyDocument } from '@carrot-fndn/shared/types';
 import { formatAsJson } from '@carrot-fndn/shared/cli';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { logger, toDocumentKey } from '@carrot-fndn/shared/helpers';
+import path from 'node:path';
 
 import type { RunOptions } from './run.command';
 
@@ -60,6 +61,14 @@ export const handleRun = async (
   logger.info(
     `DOCUMENT_ATTACHMENT_BUCKET_NAME=${process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] ?? '(not set)'}`,
   );
+
+  if (options.cache !== false) {
+    process.env['TEXTRACT_CACHE_DIR'] = path.resolve(
+      __dirname,
+      '../../../document-extractor-cli/data/cache',
+    );
+    logger.info(`Textract cache enabled: ${process.env['TEXTRACT_CACHE_DIR']}`);
+  }
 
   const config = parseConfig(options.config);
   const processor = await loadProcessor(processorPath, config);

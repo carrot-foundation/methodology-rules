@@ -12,6 +12,7 @@ import { handleRun } from './run.handler';
 export interface RunOptions {
   auditDocumentId?: string | undefined;
   auditedDocumentId?: string | undefined;
+  cache: boolean;
   concurrency: number;
   config?: string | undefined;
   debug: boolean;
@@ -91,6 +92,7 @@ export const runCommand = new Command('run')
     false,
   )
   .option('--json', 'Output as JSON', false)
+  .option('--no-cache', 'Disable Textract output caching')
   .action(async (processorPath: string, options: RunOptions) => {
     try {
       if (options.inputFile) {
