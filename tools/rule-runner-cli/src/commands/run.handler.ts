@@ -7,21 +7,17 @@ import { logger, toDocumentKey } from '@carrot-fndn/shared/helpers';
 import type { RunOptions } from './run.command';
 
 import { formatAsHuman } from '../formatters/human.formatter';
+import { parseConfig } from '../utils/config-parser';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 
-const parseConfig = (
-  configString: string | undefined,
-): Record<string, unknown> | undefined => {
-  if (!configString) {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(configString) as Record<string, unknown>;
-  } catch {
-    throw new Error(`Invalid --config JSON: ${configString}`);
-  }
+type SingleRunOptions = Omit<
+  RunOptions,
+  'auditDocumentId' | 'auditedDocumentId' | 'methodologyExecutionId'
+> & {
+  auditDocumentId: string;
+  auditedDocumentId: string;
+  methodologyExecutionId: string;
 };
 
 const logDocumentDetails = async (
@@ -56,7 +52,7 @@ const logDocumentDetails = async (
 
 export const handleRun = async (
   processorPath: string,
-  options: RunOptions,
+  options: SingleRunOptions,
 ): Promise<void> => {
   logger.info(
     `DOCUMENT_BUCKET_NAME=${process.env['DOCUMENT_BUCKET_NAME'] ?? '(not set)'}`,
@@ -68,19 +64,22 @@ export const handleRun = async (
   const config = parseConfig(options.config);
   const processor = await loadProcessor(processorPath, config);
 
+  const documentKeyPrefix = `${options.methodologyExecutionId}/documents`;
+
   const ruleInput = buildRuleInput({
     documentId: options.auditDocumentId,
-    documentKeyPrefix: options.documentKeyPrefix,
+    documentKeyPrefix,
     parentDocumentId: options.auditedDocumentId,
   });
 
   logger.info(`Running processor from: ${processorPath}`);
+  logger.info(`Methodology execution: ${options.methodologyExecutionId}`);
   logger.info(
-    `Audit document: ${options.documentKeyPrefix}/${options.auditDocumentId}`,
+    `Audit document: ${documentKeyPrefix}/${options.auditDocumentId}`,
   );
 
   logger.info(
-    `Audited document: ${options.documentKeyPrefix}/${options.auditedDocumentId}`,
+    `Audited document: ${documentKeyPrefix}/${options.auditedDocumentId}`,
   );
 
   if (config) {
@@ -95,12 +94,12 @@ export const handleRun = async (
     await logDocumentDetails(
       'Audit document',
       options.auditDocumentId,
-      options.documentKeyPrefix,
+      documentKeyPrefix,
     );
     await logDocumentDetails(
       'Audited document',
       options.auditedDocumentId,
-      options.documentKeyPrefix,
+      documentKeyPrefix,
     );
   }
 

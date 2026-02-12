@@ -4,6 +4,7 @@ import {
   bold,
   formatAsJson,
   green,
+  processBatch,
   red,
   yellow,
 } from '@carrot-fndn/shared/cli';
@@ -197,32 +198,6 @@ const logFileResult = (
   }
 };
 
-const processBatchResults = (
-  settled: PromiseSettledResult<FileSuccess>[],
-  batch: string[],
-  successes: FileSuccess[],
-  failures: FileFailure[],
-  isBatch: boolean,
-  options: ExtractOptions,
-): void => {
-  for (const [entryIndex, result] of settled.entries()) {
-    const currentFilePath = batch[entryIndex]!;
-
-    if (result.status === 'fulfilled') {
-      successes.push(result.value);
-      logFileResult(result.value, isBatch, options);
-    } else {
-      const errorMessage =
-        result.reason instanceof Error
-          ? result.reason.message
-          : String(result.reason);
-
-      failures.push({ error: errorMessage, filePath: currentFilePath });
-      logger.error(`Failed: ${currentFilePath} — ${errorMessage}`);
-    }
-  }
-};
-
 const formatBreakdown = (items: FileSuccess[]): string => {
   const lines: string[] = [];
 
@@ -288,10 +263,8 @@ export const handleExtract = async (
   const documentExtractor = createDocumentExtractor(textExtractor);
   const { concurrency } = options;
 
-  const successes: FileSuccess[] = [];
-  const failures: FileFailure[] = [];
-
   const cacheEnabled = options.cache !== false;
+  const isBatch = resolvedPaths.length > 1;
 
   const processSingleFile = async (filePath: string): Promise<FileSuccess> => {
     const s3Uri = parseS3Uri(filePath);
@@ -349,35 +322,48 @@ export const handleExtract = async (
     return { filePath, result };
   };
 
-  const isBatch = resolvedPaths.length > 1;
-  const totalBatches = Math.ceil(resolvedPaths.length / concurrency);
+  const batchOptions = {
+    concurrency,
+    items: resolvedPaths,
+    onItemFailure: (filePath: string, error: string) => {
+      logger.error(`Failed: ${filePath} — ${error}`);
+    },
+    onItemSuccess: (_filePath: string, fileResult: FileSuccess) => {
+      logFileResult(fileResult, isBatch, options);
+    },
+    processItem: processSingleFile,
+    ...(isBatch && {
+      onBatchStart: (
+        batchNumber: number,
+        totalBatches: number,
+        batchSize: number,
+      ) => {
+        logger.info(
+          `Processing batch ${String(batchNumber)}/${String(totalBatches)} (${String(batchSize)} files)...`,
+        );
+      },
+    }),
+  };
 
-  for (let index = 0; index < resolvedPaths.length; index += concurrency) {
-    const batch = resolvedPaths.slice(index, index + concurrency);
-    const batchNumber = Math.floor(index / concurrency) + 1;
+  const { failures, successes } = await processBatch(batchOptions);
 
-    if (isBatch) {
-      logger.info(
-        `Processing batch ${String(batchNumber)}/${String(totalBatches)} (${String(batch.length)} files)...`,
-      );
-    }
-
-    const settled = await Promise.allSettled(
-      batch.map((fp) => processSingleFile(fp)),
-    );
-
-    processBatchResults(settled, batch, successes, failures, isBatch, options);
-  }
+  const mappedFailures: FileFailure[] = failures.map((f) => ({
+    error: f.error,
+    filePath: f.item,
+  }));
+  const mappedSuccesses: FileSuccess[] = successes.map((s) => s.result);
 
   if (isBatch) {
-    logSummary(resolvedPaths.length, successes, failures);
+    logSummary(resolvedPaths.length, mappedSuccesses, mappedFailures);
   }
 
-  if (isBatch && failures.length > 0) {
-    await writeFailuresJson(failures, options.outputFailures);
+  if (isBatch && mappedFailures.length > 0) {
+    await writeFailuresJson(mappedFailures, options.outputFailures);
   }
 
-  const reviewRequiredItems = successes.filter((s) => s.result.reviewRequired);
+  const reviewRequiredItems = mappedSuccesses.filter(
+    (s) => s.result.reviewRequired,
+  );
 
   if (isBatch && reviewRequiredItems.length > 0) {
     await writeReviewRequiredJson(reviewRequiredItems);
@@ -387,7 +373,7 @@ export const handleExtract = async (
     process.exitCode = 2;
   }
 
-  if (failures.length > 0) {
+  if (mappedFailures.length > 0) {
     process.exitCode = 1;
   }
 };
