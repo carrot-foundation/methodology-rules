@@ -85,8 +85,6 @@ export const CROSS_VALIDATION_COMMENTS = {
   GENERATOR_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The generator name extracted from the document does not match the "${WASTE_GENERATOR}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
-  HAULER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
-    `The hauler address extracted from the document does not match the "${HAULER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   HAULER_NAME_MISMATCH: ({ score }: { score: number }) =>
     `The hauler name extracted from the document does not match the "${HAULER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   HAULER_TAX_ID_MISMATCH: `The hauler tax ID extracted from the document does not match the "${HAULER}" participant tax ID.`,

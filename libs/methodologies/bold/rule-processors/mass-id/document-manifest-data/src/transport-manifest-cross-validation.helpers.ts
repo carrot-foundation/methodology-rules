@@ -323,15 +323,6 @@ export const validateMtrExtractedData = (
         field: 'hauler tax ID',
       }),
     ),
-    validateEntityAddress(
-      extractedData.hauler,
-      eventData.haulerEvent?.address,
-      CROSS_VALIDATION_COMMENTS.HAULER_ADDRESS_MISMATCH,
-      NOT_EXTRACTED({
-        context: '"Hauler" event',
-        field: 'hauler address',
-      }),
-    ),
     validateDateField(
       extractedData.transportDate,
       eventData.pickUpEvent?.externalCreatedAt,

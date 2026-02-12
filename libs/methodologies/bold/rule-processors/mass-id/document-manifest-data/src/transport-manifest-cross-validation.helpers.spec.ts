@@ -1427,7 +1427,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(addressReason).toBeDefined();
     });
 
-    it('should set reviewRequired when hauler address does not match', () => {
+    it('should not set reviewRequired when hauler address does not match', () => {
       const extractionResult = createExtractionResult({
         hauler: stubEntityWithHighAddress(
           'Hauler Co',
@@ -1456,14 +1456,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toBeDefined();
-
-      const addressReason = result.reviewReasons?.find((r) =>
-        r.includes('hauler address'),
-      );
-
-      expect(addressReason).toBeDefined();
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewReasons ?? []).toHaveLength(0);
     });
 
     it('should skip address validation when address confidence is low', () => {
