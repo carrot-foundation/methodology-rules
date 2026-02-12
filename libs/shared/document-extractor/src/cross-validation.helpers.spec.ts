@@ -171,7 +171,36 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.crossValidation).toEqual({
+      _extraction: {
+        documentType: 'recyclingManifest',
+        layoutId: null,
+        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+        s3Uri: 's3://test-bucket/test-key-att-1',
+      },
       documentNumber: { event: '123', extracted: '456' },
+    });
+  });
+
+  it('should include extraction metadata with null layouts when not provided', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      getExtractorConfig: () => ({ documentType: 'recyclingManifest' }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.crossValidation['_extraction']).toEqual({
+      documentType: 'recyclingManifest',
+      layoutId: null,
+      layouts: null,
+      s3Uri: 's3://test-bucket/test-key-att-1',
     });
   });
 

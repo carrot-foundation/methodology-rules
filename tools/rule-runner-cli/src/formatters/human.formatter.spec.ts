@@ -33,6 +33,19 @@ describe('formatAsHuman', () => {
     expect(output).toContain('Validation failed');
   });
 
+  it('should format a REVIEW_REQUIRED result', () => {
+    const output = formatAsHuman({
+      requestId: 'req-1',
+      responseToken: 'token',
+      responseUrl: 'https://localhost/placeholder' as never,
+      resultComment: 'Review required: vehicle plate mismatch',
+      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+    });
+
+    expect(output).toContain('⚠ REVIEW_REQUIRED');
+    expect(output).toContain('vehicle plate mismatch');
+  });
+
   it('should include result content when present', () => {
     const output = formatAsHuman({
       requestId: 'req-1',

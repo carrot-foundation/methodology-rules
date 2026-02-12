@@ -20,9 +20,10 @@ import { parseConfig } from '../utils/config-parser';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 
-interface EntryRuleFailure {
+interface EntryRuleResult {
   entry: InputEntry;
   resultComment?: string | undefined;
+  resultContent?: Record<string, unknown> | undefined;
   resultStatus: string;
 }
 
@@ -62,26 +63,28 @@ const writeErrorsJson = async (
   logger.info(`Errors JSON written to: ${filePath}`);
 };
 
-const writeRuleFailuresJson = async (
-  ruleFailures: EntryRuleFailure[],
+const writeRuleResultsJson = async (
+  results: EntryRuleResult[],
+  prefix: string,
 ): Promise<void> => {
   const timestamp = new Date().toISOString().replaceAll(':', '-');
 
   await mkdir(LOGS_DIR, { recursive: true });
 
-  const filePath = path.join(LOGS_DIR, `rule-failures-${timestamp}.json`);
+  const filePath = path.join(LOGS_DIR, `${prefix}-${timestamp}.json`);
 
-  const data = ruleFailures.map((f) => ({
+  const data = results.map((f) => ({
     auditDocumentId: f.entry.auditDocumentId,
     auditedDocumentId: f.entry.auditedDocumentId,
     methodologyExecutionId: f.entry.methodologyExecutionId,
     resultComment: f.resultComment,
+    resultContent: f.resultContent,
     resultStatus: f.resultStatus,
   }));
 
   await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
 
-  logger.info(`Rule failures JSON written to: ${filePath}`);
+  logger.info(`${prefix} JSON written to: ${filePath}`);
 };
 
 const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
@@ -114,6 +117,7 @@ const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
 const logBatchSummary = (
   total: number,
   passed: number,
+  reviewRequired: number,
   failedRule: number,
   errors: number,
 ): void => {
@@ -121,6 +125,7 @@ const logBatchSummary = (
     bold('=== Batch Execution Summary ==='),
     `Total documents: ${String(total)}`,
     green(`Passed: ${String(passed)}`),
+    yellow(`Review required: ${String(reviewRequired)}`),
     yellow(`Failed (rule): ${String(failedRule)}`),
     red(`Errors: ${String(errors)}`),
   ];
@@ -162,8 +167,10 @@ export const handleRunBatch = async (
   }
 
   let passedCount = 0;
+  let reviewRequiredCount = 0;
   let failedRuleCount = 0;
-  const ruleFailures: EntryRuleFailure[] = [];
+  const ruleFailures: EntryRuleResult[] = [];
+  const reviewRequiredResults: EntryRuleResult[] = [];
 
   const { failures } = await processBatch<InputEntry, ProcessResult>({
     concurrency: options.concurrency,
@@ -179,11 +186,20 @@ export const handleRunBatch = async (
     onItemSuccess: (entry, { elapsedMs, output }) => {
       if (output.resultStatus === RuleOutputStatus.PASSED) {
         passedCount++;
+      } else if (output.resultStatus === RuleOutputStatus.REVIEW_REQUIRED) {
+        reviewRequiredCount++;
+        reviewRequiredResults.push({
+          entry,
+          resultComment: output.resultComment,
+          resultContent: output.resultContent,
+          resultStatus: output.resultStatus,
+        });
       } else {
         failedRuleCount++;
         ruleFailures.push({
           entry,
           resultComment: output.resultComment,
+          resultContent: output.resultContent,
           resultStatus: output.resultStatus,
         });
       }
@@ -222,6 +238,7 @@ export const handleRunBatch = async (
   logBatchSummary(
     entries.length,
     passedCount,
+    reviewRequiredCount,
     failedRuleCount,
     failures.length,
   );
@@ -231,7 +248,11 @@ export const handleRunBatch = async (
   }
 
   if (ruleFailures.length > 0) {
-    await writeRuleFailuresJson(ruleFailures);
+    await writeRuleResultsJson(ruleFailures, 'rule-failures');
+  }
+
+  if (reviewRequiredResults.length > 0) {
+    await writeRuleResultsJson(reviewRequiredResults, 'review-required');
   }
 
   if (failures.length > 0 || failedRuleCount > 0) {

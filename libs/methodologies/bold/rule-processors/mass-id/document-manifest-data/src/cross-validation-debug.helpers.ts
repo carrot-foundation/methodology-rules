@@ -1,5 +1,6 @@
 import type {
   ExtractedEntityInfo,
+  ExtractedEntityWithAddressInfo,
   ExtractionConfidence,
 } from '@carrot-fndn/shared/document-extractor';
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
@@ -7,6 +8,7 @@ import type {
   MtrExtractedData,
   WasteTypeEntryData,
 } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
 import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
@@ -34,10 +36,46 @@ const {
   VEHICLE_LICENSE_PLATE,
 } = DocumentEventAttributeName;
 
+const buildAddressString = (address: MethodologyAddress): string =>
+  [address.street, address.number, address.city, address.countryState]
+    .filter(Boolean)
+    .join(', ');
+
+const addressDebugInfo = (
+  entity: ExtractedEntityWithAddressInfo,
+  eventAddress: MethodologyAddress | undefined,
+) => {
+  const extractedAddress = [
+    entity.address.parsed,
+    entity.city.parsed,
+    entity.state.parsed,
+  ]
+    .filter(Boolean)
+    .join(', ');
+
+  if (!eventAddress) {
+    return {
+      confidence: entity.address.confidence,
+      extracted: extractedAddress,
+    };
+  }
+
+  const eventAddressString = buildAddressString(eventAddress);
+  const { score } = isNameMatch(extractedAddress, eventAddressString);
+
+  return {
+    addressSimilarity: `${(score * 100).toFixed(0)}%`,
+    confidence: entity.address.confidence,
+    event: eventAddressString,
+    extracted: extractedAddress,
+  };
+};
+
 const entityDebugInfo = (
   entity: ExtractedEntityInfo | undefined,
   eventName: string | undefined,
   eventTaxId: string | undefined,
+  eventAddress?: MethodologyAddress,
 ) => {
   if (!entity) {
     return null;
@@ -53,7 +91,7 @@ const entityDebugInfo = (
       ? null
       : normalizeTaxId(entity.taxId.parsed) === normalizeTaxId(eventTaxId);
 
-  return {
+  const base = {
     confidence: entity.name.confidence,
     eventName: eventName ?? null,
     eventTaxId: eventTaxId ?? null,
@@ -62,6 +100,21 @@ const entityDebugInfo = (
     nameSimilarity,
     taxIdMatch,
   };
+
+  const hasAddress =
+    'address' in entity && 'city' in entity && 'state' in entity;
+
+  if (hasAddress) {
+    return {
+      ...base,
+      address: addressDebugInfo(
+        entity as ExtractedEntityWithAddressInfo,
+        eventAddress,
+      ),
+    };
+  }
+
+  return base;
 };
 
 const computeDateDaysDiff = (
@@ -111,11 +164,13 @@ export const buildCrossValidationComparison = (
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
       eventData.wasteGeneratorEvent?.participant.taxId,
+      eventData.wasteGeneratorEvent?.address,
     ),
     hauler: entityDebugInfo(
       extractedData.hauler,
       eventData.haulerEvent?.participant.name,
       eventData.haulerEvent?.participant.taxId,
+      eventData.haulerEvent?.address,
     ),
     issueDate: {
       confidence: extractedData.issueDate.confidence,
@@ -130,6 +185,7 @@ export const buildCrossValidationComparison = (
       extractedData.receiver,
       eventData.recyclerEvent?.participant.name,
       eventData.recyclerEvent?.participant.taxId,
+      eventData.recyclerEvent?.address,
     ),
     receivingDate: {
       confidence: extractedData.receivingDate?.confidence ?? null,
@@ -280,6 +336,7 @@ export const buildCdfCrossValidationComparison = (
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
       eventData.wasteGeneratorEvent?.participant.taxId,
+      eventData.wasteGeneratorEvent?.address,
     ),
     issueDate: {
       confidence: extractedData.issueDate.confidence,

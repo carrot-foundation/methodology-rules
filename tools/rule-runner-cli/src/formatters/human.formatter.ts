@@ -8,13 +8,21 @@ interface HumanFormatOptions {
   elapsedMs?: number;
 }
 
+const STATUS_DISPLAY: Record<
+  RuleOutputStatus,
+  { color: (text: string) => string; icon: string }
+> = {
+  [RuleOutputStatus.FAILED]: { color: red, icon: '✗' },
+  [RuleOutputStatus.PASSED]: { color: green, icon: '✓' },
+  [RuleOutputStatus.REVIEW_REQUIRED]: { color: yellow, icon: '⚠' },
+};
+
 export const formatAsHuman = (
   result: RuleOutput,
   options: HumanFormatOptions = {},
 ): string => {
-  const passed = result.resultStatus === RuleOutputStatus.PASSED;
-  const statusColor = passed ? green : red;
-  const statusIcon = passed ? '✓' : '✗';
+  const { color: statusColor, icon: statusIcon } =
+    STATUS_DISPLAY[result.resultStatus];
 
   const statusText = statusColor(bold(`${statusIcon} ${result.resultStatus}`));
 

@@ -42,6 +42,13 @@ const processInput = async <
       Object.assign(result.crossValidation, validationResult.crossValidation);
     }
 
+    result.crossValidation['_extraction'] = {
+      documentType: extractorConfig.documentType,
+      layoutId: extractionResult.layoutId ?? null,
+      layouts: extractorConfig.layouts ?? null,
+      s3Uri: `s3://${attachmentInfo.s3Bucket}/${attachmentInfo.s3Key}`,
+    };
+
     if (validationResult.failMessages.length > 0) {
       result.failMessages.push(...validationResult.failMessages);
     }

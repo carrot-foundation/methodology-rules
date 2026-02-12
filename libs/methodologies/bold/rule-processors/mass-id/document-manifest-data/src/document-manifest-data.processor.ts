@@ -170,9 +170,8 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         resultContent: {
           crossValidation: crossValidationResult.crossValidation,
           reviewReasons: crossValidationResult.reviewReasons,
-          reviewRequired: true,
         },
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
       };
     }
 

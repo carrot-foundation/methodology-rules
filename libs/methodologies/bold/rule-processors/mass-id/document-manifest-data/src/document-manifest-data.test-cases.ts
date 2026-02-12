@@ -399,7 +399,7 @@ export const crossValidationTestCases = [
       ...defaultEvents,
     },
     resultComment: 'Review required: Low confidence extraction',
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
     scenario: 'cross-validation requires review',
   },
 ];
