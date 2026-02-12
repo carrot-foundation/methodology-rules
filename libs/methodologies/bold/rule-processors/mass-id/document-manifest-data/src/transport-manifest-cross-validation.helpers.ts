@@ -21,6 +21,7 @@ import { buildCrossValidationComparison } from './cross-validation-debug.helpers
 import {
   collectResults,
   type FieldValidationResult,
+  formatReviewReason,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
   validateBasicExtractedData,
@@ -64,9 +65,12 @@ const validateVehiclePlate = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
-            field: 'vehicle plate',
-          }),
+          reviewReason: formatReviewReason(
+            'FIELD_NOT_EXTRACTED',
+            CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+              field: 'vehicle plate',
+            }),
+          ),
         };
   }
 
@@ -93,7 +97,10 @@ const validateVehiclePlate = (
   }
 
   return {
-    reviewReason: CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
+    reviewReason: formatReviewReason(
+      'VEHICLE_PLATE_MISMATCH',
+      CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
+    ),
   };
 };
 
@@ -153,12 +160,15 @@ const validateWasteQuantity = (
 
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
-      reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH({
-        discrepancyPercentage: (discrepancy * 100).toFixed(1),
-        extractedQuantity: matchedEntry.quantity.toString(),
-        unit: matchedEntry.unit ?? 'kg',
-        weighingWeight: weighingValue.toString(),
-      }),
+      reviewReason: formatReviewReason(
+        'WASTE_QUANTITY_WEIGHT_MISMATCH',
+        CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH({
+          discrepancyPercentage: (discrepancy * 100).toFixed(1),
+          extractedQuantity: matchedEntry.quantity.toString(),
+          unit: matchedEntry.unit ?? 'kg',
+          weighingWeight: weighingValue.toString(),
+        }),
+      ),
     };
   }
 
@@ -176,9 +186,12 @@ const validateWasteType = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
-            field: 'waste type entries',
-          }),
+          reviewReason: formatReviewReason(
+            'FIELD_NOT_EXTRACTED',
+            CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+              field: 'waste type entries',
+            }),
+          ),
         };
   }
 
@@ -221,10 +234,13 @@ const validateWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH({
-      eventClassification: eventSummary,
-      extractedEntries: extractedSummary,
-    }),
+    reviewReason: formatReviewReason(
+      'WASTE_TYPE_MISMATCH',
+      CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH({
+        eventClassification: eventSummary,
+        extractedEntries: extractedSummary,
+      }),
+    ),
   };
 };
 
@@ -254,11 +270,13 @@ export const validateMtrExtractedData = (
     validateEntityName(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.name,
+      'RECEIVER_NAME_MISMATCH',
       CROSS_VALIDATION_COMMENTS.RECEIVER_NAME_MISMATCH,
       NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'receiver name',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.receiver,
@@ -268,24 +286,29 @@ export const validateMtrExtractedData = (
         context: '"Recycler" participant',
         field: 'receiver tax ID',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityAddress(
       extractedData.receiver,
       eventData.recyclerEvent?.address,
+      'RECEIVER_ADDRESS_MISMATCH',
       CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
       NOT_EXTRACTED({
         context: '"Recycler" event',
         field: 'receiver address',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityName(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
+      'GENERATOR_NAME_MISMATCH',
       CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH,
       NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator name',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.generator,
@@ -295,24 +318,29 @@ export const validateMtrExtractedData = (
         context: '"Waste Generator" participant',
         field: 'generator tax ID',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityAddress(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.address,
+      'GENERATOR_ADDRESS_MISMATCH',
       CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
       NOT_EXTRACTED({
         context: '"Waste Generator" event',
         field: 'generator address',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityName(
       extractedData.hauler,
       eventData.haulerEvent?.participant.name,
+      'HAULER_NAME_MISMATCH',
       CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH,
       NOT_EXTRACTED({
         context: '"Hauler" participant',
         field: 'hauler name',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.hauler,
@@ -322,18 +350,23 @@ export const validateMtrExtractedData = (
         context: '"Hauler" participant',
         field: 'hauler tax ID',
       }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateDateField(
       extractedData.transportDate,
       eventData.pickUpEvent?.externalCreatedAt,
+      'TRANSPORT_DATE_MISMATCH',
       CROSS_VALIDATION_COMMENTS.TRANSPORT_DATE_MISMATCH,
       NOT_EXTRACTED({ context: 'Pick-up event', field: 'transport date' }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateDateField(
       extractedData.receivingDate,
       eventData.dropOffEvent?.externalCreatedAt,
+      'RECEIVING_DATE_MISMATCH',
       CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH,
       NOT_EXTRACTED({ context: 'Drop-off event', field: 'receiving date' }),
+      'FIELD_NOT_EXTRACTED',
     ),
     validateWasteType(extractedData, eventData.pickUpEvent),
     validateWasteQuantity(extractedData, eventData),
