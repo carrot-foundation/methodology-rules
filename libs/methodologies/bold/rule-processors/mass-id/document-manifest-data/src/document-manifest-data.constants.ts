@@ -69,6 +69,17 @@ export const CROSS_VALIDATION_COMMENTS = {
     periodStart: string;
   }) =>
     `The Drop-off event date ("${dropOffDate}") falls outside the recycling manifest processing period ("${periodStart}" to "${periodEnd}").`,
+  FIELD_NOT_EXTRACTED: ({
+    context,
+    field,
+  }: {
+    context?: string;
+    field: string;
+  }) => {
+    const suffix = context ? ` with the ${context}` : '';
+
+    return `The ${field} could not be extracted from the document for cross-validation${suffix}.`;
+  },
   GENERATOR_ADDRESS_MISMATCH: ({
     score,
   }: {
@@ -129,8 +140,8 @@ export const CROSS_VALIDATION_COMMENTS = {
     score: number;
   }) =>
     `The receiver name extracted from the document does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
-  RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
 
+  RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,
     eventDate,
@@ -200,6 +211,7 @@ export const CROSS_VALIDATION_COMMENTS = {
     weighingWeight: string;
   }) =>
     `The waste quantity extracted from the document (${extractedQuantity} ${unit}) differs from the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) by ${discrepancyPercentage}%.`,
+
   WASTE_TYPE_MISMATCH: ({
     eventClassification,
     extractedEntries,

@@ -17,6 +17,8 @@ import {
   validateDateField,
   validateDateWithinPeriod,
   validateEntityAddress,
+  validateEntityName,
+  validateEntityTaxId,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './cross-validation.helpers';
 
@@ -74,6 +76,8 @@ const periodCommentFunction = ({
   periodEnd: string;
   periodStart: string;
 }) => `Date ${dropOffDate} outside period ${periodStart}-${periodEnd}`;
+
+const nameCommentFunction = () => 'Name mismatch';
 
 describe('cross-validation.helpers', () => {
   describe('validateBasicExtractedData', () => {
@@ -274,6 +278,98 @@ describe('cross-validation.helpers', () => {
 
       expect(result).toEqual({});
     });
+
+    it('should return reviewReason when entity not extracted but event address exists and notExtractedComment provided', () => {
+      const address = makeAddress('Rua Test', '1', 'City', 'ST');
+
+      const result = validateEntityAddress(
+        undefined,
+        address,
+        addressCommentFunction,
+        'Address not extracted',
+      );
+
+      expect(result).toEqual({ reviewReason: 'Address not extracted' });
+    });
+
+    it('should return empty when entity not extracted, event address undefined, and notExtractedComment provided', () => {
+      const result = validateEntityAddress(
+        undefined,
+        undefined,
+        addressCommentFunction,
+        'Address not extracted',
+      );
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('validateEntityName', () => {
+    it('should return reviewReason when entity not extracted but event name exists and notExtractedComment provided', () => {
+      const result = validateEntityName(
+        undefined,
+        'Some Company',
+        nameCommentFunction,
+        'Name not extracted',
+      );
+
+      expect(result).toEqual({ reviewReason: 'Name not extracted' });
+    });
+
+    it('should return empty when entity not extracted and event name is undefined', () => {
+      const result = validateEntityName(
+        undefined,
+        undefined,
+        nameCommentFunction,
+        'Name not extracted',
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when entity not extracted and no notExtractedComment', () => {
+      const result = validateEntityName(
+        undefined,
+        'Some Company',
+        nameCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('validateEntityTaxId', () => {
+    it('should return reviewReason when entity not extracted but event taxId exists and notExtractedComment provided', () => {
+      const result = validateEntityTaxId(
+        undefined,
+        '12.345.678/0001-90',
+        'Tax ID mismatch',
+        'Tax ID not extracted',
+      );
+
+      expect(result).toEqual({ reviewReason: 'Tax ID not extracted' });
+    });
+
+    it('should return empty when entity not extracted and event taxId is undefined', () => {
+      const result = validateEntityTaxId(
+        undefined,
+        undefined,
+        'Tax ID mismatch',
+        'Tax ID not extracted',
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when entity not extracted and no notExtractedComment', () => {
+      const result = validateEntityTaxId(
+        undefined,
+        '12.345.678/0001-90',
+        'Tax ID mismatch',
+      );
+
+      expect(result).toEqual({});
+    });
   });
 
   describe('validateDateField', () => {
@@ -356,6 +452,38 @@ describe('cross-validation.helpers', () => {
       } as ExtractedField<string>;
 
       const result = validateDateField(field, undefined, dateCommentFunction);
+
+      expect(result).toEqual({});
+    });
+
+    it('should return reviewReason when date not extracted but event date exists and notExtractedComment provided', () => {
+      const result = validateDateField(
+        undefined,
+        '2024-01-15',
+        dateCommentFunction,
+        'Date not extracted',
+      );
+
+      expect(result).toEqual({ reviewReason: 'Date not extracted' });
+    });
+
+    it('should return empty when date not extracted, event date undefined, and notExtractedComment provided', () => {
+      const result = validateDateField(
+        undefined,
+        undefined,
+        dateCommentFunction,
+        'Date not extracted',
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when date not extracted and no notExtractedComment', () => {
+      const result = validateDateField(
+        undefined,
+        '2024-01-15',
+        dateCommentFunction,
+      );
 
       expect(result).toEqual({});
     });
@@ -543,6 +671,38 @@ describe('cross-validation.helpers', () => {
     });
 
     it('should skip when periodField is undefined', () => {
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        undefined,
+        periodCommentFunction,
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return reviewReason when period not extracted but event date exists and notExtractedComment provided', () => {
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        undefined,
+        periodCommentFunction,
+        'Period not extracted',
+      );
+
+      expect(result).toEqual({ reviewReason: 'Period not extracted' });
+    });
+
+    it('should return empty when period not extracted, event date undefined, and notExtractedComment provided', () => {
+      const result = validateDateWithinPeriod(
+        undefined,
+        undefined,
+        periodCommentFunction,
+        'Period not extracted',
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should return empty when period not extracted and no notExtractedComment', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,

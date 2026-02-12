@@ -143,8 +143,16 @@ export const validateEntityName = (
     extractedName: string;
     score: number;
   }) => string,
+  notExtractedComment?: string,
 ): FieldValidationResult => {
-  if (!extractedEntity || !eventParticipantName) {
+  if (!extractedEntity) {
+    return eventParticipantName !== undefined &&
+      notExtractedComment !== undefined
+      ? { reviewReason: notExtractedComment }
+      : {};
+  }
+
+  if (!eventParticipantName) {
     return {};
   }
 
@@ -170,8 +178,16 @@ export const validateEntityTaxId = (
   extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantTaxId: string | undefined,
   mismatchComment: string,
+  notExtractedComment?: string,
 ): FieldValidationResult => {
-  if (!extractedEntity || !eventParticipantTaxId) {
+  if (!extractedEntity) {
+    return eventParticipantTaxId !== undefined &&
+      notExtractedComment !== undefined
+      ? { reviewReason: notExtractedComment }
+      : {};
+  }
+
+  if (!eventParticipantTaxId) {
     return {};
   }
 
@@ -198,8 +214,15 @@ export const validateEntityAddress = (
     extractedAddress: string;
     score: number;
   }) => string,
+  notExtractedComment?: string,
 ): FieldValidationResult => {
-  if (!extractedEntity || !eventAddress) {
+  if (!extractedEntity) {
+    return eventAddress !== undefined && notExtractedComment !== undefined
+      ? { reviewReason: notExtractedComment }
+      : {};
+  }
+
+  if (!eventAddress) {
     return {};
   }
 
@@ -247,8 +270,15 @@ export const validateDateField = (
     eventDate: string;
     extractedDate: string;
   }) => string,
+  notExtractedComment?: string,
 ): FieldValidationResult => {
-  if (!extractedDate || !eventDateString) {
+  if (!extractedDate) {
+    return eventDateString !== undefined && notExtractedComment !== undefined
+      ? { reviewReason: notExtractedComment }
+      : {};
+  }
+
+  if (!eventDateString) {
     return {};
   }
 
@@ -364,8 +394,15 @@ export const validateDateWithinPeriod = (
     periodEnd: string;
     periodStart: string;
   }) => string,
+  notExtractedComment?: string,
 ): FieldValidationResult => {
-  if (!eventDateString || !periodField) {
+  if (!periodField) {
+    return eventDateString !== undefined && notExtractedComment !== undefined
+      ? { reviewReason: notExtractedComment }
+      : {};
+  }
+
+  if (!eventDateString) {
     return {};
   }
 

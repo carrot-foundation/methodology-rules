@@ -49,6 +49,11 @@ const baseCdfData = {
     rawMatch: '01/01/2024',
   },
   recycler: stubEntity('Recycler Corp', '33.333.333/0001-33'),
+  wasteEntries: {
+    confidence: 'high' as const,
+    parsed: [{ code: '190812', description: 'Lodos de tratamento' }],
+    rawMatch: '190812 - Lodos de tratamento',
+  },
 };
 
 const createExtractionResult = (
@@ -402,8 +407,10 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should skip when no transport manifests extracted', () => {
-        const extractionResult = createExtractionResult({});
+      it('should set reviewRequired when no transport manifests extracted but MTR numbers exist', () => {
+        const extractionResult = createExtractionResult({
+          transportManifests: undefined as never,
+        });
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
@@ -413,7 +420,13 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.includes('transport manifest numbers'),
+          ),
+        ).toBe(true);
       });
     });
 
@@ -726,6 +739,92 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(result.reviewReasons!.length).toBeGreaterThan(0);
+      });
+    });
+
+    describe('not-extracted field detection', () => {
+      it('should set reviewRequired when recycler is not extracted but recyclerEvent exists', () => {
+        const extractionResult = createExtractionResult({
+          recycler: undefined as never,
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          recyclerEvent: {
+            participant: {
+              name: 'Recycler Corp',
+              taxId: '33.333.333/0001-33',
+            },
+          } as unknown as DocumentEvent,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) => r.includes('recycler name')),
+        ).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) => r.includes('recycler tax ID')),
+        ).toBe(true);
+      });
+
+      it('should set reviewRequired when waste entries not extracted but dropOffEvent exists', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: undefined as never,
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          dropOffEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+        ).toBe(true);
+      });
+
+      it('should set reviewRequired when processing period not extracted but dropOffEvent has date', () => {
+        const extractionResult = createExtractionResult({
+          processingPeriod: undefined as never,
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          dropOffEvent: {
+            externalCreatedAt: '2024-01-15',
+          } as unknown as DocumentEvent,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) => r.includes('processing period')),
+        ).toBe(true);
+      });
+
+      it('should not flag not-extracted when both extracted and event data are undefined', () => {
+        const extractionResult = createExtractionResult({
+          recycler: undefined as never,
+        });
+
+        const result = validateCdfExtractedData(
+          extractionResult,
+          baseEventData,
+        );
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
       });
     });
   });

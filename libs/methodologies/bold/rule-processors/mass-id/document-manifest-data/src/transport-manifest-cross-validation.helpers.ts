@@ -55,11 +55,23 @@ const {
   VEHICLE_LICENSE_PLATE,
 } = DocumentEventAttributeName;
 
+const NOT_EXTRACTED = CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED;
+
 const validateVehiclePlate = (
   extractedData: MtrExtractedData,
   pickUpEvent: DocumentEvent | undefined,
 ): FieldValidationResult => {
-  if (!pickUpEvent || !extractedData.vehiclePlate) {
+  if (!extractedData.vehiclePlate) {
+    return pickUpEvent === undefined
+      ? {}
+      : {
+          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+            field: 'vehicle plate',
+          }),
+        };
+  }
+
+  if (!pickUpEvent) {
     return {};
   }
 
@@ -162,10 +174,19 @@ const validateWasteType = (
   pickUpEvent: DocumentEvent | undefined,
 ): FieldValidationResult => {
   if (
-    !pickUpEvent ||
     extractedData.wasteTypes === undefined ||
     extractedData.wasteTypes.length === 0
   ) {
+    return pickUpEvent === undefined
+      ? {}
+      : {
+          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+            field: 'waste type entries',
+          }),
+        };
+  }
+
+  if (!pickUpEvent) {
     return {};
   }
 
@@ -235,56 +256,94 @@ export const validateMtrExtractedData = (
       extractedData.receiver,
       eventData.recyclerEvent?.participant.name,
       CROSS_VALIDATION_COMMENTS.RECEIVER_NAME_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Recycler" participant',
+        field: 'receiver name',
+      }),
     ),
     validateEntityTaxId(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Recycler" participant',
+        field: 'receiver tax ID',
+      }),
     ),
     validateEntityAddress(
       extractedData.receiver,
       eventData.recyclerEvent?.address,
       CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Recycler" event',
+        field: 'receiver address',
+      }),
     ),
     validateEntityName(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
       CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Waste Generator" participant',
+        field: 'generator name',
+      }),
     ),
     validateEntityTaxId(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Waste Generator" participant',
+        field: 'generator tax ID',
+      }),
     ),
     validateEntityAddress(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.address,
       CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Waste Generator" event',
+        field: 'generator address',
+      }),
     ),
     validateEntityName(
       extractedData.hauler,
       eventData.haulerEvent?.participant.name,
       CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Hauler" participant',
+        field: 'hauler name',
+      }),
     ),
     validateEntityTaxId(
       extractedData.hauler,
       eventData.haulerEvent?.participant.taxId,
       CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Hauler" participant',
+        field: 'hauler tax ID',
+      }),
     ),
     validateEntityAddress(
       extractedData.hauler,
       eventData.haulerEvent?.address,
       CROSS_VALIDATION_COMMENTS.HAULER_ADDRESS_MISMATCH,
+      NOT_EXTRACTED({
+        context: '"Hauler" event',
+        field: 'hauler address',
+      }),
     ),
     validateDateField(
       extractedData.transportDate,
       eventData.pickUpEvent?.externalCreatedAt,
       CROSS_VALIDATION_COMMENTS.TRANSPORT_DATE_MISMATCH,
+      NOT_EXTRACTED({ context: 'Pick-up event', field: 'transport date' }),
     ),
     validateDateField(
       extractedData.receivingDate,
       eventData.dropOffEvent?.externalCreatedAt,
       CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH,
+      NOT_EXTRACTED({ context: 'Drop-off event', field: 'receiving date' }),
     ),
     validateWasteType(extractedData, eventData.pickUpEvent),
     validateWasteQuantity(extractedData, eventData),

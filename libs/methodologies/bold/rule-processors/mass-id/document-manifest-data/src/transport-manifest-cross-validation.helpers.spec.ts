@@ -52,6 +52,17 @@ const baseMtrData = {
     rawMatch: '01/01/2024',
   },
   receiver: stubEntity('Receiver Co', '33.333.333/0001-33'),
+  vehiclePlate: {
+    confidence: 'high' as const,
+    parsed: 'ABC1234',
+    rawMatch: 'ABC1234',
+  },
+  wasteTypes: [
+    createExtractedWasteTypeEntry({
+      code: '190812',
+      description: 'Lodos de tratamento',
+    }),
+  ],
 };
 
 const createExtractionResult = (
@@ -813,8 +824,10 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should skip validation when no waste types extracted', () => {
-        const extractionResult = createExtractionResult({});
+      it('should set reviewRequired when waste types not extracted but pickUpEvent exists', () => {
+        const extractionResult = createExtractionResult({
+          wasteTypes: undefined as never,
+        });
 
         const eventData: MtrCrossValidationEventData = {
           ...baseEventData,
@@ -827,7 +840,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+        ).toBe(true);
       });
 
       it('should return review reason when code matches but description does not', () => {
@@ -945,8 +962,10 @@ describe('transport-manifest-cross-validation.helpers', () => {
     });
 
     describe('waste quantity weight validation', () => {
-      it('should return no issues when no wasteTypes in extracted data', () => {
-        const extractionResult = createExtractionResult({});
+      it('should set reviewRequired when no wasteTypes in extracted data but pickUpEvent exists', () => {
+        const extractionResult = createExtractionResult({
+          wasteTypes: undefined as never,
+        });
 
         const eventData: MtrCrossValidationEventData = {
           ...baseEventData,
@@ -960,7 +979,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons).toBeDefined();
+        expect(
+          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+        ).toBe(true);
       });
 
       it('should return no issues when no matching waste type entry', () => {
@@ -1476,6 +1499,87 @@ describe('transport-manifest-cross-validation.helpers', () => {
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
+    });
+  });
+
+  describe('not-extracted field detection', () => {
+    const baseEventData: MtrCrossValidationEventData = {
+      attachment: undefined,
+      documentNumber: '12345',
+      documentType: 'MTR',
+      dropOffEvent: undefined,
+      eventAddressId: 'addr-1',
+      eventValue: 100,
+      exemptionJustification: undefined,
+      hasWrongLabelAttachment: false,
+      haulerEvent: undefined,
+      issueDateAttribute: undefined,
+      pickUpEvent: undefined,
+      recyclerCountryCode: 'BR',
+      recyclerEvent: undefined,
+      wasteGeneratorEvent: undefined,
+      weighingEvents: [],
+    };
+
+    it('should set reviewRequired when receiver is not extracted but recyclerEvent exists', () => {
+      const extractionResult = createExtractionResult({
+        receiver: undefined as never,
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerEvent: {
+          participant: {
+            name: 'Recycler Corp',
+            taxId: '33.333.333/0001-33',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+      expect(
+        result.reviewReasons?.some((r) => r.includes('receiver name')),
+      ).toBe(true);
+      expect(
+        result.reviewReasons?.some((r) => r.includes('receiver tax ID')),
+      ).toBe(true);
+    });
+
+    it('should set reviewRequired when transport date is not extracted but pickUpEvent has date', () => {
+      const extractionResult = createExtractionResult({
+        transportDate: undefined as never,
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        pickUpEvent: {
+          externalCreatedAt: '2024-01-15',
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons).toBeDefined();
+      expect(
+        result.reviewReasons?.some((r) => r.includes('transport date')),
+      ).toBe(true);
+    });
+
+    it('should not flag not-extracted when both extracted and event data are undefined', () => {
+      const extractionResult = createExtractionResult({
+        receiver: undefined as never,
+        vehiclePlate: undefined as never,
+        wasteTypes: undefined as never,
+      });
+
+      const result = validateMtrExtractedData(extractionResult, baseEventData);
 
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(false);
