@@ -20,49 +20,18 @@ import {
   extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
+  MTR_DEFAULT_LABEL_PATTERNS,
+  MTR_DEFAULT_PATTERNS,
+  MTR_DEFAULT_SECTION_PATTERNS,
 } from './mtr-shared.helpers';
 import {
   type MtrExtractedData,
   type WasteTypeEntry,
 } from './transport-manifest.types';
 
-const MTR_PATTERNS = {
-  // eslint-disable-next-line sonarjs/slow-regex
-  cnpj: /CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi,
-  // eslint-disable-next-line sonarjs/slow-regex
-  documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
-  issueDate:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  receivingDate:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Data\s*(?:(?:de|da|do)\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  transportDate:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Data\s*(?:(?:de|da|do)\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  wasteClassification: /Classe\s*:?\s*(.+?)(?=\n|$)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  wasteQuantity: /Quantidade\s*:?\s*([\d.,]+)\s*(kg|ton|t|m³)?/i,
-  wasteType:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Tipo\s*(?:de\s*)?Residuo\s*:?\s*([a-z\s]+?)(?=\n|Classe|$)/i,
-} as const;
-
-const LABEL_PATTERNS = {
-  driverName: /nome\s*do\s*motorista|motorista/i,
-  issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emissao/i,
-  receivingDate: /Data\s*(?:(?:de|da|do)\s*)?Recebimento/i,
-  transportDate: /Data\s*(?:(?:de|da|do)\s*)?Transporte/i,
-  vehiclePlate: /placa\s*(?:do\s*)?veiculo/i,
-} as const;
-
-const SECTION_PATTERNS = {
-  destinatario:
-    /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
-  gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
-  transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
-} as const;
+const MTR_PATTERNS = { ...MTR_DEFAULT_PATTERNS } as const;
+const LABEL_PATTERNS = { ...MTR_DEFAULT_LABEL_PATTERNS } as const;
+const SECTION_PATTERNS = { ...MTR_DEFAULT_SECTION_PATTERNS } as const;
 
 const SIGNATURE_PATTERNS = [
   /MTR/i,

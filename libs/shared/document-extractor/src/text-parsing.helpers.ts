@@ -174,9 +174,13 @@ export const extractEntityFromSection = (
 
   cnpjPattern.lastIndex = 0;
 
-  if (!cnpjMatch?.[1]) {
+  const rawCnpj = cnpjMatch?.[1];
+
+  if (!rawCnpj) {
     return undefined;
   }
+
+  const normalizedCnpj = rawCnpj.replaceAll(' ', '');
 
   const lines = section
     .split('\n')
@@ -216,7 +220,7 @@ export const extractEntityFromSection = (
     rawMatch: section,
     value: {
       name: name as NonEmptyString,
-      taxId: cnpjMatch[1] as NonEmptyString,
+      taxId: normalizedCnpj as NonEmptyString,
     },
   };
 };

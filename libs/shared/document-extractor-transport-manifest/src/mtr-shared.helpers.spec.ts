@@ -5,6 +5,7 @@ import {
   extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
+  MTR_DEFAULT_PATTERNS,
   stripTrailingRegistrationNumber,
 } from './mtr-shared.helpers';
 
@@ -215,12 +216,177 @@ describe('MTR shared helpers', () => {
       });
     });
 
-    it('should return empty when both labels present but only non-name non-plate values', () => {
+    it('should not assign driverName when single value matches neither name nor plate pattern', () => {
       const section = ['Nome do Motorista', 'Placa do Veiculo', '12345'].join(
         '\n',
       );
 
       expect(extractDriverAndVehicle(section)).toEqual({});
+    });
+
+    it('should extract name with trailing period', () => {
+      const section = ['Nome do Motorista', 'ALEX .'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'ALEX .',
+      });
+    });
+
+    it('should extract name with trailing quotes', () => {
+      const section = ['Nome do Motorista', "JOAO CARLOS '''"].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: "JOAO CARLOS '''",
+      });
+    });
+
+    it('should extract name with hyphen', () => {
+      const section = ['Nome do Motorista', 'JEAN-PIERRE SILVA'].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'JEAN-PIERRE SILVA',
+      });
+    });
+
+    it('should extract short name (>= 2 chars)', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'MAX',
+        'HHK3820',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'MAX',
+        vehiclePlate: 'HHK3820',
+      });
+    });
+
+    it('should extract name with trailing comma', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'LUIZ CLAUDIO DOS REIS,',
+        'GXM5293',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'LUIZ CLAUDIO DOS REIS,',
+        vehiclePlate: 'GXM5293',
+      });
+    });
+
+    it('should not treat "motoristateste" as a driver label', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'motoristateste',
+        'OOE4A25',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'motoristateste',
+        vehiclePlate: 'OOE4A25',
+      });
+    });
+
+    it('should extract name with CPF appended as full string', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'Lourival Ribeiro Santos CPF: 640.160.486-72',
+        'LQS9J37',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'Lourival Ribeiro Santos CPF: 640.160.486-72',
+        vehiclePlate: 'LQS9J37',
+      });
+    });
+
+    it('should extract plate-concatenated name as full string', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'OOE4A25Fabiano Campolin de Souza',
+        'OOE4A25',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'OOE4A25Fabiano Campolin de Souza',
+        vehiclePlate: 'OOE4A25',
+      });
+    });
+
+    it('should extract MTR number as driverName when plate is identified', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        '224133585',
+        'FDB0D87',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: '224133585',
+        vehiclePlate: 'FDB0D87',
+      });
+    });
+
+    it('should fallback to first value line when only driver label present and findNameLine fails', () => {
+      const section = [
+        'Nome do Motorista',
+        'Lourival Ribeiro Santos CPF: 640.160.486-72',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'Lourival Ribeiro Santos CPF: 640.160.486-72',
+      });
+    });
+
+    it('should not treat short ambiguous word as driverName when it is the only value', () => {
+      const section = ['Nome do Motorista', 'Placa do Veiculo', 'SEM'].join(
+        '\n',
+      );
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
+    });
+
+    it('should extract long single name when both labels present', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'CARLOS SILVA',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'CARLOS SILVA',
+      });
+    });
+
+    it('should ignore single-char placeholder as driverName', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        '-',
+        '00000',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
+    });
+
+    it('should extract numeric value as driverName when boilerplate is filtered', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'assinatura do responsavel',
+        '411022658160',
+        'HBU5B80',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: '411022658160',
+        vehiclePlate: 'HBU5B80',
+      });
     });
   });
 
@@ -232,8 +398,7 @@ describe('MTR shared helpers', () => {
       transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
     };
     const allSectionPatterns = Object.values(sectionPatterns);
-    // eslint-disable-next-line sonarjs/slow-regex
-    const cnpjPattern = /CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi;
+    const cnpjPattern = MTR_DEFAULT_PATTERNS.cnpj;
 
     it('should extract entity with address and strip registration number', () => {
       const text = [
@@ -273,6 +438,30 @@ describe('MTR shared helpers', () => {
       expect(result.name.confidence).toBe('low');
       expect(result.taxId.confidence).toBe('low');
       expect(result.address.confidence).toBe('low');
+    });
+
+    it('should normalize CNPJ with OCR-inserted spaces', () => {
+      const text = [
+        'Gerador',
+        'EMPRESA GERADORA LTDA',
+        'CNPJ: 20.855. 175/0002-79',
+        'Endereco: Rua Test, 100',
+        'Municipio: Carazinho',
+        'UF: RS',
+        '',
+        'Transportador',
+      ].join('\n');
+
+      const result = extractMtrEntityWithAddress(
+        text,
+        sectionPatterns.gerador,
+        allSectionPatterns,
+        cnpjPattern,
+      );
+
+      expect(result.taxId.parsed).toBe('20.855.175/0002-79');
+      expect(result.taxId.confidence).toBe('high');
+      expect(result.name.parsed).toBe('EMPRESA GERADORA LTDA');
     });
 
     it('should return low confidence address when entity has no address', () => {

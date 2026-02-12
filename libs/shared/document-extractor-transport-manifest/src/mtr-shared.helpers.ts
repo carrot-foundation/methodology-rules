@@ -15,6 +15,44 @@ import {
   type MtrExtractedData,
 } from './transport-manifest.types';
 
+export const MTR_DEFAULT_PATTERNS = {
+  // eslint-disable-next-line sonarjs/slow-regex
+  cnpj: /(?:CPF\/)?CNPJ\s*:?\s*(\d{2}\.?\s*\d{3}\.?\s*\d{3}\/?\s*\d{4}-?\s*\d{2})/gi,
+  // eslint-disable-next-line sonarjs/slow-regex
+  documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
+  issueDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  receivingDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  transportDate:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Data\s*(?:(?:de|da|do)\s*)?Transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  wasteClassification: /Classe\s*:?\s*(.+?)(?=\n|$)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  wasteQuantity: /Quantidade\s*:?\s*([\d.,]+)\s*(kg|ton|t|m³)?/i,
+  wasteType:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Tipo\s*(?:de\s*)?Residuo\s*:?\s*([a-z\s]+?)(?=\n|Classe|$)/i,
+} as const;
+
+export const MTR_DEFAULT_LABEL_PATTERNS = {
+  driverName: /nome\s*do\s*motorista|motorista/i,
+  issueDate: /Data\s*(?:(?:de|da|do)\s*)?Emissao/i,
+  receivingDate: /Data\s*(?:(?:de|da|do)\s*)?Recebimento/i,
+  transportDate: /Data\s*(?:(?:de|da|do)\s*)?Transporte/i,
+  vehiclePlate: /placa\s*(?:do\s*)?veiculo/i,
+} as const;
+
+export const MTR_DEFAULT_SECTION_PATTERNS = {
+  destinatario:
+    /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
+  gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+  transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
+} as const;
+
 export const MTR_ADDRESS_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   address: /Endereco\s*:?\s*(.+)/i,
@@ -96,9 +134,14 @@ const INLINE_PLATE_PATTERN =
   /placa\s*(?:do\s*)?veiculo\s*:?\s*([A-Z]{3}[-\s]?\d[A-Z0-9]\d{2})/i;
 
 const isDriverLabel = (line: string): boolean => {
-  const lower = line.toLowerCase();
+  const lower = line.toLowerCase().trim();
 
-  return DRIVER_LABELS.some((label) => lower.startsWith(label));
+  return DRIVER_LABELS.some(
+    (label) =>
+      lower === label ||
+      lower.startsWith(`${label}:`) ||
+      lower.startsWith(`${label} `),
+  );
 };
 
 const extractInlineValue = (
@@ -111,8 +154,13 @@ const extractInlineValue = (
   return value && value.length > 0 ? value : undefined;
 };
 
+const MIN_DRIVER_NAME_LENGTH = 2;
+
 const findNameLine = (lines: string[]): string | undefined =>
-  lines.find((line) => /^[a-z\s]+$/i.test(line) && line.length > 3);
+  lines.find(
+    (line) =>
+      /^[a-z\s.'\-,]+$/i.test(line) && line.length >= MIN_DRIVER_NAME_LENGTH,
+  );
 
 const isValueLine = (line: string): boolean =>
   line.length > 0 &&
@@ -127,12 +175,13 @@ const extractFromBothLabels = (
   const nameLine = findNameLine(valueLines);
 
   if (nameLine) {
-    result.driverName = nameLine;
     const remaining = valueLines.find((line) => line !== nameLine);
-    const plate = remaining;
 
-    if (plate) {
-      result.vehiclePlate = plate;
+    if (remaining) {
+      result.driverName = nameLine;
+      result.vehiclePlate = remaining;
+    } else if (nameLine.includes(' ') || nameLine.length > 7) {
+      result.driverName = nameLine;
     }
   } else {
     const plateLine = valueLines.find((line) =>
@@ -141,6 +190,11 @@ const extractFromBothLabels = (
 
     if (plateLine) {
       result.vehiclePlate = plateLine;
+      const remaining = valueLines.find((line) => line !== plateLine);
+
+      if (remaining && remaining.length >= MIN_DRIVER_NAME_LENGTH) {
+        result.driverName = remaining;
+      }
     }
   }
 };
@@ -185,7 +239,9 @@ const extractFromSingleLabel = (
   const result: DriverAndVehicle = {};
 
   if (hasDriverLabel) {
-    const nameLine = findNameLine(valueLines);
+    const nameLine =
+      findNameLine(valueLines) ??
+      valueLines.find((line) => line.length >= MIN_DRIVER_NAME_LENGTH);
 
     if (nameLine) {
       result.driverName = nameLine;

@@ -28,6 +28,8 @@ import {
   extractAddressFields,
   extractDriverAndVehicle,
   finalizeMtrExtraction,
+  MTR_DEFAULT_LABEL_PATTERNS,
+  MTR_DEFAULT_PATTERNS,
   stripTrailingRegistrationNumber,
 } from './mtr-shared.helpers';
 import {
@@ -43,19 +45,9 @@ const SECTION_PATTERNS = {
 } as const;
 
 const MTR_PATTERNS = {
+  ...MTR_DEFAULT_PATTERNS,
   // eslint-disable-next-line sonarjs/slow-regex
-  cnpj: /CPF\/CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/gi,
-  // eslint-disable-next-line sonarjs/slow-regex
-  documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  issueDate: /Data\s*da\s*emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  razaoSocial:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Razao\s*Social\s*:?\s*(.+)/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  receivingDate: /Data\s*(?:do\s*)?recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
-  // eslint-disable-next-line sonarjs/slow-regex
-  transportDate: /Data\s*(?:do\s*)?transporte\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+  razaoSocial: /Razao\s*Social\s*:?\s*(.+)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -72,11 +64,8 @@ const SIGNATURE_PATTERNS = [
 ];
 
 const LABEL_PATTERNS = {
+  ...MTR_DEFAULT_LABEL_PATTERNS,
   driverName: /nome\s*do\s*motorista/i,
-  issueDate: /Data\s*da\s*emissao/i,
-  receivingDate: /Data\s*(?:do\s*)?recebimento/i,
-  transportDate: /Data\s*(?:do\s*)?transporte/i,
-  vehiclePlate: /placa\s*do\s*veiculo/i,
 } as const;
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
@@ -96,9 +85,13 @@ const extractEntityFromSigorSection = (
 
   MTR_PATTERNS.cnpj.lastIndex = 0;
 
-  if (!cnpjMatch?.[1]) {
+  const rawCnpj = cnpjMatch?.[1];
+
+  if (!rawCnpj) {
     return undefined;
   }
+
+  const normalizedCnpj = rawCnpj.replaceAll(' ', '');
 
   const razaoMatch = MTR_PATTERNS.razaoSocial.exec(section);
 
@@ -118,7 +111,7 @@ const extractEntityFromSigorSection = (
     rawMatch: section,
     value: {
       name: name as NonEmptyString,
-      taxId: cnpjMatch[1] as NonEmptyString,
+      taxId: normalizedCnpj as NonEmptyString,
       ...addressData,
     },
   };
