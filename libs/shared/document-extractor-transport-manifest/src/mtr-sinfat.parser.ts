@@ -1,4 +1,8 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type {
+  HeaderColumnDefinition,
+  TableColumnConfig,
+  TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
@@ -6,7 +10,6 @@ import {
   createHighConfidenceField,
   createLowConfidenceField,
   type DocumentParser,
-  extractAllStringFields,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
   extractSection,
@@ -15,6 +18,10 @@ import {
   registerParser,
   stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  detectTableColumns,
+  extractTableFromBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   extractDriverAndVehicle,
@@ -49,6 +56,65 @@ const SIGNATURE_PATTERNS = [
 ];
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
+
+type SinfatWasteColumn =
+  | 'classification'
+  | 'description'
+  | 'packaging'
+  | 'physicalState'
+  | 'quantity'
+  | 'technology'
+  | 'unit';
+
+const SINFAT_HEADER_DEFS: [
+  HeaderColumnDefinition<SinfatWasteColumn>,
+  ...Array<HeaderColumnDefinition<SinfatWasteColumn>>,
+] = [
+  { headerPattern: /^Item.*IBAMA/i, name: 'description' },
+  { headerPattern: /^Estado\s+F[ií]sico$/i, name: 'physicalState' },
+  { headerPattern: /^Classe$/i, name: 'classification' },
+  { headerPattern: /^Acondicionamento$/i, name: 'packaging' },
+  { headerPattern: /^Qtde$/i, name: 'quantity' },
+  { headerPattern: /^Unidade$/i, name: 'unit' },
+  { headerPattern: /^Tecnologia$/i, name: 'technology' },
+];
+
+const SINFAT_ANCHOR_COLUMN: SinfatWasteColumn = 'description';
+
+const SINFAT_WASTE_CODE_PATTERN = /^\d+\.\s+(\d{6})\s+(.+)/;
+
+// eslint-disable-next-line sonarjs/slow-regex
+const SINFAT_WASTE_ITEM_PATTERN = /\d+\.\s+(\d{6})\s+(.+)/g;
+
+const parseSinfatWasteRow = (
+  rawDescription: string,
+  row: Record<string, string | undefined>,
+): WasteTypeEntry => {
+  const codeMatch = SINFAT_WASTE_CODE_PATTERN.exec(rawDescription)!;
+
+  const entry: WasteTypeEntry = {
+    code: codeMatch[1] as string,
+    description: (codeMatch[2] as string).trim(),
+  };
+
+  if (row['classification']) {
+    entry.classification = row['classification'];
+  }
+
+  if (row['quantity']) {
+    const quantity = parseBrazilianNumber(row['quantity']);
+
+    if (quantity !== undefined) {
+      entry.quantity = quantity;
+    }
+  }
+
+  if (row['unit']) {
+    entry.unit = row['unit'];
+  }
+
+  return entry;
+};
 
 export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
@@ -138,43 +204,7 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     );
 
     this.extractHaulerFields(text, partialData);
-
-    const wasteTypeMatches = extractAllStringFields(
-      text,
-      MTR_PATTERNS.wasteType,
-    );
-    const wasteClassificationExtracted = extractStringField(
-      text,
-      MTR_PATTERNS.wasteClassification,
-    );
-    const wasteQuantityExtracted = extractStringField(
-      text,
-      MTR_PATTERNS.wasteQuantity,
-    );
-    const wasteQuantity = wasteQuantityExtracted
-      ? parseBrazilianNumber(wasteQuantityExtracted.value)
-      : undefined;
-
-    if (wasteTypeMatches.length > 0) {
-      const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => {
-        const entry: WasteTypeEntry = { description: m.value };
-
-        if (wasteClassificationExtracted) {
-          entry.classification = wasteClassificationExtracted.value;
-        }
-
-        if (wasteQuantity !== undefined) {
-          entry.quantity = wasteQuantity;
-        }
-
-        return entry;
-      });
-
-      partialData.wasteTypes = createHighConfidenceField(
-        entries,
-        wasteTypeMatches.map((m) => m.rawMatch).join('\n'),
-      );
-    }
+    this.extractWasteFields(extractionResult, text, partialData);
 
     return finalizeMtrExtraction(partialData, matchScore, rawText);
   }
@@ -222,6 +252,84 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
 
     if (LABEL_PATTERNS.vehiclePlate.test(rawText)) {
       partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+    }
+  }
+
+  private extractWasteFields(
+    extractionResult: TextExtractionResult,
+    text: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const detected = detectTableColumns(
+      extractionResult.blocks,
+      SINFAT_HEADER_DEFS,
+    );
+
+    if (detected) {
+      this.extractWasteFromTable(extractionResult, detected, partialData);
+
+      return;
+    }
+
+    this.extractWasteFromText(text, partialData);
+  }
+
+  private extractWasteFromTable(
+    extractionResult: TextExtractionResult,
+    detected: {
+      columns: Array<TableColumnConfig<SinfatWasteColumn>>;
+      headerTop: number;
+    },
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const { rows } = extractTableFromBlocks(extractionResult.blocks, {
+      anchorColumn: SINFAT_ANCHOR_COLUMN,
+      columns: detected.columns as [
+        TableColumnConfig<SinfatWasteColumn>,
+        ...Array<TableColumnConfig<SinfatWasteColumn>>,
+      ],
+      maxRowGap: 0.03,
+      yRange: { max: 1, min: detected.headerTop + 0.01 },
+    });
+
+    const rowsWithDescription = rows.filter(
+      (row): row is typeof row & { description: string } =>
+        row.description !== undefined &&
+        SINFAT_WASTE_CODE_PATTERN.test(row.description),
+    );
+
+    const entries = rowsWithDescription.map((row) =>
+      parseSinfatWasteRow(row.description, row),
+    );
+
+    if (entries.length > 0) {
+      partialData.wasteTypes = createHighConfidenceField(
+        entries,
+        rowsWithDescription.map((row) => row.description).join('\n'),
+      );
+    }
+  }
+
+  private extractWasteFromText(
+    text: string,
+    partialData: Partial<MtrExtractedData>,
+  ): void {
+    const entries: WasteTypeEntry[] = [];
+    const rawMatches: string[] = [];
+
+    for (const match of text.matchAll(SINFAT_WASTE_ITEM_PATTERN)) {
+      entries.push({
+        code: match[1]!,
+        description: match[2]!.trim(),
+      });
+      rawMatches.push(match[0]);
+    }
+
+    if (entries.length > 0) {
+      partialData.wasteTypes = createHighConfidenceField(
+        entries,
+        rawMatches.join('\n'),
+      );
     }
   }
 }

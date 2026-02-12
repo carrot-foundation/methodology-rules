@@ -62,11 +62,14 @@ const buildColumnRanges = (
   xTolerance: number,
 ): ColumnRange[] =>
   columns.map((column, index) => {
+    const previousColumn = columns[index - 1];
     const nextColumn = columns[index + 1];
 
     return {
-      max: nextColumn ? nextColumn.headerLeft - xTolerance : 1,
-      min: column.headerLeft - xTolerance,
+      max: nextColumn ? (column.headerLeft + nextColumn.headerLeft) / 2 : 1,
+      min: previousColumn
+        ? (previousColumn.headerLeft + column.headerLeft) / 2
+        : column.headerLeft - xTolerance,
       name: column.name,
     };
   });

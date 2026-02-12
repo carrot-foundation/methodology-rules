@@ -1,5 +1,8 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
-import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import {
+  stubTextExtractionResult,
+  stubTextExtractionResultWithBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import { MtrSinfatParser } from './mtr-sinfat.parser';
 
@@ -40,10 +43,20 @@ Endereço: Rod. BR-116, Km 20
 Município: Curitiba
 UF: PR
 
-Tipo de Resíduo: Plástico
-Classe: II - Não Perigoso
-Quantidade: 1.500,50 kg
-Tecnologia: Compostagem`;
+Identificação dos Resíduos
+Item. Código IBAMA e Denominação
+Estado Físico
+Classe
+Qtde
+Unidade
+Tecnologia
+1. 200108 Resíduos biodegradáveis de cozinha e cantinas
+Sólido
+IIA
+Caçamba Fechada
+1.500,50000
+Quilograma
+Compostagem`;
 
   describe('parse', () => {
     it('should parse a valid SINFAT MTR document with high confidence', () => {
@@ -72,6 +85,13 @@ Tecnologia: Compostagem`;
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          code: '200108',
+          description: 'Residuos biodegradaveis de cozinha e cantinas',
+        },
+      ]);
+      expect(result.data.wasteTypes?.confidence).toBe('high');
       expect(result.reviewRequired).toBe(false);
     });
 
@@ -209,6 +229,302 @@ Tecnologia: Compostagem`;
       expect(result.data.driverName?.confidence).toBe('low');
       expect(result.data.vehiclePlate?.parsed).toBe('');
       expect(result.data.vehiclePlate?.confidence).toBe('low');
+    });
+
+    it('should extract waste types from Textract blocks using table extraction', () => {
+      const headerY = 0.68;
+      const dataY = 0.71;
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: headerY,
+              width: 0.18,
+            },
+            text: 'Item. Código IBAMA e Denominação',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: headerY, width: 0.07 },
+            text: 'Estado Físico',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.49,
+              top: headerY,
+              width: 0.03,
+            },
+            text: 'Classe',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.54,
+              top: headerY,
+              width: 0.09,
+            },
+            text: 'Acondicionamento',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.65,
+              top: headerY,
+              width: 0.02,
+            },
+            text: 'Qtde',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.72,
+              top: headerY,
+              width: 0.04,
+            },
+            text: 'Unidade',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.84,
+              top: headerY,
+              width: 0.05,
+            },
+            text: 'Tecnologia',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.04, top: dataY, width: 0.31 },
+            text: '1. 020501 Materiais impróprios para consumo',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.49, top: dataY, width: 0.03 },
+            text: 'IIA',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.65, top: dataY, width: 0.05 },
+            text: '14,95000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.72, top: dataY, width: 0.04 },
+            text: 'Tonelada',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          classification: 'IIA',
+          code: '020501',
+          description: 'Materiais impróprios para consumo',
+          quantity: 14.95,
+          unit: 'Tonelada',
+        },
+      ]);
+      expect(result.data.wasteTypes?.confidence).toBe('high');
+    });
+
+    it('should extract multiple waste items from text fallback', () => {
+      const text = `Manifesto de Transporte de Resíduos
+Fundação Estadual de Proteção Ambiental
+MTR nº 0124048986
+Data de Emissão: 15/03/2024
+Data de Transporte: 16/03/2024
+Data de Recebimento: 18/03/2024
+
+Gerador
+EMPRESA GERADORA LTDA
+CNPJ: 12.345.678/0001-90
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+
+Destinatário
+RECICLAGEM SUSTENTÁVEL LTDA
+CNPJ: 11.222.333/0001-44
+
+1. 020502 Lodos do Tratamento local de efluentes
+2. 200108 Resíduos biodegradáveis de cozinha e cantinas`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        {
+          code: '020502',
+          description: 'Lodos do Tratamento local de efluentes',
+        },
+        {
+          code: '200108',
+          description: 'Residuos biodegradaveis de cozinha e cantinas',
+        },
+      ]);
+    });
+
+    it('should skip rows without description in table extraction', () => {
+      const headerY = 0.68;
+      const dataY = 0.71;
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: headerY,
+              width: 0.18,
+            },
+            text: 'Item. Código IBAMA e Denominação',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: headerY, width: 0.07 },
+            text: 'Estado Físico',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.49,
+              top: headerY,
+              width: 0.03,
+            },
+            text: 'Classe',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.54,
+              top: headerY,
+              width: 0.09,
+            },
+            text: 'Acondicionamento',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.65,
+              top: headerY,
+              width: 0.02,
+            },
+            text: 'Qtde',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.72,
+              top: headerY,
+              width: 0.04,
+            },
+            text: 'Unidade',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.84,
+              top: headerY,
+              width: 0.05,
+            },
+            text: 'Tecnologia',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.49, top: dataY, width: 0.03 },
+            text: 'IIA',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes).toBeUndefined();
+    });
+
+    it('should filter out footer lines that are not waste entries in table extraction', () => {
+      const headerY = 0.68;
+      const dataY = 0.71;
+      const footerY = 0.73;
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: headerY,
+              width: 0.18,
+            },
+            text: 'Item. Código IBAMA e Denominação',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: headerY, width: 0.07 },
+            text: 'Estado Físico',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.49,
+              top: headerY,
+              width: 0.03,
+            },
+            text: 'Classe',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.54,
+              top: headerY,
+              width: 0.09,
+            },
+            text: 'Acondicionamento',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.65,
+              top: headerY,
+              width: 0.02,
+            },
+            text: 'Qtde',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.72,
+              top: headerY,
+              width: 0.04,
+            },
+            text: 'Unidade',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.84,
+              top: headerY,
+              width: 0.05,
+            },
+            text: 'Tecnologia',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.04, top: dataY, width: 0.31 },
+            text: '1. 020299 Outros resíduos',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: footerY,
+              width: 0.21,
+            },
+            text: 'Descrição int. do Gerador: Efluente Industrial',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.04, top: 0.76, width: 0.35 },
+            text: 'Observação do Recebimento dos Residuos',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.parsed).toEqual([
+        { code: '020299', description: 'Outros resíduos' },
+      ]);
     });
   });
 

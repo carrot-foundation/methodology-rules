@@ -41,6 +41,7 @@ const SIGNATURE_PATTERNS = [
   /Destinatario|Destinador/i,
   /IBAMA/i,
   /Residuo/i,
+  /Tipo\s*(?:de\s*)?Residuo/i,
 ];
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);

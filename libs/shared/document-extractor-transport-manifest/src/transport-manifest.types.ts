@@ -33,6 +33,9 @@ export const MTR_REQUIRED_FIELDS = [
   'generator',
   'hauler',
   'receiver',
+  'transportDate',
+  'receivingDate',
+  'wasteTypes',
 ] as const;
 
 export const MTR_ALL_FIELDS = [

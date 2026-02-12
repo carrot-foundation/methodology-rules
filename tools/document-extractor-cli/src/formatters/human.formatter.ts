@@ -50,7 +50,12 @@ const isReceiptEntry = (
 
 const isWasteEntry = (
   item: unknown,
-): item is { description: string; quantity?: number; unit?: string } =>
+): item is {
+  code?: string;
+  description: string;
+  quantity?: number;
+  unit?: string;
+} =>
   typeof item === 'object' &&
   item !== null &&
   'description' in item &&
@@ -90,13 +95,19 @@ const formatReceiptEntries = (
 
 const formatWasteEntries = (
   name: string,
-  items: { description: string; quantity?: number; unit?: string }[],
+  items: {
+    code?: string;
+    description: string;
+    quantity?: number;
+    unit?: string;
+  }[],
   confidence: string,
   indent: string,
 ): string[] => {
   const lines = [`${indent}${bold(name)}: [${formatConfidence(confidence)}]`];
 
   for (const entry of items) {
+    const codePrefix = entry.code ? `${entry.code} - ` : '';
     const qty =
       entry.quantity === undefined
         ? ''
@@ -104,7 +115,7 @@ const formatWasteEntries = (
 
     const suffix = qty ? `: ${qty.trim()}` : '';
 
-    lines.push(`${indent}  - ${entry.description}${suffix}`);
+    lines.push(`${indent}  - ${codePrefix}${entry.description}${suffix}`);
   }
 
   return lines;
