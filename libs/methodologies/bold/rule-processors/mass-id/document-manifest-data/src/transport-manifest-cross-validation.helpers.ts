@@ -4,6 +4,7 @@ import {
   type BaseExtractedData,
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
+import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { normalizeVehiclePlate } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
@@ -92,7 +93,11 @@ const validateWasteQuantity = (
   extractedData: MtrExtractedData,
   eventData: MtrCrossValidationEventData,
 ): FieldValidationResult => {
-  if (!extractedData.wasteTypes || !eventData.pickUpEvent) {
+  if (
+    extractedData.wasteTypes === undefined ||
+    extractedData.wasteTypes.length === 0 ||
+    !eventData.pickUpEvent
+  ) {
     return {};
   }
 
@@ -106,7 +111,9 @@ const validateWasteQuantity = (
     LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   )?.toString();
 
-  const entries = extractedData.wasteTypes.parsed;
+  const entries = extractedData.wasteTypes.map((entry) =>
+    toWasteTypeEntryData(entry),
+  );
   const matchedEntry = entries.find(
     (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
   );
@@ -154,7 +161,11 @@ const validateWasteType = (
   extractedData: MtrExtractedData,
   pickUpEvent: DocumentEvent | undefined,
 ): FieldValidationResult => {
-  if (!pickUpEvent || !extractedData.wasteTypes) {
+  if (
+    !pickUpEvent ||
+    extractedData.wasteTypes === undefined ||
+    extractedData.wasteTypes.length === 0
+  ) {
     return {};
   }
 
@@ -172,7 +183,9 @@ const validateWasteType = (
     return {};
   }
 
-  const entries = extractedData.wasteTypes.parsed;
+  const entries = extractedData.wasteTypes.map((entry) =>
+    toWasteTypeEntryData(entry),
+  );
   const hasMatch = entries.some(
     (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
   );

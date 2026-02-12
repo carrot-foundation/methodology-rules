@@ -24,6 +24,7 @@ import {
 } from '@carrot-fndn/shared/text-extractor';
 
 import {
+  createExtractedWasteTypeEntry,
   extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
@@ -33,7 +34,7 @@ import {
 } from './mtr-shared.helpers';
 import {
   type MtrExtractedData,
-  type WasteTypeEntry,
+  type WasteTypeEntryData,
 } from './transport-manifest.types';
 
 const MTR_PATTERNS = {
@@ -89,10 +90,10 @@ const SINFAT_WASTE_ITEM_PATTERN = /\d+\.\s+(\d{6})\s+(.+)/g;
 const parseSinfatWasteRow = (
   rawDescription: string,
   row: Record<string, string | undefined>,
-): WasteTypeEntry => {
+): WasteTypeEntryData => {
   const codeMatch = SINFAT_WASTE_CODE_PATTERN.exec(rawDescription)!;
 
-  const entry: WasteTypeEntry = {
+  const entry: WasteTypeEntryData = {
     code: codeMatch[1] as string,
     description: (codeMatch[2] as string).trim(),
   };
@@ -303,9 +304,8 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     );
 
     if (entries.length > 0) {
-      partialData.wasteTypes = createHighConfidenceField(
-        entries,
-        rowsWithDescription.map((row) => row.description).join('\n'),
+      partialData.wasteTypes = entries.map((entry) =>
+        createExtractedWasteTypeEntry(entry),
       );
     }
   }
@@ -314,21 +314,18 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
     text: string,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const entries: WasteTypeEntry[] = [];
-    const rawMatches: string[] = [];
+    const entries: WasteTypeEntryData[] = [];
 
     for (const match of text.matchAll(SINFAT_WASTE_ITEM_PATTERN)) {
       entries.push({
         code: match[1]!,
         description: match[2]!.trim(),
       });
-      rawMatches.push(match[0]);
     }
 
     if (entries.length > 0) {
-      partialData.wasteTypes = createHighConfidenceField(
-        entries,
-        rawMatches.join('\n'),
+      partialData.wasteTypes = entries.map((entry) =>
+        createExtractedWasteTypeEntry(entry),
       );
     }
   }

@@ -149,6 +149,50 @@ describe('confidence.helpers', () => {
 
       expect(result).toEqual([]);
     });
+
+    it('should return indexed dot-notation entries for arrays of entity groups', () => {
+      const data = {
+        wasteTypes: [
+          {
+            code: createHighConfidenceField('200108'),
+            description: createHighConfidenceField('Residuos'),
+            quantity: createLowConfidenceField(undefined),
+            unit: createLowConfidenceField(''),
+          },
+          {
+            code: createLowConfidenceField(''),
+            description: createHighConfidenceField('Plastico'),
+            quantity: createHighConfidenceField(10),
+            unit: createHighConfidenceField('kg'),
+          },
+        ],
+      };
+
+      const result = collectLowConfidenceFields(data, ['wasteTypes']);
+
+      expect(result).toEqual([
+        'wasteTypes[0].quantity',
+        'wasteTypes[0].unit',
+        'wasteTypes[1].code',
+      ]);
+    });
+
+    it('should return empty array for arrays of entity groups with all high confidence', () => {
+      const data = {
+        wasteTypes: [
+          {
+            code: createHighConfidenceField('200108'),
+            description: createHighConfidenceField('Residuos'),
+            quantity: createHighConfidenceField(10),
+            unit: createHighConfidenceField('kg'),
+          },
+        ],
+      };
+
+      const result = collectLowConfidenceFields(data, ['wasteTypes']);
+
+      expect(result).toEqual([]);
+    });
   });
 
   describe('collectMissingRequiredFields', () => {

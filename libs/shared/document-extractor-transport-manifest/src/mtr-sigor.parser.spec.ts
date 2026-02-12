@@ -4,6 +4,7 @@ import {
   stubTextExtractionResultWithBlocks,
 } from '@carrot-fndn/shared/text-extractor';
 
+import { toWasteTypeEntryData } from './mtr-shared.helpers';
 import { MtrSigorParser } from './mtr-sigor.parser';
 
 const stubBoundingBox = (left: number, top: number) => ({
@@ -117,7 +118,7 @@ describe('MtrSigorParser', () => {
       expect(result.data.receiver.state.parsed).toBe('SP');
       expect(result.data.driverName?.parsed).toBe('GERSON PEREIRA DA SILVA');
       expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'CLASSE IIA',
           code: '190812',
@@ -458,7 +459,7 @@ describe('MtrSigorParser', () => {
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'CLASSE IIA',
           code: '190812',
@@ -511,7 +512,7 @@ describe('MtrSigorParser', () => {
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'CLASSE IIA',
           code: '190812',
@@ -562,7 +563,7 @@ describe('MtrSigorParser', () => {
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'CLASSE IIA',
           code: '190812',
@@ -651,10 +652,59 @@ describe('MtrSigorParser', () => {
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           description: 'Resíduo genérico sem código',
           quantity: 10,
+          unit: 'TON',
+        },
+      ]);
+    });
+
+    it('should skip rows where item column is not a positive integer (e.g. footer text)', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190812-Lodos de tratamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '13,4700' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          // Footer text picked up by Textract with "0" aligning to item column
+          { boundingBox: stubBoundingBox(0.048, 0.85), text: '0' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.85),
+            text: 'Uma via deste MTR deve acompanhar 0 transporte',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          code: '190812',
+          description: 'Lodos de tratamento',
+          quantity: 13.47,
           unit: 'TON',
         },
       ]);
@@ -693,7 +743,7 @@ describe('MtrSigorParser', () => {
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         { code: '190812', description: 'Lodos de tratamento' },
       ]);
     });

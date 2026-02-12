@@ -23,8 +23,24 @@ const isExtractedEntityGroup = (
   typeof value === 'object' &&
   value !== null &&
   !('parsed' in value) &&
+  !Array.isArray(value) &&
   Object.values(value as Record<string, unknown>).some((v) =>
     isExtractedField(v),
+  );
+
+const isExtractedEntityGroupArray = (
+  value: unknown,
+): value is Array<Record<string, unknown>> =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every(
+    (item) =>
+      typeof item === 'object' &&
+      item !== null &&
+      !('parsed' in item) &&
+      Object.values(item as Record<string, unknown>).some((v) =>
+        isExtractedField(v),
+      ),
   );
 
 const formatConfidence = (confidence: string): string => {
@@ -200,6 +216,40 @@ const pushFieldResult = (lines: string[], result: string | string[]): void => {
   }
 };
 
+const formatEntityGroupArrayEntry = (
+  entry: Record<string, unknown>,
+  index: number,
+  indent: string,
+): string[] => {
+  const lines: string[] = [`${indent}[${String(index)}]:`];
+  const lowFields: string[] = [];
+
+  for (const [subKey, subField] of Object.entries(entry)) {
+    if (isExtractedField(subField)) {
+      const value =
+        subField.parsed === undefined || subField.parsed === ''
+          ? '(not extracted)'
+          : String(subField.parsed);
+
+      lines.push(
+        `${indent}  ${bold(subKey)}: ${value} [${formatConfidence(subField.confidence)}]`,
+      );
+
+      if (subField.confidence === 'low') {
+        lowFields.push(subKey);
+      }
+    }
+  }
+
+  if (lowFields.length > 0) {
+    const lowFieldsSummary = `⚠ low: ${lowFields.join(', ')}`;
+
+    lines[0] = `${indent}[${String(index)}]: ${yellow(lowFieldsSummary)}`;
+  }
+
+  return lines;
+};
+
 const formatExtractedFields = (data: Record<string, unknown>): string[] => {
   const lines: string[] = [];
 
@@ -208,7 +258,13 @@ const formatExtractedFields = (data: Record<string, unknown>): string[] => {
       continue;
     }
 
-    if (isExtractedEntityGroup(value)) {
+    if (isExtractedEntityGroupArray(value)) {
+      lines.push(`  ${bold(key)}: ${String(value.length)} entries`);
+
+      for (const [index, entry] of value.entries()) {
+        lines.push(...formatEntityGroupArrayEntry(entry, index, '    '));
+      }
+    } else if (isExtractedEntityGroup(value)) {
       lines.push(`  ${bold(key)}:`);
 
       for (const [subKey, subField] of Object.entries(value)) {

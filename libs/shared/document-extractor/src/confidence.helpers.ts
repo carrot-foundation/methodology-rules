@@ -98,6 +98,25 @@ const isExtractedEntityGroup = (
     isExtractedField(v),
   );
 
+const isExtractedEntityGroupArray = (
+  value: unknown,
+): value is Array<Record<string, unknown>> =>
+  Array.isArray(value) &&
+  value.length > 0 &&
+  value.every((item) => isExtractedEntityGroup(item));
+
+const collectLowConfidenceFromGroup = (
+  group: Record<string, unknown>,
+  prefix: string,
+  result: string[],
+): void => {
+  for (const [subKey, subField] of Object.entries(group)) {
+    if (isExtractedField(subField) && subField.confidence === 'low') {
+      result.push(`${prefix}.${subKey}`);
+    }
+  }
+};
+
 export const collectLowConfidenceFields = (
   data: Record<string, unknown>,
   fieldNames: string[],
@@ -111,12 +130,16 @@ export const collectLowConfidenceFields = (
       if (field.confidence === 'low') {
         result.push(fieldName);
       }
-    } else if (isExtractedEntityGroup(field)) {
-      for (const [subKey, subField] of Object.entries(field)) {
-        if (isExtractedField(subField) && subField.confidence === 'low') {
-          result.push(`${fieldName}.${subKey}`);
-        }
+    } else if (Array.isArray(field) && isExtractedEntityGroupArray(field)) {
+      for (const [index, entry] of field.entries()) {
+        collectLowConfidenceFromGroup(
+          entry,
+          `${fieldName}[${String(index)}]`,
+          result,
+        );
       }
+    } else if (isExtractedEntityGroup(field)) {
+      collectLowConfidenceFromGroup(field, fieldName, result);
     }
   }
 

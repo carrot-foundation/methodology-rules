@@ -1,6 +1,7 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
+import { toWasteTypeEntryData } from './mtr-shared.helpers';
 import { MtrSinirParser } from './mtr-sinir.parser';
 
 describe('MtrSinirParser', () => {
@@ -75,17 +76,19 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       expect(result.data.receiver.state.parsed).toBe('PR');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
       expect(result.data.driverName?.parsed).toBe('Joao da Silva');
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'II - Nao Perigoso',
           description: 'Plastico',
           quantity: 1500.5,
         },
       ]);
+      expect(result.data.wasteTypes?.[0]?.code.confidence).toBe('low');
+      expect(result.data.wasteTypes?.[0]?.unit.confidence).toBe('low');
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
-      expect(result.reviewRequired).toBe(false);
+      expect(result.reviewRequired).toBe(true);
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -243,7 +246,9 @@ Quantidade: invalid kg
         stubTextExtractionResult(invalidQuantityText),
       );
 
-      expect(result.data.wasteTypes?.parsed[0]?.quantity).toBeUndefined();
+      expect(
+        result.data.wasteTypes?.map(toWasteTypeEntryData)[0]?.quantity,
+      ).toBeUndefined();
     });
 
     it('should handle waste quantity with NaN result', () => {
@@ -257,7 +262,9 @@ Quantidade: ... kg
 
       const result = parser.parse(stubTextExtractionResult(nanQuantityText));
 
-      expect(result.data.wasteTypes?.parsed[0]?.quantity).toBeUndefined();
+      expect(
+        result.data.wasteTypes?.map(toWasteTypeEntryData)[0]?.quantity,
+      ).toBeUndefined();
     });
 
     it('should parse entities with unformatted CNPJs (raw 14 digits)', () => {

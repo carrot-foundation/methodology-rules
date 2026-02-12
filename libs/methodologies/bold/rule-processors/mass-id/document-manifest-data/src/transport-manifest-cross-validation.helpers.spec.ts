@@ -5,6 +5,8 @@ import type {
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+
 import {
   matchWasteTypeEntry,
   type MtrCrossValidationEventData,
@@ -674,11 +676,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
     describe('waste type validation', () => {
       it('should not flag when code and description both match', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '190812', description: 'Lodos de tratamento' }],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -697,11 +700,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should match with description-only when no code on either side', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ description: 'Plástico' }],
-            rawMatch: 'Tipo de Resíduo: Plástico',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({ description: 'Plástico' }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -717,16 +718,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should match with fuzzy description at ~60% threshold', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                description:
-                  'Lodos de tratamento biológico de águas residuárias',
-              },
-            ],
-            rawMatch: 'Lodos de tratamento biológico',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              description: 'Lodos de tratamento biológico de águas residuárias',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -745,14 +741,16 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should match when at least one of multiple waste types matches', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              { code: '020101', description: 'Lodos da lavagem' },
-              { code: '190812', description: 'Lodos de tratamento' },
-            ],
-            rawMatch: '020101-Lodos da lavagem\n190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '020101',
+              description: 'Lodos da lavagem',
+            }),
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -771,11 +769,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return review reason when no waste type matches', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '020101', description: 'Lodos da lavagem' }],
-            rawMatch: '020101-Lodos da lavagem',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '020101',
+              description: 'Lodos da lavagem',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -795,11 +794,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should skip validation when event has no waste classification', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '190812', description: 'Lodos' }],
-            rawMatch: '190812-Lodos',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -832,13 +832,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return review reason when code matches but description does not', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              { code: '190812', description: 'Something completely different' },
-            ],
-            rawMatch: '190812-Something completely different',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Something completely different',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -858,11 +857,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should normalize waste codes with spaces', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '19 08 12', description: 'Lodos de tratamento' }],
-            rawMatch: '19 08 12 - Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '19 08 12',
+              description: 'Lodos de tratamento',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -881,11 +881,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return review reason with description-only mismatch', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ description: 'Plástico reciclado' }],
-            rawMatch: 'Tipo de Resíduo: Plástico reciclado',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              description: 'Plástico reciclado',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -907,11 +907,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return review reason when event has only code and no description', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ description: 'Plástico' }],
-            rawMatch: 'Tipo de Resíduo: Plástico',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({ description: 'Plástico' }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -928,11 +926,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should skip validation when pickUpEvent is missing', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '190812', description: 'Lodos' }],
-            rawMatch: '190812-Lodos',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos',
+            }),
+          ],
         });
 
         const result = validateMtrExtractedData(
@@ -966,18 +965,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return no issues when no matching waste type entry', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '020101',
-                description: 'Lodos da lavagem',
-                quantity: 500,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '020101-Lodos da lavagem',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '020101',
+              description: 'Lodos da lavagem',
+              quantity: 500,
+              unit: 'kg',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -996,11 +991,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return no issues when matched entry has no quantity', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [{ code: '190812', description: 'Lodos de tratamento' }],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1020,18 +1016,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return no issues when unit is volumetric (m³)', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 5,
-                unit: 'm³',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 5,
+              unit: 'm³',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1051,18 +1043,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return no issues when no weighing events', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 500,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 500,
+              unit: 'kg',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1082,18 +1070,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return no issues when within 10% threshold', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 950,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 950,
+              unit: 'kg',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1113,18 +1097,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should return review reason when exceeding 10% threshold', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 500,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 500,
+              unit: 'kg',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1147,18 +1127,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should correctly normalize ton units to kg', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 2,
-                unit: 'ton',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 2,
+              unit: 'ton',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1178,18 +1154,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should correctly normalize "t" unit to kg', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 5,
-                unit: 't',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 5,
+              unit: 't',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1209,18 +1181,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should use first weighing event with valid value', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 1000,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 1000,
+              unit: 'kg',
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1244,17 +1212,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should show "kg" in review reason when unit is undefined and discrepancy exceeds threshold', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 500,
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 500,
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {
@@ -1274,17 +1238,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       it('should treat undefined unit as kg', () => {
         const extractionResult = createExtractionResult({
-          wasteTypes: {
-            confidence: 'high',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos de tratamento',
-                quantity: 1000,
-              },
-            ],
-            rawMatch: '190812-Lodos de tratamento',
-          },
+          wasteTypes: [
+            createExtractedWasteTypeEntry({
+              code: '190812',
+              description: 'Lodos de tratamento',
+              quantity: 1000,
+            }),
+          ],
         });
 
         const eventData: MtrCrossValidationEventData = {

@@ -4,6 +4,7 @@ import {
   stubTextExtractionResultWithBlocks,
 } from '@carrot-fndn/shared/text-extractor';
 
+import { toWasteTypeEntryData } from './mtr-shared.helpers';
 import { MtrSinfatParser } from './mtr-sinfat.parser';
 
 describe('MtrSinfatParser', () => {
@@ -85,14 +86,15 @@ Compostagem`;
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           code: '200108',
           description: 'Residuos biodegradaveis de cozinha e cantinas',
         },
       ]);
-      expect(result.data.wasteTypes?.confidence).toBe('high');
-      expect(result.reviewRequired).toBe(false);
+      expect(result.data.wasteTypes?.[0]?.quantity.confidence).toBe('low');
+      expect(result.data.wasteTypes?.[0]?.unit.confidence).toBe('low');
+      expect(result.reviewRequired).toBe(true);
     });
 
     it('should match 10-digit MTR numbers without colon', () => {
@@ -314,7 +316,7 @@ Tecnologia: Compostagem`;
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'IIA',
           code: '020501',
@@ -323,7 +325,6 @@ Tecnologia: Compostagem`;
           unit: 'Tonelada',
         },
       ]);
-      expect(result.data.wasteTypes?.confidence).toBe('high');
     });
 
     it('should extract multiple waste items from text fallback', () => {
@@ -351,7 +352,7 @@ CNPJ: 11.222.333/0001-44
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           code: '020502',
           description: 'Lodos do Tratamento local de efluentes',
@@ -522,7 +523,7 @@ CNPJ: 11.222.333/0001-44
         ]),
       );
 
-      expect(result.data.wasteTypes?.parsed).toEqual([
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         { code: '020299', description: 'Outros resíduos' },
       ]);
     });

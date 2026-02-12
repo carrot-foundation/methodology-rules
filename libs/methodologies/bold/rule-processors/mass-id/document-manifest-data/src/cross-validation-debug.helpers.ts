@@ -5,9 +5,10 @@ import type {
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type {
   MtrExtractedData,
-  WasteTypeEntry,
+  WasteTypeEntryData,
 } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
+import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
   dateDifferenceInDays,
   isNameMatch,
@@ -180,13 +181,18 @@ export const logCrossValidationComparison = (
           }),
         },
         wasteQuantityWeight: (() => {
-          const entries = extractedData.wasteTypes?.parsed;
-
-          if (!entries) {
+          if (
+            extractedData.wasteTypes === undefined ||
+            extractedData.wasteTypes.length === 0
+          ) {
             return null;
           }
 
-          const matchedEntry: undefined | WasteTypeEntry = entries.find(
+          const entries = extractedData.wasteTypes.map((entry) =>
+            toWasteTypeEntryData(entry),
+          );
+
+          const matchedEntry: undefined | WasteTypeEntryData = entries.find(
             (entry) =>
               matchWasteTypeEntry(entry, eventWasteCode, eventWasteDescription)
                 .isMatch,
@@ -225,9 +231,9 @@ export const logCrossValidationComparison = (
           };
         })(),
         wasteType: {
-          confidence: extractedData.wasteTypes?.confidence ?? null,
           entries:
-            extractedData.wasteTypes?.parsed.map((entry) => {
+            extractedData.wasteTypes?.map((extractedEntry) => {
+              const entry = toWasteTypeEntryData(extractedEntry);
               const match = matchWasteTypeEntry(
                 entry,
                 eventWasteCode,

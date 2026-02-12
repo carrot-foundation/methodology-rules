@@ -17,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
+  createExtractedWasteTypeEntry,
   extractDriverAndVehicle,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
@@ -26,7 +27,7 @@ import {
 } from './mtr-shared.helpers';
 import {
   type MtrExtractedData,
-  type WasteTypeEntry,
+  type WasteTypeEntryData,
 } from './transport-manifest.types';
 
 const MTR_PATTERNS = { ...MTR_DEFAULT_PATTERNS } as const;
@@ -152,8 +153,8 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
       : undefined;
 
     if (wasteTypeMatches.length > 0) {
-      const entries: WasteTypeEntry[] = wasteTypeMatches.map((m) => {
-        const entry: WasteTypeEntry = { description: m.value };
+      const entries: WasteTypeEntryData[] = wasteTypeMatches.map((m) => {
+        const entry: WasteTypeEntryData = { description: m.value };
 
         if (wasteClassificationExtracted) {
           entry.classification = wasteClassificationExtracted.value;
@@ -166,9 +167,8 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
         return entry;
       });
 
-      partialData.wasteTypes = createHighConfidenceField(
-        entries,
-        wasteTypeMatches.map((m) => m.rawMatch).join('\n'),
+      partialData.wasteTypes = entries.map((entry) =>
+        createExtractedWasteTypeEntry(entry),
       );
     }
 

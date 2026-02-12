@@ -2,7 +2,10 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   createExtractedEntityWithAddress,
+  createHighConfidenceField,
+  createLowConfidenceField,
   type ExtractedEntityWithAddressInfo,
+  type ExtractedField,
   extractEntityFromSection,
   type ExtractionOutput,
   extractSection,
@@ -10,9 +13,11 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 
 import {
+  type ExtractedWasteTypeEntry,
   MTR_ALL_FIELDS,
   MTR_REQUIRED_FIELDS,
   type MtrExtractedData,
+  type WasteTypeEntryData,
 } from './transport-manifest.types';
 
 export const MTR_DEFAULT_PATTERNS = {
@@ -297,6 +302,80 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
   return extractFromSingleLabel(valueLines, driverLabelIndex !== -1);
 };
 
+export const createExtractedWasteTypeEntry = (
+  raw: WasteTypeEntryData,
+): ExtractedWasteTypeEntry => {
+  const entry: ExtractedWasteTypeEntry = {
+    code: raw.code
+      ? createHighConfidenceField(raw.code)
+      : createLowConfidenceField(''),
+    description: createHighConfidenceField(raw.description),
+    quantity:
+      raw.quantity === undefined
+        ? // eslint-disable-next-line unicorn/no-useless-undefined
+          createLowConfidenceField<number | undefined>(undefined)
+        : createHighConfidenceField<number | undefined>(raw.quantity),
+    unit: raw.unit
+      ? createHighConfidenceField(raw.unit)
+      : createLowConfidenceField(''),
+  };
+
+  if (raw.classification !== undefined) {
+    entry.classification = createHighConfidenceField(raw.classification);
+  }
+
+  return entry;
+};
+
+export const toWasteTypeEntryData = (
+  entry: ExtractedWasteTypeEntry,
+): WasteTypeEntryData => {
+  const data: WasteTypeEntryData = {
+    description: entry.description.parsed,
+  };
+
+  if (entry.code.parsed) {
+    data.code = entry.code.parsed;
+  }
+
+  if (entry.quantity.parsed !== undefined) {
+    data.quantity = entry.quantity.parsed;
+  }
+
+  if (entry.unit.parsed) {
+    data.unit = entry.unit.parsed;
+  }
+
+  if (entry.classification?.parsed) {
+    data.classification = entry.classification.parsed;
+  }
+
+  return data;
+};
+
+const collectWasteTypeConfidenceFields = (
+  wasteTypes: ExtractedWasteTypeEntry[] | undefined,
+): Array<ExtractedField<unknown>> => {
+  if (!wasteTypes) {
+    return [];
+  }
+
+  return wasteTypes.flatMap((entry) => {
+    const fields: Array<ExtractedField<unknown>> = [
+      entry.code,
+      entry.description,
+      entry.quantity,
+      entry.unit,
+    ];
+
+    if (entry.classification) {
+      fields.push(entry.classification);
+    }
+
+    return fields;
+  });
+};
+
 export const finalizeMtrExtraction = (
   partialData: Partial<MtrExtractedData>,
   matchScore: number,
@@ -313,6 +392,7 @@ export const finalizeMtrExtraction = (
       partialData.hauler?.taxId,
       partialData.receiver?.name,
       partialData.receiver?.taxId,
+      ...collectWasteTypeConfidenceFields(partialData.wasteTypes),
     ],
     documentType: 'transportManifest',
     matchScore,

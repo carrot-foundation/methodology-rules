@@ -25,6 +25,7 @@ import {
 } from '@carrot-fndn/shared/text-extractor';
 
 import {
+  createExtractedWasteTypeEntry,
   extractAddressFields,
   extractDriverAndVehicle,
   finalizeMtrExtraction,
@@ -34,7 +35,7 @@ import {
 } from './mtr-shared.helpers';
 import {
   type MtrExtractedData,
-  type WasteTypeEntry,
+  type WasteTypeEntryData,
 } from './transport-manifest.types';
 
 const SECTION_PATTERNS = {
@@ -147,7 +148,13 @@ const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
 
 const parseWasteRow = (
   row: Record<string, string | undefined>,
-): undefined | WasteTypeEntry => {
+): undefined | WasteTypeEntryData => {
+  const itemNumber = Number(row['item']);
+
+  if (!Number.isInteger(itemNumber) || itemNumber <= 0) {
+    return undefined;
+  }
+
   const rawDescription = row['description'];
 
   if (!rawDescription) {
@@ -156,7 +163,7 @@ const parseWasteRow = (
 
   const codeMatch = WASTE_CODE_PATTERN.exec(rawDescription);
 
-  const entry: WasteTypeEntry = codeMatch?.[1]
+  const entry: WasteTypeEntryData = codeMatch?.[1]
     ? { code: codeMatch[1], description: codeMatch[2]!.trim() }
     : { description: rawDescription.trim() };
 
@@ -360,15 +367,11 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
 
     const entries = rows
       .map((row) => parseWasteRow(row))
-      .filter((entry): entry is WasteTypeEntry => entry !== undefined);
+      .filter((entry): entry is WasteTypeEntryData => entry !== undefined);
 
     if (entries.length > 0) {
-      partialData.wasteTypes = createHighConfidenceField(
-        entries,
-        rows
-          .map((row) => row.description)
-          .filter(Boolean)
-          .join('\n'),
+      partialData.wasteTypes = entries.map((entry) =>
+        createExtractedWasteTypeEntry(entry),
       );
     }
   }

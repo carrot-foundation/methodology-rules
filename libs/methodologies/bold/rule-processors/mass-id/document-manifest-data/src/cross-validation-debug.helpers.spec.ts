@@ -2,6 +2,7 @@ import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-re
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import { logger } from '@carrot-fndn/shared/helpers';
 
 import type { CdfCrossValidationEventData } from './recycling-manifest-cross-validation.helpers';
@@ -144,11 +145,9 @@ describe('cross-validation-debug.helpers', () => {
 
       const extractedData: MtrExtractedData = {
         ...baseExtractedData,
-        wasteTypes: {
-          confidence: 'high',
-          parsed: [{ description: 'Lodos de tratamento' }],
-          rawMatch: 'Lodos',
-        },
+        wasteTypes: [
+          createExtractedWasteTypeEntry({ description: 'Lodos de tratamento' }),
+        ],
       } as unknown as MtrExtractedData;
 
       const eventData: MtrCrossValidationEventData = {
@@ -215,11 +214,12 @@ describe('cross-validation-debug.helpers', () => {
           parsed: 'ABC1234',
           rawMatch: 'ABC1234',
         },
-        wasteTypes: {
-          confidence: 'high',
-          parsed: [{ code: '190812', description: 'Lodos de tratamento' }],
-          rawMatch: '190812-Lodos',
-        },
+        wasteTypes: [
+          createExtractedWasteTypeEntry({
+            code: '190812',
+            description: 'Lodos de tratamento',
+          }),
+        ],
       } as unknown as MtrExtractedData;
 
       const eventData: MtrCrossValidationEventData = {

@@ -1,7 +1,7 @@
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type {
   MtrExtractedData,
-  WasteTypeEntry,
+  WasteTypeEntryData,
 } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
@@ -306,7 +306,7 @@ export interface WasteTypeMatchResult {
 }
 
 export const matchWasteTypeEntry = (
-  entry: WasteTypeEntry,
+  entry: WasteTypeEntryData,
   eventCode: string | undefined,
   eventDescription: string | undefined,
 ): WasteTypeMatchResult => {
