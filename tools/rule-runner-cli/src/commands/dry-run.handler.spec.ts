@@ -1,8 +1,14 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
+import { logger } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import type { DryRunOptions } from './dry-run.command';
+
+import { loadProcessor } from '../utils/processor-loader';
+import { buildRuleInput } from '../utils/rule-input.builder';
+import { prepareDryRun } from '../utils/smaug-client';
+import { handleDryRun } from './dry-run.handler';
 
 jest.mock('../utils/smaug-client', () => ({
   prepareDryRun: jest.fn(),
@@ -23,13 +29,6 @@ jest.mock('../utils/rule-input.builder', () => ({
   }),
 }));
 
-import { logger } from '@carrot-fndn/shared/helpers';
-
-import { handleDryRun } from './dry-run.handler';
-import { loadProcessor } from '../utils/processor-loader';
-import { buildRuleInput } from '../utils/rule-input.builder';
-import { prepareDryRun } from '../utils/smaug-client';
-
 const mockPrepareDryRun = prepareDryRun as jest.MockedFunction<
   typeof prepareDryRun
 >;
@@ -47,7 +46,7 @@ const baseOptions: DryRunOptions = {
   documentId: 'mass-id-456',
   json: false,
   methodologySlug: 'bold-carbon-organic',
-  rulesScope: 'MASS_ID',
+  rulesScope: 'MassID',
   smaugUrl: 'https://smaug.carrot.eco',
 };
 
@@ -60,14 +59,14 @@ const mockPreparedResponse = {
       executionOrder: 1,
       ruleId: 'rule-1',
       ruleName: 'Document Manifest Data',
-      ruleScope: 'MASS_ID',
+      ruleScope: 'MassID',
       ruleSlug: 'document-manifest-data',
     },
     {
       executionOrder: 2,
       ruleId: 'rule-2',
       ruleName: 'Project Boundary',
-      ruleScope: 'MASS_ID',
+      ruleScope: 'MassID',
       ruleSlug: 'project-boundary',
     },
   ],
@@ -104,7 +103,7 @@ describe('handleDryRun', () => {
     expect(mockPrepareDryRun).toHaveBeenCalledWith('https://smaug.carrot.eco', {
       documentId: 'mass-id-456',
       methodologySlug: 'bold-carbon-organic',
-      rulesScope: 'MASS_ID',
+      rulesScope: 'MassID',
     });
   });
 

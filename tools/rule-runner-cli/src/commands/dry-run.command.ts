@@ -40,7 +40,10 @@ export const dryRunCommand = new Command('dry-run')
     ).makeOptionMandatory(),
   )
   .addOption(
-    new Option('-s, --rules-scope <scope>', 'Rules scope').default('MASS_ID'),
+    new Option(
+      '-s, --rules-scope <scope>',
+      'Rules scope (MassID, Credit Order, RecycledID, GasID)',
+    ).default('MassID'),
   )
   .addOption(new Option('--rule-slug <slug>', 'Run only this specific rule'))
   .addOption(

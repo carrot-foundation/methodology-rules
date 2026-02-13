@@ -17,7 +17,10 @@ const resolveProcessorPath = (rule: {
   ruleScope: string;
   ruleSlug: string;
 }): string => {
-  const scopeDirectory = rule.ruleScope.toLowerCase().replaceAll('_', '-');
+  const scopeDirectory = rule.ruleScope
+    .replaceAll(/\s+/g, '-')
+    .replaceAll(/([a-z])([A-Z])/g, '$1-$2')
+    .toLowerCase();
 
   return `libs/methodologies/bold/rule-processors/${scopeDirectory}/${rule.ruleSlug}`;
 };

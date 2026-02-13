@@ -1,5 +1,12 @@
-import { httpRequest } from '@carrot-fndn/shared/http-request';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { httpRequest } from '@carrot-fndn/shared/http-request';
+
+export interface DryRunPrepareResponse {
+  auditDocumentId: string;
+  auditedDocumentId: string;
+  executionId: string;
+  rules: DryRunPrepareRule[];
+}
 
 interface DryRunPrepareRequest {
   documentId: string;
@@ -16,13 +23,6 @@ interface DryRunPrepareRule {
   ruleSlug: string;
 }
 
-export interface DryRunPrepareResponse {
-  auditDocumentId: string;
-  auditedDocumentId: string;
-  executionId: string;
-  rules: DryRunPrepareRule[];
-}
-
 export const prepareDryRun = async (
   smaugUrl: string,
   request: DryRunPrepareRequest,
@@ -37,5 +37,16 @@ export const prepareDryRun = async (
     url,
   });
 
-  return response?.data as DryRunPrepareResponse;
+  if (!response || response.status >= 400) {
+    const errorBody =
+      response?.data !== undefined && response.data !== null
+        ? JSON.stringify(response.data, undefined, 2)
+        : 'No response body';
+
+    throw new Error(
+      `Smaug dry-run prepare failed (HTTP ${String(response?.status ?? 'N/A')}): ${errorBody}`,
+    );
+  }
+
+  return response.data as DryRunPrepareResponse;
 };

@@ -1,10 +1,10 @@
+import { httpRequest } from '@carrot-fndn/shared/http-request';
+
 import { prepareDryRun } from './smaug-client';
 
 jest.mock('@carrot-fndn/shared/http-request', () => ({
   httpRequest: jest.fn(),
 }));
-
-import { httpRequest } from '@carrot-fndn/shared/http-request';
 
 const mockHttpRequest = httpRequest as jest.MockedFunction<typeof httpRequest>;
 
@@ -36,14 +36,14 @@ describe('prepareDryRun', () => {
     const result = await prepareDryRun(smaugUrl, {
       documentId: 'mass-id-456',
       methodologySlug: 'bold-carbon-organic',
-      rulesScope: 'MASS_ID',
+      rulesScope: 'MassID',
     });
 
     expect(mockHttpRequest).toHaveBeenCalledWith({
       data: {
         documentId: 'mass-id-456',
         methodologySlug: 'bold-carbon-organic',
-        rulesScope: 'MASS_ID',
+        rulesScope: 'MassID',
       },
       method: 'POST',
       url: `${smaugUrl}/methodologies/dry-run/prepare`,
@@ -59,7 +59,7 @@ describe('prepareDryRun', () => {
       documentId: 'mass-id-456',
       methodologySlug: 'bold-carbon-organic',
       ruleSlug: 'document-manifest-data',
-      rulesScope: 'MASS_ID',
+      rulesScope: 'MassID',
     });
 
     expect(mockHttpRequest).toHaveBeenCalledWith(
@@ -69,5 +69,32 @@ describe('prepareDryRun', () => {
         }),
       }),
     );
+  });
+
+  it('should throw on 4xx error response with error body', async () => {
+    mockHttpRequest.mockResolvedValue({
+      data: { error: 'Bad Request', message: 'Invalid scope' },
+      status: 400,
+    } as never);
+
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'INVALID',
+      }),
+    ).rejects.toThrow('Smaug dry-run prepare failed (HTTP 400)');
+  });
+
+  it('should throw when response is null', async () => {
+    mockHttpRequest.mockResolvedValue(null as never);
+
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'MassID',
+      }),
+    ).rejects.toThrow('Smaug dry-run prepare failed');
   });
 });
