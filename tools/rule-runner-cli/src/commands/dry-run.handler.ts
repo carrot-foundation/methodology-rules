@@ -17,9 +17,39 @@ const resolveProcessorPath = (rule: {
   ruleScope: string;
   ruleSlug: string;
 }): string => {
-  const scopeDir = rule.ruleScope.toLowerCase().replace(/_/g, '-');
+  const scopeDirectory = rule.ruleScope.toLowerCase().replaceAll('_', '-');
 
-  return `libs/methodologies/bold/rule-processors/${scopeDir}/${rule.ruleSlug}`;
+  return `libs/methodologies/bold/rule-processors/${scopeDirectory}/${rule.ruleSlug}`;
+};
+
+const executeRule = async (
+  rule: { ruleName: string; ruleSlug: string },
+  resolvedPath: string,
+  prepared: DryRunPrepareResponse,
+  documentKeyPrefix: string,
+  config: Record<string, unknown> | undefined,
+  options: DryRunOptions,
+): Promise<void> => {
+  logger.info(`\n--- Running: ${rule.ruleName} (${rule.ruleSlug}) ---`);
+  logger.info(`Processor path: ${resolvedPath}`);
+
+  const processor = await loadProcessor(resolvedPath, config);
+
+  const ruleInput = buildRuleInput({
+    documentId: prepared.auditDocumentId,
+    documentKeyPrefix,
+    parentDocumentId: prepared.auditedDocumentId,
+  });
+
+  const startTime = Date.now();
+  const result = await processor.process(ruleInput);
+  const elapsedMs = Date.now() - startTime;
+
+  if (options.json) {
+    logger.info(formatAsJson(result));
+  } else {
+    logger.info(formatAsHuman(result, { debug: options.debug, elapsedMs }));
+  }
 };
 
 export const handleDryRun = async (
@@ -68,29 +98,15 @@ export const handleDryRun = async (
   for (const rule of prepared.rules) {
     const resolvedPath = processorPath ?? resolveProcessorPath(rule);
 
-    logger.info(`\n--- Running: ${rule.ruleName} (${rule.ruleSlug}) ---`);
-    logger.info(`Processor path: ${resolvedPath}`);
-
     try {
-      // eslint-disable-next-line no-await-in-loop
-      const processor = await loadProcessor(resolvedPath, config);
-
-      const ruleInput = buildRuleInput({
-        documentId: prepared.auditDocumentId,
+      await executeRule(
+        rule,
+        resolvedPath,
+        prepared,
         documentKeyPrefix,
-        parentDocumentId: prepared.auditedDocumentId,
-      });
-
-      const startTime = Date.now();
-      // eslint-disable-next-line no-await-in-loop
-      const result = await processor.process(ruleInput);
-      const elapsedMs = Date.now() - startTime;
-
-      if (options.json) {
-        logger.info(formatAsJson(result));
-      } else {
-        logger.info(formatAsHuman(result, { debug: options.debug, elapsedMs }));
-      }
+        config,
+        options,
+      );
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : String(error);
 
