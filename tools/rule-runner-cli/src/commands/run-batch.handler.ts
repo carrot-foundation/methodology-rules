@@ -10,21 +10,24 @@ import {
 } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
+import type { RuleResultEntry } from '../utils/batch-summary';
 import type { RunOptions } from './run.command';
 
 import { formatAsHuman } from '../formatters/human.formatter';
+import {
+  appendBreakdown,
+  buildReasonCodeBreakdown,
+  writeJsonLog,
+} from '../utils/batch-summary';
 import { parseConfig } from '../utils/config-parser';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 
-interface EntryRuleResult {
+interface EntryRuleResult extends RuleResultEntry {
   entry: InputEntry;
-  resultComment?: string | undefined;
-  resultContent?: Record<string, unknown> | undefined;
-  resultStatus: string;
 }
 
 interface InputEntry {
@@ -37,55 +40,6 @@ interface ProcessResult {
   elapsedMs: number;
   output: RuleOutput;
 }
-
-const LOGS_DIR = path.resolve(__dirname, '../../logs');
-
-const writeErrorsJson = async (
-  failures: Array<{ error: string; item: InputEntry }>,
-  outputPath: string | undefined,
-): Promise<void> => {
-  const timestamp = new Date().toISOString().replaceAll(':', '-');
-
-  await mkdir(LOGS_DIR, { recursive: true });
-
-  const filePath =
-    outputPath ?? path.join(LOGS_DIR, `rule-errors-${timestamp}.json`);
-
-  const data = failures.map((f) => ({
-    auditDocumentId: f.item.auditDocumentId,
-    auditedDocumentId: f.item.auditedDocumentId,
-    error: f.error,
-    methodologyExecutionId: f.item.methodologyExecutionId,
-  }));
-
-  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
-
-  logger.info(`Errors JSON written to: ${filePath}`);
-};
-
-const writeRuleResultsJson = async (
-  results: EntryRuleResult[],
-  prefix: string,
-): Promise<void> => {
-  const timestamp = new Date().toISOString().replaceAll(':', '-');
-
-  await mkdir(LOGS_DIR, { recursive: true });
-
-  const filePath = path.join(LOGS_DIR, `${prefix}-${timestamp}.json`);
-
-  const data = results.map((f) => ({
-    auditDocumentId: f.entry.auditDocumentId,
-    auditedDocumentId: f.entry.auditedDocumentId,
-    methodologyExecutionId: f.entry.methodologyExecutionId,
-    resultComment: f.resultComment,
-    resultContent: f.resultContent,
-    resultStatus: f.resultStatus,
-  }));
-
-  await writeFile(filePath, JSON.stringify(data, null, 2), 'utf8');
-
-  logger.info(`${prefix} JSON written to: ${filePath}`);
-};
 
 const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
   const content = await readFile(filePath, 'utf8');
@@ -114,69 +68,21 @@ const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
   return parsed as InputEntry[];
 };
 
-interface ReviewReasonCodeBreakdown {
-  code: string;
-  count: number;
-}
-
-const buildReasonCodeBreakdown = (
-  results: EntryRuleResult[],
-  field: 'failReasons' | 'reviewReasons',
-): ReviewReasonCodeBreakdown[] => {
-  const codeCounts = new Map<string, number>();
-
-  for (const result of results) {
-    const reasons = result.resultContent?.[field];
-
-    if (!Array.isArray(reasons)) {
-      continue;
-    }
-
-    for (const reason of reasons as unknown[]) {
-      if (
-        typeof reason === 'object' &&
-        reason !== null &&
-        'code' in reason &&
-        typeof (reason as { code: unknown }).code === 'string'
-      ) {
-        const code = (reason as { code: string }).code;
-
-        codeCounts.set(code, (codeCounts.get(code) ?? 0) + 1);
-      }
-    }
-  }
-
-  return [...codeCounts.entries()]
-    .map(([code, count]) => ({ code, count }))
-    .sort((a, b) => b.count - a.count);
-};
-
-const appendBreakdown = (
-  lines: string[],
-  title: string,
-  breakdown: ReviewReasonCodeBreakdown[],
-  color: (text: string) => string,
-): void => {
-  if (breakdown.length === 0) {
-    return;
-  }
-
-  lines.push('', bold(title));
-
-  for (const { code, count } of breakdown) {
-    lines.push(color(`  ${code}: ${String(count)}`));
-  }
-};
-
 const logBatchSummary = (
   total: number,
   passed: number,
   reviewRequired: number,
   failedRule: number,
   errors: number,
-  reviewRequiredBreakdown: ReviewReasonCodeBreakdown[],
-  failedBreakdown: ReviewReasonCodeBreakdown[],
+  reviewRequiredResults: EntryRuleResult[],
+  ruleFailures: EntryRuleResult[],
 ): void => {
+  const reviewRequiredBreakdown = buildReasonCodeBreakdown(
+    reviewRequiredResults,
+    'reviewReasons',
+  );
+  const failedBreakdown = buildReasonCodeBreakdown(ruleFailures, 'failReasons');
+
   const lines: string[] = [
     bold('=== Batch Execution Summary ==='),
     `Total documents: ${String(total)}`,
@@ -307,32 +213,51 @@ export const handleRunBatch = async (
     },
   });
 
-  const reviewRequiredBreakdown = buildReasonCodeBreakdown(
-    reviewRequiredResults,
-    'reviewReasons',
-  );
-  const failedBreakdown = buildReasonCodeBreakdown(ruleFailures, 'failReasons');
-
   logBatchSummary(
     entries.length,
     passedCount,
     reviewRequiredCount,
     failedRuleCount,
     failures.length,
-    reviewRequiredBreakdown,
-    failedBreakdown,
+    reviewRequiredResults,
+    ruleFailures,
   );
 
   if (failures.length > 0) {
-    await writeErrorsJson(failures, options.outputFailures);
+    const data = failures.map((f) => ({
+      auditDocumentId: f.item.auditDocumentId,
+      auditedDocumentId: f.item.auditedDocumentId,
+      error: f.error,
+      methodologyExecutionId: f.item.methodologyExecutionId,
+    }));
+
+    await writeJsonLog(data, 'rule-errors', options.outputFailures);
   }
 
   if (ruleFailures.length > 0) {
-    await writeRuleResultsJson(ruleFailures, 'rule-failures');
+    const data = ruleFailures.map((f) => ({
+      auditDocumentId: f.entry.auditDocumentId,
+      auditedDocumentId: f.entry.auditedDocumentId,
+      methodologyExecutionId: f.entry.methodologyExecutionId,
+      resultComment: f.resultComment,
+      resultContent: f.resultContent,
+      resultStatus: f.resultStatus,
+    }));
+
+    await writeJsonLog(data, 'rule-failures');
   }
 
   if (reviewRequiredResults.length > 0) {
-    await writeRuleResultsJson(reviewRequiredResults, 'review-required');
+    const data = reviewRequiredResults.map((f) => ({
+      auditDocumentId: f.entry.auditDocumentId,
+      auditedDocumentId: f.entry.auditedDocumentId,
+      methodologyExecutionId: f.entry.methodologyExecutionId,
+      resultComment: f.resultComment,
+      resultContent: f.resultContent,
+      resultStatus: f.resultStatus,
+    }));
+
+    await writeJsonLog(data, 'review-required');
   }
 
   if (failures.length > 0 || failedRuleCount > 0) {

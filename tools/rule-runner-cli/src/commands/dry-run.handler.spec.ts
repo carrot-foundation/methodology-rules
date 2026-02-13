@@ -8,7 +8,11 @@ import type { DryRunOptions } from './dry-run.command';
 import { loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 import { prepareDryRun } from '../utils/smaug-client';
-import { handleDryRun } from './dry-run.handler';
+import {
+  handleDryRun,
+  resolveDryRunEnvironment,
+  resolveProcessorPath,
+} from './dry-run.handler';
 
 jest.mock('../utils/smaug-client', () => ({
   prepareDryRun: jest.fn(),
@@ -39,9 +43,10 @@ const mockBuildRuleInput = buildRuleInput as jest.MockedFunction<
   typeof buildRuleInput
 >;
 
-const baseOptions: DryRunOptions = {
+const baseOptions: DryRunOptions & { documentId: string } = {
   allRules: false,
   cache: false,
+  concurrency: 5,
   debug: false,
   documentId: 'mass-id-456',
   json: false,
@@ -144,9 +149,34 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce(new Error('First rule failed'))
       .mockResolvedValueOnce(mockRuleOutput);
 
-    await handleDryRun('some/path', baseOptions);
+    const result = await handleDryRun('some/path', baseOptions);
 
     expect(mockProcess).toHaveBeenCalledTimes(2);
+    expect(result.ruleResults).toHaveLength(2);
+    expect(result.ruleResults[0]?.status).toBe('error');
+    expect(result.ruleResults[1]?.status).toBe('passed');
+  });
+
+  it('should return review_required status for REVIEW_REQUIRED rule output', async () => {
+    mockProcess.mockResolvedValue({
+      ...mockRuleOutput,
+      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+    });
+
+    const result = await handleDryRun('some/path', baseOptions);
+
+    expect(result.ruleResults[0]?.status).toBe('review_required');
+  });
+
+  it('should return failed status for FAILED rule output', async () => {
+    mockProcess.mockResolvedValue({
+      ...mockRuleOutput,
+      resultStatus: RuleOutputStatus.FAILED,
+    });
+
+    const result = await handleDryRun('some/path', baseOptions);
+
+    expect(result.ruleResults[0]?.status).toBe('failed');
   });
 
   it('should throw when AUDIT_URL is not set and no --smaug-url provided', async () => {
@@ -280,5 +310,91 @@ describe('handleDryRun', () => {
     await handleDryRun('some/path', { ...baseOptions, debug: true });
 
     expect(errorSpy).toHaveBeenCalledWith('');
+  });
+});
+
+describe('resolveDryRunEnv', () => {
+  beforeEach(() => {
+    delete process.env['AUDIT_URL'];
+    delete process.env['TEXTRACT_CACHE_DIR'];
+    delete process.env['DEBUG'];
+  });
+
+  it('should return smaugUrl from options', () => {
+    const result = resolveDryRunEnvironment({
+      cache: false,
+      debug: false,
+      smaugUrl: 'https://smaug.carrot.eco',
+    });
+
+    expect(result).toStrictEqual({ smaugUrl: 'https://smaug.carrot.eco' });
+  });
+
+  it('should fall back to AUDIT_URL env var', () => {
+    process.env['AUDIT_URL'] = 'https://env-smaug.carrot.eco';
+
+    const result = resolveDryRunEnvironment({
+      cache: false,
+      debug: false,
+      smaugUrl: undefined,
+    });
+
+    expect(result).toStrictEqual({ smaugUrl: 'https://env-smaug.carrot.eco' });
+  });
+
+  it('should throw when no smaug URL is available', () => {
+    expect(() =>
+      resolveDryRunEnvironment({
+        cache: false,
+        debug: false,
+        smaugUrl: undefined,
+      }),
+    ).toThrow('Smaug URL not set. Use --smaug-url or set AUDIT_URL env var.');
+  });
+
+  it('should set TEXTRACT_CACHE_DIR when cache is enabled', () => {
+    resolveDryRunEnvironment({
+      cache: true,
+      debug: false,
+      smaugUrl: 'https://smaug.carrot.eco',
+    });
+
+    expect(process.env['TEXTRACT_CACHE_DIR']).toBeDefined();
+  });
+
+  it('should set DEBUG env var when debug is enabled', () => {
+    resolveDryRunEnvironment({
+      cache: false,
+      debug: true,
+      smaugUrl: 'https://smaug.carrot.eco',
+    });
+
+    expect(process.env['DEBUG']).toBe('true');
+  });
+});
+
+describe('resolveProcessorPath', () => {
+  it('should resolve path for simple scope', () => {
+    expect(
+      resolveProcessorPath({ ruleScope: 'MassID', ruleSlug: 'my-rule' }),
+    ).toBe('libs/methodologies/bold/rule-processors/mass-id/my-rule');
+  });
+
+  it('should handle camelCase scope names', () => {
+    expect(
+      resolveProcessorPath({
+        ruleScope: 'CreditOrder',
+        ruleSlug: 'some-rule',
+      }),
+    ).toBe('libs/methodologies/bold/rule-processors/credit-order/some-rule');
+  });
+
+  it('should handle spaces in scope names', () => {
+    expect(
+      resolveProcessorPath({
+        ruleScope: 'Credit Order',
+        ruleSlug: 'some-rule',
+      }),
+    ).toBe('libs/methodologies/bold/rule-processors/credit-order/some-rule');
   });
 });

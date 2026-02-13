@@ -1,21 +1,39 @@
 import { handleCommandError } from '@carrot-fndn/shared/cli';
-import { Argument, Command, Option } from '@commander-js/extra-typings';
+import {
+  Argument,
+  Command,
+  InvalidArgumentError,
+  Option,
+} from '@commander-js/extra-typings';
 
+import { handleDryRunBatch } from './dry-run-batch.handler';
 import { handleDryRun } from './dry-run.handler';
 
 export interface DryRunOptions {
   allRules: boolean;
   cache: boolean;
+  concurrency: number;
   config?: string | undefined;
   debug: boolean;
-  documentId: string;
+  documentId?: string | undefined;
   envFile?: string | undefined;
+  inputFile?: string | undefined;
   json: boolean;
   methodologySlug: string;
   ruleSlug?: string | undefined;
   rulesScope: string;
   smaugUrl?: string | undefined;
 }
+
+const parseConcurrency = (value: string): number => {
+  const parsed = Number.parseInt(value, 10);
+
+  if (Number.isNaN(parsed) || parsed < 1) {
+    throw new InvalidArgumentError('Must be a positive integer.');
+  }
+
+  return parsed;
+};
 
 export const dryRunCommand = new Command('dry-run')
   .description(
@@ -37,7 +55,7 @@ export const dryRunCommand = new Command('dry-run')
     new Option(
       '-d, --document-id <id>',
       'Mass-ID document ID (Palantir document ID)',
-    ).makeOptionMandatory(),
+    ),
   )
   .addOption(
     new Option(
@@ -57,6 +75,20 @@ export const dryRunCommand = new Command('dry-run')
   )
   .addOption(new Option('--config <json>', 'Processor config as JSON string'))
   .addOption(
+    new Option(
+      '--input-file <path>',
+      'JSON file with array of document IDs for batch processing',
+    ),
+  )
+  .addOption(
+    new Option(
+      '--concurrency <n>',
+      'Number of parallel documents in batch mode',
+    )
+      .default(5)
+      .argParser(parseConcurrency),
+  )
+  .addOption(
     new Option('--env-file <path>', 'Path to .env file').default(
       '.env-files/.env.test',
     ),
@@ -72,7 +104,19 @@ export const dryRunCommand = new Command('dry-run')
         );
       }
 
-      await handleDryRun(processorPath, options);
+      if (options.inputFile) {
+        await handleDryRunBatch(processorPath, options);
+      } else {
+        const { documentId } = options;
+
+        if (!documentId) {
+          throw new Error(
+            'Single-document mode requires --document-id (-d). Use --input-file for batch processing.',
+          );
+        }
+
+        await handleDryRun(processorPath, { ...options, documentId });
+      }
     } catch (error: unknown) {
       handleCommandError(error, { verbose: options.debug });
     }
