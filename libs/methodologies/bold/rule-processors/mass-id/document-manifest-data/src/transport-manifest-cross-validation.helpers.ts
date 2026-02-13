@@ -30,7 +30,7 @@ import {
   validateEntityTaxId,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './cross-validation.helpers';
-import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
+import { REVIEW_REASONS } from './document-manifest-data.constants';
 
 export {
   matchWasteTypeEntry,
@@ -54,8 +54,6 @@ const {
   VEHICLE_LICENSE_PLATE,
 } = DocumentEventAttributeName;
 
-const NOT_EXTRACTED = CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED;
-
 const validateVehiclePlate = (
   extractedData: MtrExtractedData,
   pickUpEvent: DocumentEvent | undefined,
@@ -64,10 +62,9 @@ const validateVehiclePlate = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+          reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
             field: 'vehicle plate',
           }),
-          reviewReasonCode: 'FIELD_NOT_EXTRACTED',
         };
   }
 
@@ -94,8 +91,7 @@ const validateVehiclePlate = (
   }
 
   return {
-    reviewReason: CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
-    reviewReasonCode: 'VEHICLE_PLATE_MISMATCH',
+    reviewReason: REVIEW_REASONS.VEHICLE_PLATE_MISMATCH(),
   };
 };
 
@@ -155,13 +151,12 @@ const validateWasteQuantity = (
 
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
-      reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH({
+      reviewReason: REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH({
         discrepancyPercentage: (discrepancy * 100).toFixed(1),
         extractedQuantity: matchedEntry.quantity.toString(),
         unit: matchedEntry.unit ?? 'kg',
         weighingWeight: weighingValue.toString(),
       }),
-      reviewReasonCode: 'WASTE_QUANTITY_WEIGHT_MISMATCH',
     };
   }
 
@@ -179,10 +174,9 @@ const validateWasteType = (
     return pickUpEvent === undefined
       ? {}
       : {
-          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+          reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
             field: 'waste type entries',
           }),
-          reviewReasonCode: 'FIELD_NOT_EXTRACTED',
         };
   }
 
@@ -225,11 +219,10 @@ const validateWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason: CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH({
+    reviewReason: REVIEW_REASONS.WASTE_TYPE_MISMATCH({
       eventClassification: eventSummary,
       extractedEntries: extractedSummary,
     }),
-    reviewReasonCode: 'WASTE_TYPE_MISMATCH',
   };
 };
 
@@ -238,7 +231,8 @@ export const validateMtrExtractedData = (
   eventData: MtrCrossValidationEventData,
 ): ValidationResult & {
   crossValidation?: Record<string, unknown>;
-  reviewReasons?: string[];
+  failReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
+  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
 } => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
@@ -254,124 +248,114 @@ export const validateMtrExtractedData = (
     extractionResult.data.extractionConfidence,
   );
 
-  const { failMessages, reviewReasonCodes, reviewReasons } = collectResults([
+  const { failReasons, reviewReasons } = collectResults([
     validateVehiclePlate(extractedData, eventData.pickUpEvent),
     validateEntityName(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.name,
-      'RECEIVER_NAME_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECEIVER_NAME_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.RECEIVER_NAME_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'receiver name',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.taxId,
-      'RECEIVER_TAX_ID_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.RECEIVER_TAX_ID_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'receiver tax ID',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityAddress(
       extractedData.receiver,
       eventData.recyclerEvent?.address,
-      'RECEIVER_ADDRESS_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.RECEIVER_ADDRESS_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" event',
         field: 'receiver address',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityName(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
-      'GENERATOR_NAME_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_NAME_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator name',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.taxId,
-      'GENERATOR_TAX_ID_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_TAX_ID_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator tax ID',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityAddress(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.address,
-      'GENERATOR_ADDRESS_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_ADDRESS_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" event',
         field: 'generator address',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityName(
       extractedData.hauler,
       eventData.haulerEvent?.participant.name,
-      'HAULER_NAME_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.HAULER_NAME_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Hauler" participant',
         field: 'hauler name',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.hauler,
       eventData.haulerEvent?.participant.taxId,
-      'HAULER_TAX_ID_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.HAULER_TAX_ID_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Hauler" participant',
         field: 'hauler tax ID',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateDateField(
       extractedData.transportDate,
       eventData.pickUpEvent?.externalCreatedAt,
-      'TRANSPORT_DATE_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.TRANSPORT_DATE_MISMATCH,
-      NOT_EXTRACTED({ context: 'Pick-up event', field: 'transport date' }),
-      'FIELD_NOT_EXTRACTED',
+      REVIEW_REASONS.TRANSPORT_DATE_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: 'Pick-up event',
+        field: 'transport date',
+      }),
     ),
     validateDateField(
       extractedData.receivingDate,
       eventData.dropOffEvent?.externalCreatedAt,
-      'RECEIVING_DATE_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH,
-      NOT_EXTRACTED({ context: 'Drop-off event', field: 'receiving date' }),
-      'FIELD_NOT_EXTRACTED',
+      REVIEW_REASONS.RECEIVING_DATE_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: 'Drop-off event',
+        field: 'receiving date',
+      }),
     ),
     validateWasteType(extractedData, eventData.pickUpEvent),
     validateWasteQuantity(extractedData, eventData),
   ]);
 
-  const allFailMessages = [...basicResult.failMessages, ...failMessages];
+  const allFailMessages = [
+    ...basicResult.failMessages,
+    ...failReasons.map((r) => r.description),
+  ];
 
-  if (reviewReasons.length > 0) {
+  if (failReasons.length > 0 || reviewReasons.length > 0) {
     return {
-      crossValidation: { ...crossValidation, reviewReasonCodes },
+      crossValidation,
       failMessages: allFailMessages,
+      failReasons,
       reviewReasons,
-      reviewRequired: true,
+      reviewRequired: reviewReasons.length > 0,
     };
   }
 

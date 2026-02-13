@@ -29,14 +29,12 @@ import {
   validateEntityTaxId,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './cross-validation.helpers';
-import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
+import { REVIEW_REASONS } from './document-manifest-data.constants';
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
 } = DocumentEventAttributeName;
-
-const NOT_EXTRACTED = CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED;
 
 export interface CdfCrossValidationEventData
   extends DocumentManifestEventSubject {
@@ -55,11 +53,10 @@ const validateMtrNumberCrossReference = (
     return mtrDocumentNumbers.length > 0
       ? [
           {
-            reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+            reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
               context: 'MTR document numbers',
               field: 'transport manifest numbers',
             }),
-            reviewReasonCode: 'FIELD_NOT_EXTRACTED',
           },
         ]
       : [];
@@ -80,10 +77,7 @@ const validateMtrNumberCrossReference = (
 
     if (!found) {
       results.push({
-        reviewReason: CROSS_VALIDATION_COMMENTS.MTR_NUMBER_NOT_IN_CDF({
-          mtrNumber,
-        }),
-        reviewReasonCode: 'MTR_NUMBER_NOT_IN_CDF',
+        reviewReason: REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF({ mtrNumber }),
       });
     }
   }
@@ -99,11 +93,10 @@ const validateCdfWasteType = (
     return eventData.dropOffEvent === undefined
       ? {}
       : {
-          reviewReason: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED({
+          reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
             context: 'Drop-off event',
             field: 'waste type entries',
           }),
-          reviewReasonCode: 'FIELD_NOT_EXTRACTED',
         };
   }
 
@@ -144,12 +137,10 @@ const validateCdfWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason:
-      CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH({
-        eventClassification: eventSummary,
-        extractedEntries: extractedSummary,
-      }),
-    reviewReasonCode: 'RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
+    reviewReason: REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH({
+      eventClassification: eventSummary,
+      extractedEntries: extractedSummary,
+    }),
   };
 };
 
@@ -204,15 +195,12 @@ const validateCdfWasteQuantity = (
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
       reviewReason:
-        CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH(
-          {
-            discrepancyPercentage: (discrepancy * 100).toFixed(1),
-            extractedQuantity: matchedEntry.quantity.toString(),
-            unit: matchedEntry.unit ?? 'kg',
-            weighingWeight: weighingValue.toString(),
-          },
-        ),
-      reviewReasonCode: 'RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
+        REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH({
+          discrepancyPercentage: (discrepancy * 100).toFixed(1),
+          extractedQuantity: matchedEntry.quantity.toString(),
+          unit: matchedEntry.unit ?? 'kg',
+          weighingWeight: weighingValue.toString(),
+        }),
     };
   }
 
@@ -237,7 +225,8 @@ export const validateCdfExtractedData = (
   eventData: CdfCrossValidationEventData,
 ): ValidationResult & {
   crossValidation?: Record<string, unknown>;
-  reviewReasons?: string[];
+  failReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
+  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
 } => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
@@ -253,72 +242,60 @@ export const validateCdfExtractedData = (
     extractionResult.data.extractionConfidence,
   );
 
-  const { failMessages, reviewReasonCodes, reviewReasons } = collectResults([
+  const { failReasons, reviewReasons } = collectResults([
     validateEntityName(
       extractedData.recycler,
       eventData.recyclerEvent?.participant.name,
-      'RECYCLER_NAME_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECYCLER_NAME_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.RECYCLER_NAME_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'recycler name',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.recycler,
       eventData.recyclerEvent?.participant.taxId,
-      'RECYCLER_TAX_ID_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.RECYCLER_TAX_ID_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.RECYCLER_TAX_ID_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'recycler tax ID',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityName(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
-      'GENERATOR_NAME_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_NAME_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator name',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityTaxId(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.taxId,
-      'GENERATOR_TAX_ID_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_TAX_ID_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator tax ID',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateEntityAddress(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.address,
-      'GENERATOR_ADDRESS_MISMATCH',
-      CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.GENERATOR_ADDRESS_MISMATCH,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" event',
         field: 'generator address',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateDateWithinPeriod(
       eventData.dropOffEvent?.externalCreatedAt,
       extractedData.processingPeriod,
-      'DROP_OFF_DATE_OUTSIDE_PERIOD',
-      CROSS_VALIDATION_COMMENTS.DROP_OFF_DATE_OUTSIDE_PERIOD,
-      NOT_EXTRACTED({
+      REVIEW_REASONS.DROP_OFF_DATE_OUTSIDE_PERIOD,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: 'Drop-off event date',
         field: 'processing period',
       }),
-      'FIELD_NOT_EXTRACTED',
     ),
     validateCdfWasteType(extractedData, eventData),
     validateCdfWasteQuantity(extractedData, eventData),
@@ -328,14 +305,18 @@ export const validateCdfExtractedData = (
     ),
   ]);
 
-  const allFailMessages = [...basicResult.failMessages, ...failMessages];
+  const allFailMessages = [
+    ...basicResult.failMessages,
+    ...failReasons.map((r) => r.description),
+  ];
 
-  if (reviewReasons.length > 0) {
+  if (failReasons.length > 0 || reviewReasons.length > 0) {
     return {
-      crossValidation: { ...crossValidation, reviewReasonCodes },
+      crossValidation,
       failMessages: allFailMessages,
+      failReasons,
       reviewReasons,
-      reviewRequired: true,
+      reviewRequired: reviewReasons.length > 0,
     };
   }
 

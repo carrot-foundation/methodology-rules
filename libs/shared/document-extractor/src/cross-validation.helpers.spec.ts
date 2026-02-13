@@ -100,6 +100,7 @@ describe('crossValidateAttachments', () => {
     expect(result).toEqual({
       crossValidation: {},
       failMessages: [],
+      failReasons: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -119,8 +120,13 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain(
-      'Unknown document type, cannot perform cross-validation for attachment att-1',
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'UNKNOWN_DOCUMENT_TYPE',
+          description: expect.stringContaining('att-1') as string,
+        }),
+      ]),
     );
     expect(extractor.extract).not.toHaveBeenCalled();
   });
@@ -226,7 +232,12 @@ describe('crossValidateAttachments', () => {
 
   it('should set reviewRequired when extraction result requires review', async () => {
     const extractionOutput = createExtractionOutput({
-      reviewReasons: ['Low confidence extraction'],
+      reviewReasons: [
+        {
+          code: 'LOW_CONFIDENCE_VALUE',
+          description: 'Low confidence extraction',
+        },
+      ],
       reviewRequired: true,
     });
     const extractor = createMockExtractor(extractionOutput);
@@ -241,7 +252,11 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain('Low confidence extraction');
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'LOW_CONFIDENCE_VALUE' }),
+      ]),
+    );
   });
 
   it('should fail when extraction errors occur', async () => {
@@ -330,8 +345,13 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain(
-      'Unknown document type, cannot perform cross-validation for attachment att-1',
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'UNKNOWN_DOCUMENT_TYPE',
+          description: expect.stringContaining('att-1') as string,
+        }),
+      ]),
     );
     expect(extractor.extract).toHaveBeenCalledTimes(1);
     expect(validateFunction).toHaveBeenCalledTimes(1);
@@ -343,7 +363,12 @@ describe('crossValidateAttachments', () => {
     const config = createConfig({
       validate: () => ({
         failMessages: [],
-        reviewReasons: ['Name similarity low: 45%'],
+        reviewReasons: [
+          {
+            code: 'NAME_SIMILARITY_LOW',
+            description: 'Name similarity low: 45%',
+          },
+        ],
         reviewRequired: true,
       }),
     });
@@ -357,8 +382,41 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain('Name similarity low: 45%');
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ description: 'Name similarity low: 45%' }),
+      ]),
+    );
     expect(result.failMessages).toHaveLength(0);
+  });
+
+  it('should collect failReasons from validate callback', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        failMessages: ['Tax ID mismatch'],
+        failReasons: [
+          {
+            code: 'TAX_ID_MISMATCH',
+            description: 'Tax ID mismatch',
+          },
+        ],
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.failReasons).toEqual([
+      expect.objectContaining({ code: 'TAX_ID_MISMATCH' }),
+    ]);
+    expect(result.failMessages).toEqual(['Tax ID mismatch']);
   });
 
   it('should continue processing after extraction error', async () => {

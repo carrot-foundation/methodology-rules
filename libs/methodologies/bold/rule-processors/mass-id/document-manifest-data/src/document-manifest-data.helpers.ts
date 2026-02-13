@@ -38,6 +38,7 @@ export type EventAttributeValueType =
 export interface ValidationResult {
   failMessages: string[];
   passMessage?: string;
+  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
   reviewRequired?: boolean;
 }
 

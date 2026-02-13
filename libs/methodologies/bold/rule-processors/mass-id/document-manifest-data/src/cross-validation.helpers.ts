@@ -12,6 +12,7 @@ import {
   type ExtractedField,
   type ExtractionConfidence,
   type ExtractionOutput,
+  type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
 import { dateDifferenceInDays, isNameMatch } from '@carrot-fndn/shared/helpers';
 
@@ -23,40 +24,36 @@ import type {
 import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
 
 export interface FieldValidationResult {
-  failMessage?: string;
-  reviewReason?: string;
-  reviewReasonCode?: string;
+  failReason?: ReviewReason;
+  reviewReason?: ReviewReason;
 }
 
 export const routeByConfidence = (
   confidence: ExtractionConfidence,
-  message: string,
+  reviewReason: ReviewReason,
 ): FieldValidationResult =>
-  confidence === 'high' ? { failMessage: message } : { reviewReason: message };
+  confidence === 'high' ? { failReason: reviewReason } : { reviewReason };
 
 export const collectResults = (
   results: FieldValidationResult[],
 ): {
-  failMessages: string[];
-  reviewReasonCodes: string[];
-  reviewReasons: string[];
+  failReasons: ReviewReason[];
+  reviewReasons: ReviewReason[];
 } => {
-  const failMessages: string[] = [];
-  const reviewReasons: string[] = [];
-  const reviewReasonCodes: string[] = [];
+  const failReasons: ReviewReason[] = [];
+  const reviewReasons: ReviewReason[] = [];
 
-  for (const { failMessage, reviewReason, reviewReasonCode } of results) {
-    if (failMessage) {
-      failMessages.push(failMessage);
+  for (const { failReason, reviewReason } of results) {
+    if (failReason) {
+      failReasons.push(failReason);
     }
 
     if (reviewReason) {
       reviewReasons.push(reviewReason);
-      reviewReasonCodes.push(reviewReasonCode ?? 'UNKNOWN');
     }
   }
 
-  return { failMessages, reviewReasonCodes, reviewReasons };
+  return { failReasons, reviewReasons };
 };
 
 export const validateHighConfidenceField = (
@@ -145,19 +142,12 @@ export const normalizeTaxId = (taxId: string): string =>
 export const validateEntityName = (
   extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantName: string | undefined,
-  code: string,
-  commentFunction: (parameters: { score: number }) => string,
-  notExtractedComment?: string,
-  notExtractedCode?: string,
+  reviewReasonFunction: (parameters: { score: number }) => ReviewReason,
+  notExtractedReviewReason?: ReviewReason,
 ): FieldValidationResult => {
   if (!extractedEntity) {
-    return eventParticipantName !== undefined &&
-      notExtractedComment !== undefined &&
-      notExtractedCode !== undefined
-      ? {
-          reviewReason: notExtractedComment,
-          reviewReasonCode: notExtractedCode,
-        }
+    return eventParticipantName !== undefined && notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
       : {};
   }
 
@@ -172,30 +162,18 @@ export const validateEntityName = (
   const extractedName = extractedEntity.name.parsed;
   const { isMatch, score } = isNameMatch(extractedName, eventParticipantName);
 
-  return isMatch
-    ? {}
-    : {
-        reviewReason: commentFunction({ score }),
-        reviewReasonCode: code,
-      };
+  return isMatch ? {} : { reviewReason: reviewReasonFunction({ score }) };
 };
 
 export const validateEntityTaxId = (
   extractedEntity: ExtractedEntityInfo | undefined,
   eventParticipantTaxId: string | undefined,
-  _code: string,
-  mismatchComment: string,
-  notExtractedComment?: string,
-  notExtractedCode?: string,
+  mismatchReviewReasonFunction: () => ReviewReason,
+  notExtractedReviewReason?: ReviewReason,
 ): FieldValidationResult => {
   if (!extractedEntity) {
-    return eventParticipantTaxId !== undefined &&
-      notExtractedComment !== undefined &&
-      notExtractedCode !== undefined
-      ? {
-          reviewReason: notExtractedComment,
-          reviewReasonCode: notExtractedCode,
-        }
+    return eventParticipantTaxId !== undefined && notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
       : {};
   }
 
@@ -215,27 +193,18 @@ export const validateEntityTaxId = (
     return {};
   }
 
-  // At this point we know confidence is 'high' (due to check on line 205)
-  // High confidence mismatches are failMessages (not reviewReasons), so code is not used
-  return { failMessage: mismatchComment };
+  return { failReason: mismatchReviewReasonFunction() };
 };
 
 export const validateEntityAddress = (
   extractedEntity: ExtractedEntityWithAddressInfo | undefined,
   eventAddress: MethodologyAddress | undefined,
-  code: string,
-  commentFunction: (parameters: { score: number }) => string,
-  notExtractedComment?: string,
-  notExtractedCode?: string,
+  reviewReasonFunction: (parameters: { score: number }) => ReviewReason,
+  notExtractedReviewReason?: ReviewReason,
 ): FieldValidationResult => {
   if (!extractedEntity) {
-    return eventAddress !== undefined &&
-      notExtractedComment !== undefined &&
-      notExtractedCode !== undefined
-      ? {
-          reviewReason: notExtractedComment,
-          reviewReasonCode: notExtractedCode,
-        }
+    return eventAddress !== undefined && notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
       : {};
   }
 
@@ -266,12 +235,7 @@ export const validateEntityAddress = (
 
   const { isMatch, score } = isNameMatch(extractedAddress, eventAddressString);
 
-  return isMatch
-    ? {}
-    : {
-        reviewReason: commentFunction({ score }),
-        reviewReasonCode: code,
-      };
+  return isMatch ? {} : { reviewReason: reviewReasonFunction({ score }) };
 };
 
 export const DATE_TOLERANCE_DAYS = 3;
@@ -279,23 +243,16 @@ export const DATE_TOLERANCE_DAYS = 3;
 export const validateDateField = (
   extractedDate: ExtractedField<string> | undefined,
   eventDateString: string | undefined,
-  code: string,
-  commentFunction: (parameters: {
+  reviewReasonFunction: (parameters: {
     daysDiff: number;
     eventDate: string;
     extractedDate: string;
-  }) => string,
-  notExtractedComment?: string,
-  notExtractedCode?: string,
+  }) => ReviewReason,
+  notExtractedReviewReason?: ReviewReason,
 ): FieldValidationResult => {
   if (!extractedDate) {
-    return eventDateString !== undefined &&
-      notExtractedComment !== undefined &&
-      notExtractedCode !== undefined
-      ? {
-          reviewReason: notExtractedComment,
-          reviewReasonCode: notExtractedCode,
-        }
+    return eventDateString !== undefined && notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
       : {};
   }
 
@@ -313,15 +270,15 @@ export const validateDateField = (
     return {};
   }
 
-  const message = commentFunction({
+  const reviewReason = reviewReasonFunction({
     daysDiff,
     eventDate: eventDateString,
     extractedDate: extractedDate.parsed,
   });
 
   return daysDiff > DATE_TOLERANCE_DAYS
-    ? { failMessage: message }
-    : { reviewReason: message, reviewReasonCode: code };
+    ? { failReason: reviewReason }
+    : { reviewReason };
 };
 
 export const WEIGHT_DISCREPANCY_THRESHOLD = 0.1;
@@ -410,23 +367,16 @@ const ddmmyyyyToIso = (dateString: string): string | undefined => {
 export const validateDateWithinPeriod = (
   eventDateString: string | undefined,
   periodField: ExtractedField<string> | undefined,
-  code: string,
-  commentFunction: (parameters: {
+  reviewReasonFunction: (parameters: {
     dropOffDate: string;
     periodEnd: string;
     periodStart: string;
-  }) => string,
-  notExtractedComment?: string,
-  notExtractedCode?: string,
+  }) => ReviewReason,
+  notExtractedReviewReason?: ReviewReason,
 ): FieldValidationResult => {
   if (!periodField) {
-    return eventDateString !== undefined &&
-      notExtractedComment !== undefined &&
-      notExtractedCode !== undefined
-      ? {
-          reviewReason: notExtractedComment,
-          reviewReasonCode: notExtractedCode,
-        }
+    return eventDateString !== undefined && notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
       : {};
   }
 
@@ -453,13 +403,13 @@ export const validateDateWithinPeriod = (
     return {};
   }
 
-  const message = commentFunction({
+  const reviewReason = reviewReasonFunction({
     dropOffDate: eventDateString,
     periodEnd: range.end,
     periodStart: range.start,
   });
 
   return periodField.confidence === 'high'
-    ? { failMessage: message }
-    : { reviewReason: message, reviewReasonCode: code };
+    ? { failReason: reviewReason }
+    : { reviewReason };
 };

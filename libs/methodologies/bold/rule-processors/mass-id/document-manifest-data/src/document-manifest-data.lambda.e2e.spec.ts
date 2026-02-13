@@ -26,6 +26,7 @@ describe('DocumentManifestDataLambda E2E', () => {
     jest.mocked(crossValidateWithTextract).mockResolvedValue({
       crossValidation: {},
       failMessages: [],
+      failReasons: [],
       reviewReasons: [],
       reviewRequired: false,
     });

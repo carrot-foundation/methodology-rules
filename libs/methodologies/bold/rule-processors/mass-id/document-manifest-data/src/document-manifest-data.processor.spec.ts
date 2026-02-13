@@ -25,6 +25,7 @@ describe('DocumentManifestDataProcessor', () => {
     crossValidateWithTextractMock.mockResolvedValue({
       crossValidation: {},
       failMessages: [],
+      failReasons: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -56,6 +57,7 @@ describe('DocumentManifestDataProcessor', () => {
       crossValidateWithTextractMock.mockResolvedValueOnce({
         crossValidation: {},
         failMessages: testCase.crossValidationFailMessages,
+        failReasons: [],
         reviewReasons: [],
         reviewRequired: false,
       });
@@ -65,6 +67,7 @@ describe('DocumentManifestDataProcessor', () => {
       crossValidateWithTextractMock.mockResolvedValueOnce({
         crossValidation: {},
         failMessages: [],
+        failReasons: [],
         reviewReasons: testCase.crossValidationReviewReasons,
         reviewRequired: true,
       });

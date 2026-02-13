@@ -24,9 +24,10 @@ const processInput = async <
 
     if (!extractorConfig) {
       result.reviewRequired = true;
-      result.reviewReasons.push(
-        `Unknown document type, cannot perform cross-validation for attachment ${attachmentInfo.attachmentId}`,
-      );
+      result.reviewReasons.push({
+        code: 'UNKNOWN_DOCUMENT_TYPE',
+        description: `Unknown document type, cannot perform cross-validation for attachment ${attachmentInfo.attachmentId}`,
+      });
 
       return;
     }
@@ -51,6 +52,10 @@ const processInput = async <
 
     if (validationResult.failMessages.length > 0) {
       result.failMessages.push(...validationResult.failMessages);
+    }
+
+    if (validationResult.failReasons) {
+      result.failReasons.push(...validationResult.failReasons);
     }
 
     if (validationResult.reviewRequired === true) {
@@ -87,6 +92,7 @@ export const crossValidateAttachments = async <
   const result: CrossValidationResult = {
     crossValidation: {},
     failMessages: [],
+    failReasons: [],
     reviewReasons: [],
     reviewRequired: false,
   };

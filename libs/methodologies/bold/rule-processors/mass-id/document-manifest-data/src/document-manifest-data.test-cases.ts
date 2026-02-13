@@ -373,7 +373,9 @@ export const crossValidationTestCases = [
     scenario: 'cross-validation finds mismatches in the document',
   },
   {
-    crossValidationReviewReasons: ['Low confidence extraction'],
+    crossValidationReviewReasons: [
+      { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
+    ],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
     events: {
       [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({

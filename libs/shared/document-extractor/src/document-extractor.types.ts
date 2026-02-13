@@ -1,6 +1,8 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
+import type { ReviewReason } from './cross-validation.types';
+
 export interface BaseExtractedData {
   documentType: DocumentType;
   extractionConfidence: ExtractionConfidence;
@@ -39,7 +41,7 @@ export type ExtractionConfidence = 'high' | 'low';
 export interface ExtractionOutput<T extends BaseExtractedData> {
   data: T;
   layoutId?: string;
-  reviewReasons: string[];
+  reviewReasons: ReviewReason[];
   reviewRequired: boolean;
   textExtractionResult?: TextExtractionResult;
 }

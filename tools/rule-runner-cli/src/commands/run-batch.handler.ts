@@ -114,12 +114,68 @@ const readInputFile = async (filePath: string): Promise<InputEntry[]> => {
   return parsed as InputEntry[];
 };
 
+interface ReviewReasonCodeBreakdown {
+  code: string;
+  count: number;
+}
+
+const buildReasonCodeBreakdown = (
+  results: EntryRuleResult[],
+  field: 'failReasons' | 'reviewReasons',
+): ReviewReasonCodeBreakdown[] => {
+  const codeCounts = new Map<string, number>();
+
+  for (const result of results) {
+    const reasons = result.resultContent?.[field];
+
+    if (!Array.isArray(reasons)) {
+      continue;
+    }
+
+    for (const reason of reasons as unknown[]) {
+      if (
+        typeof reason === 'object' &&
+        reason !== null &&
+        'code' in reason &&
+        typeof (reason as { code: unknown }).code === 'string'
+      ) {
+        const code = (reason as { code: string }).code;
+
+        codeCounts.set(code, (codeCounts.get(code) ?? 0) + 1);
+      }
+    }
+  }
+
+  return [...codeCounts.entries()]
+    .map(([code, count]) => ({ code, count }))
+    .sort((a, b) => b.count - a.count);
+};
+
+const appendBreakdown = (
+  lines: string[],
+  title: string,
+  breakdown: ReviewReasonCodeBreakdown[],
+  color: (text: string) => string,
+): void => {
+  if (breakdown.length === 0) {
+    return;
+  }
+
+  lines.push('', bold(title));
+
+  for (const { code, count } of breakdown) {
+    lines.push(color(`  ${code}: ${String(count)}`));
+  }
+};
+
 const logBatchSummary = (
   total: number,
   passed: number,
   reviewRequired: number,
   failedRule: number,
   errors: number,
+  reviewRequiredBreakdown: ReviewReasonCodeBreakdown[],
+  failedBreakdown: ReviewReasonCodeBreakdown[],
 ): void => {
   const lines: string[] = [
     bold('=== Batch Execution Summary ==='),
@@ -129,6 +185,14 @@ const logBatchSummary = (
     yellow(`Failed (rule): ${String(failedRule)}`),
     red(`Errors: ${String(errors)}`),
   ];
+
+  appendBreakdown(
+    lines,
+    'Review Reason Codes (Review Required):',
+    reviewRequiredBreakdown,
+    yellow,
+  );
+  appendBreakdown(lines, 'Review Reason Codes (Failed):', failedBreakdown, red);
 
   logger.info(`\n${lines.join('\n')}`);
 };
@@ -243,12 +307,20 @@ export const handleRunBatch = async (
     },
   });
 
+  const reviewRequiredBreakdown = buildReasonCodeBreakdown(
+    reviewRequiredResults,
+    'reviewReasons',
+  );
+  const failedBreakdown = buildReasonCodeBreakdown(ruleFailures, 'failReasons');
+
   logBatchSummary(
     entries.length,
     passedCount,
     reviewRequiredCount,
     failedRuleCount,
     failures.length,
+    reviewRequiredBreakdown,
+    failedBreakdown,
   );
 
   if (failures.length > 0) {

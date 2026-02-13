@@ -1,3 +1,5 @@
+import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
+
 import {
   DocumentEventAttributeName,
   DocumentEventName,
@@ -169,4 +171,130 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedEntries: string;
   }) =>
     `None of the waste types extracted from the document (${extractedEntries}) match the Pick-up event's waste classification (${eventClassification}).`,
+} as const;
+
+export const REVIEW_REASONS = {
+  DROP_OFF_DATE_OUTSIDE_PERIOD: (parameters: {
+    dropOffDate: string;
+    periodEnd: string;
+    periodStart: string;
+  }): ReviewReason => ({
+    code: 'DROP_OFF_DATE_OUTSIDE_PERIOD',
+    description:
+      CROSS_VALIDATION_COMMENTS.DROP_OFF_DATE_OUTSIDE_PERIOD(parameters),
+  }),
+  FIELD_NOT_EXTRACTED: (parameters: {
+    context?: string;
+    field: string;
+  }): ReviewReason => ({
+    code: 'FIELD_NOT_EXTRACTED',
+    description: CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED(parameters),
+  }),
+  GENERATOR_ADDRESS_MISMATCH: (parameters: {
+    score: number;
+  }): ReviewReason => ({
+    code: 'GENERATOR_ADDRESS_MISMATCH',
+    description:
+      CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH(parameters),
+  }),
+  GENERATOR_NAME_MISMATCH: (parameters: { score: number }): ReviewReason => ({
+    code: 'GENERATOR_NAME_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH(parameters),
+  }),
+  GENERATOR_TAX_ID_MISMATCH: (): ReviewReason => ({
+    code: 'GENERATOR_TAX_ID_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
+  }),
+  HAULER_NAME_MISMATCH: (parameters: { score: number }): ReviewReason => ({
+    code: 'HAULER_NAME_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH(parameters),
+  }),
+  HAULER_TAX_ID_MISMATCH: /* istanbul ignore next */ (): ReviewReason => ({
+    code: 'HAULER_TAX_ID_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
+  }),
+  MTR_NUMBER_NOT_IN_CDF: (parameters: { mtrNumber: string }): ReviewReason => ({
+    code: 'MTR_NUMBER_NOT_IN_CDF',
+    description: CROSS_VALIDATION_COMMENTS.MTR_NUMBER_NOT_IN_CDF(parameters),
+  }),
+  RECEIVER_ADDRESS_MISMATCH: (parameters: { score: number }): ReviewReason => ({
+    code: 'RECEIVER_ADDRESS_MISMATCH',
+    description:
+      CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH(parameters),
+  }),
+  RECEIVER_NAME_MISMATCH: (parameters: { score: number }): ReviewReason => ({
+    code: 'RECEIVER_NAME_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.RECEIVER_NAME_MISMATCH(parameters),
+  }),
+  RECEIVER_TAX_ID_MISMATCH: (): ReviewReason => ({
+    code: 'RECEIVER_TAX_ID_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
+  }),
+  RECEIVING_DATE_MISMATCH: (parameters: {
+    daysDiff: number;
+    eventDate: string;
+    extractedDate: string;
+  }): ReviewReason => ({
+    code: 'RECEIVING_DATE_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH(parameters),
+  }),
+  RECYCLER_NAME_MISMATCH: (parameters: { score: number }): ReviewReason => ({
+    code: 'RECYCLER_NAME_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.RECYCLER_NAME_MISMATCH(parameters),
+  }),
+  RECYCLER_TAX_ID_MISMATCH: (): ReviewReason => ({
+    code: 'RECYCLER_TAX_ID_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.RECYCLER_TAX_ID_MISMATCH,
+  }),
+  RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: (parameters: {
+    discrepancyPercentage: string;
+    extractedQuantity: string;
+    unit: string;
+    weighingWeight: string;
+  }): ReviewReason => ({
+    code: 'RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
+    description:
+      CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH(
+        parameters,
+      ),
+  }),
+  RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH: (parameters: {
+    eventClassification: string;
+    extractedEntries: string;
+  }): ReviewReason => ({
+    code: 'RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
+    description:
+      CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH(
+        parameters,
+      ),
+  }),
+  TRANSPORT_DATE_MISMATCH: (parameters: {
+    daysDiff: number;
+    eventDate: string;
+    extractedDate: string;
+  }): ReviewReason => ({
+    code: 'TRANSPORT_DATE_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.TRANSPORT_DATE_MISMATCH(parameters),
+  }),
+  VEHICLE_PLATE_MISMATCH: (): ReviewReason => ({
+    code: 'VEHICLE_PLATE_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
+  }),
+  WASTE_QUANTITY_WEIGHT_MISMATCH: (parameters: {
+    discrepancyPercentage: string;
+    extractedQuantity: string;
+    unit: string;
+    weighingWeight: string;
+  }): ReviewReason => ({
+    code: 'WASTE_QUANTITY_WEIGHT_MISMATCH',
+    description:
+      CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH(parameters),
+  }),
+  WASTE_TYPE_MISMATCH: (parameters: {
+    eventClassification: string;
+    extractedEntries: string;
+  }): ReviewReason => ({
+    code: 'WASTE_TYPE_MISMATCH',
+    description: CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH(parameters),
+  }),
 } as const;

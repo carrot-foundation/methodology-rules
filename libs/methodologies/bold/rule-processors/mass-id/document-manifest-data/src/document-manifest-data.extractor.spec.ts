@@ -51,6 +51,7 @@ describe('crossValidateWithTextract', () => {
     expect(result).toEqual({
       crossValidation: {},
       failMessages: [],
+      failReasons: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -71,6 +72,7 @@ describe('crossValidateWithTextract', () => {
     expect(result).toEqual({
       crossValidation: {},
       failMessages: [],
+      failReasons: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -102,8 +104,13 @@ describe('crossValidateWithTextract', () => {
     });
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain(
-      'Unknown document type, cannot perform cross-validation for attachment att-1',
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'UNKNOWN_DOCUMENT_TYPE',
+          description: expect.stringContaining('att-1') as string,
+        }),
+      ]),
     );
   });
 
@@ -175,7 +182,9 @@ describe('crossValidateWithTextract', () => {
         extractionConfidence: 'high',
         issueDate: { confidence: 'high', parsed: '2024-01-01' },
       },
-      reviewReasons: ['Some review reason'],
+      reviewReasons: [
+        { code: 'SOME_REVIEW_CODE', description: 'Some review reason' },
+      ],
       reviewRequired: true,
     });
 
@@ -186,7 +195,11 @@ describe('crossValidateWithTextract', () => {
     });
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toContain('Some review reason');
+    expect(result.reviewReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ description: 'Some review reason' }),
+      ]),
+    );
   });
 
   it('should fail when extraction errors occur', async () => {

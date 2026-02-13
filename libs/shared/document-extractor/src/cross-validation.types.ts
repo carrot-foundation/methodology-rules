@@ -31,13 +31,20 @@ export interface CrossValidationInput<TEventData> {
 export interface CrossValidationResult {
   crossValidation: Record<string, unknown>;
   failMessages: string[];
-  reviewReasons: string[];
+  failReasons: ReviewReason[];
+  reviewReasons: ReviewReason[];
   reviewRequired: boolean;
 }
 
 export interface CrossValidationValidateResult {
   crossValidation?: Record<string, unknown>;
   failMessages: string[];
-  reviewReasons?: string[];
+  failReasons?: ReviewReason[];
+  reviewReasons?: ReviewReason[];
   reviewRequired?: boolean;
+}
+
+export interface ReviewReason {
+  code: string;
+  description: string;
 }

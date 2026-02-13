@@ -1,5 +1,6 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
+import type { ReviewReason } from './cross-validation.types';
 import type {
   BaseExtractedData,
   DocumentType,
@@ -156,28 +157,41 @@ export const collectMissingRequiredFields = (
     return field === undefined;
   });
 
+const toUpperSnakeCase = (fieldName: string): string =>
+  fieldName
+    .replaceAll(/([A-Z])/g, '_$1')
+    .toUpperCase()
+    .replace(/^_/, '');
+
 export const buildExtractionOutput = <T extends BaseExtractedData>(
   data: T,
   layoutMatchScore: number,
 ): ExtractionOutput<T> => {
-  const reviewReasons: string[] = [];
+  const reviewReasons: ReviewReason[] = [];
 
   if (data.missingRequiredFields.length > 0) {
-    reviewReasons.push(
-      `Missing required fields: ${data.missingRequiredFields.join(', ')}`,
-    );
+    for (const field of data.missingRequiredFields) {
+      reviewReasons.push({
+        code: `MISSING_REQUIRED_${toUpperSnakeCase(field)}`,
+        description: `Missing required fields: ${data.missingRequiredFields.join(', ')}`,
+      });
+    }
   }
 
   if (data.lowConfidenceFields.length > 0) {
-    reviewReasons.push(
-      `Low confidence fields: ${data.lowConfidenceFields.join(', ')}`,
-    );
+    for (const field of data.lowConfidenceFields) {
+      reviewReasons.push({
+        code: `LOW_CONFIDENCE_${toUpperSnakeCase(field)}`,
+        description: `Low confidence fields: ${data.lowConfidenceFields.join(', ')}`,
+      });
+    }
   }
 
   if (layoutMatchScore < LAYOUT_REVIEW_THRESHOLD) {
-    reviewReasons.push(
-      `Layout match score (${layoutMatchScore.toFixed(2)}) below review threshold (${LAYOUT_REVIEW_THRESHOLD})`,
-    );
+    reviewReasons.push({
+      code: 'LOW_LAYOUT_MATCH_SCORE',
+      description: `Layout match score (${layoutMatchScore.toFixed(2)}) below review threshold (${LAYOUT_REVIEW_THRESHOLD})`,
+    });
   }
 
   return {

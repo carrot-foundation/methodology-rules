@@ -161,8 +161,10 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('recycler name');
-        expect(result.reviewReasons?.[0]).toContain('Similarity:');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'recycler name',
+        );
+        expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
       });
 
       it('should fail when recycler tax ID does not match with high confidence', () => {
@@ -209,7 +211,9 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('generator name');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'generator name',
+        );
       });
 
       it('should fail when generator tax ID does not match', () => {
@@ -271,8 +275,8 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
 
-        const addressReason = result.reviewReasons?.find((r: string) =>
-          r.includes('generator address'),
+        const addressReason = result.reviewReasons?.find((r) =>
+          r.description.includes('generator address'),
         );
 
         expect(addressReason).toBeDefined();
@@ -343,7 +347,9 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('Drop-off event date');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'Drop-off event date',
+        );
       });
     });
 
@@ -385,8 +391,8 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('MTR-001');
-        expect(result.reviewReasons?.[0]).toContain('not found');
+        expect(result.reviewReasons?.[0]?.description).toContain('MTR-001');
+        expect(result.reviewReasons?.[0]?.description).toContain('not found');
       });
 
       it('should skip when no MTR document numbers', () => {
@@ -424,7 +430,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewReasons).toBeDefined();
         expect(
           result.reviewReasons?.some((r) =>
-            r.includes('transport manifest numbers'),
+            r.description.includes('transport manifest numbers'),
           ),
         ).toBe(true);
       });
@@ -517,7 +523,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.description).toContain('waste types');
       });
     });
 
@@ -643,8 +649,12 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('waste quantity');
-        expect(result.reviewReasons?.[0]).toContain('recycling manifest');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'waste quantity',
+        );
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'recycling manifest',
+        );
       });
 
       it('should show "kg" in review reason when unit is undefined and discrepancy exceeds threshold', () => {
@@ -674,7 +684,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('500 kg');
+        expect(result.reviewReasons?.[0]?.description).toContain('500 kg');
       });
 
       it('should return review reason with description-only mismatch for CDF events', () => {
@@ -697,7 +707,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain(
+        expect(result.reviewReasons?.[0]?.description).toContain(
           'Metal ferroso totalmente diferente',
         );
       });
@@ -763,10 +773,14 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(
-          result.reviewReasons?.some((r) => r.includes('recycler name')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('recycler name'),
+          ),
         ).toBe(true);
         expect(
-          result.reviewReasons?.some((r) => r.includes('recycler tax ID')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('recycler tax ID'),
+          ),
         ).toBe(true);
       });
 
@@ -788,7 +802,9 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(
-          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste type entries'),
+          ),
         ).toBe(true);
       });
 
@@ -809,7 +825,9 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(
-          result.reviewReasons?.some((r) => r.includes('processing period')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('processing period'),
+          ),
         ).toBe(true);
       });
 

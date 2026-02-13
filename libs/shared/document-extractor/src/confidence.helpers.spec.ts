@@ -251,7 +251,11 @@ describe('confidence.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
-        expect.stringContaining('Missing required fields'),
+        expect.objectContaining({
+          description: expect.stringContaining(
+            'Missing required fields',
+          ) as string,
+        }),
       );
     });
 
@@ -268,7 +272,11 @@ describe('confidence.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
-        expect.stringContaining('Low confidence fields'),
+        expect.objectContaining({
+          description: expect.stringContaining(
+            'Low confidence fields',
+          ) as string,
+        }),
       );
     });
 
@@ -285,7 +293,9 @@ describe('confidence.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
-        expect.stringContaining('Layout match score'),
+        expect.objectContaining({
+          description: expect.stringContaining('Layout match score') as string,
+        }),
       );
     });
   });
@@ -479,7 +489,9 @@ describe('confidence.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
-        expect.stringContaining('Layout match score'),
+        expect.objectContaining({
+          description: expect.stringContaining('Layout match score') as string,
+        }),
       );
     });
   });

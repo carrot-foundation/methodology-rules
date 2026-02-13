@@ -170,9 +170,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('vehicle plate');
-      expect(result.reviewReasons?.[0]).not.toContain('ABC1234');
-      expect(result.reviewReasons?.[0]).not.toContain('XYZ9876');
+      expect(result.reviewReasons?.[0]?.description).toContain('vehicle plate');
+      expect(result.reviewReasons?.[0]?.description).not.toContain('ABC1234');
+      expect(result.reviewReasons?.[0]?.description).not.toContain('XYZ9876');
     });
 
     it('should set reviewRequired when vehicle plate does not match with low confidence', () => {
@@ -204,7 +204,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('vehicle plate');
+      expect(result.reviewReasons?.[0]?.description).toContain('vehicle plate');
     });
 
     it('should skip vehicle plate validation when pickUpEvent is missing', () => {
@@ -253,8 +253,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('receiver name');
-      expect(result.reviewReasons?.[0]).toContain('Similarity:');
+      expect(result.reviewReasons?.[0]?.description).toContain('receiver name');
+      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -290,8 +290,10 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('generator name');
-      expect(result.reviewReasons?.[0]).toContain('Similarity:');
+      expect(result.reviewReasons?.[0]?.description).toContain(
+        'generator name',
+      );
+      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -327,8 +329,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]).toContain('hauler name');
-      expect(result.reviewReasons?.[0]).toContain('Similarity:');
+      expect(result.reviewReasons?.[0]?.description).toContain('hauler name');
+      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -803,7 +805,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
-        expect(result.reviewReasons?.[0]).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.description).toContain('waste types');
       });
 
       it('should skip validation when event has no waste classification', () => {
@@ -846,7 +848,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(
-          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste type entries'),
+          ),
         ).toBe(true);
       });
 
@@ -872,7 +876,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
-        expect(result.reviewReasons?.[0]).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.description).toContain('waste types');
       });
 
       it('should normalize waste codes with spaces', () => {
@@ -919,8 +923,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('waste types');
-        expect(result.reviewReasons?.[0]).toContain(
+        expect(result.reviewReasons?.[0]?.description).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.description).toContain(
           'Metal ferroso totalmente diferente',
         );
       });
@@ -941,7 +945,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
-        expect(result.reviewReasons?.[0]).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.description).toContain('waste types');
       });
 
       it('should skip validation when pickUpEvent is missing', () => {
@@ -985,7 +989,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(
-          result.reviewReasons?.some((r) => r.includes('waste type entries')),
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste type entries'),
+          ),
         ).toBe(true);
       });
 
@@ -1146,9 +1152,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
-        expect(result.reviewReasons?.[0]).toContain('waste quantity');
-        expect(result.reviewReasons?.[0]).toContain('500');
-        expect(result.reviewReasons?.[0]).toContain('1000');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'waste quantity',
+        );
+        expect(result.reviewReasons?.[0]?.description).toContain('500');
+        expect(result.reviewReasons?.[0]?.description).toContain('1000');
       });
 
       it('should correctly normalize ton units to kg', () => {
@@ -1202,7 +1210,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('waste quantity');
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'waste quantity',
+        );
       });
 
       it('should use first weighing event with valid value', () => {
@@ -1259,7 +1269,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]).toContain('500 kg');
+        expect(result.reviewReasons?.[0]?.description).toContain('500 kg');
       });
 
       it('should treat undefined unit as kg', () => {
@@ -1382,7 +1392,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewReasons).toBeDefined();
 
       const addressReason = result.reviewReasons?.find((r) =>
-        r.includes('receiver address'),
+        r.description.includes('receiver address'),
       );
 
       expect(addressReason).toBeDefined();
@@ -1421,7 +1431,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewReasons).toBeDefined();
 
       const addressReason = result.reviewReasons?.find((r) =>
-        r.includes('generator address'),
+        r.description.includes('generator address'),
       );
 
       expect(addressReason).toBeDefined();
@@ -1541,10 +1551,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
       expect(
-        result.reviewReasons?.some((r) => r.includes('receiver name')),
+        result.reviewReasons?.some((r) =>
+          r.description.includes('receiver name'),
+        ),
       ).toBe(true);
       expect(
-        result.reviewReasons?.some((r) => r.includes('receiver tax ID')),
+        result.reviewReasons?.some((r) =>
+          r.description.includes('receiver tax ID'),
+        ),
       ).toBe(true);
     });
 
@@ -1565,7 +1579,9 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toBeDefined();
       expect(
-        result.reviewReasons?.some((r) => r.includes('transport date')),
+        result.reviewReasons?.some((r) =>
+          r.description.includes('transport date'),
+        ),
       ).toBe(true);
     });
 

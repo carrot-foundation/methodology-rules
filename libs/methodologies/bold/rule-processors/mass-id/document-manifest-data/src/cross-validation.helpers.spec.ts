@@ -50,10 +50,12 @@ const makeAddress = (
     street,
   }) as unknown as MethodologyAddress;
 
-const addressCommentFunction = ({ score }: { score: number }) =>
-  `Address mismatch: ${(score * 100).toFixed(0)}%`;
+const addressReviewReasonFunction = ({ score }: { score: number }) => ({
+  code: 'ADDRESS_MISMATCH',
+  description: `Address mismatch: ${(score * 100).toFixed(0)}%`,
+});
 
-const dateCommentFunction = ({
+const dateReviewReasonFunction = ({
   daysDiff,
   eventDate,
   extractedDate,
@@ -61,9 +63,12 @@ const dateCommentFunction = ({
   daysDiff: number;
   eventDate: string;
   extractedDate: string;
-}) => `Date differs by ${daysDiff} days: ${extractedDate} vs ${eventDate}`;
+}) => ({
+  code: 'DATE_MISMATCH',
+  description: `Date differs by ${daysDiff} days: ${extractedDate} vs ${eventDate}`,
+});
 
-const periodCommentFunction = ({
+const periodReviewReasonFunction = ({
   dropOffDate,
   periodEnd,
   periodStart,
@@ -71,9 +76,25 @@ const periodCommentFunction = ({
   dropOffDate: string;
   periodEnd: string;
   periodStart: string;
-}) => `Date ${dropOffDate} outside period ${periodStart}-${periodEnd}`;
+}) => ({
+  code: 'DATE_OUTSIDE_PERIOD',
+  description: `Date ${dropOffDate} outside period ${periodStart}-${periodEnd}`,
+});
 
-const nameCommentFunction = () => 'Name mismatch';
+const nameReviewReasonFunction = ({ score }: { score: number }) => ({
+  code: 'NAME_MISMATCH',
+  description: `Name mismatch: ${(score * 100).toFixed(0)}%`,
+});
+
+const taxIdReviewReasonFunction = () => ({
+  code: 'TAX_ID_MISMATCH',
+  description: 'Tax ID mismatch',
+});
+
+const notExtractedReviewReason = {
+  code: 'FIELD_NOT_EXTRACTED',
+  description: 'Field not extracted',
+};
 
 describe('cross-validation.helpers', () => {
   describe('validateBasicExtractedData', () => {
@@ -210,8 +231,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
+        addressReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -228,12 +248,12 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
+        addressReviewReasonFunction,
       );
 
-      expect(result.reviewReason).toContain('Address mismatch');
-      expect(result.reviewReasonCode).toBe('ADDRESS_MISMATCH');
+      expect(result.reviewReason).toBeDefined();
+      expect(result.reviewReason?.code).toBe('ADDRESS_MISMATCH');
+      expect(result.reviewReason?.description).toContain('Address mismatch');
     });
 
     it('should skip when extractedEntity is undefined', () => {
@@ -242,8 +262,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         undefined,
         address,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
+        addressReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -255,8 +274,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         undefined,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
+        addressReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -274,39 +292,33 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityAddress(
         entity,
         address,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
+        addressReviewReasonFunction,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return reviewReason when entity not extracted but event address exists and notExtractedComment provided', () => {
+    it('should return reviewReason when entity not extracted but event address exists and notExtractedReviewReason provided', () => {
       const address = makeAddress('Rua Test', '1', 'City', 'ST');
 
       const result = validateEntityAddress(
         undefined,
         address,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
-        'Address not extracted',
-        'FIELD_NOT_EXTRACTED',
+        addressReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({
-        reviewReason: 'Address not extracted',
-        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
+        reviewReason: notExtractedReviewReason,
       });
     });
 
-    it('should return empty when entity not extracted, event address undefined, and notExtractedComment provided', () => {
+    it('should return empty when entity not extracted, event address undefined, and notExtractedReviewReason provided', () => {
       const result = validateEntityAddress(
         undefined,
         undefined,
-        'ADDRESS_MISMATCH',
-        addressCommentFunction,
-        'Address not extracted',
-        'FIELD_NOT_EXTRACTED',
+        addressReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({});
@@ -314,19 +326,16 @@ describe('cross-validation.helpers', () => {
   });
 
   describe('validateEntityName', () => {
-    it('should return reviewReason when entity not extracted but event name exists and notExtractedComment provided', () => {
+    it('should return reviewReason when entity not extracted but event name exists and notExtractedReviewReason provided', () => {
       const result = validateEntityName(
         undefined,
         'Some Company',
-        'NAME_MISMATCH',
-        nameCommentFunction,
-        'Name not extracted',
-        'FIELD_NOT_EXTRACTED',
+        nameReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({
-        reviewReason: 'Name not extracted',
-        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
+        reviewReason: notExtractedReviewReason,
       });
     });
 
@@ -334,21 +343,18 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityName(
         undefined,
         undefined,
-        'NAME_MISMATCH',
-        nameCommentFunction,
-        'Name not extracted',
-        'FIELD_NOT_EXTRACTED',
+        nameReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return empty when entity not extracted and no notExtractedComment', () => {
+    it('should return empty when entity not extracted and no notExtractedReviewReason', () => {
       const result = validateEntityName(
         undefined,
         'Some Company',
-        'NAME_MISMATCH',
-        nameCommentFunction,
+        nameReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -356,19 +362,16 @@ describe('cross-validation.helpers', () => {
   });
 
   describe('validateEntityTaxId', () => {
-    it('should return reviewReason when entity not extracted but event taxId exists and notExtractedComment provided', () => {
+    it('should return reviewReason when entity not extracted but event taxId exists and notExtractedReviewReason provided', () => {
       const result = validateEntityTaxId(
         undefined,
         '12.345.678/0001-90',
-        'TAX_ID_MISMATCH',
-        'Tax ID mismatch',
-        'Tax ID not extracted',
-        'FIELD_NOT_EXTRACTED',
+        taxIdReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({
-        reviewReason: 'Tax ID not extracted',
-        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
+        reviewReason: notExtractedReviewReason,
       });
     });
 
@@ -376,21 +379,18 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         undefined,
         undefined,
-        'TAX_ID_MISMATCH',
-        'Tax ID mismatch',
-        'Tax ID not extracted',
-        'FIELD_NOT_EXTRACTED',
+        taxIdReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return empty when entity not extracted and no notExtractedComment', () => {
+    it('should return empty when entity not extracted and no notExtractedReviewReason', () => {
       const result = validateEntityTaxId(
         undefined,
         '12.345.678/0001-90',
-        'TAX_ID_MISMATCH',
-        'Tax ID mismatch',
+        taxIdReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -405,8 +405,7 @@ describe('cross-validation.helpers', () => {
       const result = validateEntityTaxId(
         entity,
         '12.345.678/0001-90',
-        'TAX_ID_MISMATCH',
-        'Tax ID mismatch',
+        taxIdReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -423,8 +422,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-15',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -439,16 +437,16 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-03',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
-      expect(result.reviewReason).toContain('Date differs by');
-      expect(result.reviewReasonCode).toBe('DATE_MISMATCH');
-      expect(result.failMessage).toBeUndefined();
+      expect(result.reviewReason).toBeDefined();
+      expect(result.reviewReason?.code).toBe('DATE_MISMATCH');
+      expect(result.reviewReason?.description).toContain('Date differs by');
+      expect(result.failReason).toBeUndefined();
     });
 
-    it('should return failMessage when beyond tolerance (>3 days)', () => {
+    it('should return failReason when beyond tolerance (>3 days)', () => {
       const field: ExtractedField<string> = {
         confidence: 'high',
         parsed: '01/01/2024',
@@ -457,11 +455,12 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-01-10',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
-      expect(result.failMessage).toContain('Date differs by');
+      expect(result.failReason).toBeDefined();
+      expect(result.failReason?.code).toBe('DATE_MISMATCH');
+      expect(result.failReason?.description).toContain('Date differs by');
       expect(result.reviewReason).toBeUndefined();
     });
 
@@ -474,8 +473,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         '2024-06-15',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -485,8 +483,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -501,48 +498,41 @@ describe('cross-validation.helpers', () => {
       const result = validateDateField(
         field,
         undefined,
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return reviewReason when date not extracted but event date exists and notExtractedComment provided', () => {
+    it('should return reviewReason when date not extracted but event date exists and notExtractedReviewReason provided', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'DATE_MISMATCH',
-        dateCommentFunction,
-        'Date not extracted',
-        'FIELD_NOT_EXTRACTED',
+        dateReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({
-        reviewReason: 'Date not extracted',
-        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
+        reviewReason: notExtractedReviewReason,
       });
     });
 
-    it('should return empty when date not extracted, event date undefined, and notExtractedComment provided', () => {
+    it('should return empty when date not extracted, event date undefined, and notExtractedReviewReason provided', () => {
       const result = validateDateField(
         undefined,
         undefined,
-        'DATE_MISMATCH',
-        dateCommentFunction,
-        'Date not extracted',
-        'FIELD_NOT_EXTRACTED',
+        dateReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return empty when date not extracted and no notExtractedComment', () => {
+    it('should return empty when date not extracted and no notExtractedReviewReason', () => {
       const result = validateDateField(
         undefined,
         '2024-01-15',
-        'DATE_MISMATCH',
-        dateCommentFunction,
+        dateReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -663,14 +653,13 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return failMessage when date is before period (high confidence)', () => {
+    it('should return failReason when date is before period (high confidence)', () => {
       const period: ExtractedField<string> = {
         confidence: 'high',
         parsed: '01/02/2024 ate 28/02/2024',
@@ -679,14 +668,15 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
-      expect(result.failMessage).toContain('outside period');
+      expect(result.failReason).toBeDefined();
+      expect(result.failReason?.code).toBe('DATE_OUTSIDE_PERIOD');
+      expect(result.failReason?.description).toContain('outside period');
     });
 
-    it('should return failMessage when date is after period (high confidence)', () => {
+    it('should return failReason when date is after period (high confidence)', () => {
       const period: ExtractedField<string> = {
         confidence: 'high',
         parsed: '01/01/2024 ate 31/01/2024',
@@ -695,11 +685,11 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-03-01',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
-      expect(result.failMessage).toContain('outside period');
+      expect(result.failReason).toBeDefined();
+      expect(result.failReason?.description).toContain('outside period');
     });
 
     it('should return reviewReason when confidence is low', () => {
@@ -711,13 +701,13 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
-      expect(result.reviewReason).toContain('outside period');
-      expect(result.reviewReasonCode).toBe('DATE_OUTSIDE_PERIOD');
-      expect(result.failMessage).toBeUndefined();
+      expect(result.reviewReason).toBeDefined();
+      expect(result.reviewReason?.code).toBe('DATE_OUTSIDE_PERIOD');
+      expect(result.reviewReason?.description).toContain('outside period');
+      expect(result.failReason).toBeUndefined();
     });
 
     it('should skip when eventDateString is undefined', () => {
@@ -729,8 +719,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         undefined,
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -740,48 +729,41 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return reviewReason when period not extracted but event date exists and notExtractedComment provided', () => {
+    it('should return reviewReason when period not extracted but event date exists and notExtractedReviewReason provided', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
-        'Period not extracted',
-        'FIELD_NOT_EXTRACTED',
+        periodReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({
-        reviewReason: 'Period not extracted',
-        reviewReasonCode: 'FIELD_NOT_EXTRACTED',
+        reviewReason: notExtractedReviewReason,
       });
     });
 
-    it('should return empty when period not extracted, event date undefined, and notExtractedComment provided', () => {
+    it('should return empty when period not extracted, event date undefined, and notExtractedReviewReason provided', () => {
       const result = validateDateWithinPeriod(
         undefined,
         undefined,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
-        'Period not extracted',
-        'FIELD_NOT_EXTRACTED',
+        periodReviewReasonFunction,
+        notExtractedReviewReason,
       );
 
       expect(result).toEqual({});
     });
 
-    it('should return empty when period not extracted and no notExtractedComment', () => {
+    it('should return empty when period not extracted and no notExtractedReviewReason', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         undefined,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -796,8 +778,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -812,8 +793,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -828,8 +808,7 @@ describe('cross-validation.helpers', () => {
       const result = validateDateWithinPeriod(
         '2024-01-15',
         period,
-        'DATE_OUTSIDE_PERIOD',
-        periodCommentFunction,
+        periodReviewReasonFunction,
       );
 
       expect(result).toEqual({});
@@ -837,13 +816,19 @@ describe('cross-validation.helpers', () => {
   });
 
   describe('routeByConfidence', () => {
-    it('should return failMessage when confidence is high', () => {
-      expect(routeByConfidence('high', 'msg')).toEqual({ failMessage: 'msg' });
+    it('should return failReason when confidence is high', () => {
+      const reviewReason = { code: 'TEST_CODE', description: 'Test message' };
+
+      expect(routeByConfidence('high', reviewReason)).toEqual({
+        failReason: reviewReason,
+      });
     });
 
     it('should return reviewReason when confidence is not high', () => {
-      expect(routeByConfidence('low', 'msg')).toEqual({
-        reviewReason: 'msg',
+      const reviewReason = { code: 'TEST_CODE', description: 'Test message' };
+
+      expect(routeByConfidence('low', reviewReason)).toEqual({
+        reviewReason,
       });
     });
   });
