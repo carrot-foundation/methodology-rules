@@ -162,7 +162,21 @@ export const validateEntityName = (
   const extractedName = extractedEntity.name.parsed;
   const { isMatch, score } = isNameMatch(extractedName, eventParticipantName);
 
-  return isMatch ? {} : { reviewReason: reviewReasonFunction({ score }) };
+  return isMatch
+    ? {}
+    : {
+        reviewReason: {
+          ...reviewReasonFunction({ score }),
+          comparedFields: [
+            {
+              event: eventParticipantName,
+              extracted: extractedName,
+              field: 'name',
+              similarity: `${(score * 100).toFixed(0)}%`,
+            },
+          ],
+        },
+      };
 };
 
 export const validateEntityTaxId = (
@@ -193,7 +207,18 @@ export const validateEntityTaxId = (
     return {};
   }
 
-  return { failReason: mismatchReviewReasonFunction() };
+  return {
+    failReason: {
+      ...mismatchReviewReasonFunction(),
+      comparedFields: [
+        {
+          event: eventParticipantTaxId,
+          extracted: extractedTaxId,
+          field: 'taxId',
+        },
+      ],
+    },
+  };
 };
 
 export const validateEntityAddress = (
@@ -235,7 +260,21 @@ export const validateEntityAddress = (
 
   const { isMatch, score } = isNameMatch(extractedAddress, eventAddressString);
 
-  return isMatch ? {} : { reviewReason: reviewReasonFunction({ score }) };
+  return isMatch
+    ? {}
+    : {
+        reviewReason: {
+          ...reviewReasonFunction({ score }),
+          comparedFields: [
+            {
+              event: eventAddressString,
+              extracted: extractedAddress,
+              field: 'address',
+              similarity: `${(score * 100).toFixed(0)}%`,
+            },
+          ],
+        },
+      };
 };
 
 export const DATE_TOLERANCE_DAYS = 3;
@@ -270,11 +309,21 @@ export const validateDateField = (
     return {};
   }
 
-  const reviewReason = reviewReasonFunction({
-    daysDiff,
-    eventDate: eventDateString,
-    extractedDate: extractedDate.parsed,
-  });
+  const reviewReason = {
+    ...reviewReasonFunction({
+      daysDiff,
+      eventDate: eventDateString,
+      extractedDate: extractedDate.parsed,
+    }),
+    comparedFields: [
+      {
+        event: eventDateString,
+        extracted: extractedDate.parsed,
+        field: 'date',
+        similarity: `${daysDiff} days`,
+      },
+    ],
+  };
 
   return daysDiff > DATE_TOLERANCE_DAYS
     ? { failReason: reviewReason }
@@ -403,11 +452,20 @@ export const validateDateWithinPeriod = (
     return {};
   }
 
-  const reviewReason = reviewReasonFunction({
-    dropOffDate: eventDateString,
-    periodEnd: range.end,
-    periodStart: range.start,
-  });
+  const reviewReason = {
+    ...reviewReasonFunction({
+      dropOffDate: eventDateString,
+      periodEnd: range.end,
+      periodStart: range.start,
+    }),
+    comparedFields: [
+      {
+        event: eventIso,
+        extracted: `${range.start} - ${range.end}`,
+        field: 'dateWithinPeriod',
+      },
+    ],
+  };
 
   return periodField.confidence === 'high'
     ? { failReason: reviewReason }

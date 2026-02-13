@@ -254,6 +254,14 @@ describe('cross-validation.helpers', () => {
       expect(result.reviewReason).toBeDefined();
       expect(result.reviewReason?.code).toBe('ADDRESS_MISMATCH');
       expect(result.reviewReason?.description).toContain('Address mismatch');
+      expect(result.reviewReason?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: 'Av Brasil, 100, Curitiba, PR',
+          extracted: 'Rua Completamente Diferente 999, Rio de Janeiro, RJ',
+          field: 'address',
+          similarity: expect.stringContaining('%'),
+        }),
+      ]);
     });
 
     it('should skip when extractedEntity is undefined', () => {
@@ -443,6 +451,13 @@ describe('cross-validation.helpers', () => {
       expect(result.reviewReason).toBeDefined();
       expect(result.reviewReason?.code).toBe('DATE_MISMATCH');
       expect(result.reviewReason?.description).toContain('Date differs by');
+      expect(result.reviewReason?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '2024-01-03',
+          extracted: '01/01/2024',
+          field: 'date',
+        }),
+      ]);
       expect(result.failReason).toBeUndefined();
     });
 
@@ -461,6 +476,13 @@ describe('cross-validation.helpers', () => {
       expect(result.failReason).toBeDefined();
       expect(result.failReason?.code).toBe('DATE_MISMATCH');
       expect(result.failReason?.description).toContain('Date differs by');
+      expect(result.failReason?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '2024-01-10',
+          extracted: '01/01/2024',
+          field: 'date',
+        }),
+      ]);
       expect(result.reviewReason).toBeUndefined();
     });
 
@@ -674,6 +696,13 @@ describe('cross-validation.helpers', () => {
       expect(result.failReason).toBeDefined();
       expect(result.failReason?.code).toBe('DATE_OUTSIDE_PERIOD');
       expect(result.failReason?.description).toContain('outside period');
+      expect(result.failReason?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '2024-01-15',
+          extracted: '01/02/2024 - 28/02/2024',
+          field: 'dateWithinPeriod',
+        }),
+      ]);
     });
 
     it('should return failReason when date is after period (high confidence)', () => {
@@ -707,6 +736,13 @@ describe('cross-validation.helpers', () => {
       expect(result.reviewReason).toBeDefined();
       expect(result.reviewReason?.code).toBe('DATE_OUTSIDE_PERIOD');
       expect(result.reviewReason?.description).toContain('outside period');
+      expect(result.reviewReason?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '2024-01-15',
+          extracted: '01/02/2024 - 28/02/2024',
+          field: 'dateWithinPeriod',
+        }),
+      ]);
       expect(result.failReason).toBeUndefined();
     });
 

@@ -13,6 +13,12 @@
       "options": {
         "command": "LOG_FORMAT=pretty LOG_LEVEL=debug npx ts-node --project tools/rule-runner-cli/tsconfig.json --compilerOptions '{\"module\":\"commonjs\"}' -r tsconfig-paths/register tools/rule-runner-cli/src/main.ts"
       }
+    },
+    "export-tsv": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash tools/rule-runner-cli/scripts/export-tsv.sh {args.file}"
+      }
     }
   }
 }

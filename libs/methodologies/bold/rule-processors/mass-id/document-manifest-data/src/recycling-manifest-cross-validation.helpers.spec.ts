@@ -165,6 +165,14 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           'recycler name',
         );
         expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            event: 'Recycler Corp',
+            extracted: 'COMPLETELY DIFFERENT COMPANY',
+            field: 'name',
+            similarity: expect.stringContaining('%'),
+          }),
+        ]);
       });
 
       it('should fail when recycler tax ID does not match with high confidence', () => {
@@ -183,6 +191,13 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         expect(result.failMessages).toHaveLength(1);
         expect(result.failMessages[0]).toContain('recycler tax ID');
+        expect(result.failReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            event: '33.333.333/0001-33',
+            extracted: '99.999.999/0001-99',
+            field: 'taxId',
+          }),
+        ]);
       });
     });
 
@@ -393,6 +408,13 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons?.[0]?.description).toContain('MTR-001');
         expect(result.reviewReasons?.[0]?.description).toContain('not found');
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            event: 'MTR-001',
+            extracted: 'MTR-999',
+            field: 'mtrNumber',
+          }),
+        ]);
       });
 
       it('should skip when no MTR document numbers', () => {
@@ -524,6 +546,11 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons?.[0]?.description).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            field: 'wasteType',
+          }),
+        ]);
       });
     });
 
@@ -655,6 +682,13 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewReasons?.[0]?.description).toContain(
           'recycling manifest',
         );
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            event: '1000 kg',
+            extracted: '500 kg',
+            field: 'wasteQuantity',
+          }),
+        ]);
       });
 
       it('should show "kg" in review reason when unit is undefined and discrepancy exceeds threshold', () => {

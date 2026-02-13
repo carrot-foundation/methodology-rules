@@ -77,7 +77,16 @@ const validateMtrNumberCrossReference = (
 
     if (!found) {
       results.push({
-        reviewReason: REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF({ mtrNumber }),
+        reviewReason: {
+          ...REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF({ mtrNumber }),
+          comparedFields: [
+            {
+              event: mtrNumber,
+              extracted: extractedManifests.join(', '),
+              field: 'mtrNumber',
+            },
+          ],
+        },
       });
     }
   }
@@ -137,10 +146,19 @@ const validateCdfWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason: REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH({
-      eventClassification: eventSummary,
-      extractedEntries: extractedSummary,
-    }),
+    reviewReason: {
+      ...REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH({
+        eventClassification: eventSummary,
+        extractedEntries: extractedSummary,
+      }),
+      comparedFields: [
+        {
+          event: eventSummary,
+          extracted: extractedSummary,
+          field: 'wasteType',
+        },
+      ],
+    },
   };
 };
 
@@ -194,13 +212,22 @@ const validateCdfWasteQuantity = (
 
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
-      reviewReason:
-        REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH({
+      reviewReason: {
+        ...REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH({
           discrepancyPercentage: (discrepancy * 100).toFixed(1),
           extractedQuantity: matchedEntry.quantity.toString(),
           unit: matchedEntry.unit ?? 'kg',
           weighingWeight: weighingValue.toString(),
         }),
+        comparedFields: [
+          {
+            event: `${weighingValue} kg`,
+            extracted: `${matchedEntry.quantity} ${matchedEntry.unit ?? 'kg'}`,
+            field: 'wasteQuantity',
+            similarity: `${(discrepancy * 100).toFixed(1)}% discrepancy`,
+          },
+        ],
+      },
     };
   }
 

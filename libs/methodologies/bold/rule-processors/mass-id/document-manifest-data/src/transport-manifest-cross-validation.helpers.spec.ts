@@ -173,6 +173,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewReasons?.[0]?.description).toContain('vehicle plate');
       expect(result.reviewReasons?.[0]?.description).not.toContain('ABC1234');
       expect(result.reviewReasons?.[0]?.description).not.toContain('XYZ9876');
+      expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: 'XYZ9876',
+          extracted: 'ABC1234',
+          field: 'vehiclePlate',
+        }),
+      ]);
     });
 
     it('should set reviewRequired when vehicle plate does not match with low confidence', () => {
@@ -255,6 +262,14 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewReasons).toBeDefined();
       expect(result.reviewReasons?.[0]?.description).toContain('receiver name');
       expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
+      expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: 'Original Recycler Corp',
+          extracted: 'COMPLETELY DIFFERENT COMPANY',
+          field: 'name',
+          similarity: expect.stringContaining('%'),
+        }),
+      ]);
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -367,6 +382,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.failMessages).toHaveLength(1);
       expect(result.failMessages[0]).toContain('receiver tax ID');
+      expect(result.failReasons?.[0]?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '11.111.111/0001-11',
+          extracted: '99.999.999/0001-99',
+          field: 'taxId',
+        }),
+      ]);
     });
 
     it('should not fail when tax IDs match after normalization', () => {
@@ -806,6 +828,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
         expect(result.reviewReasons).toBeDefined();
         expect(result.reviewReasons?.[0]?.description).toContain('waste types');
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            field: 'wasteType',
+          }),
+        ]);
       });
 
       it('should skip validation when event has no waste classification', () => {
@@ -1157,6 +1184,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
         );
         expect(result.reviewReasons?.[0]?.description).toContain('500');
         expect(result.reviewReasons?.[0]?.description).toContain('1000');
+        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
+          expect.objectContaining({
+            event: '1000 kg',
+            extracted: '500 kg',
+            field: 'wasteQuantity',
+          }),
+        ]);
       });
 
       it('should correctly normalize ton units to kg', () => {

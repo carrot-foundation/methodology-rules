@@ -44,7 +44,15 @@ export interface CrossValidationValidateResult {
   reviewRequired?: boolean;
 }
 
+export interface ComparedField {
+  event: string;
+  extracted: string;
+  field: string;
+  similarity?: string;
+}
+
 export interface ReviewReason {
   code: string;
+  comparedFields?: ComparedField[];
   description: string;
 }

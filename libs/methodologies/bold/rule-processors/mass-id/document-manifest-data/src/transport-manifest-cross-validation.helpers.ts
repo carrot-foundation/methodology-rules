@@ -91,7 +91,16 @@ const validateVehiclePlate = (
   }
 
   return {
-    reviewReason: REVIEW_REASONS.VEHICLE_PLATE_MISMATCH(),
+    reviewReason: {
+      ...REVIEW_REASONS.VEHICLE_PLATE_MISMATCH(),
+      comparedFields: [
+        {
+          event: eventPlate,
+          extracted: extractedData.vehiclePlate.parsed,
+          field: 'vehiclePlate',
+        },
+      ],
+    },
   };
 };
 
@@ -151,12 +160,22 @@ const validateWasteQuantity = (
 
   if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
     return {
-      reviewReason: REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH({
-        discrepancyPercentage: (discrepancy * 100).toFixed(1),
-        extractedQuantity: matchedEntry.quantity.toString(),
-        unit: matchedEntry.unit ?? 'kg',
-        weighingWeight: weighingValue.toString(),
-      }),
+      reviewReason: {
+        ...REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH({
+          discrepancyPercentage: (discrepancy * 100).toFixed(1),
+          extractedQuantity: matchedEntry.quantity.toString(),
+          unit: matchedEntry.unit ?? 'kg',
+          weighingWeight: weighingValue.toString(),
+        }),
+        comparedFields: [
+          {
+            event: `${weighingValue} kg`,
+            extracted: `${matchedEntry.quantity} ${matchedEntry.unit ?? 'kg'}`,
+            field: 'wasteQuantity',
+            similarity: `${(discrepancy * 100).toFixed(1)}% discrepancy`,
+          },
+        ],
+      },
     };
   }
 
@@ -219,10 +238,19 @@ const validateWasteType = (
     : (eventDescription ?? '');
 
   return {
-    reviewReason: REVIEW_REASONS.WASTE_TYPE_MISMATCH({
-      eventClassification: eventSummary,
-      extractedEntries: extractedSummary,
-    }),
+    reviewReason: {
+      ...REVIEW_REASONS.WASTE_TYPE_MISMATCH({
+        eventClassification: eventSummary,
+        extractedEntries: extractedSummary,
+      }),
+      comparedFields: [
+        {
+          event: eventSummary,
+          extracted: extractedSummary,
+          field: 'wasteType',
+        },
+      ],
+    },
   };
 };
 
