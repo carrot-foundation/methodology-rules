@@ -1,16 +1,16 @@
-import type { ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
-import type {
-  TextExtractionInput,
-  TextExtractionResult,
-} from '@carrot-fndn/shared/text-extractor';
+import type { ScaleTicketExtractedData } from '@carrot-fndn/shared/document-extractor-scale-ticket';
+import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
 
-import { logger } from '@carrot-fndn/shared/helpers';
-import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
+import {
+  createDocumentExtractor,
+  type DocumentExtractorService,
+} from '@carrot-fndn/shared/document-extractor';
+import '@carrot-fndn/shared/document-extractor-scale-ticket';
+import { isNonEmptyArray, logger } from '@carrot-fndn/shared/helpers';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import type {
-  ScaleTicketLayout,
   ScaleTicketVerificationContext,
   ScaleTicketVerificationResult,
 } from './scale-ticket-verification.types';
@@ -20,31 +20,12 @@ import {
   NET_WEIGHT_CALCULATION_TOLERANCE,
 } from '../weighing.constants';
 
-const layoutParsers: Record<ScaleTicketLayout, ScaleTicketParser> = {
-  layout1: new Layout1ScaleTicketParser(),
-};
-
-const getParser = (layout: ScaleTicketLayout): ScaleTicketParser | undefined =>
-  layoutParsers[layout];
+const documentExtractor: DocumentExtractorService =
+  createDocumentExtractor(textExtractor);
 
 export const isScaleTicketVerificationConfig = (
   config: MethodologyAdditionalVerification,
 ): boolean => config.verificationType === 'scaleTicket';
-
-const extractScaleTicketData = (
-  layout: ScaleTicketLayout,
-  extractionResult: TextExtractionResult,
-) => {
-  const parser = getParser(layout);
-
-  if (!parser) {
-    throw new Error(
-      INVALID_RESULT_COMMENTS.SCALE_TICKET_UNSUPPORTED_LAYOUT(layout),
-    );
-  }
-
-  return parser.parse(extractionResult);
-};
 
 export const verifyScaleTicketNetWeight = async ({
   config,
@@ -65,22 +46,32 @@ export const verifyScaleTicketNetWeight = async ({
     };
   }
 
-  try {
-    const extractionResult =
-      await textExtractor.extractText(textExtractorInput);
-    const scaleTicketData = extractScaleTicketData(
-      config.scaleTicketLayout,
-      extractionResult,
-    );
+  const layoutIds = config.layoutIds;
 
-    const diff = Math.abs(scaleTicketData.netWeight.value - expectedNetWeight);
+  if (!isNonEmptyArray(layoutIds)) {
+    return {
+      errors: [
+        INVALID_RESULT_COMMENTS.SCALE_TICKET_UNSUPPORTED_LAYOUT('undefined'),
+      ],
+    };
+  }
+
+  try {
+    const extractionOutput =
+      await documentExtractor.extract<ScaleTicketExtractedData>(
+        textExtractorInput,
+        { documentType: 'scaleTicket', layouts: layoutIds },
+      );
+
+    const ticketNetWeight = extractionOutput.data.netWeight.parsed.value;
+    const diff = Math.abs(ticketNetWeight - expectedNetWeight);
 
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
       return {
         errors: [
           INVALID_RESULT_COMMENTS.SCALE_TICKET_NET_WEIGHT_MISMATCH({
             expectedNetWeight,
-            ticketNetWeight: scaleTicketData.netWeight.value,
+            ticketNetWeight,
           }),
         ],
       };

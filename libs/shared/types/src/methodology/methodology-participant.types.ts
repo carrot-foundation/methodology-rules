@@ -14,5 +14,7 @@ export interface MethodologyParticipant {
   id: string;
   name: string;
   piiSnapshotId: string;
+  taxId: string;
+  taxIdType: string;
   type: MethodologyParticipantType | string;
 }

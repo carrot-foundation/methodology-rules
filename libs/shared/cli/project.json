@@ -1,0 +1,12 @@
+{
+  "name": "shared-cli",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:shared", "stack:any", "type:library"],
+  "sourceRoot": "libs/shared/cli/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {}
+  }
+}

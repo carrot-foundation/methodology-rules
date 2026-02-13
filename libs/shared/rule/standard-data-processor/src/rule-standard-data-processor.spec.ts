@@ -73,7 +73,6 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a resultStatus PASSED if the rule is not applicable', async () => {
     const ruleInput = random<RuleInput>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['getRuleSubject'] = jest.fn(
       () => undefined,
     );
@@ -116,7 +115,6 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a resultStatus FAILED if the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultStatus: RuleOutputStatus.FAILED,
     }));
@@ -139,7 +137,6 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a result with a fail comment when the rule is applicable and failed', async () => {
     const ruleInput = random<RuleInput>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultComment: 'Failed',
       resultStatus: RuleOutputStatus.FAILED,
@@ -165,7 +162,6 @@ describe('RuleStandardDataProcessor', () => {
     const ruleInput = random<RuleInput>();
     const resultContent = random<AnyObject>();
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultComment: 'Failed',
       resultContent,

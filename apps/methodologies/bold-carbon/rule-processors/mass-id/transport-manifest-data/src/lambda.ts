@@ -1,12 +1,8 @@
-import { TRANSPORT_MANIFEST_AI_CONTEXT } from '@carrot-fndn/shared/methodologies/ai-attachment-validator';
 import { documentManifestDataLambda } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/document-manifest-data';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const { TRANSPORT_MANIFEST } = DocumentEventName;
 
 export const handler = documentManifestDataLambda({
-  aiParameters: {
-    systemPrompt: TRANSPORT_MANIFEST_AI_CONTEXT,
-  },
   documentManifestType: TRANSPORT_MANIFEST,
 });

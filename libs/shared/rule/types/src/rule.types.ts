@@ -5,6 +5,7 @@ import { tags } from 'typia';
 export enum RuleOutputStatus {
   FAILED = 'FAILED',
   PASSED = 'PASSED',
+  REVIEW_REQUIRED = 'REVIEW_REQUIRED',
 }
 
 export interface IRuleDataProcessor {
