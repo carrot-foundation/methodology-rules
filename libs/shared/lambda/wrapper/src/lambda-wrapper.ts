@@ -5,6 +5,7 @@ import type { Handler } from 'aws-lambda';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { AWSLambda, setTags } from '@sentry/serverless';
 
 const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput => ({
@@ -13,6 +14,12 @@ const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput => ({
 
 const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
   ruleOutput;
+
+// TODO: remove once Smaug supports REVIEW_REQUIRED
+const toUpstreamCompatibleOutput = (ruleOutput: RuleOutput): RuleOutput =>
+  ruleOutput.resultStatus === RuleOutputStatus.REVIEW_REQUIRED
+    ? { ...ruleOutput, resultStatus: RuleOutputStatus.FAILED }
+    : ruleOutput;
 
 const setRuleSentryTags = ({
   documentId,
@@ -47,7 +54,9 @@ export const wrapRuleIntoLambdaHandler = (
     logger.info({ ruleInput }, 'Rule invoked');
 
     try {
-      const ruleOutput = await rule.process(ruleInput);
+      const ruleOutput = toUpstreamCompatibleOutput(
+        await rule.process(ruleInput),
+      );
 
       await reportRuleResults(ruleOutput);
 

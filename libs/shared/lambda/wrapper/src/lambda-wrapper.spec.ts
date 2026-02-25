@@ -4,6 +4,7 @@ import type { Context } from 'aws-lambda';
 
 import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 import * as Sentry from '@sentry/serverless';
 import { random } from 'typia';
@@ -25,17 +26,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
   jest.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
 
-  it('should work', async () => {
-    const response = random<RuleOutput>();
-
-    class Wrapped extends RuleDataProcessor {
-      process() {
-        return Promise.resolve({
-          ...response,
-        });
-      }
-    }
-
+  const mockStsAndFetch = () => {
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
@@ -45,16 +36,57 @@ describe('wrapRuleIntoLambdaHandler', () => {
     } as never);
 
     jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
+  };
+
+  it('should work', async () => {
+    const response = {
+      ...random<RuleOutput>(),
+      resultStatus: RuleOutputStatus.PASSED,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve({ ...response });
+      }
+    }
+
+    mockStsAndFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
-
-    const ruleEvent = random<MethodologyRuleEvent>();
-
-    const lambdaContext = random<Context>();
-
-    const result = await wrapper(ruleEvent, lambdaContext, () => {});
+    const result = await wrapper(
+      random<MethodologyRuleEvent>(),
+      random<Context>(),
+      () => {},
+    );
 
     expect(result).toEqual(response);
+  });
+
+  it('should convert REVIEW_REQUIRED to FAILED before reporting and returning', async () => {
+    const response = {
+      ...random<RuleOutput>(),
+      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve({ ...response });
+      }
+    }
+
+    mockStsAndFetch();
+
+    const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
+    const result = await wrapper(
+      random<MethodologyRuleEvent>(),
+      random<Context>(),
+      () => {},
+    );
+
+    expect(result).toEqual({
+      ...response,
+      resultStatus: RuleOutputStatus.FAILED,
+    });
   });
 
   it('should call setRuleSentryTags correctly', async () => {
