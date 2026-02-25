@@ -3,6 +3,7 @@ import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import {
   buildWasteEntriesFromSubtotals,
   createRecyclerEntity,
+  derivePeriodFromReceiptDates,
   extractCadriNumbers,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
@@ -462,6 +463,46 @@ describe('CDF shared helpers', () => {
       ];
 
       expect(extractCadriNumbers(rows)).toEqual([]);
+    });
+  });
+
+  describe('derivePeriodFromReceiptDates', () => {
+    it('should derive period from multiple receipt dates', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 85, receiptDate: '15/07/2024', wasteType: 'LODO' },
+        { quantity: 90, receiptDate: '01/07/2024', wasteType: 'LODO' },
+        { quantity: 50, receiptDate: '28/07/2024', wasteType: 'LODO' },
+      ];
+
+      const result = derivePeriodFromReceiptDates(rows);
+
+      expect(result).toBe('01/07/2024 ate 28/07/2024');
+    });
+
+    it('should return single date range when only one row exists', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 85, receiptDate: '15/07/2024', wasteType: 'LODO' },
+      ];
+
+      const result = derivePeriodFromReceiptDates(rows);
+
+      expect(result).toBe('15/07/2024 ate 15/07/2024');
+    });
+
+    it('should return undefined when rows array is empty', () => {
+      expect(derivePeriodFromReceiptDates([])).toBeUndefined();
+    });
+
+    it('should handle dates spanning multiple months', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 10, receiptDate: '28/01/2024', wasteType: 'LODO' },
+        { quantity: 20, receiptDate: '15/02/2024', wasteType: 'LODO' },
+        { quantity: 30, receiptDate: '01/03/2024', wasteType: 'LODO' },
+      ];
+
+      const result = derivePeriodFromReceiptDates(rows);
+
+      expect(result).toBe('28/01/2024 ate 01/03/2024');
     });
   });
 

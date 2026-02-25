@@ -288,6 +288,53 @@ export const toReceiptEntries = (rows: ReceiptTableRow[]): ReceiptEntry[] =>
     return entry;
   });
 
+const parseDdMmYyyy = (dateString: string): Date | undefined => {
+  const [dd, mm, yyyy] = dateString.split('/');
+
+  if (!dd || !mm || !yyyy) {
+    return undefined;
+  }
+
+  return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+};
+
+export const derivePeriodFromReceiptDates = (
+  rows: ReceiptTableRow[],
+): string | undefined => {
+  if (rows.length === 0) {
+    return undefined;
+  }
+
+  let minDate: Date | undefined;
+  let maxDate: Date | undefined;
+  let minDateString = '';
+  let maxDateString = '';
+
+  for (const row of rows) {
+    const date = parseDdMmYyyy(row.receiptDate);
+
+    if (!date) {
+      continue;
+    }
+
+    if (!minDate || date < minDate) {
+      minDate = date;
+      minDateString = row.receiptDate;
+    }
+
+    if (!maxDate || date > maxDate) {
+      maxDate = date;
+      maxDateString = row.receiptDate;
+    }
+  }
+
+  if (!minDate || !maxDate) {
+    return undefined;
+  }
+
+  return `${minDateString} ate ${maxDateString}`;
+};
+
 export const finalizeCdfExtraction = (
   partialData: Partial<CdfExtractedData>,
   matchScore: number,
