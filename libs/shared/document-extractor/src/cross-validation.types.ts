@@ -10,6 +10,13 @@ export interface AttachmentInfo {
   s3Key: string;
 }
 
+export interface ComparedField {
+  event: string;
+  extracted: string;
+  field: string;
+  similarity?: string;
+}
+
 export interface CrossValidationConfig<
   TEventData,
   TExtractedData extends BaseExtractedData,
@@ -42,13 +49,6 @@ export interface CrossValidationValidateResult {
   failReasons?: ReviewReason[];
   reviewReasons?: ReviewReason[];
   reviewRequired?: boolean;
-}
-
-export interface ComparedField {
-  event: string;
-  extracted: string;
-  field: string;
-  similarity?: string;
 }
 
 export interface ReviewReason {
