@@ -293,7 +293,10 @@ export const formatAsHuman = <T extends BaseExtractedData>(
   if (result.reviewReasons.length > 0) {
     lines.push(
       `\n${bold('Review Reasons:')}`,
-      ...formatBulletList(result.reviewReasons, yellow),
+      ...formatBulletList(
+        result.reviewReasons.map((r) => r.description),
+        yellow,
+      ),
     );
   }
 

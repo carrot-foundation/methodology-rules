@@ -128,7 +128,7 @@ const groupReviewReasons = (items: FileSuccess[]): Map<string, number> => {
 
   for (const item of items) {
     for (const reason of item.result.reviewReasons) {
-      counts.set(reason, (counts.get(reason) ?? 0) + 1);
+      counts.set(reason.description, (counts.get(reason.description) ?? 0) + 1);
     }
   }
 
