@@ -346,6 +346,101 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.processingPeriod).toBeUndefined();
     });
 
+    it('should not set processingPeriod when no rows match the receipt table pattern', () => {
+      const invalidDatesText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
+        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
+        'Descrição: Tipo de Matéria-Prima CADRI Data',
+        'LODO SÓLIDO - SANITÁRIO - invalid-date 85,12',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(invalidDatesText));
+
+      expect(result.data.processingPeriod).toBeUndefined();
+    });
+
+    it('should skip receipt table rows with unparseable quantity', () => {
+      const badQuantityText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
+        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
+        'Descrição: Tipo de Matéria-Prima CADRI Data',
+        'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 ...',
+        'LODO SÓLIDO - SANITÁRIO 42003189 02/07/2024 90,50',
+        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 90,50',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(badQuantityText));
+
+      expect(result.data.receiptEntries?.parsed).toHaveLength(1);
+    });
+
+    it('should skip waste subtotals with unparseable quantity', () => {
+      const badSubtotalText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'Quantidade Tratada de LODO SOLIDO - SANITARIO ...',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+        'Quantidade Total Tratado',
+        '100,00',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(badSubtotalText));
+
+      expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(100);
+    });
+
+    it('should not extract waste type descriptions when section markers are missing', () => {
+      const noMarkersText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
+        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 85,12',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noMarkersText));
+
+      expect(result.data.wasteEntries?.parsed[0]?.description).toBe(
+        'LODO SOLIDO - SANITARIO',
+      );
+    });
+
     it('should fall back to total quantity when no table rows or subtotals are present', () => {
       const fallbackText = [
         'CDF 100/24',

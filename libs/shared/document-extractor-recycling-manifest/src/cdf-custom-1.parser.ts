@@ -17,17 +17,204 @@ import {
   stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
 
+import { finalizeCdfExtraction } from './cdf-shared.helpers';
 import {
-  buildWasteEntriesFromSubtotals,
-  derivePeriodFromReceiptDates,
-  extractCadriNumbers,
-  extractWasteSubtotals,
-  extractWasteTypeDescriptions,
-  finalizeCdfExtraction,
-  parseReceiptTableRows,
-  toReceiptEntries,
-} from './cdf-shared.helpers';
-import { type CdfExtractedData } from './recycling-manifest.types';
+  type CdfExtractedData,
+  type ReceiptEntry,
+  type WasteEntry,
+} from './recycling-manifest.types';
+
+interface ReceiptTableRow {
+  cadri?: string;
+  quantity: number;
+  receiptDate: string;
+  wasteType: string;
+}
+
+interface WasteSubtotal {
+  quantity: number;
+  wasteType: string;
+}
+
+interface WasteTypeDescription {
+  description: string;
+  wasteType: string;
+}
+
+const parseDdMmYyyy = (dateString: string): Date | undefined => {
+  const [dd, mm, yyyy] = dateString.split('/');
+
+  // istanbul ignore next -- defensive check; regex ensures dd/mm/yyyy format
+  if (!dd || !mm || !yyyy) {
+    return undefined;
+  }
+
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+
+  // istanbul ignore next -- defensive check; JS Date with numeric values is always valid
+  return Number.isNaN(date.getTime()) ? undefined : date;
+};
+
+const derivePeriodFromReceiptDates = (
+  rows: ReceiptTableRow[],
+): string | undefined => {
+  let minDate: Date | undefined;
+  let maxDate: Date | undefined;
+  let minDateString = '';
+  let maxDateString = '';
+
+  for (const row of rows) {
+    const date = parseDdMmYyyy(row.receiptDate);
+
+    // istanbul ignore next -- defensive check; regex ensures valid date format
+    if (!date) {
+      continue;
+    }
+
+    if (!minDate || date < minDate) {
+      minDate = date;
+      minDateString = row.receiptDate;
+    }
+
+    if (!maxDate || date > maxDate) {
+      maxDate = date;
+      maxDateString = row.receiptDate;
+    }
+  }
+
+  // istanbul ignore next -- defensive check; at least one valid date exists when rows are present
+  if (!minDate || !maxDate) {
+    return undefined;
+  }
+
+  return `${minDateString} ate ${maxDateString}`;
+};
+
+const parseReceiptTableRows = (rawText: string): ReceiptTableRow[] => {
+  const rows: ReceiptTableRow[] = [];
+
+  const rowPattern =
+    // eslint-disable-next-line sonarjs/slow-regex
+    /^(.+?)\s+(-|\d{5,})\s+(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+)\s*$/gm;
+
+  for (const match of rawText.matchAll(rowPattern)) {
+    const [, wasteType, cadriField, receiptDate, quantityString] = match;
+
+    const quantity = parseBrazilianNumber(quantityString!);
+
+    if (quantity === undefined) {
+      continue;
+    }
+
+    const row: ReceiptTableRow = {
+      quantity,
+      receiptDate: receiptDate!,
+      wasteType: wasteType!.trim(),
+    };
+
+    if (cadriField !== undefined && cadriField !== '-') {
+      row.cadri = cadriField;
+    }
+
+    rows.push(row);
+  }
+
+  return rows;
+};
+
+const toReceiptEntries = (rows: ReceiptTableRow[]): ReceiptEntry[] =>
+  rows.map((row) => {
+    const entry: ReceiptEntry = {
+      quantity: row.quantity,
+      receiptDate: row.receiptDate,
+      wasteType: row.wasteType,
+    };
+
+    if (row.cadri !== undefined) {
+      entry.cadri = row.cadri;
+    }
+
+    return entry;
+  });
+
+const extractCadriNumbers = (rows: ReceiptTableRow[]): string[] => [
+  ...new Set(rows.filter((r) => r.cadri !== undefined).map((r) => r.cadri!)),
+];
+
+const extractWasteTypeDescriptions = (
+  rawText: string,
+): WasteTypeDescription[] => {
+  const descriptions: WasteTypeDescription[] = [];
+
+  const sectionEnd = /(?:Descricao|Tipo\s+de\s+Materia-Prima)\s*:/i.exec(
+    rawText,
+  );
+  const sectionStart = /IE\s*:\s*[\d.]+/i.exec(rawText);
+
+  if (!sectionStart || !sectionEnd) {
+    return descriptions;
+  }
+
+  const section = rawText.slice(
+    sectionStart.index + sectionStart[0].length,
+    sectionEnd.index,
+  );
+
+  // eslint-disable-next-line sonarjs/slow-regex
+  const linePattern = /^([^:]+):\s*(.+?)\s*$/gm;
+
+  for (const match of section.matchAll(linePattern)) {
+    if (match[1] && match[2]) {
+      descriptions.push({
+        description: match[2].trim(),
+        wasteType: match[1].trim(),
+      });
+    }
+  }
+
+  return descriptions;
+};
+
+const extractWasteSubtotals = (rawText: string): WasteSubtotal[] => {
+  const subtotals: WasteSubtotal[] = [];
+
+  // eslint-disable-next-line sonarjs/slow-regex
+  const pattern = /Quantidade\s+Tratada\s+de\s+(.+?)\s+([\d.,]+)\s*$/gm;
+
+  for (const match of rawText.matchAll(pattern)) {
+    const [, wasteType, quantityString] = match;
+
+    const quantity = parseBrazilianNumber(quantityString!);
+
+    if (quantity === undefined) {
+      continue;
+    }
+
+    subtotals.push({
+      quantity,
+      wasteType: wasteType!.trim(),
+    });
+  }
+
+  return subtotals;
+};
+
+const buildWasteEntriesFromSubtotals = (
+  subtotals: WasteSubtotal[],
+  descriptions: WasteTypeDescription[],
+): WasteEntry[] => {
+  const descriptionMap = new Map(
+    descriptions.map((d) => [d.wasteType.toUpperCase(), d.description]),
+  );
+
+  return subtotals.map((subtotal) => ({
+    description:
+      descriptionMap.get(subtotal.wasteType.toUpperCase()) ??
+      subtotal.wasteType,
+    quantity: subtotal.quantity,
+    unit: 'ton',
+  }));
+};
 
 const MONTHS: Record<string, string> = {
   abril: '04',
