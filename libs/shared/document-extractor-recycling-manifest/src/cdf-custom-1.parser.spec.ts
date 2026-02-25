@@ -316,6 +316,36 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.transportManifests).toBeUndefined();
     });
 
+    it('should derive processingPeriod from receipt table dates', () => {
+      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
+
+      expect(result.data.processingPeriod?.parsed).toBe(
+        '01/07/2024 ate 15/07/2024',
+      );
+      expect(result.data.processingPeriod?.confidence).toBe('high');
+    });
+
+    it('should not set processingPeriod when no receipt table rows exist', () => {
+      const noTableText = [
+        'CDF 100/24',
+        'Jundiaí, 01 de Janeiro de 2024.',
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'Empresa Recebedora: Tera Ambiental Ltda.',
+        'CNPJ: 59.591.115/0003-02',
+        'Empresa Geradora: Generator LTDA',
+        'CNPJ: 46.344.354/0005-88',
+        'Cadastro na Cetesb: 123',
+        'CADRI',
+        'matérias-primas',
+        'Quantidade Total Tratado',
+        '1.234,56',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(noTableText));
+
+      expect(result.data.processingPeriod).toBeUndefined();
+    });
+
     it('should fall back to total quantity when no table rows or subtotals are present', () => {
       const fallbackText = [
         'CDF 100/24',

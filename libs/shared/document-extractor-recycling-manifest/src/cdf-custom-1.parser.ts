@@ -19,6 +19,7 @@ import {
 
 import {
   buildWasteEntriesFromSubtotals,
+  derivePeriodFromReceiptDates,
   extractCadriNumbers,
   extractWasteSubtotals,
   extractWasteTypeDescriptions,
@@ -269,6 +270,15 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
         partialData.transportManifests = createHighConfidenceField(
           cadriNumbers,
           cadriNumbers.join(', '),
+        );
+      }
+
+      const period = derivePeriodFromReceiptDates(rows);
+
+      if (period) {
+        partialData.processingPeriod = createHighConfidenceField(
+          period as NonEmptyString,
+          period,
         );
       }
     }
