@@ -276,7 +276,7 @@ export const validateMtrExtractedData = (
     extractionResult.data.extractionConfidence,
   );
 
-  const { failReasons, reviewReasons } = collectResults([
+  const { failReasons, reviewReasons: fieldReviewReasons } = collectResults([
     validateVehiclePlate(extractedData, eventData.pickUpEvent),
     validateEntityName(
       extractedData.receiver,
@@ -371,6 +371,8 @@ export const validateMtrExtractedData = (
     validateWasteType(extractedData, eventData.pickUpEvent),
     validateWasteQuantity(extractedData, eventData),
   ]);
+
+  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
 
   const allFailMessages = [
     ...basicResult.failMessages,

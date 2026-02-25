@@ -221,6 +221,69 @@ describe('cross-validation.helpers', () => {
 
       expect(result.failMessages).toHaveLength(0);
     });
+
+    it('should add review reason when document number is not extracted but event has one', () => {
+      const extractionResult = {
+        data: {
+          extractionConfidence: 'high',
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
+
+      const eventSubject: DocumentManifestEventSubject = {
+        documentNumber: '12345',
+        issueDateAttribute: undefined,
+      } as DocumentManifestEventSubject;
+
+      const result = validateBasicExtractedData(extractionResult, eventSubject);
+
+      expect(result.reviewReasons).toHaveLength(1);
+      expect(result.reviewReasons[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+      expect(result.reviewReasons[0]?.description).toContain('document number');
+    });
+
+    it('should add review reason when issue date is not extracted but event has one', () => {
+      const extractionResult = {
+        data: {
+          extractionConfidence: 'high',
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
+
+      const eventSubject: DocumentManifestEventSubject = {
+        documentNumber: undefined,
+        issueDateAttribute: { name: 'issueDate', value: '2024-01-01' },
+      } as DocumentManifestEventSubject;
+
+      const result = validateBasicExtractedData(extractionResult, eventSubject);
+
+      expect(result.reviewReasons).toHaveLength(1);
+      expect(result.reviewReasons[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+      expect(result.reviewReasons[0]?.description).toContain('issue date');
+    });
+
+    it('should not add review reasons when extracted fields are present', () => {
+      const extractionResult = {
+        data: {
+          documentNumber: { confidence: 'high', parsed: '12345' },
+          extractionConfidence: 'high',
+          issueDate: { confidence: 'high', parsed: '2024-01-01' },
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
+
+      const eventSubject: DocumentManifestEventSubject = {
+        documentNumber: '12345',
+        issueDateAttribute: { name: 'issueDate', value: '2024-01-01' },
+      } as DocumentManifestEventSubject;
+
+      const result = validateBasicExtractedData(extractionResult, eventSubject);
+
+      expect(result.reviewReasons).toHaveLength(0);
+    });
   });
 
   describe('validateEntityAddress', () => {
@@ -805,7 +868,7 @@ describe('cross-validation.helpers', () => {
       expect(result).toEqual({});
     });
 
-    it('should skip when period format is invalid', () => {
+    it('should skip when period format is invalid and no notExtractedReviewReason', () => {
       const period: ExtractedField<string> = {
         confidence: 'high',
         parsed: 'invalid period',
@@ -818,6 +881,22 @@ describe('cross-validation.helpers', () => {
       );
 
       expect(result).toEqual({});
+    });
+
+    it('should return reviewReason when period format is invalid and notExtractedReviewReason provided', () => {
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: 'invalid period',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-01-15',
+        period,
+        periodReviewReasonFunction,
+        notExtractedReviewReason,
+      );
+
+      expect(result).toEqual({ reviewReason: notExtractedReviewReason });
     });
 
     it('should return empty when date is on the start boundary', () => {

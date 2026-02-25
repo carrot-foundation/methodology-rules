@@ -21,7 +21,10 @@ import type {
   ValidationResult,
 } from './document-manifest-data.helpers';
 
-import { CROSS_VALIDATION_COMMENTS } from './document-manifest-data.constants';
+import {
+  CROSS_VALIDATION_COMMENTS,
+  REVIEW_REASONS,
+} from './document-manifest-data.constants';
 
 export interface FieldValidationResult {
   failReason?: ReviewReason;
@@ -82,22 +85,27 @@ export const validateHighConfidenceField = (
 export const validateBasicExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventSubject: DocumentManifestEventSubject,
-): ValidationResult => {
+): ValidationResult & { reviewReasons: ReviewReason[] } => {
   const extractedData = extractionResult.data as
     | CdfExtractedData
     | MtrExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return { failMessages: [], reviewRequired: true };
+    return { failMessages: [], reviewReasons: [], reviewRequired: true };
   }
 
   const failMessages: string[] = [];
+  const reviewReasons: ReviewReason[] = [];
 
-  const documentNumberMismatch = validateHighConfidenceField(
-    eventSubject.documentNumber?.toString(),
+  const eventDocumentNumber = eventSubject.documentNumber?.toString();
+  const extractedDocumentNumber =
     'documentNumber' in extractedData
       ? extractedData.documentNumber
-      : undefined,
+      : undefined;
+
+  const documentNumberMismatch = validateHighConfidenceField(
+    eventDocumentNumber,
+    extractedDocumentNumber,
     ({ eventValue, extractedValue }) =>
       CROSS_VALIDATION_COMMENTS.DOCUMENT_NUMBER_MISMATCH({
         eventDocumentNumber: eventValue,
@@ -107,6 +115,10 @@ export const validateBasicExtractedData = (
 
   if (documentNumberMismatch) {
     failMessages.push(documentNumberMismatch);
+  } else if (eventDocumentNumber && !extractedDocumentNumber) {
+    reviewReasons.push(
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({ field: 'document number' }),
+    );
   }
 
   const eventIssueDate = eventSubject.issueDateAttribute?.value?.toString();
@@ -131,9 +143,13 @@ export const validateBasicExtractedData = (
         }),
       );
     }
+  } else if (eventIssueDate && !extractedIssueDate) {
+    reviewReasons.push(
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({ field: 'issue date' }),
+    );
   }
 
-  return { failMessages };
+  return { failMessages, reviewReasons };
 };
 
 export const normalizeTaxId = (taxId: string): string =>
@@ -436,7 +452,9 @@ export const validateDateWithinPeriod = (
   const range = parsePeriodRange(periodField.parsed);
 
   if (!range) {
-    return {};
+    return notExtractedReviewReason
+      ? { reviewReason: notExtractedReviewReason }
+      : {};
   }
 
   const startIso = ddmmyyyyToIso(range.start);

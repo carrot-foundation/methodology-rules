@@ -269,7 +269,7 @@ export const validateCdfExtractedData = (
     extractionResult.data.extractionConfidence,
   );
 
-  const { failReasons, reviewReasons } = collectResults([
+  const { failReasons, reviewReasons: fieldReviewReasons } = collectResults([
     validateEntityName(
       extractedData.recycler,
       eventData.recyclerEvent?.participant.name,
@@ -331,6 +331,8 @@ export const validateCdfExtractedData = (
       eventData.mtrDocumentNumbers,
     ),
   ]);
+
+  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
 
   const allFailMessages = [
     ...basicResult.failMessages,
