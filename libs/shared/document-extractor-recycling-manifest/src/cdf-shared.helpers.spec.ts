@@ -504,6 +504,27 @@ describe('CDF shared helpers', () => {
 
       expect(result).toBe('28/01/2024 ate 01/03/2024');
     });
+
+    it('should skip rows with unparseable dates', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 10, receiptDate: '15/07/2024', wasteType: 'LODO' },
+        { quantity: 20, receiptDate: 'invalid', wasteType: 'LODO' },
+        { quantity: 30, receiptDate: '28/07/2024', wasteType: 'LODO' },
+      ];
+
+      const result = derivePeriodFromReceiptDates(rows);
+
+      expect(result).toBe('15/07/2024 ate 28/07/2024');
+    });
+
+    it('should return undefined when all dates are unparseable', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 10, receiptDate: 'invalid', wasteType: 'LODO' },
+        { quantity: 20, receiptDate: 'bad-date', wasteType: 'LODO' },
+      ];
+
+      expect(derivePeriodFromReceiptDates(rows)).toBeUndefined();
+    });
   });
 
   describe('finalizeCdfExtraction', () => {

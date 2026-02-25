@@ -295,7 +295,9 @@ const parseDdMmYyyy = (dateString: string): Date | undefined => {
     return undefined;
   }
 
-  return new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+  const date = new Date(Number(yyyy), Number(mm) - 1, Number(dd));
+
+  return Number.isNaN(date.getTime()) ? undefined : date;
 };
 
 export const derivePeriodFromReceiptDates = (
