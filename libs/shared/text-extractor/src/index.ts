@@ -1,3 +1,4 @@
+export * from './multi-page.helpers';
 export * from './table-extraction.helpers';
 export { textExtractor } from './text-extractor.provider';
 export * from './text-extractor.stubs';
