@@ -124,7 +124,7 @@
     "@sentry/aws-serverless": "9.19.0",
     "@sentry/serverless": "7.120.3",
     "@smithy/signature-v4": "5.1.0",
-    "axios": "1.12.0",
+    "axios": "1.13.5",
     "bignumber.js": "9.3.0",
     "commander": "14.0.3",
     "date-fns": "4.1.0",
