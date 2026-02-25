@@ -37,8 +37,10 @@ const CDF_PATTERNS = {
     /Endereco\s*:\s*(.+?)\s+Municipio\s*:\s*(\S.+?)\s+UF\s*:\s*(\w{2})/i,
   // eslint-disable-next-line sonarjs/slow-regex
   generatorName: /Razao\s*Social\s*:\s*(.+?)\s+CPF\/CNPJ/is,
+
   generatorTaxId:
-    /Razao\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2})/i,
+    // eslint-disable-next-line sonarjs/regex-complexity, sonarjs/slow-regex
+    /Razao\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2}|\d{3}\.?\d{3}\.?\d{3}-?\d{2})/i,
 
   issueDateDeclaracao: /Declaracao[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
 

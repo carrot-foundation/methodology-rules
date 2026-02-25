@@ -172,6 +172,23 @@ describe('CdfSinfatParser', () => {
       expect(result.data.issueDate.parsed).toBe('15/06/2024');
     });
 
+    it('should extract generator taxId when it is a CPF', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'Identificação do Gerador',
+        'Razão Social: João da Silva CPF/CNPJ: 123.456.789-01',
+        'Endereço: Rua Principal, 100 Municipio: São Paulo UF: SP',
+        'Declaração',
+        'São Paulo, 01/04/2024',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator.taxId.parsed).toBe('123.456.789-01');
+      expect(result.data.generator.name.parsed).toBe('Joao da Silva');
+    });
+
     it('should extract processing period range', () => {
       const text = [
         'CDF nº 100/2023',
