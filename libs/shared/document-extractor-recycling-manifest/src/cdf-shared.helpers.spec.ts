@@ -525,6 +525,17 @@ describe('CDF shared helpers', () => {
 
       expect(derivePeriodFromReceiptDates(rows)).toBeUndefined();
     });
+
+    it('should skip dates with non-numeric components', () => {
+      const rows: ReceiptTableRow[] = [
+        { quantity: 10, receiptDate: 'xx/yy/zzzz', wasteType: 'LODO' },
+        { quantity: 20, receiptDate: '15/07/2024', wasteType: 'LODO' },
+      ];
+
+      const result = derivePeriodFromReceiptDates(rows);
+
+      expect(result).toBe('15/07/2024 ate 15/07/2024');
+    });
   });
 
   describe('finalizeCdfExtraction', () => {
