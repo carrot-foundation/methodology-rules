@@ -354,6 +354,48 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
     });
 
+    it('should fail when hauler tax ID does not match with high confidence', () => {
+      const extractionResult = createExtractionResult({
+        hauler: {
+          address: { confidence: 'low', parsed: '' as never },
+          city: { confidence: 'low', parsed: '' as never },
+          name: {
+            confidence: 'high',
+            parsed: 'Hauler Co' as never,
+            rawMatch: 'some raw text',
+          },
+          state: { confidence: 'low', parsed: '' as never },
+          taxId: {
+            confidence: 'high',
+            parsed: '99.999.999/0001-99' as never,
+            rawMatch: 'some raw text',
+          },
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        haulerEvent: {
+          participant: {
+            name: 'Hauler Co',
+            taxId: '22.222.222/0001-22',
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(1);
+      expect(result.failMessages[0]).toContain('hauler tax ID');
+      expect(result.failReasons?.[0]?.comparedFields).toEqual([
+        expect.objectContaining({
+          event: '22.222.222/0001-22',
+          extracted: '99.999.999/0001-99',
+          field: 'taxId',
+        }),
+      ]);
+    });
+
     it('should fail when receiver tax ID does not match with high confidence', () => {
       const extractionResult = createExtractionResult({
         receiver: {

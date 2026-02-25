@@ -209,7 +209,7 @@ export const REVIEW_REASONS = {
     code: 'HAULER_NAME_MISMATCH',
     description: CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH(parameters),
   }),
-  HAULER_TAX_ID_MISMATCH: /* istanbul ignore next */ (): ReviewReason => ({
+  HAULER_TAX_ID_MISMATCH: (): ReviewReason => ({
     code: 'HAULER_TAX_ID_MISMATCH',
     description: CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
   }),

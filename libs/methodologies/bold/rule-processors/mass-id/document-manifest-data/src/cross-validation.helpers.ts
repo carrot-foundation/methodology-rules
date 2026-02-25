@@ -3,6 +3,7 @@ import type {
   MtrExtractedData,
   WasteTypeEntryData,
 } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
 import {
@@ -16,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 import {
   dateDifferenceInDays,
+  getTimezoneFromAddress,
   isNameMatch,
   utcIsoToLocalDate,
 } from '@carrot-fndn/shared/helpers';
@@ -134,8 +136,12 @@ export const validateBasicExtractedData = (
     extractedIssueDate &&
     extractedIssueDate.confidence === 'high'
   ) {
+    const timezone = getTimezoneFromAddress(
+      eventSubject.recyclerCountryCode ?? 'BR',
+    );
+    const localEventIssueDate = utcIsoToLocalDate(eventIssueDate, timezone);
     const daysDiff = dateDifferenceInDays(
-      eventIssueDate,
+      localEventIssueDate,
       extractedIssueDate.parsed,
     );
 
@@ -419,6 +425,71 @@ export const matchWasteTypeEntry = (
   }
 
   return { descriptionSimilarity: null, isCodeMatch: null, isMatch: false };
+};
+
+export const validateWasteQuantityDiscrepancy = (
+  entries: WasteTypeEntryData[],
+  eventCode: string | undefined,
+  eventDescription: string | undefined,
+  weighingEvents: Pick<DocumentEvent, 'value'>[],
+  reviewReasonFunction: (parameters: {
+    discrepancyPercentage: string;
+    extractedQuantity: string;
+    unit: string;
+    weighingWeight: string;
+  }) => ReviewReason,
+): FieldValidationResult => {
+  const matchedEntry = entries.find(
+    (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
+  );
+
+  if (matchedEntry?.quantity === undefined || matchedEntry.quantity === 0) {
+    return {};
+  }
+
+  const extractedQuantityKg = normalizeQuantityToKg(
+    matchedEntry.quantity,
+    matchedEntry.unit,
+  );
+
+  if (extractedQuantityKg === undefined) {
+    return {};
+  }
+
+  const weighingEvent = weighingEvents.find(
+    (event) => event.value !== undefined && event.value > 0,
+  );
+
+  if (!weighingEvent?.value) {
+    return {};
+  }
+
+  const weighingValue = weighingEvent.value;
+  const discrepancy =
+    Math.abs(extractedQuantityKg - weighingValue) / weighingValue;
+
+  if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
+    return {
+      reviewReason: {
+        ...reviewReasonFunction({
+          discrepancyPercentage: (discrepancy * 100).toFixed(1),
+          extractedQuantity: matchedEntry.quantity.toString(),
+          unit: matchedEntry.unit ?? 'kg',
+          weighingWeight: weighingValue.toString(),
+        }),
+        comparedFields: [
+          {
+            event: `${weighingValue} kg`,
+            extracted: `${matchedEntry.quantity} ${matchedEntry.unit ?? 'kg'}`,
+            field: 'wasteQuantity',
+            similarity: `${(discrepancy * 100).toFixed(1)}% discrepancy`,
+          },
+        ],
+      },
+    };
+  }
+
+  return {};
 };
 
 export const parsePeriodRange = (

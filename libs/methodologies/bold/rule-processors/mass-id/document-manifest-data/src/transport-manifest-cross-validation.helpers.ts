@@ -25,19 +25,19 @@ import {
   collectResults,
   type FieldValidationResult,
   matchWasteTypeEntry,
-  normalizeQuantityToKg,
   validateBasicExtractedData,
   validateDateField,
   validateEntityAddress,
   validateEntityName,
   validateEntityTaxId,
-  WEIGHT_DISCREPANCY_THRESHOLD,
+  validateWasteQuantityDiscrepancy,
 } from './cross-validation.helpers';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
 export {
   matchWasteTypeEntry,
   normalizeQuantityToKg,
+  validateWasteQuantityDiscrepancy,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './cross-validation.helpers';
 
@@ -132,57 +132,14 @@ const validateWasteQuantity = (
   const entries = extractedData.wasteTypes.map((entry) =>
     toWasteTypeEntryData(entry),
   );
-  const matchedEntry = entries.find(
-    (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
+
+  return validateWasteQuantityDiscrepancy(
+    entries,
+    eventCode,
+    eventDescription,
+    eventData.weighingEvents,
+    REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH,
   );
-
-  if (matchedEntry?.quantity === undefined || matchedEntry.quantity === 0) {
-    return {};
-  }
-
-  const extractedQuantityKg = normalizeQuantityToKg(
-    matchedEntry.quantity,
-    matchedEntry.unit,
-  );
-
-  if (extractedQuantityKg === undefined) {
-    return {};
-  }
-
-  const weighingEvent = eventData.weighingEvents.find(
-    (event) => event.value !== undefined && event.value > 0,
-  );
-
-  if (!weighingEvent?.value) {
-    return {};
-  }
-
-  const weighingValue = weighingEvent.value;
-  const discrepancy =
-    Math.abs(extractedQuantityKg - weighingValue) / weighingValue;
-
-  if (discrepancy > WEIGHT_DISCREPANCY_THRESHOLD) {
-    return {
-      reviewReason: {
-        ...REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH({
-          discrepancyPercentage: (discrepancy * 100).toFixed(1),
-          extractedQuantity: matchedEntry.quantity.toString(),
-          unit: matchedEntry.unit ?? 'kg',
-          weighingWeight: weighingValue.toString(),
-        }),
-        comparedFields: [
-          {
-            event: `${weighingValue} kg`,
-            extracted: `${matchedEntry.quantity} ${matchedEntry.unit ?? 'kg'}`,
-            field: 'wasteQuantity',
-            similarity: `${(discrepancy * 100).toFixed(1)}% discrepancy`,
-          },
-        ],
-      },
-    };
-  }
-
-  return {};
 };
 
 const validateWasteType = (

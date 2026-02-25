@@ -264,6 +264,36 @@ describe('cross-validation.helpers', () => {
       expect(result.reviewReasons[0]?.description).toContain('issue date');
     });
 
+    it('should not flag issue date mismatch when event UTC datetime is same local date as extracted', () => {
+      // 2024-01-15T02:30:00.000Z = Jan 15 UTC, but Jan 14 23:30 in Brazil (UTC-3)
+      // Without timezone fix: UTC date "2024-01-15" vs extracted "2024-01-14" = 1 day diff → false failure
+      // With timezone fix: local date "2024-01-14" matches extracted "2024-01-14" → no failure
+      const extractionResult = {
+        data: {
+          extractionConfidence: 'high',
+          issueDate: {
+            confidence: 'high',
+            parsed: '2024-01-14',
+          },
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
+
+      const eventSubject: DocumentManifestEventSubject = {
+        documentNumber: undefined,
+        issueDateAttribute: {
+          name: 'issueDate',
+          value: '2024-01-15T02:30:00.000Z',
+        },
+        recyclerCountryCode: 'BR',
+      } as DocumentManifestEventSubject;
+
+      const result = validateBasicExtractedData(extractionResult, eventSubject);
+
+      expect(result.failMessages).toHaveLength(0);
+    });
+
     it('should not add review reasons when extracted fields are present', () => {
       const extractionResult = {
         data: {

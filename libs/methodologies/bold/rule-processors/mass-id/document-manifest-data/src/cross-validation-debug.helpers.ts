@@ -18,7 +18,10 @@ import {
   normalizeVehiclePlate,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  type DocumentEvent,
+  DocumentEventAttributeName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { CdfCrossValidationEventData } from './recycling-manifest-cross-validation.helpers';
 import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
@@ -35,6 +38,52 @@ const {
   LOCAL_WASTE_CLASSIFICATION_ID,
   VEHICLE_LICENSE_PLATE,
 } = DocumentEventAttributeName;
+
+const buildWasteQuantityDebugInfo = (
+  entries: undefined | WasteTypeEntryData[],
+  eventWasteCode: string | undefined,
+  eventWasteDescription: string | undefined,
+  weighingEvents: DocumentEvent[],
+): null | Record<string, unknown> => {
+  if (!entries || entries.length === 0) {
+    return null;
+  }
+
+  const matchedEntry = entries.find(
+    (entry) =>
+      matchWasteTypeEntry(entry, eventWasteCode, eventWasteDescription).isMatch,
+  );
+
+  if (matchedEntry?.quantity === undefined) {
+    return null;
+  }
+
+  const normalizedKg = normalizeQuantityToKg(
+    matchedEntry.quantity,
+    matchedEntry.unit,
+  );
+
+  const weighingEvent = weighingEvents.find(
+    (event) => event.value !== undefined && event.value > 0,
+  );
+
+  const weighingValue = weighingEvent?.value;
+  const discrepancy =
+    normalizedKg !== undefined &&
+    weighingValue !== undefined &&
+    weighingValue > 0
+      ? Math.abs(normalizedKg - weighingValue) / weighingValue
+      : null;
+
+  return {
+    discrepancyPercentage:
+      discrepancy === null ? null : `${(discrepancy * 100).toFixed(1)}%`,
+    extractedQuantity: matchedEntry.quantity,
+    extractedUnit: matchedEntry.unit ?? null,
+    normalizedKg: normalizedKg ?? null,
+    weighingValue: weighingValue ?? null,
+  };
+};
 
 const buildAddressString = (address: MethodologyAddress): string =>
   [address.street, address.number, address.city, address.countryState]
@@ -216,54 +265,12 @@ export const buildCrossValidationComparison = (
             normalizeVehiclePlate(extractedData.vehiclePlate.parsed)
           : null,
     },
-    wasteQuantityWeight: (() => {
-      if (
-        extractedData.wasteTypes === undefined ||
-        extractedData.wasteTypes.length === 0
-      ) {
-        return null;
-      }
-
-      const entries = extractedData.wasteTypes.map((entry) =>
-        toWasteTypeEntryData(entry),
-      );
-
-      const matchedEntry: undefined | WasteTypeEntryData = entries.find(
-        (entry) =>
-          matchWasteTypeEntry(entry, eventWasteCode, eventWasteDescription)
-            .isMatch,
-      );
-
-      if (matchedEntry?.quantity === undefined) {
-        return null;
-      }
-
-      const normalizedKg = normalizeQuantityToKg(
-        matchedEntry.quantity,
-        matchedEntry.unit,
-      );
-
-      const weighingEvent = eventData.weighingEvents.find(
-        (event) => event.value !== undefined && event.value > 0,
-      );
-
-      const weighingValue = weighingEvent?.value;
-      const discrepancy =
-        normalizedKg !== undefined &&
-        weighingValue !== undefined &&
-        weighingValue > 0
-          ? Math.abs(normalizedKg - weighingValue) / weighingValue
-          : null;
-
-      return {
-        discrepancyPercentage:
-          discrepancy === null ? null : `${(discrepancy * 100).toFixed(1)}%`,
-        extractedQuantity: matchedEntry.quantity,
-        extractedUnit: matchedEntry.unit ?? null,
-        normalizedKg: normalizedKg ?? null,
-        weighingValue: weighingValue ?? null,
-      };
-    })(),
+    wasteQuantityWeight: buildWasteQuantityDebugInfo(
+      extractedData.wasteTypes?.map((entry) => toWasteTypeEntryData(entry)),
+      eventWasteCode,
+      eventWasteDescription,
+      eventData.weighingEvents,
+    ),
     wasteType: {
       entries:
         extractedData.wasteTypes?.map((extractedEntry) => {
@@ -365,49 +372,12 @@ export const buildCdfCrossValidationComparison = (
       eventData.recyclerEvent?.participant.name,
       eventData.recyclerEvent?.participant.taxId,
     ),
-    wasteQuantityWeight: (() => {
-      const entries = extractedData.wasteEntries?.parsed;
-
-      if (!entries) {
-        return null;
-      }
-
-      const matchedEntry = entries.find(
-        (entry) =>
-          matchWasteTypeEntry(entry, eventWasteCode, eventWasteDescription)
-            .isMatch,
-      );
-
-      if (matchedEntry?.quantity === undefined) {
-        return null;
-      }
-
-      const normalizedKg = normalizeQuantityToKg(
-        matchedEntry.quantity,
-        matchedEntry.unit,
-      );
-
-      const weighingEvent = eventData.weighingEvents.find(
-        (event) => event.value !== undefined && event.value > 0,
-      );
-
-      const weighingValue = weighingEvent?.value;
-      const discrepancy =
-        normalizedKg !== undefined &&
-        weighingValue !== undefined &&
-        weighingValue > 0
-          ? Math.abs(normalizedKg - weighingValue) / weighingValue
-          : null;
-
-      return {
-        discrepancyPercentage:
-          discrepancy === null ? null : `${(discrepancy * 100).toFixed(1)}%`,
-        extractedQuantity: matchedEntry.quantity,
-        extractedUnit: matchedEntry.unit ?? null,
-        normalizedKg: normalizedKg ?? null,
-        weighingValue: weighingValue ?? null,
-      };
-    })(),
+    wasteQuantityWeight: buildWasteQuantityDebugInfo(
+      extractedData.wasteEntries?.parsed,
+      eventWasteCode,
+      eventWasteDescription,
+      eventData.weighingEvents,
+    ),
     wasteType: {
       confidence: extractedData.wasteEntries?.confidence ?? null,
       entries:

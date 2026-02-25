@@ -42,9 +42,6 @@ import {
   type ValidationResult,
 } from './document-manifest-data.helpers';
 
-// Import parsers to register them
-import '@carrot-fndn/shared/document-extractor';
-
 const {
   ACTOR,
   DROP_OFF,

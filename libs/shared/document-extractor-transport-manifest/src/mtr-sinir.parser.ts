@@ -4,12 +4,10 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import {
   calculateMatchScore,
   createHighConfidenceField,
-  createLowConfidenceField,
   type DocumentParser,
   extractAllStringFields,
   extractFieldWithLabelFallback,
   type ExtractionOutput,
-  extractSection,
   extractStringField,
   parseBrazilianNumber,
   registerParser,
@@ -18,7 +16,7 @@ import {
 
 import {
   createExtractedWasteTypeEntry,
-  extractDriverAndVehicle,
+  extractHaulerFields,
   extractMtrEntityWithAddress,
   finalizeMtrExtraction,
   MTR_DEFAULT_LABEL_PATTERNS,
@@ -134,7 +132,7 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
       MTR_PATTERNS.cnpj,
     );
 
-    this.extractHaulerFields(text, partialData);
+    extractHaulerFields(text, partialData);
 
     const wasteTypeMatches = extractAllStringFields(
       text,
@@ -173,52 +171,6 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
     }
 
     return finalizeMtrExtraction(partialData, matchScore, rawText);
-  }
-
-  private extractHaulerFields(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-  ): void {
-    const haulerSection = extractSection(
-      rawText,
-      SECTION_PATTERNS.transportador,
-      ALL_SECTION_PATTERNS,
-    );
-
-    if (haulerSection) {
-      const { driverName, vehiclePlate } =
-        extractDriverAndVehicle(haulerSection);
-
-      if (driverName) {
-        partialData.driverName = createHighConfidenceField(
-          driverName as NonEmptyString,
-          `Nome do Motorista\n${driverName}`,
-        );
-      } else if (LABEL_PATTERNS.driverName.test(rawText)) {
-        partialData.driverName = createLowConfidenceField('' as NonEmptyString);
-      }
-
-      if (vehiclePlate) {
-        partialData.vehiclePlate = createHighConfidenceField(
-          vehiclePlate as NonEmptyString,
-          `Placa do Veiculo\n${vehiclePlate}`,
-        );
-      } else if (LABEL_PATTERNS.vehiclePlate.test(rawText)) {
-        partialData.vehiclePlate = createLowConfidenceField(
-          '' as NonEmptyString,
-        );
-      }
-
-      return;
-    }
-
-    if (LABEL_PATTERNS.driverName.test(rawText)) {
-      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
-    }
-
-    if (LABEL_PATTERNS.vehiclePlate.test(rawText)) {
-      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
-    }
   }
 }
 

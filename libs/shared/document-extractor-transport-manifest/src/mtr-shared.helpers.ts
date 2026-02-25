@@ -376,6 +376,49 @@ const collectWasteTypeConfidenceFields = (
   });
 };
 
+export const extractHaulerFields = (
+  rawText: string,
+  partialData: Partial<MtrExtractedData>,
+): void => {
+  const haulerSection = extractSection(
+    rawText,
+    MTR_DEFAULT_SECTION_PATTERNS.transportador,
+    Object.values(MTR_DEFAULT_SECTION_PATTERNS),
+  );
+
+  if (haulerSection) {
+    const { driverName, vehiclePlate } = extractDriverAndVehicle(haulerSection);
+
+    if (driverName) {
+      partialData.driverName = createHighConfidenceField(
+        driverName as NonEmptyString,
+        `Nome do Motorista\n${driverName}`,
+      );
+    } else if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(rawText)) {
+      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+    }
+
+    if (vehiclePlate) {
+      partialData.vehiclePlate = createHighConfidenceField(
+        vehiclePlate as NonEmptyString,
+        `Placa do Veiculo\n${vehiclePlate}`,
+      );
+    } else if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+    }
+
+    return;
+  }
+
+  if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(rawText)) {
+    partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+  }
+
+  if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+    partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+  }
+};
+
 export const finalizeMtrExtraction = (
   partialData: Partial<MtrExtractedData>,
   matchScore: number,
