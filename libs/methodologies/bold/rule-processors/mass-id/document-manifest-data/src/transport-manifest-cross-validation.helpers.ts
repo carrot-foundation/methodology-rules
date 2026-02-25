@@ -71,6 +71,10 @@ const validateVehiclePlate = (
         };
   }
 
+  if (extractedData.vehiclePlate.confidence !== 'high') {
+    return {};
+  }
+
   if (!pickUpEvent) {
     return {};
   }

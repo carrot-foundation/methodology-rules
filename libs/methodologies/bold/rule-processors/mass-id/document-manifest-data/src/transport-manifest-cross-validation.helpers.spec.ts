@@ -186,7 +186,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       ]);
     });
 
-    it('should set reviewRequired when vehicle plate does not match with low confidence', () => {
+    it('should skip vehicle plate validation when extracted plate has low confidence and a parsed value', () => {
       const extractionResult = createExtractionResult({
         vehiclePlate: {
           confidence: 'low',
@@ -214,9 +214,38 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const result = validateMtrExtractedData(extractionResult, eventData);
 
       expect(result.failMessages).toHaveLength(0);
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]?.description).toContain('vehicle plate');
+      expect(result.reviewRequired).toBe(false);
+    });
+
+    it('should skip vehicle plate validation when extracted plate has low confidence', () => {
+      const extractionResult = createExtractionResult({
+        vehiclePlate: {
+          confidence: 'low',
+          parsed: '',
+          rawMatch: '',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        pickUpEvent: {
+          address: STUB_BR_ADDRESS,
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: 'Vehicle License Plate',
+                value: 'XYZ9876',
+              },
+            ],
+          },
+        } as unknown as DocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
     });
 
     it('should skip vehicle plate validation when pickUpEvent is missing', () => {

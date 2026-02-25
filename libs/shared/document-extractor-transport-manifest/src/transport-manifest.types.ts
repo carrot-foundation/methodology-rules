@@ -16,14 +16,14 @@ export interface ExtractedWasteTypeEntry {
 export interface MtrExtractedData extends BaseExtractedData {
   documentNumber: ExtractedField<NonEmptyString>;
   documentType: 'transportManifest';
-  driverName?: ExtractedField<NonEmptyString>;
+  driverName?: ExtractedField<string>;
   generator: ExtractedEntityWithAddressInfo;
   hauler: ExtractedEntityWithAddressInfo;
   issueDate: ExtractedField<NonEmptyString>;
   receiver: ExtractedEntityWithAddressInfo;
   receivingDate?: ExtractedField<NonEmptyString>;
   transportDate?: ExtractedField<NonEmptyString>;
-  vehiclePlate?: ExtractedField<NonEmptyString>;
+  vehiclePlate?: ExtractedField<string>;
   wasteTypes?: ExtractedWasteTypeEntry[];
 }
 

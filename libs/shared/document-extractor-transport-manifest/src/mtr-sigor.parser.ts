@@ -280,20 +280,20 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
-        driverName as NonEmptyString,
+        driverName,
         `Nome do Motorista\n${driverName}`,
       );
     } else if (LABEL_PATTERNS.driverName.test(haulerSection)) {
-      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+      partialData.driverName = createLowConfidenceField('');
     }
 
     if (vehiclePlate) {
       partialData.vehiclePlate = createHighConfidenceField(
-        vehiclePlate as NonEmptyString,
+        vehiclePlate,
         `Placa do Veiculo\n${vehiclePlate}`,
       );
     } else if (LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
-      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+      partialData.vehiclePlate = createLowConfidenceField('');
     }
   }
 

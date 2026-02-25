@@ -391,31 +391,31 @@ export const extractHaulerFields = (
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
-        driverName as NonEmptyString,
+        driverName,
         `Nome do Motorista\n${driverName}`,
       );
     } else if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(haulerSection)) {
-      partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+      partialData.driverName = createLowConfidenceField('');
     }
 
     if (vehiclePlate) {
       partialData.vehiclePlate = createHighConfidenceField(
-        vehiclePlate as NonEmptyString,
+        vehiclePlate,
         `Placa do Veiculo\n${vehiclePlate}`,
       );
     } else if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
-      partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+      partialData.vehiclePlate = createLowConfidenceField('');
     }
 
     return;
   }
 
   if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(rawText)) {
-    partialData.driverName = createLowConfidenceField('' as NonEmptyString);
+    partialData.driverName = createLowConfidenceField('');
   }
 
   if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(rawText)) {
-    partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
+    partialData.vehiclePlate = createLowConfidenceField('');
   }
 };
 
