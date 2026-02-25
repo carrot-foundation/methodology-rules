@@ -56,9 +56,10 @@ export const crossValidateWithTextract = async ({
 
   const mtrDocumentNumbers = collectMtrDocumentNumbers(documentManifestEvents);
 
-  for (const [index, attachmentInfo] of attachmentInfos.entries()) {
-    // eslint-disable-next-line security/detect-object-injection
-    const baseEvent = documentManifestEvents[index];
+  for (const attachmentInfo of attachmentInfos) {
+    const baseEvent = documentManifestEvents.find(
+      (event) => event.attachment?.attachmentId === attachmentInfo.attachmentId,
+    );
 
     if (!baseEvent) {
       continue;

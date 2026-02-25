@@ -69,6 +69,16 @@ describe('text-parsing.helpers', () => {
 
       expect(result).toBeUndefined();
     });
+
+    it('should return the same result on repeated calls with a global pattern', () => {
+      const pattern = /Ticket:\s*(\d+)/g;
+      const text = 'Ticket: 12345';
+
+      const result1 = extractStringField(text, pattern);
+      const result2 = extractStringField(text, pattern);
+
+      expect(result2).toEqual(result1);
+    });
   });
 
   describe('extractAllStringFields', () => {

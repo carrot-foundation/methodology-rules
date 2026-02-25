@@ -222,13 +222,18 @@ export const buildCrossValidationComparison = (
       eventData.haulerEvent?.address,
     ),
     issueDate: {
-      confidence: extractedData.issueDate.confidence,
+      confidence:
+        (extractedData.issueDate as MtrExtractedData['issueDate'] | undefined)
+          ?.confidence ?? null,
       daysDiff: computeDateDaysDiff(
         eventIssueDate,
-        extractedData.issueDate.parsed,
+        (extractedData.issueDate as MtrExtractedData['issueDate'] | undefined)
+          ?.parsed,
       ),
       event: eventIssueDate ?? null,
-      extracted: extractedData.issueDate.parsed,
+      extracted:
+        (extractedData.issueDate as MtrExtractedData['issueDate'] | undefined)
+          ?.parsed ?? null,
     },
     receiver: entityDebugInfo(
       extractedData.receiver,
@@ -346,13 +351,18 @@ export const buildCdfCrossValidationComparison = (
       eventData.wasteGeneratorEvent?.address,
     ),
     issueDate: {
-      confidence: extractedData.issueDate.confidence,
+      confidence:
+        (extractedData.issueDate as CdfExtractedData['issueDate'] | undefined)
+          ?.confidence ?? null,
       daysDiff: computeDateDaysDiff(
         eventIssueDate,
-        extractedData.issueDate.parsed,
+        (extractedData.issueDate as CdfExtractedData['issueDate'] | undefined)
+          ?.parsed,
       ),
       event: eventIssueDate ?? null,
-      extracted: extractedData.issueDate.parsed,
+      extracted:
+        (extractedData.issueDate as CdfExtractedData['issueDate'] | undefined)
+          ?.parsed ?? null,
     },
     mtrNumbers: {
       eventMtrNumbers: eventData.mtrDocumentNumbers,

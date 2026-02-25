@@ -53,11 +53,6 @@ const baseEventData: MtrCrossValidationEventData = {
   weighingEvents: [],
 };
 
-const stubCdfEntity = (name: string, taxId: string) => ({
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
-
 describe('cross-validation-debug.helpers', () => {
   let debugSpy: jest.SpyInstance;
 
@@ -327,14 +322,14 @@ describe('cross-validation-debug.helpers', () => {
   });
 
   describe('buildCdfCrossValidationComparison', () => {
-    const stubCdfEntityWithAddress = (
+    const stubEntityWithAddress = (
       name: string,
       taxId: string,
       address: string,
       city: string,
       state: string,
     ) => ({
-      ...stubCdfEntity(name, taxId),
+      ...stubEntity(name, taxId),
       address: {
         confidence: 'high' as const,
         parsed: address,
@@ -351,7 +346,7 @@ describe('cross-validation-debug.helpers', () => {
         rawMatch: 'CDF-001',
       },
       documentType: 'recyclingManifest',
-      generator: stubCdfEntityWithAddress(
+      generator: stubEntityWithAddress(
         'Generator Co',
         '11.111.111/0001-11',
         'Rua Test',
@@ -363,7 +358,7 @@ describe('cross-validation-debug.helpers', () => {
         parsed: '2024-01-01',
         rawMatch: '01/01/2024',
       },
-      recycler: stubCdfEntity('Recycler Corp', '33.333.333/0001-33'),
+      recycler: stubEntity('Recycler Corp', '33.333.333/0001-33'),
     } as unknown as CdfExtractedData;
 
     const baseCdfEventData: CdfCrossValidationEventData = {

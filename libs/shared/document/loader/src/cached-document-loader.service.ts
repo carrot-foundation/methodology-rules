@@ -32,9 +32,16 @@ export class CachedDocumentLoaderService implements DocumentLoader {
 
     const result = await this.delegate.load(dto);
 
-    await mkdir(this.cacheDirectory, { recursive: true });
-    await writeFile(filePath, JSON.stringify(result), 'utf8');
-    logger.info(`Cached document (...${cacheKey.slice(-8)})`);
+    try {
+      await mkdir(this.cacheDirectory, { recursive: true });
+      await writeFile(filePath, JSON.stringify(result), 'utf8');
+      logger.info(`Cached document (...${cacheKey.slice(-8)})`);
+    } catch (error) {
+      logger.warn(
+        { error },
+        `Failed to cache document (...${cacheKey.slice(-8)})`,
+      );
+    }
 
     return result;
   }

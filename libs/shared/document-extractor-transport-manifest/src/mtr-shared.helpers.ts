@@ -376,14 +376,30 @@ const collectWasteTypeConfidenceFields = (
   });
 };
 
+export interface ExtractHaulerFieldsOptions {
+  allSectionPatterns?: RegExp[];
+  labelPatterns?: Pick<
+    typeof MTR_DEFAULT_LABEL_PATTERNS,
+    'driverName' | 'vehiclePlate'
+  >;
+  sectionPattern?: RegExp;
+}
+
 export const extractHaulerFields = (
   rawText: string,
   partialData: Partial<MtrExtractedData>,
+  options: ExtractHaulerFieldsOptions = {},
 ): void => {
+  const sectionPattern =
+    options.sectionPattern ?? MTR_DEFAULT_SECTION_PATTERNS.transportador;
+  const allSectionPatterns =
+    options.allSectionPatterns ?? Object.values(MTR_DEFAULT_SECTION_PATTERNS);
+  const labelPatterns = options.labelPatterns ?? MTR_DEFAULT_LABEL_PATTERNS;
+
   const haulerSection = extractSection(
     rawText,
-    MTR_DEFAULT_SECTION_PATTERNS.transportador,
-    Object.values(MTR_DEFAULT_SECTION_PATTERNS),
+    sectionPattern,
+    allSectionPatterns,
   );
 
   if (haulerSection) {
@@ -394,7 +410,7 @@ export const extractHaulerFields = (
         driverName,
         `Nome do Motorista\n${driverName}`,
       );
-    } else if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(haulerSection)) {
+    } else if (labelPatterns.driverName.test(haulerSection)) {
       partialData.driverName = createLowConfidenceField('');
     }
 
@@ -403,18 +419,18 @@ export const extractHaulerFields = (
         vehiclePlate,
         `Placa do Veiculo\n${vehiclePlate}`,
       );
-    } else if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
+    } else if (labelPatterns.vehiclePlate.test(haulerSection)) {
       partialData.vehiclePlate = createLowConfidenceField('');
     }
 
     return;
   }
 
-  if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(rawText)) {
+  if (labelPatterns.driverName.test(rawText)) {
     partialData.driverName = createLowConfidenceField('');
   }
 
-  if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+  if (labelPatterns.vehiclePlate.test(rawText)) {
     partialData.vehiclePlate = createLowConfidenceField('');
   }
 };

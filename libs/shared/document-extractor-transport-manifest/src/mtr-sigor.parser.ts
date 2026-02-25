@@ -9,7 +9,6 @@ import {
   calculateMatchScore,
   createExtractedEntityWithAddress,
   createHighConfidenceField,
-  createLowConfidenceField,
   type DocumentParser,
   type EntityWithAddressInfo,
   extractFieldWithLabelFallback,
@@ -27,7 +26,7 @@ import {
 import {
   createExtractedWasteTypeEntry,
   extractAddressFields,
-  extractDriverAndVehicle,
+  extractHaulerFields,
   finalizeMtrExtraction,
   MTR_DEFAULT_LABEL_PATTERNS,
   MTR_DEFAULT_PATTERNS,
@@ -215,7 +214,11 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     this.extractTransportDate(text, partialData);
     this.extractReceivingDate(text, partialData);
     this.extractEntities(text, partialData);
-    this.extractHaulerFields(text, partialData);
+    extractHaulerFields(text, partialData, {
+      allSectionPatterns: ALL_SECTION_PATTERNS,
+      labelPatterns: LABEL_PATTERNS,
+      sectionPattern: SECTION_PATTERNS.transportador,
+    });
     this.extractWasteFields(extractionResult, partialData);
 
     return finalizeMtrExtraction(partialData, matchScore, rawText);
@@ -260,41 +263,6 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     );
 
     partialData.receiver = createExtractedEntityWithAddress(receiverExtracted);
-  }
-
-  private extractHaulerFields(
-    rawText: string,
-    partialData: Partial<MtrExtractedData>,
-  ): void {
-    const haulerSection = extractSection(
-      rawText,
-      SECTION_PATTERNS.transportador,
-      ALL_SECTION_PATTERNS,
-    );
-
-    if (!haulerSection) {
-      return;
-    }
-
-    const { driverName, vehiclePlate } = extractDriverAndVehicle(haulerSection);
-
-    if (driverName) {
-      partialData.driverName = createHighConfidenceField(
-        driverName,
-        `Nome do Motorista\n${driverName}`,
-      );
-    } else if (LABEL_PATTERNS.driverName.test(haulerSection)) {
-      partialData.driverName = createLowConfidenceField('');
-    }
-
-    if (vehiclePlate) {
-      partialData.vehiclePlate = createHighConfidenceField(
-        vehiclePlate,
-        `Placa do Veiculo\n${vehiclePlate}`,
-      );
-    } else if (LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
-      partialData.vehiclePlate = createLowConfidenceField('');
-    }
   }
 
   private extractIssueDate(

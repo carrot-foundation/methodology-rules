@@ -20,6 +20,10 @@ export const extractStringField = (
   text: string,
   pattern: RegExp,
 ): undefined | { rawMatch: string; value: string } => {
+  if (pattern.global || pattern.sticky) {
+    pattern.lastIndex = 0;
+  }
+
   const match = pattern.exec(text);
 
   if (!match?.[1]) {

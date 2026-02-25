@@ -1,4 +1,4 @@
-import { differenceInDays, parse, parseISO } from 'date-fns';
+import { differenceInDays, format, parse, parseISO } from 'date-fns';
 
 /**
  * Aggressively normalizes a string for comparison purposes.
@@ -141,7 +141,7 @@ export const normalizeDateToISO = (value: string): string | undefined => {
   const isoDate = parseISO(trimmed);
 
   if (!Number.isNaN(isoDate.getTime())) {
-    return isoDate.toISOString().split('T')[0];
+    return format(isoDate, 'yyyy-MM-dd');
   }
 
   // Try Brazilian date formats
@@ -149,7 +149,7 @@ export const normalizeDateToISO = (value: string): string | undefined => {
     const parsed = parse(trimmed, formatString, new Date());
 
     if (!Number.isNaN(parsed.getTime())) {
-      return parsed.toISOString().split('T')[0];
+      return format(parsed, 'yyyy-MM-dd');
     }
   }
 

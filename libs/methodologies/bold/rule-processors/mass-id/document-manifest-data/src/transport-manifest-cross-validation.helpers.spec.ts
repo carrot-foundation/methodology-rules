@@ -779,6 +779,77 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should fail when event issueDateAttribute does not match extracted issue date', () => {
+      const extractionResult = createExtractionResult({
+        issueDate: {
+          confidence: 'high' as const,
+          parsed: '2024-06-15' as never,
+          rawMatch: '15/06/2024',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        issueDateAttribute: {
+          isPublic: false,
+          name: 'Issue Date',
+          value: '2024-01-01T12:00:00.000Z',
+        },
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(1);
+      expect(result.failMessages[0]).toContain('2024-01-01T12:00:00.000Z');
+      expect(result.failMessages[0]).toContain('2024-06-15');
+    });
+
+    it('should add review reason when event has issueDateAttribute but issue date was not extracted', () => {
+      const extractionResult = {
+        data: {
+          ...baseMtrData,
+          extractionConfidence: 'high' as const,
+          issueDate: undefined,
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        issueDateAttribute: {
+          isPublic: false,
+          name: 'Issue Date',
+          value: '2024-01-01',
+        },
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(true);
+      expect(result.reviewReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+      expect(result.reviewReasons?.[0]?.description).toContain('issue date');
+    });
+
+    it('should not fail when event issueDateAttribute matches extracted issue date', () => {
+      const extractionResult = createExtractionResult({});
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        issueDateAttribute: {
+          isPublic: false,
+          name: 'Issue Date',
+          value: '2024-01-01T12:00:00.000Z',
+        },
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
+    });
+
     it('should return no issues when all data matches', () => {
       const extractionResult = createExtractionResult({
         documentNumber: {

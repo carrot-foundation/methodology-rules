@@ -86,6 +86,19 @@ describe('CachedDocumentLoaderService', () => {
     expect(calls).toBe(2);
   });
 
+  it('should still return the document when cache write fails', async () => {
+    const document = stubDocumentEntity();
+    const readOnlyDirectory = '/nonexistent/readonly/path';
+    const service = new CachedDocumentLoaderService(
+      makeDelegate(document),
+      readOnlyDirectory,
+    );
+
+    const result = await service.load(stubDocumentKeyDto());
+
+    expect(result).toStrictEqual(document);
+  });
+
   it('should create cache directory if it does not exist', async () => {
     const nestedCacheDirectory = path.join(
       temporaryDirectory,

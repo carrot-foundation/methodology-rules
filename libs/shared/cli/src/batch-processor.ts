@@ -28,6 +28,10 @@ export const processBatch = async <TItem, TSuccess>(
     processItem,
   } = options;
 
+  if (concurrency <= 0) {
+    throw new Error('concurrency must be greater than 0');
+  }
+
   const successes: BatchResult<TItem, TSuccess>['successes'] = [];
   const failures: BatchResult<TItem, TSuccess>['failures'] = [];
 

@@ -113,6 +113,26 @@ describe('processBatch', () => {
     expect(failureItems).toEqual([{ error: 'failed-b', item: 'b' }]);
   });
 
+  it('should throw when concurrency is zero', async () => {
+    await expect(
+      processBatch({
+        concurrency: 0,
+        items: ['a'],
+        processItem: (item) => Promise.resolve(item),
+      }),
+    ).rejects.toThrow('concurrency must be greater than 0');
+  });
+
+  it('should throw when concurrency is negative', async () => {
+    await expect(
+      processBatch({
+        concurrency: -1,
+        items: ['a'],
+        processItem: (item) => Promise.resolve(item),
+      }),
+    ).rejects.toThrow('concurrency must be greater than 0');
+  });
+
   it('should handle empty items array', async () => {
     const result = await processBatch({
       concurrency: 5,

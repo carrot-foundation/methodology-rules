@@ -43,7 +43,7 @@ const processInput = async <
       Object.assign(result.crossValidation, validationResult.crossValidation);
     }
 
-    result.crossValidation['_extraction'] = {
+    result.crossValidation[`_extraction_${attachmentInfo.attachmentId}`] = {
       documentType: extractorConfig.documentType,
       layoutId: extractionResult.layoutId ?? null,
       layouts: extractorConfig.layouts ?? null,

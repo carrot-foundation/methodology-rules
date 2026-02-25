@@ -15,7 +15,7 @@ const DOCUMENT_TYPE_CHOICES: Array<{
 
 export const promptForFilePath = (): Promise<string> =>
   input({
-    message: `Enter file path or glob pattern (use ${EXTRACT_OPTIONS.filePath}):`,
+    message: 'Enter file path or glob pattern:',
     validate: (value) => {
       if (value.trim().length === 0) {
         return 'File path is required';

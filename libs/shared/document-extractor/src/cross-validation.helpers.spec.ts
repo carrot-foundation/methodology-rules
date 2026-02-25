@@ -177,7 +177,7 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.crossValidation).toEqual({
-      _extraction: {
+      '_extraction_att-1': {
         documentType: 'recyclingManifest',
         layoutId: null,
         layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
@@ -202,7 +202,7 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.crossValidation['_extraction']).toEqual({
+    expect(result.crossValidation['_extraction_att-1']).toEqual({
       documentType: 'recyclingManifest',
       layoutId: null,
       layouts: null,

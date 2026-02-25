@@ -56,7 +56,9 @@ describe('ScaleTicketLayout1Parser', () => {
       expect(result.data.missingRequiredFields).toContain('netWeight');
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
-        expect.stringContaining('Missing required fields'),
+        expect.objectContaining({
+          description: expect.stringContaining('Missing required fields'),
+        }),
       );
     });
 

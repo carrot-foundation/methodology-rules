@@ -45,7 +45,7 @@ pnpm commit                  # Interactive conventional commit
 
 ## Architecture
 
-```
+```text
 libs/
 ├── methodologies/bold/rule-processors/
 │   ├── mass-id/              # Mass ID rule processors
@@ -66,7 +66,7 @@ tools/                        # Scripts (create-rule.js, apply-methodology-rule.
 
 Each rule processor follows this structure:
 
-```
+```text
 {rule-name}/
 ├── {rule-name}.processor.ts       # Core logic (extends ParentDocumentRuleProcessor)
 ├── {rule-name}.lambda.ts          # Lambda handler
@@ -93,7 +93,7 @@ Nx enforces module boundaries via tags:
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`
 Scopes: `nx`, `rule`, `shared`, `script`
 
-```
+```text
 feat(rule): add vehicle definition validation
 fix(shared): prevent racing of requests
 ```
