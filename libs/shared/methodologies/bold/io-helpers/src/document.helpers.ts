@@ -1,13 +1,13 @@
 import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { Maybe } from '@carrot-fndn/shared/types';
 
-import { DocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import { type DocumentLoader } from '@carrot-fndn/shared/document/loader';
 import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 
 import { validateDocument } from './document-helpers.typia';
 
 export const loadDocument = async (
-  loaderService: DocumentLoaderService,
+  loaderService: DocumentLoader,
   key: Maybe<string>,
 ): Promise<Document | undefined> => {
   if (!isNonEmptyString(key)) {

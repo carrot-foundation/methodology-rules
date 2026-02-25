@@ -124,6 +124,12 @@ export const handleRunBatch = async (
       '../../../document-extractor-cli/data/cache',
     );
     logger.info(`Textract cache enabled: ${process.env['TEXTRACT_CACHE_DIR']}`);
+
+    process.env['DOCUMENT_CACHE_DIR'] = path.resolve(
+      __dirname,
+      '../../../document-extractor-cli/data/document-cache',
+    );
+    logger.info(`Document cache enabled: ${process.env['DOCUMENT_CACHE_DIR']}`);
   }
 
   const config = parseConfig(options.config);

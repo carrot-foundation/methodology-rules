@@ -4,7 +4,7 @@ import type {
   DocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { DocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import { type DocumentLoader } from '@carrot-fndn/shared/document/loader';
 import {
   isNil,
   isNonEmptyString,
@@ -34,7 +34,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
   DocumentQueryCriteria,
   QueryContext
 > {
-  constructor(private readonly documentLoaderService: DocumentLoaderService) {
+  constructor(private readonly documentLoaderService: DocumentLoader) {
     const documentFetcher: DocumentFetcher<Document> = {
       fetch: async ({ s3Key: documentKey }) => {
         const document = await this.documentLoaderService.load({
