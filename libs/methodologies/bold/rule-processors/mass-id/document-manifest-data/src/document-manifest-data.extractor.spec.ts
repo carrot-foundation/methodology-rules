@@ -20,6 +20,8 @@ jest.mock('@carrot-fndn/shared/document-extractor', () =>
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 
+const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
+
 const noRelatedEvents: {
   dropOffEvent: undefined;
   haulerEvent: undefined;
@@ -284,11 +286,13 @@ describe('crossValidateWithTextract', () => {
     ];
 
     const pickUpEvent = {
+      address: STUB_BR_ADDRESS,
       externalCreatedAt: '2024-01-01',
       metadata: { attributes: [] },
     } as unknown as DocumentEvent;
 
     const dropOffEvent = {
+      address: STUB_BR_ADDRESS,
       externalCreatedAt: '2024-01-01',
     } as unknown as DocumentEvent;
 

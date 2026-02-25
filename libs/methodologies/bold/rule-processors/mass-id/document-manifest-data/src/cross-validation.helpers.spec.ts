@@ -622,6 +622,24 @@ describe('cross-validation.helpers', () => {
 
       expect(result).toEqual({});
     });
+
+    it('should pass when UTC datetime crosses midnight but matches extracted date in local timezone', () => {
+      // 2024-11-01T02:45:00.000Z = 2024-10-31 in America/Sao_Paulo (UTC-3)
+      const field: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '31/10/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateField(
+        field,
+        '2024-11-01T02:45:00.000Z',
+        dateReviewReasonFunction,
+        undefined,
+        'America/Sao_Paulo',
+      );
+
+      expect(result).toEqual({});
+    });
   });
 
   describe('matchWasteTypeEntry', () => {
@@ -927,6 +945,42 @@ describe('cross-validation.helpers', () => {
       );
 
       expect(result).toEqual({});
+    });
+
+    it('should pass when UTC datetime crosses midnight but falls within period in local timezone', () => {
+      // 2024-11-01T02:45:00.000Z = 2024-10-31 in America/Sao_Paulo (UTC-3)
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/10/2024 ate 31/10/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-11-01T02:45:00.000Z',
+        period,
+        periodReviewReasonFunction,
+        undefined,
+        'America/Sao_Paulo',
+      );
+
+      expect(result).toEqual({});
+    });
+
+    it('should fail when UTC datetime falls outside period even in local timezone', () => {
+      // 2024-11-02T02:45:00.000Z = 2024-11-01 in America/Sao_Paulo — still outside October
+      const period: ExtractedField<string> = {
+        confidence: 'high',
+        parsed: '01/10/2024 ate 31/10/2024',
+      } as ExtractedField<string>;
+
+      const result = validateDateWithinPeriod(
+        '2024-11-02T02:45:00.000Z',
+        period,
+        periodReviewReasonFunction,
+        undefined,
+        'America/Sao_Paulo',
+      );
+
+      expect(result.failReason).toBeDefined();
     });
   });
 

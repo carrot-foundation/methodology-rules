@@ -56,6 +56,8 @@ const baseCdfData = {
   },
 };
 
+const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
+
 const createExtractionResult = (
   data: Partial<CdfExtractedData>,
 ): ExtractionOutput<BaseExtractedData> =>
@@ -78,6 +80,7 @@ const makeDropOffEventWithClassification = (
   externalCreatedAt?: string,
 ): DocumentEvent =>
   ({
+    address: STUB_BR_ADDRESS,
     externalCreatedAt,
     metadata: {
       attributes: [
@@ -311,6 +314,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
           dropOffEvent: {
+            address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-01-15',
           } as unknown as DocumentEvent,
         };
@@ -333,6 +337,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
           dropOffEvent: {
+            address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
           } as unknown as DocumentEvent,
         };
@@ -355,6 +360,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
           dropOffEvent: {
+            address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
           } as unknown as DocumentEvent,
         };
@@ -769,6 +775,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
           dropOffEvent: {
+            address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
           } as unknown as DocumentEvent,
           mtrDocumentNumbers: ['MTR-001'],
@@ -850,6 +857,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
           dropOffEvent: {
+            address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-01-15',
           } as unknown as DocumentEvent,
         };

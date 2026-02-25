@@ -1,6 +1,7 @@
 import {
   aggressiveNormalize,
   dateDifferenceInDays,
+  DEFAULT_NAME_MATCH_THRESHOLD,
   diceCoefficient,
   isNameMatch,
   normalizeDateToISO,
@@ -97,6 +98,85 @@ describe('string-comparison.helpers', () => {
       const result = isNameMatch('abc', 'abd', 0.9);
 
       expect(result.isMatch).toBe(false);
+    });
+
+    it('should not match when names differ only by extra business-type words and token subset is disabled', () => {
+      const result = isNameMatch(
+        'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
+        'ROYAL CANIN DO BRASIL LTDA',
+      );
+
+      expect(result.isMatch).toBe(false);
+      expect(result.score).toBeGreaterThan(0.5);
+      expect(result.score).toBeLessThan(DEFAULT_NAME_MATCH_THRESHOLD);
+    });
+
+    describe('with token subset enabled', () => {
+      it('should match when one name has extra business-type words not present in the other', () => {
+        const result = isNameMatch(
+          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          'ROYAL CANIN DO BRASIL LTDA',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should match when one name uses single-letter abbreviations for middle words', () => {
+        const result = isNameMatch(
+          'LEDA A B SHINE',
+          'LEDA ABRACADABRA BAKED SHINE',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should match when abbreviated name uses dots that get stripped on normalization', () => {
+        const result = isNameMatch(
+          'LEDA A. B. SHINE',
+          'LEDA ABRACADABRA BAKED SHINE',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should match regardless of which argument has the extra words', () => {
+        const result = isNameMatch(
+          'ROYAL CANIN DO BRASIL LTDA',
+          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should not match when the shorter name has fewer than 2 meaningful tokens', () => {
+        const result = isNameMatch(
+          'LTDA',
+          'ROYAL CANIN DO BRASIL LTDA',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(false);
+      });
+
+      it('should not match completely different names', () => {
+        const result = isNameMatch(
+          'Company Alpha Services',
+          'Totally Different Corp',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(false);
+      });
     });
   });
 

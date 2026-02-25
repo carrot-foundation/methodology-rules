@@ -81,11 +81,14 @@ const createExtractionResult = (
 const makeWeighingEvent = (value: number): DocumentEvent =>
   ({ value }) as unknown as DocumentEvent;
 
+const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
+
 const makePickUpEventWithClassification = (
   code?: string,
   description?: string,
 ): DocumentEvent =>
   ({
+    address: STUB_BR_ADDRESS,
     metadata: {
       attributes: [
         ...(code === undefined
@@ -153,6 +156,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           metadata: {
             attributes: [
               {
@@ -194,6 +198,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           metadata: {
             attributes: [
               {
@@ -539,6 +544,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-10',
         } as unknown as DocumentEvent,
       };
@@ -561,6 +567,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-03',
         } as unknown as DocumentEvent,
       };
@@ -583,6 +590,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         dropOffEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-10',
         } as unknown as DocumentEvent,
       };
@@ -605,6 +613,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           metadata: {
             attributes: [
               {
@@ -634,6 +643,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           metadata: {
             attributes: [
               {
@@ -664,6 +674,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-06-15',
         } as unknown as DocumentEvent,
       };
@@ -686,6 +697,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-15',
         } as unknown as DocumentEvent,
       };
@@ -1604,6 +1616,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       const eventData: MtrCrossValidationEventData = {
         ...baseEventData,
         pickUpEvent: {
+          address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-15',
         } as unknown as DocumentEvent,
       };

@@ -5,7 +5,10 @@ import {
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
 import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
-import { normalizeVehiclePlate } from '@carrot-fndn/shared/helpers';
+import {
+  getTimezoneFromAddress,
+  normalizeVehiclePlate,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
@@ -358,6 +361,10 @@ export const validateMtrExtractedData = (
         context: 'Pick-up event',
         field: 'transport date',
       }),
+      getTimezoneFromAddress(
+        eventData.pickUpEvent?.address.countryCode ?? 'BR',
+        eventData.pickUpEvent?.address.countryState,
+      ),
     ),
     validateDateField(
       extractedData.receivingDate,
@@ -367,6 +374,10 @@ export const validateMtrExtractedData = (
         context: 'Drop-off event',
         field: 'receiving date',
       }),
+      getTimezoneFromAddress(
+        eventData.dropOffEvent?.address.countryCode ?? 'BR',
+        eventData.dropOffEvent?.address.countryState,
+      ),
     ),
     validateWasteType(extractedData, eventData.pickUpEvent),
     validateWasteQuantity(extractedData, eventData),

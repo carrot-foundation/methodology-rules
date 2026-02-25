@@ -14,7 +14,11 @@ import {
   type ExtractionOutput,
   type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
-import { dateDifferenceInDays, isNameMatch } from '@carrot-fndn/shared/helpers';
+import {
+  dateDifferenceInDays,
+  isNameMatch,
+  utcIsoToLocalDate,
+} from '@carrot-fndn/shared/helpers';
 
 import type {
   DocumentManifestEventSubject,
@@ -176,7 +180,12 @@ export const validateEntityName = (
   }
 
   const extractedName = extractedEntity.name.parsed;
-  const { isMatch, score } = isNameMatch(extractedName, eventParticipantName);
+  const { isMatch, score } = isNameMatch(
+    extractedName,
+    eventParticipantName,
+    undefined,
+    true,
+  );
 
   return isMatch
     ? {}
@@ -274,7 +283,12 @@ export const validateEntityAddress = (
     .filter(Boolean)
     .join(', ');
 
-  const { isMatch, score } = isNameMatch(extractedAddress, eventAddressString);
+  const { isMatch, score } = isNameMatch(
+    extractedAddress,
+    eventAddressString,
+    undefined,
+    true,
+  );
 
   return isMatch
     ? {}
@@ -304,6 +318,7 @@ export const validateDateField = (
     extractedDate: string;
   }) => ReviewReason,
   notExtractedReviewReason?: ReviewReason,
+  timezone = 'UTC',
 ): FieldValidationResult => {
   if (!extractedDate) {
     return eventDateString !== undefined && notExtractedReviewReason
@@ -319,7 +334,8 @@ export const validateDateField = (
     return {};
   }
 
-  const daysDiff = dateDifferenceInDays(extractedDate.parsed, eventDateString);
+  const localEventDate = utcIsoToLocalDate(eventDateString, timezone);
+  const daysDiff = dateDifferenceInDays(extractedDate.parsed, localEventDate);
 
   if (daysDiff === undefined || daysDiff === 0) {
     return {};
@@ -438,6 +454,7 @@ export const validateDateWithinPeriod = (
     periodStart: string;
   }) => ReviewReason,
   notExtractedReviewReason?: ReviewReason,
+  timezone = 'UTC',
 ): FieldValidationResult => {
   if (!periodField) {
     return eventDateString !== undefined && notExtractedReviewReason
@@ -459,7 +476,7 @@ export const validateDateWithinPeriod = (
 
   const startIso = ddmmyyyyToIso(range.start);
   const endIso = ddmmyyyyToIso(range.end);
-  const eventIso = eventDateString.slice(0, 10);
+  const eventIso = utcIsoToLocalDate(eventDateString, timezone);
 
   // istanbul ignore next -- parsePeriodRange regex guarantees valid date parts
   if (!startIso || !endIso) {

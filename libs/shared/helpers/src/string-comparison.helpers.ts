@@ -49,21 +49,77 @@ export const diceCoefficient = (a: string, b: string): number => {
   return (2 * intersection) / (a.length - 1 + (b.length - 1));
 };
 
-const DEFAULT_NAME_MATCH_THRESHOLD = 0.75;
+export const DEFAULT_NAME_MATCH_THRESHOLD = 0.75;
+
+const MEANINGFUL_TOKEN_MIN_LENGTH = 2;
+const MIN_MEANINGFUL_TOKENS = 2;
+
+/**
+ * Checks if all tokens of `shorter` can be matched in `longer`.
+ * Single-character tokens are treated as abbreviation prefixes (e.g. "A" matches "Abracadabra").
+ * Requires at least MIN_MEANINGFUL_TOKENS tokens of length >= MEANINGFUL_TOKEN_MIN_LENGTH
+ * in the shorter list to avoid spurious matches on single-suffix names.
+ */
+const fuzzyTokenSubset = (shorter: string[], longer: string[]): boolean => {
+  const meaningfulCount = shorter.filter(
+    (t) => t.length >= MEANINGFUL_TOKEN_MIN_LENGTH,
+  ).length;
+
+  if (meaningfulCount < MIN_MEANINGFUL_TOKENS) {
+    return false;
+  }
+
+  const pool = [...longer];
+
+  for (const token of shorter) {
+    const index = pool.findIndex((lt) =>
+      token.length === 1 ? lt.startsWith(token) : lt === token,
+    );
+
+    if (index === -1) {
+      return false;
+    }
+
+    pool.splice(index, 1);
+  }
+
+  return true;
+};
 
 /**
  * Checks whether two names match using aggressive normalization and Dice coefficient.
+ * When `useTokenSubset` is true, also matches if all tokens of the shorter name are
+ * present in the longer name (with single-character tokens treated as abbreviation prefixes).
+ * Use `useTokenSubset` only for entity names and addresses, not for generic string comparison.
  */
 export const isNameMatch = (
   a: string,
   b: string,
   threshold = DEFAULT_NAME_MATCH_THRESHOLD,
+  useTokenSubset = false,
 ): { isMatch: boolean; score: number } => {
   const normalizedA = aggressiveNormalize(a);
   const normalizedB = aggressiveNormalize(b);
   const score = diceCoefficient(normalizedA, normalizedB);
 
-  return { isMatch: score >= threshold, score };
+  if (score >= threshold) {
+    return { isMatch: true, score };
+  }
+
+  if (useTokenSubset) {
+    const tokensA = normalizedA.split(' ');
+    const tokensB = normalizedB.split(' ');
+    const [shorter, longer] =
+      tokensA.length <= tokensB.length
+        ? [tokensA, tokensB]
+        : [tokensB, tokensA];
+
+    if (fuzzyTokenSubset(shorter, longer)) {
+      return { isMatch: true, score };
+    }
+  }
+
+  return { isMatch: false, score };
 };
 
 /**

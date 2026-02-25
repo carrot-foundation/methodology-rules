@@ -4,7 +4,10 @@ import {
   type BaseExtractedData,
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
-import { isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import {
+  getTimezoneFromAddress,
+  isNonEmptyString,
+} from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
@@ -323,6 +326,10 @@ export const validateCdfExtractedData = (
         context: 'Drop-off event date',
         field: 'processing period',
       }),
+      getTimezoneFromAddress(
+        eventData.dropOffEvent?.address.countryCode ?? 'BR',
+        eventData.dropOffEvent?.address.countryState,
+      ),
     ),
     validateCdfWasteType(extractedData, eventData),
     validateCdfWasteQuantity(extractedData, eventData),
