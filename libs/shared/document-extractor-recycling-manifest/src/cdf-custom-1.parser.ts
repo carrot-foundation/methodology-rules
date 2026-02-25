@@ -1,4 +1,9 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type {
+  HeaderColumnDefinition,
+  TableColumnConfig,
+  TableRow,
+  TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
@@ -16,6 +21,11 @@ import {
   registerParser,
   stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  detectTableColumns,
+  extractTableFromBlocks,
+  normalizeMultiPageBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import { finalizeCdfExtraction } from './cdf-shared.helpers';
 import {
@@ -120,6 +130,59 @@ const parseReceiptTableRows = (rawText: string): ReceiptTableRow[] => {
   }
 
   return rows;
+};
+
+type CdfTableColumn = 'cadri' | 'quantity' | 'receiptDate' | 'wasteType';
+
+const CDF_TABLE_HEADER_DEFS: [
+  HeaderColumnDefinition<CdfTableColumn>,
+  ...Array<HeaderColumnDefinition<CdfTableColumn>>,
+] = [
+  { headerPattern: /Data\s+de\s+recebimento/i, name: 'receiptDate' },
+  { headerPattern: /Tipo\s+de\s+Mat[eé]ria-Prima/i, name: 'wasteType' },
+  { headerPattern: /CADRI/i, name: 'cadri' },
+  { headerPattern: /Quantidade\s+Recebida/i, name: 'quantity' },
+];
+
+const CDF_TABLE_ANCHOR: CdfTableColumn = 'wasteType';
+
+// Multi-page normalized coordinates can exceed 1.0 per page (normalizeMultiPageBlocks adds N-1 for page N)
+const MULTI_PAGE_Y_MAX = 100;
+
+const parseCdfTableRow = (
+  row: TableRow<CdfTableColumn>,
+): ReceiptTableRow | undefined => {
+  const wasteType = row.wasteType?.trim();
+  const receiptDate = row.receiptDate?.trim();
+  const quantityString = row.quantity?.trim();
+
+  if (!wasteType || !receiptDate || !quantityString) {
+    return undefined;
+  }
+
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(receiptDate)) {
+    return undefined;
+  }
+
+  const quantity = parseBrazilianNumber(quantityString);
+
+  if (quantity === undefined) {
+    return undefined;
+  }
+
+  const tableRow: ReceiptTableRow = {
+    quantity,
+    receiptDate,
+    wasteType: stripAccents(wasteType),
+  };
+
+  const cadri = row.cadri?.trim();
+
+  if (cadri && /^\d{5,}$/.test(cadri)) {
+    tableRow.cadri = cadri;
+  }
+
+  return tableRow;
 };
 
 const toReceiptEntries = (rows: ReceiptTableRow[]): ReceiptEntry[] =>
@@ -396,7 +459,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       partialData.environmentalLicense = environmentalLicense;
     }
     this.extractTreatmentMethod(text, partialData);
-    this.extractTableData(text, partialData);
+    this.extractTableData(extractionResult, partialData);
 
     return finalizeCdfExtraction(partialData, matchScore, rawText);
   }
@@ -439,11 +502,41 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     }
   }
 
+  private extractReceiptRows(
+    extractionResult: TextExtractionResult,
+  ): ReceiptTableRow[] {
+    const normalized = normalizeMultiPageBlocks(extractionResult.blocks);
+    const detected = detectTableColumns(normalized, CDF_TABLE_HEADER_DEFS);
+
+    if (detected) {
+      const { rows } = extractTableFromBlocks(normalized, {
+        anchorColumn: CDF_TABLE_ANCHOR,
+        columns: detected.columns as [
+          TableColumnConfig<CdfTableColumn>,
+          ...Array<TableColumnConfig<CdfTableColumn>>,
+        ],
+        maxRowGap: 0.03,
+        yRange: { max: MULTI_PAGE_Y_MAX, min: detected.headerTop + 0.01 },
+      });
+
+      const parsed = rows
+        .map((row) => parseCdfTableRow(row))
+        .filter((r): r is ReceiptTableRow => r !== undefined);
+
+      if (parsed.length > 0) {
+        return parsed;
+      }
+    }
+
+    // Fallback: regex on raw text (for cases where block detection fails)
+    return parseReceiptTableRows(stripAccents(extractionResult.rawText));
+  }
+
   private extractTableData(
-    rawText: string,
+    extractionResult: TextExtractionResult,
     partialData: Partial<CdfExtractedData>,
   ): void {
-    const rows = parseReceiptTableRows(rawText);
+    const rows = this.extractReceiptRows(extractionResult);
 
     if (rows.length > 0) {
       partialData.receiptEntries = createHighConfidenceField(
@@ -470,10 +563,11 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       }
     }
 
-    const subtotals = extractWasteSubtotals(rawText);
+    const text = stripAccents(extractionResult.rawText);
+    const subtotals = extractWasteSubtotals(text);
 
     if (subtotals.length > 0) {
-      const descriptions = extractWasteTypeDescriptions(rawText);
+      const descriptions = extractWasteTypeDescriptions(text);
       const wasteEntries = buildWasteEntriesFromSubtotals(
         subtotals,
         descriptions,
@@ -489,7 +583,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       return;
     }
 
-    this.extractWasteQuantityFallback(rawText, partialData);
+    this.extractWasteQuantityFallback(text, partialData);
   }
 
   private extractTreatmentMethod(

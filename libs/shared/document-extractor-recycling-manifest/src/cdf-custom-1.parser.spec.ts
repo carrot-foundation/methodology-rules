@@ -1,3 +1,5 @@
+import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
 
@@ -9,6 +11,47 @@ describe('CdfCustom1Parser', () => {
   beforeEach(() => {
     clearRegistry();
   });
+
+  type TextBlock = TextExtractionResult['blocks'][number];
+
+  const makeBlock = (text: string, left: number, top: number): TextBlock => ({
+    blockType: 'LINE',
+    boundingBox: { height: 0.015, left, top, width: 0.2 },
+    id: `${text}-${top}`,
+    text,
+  });
+
+  // Table header blocks (from real Textract - note Data header is slightly higher)
+  const CDF_TABLE_HEADER_BLOCKS: TextBlock[] = [
+    makeBlock('Data de recebimento da', 0.331, 0.508),
+    makeBlock('Tipo de Matéria-Prima', 0.071, 0.515),
+    makeBlock('CADRI', 0.27, 0.515),
+    makeBlock('Quantidade Recebida (ton)', 0.625, 0.515),
+  ];
+
+  // Helper to build a receipt row (3 blocks per row)
+  const makeReceiptRow = (
+    wasteType: string,
+    date: string,
+    quantity: string,
+    top: number,
+    cadri?: string,
+  ): TextBlock[] => [
+    makeBlock(wasteType, 0.066, top),
+    ...(cadri ? [makeBlock(cadri, 0.27, top + 0.001)] : []),
+    makeBlock(date, 0.388, top + 0.001),
+    makeBlock(quantity, 0.716, top + 0.001),
+  ];
+
+  // Preamble blocks (generator, recycler, etc.) needed for parser to extract other fields
+  const CDF_PREAMBLE_BLOCKS: TextBlock[] = [
+    makeBlock('CDF 50193/24', 0.06, 0.05),
+    makeBlock('Jundiaí, 07 de Agosto de 2024.', 0.06, 0.1),
+    makeBlock('Empresa Recebedora: Tera Ambiental Ltda.', 0.06, 0.2),
+    makeBlock('CNPJ: 59.591.115/0003-02 IE: 407.275.597.112', 0.06, 0.22),
+    makeBlock('Empresa Geradora: AJINOMOTO DO BRASIL', 0.06, 0.3),
+    makeBlock('CNPJ: 46.344.354/0005-88 IE: 417325212115', 0.06, 0.32),
+  ];
 
   const validCustomCdfText = [
     'Tera Ambiental Ltda',
@@ -462,6 +505,181 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.receiptEntries).toBeUndefined();
       expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(1234.56);
       expect(result.data.wasteEntries?.parsed[0]?.description).toBe('');
+    });
+
+    it('should extract receipt entries from block-based table', () => {
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '01/07/2024',
+          '85,12',
+          0.539,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '02/07/2024',
+          '90,50',
+          0.556,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '15/07/2024',
+          '201,97',
+          0.575,
+        ),
+        makeBlock(
+          'Quantidade Tratada de LODO SOLIDO - SANITARIO 377,59',
+          0.09,
+          0.6,
+        ),
+        makeBlock('Quantidade Total Tratado', 0.19, 0.62),
+        makeBlock('377,59', 0.19, 0.635),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as never,
+      });
+
+      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
+      expect(result.data.receiptEntries?.confidence).toBe('high');
+      expect(result.data.receiptEntries?.parsed[0]).toEqual({
+        quantity: 85.12,
+        receiptDate: '01/07/2024',
+        wasteType: 'LODO SOLIDO - SANITARIO',
+      });
+      expect(result.data.processingPeriod?.parsed).toBe(
+        '01/07/2024 ate 15/07/2024',
+      );
+      expect(result.data.processingPeriod?.confidence).toBe('high');
+    });
+
+    it('should extract receipt entries from multi-page block-based table', () => {
+      // Page 1: rows with top 0.539–0.868; page 2: rows with top 0.018–0.036 (reset)
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        // Page 1 rows
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '01/12/2024',
+          '91,46',
+          0.539,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '18/12/2024',
+          '98,59',
+          0.85,
+        ),
+        // Page break marker (footer at bottom of page 1)
+        makeBlock('Tera Ambiental Ltda', 0.435, 0.92),
+        // Page 2 rows (top resets)
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '20/12/2024',
+          '80,11',
+          0.018,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '31/12/2024',
+          '79,79',
+          0.036,
+        ),
+        makeBlock(
+          'Quantidade Tratada de LODO SOLIDO - SANITARIO 350,00',
+          0.09,
+          0.22,
+        ),
+        makeBlock('Quantidade Total Tratado', 0.19, 0.24),
+        makeBlock('350,00', 0.19, 0.255),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as never,
+      });
+
+      expect(result.data.receiptEntries?.parsed).toHaveLength(4);
+      expect(result.data.processingPeriod?.parsed).toBe(
+        '01/12/2024 ate 31/12/2024',
+      );
+    });
+
+    it('should extract CADRI numbers when present in blocks', () => {
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '01/07/2024',
+          '85,12',
+          0.539,
+          '42003189',
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '02/07/2024',
+          '90,50',
+          0.556,
+          '42003189',
+        ),
+        makeBlock('Quantidade Total Tratado', 0.19, 0.62),
+        makeBlock('175,62', 0.19, 0.635),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as never,
+      });
+
+      expect(result.data.transportManifests?.parsed).toEqual(['42003189']);
+      expect(result.data.receiptEntries?.parsed[0]?.cadri).toBe('42003189');
+    });
+
+    it('should skip block rows with invalid date format and fall back to regex', () => {
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        // Row with invalid date format (not dd/mm/yyyy)
+        makeBlock('LODO SOLIDO - SANITARIO', 0.066, 0.539),
+        makeBlock('invalid-date', 0.388, 0.54),
+        makeBlock('85,12', 0.716, 0.54),
+        makeBlock('Quantidade Total Tratado', 0.19, 0.62),
+        makeBlock('85,12', 0.19, 0.635),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as never,
+      });
+
+      // Block extraction yields 0 valid rows, falls back to regex on rawText
+      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
+    });
+
+    it('should skip block rows with unparseable quantity and fall back to regex', () => {
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        // Row with unparseable quantity
+        makeBlock('LODO SOLIDO - SANITARIO', 0.066, 0.539),
+        makeBlock('01/07/2024', 0.388, 0.54),
+        makeBlock('...', 0.716, 0.54),
+        makeBlock('Quantidade Total Tratado', 0.19, 0.62),
+        makeBlock('85,12', 0.19, 0.635),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as never,
+      });
+
+      // Block extraction yields 0 valid rows, falls back to regex on rawText
+      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
     });
   });
 
