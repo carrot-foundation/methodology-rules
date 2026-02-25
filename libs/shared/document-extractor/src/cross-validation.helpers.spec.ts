@@ -324,6 +324,8 @@ describe('crossValidateAttachments', () => {
 
     expect(extractor.extract).toHaveBeenCalledTimes(2);
     expect(result.failMessages).toEqual(['Error from first']);
+    expect(result.crossValidation['_extraction_att-1']).toBeDefined();
+    expect(result.crossValidation['_extraction_att-2']).toBeDefined();
   });
 
   it('should continue processing after unknown document type', async () => {

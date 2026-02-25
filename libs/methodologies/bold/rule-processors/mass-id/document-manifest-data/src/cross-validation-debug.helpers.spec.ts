@@ -593,5 +593,23 @@ describe('cross-validation-debug.helpers', () => {
       expect(quantityWeight['normalizedKg']).toBe(1000);
       expect(quantityWeight['weighingValue']).toBe(1000);
     });
+
+    it('should return null for issueDate fields when issueDate is not extracted', () => {
+      const extractedData = {
+        ...baseCdfExtractedData,
+        issueDate: undefined,
+      } as unknown as CdfExtractedData;
+
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        baseCdfEventData,
+        'high',
+      );
+
+      const issueDate = result['issueDate'] as Record<string, unknown>;
+
+      expect(issueDate['confidence']).toBeNull();
+      expect(issueDate['extracted']).toBeNull();
+    });
   });
 });

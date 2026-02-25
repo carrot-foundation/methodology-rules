@@ -9,6 +9,7 @@ import {
 // Side-effect imports: parsers self-register via registerParser() at module load
 import '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import '@carrot-fndn/shared/document-extractor-transport-manifest';
+import { logger } from '@carrot-fndn/shared/helpers';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import {
@@ -62,6 +63,10 @@ export const crossValidateWithTextract = async ({
     );
 
     if (!baseEvent) {
+      logger.warn(
+        { attachmentId: attachmentInfo.attachmentId },
+        'No matching document manifest event found for attachment, skipping cross-validation',
+      );
       continue;
     }
 

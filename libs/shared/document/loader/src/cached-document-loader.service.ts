@@ -38,7 +38,7 @@ export class CachedDocumentLoaderService implements DocumentLoader {
       logger.info(`Cached document (...${cacheKey.slice(-8)})`);
     } catch (error) {
       logger.warn(
-        { error },
+        { err: error },
         `Failed to cache document (...${cacheKey.slice(-8)})`,
       );
     }

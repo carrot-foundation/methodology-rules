@@ -120,7 +120,7 @@ describe('processBatch', () => {
         items: ['a'],
         processItem: (item) => Promise.resolve(item),
       }),
-    ).rejects.toThrow('concurrency must be greater than 0');
+    ).rejects.toThrow('concurrency must be a positive integer');
   });
 
   it('should throw when concurrency is negative', async () => {
@@ -130,7 +130,27 @@ describe('processBatch', () => {
         items: ['a'],
         processItem: (item) => Promise.resolve(item),
       }),
-    ).rejects.toThrow('concurrency must be greater than 0');
+    ).rejects.toThrow('concurrency must be a positive integer');
+  });
+
+  it('should throw when concurrency is NaN', async () => {
+    await expect(
+      processBatch({
+        concurrency: Number.NaN,
+        items: ['a'],
+        processItem: (item) => Promise.resolve(item),
+      }),
+    ).rejects.toThrow('concurrency must be a positive integer');
+  });
+
+  it('should throw when concurrency is a fractional number', async () => {
+    await expect(
+      processBatch({
+        concurrency: 0.5,
+        items: ['a'],
+        processItem: (item) => Promise.resolve(item),
+      }),
+    ).rejects.toThrow('concurrency must be a positive integer');
   });
 
   it('should handle empty items array', async () => {

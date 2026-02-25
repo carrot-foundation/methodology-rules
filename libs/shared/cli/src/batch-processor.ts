@@ -28,8 +28,12 @@ export const processBatch = async <TItem, TSuccess>(
     processItem,
   } = options;
 
-  if (concurrency <= 0) {
-    throw new Error('concurrency must be greater than 0');
+  if (
+    !Number.isFinite(concurrency) ||
+    !Number.isInteger(concurrency) ||
+    concurrency <= 0
+  ) {
+    throw new Error('concurrency must be a positive integer');
   }
 
   const successes: BatchResult<TItem, TSuccess>['successes'] = [];

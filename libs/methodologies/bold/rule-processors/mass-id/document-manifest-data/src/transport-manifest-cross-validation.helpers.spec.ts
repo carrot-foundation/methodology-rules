@@ -12,6 +12,7 @@ import {
   type MtrCrossValidationEventData,
   normalizeQuantityToKg,
   validateMtrExtractedData,
+  validateWasteQuantityDiscrepancy,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './transport-manifest-cross-validation.helpers';
 
@@ -1176,7 +1177,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         ).toBe(true);
       });
 
-      it('should return no issues when no matching waste type entry', () => {
+      it('should flag document for review when extracted and event waste types differ', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
             createExtractedWasteTypeEntry({
@@ -1200,6 +1201,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(true);
       });
 
       it('should return no issues when matched entry has no quantity', () => {
@@ -1797,6 +1799,18 @@ describe('transport-manifest-cross-validation.helpers', () => {
       );
 
       expect(result.isMatch).toBe(true);
+    });
+
+    it('should re-export validateWasteQuantityDiscrepancy from shared helpers', () => {
+      const result = validateWasteQuantityDiscrepancy(
+        [],
+        '01 01 01',
+        'Waste',
+        [],
+        () => ({ code: 'MISMATCH', description: 'mismatch' }),
+      );
+
+      expect(result).toEqual({});
     });
   });
 });
