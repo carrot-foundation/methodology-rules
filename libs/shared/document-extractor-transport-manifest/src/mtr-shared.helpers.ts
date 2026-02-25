@@ -394,7 +394,7 @@ export const extractHaulerFields = (
         driverName as NonEmptyString,
         `Nome do Motorista\n${driverName}`,
       );
-    } else if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(rawText)) {
+    } else if (MTR_DEFAULT_LABEL_PATTERNS.driverName.test(haulerSection)) {
       partialData.driverName = createLowConfidenceField('' as NonEmptyString);
     }
 
@@ -403,7 +403,7 @@ export const extractHaulerFields = (
         vehiclePlate as NonEmptyString,
         `Placa do Veiculo\n${vehiclePlate}`,
       );
-    } else if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(rawText)) {
+    } else if (MTR_DEFAULT_LABEL_PATTERNS.vehiclePlate.test(haulerSection)) {
       partialData.vehiclePlate = createLowConfidenceField('' as NonEmptyString);
     }
 

@@ -292,6 +292,7 @@ describe('cross-validation.helpers', () => {
       const result = validateBasicExtractedData(extractionResult, eventSubject);
 
       expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewReasons).toHaveLength(0);
     });
 
     it('should not add review reasons when extracted fields are present', () => {

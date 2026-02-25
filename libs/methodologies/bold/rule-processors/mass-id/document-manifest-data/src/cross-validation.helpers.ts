@@ -443,7 +443,7 @@ export const validateWasteQuantityDiscrepancy = (
     (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
   );
 
-  if (matchedEntry?.quantity === undefined || matchedEntry.quantity === 0) {
+  if (matchedEntry?.quantity === undefined || matchedEntry.quantity <= 0) {
     return {};
   }
 
