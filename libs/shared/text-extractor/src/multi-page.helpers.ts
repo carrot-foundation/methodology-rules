@@ -20,11 +20,13 @@ export const normalizeMultiPageBlocks = (
 
     const { top } = block.boundingBox;
 
-    if (lastTop !== undefined && lastTop - top > pageBreakThreshold) {
-      pageOffset += 1;
-    }
+    if (block.blockType === 'LINE') {
+      if (lastTop !== undefined && lastTop - top > pageBreakThreshold) {
+        pageOffset += 1;
+      }
 
-    lastTop = top;
+      lastTop = top;
+    }
 
     result.push({
       ...block,

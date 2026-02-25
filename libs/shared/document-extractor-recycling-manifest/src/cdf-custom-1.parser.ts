@@ -516,6 +516,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
           ...Array<TableColumnConfig<CdfTableColumn>>,
         ],
         maxRowGap: 0.03,
+        xTolerance: 0.05,
         yRange: { max: MULTI_PAGE_Y_MAX, min: detected.headerTop + 0.01 },
       });
 

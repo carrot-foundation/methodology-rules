@@ -81,4 +81,36 @@ describe('normalizeMultiPageBlocks', () => {
 
     expect(blocks[1]?.boundingBox?.top).toBe(original);
   });
+
+  it('should not detect false page break at LINE-to-WORD block transition', () => {
+    const blocks: TextBlock[] = [
+      {
+        blockType: 'LINE',
+        boundingBox: { height: 0.015, left: 0.1, top: 0.9, width: 0.2 },
+        id: 'line-last',
+        text: 'last line',
+      },
+      // WORD block at top of same page (appears at top because block order is LINE blocks then WORD blocks)
+      {
+        blockType: 'WORD',
+        boundingBox: { height: 0.015, left: 0.1, top: 0.03, width: 0.1 },
+        id: 'word-1',
+        text: 'word',
+      },
+      // Actual page 2 LINE block
+      {
+        blockType: 'LINE',
+        boundingBox: { height: 0.015, left: 0.1, top: 0.02, width: 0.2 },
+        id: 'line-p2',
+        text: 'page 2 line',
+      },
+    ];
+
+    const result = normalizeMultiPageBlocks(blocks);
+
+    // WORD block should NOT trigger page break
+    expect(result[1]?.boundingBox?.top).toBeCloseTo(0.03); // no offset
+    // LINE block at top of page 2 SHOULD trigger page break (LINE→LINE transition)
+    expect(result[2]?.boundingBox?.top).toBeCloseTo(1.02);
+  });
 });
