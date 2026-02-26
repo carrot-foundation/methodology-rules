@@ -202,12 +202,12 @@ export const buildCrossValidationComparison = (
 
   const crossValidation: Record<string, unknown> = {
     documentNumber: {
-      confidence: extractedData.documentNumber.confidence,
+      confidence: extractedData.documentNumber?.confidence ?? null,
       event: eventData.documentNumber?.toString() ?? null,
-      extracted: extractedData.documentNumber.parsed,
+      extracted: extractedData.documentNumber?.parsed ?? null,
       isMatch:
         eventData.documentNumber?.toString() ===
-        extractedData.documentNumber.parsed,
+        extractedData.documentNumber?.parsed,
     },
     generator: entityDebugInfo(
       extractedData.generator,
@@ -337,12 +337,12 @@ export const buildCdfCrossValidationComparison = (
 
   const crossValidation: Record<string, unknown> = {
     documentNumber: {
-      confidence: extractedData.documentNumber.confidence,
+      confidence: extractedData.documentNumber?.confidence ?? null,
       event: eventData.documentNumber?.toString() ?? null,
-      extracted: extractedData.documentNumber.parsed,
+      extracted: extractedData.documentNumber?.parsed ?? null,
       isMatch:
         eventData.documentNumber?.toString() ===
-        extractedData.documentNumber.parsed,
+        extractedData.documentNumber?.parsed,
     },
     generator: entityDebugInfo(
       extractedData.generator,
