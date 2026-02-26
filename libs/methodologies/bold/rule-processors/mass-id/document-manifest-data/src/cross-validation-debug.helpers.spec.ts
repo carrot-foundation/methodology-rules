@@ -610,6 +610,7 @@ describe('cross-validation-debug.helpers', () => {
 
       expect(issueDate['confidence']).toBeNull();
       expect(issueDate['extracted']).toBeNull();
+      expect(issueDate['event']).toBeNull();
     });
   });
 });

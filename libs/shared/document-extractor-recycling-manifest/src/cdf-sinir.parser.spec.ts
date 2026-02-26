@@ -256,8 +256,6 @@ describe('CdfSinirParser', () => {
       const result = parser.parse(stubTextExtractionResult(incompleteCdfText));
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields).toContain('documentNumber');
-      expect(result.data.missingRequiredFields).toContain('issueDate');
     });
 
     it('should not extract waste entries when none are present', () => {

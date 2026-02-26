@@ -133,7 +133,7 @@ const extractWasteEntries = (rawText: string): WasteEntry[] => {
 
 export class CdfSinirParser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
-  readonly layoutId = 'cdf-sinir';
+  readonly layoutId = 'cdf-sinir' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {

@@ -43,7 +43,6 @@ const LABEL_PATTERNS = {
   vehiclePlate: /Placa Veiculo/i,
 } as const;
 
-const REQUIRED_FIELDS = ['netWeight'] as const;
 const ALL_FIELDS = [
   'netWeight',
   'ticketNumber',
@@ -182,7 +181,7 @@ export class ScaleTicketLayout1Parser
   implements DocumentParser<ScaleTicketExtractedData>
 {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'layout-1';
+  readonly layoutId = 'layout-1' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -279,7 +278,6 @@ export class ScaleTicketLayout1Parser
       matchScore,
       partialData,
       rawText,
-      requiredFields: [...REQUIRED_FIELDS],
     });
   }
 }

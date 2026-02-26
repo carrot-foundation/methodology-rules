@@ -1,3 +1,5 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
+
 import type {
   AttachmentInfo,
   CrossValidationConfig,
@@ -43,14 +45,18 @@ const createConfig = (
     if (eventData.documentType === 'CDF') {
       return {
         documentType: 'recyclingManifest',
-        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+        layouts: [
+          'cdf-sinfat',
+          'cdf-custom-1',
+          'cdf-sinir',
+        ] as NonEmptyString[],
       };
     }
 
     if (eventData.documentType === 'MTR') {
       return {
         documentType: 'transportManifest',
-        layouts: ['mtr-sinir', 'mtr-sigor', 'mtr-sinfat'],
+        layouts: ['mtr-sinir', 'mtr-sigor', 'mtr-sinfat'] as NonEmptyString[],
       };
     }
 
@@ -81,7 +87,6 @@ const createExtractionOutput = (
     documentType: 'recyclingManifest',
     extractionConfidence: 'high',
     lowConfidenceFields: [],
-    missingRequiredFields: [],
     rawText: 'test raw text' as never,
     value: 'extracted-value',
   },
@@ -150,7 +155,11 @@ describe('crossValidateAttachments', () => {
       { s3Bucket: 'test-bucket', s3Key: 'test-key-att-1' },
       {
         documentType: 'recyclingManifest',
-        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+        layouts: [
+          'cdf-sinfat',
+          'cdf-custom-1',
+          'cdf-sinir',
+        ] as NonEmptyString[],
       },
     );
     expect(validateFunction).toHaveBeenCalledWith(extractionOutput, eventData);
@@ -180,7 +189,11 @@ describe('crossValidateAttachments', () => {
       '_extraction_att-1': {
         documentType: 'recyclingManifest',
         layoutId: null,
-        layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'],
+        layouts: [
+          'cdf-sinfat',
+          'cdf-custom-1',
+          'cdf-sinir',
+        ] as NonEmptyString[],
         s3Uri: 's3://test-bucket/test-key-att-1',
       },
       documentNumber: { event: '123', extracted: '456' },

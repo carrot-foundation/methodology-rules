@@ -398,7 +398,7 @@ describe('MTR shared helpers', () => {
       transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
     };
     const allSectionPatterns = Object.values(sectionPatterns);
-    const cnpjPattern = MTR_DEFAULT_PATTERNS.cnpj;
+    const brazilianTaxIdPattern = MTR_DEFAULT_PATTERNS.brazilianTaxId;
 
     it('should extract entity with address and strip registration number', () => {
       const text = [
@@ -416,7 +416,7 @@ describe('MTR shared helpers', () => {
         text,
         sectionPatterns.gerador,
         allSectionPatterns,
-        cnpjPattern,
+        brazilianTaxIdPattern,
       );
 
       expect(result.name.parsed).toBe('EMPRESA GERADORA LTDA');
@@ -432,7 +432,7 @@ describe('MTR shared helpers', () => {
         'Random text without sections',
         sectionPatterns.gerador,
         allSectionPatterns,
-        cnpjPattern,
+        brazilianTaxIdPattern,
       );
 
       expect(result.name.confidence).toBe('low');
@@ -456,7 +456,7 @@ describe('MTR shared helpers', () => {
         text,
         sectionPatterns.gerador,
         allSectionPatterns,
-        cnpjPattern,
+        brazilianTaxIdPattern,
       );
 
       expect(result.taxId.parsed).toBe('20.855.175/0002-79');
@@ -477,7 +477,7 @@ describe('MTR shared helpers', () => {
         text,
         sectionPatterns.gerador,
         allSectionPatterns,
-        cnpjPattern,
+        brazilianTaxIdPattern,
       );
 
       expect(result.name.parsed).toBe('EMPRESA GERADORA LTDA');
@@ -488,19 +488,21 @@ describe('MTR shared helpers', () => {
   });
 
   describe('finalizeMtrExtraction', () => {
-    it('should return extraction output with review required when fields are missing', () => {
+    it('should return extraction output with review required for low match score', () => {
       const result = finalizeMtrExtraction(
         {
           documentType: 'transportManifest',
           rawText: 'test' as never,
         },
-        0.5,
+        0.4,
         'test',
       );
 
       expect(result.data.documentType).toBe('transportManifest');
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields.length).toBeGreaterThan(0);
+      expect(
+        result.reviewReasons.some((r) => r.code === 'LOW_LAYOUT_MATCH_SCORE'),
+      ).toBe(true);
     });
   });
 });

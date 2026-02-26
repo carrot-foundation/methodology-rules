@@ -165,8 +165,6 @@ describe('CdfCustom1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(incompleteText));
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields).toContain('documentNumber');
-      expect(result.data.missingRequiredFields).toContain('issueDate');
       expect(result.reviewReasons.length).toBeGreaterThan(0);
     });
 
@@ -230,7 +228,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(invalidMonthText));
 
-      expect(result.data.missingRequiredFields).toContain('issueDate');
+      expect(result.data.issueDate).toBeUndefined();
     });
 
     it('should extract environmental license from preamble text', () => {

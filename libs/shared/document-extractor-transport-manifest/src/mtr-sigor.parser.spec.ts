@@ -178,8 +178,6 @@ describe('MtrSigorParser', () => {
       const result = parser.parse(stubTextExtractionResult(incompleteText));
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields).toContain('documentNumber');
-      expect(result.data.missingRequiredFields).toContain('issueDate');
       expect(result.reviewReasons.length).toBeGreaterThan(0);
     });
 

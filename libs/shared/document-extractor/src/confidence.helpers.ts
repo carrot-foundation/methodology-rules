@@ -169,15 +169,6 @@ export const buildExtractionOutput = <T extends BaseExtractedData>(
 ): ExtractionOutput<T> => {
   const reviewReasons: ReviewReason[] = [];
 
-  if (data.missingRequiredFields.length > 0) {
-    for (const field of data.missingRequiredFields) {
-      reviewReasons.push({
-        code: `MISSING_REQUIRED_${toUpperSnakeCase(field)}`,
-        description: `Missing required fields: ${data.missingRequiredFields.join(', ')}`,
-      });
-    }
-  }
-
   if (data.lowConfidenceFields.length > 0) {
     for (const field of data.lowConfidenceFields) {
       reviewReasons.push({
@@ -230,7 +221,6 @@ export interface FinalizeExtractionInput<T extends BaseExtractedData> {
   matchScore: number;
   partialData: Partial<T>;
   rawText: NonEmptyString;
-  requiredFields: readonly string[];
 }
 
 export const finalizeExtraction = <T extends BaseExtractedData>(
@@ -243,12 +233,8 @@ export const finalizeExtraction = <T extends BaseExtractedData>(
     matchScore,
     partialData,
     rawText,
-    requiredFields,
   } = input;
 
-  const missingRequiredFields = collectMissingRequiredFields(partialData, [
-    ...requiredFields,
-  ]);
   const lowConfidenceFields = collectLowConfidenceFields(partialData, [
     ...allFields,
   ]);
@@ -259,7 +245,6 @@ export const finalizeExtraction = <T extends BaseExtractedData>(
     documentType,
     extractionConfidence,
     lowConfidenceFields,
-    missingRequiredFields,
     rawText,
   } as T;
 

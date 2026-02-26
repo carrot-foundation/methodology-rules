@@ -15,14 +15,14 @@ import {
 import {
   type ExtractedWasteTypeEntry,
   MTR_ALL_FIELDS,
-  MTR_REQUIRED_FIELDS,
   type MtrExtractedData,
   type WasteTypeEntryData,
 } from './transport-manifest.types';
 
 export const MTR_DEFAULT_PATTERNS = {
-  // eslint-disable-next-line sonarjs/slow-regex
-  cnpj: /(?:CPF\/)?CNPJ\s*:?\s*(\d{2}\.?\s*\d{3}\.?\s*\d{3}\/?\s*\d{4}-?\s*\d{2})/gi,
+  brazilianTaxId:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /(?:CPF\/)?CNPJ\s*:?\s*(\d{2}\.?\s*\d{3}\.?\s*\d{3}\/?\s*\d{4}-?\s*\d{2})/gi,
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
   issueDate:
@@ -93,13 +93,13 @@ export const extractMtrEntityWithAddress = (
   rawText: string,
   sectionPattern: RegExp,
   allSectionPatterns: RegExp[],
-  cnpjPattern: RegExp,
+  brazilianTaxIdPattern: RegExp,
 ): ExtractedEntityWithAddressInfo => {
   const entityExtracted = extractEntityFromSection(
     rawText,
     sectionPattern,
     allSectionPatterns,
-    cnpjPattern,
+    brazilianTaxIdPattern,
   );
 
   const section = extractSection(rawText, sectionPattern, allSectionPatterns);
@@ -457,5 +457,4 @@ export const finalizeMtrExtraction = (
     matchScore,
     partialData,
     rawText,
-    requiredFields: [...MTR_REQUIRED_FIELDS],
   });

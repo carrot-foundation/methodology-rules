@@ -117,7 +117,7 @@ const parseSinfatWasteRow = (
 
 export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mtr-sinfat';
+  readonly layoutId = 'mtr-sinfat' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -185,21 +185,21 @@ export class MtrSinfatParser implements DocumentParser<MtrExtractedData> {
       text,
       SECTION_PATTERNS.gerador,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.hauler = extractMtrEntityWithAddress(
       text,
       SECTION_PATTERNS.transportador,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.receiver = extractMtrEntityWithAddress(
       text,
       SECTION_PATTERNS.destinatario,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     extractHaulerFields(text, partialData);

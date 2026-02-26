@@ -225,19 +225,21 @@ describe('CDF shared helpers', () => {
   });
 
   describe('finalizeCdfExtraction', () => {
-    it('should return extraction output with review required when fields are missing', () => {
+    it('should return extraction output with review required for low match score', () => {
       const result = finalizeCdfExtraction(
         {
           documentType: 'recyclingManifest',
           rawText: 'test' as never,
         },
-        0.5,
+        0.4,
         'test',
       );
 
       expect(result.data.documentType).toBe('recyclingManifest');
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields.length).toBeGreaterThan(0);
+      expect(
+        result.reviewReasons.some((r) => r.code === 'LOW_LAYOUT_MATCH_SCORE'),
+      ).toBe(true);
     });
   });
 });

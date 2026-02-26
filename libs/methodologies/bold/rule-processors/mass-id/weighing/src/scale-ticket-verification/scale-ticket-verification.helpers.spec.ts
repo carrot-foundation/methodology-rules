@@ -27,7 +27,6 @@ describe('scale-ticket-verification', () => {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
         lowConfidenceFields: [],
-        missingRequiredFields: [],
         netWeight: {
           confidence: 'high',
           parsed: { unit: 'kg', value: expectedNetWeight },
@@ -94,7 +93,6 @@ describe('scale-ticket-verification', () => {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
         lowConfidenceFields: [],
-        missingRequiredFields: [],
         netWeight: { confidence: 'high', parsed: { unit: 'kg', value: 0 } },
         rawText: '',
       },
@@ -151,7 +149,6 @@ describe('scale-ticket-verification', () => {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
         lowConfidenceFields: [],
-        missingRequiredFields: [],
         netWeight: { confidence: 'high', parsed: { unit: 'kg', value: 50 } },
         rawText: '',
       },

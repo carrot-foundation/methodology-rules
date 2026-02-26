@@ -1,3 +1,5 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
+
 import {
   stubTextExtractionResult,
   type TextExtractionResult,
@@ -25,7 +27,6 @@ const buildMockOutput = (
     documentType,
     extractionConfidence: 'high',
     lowConfidenceFields: [],
-    missingRequiredFields: [],
     rawText: STUB_TEXT,
   },
   reviewReasons: [],
@@ -34,7 +35,7 @@ const buildMockOutput = (
 
 class LowScoreParser implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'low-score-layout';
+  readonly layoutId = 'low-score-layout' as NonEmptyString;
 
   getMatchScore(): number {
     return 0.1;
@@ -47,7 +48,7 @@ class LowScoreParser implements DocumentParser<BaseExtractedData> {
 
 class StubParser implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'stub-layout';
+  readonly layoutId = 'stub-layout' as NonEmptyString;
 
   getMatchScore(): number {
     return 0.9;
@@ -60,7 +61,7 @@ class StubParser implements DocumentParser<BaseExtractedData> {
 
 class StubParser2 implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'stub-layout-2';
+  readonly layoutId = 'stub-layout-2' as NonEmptyString;
 
   getMatchScore(): number {
     return 0.8;
@@ -97,7 +98,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout'],
+          layouts: ['stub-layout'] as NonEmptyString[],
           textExtractionResult: preComputed,
         },
       );
@@ -110,7 +111,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout'],
+          layouts: ['stub-layout'] as NonEmptyString[],
         },
       );
 
@@ -124,7 +125,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout'],
+          layouts: ['stub-layout'] as NonEmptyString[],
         },
       );
 
@@ -155,7 +156,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout'],
+          layouts: ['stub-layout'] as NonEmptyString[],
         },
       );
 
@@ -169,7 +170,7 @@ describe('DocumentExtractor', () => {
           { filePath: 'test.pdf' },
           {
             documentType: 'scaleTicket',
-            layouts: ['nonexistent-layout'],
+            layouts: ['nonexistent-layout'] as NonEmptyString[],
           },
         ),
       ).rejects.toThrow(
@@ -188,7 +189,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout', 'stub-layout-2'],
+          layouts: ['stub-layout', 'stub-layout-2'] as NonEmptyString[],
         },
       );
 
@@ -206,7 +207,7 @@ describe('DocumentExtractor', () => {
           { filePath: 'test.pdf' },
           {
             documentType: 'scaleTicket',
-            layouts: ['low-score-layout', 'stub-layout-2'],
+            layouts: ['low-score-layout', 'stub-layout-2'] as NonEmptyString[],
           },
         ),
       ).rejects.toThrow(
@@ -254,7 +255,7 @@ describe('DocumentExtractor', () => {
         { filePath: 'test.pdf' },
         {
           documentType: 'scaleTicket',
-          layouts: ['stub-layout'],
+          layouts: ['stub-layout'] as NonEmptyString[],
         },
       );
 

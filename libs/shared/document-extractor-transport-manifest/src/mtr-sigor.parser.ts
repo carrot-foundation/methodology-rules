@@ -80,18 +80,18 @@ const extractEntityFromSigorSection = (
     return undefined;
   }
 
-  MTR_PATTERNS.cnpj.lastIndex = 0;
-  const cnpjMatch = MTR_PATTERNS.cnpj.exec(section);
+  MTR_PATTERNS.brazilianTaxId.lastIndex = 0;
+  const taxIdMatch = MTR_PATTERNS.brazilianTaxId.exec(section);
 
-  MTR_PATTERNS.cnpj.lastIndex = 0;
+  MTR_PATTERNS.brazilianTaxId.lastIndex = 0;
 
-  const rawCnpj = cnpjMatch?.[1];
+  const rawTaxId = taxIdMatch?.[1];
 
-  if (!rawCnpj) {
+  if (!rawTaxId) {
     return undefined;
   }
 
-  const normalizedCnpj = rawCnpj.replaceAll(' ', '');
+  const normalizedCnpj = rawTaxId.replaceAll(' ', '');
 
   const razaoMatch = MTR_PATTERNS.razaoSocial.exec(section);
 
@@ -187,7 +187,7 @@ const parseWasteRow = (
 
 export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mtr-sigor';
+  readonly layoutId = 'mtr-sigor' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {

@@ -1,3 +1,5 @@
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
+
 import {
   stubTextExtractionResult,
   type TextExtractionResult,
@@ -29,7 +31,6 @@ const buildMockExtractionOutput = (
     documentType,
     extractionConfidence: 'high',
     lowConfidenceFields: [],
-    missingRequiredFields: [],
     rawText,
   },
   reviewReasons: [],
@@ -40,7 +41,7 @@ class MockScaleTicketLayout2Parser
   implements DocumentParser<BaseExtractedData>
 {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'layout-2';
+  readonly layoutId = 'layout-2' as NonEmptyString;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
     return extractionResult.rawText.includes('layout2') ? 0.95 : 0.1;
@@ -55,7 +56,7 @@ class MockScaleTicketLayout2Parser
 
 class MockScaleTicketParser implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'scaleTicket' as const;
-  readonly layoutId = 'mock-layout';
+  readonly layoutId = 'mock-layout' as NonEmptyString;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
     return extractionResult.rawText.includes('scale') ? 0.8 : 0.1;
@@ -70,7 +71,7 @@ class MockScaleTicketParser implements DocumentParser<BaseExtractedData> {
 
 class MockTransportManifestParser implements DocumentParser<BaseExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mock-transport-layout';
+  readonly layoutId = 'mock-transport-layout' as NonEmptyString;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
     return extractionResult.rawText.includes('MTR') ? 0.9 : 0.1;

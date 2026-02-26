@@ -39,7 +39,7 @@ const CDF_PATTERNS = {
   generatorName: /Razao\s*Social\s*:\s*(.+?)\s+CPF\/CNPJ/is,
 
   generatorTaxId:
-    // eslint-disable-next-line sonarjs/regex-complexity, sonarjs/slow-regex
+    // eslint-disable-next-line sonarjs/regex-complexity
     /Razao\s*Social\s*:[\s\S]*?CPF\/CNPJ\s*:\s*(\d{2}[\d.]+\/\d{4}-\d{2}|\d{3}\.?\d{3}\.?\d{3}-?\d{2})/i,
 
   issueDateDeclaracao: /Declaracao[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
@@ -128,7 +128,7 @@ const extractWasteEntries = (rawText: string): WasteEntry[] => {
 
 export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
-  readonly layoutId = 'cdf-sinfat';
+  readonly layoutId = 'cdf-sinfat' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {

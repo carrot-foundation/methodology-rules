@@ -35,17 +35,6 @@ export interface WasteTypeEntryData {
   unit?: string;
 }
 
-export const MTR_REQUIRED_FIELDS = [
-  'documentNumber',
-  'issueDate',
-  'generator',
-  'hauler',
-  'receiver',
-  'transportDate',
-  'receivingDate',
-  'wasteTypes',
-] as const;
-
 export const MTR_ALL_FIELDS = [
   'documentNumber',
   'issueDate',

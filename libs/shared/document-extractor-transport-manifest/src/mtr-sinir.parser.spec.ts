@@ -103,7 +103,6 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
       const result = parser.parse(stubTextExtractionResult(incompleteMtrText));
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields).toContain('documentNumber');
       expect(result.reviewReasons.length).toBeGreaterThan(0);
     });
 

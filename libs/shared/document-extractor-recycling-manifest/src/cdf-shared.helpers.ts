@@ -9,7 +9,6 @@ import {
 
 import {
   CDF_ALL_FIELDS,
-  CDF_REQUIRED_FIELDS,
   type CdfExtractedData,
   type WasteEntry,
 } from './recycling-manifest.types';
@@ -162,5 +161,4 @@ export const finalizeCdfExtraction = (
     matchScore,
     partialData,
     rawText,
-    requiredFields: [...CDF_REQUIRED_FIELDS],
   });

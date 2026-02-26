@@ -414,7 +414,7 @@ const extractGeneratorWithAddress = (
 
 export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
-  readonly layoutId = 'cdf-custom-1';
+  readonly layoutId = 'cdf-custom-1' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {

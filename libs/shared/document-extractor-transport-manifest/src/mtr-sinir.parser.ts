@@ -47,7 +47,7 @@ const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
 export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
   readonly documentType = 'transportManifest' as const;
-  readonly layoutId = 'mtr-sinir';
+  readonly layoutId = 'mtr-sinir' as NonEmptyString;
   readonly textractMode = 'detect' as const;
 
   getMatchScore(extractionResult: TextExtractionResult): number {
@@ -115,21 +115,21 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
       text,
       SECTION_PATTERNS.gerador,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.hauler = extractMtrEntityWithAddress(
       text,
       SECTION_PATTERNS.transportador,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.receiver = extractMtrEntityWithAddress(
       text,
       SECTION_PATTERNS.destinatario,
       ALL_SECTION_PATTERNS,
-      MTR_PATTERNS.cnpj,
+      MTR_PATTERNS.brazilianTaxId,
     );
 
     extractHaulerFields(text, partialData);

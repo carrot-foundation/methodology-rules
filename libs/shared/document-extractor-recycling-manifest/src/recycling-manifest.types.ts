@@ -36,13 +36,6 @@ export interface WasteEntry {
   unit?: string;
 }
 
-export const CDF_REQUIRED_FIELDS = [
-  'documentNumber',
-  'issueDate',
-  'generator',
-  'recycler',
-] as const;
-
 export const CDF_ALL_FIELDS = [
   'documentNumber',
   'issueDate',

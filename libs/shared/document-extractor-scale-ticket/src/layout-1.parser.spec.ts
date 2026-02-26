@@ -43,7 +43,7 @@ describe('ScaleTicketLayout1Parser', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
-    it('should set reviewRequired when net weight is missing', () => {
+    it('should parse without netWeight when it is not present', () => {
       const noNetWeightText = `
         Ticket de pesagem   12345
         Placa Veículo ABC1234
@@ -53,13 +53,6 @@ describe('ScaleTicketLayout1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(noNetWeightText));
 
       expect(result.data.netWeight).toBeUndefined();
-      expect(result.data.missingRequiredFields).toContain('netWeight');
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toContainEqual(
-        expect.objectContaining({
-          description: expect.stringContaining('Missing required fields'),
-        }),
-      );
     });
 
     it('should parse with accented characters in pattern', () => {
@@ -92,7 +85,6 @@ describe('ScaleTicketLayout1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(invalidWeightText));
 
       expect(result.data.netWeight).toBeUndefined();
-      expect(result.data.missingRequiredFields).toContain('netWeight');
     });
 
     it('should handle weight without datetime information', () => {

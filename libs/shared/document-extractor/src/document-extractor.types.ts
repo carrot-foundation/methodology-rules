@@ -7,20 +7,19 @@ export interface BaseExtractedData {
   documentType: DocumentType;
   extractionConfidence: ExtractionConfidence;
   lowConfidenceFields: string[];
-  missingRequiredFields: string[];
   rawText: NonEmptyString;
 }
 
 export interface DocumentExtractorConfig {
   documentType?: DocumentType | undefined;
-  layouts?: string[] | undefined;
+  layouts?: NonEmptyString[] | undefined;
   textExtractionResult?: TextExtractionResult | undefined;
 }
 
 export interface DocumentParser<T extends BaseExtractedData> {
   readonly documentType: DocumentType;
   getMatchScore(extractionResult: TextExtractionResult): number;
-  readonly layoutId: string;
+  readonly layoutId: NonEmptyString;
   parse(extractionResult: TextExtractionResult): ExtractionOutput<T>;
   readonly textractMode?: 'analyze' | 'detect';
 }
@@ -40,7 +39,7 @@ export type ExtractionConfidence = 'high' | 'low';
 
 export interface ExtractionOutput<T extends BaseExtractedData> {
   data: T;
-  layoutId?: string;
+  layoutId?: NonEmptyString;
   reviewReasons: ReviewReason[];
   reviewRequired: boolean;
   textExtractionResult?: TextExtractionResult;
@@ -48,5 +47,5 @@ export interface ExtractionOutput<T extends BaseExtractedData> {
 
 export interface LayoutConfig {
   documentType: DocumentType;
-  layoutId: string;
+  layoutId: NonEmptyString;
 }

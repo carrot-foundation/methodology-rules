@@ -228,7 +228,6 @@ describe('confidence.helpers', () => {
         documentType: 'scaleTicket' as const,
         extractionConfidence: 'high' as const,
         lowConfidenceFields: [],
-        missingRequiredFields: [],
         rawText: 'test' as const,
       };
 
@@ -238,33 +237,11 @@ describe('confidence.helpers', () => {
       expect(result.reviewReasons).toEqual([]);
     });
 
-    it('should return reviewRequired true with missing fields reason', () => {
-      const data = {
-        documentType: 'scaleTicket' as const,
-        extractionConfidence: 'low' as const,
-        lowConfidenceFields: [],
-        missingRequiredFields: ['fieldA', 'fieldB'],
-        rawText: 'test' as const,
-      };
-
-      const result = buildExtractionOutput(data, 0.8);
-
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toContainEqual(
-        expect.objectContaining({
-          description: expect.stringContaining(
-            'Missing required fields',
-          ) as string,
-        }),
-      );
-    });
-
     it('should return reviewRequired true with low confidence reason', () => {
       const data = {
         documentType: 'scaleTicket' as const,
         extractionConfidence: 'low' as const,
         lowConfidenceFields: ['fieldA'],
-        missingRequiredFields: [],
         rawText: 'test' as const,
       };
 
@@ -285,7 +262,6 @@ describe('confidence.helpers', () => {
         documentType: 'scaleTicket' as const,
         extractionConfidence: 'high' as const,
         lowConfidenceFields: [],
-        missingRequiredFields: [],
         rawText: 'test' as const,
       };
 
@@ -420,33 +396,11 @@ describe('confidence.helpers', () => {
         matchScore: 0.8,
         partialData,
         rawText,
-        requiredFields: ['fieldA'],
       });
 
-      expect(result.data.missingRequiredFields).toEqual([]);
       expect(result.data.lowConfidenceFields).toEqual([]);
       expect(result.data.extractionConfidence).toBe('high');
       expect(result.reviewRequired).toBe(false);
-    });
-
-    it('should report missing required fields', () => {
-      const partialData = {
-        documentType: 'scaleTicket' as const,
-        rawText,
-      };
-
-      const result = finalizeExtraction({
-        allFields: ['fieldA'],
-        confidenceFields: [],
-        documentType: 'scaleTicket',
-        matchScore: 0.8,
-        partialData,
-        rawText,
-        requiredFields: ['fieldA'],
-      });
-
-      expect(result.data.missingRequiredFields).toEqual(['fieldA']);
-      expect(result.reviewRequired).toBe(true);
     });
 
     it('should report low confidence fields', () => {
@@ -463,7 +417,6 @@ describe('confidence.helpers', () => {
         matchScore: 0.8,
         partialData,
         rawText,
-        requiredFields: [],
       });
 
       expect(result.data.lowConfidenceFields).toEqual(['fieldA']);
@@ -484,7 +437,6 @@ describe('confidence.helpers', () => {
         matchScore: 0.4,
         partialData,
         rawText,
-        requiredFields: [],
       });
 
       expect(result.reviewRequired).toBe(true);

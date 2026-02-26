@@ -118,7 +118,6 @@ EMPRESA GERADORA LTDA`;
       const result = parser.parse(stubTextExtractionResult(incompleteText));
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.data.missingRequiredFields).toContain('documentNumber');
     });
 
     it('should set low confidence for entities with missing CNPJ', () => {
