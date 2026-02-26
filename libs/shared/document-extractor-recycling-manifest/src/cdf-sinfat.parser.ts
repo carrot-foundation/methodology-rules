@@ -6,7 +6,6 @@ import {
   createExtractedEntityWithAddress,
   createHighConfidenceField,
   type DocumentParser,
-  type EntityWithAddressInfo,
   type ExtractionOutput,
   extractStringField,
   registerParser,
@@ -15,6 +14,7 @@ import {
 
 import {
   createRecyclerEntity,
+  extractGenerator,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
   extractWasteClassificationData,
@@ -68,39 +68,6 @@ const WASTE_CODE_PATTERN =
 const MTR_SECTION_PATTERN =
   // eslint-disable-next-line sonarjs/slow-regex
   /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Responsavel|$)/i;
-
-const extractGenerator = (
-  rawText: string,
-): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
-  const nameMatch = CDF_PATTERNS.generatorName.exec(rawText);
-  const taxIdMatch = CDF_PATTERNS.generatorTaxId.exec(rawText);
-
-  if (!nameMatch?.[1] || !taxIdMatch?.[1]) {
-    return undefined;
-  }
-
-  const name = nameMatch[1].replaceAll(/\s+/g, ' ').trim();
-
-  const entity: EntityWithAddressInfo = {
-    name: name as NonEmptyString,
-    taxId: taxIdMatch[1] as NonEmptyString,
-  };
-
-  const addressMatch = CDF_PATTERNS.generatorAddress.exec(rawText);
-
-  if (addressMatch?.[1] && addressMatch[2] && addressMatch[3]) {
-    entity.address = addressMatch[1].trim();
-    entity.city = addressMatch[2].trim();
-    entity.state = addressMatch[3].trim();
-  }
-
-  const rawMatch = rawText.slice(
-    nameMatch.index,
-    taxIdMatch.index + taxIdMatch[0].length,
-  );
-
-  return { rawMatch, value: entity };
-};
 
 const extractWasteCodes = (
   rawText: string,
@@ -169,7 +136,11 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
 
     partialData.recycler = createRecyclerEntity(recyclerExtracted);
 
-    const generatorExtracted = extractGenerator(text);
+    const generatorExtracted = extractGenerator(text, {
+      generatorAddress: CDF_PATTERNS.generatorAddress,
+      generatorName: CDF_PATTERNS.generatorName,
+      generatorTaxId: CDF_PATTERNS.generatorTaxId,
+    });
 
     partialData.generator =
       createExtractedEntityWithAddress(generatorExtracted);

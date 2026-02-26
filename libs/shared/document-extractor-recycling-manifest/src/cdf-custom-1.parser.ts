@@ -618,7 +618,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       }
     } else if (LABEL_PATTERNS.wasteQuantity.test(rawText)) {
       partialData.wasteEntries = createLowConfidenceField([
-        { description: '', quantity: 0 },
+        { description: '' },
       ]);
     }
   }

@@ -1,4 +1,5 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
@@ -538,7 +539,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as never,
+        rawText: validCustomCdfText as NonEmptyString,
       });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(3);
@@ -598,7 +599,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as never,
+        rawText: validCustomCdfText as NonEmptyString,
       });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(4);
@@ -631,7 +632,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as never,
+        rawText: validCustomCdfText as NonEmptyString,
       });
 
       expect(result.data.transportManifests?.parsed).toEqual(['42003189']);
@@ -652,7 +653,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as never,
+        rawText: validCustomCdfText as NonEmptyString,
       });
 
       // Block extraction yields 0 valid rows, falls back to regex on rawText
@@ -673,7 +674,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as never,
+        rawText: validCustomCdfText as NonEmptyString,
       });
 
       // Block extraction yields 0 valid rows, falls back to regex on rawText

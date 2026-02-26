@@ -47,4 +47,4 @@ export const CDF_ALL_FIELDS = [
   'processingPeriod',
   'transportManifests',
   'receiptEntries',
-] as const;
+] as const satisfies readonly (keyof CdfExtractedData)[];

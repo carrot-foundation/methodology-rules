@@ -2,6 +2,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   createExtractedEntity,
+  type EntityWithAddressInfo,
   type ExtractedEntityInfo,
   type ExtractionOutput,
   finalizeExtraction,
@@ -140,6 +141,44 @@ export const extractMtrNumbers = (
   return [...sectionMatch[1].matchAll(digitPattern)].map(
     (match) => match[1] as string,
   );
+};
+
+export const extractGenerator = (
+  rawText: string,
+  patterns: {
+    generatorAddress: RegExp;
+    generatorName: RegExp;
+    generatorTaxId: RegExp;
+  },
+): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
+  const nameMatch = patterns.generatorName.exec(rawText);
+  const taxIdMatch = patterns.generatorTaxId.exec(rawText);
+
+  if (!nameMatch?.[1] || !taxIdMatch?.[1]) {
+    return undefined;
+  }
+
+  const name = nameMatch[1].replaceAll(/\s+/g, ' ').trim();
+
+  const entity: EntityWithAddressInfo = {
+    name: name as NonEmptyString,
+    taxId: taxIdMatch[1] as NonEmptyString,
+  };
+
+  const addressMatch = patterns.generatorAddress.exec(rawText);
+
+  if (addressMatch?.[1] && addressMatch[2] && addressMatch[3]) {
+    entity.address = addressMatch[1].trim();
+    entity.city = addressMatch[2].trim();
+    entity.state = addressMatch[3].trim();
+  }
+
+  const rawMatch = rawText.slice(
+    nameMatch.index,
+    taxIdMatch.index + taxIdMatch[0].length,
+  );
+
+  return { rawMatch, value: entity };
 };
 
 export const finalizeCdfExtraction = (
