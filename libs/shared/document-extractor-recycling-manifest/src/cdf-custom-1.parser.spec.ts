@@ -86,18 +86,18 @@ describe('CdfCustom1Parser', () => {
     it('should parse a valid custom CDF document with high confidence', () => {
       const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
 
-      expect(result.data.documentNumber.parsed).toBe('50193/24');
-      expect(result.data.documentNumber.confidence).toBe('high');
-      expect(result.data.issueDate.parsed).toBe('07/08/2024');
-      expect(result.data.issueDate.confidence).toBe('high');
-      expect(result.data.recycler.name.parsed).toBe('Tera Ambiental Ltda.');
-      expect(result.data.recycler.taxId.parsed).toBe('59.591.115/0003-02');
-      expect(result.data.recycler.name.confidence).toBe('high');
-      expect(result.data.generator.name.parsed).toBe(
+      expect(result.data.documentNumber?.parsed).toBe('50193/24');
+      expect(result.data.documentNumber?.confidence).toBe('high');
+      expect(result.data.issueDate?.parsed).toBe('07/08/2024');
+      expect(result.data.issueDate?.confidence).toBe('high');
+      expect(result.data.recycler?.name.parsed).toBe('Tera Ambiental Ltda.');
+      expect(result.data.recycler?.taxId.parsed).toBe('59.591.115/0003-02');
+      expect(result.data.recycler?.name.confidence).toBe('high');
+      expect(result.data.generator?.name.parsed).toBe(
         'AJINOMOTO DO BRASIL INDUSTRIA E COMERCIO DE ALIMENTOS LTDA.',
       );
-      expect(result.data.generator.taxId.parsed).toBe('46.344.354/0005-88');
-      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.generator?.taxId.parsed).toBe('46.344.354/0005-88');
+      expect(result.data.generator?.name.confidence).toBe('high');
       expect(result.data.environmentalLicense?.parsed).toBe('36013428');
       expect(result.data.treatmentMethod?.parsed).toBe(
         'compostagem de lodo de esgoto',
@@ -110,7 +110,7 @@ describe('CdfCustom1Parser', () => {
         },
       ]);
       expect(result.data.documentType).toBe('recyclingManifest');
-      expect(result.data.generator.address.confidence).toBe('low');
+      expect(result.data.generator?.address.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
       expect(result.data.lowConfidenceFields).toEqual(
         expect.arrayContaining([
@@ -143,16 +143,16 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.name.parsed).toBe(
+      expect(result.data.generator?.name.parsed).toBe(
         'COMPANHIA SANEAMENTO DE JUNDIAI',
       );
-      expect(result.data.generator.taxId.parsed).toBe('01.201.289/0001-70');
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.generator?.taxId.parsed).toBe('01.201.289/0001-70');
+      expect(result.data.generator?.address.parsed).toBe(
         'ESTRADA MUNICIPAL DO VARJAO, 4.520 JD. NOVO HORIZONTE',
       );
-      expect(result.data.generator.city.parsed).toBe('JUNDIAI');
-      expect(result.data.generator.state.parsed).toBe('SP');
-      expect(result.data.generator.address.confidence).toBe('high');
+      expect(result.data.generator?.city.parsed).toBe('JUNDIAI');
+      expect(result.data.generator?.state.parsed).toBe('SP');
+      expect(result.data.generator?.address.confidence).toBe('high');
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -183,8 +183,8 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
-      expect(result.data.recycler.name.confidence).toBe('low');
-      expect(result.data.generator.name.confidence).toBe('low');
+      expect(result.data.recycler?.name.confidence).toBe('low');
+      expect(result.data.generator?.name.confidence).toBe('low');
       expect(result.data.extractionConfidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
@@ -200,7 +200,7 @@ describe('CdfCustom1Parser', () => {
         const fullText = `${text}\nJundiaí, 01 de Janeiro de 2024.`;
         const result = parser.parse(stubTextExtractionResult(fullText));
 
-        expect(result.data.documentNumber.parsed).toBe(expected);
+        expect(result.data.documentNumber?.parsed).toBe(expected);
       }
     });
 
@@ -216,7 +216,7 @@ describe('CdfCustom1Parser', () => {
         const text = `CDF 100/24\nCity, 15 de ${name} de 2024.`;
         const result = parser.parse(stubTextExtractionResult(text));
 
-        expect(result.data.issueDate.parsed).toBe(`15/${expected}/2024`);
+        expect(result.data.issueDate?.parsed).toBe(`15/${expected}/2024`);
       }
     });
 
@@ -293,7 +293,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(shortNameText));
 
-      expect(result.data.recycler.name.confidence).toBe('low');
+      expect(result.data.recycler?.name.confidence).toBe('low');
     });
 
     it('should handle quantity on the same line as label (fallback)', () => {

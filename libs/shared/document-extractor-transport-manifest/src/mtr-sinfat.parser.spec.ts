@@ -63,24 +63,24 @@ Compostagem`;
     it('should parse a valid SINFAT MTR document with high confidence', () => {
       const result = parser.parse(stubTextExtractionResult(validSinfatText));
 
-      expect(result.data.documentNumber.parsed).toBe('0124048986');
-      expect(result.data.documentNumber.confidence).toBe('high');
-      expect(result.data.issueDate.parsed).toBe('15/03/2024');
-      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
-      expect(result.data.generator.taxId.parsed).toBe('12.345.678/0001-90');
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.documentNumber?.parsed).toBe('0124048986');
+      expect(result.data.documentNumber?.confidence).toBe('high');
+      expect(result.data.issueDate?.parsed).toBe('15/03/2024');
+      expect(result.data.generator?.name.parsed).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator?.taxId.parsed).toBe('12.345.678/0001-90');
+      expect(result.data.generator?.address.parsed).toBe(
         'Rua Empresario Agenello Senger, nº S/N',
       );
-      expect(result.data.generator.city.parsed).toBe('Carazinho');
-      expect(result.data.generator.state.parsed).toBe('RS');
-      expect(result.data.hauler.name.parsed).toBe(
+      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.state.parsed).toBe('RS');
+      expect(result.data.hauler?.name.parsed).toBe(
         'TRANSPORTES AMBIENTAIS S.A.',
       );
-      expect(result.data.hauler.taxId.parsed).toBe('98.765.432/0001-10');
-      expect(result.data.receiver.name.parsed).toBe(
+      expect(result.data.hauler?.taxId.parsed).toBe('98.765.432/0001-10');
+      expect(result.data.receiver?.name.parsed).toBe(
         'RECICLAGEM SUSTENTAVEL LTDA',
       );
-      expect(result.data.receiver.taxId.parsed).toBe('11.222.333/0001-44');
+      expect(result.data.receiver?.taxId.parsed).toBe('11.222.333/0001-44');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
       expect(result.data.driverName?.parsed).toBe('Joao da Silva');
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
@@ -104,7 +104,7 @@ Data de Emissão: 15/03/2024`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.documentNumber.parsed).toBe('0124048986');
+      expect(result.data.documentNumber?.parsed).toBe('0124048986');
     });
 
     it('should set reviewRequired when required fields are missing', () => {
@@ -136,9 +136,9 @@ DESTINO SEM CNPJ`;
 
       const result = parser.parse(stubTextExtractionResult(noCnpjText));
 
-      expect(result.data.generator.name.confidence).toBe('low');
-      expect(result.data.hauler.name.confidence).toBe('low');
-      expect(result.data.receiver.name.confidence).toBe('low');
+      expect(result.data.generator?.name.confidence).toBe('low');
+      expect(result.data.hauler?.name.confidence).toBe('low');
+      expect(result.data.receiver?.name.confidence).toBe('low');
     });
 
     it('should strip trailing registration numbers from entity names', () => {
@@ -160,8 +160,8 @@ CNPJ: 11222333000144`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.name.parsed).toBe('BODY FOOD FABRICANTES');
-      expect(result.data.hauler.name.parsed).toBe('COMPOSTAMAIS LTDA.');
+      expect(result.data.generator?.name.parsed).toBe('BODY FOOD FABRICANTES');
+      expect(result.data.hauler?.name.parsed).toBe('COMPOSTAMAIS LTDA.');
     });
 
     it('should extract driver and plate from multi-line section layout', () => {

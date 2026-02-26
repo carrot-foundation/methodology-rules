@@ -82,9 +82,6 @@ const extractEntityFromSigorSection = (
 
   MTR_PATTERNS.brazilianTaxId.lastIndex = 0;
   const taxIdMatch = MTR_PATTERNS.brazilianTaxId.exec(section);
-
-  MTR_PATTERNS.brazilianTaxId.lastIndex = 0;
-
   const rawTaxId = taxIdMatch?.[1];
 
   if (!rawTaxId) {
@@ -163,7 +160,10 @@ const parseWasteRow = (
   const codeMatch = WASTE_CODE_PATTERN.exec(rawDescription);
 
   const entry: WasteTypeEntryData = codeMatch?.[1]
-    ? { code: codeMatch[1], description: codeMatch[2]!.trim() }
+    ? {
+        code: codeMatch[1],
+        description: (codeMatch[2] ?? rawDescription).trim(),
+      }
     : { description: rawDescription.trim() };
 
   if (row['classification']) {

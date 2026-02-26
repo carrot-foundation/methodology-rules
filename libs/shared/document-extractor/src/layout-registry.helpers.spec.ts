@@ -25,7 +25,7 @@ import {
 
 const buildMockExtractionOutput = (
   documentType: DocumentType,
-  rawText: string,
+  rawText: NonEmptyString,
 ): ExtractionOutput<BaseExtractedData> => ({
   data: {
     documentType,
@@ -108,12 +108,20 @@ describe('layout-registry', () => {
 
     it('should replace existing parser with same documentType and layoutId', () => {
       registerParser('scaleTicket', 'mock-layout', MockScaleTicketParser);
-      registerParser('scaleTicket', 'mock-layout', MockScaleTicketParser);
+      registerParser(
+        'scaleTicket',
+        'mock-layout',
+        MockScaleTicketLayout2Parser,
+      );
 
-      const layouts = getRegisteredLayouts();
+      const parser = getParser({
+        documentType: 'scaleTicket',
+        layoutId: 'mock-layout',
+      });
 
+      expect(parser).toBeInstanceOf(MockScaleTicketLayout2Parser);
       expect(
-        layouts.filter(
+        getRegisteredLayouts().filter(
           (l) =>
             l.documentType === 'scaleTicket' && l.layoutId === 'mock-layout',
         ),

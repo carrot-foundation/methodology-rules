@@ -7,14 +7,14 @@ import type {
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 export interface CdfExtractedData extends BaseExtractedData {
-  documentNumber: ExtractedField<NonEmptyString>;
+  documentNumber?: ExtractedField<NonEmptyString>;
   documentType: 'recyclingManifest';
   environmentalLicense?: ExtractedField<NonEmptyString>;
-  generator: ExtractedEntityWithAddressInfo;
-  issueDate: ExtractedField<NonEmptyString>;
+  generator?: ExtractedEntityWithAddressInfo;
+  issueDate?: ExtractedField<NonEmptyString>;
   processingPeriod?: ExtractedField<NonEmptyString>;
   receiptEntries?: ExtractedField<ReceiptEntry[]>;
-  recycler: ExtractedEntityInfo;
+  recycler?: ExtractedEntityInfo;
   transportManifests?: ExtractedField<string[]>;
   treatmentMethod?: ExtractedField<NonEmptyString>;
   wasteEntries?: ExtractedField<WasteEntry[]>;

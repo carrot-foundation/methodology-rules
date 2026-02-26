@@ -250,9 +250,8 @@ describe('confidence.helpers', () => {
       expect(result.reviewRequired).toBe(true);
       expect(result.reviewReasons).toContainEqual(
         expect.objectContaining({
-          description: expect.stringContaining(
-            'Low confidence fields',
-          ) as string,
+          code: 'LOW_CONFIDENCE_FIELD_A',
+          description: 'Low confidence field: fieldA',
         }),
       );
     });

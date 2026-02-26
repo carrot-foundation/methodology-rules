@@ -169,13 +169,11 @@ export const buildExtractionOutput = <T extends BaseExtractedData>(
 ): ExtractionOutput<T> => {
   const reviewReasons: ReviewReason[] = [];
 
-  if (data.lowConfidenceFields.length > 0) {
-    for (const field of data.lowConfidenceFields) {
-      reviewReasons.push({
-        code: `LOW_CONFIDENCE_${toUpperSnakeCase(field)}`,
-        description: `Low confidence fields: ${data.lowConfidenceFields.join(', ')}`,
-      });
-    }
+  for (const field of data.lowConfidenceFields) {
+    reviewReasons.push({
+      code: `LOW_CONFIDENCE_${toUpperSnakeCase(field)}`,
+      description: `Low confidence field: ${field}`,
+    });
   }
 
   if (layoutMatchScore < LAYOUT_REVIEW_THRESHOLD) {

@@ -45,27 +45,29 @@ describe('CdfSinirParser', () => {
     it('should parse all fields from a valid SINIR CDF document', () => {
       const result = parser.parse(stubTextExtractionResult(validSinirCdfText));
 
-      expect(result.data.documentNumber.parsed).toBe('3001234/2025');
-      expect(result.data.documentNumber.confidence).toBe('high');
+      expect(result.data.documentNumber?.parsed).toBe('3001234/2025');
+      expect(result.data.documentNumber?.confidence).toBe('high');
 
-      expect(result.data.recycler.name.parsed).toBe('EMPRESA RECICLADORA LTDA');
-      expect(result.data.recycler.taxId.parsed).toBe('13843890000145');
-      expect(result.data.recycler.name.confidence).toBe('high');
+      expect(result.data.recycler?.name.parsed).toBe(
+        'EMPRESA RECICLADORA LTDA',
+      );
+      expect(result.data.recycler?.taxId.parsed).toBe('13843890000145');
+      expect(result.data.recycler?.name.confidence).toBe('high');
 
-      expect(result.data.generator.name.parsed).toBe(
+      expect(result.data.generator?.name.parsed).toBe(
         'LATICINIOS BELA VISTA LTDA',
       );
-      expect(result.data.generator.taxId.parsed).toBe('02089969003555');
-      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.generator?.taxId.parsed).toBe('02089969003555');
+      expect(result.data.generator?.name.confidence).toBe('high');
 
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.generator?.address.parsed).toBe(
         'Rua Empresario Agenello Senger, nº S/N',
       );
-      expect(result.data.generator.city.parsed).toBe('Carazinho');
-      expect(result.data.generator.state.parsed).toBe('RS');
+      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.state.parsed).toBe('RS');
 
-      expect(result.data.issueDate.parsed).toBe('10/05/2025');
-      expect(result.data.issueDate.confidence).toBe('high');
+      expect(result.data.issueDate?.parsed).toBe('10/05/2025');
+      expect(result.data.issueDate?.confidence).toBe('high');
 
       expect(result.data.processingPeriod?.parsed).toBe(
         '01/04/2025 a 30/04/2025',
@@ -115,7 +117,7 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.recycler.taxId.parsed).toBe('13843890000145');
+      expect(result.data.recycler?.taxId.parsed).toBe('13843890000145');
     });
 
     it('should extract generator with separate-line labels', () => {
@@ -132,8 +134,8 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.name.parsed).toBe('EMPRESA GERADORA LTDA');
-      expect(result.data.generator.taxId.parsed).toBe('12345678000190');
+      expect(result.data.generator?.name.parsed).toBe('EMPRESA GERADORA LTDA');
+      expect(result.data.generator?.taxId.parsed).toBe('12345678000190');
     });
 
     it('should extract generator with same-line labels and CNPJ/CPF format', () => {
@@ -158,18 +160,18 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.name.parsed).toBe(
+      expect(result.data.generator?.name.parsed).toBe(
         'Brasturinvest Investimentos Turistico SA',
       );
-      expect(result.data.generator.name.confidence).toBe('high');
-      expect(result.data.generator.taxId.parsed).toBe('03422594000540');
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.generator?.name.confidence).toBe('high');
+      expect(result.data.generator?.taxId.parsed).toBe('03422594000540');
+      expect(result.data.generator?.address.parsed).toBe(
         'Comendador Araujo,499 Pestana Curitiba Hotel Centro',
       );
-      expect(result.data.generator.city.parsed).toBe('Curitiba');
-      expect(result.data.generator.state.parsed).toBe('PR');
-      expect(result.data.issueDate.parsed).toBe('06/05/2024');
-      expect(result.data.issueDate.confidence).toBe('high');
+      expect(result.data.generator?.city.parsed).toBe('Curitiba');
+      expect(result.data.generator?.state.parsed).toBe('PR');
+      expect(result.data.issueDate?.parsed).toBe('06/05/2024');
+      expect(result.data.issueDate?.confidence).toBe('high');
     });
 
     it('should extract generator address from multi-line OCR layout', () => {
@@ -193,12 +195,12 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.generator?.address.parsed).toBe(
         'Rua Santa Catarina, 1575 Guaira',
       );
-      expect(result.data.generator.address.confidence).toBe('high');
-      expect(result.data.generator.city.parsed).toBe('Curitiba');
-      expect(result.data.generator.state.parsed).toBe('PR');
+      expect(result.data.generator?.address.confidence).toBe('high');
+      expect(result.data.generator?.city.parsed).toBe('Curitiba');
+      expect(result.data.generator?.state.parsed).toBe('PR');
     });
 
     it('should extract issue date before Responsável when Declaração is absent', () => {
@@ -212,8 +214,8 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.issueDate.parsed).toBe('18/02/2025');
-      expect(result.data.issueDate.confidence).toBe('high');
+      expect(result.data.issueDate?.parsed).toBe('18/02/2025');
+      expect(result.data.issueDate?.confidence).toBe('high');
     });
 
     it('should set low confidence when recycler preamble is missing', () => {
@@ -229,7 +231,7 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noRecyclerText));
 
-      expect(result.data.recycler.name.confidence).toBe('low');
+      expect(result.data.recycler?.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 
@@ -243,7 +245,7 @@ describe('CdfSinirParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noGeneratorText));
 
-      expect(result.data.generator.name.confidence).toBe('low');
+      expect(result.data.generator?.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 

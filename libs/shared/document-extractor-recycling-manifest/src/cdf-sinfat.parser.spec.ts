@@ -39,28 +39,28 @@ describe('CdfSinfatParser', () => {
     it('should parse all fields from a valid CDF document', () => {
       const result = parser.parse(stubTextExtractionResult(validCdfText));
 
-      expect(result.data.documentNumber.parsed).toBe('2154920/2023');
-      expect(result.data.documentNumber.confidence).toBe('high');
+      expect(result.data.documentNumber?.parsed).toBe('2154920/2023');
+      expect(result.data.documentNumber?.confidence).toBe('high');
 
-      expect(result.data.recycler.name.parsed).toBe(
+      expect(result.data.recycler?.name.parsed).toBe(
         'ECO ADUBOS ORGANICOS LTDA',
       );
-      expect(result.data.recycler.taxId.parsed).toBe('13.843.890/0001-45');
-      expect(result.data.recycler.name.confidence).toBe('high');
+      expect(result.data.recycler?.taxId.parsed).toBe('13.843.890/0001-45');
+      expect(result.data.recycler?.name.confidence).toBe('high');
 
-      expect(result.data.generator.name.parsed).toBe(
+      expect(result.data.generator?.name.parsed).toBe(
         'Laticinios Bela Vista LTDA',
       );
-      expect(result.data.generator.taxId.parsed).toBe('02.089.969/0035-55');
-      expect(result.data.generator.address.parsed).toBe(
+      expect(result.data.generator?.taxId.parsed).toBe('02.089.969/0035-55');
+      expect(result.data.generator?.address.parsed).toBe(
         'Rua Empresario Agenello Senger, nº S/N',
       );
-      expect(result.data.generator.city.parsed).toBe('Carazinho');
-      expect(result.data.generator.state.parsed).toBe('RS');
-      expect(result.data.generator.name.confidence).toBe('high');
+      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.state.parsed).toBe('RS');
+      expect(result.data.generator?.name.confidence).toBe('high');
 
-      expect(result.data.issueDate.parsed).toBe('10/04/2023');
-      expect(result.data.issueDate.confidence).toBe('high');
+      expect(result.data.issueDate?.parsed).toBe('10/04/2023');
+      expect(result.data.issueDate?.confidence).toBe('high');
 
       expect(result.data.processingPeriod?.parsed).toBe(
         '01/02/2023 ate 28/02/2023',
@@ -110,7 +110,7 @@ describe('CdfSinfatParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noRecyclerText));
 
-      expect(result.data.recycler.name.confidence).toBe('low');
+      expect(result.data.recycler?.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 
@@ -124,7 +124,7 @@ describe('CdfSinfatParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(noGeneratorText));
 
-      expect(result.data.generator.name.confidence).toBe('low');
+      expect(result.data.generator?.name.confidence).toBe('low');
       expect(result.reviewRequired).toBe(true);
     });
 
@@ -150,7 +150,7 @@ describe('CdfSinfatParser', () => {
         const fullText = `${text}\nDeclaração\n01/01/2024`;
         const result = parser.parse(stubTextExtractionResult(fullText));
 
-        expect(result.data.documentNumber.parsed).toBe(expected);
+        expect(result.data.documentNumber?.parsed).toBe(expected);
       }
     });
 
@@ -167,7 +167,7 @@ describe('CdfSinfatParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.issueDate.parsed).toBe('15/06/2024');
+      expect(result.data.issueDate?.parsed).toBe('15/06/2024');
     });
 
     it('should extract generator taxId when it is a CPF', () => {
@@ -183,8 +183,8 @@ describe('CdfSinfatParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.taxId.parsed).toBe('123.456.789-01');
-      expect(result.data.generator.name.parsed).toBe('Joao da Silva');
+      expect(result.data.generator?.taxId.parsed).toBe('123.456.789-01');
+      expect(result.data.generator?.name.parsed).toBe('Joao da Silva');
     });
 
     it('should extract processing period range', () => {
@@ -289,13 +289,13 @@ describe('CdfSinfatParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.generator.name.parsed).toBe('Company LTDA');
-      expect(result.data.generator.address.parsed).toBe('');
-      expect(result.data.generator.address.confidence).toBe('low');
-      expect(result.data.generator.city.parsed).toBe('');
-      expect(result.data.generator.city.confidence).toBe('low');
-      expect(result.data.generator.state.parsed).toBe('');
-      expect(result.data.generator.state.confidence).toBe('low');
+      expect(result.data.generator?.name.parsed).toBe('Company LTDA');
+      expect(result.data.generator?.address.parsed).toBe('');
+      expect(result.data.generator?.address.confidence).toBe('low');
+      expect(result.data.generator?.city.parsed).toBe('');
+      expect(result.data.generator?.city.confidence).toBe('low');
+      expect(result.data.generator?.state.parsed).toBe('');
+      expect(result.data.generator?.state.confidence).toBe('low');
     });
   });
 
