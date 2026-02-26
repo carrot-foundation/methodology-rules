@@ -28,6 +28,7 @@ pnpm build-lambda:affected   # Build affected Lambda functions
 # Single project (replace <project-name>)
 pnpm nx test <project-name>
 pnpm nx lint <project-name>
+pnpm nx ts <project-name>       # Type check
 
 # Rule management
 pnpm create-rule <name> <scope> <description>
@@ -125,6 +126,16 @@ gh pr create \
 ```
 
 Labels: `feature`, `bug`, `chore`, `docs`, `refactoring`
+
+## Document Extractor Framework
+
+Parsers (`DocumentParser<T>`) are field-neutral — they do not determine which fields are required:
+
+- All extracted fields are optional; parsers return `undefined` for missing ones
+- Rule processors decide what fields are required for their context
+- `reviewRequired` is triggered only by low confidence fields or low layout match score (< 0.5)
+- `layoutId` and `layouts` use the `NonEmptyString` branded type; use `as NonEmptyString` casts on literals
+- Only add default layouts in `defaults.ts` if a document type has stable, well-known layouts
 
 ## Troubleshooting
 
