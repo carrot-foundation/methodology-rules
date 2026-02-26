@@ -2,6 +2,7 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 
 import {
   getOrDefault,
+  isNameMatch,
   isNonEmptyString,
   normalizeString,
 } from '@carrot-fndn/shared/helpers';
@@ -26,10 +27,9 @@ import {
 } from '@carrot-fndn/shared/types';
 
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
-import {
-  getCdmCodeFromSubtype,
-  normalizeDescriptionForComparison,
-} from './regional-waste-classification.helpers';
+import { getCdmCodeFromSubtype } from './regional-waste-classification.helpers';
+
+const DESCRIPTION_SIMILARITY_THRESHOLD = 0.9;
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -114,12 +114,13 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     const expectedDescription = classificationEntry.description;
 
-    const normalizedProvidedDescription =
-      normalizeDescriptionForComparison(description);
-    const normalizedExpectedDescription =
-      normalizeDescriptionForComparison(expectedDescription);
+    const { isMatch } = isNameMatch(
+      description,
+      expectedDescription,
+      DESCRIPTION_SIMILARITY_THRESHOLD,
+    );
 
-    if (normalizedProvidedDescription !== normalizedExpectedDescription) {
+    if (!isMatch) {
       return this.isFailed(
         RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
         subject,

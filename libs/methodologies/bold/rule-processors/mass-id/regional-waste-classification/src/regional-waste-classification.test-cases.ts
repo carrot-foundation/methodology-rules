@@ -176,6 +176,33 @@ export const regionalWasteClassificationTestCases = [
       [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
       [PICK_UP]: stubBoldMassIDPickUpEvent({
         metadataAttributes: [
+          [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 02'],
+          [
+            LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+            'Residuos de tecidos animais',
+          ],
+        ],
+      }),
+    },
+    partialDocument: {
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    },
+    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultContent: {
+      description: 'Residuos de tecidos animais',
+      id: '02 01 02',
+      recyclerCountryCode: 'BR',
+      subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+    },
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario:
+      'the local waste classification description matches after aggressive normalization (accent stripped).',
+  },
+  {
+    events: {
+      [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+      [PICK_UP]: stubBoldMassIDPickUpEvent({
+        metadataAttributes: [
           [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
           [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
         ],
