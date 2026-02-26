@@ -36,10 +36,8 @@ describe('CdfCustom1Parser', () => {
     date: string,
     quantity: string,
     top: number,
-    cadri?: string,
   ): TextBlock[] => [
     makeBlock(wasteType, 0.066, top),
-    ...(cadri ? [makeBlock(cadri, 0.27, top + 0.001)] : []),
     makeBlock(date, 0.388, top + 0.001),
     makeBlock(quantity, 0.716, top + 0.001),
   ];
@@ -315,47 +313,10 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.receiptEntries?.parsed).toHaveLength(3);
       expect(result.data.receiptEntries?.confidence).toBe('high');
       expect(result.data.receiptEntries?.parsed[0]).toEqual({
-        cadri: '42003189',
         quantity: 85.12,
         receiptDate: '01/07/2024',
         wasteType: 'LODO SOLIDO - SANITARIO',
       });
-    });
-
-    it('should extract CADRI as transport manifests', () => {
-      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
-
-      expect(result.data.transportManifests?.parsed).toEqual(['42003189']);
-      expect(result.data.transportManifests?.confidence).toBe('high');
-    });
-
-    it('should not extract transport manifests when all CADRIs are dashes', () => {
-      const noCadriText = [
-        'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
-        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
-        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
-        'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
-        'Descrição: Tipo de Matéria-Prima CADRI',
-        'LODO SÓLIDO - SANITÁRIO - 01/07/2024 85,12',
-        'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 85,12',
-        'Quantidade Total Tratado',
-        '85,12',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
-        'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
-        'CERTIFICADO DE DESTINAÇÃO FINAL',
-        'Cadastro na Cetesb: 123',
-        'CADRI',
-        'matérias-primas',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(noCadriText));
-
-      expect(result.data.receiptEntries?.parsed).toHaveLength(1);
-      expect(result.data.receiptEntries?.parsed[0]?.cadri).toBeUndefined();
-      expect(result.data.transportManifests).toBeUndefined();
     });
 
     it('should derive processingPeriod from receipt table dates', () => {
@@ -606,37 +567,6 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.processingPeriod?.parsed).toBe(
         '01/12/2024 ate 31/12/2024',
       );
-    });
-
-    it('should extract CADRI numbers when present in blocks', () => {
-      const blocks: TextBlock[] = [
-        ...CDF_PREAMBLE_BLOCKS,
-        ...CDF_TABLE_HEADER_BLOCKS,
-        ...makeReceiptRow(
-          'LODO SOLIDO - SANITARIO',
-          '01/07/2024',
-          '85,12',
-          0.539,
-          '42003189',
-        ),
-        ...makeReceiptRow(
-          'LODO SOLIDO - SANITARIO',
-          '02/07/2024',
-          '90,50',
-          0.556,
-          '42003189',
-        ),
-        makeBlock('Quantidade Total Tratado', 0.19, 0.62),
-        makeBlock('175,62', 0.19, 0.635),
-      ];
-
-      const result = parser.parse({
-        blocks,
-        rawText: validCustomCdfText as NonEmptyString,
-      });
-
-      expect(result.data.transportManifests?.parsed).toEqual(['42003189']);
-      expect(result.data.receiptEntries?.parsed[0]?.cadri).toBe('42003189');
     });
 
     it('should skip block rows with invalid date format and fall back to regex', () => {

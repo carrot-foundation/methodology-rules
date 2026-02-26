@@ -35,7 +35,6 @@ import {
 } from './recycling-manifest.types';
 
 interface ReceiptTableRow {
-  cadri?: string;
   quantity: number;
   receiptDate: string;
   wasteType: string;
@@ -105,10 +104,10 @@ const parseReceiptTableRows = (rawText: string): ReceiptTableRow[] => {
 
   const rowPattern =
     // eslint-disable-next-line sonarjs/slow-regex
-    /^(.+?)\s+(-|\d{5,})\s+(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+)\s*$/gm;
+    /^(.+?)\s+(?:-|\d{5,})\s+(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+)\s*$/gm;
 
   for (const match of rawText.matchAll(rowPattern)) {
-    const [, wasteType, cadriField, receiptDate, quantityString] = match;
+    const [, wasteType, receiptDate, quantityString] = match;
 
     const quantity = parseBrazilianNumber(quantityString!);
 
@@ -121,10 +120,6 @@ const parseReceiptTableRows = (rawText: string): ReceiptTableRow[] => {
       receiptDate: receiptDate!,
       wasteType: wasteType!.trim(),
     };
-
-    if (cadriField !== undefined && cadriField !== '-') {
-      row.cadri = cadriField;
-    }
 
     rows.push(row);
   }
@@ -170,39 +165,19 @@ const parseCdfTableRow = (
     return undefined;
   }
 
-  const tableRow: ReceiptTableRow = {
+  return {
     quantity,
     receiptDate,
     wasteType: stripAccents(wasteType),
   };
-
-  const cadri = row.cadri?.trim();
-
-  if (cadri && /^\d{5,}$/.test(cadri)) {
-    tableRow.cadri = cadri;
-  }
-
-  return tableRow;
 };
 
 const toReceiptEntries = (rows: ReceiptTableRow[]): ReceiptEntry[] =>
-  rows.map((row) => {
-    const entry: ReceiptEntry = {
-      quantity: row.quantity,
-      receiptDate: row.receiptDate,
-      wasteType: row.wasteType,
-    };
-
-    if (row.cadri !== undefined) {
-      entry.cadri = row.cadri;
-    }
-
-    return entry;
-  });
-
-const extractCadriNumbers = (rows: ReceiptTableRow[]): string[] => [
-  ...new Set(rows.filter((r) => r.cadri !== undefined).map((r) => r.cadri!)),
-];
+  rows.map((row) => ({
+    quantity: row.quantity,
+    receiptDate: row.receiptDate,
+    wasteType: row.wasteType,
+  }));
 
 const extractWasteTypeDescriptions = (
   rawText: string,
@@ -544,15 +519,6 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
         toReceiptEntries(rows),
         `${String(rows.length)} receipt table rows`,
       );
-
-      const cadriNumbers = extractCadriNumbers(rows);
-
-      if (cadriNumbers.length > 0) {
-        partialData.transportManifests = createHighConfidenceField(
-          cadriNumbers,
-          cadriNumbers.join(', '),
-        );
-      }
 
       const period = derivePeriodFromReceiptDates(rows);
 
