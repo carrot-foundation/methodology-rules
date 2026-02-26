@@ -199,7 +199,6 @@ const METADATA_FIELDS = new Set([
   'documentType',
   'extractionConfidence',
   'lowConfidenceFields',
-  'missingRequiredFields',
   'rawText',
 ]);
 
@@ -297,13 +296,6 @@ export const formatAsHuman = <T extends BaseExtractedData>(
         result.reviewReasons.map((r) => r.description),
         yellow,
       ),
-    );
-  }
-
-  if (result.data.missingRequiredFields.length > 0) {
-    lines.push(
-      `\n${bold('Missing Required Fields:')}`,
-      ...formatBulletList(result.data.missingRequiredFields, red),
     );
   }
 

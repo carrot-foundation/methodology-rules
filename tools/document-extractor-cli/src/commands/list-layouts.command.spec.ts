@@ -19,7 +19,6 @@ const createMockParser = () =>
           documentType: 'scaleTicket' as const,
           extractionConfidence: 'high' as const,
           lowConfidenceFields: [],
-          missingRequiredFields: [],
           rawText: 'test' as never,
         },
         reviewReasons: [],
