@@ -107,20 +107,19 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
+      expect(result.documentNumber).toHaveProperty('event', '12345');
+      expect(result.documentNumber).toHaveProperty('extracted', '12345');
 
-      expect(documentNumber).toHaveProperty('event', '12345');
-      expect(documentNumber).toHaveProperty('extracted', '12345');
-
-      const generator = result['generator'] as Record<string, unknown>;
-
-      expect(generator).toHaveProperty('extractedName', 'Generator Co');
-      expect(generator).toHaveProperty('eventName', 'Generator Co');
-      expect(generator).toHaveProperty('extractedTaxId', '11.111.111/0001-11');
-      expect(generator).toHaveProperty('eventTaxId', '11.111.111/0001-11');
+      expect(result.generator).toHaveProperty('extractedName', 'Generator Co');
+      expect(result.generator).toHaveProperty('eventName', 'Generator Co');
+      expect(result.generator).toHaveProperty(
+        'extractedTaxId',
+        '11.111.111/0001-11',
+      );
+      expect(result.generator).toHaveProperty(
+        'eventTaxId',
+        '11.111.111/0001-11',
+      );
     });
 
     it('should handle null fallbacks with minimal event data', () => {
@@ -142,34 +141,26 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
+      expect(result.documentNumber).toHaveProperty('event', null);
 
-      expect(documentNumber).toHaveProperty('event', null);
+      expect(result.generator).toHaveProperty('eventName', null);
+      expect(result.generator).toHaveProperty('eventTaxId', null);
+      expect(result.generator).toHaveProperty('extractedName', 'Generator Co');
 
-      const generator = result['generator'] as Record<string, unknown>;
+      expect(result.receivingDate).toHaveProperty('event', null);
+      expect(result.receivingDate).toHaveProperty('extracted', null);
+      expect(result.transportDate).toHaveProperty('event', null);
+      expect(result.transportDate).toHaveProperty('extracted', null);
+      expect(result.vehiclePlate).toHaveProperty('event', null);
+      expect(result.vehiclePlate).toHaveProperty('extracted', null);
 
-      expect(generator).toHaveProperty('eventName', null);
-      expect(generator).toHaveProperty('eventTaxId', null);
-      expect(generator).toHaveProperty('extractedName', 'Generator Co');
+      expect(result.wasteType).toHaveProperty('eventCode', null);
+      expect(result.wasteType).toHaveProperty('eventDescription', null);
 
-      expect(result['receivingDate']).toHaveProperty('event', null);
-      expect(result['receivingDate']).toHaveProperty('extracted', null);
-      expect(result['transportDate']).toHaveProperty('event', null);
-      expect(result['transportDate']).toHaveProperty('extracted', null);
-      expect(result['vehiclePlate']).toHaveProperty('event', null);
-      expect(result['vehiclePlate']).toHaveProperty('extracted', null);
-
-      const wasteType = result['wasteType'] as Record<string, unknown>;
-
-      expect(wasteType).toHaveProperty('eventCode', null);
-      expect(wasteType).toHaveProperty('eventDescription', null);
-
-      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
-
-      expect(entries[0]).toHaveProperty('extracted', 'Lodos de tratamento');
+      expect(result.wasteType.entries?.[0]).toHaveProperty(
+        'extracted',
+        'Lodos de tratamento',
+      );
     });
 
     it('should include all fields with full event data', () => {
@@ -242,22 +233,19 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      expect(result['issueDate']).toHaveProperty('event', null);
-      expect(result['issueDate']).toHaveProperty('extracted', '2024-01-01');
-      expect(result['receivingDate']).toHaveProperty('event', '2024-01-15');
-      expect(result['transportDate']).toHaveProperty('event', '2024-01-10');
-      expect(result['vehiclePlate']).toHaveProperty('event', 'ABC1234');
-      expect(result['vehiclePlate']).toHaveProperty('isMatch', true);
+      expect(result.issueDate).toHaveProperty('event', null);
+      expect(result.issueDate).toHaveProperty('extracted', '2024-01-01');
+      expect(result.receivingDate).toHaveProperty('event', '2024-01-15');
+      expect(result.transportDate).toHaveProperty('event', '2024-01-10');
+      expect(result.vehiclePlate).toHaveProperty('event', 'ABC1234');
+      expect(result.vehiclePlate).toHaveProperty('isMatch', true);
 
-      const wasteType = result['wasteType'] as Record<string, unknown>;
-      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
-
-      expect(entries[0]).toHaveProperty(
+      expect(result.wasteType.entries?.[0]).toHaveProperty(
         'extracted',
         '190812 - Lodos de tratamento',
       );
-      expect(wasteType).toHaveProperty('eventCode', '190812');
-      expect(wasteType).toHaveProperty(
+      expect(result.wasteType).toHaveProperty('eventCode', '190812');
+      expect(result.wasteType).toHaveProperty(
         'eventDescription',
         'Lodos de tratamento',
       );
@@ -283,21 +271,15 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const receiver = result['receiver'] as Record<string, unknown>;
+      expect(result.receiver?.nameSimilarity).toBe('100%');
+      expect(result.receiver?.taxIdMatch).toBe(true);
 
-      expect(receiver['nameSimilarity']).toBe('100%');
-      expect(receiver['taxIdMatch']).toBe(true);
+      expect(result.generator?.taxIdMatch).toBe(false);
+      expect(result.generator?.nameSimilarity).not.toBe('100%');
 
-      const generator = result['generator'] as Record<string, unknown>;
-
-      expect(generator['taxIdMatch']).toBe(false);
-      expect(generator['nameSimilarity']).not.toBe('100%');
-
-      const hauler = result['hauler'] as Record<string, unknown>;
-
-      expect(hauler['confidence']).toBe('high');
-      expect(hauler['nameSimilarity']).toBeNull();
-      expect(hauler['taxIdMatch']).toBeNull();
+      expect(result.hauler?.confidence).toBe('high');
+      expect(result.hauler?.nameSimilarity).toBeNull();
+      expect(result.hauler?.taxIdMatch).toBeNull();
     });
 
     it('should handle missing document number in event data', () => {
@@ -312,12 +294,7 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(documentNumber['isMatch']).toBe(false);
+      expect(result.documentNumber.isMatch).toBe(false);
     });
 
     it('should handle missing documentNumber in extracted data', () => {
@@ -332,14 +309,9 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(documentNumber['confidence']).toBeNull();
-      expect(documentNumber['extracted']).toBeNull();
-      expect(documentNumber['isMatch']).toBe(false);
+      expect(result.documentNumber.confidence).toBeNull();
+      expect(result.documentNumber.extracted).toBeNull();
+      expect(result.documentNumber.isMatch).toBe(false);
     });
   });
 
@@ -418,7 +390,7 @@ describe('cross-validation-debug.helpers', () => {
               isMatch: true,
             }),
             mtrNumbers: expect.objectContaining({
-              eventMtrNumbers: [],
+              event: [],
             }),
           }),
           extractionConfidence: 'high',
@@ -426,13 +398,8 @@ describe('cross-validation-debug.helpers', () => {
         'Cross-validation field comparison (CDF)',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(documentNumber).toHaveProperty('event', 'CDF-001');
-      expect(documentNumber).toHaveProperty('extracted', 'CDF-001');
+      expect(result.documentNumber).toHaveProperty('event', 'CDF-001');
+      expect(result.documentNumber).toHaveProperty('extracted', 'CDF-001');
     });
 
     it('should always include values in the returned object', () => {
@@ -455,13 +422,8 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(documentNumber).toHaveProperty('event', 'CDF-001');
-      expect(documentNumber).toHaveProperty('extracted', 'CDF-001');
+      expect(result.documentNumber).toHaveProperty('event', 'CDF-001');
+      expect(result.documentNumber).toHaveProperty('extracted', 'CDF-001');
     });
 
     it('should handle null fallbacks with minimal CDF event data', () => {
@@ -485,17 +447,12 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
+      expect(result.documentNumber).toHaveProperty('event', null);
 
-      expect(documentNumber).toHaveProperty('event', null);
-
-      const wasteType = result['wasteType'] as Record<string, unknown>;
-      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
-
-      expect(entries[0]).toHaveProperty('extracted', 'Lodos de tratamento');
+      expect(result.wasteType.entries?.[0]).toHaveProperty(
+        'extracted',
+        'Lodos de tratamento',
+      );
     });
 
     it('should include processing period and MTR numbers', () => {
@@ -527,17 +484,16 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      expect(result['mtrNumbers']).toEqual({
-        eventMtrNumbers: ['MTR-001'],
-        extractedManifests: ['MTR-001', 'MTR-002'],
+      expect(result.mtrNumbers).toEqual({
+        event: ['MTR-001'],
+        extracted: ['MTR-001', 'MTR-002'],
+        isMatch: true,
       });
 
-      const period = result['processingPeriod'] as Record<string, unknown>;
-
-      expect(period['confidence']).toBe('high');
-      expect(period['dropOffDate']).toBe('2024-01-15');
-      expect(period['start']).toBe('01/01/2024');
-      expect(period['end']).toBe('31/01/2024');
+      expect(result.processingPeriod.confidence).toBe('high');
+      expect(result.processingPeriod.event).toBe('2024-01-15');
+      expect(result.processingPeriod.start).toBe('01/01/2024');
+      expect(result.processingPeriod.end).toBe('31/01/2024');
     });
 
     it('should include waste type and quantity with full event data', () => {
@@ -584,22 +540,13 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const wasteType = result['wasteType'] as Record<string, unknown>;
+      expect(result.wasteType.confidence).toBe('high');
+      expect(result.wasteType.eventCode).toBe('190812');
 
-      expect(wasteType['confidence']).toBe('high');
-      expect(wasteType['eventCode']).toBe('190812');
+      expect(result.wasteType.entries?.[0]?.isMatch).toBe(true);
 
-      const entries = wasteType['entries'] as Array<Record<string, unknown>>;
-
-      expect(entries[0]?.['isMatch']).toBe(true);
-
-      const quantityWeight = result['wasteQuantityWeight'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(quantityWeight['normalizedKg']).toBe(1000);
-      expect(quantityWeight['weighingValue']).toBe(1000);
+      expect(result.wasteQuantityWeight?.extracted).toBe(1000);
+      expect(result.wasteQuantityWeight?.event).toBe(1000);
     });
 
     it('should return null for issueDate fields when issueDate is not extracted', () => {
@@ -614,11 +561,9 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const issueDate = result['issueDate'] as Record<string, unknown>;
-
-      expect(issueDate['confidence']).toBeNull();
-      expect(issueDate['extracted']).toBeNull();
-      expect(issueDate['event']).toBeNull();
+      expect(result.issueDate.confidence).toBeNull();
+      expect(result.issueDate.extracted).toBeNull();
+      expect(result.issueDate.event).toBeNull();
     });
 
     it('should return null for documentNumber fields when documentNumber is not extracted', () => {
@@ -633,13 +578,8 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const documentNumber = result['documentNumber'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(documentNumber['confidence']).toBeNull();
-      expect(documentNumber['extracted']).toBeNull();
+      expect(result.documentNumber.confidence).toBeNull();
+      expect(result.documentNumber.extracted).toBeNull();
     });
 
     it('should return null for cdfTotalWeight when wasteEntries are absent', () => {
@@ -649,36 +589,10 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      expect(result['cdfTotalWeight']).toBeNull();
+      expect(result.cdfTotalWeight).toBeNull();
     });
 
-    it('should include layoutConfig in crossValidation output', () => {
-      const layoutValidationConfig = {
-        unsupportedFields: ['transportManifests'],
-        unsupportedValidations: ['wasteType'],
-      };
-
-      const result = buildCdfCrossValidationComparison(
-        baseCdfExtractedData,
-        baseCdfEventData,
-        'high',
-        layoutValidationConfig,
-      );
-
-      expect(result['layoutConfig']).toEqual(layoutValidationConfig);
-    });
-
-    it('should include empty layoutConfig when no config provided', () => {
-      const result = buildCdfCrossValidationComparison(
-        baseCdfExtractedData,
-        baseCdfEventData,
-        'high',
-      );
-
-      expect(result['layoutConfig']).toEqual({});
-    });
-
-    it('should return cdfTotalWeight with null extractedTotalKg when all entries are volumetric', () => {
+    it('should return cdfTotalWeight with null extracted when all entries are volumetric', () => {
       const extractedData: CdfExtractedData = {
         ...baseCdfExtractedData,
         wasteEntries: {
@@ -694,13 +608,8 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      const cdfTotalWeight = result['cdfTotalWeight'] as Record<
-        string,
-        unknown
-      >;
-
-      expect(cdfTotalWeight['extractedTotalKg']).toBeNull();
-      expect(cdfTotalWeight['isValid']).toBeNull();
+      expect(result.cdfTotalWeight?.extracted).toBeNull();
+      expect(result.cdfTotalWeight?.isMatch).toBeNull();
     });
   });
 });

@@ -112,7 +112,7 @@ const validateCdfTotalWeightVsDocumentValue = (
   extractedData: CdfExtractedData,
   documentCurrentValue: number,
 ): FieldValidationResult => {
-  if (!extractedData.wasteEntries) {
+  if (!extractedData.wasteEntries || documentCurrentValue === 0) {
     return {};
   }
 
@@ -121,7 +121,12 @@ const validateCdfTotalWeightVsDocumentValue = (
   );
 
   if (!hasValidQuantity) {
-    return {};
+    return routeByConfidence(
+      extractedData.wasteEntries.confidence,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'waste entry quantities',
+      }),
+    );
   }
 
   if (documentCurrentValue > totalKg) {
@@ -172,7 +177,19 @@ const validateCdfWasteType = (
   }
 
   const entries = extractedData.wasteEntries.parsed;
-  const hasMatch = entries.some(
+  const meaningfulEntries = entries.filter((e) => e.code || e.description);
+
+  if (meaningfulEntries.length === 0) {
+    return routeByConfidence(
+      extractedData.wasteEntries.confidence,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: 'Pick-up event',
+        field: 'waste type entries',
+      }),
+    );
+  }
+
+  const hasMatch = meaningfulEntries.some(
     (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
   );
 
@@ -180,7 +197,7 @@ const validateCdfWasteType = (
     return {};
   }
 
-  const extractedSummary = entries
+  const extractedSummary = meaningfulEntries
     .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
     .join(', ');
 
@@ -283,7 +300,6 @@ export const validateCdfExtractedData = (
     extractedData,
     eventData,
     extractionResult.data.extractionConfidence,
-    layoutValidationConfig,
   );
 
   const { failReasons, reviewReasons: fieldReviewReasons } = collectResults([
@@ -363,11 +379,14 @@ export const validateCdfExtractedData = (
       ? buildCdfPassMessage(extractedData, eventData)
       : undefined;
 
-  return buildCrossValidationResponse(
-    basicResult,
-    fieldReviewReasons,
-    failReasons,
-    crossValidation,
-    passMessage,
-  );
+  return {
+    ...buildCrossValidationResponse(
+      basicResult,
+      fieldReviewReasons,
+      failReasons,
+      crossValidation,
+      passMessage,
+    ),
+    extractionMetadata: { layoutConfig: layoutValidationConfig },
+  };
 };

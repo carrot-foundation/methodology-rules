@@ -28,14 +28,13 @@ import type {
   DocumentManifestEventSubject,
   ValidationResult,
 } from './document-manifest-data.helpers';
+import type { AttachmentCrossValidation } from './document-manifest-data.result-content.types';
 
-import {
-  CROSS_VALIDATION_COMMENTS,
-  REVIEW_REASONS,
-} from './document-manifest-data.constants';
+import { REVIEW_REASONS } from './document-manifest-data.constants';
 
 export type CrossValidationResponse = ValidationResult & {
-  crossValidation?: Record<string, unknown>;
+  crossValidation?: AttachmentCrossValidation;
+  extractionMetadata?: Record<string, unknown>;
   failReasons?: ReviewReason[];
   reviewReasons?: ReviewReason[];
 };
@@ -46,23 +45,24 @@ export interface FieldValidationResult {
 }
 
 export const buildCrossValidationResponse = (
-  basicResult: ValidationResult & { reviewReasons: ReviewReason[] },
+  basicResult: ValidationResult & {
+    failReasons: ReviewReason[];
+    reviewReasons: ReviewReason[];
+  },
   fieldReviewReasons: ReviewReason[],
   failReasons: ReviewReason[],
-  crossValidation: Record<string, unknown>,
+  crossValidation: AttachmentCrossValidation,
   passMessage?: string,
 ): CrossValidationResponse => {
   const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
-  const failMessages = [
-    ...basicResult.failMessages,
-    ...failReasons.map((r) => r.description),
-  ];
+  const allFailReasons = [...basicResult.failReasons, ...failReasons];
+  const failMessages = allFailReasons.map((r) => r.description);
 
-  if (failReasons.length > 0 || reviewReasons.length > 0) {
+  if (allFailReasons.length > 0 || reviewReasons.length > 0) {
     return {
       crossValidation,
       failMessages,
-      failReasons,
+      failReasons: allFailReasons,
       ...(passMessage !== undefined && { passMessage }),
       reviewReasons,
       reviewRequired: reviewReasons.length > 0,
@@ -105,42 +105,27 @@ export const collectResults = (
   return { failReasons, reviewReasons };
 };
 
-export const validateHighConfidenceField = (
-  eventValue: string | undefined,
-  extractedField: ExtractedField<string> | undefined,
-  mismatchComment: (parameters: {
-    eventValue: string;
-    extractedValue: string;
-  }) => string,
-): string | undefined => {
-  if (
-    !eventValue ||
-    !extractedField ||
-    extractedField.confidence !== 'high' ||
-    eventValue === extractedField.parsed
-  ) {
-    return undefined;
-  }
-
-  return mismatchComment({
-    eventValue,
-    extractedValue: extractedField.parsed,
-  });
-};
-
 export const validateBasicExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventSubject: DocumentManifestEventSubject,
-): ValidationResult & { reviewReasons: ReviewReason[] } => {
+): ValidationResult & {
+  failReasons: ReviewReason[];
+  reviewReasons: ReviewReason[];
+} => {
   const extractedData = extractionResult.data as
     | CdfExtractedData
     | MtrExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return { failMessages: [], reviewReasons: [], reviewRequired: true };
+    return {
+      failMessages: [],
+      failReasons: [],
+      reviewReasons: [],
+      reviewRequired: true,
+    };
   }
 
-  const failMessages: string[] = [];
+  const failReasons: ReviewReason[] = [];
   const reviewReasons: ReviewReason[] = [];
 
   const eventDocumentNumber = eventSubject.documentNumber?.toString();
@@ -149,18 +134,18 @@ export const validateBasicExtractedData = (
       ? extractedData.documentNumber
       : undefined;
 
-  const documentNumberMismatch = validateHighConfidenceField(
-    eventDocumentNumber,
-    extractedDocumentNumber,
-    ({ eventValue, extractedValue }) =>
-      CROSS_VALIDATION_COMMENTS.DOCUMENT_NUMBER_MISMATCH({
-        eventDocumentNumber: eventValue,
-        extractedDocumentNumber: extractedValue,
+  if (
+    eventDocumentNumber &&
+    extractedDocumentNumber &&
+    extractedDocumentNumber.confidence === 'high' &&
+    eventDocumentNumber !== extractedDocumentNumber.parsed
+  ) {
+    failReasons.push(
+      REVIEW_REASONS.DOCUMENT_NUMBER_MISMATCH({
+        eventDocumentNumber,
+        extractedDocumentNumber: extractedDocumentNumber.parsed,
       }),
-  );
-
-  if (documentNumberMismatch) {
-    failMessages.push(documentNumberMismatch);
+    );
   } else if (eventDocumentNumber && !extractedDocumentNumber) {
     reviewReasons.push(
       REVIEW_REASONS.FIELD_NOT_EXTRACTED({ field: 'document number' }),
@@ -186,8 +171,8 @@ export const validateBasicExtractedData = (
     );
 
     if (daysDiff !== undefined && daysDiff > 0) {
-      failMessages.push(
-        CROSS_VALIDATION_COMMENTS.ISSUE_DATE_MISMATCH({
+      failReasons.push(
+        REVIEW_REASONS.ISSUE_DATE_MISMATCH({
           eventIssueDate,
           extractedIssueDate: extractedIssueDate.parsed,
         }),
@@ -199,7 +184,11 @@ export const validateBasicExtractedData = (
     );
   }
 
-  return { failMessages, reviewReasons };
+  return {
+    failMessages: failReasons.map((r) => r.description),
+    failReasons,
+    reviewReasons,
+  };
 };
 
 const {

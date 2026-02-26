@@ -141,6 +141,8 @@ describe('cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(1);
       expect(result.failMessages[0]).toContain('12345');
       expect(result.failMessages[0]).toContain('99999');
+      expect(result.failReasons).toHaveLength(1);
+      expect(result.failReasons[0]?.code).toBe('DOCUMENT_NUMBER_MISMATCH');
     });
 
     it('should return fail message when issue dates do not match with high confidence', () => {
@@ -166,6 +168,8 @@ describe('cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(1);
       expect(result.failMessages[0]).toContain('2024-01-01');
       expect(result.failMessages[0]).toContain('2024-12-31');
+      expect(result.failReasons).toHaveLength(1);
+      expect(result.failReasons[0]?.code).toBe('ISSUE_DATE_MISMATCH');
     });
 
     it('should return no fail messages when data matches', () => {

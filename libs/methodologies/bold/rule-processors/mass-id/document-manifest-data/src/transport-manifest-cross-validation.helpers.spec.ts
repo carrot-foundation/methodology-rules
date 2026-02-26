@@ -1019,6 +1019,25 @@ describe('transport-manifest-cross-validation.helpers', () => {
         ).toBe(true);
       });
 
+      it('should fail when all waste type entries have no meaningful code or description with high confidence', () => {
+        const extractionResult = createExtractionResult({
+          wasteTypes: [createExtractedWasteTypeEntry({ description: '' })],
+        });
+
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: makePickUpEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+        };
+
+        const result = validateMtrExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(false);
+        expect(result.failReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+      });
+
       it('should return review reason when code matches but description does not', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [

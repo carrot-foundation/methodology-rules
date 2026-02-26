@@ -153,12 +153,21 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       weighingEvents: ruleSubject.weighingEvents,
     });
 
+    const { extractionMetadata } = crossValidationResult;
+
     if (crossValidationResult.failMessages.length > 0) {
+      const { reviewReasons } = crossValidationResult;
+
       return {
-        resultComment: crossValidationResult.failMessages.join(' '),
+        resultComment:
+          reviewReasons.length > 0
+            ? `${crossValidationResult.failMessages.join(' ')} Review required: ${reviewReasons.map((r) => r.description).join('; ')}`
+            : crossValidationResult.failMessages.join(' '),
         resultContent: {
           crossValidation: crossValidationResult.crossValidation,
+          extractionMetadata,
           failReasons: crossValidationResult.failReasons,
+          ...(reviewReasons.length > 0 && { reviewReasons }),
         },
         resultStatus: RuleOutputStatus.FAILED,
       };
@@ -174,6 +183,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         resultComment: `${resultComment} Review required: ${crossValidationResult.reviewReasons.map((r) => r.description).join('; ')}`,
         resultContent: {
           crossValidation: crossValidationResult.crossValidation,
+          extractionMetadata,
           reviewReasons: crossValidationResult.reviewReasons,
         },
         resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
@@ -184,6 +194,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       resultComment,
       resultContent: {
         crossValidation: crossValidationResult.crossValidation,
+        extractionMetadata,
       },
       resultStatus: RuleOutputStatus.PASSED,
     };

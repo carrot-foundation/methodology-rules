@@ -25,6 +25,7 @@ import {
   type FieldValidationResult,
   getWasteClassification,
   matchWasteTypeEntry,
+  routeByConfidence,
   validateBasicExtractedData,
   validateDateField,
   validateEntityAddress,
@@ -167,7 +168,18 @@ const validateWasteType = (
   const entries = extractedData.wasteTypes.map((entry) =>
     toWasteTypeEntryData(entry),
   );
-  const hasMatch = entries.some(
+  const meaningfulEntries = entries.filter((e) => e.code || e.description);
+
+  if (meaningfulEntries.length === 0) {
+    return routeByConfidence(
+      extractedData.extractionConfidence,
+      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'waste type entries',
+      }),
+    );
+  }
+
+  const hasMatch = meaningfulEntries.some(
     (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
   );
 
@@ -175,7 +187,7 @@ const validateWasteType = (
     return {};
   }
 
-  const extractedSummary = entries
+  const extractedSummary = meaningfulEntries
     .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
     .join(', ');
 
