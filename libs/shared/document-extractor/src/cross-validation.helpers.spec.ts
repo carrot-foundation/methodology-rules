@@ -104,8 +104,10 @@ describe('crossValidateAttachments', () => {
 
     expect(result).toEqual({
       crossValidation: {},
+      extractionMetadata: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -186,17 +188,13 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.crossValidation).toEqual({
-      '_extraction_att-1': {
-        documentType: 'recyclingManifest',
-        layoutId: null,
-        layouts: [
-          'cdf-sinfat',
-          'cdf-custom-1',
-          'cdf-sinir',
-        ] as NonEmptyString[],
-        s3Uri: 's3://test-bucket/test-key-att-1',
-      },
       documentNumber: { event: '123', extracted: '456' },
+    });
+    expect(result.extractionMetadata['att-1']).toEqual({
+      documentType: 'recyclingManifest',
+      layoutId: null,
+      layouts: ['cdf-sinfat', 'cdf-custom-1', 'cdf-sinir'] as NonEmptyString[],
+      s3Uri: 's3://test-bucket/test-key-att-1',
     });
   });
 
@@ -215,12 +213,34 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.crossValidation['_extraction_att-1']).toEqual({
+    expect(result.extractionMetadata['att-1']).toEqual({
       documentType: 'recyclingManifest',
       layoutId: null,
       layouts: null,
       s3Uri: 's3://test-bucket/test-key-att-1',
     });
+  });
+
+  it('should fall back to extracted documentType when config omits it', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      getExtractorConfig: () => ({}),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.extractionMetadata['att-1']).toEqual(
+      expect.objectContaining({
+        documentType: 'recyclingManifest',
+      }),
+    );
   });
 
   it('should collect fail messages from validation', async () => {
@@ -337,8 +357,8 @@ describe('crossValidateAttachments', () => {
 
     expect(extractor.extract).toHaveBeenCalledTimes(2);
     expect(result.failMessages).toEqual(['Error from first']);
-    expect(result.crossValidation['_extraction_att-1']).toBeDefined();
-    expect(result.crossValidation['_extraction_att-2']).toBeDefined();
+    expect(result.extractionMetadata['att-1']).toBeDefined();
+    expect(result.extractionMetadata['att-2']).toBeDefined();
   });
 
   it('should continue processing after unknown document type', async () => {
@@ -403,6 +423,58 @@ describe('crossValidateAttachments', () => {
       ]),
     );
     expect(result.failMessages).toHaveLength(0);
+  });
+
+  it('should collect passMessage from validate callback', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        failMessages: [],
+        passMessage: 'Valid CDF attachment declared for 500 kg',
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.passMessages).toEqual([
+      'Valid CDF attachment declared for 500 kg',
+    ]);
+    expect(result.failMessages).toHaveLength(0);
+  });
+
+  it('should merge extractionMetadata into _extraction_xxx entry', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        extractionMetadata: {
+          layoutConfig: { unsupportedFields: ['vehiclePlate'] },
+        },
+        failMessages: [],
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.extractionMetadata['att-1']).toEqual(
+      expect.objectContaining({
+        documentType: 'recyclingManifest',
+        layoutConfig: { unsupportedFields: ['vehiclePlate'] },
+      }),
+    );
   });
 
   it('should collect failReasons from validate callback', async () => {

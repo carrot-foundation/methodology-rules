@@ -11,9 +11,10 @@ import type { BaseExtractedData } from './document-extractor.types';
 const processInput = async <
   TEventData,
   TExtractedData extends BaseExtractedData,
+  TCrossValidation extends object,
 >(
   input: CrossValidationInput<TEventData>,
-  config: CrossValidationConfig<TEventData, TExtractedData>,
+  config: CrossValidationConfig<TEventData, TExtractedData, TCrossValidation>,
   extractor: DocumentExtractorService,
   result: CrossValidationResult,
 ): Promise<void> => {
@@ -43,11 +44,13 @@ const processInput = async <
       Object.assign(result.crossValidation, validationResult.crossValidation);
     }
 
-    result.crossValidation[`_extraction_${attachmentInfo.attachmentId}`] = {
-      documentType: extractorConfig.documentType,
+    result.extractionMetadata[attachmentInfo.attachmentId] = {
+      documentType:
+        extractorConfig.documentType ?? extractionResult.data.documentType,
       layoutId: extractionResult.layoutId ?? null,
       layouts: extractorConfig.layouts ?? null,
       s3Uri: `s3://${attachmentInfo.s3Bucket}/${attachmentInfo.s3Key}`,
+      ...validationResult.extractionMetadata,
     };
 
     if (validationResult.failMessages.length > 0) {
@@ -88,13 +91,15 @@ const processInput = async <
 export const crossValidateAttachments = async <
   TEventData,
   TExtractedData extends BaseExtractedData,
+  TCrossValidation extends object = Record<string, unknown>,
 >(
   inputs: CrossValidationInput<TEventData>[],
-  config: CrossValidationConfig<TEventData, TExtractedData>,
+  config: CrossValidationConfig<TEventData, TExtractedData, TCrossValidation>,
   extractor: DocumentExtractorService,
 ): Promise<CrossValidationResult> => {
   const result: CrossValidationResult = {
     crossValidation: {},
+    extractionMetadata: {},
     failMessages: [],
     failReasons: [],
     passMessages: [],
