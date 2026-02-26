@@ -8,6 +8,10 @@ import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import {
+  stubMtrEntity as stubEntity,
+  stubMtrEntityWithHighAddress as stubEntityWithHighAddress,
+} from './cross-validation.test-helpers';
+import {
   matchWasteTypeEntry,
   type MtrCrossValidationEventData,
   normalizeQuantityToKg,
@@ -15,28 +19,6 @@ import {
   validateWasteQuantityDiscrepancy,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './transport-manifest-cross-validation.helpers';
-
-const stubEntity = (name: string, taxId: string) => ({
-  address: { confidence: 'low' as const, parsed: '' },
-  city: { confidence: 'low' as const, parsed: '' },
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  state: { confidence: 'low' as const, parsed: '' },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
-
-const stubEntityWithHighAddress = (
-  name: string,
-  taxId: string,
-  address: string,
-  city: string,
-  state: string,
-) => ({
-  address: { confidence: 'high' as const, parsed: address },
-  city: { confidence: 'high' as const, parsed: city },
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  state: { confidence: 'high' as const, parsed: state },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
 
 const baseMtrData = {
   documentNumber: {
@@ -127,6 +109,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
@@ -1542,6 +1525,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
@@ -1714,6 +1698,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,

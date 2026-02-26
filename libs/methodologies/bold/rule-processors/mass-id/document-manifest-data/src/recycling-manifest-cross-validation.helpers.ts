@@ -8,22 +8,23 @@ import {
   getTimezoneFromAddress,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
-import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
   DocumentManifestEventSubject,
-  ValidationResult,
+  LayoutValidationConfig,
 } from './document-manifest-data.helpers';
 
 import { buildCdfCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
+  buildCrossValidationResponse,
   collectResults,
+  computeCdfTotalKg,
+  type CrossValidationResponse,
   type FieldValidationResult,
+  getWasteClassification,
   matchWasteTypeEntry,
+  routeByConfidence,
   validateBasicExtractedData,
   validateDateWithinPeriod,
   validateEntityAddress,
@@ -31,17 +32,19 @@ import {
   validateEntityTaxId,
   validateWasteQuantityDiscrepancy,
 } from './cross-validation.helpers';
-import { REVIEW_REASONS } from './document-manifest-data.constants';
-
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+import {
+  RESULT_COMMENTS,
+  REVIEW_REASONS,
+} from './document-manifest-data.constants';
+import { getLayoutValidationConfig } from './document-manifest-data.helpers';
 
 export interface CdfCrossValidationEventData
   extends DocumentManifestEventSubject {
+  documentCurrentValue: number;
   dropOffEvent: DocumentEvent | undefined;
+  manifestType: 'cdf';
   mtrDocumentNumbers: string[];
+  pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
   weighingEvents: DocumentEvent[];
@@ -50,8 +53,17 @@ export interface CdfCrossValidationEventData
 const validateMtrNumberCrossReference = (
   extractedData: CdfExtractedData,
   mtrDocumentNumbers: string[],
+  layoutValidationConfig: LayoutValidationConfig,
 ): FieldValidationResult[] => {
   if (!extractedData.transportManifests) {
+    if (
+      layoutValidationConfig.unsupportedFields?.includes(
+        'transportManifests',
+      ) === true
+    ) {
+      return [];
+    }
+
     return mtrDocumentNumbers.length > 0
       ? [
           {
@@ -96,34 +108,64 @@ const validateMtrNumberCrossReference = (
   return results;
 };
 
+const validateCdfTotalWeightVsDocumentValue = (
+  extractedData: CdfExtractedData,
+  documentCurrentValue: number,
+): FieldValidationResult => {
+  if (!extractedData.wasteEntries) {
+    return {};
+  }
+
+  const { hasValidQuantity, totalKg } = computeCdfTotalKg(
+    extractedData.wasteEntries.parsed,
+  );
+
+  if (!hasValidQuantity) {
+    return {};
+  }
+
+  if (documentCurrentValue > totalKg) {
+    return routeByConfidence(
+      extractedData.wasteEntries.confidence,
+      REVIEW_REASONS.CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE({
+        documentCurrentValue,
+        extractedTotalKg: totalKg,
+      }),
+    );
+  }
+
+  return {};
+};
+
 const validateCdfWasteType = (
   extractedData: CdfExtractedData,
   eventData: CdfCrossValidationEventData,
+  layoutValidationConfig: LayoutValidationConfig,
 ): FieldValidationResult => {
+  if (
+    layoutValidationConfig.unsupportedValidations?.includes('wasteType') ===
+    true
+  ) {
+    return {};
+  }
+
   if (!extractedData.wasteEntries) {
-    return eventData.dropOffEvent === undefined
+    return eventData.pickUpEvent === undefined
       ? {}
       : {
           reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-            context: 'Drop-off event',
+            context: 'Pick-up event',
             field: 'waste type entries',
           }),
         };
   }
 
-  if (!eventData.dropOffEvent) {
+  if (!eventData.pickUpEvent) {
     return {};
   }
 
-  const eventCode = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
+  const { code: eventCode, description: eventDescription } =
+    getWasteClassification(eventData.pickUpEvent);
 
   if (!eventCode && !eventDescription) {
     return {};
@@ -168,19 +210,12 @@ const validateCdfWasteQuantity = (
   extractedData: CdfExtractedData,
   eventData: CdfCrossValidationEventData,
 ): FieldValidationResult => {
-  if (!extractedData.wasteEntries || !eventData.dropOffEvent) {
+  if (!extractedData.wasteEntries || !eventData.pickUpEvent) {
     return {};
   }
 
-  const eventCode = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
+  const { code: eventCode, description: eventDescription } =
+    getWasteClassification(eventData.pickUpEvent);
 
   return validateWasteQuantityDiscrepancy(
     extractedData.wasteEntries.parsed,
@@ -194,7 +229,8 @@ const validateCdfWasteQuantity = (
 export const isCdfEventData = (
   eventData: DocumentManifestEventSubject,
 ): eventData is CdfCrossValidationEventData =>
-  'mtrDocumentNumbers' in eventData;
+  'manifestType' in eventData &&
+  (eventData as { manifestType: unknown }).manifestType === 'cdf';
 
 export const collectMtrDocumentNumbers = (
   documentManifestEvents: DocumentManifestEventSubject[],
@@ -204,14 +240,34 @@ export const collectMtrDocumentNumbers = (
     .map((e) => e.documentNumber?.toString())
     .filter((value): value is string => isNonEmptyString(value));
 
+const buildCdfPassMessage = (
+  extractedData: CdfExtractedData,
+  eventData: CdfCrossValidationEventData,
+): string | undefined => {
+  if (!extractedData.wasteEntries) {
+    return undefined;
+  }
+
+  const { hasValidQuantity, totalKg } = computeCdfTotalKg(
+    extractedData.wasteEntries.parsed,
+  );
+
+  if (!hasValidQuantity) {
+    return undefined;
+  }
+
+  return RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
+    documentNumber: eventData.documentNumber?.toString() ?? '',
+    documentType: eventData.documentType?.toString() ?? '',
+    issueDate: eventData.issueDateAttribute?.value?.toString() ?? '',
+    value: totalKg,
+  });
+};
+
 export const validateCdfExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: CdfCrossValidationEventData,
-): ValidationResult & {
-  crossValidation?: Record<string, unknown>;
-  failReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-} => {
+): CrossValidationResponse => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
   if (basicResult.reviewRequired === true) {
@@ -219,11 +275,15 @@ export const validateCdfExtractedData = (
   }
 
   const extractedData = extractionResult.data as CdfExtractedData;
+  const layoutValidationConfig = getLayoutValidationConfig(
+    extractionResult.layoutId,
+  );
 
   const crossValidation = buildCdfCrossValidationComparison(
     extractedData,
     eventData,
     extractionResult.data.extractionConfidence,
+    layoutValidationConfig,
   );
 
   const { failReasons, reviewReasons: fieldReviewReasons } = collectResults([
@@ -285,34 +345,29 @@ export const validateCdfExtractedData = (
         eventData.dropOffEvent?.address.countryState,
       ),
     ),
-    validateCdfWasteType(extractedData, eventData),
+    validateCdfTotalWeightVsDocumentValue(
+      extractedData,
+      eventData.documentCurrentValue,
+    ),
+    validateCdfWasteType(extractedData, eventData, layoutValidationConfig),
     validateCdfWasteQuantity(extractedData, eventData),
     ...validateMtrNumberCrossReference(
       extractedData,
       eventData.mtrDocumentNumbers,
+      layoutValidationConfig,
     ),
   ]);
 
-  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
+  const passMessage =
+    failReasons.length === 0
+      ? buildCdfPassMessage(extractedData, eventData)
+      : undefined;
 
-  const allFailMessages = [
-    ...basicResult.failMessages,
-    ...failReasons.map((r) => r.description),
-  ];
-
-  if (failReasons.length > 0 || reviewReasons.length > 0) {
-    return {
-      crossValidation,
-      failMessages: allFailMessages,
-      failReasons,
-      reviewReasons,
-      reviewRequired: reviewReasons.length > 0,
-    };
-  }
-
-  return {
+  return buildCrossValidationResponse(
+    basicResult,
+    fieldReviewReasons,
+    failReasons,
     crossValidation,
-    failMessages: allFailMessages,
-    reviewRequired: false,
-  };
+    passMessage,
+  );
 };

@@ -15,15 +15,15 @@ import {
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import type {
-  DocumentManifestEventSubject,
-  ValidationResult,
-} from './document-manifest-data.helpers';
+import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
 
 import { buildCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
+  buildCrossValidationResponse,
   collectResults,
+  type CrossValidationResponse,
   type FieldValidationResult,
+  getWasteClassification,
   matchWasteTypeEntry,
   validateBasicExtractedData,
   validateDateField,
@@ -45,17 +45,14 @@ export interface MtrCrossValidationEventData
   extends DocumentManifestEventSubject {
   dropOffEvent: DocumentEvent | undefined;
   haulerEvent: DocumentEvent | undefined;
+  manifestType: 'mtr';
   pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
   weighingEvents: DocumentEvent[];
 }
 
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-  VEHICLE_LICENSE_PLATE,
-} = DocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 const validateVehiclePlate = (
   extractedData: MtrExtractedData,
@@ -123,15 +120,8 @@ const validateWasteQuantity = (
     return {};
   }
 
-  const eventCode = getEventAttributeValue(
-    eventData.pickUpEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    eventData.pickUpEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
+  const { code: eventCode, description: eventDescription } =
+    getWasteClassification(eventData.pickUpEvent);
 
   const entries = extractedData.wasteTypes.map((entry) =>
     toWasteTypeEntryData(entry),
@@ -167,15 +157,8 @@ const validateWasteType = (
     return {};
   }
 
-  const eventCode = getEventAttributeValue(
-    pickUpEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    pickUpEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
+  const { code: eventCode, description: eventDescription } =
+    getWasteClassification(pickUpEvent);
 
   if (!eventCode && !eventDescription) {
     return {};
@@ -221,11 +204,7 @@ const validateWasteType = (
 export const validateMtrExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: MtrCrossValidationEventData,
-): ValidationResult & {
-  crossValidation?: Record<string, unknown>;
-  failReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-} => {
+): CrossValidationResponse => {
   const basicResult = validateBasicExtractedData(extractionResult, eventData);
 
   if (basicResult.reviewRequired === true) {
@@ -344,26 +323,10 @@ export const validateMtrExtractedData = (
     validateWasteQuantity(extractedData, eventData),
   ]);
 
-  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
-
-  const allFailMessages = [
-    ...basicResult.failMessages,
-    ...failReasons.map((r) => r.description),
-  ];
-
-  if (failReasons.length > 0 || reviewReasons.length > 0) {
-    return {
-      crossValidation,
-      failMessages: allFailMessages,
-      failReasons,
-      reviewReasons,
-      reviewRequired: reviewReasons.length > 0,
-    };
-  }
-
-  return {
+  return buildCrossValidationResponse(
+    basicResult,
+    fieldReviewReasons,
+    failReasons,
     crossValidation,
-    failMessages: allFailMessages,
-    reviewRequired: false,
-  };
+  );
 };

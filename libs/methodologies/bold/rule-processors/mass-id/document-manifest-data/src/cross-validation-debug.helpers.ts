@@ -23,21 +23,21 @@ import {
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import type { LayoutValidationConfig } from './document-manifest-data.helpers';
 import type { CdfCrossValidationEventData } from './recycling-manifest-cross-validation.helpers';
 import type { MtrCrossValidationEventData } from './transport-manifest-cross-validation.helpers';
 
 import {
+  buildAddressString,
+  computeCdfTotalKg,
+  getWasteClassification,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
   normalizeTaxId,
   parsePeriodRange,
 } from './cross-validation.helpers';
 
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-  VEHICLE_LICENSE_PLATE,
-} = DocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 const buildWasteQuantityDebugInfo = (
   entries: undefined | WasteTypeEntryData[],
@@ -84,11 +84,6 @@ const buildWasteQuantityDebugInfo = (
     weighingValue: weighingValue ?? null,
   };
 };
-
-const buildAddressString = (address: MethodologyAddress): string =>
-  [address.street, address.number, address.city, address.countryState]
-    .filter(Boolean)
-    .join(', ');
 
 const addressDebugInfo = (
   entity: ExtractedEntityWithAddressInfo,
@@ -174,6 +169,30 @@ const computeDateDaysDiff = (
     ? dateDifferenceInDays(extractedDate, eventDate)
     : null;
 
+const buildWasteTypeDebugEntry = (
+  entry: WasteTypeEntryData,
+  eventWasteCode: string | undefined,
+  eventWasteDescription: string | undefined,
+): Record<string, unknown> => {
+  const match = matchWasteTypeEntry(
+    entry,
+    eventWasteCode,
+    eventWasteDescription,
+  );
+
+  return {
+    descriptionSimilarity:
+      match.descriptionSimilarity === null
+        ? null
+        : `${(match.descriptionSimilarity * 100).toFixed(0)}%`,
+    extracted: entry.code
+      ? `${entry.code} - ${entry.description}`
+      : entry.description,
+    isCodeMatch: match.isCodeMatch,
+    isMatch: match.isMatch,
+  };
+};
+
 export const buildCrossValidationComparison = (
   extractedData: MtrExtractedData,
   eventData: MtrCrossValidationEventData,
@@ -183,19 +202,8 @@ export const buildCrossValidationComparison = (
     ? getEventAttributeValue(eventData.pickUpEvent, VEHICLE_LICENSE_PLATE)
     : undefined;
 
-  const eventWasteCode = eventData.pickUpEvent
-    ? getEventAttributeValue(
-        eventData.pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_ID,
-      )?.toString()
-    : undefined;
-
-  const eventWasteDescription = eventData.pickUpEvent
-    ? getEventAttributeValue(
-        eventData.pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-      )?.toString()
-    : undefined;
+  const { code: eventWasteCode, description: eventWasteDescription } =
+    getWasteClassification(eventData.pickUpEvent);
 
   const eventIssueDate = eventData.issueDateAttribute?.value?.toString();
   const eventPlateString = eventPlateValue?.toString();
@@ -273,26 +281,13 @@ export const buildCrossValidationComparison = (
     ),
     wasteType: {
       entries:
-        extractedData.wasteTypes?.map((extractedEntry) => {
-          const entry = toWasteTypeEntryData(extractedEntry);
-          const match = matchWasteTypeEntry(
-            entry,
+        extractedData.wasteTypes?.map((extractedEntry) =>
+          buildWasteTypeDebugEntry(
+            toWasteTypeEntryData(extractedEntry),
             eventWasteCode,
             eventWasteDescription,
-          );
-
-          return {
-            descriptionSimilarity:
-              match.descriptionSimilarity === null
-                ? null
-                : `${(match.descriptionSimilarity * 100).toFixed(0)}%`,
-            extracted: entry.code
-              ? `${entry.code} - ${entry.description}`
-              : entry.description,
-            isCodeMatch: match.isCodeMatch,
-            isMatch: match.isMatch,
-          };
-        }) ?? null,
+          ),
+        ) ?? null,
       eventCode: eventWasteCode ?? null,
       eventDescription: eventWasteDescription ?? null,
     },
@@ -306,24 +301,34 @@ export const buildCrossValidationComparison = (
   return crossValidation;
 };
 
+const buildCdfTotalWeightDebugInfo = (
+  extractedData: CdfExtractedData,
+  documentCurrentValue: number,
+): null | Record<string, unknown> => {
+  if (!extractedData.wasteEntries) {
+    return null;
+  }
+
+  const { hasValidQuantity, totalKg } = computeCdfTotalKg(
+    extractedData.wasteEntries.parsed,
+  );
+
+  return {
+    confidence: extractedData.wasteEntries.confidence,
+    documentCurrentValue,
+    extractedTotalKg: hasValidQuantity ? totalKg : null,
+    isValid: hasValidQuantity ? documentCurrentValue <= totalKg : null,
+  };
+};
+
 export const buildCdfCrossValidationComparison = (
   extractedData: CdfExtractedData,
   eventData: CdfCrossValidationEventData,
   extractionConfidence: ExtractionConfidence,
+  layoutValidationConfig: LayoutValidationConfig = {},
 ): Record<string, unknown> => {
-  const eventWasteCode = eventData.dropOffEvent
-    ? getEventAttributeValue(
-        eventData.dropOffEvent,
-        LOCAL_WASTE_CLASSIFICATION_ID,
-      )?.toString()
-    : undefined;
-
-  const eventWasteDescription = eventData.dropOffEvent
-    ? getEventAttributeValue(
-        eventData.dropOffEvent,
-        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-      )?.toString()
-    : undefined;
+  const { code: eventWasteCode, description: eventWasteDescription } =
+    getWasteClassification(eventData.pickUpEvent);
 
   const eventIssueDate = eventData.issueDateAttribute?.value?.toString();
   const periodRange = extractedData.processingPeriod
@@ -331,6 +336,10 @@ export const buildCdfCrossValidationComparison = (
     : undefined;
 
   const crossValidation: Record<string, unknown> = {
+    cdfTotalWeight: buildCdfTotalWeightDebugInfo(
+      extractedData,
+      eventData.documentCurrentValue,
+    ),
     documentNumber: {
       confidence: extractedData.documentNumber?.confidence ?? null,
       event: eventData.documentNumber?.toString() ?? null,
@@ -354,6 +363,7 @@ export const buildCdfCrossValidationComparison = (
       event: eventIssueDate ?? null,
       extracted: extractedData.issueDate?.parsed ?? null,
     },
+    layoutConfig: layoutValidationConfig,
     mtrNumbers: {
       eventMtrNumbers: eventData.mtrDocumentNumbers,
       extractedManifests: extractedData.transportManifests?.parsed ?? null,
@@ -381,25 +391,13 @@ export const buildCdfCrossValidationComparison = (
     wasteType: {
       confidence: extractedData.wasteEntries?.confidence ?? null,
       entries:
-        extractedData.wasteEntries?.parsed.map((entry) => {
-          const match = matchWasteTypeEntry(
+        extractedData.wasteEntries?.parsed.map((entry) =>
+          buildWasteTypeDebugEntry(
             entry,
             eventWasteCode,
             eventWasteDescription,
-          );
-
-          return {
-            descriptionSimilarity:
-              match.descriptionSimilarity === null
-                ? null
-                : `${(match.descriptionSimilarity * 100).toFixed(0)}%`,
-            extracted: entry.code
-              ? `${entry.code} - ${entry.description}`
-              : entry.description,
-            isCodeMatch: match.isCodeMatch,
-            isMatch: match.isMatch,
-          };
-        }) ?? null,
+          ),
+        ) ?? null,
       eventCode: eventWasteCode ?? null,
       eventDescription: eventWasteDescription ?? null,
     },

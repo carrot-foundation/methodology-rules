@@ -70,6 +70,7 @@ type RuleSubject = {
   documentManifestEvents: DocumentManifestEventSubject[];
   dropOffEvent: DocumentEvent | undefined;
   haulerEvent: DocumentEvent | undefined;
+  mtrEventDocumentNumbers: string[];
   pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
@@ -124,6 +125,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         this.validateDocumentManifestEvents(
           subject,
           ruleSubject.recyclerEvent as DocumentEvent,
+          ruleSubject.document.currentValue,
         ),
     );
     const allFailMessages = validationResults.flatMap((v) => v.failMessages);
@@ -140,9 +142,11 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     const crossValidationResult = await crossValidateWithTextract({
       attachmentInfos: ruleSubject.attachmentInfos,
+      documentCurrentValue: ruleSubject.document.currentValue,
       documentManifestEvents: ruleSubject.documentManifestEvents,
       dropOffEvent: ruleSubject.dropOffEvent,
       haulerEvent: ruleSubject.haulerEvent,
+      mtrEventDocumentNumbers: ruleSubject.mtrEventDocumentNumbers,
       pickUpEvent: ruleSubject.pickUpEvent,
       recyclerEvent: ruleSubject.recyclerEvent,
       wasteGeneratorEvent: ruleSubject.wasteGeneratorEvent,
@@ -160,7 +164,10 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       };
     }
 
-    const resultComment = passMessages.join(' ');
+    const resultComment =
+      crossValidationResult.passMessages.length > 0
+        ? crossValidationResult.passMessages.join(' ')
+        : passMessages.join(' ');
 
     if (crossValidationResult.reviewRequired) {
       return {
@@ -234,6 +241,19 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       [],
     );
 
+    const mtrEventDocumentNumbers =
+      this.documentManifestType === RECYCLING_MANIFEST
+        ? getOrDefault(
+            document.externalEvents
+              ?.filter(eventNameIsAnyOf([TRANSPORT_MANIFEST]))
+              .map((event) =>
+                getEventAttributeValue(event, DOCUMENT_NUMBER)?.toString(),
+              )
+              .filter((v): v is string => isNonEmptyString(v)),
+            [],
+          )
+        : [];
+
     return {
       attachmentInfos: getAttachmentInfos({
         documentId: document.id,
@@ -243,6 +263,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       documentManifestEvents,
       dropOffEvent,
       haulerEvent,
+      mtrEventDocumentNumbers,
       pickUpEvent,
       recyclerEvent,
       wasteGeneratorEvent,
@@ -284,13 +305,13 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   private validateDocumentManifestEvents(
     subject: DocumentManifestEventSubject,
     recyclerEvent: DocumentEvent,
+    documentCurrentValue: number,
   ): ValidationResult {
     const {
       attachment,
       documentNumber,
       documentType,
       eventAddressId,
-      eventValue,
       exemptionJustification,
       hasWrongLabelAttachment,
       issueDateAttribute,
@@ -342,7 +363,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         documentNumber: documentNumber as string,
         documentType: documentType as string,
         issueDate: issueDateAttribute?.value as string,
-        value: getOrDefault(eventValue, 0),
+        value: documentCurrentValue,
       }),
     };
   }

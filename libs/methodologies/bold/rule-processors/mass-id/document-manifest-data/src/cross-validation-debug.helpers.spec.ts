@@ -12,11 +12,10 @@ import {
   buildCdfCrossValidationComparison,
   buildCrossValidationComparison,
 } from './cross-validation-debug.helpers';
-
-const stubEntity = (name: string, taxId: string) => ({
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
+import {
+  stubEntity,
+  stubEntityWithAddress,
+} from './cross-validation.test-helpers';
 
 const baseExtractedData: MtrExtractedData = {
   documentNumber: {
@@ -46,6 +45,7 @@ const baseEventData: MtrCrossValidationEventData = {
   hasWrongLabelAttachment: false,
   haulerEvent: undefined,
   issueDateAttribute: undefined,
+  manifestType: 'mtr',
   pickUpEvent: undefined,
   recyclerCountryCode: 'BR',
   recyclerEvent: undefined,
@@ -344,23 +344,6 @@ describe('cross-validation-debug.helpers', () => {
   });
 
   describe('buildCdfCrossValidationComparison', () => {
-    const stubEntityWithAddress = (
-      name: string,
-      taxId: string,
-      address: string,
-      city: string,
-      state: string,
-    ) => ({
-      ...stubEntity(name, taxId),
-      address: {
-        confidence: 'high' as const,
-        parsed: address,
-        rawMatch: address,
-      },
-      city: { confidence: 'high' as const, parsed: city, rawMatch: city },
-      state: { confidence: 'high' as const, parsed: state, rawMatch: state },
-    });
-
     const baseCdfExtractedData: CdfExtractedData = {
       documentNumber: {
         confidence: 'high',
@@ -385,6 +368,7 @@ describe('cross-validation-debug.helpers', () => {
 
     const baseCdfEventData: CdfCrossValidationEventData = {
       attachment: undefined,
+      documentCurrentValue: 0,
       documentNumber: 'CDF-001',
       documentType: 'CDF',
       dropOffEvent: undefined,
@@ -393,7 +377,9 @@ describe('cross-validation-debug.helpers', () => {
       exemptionJustification: undefined,
       hasWrongLabelAttachment: false,
       issueDateAttribute: undefined,
+      manifestType: 'cdf',
       mtrDocumentNumbers: [],
+      pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
       wasteGeneratorEvent: undefined,
@@ -573,7 +559,7 @@ describe('cross-validation-debug.helpers', () => {
 
       const eventData: CdfCrossValidationEventData = {
         ...baseCdfEventData,
-        dropOffEvent: {
+        pickUpEvent: {
           metadata: {
             attributes: [
               {
@@ -654,6 +640,67 @@ describe('cross-validation-debug.helpers', () => {
 
       expect(documentNumber['confidence']).toBeNull();
       expect(documentNumber['extracted']).toBeNull();
+    });
+
+    it('should return null for cdfTotalWeight when wasteEntries are absent', () => {
+      const result = buildCdfCrossValidationComparison(
+        baseCdfExtractedData,
+        baseCdfEventData,
+        'high',
+      );
+
+      expect(result['cdfTotalWeight']).toBeNull();
+    });
+
+    it('should include layoutConfig in crossValidation output', () => {
+      const layoutValidationConfig = {
+        unsupportedFields: ['transportManifests'],
+        unsupportedValidations: ['wasteType'],
+      };
+
+      const result = buildCdfCrossValidationComparison(
+        baseCdfExtractedData,
+        baseCdfEventData,
+        'high',
+        layoutValidationConfig,
+      );
+
+      expect(result['layoutConfig']).toEqual(layoutValidationConfig);
+    });
+
+    it('should include empty layoutConfig when no config provided', () => {
+      const result = buildCdfCrossValidationComparison(
+        baseCdfExtractedData,
+        baseCdfEventData,
+        'high',
+      );
+
+      expect(result['layoutConfig']).toEqual({});
+    });
+
+    it('should return cdfTotalWeight with null extractedTotalKg when all entries are volumetric', () => {
+      const extractedData: CdfExtractedData = {
+        ...baseCdfExtractedData,
+        wasteEntries: {
+          confidence: 'high',
+          parsed: [{ description: 'Lodos', quantity: 5, unit: 'm³' }],
+          rawMatch: 'Lodos',
+        },
+      } as unknown as CdfExtractedData;
+
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        baseCdfEventData,
+        'high',
+      );
+
+      const cdfTotalWeight = result['cdfTotalWeight'] as Record<
+        string,
+        unknown
+      >;
+
+      expect(cdfTotalWeight['extractedTotalKg']).toBeNull();
+      expect(cdfTotalWeight['isValid']).toBeNull();
     });
   });
 });

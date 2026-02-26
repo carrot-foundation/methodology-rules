@@ -6,28 +6,14 @@ import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-re
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
+  stubEntity,
+  stubEntityWithAddress,
+} from './cross-validation.test-helpers';
+import {
   type CdfCrossValidationEventData,
   collectMtrDocumentNumbers,
   validateCdfExtractedData,
 } from './recycling-manifest-cross-validation.helpers';
-
-const stubEntity = (name: string, taxId: string) => ({
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
-
-const stubEntityWithAddress = (
-  name: string,
-  taxId: string,
-  address: string,
-  city: string,
-  state: string,
-) => ({
-  ...stubEntity(name, taxId),
-  address: { confidence: 'high' as const, parsed: address, rawMatch: address },
-  city: { confidence: 'high' as const, parsed: city, rawMatch: city },
-  state: { confidence: 'high' as const, parsed: state, rawMatch: state },
-});
 
 const baseCdfData = {
   documentNumber: {
@@ -60,6 +46,7 @@ const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
 
 const createExtractionResult = (
   data: Partial<CdfExtractedData>,
+  layoutId?: string,
 ): ExtractionOutput<BaseExtractedData> =>
   ({
     data: {
@@ -67,6 +54,7 @@ const createExtractionResult = (
       extractionConfidence: 'high',
       ...data,
     },
+    layoutId,
     reviewReasons: [],
     reviewRequired: false,
   }) as unknown as ExtractionOutput<BaseExtractedData>;
@@ -110,6 +98,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
   describe('validateCdfExtractedData', () => {
     const baseEventData: CdfCrossValidationEventData = {
       attachment: undefined,
+      documentCurrentValue: 0,
       documentNumber: 'CDF-001',
       documentType: 'CDF',
       dropOffEvent: undefined,
@@ -118,7 +107,9 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       exemptionJustification: undefined,
       hasWrongLabelAttachment: false,
       issueDateAttribute: undefined,
+      manifestType: 'cdf',
       mtrDocumentNumbers: [],
+      pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
       wasteGeneratorEvent: undefined,
@@ -441,6 +432,49 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
+      it('should skip waste type validation when layout does not support it', () => {
+        const extractionResult = createExtractionResult(
+          {
+            wasteEntries: {
+              confidence: 'high',
+              parsed: [{ code: '020101', description: 'Lodos da lavagem' }],
+              rawMatch: '020101-Lodos da lavagem',
+            },
+          },
+          'cdf-custom-1',
+        );
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento biologico',
+          ),
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
+      it('should skip MTR cross-reference when layout does not support transport manifests', () => {
+        const extractionResult = createExtractionResult(
+          { transportManifests: undefined as never },
+          'cdf-custom-1',
+        );
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          mtrDocumentNumbers: ['MTR-001'],
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
       it('should set reviewRequired when no transport manifests extracted but MTR numbers exist', () => {
         const extractionResult = createExtractionResult({
           transportManifests: undefined as never,
@@ -476,7 +510,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -499,7 +533,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             undefined,
             'Plastico',
           ),
@@ -522,7 +556,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(),
+          pickUpEvent: makeDropOffEventWithClassification(),
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -542,7 +576,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento biologico',
           ),
@@ -579,7 +613,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -610,7 +644,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -641,7 +675,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -672,7 +706,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -714,7 +748,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -738,7 +772,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             undefined,
             'Metal ferroso totalmente diferente',
           ),
@@ -750,6 +784,201 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewReasons?.[0]?.description).toContain(
           'Metal ferroso totalmente diferente',
         );
+      });
+    });
+
+    describe('CDF total weight vs document value validation', () => {
+      it('should return no issues when wasteEntries are not extracted', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: undefined as never,
+        });
+
+        const result = validateCdfExtractedData(
+          extractionResult,
+          baseEventData,
+        );
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
+      it('should return no issues when documentCurrentValue is within extracted total', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [
+              {
+                code: '190812',
+                description: 'Lodos',
+                quantity: 1000,
+                unit: 'kg',
+              },
+            ],
+            rawMatch: '190812-Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 800,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
+      it('should fail when documentCurrentValue exceeds extracted total with high confidence', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [
+              {
+                code: '190812',
+                description: 'Lodos',
+                quantity: 500,
+                unit: 'kg',
+              },
+            ],
+            rawMatch: '190812-Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 1000,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages.length).toBeGreaterThan(0);
+        expect(result.failMessages[0]).toContain('mass-id document value');
+      });
+
+      it('should set reviewRequired when documentCurrentValue exceeds extracted total with low confidence', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'low',
+            parsed: [
+              {
+                code: '190812',
+                description: 'Lodos',
+                quantity: 500,
+                unit: 'kg',
+              },
+            ],
+            rawMatch: '190812-Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 1000,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons?.[0]?.description).toContain(
+          'mass-id document value',
+        );
+      });
+
+      it('should return no issues when all entries have no valid quantities', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [{ description: 'Lodos' }],
+            rawMatch: 'Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 1000,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
+      it('should return no issues when all entries have volumetric units', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [{ description: 'Lodos', quantity: 5, unit: 'm³' }],
+            rawMatch: 'Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 1000,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+
+      it('should correctly sum multiple entries for comparison', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [
+              { description: 'Lodos A', quantity: 1, unit: 't' },
+              { description: 'Lodos B', quantity: 500, unit: 'kg' },
+            ],
+            rawMatch: 'Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 1400,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        // 1 ton = 1000 kg + 500 kg = 1500 kg total; 1400 <= 1500 → no issues
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
+      });
+    });
+
+    describe('pass message generation', () => {
+      it('should build pass message using extracted total when waste entries have quantities', () => {
+        const extractionResult = createExtractionResult({
+          wasteEntries: {
+            confidence: 'high',
+            parsed: [
+              {
+                code: '190812',
+                description: 'Lodos',
+                quantity: 1000,
+                unit: 'kg',
+              },
+            ],
+            rawMatch: '190812-Lodos',
+          },
+        });
+
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          documentCurrentValue: 500,
+          documentNumber: undefined,
+          documentType: undefined,
+        };
+
+        const result = validateCdfExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(false);
+        expect(result.failMessages).toHaveLength(0);
+        expect((result as { passMessage?: string }).passMessage).toBeDefined();
       });
     });
 
@@ -825,14 +1054,14 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         ).toBe(true);
       });
 
-      it('should set reviewRequired when waste entries not extracted but dropOffEvent exists', () => {
+      it('should set reviewRequired when waste entries not extracted but pickUpEvent exists', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: undefined as never,
         });
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          dropOffEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeDropOffEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),

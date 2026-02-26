@@ -404,6 +404,38 @@ export const crossValidationTestCases = [
     resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
     scenario: 'cross-validation requires review',
   },
+  {
+    crossValidationPassMessages: [
+      'The attachment pass message from extraction',
+    ],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: {
+      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+        metadataAttributes: [
+          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_NUMBER, '123'],
+          {
+            format: DATE,
+            name: ISSUE_DATE,
+            value: '2025-01-01',
+          },
+        ],
+        partialDocumentEvent: {
+          address: sameAddress,
+          attachments: [
+            stubDocumentEventAttachment({
+              label: TRANSPORT_MANIFEST,
+            }),
+          ],
+          value: 100,
+        },
+      }),
+      ...defaultEvents,
+    },
+    resultComment: 'The attachment pass message from extraction',
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: 'cross-validation provides pass messages',
+  },
 ];
 
 export const exceptionTestCases = [

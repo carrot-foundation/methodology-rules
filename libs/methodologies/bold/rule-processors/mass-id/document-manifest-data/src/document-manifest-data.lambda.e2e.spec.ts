@@ -27,6 +27,7 @@ describe('DocumentManifestDataLambda E2E', () => {
       crossValidation: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });

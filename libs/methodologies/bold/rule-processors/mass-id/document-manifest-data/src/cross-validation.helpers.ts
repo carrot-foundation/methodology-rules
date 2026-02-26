@@ -21,6 +21,8 @@ import {
   isNameMatch,
   utcIsoToLocalDate,
 } from '@carrot-fndn/shared/helpers';
+import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
   DocumentManifestEventSubject,
@@ -32,10 +34,48 @@ import {
   REVIEW_REASONS,
 } from './document-manifest-data.constants';
 
+export type CrossValidationResponse = ValidationResult & {
+  crossValidation?: Record<string, unknown>;
+  failReasons?: ReviewReason[];
+  reviewReasons?: ReviewReason[];
+};
+
 export interface FieldValidationResult {
   failReason?: ReviewReason;
   reviewReason?: ReviewReason;
 }
+
+export const buildCrossValidationResponse = (
+  basicResult: ValidationResult & { reviewReasons: ReviewReason[] },
+  fieldReviewReasons: ReviewReason[],
+  failReasons: ReviewReason[],
+  crossValidation: Record<string, unknown>,
+  passMessage?: string,
+): CrossValidationResponse => {
+  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
+  const failMessages = [
+    ...basicResult.failMessages,
+    ...failReasons.map((r) => r.description),
+  ];
+
+  if (failReasons.length > 0 || reviewReasons.length > 0) {
+    return {
+      crossValidation,
+      failMessages,
+      failReasons,
+      ...(passMessage !== undefined && { passMessage }),
+      reviewReasons,
+      reviewRequired: reviewReasons.length > 0,
+    };
+  }
+
+  return {
+    crossValidation,
+    failMessages,
+    ...(passMessage !== undefined && { passMessage }),
+    reviewRequired: false,
+  };
+};
 
 export const routeByConfidence = (
   confidence: ExtractionConfidence,
@@ -162,6 +202,28 @@ export const validateBasicExtractedData = (
   return { failMessages, reviewReasons };
 };
 
+const {
+  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+  LOCAL_WASTE_CLASSIFICATION_ID,
+} = DocumentEventAttributeName;
+
+export const getWasteClassification = (
+  pickUpEvent: DocumentEvent | undefined,
+): { code: string | undefined; description: string | undefined } => ({
+  code: pickUpEvent
+    ? getEventAttributeValue(
+        pickUpEvent,
+        LOCAL_WASTE_CLASSIFICATION_ID,
+      )?.toString()
+    : undefined,
+  description: pickUpEvent
+    ? getEventAttributeValue(
+        pickUpEvent,
+        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+      )?.toString()
+    : undefined,
+});
+
 export const normalizeTaxId = (taxId: string): string =>
   taxId.replaceAll(/[\s./-]/g, '').toLowerCase();
 
@@ -252,6 +314,11 @@ export const validateEntityTaxId = (
   };
 };
 
+export const buildAddressString = (address: MethodologyAddress): string =>
+  [address.street, address.number, address.city, address.countryState]
+    .filter(Boolean)
+    .join(', ');
+
 export const validateEntityAddress = (
   extractedEntity: ExtractedEntityWithAddressInfo | undefined,
   eventAddress: MethodologyAddress | undefined,
@@ -280,14 +347,7 @@ export const validateEntityAddress = (
     .filter(Boolean)
     .join(', ');
 
-  const eventAddressString = [
-    eventAddress.street,
-    eventAddress.number,
-    eventAddress.city,
-    eventAddress.countryState,
-  ]
-    .filter(Boolean)
-    .join(', ');
+  const eventAddressString = buildAddressString(eventAddress);
 
   const { isMatch, score } = isNameMatch(
     extractedAddress,
@@ -366,6 +426,30 @@ export const validateDateField = (
   return daysDiff > DATE_TOLERANCE_DAYS
     ? { failReason: reviewReason }
     : { reviewReason };
+};
+
+export const computeCdfTotalKg = (
+  entries: ReadonlyArray<{ quantity?: number; unit?: string }>,
+): { hasValidQuantity: boolean; totalKg: number } => {
+  let totalKg = 0;
+  let hasValidQuantity = false;
+
+  for (const entry of entries) {
+    if (entry.quantity === undefined) {
+      continue;
+    }
+
+    const normalizedKg = normalizeQuantityToKg(entry.quantity, entry.unit);
+
+    if (normalizedKg === undefined) {
+      continue;
+    }
+
+    totalKg += normalizedKg;
+    hasValidQuantity = true;
+  }
+
+  return { hasValidQuantity, totalKg };
 };
 
 export const WEIGHT_DISCREPANCY_THRESHOLD = 0.1;

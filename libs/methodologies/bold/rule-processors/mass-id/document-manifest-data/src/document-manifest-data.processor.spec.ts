@@ -26,6 +26,7 @@ describe('DocumentManifestDataProcessor', () => {
       crossValidation: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -58,6 +59,7 @@ describe('DocumentManifestDataProcessor', () => {
         crossValidation: {},
         failMessages: testCase.crossValidationFailMessages,
         failReasons: [],
+        passMessages: [],
         reviewReasons: [],
         reviewRequired: false,
       });
@@ -68,8 +70,20 @@ describe('DocumentManifestDataProcessor', () => {
         crossValidation: {},
         failMessages: [],
         failReasons: [],
+        passMessages: [],
         reviewReasons: testCase.crossValidationReviewReasons,
         reviewRequired: true,
+      });
+    }
+
+    if ('crossValidationPassMessages' in testCase) {
+      crossValidateWithTextractMock.mockResolvedValueOnce({
+        crossValidation: {},
+        failMessages: [],
+        failReasons: [],
+        passMessages: testCase.crossValidationPassMessages,
+        reviewReasons: [],
+        reviewRequired: false,
       });
     }
 

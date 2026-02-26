@@ -54,6 +54,7 @@ describe('crossValidateWithTextract', () => {
       crossValidation: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -75,6 +76,7 @@ describe('crossValidateWithTextract', () => {
       crossValidation: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });
