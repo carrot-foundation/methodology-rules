@@ -26,7 +26,7 @@ import { stubQueryContext } from './document-query.stubs';
 describe('DocumenQueryService', () => {
   const loadDocuments = new DocumentQueryService(provideDocumentLoaderService);
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => jest.restoreAllMocks());
 
   it.each([
     {
@@ -547,10 +547,7 @@ describe('DocumenQueryService', () => {
 
       jest
         .spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>);
-
-      jest
-        .spyOn(provideDocumentLoaderService, 'load')
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(
           parentDocumentEntity as DocumentEntity<Document>,
         );

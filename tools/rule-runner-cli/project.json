@@ -1,0 +1,24 @@
+{
+  "name": "rule-runner-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:tools", "stack:any", "type:application"],
+  "sourceRoot": "tools/rule-runner-cli/src",
+  "projectType": "application",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "ts": {},
+    "run": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "LOG_FORMAT=pretty LOG_LEVEL=debug npx ts-node --project tools/rule-runner-cli/tsconfig.json --compilerOptions '{\"module\":\"commonjs\"}' -r tsconfig-paths/register tools/rule-runner-cli/src/main.ts"
+      }
+    },
+    "export-tsv": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "bash tools/rule-runner-cli/scripts/export-tsv.sh {args.file}"
+      }
+    }
+  }
+}

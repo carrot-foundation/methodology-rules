@@ -11,3 +11,7 @@ export type DocumentEntity<T extends AnyObject = AnyObject> = {
 export interface DocumentKeyDto {
   key: string;
 }
+
+export interface DocumentLoader {
+  load(dto: DocumentKeyDto): Promise<DocumentEntity>;
+}

@@ -1,13 +1,11 @@
-import type { ScaleTicketData } from '@carrot-fndn/shared/scale-ticket-extractor';
+import type { ScaleTicketExtractedData } from '@carrot-fndn/shared/document-extractor-scale-ticket';
 import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
-
-export type ScaleTicketLayout = 'layout1';
 
 export interface ScaleTicketVerificationContext {
   config: MethodologyAdditionalVerification | undefined;
   expectedNetWeight: number | undefined;
-  scaleTicketData?: ScaleTicketData | undefined;
+  scaleTicketData?: ScaleTicketExtractedData | undefined;
 }
 
 export interface ScaleTicketVerificationDependencies {

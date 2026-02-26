@@ -1,6 +1,6 @@
 import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
 
-import { Layout1ScaleTicketParser } from '@carrot-fndn/shared/scale-ticket-extractor';
+import { ScaleTicketLayout1Parser } from '@carrot-fndn/shared/document-extractor-scale-ticket';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
 
 import {
@@ -22,15 +22,24 @@ describe('scale-ticket-verification', () => {
       rawText: '',
     } as never);
 
-    jest.spyOn(Layout1ScaleTicketParser.prototype, 'parse').mockReturnValue({
-      isValid: true,
-      netWeight: { unit: 'kg', value: expectedNetWeight },
-      rawText: '',
+    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+      data: {
+        documentType: 'scaleTicket',
+        extractionConfidence: 'high',
+        lowConfidenceFields: [],
+        netWeight: {
+          confidence: 'high',
+          parsed: { unit: 'kg', value: expectedNetWeight },
+        },
+        rawText: '',
+      },
+      reviewReasons: [],
+      reviewRequired: false,
     } as never);
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout1',
+        layoutIds: ['layout-1'],
         verificationType: 'scaleTicket',
       },
       expectedNetWeight,
@@ -55,10 +64,10 @@ describe('scale-ticket-verification', () => {
   it('should return no errors when verificationType is not scaleTicket', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout1',
+        layoutIds: ['layout-1'],
         verificationType: 'otherType',
       } as unknown as {
-        scaleTicketLayout: 'layout1';
+        layoutIds: ['layout-1'];
         verificationType: 'scaleTicket';
       },
       expectedNetWeight: 100,
@@ -69,9 +78,9 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return no errors when expected net weight is zero and matches the ticket net weight', async () => {
-    const baseConfig = {
-      scaleTicketLayout: 'layout1' as const,
-      verificationType: 'scaleTicket' as const,
+    const baseConfig: MethodologyAdditionalVerification = {
+      layoutIds: ['layout-1'],
+      verificationType: 'scaleTicket',
     };
 
     jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
@@ -79,10 +88,16 @@ describe('scale-ticket-verification', () => {
       rawText: '',
     } as never);
 
-    jest.spyOn(Layout1ScaleTicketParser.prototype, 'parse').mockReturnValue({
-      isValid: true,
-      netWeight: { unit: 'kg', value: 0 },
-      rawText: '',
+    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+      data: {
+        documentType: 'scaleTicket',
+        extractionConfidence: 'high',
+        lowConfidenceFields: [],
+        netWeight: { confidence: 'high', parsed: { unit: 'kg', value: 0 } },
+        rawText: '',
+      },
+      reviewReasons: [],
+      reviewRequired: false,
     } as never);
 
     const zeroResult = await verifyScaleTicketNetWeight({
@@ -97,7 +112,7 @@ describe('scale-ticket-verification', () => {
   it('should return an error when textract input is missing but config is provided', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout1',
+        layoutIds: ['layout-1'],
         verificationType: 'scaleTicket',
       },
       expectedNetWeight: 100,
@@ -107,21 +122,43 @@ describe('scale-ticket-verification', () => {
     expect(result.errors.length).toBeGreaterThan(0);
   });
 
+  it('should return an error when layoutIds is missing or empty', async () => {
+    const result = await verifyScaleTicketNetWeight({
+      config: {
+        verificationType: 'scaleTicket',
+      } as unknown as {
+        layoutIds: ['layout-1'];
+        verificationType: 'scaleTicket';
+      },
+      expectedNetWeight: 100,
+      textExtractorInput: { filePath: 'dummy-path' },
+    });
+
+    expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]).toContain('is not supported');
+  });
+
   it('should return a mismatch error when ticket net weight differs from event value', async () => {
     jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
 
-    jest.spyOn(Layout1ScaleTicketParser.prototype, 'parse').mockReturnValue({
-      isValid: true,
-      netWeight: { unit: 'kg', value: 50 },
-      rawText: '',
+    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+      data: {
+        documentType: 'scaleTicket',
+        extractionConfidence: 'high',
+        lowConfidenceFields: [],
+        netWeight: { confidence: 'high', parsed: { unit: 'kg', value: 50 } },
+        rawText: '',
+      },
+      reviewReasons: [],
+      reviewRequired: false,
     } as never);
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout1',
+        layoutIds: ['layout-1'],
         verificationType: 'scaleTicket',
       },
       expectedNetWeight: 100,
@@ -139,7 +176,7 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout1',
+        layoutIds: ['layout-1'],
         verificationType: 'scaleTicket',
       },
       expectedNetWeight: 100,
@@ -151,9 +188,9 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should build a scale ticket verification context', () => {
-    const config = {
-      scaleTicketLayout: 'layout1' as const,
-      verificationType: 'scaleTicket' as const,
+    const config: MethodologyAdditionalVerification = {
+      layoutIds: ['layout-1'],
+      verificationType: 'scaleTicket',
     };
 
     const context = buildScaleTicketVerificationContext({
@@ -175,7 +212,7 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        scaleTicketLayout: 'layout-unsupported' as unknown as 'layout1',
+        layoutIds: ['layout-unsupported'],
         verificationType: 'scaleTicket',
       },
       expectedNetWeight: 100,

@@ -50,5 +50,8 @@ temp-rules-metadata.json
 .cursor/rules/specify-rules.mdc
 .cursor/rules/user-*.mdc
 
+# Plans
+docs/plans/
+
 # Claude
 .claude

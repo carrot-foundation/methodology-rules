@@ -1,0 +1,5 @@
+{
+  "name": "@carrot-fndn/shared/cli",
+  "version": "0.0.0",
+  "sideEffects": true
+}

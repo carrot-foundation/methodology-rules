@@ -1,9 +1,13 @@
-import type { DocumentEntity, DocumentKeyDto } from './document-loader.types';
+import type {
+  DocumentEntity,
+  DocumentKeyDto,
+  DocumentLoader,
+} from './document-loader.types';
 
 import { DocumentRepository } from './document.repository';
 import { assertDocumentEntity } from './document.validators';
 
-export class DocumentLoaderService {
+export class DocumentLoaderService implements DocumentLoader {
   private readonly documentRepository: DocumentRepository;
 
   constructor(documentRepository: DocumentRepository) {

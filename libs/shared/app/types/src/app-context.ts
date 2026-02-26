@@ -5,12 +5,12 @@ import type {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
-  DocumentLoaderService,
+  type DocumentLoader,
   provideDocumentLoaderService,
 } from '@carrot-fndn/shared/document/loader';
 
 export interface AppContext {
-  documentLoaderService: DocumentLoaderService;
+  documentLoaderService: DocumentLoader;
 }
 
 export const defaultAppContext: AppContext = {

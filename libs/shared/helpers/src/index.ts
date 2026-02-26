@@ -6,4 +6,6 @@ export * from './document.helpers';
 export * from './is.typia';
 export * from './logger.helpers';
 export * from './math.helpers';
+export * from './string-comparison.helpers';
 export * from './string.helpers';
+export * from './timezone.helpers';

@@ -55,7 +55,7 @@ export const documentManifestDataTestCases = [
     events: {
       [documentManifestType]: undefined,
     },
-    resultComment: RESULT_COMMENTS.MISSING_EVENT,
+    resultComment: RESULT_COMMENTS.MISSING_EVENT(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document does not have a ${documentManifestType} event`,
   },
@@ -108,7 +108,8 @@ export const documentManifestDataTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL,
+    resultComment:
+      RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event with a wrong attachment label`,
   },
@@ -171,7 +172,10 @@ export const documentManifestDataTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
+    resultComment:
+      RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(
+        documentManifestType,
+      ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} and a attachment`,
   },
@@ -187,7 +191,7 @@ export const documentManifestDataTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.MISSING_ATTRIBUTES,
+    resultComment: RESULT_COMMENTS.MISSING_ATTRIBUTES(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
   },
@@ -211,7 +215,8 @@ export const documentManifestDataTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION,
+    resultComment:
+      RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION(documentManifestType),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} without attachment`,
   },
@@ -329,9 +334,75 @@ export const documentManifestDataTestCases = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED,
+    resultComment:
+      RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(TRANSPORT_MANIFEST),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
+  },
+];
+
+export const crossValidationTestCases = [
+  {
+    crossValidationFailMessages: ['Document number mismatch'],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: {
+      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+        metadataAttributes: [
+          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_NUMBER, '123'],
+          {
+            format: DATE,
+            name: ISSUE_DATE,
+            value: '2025-01-01',
+          },
+        ],
+        partialDocumentEvent: {
+          address: sameAddress,
+          attachments: [
+            stubDocumentEventAttachment({
+              label: TRANSPORT_MANIFEST,
+            }),
+          ],
+          value: 100,
+        },
+      }),
+      ...defaultEvents,
+    },
+    resultComment: 'Document number mismatch',
+    resultStatus: RuleOutputStatus.FAILED,
+    scenario: 'cross-validation finds mismatches in the document',
+  },
+  {
+    crossValidationReviewReasons: [
+      { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
+    ],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: {
+      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+        metadataAttributes: [
+          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_NUMBER, '123'],
+          {
+            format: DATE,
+            name: ISSUE_DATE,
+            value: '2025-01-01',
+          },
+        ],
+        partialDocumentEvent: {
+          address: sameAddress,
+          attachments: [
+            stubDocumentEventAttachment({
+              label: TRANSPORT_MANIFEST,
+            }),
+          ],
+          value: 100,
+        },
+      }),
+      ...defaultEvents,
+    },
+    resultComment: 'Review required: Low confidence extraction',
+    resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+    scenario: 'cross-validation requires review',
   },
 ];
 
