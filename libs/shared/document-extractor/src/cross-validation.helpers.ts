@@ -58,6 +58,10 @@ const processInput = async <
       result.failReasons.push(...validationResult.failReasons);
     }
 
+    if (validationResult.passMessage) {
+      result.passMessages.push(validationResult.passMessage);
+    }
+
     if (validationResult.reviewRequired === true) {
       result.reviewRequired = true;
 
@@ -93,6 +97,7 @@ export const crossValidateAttachments = async <
     crossValidation: {},
     failMessages: [],
     failReasons: [],
+    passMessages: [],
     reviewReasons: [],
     reviewRequired: false,
   };

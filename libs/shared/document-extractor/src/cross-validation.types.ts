@@ -39,6 +39,7 @@ export interface CrossValidationResult {
   crossValidation: Record<string, unknown>;
   failMessages: string[];
   failReasons: ReviewReason[];
+  passMessages: string[];
   reviewReasons: ReviewReason[];
   reviewRequired: boolean;
 }
@@ -47,6 +48,7 @@ export interface CrossValidationValidateResult {
   crossValidation?: Record<string, unknown>;
   failMessages: string[];
   failReasons?: ReviewReason[];
+  passMessage?: string;
   reviewReasons?: ReviewReason[];
   reviewRequired?: boolean;
 }
