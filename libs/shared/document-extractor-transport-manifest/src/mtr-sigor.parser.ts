@@ -162,7 +162,9 @@ const parseWasteRow = (
   const entry: WasteTypeEntryData = codeMatch?.[1]
     ? {
         code: codeMatch[1],
-        description: (codeMatch[2] ?? rawDescription).trim(),
+        // codeMatch[2] is always defined when codeMatch[1] matches (.+ requires at least one char)
+
+        description: codeMatch[2]!.trim(),
       }
     : { description: rawDescription.trim() };
 

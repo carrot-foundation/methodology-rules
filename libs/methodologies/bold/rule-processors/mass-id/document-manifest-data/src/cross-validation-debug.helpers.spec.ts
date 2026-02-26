@@ -319,6 +319,28 @@ describe('cross-validation-debug.helpers', () => {
 
       expect(documentNumber['isMatch']).toBe(false);
     });
+
+    it('should handle missing documentNumber in extracted data', () => {
+      const extractedData = {
+        ...baseExtractedData,
+        documentNumber: undefined,
+      } as unknown as MtrExtractedData;
+
+      const result = buildCrossValidationComparison(
+        extractedData,
+        baseEventData,
+        'high',
+      );
+
+      const documentNumber = result['documentNumber'] as Record<
+        string,
+        unknown
+      >;
+
+      expect(documentNumber['confidence']).toBeNull();
+      expect(documentNumber['extracted']).toBeNull();
+      expect(documentNumber['isMatch']).toBe(false);
+    });
   });
 
   describe('buildCdfCrossValidationComparison', () => {
@@ -611,6 +633,27 @@ describe('cross-validation-debug.helpers', () => {
       expect(issueDate['confidence']).toBeNull();
       expect(issueDate['extracted']).toBeNull();
       expect(issueDate['event']).toBeNull();
+    });
+
+    it('should return null for documentNumber fields when documentNumber is not extracted', () => {
+      const extractedData = {
+        ...baseCdfExtractedData,
+        documentNumber: undefined,
+      } as unknown as CdfExtractedData;
+
+      const result = buildCdfCrossValidationComparison(
+        extractedData,
+        baseCdfEventData,
+        'high',
+      );
+
+      const documentNumber = result['documentNumber'] as Record<
+        string,
+        unknown
+      >;
+
+      expect(documentNumber['confidence']).toBeNull();
+      expect(documentNumber['extracted']).toBeNull();
     });
   });
 });
