@@ -28,10 +28,7 @@ import {
   extractGenerator,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
-  extractWasteClassificationData,
   finalizeCdfExtraction,
-  mergeWasteEntries,
-  type WasteCodeInfo,
 } from './cdf-shared.helpers';
 import {
   type CdfExtractedData,
@@ -167,6 +164,7 @@ const extractWasteEntriesFromBlocks = (
       ...Array<TableColumnConfig<SinirWasteColumn>>,
     ],
     maxRowGap: 0.03,
+    xTolerance: 0.2,
     yRange: { max: 100, min: detected.headerTop + 0.01 },
   });
 
@@ -177,35 +175,9 @@ const extractWasteEntriesFromBlocks = (
   return entries.length > 0 ? entries : undefined;
 };
 
-const UNNUMBERED_WASTE_CODE_PATTERN =
-  // eslint-disable-next-line sonarjs/slow-regex
-  /^(\d{6})\s*-\s*(.+?)(?=\n\d{6}\s*-|Classe|$)/gm;
-
 const MTR_SECTION_PATTERN =
   // eslint-disable-next-line sonarjs/slow-regex
   /Manifestos?\s+Incluidos\s*:?\s*\n?([\s\S]*?)(?=\nNome\s+do\s+Responsavel|Declaracao|$)/i;
-
-const extractWasteCodes = (rawText: string): WasteCodeInfo[] => {
-  const codes: WasteCodeInfo[] = [];
-
-  for (const match of rawText.matchAll(UNNUMBERED_WASTE_CODE_PATTERN)) {
-    if (match[1] && match[2]) {
-      codes.push({
-        code: match[1],
-        description: match[2].trim().replaceAll('\n', ' '),
-      });
-    }
-  }
-
-  return codes;
-};
-
-const extractWasteEntries = (rawText: string): WasteEntry[] => {
-  const codes = extractWasteCodes(rawText);
-  const dataEntries = extractWasteClassificationData(rawText);
-
-  return mergeWasteEntries(codes, dataEntries);
-};
 
 export class CdfSinirParser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
@@ -298,11 +270,9 @@ export class CdfSinirParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    const wasteEntries =
-      extractWasteEntriesFromBlocks(extractionResult) ??
-      extractWasteEntries(text);
+    const wasteEntries = extractWasteEntriesFromBlocks(extractionResult);
 
-    if (wasteEntries.length > 0) {
+    if (wasteEntries && wasteEntries.length > 0) {
       partialData.wasteEntries = createHighConfidenceField(wasteEntries);
     }
 

@@ -74,7 +74,74 @@ describe('CdfSinfatParser', () => {
     });
 
     it('should extract waste entries with code, classification, quantity, unit, and technology', () => {
-      const result = parser.parse(stubTextExtractionResult(validCdfText));
+      const sinfatWasteHeaderBlocks = [
+        {
+          boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
+          text: 'Residuo',
+        },
+        {
+          boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
+          text: 'Classe',
+        },
+        {
+          boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
+          text: 'Quantidade',
+        },
+        {
+          boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
+          text: 'Unidade',
+        },
+        {
+          boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
+          text: 'Tecnologia',
+        },
+      ];
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validCdfText, [
+          ...sinfatWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.4 },
+            text: '1. 040108 - Residuos de couros (aparas, residuos de corte, po de rebaixamento, po de lixamento)',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.46, top: 0.31, width: 0.08 },
+            text: 'Classe II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.578, top: 0.31, width: 0.04 },
+            text: '1,95000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.652, top: 0.31, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.749, top: 0.31, width: 0.09 },
+            text: 'Compostagem',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.33, width: 0.4 },
+            text: '2. 020301 - Lamas de lavagem, limpeza, descasque, centrifugacao e separacao',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.46, top: 0.33, width: 0.08 },
+            text: 'Classe II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.578, top: 0.33, width: 0.04 },
+            text: '3,50000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.652, top: 0.33, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.749, top: 0.33, width: 0.09 },
+            text: 'Compostagem',
+          },
+        ]),
+      );
 
       expect(result.data.wasteEntries?.parsed).toHaveLength(2);
 
@@ -245,24 +312,6 @@ describe('CdfSinfatParser', () => {
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.environmentalLicense?.parsed).toBe('LO-12345/2024');
-    });
-
-    it('should handle waste entry with more data rows than code rows', () => {
-      const text = [
-        'CDF nº 100/2023',
-        'Classe II A 1,95000 Tonelada Compostagem',
-        'Declaração',
-        'City, 01/04/2024',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(text));
-
-      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
-      expect(result.data.wasteEntries?.parsed[0]?.code).toBeUndefined();
-      expect(result.data.wasteEntries?.parsed[0]?.description).toBe('');
-      expect(result.data.wasteEntries?.parsed[0]?.classification).toBe(
-        'Classe II A',
-      );
     });
 
     it('should skip rows with non-code residuo text in bounding-box table', () => {
@@ -442,21 +491,6 @@ describe('CdfSinfatParser', () => {
       expect(entry?.unit).toBe('Tonelada');
       expect(entry?.technology).toBe('Compostagem');
       expect(result.data.wasteEntries?.confidence).toBe('high');
-    });
-
-    it('should handle waste quantity with NaN value', () => {
-      const text = [
-        'CDF nº 100/2023',
-        'Classe II A ... Tonelada Compostagem',
-        'Declaração',
-        'City, 01/04/2024',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(text));
-
-      if (result.data.wasteEntries) {
-        expect(result.data.wasteEntries.parsed[0]?.quantity).toBe(0);
-      }
     });
 
     it('should extract generator without address', () => {

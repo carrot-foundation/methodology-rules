@@ -105,8 +105,52 @@ describe('CdfSinirParser', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
-    it('should extract unnumbered waste codes', () => {
-      const result = parser.parse(stubTextExtractionResult(validSinirCdfText));
+    it('should extract waste entries from blocks', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinirCdfText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.3 },
+            text: '040108 - Residuos de couros',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.31, width: 0.08 },
+            text: 'Classe II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.31, width: 0.04 },
+            text: '1,95000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.31, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.31, width: 0.09 },
+            text: 'Tratamento',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.33, width: 0.25 },
+            text: '020301 - Lamas de lavagem',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.33, width: 0.08 },
+            text: 'Classe II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.33, width: 0.04 },
+            text: '3,50000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.33, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.33, width: 0.09 },
+            text: 'Compostagem',
+          },
+        ]),
+      );
 
       expect(result.data.wasteEntries?.parsed).toHaveLength(2);
 

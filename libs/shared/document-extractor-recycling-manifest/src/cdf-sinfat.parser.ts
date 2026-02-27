@@ -28,9 +28,7 @@ import {
   extractGenerator,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
-  extractWasteClassificationData,
   finalizeCdfExtraction,
-  mergeWasteEntries,
 } from './cdf-shared.helpers';
 import {
   type CdfExtractedData,
@@ -160,6 +158,7 @@ const extractWasteEntriesFromBlocks = (
       ...Array<TableColumnConfig<SinfatWasteColumn>>,
     ],
     maxRowGap: 0.03,
+    xTolerance: 0.2,
     yRange: { max: 100, min: detected.headerTop + 0.01 },
   });
 
@@ -170,37 +169,9 @@ const extractWasteEntriesFromBlocks = (
   return entries.length > 0 ? entries : undefined;
 };
 
-const WASTE_CODE_PATTERN =
-  // eslint-disable-next-line sonarjs/slow-regex, sonarjs/regex-complexity
-  /\d+\.\s*(\d{6})\s*-\s*(.+?)(?=\d+\.\s*\d{6}\s*-|Classe|$)/gs;
-
 const MTR_SECTION_PATTERN =
   // eslint-disable-next-line sonarjs/slow-regex
   /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Responsavel|$)/i;
-
-const extractWasteCodes = (
-  rawText: string,
-): Array<{ code: string; description: string }> => {
-  const codes: Array<{ code: string; description: string }> = [];
-
-  for (const match of rawText.matchAll(WASTE_CODE_PATTERN)) {
-    if (match[1] && match[2]) {
-      codes.push({
-        code: match[1],
-        description: match[2].trim().replaceAll('\n', ' '),
-      });
-    }
-  }
-
-  return codes;
-};
-
-const extractWasteEntries = (rawText: string): WasteEntry[] => {
-  const codes = extractWasteCodes(rawText);
-  const dataEntries = extractWasteClassificationData(rawText);
-
-  return mergeWasteEntries(codes, dataEntries);
-};
 
 export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
   readonly documentType = 'recyclingManifest' as const;
@@ -291,11 +262,9 @@ export class CdfSinfatParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    const wasteEntries =
-      extractWasteEntriesFromBlocks(extractionResult) ??
-      extractWasteEntries(text);
+    const wasteEntries = extractWasteEntriesFromBlocks(extractionResult);
 
-    if (wasteEntries.length > 0) {
+    if (wasteEntries && wasteEntries.length > 0) {
       partialData.wasteEntries = createHighConfidenceField(wasteEntries);
     }
 
