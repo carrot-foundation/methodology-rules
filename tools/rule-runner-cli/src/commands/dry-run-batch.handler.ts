@@ -142,9 +142,16 @@ export const handleDryRunBatch = async (
     reviewRequiredResults.map((r) => toRuleResultEntry(r.ruleResult)),
     'reviewReasons',
   );
+  const failedEntries = ruleFailures.map((r) =>
+    toRuleResultEntry(r.ruleResult),
+  );
   const failedBreakdown = buildReasonCodeBreakdown(
-    ruleFailures.map((r) => toRuleResultEntry(r.ruleResult)),
+    failedEntries,
     'failReasons',
+  );
+  const failedReviewBreakdown = buildReasonCodeBreakdown(
+    failedEntries,
+    'reviewReasons',
   );
 
   const totalRules =
@@ -167,7 +174,13 @@ export const handleDryRunBatch = async (
     reviewRequiredBreakdown,
     yellow,
   );
-  appendBreakdown(lines, 'Review Reason Codes (Failed):', failedBreakdown, red);
+  appendBreakdown(lines, 'Fail Reason Codes:', failedBreakdown, red);
+  appendBreakdown(
+    lines,
+    'Review Reason Codes (Failed):',
+    failedReviewBreakdown,
+    red,
+  );
 
   logger.info(`\n${lines.join('\n')}`);
 
