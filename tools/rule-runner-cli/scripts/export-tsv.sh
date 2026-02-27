@@ -17,53 +17,30 @@ fi
 
 TSV_HEADER='resultStatus\tauditedDocumentId\trecyclerName\tgeneratorName\tdocumentType\tlayoutId\treasonCode\treasonDescription\tcomparedFields\ts3Uri'
 
+# Output one row per reason: each failReason (status=FAILED) and each reviewReason (status=REVIEW_REQUIRED).
 JQ_QUERY='
+  def reason_row($status; $docId; $recyclerName; $generatorName; $docType; $layoutId; $s3Uri):
+    .code as $code |
+    .description as $desc |
+    (if .comparedFields then [.comparedFields[] | .field + ": event=" + .event + " extracted=" + .extracted + (if .similarity then " similarity=" + .similarity else "" end)] | join("; ") else "" end) as $compared |
+    [$status, $docId, $recyclerName, $generatorName, $docType, $layoutId, $code, $desc, $compared, $s3Uri] | @tsv;
+
   .[] |
   (.auditedDocumentId // .documentId // "") as $docId |
-  (.resultContent.crossValidation.receiver.eventName // .resultContent.crossValidation.recycler.eventName // "") as $recyclerName |
-  (.resultContent.crossValidation.sender.eventName // .resultContent.crossValidation.generator.eventName // "") as $generatorName |
-  (.resultContent.crossValidation._extraction.s3Uri // "") as $s3Uri |
-  (.resultContent.crossValidation._extraction.documentType // "") as $docType |
-  (.resultContent.crossValidation._extraction.layoutId // "") as $layoutId |
-  (.resultContent[$rkey] // [])[] |
-  .code as $code |
-  .description as $desc |
+  (.resultContent.crossValidation.receiver.eventNames[0] // .resultContent.crossValidation.receiver.extractedName // .resultContent.crossValidation.recycler.eventNames[0] // .resultContent.crossValidation.recycler.extractedName // "") as $recyclerName |
+  (.resultContent.crossValidation.generator.eventNames[0] // .resultContent.crossValidation.generator.extractedName // "") as $generatorName |
+  (((.resultContent.extractionMetadata // {}) | to_entries | if length > 0 then .[0].value else {} end) | .s3Uri // "") as $s3Uri |
+  (((.resultContent.extractionMetadata // {}) | to_entries | if length > 0 then .[0].value else {} end) | .documentType // "") as $docType |
+  (((.resultContent.extractionMetadata // {}) | to_entries | if length > 0 then .[0].value else {} end) | .layoutId // "") as $layoutId |
   (
-    if .comparedFields then
-      [.comparedFields[] |
-        .field + ": event=" + .event + " extracted=" + .extracted +
-        (if .similarity then " similarity=" + .similarity else "" end)
-      ] | join("; ")
-    else ""
-    end
-  ) as $compared |
-  [$status, $docId, $recyclerName, $generatorName, $docType, $layoutId, $code, $desc, $compared, $s3Uri] |
-  @tsv
+    ((.resultContent.failReasons // [])[] | reason_row("FAILED"; $docId; $recyclerName; $generatorName; $docType; $layoutId; $s3Uri)),
+    ((.resultContent.reviewReasons // [])[] | reason_row("REVIEW_REQUIRED"; $docId; $recyclerName; $generatorName; $docType; $layoutId; $s3Uri))
+  )
 '
-
-detect_status() {
-  local file="$1"
-
-  local reason_key
-  reason_key=$(jq -r '
-    if (.[0].resultContent.reviewReasons // [] | length) > 0 then "reviewReasons"
-    elif (.[0].resultContent.failReasons // [] | length) > 0 then "failReasons"
-    else "reviewReasons"
-    end
-  ' "$file")
-
-  local result_status="REVIEW_REQUIRED"
-  if [[ "$reason_key" == "failReasons" ]]; then
-    result_status="FAILED"
-  fi
-
-  echo "$result_status" "$reason_key"
-}
 
 export_rows() {
   local file="$1"
-  read -r result_status reason_key <<< "$(detect_status "$file")"
-  jq -r --arg status "$result_status" --arg rkey "$reason_key" "$JQ_QUERY" "$file"
+  jq -r "$JQ_QUERY" "$file"
 }
 
 export_file() {
@@ -82,20 +59,25 @@ if [[ -d "$INPUT" ]]; then
   found=0
   combined="${INPUT%/}/all.tsv"
 
-  printf "${TSV_HEADER}\n" > "$combined"
-
   for file in "$INPUT"/{review-required,rule-failures}-*.json; do
     [[ -f "$file" ]] || continue
     export_file "$file"
-    export_rows "$file" >> "$combined"
     found=1
   done
 
   if [[ "$found" -eq 0 ]]; then
-    rm -f "$combined"
     echo "No review-required-*.json or rule-failures-*.json files found in $INPUT" >&2
     exit 1
   fi
+
+  # Build combined TSV in one go so the header is never lost
+  {
+    printf "${TSV_HEADER}\n"
+    for file in "$INPUT"/{review-required,rule-failures}-*.json; do
+      [[ -f "$file" ]] || continue
+      export_rows "$file"
+    done
+  } > "$combined"
 
   echo "Exported to $combined (combined)"
 elif [[ -f "$INPUT" ]]; then
