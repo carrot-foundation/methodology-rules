@@ -73,24 +73,24 @@ const SIGNATURE_PATTERNS = [
 ];
 
 type SinfatWasteColumn =
-  | 'classe'
-  | 'quantidade'
-  | 'residuo'
-  | 'tecnologia'
-  | 'unidade';
+  | 'classification'
+  | 'quantity'
+  | 'technology'
+  | 'unit'
+  | 'waste';
 
 const SINFAT_WASTE_HEADER_DEFS: [
   HeaderColumnDefinition<SinfatWasteColumn>,
   ...Array<HeaderColumnDefinition<SinfatWasteColumn>>,
 ] = [
-  { headerPattern: /^Res[ií]duo$/i, name: 'residuo' },
-  { headerPattern: /^Classe$/i, name: 'classe' },
-  { headerPattern: /^Quantidade$/i, name: 'quantidade' },
-  { headerPattern: /^Unidade$/i, name: 'unidade' },
-  { headerPattern: /^Tecnologia$/i, name: 'tecnologia' },
+  { headerPattern: /^Res[ií]duo$/i, name: 'waste' },
+  { headerPattern: /^Classe$/i, name: 'classification' },
+  { headerPattern: /^Quantidade$/i, name: 'quantity' },
+  { headerPattern: /^Unidade$/i, name: 'unit' },
+  { headerPattern: /^Tecnologia$/i, name: 'technology' },
 ];
 
-const SINFAT_WASTE_ANCHOR: SinfatWasteColumn = 'residuo';
+const SINFAT_WASTE_ANCHOR: SinfatWasteColumn = 'waste';
 
 // eslint-disable-next-line sonarjs/slow-regex
 const SINFAT_WASTE_CODE_PATTERN = /^(?:\d+\.\s*)?(\d{6})\s*-?\s*(.+)/;
@@ -98,14 +98,14 @@ const SINFAT_WASTE_CODE_PATTERN = /^(?:\d+\.\s*)?(\d{6})\s*-?\s*(.+)/;
 const parseSinfatWasteRow = (
   row: TableRow<SinfatWasteColumn>,
 ): undefined | WasteEntry => {
-  const residuo = row.residuo?.trim();
+  const wasteText = row.waste?.trim();
 
-  // istanbul ignore next -- anchor-based row extraction guarantees non-empty residuo
-  if (!residuo) {
+  // istanbul ignore next -- anchor-based row extraction guarantees non-empty waste text
+  if (!wasteText) {
     return undefined;
   }
 
-  const codeMatch = SINFAT_WASTE_CODE_PATTERN.exec(residuo);
+  const codeMatch = SINFAT_WASTE_CODE_PATTERN.exec(wasteText);
 
   if (!codeMatch?.[1]) {
     return undefined;
@@ -116,28 +116,28 @@ const parseSinfatWasteRow = (
     description: codeMatch[2]!.trim(),
   };
 
-  const classe = row.classe?.trim();
+  const classification = row.classification?.trim();
 
-  if (classe) {
-    entry.classification = classe;
+  if (classification) {
+    entry.classification = classification;
   }
 
-  const quantity = parseBrazilianNumber(row.quantidade?.trim() ?? '');
+  const quantity = parseBrazilianNumber(row.quantity?.trim() ?? '');
 
   if (quantity !== undefined) {
     entry.quantity = quantity;
   }
 
-  const unidade = row.unidade?.trim();
+  const unit = row.unit?.trim();
 
-  if (unidade) {
-    entry.unit = unidade;
+  if (unit) {
+    entry.unit = unit;
   }
 
-  const tecnologia = row.tecnologia?.trim();
+  const technology = row.technology?.trim();
 
-  if (tecnologia) {
-    entry.technology = tecnologia;
+  if (technology) {
+    entry.technology = technology;
   }
 
   return entry;

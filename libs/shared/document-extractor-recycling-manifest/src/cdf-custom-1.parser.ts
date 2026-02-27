@@ -273,15 +273,15 @@ const CDF_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   cnpj: /CNPJ\s*:?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/gi,
   documentNumber: /(?:CDF|N[°º])\s*(\d+\/\d{2,4})/i,
-  empresaGeradora:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Empresa\s+Geradora\s*:\s*(.+?)(?=\n|$)/i,
-  empresaRecebedora:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Empresa\s+Recebedora\s*:\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   environmentalLicense: /licenca\s+n[°º]\s*:?\s*(\d+)/i,
+  generatorCompany:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Empresa\s+Geradora\s*:\s*(.+?)(?=\n|$)/i,
   issueDate: /(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(\d{4})/i,
+  receiverCompany:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Empresa\s+Recebedora\s*:\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   totalQuantity: /Quantidade\s+Total\s+Tratad[oa]\s*\n?\s*([\d.,]+)/i,
   treatmentMethod:
@@ -445,14 +445,14 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
   ): void {
     const processorExtracted = extractEntityByLabel(
       rawText,
-      CDF_PATTERNS.empresaRecebedora,
+      CDF_PATTERNS.receiverCompany,
     );
 
     partialData.recycler = createExtractedEntity(processorExtracted);
 
     const generatorExtracted = extractGeneratorWithAddress(
       rawText,
-      extractEntityByLabel(rawText, CDF_PATTERNS.empresaGeradora),
+      extractEntityByLabel(rawText, CDF_PATTERNS.generatorCompany),
     );
 
     partialData.generator =
