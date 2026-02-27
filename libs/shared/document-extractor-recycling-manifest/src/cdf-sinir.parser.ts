@@ -90,7 +90,7 @@ const SINIR_WASTE_HEADER_DEFS: [
   HeaderColumnDefinition<SinirWasteColumn>,
   ...Array<HeaderColumnDefinition<SinirWasteColumn>>,
 ] = [
-  { headerPattern: /^Residuo$/i, name: 'residuo' },
+  { headerPattern: /^Res[ií]duo$/i, name: 'residuo' },
   { headerPattern: /^Classe$/i, name: 'classe' },
   { headerPattern: /^Quantidade$/i, name: 'quantidade' },
   { headerPattern: /^Unidade$/i, name: 'unidade' },
@@ -107,6 +107,7 @@ const parseSinirWasteRow = (
 ): undefined | WasteEntry => {
   const residuo = row.residuo?.trim();
 
+  // istanbul ignore next -- anchor-based row extraction guarantees non-empty residuo
   if (!residuo) {
     return undefined;
   }
@@ -119,7 +120,7 @@ const parseSinirWasteRow = (
 
   const entry: WasteEntry = {
     code: codeMatch[1],
-    description: codeMatch[2]?.trim() ?? residuo,
+    description: codeMatch[2]!.trim(),
   };
 
   const classe = row.classe?.trim();

@@ -443,6 +443,65 @@ describe('CdfSinirParser', () => {
       expect(second?.quantity).toBe(3.5);
     });
 
+    it('should skip rows with non-code residuo text in bounding-box table', () => {
+      const rawText = [
+        'CDF n° 100/2025',
+        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'Resíduo Classe Quantidade Unidade Tratamento',
+        'random text',
+        'Declaração',
+        'City, 07/02/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.15 },
+            text: 'random text',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries).toBeUndefined();
+    });
+
+    it('should extract waste entry from blocks without quantity columns', () => {
+      const rawText = [
+        'CDF n° 100/2025',
+        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'Resíduo Classe Quantidade Unidade Tratamento',
+        '200108 Resíduos biodegradáveis',
+        'Declaração',
+        'City, 07/02/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.3 },
+            text: '200108 Residuos biodegradaveis',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
+
+      const entry = result.data.wasteEntries?.parsed[0];
+
+      expect(entry?.code).toBe('200108');
+      expect(entry?.description).toBe('Residuos biodegradaveis');
+      expect(entry?.classification).toBeUndefined();
+      expect(entry?.quantity).toBeUndefined();
+      expect(entry?.unit).toBeUndefined();
+      expect(entry?.technology).toBeUndefined();
+    });
+
     it('should handle waste code without dash in bounding-box table', () => {
       const rawText = [
         'CDF n° 100/2025',
