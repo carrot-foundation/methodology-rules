@@ -112,7 +112,7 @@ export const normalizeQuantityToKg = (
     return quantity;
   }
 
-  if (normalized === 'ton' || normalized === 't') {
+  if (normalized === 'ton' || normalized === 't' || normalized === 'tonelada') {
     return quantity * 1000;
   }
 

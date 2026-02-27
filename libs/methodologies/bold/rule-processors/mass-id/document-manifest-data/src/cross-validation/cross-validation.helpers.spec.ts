@@ -78,6 +78,10 @@ describe('cross-validation.helpers', () => {
       expect(normalizeQuantityToKg(3, 't')).toBe(3000);
     });
 
+    it('should multiply by 1000 when unit is tonelada', () => {
+      expect(normalizeQuantityToKg(1.12, 'tonelada')).toBe(1120);
+    });
+
     it('should return undefined for unknown units', () => {
       expect(normalizeQuantityToKg(5, 'm³')).toBeUndefined();
     });
