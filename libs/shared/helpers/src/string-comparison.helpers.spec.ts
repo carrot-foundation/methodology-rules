@@ -195,6 +195,39 @@ describe('string-comparison.helpers', () => {
 
         expect(result.isMatch).toBe(true);
       });
+
+      it('should match when tokens have minor spelling differences', () => {
+        const result = isNameMatch(
+          'Rua Luis Franceshi, 2045, Cidade, PR',
+          'Rua Luiz Francheshi,2045 Bairro Norte, Cidade, PR',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should match when one side omits a street prefix token', () => {
+        const result = isNameMatch(
+          'Rua Rosa Neuman, 125, Cidade, PR',
+          'Rosa Neumann, 125 Bairro Central, Cidade, PR',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
+      });
+
+      it('should not allow tolerance when shorter has fewer than 4 meaningful tokens', () => {
+        const result = isNameMatch(
+          'Rua Exemplo, Cidade',
+          'Avenida Diferente, Cidade',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(false);
+      });
     });
   });
 
