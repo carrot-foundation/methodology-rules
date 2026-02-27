@@ -1,4 +1,9 @@
-import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import type {
+  HeaderColumnDefinition,
+  TableColumnConfig,
+  TableRow,
+  TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
@@ -8,9 +13,15 @@ import {
   type DocumentParser,
   type ExtractionOutput,
   extractStringField,
+  parseBrazilianNumber,
   registerParser,
   stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  detectTableColumns,
+  extractTableFromBlocks,
+  normalizeMultiPageBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   createRecyclerEntity,
@@ -67,6 +78,103 @@ const SIGNATURE_PATTERNS = [
   /Declaracao/i,
   /Tratamento/i,
 ];
+
+type SinirWasteColumn =
+  | 'classe'
+  | 'quantidade'
+  | 'residuo'
+  | 'tratamento'
+  | 'unidade';
+
+const SINIR_WASTE_HEADER_DEFS: [
+  HeaderColumnDefinition<SinirWasteColumn>,
+  ...Array<HeaderColumnDefinition<SinirWasteColumn>>,
+] = [
+  { headerPattern: /^Residuo$/i, name: 'residuo' },
+  { headerPattern: /^Classe$/i, name: 'classe' },
+  { headerPattern: /^Quantidade$/i, name: 'quantidade' },
+  { headerPattern: /^Unidade$/i, name: 'unidade' },
+  { headerPattern: /^Tratamento$/i, name: 'tratamento' },
+];
+
+const SINIR_WASTE_ANCHOR: SinirWasteColumn = 'residuo';
+
+// eslint-disable-next-line sonarjs/slow-regex
+const SINIR_WASTE_CODE_PATTERN = /^(\d{6})\s*-?\s*(.+)/;
+
+const parseSinirWasteRow = (
+  row: TableRow<SinirWasteColumn>,
+): undefined | WasteEntry => {
+  const residuo = row.residuo?.trim();
+
+  if (!residuo) {
+    return undefined;
+  }
+
+  const codeMatch = SINIR_WASTE_CODE_PATTERN.exec(residuo);
+
+  if (!codeMatch?.[1]) {
+    return undefined;
+  }
+
+  const entry: WasteEntry = {
+    code: codeMatch[1],
+    description: codeMatch[2]?.trim() ?? residuo,
+  };
+
+  const classe = row.classe?.trim();
+
+  if (classe) {
+    entry.classification = classe;
+  }
+
+  const quantity = parseBrazilianNumber(row.quantidade?.trim() ?? '');
+
+  if (quantity !== undefined) {
+    entry.quantity = quantity;
+  }
+
+  const unidade = row.unidade?.trim();
+
+  if (unidade) {
+    entry.unit = unidade;
+  }
+
+  const tratamento = row.tratamento?.trim();
+
+  if (tratamento) {
+    entry.technology = tratamento;
+  }
+
+  return entry;
+};
+
+const extractWasteEntriesFromBlocks = (
+  extractionResult: TextExtractionResult,
+): undefined | WasteEntry[] => {
+  const blocks = normalizeMultiPageBlocks(extractionResult.blocks);
+  const detected = detectTableColumns(blocks, SINIR_WASTE_HEADER_DEFS);
+
+  if (!detected) {
+    return undefined;
+  }
+
+  const { rows } = extractTableFromBlocks(blocks, {
+    anchorColumn: SINIR_WASTE_ANCHOR,
+    columns: detected.columns as [
+      TableColumnConfig<SinirWasteColumn>,
+      ...Array<TableColumnConfig<SinirWasteColumn>>,
+    ],
+    maxRowGap: 0.03,
+    yRange: { max: 100, min: detected.headerTop + 0.01 },
+  });
+
+  const entries = rows
+    .map((row) => parseSinirWasteRow(row))
+    .filter((r): r is WasteEntry => r !== undefined);
+
+  return entries.length > 0 ? entries : undefined;
+};
 
 const UNNUMBERED_WASTE_CODE_PATTERN =
   // eslint-disable-next-line sonarjs/slow-regex
@@ -189,7 +297,9 @@ export class CdfSinirParser implements DocumentParser<CdfExtractedData> {
       );
     }
 
-    const wasteEntries = extractWasteEntries(text);
+    const wasteEntries =
+      extractWasteEntriesFromBlocks(extractionResult) ??
+      extractWasteEntries(text);
 
     if (wasteEntries.length > 0) {
       partialData.wasteEntries = createHighConfidenceField(wasteEntries);

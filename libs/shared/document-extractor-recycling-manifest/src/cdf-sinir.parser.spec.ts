@@ -1,5 +1,8 @@
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
-import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
+import {
+  stubTextExtractionResult,
+  stubTextExtractionResultWithBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import { CdfSinirParser } from './cdf-sinir.parser';
 
@@ -9,6 +12,29 @@ describe('CdfSinirParser', () => {
   beforeEach(() => {
     clearRegistry();
   });
+
+  const sinirWasteHeaderBlocks = [
+    {
+      boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
+      text: 'Residuo',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.575, top: 0.29, width: 0.04 },
+      text: 'Classe',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.663, top: 0.29, width: 0.07 },
+      text: 'Quantidade',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.757, top: 0.29, width: 0.05 },
+      text: 'Unidade',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.858, top: 0.29, width: 0.07 },
+      text: 'Tratamento',
+    },
+  ];
 
   const validSinirCdfText = [
     'CERTIFICADO DE DESTINAÇÃO FINAL',
@@ -284,6 +310,184 @@ describe('CdfSinirParser', () => {
       const result = parser.parse(stubTextExtractionResult(noMtrText));
 
       expect(result.data.transportManifests).toBeUndefined();
+    });
+
+    it('should extract waste entries from bounding-box table when blocks are available', () => {
+      const rawText = [
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'CDF n° 3661772/2025',
+        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que recebeu',
+        'Identificação dos Resíduos',
+        'Resíduo Classe Quantidade Unidade Tratamento',
+        '200108 Resíduos biodegradáveis de cozinha e cantinas CLASSE II A 1,1200 Tonelada Compostagem',
+        'Declaração',
+        'Araucária, 18/02/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.34 },
+            text: '200108 Residuos biodegradaveis de cozinha e cantinas',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.31, width: 0.08 },
+            text: 'CLASSE II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.31, width: 0.04 },
+            text: '1,1200',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.31, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.31, width: 0.09 },
+            text: 'Compostagem',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
+
+      const entry = result.data.wasteEntries?.parsed[0];
+
+      expect(entry?.code).toBe('200108');
+      expect(entry?.description).toBe(
+        'Residuos biodegradaveis de cozinha e cantinas',
+      );
+      expect(entry?.classification).toBe('CLASSE II A');
+      expect(entry?.quantity).toBe(1.12);
+      expect(entry?.unit).toBe('Tonelada');
+      expect(entry?.technology).toBe('Compostagem');
+      expect(result.data.wasteEntries?.confidence).toBe('high');
+    });
+
+    it('should extract multiple waste entries from bounding-box table', () => {
+      const rawText = [
+        'CERTIFICADO DE DESTINAÇÃO FINAL',
+        'CDF n° 100/2025',
+        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'Identificação dos Resíduos',
+        'Resíduo Classe Quantidade Unidade Tratamento',
+        '040108 Resíduos de couros CLASSE II A 1,9500 Tonelada Tratamento',
+        '020301 Lamas de lavagem CLASSE II A 3,5000 Tonelada Compostagem',
+        'Declaração',
+        'City, 10/05/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.25 },
+            text: '040108 Residuos de couros',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.31, width: 0.08 },
+            text: 'CLASSE II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.31, width: 0.04 },
+            text: '1,9500',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.31, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.31, width: 0.09 },
+            text: 'Tratamento',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.33, width: 0.22 },
+            text: '020301 Lamas de lavagem',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.33, width: 0.08 },
+            text: 'CLASSE II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.33, width: 0.04 },
+            text: '3,5000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.33, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.33, width: 0.09 },
+            text: 'Compostagem',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(2);
+
+      const first = result.data.wasteEntries?.parsed[0];
+
+      expect(first?.code).toBe('040108');
+      expect(first?.description).toBe('Residuos de couros');
+      expect(first?.quantity).toBe(1.95);
+
+      const second = result.data.wasteEntries?.parsed[1];
+
+      expect(second?.code).toBe('020301');
+      expect(second?.description).toBe('Lamas de lavagem');
+      expect(second?.quantity).toBe(3.5);
+    });
+
+    it('should handle waste code without dash in bounding-box table', () => {
+      const rawText = [
+        'CDF n° 100/2025',
+        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'Resíduo Classe Quantidade Unidade Tratamento',
+        '200108 Resíduos biodegradáveis CLASSE II A 3,0912 Tonelada Compostagem',
+        'Declaração',
+        'City, 07/02/2025',
+        'Responsável',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinirWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.31, width: 0.3 },
+            text: '200108 Residuos biodegradaveis',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.56, top: 0.31, width: 0.08 },
+            text: 'CLASSE II A',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.678, top: 0.31, width: 0.04 },
+            text: '3,0912',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.752, top: 0.31, width: 0.06 },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.849, top: 0.31, width: 0.09 },
+            text: 'Compostagem',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
+
+      const entry = result.data.wasteEntries?.parsed[0];
+
+      expect(entry?.code).toBe('200108');
+      expect(entry?.description).toBe('Residuos biodegradaveis');
+      expect(entry?.quantity).toBe(3.0912);
     });
   });
 
