@@ -14,6 +14,15 @@ import type { ComparisonOutput } from './field.comparators';
 
 import { parsePeriodRange } from './cross-validation.helpers';
 
+const ddmmyyyyToIso = (dmy: string): string => {
+  const [d, m, y] = dmy.split('/');
+
+  return `${y}-${m}-${d}`;
+};
+
+const isBidirectionalSubstring = (a: string, b: string): boolean =>
+  a.includes(b) || b.includes(a);
+
 export const comparePeriod = (
   periodField: ExtractedField<string> | undefined,
   eventDate: string | undefined,
@@ -37,22 +46,11 @@ export const comparePeriod = (
       ? undefined
       : utcIsoToLocalDate(eventDate, timezone);
 
-  const isMatch = (() => {
-    if (!periodRange || !localEventDate) {
-      return null;
-    }
-
-    const ddmmyyyyToIso = (dmy: string): string => {
-      const [d, m, y] = dmy.split('/');
-
-      return `${y}-${m}-${d}`;
-    };
-
-    return (
-      localEventDate >= ddmmyyyyToIso(periodRange.start) &&
-      localEventDate <= ddmmyyyyToIso(periodRange.end)
-    );
-  })();
+  const isMatch =
+    !periodRange || !localEventDate
+      ? null
+      : localEventDate >= ddmmyyyyToIso(periodRange.start) &&
+        localEventDate <= ddmmyyyyToIso(periodRange.end);
 
   const debug: ProcessingPeriodComparison = {
     confidence: periodField?.confidence ?? null,
@@ -124,8 +122,8 @@ export const compareMtrNumbers = (
     extractedManifests === undefined
       ? null
       : eventMtrNumbers.every((number_) =>
-          extractedManifests.parsed.some(
-            (m) => m.includes(number_) || number_.includes(m),
+          extractedManifests.parsed.some((m) =>
+            isBidirectionalSubstring(m, number_),
           ),
         );
 
@@ -156,9 +154,8 @@ export const compareMtrNumbers = (
   const validation: FieldValidationResult[] = [];
 
   for (const mtrNumber of eventMtrNumbers) {
-    const found = extractedManifests.parsed.some(
-      (manifest) =>
-        manifest.includes(mtrNumber) || mtrNumber.includes(manifest),
+    const found = extractedManifests.parsed.some((manifest) =>
+      isBidirectionalSubstring(manifest, mtrNumber),
     );
 
     if (!found) {

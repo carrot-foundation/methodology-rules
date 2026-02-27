@@ -104,11 +104,7 @@ export const compareWasteType = (
     };
   }
 
-  const hasMatch = meaningfulEntries.some(
-    (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
-  );
-
-  if (hasMatch) {
+  if (debug.isMatch === true) {
     return { debug, validation: [] };
   }
 

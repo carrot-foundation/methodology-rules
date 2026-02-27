@@ -31,12 +31,6 @@ import {
 } from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
-export {
-  matchWasteTypeEntry,
-  normalizeQuantityToKg,
-  WEIGHT_DISCREPANCY_THRESHOLD,
-} from './cross-validation';
-
 export interface MtrCrossValidationEventData
   extends DocumentManifestEventSubject {
   dropOffEvent: DocumentEvent | undefined;

@@ -8,15 +8,17 @@ import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import {
+  matchWasteTypeEntry,
+  normalizeQuantityToKg,
+  WEIGHT_DISCREPANCY_THRESHOLD,
+} from './cross-validation';
+import {
   stubMtrEntity as stubEntity,
   stubMtrEntityWithHighAddress as stubEntityWithHighAddress,
 } from './cross-validation/cross-validation.stubs';
 import {
-  matchWasteTypeEntry,
   type MtrCrossValidationEventData,
-  normalizeQuantityToKg,
   validateMtrExtractedData,
-  WEIGHT_DISCREPANCY_THRESHOLD,
 } from './transport-manifest-cross-validation.helpers';
 
 const baseMtrData = {
