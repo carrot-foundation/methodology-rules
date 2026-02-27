@@ -10,6 +10,7 @@ export interface MethodologyAuthor {
 }
 
 export interface MethodologyParticipant {
+  businessName?: string | undefined;
   countryCode: string;
   id: string;
   name: string;
