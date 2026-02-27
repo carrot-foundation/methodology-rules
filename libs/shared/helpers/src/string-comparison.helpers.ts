@@ -60,7 +60,9 @@ const MIN_TOKENS_FOR_TOLERANCE = 4;
 
 const isTokenMatch = (token: string, candidate: string): boolean => {
   if (token.length === 1) {
-    return candidate.startsWith(token);
+    return /^\d$/.test(token)
+      ? candidate === token
+      : candidate.startsWith(token);
   }
 
   if (token === candidate) {

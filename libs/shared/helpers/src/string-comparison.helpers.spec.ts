@@ -152,6 +152,17 @@ describe('string-comparison.helpers', () => {
         expect(result.isMatch).toBe(true);
       });
 
+      it('should not treat single-digit tokens as prefixes (e.g. 1 should not match 10)', () => {
+        const result = isNameMatch(
+          'EMPRESA 1 LTDA',
+          'EMPRESA 10 COMERCIO LTDA',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(false);
+      });
+
       it('should match regardless of which argument has the extra words', () => {
         const result = isNameMatch(
           'ROYAL CANIN DO BRASIL LTDA',
