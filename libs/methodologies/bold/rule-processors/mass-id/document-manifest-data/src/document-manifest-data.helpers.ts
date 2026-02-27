@@ -48,8 +48,10 @@ export const DOCUMENT_TYPE_MAPPING: Record<string, DocumentType> = {
 };
 
 export interface LayoutValidationConfig {
-  readonly unsupportedValidations?: readonly string[];
+  readonly unsupportedValidations?: readonly ValidationKey[];
 }
+
+export type ValidationKey = 'mtrNumbers' | 'wasteType';
 
 const LAYOUT_VALIDATION_CONFIG: Record<string, LayoutValidationConfig> = {
   'cdf-custom-1': {

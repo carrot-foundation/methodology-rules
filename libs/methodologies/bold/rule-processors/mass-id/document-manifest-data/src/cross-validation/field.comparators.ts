@@ -88,25 +88,23 @@ export const compareStringField = (
     extracted: field.parsed,
   });
 
+  const withComparedFields = {
+    ...reason,
+    comparedFields: [
+      {
+        event: eventValue,
+        extracted: field.parsed,
+        field: 'value',
+      },
+    ],
+  };
+
   return {
     debug,
     validation:
       options.routing === 'fail'
-        ? [{ failReason: reason }]
-        : [
-            {
-              reviewReason: {
-                ...reason,
-                comparedFields: [
-                  {
-                    event: eventValue,
-                    extracted: field.parsed,
-                    field: 'value',
-                  },
-                ],
-              },
-            },
-          ],
+        ? [{ failReason: withComparedFields }]
+        : [{ reviewReason: withComparedFields }],
   };
 };
 
