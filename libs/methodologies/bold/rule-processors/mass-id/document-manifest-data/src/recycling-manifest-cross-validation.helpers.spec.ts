@@ -565,7 +565,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should fail when all waste entries have no meaningful code or description and confidence is high', () => {
+      it('should set reviewRequired when all waste entries have no meaningful code or description and confidence is high', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -584,8 +584,8 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(false);
-        expect(result.failReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
       });
 
       it('should set reviewRequired when all waste entries have no meaningful code or description and confidence is low', () => {
