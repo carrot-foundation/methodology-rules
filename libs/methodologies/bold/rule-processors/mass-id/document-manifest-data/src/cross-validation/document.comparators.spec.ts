@@ -1,9 +1,6 @@
 import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
 
-import {
-  compareMtrNumbers,
-  comparePeriod,
-} from './cross-validation.document-comparators';
+import { compareMtrNumbers, comparePeriod } from './document.comparators';
 
 const notExtractedReason: ReviewReason = {
   code: 'NOT_EXTRACTED',

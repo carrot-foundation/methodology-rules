@@ -1,17 +1,17 @@
 import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
 
 import {
-  compareDateField,
-  compareEntity,
-  compareStringField,
-  DATE_TOLERANCE_DAYS,
-} from './cross-validation.field-comparators';
-import {
   stubEntity,
   stubEntityWithAddress,
   stubMtrEntity,
   stubMtrEntityWithHighAddress,
-} from './cross-validation.test-helpers';
+} from './cross-validation.stubs';
+import {
+  compareDateField,
+  compareEntity,
+  compareStringField,
+  DATE_TOLERANCE_DAYS,
+} from './field.comparators';
 
 const mismatchReason = ({
   event,

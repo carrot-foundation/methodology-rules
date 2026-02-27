@@ -12,8 +12,8 @@ import type {
   WasteTypeComparison,
   WasteTypeEntry,
 } from '../document-manifest-data.result-content.types';
-import type { ComparisonOutput } from './cross-validation.field-comparators';
 import type { FieldValidationResult } from './cross-validation.helpers';
+import type { ComparisonOutput } from './field.comparators';
 
 import {
   computeCdfTotalKg,

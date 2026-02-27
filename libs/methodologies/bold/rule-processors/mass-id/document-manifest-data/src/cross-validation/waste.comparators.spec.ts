@@ -7,7 +7,7 @@ import {
   compareWasteQuantity,
   compareWasteType,
   WEIGHT_DISCREPANCY_THRESHOLD,
-} from './cross-validation.waste-comparators';
+} from './waste.comparators';
 
 const notExtractedReason: ReviewReason = {
   code: 'NOT_EXTRACTED',

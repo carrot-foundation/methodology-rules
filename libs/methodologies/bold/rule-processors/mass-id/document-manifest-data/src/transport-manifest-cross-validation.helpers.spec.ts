@@ -10,7 +10,7 @@ import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extr
 import {
   stubMtrEntity as stubEntity,
   stubMtrEntityWithHighAddress as stubEntityWithHighAddress,
-} from './cross-validation/cross-validation.test-helpers';
+} from './cross-validation/cross-validation.stubs';
 import {
   matchWasteTypeEntry,
   type MtrCrossValidationEventData,
