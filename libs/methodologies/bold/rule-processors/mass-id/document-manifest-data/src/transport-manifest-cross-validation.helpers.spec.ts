@@ -16,7 +16,6 @@ import {
   type MtrCrossValidationEventData,
   normalizeQuantityToKg,
   validateMtrExtractedData,
-  validateWasteQuantityDiscrepancy,
   WEIGHT_DISCREPANCY_THRESHOLD,
 } from './transport-manifest-cross-validation.helpers';
 
@@ -165,7 +164,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect.objectContaining({
           event: 'XYZ9876',
           extracted: 'ABC1234',
-          field: 'vehiclePlate',
+          field: 'value',
         }),
       ]);
     });
@@ -1019,7 +1018,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         ).toBe(true);
       });
 
-      it('should fail when all waste type entries have no meaningful code or description with high confidence', () => {
+      it('should set reviewRequired when all waste type entries have no meaningful code or description', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [createExtractedWasteTypeEntry({ description: '' })],
         });
@@ -1034,8 +1033,8 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
         const result = validateMtrExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(false);
-        expect(result.failReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
       });
 
       it('should return review reason when code matches but description does not', () => {
@@ -1803,18 +1802,6 @@ describe('transport-manifest-cross-validation.helpers', () => {
       );
 
       expect(result.isMatch).toBe(true);
-    });
-
-    it('should re-export validateWasteQuantityDiscrepancy from shared helpers', () => {
-      const result = validateWasteQuantityDiscrepancy(
-        [],
-        '01 01 01',
-        'Waste',
-        [],
-        () => ({ code: 'MISMATCH', description: 'mismatch' }),
-      );
-
-      expect(result).toEqual({});
     });
   });
 });

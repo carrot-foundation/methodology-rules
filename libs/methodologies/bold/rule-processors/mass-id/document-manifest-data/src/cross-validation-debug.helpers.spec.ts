@@ -294,7 +294,7 @@ describe('cross-validation-debug.helpers', () => {
         'high',
       );
 
-      expect(result.documentNumber.isMatch).toBe(false);
+      expect(result.documentNumber.isMatch).toBeNull();
     });
 
     it('should handle missing documentNumber in extracted data', () => {
@@ -311,7 +311,7 @@ describe('cross-validation-debug.helpers', () => {
 
       expect(result.documentNumber.confidence).toBeNull();
       expect(result.documentNumber.extracted).toBeNull();
-      expect(result.documentNumber.isMatch).toBe(false);
+      expect(result.documentNumber.isMatch).toBeNull();
     });
   });
 

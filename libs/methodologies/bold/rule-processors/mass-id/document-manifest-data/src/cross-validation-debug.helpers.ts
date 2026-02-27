@@ -1,6 +1,7 @@
 import type {
   ExtractedEntityInfo,
   ExtractedEntityWithAddressInfo,
+  ExtractedField,
   ExtractionConfidence,
 } from '@carrot-fndn/shared/document-extractor';
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
@@ -27,8 +28,10 @@ import type {
   CdfCrossValidation,
   CdfTotalWeightComparison,
   EntityComparison,
+  FieldComparison,
   MtrCrossValidation,
   WasteQuantityComparison,
+  WasteTypeComparison,
   WasteTypeEntry,
 } from './document-manifest-data.result-content.types';
 import type { CdfCrossValidationEventData } from './recycling-manifest-cross-validation.helpers';
@@ -222,6 +225,56 @@ const buildWasteTypeDebugEntry = (
   };
 };
 
+const fieldComparison = (
+  field: ExtractedField<string> | undefined,
+  eventValue: string | undefined,
+  compareFunction: (extracted: string, event: string) => boolean = (a, b) =>
+    a === b,
+): FieldComparison => ({
+  confidence: field?.confidence ?? null,
+  event: eventValue ?? null,
+  extracted: field?.parsed ?? null,
+  isMatch:
+    field !== undefined && eventValue !== undefined
+      ? compareFunction(field.parsed, eventValue)
+      : null,
+});
+
+const dateComparison = (
+  field: ExtractedField<string> | undefined,
+  eventDate: string | undefined,
+): FieldComparison => {
+  const daysDiff = computeDateDaysDiff(field?.parsed, eventDate);
+
+  return {
+    confidence: field?.confidence ?? null,
+    daysDiff: daysDiff ?? null,
+    event: eventDate ?? null,
+    extracted: field?.parsed ?? null,
+    isMatch: daysDiff == null ? null : daysDiff === 0,
+  };
+};
+
+const wasteTypeComparison = (
+  entries: undefined | WasteTypeEntryData[],
+  eventCode: string | undefined,
+  eventDescription: string | undefined,
+  confidence?: ExtractionConfidence | null,
+): WasteTypeComparison => {
+  const debugEntries =
+    entries?.map((entry) =>
+      buildWasteTypeDebugEntry(entry, eventCode, eventDescription),
+    ) ?? null;
+
+  return {
+    ...(confidence !== undefined && { confidence }),
+    entries: debugEntries,
+    eventCode: eventCode ?? null,
+    eventDescription: eventDescription ?? null,
+    isMatch: debugEntries?.some((e) => e.isMatch === true) ?? null,
+  };
+};
+
 export const buildCrossValidationComparison = (
   extractedData: MtrExtractedData,
   eventData: MtrCrossValidationEventData,
@@ -237,28 +290,11 @@ export const buildCrossValidationComparison = (
   const eventIssueDate = eventData.issueDateAttribute?.value?.toString();
   const eventPlateString = eventPlateValue?.toString();
 
-  const issueDateDaysDiff = computeDateDaysDiff(
-    eventIssueDate,
-    extractedData.issueDate?.parsed,
-  );
-  const receivingDateDaysDiff = computeDateDaysDiff(
-    extractedData.receivingDate?.parsed,
-    eventData.dropOffEvent?.externalCreatedAt,
-  );
-  const transportDateDaysDiff = computeDateDaysDiff(
-    extractedData.transportDate?.parsed,
-    eventData.pickUpEvent?.externalCreatedAt,
-  );
-
   const crossValidation: MtrCrossValidation = {
-    documentNumber: {
-      confidence: extractedData.documentNumber?.confidence ?? null,
-      event: eventData.documentNumber?.toString() ?? null,
-      extracted: extractedData.documentNumber?.parsed ?? null,
-      isMatch:
-        eventData.documentNumber?.toString() ===
-        extractedData.documentNumber?.parsed,
-    },
+    documentNumber: fieldComparison(
+      extractedData.documentNumber,
+      eventData.documentNumber?.toString(),
+    ),
     generator: entityDebugInfo(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
@@ -271,69 +307,37 @@ export const buildCrossValidationComparison = (
       eventData.haulerEvent?.participant.taxId,
       eventData.haulerEvent?.address,
     ),
-    issueDate: {
-      confidence: extractedData.issueDate?.confidence ?? null,
-      daysDiff: issueDateDaysDiff ?? null,
-      event: eventIssueDate ?? null,
-      extracted: extractedData.issueDate?.parsed ?? null,
-      isMatch: issueDateDaysDiff == null ? null : issueDateDaysDiff === 0,
-    },
+    issueDate: dateComparison(extractedData.issueDate, eventIssueDate),
     receiver: entityDebugInfo(
       extractedData.receiver,
       eventData.recyclerEvent?.participant.name,
       eventData.recyclerEvent?.participant.taxId,
       eventData.recyclerEvent?.address,
     ),
-    receivingDate: {
-      confidence: extractedData.receivingDate?.confidence ?? null,
-      daysDiff: receivingDateDaysDiff ?? null,
-      event: eventData.dropOffEvent?.externalCreatedAt ?? null,
-      extracted: extractedData.receivingDate?.parsed ?? null,
-      isMatch:
-        receivingDateDaysDiff == null ? null : receivingDateDaysDiff === 0,
-    },
-    transportDate: {
-      confidence: extractedData.transportDate?.confidence ?? null,
-      daysDiff: transportDateDaysDiff ?? null,
-      event: eventData.pickUpEvent?.externalCreatedAt ?? null,
-      extracted: extractedData.transportDate?.parsed ?? null,
-      isMatch:
-        transportDateDaysDiff == null ? null : transportDateDaysDiff === 0,
-    },
-    vehiclePlate: {
-      confidence: extractedData.vehiclePlate?.confidence ?? null,
-      event: eventPlateString ?? null,
-      extracted: extractedData.vehiclePlate?.parsed ?? null,
-      isMatch:
-        eventPlateString !== undefined &&
-        extractedData.vehiclePlate !== undefined
-          ? normalizeVehiclePlate(eventPlateString) ===
-            normalizeVehiclePlate(extractedData.vehiclePlate.parsed)
-          : null,
-    },
+    receivingDate: dateComparison(
+      extractedData.receivingDate,
+      eventData.dropOffEvent?.externalCreatedAt,
+    ),
+    transportDate: dateComparison(
+      extractedData.transportDate,
+      eventData.pickUpEvent?.externalCreatedAt,
+    ),
+    vehiclePlate: fieldComparison(
+      extractedData.vehiclePlate,
+      eventPlateString,
+      (a, b) => normalizeVehiclePlate(a) === normalizeVehiclePlate(b),
+    ),
     wasteQuantityWeight: buildWasteQuantityDebugInfo(
       extractedData.wasteTypes?.map((entry) => toWasteTypeEntryData(entry)),
       eventWasteCode,
       eventWasteDescription,
       eventData.weighingEvents,
     ),
-    wasteType: (() => {
-      const entries =
-        extractedData.wasteTypes?.map((extractedEntry) =>
-          buildWasteTypeDebugEntry(
-            toWasteTypeEntryData(extractedEntry),
-            eventWasteCode,
-            eventWasteDescription,
-          ),
-        ) ?? null;
-
-      return {
-        entries,
-        eventCode: eventWasteCode ?? null,
-        eventDescription: eventWasteDescription ?? null,
-        isMatch: entries?.some((e) => e.isMatch === true) ?? null,
-      };
-    })(),
+    wasteType: wasteTypeComparison(
+      extractedData.wasteTypes?.map(toWasteTypeEntryData),
+      eventWasteCode,
+      eventWasteDescription,
+    ),
   };
 
   logger.debug(
@@ -406,37 +410,22 @@ export const buildCdfCrossValidationComparison = (
           ),
         );
 
-  const issueDateDaysDiff = computeDateDaysDiff(
-    eventIssueDate,
-    extractedData.issueDate?.parsed,
-  );
-
   const crossValidation: CdfCrossValidation = {
     cdfTotalWeight: buildCdfTotalWeightDebugInfo(
       extractedData,
       eventData.documentCurrentValue,
     ),
-    documentNumber: {
-      confidence: extractedData.documentNumber?.confidence ?? null,
-      event: eventData.documentNumber?.toString() ?? null,
-      extracted: extractedData.documentNumber?.parsed ?? null,
-      isMatch:
-        eventData.documentNumber?.toString() ===
-        extractedData.documentNumber?.parsed,
-    },
+    documentNumber: fieldComparison(
+      extractedData.documentNumber,
+      eventData.documentNumber?.toString(),
+    ),
     generator: entityDebugInfo(
       extractedData.generator,
       eventData.wasteGeneratorEvent?.participant.name,
       eventData.wasteGeneratorEvent?.participant.taxId,
       eventData.wasteGeneratorEvent?.address,
     ),
-    issueDate: {
-      confidence: extractedData.issueDate?.confidence ?? null,
-      daysDiff: issueDateDaysDiff ?? null,
-      event: eventIssueDate ?? null,
-      extracted: extractedData.issueDate?.parsed ?? null,
-      isMatch: issueDateDaysDiff == null ? null : issueDateDaysDiff === 0,
-    },
+    issueDate: dateComparison(extractedData.issueDate, eventIssueDate),
     mtrNumbers: {
       event: eventData.mtrDocumentNumbers,
       extracted: extractedData.transportManifests?.parsed ?? null,
@@ -463,24 +452,12 @@ export const buildCdfCrossValidationComparison = (
       eventWasteDescription,
       eventData.weighingEvents,
     ),
-    wasteType: (() => {
-      const entries =
-        extractedData.wasteEntries?.parsed.map((entry) =>
-          buildWasteTypeDebugEntry(
-            entry,
-            eventWasteCode,
-            eventWasteDescription,
-          ),
-        ) ?? null;
-
-      return {
-        confidence: extractedData.wasteEntries?.confidence ?? null,
-        entries,
-        eventCode: eventWasteCode ?? null,
-        eventDescription: eventWasteDescription ?? null,
-        isMatch: entries?.some((e) => e.isMatch === true) ?? null,
-      };
-    })(),
+    wasteType: wasteTypeComparison(
+      extractedData.wasteEntries?.parsed,
+      eventWasteCode,
+      eventWasteDescription,
+      extractedData.wasteEntries?.confidence ?? null,
+    ),
   };
 
   logger.debug(
