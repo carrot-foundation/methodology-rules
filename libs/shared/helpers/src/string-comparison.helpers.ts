@@ -10,6 +10,8 @@ export const aggressiveNormalize = (value: string): string =>
     .replaceAll(/[\u0300-\u036F]/g, '')
     .toLowerCase()
     .replaceAll(/[^\d\sa-z]/g, '')
+    .replaceAll(/([a-z])(\d)/g, '$1 $2')
+    .replaceAll(/(\d)([a-z])/g, '$1 $2')
     .replaceAll(/\s+/g, ' ')
     .trim();
 

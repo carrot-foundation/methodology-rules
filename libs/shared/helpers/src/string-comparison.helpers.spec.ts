@@ -25,6 +25,13 @@ describe('string-comparison.helpers', () => {
       expect(aggressiveNormalize('  hello   world  ')).toBe('hello world');
     });
 
+    it('should split letter-digit boundaries', () => {
+      expect(aggressiveNormalize('Bellegard,400')).toBe('bellegard 400');
+      expect(aggressiveNormalize('ABC123')).toBe('abc 123');
+      expect(aggressiveNormalize('123ABC')).toBe('123 abc');
+      expect(aggressiveNormalize('test42value')).toBe('test 42 value');
+    });
+
     it('should handle empty string', () => {
       expect(aggressiveNormalize('')).toBe('');
     });
@@ -176,6 +183,17 @@ describe('string-comparison.helpers', () => {
         );
 
         expect(result.isMatch).toBe(false);
+      });
+
+      it('should match addresses with merged number and extra locality', () => {
+        const result = isNameMatch(
+          'Rua Exemplo,400 Bairro Centro, Cidade, SP',
+          'R Exemplo, 400, Cidade, SP',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(true);
       });
     });
   });
