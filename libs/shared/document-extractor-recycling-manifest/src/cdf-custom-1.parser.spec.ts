@@ -307,8 +307,34 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.wasteEntries?.parsed[0]?.quantity).toBe(500);
     });
 
-    it('should extract receipt table entries', () => {
-      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
+    it('should extract receipt table entries from blocks', () => {
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '01/07/2024',
+          '85,12',
+          0.539,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '02/07/2024',
+          '90,50',
+          0.556,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '15/07/2024',
+          '201,97',
+          0.573,
+        ),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as NonEmptyString,
+      });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(3);
       expect(result.data.receiptEntries?.confidence).toBe('high');
@@ -320,7 +346,27 @@ describe('CdfCustom1Parser', () => {
     });
 
     it('should derive processingPeriod from receipt table dates', () => {
-      const result = parser.parse(stubTextExtractionResult(validCustomCdfText));
+      const blocks: TextBlock[] = [
+        ...CDF_PREAMBLE_BLOCKS,
+        ...CDF_TABLE_HEADER_BLOCKS,
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '01/07/2024',
+          '85,12',
+          0.539,
+        ),
+        ...makeReceiptRow(
+          'LODO SOLIDO - SANITARIO',
+          '15/07/2024',
+          '201,97',
+          0.556,
+        ),
+      ];
+
+      const result = parser.parse({
+        blocks,
+        rawText: validCustomCdfText as NonEmptyString,
+      });
 
       expect(result.data.processingPeriod?.parsed).toBe(
         '01/07/2024 ate 15/07/2024',
@@ -396,7 +442,8 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(badQuantityText));
 
-      expect(result.data.receiptEntries?.parsed).toHaveLength(1);
+      // No blocks provided, so no receipt entries extracted
+      expect(result.data.receiptEntries).toBeUndefined();
     });
 
     it('should skip waste subtotals with unparseable quantity', () => {
@@ -569,7 +616,7 @@ describe('CdfCustom1Parser', () => {
       );
     });
 
-    it('should skip block rows with invalid date format and fall back to regex', () => {
+    it('should skip block rows with invalid date format', () => {
       const blocks: TextBlock[] = [
         ...CDF_PREAMBLE_BLOCKS,
         ...CDF_TABLE_HEADER_BLOCKS,
@@ -586,11 +633,11 @@ describe('CdfCustom1Parser', () => {
         rawText: validCustomCdfText as NonEmptyString,
       });
 
-      // Block extraction yields 0 valid rows, falls back to regex on rawText
-      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
+      // Block extraction yields 0 valid rows, no receipt entries
+      expect(result.data.receiptEntries).toBeUndefined();
     });
 
-    it('should skip block rows with unparseable quantity and fall back to regex', () => {
+    it('should skip block rows with unparseable quantity', () => {
       const blocks: TextBlock[] = [
         ...CDF_PREAMBLE_BLOCKS,
         ...CDF_TABLE_HEADER_BLOCKS,
@@ -607,8 +654,8 @@ describe('CdfCustom1Parser', () => {
         rawText: validCustomCdfText as NonEmptyString,
       });
 
-      // Block extraction yields 0 valid rows, falls back to regex on rawText
-      expect(result.data.receiptEntries?.parsed).toHaveLength(3);
+      // Block extraction yields 0 valid rows, no receipt entries
+      expect(result.data.receiptEntries).toBeUndefined();
     });
   });
 
