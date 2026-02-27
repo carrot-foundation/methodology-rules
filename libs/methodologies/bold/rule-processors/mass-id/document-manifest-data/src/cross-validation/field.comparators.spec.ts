@@ -44,10 +44,6 @@ const onDateMismatch = ({
 
 const entityReasons = {
   name: {
-    mismatchReason: ({ score }: { score: number }) => ({
-      code: 'NAME_MISMATCH',
-      description: `Name similarity: ${(score * 100).toFixed(0)}%`,
-    }),
     notExtractedReason: {
       code: 'NAME_NOT_EXTRACTED',
       description: 'Name not extracted',
@@ -321,7 +317,7 @@ describe('cross-validation field comparators', () => {
     it('should return null debug and not-extracted reviews when entity is undefined', () => {
       const result = compareEntity(
         undefined,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasons,
       );
@@ -352,7 +348,7 @@ describe('cross-validation field comparators', () => {
       const entity = stubEntity('Generator Co', '11.111.111/0001-11');
       const result = compareEntity(
         entity,
-        'Different Name',
+        ['Different Name'],
         '11.111.111/0001-11',
         entityReasons,
       );
@@ -365,7 +361,7 @@ describe('cross-validation field comparators', () => {
       const entity = stubEntity('Generator Co', '11.111.111/0001-11');
       const result = compareEntity(
         entity,
-        'Generator Co',
+        ['Generator Co'],
         '22.222.222/0001-22',
         entityReasons,
       );
@@ -381,11 +377,11 @@ describe('cross-validation field comparators', () => {
       expect(taxIdFail?.failReason?.comparedFields?.[0]?.field).toBe('taxId');
     });
 
-    it('should return reviewReason when name mismatches with high confidence', () => {
+    it('should not produce name mismatch validation (name is informational only)', () => {
       const entity = stubEntity('Generator Co', '11.111.111/0001-11');
       const result = compareEntity(
         entity,
-        'Completely Different Company Name XYZ',
+        ['Completely Different Company Name XYZ'],
         undefined,
         entityReasons,
       );
@@ -394,12 +390,53 @@ describe('cross-validation field comparators', () => {
         (v) => v.reviewReason?.code === 'NAME_MISMATCH',
       );
 
-      if (result.debug?.isMatch === false) {
-        expect(nameReview).toBeDefined();
-        expect(nameReview?.reviewReason?.comparedFields?.[0]?.field).toBe(
-          'name',
-        );
-      }
+      expect(nameReview).toBeUndefined();
+      expect(result.debug?.nameSimilarity).toBeDefined();
+    });
+
+    it('should match if businessName matches but registered name does not', () => {
+      const entity = stubEntity(
+        'CONCESSIONARIA DO BLOCO SUL S.A.',
+        '11.111.111/0001-11',
+      );
+      const result = compareEntity(
+        entity,
+        [
+          'Aeroporto Internacional Afonso Pena',
+          'CONCESSIONARIA DO BLOCO SUL S.A.',
+        ],
+        '11.111.111/0001-11',
+        entityReasons,
+      );
+
+      expect(result.debug?.isMatch).toBe(true);
+      expect(result.validation).toEqual([]);
+    });
+
+    it('should use best score from multiple names', () => {
+      const entity = stubEntity('Generator Company Ltd', '11.111.111/0001-11');
+      const result = compareEntity(
+        entity,
+        ['Completely Wrong Name', 'Generator Company Ltd'],
+        '11.111.111/0001-11',
+        entityReasons,
+      );
+
+      expect(result.debug?.isMatch).toBe(true);
+      expect(result.debug?.nameSimilarity).toBe('100%');
+    });
+
+    it('should keep better score when first name matches best', () => {
+      const entity = stubEntity('Generator Company Ltd', '11.111.111/0001-11');
+      const result = compareEntity(
+        entity,
+        ['Generator Company Ltd', 'Completely Wrong Name'],
+        '11.111.111/0001-11',
+        entityReasons,
+      );
+
+      expect(result.debug?.isMatch).toBe(true);
+      expect(result.debug?.nameSimilarity).toBe('100%');
     });
 
     it('should skip name validation when confidence is low', () => {
@@ -413,7 +450,7 @@ describe('cross-validation field comparators', () => {
       };
       const result = compareEntity(
         entity,
-        'Completely Different Company Name XYZ',
+        ['Completely Different Company Name XYZ'],
         '99.999.999/0001-99',
         entityReasons,
       );
@@ -432,7 +469,7 @@ describe('cross-validation field comparators', () => {
 
       const result = compareEntity(
         entity,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasonsWithAddress,
         stubEventAddress(),
@@ -453,7 +490,7 @@ describe('cross-validation field comparators', () => {
 
       const result = compareEntity(
         entity,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasonsWithAddress,
         stubEventAddress({
@@ -477,7 +514,7 @@ describe('cross-validation field comparators', () => {
 
       const result = compareEntity(
         entity,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasonsWithAddress,
         stubEventAddress(),
@@ -496,7 +533,7 @@ describe('cross-validation field comparators', () => {
 
       const result = compareEntity(
         entity,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasonsWithAddress,
         stubEventAddress({
@@ -518,7 +555,7 @@ describe('cross-validation field comparators', () => {
     it('should include address not-extracted review when entity undefined and address present', () => {
       const result = compareEntity(
         undefined,
-        'Generator Co',
+        ['Generator Co'],
         '11.111.111/0001-11',
         entityReasonsWithAddress,
         stubEventAddress(),

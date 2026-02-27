@@ -15,7 +15,6 @@ import type { CdfCrossValidation } from './document-manifest-data.result-content
 
 import {
   collectResults,
-  compareCdfTotalWeight,
   compareDateField,
   compareEntity,
   compareMtrNumbers,
@@ -26,6 +25,7 @@ import {
   computeCdfTotalKg,
   type CrossValidationResponse,
   type EntityComparisonReasons,
+  getParticipantNames,
   getWasteClassification,
 } from './cross-validation';
 import {
@@ -142,7 +142,6 @@ export const validateCdfExtractedData = (
 
   const recyclerReasons: EntityComparisonReasons = {
     name: {
-      mismatchReason: REVIEW_REASONS.RECYCLER_NAME_MISMATCH,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'recycler name',
@@ -159,7 +158,7 @@ export const validateCdfExtractedData = (
 
   const recycler = compareEntity(
     extractedData.recycler,
-    eventData.recyclerEvent?.participant.name,
+    getParticipantNames(eventData.recyclerEvent?.participant),
     eventData.recyclerEvent?.participant.taxId,
     recyclerReasons,
   );
@@ -173,7 +172,6 @@ export const validateCdfExtractedData = (
       }),
     },
     name: {
-      mismatchReason: REVIEW_REASONS.GENERATOR_NAME_MISMATCH,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator name',
@@ -190,7 +188,7 @@ export const validateCdfExtractedData = (
 
   const generator = compareEntity(
     extractedData.generator,
-    eventData.wasteGeneratorEvent?.participant.name,
+    getParticipantNames(eventData.wasteGeneratorEvent?.participant),
     eventData.wasteGeneratorEvent?.participant.taxId,
     generatorReasons,
     eventData.wasteGeneratorEvent?.address,
@@ -208,20 +206,6 @@ export const validateCdfExtractedData = (
       timezone: dropOffTimezone,
     },
   );
-
-  const cdfTotalWeight =
-    eventData.documentCurrentValue === 0
-      ? { debug: null, validation: [] }
-      : compareCdfTotalWeight(extractedData, eventData.documentCurrentValue, {
-          mismatchReason:
-            REVIEW_REASONS.CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE,
-          notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-            field: 'waste entry quantities',
-          }),
-          ...(extractedData.wasteEntries !== undefined && {
-            wasteEntriesConfidence: extractedData.wasteEntries.confidence,
-          }),
-        });
 
   const wasteType = compareWasteType(
     extractedData.wasteEntries?.parsed,
@@ -246,8 +230,16 @@ export const validateCdfExtractedData = (
     eventWasteDescription,
     eventData.weighingEvents,
     {
+      confidence: extractedData.wasteEntries?.confidence ?? null,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'waste quantity',
+      }),
       onMismatch:
         REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH,
+      skipValidation:
+        layoutValidationConfig.unsupportedValidations?.includes(
+          'wasteQuantityWeight',
+        ) === true,
     },
   );
 
@@ -268,7 +260,6 @@ export const validateCdfExtractedData = (
   );
 
   const crossValidation: CdfCrossValidation = {
-    cdfTotalWeight: cdfTotalWeight.debug,
     documentNumber: documentNumber.debug,
     generator: generator.debug,
     issueDate: issueDate.debug,
@@ -285,7 +276,6 @@ export const validateCdfExtractedData = (
     ...recycler.validation,
     ...generator.validation,
     ...processingPeriod.validation,
-    ...cdfTotalWeight.validation,
     ...wasteType.validation,
     ...wasteQuantityWeight.validation,
     ...mtrNumbers.validation,

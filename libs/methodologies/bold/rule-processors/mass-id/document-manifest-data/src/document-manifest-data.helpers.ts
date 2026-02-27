@@ -51,7 +51,7 @@ export interface LayoutValidationConfig {
   readonly unsupportedValidations?: readonly ValidationKey[];
 }
 
-export type ValidationKey = 'mtrNumbers' | 'wasteType';
+export type ValidationKey = 'mtrNumbers' | 'wasteQuantityWeight' | 'wasteType';
 
 const LAYOUT_VALIDATION_CONFIG: Record<string, LayoutValidationConfig> = {
   'cdf-custom-1': {

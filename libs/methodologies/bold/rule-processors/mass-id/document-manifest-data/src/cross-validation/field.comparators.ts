@@ -31,7 +31,6 @@ export interface EntityComparisonReasons {
     notExtractedReason?: ReviewReason;
   };
   name: {
-    mismatchReason: (parameters: { score: number }) => ReviewReason;
     notExtractedReason?: ReviewReason;
   };
   taxId: {
@@ -189,14 +188,18 @@ export const compareDateField = (
 };
 
 const buildEntityNotExtractedReasons = (
-  eventName: string | undefined,
+  eventNames: readonly string[] | undefined,
   eventTaxId: string | undefined,
   eventAddress: MethodologyAddress | undefined,
   reasons: EntityComparisonReasons,
 ): FieldValidationResult[] => {
   const validation: FieldValidationResult[] = [];
 
-  if (eventName !== undefined && reasons.name.notExtractedReason) {
+  if (
+    eventNames !== undefined &&
+    eventNames.length > 0 &&
+    reasons.name.notExtractedReason
+  ) {
     validation.push({ reviewReason: reasons.name.notExtractedReason });
   }
 
@@ -283,20 +286,8 @@ const validateEntityAddress = (
   };
 };
 
-const resolveEntityIsMatch = (
-  taxIdMatch: boolean | null,
-  nameResult: undefined | { isMatch: boolean },
-): boolean | null => {
-  if (taxIdMatch === true) {
-    return true;
-  }
-
-  if (taxIdMatch === false) {
-    return false;
-  }
-
-  return nameResult === undefined ? null : nameResult.isMatch;
-};
+const resolveEntityIsMatch = (taxIdMatch: boolean | null): boolean | null =>
+  taxIdMatch;
 
 const toEntityWithAddress = (
   entity: ExtractedEntityInfo,
@@ -307,9 +298,21 @@ const toEntityWithAddress = (
   return hasAddress ? (entity as ExtractedEntityWithAddressInfo) : undefined;
 };
 
+export const getParticipantNames = (
+  participant: undefined | { businessName?: string | undefined; name: string },
+): string[] | undefined => {
+  if (!participant) {
+    return undefined;
+  }
+
+  return [participant.name, participant.businessName].filter(
+    (n): n is string => n !== undefined,
+  );
+};
+
 export const compareEntity = (
   entity: ExtractedEntityInfo | undefined,
-  eventName: string | undefined,
+  eventNames: readonly string[] | undefined,
   eventTaxId: string | undefined,
   reasons: EntityComparisonReasons,
   eventAddress?: MethodologyAddress,
@@ -318,7 +321,7 @@ export const compareEntity = (
     return {
       debug: null,
       validation: buildEntityNotExtractedReasons(
-        eventName,
+        eventNames,
         eventTaxId,
         eventAddress,
         reasons,
@@ -326,10 +329,23 @@ export const compareEntity = (
     };
   }
 
-  const nameResult =
-    eventName === undefined
-      ? undefined
-      : isNameMatch(entity.name.parsed, eventName, undefined, true);
+  const nameResult = (() => {
+    if (eventNames === undefined || eventNames.length === 0) {
+      return;
+    }
+
+    let best: undefined | { isMatch: boolean; score: number };
+
+    for (const name of eventNames) {
+      const result = isNameMatch(entity.name.parsed, name, undefined, true);
+
+      if (best === undefined || result.score > best.score) {
+        best = result;
+      }
+    }
+
+    return best;
+  })();
 
   const nameSimilarity =
     nameResult === undefined ? null : `${(nameResult.score * 100).toFixed(0)}%`;
@@ -343,11 +359,11 @@ export const compareEntity = (
 
   const base: EntityComparison = {
     confidence: entity.name.confidence,
-    eventName: eventName ?? null,
+    eventNames: eventNames ?? null,
     eventTaxId: eventTaxId ?? null,
     extractedName: entity.name.parsed,
     extractedTaxId: entity.taxId.parsed,
-    isMatch: resolveEntityIsMatch(taxIdMatch, nameResult),
+    isMatch: resolveEntityIsMatch(taxIdMatch),
     nameSimilarity,
     taxIdMatch,
   };
@@ -357,26 +373,6 @@ export const compareEntity = (
   }
 
   const validation: FieldValidationResult[] = [];
-
-  if (
-    entity.name.confidence === 'high' &&
-    nameResult !== undefined &&
-    !nameResult.isMatch
-  ) {
-    validation.push({
-      reviewReason: {
-        ...reasons.name.mismatchReason({ score: nameResult.score }),
-        comparedFields: [
-          {
-            event: eventName!,
-            extracted: entity.name.parsed,
-            field: 'name',
-            similarity: nameSimilarity!,
-          },
-        ],
-      },
-    });
-  }
 
   if (entity.taxId.confidence === 'high' && taxIdMatch === false) {
     validation.push({

@@ -27,6 +27,7 @@ import {
   compareWasteType,
   type CrossValidationResponse,
   type EntityComparisonReasons,
+  getParticipantNames,
   getWasteClassification,
 } from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
@@ -123,7 +124,6 @@ export const validateMtrExtractedData = (
       }),
     },
     name: {
-      mismatchReason: REVIEW_REASONS.RECEIVER_NAME_MISMATCH,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'receiver name',
@@ -140,7 +140,7 @@ export const validateMtrExtractedData = (
 
   const receiver = compareEntity(
     extractedData.receiver,
-    eventData.recyclerEvent?.participant.name,
+    getParticipantNames(eventData.recyclerEvent?.participant),
     eventData.recyclerEvent?.participant.taxId,
     receiverReasons,
     eventData.recyclerEvent?.address,
@@ -155,7 +155,6 @@ export const validateMtrExtractedData = (
       }),
     },
     name: {
-      mismatchReason: REVIEW_REASONS.GENERATOR_NAME_MISMATCH,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" participant',
         field: 'generator name',
@@ -172,7 +171,7 @@ export const validateMtrExtractedData = (
 
   const generator = compareEntity(
     extractedData.generator,
-    eventData.wasteGeneratorEvent?.participant.name,
+    getParticipantNames(eventData.wasteGeneratorEvent?.participant),
     eventData.wasteGeneratorEvent?.participant.taxId,
     generatorReasons,
     eventData.wasteGeneratorEvent?.address,
@@ -180,7 +179,6 @@ export const validateMtrExtractedData = (
 
   const haulerReasons: EntityComparisonReasons = {
     name: {
-      mismatchReason: REVIEW_REASONS.HAULER_NAME_MISMATCH,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Hauler" participant',
         field: 'hauler name',
@@ -197,7 +195,7 @@ export const validateMtrExtractedData = (
 
   const hauler = compareEntity(
     extractedData.hauler,
-    eventData.haulerEvent?.participant.name,
+    getParticipantNames(eventData.haulerEvent?.participant),
     eventData.haulerEvent?.participant.taxId,
     haulerReasons,
   );
@@ -266,6 +264,9 @@ export const validateMtrExtractedData = (
     eventWasteDescription,
     eventData.weighingEvents,
     {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'waste quantity',
+      }),
       onMismatch: REVIEW_REASONS.WASTE_QUANTITY_WEIGHT_MISMATCH,
     },
   );

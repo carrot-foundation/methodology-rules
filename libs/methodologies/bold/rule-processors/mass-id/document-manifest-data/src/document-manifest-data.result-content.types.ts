@@ -9,7 +9,6 @@ import type {
 export type AttachmentCrossValidation = CdfCrossValidation | MtrCrossValidation;
 
 export interface CdfCrossValidation {
-  cdfTotalWeight: CdfTotalWeightComparison | null;
   documentNumber: FieldComparison;
   generator: EntityComparison | null;
   issueDate: FieldComparison;
@@ -19,11 +18,6 @@ export interface CdfCrossValidation {
   wasteQuantityWeight: null | WasteQuantityComparison;
   wasteType: WasteTypeComparison;
 }
-
-export type CdfTotalWeightComparison = FieldComparisonBase<
-  null | number,
-  number
->;
 
 export type DocumentManifestResultContent = {
   crossValidation: Partial<AttachmentCrossValidation>;
@@ -40,7 +34,7 @@ export interface EntityComparison extends ComparisonResult {
     extracted: string;
   };
   confidence: ExtractionConfidence | null;
-  eventName: null | string;
+  eventNames: null | readonly string[];
   eventTaxId: null | string;
   extractedName: string;
   extractedTaxId: string;
@@ -78,9 +72,9 @@ export interface ProcessingPeriodComparison extends FieldComparisonBase {
 
 export interface WasteQuantityComparison
   extends FieldComparisonBase<null | number, null | number> {
-  discrepancyPercentage: null | string;
   extractedQuantity: null | number;
   extractedUnit: null | string;
+  source: 'matched-entry' | 'total-weight';
 }
 
 export interface WasteTypeComparison extends ComparisonResult {

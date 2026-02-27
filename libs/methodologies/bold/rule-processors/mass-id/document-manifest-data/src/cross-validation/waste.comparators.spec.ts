@@ -1,13 +1,7 @@
 import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
-import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type { WasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
-import {
-  compareCdfTotalWeight,
-  compareWasteQuantity,
-  compareWasteType,
-  WEIGHT_DISCREPANCY_THRESHOLD,
-} from './waste.comparators';
+import { compareWasteQuantity, compareWasteType } from './waste.comparators';
 
 const notExtractedReason: ReviewReason = {
   code: 'NOT_EXTRACTED',
@@ -26,41 +20,19 @@ const onWasteMismatch = ({
 });
 
 const onQuantityMismatch = ({
-  discrepancyPercentage,
-  extractedQuantity,
-  unit,
+  extractedQuantityKg,
   weighingWeight,
 }: {
-  discrepancyPercentage: string;
-  extractedQuantity: string;
-  unit: string;
+  extractedQuantityKg: string;
   weighingWeight: string;
 }): ReviewReason => ({
-  code: 'WEIGHT_DISCREPANCY',
-  description: `${extractedQuantity} ${unit} vs ${weighingWeight} kg (${discrepancyPercentage}%)`,
-});
-
-const cdfWeightMismatchReason = ({
-  documentCurrentValue,
-  extractedTotalKg,
-}: {
-  documentCurrentValue: number;
-  extractedTotalKg: number;
-}): ReviewReason => ({
-  code: 'CDF_WEIGHT_EXCEEDS',
-  description: `Document value ${documentCurrentValue} exceeds extracted ${extractedTotalKg}`,
+  code: 'WEIGHT_BELOW_WEIGHING',
+  description: `Extracted ${extractedQuantityKg} kg < weighing ${weighingWeight} kg`,
 });
 
 const matchingWasteEntry: WasteTypeEntryData = {
   code: '01 01 01',
   description: 'Residuos de papel',
-};
-
-const baseCdfData = {
-  documentType: 'recyclingManifest' as const,
-  extractionConfidence: 'high' as const,
-  lowConfidenceFields: [],
-  rawText: 'test' as never,
 };
 
 describe('cross-validation waste comparators', () => {
@@ -186,227 +158,312 @@ describe('cross-validation waste comparators', () => {
   });
 
   describe('compareWasteQuantity', () => {
-    it('should return match when weights are within threshold', () => {
-      const entries: WasteTypeEntryData[] = [
-        { code: '01 01 01', description: 'Papel', quantity: 100, unit: 'kg' },
-      ];
+    describe('matched-entry strategy', () => {
+      it('should return match when extracted weight >= weighing weight', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 200,
+            unit: 'kg',
+          },
+        ];
 
-      const result = compareWasteQuantity(
-        entries,
-        '01 01 01',
-        'Papel',
-        [{ value: 105 }],
-        { onMismatch: onQuantityMismatch },
-      );
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 105 }],
+          { onMismatch: onQuantityMismatch },
+        );
 
-      expect(result.debug).not.toBeNull();
-      expect(result.debug?.isMatch).toBe(true);
-      expect(result.validation).toEqual([]);
-    });
-
-    it('should return reviewReason when discrepancy exceeds threshold', () => {
-      const entries: WasteTypeEntryData[] = [
-        { code: '01 01 01', description: 'Papel', quantity: 100, unit: 'kg' },
-      ];
-
-      const result = compareWasteQuantity(
-        entries,
-        '01 01 01',
-        'Papel',
-        [{ value: 200 }],
-        { onMismatch: onQuantityMismatch },
-      );
-
-      expect(result.debug?.isMatch).toBe(false);
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason?.code).toBe(
-        'WEIGHT_DISCREPANCY',
-      );
-    });
-
-    it('should return null debug when no entries provided', () => {
-      const result = compareWasteQuantity(
-        undefined,
-        '01 01 01',
-        'Papel',
-        [{ value: 100 }],
-        { onMismatch: onQuantityMismatch },
-      );
-
-      expect(result.debug).toBeNull();
-      expect(result.validation).toEqual([]);
-    });
-
-    it('should return null debug when no matched entry has quantity', () => {
-      const entries: WasteTypeEntryData[] = [
-        { code: '01 01 01', description: 'Papel' },
-      ];
-
-      const result = compareWasteQuantity(
-        entries,
-        '01 01 01',
-        'Papel',
-        [{ value: 100 }],
-        { onMismatch: onQuantityMismatch },
-      );
-
-      expect(result.debug).toBeNull();
-    });
-
-    it('should return null debug when no weighing events have value', () => {
-      const entries: WasteTypeEntryData[] = [
-        { code: '01 01 01', description: 'Papel', quantity: 100, unit: 'kg' },
-      ];
-
-      const result = compareWasteQuantity(entries, '01 01 01', 'Papel', [], {
-        onMismatch: onQuantityMismatch,
+        expect(result.debug).not.toBeNull();
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.validation).toEqual([]);
       });
 
-      expect(result.debug?.event).toBeNull();
-      expect(result.debug?.discrepancyPercentage).toBeNull();
-    });
+      it('should return match when extracted weight equals weighing weight', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 100,
+            unit: 'kg',
+          },
+        ];
 
-    it('should handle ton unit conversion', () => {
-      const entries: WasteTypeEntryData[] = [
-        { code: '01 01 01', description: 'Papel', quantity: 1, unit: 'ton' },
-      ];
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { onMismatch: onQuantityMismatch },
+        );
 
-      const result = compareWasteQuantity(
-        entries,
-        '01 01 01',
-        'Papel',
-        [{ value: 1000 }],
-        { onMismatch: onQuantityMismatch },
-      );
-
-      expect(result.debug?.extracted).toBe(1000);
-      expect(result.debug?.isMatch).toBe(true);
-    });
-
-    it('should export WEIGHT_DISCREPANCY_THRESHOLD as 0.1', () => {
-      expect(WEIGHT_DISCREPANCY_THRESHOLD).toBe(0.1);
-    });
-  });
-
-  describe('compareCdfTotalWeight', () => {
-    it('should return null debug when wasteEntries is missing', () => {
-      const extractedData = { ...baseCdfData } as CdfExtractedData;
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.validation).toEqual([]);
       });
 
-      expect(result.debug).toBeNull();
-      expect(result.validation).toEqual([]);
-    });
+      it('should return reviewReason when extracted weight is less than weighing weight', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 80,
+            unit: 'kg',
+          },
+        ];
 
-    it('should return isMatch true when documentCurrentValue <= totalKg', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'high' as const,
-          parsed: [{ description: 'Papel', quantity: 150, unit: 'kg' }],
-        },
-      } as CdfExtractedData;
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { onMismatch: onQuantityMismatch },
+        );
 
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_BELOW_WEIGHING',
+        );
       });
 
-      expect(result.debug?.isMatch).toBe(true);
-      expect(result.validation).toEqual([]);
-    });
+      it('should return null isMatch when no weighing events have value', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 100,
+            unit: 'kg',
+          },
+        ];
 
-    it('should return failReason when documentCurrentValue exceeds totalKg and confidence is high', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'high' as const,
-          parsed: [{ description: 'Papel', quantity: 50, unit: 'kg' }],
-        },
-      } as CdfExtractedData;
+        const result = compareWasteQuantity(entries, '01 01 01', 'Papel', [], {
+          onMismatch: onQuantityMismatch,
+        });
 
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
+        expect(result.debug?.event).toBeNull();
+        expect(result.debug?.isMatch).toBeNull();
+        expect(result.debug?.source).toBe('matched-entry');
       });
 
-      expect(result.debug?.isMatch).toBe(false);
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.failReason?.code).toBe('CDF_WEIGHT_EXCEEDS');
+      it('should handle ton unit conversion', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 1,
+            unit: 'ton',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 1000 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.extracted).toBe(1000);
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.debug?.source).toBe('matched-entry');
+      });
     });
 
-    it('should return reviewReason when documentCurrentValue exceeds totalKg and confidence is low', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'low' as const,
-          parsed: [{ description: 'Papel', quantity: 50, unit: 'kg' }],
-        },
-      } as CdfExtractedData;
+    describe('total-weight fallback strategy', () => {
+      it('should fall back to total weight when no entry matches by waste type', () => {
+        const entries: WasteTypeEntryData[] = [
+          { description: 'Plastico', quantity: 500, unit: 'kg' },
+          { description: 'Metal', quantity: 300, unit: 'kg' },
+        ];
 
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 700 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.extracted).toBe(800);
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
       });
 
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason?.code).toBe(
-        'CDF_WEIGHT_EXCEEDS',
-      );
+      it('should return mismatch when total weight is less than weighing', () => {
+        const entries: WasteTypeEntryData[] = [
+          { description: 'Plastico', quantity: 200, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 500 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_BELOW_WEIGHING',
+        );
+      });
+
+      it('should fall back to total weight when matched entry has no quantity', () => {
+        const entries: WasteTypeEntryData[] = [
+          { code: '01 01 01', description: 'Papel' },
+          { description: 'Other', quantity: 500, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 400 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.extracted).toBe(500);
+        expect(result.debug?.isMatch).toBe(true);
+      });
+
+      it('should return notExtractedReason when no entries have valid quantities', () => {
+        const entries: WasteTypeEntryData[] = [
+          { description: 'Plastico' },
+          { description: 'Metal' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { notExtractedReason, onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.extracted).toBeNull();
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
+      });
+
+      it('should handle mixed units in total weight calculation', () => {
+        const entries: WasteTypeEntryData[] = [
+          { description: 'Lodos A', quantity: 1, unit: 't' },
+          { description: 'Lodos B', quantity: 500, unit: 'kg' },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '99 99 99',
+          'No match',
+          [{ value: 1400 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.extracted).toBe(1500);
+        expect(result.debug?.isMatch).toBe(true);
+      });
     });
 
-    it('should use wasteEntriesConfidence override when provided', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'high' as const,
-          parsed: [{ description: 'Papel', quantity: 50, unit: 'kg' }],
-        },
-      } as CdfExtractedData;
+    describe('no entries', () => {
+      it('should return null debug when no entries provided', () => {
+        const result = compareWasteQuantity(
+          undefined,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { onMismatch: onQuantityMismatch },
+        );
 
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
-        wasteEntriesConfidence: 'low',
+        expect(result.debug).toBeNull();
       });
 
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason).toBeDefined();
+      it('should return notExtractedReason when no entries and weighing exists', () => {
+        const result = compareWasteQuantity(
+          undefined,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { notExtractedReason, onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug).toBeNull();
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
+      });
+
+      it('should not return notExtractedReason when no entries and no weighing', () => {
+        const result = compareWasteQuantity(
+          undefined,
+          '01 01 01',
+          'Papel',
+          [],
+          { notExtractedReason, onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug).toBeNull();
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should return null debug for empty entries array', () => {
+        const result = compareWasteQuantity([], '01 01 01', 'Papel', [], {
+          onMismatch: onQuantityMismatch,
+        });
+
+        expect(result.debug).toBeNull();
+        expect(result.validation).toEqual([]);
+      });
     });
 
-    it('should return notExtractedReason when no valid quantities exist', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'high' as const,
-          parsed: [{ description: 'Papel' }],
-        },
-      } as CdfExtractedData;
+    describe('skipValidation', () => {
+      it('should skip validation when skipValidation is true', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 80,
+            unit: 'kg',
+          },
+        ];
 
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
-        notExtractedReason,
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { onMismatch: onQuantityMismatch, skipValidation: true },
+        );
+
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation).toEqual([]);
       });
 
-      expect(result.debug?.extracted).toBeNull();
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.failReason?.code).toBe('NOT_EXTRACTED');
-    });
+      it('should skip notExtractedReason when skipValidation is true', () => {
+        const result = compareWasteQuantity(
+          undefined,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          {
+            notExtractedReason,
+            onMismatch: onQuantityMismatch,
+            skipValidation: true,
+          },
+        );
 
-    it('should return reviewReason when no valid quantities exist and confidence is low', () => {
-      const extractedData = {
-        ...baseCdfData,
-        wasteEntries: {
-          confidence: 'low' as const,
-          parsed: [{ description: 'Papel' }],
-        },
-      } as CdfExtractedData;
-
-      const result = compareCdfTotalWeight(extractedData, 100, {
-        mismatchReason: cdfWeightMismatchReason,
-        notExtractedReason,
+        expect(result.validation).toEqual([]);
       });
-
-      expect(result.debug?.extracted).toBeNull();
-      expect(result.validation).toHaveLength(1);
-      expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
     });
   });
 });

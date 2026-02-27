@@ -53,14 +53,6 @@ export const RESULT_COMMENTS = {
 } as const;
 
 export const CROSS_VALIDATION_COMMENTS = {
-  CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE: ({
-    documentCurrentValue,
-    extractedTotalKg,
-  }: {
-    documentCurrentValue: number;
-    extractedTotalKg: number;
-  }) =>
-    `The mass-id document value (${documentCurrentValue}${MeasurementUnit.KG}) exceeds the total weight extracted from the CDF (${extractedTotalKg}${MeasurementUnit.KG}).`,
   DOCUMENT_NUMBER_MISMATCH: ({
     eventDocumentNumber,
     extractedDocumentNumber,
@@ -92,11 +84,7 @@ export const CROSS_VALIDATION_COMMENTS = {
   },
   GENERATOR_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The generator address extracted from the document does not match the "${WASTE_GENERATOR}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
-  GENERATOR_NAME_MISMATCH: ({ score }: { score: number }) =>
-    `The generator name extracted from the document does not match the "${WASTE_GENERATOR}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
-  HAULER_NAME_MISMATCH: ({ score }: { score: number }) =>
-    `The hauler name extracted from the document does not match the "${HAULER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   HAULER_TAX_ID_MISMATCH: `The hauler tax ID extracted from the document does not match the "${HAULER}" participant tax ID.`,
   ISSUE_DATE_MISMATCH: ({
     eventIssueDate,
@@ -110,9 +98,6 @@ export const CROSS_VALIDATION_COMMENTS = {
     `The MTR number ("${mtrNumber}") from this mass-id was not found in the CDF's transport manifests list.`,
   RECEIVER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
     `The receiver address extracted from the document does not match the "${RECYCLER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
-  RECEIVER_NAME_MISMATCH: ({ score }: { score: number }) =>
-    `The receiver name extracted from the document does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
-
   RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,
@@ -124,21 +109,15 @@ export const CROSS_VALIDATION_COMMENTS = {
     extractedDate: string;
   }) =>
     `The receiving date extracted from the document ("${extractedDate}") differs from the Drop-off event date ("${eventDate}") by ${daysDiff} day(s).`,
-  RECYCLER_NAME_MISMATCH: ({ score }: { score: number }) =>
-    `The recycler name extracted from the recycling manifest does not match the "${RECYCLER}" participant name. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECYCLER_TAX_ID_MISMATCH: `The recycler tax ID extracted from the recycling manifest does not match the "${RECYCLER}" participant tax ID.`,
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: ({
-    discrepancyPercentage,
-    extractedQuantity,
-    unit,
+    extractedQuantityKg,
     weighingWeight,
   }: {
-    discrepancyPercentage: string;
-    extractedQuantity: string;
-    unit: string;
+    extractedQuantityKg: string;
     weighingWeight: string;
   }) =>
-    `The waste quantity extracted from the recycling manifest (${extractedQuantity} ${unit}) differs from the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) by ${discrepancyPercentage}%.`,
+    `The waste quantity extracted from the recycling manifest (${extractedQuantityKg} ${MeasurementUnit.KG}) is less than the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}).`,
   RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH: ({
     eventClassification,
     extractedEntries,
@@ -159,17 +138,13 @@ export const CROSS_VALIDATION_COMMENTS = {
     `The transport date extracted from the document ("${extractedDate}") differs from the Pick-up event date ("${eventDate}") by ${daysDiff} day(s).`,
   VEHICLE_PLATE_MISMATCH: `The vehicle plate extracted from the document does not match the Pick-up event value.`,
   WASTE_QUANTITY_WEIGHT_MISMATCH: ({
-    discrepancyPercentage,
-    extractedQuantity,
-    unit,
+    extractedQuantityKg,
     weighingWeight,
   }: {
-    discrepancyPercentage: string;
-    extractedQuantity: string;
-    unit: string;
+    extractedQuantityKg: string;
     weighingWeight: string;
   }) =>
-    `The waste quantity extracted from the document (${extractedQuantity} ${unit}) differs from the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}) by ${discrepancyPercentage}%.`,
+    `The waste quantity extracted from the document (${extractedQuantityKg} ${MeasurementUnit.KG}) is less than the weighing event weight (${weighingWeight} ${MeasurementUnit.KG}).`,
 
   WASTE_TYPE_MISMATCH: ({
     eventClassification,
@@ -199,10 +174,6 @@ function staticReviewReason(
 }
 
 export const REVIEW_REASONS = {
-  CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE: reviewReason(
-    'CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE',
-    CROSS_VALIDATION_COMMENTS.CDF_TOTAL_WEIGHT_LESS_THAN_DOCUMENT_VALUE,
-  ),
   DOCUMENT_NUMBER_MISMATCH: reviewReason(
     'DOCUMENT_NUMBER_MISMATCH',
     CROSS_VALIDATION_COMMENTS.DOCUMENT_NUMBER_MISMATCH,
@@ -219,17 +190,9 @@ export const REVIEW_REASONS = {
     'GENERATOR_ADDRESS_MISMATCH',
     CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
   ),
-  GENERATOR_NAME_MISMATCH: reviewReason(
-    'GENERATOR_NAME_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.GENERATOR_NAME_MISMATCH,
-  ),
   GENERATOR_TAX_ID_MISMATCH: staticReviewReason(
     'GENERATOR_TAX_ID_MISMATCH',
     CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
-  ),
-  HAULER_NAME_MISMATCH: reviewReason(
-    'HAULER_NAME_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.HAULER_NAME_MISMATCH,
   ),
   HAULER_TAX_ID_MISMATCH: staticReviewReason(
     'HAULER_TAX_ID_MISMATCH',
@@ -247,10 +210,6 @@ export const REVIEW_REASONS = {
     'RECEIVER_ADDRESS_MISMATCH',
     CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
   ),
-  RECEIVER_NAME_MISMATCH: reviewReason(
-    'RECEIVER_NAME_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECEIVER_NAME_MISMATCH,
-  ),
   RECEIVER_TAX_ID_MISMATCH: staticReviewReason(
     'RECEIVER_TAX_ID_MISMATCH',
     CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
@@ -258,10 +217,6 @@ export const REVIEW_REASONS = {
   RECEIVING_DATE_MISMATCH: reviewReason(
     'RECEIVING_DATE_MISMATCH',
     CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH,
-  ),
-  RECYCLER_NAME_MISMATCH: reviewReason(
-    'RECYCLER_NAME_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECYCLER_NAME_MISMATCH,
   ),
   RECYCLER_TAX_ID_MISMATCH: staticReviewReason(
     'RECYCLER_TAX_ID_MISMATCH',

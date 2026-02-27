@@ -5,6 +5,8 @@ import type {
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
+
 import {
   stubEntity,
   stubEntityWithAddress,
@@ -174,7 +176,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
     });
 
     describe('recycler validation', () => {
-      it('should set reviewRequired when recycler name does not match', () => {
+      it('should not produce review reason when recycler name does not match (informational only)', () => {
         const extractionResult = createExtractionResult({
           recycler: stubEntity(
             'COMPLETELY DIFFERENT COMPANY',
@@ -191,19 +193,12 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]?.description).toContain(
-          'recycler name',
-        );
-        expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
-        expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
-          expect.objectContaining({
-            event: 'Recycler Corp',
-            extracted: 'COMPLETELY DIFFERENT COMPANY',
-            field: 'name',
-            similarity: expect.stringContaining('%'),
-          }),
-        ]);
+        expect(result.reviewRequired).toBe(false);
+        const cdfResult = result.crossValidation as
+          | CdfCrossValidation
+          | undefined;
+
+        expect(cdfResult?.recycler?.nameSimilarity).toBeDefined();
       });
 
       it('should fail when recycler tax ID does not match with high confidence', () => {
@@ -233,7 +228,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
     });
 
     describe('generator validation', () => {
-      it('should set reviewRequired when generator name does not match', () => {
+      it('should not produce review reason when generator name does not match (informational only)', () => {
         const extractionResult = createExtractionResult({
           generator: stubEntityWithAddress(
             'COMPLETELY DIFFERENT GENERATOR',
@@ -256,10 +251,13 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]?.description).toContain(
-          'generator name',
-        );
+        expect(result.reviewRequired).toBe(false);
+
+        const cdfResult = result.crossValidation as
+          | CdfCrossValidation
+          | undefined;
+
+        expect(cdfResult?.generator?.nameSimilarity).toBeDefined();
       });
 
       it('should fail when generator tax ID does not match', () => {
@@ -678,7 +676,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
     });
 
     describe('waste quantity validation', () => {
-      it('should return no issues when within 10% threshold', () => {
+      it('should return no issues when extracted weight >= weighing weight', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -686,7 +684,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
               {
                 code: '190812',
                 description: 'Lodos de tratamento',
-                quantity: 950,
+                quantity: 1200,
                 unit: 'kg',
               },
             ],
@@ -709,7 +707,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should return no issues when unit is volumetric (m³)', () => {
+      it('should set reviewRequired when unit is volumetric (m³) and weighing exists', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -737,7 +735,12 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
       it('should return no issues when no weighing events with valid value', () => {
@@ -870,8 +873,8 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       });
     });
 
-    describe('CDF total weight vs document value validation', () => {
-      it('should return no issues when wasteEntries are not extracted', () => {
+    describe('waste quantity fallback to total weight', () => {
+      it('should return no issues when no waste entries and no weighing events', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: undefined as never,
         });
@@ -885,90 +888,72 @@ describe('recycling-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should return no issues when documentCurrentValue is within extracted total', () => {
+      it('should return no issues when total weight >= weighing weight (fallback path)', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
             parsed: [
               {
-                code: '190812',
-                description: 'Lodos',
+                code: '999999',
+                description: 'Non matching waste',
                 quantity: 1000,
                 unit: 'kg',
               },
             ],
-            rawMatch: '190812-Lodos',
+            rawMatch: '999999-Non matching waste',
           },
         });
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 800,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(800)],
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
       });
 
-      it('should fail when documentCurrentValue exceeds extracted total with high confidence', () => {
+      it('should return review reason when weighing exceeds total weight (fallback path)', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
             parsed: [
               {
-                code: '190812',
-                description: 'Lodos',
+                code: '999999',
+                description: 'Non matching waste',
                 quantity: 500,
                 unit: 'kg',
               },
             ],
-            rawMatch: '190812-Lodos',
+            rawMatch: '999999-Non matching waste',
           },
         });
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 1000,
-        };
-
-        const result = validateCdfExtractedData(extractionResult, eventData);
-
-        expect(result.failMessages.length).toBeGreaterThan(0);
-        expect(result.failMessages[0]).toContain('mass-id document value');
-      });
-
-      it('should set reviewRequired when documentCurrentValue exceeds extracted total with low confidence', () => {
-        const extractionResult = createExtractionResult({
-          wasteEntries: {
-            confidence: 'low',
-            parsed: [
-              {
-                code: '190812',
-                description: 'Lodos',
-                quantity: 500,
-                unit: 'kg',
-              },
-            ],
-            rawMatch: '190812-Lodos',
-          },
-        });
-
-        const eventData: CdfCrossValidationEventData = {
-          ...baseEventData,
-          documentCurrentValue: 1000,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(1000)],
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         expect(result.reviewRequired).toBe(true);
-        expect(result.reviewReasons?.[0]?.description).toContain(
-          'mass-id document value',
-        );
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
-      it('should fail when all entries have no valid quantities and documentCurrentValue is non-zero with high confidence', () => {
+      it('should return review reason when no entries have valid quantities and weighing exists', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -979,16 +964,24 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 1000,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(1000)],
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(false);
-        expect(result.failReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+        expect(result.reviewRequired).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
-      it('should fail when all entries have volumetric units and documentCurrentValue is non-zero with high confidence', () => {
+      it('should return review reason when all entries have volumetric units and weighing exists', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -999,16 +992,24 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 1000,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(1000)],
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
-        expect(result.reviewRequired).toBe(false);
-        expect(result.failReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+        expect(result.reviewRequired).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
-      it('should correctly sum multiple entries for comparison', () => {
+      it('should correctly sum multiple entries for fallback comparison', () => {
         const extractionResult = createExtractionResult({
           wasteEntries: {
             confidence: 'high',
@@ -1022,14 +1023,17 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 1400,
+          pickUpEvent: makeDropOffEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+          weighingEvents: [makeWeighingEvent(1400)],
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
 
         // 1 ton = 1000 kg + 500 kg = 1500 kg total; 1400 <= 1500 → no issues
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
       });
     });
 
