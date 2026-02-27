@@ -4,11 +4,7 @@ import {
   createRecyclerEntity,
   extractMtrNumbers,
   extractRecyclerFromPreamble,
-  extractWasteClassificationData,
   finalizeCdfExtraction,
-  mergeWasteEntries,
-  type WasteCodeInfo,
-  type WasteDataInfo,
 } from './cdf-shared.helpers';
 
 describe('CDF shared helpers', () => {
@@ -72,116 +68,6 @@ describe('CDF shared helpers', () => {
 
       expect(result.name.confidence).toBe('low');
       expect(result.taxId.confidence).toBe('low');
-    });
-  });
-
-  describe('extractWasteClassificationData', () => {
-    it('should extract waste classification, quantity, unit, and technology', () => {
-      const text = 'Classe II A 1,95000 Tonelada Compostagem';
-
-      const result = extractWasteClassificationData(text);
-
-      expect(result).toEqual([
-        {
-          classification: 'Classe II A',
-          quantity: 1.95,
-          technology: 'Compostagem',
-          unit: 'Tonelada',
-        },
-      ]);
-    });
-
-    it('should extract multiple waste data entries', () => {
-      const text = [
-        'Classe II A 1,95000 Tonelada Compostagem',
-        'Classe II A 3,50000 Tonelada Compostagem',
-      ].join('\n');
-
-      const result = extractWasteClassificationData(text);
-
-      expect(result).toHaveLength(2);
-      expect(result[0]?.quantity).toBe(1.95);
-      expect(result[1]?.quantity).toBe(3.5);
-    });
-
-    it('should handle NaN quantity by defaulting to 0', () => {
-      const text = 'Classe II A ... Tonelada Compostagem';
-
-      const result = extractWasteClassificationData(text);
-
-      if (result.length > 0) {
-        expect(result[0]?.quantity).toBe(0);
-      }
-    });
-
-    it('should return empty array when no waste data found', () => {
-      expect(extractWasteClassificationData('No waste data here')).toEqual([]);
-    });
-  });
-
-  describe('mergeWasteEntries', () => {
-    it('should merge codes with data entries by index', () => {
-      const codes: WasteCodeInfo[] = [
-        { code: '040108', description: 'Residuos de couros' },
-        { code: '020301', description: 'Lamas de lavagem' },
-      ];
-      const data: WasteDataInfo[] = [
-        {
-          classification: 'Classe II A',
-          quantity: 1.95,
-          technology: 'Compostagem',
-          unit: 'Tonelada',
-        },
-        {
-          classification: 'Classe II A',
-          quantity: 3.5,
-          technology: 'Compostagem',
-          unit: 'Tonelada',
-        },
-      ];
-
-      const result = mergeWasteEntries(codes, data);
-
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        classification: 'Classe II A',
-        code: '040108',
-        description: 'Residuos de couros',
-        quantity: 1.95,
-        technology: 'Compostagem',
-        unit: 'Tonelada',
-      });
-    });
-
-    it('should handle more data entries than codes', () => {
-      const codes: WasteCodeInfo[] = [];
-      const data: WasteDataInfo[] = [
-        {
-          classification: 'Classe II A',
-          quantity: 1.95,
-          technology: 'Compostagem',
-          unit: 'Tonelada',
-        },
-      ];
-
-      const result = mergeWasteEntries(codes, data);
-
-      expect(result).toHaveLength(1);
-      expect(result[0]?.code).toBeUndefined();
-      expect(result[0]?.description).toBe('');
-    });
-
-    it('should handle more codes than data entries', () => {
-      const codes: WasteCodeInfo[] = [
-        { code: '040108', description: 'Residuos de couros' },
-      ];
-      const data: WasteDataInfo[] = [];
-
-      const result = mergeWasteEntries(codes, data);
-
-      expect(result).toHaveLength(1);
-      expect(result[0]?.code).toBe('040108');
-      expect(result[0]?.classification).toBeUndefined();
     });
   });
 
