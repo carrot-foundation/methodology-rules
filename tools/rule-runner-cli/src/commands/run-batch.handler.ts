@@ -82,6 +82,10 @@ const logBatchSummary = (
     'reviewReasons',
   );
   const failedBreakdown = buildReasonCodeBreakdown(ruleFailures, 'failReasons');
+  const failedReviewBreakdown = buildReasonCodeBreakdown(
+    ruleFailures,
+    'reviewReasons',
+  );
 
   const lines: string[] = [
     bold('=== Batch Execution Summary ==='),
@@ -98,7 +102,13 @@ const logBatchSummary = (
     reviewRequiredBreakdown,
     yellow,
   );
-  appendBreakdown(lines, 'Review Reason Codes (Failed):', failedBreakdown, red);
+  appendBreakdown(lines, 'Fail Reason Codes:', failedBreakdown, red);
+  appendBreakdown(
+    lines,
+    'Review Reason Codes (Failed):',
+    failedReviewBreakdown,
+    red,
+  );
 
   logger.info(`\n${lines.join('\n')}`);
 };

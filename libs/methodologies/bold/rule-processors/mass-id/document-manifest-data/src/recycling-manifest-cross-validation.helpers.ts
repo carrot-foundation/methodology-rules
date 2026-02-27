@@ -8,193 +8,49 @@ import {
   getTimezoneFromAddress,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
-import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import type {
-  DocumentManifestEventSubject,
-  ValidationResult,
-} from './document-manifest-data.helpers';
+import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
+import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
 
-import { buildCdfCrossValidationComparison } from './cross-validation-debug.helpers';
 import {
   collectResults,
-  type FieldValidationResult,
-  matchWasteTypeEntry,
-  validateBasicExtractedData,
-  validateDateWithinPeriod,
-  validateEntityAddress,
-  validateEntityName,
-  validateEntityTaxId,
-  validateWasteQuantityDiscrepancy,
-} from './cross-validation.helpers';
-import { REVIEW_REASONS } from './document-manifest-data.constants';
-
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+  compareDateField,
+  compareEntity,
+  compareMtrNumbers,
+  comparePeriod,
+  compareStringField,
+  compareWasteQuantity,
+  compareWasteType,
+  computeCdfTotalKg,
+  type CrossValidationResponse,
+  type EntityComparisonReasons,
+  getParticipantNames,
+  getWasteClassification,
+} from './cross-validation';
+import {
+  RESULT_COMMENTS,
+  REVIEW_REASONS,
+} from './document-manifest-data.constants';
+import { getLayoutValidationConfig } from './document-manifest-data.helpers';
 
 export interface CdfCrossValidationEventData
   extends DocumentManifestEventSubject {
+  documentCurrentValue: number;
   dropOffEvent: DocumentEvent | undefined;
+  manifestType: 'cdf';
   mtrDocumentNumbers: string[];
+  pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
   weighingEvents: DocumentEvent[];
 }
 
-const validateMtrNumberCrossReference = (
-  extractedData: CdfExtractedData,
-  mtrDocumentNumbers: string[],
-): FieldValidationResult[] => {
-  if (!extractedData.transportManifests) {
-    return mtrDocumentNumbers.length > 0
-      ? [
-          {
-            reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-              context: 'MTR document numbers',
-              field: 'transport manifest numbers',
-            }),
-          },
-        ]
-      : [];
-  }
-
-  if (mtrDocumentNumbers.length === 0) {
-    return [];
-  }
-
-  const extractedManifests = extractedData.transportManifests.parsed;
-  const results: FieldValidationResult[] = [];
-
-  for (const mtrNumber of mtrDocumentNumbers) {
-    const found = extractedManifests.some(
-      (manifest) =>
-        manifest.includes(mtrNumber) || mtrNumber.includes(manifest),
-    );
-
-    if (!found) {
-      results.push({
-        reviewReason: {
-          ...REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF({ mtrNumber }),
-          comparedFields: [
-            {
-              event: mtrNumber,
-              extracted: extractedManifests.join(', '),
-              field: 'mtrNumber',
-            },
-          ],
-        },
-      });
-    }
-  }
-
-  return results;
-};
-
-const validateCdfWasteType = (
-  extractedData: CdfExtractedData,
-  eventData: CdfCrossValidationEventData,
-): FieldValidationResult => {
-  if (!extractedData.wasteEntries) {
-    return eventData.dropOffEvent === undefined
-      ? {}
-      : {
-          reviewReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-            context: 'Drop-off event',
-            field: 'waste type entries',
-          }),
-        };
-  }
-
-  if (!eventData.dropOffEvent) {
-    return {};
-  }
-
-  const eventCode = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
-
-  if (!eventCode && !eventDescription) {
-    return {};
-  }
-
-  const entries = extractedData.wasteEntries.parsed;
-  const hasMatch = entries.some(
-    (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
-  );
-
-  if (hasMatch) {
-    return {};
-  }
-
-  const extractedSummary = entries
-    .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
-    .join(', ');
-
-  // istanbul ignore next -- eventDescription is guaranteed to be defined when eventCode is absent (early return above)
-  const eventSummary = eventCode
-    ? `${eventCode} - ${eventDescription ?? ''}`
-    : (eventDescription ?? '');
-
-  return {
-    reviewReason: {
-      ...REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH({
-        eventClassification: eventSummary,
-        extractedEntries: extractedSummary,
-      }),
-      comparedFields: [
-        {
-          event: eventSummary,
-          extracted: extractedSummary,
-          field: 'wasteType',
-        },
-      ],
-    },
-  };
-};
-
-const validateCdfWasteQuantity = (
-  extractedData: CdfExtractedData,
-  eventData: CdfCrossValidationEventData,
-): FieldValidationResult => {
-  if (!extractedData.wasteEntries || !eventData.dropOffEvent) {
-    return {};
-  }
-
-  const eventCode = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
-  )?.toString();
-
-  const eventDescription = getEventAttributeValue(
-    eventData.dropOffEvent,
-    LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  )?.toString();
-
-  return validateWasteQuantityDiscrepancy(
-    extractedData.wasteEntries.parsed,
-    eventCode,
-    eventDescription,
-    eventData.weighingEvents,
-    REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH,
-  );
-};
-
 export const isCdfEventData = (
   eventData: DocumentManifestEventSubject,
 ): eventData is CdfCrossValidationEventData =>
-  'mtrDocumentNumbers' in eventData;
+  'manifestType' in eventData &&
+  (eventData as { manifestType: unknown }).manifestType === 'cdf';
 
 export const collectMtrDocumentNumbers = (
   documentManifestEvents: DocumentManifestEventSubject[],
@@ -204,115 +60,241 @@ export const collectMtrDocumentNumbers = (
     .map((e) => e.documentNumber?.toString())
     .filter((value): value is string => isNonEmptyString(value));
 
+const buildCdfPassMessage = (
+  extractedData: CdfExtractedData,
+  eventData: CdfCrossValidationEventData,
+): string | undefined => {
+  if (!extractedData.wasteEntries) {
+    return undefined;
+  }
+
+  const { hasValidQuantity, totalKg } = computeCdfTotalKg(
+    extractedData.wasteEntries.parsed,
+  );
+
+  if (!hasValidQuantity) {
+    return undefined;
+  }
+
+  return RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
+    documentNumber: eventData.documentNumber?.toString() ?? '',
+    documentType: eventData.documentType?.toString() ?? '',
+    issueDate: eventData.issueDateAttribute?.value?.toString() ?? '',
+    value: totalKg,
+  });
+};
+
 export const validateCdfExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: CdfCrossValidationEventData,
-): ValidationResult & {
-  crossValidation?: Record<string, unknown>;
-  failReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-  reviewReasons?: import('@carrot-fndn/shared/document-extractor').ReviewReason[];
-} => {
-  const basicResult = validateBasicExtractedData(extractionResult, eventData);
-
-  if (basicResult.reviewRequired === true) {
-    return basicResult;
-  }
-
+): CrossValidationResponse => {
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  const crossValidation = buildCdfCrossValidationComparison(
-    extractedData,
-    eventData,
-    extractionResult.data.extractionConfidence,
+  if (extractionResult.data.extractionConfidence === 'low') {
+    return { failMessages: [], reviewRequired: true };
+  }
+
+  const layoutValidationConfig = getLayoutValidationConfig(
+    extractionResult.layoutId,
   );
 
-  const { failReasons, reviewReasons: fieldReviewReasons } = collectResults([
-    validateEntityName(
-      extractedData.recycler,
-      eventData.recyclerEvent?.participant.name,
-      REVIEW_REASONS.RECYCLER_NAME_MISMATCH,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+  const eventIssueDate = eventData.issueDateAttribute?.value?.toString();
+  const recyclerTimezone = getTimezoneFromAddress(
+    eventData.recyclerCountryCode ?? 'BR',
+  );
+
+  const { code: eventWasteCode, description: eventWasteDescription } =
+    getWasteClassification(eventData.pickUpEvent);
+
+  const dropOffTimezone = getTimezoneFromAddress(
+    eventData.dropOffEvent?.address.countryCode ?? 'BR',
+    eventData.dropOffEvent?.address.countryState,
+  );
+
+  const documentNumber = compareStringField(
+    extractedData.documentNumber,
+    eventData.documentNumber?.toString(),
+    {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'document number',
+      }),
+      onMismatch: ({ event, extracted }) =>
+        REVIEW_REASONS.DOCUMENT_NUMBER_MISMATCH({
+          eventDocumentNumber: event,
+          extractedDocumentNumber: extracted,
+        }),
+      routing: 'fail',
+    },
+  );
+
+  const issueDate = compareDateField(extractedData.issueDate, eventIssueDate, {
+    notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+      field: 'issue date',
+    }),
+    onMismatch: ({ event, extracted }) =>
+      REVIEW_REASONS.ISSUE_DATE_MISMATCH({
+        eventIssueDate: event,
+        extractedIssueDate: extracted,
+      }),
+    timezone: recyclerTimezone,
+    tolerance: 0,
+  });
+
+  const recyclerReasons: EntityComparisonReasons = {
+    name: {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'recycler name',
       }),
-    ),
-    validateEntityTaxId(
-      extractedData.recycler,
-      eventData.recyclerEvent?.participant.taxId,
-      REVIEW_REASONS.RECYCLER_TAX_ID_MISMATCH,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+    },
+    taxId: {
+      mismatchReason: REVIEW_REASONS.RECYCLER_TAX_ID_MISMATCH,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Recycler" participant',
         field: 'recycler tax ID',
       }),
-    ),
-    validateEntityName(
-      extractedData.generator,
-      eventData.wasteGeneratorEvent?.participant.name,
-      REVIEW_REASONS.GENERATOR_NAME_MISMATCH,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-        context: '"Waste Generator" participant',
-        field: 'generator name',
-      }),
-    ),
-    validateEntityTaxId(
-      extractedData.generator,
-      eventData.wasteGeneratorEvent?.participant.taxId,
-      REVIEW_REASONS.GENERATOR_TAX_ID_MISMATCH,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
-        context: '"Waste Generator" participant',
-        field: 'generator tax ID',
-      }),
-    ),
-    validateEntityAddress(
-      extractedData.generator,
-      eventData.wasteGeneratorEvent?.address,
-      REVIEW_REASONS.GENERATOR_ADDRESS_MISMATCH,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+    },
+  };
+
+  const recycler = compareEntity(
+    extractedData.recycler,
+    getParticipantNames(eventData.recyclerEvent?.participant),
+    eventData.recyclerEvent?.participant.taxId,
+    recyclerReasons,
+  );
+
+  const generatorReasons: EntityComparisonReasons = {
+    address: {
+      mismatchReason: REVIEW_REASONS.GENERATOR_ADDRESS_MISMATCH,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: '"Waste Generator" event',
         field: 'generator address',
       }),
-    ),
-    validateDateWithinPeriod(
-      eventData.dropOffEvent?.externalCreatedAt,
-      extractedData.processingPeriod,
-      REVIEW_REASONS.DROP_OFF_DATE_OUTSIDE_PERIOD,
-      REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+    },
+    name: {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: '"Waste Generator" participant',
+        field: 'generator name',
+      }),
+    },
+    taxId: {
+      mismatchReason: REVIEW_REASONS.GENERATOR_TAX_ID_MISMATCH,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: '"Waste Generator" participant',
+        field: 'generator tax ID',
+      }),
+    },
+  };
+
+  const generator = compareEntity(
+    extractedData.generator,
+    getParticipantNames(eventData.wasteGeneratorEvent?.participant),
+    eventData.wasteGeneratorEvent?.participant.taxId,
+    generatorReasons,
+    eventData.wasteGeneratorEvent?.address,
+  );
+
+  const processingPeriod = comparePeriod(
+    extractedData.processingPeriod,
+    eventData.dropOffEvent?.externalCreatedAt,
+    {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         context: 'Drop-off event date',
         field: 'processing period',
       }),
-      getTimezoneFromAddress(
-        eventData.dropOffEvent?.address.countryCode ?? 'BR',
-        eventData.dropOffEvent?.address.countryState,
-      ),
-    ),
-    validateCdfWasteType(extractedData, eventData),
-    validateCdfWasteQuantity(extractedData, eventData),
-    ...validateMtrNumberCrossReference(
-      extractedData,
-      eventData.mtrDocumentNumbers,
-    ),
+      onMismatch: REVIEW_REASONS.DROP_OFF_DATE_OUTSIDE_PERIOD,
+      timezone: dropOffTimezone,
+    },
+  );
+
+  const wasteType = compareWasteType(
+    extractedData.wasteEntries?.parsed,
+    eventWasteCode,
+    eventWasteDescription,
+    {
+      confidence: extractedData.wasteEntries?.confidence ?? null,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: 'Pick-up event',
+        field: 'waste type entries',
+      }),
+      onMismatch: REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH,
+      skipValidation:
+        layoutValidationConfig.unsupportedValidations?.includes('wasteType') ===
+        true,
+    },
+  );
+
+  const wasteQuantityWeight = compareWasteQuantity(
+    extractedData.wasteEntries?.parsed,
+    eventWasteCode,
+    eventWasteDescription,
+    eventData.weighingEvents,
+    {
+      confidence: extractedData.wasteEntries?.confidence ?? null,
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        field: 'waste quantity',
+      }),
+      onMismatch:
+        REVIEW_REASONS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH,
+      skipValidation:
+        layoutValidationConfig.unsupportedValidations?.includes(
+          'wasteQuantityWeight',
+        ) === true,
+    },
+  );
+
+  const mtrNumbers = compareMtrNumbers(
+    extractedData.transportManifests,
+    eventData.mtrDocumentNumbers,
+    {
+      notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+        context: 'MTR document numbers',
+        field: 'transport manifest numbers',
+      }),
+      onMismatch: REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF,
+      skipValidation:
+        layoutValidationConfig.unsupportedValidations?.includes(
+          'mtrNumbers',
+        ) === true,
+    },
+  );
+
+  const crossValidation: CdfCrossValidation = {
+    documentNumber: documentNumber.debug,
+    generator: generator.debug,
+    issueDate: issueDate.debug,
+    mtrNumbers: mtrNumbers.debug,
+    processingPeriod: processingPeriod.debug,
+    recycler: recycler.debug,
+    wasteQuantityWeight: wasteQuantityWeight.debug,
+    wasteType: wasteType.debug,
+  };
+
+  const { failReasons, reviewReasons } = collectResults([
+    ...documentNumber.validation,
+    ...issueDate.validation,
+    ...recycler.validation,
+    ...generator.validation,
+    ...processingPeriod.validation,
+    ...wasteType.validation,
+    ...wasteQuantityWeight.validation,
+    ...mtrNumbers.validation,
   ]);
 
-  const reviewReasons = [...basicResult.reviewReasons, ...fieldReviewReasons];
+  const passMessage =
+    failReasons.length === 0 && reviewReasons.length === 0
+      ? buildCdfPassMessage(extractedData, eventData)
+      : undefined;
 
-  const allFailMessages = [
-    ...basicResult.failMessages,
-    ...failReasons.map((r) => r.description),
-  ];
-
-  if (failReasons.length > 0 || reviewReasons.length > 0) {
-    return {
-      crossValidation,
-      failMessages: allFailMessages,
-      failReasons,
-      reviewReasons,
-      reviewRequired: reviewReasons.length > 0,
-    };
-  }
+  const failMessages = failReasons.map((r) => r.description);
 
   return {
     crossValidation,
-    failMessages: allFailMessages,
-    reviewRequired: false,
+    extractionMetadata: { layoutConfig: layoutValidationConfig },
+    failMessages,
+    ...(failReasons.length > 0 && { failReasons }),
+    ...(passMessage !== undefined && { passMessage }),
+    ...(reviewReasons.length > 0 && { reviewReasons }),
+    reviewRequired: reviewReasons.length > 0,
   };
 };

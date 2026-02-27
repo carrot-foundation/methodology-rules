@@ -247,6 +247,32 @@ describe('DocumentExtractor', () => {
     });
   });
 
+  describe('accent normalization', () => {
+    it('should normalize accents in block text', async () => {
+      const accentedResult: TextExtractionResult = {
+        blocks: [
+          { blockType: 'LINE', id: 'b1', text: 'Resíduo' },
+          { blockType: 'LINE', id: 'b2', text: 'Período' },
+        ],
+        rawText: 'Resíduo Período',
+      };
+
+      mockTextExtractor.extractText.mockResolvedValue(accentedResult);
+
+      const result = await extractor.extract(
+        { filePath: 'test.pdf' },
+        {
+          documentType: 'scaleTicket',
+          layouts: ['stub-layout'] as NonEmptyString[],
+        },
+      );
+
+      expect(result.textExtractionResult?.blocks[0]?.text).toBe('Residuo');
+      expect(result.textExtractionResult?.blocks[1]?.text).toBe('Periodo');
+      expect(result.textExtractionResult?.rawText).toBe('Residuo Periodo');
+    });
+  });
+
   describe('createDocumentExtractor', () => {
     it('should create a DocumentExtractorService instance', async () => {
       const service = createDocumentExtractor(mockTextExtractor);

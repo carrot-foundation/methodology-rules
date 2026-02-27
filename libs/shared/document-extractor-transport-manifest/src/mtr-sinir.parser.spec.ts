@@ -337,7 +337,7 @@ IBAMA - Instituto Brasileiro do Meio Ambiente`;
     });
 
     it('should parse entities with "Identificação do Destinador" header', () => {
-      const destinadorText = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
+      const receiverVariantText = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
 MTR Nº: 444555666
 Data de Emissão: 15/03/2024
 
@@ -355,7 +355,9 @@ CNPJ: 11.222.333/0001-44
 
 IBAMA - Instituto Brasileiro do Meio Ambiente`;
 
-      const result = parser.parse(stubTextExtractionResult(destinadorText));
+      const result = parser.parse(
+        stubTextExtractionResult(receiverVariantText),
+      );
 
       expect(result.data.receiver?.name.parsed).toBe(
         'RECICLAGEM SUSTENTAVEL LTDA',

@@ -10,6 +10,8 @@ export const aggressiveNormalize = (value: string): string =>
     .replaceAll(/[\u0300-\u036F]/g, '')
     .toLowerCase()
     .replaceAll(/[^\d\sa-z]/g, '')
+    .replaceAll(/([a-z])(\d)/g, '$1 $2')
+    .replaceAll(/(\d)([a-z])/g, '$1 $2')
     .replaceAll(/\s+/g, ' ')
     .trim();
 
@@ -53,10 +55,28 @@ export const DEFAULT_NAME_MATCH_THRESHOLD = 0.75;
 
 const MEANINGFUL_TOKEN_MIN_LENGTH = 2;
 const MIN_MEANINGFUL_TOKENS = 2;
+const FUZZY_TOKEN_THRESHOLD = 0.8;
+const MIN_TOKENS_FOR_TOLERANCE = 4;
+
+const isTokenMatch = (token: string, candidate: string): boolean => {
+  if (token.length === 1) {
+    return /^\d$/.test(token)
+      ? candidate === token
+      : candidate.startsWith(token);
+  }
+
+  if (token === candidate) {
+    return true;
+  }
+
+  return diceCoefficient(token, candidate) >= FUZZY_TOKEN_THRESHOLD;
+};
 
 /**
- * Checks if all tokens of `shorter` can be matched in `longer`.
+ * Checks if tokens of `shorter` can be matched in `longer`.
  * Single-character tokens are treated as abbreviation prefixes (e.g. "A" matches "Abracadabra").
+ * Multi-character tokens use fuzzy matching (Dice coefficient >= 0.8).
+ * Allows 1 unmatched token when `shorter` has >= 4 meaningful tokens.
  * Requires at least MIN_MEANINGFUL_TOKENS tokens of length >= MEANINGFUL_TOKEN_MIN_LENGTH
  * in the shorter list to avoid spurious matches on single-suffix names.
  */
@@ -70,17 +90,21 @@ const fuzzyTokenSubset = (shorter: string[], longer: string[]): boolean => {
   }
 
   const pool = [...longer];
+  let misses = 0;
+  const maxMisses = meaningfulCount >= MIN_TOKENS_FOR_TOLERANCE ? 1 : 0;
 
   for (const token of shorter) {
-    const index = pool.findIndex((lt) =>
-      token.length === 1 ? lt.startsWith(token) : lt === token,
-    );
+    const index = pool.findIndex((lt) => isTokenMatch(token, lt));
 
     if (index === -1) {
-      return false;
-    }
+      misses++;
 
-    pool.splice(index, 1);
+      if (misses > maxMisses) {
+        return false;
+      }
+    } else {
+      pool.splice(index, 1);
+    }
   }
 
   return true;
