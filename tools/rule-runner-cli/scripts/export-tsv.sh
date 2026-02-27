@@ -15,12 +15,13 @@ if ! command -v jq &>/dev/null; then
   exit 1
 fi
 
-TSV_HEADER='resultStatus\tauditedDocumentId\trecyclerName\tdocumentType\tlayoutId\treasonCode\treasonDescription\tcomparedFields\ts3Uri'
+TSV_HEADER='resultStatus\tauditedDocumentId\trecyclerName\tgeneratorName\tdocumentType\tlayoutId\treasonCode\treasonDescription\tcomparedFields\ts3Uri'
 
 JQ_QUERY='
   .[] |
   (.auditedDocumentId // .documentId // "") as $docId |
   (.resultContent.crossValidation.receiver.eventName // .resultContent.crossValidation.recycler.eventName // "") as $recyclerName |
+  (.resultContent.crossValidation.sender.eventName // .resultContent.crossValidation.generator.eventName // "") as $generatorName |
   (.resultContent.crossValidation._extraction.s3Uri // "") as $s3Uri |
   (.resultContent.crossValidation._extraction.documentType // "") as $docType |
   (.resultContent.crossValidation._extraction.layoutId // "") as $layoutId |
@@ -36,7 +37,7 @@ JQ_QUERY='
     else ""
     end
   ) as $compared |
-  [$status, $docId, $recyclerName, $docType, $layoutId, $code, $desc, $compared, $s3Uri] |
+  [$status, $docId, $recyclerName, $generatorName, $docType, $layoutId, $code, $desc, $compared, $s3Uri] |
   @tsv
 '
 
