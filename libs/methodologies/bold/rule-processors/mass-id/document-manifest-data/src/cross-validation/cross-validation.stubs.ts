@@ -67,10 +67,9 @@ export function stubMtrEntityWithHighAddress(
   taxId: { confidence: 'high'; parsed: string; rawMatch: string };
 } {
   return {
+    ...stubMtrEntity(name, taxId),
     address: { confidence: 'high' as const, parsed: address },
     city: { confidence: 'high' as const, parsed: city },
-    name: { confidence: 'high' as const, parsed: name, rawMatch: name },
     state: { confidence: 'high' as const, parsed: state },
-    taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
   };
 }

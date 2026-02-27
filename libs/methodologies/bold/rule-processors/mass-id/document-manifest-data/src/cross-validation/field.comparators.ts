@@ -161,7 +161,7 @@ export const compareDateField = (
     return { debug, validation: [] };
   }
 
-  if (daysDiff === undefined || daysDiff === null || daysDiff === 0) {
+  if (daysDiff == null || daysDiff === 0) {
     return { debug, validation: [] };
   }
 

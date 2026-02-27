@@ -62,8 +62,10 @@ export const crossValidateWithTextract = async ({
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
   const mtrDocumentNumbers = [
-    ...collectMtrDocumentNumbers(documentManifestEvents),
-    ...mtrEventDocumentNumbers,
+    ...new Set([
+      ...collectMtrDocumentNumbers(documentManifestEvents),
+      ...mtrEventDocumentNumbers,
+    ]),
   ];
 
   for (const attachmentInfo of attachmentInfos) {

@@ -87,7 +87,7 @@ export const computeCdfTotalKg = (
 
     const normalizedKg = normalizeQuantityToKg(entry.quantity, entry.unit);
 
-    if (normalizedKg === undefined) {
+    if (normalizedKg === undefined || normalizedKg <= 0) {
       continue;
     }
 

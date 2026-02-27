@@ -119,10 +119,11 @@ describe('document-manifest-data.helpers', () => {
       expect(getLayoutValidationConfig('unknown-layout')).toEqual({});
     });
 
-    it('should return unsupported fields for cdf-custom-1', () => {
+    it('should return unsupported validations for cdf-custom-1', () => {
       const config = getLayoutValidationConfig('cdf-custom-1');
 
-      expect(config.unsupportedFields).toContain('transportManifests');
+      expect(config.unsupportedValidations).toContain('mtrNumbers');
+      expect(config.unsupportedValidations).toContain('wasteType');
     });
   });
 });

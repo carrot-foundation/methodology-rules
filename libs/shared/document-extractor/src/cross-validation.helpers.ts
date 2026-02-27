@@ -45,12 +45,12 @@ const processInput = async <
     }
 
     result.extractionMetadata[attachmentInfo.attachmentId] = {
+      ...validationResult.extractionMetadata,
       documentType:
         extractorConfig.documentType ?? extractionResult.data.documentType,
       layoutId: extractionResult.layoutId ?? null,
       layouts: extractorConfig.layouts ?? null,
       s3Uri: `s3://${attachmentInfo.s3Bucket}/${attachmentInfo.s3Key}`,
-      ...validationResult.extractionMetadata,
     };
 
     if (validationResult.failMessages.length > 0) {

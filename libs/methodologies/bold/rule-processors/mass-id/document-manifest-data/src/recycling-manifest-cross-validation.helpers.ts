@@ -261,8 +261,8 @@ export const validateCdfExtractedData = (
       }),
       onMismatch: REVIEW_REASONS.MTR_NUMBER_NOT_IN_CDF,
       skipValidation:
-        layoutValidationConfig.unsupportedFields?.includes(
-          'transportManifests',
+        layoutValidationConfig.unsupportedValidations?.includes(
+          'mtrNumbers',
         ) === true,
     },
   );
@@ -292,29 +292,19 @@ export const validateCdfExtractedData = (
   ]);
 
   const passMessage =
-    failReasons.length === 0
+    failReasons.length === 0 && reviewReasons.length === 0
       ? buildCdfPassMessage(extractedData, eventData)
       : undefined;
 
   const failMessages = failReasons.map((r) => r.description);
 
-  if (failReasons.length > 0 || reviewReasons.length > 0) {
-    return {
-      crossValidation,
-      extractionMetadata: { layoutConfig: layoutValidationConfig },
-      failMessages,
-      failReasons,
-      ...(passMessage !== undefined && { passMessage }),
-      reviewReasons,
-      reviewRequired: reviewReasons.length > 0,
-    };
-  }
-
   return {
     crossValidation,
     extractionMetadata: { layoutConfig: layoutValidationConfig },
     failMessages,
+    ...(failReasons.length > 0 && { failReasons }),
     ...(passMessage !== undefined && { passMessage }),
-    reviewRequired: false,
+    ...(reviewReasons.length > 0 && { reviewReasons }),
+    reviewRequired: reviewReasons.length > 0,
   };
 };

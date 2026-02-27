@@ -1061,7 +1061,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         expect(result.reviewRequired).toBe(false);
         expect(result.failMessages).toHaveLength(0);
-        expect((result as { passMessage?: string }).passMessage).toBeDefined();
+        expect(result.passMessage).toBeDefined();
       });
     });
 
