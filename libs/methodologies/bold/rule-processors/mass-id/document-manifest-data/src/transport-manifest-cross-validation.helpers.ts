@@ -19,26 +19,23 @@ import type { DocumentManifestEventSubject } from './document-manifest-data.help
 import type { MtrCrossValidation } from './document-manifest-data.result-content.types';
 
 import {
+  collectResults,
   compareDateField,
   compareEntity,
   compareStringField,
   compareWasteQuantity,
   compareWasteType,
-  type EntityComparisonReasons,
-} from './cross-validation-comparators';
-import {
-  collectResults,
   type CrossValidationResponse,
+  type EntityComparisonReasons,
   getWasteClassification,
-} from './cross-validation.helpers';
+} from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
-
-export { WEIGHT_DISCREPANCY_THRESHOLD } from './cross-validation-comparators';
 
 export {
   matchWasteTypeEntry,
   normalizeQuantityToKg,
-} from './cross-validation.helpers';
+  WEIGHT_DISCREPANCY_THRESHOLD,
+} from './cross-validation';
 
 export interface MtrCrossValidationEventData
   extends DocumentManifestEventSubject {
@@ -59,7 +56,6 @@ export const validateMtrExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as MtrExtractedData;
 
-  // Low-confidence early exit
   if (extractionResult.data.extractionConfidence === 'low') {
     return { failMessages: [], reviewRequired: true };
   }
@@ -81,7 +77,6 @@ export const validateMtrExtractedData = (
     toWasteTypeEntryData(entry),
   );
 
-  // --- Call comparators ---
   const documentNumber = compareStringField(
     extractedData.documentNumber,
     eventData.documentNumber?.toString(),
@@ -281,7 +276,6 @@ export const validateMtrExtractedData = (
     },
   );
 
-  // --- Build debug cross-validation object ---
   const crossValidation: MtrCrossValidation = {
     documentNumber: documentNumber.debug,
     generator: generator.debug,
@@ -295,7 +289,6 @@ export const validateMtrExtractedData = (
     wasteType: wasteType.debug,
   };
 
-  // --- Collect validation results ---
   const { failReasons, reviewReasons } = collectResults([
     ...documentNumber.validation,
     ...issueDate.validation,
@@ -309,7 +302,6 @@ export const validateMtrExtractedData = (
     ...wasteQuantityWeight.validation,
   ]);
 
-  // Build response
   const failMessages = failReasons.map((r) => r.description);
 
   if (failReasons.length > 0 || reviewReasons.length > 0) {

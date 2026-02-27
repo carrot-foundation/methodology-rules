@@ -13,17 +13,13 @@ import {
   compareWasteType,
   DATE_TOLERANCE_DAYS,
   WEIGHT_DISCREPANCY_THRESHOLD,
-} from './cross-validation-comparators';
+} from './';
 import {
   stubEntity,
   stubEntityWithAddress,
   stubMtrEntity,
   stubMtrEntityWithHighAddress,
 } from './cross-validation.test-helpers';
-
-// ---------------------------------------------------------------------------
-// Shared test helpers (outer scope for unicorn/consistent-function-scoping)
-// ---------------------------------------------------------------------------
 
 const mismatchReason = ({
   event,
@@ -182,15 +178,7 @@ const stubEventAddress = (
   ...overrides,
 });
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 describe('cross-validation-comparators', () => {
-  // -------------------------------------------------------------------------
-  // compareStringField
-  // -------------------------------------------------------------------------
-
   describe('compareStringField', () => {
     it('should return match when values are equal', () => {
       const result = compareStringField(
@@ -306,10 +294,6 @@ describe('cross-validation-comparators', () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // compareDateField
-  // -------------------------------------------------------------------------
-
   describe('compareDateField', () => {
     it('should return match when dates are the same', () => {
       const result = compareDateField(
@@ -363,7 +347,6 @@ describe('cross-validation-comparators', () => {
     });
 
     it('should use default tolerance of DATE_TOLERANCE_DAYS', () => {
-      // daysDiff = 3 should be within default tolerance (review not fail)
       const result = compareDateField(
         { confidence: 'high', parsed: '2024-01-01', rawMatch: '01/01/2024' },
         '2024-01-04T00:00:00Z',
@@ -371,7 +354,6 @@ describe('cross-validation-comparators', () => {
       );
 
       expect(result.validation).toHaveLength(1);
-      // daysDiff = 3, tolerance = 3, so 3 > 3 is false -> review
       expect(result.validation[0]?.reviewReason).toBeDefined();
       expect(DATE_TOLERANCE_DAYS).toBe(3);
     });
@@ -409,10 +391,6 @@ describe('cross-validation-comparators', () => {
       expect(result.validation).toEqual([]);
     });
   });
-
-  // -------------------------------------------------------------------------
-  // compareEntity
-  // -------------------------------------------------------------------------
 
   describe('compareEntity', () => {
     it('should return null debug and not-extracted reviews when entity is undefined', () => {
@@ -487,7 +465,6 @@ describe('cross-validation-comparators', () => {
         entityReasons,
       );
 
-      // No taxId to compare -> falls back to name matching
       const nameReview = result.validation.find(
         (v) => v.reviewReason?.code === 'NAME_MISMATCH',
       );
@@ -516,7 +493,6 @@ describe('cross-validation-comparators', () => {
         entityReasons,
       );
 
-      // Both fields are low confidence -> no validation
       expect(result.validation).toEqual([]);
     });
 
@@ -607,7 +583,6 @@ describe('cross-validation-comparators', () => {
         }),
       );
 
-      // Entity has address fields (from stubMtrEntity) but with low confidence
       const addressReview = result.validation.find(
         (v) => v.reviewReason?.code === 'ADDRESS_MISMATCH',
       );
@@ -632,10 +607,6 @@ describe('cross-validation-comparators', () => {
       expect(addressNotExtracted).toBeDefined();
     });
   });
-
-  // -------------------------------------------------------------------------
-  // compareWasteType
-  // -------------------------------------------------------------------------
 
   describe('compareWasteType', () => {
     it('should return match when entries contain a matching entry', () => {
@@ -758,10 +729,6 @@ describe('cross-validation-comparators', () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // compareWasteQuantity
-  // -------------------------------------------------------------------------
-
   describe('compareWasteQuantity', () => {
     it('should return match when weights are within threshold', () => {
       const entries: WasteTypeEntryData[] = [
@@ -865,10 +832,6 @@ describe('cross-validation-comparators', () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // compareCdfTotalWeight
-  // -------------------------------------------------------------------------
-
   describe('compareCdfTotalWeight', () => {
     it('should return null debug when wasteEntries is missing', () => {
       const extractedData = { ...baseCdfData } as CdfExtractedData;
@@ -948,7 +911,6 @@ describe('cross-validation-comparators', () => {
         wasteEntriesConfidence: 'low',
       });
 
-      // Even though wasteEntries has high confidence, the override makes it low -> reviewReason
       expect(result.validation).toHaveLength(1);
       expect(result.validation[0]?.reviewReason).toBeDefined();
     });
@@ -991,10 +953,6 @@ describe('cross-validation-comparators', () => {
       expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
     });
   });
-
-  // -------------------------------------------------------------------------
-  // comparePeriod
-  // -------------------------------------------------------------------------
 
   describe('comparePeriod', () => {
     it('should return match when event date falls within period', () => {
@@ -1118,10 +1076,6 @@ describe('cross-validation-comparators', () => {
     });
   });
 
-  // -------------------------------------------------------------------------
-  // compareMtrNumbers
-  // -------------------------------------------------------------------------
-
   describe('compareMtrNumbers', () => {
     it('should return match when all event MTR numbers are found', () => {
       const result = compareMtrNumbers(
@@ -1147,7 +1101,6 @@ describe('cross-validation-comparators', () => {
     });
 
     it('should use bidirectional substring matching', () => {
-      // Event number is a substring of extracted
       const result = compareMtrNumbers(
         { confidence: 'high', parsed: ['MTR-001-FULL'] },
         ['MTR-001'],

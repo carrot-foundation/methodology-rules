@@ -8,7 +8,7 @@ import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types
 import {
   stubEntity,
   stubEntityWithAddress,
-} from './cross-validation.test-helpers';
+} from './cross-validation/cross-validation.test-helpers';
 import {
   type CdfCrossValidationEventData,
   collectMtrDocumentNumbers,

@@ -7,8 +7,8 @@ import { isNameMatch } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import type { ValidationResult } from './document-manifest-data.helpers';
-import type { AttachmentCrossValidation } from './document-manifest-data.result-content.types';
+import type { ValidationResult } from '../document-manifest-data.helpers';
+import type { AttachmentCrossValidation } from '../document-manifest-data.result-content.types';
 
 export type CrossValidationResponse = ValidationResult & {
   crossValidation?: AttachmentCrossValidation;

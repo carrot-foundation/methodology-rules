@@ -20,16 +20,11 @@ export interface CdfCrossValidation {
   wasteType: WasteTypeComparison;
 }
 
-/** CDF total weight: extracted kg vs document value */
 export type CdfTotalWeightComparison = FieldComparisonBase<
   null | number,
   number
 >;
 
-/**
- * The result content stored in the rule output when cross-validation is
- * performed.
- */
 export type DocumentManifestResultContent = {
   crossValidation: Partial<AttachmentCrossValidation>;
   extractionMetadata?: Record<string, ExtractionMetadata>;
@@ -37,7 +32,6 @@ export type DocumentManifestResultContent = {
   reviewReasons?: ReviewReason[];
 };
 
-/** Complex entity comparison: just enforce isMatch */
 export interface EntityComparison extends ComparisonResult {
   address?: {
     addressSimilarity?: string;
@@ -54,7 +48,6 @@ export interface EntityComparison extends ComparisonResult {
   taxIdMatch: boolean | null;
 }
 
-/** Simple field comparison (dates, doc number, vehicle plate) */
 export interface FieldComparison extends FieldComparisonBase {
   daysDiff?: null | number;
   similarity?: null | string;
@@ -73,19 +66,16 @@ export interface MtrCrossValidation {
   wasteType: WasteTypeComparison;
 }
 
-/** MTR numbers: extracted manifest list vs event list (no confidence) */
 export type MtrNumbersComparison = Omit<
   FieldComparisonBase<null | string[], string[]>,
   'confidence'
 >;
 
-/** Processing period: extracted period string vs drop-off date */
 export interface ProcessingPeriodComparison extends FieldComparisonBase {
   end?: string;
   start?: string;
 }
 
-/** Waste quantity: extracted kg vs weighing kg */
 export interface WasteQuantityComparison
   extends FieldComparisonBase<null | number, null | number> {
   discrepancyPercentage: null | string;
@@ -93,7 +83,6 @@ export interface WasteQuantityComparison
   extractedUnit: null | string;
 }
 
-/** Complex waste type comparison: just enforce isMatch */
 export interface WasteTypeComparison extends ComparisonResult {
   confidence?: ExtractionConfidence | null;
   entries: null | WasteTypeEntry[];

@@ -1,11 +1,3 @@
-/**
- * Shared test stub helpers for cross-validation spec files.
- *
- * "stubEntity" produces the minimal entity shape used by CDF (recycling manifest)
- * and debug specs. "stubMtrEntity" adds the low-confidence address/city/state
- * fields that MTR (transport manifest) entities always carry.
- */
-
 export function stubEntity(
   name: string,
   taxId: string,

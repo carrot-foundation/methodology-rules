@@ -18,7 +18,6 @@ export interface ComparedField {
   similarity?: string;
 }
 
-/** Level 1: Every comparison produces a match result. All comparisons extend this. */
 export interface ComparisonResult {
   isMatch: boolean | null;
 }
@@ -66,7 +65,6 @@ export interface CrossValidationValidateResult<
   reviewRequired?: boolean;
 }
 
-/** Metadata about a document attachment extraction. */
 export interface ExtractionMetadata {
   [key: string]: unknown;
   documentType: string;
@@ -75,7 +73,6 @@ export interface ExtractionMetadata {
   s3Uri: string;
 }
 
-/** Level 2: Simple comparisons with one extracted value vs one event value. */
 export interface FieldComparisonBase<
   TExtracted = null | string,
   TEvent = TExtracted,

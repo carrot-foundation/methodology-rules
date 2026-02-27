@@ -14,6 +14,7 @@ import type { DocumentManifestEventSubject } from './document-manifest-data.help
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
 
 import {
+  collectResults,
   compareCdfTotalWeight,
   compareDateField,
   compareEntity,
@@ -22,14 +23,11 @@ import {
   compareStringField,
   compareWasteQuantity,
   compareWasteType,
-  type EntityComparisonReasons,
-} from './cross-validation-comparators';
-import {
-  collectResults,
   computeCdfTotalKg,
   type CrossValidationResponse,
+  type EntityComparisonReasons,
   getWasteClassification,
-} from './cross-validation.helpers';
+} from './cross-validation';
 import {
   RESULT_COMMENTS,
   REVIEW_REASONS,
@@ -92,7 +90,6 @@ export const validateCdfExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  // Low-confidence early exit
   if (extractionResult.data.extractionConfidence === 'low') {
     return { failMessages: [], reviewRequired: true };
   }
@@ -114,7 +111,6 @@ export const validateCdfExtractedData = (
     eventData.dropOffEvent?.address.countryState,
   );
 
-  // --- Call comparators ---
   const documentNumber = compareStringField(
     extractedData.documentNumber,
     eventData.documentNumber?.toString(),
@@ -271,7 +267,6 @@ export const validateCdfExtractedData = (
     },
   );
 
-  // --- Build debug cross-validation object ---
   const crossValidation: CdfCrossValidation = {
     cdfTotalWeight: cdfTotalWeight.debug,
     documentNumber: documentNumber.debug,
@@ -284,7 +279,6 @@ export const validateCdfExtractedData = (
     wasteType: wasteType.debug,
   };
 
-  // --- Collect validation results ---
   const { failReasons, reviewReasons } = collectResults([
     ...documentNumber.validation,
     ...issueDate.validation,
@@ -297,13 +291,11 @@ export const validateCdfExtractedData = (
     ...mtrNumbers.validation,
   ]);
 
-  // Build pass message (only when no fail reasons)
   const passMessage =
     failReasons.length === 0
       ? buildCdfPassMessage(extractedData, eventData)
       : undefined;
 
-  // Build response
   const failMessages = failReasons.map((r) => r.description);
 
   if (failReasons.length > 0 || reviewReasons.length > 0) {
