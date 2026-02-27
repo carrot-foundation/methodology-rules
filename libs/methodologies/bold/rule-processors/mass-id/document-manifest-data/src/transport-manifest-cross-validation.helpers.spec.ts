@@ -833,6 +833,21 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should fail when document number does not match', () => {
+      const extractionResult = createExtractionResult({
+        documentNumber: {
+          confidence: 'high',
+          parsed: '99999',
+          rawMatch: '99999',
+        },
+      });
+
+      const result = validateMtrExtractedData(extractionResult, baseEventData);
+
+      expect(result.failMessages.length).toBeGreaterThan(0);
+      expect(result.failReasons?.[0]?.description).toContain('Document Number');
+    });
+
     it('should return no issues when all data matches', () => {
       const extractionResult = createExtractionResult({
         documentNumber: {
@@ -846,6 +861,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(false);
+    });
+
+    it('should default recyclerCountryCode to BR when undefined', () => {
+      const extractionResult = createExtractionResult({});
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerCountryCode: undefined,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
     });
 
     describe('waste type validation', () => {

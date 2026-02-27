@@ -730,6 +730,32 @@ describe('cross-validation-comparators', () => {
 
       expect(result.validation).toEqual([]);
     });
+
+    it('should return empty validation when entries are meaningless and no notExtractedReason', () => {
+      const result = compareWasteType(
+        [{ description: '' }],
+        '01 01 01',
+        'Residuos',
+        { onMismatch: onWasteMismatch },
+      );
+
+      expect(result.validation).toEqual([]);
+    });
+
+    it('should build event summary with empty description when eventCode exists but eventDescription is undefined', () => {
+      const result = compareWasteType(
+        [{ code: '02 02 02', description: 'Residuos de plastico' }],
+        '01 01 01',
+        undefined,
+        { onMismatch: onWasteMismatch },
+      );
+
+      expect(result.debug.isMatch).toBe(false);
+      expect(result.validation).toHaveLength(1);
+      expect(result.validation[0]?.reviewReason?.code).toBe(
+        'WASTE_TYPE_MISMATCH',
+      );
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -945,6 +971,25 @@ describe('cross-validation-comparators', () => {
       expect(result.validation).toHaveLength(1);
       expect(result.validation[0]?.failReason?.code).toBe('NOT_EXTRACTED');
     });
+
+    it('should return reviewReason when no valid quantities exist and confidence is low', () => {
+      const extractedData = {
+        ...baseCdfData,
+        wasteEntries: {
+          confidence: 'low' as const,
+          parsed: [{ description: 'Papel' }],
+        },
+      } as CdfExtractedData;
+
+      const result = compareCdfTotalWeight(extractedData, 100, {
+        mismatchReason: cdfWeightMismatchReason,
+        notExtractedReason,
+      });
+
+      expect(result.debug?.extracted).toBeNull();
+      expect(result.validation).toHaveLength(1);
+      expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -1040,6 +1085,21 @@ describe('cross-validation-comparators', () => {
       expect(result.debug.isMatch).toBeNull();
       expect(result.validation).toHaveLength(1);
       expect(result.validation[0]?.reviewReason?.code).toBe('NOT_EXTRACTED');
+    });
+
+    it('should return empty validation when period cannot be parsed and no notExtractedReason', () => {
+      const result = comparePeriod(
+        {
+          confidence: 'high',
+          parsed: 'invalid period string',
+          rawMatch: 'invalid period string',
+        },
+        '2024-01-15T12:00:00Z',
+        { onMismatch: onPeriodMismatch },
+      );
+
+      expect(result.debug.isMatch).toBeNull();
+      expect(result.validation).toEqual([]);
     });
 
     it('should handle "a" separator in period string', () => {

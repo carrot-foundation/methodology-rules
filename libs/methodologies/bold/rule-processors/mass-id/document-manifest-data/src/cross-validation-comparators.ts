@@ -536,9 +536,9 @@ export const compareWasteType = (
     .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
     .join(', ');
 
-  const eventSummary = eventCode
-    ? `${eventCode} - ${eventDescription ?? ''}`
-    : (eventDescription ?? '');
+  const eventSummary = [eventCode, eventDescription]
+    .filter(Boolean)
+    .join(' - ');
 
   return {
     debug,

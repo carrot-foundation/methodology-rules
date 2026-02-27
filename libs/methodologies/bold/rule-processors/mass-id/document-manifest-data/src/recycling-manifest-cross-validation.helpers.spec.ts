@@ -136,6 +136,43 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should fail when issue date does not match', () => {
+      const extractionResult = createExtractionResult({
+        issueDate: {
+          confidence: 'high',
+          parsed: '2024-02-15',
+          rawMatch: '15/02/2024',
+        },
+      });
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseEventData,
+        issueDateAttribute: {
+          isPublic: false,
+          name: 'Issue Date',
+          value: '2024-01-01T12:00:00.000Z',
+        },
+      };
+
+      const result = validateCdfExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages.length).toBeGreaterThan(0);
+      expect(result.failReasons?.[0]?.description).toContain('Issue Date');
+    });
+
+    it('should default recyclerCountryCode to BR when undefined', () => {
+      const extractionResult = createExtractionResult({});
+
+      const eventData: CdfCrossValidationEventData = {
+        ...baseEventData,
+        recyclerCountryCode: undefined,
+      };
+
+      const result = validateCdfExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+    });
+
     describe('recycler validation', () => {
       it('should set reviewRequired when recycler name does not match', () => {
         const extractionResult = createExtractionResult({
