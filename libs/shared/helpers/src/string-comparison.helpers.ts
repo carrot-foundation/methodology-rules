@@ -317,6 +317,60 @@ export const isAddressMatch = (
 export const normalizeVehiclePlate = (plate: string): string =>
   plate.replaceAll(/[-\s]/g, '').toUpperCase();
 
+const OCR_CONFUSABLE_PAIRS: ReadonlySet<string> = new Set([
+  '0D',
+  '0O',
+  '1I',
+  '2Z',
+  '5S',
+  '6G',
+  '8B',
+  'B8',
+  'D0',
+  'G6',
+  'I1',
+  'O0',
+  'S5',
+  'Z2',
+]);
+
+export const isOcrPlausiblePlateMatch = (
+  plateA: string,
+  plateB: string,
+): boolean => {
+  const a = normalizeVehiclePlate(plateA);
+  const b = normalizeVehiclePlate(plateB);
+
+  if (a === b) {
+    return true;
+  }
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let diffCount = 0;
+  let isOcrDiff = true;
+
+  for (const [index, charA] of [...a].entries()) {
+    const charB = b[index];
+
+    if (charA !== charB) {
+      diffCount++;
+
+      if (diffCount > 1) {
+        return false;
+      }
+
+      if (!OCR_CONFUSABLE_PAIRS.has(`${charA}${charB}`)) {
+        isOcrDiff = false;
+      }
+    }
+  }
+
+  return diffCount === 1 && isOcrDiff;
+};
+
 const BRAZILIAN_DATE_FORMATS = ['dd/MM/yyyy', 'dd-MM-yyyy'];
 
 /**

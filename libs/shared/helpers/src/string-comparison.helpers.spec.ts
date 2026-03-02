@@ -5,6 +5,7 @@ import {
   diceCoefficient,
   isAddressMatch,
   isNameMatch,
+  isOcrPlausiblePlateMatch,
   normalizeAddress,
   normalizeDateToISO,
   normalizeVehiclePlate,
@@ -398,6 +399,56 @@ describe('string-comparison.helpers', () => {
       );
 
       expect(result.isMatch).toBe(true);
+    });
+  });
+
+  describe('isOcrPlausiblePlateMatch', () => {
+    it('should return true for I/1 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('XYZ1I23', 'XYZ1123')).toBe(true);
+    });
+
+    it('should return true for B/8 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('FAK3B99', 'FAK3899')).toBe(true);
+    });
+
+    it('should return true for O/0 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABC0D23', 'ABCOD23')).toBe(true);
+    });
+
+    it('should return true for S/5 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('AB5CD23', 'ABSCD23')).toBe(true);
+    });
+
+    it('should return true for Z/2 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABZ1D23', 'AB21D23')).toBe(true);
+    });
+
+    it('should return true for D/0 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1023')).toBe(true);
+    });
+
+    it('should return true for G/6 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABG1D23', 'AB61D23')).toBe(true);
+    });
+
+    it('should return true for exact match after normalization', () => {
+      expect(isOcrPlausiblePlateMatch('ABC-1D23', 'abc 1d23')).toBe(true);
+    });
+
+    it('should return false for non-OCR single char difference', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1D24')).toBe(false);
+    });
+
+    it('should return false when more than 1 character differs', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'XYZ1D23')).toBe(false);
+    });
+
+    it('should return false for different length plates', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1D234')).toBe(false);
+    });
+
+    it('should return false when two OCR-confusable chars differ', () => {
+      expect(isOcrPlausiblePlateMatch('XYZ1I23', 'X1Z1123')).toBe(false);
     });
   });
 
