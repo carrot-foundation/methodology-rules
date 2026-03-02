@@ -22,6 +22,9 @@ export interface FieldValidationResult {
   reviewReason?: ReviewReason;
 }
 
+export const formatScoreAsPercent = (score: number): string =>
+  `${(score * 100).toFixed(0)}%`;
+
 export const collectResults = (
   results: FieldValidationResult[],
 ): {
@@ -108,7 +111,7 @@ export const normalizeQuantityToKg = (
 
   const normalized = unit.toLowerCase();
 
-  if (normalized === 'kg') {
+  if (normalized === 'kg' || normalized === 'quilograma') {
     return quantity;
   }
 

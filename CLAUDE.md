@@ -112,6 +112,27 @@ fix(shared): prevent racing of requests
 - Test env: `.env-files/.env.test`
 - Coverage output: `./coverage/{projectRoot}`
 
+### No Real Data in Tests
+
+**Never commit real data in test files or any file in the repository.** This includes:
+
+- Company names (e.g. real client or partner names)
+- Tax IDs (CPF, CNPJ)
+- Vehicle license plates
+- Addresses (street names, cities that identify real locations)
+- Person names tied to real individuals
+- Phone numbers, emails, or any other PII
+
+Always use obviously fake, synthetic values. Examples:
+
+- Companies: `VERDE CAMPO LTDA`, `EXEMPLO INDUSTRIAS`
+- CNPJs: `11.222.333/0004-55`, `77.888.999/0001-22`
+- Plates: `FKE1A23`, `HIJ3K56`
+- Addresses: `Rua Modelo, 100`, `Av. Principal, 500`, `Cidade Centro`
+- People: `Pedro Santos`, `Ana Ferreira`
+
+When writing parser tests that include raw OCR text, ensure both the input text and the expected assertion values use fake data consistently.
+
 ## Pull Requests
 
 Use gh CLI with these repo-specific settings:

@@ -45,32 +45,32 @@ describe('CdfCustom1Parser', () => {
   // Preamble blocks (generator, recycler, etc.) needed for parser to extract other fields
   const CDF_PREAMBLE_BLOCKS: TextBlock[] = [
     makeBlock('CDF 50193/24', 0.06, 0.05),
-    makeBlock('Jundiaí, 07 de Agosto de 2024.', 0.06, 0.1),
-    makeBlock('Empresa Recebedora: Tera Ambiental Ltda.', 0.06, 0.2),
-    makeBlock('CNPJ: 59.591.115/0003-02 IE: 407.275.597.112', 0.06, 0.22),
-    makeBlock('Empresa Geradora: AJINOMOTO DO BRASIL', 0.06, 0.3),
-    makeBlock('CNPJ: 46.344.354/0005-88 IE: 417325212115', 0.06, 0.32),
+    makeBlock('Cidade Centro, 07 de Agosto de 2024.', 0.06, 0.1),
+    makeBlock('Empresa Recebedora: Destino Ambiental Ltda.', 0.06, 0.2),
+    makeBlock('CNPJ: 33.444.555/0003-77 IE: 111.222.333.444', 0.06, 0.22),
+    makeBlock('Empresa Geradora: EXEMPLO INDUSTRIAS', 0.06, 0.3),
+    makeBlock('CNPJ: 11.222.333/0004-55 IE: 222333444555', 0.06, 0.32),
   ];
 
   const validCustomCdfText = [
-    'Tera Ambiental Ltda',
-    'Rua Paulino Corado, 20 - Sala 603 Jardim Santa Teresa, Jundiaí - SP',
+    'Destino Ambiental Ltda',
+    'Rua Comercial, 20 - Sala 603 Jardim Modelo, Cidade Centro - SP',
     'CDF 50193/24',
-    'Jundiaí, 07 de Agosto de 2024.',
+    'Cidade Centro, 07 de Agosto de 2024.',
     'CERTIFICADO DE DESTINAÇÃO FINAL',
     'N°50193/24',
-    'Informamos que a Tera Ambiental Ltda, com sede em Jundiaí, no estado de São Paulo,',
-    'inscrita no CNPJ: 59.591.115/0003-02, através da compostagem de lodo de esgoto,',
-    'certifica que as matérias-primas abaixo discriminados da empresa AJINOMOTO DO BRASIL',
+    'Informamos que a Destino Ambiental Ltda, com sede em Cidade Centro, no estado de São Paulo,',
+    'inscrita no CNPJ: 33.444.555/0003-77, através da compostagem de lodo de esgoto,',
+    'certifica que as matérias-primas abaixo discriminados da empresa EXEMPLO INDUSTRIAS',
     'no período abaixo identificado foram recebidas e tratadas em',
     'conformidade com a licença nº: 36013428 de 25/06/2024.',
-    'Empresa Recebedora: Tera Ambiental Ltda.',
-    'Endereço: Estrada Municipal do Varjão, 4.520',
-    'Cadastro na Cetesb: 407-0361098',
-    'CNPJ: 59.591.115/0003-02 IE: 407.275.597.112',
-    'Empresa Geradora: AJINOMOTO DO BRASIL INDÚSTRIA E COMÉRCIO DE ALIMENTOS LTDA.',
-    'Endereço: RODOVIA ANHANGUERA (SP 330) KM 131',
-    'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+    'Empresa Recebedora: Destino Ambiental Ltda.',
+    'Endereço: Estrada Municipal Exemplo, 4.520',
+    'Cadastro na Cetesb: 100-0001234',
+    'CNPJ: 33.444.555/0003-77 IE: 111.222.333.444',
+    'Empresa Geradora: EXEMPLO INDUSTRIAS E COMERCIO DE ALIMENTOS LTDA.',
+    'Endereço: RODOVIA EXEMPLO (XX 100) KM 50',
+    'CNPJ: 11.222.333/0004-55 IE: 222333444555',
     'LODO SÓLIDO - SANITÁRIO: LODO GERADO NA ESTAÇÃO DE TRATAMENTO DE ÁGUA',
     'Descrição: Tipo de Matéria-Prima CADRI Data do Recebimento Quantidade (ton)',
     'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
@@ -89,13 +89,13 @@ describe('CdfCustom1Parser', () => {
       expect(result.data.documentNumber?.confidence).toBe('high');
       expect(result.data.issueDate?.parsed).toBe('07/08/2024');
       expect(result.data.issueDate?.confidence).toBe('high');
-      expect(result.data.recycler?.name.parsed).toBe('Tera Ambiental Ltda.');
-      expect(result.data.recycler?.taxId.parsed).toBe('59.591.115/0003-02');
+      expect(result.data.recycler?.name.parsed).toBe('Destino Ambiental Ltda.');
+      expect(result.data.recycler?.taxId.parsed).toBe('33.444.555/0003-77');
       expect(result.data.recycler?.name.confidence).toBe('high');
       expect(result.data.generator?.name.parsed).toBe(
-        'AJINOMOTO DO BRASIL INDUSTRIA E COMERCIO DE ALIMENTOS LTDA.',
+        'EXEMPLO INDUSTRIAS E COMERCIO DE ALIMENTOS LTDA.',
       );
-      expect(result.data.generator?.taxId.parsed).toBe('46.344.354/0005-88');
+      expect(result.data.generator?.taxId.parsed).toBe('11.222.333/0004-55');
       expect(result.data.generator?.name.confidence).toBe('high');
       expect(result.data.environmentalLicense?.parsed).toBe('36013428');
       expect(result.data.treatmentMethod?.parsed).toBe(
@@ -123,16 +123,16 @@ describe('CdfCustom1Parser', () => {
     it('should extract generator address when Endereço line has city/state format', () => {
       const text = [
         'CDF 31014/21',
-        'Jundiaí, 10 de Fevereiro de 2021.',
+        'Cidade Centro, 10 de Fevereiro de 2021.',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'N°31014/21',
         'certifica que as matérias-primas',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'Endereço: Estrada Municipal do Varjão, 4.520 Bairro Varjão Jundiaí/SP CEP: 13212-590',
-        'CNPJ: 59.591.115/0003-02',
-        'Empresa Geradora: COMPANHIA SANEAMENTO DE JUNDIAI',
-        'Endereço: ESTRADA MUNICIPAL DO VARJÃO, 4.520 JD. NOVO HORIZONTE, JUNDIAI /SP CEP: 13212-590',
-        'CNPJ: 01.201.289/0001-70 IE: ISENTO',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'Endereço: Estrada Municipal Exemplo, 4.520 Bairro Exemplo Cidade Centro/SP CEP: 13212-590',
+        'CNPJ: 33.444.555/0003-77',
+        'Empresa Geradora: COMPANHIA SANEAMENTO MUNICIPAL',
+        'Endereço: ESTRADA MUNICIPAL EXEMPLO, 4.520 JD. HORIZONTE, CIDADE CENTRO /SP CEP: 13212-590',
+        'CNPJ: 99.000.111/0001-44 IE: ISENTO',
         'Cadastro na Cetesb: 123',
         'CADRI',
         'matérias-primas',
@@ -143,20 +143,20 @@ describe('CdfCustom1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.generator?.name.parsed).toBe(
-        'COMPANHIA SANEAMENTO DE JUNDIAI',
+        'COMPANHIA SANEAMENTO MUNICIPAL',
       );
-      expect(result.data.generator?.taxId.parsed).toBe('01.201.289/0001-70');
+      expect(result.data.generator?.taxId.parsed).toBe('99.000.111/0001-44');
       expect(result.data.generator?.address.parsed).toBe(
-        'ESTRADA MUNICIPAL DO VARJAO, 4.520 JD. NOVO HORIZONTE',
+        'ESTRADA MUNICIPAL EXEMPLO, 4.520 JD. HORIZONTE',
       );
-      expect(result.data.generator?.city.parsed).toBe('JUNDIAI');
+      expect(result.data.generator?.city.parsed).toBe('CIDADE CENTRO');
       expect(result.data.generator?.state.parsed).toBe('SP');
       expect(result.data.generator?.address.confidence).toBe('high');
     });
 
     it('should set reviewRequired when required fields are missing', () => {
       const incompleteText = [
-        'Tera Ambiental Ltda',
+        'Destino Ambiental Ltda',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Empresa Recebedora: Some Company',
       ].join('\n');
@@ -170,7 +170,7 @@ describe('CdfCustom1Parser', () => {
     it('should set low confidence for entities with missing CNPJ', () => {
       const noCnpjText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Empresa Recebedora: Company Without CNPJ',
         'Empresa Geradora: Generator Without CNPJ',
@@ -196,7 +196,7 @@ describe('CdfCustom1Parser', () => {
       ];
 
       for (const { expected, text } of variations) {
-        const fullText = `${text}\nJundiaí, 01 de Janeiro de 2024.`;
+        const fullText = `${text}\nCidade Centro, 01 de Janeiro de 2024.`;
         const result = parser.parse(stubTextExtractionResult(fullText));
 
         expect(result.data.documentNumber?.parsed).toBe(expected);
@@ -233,7 +233,7 @@ describe('CdfCustom1Parser', () => {
     it('should extract environmental license from preamble text', () => {
       const licenseText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'conformidade com a licença nº: 36013428 de 25/06/2024.',
       ].join('\n');
 
@@ -245,7 +245,7 @@ describe('CdfCustom1Parser', () => {
     it('should extract treatment method from preamble text', () => {
       const treatmentText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'através da compostagem de lodo de esgoto, certifica que',
       ].join('\n');
 
@@ -259,7 +259,7 @@ describe('CdfCustom1Parser', () => {
     it('should handle waste quantity in Brazilian number format', () => {
       const quantityText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado',
         '1.377,59',
       ].join('\n');
@@ -272,7 +272,7 @@ describe('CdfCustom1Parser', () => {
     it('should not extract waste quantity when value is NaN', () => {
       const nanQuantityText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado',
         '...',
       ].join('\n');
@@ -285,9 +285,9 @@ describe('CdfCustom1Parser', () => {
     it('should handle entity with short name after label', () => {
       const shortNameText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Empresa Recebedora: AB',
-        'CNPJ: 59.591.115/0003-02',
+        'CNPJ: 33.444.555/0003-77',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(shortNameText));
@@ -298,7 +298,7 @@ describe('CdfCustom1Parser', () => {
     it('should handle quantity on the same line as label (fallback)', () => {
       const sameLineText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado 500,00',
       ].join('\n');
 
@@ -377,12 +377,12 @@ describe('CdfCustom1Parser', () => {
     it('should not set processingPeriod when no receipt table rows exist', () => {
       const noTableText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'Cadastro na Cetesb: 123',
         'CADRI',
         'matérias-primas',
@@ -398,16 +398,16 @@ describe('CdfCustom1Parser', () => {
     it('should not set processingPeriod when no rows match the receipt table pattern', () => {
       const invalidDatesText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
-        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
-        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'Cidade Centro, 01 de Janeiro de 2024.',
+        'CNPJ: 33.444.555/0003-77 IE: 111222333444',
+        'CNPJ: 11.222.333/0004-55 IE: 222333444555',
         'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
         'Descrição: Tipo de Matéria-Prima CADRI Data',
         'LODO SÓLIDO - SANITÁRIO - invalid-date 85,12',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Cadastro na Cetesb: 123',
         'CADRI',
@@ -422,18 +422,18 @@ describe('CdfCustom1Parser', () => {
     it('should skip receipt table rows with unparseable quantity', () => {
       const badQuantityText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
-        'CNPJ: 59.591.115/0003-02 IE: 407275597112',
-        'CNPJ: 46.344.354/0005-88 IE: 417325212115',
+        'Cidade Centro, 01 de Janeiro de 2024.',
+        'CNPJ: 33.444.555/0003-77 IE: 111222333444',
+        'CNPJ: 11.222.333/0004-55 IE: 222333444555',
         'LODO SÓLIDO - SANITÁRIO: LODO DE ETE',
         'Descrição: Tipo de Matéria-Prima CADRI Data',
         'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 ...',
         'LODO SÓLIDO - SANITÁRIO 42003189 02/07/2024 90,50',
         'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 90,50',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Cadastro na Cetesb: 123',
         'CADRI',
@@ -449,12 +449,12 @@ describe('CdfCustom1Parser', () => {
     it('should skip waste subtotals with unparseable quantity', () => {
       const badSubtotalText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Tratada de LODO SOLIDO - SANITARIO ...',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Cadastro na Cetesb: 123',
         'CADRI',
@@ -471,13 +471,13 @@ describe('CdfCustom1Parser', () => {
     it('should not extract waste type descriptions when section markers are missing', () => {
       const noMarkersText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'LODO SÓLIDO - SANITÁRIO 42003189 01/07/2024 85,12',
         'Quantidade Tratada de LODO SÓLIDO - SANITÁRIO 85,12',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Cadastro na Cetesb: 123',
         'CADRI',
@@ -494,12 +494,12 @@ describe('CdfCustom1Parser', () => {
     it('should fall back to total quantity when no table rows or subtotals are present', () => {
       const fallbackText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
-        'Empresa Recebedora: Tera Ambiental Ltda.',
-        'CNPJ: 59.591.115/0003-02',
+        'Empresa Recebedora: Destino Ambiental Ltda.',
+        'CNPJ: 33.444.555/0003-77',
         'Empresa Geradora: Generator LTDA',
-        'CNPJ: 46.344.354/0005-88',
+        'CNPJ: 11.222.333/0004-55',
         'Cadastro na Cetesb: 123',
         'CADRI',
         'matérias-primas',
@@ -582,7 +582,7 @@ describe('CdfCustom1Parser', () => {
           0.85,
         ),
         // Page break marker (footer at bottom of page 1)
-        makeBlock('Tera Ambiental Ltda', 0.435, 0.92),
+        makeBlock('Destino Ambiental Ltda', 0.435, 0.92),
         // Page 2 rows (top resets)
         ...makeReceiptRow(
           'LODO SOLIDO - SANITARIO',

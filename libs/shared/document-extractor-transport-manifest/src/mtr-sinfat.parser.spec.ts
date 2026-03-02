@@ -24,8 +24,8 @@ Data de Recebimento: 18/03/2024
 Gerador
 EMPRESA GERADORA LTDA
 CNPJ: 12.345.678/0001-90
-Endereço: Rua Empresário Agenello Senger, nº S/N
-Município: Carazinho
+Endereço: Rua Industrial, nº S/N
+Município: Cidade Interior
 UF: RS
 
 Transportador
@@ -35,7 +35,7 @@ Endereço: Av. Brasil, 500
 Município: Porto Alegre
 Estado: RS
 Placa do Veículo: ABC-1D23
-Motorista: João da Silva
+Motorista: Pedro Santos
 
 Destinatário
 RECICLAGEM SUSTENTÁVEL LTDA
@@ -69,9 +69,9 @@ Compostagem`;
       expect(result.data.generator?.name.parsed).toBe('EMPRESA GERADORA LTDA');
       expect(result.data.generator?.taxId.parsed).toBe('12.345.678/0001-90');
       expect(result.data.generator?.address.parsed).toBe(
-        'Rua Empresario Agenello Senger, nº S/N',
+        'Rua Industrial, nº S/N',
       );
-      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.city.parsed).toBe('Cidade Interior');
       expect(result.data.generator?.state.parsed).toBe('RS');
       expect(result.data.hauler?.name.parsed).toBe(
         'TRANSPORTES AMBIENTAIS S.A.',
@@ -82,7 +82,7 @@ Compostagem`;
       );
       expect(result.data.receiver?.taxId.parsed).toBe('11.222.333/0001-44');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC-1D23');
-      expect(result.data.driverName?.parsed).toBe('Joao da Silva');
+      expect(result.data.driverName?.parsed).toBe('Pedro Santos');
       expect(result.data.transportDate?.parsed).toBe('16/03/2024');
       expect(result.data.receivingDate?.parsed).toBe('18/03/2024');
       expect(result.data.documentType).toBe('transportManifest');
@@ -148,11 +148,11 @@ Data de Emissão: 15/03/2024
 
 Gerador
 BODY FOOD FABRICANTES 262960
-CNPJ: 28324667000169
+CNPJ: 88999000000133
 
 Transportador
-COMPOSTAMAIS LTDA. - 112752
-CNPJ: 33545743000104
+COMPOST VERDE LTDA. - 112752
+CNPJ: 77888999000122
 
 Destinatário
 RECICLAGEM VERDE LTDA
@@ -161,7 +161,7 @@ CNPJ: 11222333000144`;
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.generator?.name.parsed).toBe('BODY FOOD FABRICANTES');
-      expect(result.data.hauler?.name.parsed).toBe('COMPOSTAMAIS LTDA.');
+      expect(result.data.hauler?.name.parsed).toBe('COMPOST VERDE LTDA.');
     });
 
     it('should extract driver and plate from multi-line section layout', () => {
@@ -175,8 +175,8 @@ TRANSPORTES AMBIENTAIS S.A.
 CNPJ: 98.765.432/0001-10
 Nome do Motorista
 Placa do Veículo
-Rafael Silva
-NKW1862
+Lucas Ferreira
+HIJ3K56
 nome e assinatura do responsável
 
 Destinatário
@@ -186,9 +186,9 @@ Tecnologia: Compostagem`;
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.driverName?.parsed).toBe('Rafael Silva');
+      expect(result.data.driverName?.parsed).toBe('Lucas Ferreira');
       expect(result.data.driverName?.confidence).toBe('high');
-      expect(result.data.vehiclePlate?.parsed).toBe('NKW1862');
+      expect(result.data.vehiclePlate?.parsed).toBe('HIJ3K56');
       expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
 

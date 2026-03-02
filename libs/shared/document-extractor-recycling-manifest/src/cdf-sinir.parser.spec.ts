@@ -40,15 +40,15 @@ describe('CdfSinirParser', () => {
     'CERTIFICADO DE DESTINAÇÃO FINAL',
     'CDF nº 3001234/2025',
     'Periodo: 01/04/2025 a 30/04/2025',
-    'EMPRESA RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+    'EMPRESA RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
     'os resíduos abaixo discriminados.',
     'Licença Ambiental: LO-1234/2024',
     '',
     'Razão Social:',
-    'LATICÍNIOS BELA VISTA LTDA',
+    'LATICÍNIOS MODELO LTDA',
     'CPF/CNPJ:',
-    '02089969003555',
-    'Endereço: Rua Empresário Agenello Senger, nº S/N Municipio: Carazinho UF: RS',
+    '55666777003599',
+    'Endereço: Rua Industrial, nº S/N Municipio: Cidade Interior UF: RS',
     '',
     'Identificação dos Resíduos',
     '040108 - Resíduos de couros',
@@ -58,7 +58,7 @@ describe('CdfSinirParser', () => {
     '',
     'Declaração',
     'Declaramos que os resíduos foram destinados.',
-    'Carazinho, 10/05/2025',
+    'Cidade Interior, 10/05/2025',
     '',
     'Manifestos Incluídos:',
     '240001460711, 240001460712, 240001460713',
@@ -77,19 +77,17 @@ describe('CdfSinirParser', () => {
       expect(result.data.recycler?.name.parsed).toBe(
         'EMPRESA RECICLADORA LTDA',
       );
-      expect(result.data.recycler?.taxId.parsed).toBe('13843890000145');
+      expect(result.data.recycler?.taxId.parsed).toBe('44555666000188');
       expect(result.data.recycler?.name.confidence).toBe('high');
 
-      expect(result.data.generator?.name.parsed).toBe(
-        'LATICINIOS BELA VISTA LTDA',
-      );
-      expect(result.data.generator?.taxId.parsed).toBe('02089969003555');
+      expect(result.data.generator?.name.parsed).toBe('LATICINIOS MODELO LTDA');
+      expect(result.data.generator?.taxId.parsed).toBe('55666777003599');
       expect(result.data.generator?.name.confidence).toBe('high');
 
       expect(result.data.generator?.address.parsed).toBe(
-        'Rua Empresario Agenello Senger, nº S/N',
+        'Rua Industrial, nº S/N',
       );
-      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.city.parsed).toBe('Cidade Interior');
       expect(result.data.generator?.state.parsed).toBe('RS');
 
       expect(result.data.issueDate?.parsed).toBe('10/05/2025');
@@ -180,20 +178,20 @@ describe('CdfSinirParser', () => {
     it('should handle unformatted 14-digit CNPJ for recycler', () => {
       const text = [
         'CDF nº 100/2023',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Declaração',
         'City, 01/04/2024',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(text));
 
-      expect(result.data.recycler?.taxId.parsed).toBe('13843890000145');
+      expect(result.data.recycler?.taxId.parsed).toBe('44555666000188');
     });
 
     it('should extract generator with separate-line labels', () => {
       const text = [
         'CDF nº 100/2023',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Razão Social:',
         'EMPRESA GERADORA LTDA',
         'CNPJ:',
@@ -212,18 +210,18 @@ describe('CdfSinirParser', () => {
       const text = [
         'CDF n° 2834634/2024',
         'Período : 20/03/2024 até 30/04/2024',
-        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que',
-        'recebeu, em sua unidade de Araucária PR',
+        'COMPOST VERDE LTDA., CPF/CNPJ 77888999000122 certifica que',
+        'recebeu, em sua unidade de Cidade Industrial PR',
         'Identificação do Gerador',
         'Razão Social :Brasturinvest Investimentos Turistico SA',
-        'CNPJ/CPF : 03422594000540',
+        'CNPJ/CPF : 44555666000177',
         'Endereço :',
-        'Comendador Araújo,499 Pestana Curitiba Hotel Centro',
+        'Rua Central,499 Bairro Modelo Hotel Centro',
         'Munícipio :',
         'Curitiba',
         'UF PR',
         'Identificação dos Resíduos',
-        'Araucária, 06/05/2024',
+        'Cidade Industrial, 06/05/2024',
         'Responsável',
         'Sistema MTR do Sinir',
       ].join('\n');
@@ -234,9 +232,9 @@ describe('CdfSinirParser', () => {
         'Brasturinvest Investimentos Turistico SA',
       );
       expect(result.data.generator?.name.confidence).toBe('high');
-      expect(result.data.generator?.taxId.parsed).toBe('03422594000540');
+      expect(result.data.generator?.taxId.parsed).toBe('44555666000177');
       expect(result.data.generator?.address.parsed).toBe(
-        'Comendador Araujo,499 Pestana Curitiba Hotel Centro',
+        'Rua Central,499 Bairro Modelo Hotel Centro',
       );
       expect(result.data.generator?.city.parsed).toBe('Curitiba');
       expect(result.data.generator?.state.parsed).toBe('PR');
@@ -247,18 +245,18 @@ describe('CdfSinirParser', () => {
     it('should extract generator address from multi-line OCR layout', () => {
       const text = [
         'CDF n° 2834634/2024',
-        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que',
-        'recebeu, em sua unidade de Araucária PR',
+        'COMPOST VERDE LTDA., CPF/CNPJ 77888999000122 certifica que',
+        'recebeu, em sua unidade de Cidade Industrial PR',
         'Razão Social :Empresa Geradora LTDA',
-        'CNPJ/CPF : 03422594000540',
+        'CNPJ/CPF : 44555666000177',
         'Endereço :',
-        'Rua Santa Catarina, 1575 Guaíra',
+        'Rua Floresta, 1575 Jardim',
         'Munícipio',
         'Curitiba',
         'UF PR',
         'Identificação dos Resíduos',
         'Declaração',
-        'Araucária, 06/05/2024',
+        'Cidade Industrial, 06/05/2024',
         'Responsável',
         'Sistema MTR do Sinir',
       ].join('\n');
@@ -266,7 +264,7 @@ describe('CdfSinirParser', () => {
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.generator?.address.parsed).toBe(
-        'Rua Santa Catarina, 1575 Guaira',
+        'Rua Floresta, 1575 Jardim',
       );
       expect(result.data.generator?.address.confidence).toBe('high');
       expect(result.data.generator?.city.parsed).toBe('Curitiba');
@@ -276,8 +274,8 @@ describe('CdfSinirParser', () => {
     it('should extract issue date before Responsável when Declaração is absent', () => {
       const text = [
         'CDF nº 100/2023',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
-        'Araucária, 18/02/2025',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
+        'Cidade Industrial, 18/02/2025',
         'Responsável',
         'Sistema MTR do Sinir',
       ].join('\n');
@@ -294,7 +292,7 @@ describe('CdfSinirParser', () => {
         'Razão Social:',
         'Company LTDA',
         'CNPJ:',
-        '02089969003555',
+        '55666777003599',
         'Declaração',
         'City, 10/04/2023',
       ].join('\n');
@@ -308,7 +306,7 @@ describe('CdfSinirParser', () => {
     it('should set low confidence when generator section is missing', () => {
       const noGeneratorText = [
         'CDF nº 100/2023',
-        'EMPRESA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'EMPRESA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Declaração',
         'City, 10/04/2023',
       ].join('\n');
@@ -333,7 +331,7 @@ describe('CdfSinirParser', () => {
     it('should not extract waste entries when none are present', () => {
       const noWasteText = [
         'CDF nº 100/2023',
-        'EMPRESA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'EMPRESA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Declaração',
         'City, 01/04/2024',
       ].join('\n');
@@ -346,7 +344,7 @@ describe('CdfSinirParser', () => {
     it('should not extract transport manifests when section is missing', () => {
       const noMtrText = [
         'CDF nº 100/2023',
-        'EMPRESA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'EMPRESA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Declaração',
         'City, 01/04/2024',
       ].join('\n');
@@ -360,12 +358,12 @@ describe('CdfSinirParser', () => {
       const rawText = [
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'CDF n° 3661772/2025',
-        'COMPOSTAMAIS LTDA., CPF/CNPJ 33545743000104 certifica que recebeu',
+        'COMPOST VERDE LTDA., CPF/CNPJ 77888999000122 certifica que recebeu',
         'Identificação dos Resíduos',
         'Resíduo Classe Quantidade Unidade Tratamento',
         '200108 Resíduos biodegradáveis de cozinha e cantinas CLASSE II A 1,1200 Tonelada Compostagem',
         'Declaração',
-        'Araucária, 18/02/2025',
+        'Cidade Industrial, 18/02/2025',
         'Responsável',
         'Sistema MTR do Sinir',
       ].join('\n');
@@ -415,7 +413,7 @@ describe('CdfSinirParser', () => {
       const rawText = [
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'CDF n° 100/2025',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Identificação dos Resíduos',
         'Resíduo Classe Quantidade Unidade Tratamento',
         '040108 Resíduos de couros CLASSE II A 1,9500 Tonelada Tratamento',
@@ -490,7 +488,7 @@ describe('CdfSinirParser', () => {
     it('should skip rows with non-code residuo text in bounding-box table', () => {
       const rawText = [
         'CDF n° 100/2025',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Resíduo Classe Quantidade Unidade Tratamento',
         'random text',
         'Declaração',
@@ -515,7 +513,7 @@ describe('CdfSinirParser', () => {
     it('should extract waste entry from blocks without quantity columns', () => {
       const rawText = [
         'CDF n° 100/2025',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Resíduo Classe Quantidade Unidade Tratamento',
         '200108 Resíduos biodegradáveis',
         'Declaração',
@@ -549,7 +547,7 @@ describe('CdfSinirParser', () => {
     it('should handle waste code without dash in bounding-box table', () => {
       const rawText = [
         'CDF n° 100/2025',
-        'RECICLADORA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
         'Resíduo Classe Quantidade Unidade Tratamento',
         '200108 Resíduos biodegradáveis CLASSE II A 3,0912 Tonelada Compostagem',
         'Declaração',

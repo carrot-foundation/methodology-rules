@@ -18,15 +18,15 @@ describe('CDF shared helpers', () => {
 
     it('should extract recycler name and CNPJ from preamble', () => {
       const text =
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu';
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu';
 
       const result = extractRecyclerFromPreamble(text, preamblePattern);
 
       expect(result).toEqual({
         rawMatch: expect.any(String),
         value: {
-          name: 'ECO ADUBOS ORGANICOS LTDA',
-          taxId: '13.843.890/0001-45',
+          name: 'ADUBOS VERDES ORGANICOS LTDA',
+          taxId: '44.555.666/0001-88',
         },
       });
     });
@@ -40,27 +40,27 @@ describe('CDF shared helpers', () => {
     it('should handle unformatted CNPJ with custom pattern', () => {
       const unformattedPattern = /^(.+?),\s*CPF\/CNPJ\s+(\d{14})\s+certifica/m;
       const text =
-        'EMPRESA LTDA, CPF/CNPJ 13843890000145 certifica que recebeu';
+        'EMPRESA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu';
 
       const result = extractRecyclerFromPreamble(text, unformattedPattern);
 
-      expect(result?.value.taxId).toBe('13843890000145');
+      expect(result?.value.taxId).toBe('44555666000188');
     });
   });
 
   describe('createRecyclerEntity', () => {
     it('should create high confidence entity from extracted data', () => {
       const result = createRecyclerEntity({
-        rawMatch: 'ECO ADUBOS, CPF/CNPJ 13.843.890/0001-45 certifica',
+        rawMatch: 'ADUBOS VERDES, CPF/CNPJ 44.555.666/0001-88 certifica',
         value: {
-          name: 'ECO ADUBOS',
-          taxId: '13.843.890/0001-45',
+          name: 'ADUBOS VERDES',
+          taxId: '44.555.666/0001-88',
         },
       });
 
-      expect(result.name.parsed).toBe('ECO ADUBOS');
+      expect(result.name.parsed).toBe('ADUBOS VERDES');
       expect(result.name.confidence).toBe('high');
-      expect(result.taxId.parsed).toBe('13.843.890/0001-45');
+      expect(result.taxId.parsed).toBe('44.555.666/0001-88');
     });
 
     it('should create low confidence entity when undefined', () => {

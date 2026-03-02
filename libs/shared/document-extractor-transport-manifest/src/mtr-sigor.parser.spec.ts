@@ -27,31 +27,31 @@ describe('MtrSigorParser', () => {
     'CETESB',
     '',
     'Identificação do Gerador',
-    'Razão Social: Ajinomoto do Brasil Indústria e Comércio de Alimentos Ltda 2845',
-    'CPF/CNPJ: 46.344.354/0005-88',
-    'Endereço: Rua Vergueiro, 1855',
-    'Município: Limeira',
+    'Razão Social: Exemplo Indústrias de Alimentos Ltda 2845',
+    'CPF/CNPJ: 11.222.333/0004-55',
+    'Endereço: Rua Modelo, 1855',
+    'Município: Cidade Nova',
     'UF: SP',
     'Data da emissão: 08/07/2024',
     'Data do transporte: 09/07/2024',
     'Data do recebimento: 10/07/2024',
     '',
     'Identificação do Transportador',
-    'Razão Social: RECICLADOS LIMEIRA LTDA 5193',
-    'CPF/CNPJ: 04.359.529/0001-57',
-    'Endereço: Av. Paulista, 1000',
+    'Razão Social: RECICLADOS MODELO LTDA 5193',
+    'CPF/CNPJ: 22.333.444/0001-66',
+    'Endereço: Av. Principal, 1000',
     'Município: São Paulo',
     'Estado: SP',
     'Nome do Motorista',
     'Placa do Veículo',
-    'GERSON PEREIRA DA SILVA',
-    'AUP5E49',
+    'CARLOS OLIVEIRA DOS SANTOS',
+    'FKE1A23',
     '',
     'Identificação do Destinador',
-    'Razão Social: TERA AMBIENTAL LTDA. - 596',
-    'CPF/CNPJ: 59.591.115/0003-02',
-    'Endereço: Rod. SP-101, Km 5',
-    'Município: Paulínia',
+    'Razão Social: DESTINO AMBIENTAL LTDA. - 596',
+    'CPF/CNPJ: 33.444.555/0003-77',
+    'Endereço: Rod. XX-101, Km 5',
+    'Município: Cidade Sul',
     'UF: SP',
     '',
     'Identificação dos Resíduos',
@@ -99,25 +99,25 @@ describe('MtrSigorParser', () => {
       expect(result.data.issueDate?.parsed).toBe('08/07/2024');
       expect(result.data.issueDate?.confidence).toBe('high');
       expect(result.data.generator?.name.parsed).toBe(
-        'Ajinomoto do Brasil Industria e Comercio de Alimentos Ltda',
+        'Exemplo Industrias de Alimentos Ltda',
       );
-      expect(result.data.generator?.taxId.parsed).toBe('46.344.354/0005-88');
-      expect(result.data.generator?.address.parsed).toBe('Rua Vergueiro, 1855');
-      expect(result.data.generator?.city.parsed).toBe('Limeira');
+      expect(result.data.generator?.taxId.parsed).toBe('11.222.333/0004-55');
+      expect(result.data.generator?.address.parsed).toBe('Rua Modelo, 1855');
+      expect(result.data.generator?.city.parsed).toBe('Cidade Nova');
       expect(result.data.generator?.state.parsed).toBe('SP');
       expect(result.data.generator?.name.confidence).toBe('high');
-      expect(result.data.hauler?.name.parsed).toBe('RECICLADOS LIMEIRA LTDA');
-      expect(result.data.hauler?.taxId.parsed).toBe('04.359.529/0001-57');
-      expect(result.data.hauler?.address.parsed).toBe('Av. Paulista, 1000');
+      expect(result.data.hauler?.name.parsed).toBe('RECICLADOS MODELO LTDA');
+      expect(result.data.hauler?.taxId.parsed).toBe('22.333.444/0001-66');
+      expect(result.data.hauler?.address.parsed).toBe('Av. Principal, 1000');
       expect(result.data.hauler?.city.parsed).toBe('Sao Paulo');
       expect(result.data.hauler?.state.parsed).toBe('SP');
-      expect(result.data.receiver?.name.parsed).toBe('TERA AMBIENTAL LTDA.');
-      expect(result.data.receiver?.taxId.parsed).toBe('59.591.115/0003-02');
-      expect(result.data.receiver?.address.parsed).toBe('Rod. SP-101, Km 5');
-      expect(result.data.receiver?.city.parsed).toBe('Paulinia');
+      expect(result.data.receiver?.name.parsed).toBe('DESTINO AMBIENTAL LTDA.');
+      expect(result.data.receiver?.taxId.parsed).toBe('33.444.555/0003-77');
+      expect(result.data.receiver?.address.parsed).toBe('Rod. XX-101, Km 5');
+      expect(result.data.receiver?.city.parsed).toBe('Cidade Sul');
       expect(result.data.receiver?.state.parsed).toBe('SP');
-      expect(result.data.driverName?.parsed).toBe('GERSON PEREIRA DA SILVA');
-      expect(result.data.vehiclePlate?.parsed).toBe('AUP5E49');
+      expect(result.data.driverName?.parsed).toBe('CARLOS OLIVEIRA DOS SANTOS');
+      expect(result.data.vehiclePlate?.parsed).toBe('FKE1A23');
       expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         {
           classification: 'CLASSE IIA',
@@ -249,8 +249,8 @@ describe('MtrSigorParser', () => {
         'CPF/CNPJ: 98.765.432/0001-10',
         'Nome do Motorista',
         'Placa do Veículo',
-        'CARLOS SILVA',
-        'BRA2E19',
+        'PEDRO ALMEIDA',
+        'FKE2B34',
         '',
         'Identificação do Destinador',
         'Razão Social: Receiver Co',
@@ -259,8 +259,8 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(stubTextExtractionResult(labelValueText));
 
-      expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
-      expect(result.data.vehiclePlate?.parsed).toBe('BRA2E19');
+      expect(result.data.driverName?.parsed).toBe('PEDRO ALMEIDA');
+      expect(result.data.vehiclePlate?.parsed).toBe('FKE2B34');
     });
 
     it('should not extract driver name when labels have no following values', () => {
@@ -296,7 +296,7 @@ describe('MtrSigorParser', () => {
         'CPF/CNPJ: 98.765.432/0001-10',
         'Nome do Motorista',
         'Placa do Veículo',
-        'CARLOS SILVA',
+        'PEDRO ALMEIDA',
         'NKW 1/62',
       ].join('\n');
 
@@ -304,7 +304,7 @@ describe('MtrSigorParser', () => {
         stubTextExtractionResult(ocrMangledPlateText),
       );
 
-      expect(result.data.driverName?.parsed).toBe('CARLOS SILVA');
+      expect(result.data.driverName?.parsed).toBe('PEDRO ALMEIDA');
       expect(result.data.vehiclePlate?.parsed).toBe('NKW 1/62');
       expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
@@ -319,12 +319,12 @@ describe('MtrSigorParser', () => {
         'Razão Social: Transport Co',
         'CPF/CNPJ: 98.765.432/0001-10',
         'Nome do Motorista',
-        'MARIA SANTOS',
+        'ANA FERREIRA',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(onlyDriverText));
 
-      expect(result.data.driverName?.parsed).toBe('MARIA SANTOS');
+      expect(result.data.driverName?.parsed).toBe('ANA FERREIRA');
     });
 
     it('should extract vehicle plate when only plate label is present', () => {
@@ -337,12 +337,12 @@ describe('MtrSigorParser', () => {
         'Razão Social: Transport Co',
         'CPF/CNPJ: 98.765.432/0001-10',
         'Placa do Veículo',
-        'BRA2E19',
+        'FKE2B34',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(onlyPlateText));
 
-      expect(result.data.vehiclePlate?.parsed).toBe('BRA2E19');
+      expect(result.data.vehiclePlate?.parsed).toBe('FKE2B34');
       expect(result.data.driverName).toBeUndefined();
     });
 

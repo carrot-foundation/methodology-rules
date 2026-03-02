@@ -15,6 +15,7 @@ import type { ComparisonOutput } from './field.comparators';
 
 import {
   computeCdfTotalKg,
+  formatScoreAsPercent,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
 } from './cross-validation.helpers';
@@ -34,7 +35,7 @@ const buildWasteTypeDebugEntry = (
     descriptionSimilarity:
       match.descriptionSimilarity === null
         ? null
-        : `${(match.descriptionSimilarity * 100).toFixed(0)}%`,
+        : formatScoreAsPercent(match.descriptionSimilarity),
     extracted: entry.code
       ? `${entry.code} - ${entry.description}`
       : entry.description,
@@ -154,6 +155,8 @@ const getWeighingValueKg = (
 ): number | undefined =>
   weighingEvents.find((e) => e.value !== undefined && e.value > 0)?.value;
 
+const WEIGHT_TOLERANCE_KG = 0.01;
+
 const buildWeightValidation = (
   extractedKg: number | undefined,
   weighingValue: number | undefined,
@@ -176,7 +179,10 @@ const buildWeightValidation = (
       : [];
   }
 
-  if (weighingValue === undefined || weighingValue <= extractedKg) {
+  if (
+    weighingValue === undefined ||
+    weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
+  ) {
     return [];
   }
 
@@ -240,7 +246,7 @@ export const compareWasteQuantity = (
     );
     const isMatch =
       normalizedKg !== undefined && weighingValue !== undefined
-        ? weighingValue <= normalizedKg
+        ? weighingValue <= normalizedKg + WEIGHT_TOLERANCE_KG
         : null;
 
     return {
@@ -262,7 +268,7 @@ export const compareWasteQuantity = (
   const extractedKg = hasValidQuantity ? totalKg : undefined;
   const isMatch =
     extractedKg !== undefined && weighingValue !== undefined
-      ? weighingValue <= extractedKg
+      ? weighingValue <= extractedKg + WEIGHT_TOLERANCE_KG
       : null;
 
   return {

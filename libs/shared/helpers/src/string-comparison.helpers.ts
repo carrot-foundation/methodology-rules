@@ -15,6 +15,88 @@ export const aggressiveNormalize = (value: string): string =>
     .replaceAll(/\s+/g, ' ')
     .trim();
 
+const BRAZILIAN_ADDRESS_ABBREVIATIONS = new Map<string, string>([
+  ['al', 'alameda'],
+  ['alam', 'alameda'],
+  ['av', 'avenida'],
+  ['cj', 'conjunto'],
+  ['cond', 'condominio'],
+  ['est', 'estrada'],
+  ['pc', 'praca'],
+  ['pca', 'praca'],
+  ['r', 'rua'],
+  ['res', 'residencial'],
+  ['rod', 'rodovia'],
+  ['trav', 'travessa'],
+]);
+
+const expandAddressAbbreviations = (tokens: string[]): string[] =>
+  tokens.map((t) => BRAZILIAN_ADDRESS_ABBREVIATIONS.get(t) ?? t);
+
+const findRepeatedRunLength = (
+  result: string[],
+  tokens: string[],
+  index: number,
+): number => {
+  for (let runLength = result.length; runLength >= 1; runLength--) {
+    if (index + runLength > tokens.length || result.length < runLength) {
+      continue;
+    }
+
+    const tail = result.slice(-runLength);
+    const next = tokens.slice(index, index + runLength);
+
+    if (tail.every((t, index_) => t === next.at(index_))) {
+      return runLength;
+    }
+  }
+
+  return 0;
+};
+
+const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
+  const result: string[] = [];
+  let index = 0;
+
+  while (index < tokens.length) {
+    const runLength = findRepeatedRunLength(result, tokens, index);
+
+    if (runLength > 0) {
+      index += runLength;
+    } else {
+      const token = tokens.at(index);
+
+      if (token !== undefined) {
+        result.push(token);
+      }
+
+      index++;
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Normalizes an address string for comparison.
+ * Applies aggressiveNormalize, then expands Brazilian street abbreviations
+ * and deduplicates consecutive identical tokens (OCR noise).
+ */
+export const normalizeAddress = (value: string): string => {
+  const withDigitSpaces = value.replaceAll(/(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g, ' ');
+  const normalized = aggressiveNormalize(withDigitSpaces);
+
+  if (normalized === '') {
+    return '';
+  }
+
+  const tokens = normalized.split(' ');
+  const expanded = expandAddressAbbreviations(tokens);
+  const deduped = deduplicateConsecutiveTokens(expanded);
+
+  return deduped.join(' ');
+};
+
 /**
  * Computes the Sorensen-Dice coefficient between two strings.
  * Returns a value between 0 (completely different) and 1 (identical).
@@ -155,10 +237,153 @@ export const isNameMatch = (
 };
 
 /**
+ * Strips leading zeros from a numeric string, preserving at least one digit.
+ */
+const stripLeadingZeros = (value: string): string =>
+  value.replace(/^0+/, '') || '0';
+
+/**
+ * Extracts numeric tokens (street numbers, km markers) from token list,
+ * normalizing away leading zeros so that "01" matches "1".
+ */
+const extractNumericTokens = (tokens: string[]): string[] =>
+  tokens.filter((t) => isNumericToken(t)).map((t) => stripLeadingZeros(t));
+
+/**
+ * Checks that every numeric token in the shorter list has an exact match in
+ * the longer list. Street numbers are critical in address comparison and must
+ * not be fuzzily matched.
+ */
+const isRepeatedNumber = (long: string, short: string): boolean =>
+  long.length > short.length &&
+  long.length % short.length === 0 &&
+  long === short.repeat(long.length / short.length);
+
+const numericTokensMatch = (
+  shorterNums: string[],
+  longerNums: string[],
+): boolean => {
+  const pool = [...longerNums];
+
+  for (const number_ of shorterNums) {
+    const index = pool.indexOf(number_);
+
+    if (index === -1) {
+      const repIndex = pool.findIndex(
+        (p) => isRepeatedNumber(p, number_) || isRepeatedNumber(number_, p),
+      );
+
+      if (repIndex === -1) {
+        return false;
+      }
+
+      pool.splice(repIndex, 1);
+    } else {
+      pool.splice(index, 1);
+    }
+  }
+
+  return true;
+};
+
+/**
+ * Checks whether two addresses match using address-specific normalization
+ * (abbreviation expansion + OCR dedup) followed by Dice coefficient and
+ * token subset matching. Numeric tokens (street numbers) must match exactly.
+ */
+export const isAddressMatch = (
+  a: string,
+  b: string,
+  threshold = DEFAULT_NAME_MATCH_THRESHOLD,
+): { isMatch: boolean; score: number } => {
+  const normalizedA = normalizeAddress(a);
+  const normalizedB = normalizeAddress(b);
+  const tokensA = normalizedA.split(' ');
+  const tokensB = normalizedB.split(' ');
+  const score = diceCoefficient(normalizedA, normalizedB);
+
+  const numsA = extractNumericTokens(tokensA);
+  const numsB = extractNumericTokens(tokensB);
+  const [shorterNums, longerNums] =
+    numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
+
+  if (shorterNums.length > 0 && !numericTokensMatch(shorterNums, longerNums)) {
+    return { isMatch: false, score };
+  }
+
+  if (score >= threshold) {
+    return { isMatch: true, score };
+  }
+
+  const [shorter, longer] =
+    tokensA.length <= tokensB.length ? [tokensA, tokensB] : [tokensB, tokensA];
+
+  if (fuzzyTokenSubset(shorter, longer)) {
+    return { isMatch: true, score };
+  }
+
+  return { isMatch: false, score };
+};
+
+/**
  * Normalizes a vehicle license plate by removing dashes, spaces, and uppercasing.
  */
 export const normalizeVehiclePlate = (plate: string): string =>
   plate.replaceAll(/[-\s]/g, '').toUpperCase();
+
+const OCR_CONFUSABLE_PAIRS: ReadonlySet<string> = new Set([
+  '0D',
+  '0O',
+  '1I',
+  '2Z',
+  '5S',
+  '6G',
+  '8B',
+  'B8',
+  'D0',
+  'G6',
+  'I1',
+  'O0',
+  'S5',
+  'Z2',
+]);
+
+export const isOcrPlausiblePlateMatch = (
+  plateA: string,
+  plateB: string,
+): boolean => {
+  const a = normalizeVehiclePlate(plateA);
+  const b = normalizeVehiclePlate(plateB);
+
+  if (a === b) {
+    return true;
+  }
+
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let diffCount = 0;
+  let isOcrDiff = true;
+
+  for (const [index, charA] of [...a].entries()) {
+    const charB = b[index];
+
+    if (charA !== charB) {
+      diffCount++;
+
+      if (diffCount > 1) {
+        return false;
+      }
+
+      if (!OCR_CONFUSABLE_PAIRS.has(`${charA}${charB}`)) {
+        isOcrDiff = false;
+      }
+    }
+  }
+
+  return diffCount === 1 && isOcrDiff;
+};
 
 const BRAZILIAN_DATE_FORMATS = ['dd/MM/yyyy', 'dd-MM-yyyy'];
 

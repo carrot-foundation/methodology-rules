@@ -3,7 +3,10 @@ import {
   dateDifferenceInDays,
   DEFAULT_NAME_MATCH_THRESHOLD,
   diceCoefficient,
+  isAddressMatch,
   isNameMatch,
+  isOcrPlausiblePlateMatch,
+  normalizeAddress,
   normalizeDateToISO,
   normalizeVehiclePlate,
 } from './string-comparison.helpers';
@@ -109,8 +112,8 @@ describe('string-comparison.helpers', () => {
 
     it('should not match when names differ only by extra business-type words and token subset is disabled', () => {
       const result = isNameMatch(
-        'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
-        'ROYAL CANIN DO BRASIL LTDA',
+        'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
+        'VERDE CAMPO DO BRASIL LTDA',
       );
 
       expect(result.isMatch).toBe(false);
@@ -121,8 +124,8 @@ describe('string-comparison.helpers', () => {
     describe('with token subset enabled', () => {
       it('should match when one name has extra business-type words not present in the other', () => {
         const result = isNameMatch(
-          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
-          'ROYAL CANIN DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -165,8 +168,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match regardless of which argument has the extra words', () => {
         const result = isNameMatch(
-          'ROYAL CANIN DO BRASIL LTDA',
-          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -177,7 +180,7 @@ describe('string-comparison.helpers', () => {
       it('should not match when the shorter name has fewer than 2 meaningful tokens', () => {
         const result = isNameMatch(
           'LTDA',
-          'ROYAL CANIN DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -209,8 +212,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match when tokens have minor spelling differences', () => {
         const result = isNameMatch(
-          'Rua Luis Franceshi, 2045, Cidade, PR',
-          'Rua Luiz Francheshi,2045 Bairro Norte, Cidade, PR',
+          'Rua Flores Amarelas, 2045, Cidade, PR',
+          'Rua Florez Amarellas,2045 Bairro Norte, Cidade, PR',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -220,8 +223,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match when one side omits a street prefix token', () => {
         const result = isNameMatch(
-          'Rua Rosa Neuman, 125, Cidade, PR',
-          'Rosa Neumann, 125 Bairro Central, Cidade, PR',
+          'Rua Girassol Dourado, 125, Cidade, PR',
+          'Girassol Douraddo, 125 Bairro Central, Cidade, PR',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -250,6 +253,230 @@ describe('string-comparison.helpers', () => {
 
         expect(result.isMatch).toBe(false);
       });
+    });
+  });
+
+  describe('normalizeAddress', () => {
+    it('should expand "al" to "alameda"', () => {
+      expect(normalizeAddress('Al Jacaranda, 1')).toBe('alameda jacaranda 1');
+    });
+
+    it('should expand "rod" to "rodovia"', () => {
+      expect(normalizeAddress('Rod Exemplo, 100')).toBe('rodovia exemplo 100');
+    });
+
+    it('should expand "av" to "avenida"', () => {
+      expect(normalizeAddress('Av Brasil, 500')).toBe('avenida brasil 500');
+    });
+
+    it('should expand "r" to "rua" only as standalone token', () => {
+      expect(normalizeAddress('R Exemplo, 10')).toBe('rua exemplo 10');
+    });
+
+    it('should not expand tokens that are not abbreviations', () => {
+      expect(normalizeAddress('Alameda Jacaranda, 1')).toBe(
+        'alameda jacaranda 1',
+      );
+    });
+
+    it('should deduplicate consecutive identical tokens', () => {
+      expect(normalizeAddress('KM 5 KM 5 Bairro')).toBe('km 5 bairro');
+    });
+
+    it('should deduplicate longer consecutive runs', () => {
+      expect(normalizeAddress('RODOVIA PR 423KM KM 24 3 KM 24 3 JARDIM')).toBe(
+        'rodovia pr 423 km 24 3 jardim',
+      );
+    });
+
+    it('should handle accents and punctuation like aggressiveNormalize', () => {
+      expect(normalizeAddress('Av. São Paulo, 100')).toBe(
+        'avenida sao paulo 100',
+      );
+    });
+
+    it('should handle empty string', () => {
+      expect(normalizeAddress('')).toBe('');
+    });
+
+    it('should split digit sequences separated by punctuation', () => {
+      expect(normalizeAddress('BR-116,2007 Bairro')).toBe('br 116 2007 bairro');
+    });
+
+    it('should split route and street number joined by comma', () => {
+      expect(normalizeAddress('BR-376,22591 Miringuava')).toBe(
+        'br 376 22591 miringuava',
+      );
+    });
+  });
+
+  describe('isAddressMatch', () => {
+    it('should match when one side uses street abbreviation and other uses full name', () => {
+      const result = isAddressMatch(
+        'Al Jacaranda, 1, Cidade dos Pinheiros, SP',
+        'Alameda Jacaranda, 01 Bairro Norte, Cidade dos Pinheiros, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when OCR produces duplicate tokens', () => {
+      const result = isAddressMatch(
+        'Rod Exemplo, 423, Cidade Nova, PR',
+        'RODOVIA EXEMPLO 423KM,S/N SN,KM 24,3 KM 24,3 JARDIM, Cidade Nova, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match identical addresses', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Cidade, SP',
+        'Rua Exemplo, 100, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+      expect(result.score).toBe(1);
+    });
+
+    it('should not match truly different addresses', () => {
+      const result = isAddressMatch(
+        'Avenida Alpha, 100, Cidade, SP',
+        'Rua Beta, 200, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should not match addresses with different street numbers', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Cidade, SP',
+        'Rua Exemplo, 200, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should match when "Rod" abbreviation is used for "Rodovia"', () => {
+      const result = isAddressMatch(
+        'Rod Brasil, 100, Cidade, PR',
+        'Rodovia Brasil, 100, Cidade, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should not match addresses with same number but completely different names', () => {
+      const result = isAddressMatch(
+        'Rua Alpha, 100, Cidade, SP',
+        'Avenida Beta, 100, Metropole, RJ',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should match addresses where street number has leading zeros', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 001, Cidade, SP',
+        'Rua Exemplo, 1, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match addresses where street number is all zeros', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 000, Cidade, SP',
+        'Rua Exemplo, 0, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when first address has more numeric tokens than the second', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Lote 50, Cidade, SP',
+        'Rua Exemplo, 100, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match via token subset when first address has more tokens and dice score is low', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, Complemento Lote B, 100, Cidade Grande, Estado, SP',
+        'R Exemplo, 100, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when extracted address has route and number joined by comma', () => {
+      const result = isAddressMatch(
+        'BR-376,22591 Miringuava, Sao Jose dos Pinhais, PR',
+        'Rod Br-376, 22591, São José dos Pinhais, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when source document has duplicated street number', () => {
+      const result = isAddressMatch(
+        'RUA Exemplo, 210210 Bairro Norte, Cidade, SP',
+        'RUA Exemplo, 210, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+  });
+
+  describe('isOcrPlausiblePlateMatch', () => {
+    it('should return true for I/1 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('XYZ1I23', 'XYZ1123')).toBe(true);
+    });
+
+    it('should return true for B/8 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('FAK3B99', 'FAK3899')).toBe(true);
+    });
+
+    it('should return true for O/0 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABC0D23', 'ABCOD23')).toBe(true);
+    });
+
+    it('should return true for S/5 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('AB5CD23', 'ABSCD23')).toBe(true);
+    });
+
+    it('should return true for Z/2 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABZ1D23', 'AB21D23')).toBe(true);
+    });
+
+    it('should return true for D/0 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1023')).toBe(true);
+    });
+
+    it('should return true for G/6 OCR confusion', () => {
+      expect(isOcrPlausiblePlateMatch('ABG1D23', 'AB61D23')).toBe(true);
+    });
+
+    it('should return true for exact match after normalization', () => {
+      expect(isOcrPlausiblePlateMatch('ABC-1D23', 'abc 1d23')).toBe(true);
+    });
+
+    it('should return false for non-OCR single char difference', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1D24')).toBe(false);
+    });
+
+    it('should return false when more than 1 character differs', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'XYZ1D23')).toBe(false);
+    });
+
+    it('should return false for different length plates', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1D23', 'ABC1D234')).toBe(false);
+    });
+
+    it('should return false when two OCR-confusable chars differ', () => {
+      expect(isOcrPlausiblePlateMatch('XYZ1I23', 'X1Z1123')).toBe(false);
     });
   });
 

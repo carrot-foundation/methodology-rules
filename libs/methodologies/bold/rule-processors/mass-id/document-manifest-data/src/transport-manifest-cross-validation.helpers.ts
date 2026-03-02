@@ -7,6 +7,7 @@ import {
 import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
   getTimezoneFromAddress,
+  isOcrPlausiblePlateMatch,
   normalizeVehiclePlate,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
@@ -105,8 +106,7 @@ export const validateMtrExtractedData = (
     extractedData.vehiclePlate,
     eventPlateString,
     {
-      compareFn: (a, b) =>
-        normalizeVehiclePlate(a) === normalizeVehiclePlate(b),
+      compareFn: isOcrPlausiblePlateMatch,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         field: 'vehicle plate',
       }),
@@ -114,6 +114,19 @@ export const validateMtrExtractedData = (
       routing: 'review',
     },
   );
+
+  const extractedPlate = extractedData.vehiclePlate?.parsed;
+
+  if (
+    extractedPlate !== undefined &&
+    eventPlateString !== undefined &&
+    normalizeVehiclePlate(extractedPlate) !==
+      normalizeVehiclePlate(eventPlateString) &&
+    isOcrPlausiblePlateMatch(extractedPlate, eventPlateString)
+  ) {
+    vehiclePlate.debug.observation =
+      'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.';
+  }
 
   const receiverReasons: EntityComparisonReasons = {
     address: {

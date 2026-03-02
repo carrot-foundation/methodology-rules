@@ -8,6 +8,7 @@ import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
 import {
   dateDifferenceInDays,
+  isAddressMatch,
   isNameMatch,
   utcIsoToLocalDate,
 } from '@carrot-fndn/shared/helpers';
@@ -18,7 +19,11 @@ import type {
 } from '../document-manifest-data.result-content.types';
 import type { FieldValidationResult } from './cross-validation.helpers';
 
-import { buildAddressString, normalizeTaxId } from './cross-validation.helpers';
+import {
+  buildAddressString,
+  formatScoreAsPercent,
+  normalizeTaxId,
+} from './cross-validation.helpers';
 
 export interface ComparisonOutput<TDebug> {
   debug: TDebug;
@@ -239,10 +244,10 @@ const buildAddressDebug = (
   }
 
   const eventAddressString = buildAddressString(eventAddress);
-  const { score } = isNameMatch(extractedAddress, eventAddressString);
+  const { score } = isAddressMatch(extractedAddress, eventAddressString);
 
   return {
-    addressSimilarity: `${(score * 100).toFixed(0)}%`,
+    addressSimilarity: formatScoreAsPercent(score),
     confidence: entityWithAddress.address.confidence,
     event: eventAddressString,
     extracted: extractedAddress,
@@ -260,11 +265,9 @@ const validateEntityAddress = (
 
   const eventAddressString = buildAddressString(eventAddress);
   const extractedAddress = buildExtractedAddress(entityWithAddress);
-  const { isMatch, score } = isNameMatch(
+  const { isMatch, score } = isAddressMatch(
     extractedAddress,
     eventAddressString,
-    undefined,
-    true,
   );
 
   if (isMatch) {
@@ -279,7 +282,7 @@ const validateEntityAddress = (
           event: eventAddressString,
           extracted: extractedAddress,
           field: 'address',
-          similarity: `${(score * 100).toFixed(0)}%`,
+          similarity: formatScoreAsPercent(score),
         },
       ],
     },
@@ -348,7 +351,7 @@ export const compareEntity = (
   })();
 
   const nameSimilarity =
-    nameResult === undefined ? null : `${(nameResult.score * 100).toFixed(0)}%`;
+    nameResult === undefined ? null : formatScoreAsPercent(nameResult.score);
 
   const taxIdMatch =
     eventTaxId === undefined
