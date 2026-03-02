@@ -15,6 +15,7 @@ import type { ComparisonOutput } from './field.comparators';
 
 import {
   computeCdfTotalKg,
+  formatScoreAsPercent,
   matchWasteTypeEntry,
   normalizeQuantityToKg,
 } from './cross-validation.helpers';
@@ -34,7 +35,7 @@ const buildWasteTypeDebugEntry = (
     descriptionSimilarity:
       match.descriptionSimilarity === null
         ? null
-        : `${(match.descriptionSimilarity * 100).toFixed(0)}%`,
+        : formatScoreAsPercent(match.descriptionSimilarity),
     extracted: entry.code
       ? `${entry.code} - ${entry.description}`
       : entry.description,

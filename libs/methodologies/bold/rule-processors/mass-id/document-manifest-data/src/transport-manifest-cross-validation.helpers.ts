@@ -106,9 +106,7 @@ export const validateMtrExtractedData = (
     extractedData.vehiclePlate,
     eventPlateString,
     {
-      compareFn: (a, b) =>
-        normalizeVehiclePlate(a) === normalizeVehiclePlate(b) ||
-        isOcrPlausiblePlateMatch(a, b),
+      compareFn: isOcrPlausiblePlateMatch,
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         field: 'vehicle plate',
       }),

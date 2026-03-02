@@ -22,6 +22,9 @@ export interface FieldValidationResult {
   reviewReason?: ReviewReason;
 }
 
+export const formatScoreAsPercent = (score: number): string =>
+  `${(score * 100).toFixed(0)}%`;
+
 export const collectResults = (
   results: FieldValidationResult[],
 ): {
