@@ -108,7 +108,7 @@ export const normalizeQuantityToKg = (
 
   const normalized = unit.toLowerCase();
 
-  if (normalized === 'kg') {
+  if (normalized === 'kg' || normalized === 'quilograma') {
     return quantity;
   }
 

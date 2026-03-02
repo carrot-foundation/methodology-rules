@@ -82,6 +82,10 @@ describe('cross-validation.helpers', () => {
       expect(normalizeQuantityToKg(1.12, 'tonelada')).toBe(1120);
     });
 
+    it('should return quantity as-is when unit is Quilograma', () => {
+      expect(normalizeQuantityToKg(80, 'Quilograma')).toBe(80);
+    });
+
     it('should return undefined for unknown units', () => {
       expect(normalizeQuantityToKg(5, 'm³')).toBeUndefined();
     });
