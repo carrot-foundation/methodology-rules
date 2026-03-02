@@ -8,6 +8,7 @@ import type { MethodologyAddress } from '@carrot-fndn/shared/types';
 
 import {
   dateDifferenceInDays,
+  isAddressMatch,
   isNameMatch,
   utcIsoToLocalDate,
 } from '@carrot-fndn/shared/helpers';
@@ -239,7 +240,7 @@ const buildAddressDebug = (
   }
 
   const eventAddressString = buildAddressString(eventAddress);
-  const { score } = isNameMatch(extractedAddress, eventAddressString);
+  const { score } = isAddressMatch(extractedAddress, eventAddressString);
 
   return {
     addressSimilarity: `${(score * 100).toFixed(0)}%`,
@@ -260,11 +261,9 @@ const validateEntityAddress = (
 
   const eventAddressString = buildAddressString(eventAddress);
   const extractedAddress = buildExtractedAddress(entityWithAddress);
-  const { isMatch, score } = isNameMatch(
+  const { isMatch, score } = isAddressMatch(
     extractedAddress,
     eventAddressString,
-    undefined,
-    true,
   );
 
   if (isMatch) {

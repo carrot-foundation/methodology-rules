@@ -44,6 +44,7 @@ export interface EntityComparison extends ComparisonResult {
 
 export interface FieldComparison extends FieldComparisonBase {
   daysDiff?: null | number;
+  observation?: string;
   similarity?: null | string;
 }
 
