@@ -58,15 +58,19 @@ const MIN_MEANINGFUL_TOKENS = 2;
 const FUZZY_TOKEN_THRESHOLD = 0.8;
 const MIN_TOKENS_FOR_TOLERANCE = 4;
 
-const isTokenMatch = (token: string, candidate: string): boolean => {
-  if (token.length === 1) {
-    return /^\d$/.test(token)
-      ? candidate === token
-      : candidate.startsWith(token);
-  }
+const isNumericToken = (token: string): boolean => /^\d+$/.test(token);
 
+const isTokenMatch = (token: string, candidate: string): boolean => {
   if (token === candidate) {
     return true;
+  }
+
+  if (isNumericToken(token)) {
+    return false;
+  }
+
+  if (token.length === 1) {
+    return candidate.startsWith(token);
   }
 
   return diceCoefficient(token, candidate) >= FUZZY_TOKEN_THRESHOLD;
@@ -80,8 +84,6 @@ const isTokenMatch = (token: string, candidate: string): boolean => {
  * Requires at least MIN_MEANINGFUL_TOKENS tokens of length >= MEANINGFUL_TOKEN_MIN_LENGTH
  * in the shorter list to avoid spurious matches on single-suffix names.
  */
-const isNumericToken = (token: string): boolean => /^\d+$/.test(token);
-
 const fuzzyTokenSubset = (shorter: string[], longer: string[]): boolean => {
   const meaningfulCount = shorter.filter(
     (t) => t.length >= MEANINGFUL_TOKEN_MIN_LENGTH,

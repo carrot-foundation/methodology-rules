@@ -115,7 +115,12 @@ export const compareWasteType = (
   }
 
   const extractedSummary = meaningfulEntries
-    .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
+    .map((e) => {
+      const code = e.code?.trim();
+      const description = e.description.trim();
+
+      return code ? `${code} - ${description}` : description;
+    })
     .join(', ');
 
   const eventSummary = [trimmedEventCode, trimmedEventDescription]
@@ -257,7 +262,7 @@ export const compareWasteQuantity = (
 
   return {
     debug: {
-      confidence: null,
+      confidence: options.confidence ?? null,
       event: weighingValue ?? null,
       extracted: extractedKg ?? null,
       extractedQuantity: null,

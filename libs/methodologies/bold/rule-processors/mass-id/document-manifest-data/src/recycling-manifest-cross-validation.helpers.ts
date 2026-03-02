@@ -58,7 +58,7 @@ export const collectMtrDocumentNumbers = (
   ...new Set(
     documentManifestEvents
       .filter((e) => e.documentType?.toString() === 'MTR')
-      .map((e) => e.documentNumber?.toString())
+      .map((e) => e.documentNumber?.toString().trim())
       .filter((value): value is string => isNonEmptyString(value)),
   ),
 ];
