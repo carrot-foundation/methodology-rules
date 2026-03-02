@@ -170,7 +170,7 @@ describe('CdfCustom1Parser', () => {
     it('should set low confidence for entities with missing CNPJ', () => {
       const noCnpjText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'CERTIFICADO DE DESTINAÇÃO FINAL',
         'Empresa Recebedora: Company Without CNPJ',
         'Empresa Geradora: Generator Without CNPJ',
@@ -233,7 +233,7 @@ describe('CdfCustom1Parser', () => {
     it('should extract environmental license from preamble text', () => {
       const licenseText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'conformidade com a licença nº: 36013428 de 25/06/2024.',
       ].join('\n');
 
@@ -245,7 +245,7 @@ describe('CdfCustom1Parser', () => {
     it('should extract treatment method from preamble text', () => {
       const treatmentText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'através da compostagem de lodo de esgoto, certifica que',
       ].join('\n');
 
@@ -259,7 +259,7 @@ describe('CdfCustom1Parser', () => {
     it('should handle waste quantity in Brazilian number format', () => {
       const quantityText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado',
         '1.377,59',
       ].join('\n');
@@ -272,7 +272,7 @@ describe('CdfCustom1Parser', () => {
     it('should not extract waste quantity when value is NaN', () => {
       const nanQuantityText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado',
         '...',
       ].join('\n');
@@ -298,7 +298,7 @@ describe('CdfCustom1Parser', () => {
     it('should handle quantity on the same line as label (fallback)', () => {
       const sameLineText = [
         'CDF 100/24',
-        'Jundiaí, 01 de Janeiro de 2024.',
+        'Cidade Centro, 01 de Janeiro de 2024.',
         'Quantidade Total Tratado 500,00',
       ].join('\n');
 
