@@ -80,6 +80,8 @@ const isTokenMatch = (token: string, candidate: string): boolean => {
  * Requires at least MIN_MEANINGFUL_TOKENS tokens of length >= MEANINGFUL_TOKEN_MIN_LENGTH
  * in the shorter list to avoid spurious matches on single-suffix names.
  */
+const isNumericToken = (token: string): boolean => /^\d+$/.test(token);
+
 const fuzzyTokenSubset = (shorter: string[], longer: string[]): boolean => {
   const meaningfulCount = shorter.filter(
     (t) => t.length >= MEANINGFUL_TOKEN_MIN_LENGTH,
@@ -97,6 +99,10 @@ const fuzzyTokenSubset = (shorter: string[], longer: string[]): boolean => {
     const index = pool.findIndex((lt) => isTokenMatch(token, lt));
 
     if (index === -1) {
+      if (isNumericToken(token)) {
+        return false;
+      }
+
       misses++;
 
       if (misses > maxMisses) {

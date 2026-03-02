@@ -57,16 +57,23 @@ export const compareWasteType = (
     skipValidation?: boolean;
   },
 ): ComparisonOutput<WasteTypeComparison> => {
+  const trimmedEventCode = eventCode?.trim() || undefined;
+  const trimmedEventDescription = eventDescription?.trim() || undefined;
+
   const debugEntries =
     entries?.map((entry) =>
-      buildWasteTypeDebugEntry(entry, eventCode, eventDescription),
+      buildWasteTypeDebugEntry(
+        entry,
+        trimmedEventCode,
+        trimmedEventDescription,
+      ),
     ) ?? null;
 
   const debug: WasteTypeComparison = {
     ...(options.confidence !== undefined && { confidence: options.confidence }),
     entries: debugEntries,
-    eventCode: eventCode ?? null,
-    eventDescription: eventDescription ?? null,
+    eventCode: trimmedEventCode ?? null,
+    eventDescription: trimmedEventDescription ?? null,
     isMatch: debugEntries?.some((e) => e.isMatch === true) ?? null,
   };
 
@@ -79,17 +86,20 @@ export const compareWasteType = (
       debug,
       validation:
         options.notExtractedReason &&
-        (eventCode !== undefined || eventDescription !== undefined)
+        (trimmedEventCode !== undefined ||
+          trimmedEventDescription !== undefined)
           ? [{ reviewReason: options.notExtractedReason }]
           : [],
     };
   }
 
-  if (!eventCode && !eventDescription) {
+  if (!trimmedEventCode && !trimmedEventDescription) {
     return { debug, validation: [] };
   }
 
-  const meaningfulEntries = entries.filter((e) => e.code || e.description);
+  const meaningfulEntries = entries.filter(
+    (e) => e.code?.trim() || e.description.trim(),
+  );
 
   if (meaningfulEntries.length === 0) {
     return {
@@ -108,7 +118,7 @@ export const compareWasteType = (
     .map((e) => (e.code ? `${e.code} - ${e.description}` : e.description))
     .join(', ');
 
-  const eventSummary = [eventCode, eventDescription]
+  const eventSummary = [trimmedEventCode, trimmedEventDescription]
     .filter(Boolean)
     .join(' - ');
 

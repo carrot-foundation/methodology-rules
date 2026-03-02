@@ -54,11 +54,14 @@ export const isCdfEventData = (
 
 export const collectMtrDocumentNumbers = (
   documentManifestEvents: DocumentManifestEventSubject[],
-): string[] =>
-  documentManifestEvents
-    .filter((e) => e.documentType?.toString() === 'MTR')
-    .map((e) => e.documentNumber?.toString())
-    .filter((value): value is string => isNonEmptyString(value));
+): string[] => [
+  ...new Set(
+    documentManifestEvents
+      .filter((e) => e.documentType?.toString() === 'MTR')
+      .map((e) => e.documentNumber?.toString())
+      .filter((value): value is string => isNonEmptyString(value)),
+  ),
+];
 
 const buildCdfPassMessage = (
   extractedData: CdfExtractedData,
@@ -91,7 +94,15 @@ export const validateCdfExtractedData = (
   const extractedData = extractionResult.data as CdfExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return { failMessages: [], reviewRequired: true };
+    return {
+      failMessages: [],
+      reviewReasons: [
+        REVIEW_REASONS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW({
+          confidence: extractionResult.data.extractionConfidence,
+        }),
+      ],
+      reviewRequired: true,
+    };
   }
 
   const layoutValidationConfig = getLayoutValidationConfig(

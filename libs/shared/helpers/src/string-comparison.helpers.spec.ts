@@ -229,6 +229,17 @@ describe('string-comparison.helpers', () => {
         expect(result.isMatch).toBe(true);
       });
 
+      it('should not tolerate numeric token mismatches even with 4+ meaningful tokens', () => {
+        const result = isNameMatch(
+          'ACME Ind 100 Prod Servicos',
+          'ACME Ind 200 Prod Servicos Ambientais Ltda',
+          DEFAULT_NAME_MATCH_THRESHOLD,
+          true,
+        );
+
+        expect(result.isMatch).toBe(false);
+      });
+
       it('should not allow tolerance when shorter has fewer than 4 meaningful tokens', () => {
         const result = isNameMatch(
           'Rua Exemplo, Cidade',

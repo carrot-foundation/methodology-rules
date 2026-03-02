@@ -38,6 +38,29 @@ describe('CdfSinfatParser', () => {
     'Nome do Responsável',
   ].join('\n');
 
+  const sinfatWasteHeaderBlocks = [
+    {
+      boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
+      text: 'Residuo',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
+      text: 'Classe',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
+      text: 'Quantidade',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
+      text: 'Unidade',
+    },
+    {
+      boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
+      text: 'Tecnologia',
+    },
+  ];
+
   describe('parse', () => {
     it('should parse all fields from a valid CDF document', () => {
       const result = parser.parse(stubTextExtractionResult(validCdfText));
@@ -74,29 +97,6 @@ describe('CdfSinfatParser', () => {
     });
 
     it('should extract waste entries with code, classification, quantity, unit, and technology', () => {
-      const sinfatWasteHeaderBlocks = [
-        {
-          boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
-          text: 'Residuo',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
-          text: 'Classe',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
-          text: 'Quantidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
-          text: 'Unidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
-          text: 'Tecnologia',
-        },
-      ];
-
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(validCdfText, [
           ...sinfatWasteHeaderBlocks,
@@ -315,29 +315,6 @@ describe('CdfSinfatParser', () => {
     });
 
     it('should skip rows with non-code residuo text in bounding-box table', () => {
-      const sinfatWasteHeaderBlocks = [
-        {
-          boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
-          text: 'Residuo',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
-          text: 'Classe',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
-          text: 'Quantidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
-          text: 'Unidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
-          text: 'Tecnologia',
-        },
-      ];
-
       const rawText = [
         'Certificado de Destinação Final CDF nº 100/2025',
         'BIOCOMP LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',
@@ -362,29 +339,6 @@ describe('CdfSinfatParser', () => {
     });
 
     it('should extract waste entry from blocks without quantity columns', () => {
-      const sinfatWasteHeaderBlocks = [
-        {
-          boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
-          text: 'Residuo',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
-          text: 'Classe',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
-          text: 'Quantidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
-          text: 'Unidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
-          text: 'Tecnologia',
-        },
-      ];
-
       const rawText = [
         'Certificado de Destinação Final CDF nº 100/2025',
         'BIOCOMP LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',
@@ -418,29 +372,6 @@ describe('CdfSinfatParser', () => {
     });
 
     it('should extract waste entries from bounding-box table when blocks are available', () => {
-      const sinfatWasteHeaderBlocks = [
-        {
-          boundingBox: { height: 0.02, left: 0.05, top: 0.29, width: 0.05 },
-          text: 'Residuo',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.475, top: 0.29, width: 0.04 },
-          text: 'Classe',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.563, top: 0.29, width: 0.07 },
-          text: 'Quantidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.657, top: 0.29, width: 0.05 },
-          text: 'Unidade',
-        },
-        {
-          boundingBox: { height: 0.02, left: 0.758, top: 0.29, width: 0.07 },
-          text: 'Tecnologia',
-        },
-      ];
-
       const rawText = [
         'Certificado de Destinação Final CDF nº 3305038/2025',
         'BIOCOMP SOLUCOES AMBIENTAIS LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',

@@ -64,7 +64,7 @@ const createExtractionResult = (
 const makeWeighingEvent = (value: number): DocumentEvent =>
   ({ value }) as unknown as DocumentEvent;
 
-const makeDropOffEventWithClassification = (
+const makeEventWithClassification = (
   code?: string,
   description?: string,
   externalCreatedAt?: string,
@@ -118,7 +118,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       weighingEvents: [],
     };
 
-    it('should return reviewRequired when basic extraction confidence is low', () => {
+    it('should return reviewRequired with reviewReasons when extraction confidence is low', () => {
       const extractionResult = createExtractionResult({
         extractionConfidence: 'low' as never,
       });
@@ -127,6 +127,11 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewReasons).toHaveLength(1);
+      expect(result.reviewReasons?.[0]?.code).toBe(
+        'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
+      );
+      expect(result.reviewReasons?.[0]?.description).toContain('low');
     });
 
     it('should return no issues when all data matches', () => {
@@ -481,7 +486,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento biologico',
           ),
@@ -545,7 +550,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -568,10 +573,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
-            undefined,
-            'Plastico',
-          ),
+          pickUpEvent: makeEventWithClassification(undefined, 'Plastico'),
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -591,7 +593,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(),
+          pickUpEvent: makeEventWithClassification(),
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -611,7 +613,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -634,7 +636,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -657,7 +659,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento biologico',
           ),
@@ -694,7 +696,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -725,7 +727,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -761,7 +763,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -792,7 +794,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -834,7 +836,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -858,7 +860,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             undefined,
             'Metal ferroso totalmente diferente',
           ),
@@ -906,7 +908,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -936,7 +938,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -964,7 +966,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -992,7 +994,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -1023,7 +1025,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),
@@ -1148,7 +1150,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          pickUpEvent: makeDropOffEventWithClassification(
+          pickUpEvent: makeEventWithClassification(
             '190812',
             'Lodos de tratamento',
           ),

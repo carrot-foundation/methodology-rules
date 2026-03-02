@@ -53,6 +53,12 @@ export const RESULT_COMMENTS = {
 } as const;
 
 export const CROSS_VALIDATION_COMMENTS = {
+  DOCUMENT_EXTRACTION_CONFIDENCE_LOW: ({
+    confidence,
+  }: {
+    confidence: string;
+  }) =>
+    `Extraction confidence is low (${confidence}). Cross-validation skipped; manual review required.`,
   DOCUMENT_NUMBER_MISMATCH: ({
     eventDocumentNumber,
     extractedDocumentNumber,
@@ -174,6 +180,10 @@ function staticReviewReason(
 }
 
 export const REVIEW_REASONS = {
+  DOCUMENT_EXTRACTION_CONFIDENCE_LOW: reviewReason(
+    'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
+    CROSS_VALIDATION_COMMENTS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW,
+  ),
   DOCUMENT_NUMBER_MISMATCH: reviewReason(
     'DOCUMENT_NUMBER_MISMATCH',
     CROSS_VALIDATION_COMMENTS.DOCUMENT_NUMBER_MISMATCH,
