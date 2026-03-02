@@ -15,6 +15,87 @@ export const aggressiveNormalize = (value: string): string =>
     .replaceAll(/\s+/g, ' ')
     .trim();
 
+const BRAZILIAN_ADDRESS_ABBREVIATIONS = new Map<string, string>([
+  ['al', 'alameda'],
+  ['alam', 'alameda'],
+  ['av', 'avenida'],
+  ['cj', 'conjunto'],
+  ['cond', 'condominio'],
+  ['est', 'estrada'],
+  ['pc', 'praca'],
+  ['pca', 'praca'],
+  ['r', 'rua'],
+  ['res', 'residencial'],
+  ['rod', 'rodovia'],
+  ['trav', 'travessa'],
+]);
+
+const expandAddressAbbreviations = (tokens: string[]): string[] =>
+  tokens.map((t) => BRAZILIAN_ADDRESS_ABBREVIATIONS.get(t) ?? t);
+
+const findRepeatedRunLength = (
+  result: string[],
+  tokens: string[],
+  index: number,
+): number => {
+  for (let runLength = result.length; runLength >= 1; runLength--) {
+    if (index + runLength > tokens.length || result.length < runLength) {
+      continue;
+    }
+
+    const tail = result.slice(-runLength);
+    const next = tokens.slice(index, index + runLength);
+
+    if (tail.every((t, index_) => t === next.at(index_))) {
+      return runLength;
+    }
+  }
+
+  return 0;
+};
+
+const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
+  const result: string[] = [];
+  let index = 0;
+
+  while (index < tokens.length) {
+    const runLength = findRepeatedRunLength(result, tokens, index);
+
+    if (runLength > 0) {
+      index += runLength;
+    } else {
+      const token = tokens.at(index);
+
+      if (token !== undefined) {
+        result.push(token);
+      }
+
+      index++;
+    }
+  }
+
+  return result;
+};
+
+/**
+ * Normalizes an address string for comparison.
+ * Applies aggressiveNormalize, then expands Brazilian street abbreviations
+ * and deduplicates consecutive identical tokens (OCR noise).
+ */
+export const normalizeAddress = (value: string): string => {
+  const normalized = aggressiveNormalize(value);
+
+  if (normalized === '') {
+    return '';
+  }
+
+  const tokens = normalized.split(' ');
+  const expanded = expandAddressAbbreviations(tokens);
+  const deduped = deduplicateConsecutiveTokens(expanded);
+
+  return deduped.join(' ');
+};
+
 /**
  * Computes the Sorensen-Dice coefficient between two strings.
  * Returns a value between 0 (completely different) and 1 (identical).

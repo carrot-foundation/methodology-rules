@@ -4,6 +4,7 @@ import {
   DEFAULT_NAME_MATCH_THRESHOLD,
   diceCoefficient,
   isNameMatch,
+  normalizeAddress,
   normalizeDateToISO,
   normalizeVehiclePlate,
 } from './string-comparison.helpers';
@@ -250,6 +251,50 @@ describe('string-comparison.helpers', () => {
 
         expect(result.isMatch).toBe(false);
       });
+    });
+  });
+
+  describe('normalizeAddress', () => {
+    it('should expand "al" to "alameda"', () => {
+      expect(normalizeAddress('Al Jacaranda, 1')).toBe('alameda jacaranda 1');
+    });
+
+    it('should expand "rod" to "rodovia"', () => {
+      expect(normalizeAddress('Rod Exemplo, 100')).toBe('rodovia exemplo 100');
+    });
+
+    it('should expand "av" to "avenida"', () => {
+      expect(normalizeAddress('Av Brasil, 500')).toBe('avenida brasil 500');
+    });
+
+    it('should expand "r" to "rua" only as standalone token', () => {
+      expect(normalizeAddress('R Exemplo, 10')).toBe('rua exemplo 10');
+    });
+
+    it('should not expand tokens that are not abbreviations', () => {
+      expect(normalizeAddress('Alameda Jacaranda, 1')).toBe(
+        'alameda jacaranda 1',
+      );
+    });
+
+    it('should deduplicate consecutive identical tokens', () => {
+      expect(normalizeAddress('KM 5 KM 5 Bairro')).toBe('km 5 bairro');
+    });
+
+    it('should deduplicate longer consecutive runs', () => {
+      expect(normalizeAddress('RODOVIA PR 423KM KM 24 3 KM 24 3 JARDIM')).toBe(
+        'rodovia pr 423 km 24 3 jardim',
+      );
+    });
+
+    it('should handle accents and punctuation like aggressiveNormalize', () => {
+      expect(normalizeAddress('Av. São Paulo, 100')).toBe(
+        'avenida sao paulo 100',
+      );
+    });
+
+    it('should handle empty string', () => {
+      expect(normalizeAddress('')).toBe('');
     });
   });
 
