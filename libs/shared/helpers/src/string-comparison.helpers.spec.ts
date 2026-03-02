@@ -109,8 +109,8 @@ describe('string-comparison.helpers', () => {
 
     it('should not match when names differ only by extra business-type words and token subset is disabled', () => {
       const result = isNameMatch(
-        'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
-        'ROYAL CANIN DO BRASIL LTDA',
+        'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
+        'VERDE CAMPO DO BRASIL LTDA',
       );
 
       expect(result.isMatch).toBe(false);
@@ -121,8 +121,8 @@ describe('string-comparison.helpers', () => {
     describe('with token subset enabled', () => {
       it('should match when one name has extra business-type words not present in the other', () => {
         const result = isNameMatch(
-          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
-          'ROYAL CANIN DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -165,8 +165,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match regardless of which argument has the extra words', () => {
         const result = isNameMatch(
-          'ROYAL CANIN DO BRASIL LTDA',
-          'ROYAL CANIN DO BRASIL INDUSTRIA E COMERCIO LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL INDUSTRIA E COMERCIO LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -177,7 +177,7 @@ describe('string-comparison.helpers', () => {
       it('should not match when the shorter name has fewer than 2 meaningful tokens', () => {
         const result = isNameMatch(
           'LTDA',
-          'ROYAL CANIN DO BRASIL LTDA',
+          'VERDE CAMPO DO BRASIL LTDA',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -209,8 +209,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match when tokens have minor spelling differences', () => {
         const result = isNameMatch(
-          'Rua Luis Franceshi, 2045, Cidade, PR',
-          'Rua Luiz Francheshi,2045 Bairro Norte, Cidade, PR',
+          'Rua Flores Amarelas, 2045, Cidade, PR',
+          'Rua Florez Amarellas,2045 Bairro Norte, Cidade, PR',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
@@ -220,8 +220,8 @@ describe('string-comparison.helpers', () => {
 
       it('should match when one side omits a street prefix token', () => {
         const result = isNameMatch(
-          'Rua Rosa Neuman, 125, Cidade, PR',
-          'Rosa Neumann, 125 Bairro Central, Cidade, PR',
+          'Rua Girassol Dourado, 125, Cidade, PR',
+          'Girassol Douraddo, 125 Bairro Central, Cidade, PR',
           DEFAULT_NAME_MATCH_THRESHOLD,
           true,
         );
