@@ -38,7 +38,6 @@ const isMtrEventData = (
 
 export const crossValidateWithTextract = async ({
   attachmentInfos,
-  documentCurrentValue = 0,
   documentManifestEvents,
   dropOffEvent,
   haulerEvent,
@@ -49,7 +48,6 @@ export const crossValidateWithTextract = async ({
   weighingEvents,
 }: {
   attachmentInfos: AttachmentInfo[];
-  documentCurrentValue?: number;
   documentManifestEvents: DocumentManifestEventSubject[];
   dropOffEvent: DocumentEvent | undefined;
   haulerEvent: DocumentEvent | undefined;
@@ -99,7 +97,6 @@ export const crossValidateWithTextract = async ({
     } else {
       const cdfEventData: CdfCrossValidationEventData = {
         ...baseEvent,
-        documentCurrentValue,
         dropOffEvent,
         manifestType: 'cdf',
         mtrDocumentNumbers,

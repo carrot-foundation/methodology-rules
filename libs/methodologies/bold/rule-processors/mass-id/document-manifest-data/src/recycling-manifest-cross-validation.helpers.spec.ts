@@ -100,7 +100,6 @@ describe('recycling-manifest-cross-validation.helpers', () => {
   describe('validateCdfExtractedData', () => {
     const baseEventData: CdfCrossValidationEventData = {
       attachment: undefined,
-      documentCurrentValue: 0,
       documentNumber: 'CDF-001',
       documentType: 'CDF',
       dropOffEvent: undefined,
@@ -1058,7 +1057,6 @@ describe('recycling-manifest-cross-validation.helpers', () => {
 
         const eventData: CdfCrossValidationEventData = {
           ...baseEventData,
-          documentCurrentValue: 500,
           documentNumber: undefined,
           documentType: undefined,
         };

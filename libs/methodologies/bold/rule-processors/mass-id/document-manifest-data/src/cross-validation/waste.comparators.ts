@@ -224,8 +224,13 @@ export const compareWasteQuantity = (
   }
 
   // Strategy 1: match by waste type
+  const trimmedEventCode = eventCode?.trim() || undefined;
+  const trimmedEventDescription = eventDescription?.trim() || undefined;
+
   const matchedEntry = entries.find(
-    (entry) => matchWasteTypeEntry(entry, eventCode, eventDescription).isMatch,
+    (entry) =>
+      matchWasteTypeEntry(entry, trimmedEventCode, trimmedEventDescription)
+        .isMatch,
   );
 
   if (matchedEntry?.quantity !== undefined) {

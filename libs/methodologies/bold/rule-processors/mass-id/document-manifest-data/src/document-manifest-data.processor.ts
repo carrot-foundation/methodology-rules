@@ -142,7 +142,6 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     const crossValidationResult = await crossValidateWithTextract({
       attachmentInfos: ruleSubject.attachmentInfos,
-      documentCurrentValue: ruleSubject.document.currentValue,
       documentManifestEvents: ruleSubject.documentManifestEvents,
       dropOffEvent: ruleSubject.dropOffEvent,
       haulerEvent: ruleSubject.haulerEvent,

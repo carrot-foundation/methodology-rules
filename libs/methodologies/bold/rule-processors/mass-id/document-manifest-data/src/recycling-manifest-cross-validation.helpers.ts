@@ -36,7 +36,6 @@ import { getLayoutValidationConfig } from './document-manifest-data.helpers';
 
 export interface CdfCrossValidationEventData
   extends DocumentManifestEventSubject {
-  documentCurrentValue: number;
   dropOffEvent: DocumentEvent | undefined;
   manifestType: 'cdf';
   mtrDocumentNumbers: string[];
@@ -57,7 +56,7 @@ export const collectMtrDocumentNumbers = (
 ): string[] => [
   ...new Set(
     documentManifestEvents
-      .filter((e) => e.documentType?.toString() === 'MTR')
+      .filter((e) => e.documentType?.toString().trim() === 'MTR')
       .map((e) => e.documentNumber?.toString().trim())
       .filter((value): value is string => isNonEmptyString(value)),
   ),
