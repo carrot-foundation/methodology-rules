@@ -426,6 +426,124 @@ describe('cross-validation waste comparators', () => {
       });
     });
 
+    describe('floating-point tolerance', () => {
+      it('should not raise mismatch when extracted weight has floating-point noise below event weight', () => {
+        // 0.0392 TON * 1000 = 39.199999999999996 (IEEE 754) vs event 39.2 kg
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 39.199_999_999_999_996,
+            unit: 'kg',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 39.2 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.debug?.source).toBe('matched-entry');
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should not raise mismatch for other observed floating-point cases', () => {
+        // 0.3696 TON * 1000 = 369.59999999999997 vs event 369.6 kg
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 369.599_999_999_999_97,
+            unit: 'kg',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 369.6 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should still raise mismatch for real weight discrepancies', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 39.2,
+            unit: 'kg',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 80 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation).toHaveLength(1);
+        expect(result.validation[0]?.reviewReason?.code).toBe(
+          'WEIGHT_BELOW_WEIGHING',
+        );
+      });
+
+      it('should tolerate floating-point noise in total-weight fallback strategy', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            description: 'Plastico',
+            quantity: 39.199_999_999_999_996,
+            unit: 'kg',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '99 99 99',
+          'No match',
+          [{ value: 39.2 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.source).toBe('total-weight');
+        expect(result.debug?.isMatch).toBe(true);
+        expect(result.validation).toEqual([]);
+      });
+
+      it('should raise mismatch at tolerance boundary when difference exceeds 0.01 kg', () => {
+        const entries: WasteTypeEntryData[] = [
+          {
+            code: '01 01 01',
+            description: 'Papel',
+            quantity: 99.98,
+            unit: 'kg',
+          },
+        ];
+
+        const result = compareWasteQuantity(
+          entries,
+          '01 01 01',
+          'Papel',
+          [{ value: 100 }],
+          { onMismatch: onQuantityMismatch },
+        );
+
+        expect(result.debug?.isMatch).toBe(false);
+        expect(result.validation).toHaveLength(1);
+      });
+    });
+
     describe('skipValidation', () => {
       it('should skip validation when skipValidation is true', () => {
         const entries: WasteTypeEntryData[] = [
