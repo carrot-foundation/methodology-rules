@@ -298,6 +298,16 @@ describe('string-comparison.helpers', () => {
     it('should handle empty string', () => {
       expect(normalizeAddress('')).toBe('');
     });
+
+    it('should split digit sequences separated by punctuation', () => {
+      expect(normalizeAddress('BR-116,2007 Bairro')).toBe('br 116 2007 bairro');
+    });
+
+    it('should split route and street number joined by comma', () => {
+      expect(normalizeAddress('BR-376,22591 Miringuava')).toBe(
+        'br 376 22591 miringuava',
+      );
+    });
   });
 
   describe('isAddressMatch', () => {
@@ -396,6 +406,24 @@ describe('string-comparison.helpers', () => {
       const result = isAddressMatch(
         'Rua Exemplo, Complemento Lote B, 100, Cidade Grande, Estado, SP',
         'R Exemplo, 100, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when extracted address has route and number joined by comma', () => {
+      const result = isAddressMatch(
+        'BR-376,22591 Miringuava, Sao Jose dos Pinhais, PR',
+        'Rod Br-376, 22591, São José dos Pinhais, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when source document has duplicated street number', () => {
+      const result = isAddressMatch(
+        'RUA Exemplo, 210210 Bairro Norte, Cidade, SP',
+        'RUA Exemplo, 210, Cidade, SP',
       );
 
       expect(result.isMatch).toBe(true);

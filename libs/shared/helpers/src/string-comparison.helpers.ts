@@ -83,7 +83,8 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
  * and deduplicates consecutive identical tokens (OCR noise).
  */
 export const normalizeAddress = (value: string): string => {
-  const normalized = aggressiveNormalize(value);
+  const withDigitSpaces = value.replaceAll(/(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g, ' ');
+  const normalized = aggressiveNormalize(withDigitSpaces);
 
   if (normalized === '') {
     return '';
@@ -253,6 +254,11 @@ const extractNumericTokens = (tokens: string[]): string[] =>
  * the longer list. Street numbers are critical in address comparison and must
  * not be fuzzily matched.
  */
+const isRepeatedNumber = (long: string, short: string): boolean =>
+  long.length > short.length &&
+  long.length % short.length === 0 &&
+  long === short.repeat(long.length / short.length);
+
 const numericTokensMatch = (
   shorterNums: string[],
   longerNums: string[],
@@ -263,10 +269,18 @@ const numericTokensMatch = (
     const index = pool.indexOf(number_);
 
     if (index === -1) {
-      return false;
-    }
+      const repIndex = pool.findIndex(
+        (p) => isRepeatedNumber(p, number_) || isRepeatedNumber(number_, p),
+      );
 
-    pool.splice(index, 1);
+      if (repIndex === -1) {
+        return false;
+      }
+
+      pool.splice(repIndex, 1);
+    } else {
+      pool.splice(index, 1);
+    }
   }
 
   return true;
