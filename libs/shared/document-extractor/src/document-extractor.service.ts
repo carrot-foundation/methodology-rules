@@ -1,5 +1,6 @@
 import type {
   TextExtractionInput,
+  TextExtractionResult,
   TextExtractor,
 } from '@carrot-fndn/shared/text-extractor';
 
@@ -15,6 +16,17 @@ import {
   selectBestParser,
   selectBestParserGlobal,
 } from './layout-registry.helpers';
+import { stripAccents } from './text-parsing.helpers';
+
+const normalizeAccents = (
+  result: TextExtractionResult,
+): TextExtractionResult => ({
+  blocks: result.blocks.map((block) => ({
+    ...block,
+    ...(block.text !== undefined && { text: stripAccents(block.text) }),
+  })),
+  rawText: stripAccents(result.rawText),
+});
 
 export interface DocumentExtractorService {
   extract<T extends BaseExtractedData>(
@@ -32,8 +44,10 @@ export class DocumentExtractor implements DocumentExtractorService {
   ): Promise<ExtractionOutput<T>> {
     const { documentType, layouts, textExtractionResult } = config;
 
-    const extractionResult =
+    const rawResult =
       textExtractionResult ?? (await this.textExtractor.extractText(input));
+
+    const extractionResult = normalizeAccents(rawResult);
 
     if (!documentType) {
       const bestMatch = selectBestParserGlobal<T>(extractionResult);

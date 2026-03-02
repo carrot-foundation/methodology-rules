@@ -24,8 +24,10 @@ describe('DocumentManifestDataProcessor', () => {
     jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
     crossValidateWithTextractMock.mockResolvedValue({
       crossValidation: {},
+      extractionMetadata: {},
       failMessages: [],
       failReasons: [],
+      passMessages: [],
       reviewReasons: [],
       reviewRequired: false,
     });
@@ -53,23 +55,50 @@ describe('DocumentManifestDataProcessor', () => {
     const { documentManifestType, events, resultComment, resultStatus } =
       testCase;
 
-    if ('crossValidationFailMessages' in testCase) {
+    if (
+      'crossValidationFailMessages' in testCase &&
+      'crossValidationReviewReasons' in testCase
+    ) {
       crossValidateWithTextractMock.mockResolvedValueOnce({
         crossValidation: {},
+        extractionMetadata: {},
         failMessages: testCase.crossValidationFailMessages,
         failReasons: [],
+        passMessages: [],
+        reviewReasons: testCase.crossValidationReviewReasons,
+        reviewRequired: true,
+      });
+    } else if ('crossValidationFailMessages' in testCase) {
+      crossValidateWithTextractMock.mockResolvedValueOnce({
+        crossValidation: {},
+        extractionMetadata: {},
+        failMessages: testCase.crossValidationFailMessages,
+        failReasons: [],
+        passMessages: [],
         reviewReasons: [],
         reviewRequired: false,
       });
-    }
-
-    if ('crossValidationReviewReasons' in testCase) {
+    } else if ('crossValidationReviewReasons' in testCase) {
       crossValidateWithTextractMock.mockResolvedValueOnce({
         crossValidation: {},
+        extractionMetadata: {},
         failMessages: [],
         failReasons: [],
+        passMessages: [],
         reviewReasons: testCase.crossValidationReviewReasons,
         reviewRequired: true,
+      });
+    }
+
+    if ('crossValidationPassMessages' in testCase) {
+      crossValidateWithTextractMock.mockResolvedValueOnce({
+        crossValidation: {},
+        extractionMetadata: {},
+        failMessages: [],
+        failReasons: [],
+        passMessages: testCase.crossValidationPassMessages,
+        reviewReasons: [],
+        reviewRequired: false,
       });
     }
 

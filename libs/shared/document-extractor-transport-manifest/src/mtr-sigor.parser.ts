@@ -38,16 +38,16 @@ import {
 } from './transport-manifest.types';
 
 const SECTION_PATTERNS = {
-  destinador: /^\s*Identificacao\s+do\s+Destinador\s*$/i,
-  gerador: /^\s*Identificacao\s+do\s+Gerador\s*$/i,
-  residuos: /^\s*Identificacao\s+dos\s+Residuos\s*$/i,
-  transportador: /^\s*Identificacao\s+do\s+Transportador\s*$/i,
+  generator: /^\s*Identificacao\s+do\s+Gerador\s*$/i,
+  hauler: /^\s*Identificacao\s+do\s+Transportador\s*$/i,
+  receiver: /^\s*Identificacao\s+do\s+Destinador\s*$/i,
+  waste: /^\s*Identificacao\s+dos\s+Residuos\s*$/i,
 } as const;
 
 const MTR_PATTERNS = {
   ...MTR_DEFAULT_PATTERNS,
   // eslint-disable-next-line sonarjs/slow-regex
-  razaoSocial: /Razao\s*Social\s*:?\s*(.+)/i,
+  companyName: /Razao\s*Social\s*:?\s*(.+)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
@@ -90,13 +90,13 @@ const extractEntityFromSigorSection = (
 
   const normalizedCnpj = rawTaxId.replaceAll(' ', '');
 
-  const razaoMatch = MTR_PATTERNS.razaoSocial.exec(section);
+  const companyNameMatch = MTR_PATTERNS.companyName.exec(section);
 
-  if (!razaoMatch?.[1]) {
+  if (!companyNameMatch?.[1]) {
     return undefined;
   }
 
-  const name = stripTrailingRegistrationNumber(razaoMatch[1].trim());
+  const name = stripTrailingRegistrationNumber(companyNameMatch[1].trim());
 
   if (name.length <= 3) {
     return undefined;
@@ -219,7 +219,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     extractHaulerFields(text, partialData, {
       allSectionPatterns: ALL_SECTION_PATTERNS,
       labelPatterns: LABEL_PATTERNS,
-      sectionPattern: SECTION_PATTERNS.transportador,
+      sectionPattern: SECTION_PATTERNS.hauler,
     });
     this.extractWasteFields(extractionResult, partialData);
 
@@ -246,7 +246,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   ): void {
     const generatorExtracted = extractEntityFromSigorSection(
       rawText,
-      SECTION_PATTERNS.gerador,
+      SECTION_PATTERNS.generator,
     );
 
     partialData.generator =
@@ -254,14 +254,14 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
 
     const haulerExtracted = extractEntityFromSigorSection(
       rawText,
-      SECTION_PATTERNS.transportador,
+      SECTION_PATTERNS.hauler,
     );
 
     partialData.hauler = createExtractedEntityWithAddress(haulerExtracted);
 
     const receiverExtracted = extractEntityFromSigorSection(
       rawText,
-      SECTION_PATTERNS.destinador,
+      SECTION_PATTERNS.receiver,
     );
 
     partialData.receiver = createExtractedEntityWithAddress(receiverExtracted);

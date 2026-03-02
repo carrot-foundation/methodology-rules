@@ -32,13 +32,16 @@ const documentExtractor = createDocumentExtractor(textExtractor);
 
 const isMtrEventData = (
   eventData: DocumentManifestEventSubject,
-): eventData is MtrCrossValidationEventData => 'pickUpEvent' in eventData;
+): eventData is MtrCrossValidationEventData =>
+  'manifestType' in eventData &&
+  (eventData as { manifestType: unknown }).manifestType === 'mtr';
 
 export const crossValidateWithTextract = async ({
   attachmentInfos,
   documentManifestEvents,
   dropOffEvent,
   haulerEvent,
+  mtrEventDocumentNumbers = [],
   pickUpEvent,
   recyclerEvent,
   wasteGeneratorEvent,
@@ -48,6 +51,7 @@ export const crossValidateWithTextract = async ({
   documentManifestEvents: DocumentManifestEventSubject[];
   dropOffEvent: DocumentEvent | undefined;
   haulerEvent: DocumentEvent | undefined;
+  mtrEventDocumentNumbers?: string[];
   pickUpEvent: DocumentEvent | undefined;
   recyclerEvent: DocumentEvent | undefined;
   wasteGeneratorEvent: DocumentEvent | undefined;
@@ -55,7 +59,12 @@ export const crossValidateWithTextract = async ({
 }): Promise<CrossValidationResult> => {
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 
-  const mtrDocumentNumbers = collectMtrDocumentNumbers(documentManifestEvents);
+  const mtrDocumentNumbers = [
+    ...new Set([
+      ...collectMtrDocumentNumbers(documentManifestEvents),
+      ...mtrEventDocumentNumbers,
+    ]),
+  ];
 
   for (const attachmentInfo of attachmentInfos) {
     const baseEvent = documentManifestEvents.find(
@@ -77,6 +86,7 @@ export const crossValidateWithTextract = async ({
         ...baseEvent,
         dropOffEvent,
         haulerEvent,
+        manifestType: 'mtr',
         pickUpEvent,
         recyclerEvent,
         wasteGeneratorEvent,
@@ -88,7 +98,9 @@ export const crossValidateWithTextract = async ({
       const cdfEventData: CdfCrossValidationEventData = {
         ...baseEvent,
         dropOffEvent,
+        manifestType: 'cdf',
         mtrDocumentNumbers,
+        pickUpEvent,
         recyclerEvent,
         wasteGeneratorEvent,
         weighingEvents,

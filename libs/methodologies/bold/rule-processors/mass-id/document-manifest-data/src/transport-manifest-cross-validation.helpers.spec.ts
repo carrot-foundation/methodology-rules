@@ -7,36 +7,17 @@ import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types
 
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
+import type { MtrCrossValidation } from './document-manifest-data.result-content.types';
+
+import { matchWasteTypeEntry, normalizeQuantityToKg } from './cross-validation';
 import {
-  matchWasteTypeEntry,
+  stubMtrEntity as stubEntity,
+  stubMtrEntityWithHighAddress as stubEntityWithHighAddress,
+} from './cross-validation/cross-validation.stubs';
+import {
   type MtrCrossValidationEventData,
-  normalizeQuantityToKg,
   validateMtrExtractedData,
-  validateWasteQuantityDiscrepancy,
-  WEIGHT_DISCREPANCY_THRESHOLD,
 } from './transport-manifest-cross-validation.helpers';
-
-const stubEntity = (name: string, taxId: string) => ({
-  address: { confidence: 'low' as const, parsed: '' },
-  city: { confidence: 'low' as const, parsed: '' },
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  state: { confidence: 'low' as const, parsed: '' },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
-
-const stubEntityWithHighAddress = (
-  name: string,
-  taxId: string,
-  address: string,
-  city: string,
-  state: string,
-) => ({
-  address: { confidence: 'high' as const, parsed: address },
-  city: { confidence: 'high' as const, parsed: city },
-  name: { confidence: 'high' as const, parsed: name, rawMatch: name },
-  state: { confidence: 'high' as const, parsed: state },
-  taxId: { confidence: 'high' as const, parsed: taxId, rawMatch: taxId },
-});
 
 const baseMtrData = {
   documentNumber: {
@@ -127,6 +108,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
@@ -182,7 +164,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect.objectContaining({
           event: 'XYZ9876',
           extracted: 'ABC1234',
-          field: 'vehiclePlate',
+          field: 'value',
         }),
       ]);
     });
@@ -263,7 +245,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.failMessages).toHaveLength(0);
     });
 
-    it('should set reviewRequired when receiver name does not match', () => {
+    it('should not produce review reason when receiver name does not match (informational only)', () => {
       const extractionResult = createExtractionResult({
         receiver: {
           address: { confidence: 'low', parsed: '' as never },
@@ -293,22 +275,20 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]?.description).toContain('receiver name');
-      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
-      expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
-        expect.objectContaining({
-          event: 'Original Recycler Corp',
-          extracted: 'COMPLETELY DIFFERENT COMPANY',
-          field: 'name',
-          similarity: expect.stringContaining('%'),
-        }),
-      ]);
+      expect(
+        result.reviewReasons?.some((r) =>
+          r.description.includes('receiver name'),
+        ),
+      ).toBeFalsy();
+      const mtrResult = result.crossValidation as
+        | MtrCrossValidation
+        | undefined;
+
+      expect(mtrResult?.receiver?.nameSimilarity).toBeDefined();
       expect(result.failMessages).toHaveLength(0);
     });
 
-    it('should set reviewRequired when generator name does not match', () => {
+    it('should not produce review reason when generator name does not match (informational only)', () => {
       const extractionResult = createExtractionResult({
         generator: {
           address: { confidence: 'low', parsed: '' as never },
@@ -338,16 +318,20 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]?.description).toContain(
-        'generator name',
-      );
-      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
+      expect(
+        result.reviewReasons?.some((r) =>
+          r.description.includes('generator name'),
+        ),
+      ).toBeFalsy();
+      const mtrResult = result.crossValidation as
+        | MtrCrossValidation
+        | undefined;
+
+      expect(mtrResult?.generator?.nameSimilarity).toBeDefined();
       expect(result.failMessages).toHaveLength(0);
     });
 
-    it('should set reviewRequired when hauler name does not match', () => {
+    it('should not produce review reason when hauler name does not match (informational only)', () => {
       const extractionResult = createExtractionResult({
         hauler: {
           address: { confidence: 'low', parsed: '' as never },
@@ -377,10 +361,16 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       const result = validateMtrExtractedData(extractionResult, eventData);
 
-      expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toBeDefined();
-      expect(result.reviewReasons?.[0]?.description).toContain('hauler name');
-      expect(result.reviewReasons?.[0]?.description).toContain('Similarity:');
+      expect(
+        result.reviewReasons?.some((r) =>
+          r.description.includes('hauler name'),
+        ),
+      ).toBeFalsy();
+      const mtrResult = result.crossValidation as
+        | MtrCrossValidation
+        | undefined;
+
+      expect(mtrResult?.hauler?.nameSimilarity).toBeDefined();
       expect(result.failMessages).toHaveLength(0);
     });
 
@@ -851,6 +841,21 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should fail when document number does not match', () => {
+      const extractionResult = createExtractionResult({
+        documentNumber: {
+          confidence: 'high',
+          parsed: '99999',
+          rawMatch: '99999',
+        },
+      });
+
+      const result = validateMtrExtractedData(extractionResult, baseEventData);
+
+      expect(result.failMessages.length).toBeGreaterThan(0);
+      expect(result.failReasons?.[0]?.description).toContain('Document Number');
+    });
+
     it('should return no issues when all data matches', () => {
       const extractionResult = createExtractionResult({
         documentNumber: {
@@ -864,6 +869,19 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.failMessages).toHaveLength(0);
       expect(result.reviewRequired).toBe(false);
+    });
+
+    it('should default recyclerCountryCode to BR when undefined', () => {
+      const extractionResult = createExtractionResult({});
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        recyclerCountryCode: undefined,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
     });
 
     describe('waste type validation', () => {
@@ -1036,6 +1054,25 @@ describe('transport-manifest-cross-validation.helpers', () => {
         ).toBe(true);
       });
 
+      it('should set reviewRequired when all waste type entries have no meaningful code or description', () => {
+        const extractionResult = createExtractionResult({
+          wasteTypes: [createExtractedWasteTypeEntry({ description: '' })],
+        });
+
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: makePickUpEventWithClassification(
+            '190812',
+            'Lodos de tratamento',
+          ),
+        };
+
+        const result = validateMtrExtractedData(extractionResult, eventData);
+
+        expect(result.reviewRequired).toBe(true);
+        expect(result.reviewReasons?.[0]?.code).toBe('FIELD_NOT_EXTRACTED');
+      });
+
       it('should return review reason when code matches but description does not', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
@@ -1204,7 +1241,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(true);
       });
 
-      it('should return no issues when matched entry has no quantity', () => {
+      it('should set reviewRequired when matched entry has no quantity and weighing exists', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
             createExtractedWasteTypeEntry({
@@ -1226,10 +1263,15 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
-      it('should return no issues when unit is volumetric (m³)', () => {
+      it('should set reviewRequired when unit is volumetric (m³) and weighing exists', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
             createExtractedWasteTypeEntry({
@@ -1253,7 +1295,12 @@ describe('transport-manifest-cross-validation.helpers', () => {
         const result = validateMtrExtractedData(extractionResult, eventData);
 
         expect(result.failMessages).toHaveLength(0);
-        expect(result.reviewRequired).toBe(false);
+        expect(result.reviewRequired).toBe(true);
+        expect(
+          result.reviewReasons?.some((r) =>
+            r.description.includes('waste quantity'),
+          ),
+        ).toBe(true);
       });
 
       it('should return no issues when no weighing events', () => {
@@ -1283,13 +1330,13 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should return no issues when within 10% threshold', () => {
+      it('should return no issues when extracted weight >= weighing weight', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
             createExtractedWasteTypeEntry({
               code: '190812',
               description: 'Lodos de tratamento',
-              quantity: 950,
+              quantity: 1200,
               unit: 'kg',
             }),
           ],
@@ -1310,7 +1357,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewRequired).toBe(false);
       });
 
-      it('should return review reason when exceeding 10% threshold', () => {
+      it('should return review reason when extracted weight is less than weighing weight', () => {
         const extractionResult = createExtractionResult({
           wasteTypes: [
             createExtractedWasteTypeEntry({
@@ -1343,7 +1390,6 @@ describe('transport-manifest-cross-validation.helpers', () => {
         expect(result.reviewReasons?.[0]?.comparedFields).toEqual([
           expect.objectContaining({
             event: '1000 kg',
-            extracted: '500 kg',
             field: 'wasteQuantity',
           }),
         ]);
@@ -1394,7 +1440,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             '190812',
             'Lodos de tratamento',
           ),
-          weighingEvents: [makeWeighingEvent(4000)],
+          weighingEvents: [makeWeighingEvent(6000)],
         };
 
         const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1524,12 +1570,6 @@ describe('transport-manifest-cross-validation.helpers', () => {
     });
   });
 
-  describe('WEIGHT_DISCREPANCY_THRESHOLD', () => {
-    it('should be 0.1 (10%)', () => {
-      expect(WEIGHT_DISCREPANCY_THRESHOLD).toBe(0.1);
-    });
-  });
-
   describe('address validation in validateMtrExtractedData', () => {
     const baseEventData: MtrCrossValidationEventData = {
       attachment: undefined,
@@ -1542,6 +1582,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
@@ -1714,6 +1755,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       hasWrongLabelAttachment: false,
       haulerEvent: undefined,
       issueDateAttribute: undefined,
+      manifestType: 'mtr',
       pickUpEvent: undefined,
       recyclerCountryCode: 'BR',
       recyclerEvent: undefined,
@@ -1799,18 +1841,6 @@ describe('transport-manifest-cross-validation.helpers', () => {
       );
 
       expect(result.isMatch).toBe(true);
-    });
-
-    it('should re-export validateWasteQuantityDiscrepancy from shared helpers', () => {
-      const result = validateWasteQuantityDiscrepancy(
-        [],
-        '01 01 01',
-        'Waste',
-        [],
-        () => ({ code: 'MISMATCH', description: 'mismatch' }),
-      );
-
-      expect(result).toEqual({});
     });
   });
 });

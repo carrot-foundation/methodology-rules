@@ -392,10 +392,10 @@ describe('MTR shared helpers', () => {
 
   describe('extractMtrEntityWithAddress', () => {
     const sectionPatterns = {
-      destinatario:
+      generator: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+      hauler: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
+      receiver:
         /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
-      gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
-      transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
     };
     const allSectionPatterns = Object.values(sectionPatterns);
     const brazilianTaxIdPattern = MTR_DEFAULT_PATTERNS.brazilianTaxId;
@@ -414,7 +414,7 @@ describe('MTR shared helpers', () => {
 
       const result = extractMtrEntityWithAddress(
         text,
-        sectionPatterns.gerador,
+        sectionPatterns.generator,
         allSectionPatterns,
         brazilianTaxIdPattern,
       );
@@ -430,7 +430,7 @@ describe('MTR shared helpers', () => {
     it('should return low confidence when entity is not found', () => {
       const result = extractMtrEntityWithAddress(
         'Random text without sections',
-        sectionPatterns.gerador,
+        sectionPatterns.generator,
         allSectionPatterns,
         brazilianTaxIdPattern,
       );
@@ -454,7 +454,7 @@ describe('MTR shared helpers', () => {
 
       const result = extractMtrEntityWithAddress(
         text,
-        sectionPatterns.gerador,
+        sectionPatterns.generator,
         allSectionPatterns,
         brazilianTaxIdPattern,
       );
@@ -475,7 +475,7 @@ describe('MTR shared helpers', () => {
 
       const result = extractMtrEntityWithAddress(
         text,
-        sectionPatterns.gerador,
+        sectionPatterns.generator,
         allSectionPatterns,
         brazilianTaxIdPattern,
       );

@@ -35,7 +35,6 @@ import {
 } from './recycling-manifest.types';
 
 interface ReceiptTableRow {
-  cadri?: string;
   quantity: number;
   receiptDate: string;
   wasteType: string;
@@ -100,38 +99,6 @@ const derivePeriodFromReceiptDates = (
   return `${minDateString} ate ${maxDateString}`;
 };
 
-const parseReceiptTableRows = (rawText: string): ReceiptTableRow[] => {
-  const rows: ReceiptTableRow[] = [];
-
-  const rowPattern =
-    // eslint-disable-next-line sonarjs/slow-regex
-    /^(.+?)\s+(-|\d{5,})\s+(\d{2}\/\d{2}\/\d{4})\s+([\d.,]+)\s*$/gm;
-
-  for (const match of rawText.matchAll(rowPattern)) {
-    const [, wasteType, cadriField, receiptDate, quantityString] = match;
-
-    const quantity = parseBrazilianNumber(quantityString!);
-
-    if (quantity === undefined) {
-      continue;
-    }
-
-    const row: ReceiptTableRow = {
-      quantity,
-      receiptDate: receiptDate!,
-      wasteType: wasteType!.trim(),
-    };
-
-    if (cadriField !== undefined && cadriField !== '-') {
-      row.cadri = cadriField;
-    }
-
-    rows.push(row);
-  }
-
-  return rows;
-};
-
 type CdfTableColumn = 'cadri' | 'quantity' | 'receiptDate' | 'wasteType';
 
 const CDF_TABLE_HEADER_DEFS: [
@@ -170,39 +137,19 @@ const parseCdfTableRow = (
     return undefined;
   }
 
-  const tableRow: ReceiptTableRow = {
+  return {
     quantity,
     receiptDate,
     wasteType: stripAccents(wasteType),
   };
-
-  const cadri = row.cadri?.trim();
-
-  if (cadri && /^\d{5,}$/.test(cadri)) {
-    tableRow.cadri = cadri;
-  }
-
-  return tableRow;
 };
 
 const toReceiptEntries = (rows: ReceiptTableRow[]): ReceiptEntry[] =>
-  rows.map((row) => {
-    const entry: ReceiptEntry = {
-      quantity: row.quantity,
-      receiptDate: row.receiptDate,
-      wasteType: row.wasteType,
-    };
-
-    if (row.cadri !== undefined) {
-      entry.cadri = row.cadri;
-    }
-
-    return entry;
-  });
-
-const extractCadriNumbers = (rows: ReceiptTableRow[]): string[] => [
-  ...new Set(rows.filter((r) => r.cadri !== undefined).map((r) => r.cadri!)),
-];
+  rows.map((row) => ({
+    quantity: row.quantity,
+    receiptDate: row.receiptDate,
+    wasteType: row.wasteType,
+  }));
 
 const extractWasteTypeDescriptions = (
   rawText: string,
@@ -298,15 +245,15 @@ const CDF_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   cnpj: /CNPJ\s*:?\s*(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2})/gi,
   documentNumber: /(?:CDF|N[°º])\s*(\d+\/\d{2,4})/i,
-  empresaGeradora:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Empresa\s+Geradora\s*:\s*(.+?)(?=\n|$)/i,
-  empresaRecebedora:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Empresa\s+Recebedora\s*:\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   environmentalLicense: /licenca\s+n[°º]\s*:?\s*(\d+)/i,
+  generatorCompany:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Empresa\s+Geradora\s*:\s*(.+?)(?=\n|$)/i,
   issueDate: /(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(\d{4})/i,
+  receiverCompany:
+    // eslint-disable-next-line sonarjs/slow-regex
+    /Empresa\s+Recebedora\s*:\s*(.+?)(?=\n|$)/i,
   // eslint-disable-next-line sonarjs/slow-regex
   totalQuantity: /Quantidade\s+Total\s+Tratad[oa]\s*\n?\s*([\d.,]+)/i,
   treatmentMethod:
@@ -470,14 +417,14 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
   ): void {
     const processorExtracted = extractEntityByLabel(
       rawText,
-      CDF_PATTERNS.empresaRecebedora,
+      CDF_PATTERNS.receiverCompany,
     );
 
     partialData.recycler = createExtractedEntity(processorExtracted);
 
     const generatorExtracted = extractGeneratorWithAddress(
       rawText,
-      extractEntityByLabel(rawText, CDF_PATTERNS.empresaGeradora),
+      extractEntityByLabel(rawText, CDF_PATTERNS.generatorCompany),
     );
 
     partialData.generator =
@@ -508,29 +455,24 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     const normalized = normalizeMultiPageBlocks(extractionResult.blocks);
     const detected = detectTableColumns(normalized, CDF_TABLE_HEADER_DEFS);
 
-    if (detected) {
-      const { rows } = extractTableFromBlocks(normalized, {
-        anchorColumn: CDF_TABLE_ANCHOR,
-        columns: detected.columns as [
-          TableColumnConfig<CdfTableColumn>,
-          ...Array<TableColumnConfig<CdfTableColumn>>,
-        ],
-        maxRowGap: 0.03,
-        xTolerance: 0.05,
-        yRange: { max: MULTI_PAGE_Y_MAX, min: detected.headerTop + 0.01 },
-      });
-
-      const parsed = rows
-        .map((row) => parseCdfTableRow(row))
-        .filter((r): r is ReceiptTableRow => r !== undefined);
-
-      if (parsed.length > 0) {
-        return parsed;
-      }
+    if (!detected) {
+      return [];
     }
 
-    // Fallback: regex on raw text (for cases where block detection fails)
-    return parseReceiptTableRows(stripAccents(extractionResult.rawText));
+    const { rows } = extractTableFromBlocks(normalized, {
+      anchorColumn: CDF_TABLE_ANCHOR,
+      columns: detected.columns as [
+        TableColumnConfig<CdfTableColumn>,
+        ...Array<TableColumnConfig<CdfTableColumn>>,
+      ],
+      maxRowGap: 0.03,
+      xTolerance: 0.05,
+      yRange: { max: MULTI_PAGE_Y_MAX, min: detected.headerTop + 0.01 },
+    });
+
+    return rows
+      .map((row) => parseCdfTableRow(row))
+      .filter((r): r is ReceiptTableRow => r !== undefined);
   }
 
   private extractTableData(
@@ -544,15 +486,6 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
         toReceiptEntries(rows),
         `${String(rows.length)} receipt table rows`,
       );
-
-      const cadriNumbers = extractCadriNumbers(rows);
-
-      if (cadriNumbers.length > 0) {
-        partialData.transportManifests = createHighConfidenceField(
-          cadriNumbers,
-          cadriNumbers.join(', '),
-        );
-      }
 
       const period = derivePeriodFromReceiptDates(rows);
 

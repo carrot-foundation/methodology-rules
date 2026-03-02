@@ -1,30 +1,33 @@
+import type {
+  HeaderColumnDefinition,
+  TableColumnConfig,
+  TextExtractionResult,
+} from '@carrot-fndn/shared/text-extractor';
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   createExtractedEntity,
+  createExtractedEntityWithAddress,
+  createHighConfidenceField,
   type EntityWithAddressInfo,
   type ExtractedEntityInfo,
   type ExtractionOutput,
+  extractStringField,
   finalizeExtraction,
+  parseBrazilianNumber,
+  stripAccents,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  detectTableColumns,
+  extractTableFromBlocks,
+  normalizeMultiPageBlocks,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   CDF_ALL_FIELDS,
   type CdfExtractedData,
   type WasteEntry,
 } from './recycling-manifest.types';
-
-export interface WasteCodeInfo {
-  code: string;
-  description: string;
-}
-
-export interface WasteDataInfo {
-  classification: string;
-  quantity: number;
-  technology: string;
-  unit: string;
-}
 
 export const extractRecyclerFromPreamble = (
   rawText: string,
@@ -61,69 +64,6 @@ export const createRecyclerEntity = (
         }
       : undefined,
   );
-
-export const extractWasteClassificationData = (
-  rawText: string,
-): WasteDataInfo[] => {
-  const dataEntries: WasteDataInfo[] = [];
-
-  const dataPattern =
-    // eslint-disable-next-line sonarjs/slow-regex
-    /Classe\s+([\w\s]+?)\s+([\d.,]+)\s+(Tonelada|kg|ton|t|m³)\s+([a-z]+)/gi;
-
-  for (const match of rawText.matchAll(dataPattern)) {
-    if (match[1] && match[2] && match[3] && match[4]) {
-      const cleaned = match[2].replaceAll('.', '').replace(',', '.');
-      const quantity = Number.parseFloat(cleaned);
-
-      dataEntries.push({
-        classification: `Classe ${match[1].trim()}`,
-        quantity: Number.isNaN(quantity) ? 0 : quantity,
-        technology: match[4].trim(),
-        unit: match[3].trim(),
-      });
-    }
-  }
-
-  return dataEntries;
-};
-
-export const mergeWasteEntries = (
-  codes: WasteCodeInfo[],
-  dataEntries: WasteDataInfo[],
-): WasteEntry[] => {
-  const entries: WasteEntry[] = [];
-
-  for (
-    let index = 0;
-    index < Math.max(codes.length, dataEntries.length);
-    index++
-  ) {
-    // eslint-disable-next-line security/detect-object-injection
-    const code = codes[index];
-    // eslint-disable-next-line security/detect-object-injection
-    const data = dataEntries[index];
-
-    const entry: WasteEntry = {
-      description: code?.description ?? '',
-    };
-
-    if (code?.code) {
-      entry.code = code.code;
-    }
-
-    if (data) {
-      entry.classification = data.classification;
-      entry.quantity = data.quantity;
-      entry.unit = data.unit;
-      entry.technology = data.technology;
-    }
-
-    entries.push(entry);
-  }
-
-  return entries;
-};
 
 export const extractMtrNumbers = (
   rawText: string,
@@ -201,3 +141,208 @@ export const finalizeCdfExtraction = (
     partialData,
     rawText,
   });
+
+export interface CdfParseConfig {
+  issueDatePatterns: RegExp[];
+  mtrDigitCount: number;
+  mtrSectionPattern: RegExp;
+  patterns: {
+    documentNumber: RegExp;
+    environmentalLicense: RegExp;
+    generatorAddress: RegExp;
+    generatorName: RegExp;
+    generatorTaxId: RegExp;
+    processingPeriod: RegExp;
+    recyclerPreamble: RegExp;
+  };
+  wasteTable: CdfWasteTableConfig;
+}
+
+export interface CdfWasteTableConfig {
+  anchorColumn: string;
+  codePattern: RegExp;
+  headerDefs: [HeaderColumnDefinition, ...Array<HeaderColumnDefinition>];
+  technologyColumn: string;
+}
+
+const parseCdfWasteRow = (
+  row: Record<string, string | undefined>,
+  config: CdfWasteTableConfig,
+): undefined | WasteEntry => {
+  const wasteText = row[config.anchorColumn]?.trim();
+
+  // istanbul ignore next -- anchor-based row extraction guarantees non-empty waste text
+  if (!wasteText) {
+    return undefined;
+  }
+
+  const codeMatch = config.codePattern.exec(wasteText);
+
+  if (!codeMatch?.[1]) {
+    return undefined;
+  }
+
+  const entry: WasteEntry = {
+    code: codeMatch[1],
+    description: codeMatch[2]!.trim(),
+  };
+
+  const classification = row['classification']?.trim();
+
+  if (classification) {
+    entry.classification = classification;
+  }
+
+  const quantity = parseBrazilianNumber(row['quantity']?.trim() ?? '');
+
+  if (quantity !== undefined) {
+    entry.quantity = quantity;
+  }
+
+  const unit = row['unit']?.trim();
+
+  if (unit) {
+    entry.unit = unit;
+  }
+
+  const technology = row[config.technologyColumn]?.trim();
+
+  if (technology) {
+    entry.technology = technology;
+  }
+
+  return entry;
+};
+
+export const extractCdfWasteEntries = (
+  extractionResult: TextExtractionResult,
+  config: CdfWasteTableConfig,
+): undefined | WasteEntry[] => {
+  const blocks = normalizeMultiPageBlocks(extractionResult.blocks);
+  const detected = detectTableColumns(blocks, config.headerDefs);
+
+  if (!detected) {
+    return undefined;
+  }
+
+  const { rows } = extractTableFromBlocks(blocks, {
+    anchorColumn: config.anchorColumn,
+    columns: detected.columns as [
+      TableColumnConfig,
+      ...Array<TableColumnConfig>,
+    ],
+    maxRowGap: 0.03,
+    xTolerance: 0.2,
+    yRange: { max: 100, min: detected.headerTop + 0.01 },
+  });
+
+  const entries = rows
+    .map((row) => parseCdfWasteRow(row, config))
+    .filter((r): r is WasteEntry => r !== undefined);
+
+  return entries.length > 0 ? entries : undefined;
+};
+
+export const parseCdfDocument = (
+  extractionResult: TextExtractionResult,
+  matchScore: number,
+  config: CdfParseConfig,
+): ExtractionOutput<CdfExtractedData> => {
+  const { rawText } = extractionResult;
+  const text = stripAccents(rawText);
+
+  const partialData: Partial<CdfExtractedData> = {
+    documentType: 'recyclingManifest',
+    rawText,
+  };
+
+  const documentNumberExtracted = extractStringField(
+    text,
+    config.patterns.documentNumber,
+  );
+
+  if (documentNumberExtracted) {
+    partialData.documentNumber = createHighConfidenceField(
+      documentNumberExtracted.value as NonEmptyString,
+      documentNumberExtracted.rawMatch,
+    );
+  }
+
+  const recyclerExtracted = extractRecyclerFromPreamble(
+    text,
+    config.patterns.recyclerPreamble,
+  );
+
+  partialData.recycler = createRecyclerEntity(recyclerExtracted);
+
+  const generatorExtracted = extractGenerator(text, {
+    generatorAddress: config.patterns.generatorAddress,
+    generatorName: config.patterns.generatorName,
+    generatorTaxId: config.patterns.generatorTaxId,
+  });
+
+  partialData.generator = createExtractedEntityWithAddress(generatorExtracted);
+
+  for (const pattern of config.issueDatePatterns) {
+    const issueDateMatch = pattern.exec(text);
+
+    if (issueDateMatch?.[1]) {
+      partialData.issueDate = createHighConfidenceField(
+        issueDateMatch[1] as NonEmptyString,
+        issueDateMatch[0],
+      );
+
+      break;
+    }
+  }
+
+  const processingPeriodExtracted = extractStringField(
+    text,
+    config.patterns.processingPeriod,
+  );
+
+  if (processingPeriodExtracted) {
+    const normalizedPeriod = processingPeriodExtracted.value
+      .replaceAll('\n', ' ')
+      .replaceAll(/\s+/g, ' ');
+
+    partialData.processingPeriod = createHighConfidenceField(
+      normalizedPeriod as NonEmptyString,
+      processingPeriodExtracted.rawMatch,
+    );
+  }
+
+  const environmentalLicenseExtracted = extractStringField(
+    text,
+    config.patterns.environmentalLicense,
+  );
+
+  if (environmentalLicenseExtracted) {
+    partialData.environmentalLicense = createHighConfidenceField(
+      environmentalLicenseExtracted.value as NonEmptyString,
+      environmentalLicenseExtracted.rawMatch,
+    );
+  }
+
+  const wasteEntries = extractCdfWasteEntries(
+    extractionResult,
+    config.wasteTable,
+  );
+
+  if (wasteEntries && wasteEntries.length > 0) {
+    partialData.wasteEntries = createHighConfidenceField(wasteEntries);
+  }
+
+  const transportManifests = extractMtrNumbers(
+    text,
+    config.mtrSectionPattern,
+    config.mtrDigitCount,
+  );
+
+  if (transportManifests.length > 0) {
+    partialData.transportManifests =
+      createHighConfidenceField(transportManifests);
+  }
+
+  return finalizeCdfExtraction(partialData, matchScore, rawText);
+};

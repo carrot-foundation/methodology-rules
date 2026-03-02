@@ -52,10 +52,10 @@ export const MTR_DEFAULT_LABEL_PATTERNS = {
 } as const;
 
 export const MTR_DEFAULT_SECTION_PATTERNS = {
-  destinatario:
+  generator: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
+  hauler: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
+  receiver:
     /^\s*(?:Identificacao\s+do\s+)?(?:Destinatario|Destinador|Receptor)\s*$/i,
-  gerador: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
-  transportador: /^\s*(?:Identificacao\s+do\s+)?(?:Transportador)\s*$/i,
 } as const;
 
 export const MTR_ADDRESS_PATTERNS = {
@@ -391,7 +391,7 @@ export const extractHaulerFields = (
   options: ExtractHaulerFieldsOptions = {},
 ): void => {
   const sectionPattern =
-    options.sectionPattern ?? MTR_DEFAULT_SECTION_PATTERNS.transportador;
+    options.sectionPattern ?? MTR_DEFAULT_SECTION_PATTERNS.hauler;
   const allSectionPatterns =
     options.allSectionPatterns ?? Object.values(MTR_DEFAULT_SECTION_PATTERNS);
   const labelPatterns = options.labelPatterns ?? MTR_DEFAULT_LABEL_PATTERNS;

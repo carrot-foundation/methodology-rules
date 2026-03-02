@@ -2,6 +2,7 @@ import {
   type DocumentManifestEventSubject,
   getAttachmentInfos,
   getExtractorConfig,
+  getLayoutValidationConfig,
 } from './document-manifest-data.helpers';
 
 describe('document-manifest-data.helpers', () => {
@@ -106,6 +107,23 @@ describe('document-manifest-data.helpers', () => {
 
     it('should return undefined for unknown document type', () => {
       expect(getExtractorConfig('UNKNOWN')).toBeUndefined();
+    });
+  });
+
+  describe('getLayoutValidationConfig', () => {
+    it('should return empty config when layoutId is undefined', () => {
+      expect(getLayoutValidationConfig(undefined)).toEqual({});
+    });
+
+    it('should return empty config for unknown layout', () => {
+      expect(getLayoutValidationConfig('unknown-layout')).toEqual({});
+    });
+
+    it('should return unsupported validations for cdf-custom-1', () => {
+      const config = getLayoutValidationConfig('cdf-custom-1');
+
+      expect(config.unsupportedValidations).toContain('mtrNumbers');
+      expect(config.unsupportedValidations).toContain('wasteType');
     });
   });
 });

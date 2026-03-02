@@ -21,7 +21,6 @@ export interface CdfExtractedData extends BaseExtractedData {
 }
 
 export interface ReceiptEntry {
-  cadri?: string;
   quantity: number;
   receiptDate: string;
   wasteType: string;

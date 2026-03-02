@@ -47,6 +47,29 @@ export const DOCUMENT_TYPE_MAPPING: Record<string, DocumentType> = {
   MTR: 'transportManifest',
 };
 
+export interface LayoutValidationConfig {
+  readonly unsupportedValidations?: readonly ValidationKey[];
+}
+
+export type ValidationKey = 'mtrNumbers' | 'wasteQuantityWeight' | 'wasteType';
+
+const LAYOUT_VALIDATION_CONFIG: Record<string, LayoutValidationConfig> = {
+  'cdf-custom-1': {
+    unsupportedValidations: ['mtrNumbers', 'wasteType'],
+  },
+};
+
+export const getLayoutValidationConfig = (
+  layoutId: string | undefined,
+): LayoutValidationConfig => {
+  if (!layoutId) {
+    return {};
+  }
+
+  // eslint-disable-next-line security/detect-object-injection
+  return LAYOUT_VALIDATION_CONFIG[layoutId] ?? {};
+};
+
 export const getAttachmentInfos = ({
   documentId,
   events,

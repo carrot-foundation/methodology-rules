@@ -113,21 +113,21 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
 
     partialData.generator = extractMtrEntityWithAddress(
       text,
-      SECTION_PATTERNS.gerador,
+      SECTION_PATTERNS.generator,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.hauler = extractMtrEntityWithAddress(
       text,
-      SECTION_PATTERNS.transportador,
+      SECTION_PATTERNS.hauler,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.brazilianTaxId,
     );
 
     partialData.receiver = extractMtrEntityWithAddress(
       text,
-      SECTION_PATTERNS.destinatario,
+      SECTION_PATTERNS.receiver,
       ALL_SECTION_PATTERNS,
       MTR_PATTERNS.brazilianTaxId,
     );
