@@ -23,8 +23,8 @@ describe('MTR shared helpers', () => {
 
     it('should strip trailing registration number with dash', () => {
       expect(
-        stripTrailingRegistrationNumber('COMPOSTAMAIS LTDA. - 112752'),
-      ).toBe('COMPOSTAMAIS LTDA.');
+        stripTrailingRegistrationNumber('COMPOST VERDE LTDA. - 112752'),
+      ).toBe('COMPOST VERDE LTDA.');
     });
 
     it('should strip trailing registration number with en-dash', () => {
@@ -50,27 +50,27 @@ describe('MTR shared helpers', () => {
     it('should extract address, city, and state from section text', () => {
       const section = [
         'Razao Social: Test Company',
-        'Endereco: Rua Empresario Agenello Senger, nº S/N',
-        'Municipio: Carazinho',
+        'Endereco: Rua Industrial, nº S/N',
+        'Municipio: Cidade Interior',
         'UF: RS',
       ].join('\n');
 
       expect(extractAddressFields(section)).toEqual({
-        address: 'Rua Empresario Agenello Senger, nº S/N',
-        city: 'Carazinho',
+        address: 'Rua Industrial, nº S/N',
+        city: 'Cidade Interior',
         state: 'RS',
       });
     });
 
     it('should handle Estado variant for state', () => {
       const section = [
-        'Endereco: Av. Brasil, 500',
+        'Endereco: Av. Principal, 500',
         'Municipio: Sao Paulo',
         'Estado: SP',
       ].join('\n');
 
       expect(extractAddressFields(section)).toEqual({
-        address: 'Av. Brasil, 500',
+        address: 'Av. Principal, 500',
         city: 'Sao Paulo',
         state: 'SP',
       });
@@ -98,13 +98,13 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'GERSON PEREIRA DA SILVA',
-        'AUP5E49',
+        'CARLOS OLIVEIRA DOS SANTOS',
+        'FKE1A23',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'GERSON PEREIRA DA SILVA',
-        vehiclePlate: 'AUP5E49',
+        driverName: 'CARLOS OLIVEIRA DOS SANTOS',
+        vehiclePlate: 'FKE1A23',
       });
     });
 
@@ -112,13 +112,13 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'NKW1862',
+        'HIJ3K56',
         'Rafael Silva',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: 'Rafael Silva',
-        vehiclePlate: 'NKW1862',
+        vehiclePlate: 'HIJ3K56',
       });
     });
 
@@ -126,31 +126,31 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'CARLOS SILVA',
-        'BRA2E19',
+        'PEDRO ALMEIDA',
+        'FKE2B34',
         'nome e assinatura do responsavel',
         'cargo',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'CARLOS SILVA',
-        vehiclePlate: 'BRA2E19',
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'FKE2B34',
       });
     });
 
     it('should extract only driver name when only driver label is present', () => {
-      const section = ['Nome do Motorista', 'MARIA SANTOS'].join('\n');
+      const section = ['Nome do Motorista', 'ANA FERREIRA'].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'MARIA SANTOS',
+        driverName: 'ANA FERREIRA',
       });
     });
 
     it('should extract only plate when only plate label is present', () => {
-      const section = ['Placa do Veiculo', 'BRA2E19'].join('\n');
+      const section = ['Placa do Veiculo', 'FKE2B34'].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        vehiclePlate: 'BRA2E19',
+        vehiclePlate: 'FKE2B34',
       });
     });
 
@@ -176,43 +176,43 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'CARLOS SILVA',
-        'NKW 1/62',
+        'PEDRO ALMEIDA',
+        'HIJ 3/56',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'CARLOS SILVA',
-        vehiclePlate: 'NKW 1/62',
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'HIJ 3/56',
       });
     });
 
     it('should extract inline values (label: value on same line)', () => {
       const section = [
-        'Motorista: Joao da Silva',
+        'Motorista: Pedro Santos',
         'Placa do Veiculo: ABC1D23',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'Joao da Silva',
+        driverName: 'Pedro Santos',
         vehiclePlate: 'ABC1D23',
       });
     });
 
     it('should extract inline driver with "Motorista" label variant', () => {
-      const section = 'Motorista: Carlos Santos';
+      const section = 'Motorista: Andre Ferreira';
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'Carlos Santos',
+        driverName: 'Andre Ferreira',
       });
     });
 
     it('should extract only plate when both labels present but no name-like value', () => {
-      const section = ['Nome do Motorista', 'Placa do Veiculo', 'BRA2E19'].join(
+      const section = ['Nome do Motorista', 'Placa do Veiculo', 'FKE2B34'].join(
         '\n',
       );
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        vehiclePlate: 'BRA2E19',
+        vehiclePlate: 'FKE2B34',
       });
     });
 
@@ -233,10 +233,10 @@ describe('MTR shared helpers', () => {
     });
 
     it('should extract name with trailing quotes', () => {
-      const section = ['Nome do Motorista', "JOAO CARLOS '''"].join('\n');
+      const section = ['Nome do Motorista', "MARCOS ANTONIO '''"].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: "JOAO CARLOS '''",
+        driverName: "MARCOS ANTONIO '''",
       });
     });
 
@@ -253,12 +253,12 @@ describe('MTR shared helpers', () => {
         'Nome do Motorista',
         'Placa do Veiculo',
         'MAX',
-        'HHK3820',
+        'LMN4P78',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: 'MAX',
-        vehiclePlate: 'HHK3820',
+        vehiclePlate: 'LMN4P78',
       });
     });
 
@@ -266,13 +266,13 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'LUIZ CLAUDIO DOS REIS,',
-        'GXM5293',
+        'MARCOS ANTONIO DOS SANTOS,',
+        'PQR5S12',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'LUIZ CLAUDIO DOS REIS,',
-        vehiclePlate: 'GXM5293',
+        driverName: 'MARCOS ANTONIO DOS SANTOS,',
+        vehiclePlate: 'PQR5S12',
       });
     });
 
@@ -281,12 +281,12 @@ describe('MTR shared helpers', () => {
         'Nome do Motorista',
         'Placa do Veiculo',
         'motoristateste',
-        'OOE4A25',
+        'TUV6W34',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: 'motoristateste',
-        vehiclePlate: 'OOE4A25',
+        vehiclePlate: 'TUV6W34',
       });
     });
 
@@ -294,13 +294,13 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'Lourival Ribeiro Santos CPF: 640.160.486-72',
-        'LQS9J37',
+        'Marcos Pereira Lima CPF: 111.222.333-44',
+        'WXY7Z56',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'Lourival Ribeiro Santos CPF: 640.160.486-72',
-        vehiclePlate: 'LQS9J37',
+        driverName: 'Marcos Pereira Lima CPF: 111.222.333-44',
+        vehiclePlate: 'WXY7Z56',
       });
     });
 
@@ -308,13 +308,13 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'OOE4A25Fabiano Campolin de Souza',
-        'OOE4A25',
+        'TUV6W34Fernando Mendes Oliveira',
+        'TUV6W34',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'OOE4A25Fabiano Campolin de Souza',
-        vehiclePlate: 'OOE4A25',
+        driverName: 'TUV6W34Fernando Mendes Oliveira',
+        vehiclePlate: 'TUV6W34',
       });
     });
 
@@ -323,23 +323,23 @@ describe('MTR shared helpers', () => {
         'Nome do Motorista',
         'Placa do Veiculo',
         '224133585',
-        'FDB0D87',
+        'JKL8M90',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: '224133585',
-        vehiclePlate: 'FDB0D87',
+        vehiclePlate: 'JKL8M90',
       });
     });
 
     it('should fallback to first value line when only driver label present and findNameLine fails', () => {
       const section = [
         'Nome do Motorista',
-        'Lourival Ribeiro Santos CPF: 640.160.486-72',
+        'Marcos Pereira Lima CPF: 111.222.333-44',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'Lourival Ribeiro Santos CPF: 640.160.486-72',
+        driverName: 'Marcos Pereira Lima CPF: 111.222.333-44',
       });
     });
 
@@ -355,11 +355,11 @@ describe('MTR shared helpers', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'CARLOS SILVA',
+        'PEDRO ALMEIDA',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'CARLOS SILVA',
+        driverName: 'PEDRO ALMEIDA',
       });
     });
 
@@ -380,12 +380,12 @@ describe('MTR shared helpers', () => {
         'Placa do Veiculo',
         'assinatura do responsavel',
         '411022658160',
-        'HBU5B80',
+        'NOP9Q12',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: '411022658160',
-        vehiclePlate: 'HBU5B80',
+        vehiclePlate: 'NOP9Q12',
       });
     });
   });
@@ -406,7 +406,7 @@ describe('MTR shared helpers', () => {
         'EMPRESA GERADORA LTDA 262960',
         'CNPJ: 12.345.678/0001-90',
         'Endereco: Rua Test, 100',
-        'Municipio: Carazinho',
+        'Municipio: Cidade Interior',
         'UF: RS',
         '',
         'Transportador',
@@ -423,7 +423,7 @@ describe('MTR shared helpers', () => {
       expect(result.name.confidence).toBe('high');
       expect(result.taxId.parsed).toBe('12.345.678/0001-90');
       expect(result.address.parsed).toBe('Rua Test, 100');
-      expect(result.city.parsed).toBe('Carazinho');
+      expect(result.city.parsed).toBe('Cidade Interior');
       expect(result.state.parsed).toBe('RS');
     });
 
@@ -444,9 +444,9 @@ describe('MTR shared helpers', () => {
       const text = [
         'Gerador',
         'EMPRESA GERADORA LTDA',
-        'CNPJ: 20.855. 175/0002-79',
+        'CNPJ: 10.111. 222/0002-55',
         'Endereco: Rua Test, 100',
-        'Municipio: Carazinho',
+        'Municipio: Cidade Interior',
         'UF: RS',
         '',
         'Transportador',
@@ -459,7 +459,7 @@ describe('MTR shared helpers', () => {
         brazilianTaxIdPattern,
       );
 
-      expect(result.taxId.parsed).toBe('20.855.175/0002-79');
+      expect(result.taxId.parsed).toBe('10.111.222/0002-55');
       expect(result.taxId.confidence).toBe('high');
       expect(result.name.parsed).toBe('EMPRESA GERADORA LTDA');
     });

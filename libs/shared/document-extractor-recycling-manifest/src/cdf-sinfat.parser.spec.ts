@@ -16,12 +16,12 @@ describe('CdfSinfatParser', () => {
   const validCdfText = [
     'Periodo: 01/02/2023 até 28/02/2023',
     'Certificado de Destinação Final CDF nº 2154920/2023',
-    'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+    'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
     'os resíduos abaixo discriminados.',
     '',
     'Identificação do Gerador',
-    'Razão Social: Laticínios Bela Vista LTDA CPF/CNPJ: 02.089.969/0035-55',
-    'Endereço: Rua Empresário Agenello Senger, nº S/N Municipio: Carazinho UF: RS',
+    'Razão Social: Laticínios Modelo LTDA CPF/CNPJ: 55.666.777/0035-99',
+    'Endereço: Rua Industrial, nº S/N Municipio: Cidade Interior UF: RS',
     '',
     'Identificação dos Resíduos',
     '1. 040108 - Resíduos de couros (aparas, resíduos de corte, pó de rebaixamento, pó de lixamento)',
@@ -31,7 +31,7 @@ describe('CdfSinfatParser', () => {
     '',
     'Declaração',
     'Declaramos que os resíduos foram destinados conforme legislação ambiental vigente.',
-    'Carazinho, 10/04/2023',
+    'Cidade Interior, 10/04/2023',
     '',
     'MTRs incluidos',
     '2302037916, 2302037795, 2302037801',
@@ -69,19 +69,17 @@ describe('CdfSinfatParser', () => {
       expect(result.data.documentNumber?.confidence).toBe('high');
 
       expect(result.data.recycler?.name.parsed).toBe(
-        'ECO ADUBOS ORGANICOS LTDA',
+        'ADUBOS VERDES ORGANICOS LTDA',
       );
-      expect(result.data.recycler?.taxId.parsed).toBe('13.843.890/0001-45');
+      expect(result.data.recycler?.taxId.parsed).toBe('44.555.666/0001-88');
       expect(result.data.recycler?.name.confidence).toBe('high');
 
-      expect(result.data.generator?.name.parsed).toBe(
-        'Laticinios Bela Vista LTDA',
-      );
-      expect(result.data.generator?.taxId.parsed).toBe('02.089.969/0035-55');
+      expect(result.data.generator?.name.parsed).toBe('Laticinios Modelo LTDA');
+      expect(result.data.generator?.taxId.parsed).toBe('55.666.777/0035-99');
       expect(result.data.generator?.address.parsed).toBe(
-        'Rua Empresario Agenello Senger, nº S/N',
+        'Rua Industrial, nº S/N',
       );
-      expect(result.data.generator?.city.parsed).toBe('Carazinho');
+      expect(result.data.generator?.city.parsed).toBe('Cidade Interior');
       expect(result.data.generator?.state.parsed).toBe('RS');
       expect(result.data.generator?.name.confidence).toBe('high');
 
@@ -175,7 +173,7 @@ describe('CdfSinfatParser', () => {
         'Identificação do Gerador',
         'Razão Social: Some Company LTDA CPF/CNPJ: 02.089.969/0035-55',
         'Declaração',
-        'Carazinho, 10/04/2023',
+        'Cidade Interior, 10/04/2023',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(noRecyclerText));
@@ -187,9 +185,9 @@ describe('CdfSinfatParser', () => {
     it('should set low confidence when generator section is missing', () => {
       const noGeneratorText = [
         'Certificado de Destinação Final CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Declaração',
-        'Carazinho, 10/04/2023',
+        'Cidade Interior, 10/04/2023',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(noGeneratorText));
@@ -227,12 +225,12 @@ describe('CdfSinfatParser', () => {
     it('should extract issue date from Declaração section', () => {
       const text = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Identificação do Gerador',
         'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
         'Declaração',
         'Declaramos que os resíduos foram destinados.',
-        'Carazinho, 15/06/2024',
+        'Cidade Interior, 15/06/2024',
       ].join('\n');
 
       const result = parser.parse(stubTextExtractionResult(text));
@@ -243,9 +241,9 @@ describe('CdfSinfatParser', () => {
     it('should extract generator taxId when it is a CPF', () => {
       const text = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Identificação do Gerador',
-        'Razão Social: João da Silva CPF/CNPJ: 123.456.789-01',
+        'Razão Social: Pedro Santos CPF/CNPJ: 123.456.789-01',
         'Endereço: Rua Principal, 100 Municipio: São Paulo UF: SP',
         'Declaração',
         'São Paulo, 01/04/2024',
@@ -254,7 +252,7 @@ describe('CdfSinfatParser', () => {
       const result = parser.parse(stubTextExtractionResult(text));
 
       expect(result.data.generator?.taxId.parsed).toBe('123.456.789-01');
-      expect(result.data.generator?.name.parsed).toBe('Joao da Silva');
+      expect(result.data.generator?.name.parsed).toBe('Pedro Santos');
     });
 
     it('should extract processing period range', () => {
@@ -275,7 +273,7 @@ describe('CdfSinfatParser', () => {
     it('should not extract waste entries when none are present', () => {
       const noWasteText = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Declaração',
         'City, 01/04/2024',
       ].join('\n');
@@ -288,7 +286,7 @@ describe('CdfSinfatParser', () => {
     it('should not extract transport manifests when section is missing', () => {
       const noMtrText = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Declaração',
         'City, 01/04/2024',
       ].join('\n');
@@ -301,7 +299,7 @@ describe('CdfSinfatParser', () => {
     it('should extract environmental license', () => {
       const text = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Licença Ambiental: LO-12345/2024',
         'Identificação do Gerador',
         'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
@@ -317,7 +315,7 @@ describe('CdfSinfatParser', () => {
     it('should skip rows with non-code residuo text in bounding-box table', () => {
       const rawText = [
         'Certificado de Destinação Final CDF nº 100/2025',
-        'BIOCOMP LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',
+        'BIOPROCESSO LTDA, CPF/CNPJ 66.777.888/0003-11 certifica que recebeu',
         'Identificação dos Resíduos',
         'Resíduo Classe Quantidade Unidade Tecnologia',
         'random text',
@@ -341,7 +339,7 @@ describe('CdfSinfatParser', () => {
     it('should extract waste entry from blocks without quantity columns', () => {
       const rawText = [
         'Certificado de Destinação Final CDF nº 100/2025',
-        'BIOCOMP LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',
+        'BIOPROCESSO LTDA, CPF/CNPJ 66.777.888/0003-11 certifica que recebeu',
         'Identificação dos Resíduos',
         'Resíduo Classe Quantidade Unidade Tecnologia',
         '1. 020204 - Lodos do Tratamento',
@@ -374,12 +372,12 @@ describe('CdfSinfatParser', () => {
     it('should extract waste entries from bounding-box table when blocks are available', () => {
       const rawText = [
         'Certificado de Destinação Final CDF nº 3305038/2025',
-        'BIOCOMP SOLUCOES AMBIENTAIS LTDA, CPF/CNPJ 16.642.962/0003-46 certifica que recebeu',
+        'BIOPROCESSO SOLUCOES AMBIENTAIS LTDA, CPF/CNPJ 66.777.888/0003-11 certifica que recebeu',
         'Identificação dos Resíduos',
         'Resíduo Classe Quantidade Unidade Tecnologia',
         '1. 020204 - Lodos do Tratamento local de efluentes Classe II A 2,41000 Tonelada Compostagem',
         'Declaração',
-        'Papagaios, 31/03/2025',
+        'Cidade Rural, 31/03/2025',
         'MTRs incluidos',
         '1224257176, 1224231434',
         'Nome do Responsável',
@@ -427,7 +425,7 @@ describe('CdfSinfatParser', () => {
     it('should extract generator without address', () => {
       const text = [
         'CDF nº 100/2023',
-        'ECO ADUBOS ORGANICOS LTDA, CPF/CNPJ 13.843.890/0001-45 certifica que recebeu',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
         'Identificação do Gerador',
         'Razão Social: Company LTDA CPF/CNPJ: 02.089.969/0035-55',
         'Declaração',
