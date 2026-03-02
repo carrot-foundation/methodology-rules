@@ -3,6 +3,7 @@ import {
   dateDifferenceInDays,
   DEFAULT_NAME_MATCH_THRESHOLD,
   diceCoefficient,
+  isAddressMatch,
   isNameMatch,
   normalizeAddress,
   normalizeDateToISO,
@@ -295,6 +296,108 @@ describe('string-comparison.helpers', () => {
 
     it('should handle empty string', () => {
       expect(normalizeAddress('')).toBe('');
+    });
+  });
+
+  describe('isAddressMatch', () => {
+    it('should match when one side uses street abbreviation and other uses full name', () => {
+      const result = isAddressMatch(
+        'Al Jacaranda, 1, Cidade dos Pinheiros, SP',
+        'Alameda Jacaranda, 01 Bairro Norte, Cidade dos Pinheiros, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when OCR produces duplicate tokens', () => {
+      const result = isAddressMatch(
+        'Rod Exemplo, 423, Cidade Nova, PR',
+        'RODOVIA EXEMPLO 423KM,S/N SN,KM 24,3 KM 24,3 JARDIM, Cidade Nova, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match identical addresses', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Cidade, SP',
+        'Rua Exemplo, 100, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+      expect(result.score).toBe(1);
+    });
+
+    it('should not match truly different addresses', () => {
+      const result = isAddressMatch(
+        'Avenida Alpha, 100, Cidade, SP',
+        'Rua Beta, 200, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should not match addresses with different street numbers', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Cidade, SP',
+        'Rua Exemplo, 200, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should match when "Rod" abbreviation is used for "Rodovia"', () => {
+      const result = isAddressMatch(
+        'Rod Brasil, 100, Cidade, PR',
+        'Rodovia Brasil, 100, Cidade, PR',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should not match addresses with same number but completely different names', () => {
+      const result = isAddressMatch(
+        'Rua Alpha, 100, Cidade, SP',
+        'Avenida Beta, 100, Metropole, RJ',
+      );
+
+      expect(result.isMatch).toBe(false);
+    });
+
+    it('should match addresses where street number has leading zeros', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 001, Cidade, SP',
+        'Rua Exemplo, 1, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match addresses where street number is all zeros', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 000, Cidade, SP',
+        'Rua Exemplo, 0, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match when first address has more numeric tokens than the second', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, 100, Lote 50, Cidade, SP',
+        'Rua Exemplo, 100, Cidade, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
+    });
+
+    it('should match via token subset when first address has more tokens and dice score is low', () => {
+      const result = isAddressMatch(
+        'Rua Exemplo, Complemento Lote B, 100, Cidade Grande, Estado, SP',
+        'R Exemplo, 100, SP',
+      );
+
+      expect(result.isMatch).toBe(true);
     });
   });
 

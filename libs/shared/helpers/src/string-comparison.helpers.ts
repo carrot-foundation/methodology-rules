@@ -236,6 +236,82 @@ export const isNameMatch = (
 };
 
 /**
+ * Strips leading zeros from a numeric string, preserving at least one digit.
+ */
+const stripLeadingZeros = (value: string): string =>
+  value.replace(/^0+/, '') || '0';
+
+/**
+ * Extracts numeric tokens (street numbers, km markers) from token list,
+ * normalizing away leading zeros so that "01" matches "1".
+ */
+const extractNumericTokens = (tokens: string[]): string[] =>
+  tokens.filter((t) => isNumericToken(t)).map((t) => stripLeadingZeros(t));
+
+/**
+ * Checks that every numeric token in the shorter list has an exact match in
+ * the longer list. Street numbers are critical in address comparison and must
+ * not be fuzzily matched.
+ */
+const numericTokensMatch = (
+  shorterNums: string[],
+  longerNums: string[],
+): boolean => {
+  const pool = [...longerNums];
+
+  for (const number_ of shorterNums) {
+    const index = pool.indexOf(number_);
+
+    if (index === -1) {
+      return false;
+    }
+
+    pool.splice(index, 1);
+  }
+
+  return true;
+};
+
+/**
+ * Checks whether two addresses match using address-specific normalization
+ * (abbreviation expansion + OCR dedup) followed by Dice coefficient and
+ * token subset matching. Numeric tokens (street numbers) must match exactly.
+ */
+export const isAddressMatch = (
+  a: string,
+  b: string,
+  threshold = DEFAULT_NAME_MATCH_THRESHOLD,
+): { isMatch: boolean; score: number } => {
+  const normalizedA = normalizeAddress(a);
+  const normalizedB = normalizeAddress(b);
+  const tokensA = normalizedA.split(' ');
+  const tokensB = normalizedB.split(' ');
+  const score = diceCoefficient(normalizedA, normalizedB);
+
+  const numsA = extractNumericTokens(tokensA);
+  const numsB = extractNumericTokens(tokensB);
+  const [shorterNums, longerNums] =
+    numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
+
+  if (shorterNums.length > 0 && !numericTokensMatch(shorterNums, longerNums)) {
+    return { isMatch: false, score };
+  }
+
+  if (score >= threshold) {
+    return { isMatch: true, score };
+  }
+
+  const [shorter, longer] =
+    tokensA.length <= tokensB.length ? [tokensA, tokensB] : [tokensB, tokensA];
+
+  if (fuzzyTokenSubset(shorter, longer)) {
+    return { isMatch: true, score };
+  }
+
+  return { isMatch: false, score };
+};
+
+/**
  * Normalizes a vehicle license plate by removing dashes, spaces, and uppercasing.
  */
 export const normalizeVehiclePlate = (plate: string): string =>
