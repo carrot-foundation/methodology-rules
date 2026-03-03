@@ -99,15 +99,11 @@ const isAttributeOmitted = (
 const shouldSkipValidationWithTareException = (
   values: WeighingValues,
   isOmitted: boolean,
-): boolean =>
-  isTruckContainer(values) &&
-  isExceptionValid(values.tareException) &&
-  isOmitted;
+): boolean => isExceptionValid(values.tareException) && isOmitted;
 
 const shouldSkipNetWeightCalculationWithTareException = (
   values: WeighingValues,
 ): boolean =>
-  isTruckContainer(values) &&
   isExceptionValid(values.tareException) &&
   (isAttributeOmitted(values.grossWeight) || isAttributeOmitted(values.tare));
 

@@ -695,9 +695,11 @@ export const weighingTestCases = [
         [TARE, undefined],
       ]),
     },
-    resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException and missing Tare`,
+    resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
+      PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    ),
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the ${WEIGHING} event is valid for non-TRUCK (BIN) container with tareException and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -724,7 +726,7 @@ export const weighingTestCases = [
       tare: 1,
     }),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException when net weight calculation fails (tare exception does not apply to non-TRUCK containers)`,
+    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException when net weight calculation fails`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
