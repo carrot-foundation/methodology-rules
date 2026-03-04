@@ -117,6 +117,16 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
 
     if (
+      isExceptionValid(weighingValues.containerQuantityException) &&
+      isNil(weighingValues.containerQuantity)
+    ) {
+      passMessage =
+        PASSED_RESULT_COMMENTS.PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION(
+          passMessage,
+        );
+    }
+
+    if (
       isExceptionValid(weighingValues.tareException) &&
       isNil(weighingValues.tare?.value)
     ) {

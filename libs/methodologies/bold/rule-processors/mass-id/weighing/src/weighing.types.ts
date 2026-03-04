@@ -20,6 +20,18 @@ export interface ContainerCapacityApprovedException extends ApprovedException {
   Reason: string;
 }
 
+export interface ContainerQuantityApprovedException extends ApprovedException {
+  'Attribute Location': {
+    Asset: {
+      Category: DocumentCategory.MASS_ID;
+    };
+    Event: DocumentEventName.WEIGHING;
+  };
+  'Attribute Name': DocumentEventAttributeName.CONTAINER_QUANTITY;
+  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  Reason: string;
+}
+
 export interface TareApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
