@@ -40,9 +40,9 @@ import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors'
 import {
   calculatePreventedEmissions,
   formatNumber,
+  getBaselineByWasteSubtype,
   getGasTypeFromEvent,
   getPreventedEmissionsFactor,
-  getWasteGeneratorBaselineByWasteSubtype,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 import {
@@ -61,7 +61,7 @@ export const RESULT_COMMENTS = {
   MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
     wasteSubtype: MassIDOrganicSubtype,
   ) =>
-    `The "${BASELINES}" was not found in the "Waste Generator Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+    `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
   PASSED: (
     preventedEmissions: number,
     preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
@@ -74,7 +74,6 @@ export const RESULT_COMMENTS = {
 interface Documents {
   massIDDocument: Document;
   recyclerAccreditationDocument: Document;
-  wasteGeneratorVerificationDocument: Document;
 }
 
 export class PreventedEmissionsProcessor extends RuleDataProcessor {
@@ -105,9 +104,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
   protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
     const {
+      baseline,
       exceedingEmissionCoefficient,
       massIDDocumentValue,
-      wasteGeneratorBaseline,
       wasteSubtype,
     } = ruleSubject;
 
@@ -118,7 +117,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       };
     }
 
-    if (isNil(wasteGeneratorBaseline)) {
+    if (isNil(baseline)) {
       return {
         resultComment:
           RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
@@ -133,7 +132,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     const preventedEmissionsByWasteSubtypeAndBaselinePerTon =
       getPreventedEmissionsFactor(
         wasteSubtype,
-        wasteGeneratorBaseline,
+        baseline,
         this.processorErrors,
         othersIfOrganicContext,
       );
@@ -152,7 +151,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     ) {
       othersIfOrganicAudit = getOthersIfOrganicAuditDetails(
         ruleSubject.normalizedLocalWasteClassificationId,
-        wasteGeneratorBaseline,
+        baseline,
       );
     }
 
@@ -192,7 +191,6 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIDDocument,
     recyclerAccreditationDocument,
-    wasteGeneratorVerificationDocument,
   }: Documents): RuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
@@ -209,8 +207,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       );
     }
 
-    const wasteGeneratorBaseline = getWasteGeneratorBaselineByWasteSubtype(
-      wasteGeneratorVerificationDocument,
+    const baseline = getBaselineByWasteSubtype(
+      lastEmissionAndCompostingMetricsEvent,
       massIDDocument.subtype,
       this.processorErrors,
     );
@@ -231,7 +229,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ...(!isNil(normalizedLocalWasteClassificationId) && {
         normalizedLocalWasteClassificationId,
       }),
-      wasteGeneratorBaseline,
+      baseline,
       wasteSubtype: massIDDocument.subtype,
     };
   }
@@ -241,7 +239,6 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   ): Promise<Documents> {
     let recyclerAccreditationDocument: Document | undefined;
     let massIDDocument: Document | undefined;
-    let wasteGeneratorVerificationDocument: Document | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -251,13 +248,6 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         documentRelation.subtype === DocumentSubtype.RECYCLER.toString()
       ) {
         recyclerAccreditationDocument = document;
-      }
-
-      if (
-        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR.toString()
-      ) {
-        wasteGeneratorVerificationDocument = document;
       }
 
       if (MASS_ID.matches(documentRelation)) {
@@ -278,18 +268,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       this.processorErrors,
     );
 
-    throwIfMissing(
-      wasteGeneratorVerificationDocument,
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
-      this.processorErrors,
-    );
-
     return {
       massIDDocument: massIDDocument as Document,
       recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
-      wasteGeneratorVerificationDocument:
-        wasteGeneratorVerificationDocument as Document,
     };
   }
 }

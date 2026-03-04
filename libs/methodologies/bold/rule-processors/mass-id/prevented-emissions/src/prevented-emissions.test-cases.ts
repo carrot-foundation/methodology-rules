@@ -4,7 +4,6 @@ import {
   type StubBoldDocumentParameters,
   stubBoldEmissionAndCompostingMetricsEvent,
   stubBoldMassIDPickUpEvent,
-  stubBoldRecyclingBaselinesEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   Document,
@@ -40,9 +39,8 @@ const {
   GREENHOUSE_GAS_TYPE,
   LOCAL_WASTE_CLASSIFICATION_ID,
 } = DocumentEventAttributeName;
-const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
-const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RECYCLING_BASELINES } =
-  DocumentEventName;
+const { RECYCLER } = MassIDDocumentActorType;
+const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP } = DocumentEventName;
 
 const subtype = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
@@ -111,29 +109,11 @@ const makeRecyclerAccreditationParameters = (
   },
 });
 
-const makeWasteGeneratorAccreditationParameters = (
-  baselinesValue: Record<string, MethodologyBaseline> | undefined,
-): StubBoldDocumentParameters => ({
-  externalEventsMap: {
-    [RECYCLING_BASELINES]: stubBoldRecyclingBaselinesEvent({
-      metadataAttributes: [[BASELINES, baselinesValue]],
-    }),
-  },
-});
-
-const makeAccreditationDocuments = ({
-  recyclerMetadataAttributes,
-  wasteGeneratorBaselinesValue,
-}: {
-  recyclerMetadataAttributes: MetadataAttributeParameter[];
-  wasteGeneratorBaselinesValue: Record<string, MethodologyBaseline> | undefined;
-}): Map<string, StubBoldDocumentParameters> =>
+const makeAccreditationDocuments = (
+  recyclerMetadataAttributes: MetadataAttributeParameter[],
+): Map<string, StubBoldDocumentParameters> =>
   new Map([
     [RECYCLER, makeRecyclerAccreditationParameters(recyclerMetadataAttributes)],
-    [
-      WASTE_GENERATOR,
-      makeWasteGeneratorAccreditationParameters(wasteGeneratorBaselinesValue),
-    ],
   ]);
 
 const makeMassIdPickUpParametersWithLocalWasteClassificationCode = (
@@ -165,21 +145,19 @@ const {
 
 export const preventedEmissionsTestCases = [
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, undefined],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, undefined],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient: undefined,
         gasType: 'Methane (CH4)',
         massIDDocumentValue: 1,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -188,16 +166,14 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [
-          EXCEEDING_EMISSION_COEFFICIENT,
-          exceedingEmissionCoefficientExceedingBaseline,
-        ],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+    accreditationDocuments: makeAccreditationDocuments([
+      [
+        EXCEEDING_EMISSION_COEFFICIENT,
+        exceedingEmissionCoefficientExceedingBaseline,
       ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
@@ -210,11 +186,11 @@ export const preventedEmissionsTestCases = [
       gasType: 'Methane (CH4)',
       preventedCo2e: 0,
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient:
           exceedingEmissionCoefficientExceedingBaseline,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -224,21 +200,19 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, null],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, null],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient: null,
         gasType: 'Methane (CH4)',
         massIDDocumentValue: 1,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -247,13 +221,11 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
     resultComment: RESULT_COMMENTS.PASSED(
@@ -266,10 +238,10 @@ export const preventedEmissionsTestCases = [
       gasType: 'Methane (CH4)',
       preventedCo2e: expectedPreventedEmissionsValue,
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -290,15 +262,14 @@ export const preventedEmissionsTestCases = [
     const formulaCoeffs = getOthersIfOrganicFormulaCoeffs(othersBaseline);
 
     return {
-      accreditationDocuments: makeAccreditationDocuments({
-        recyclerMetadataAttributes: [
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      accreditationDocuments: makeAccreditationDocuments([
+        [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+        [
+          BASELINES,
+          { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: othersBaseline },
         ],
-        wasteGeneratorBaselinesValue: {
-          [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: othersBaseline,
-        },
-      }),
+      ]),
       externalCreatedAt: massIDDocument.externalCreatedAt,
       massIDDocumentsParams:
         makeMassIdPickUpParametersWithLocalWasteClassificationCode(
@@ -322,6 +293,7 @@ export const preventedEmissionsTestCases = [
         },
         preventedCo2e: expectedOthersPreventedEmissions,
         ruleSubject: {
+          baseline: othersBaseline,
           exceedingEmissionCoefficient,
           gasType: 'Methane (CH4)',
           localWasteClassificationId:
@@ -329,7 +301,6 @@ export const preventedEmissionsTestCases = [
           massIDDocumentValue,
           normalizedLocalWasteClassificationId:
             othersIfOrganicLocalWasteClassificationCode,
-          wasteGeneratorBaseline: othersBaseline,
           wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
         },
       },
@@ -339,13 +310,11 @@ export const preventedEmissionsTestCases = [
     };
   }),
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
@@ -353,34 +322,32 @@ export const preventedEmissionsTestCases = [
     ),
     resultContent: {
       ruleSubject: {
+        baseline: undefined,
         exceedingEmissionCoefficient,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteGeneratorBaseline: undefined,
         wasteSubtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Waste Generator verification document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
+    scenario: `the Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
     subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   },
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, 0],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, 0],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient: 0,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -389,22 +356,20 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   {
-    accreditationDocuments: makeAccreditationDocuments({
-      recyclerMetadataAttributes: [
-        [EXCEEDING_EMISSION_COEFFICIENT, -0.5],
-        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-      ],
-      wasteGeneratorBaselinesValue: { [subtype]: baseline },
-    }),
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, -0.5],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [subtype]: baseline }],
+    ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
     resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
+        baseline,
         exceedingEmissionCoefficient: -0.5,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteGeneratorBaseline: baseline,
         wasteSubtype: subtype,
       },
     },
@@ -414,21 +379,14 @@ export const preventedEmissionsTestCases = [
   },
 ];
 
-const wasteGeneratorVerificationDocument =
-  participantsAccreditationDocuments.get(WASTE_GENERATOR) as Document;
-
 const mapParticipantAccreditationDocuments = ({
   excludeActorTypes = [],
   recyclerExternalEvents,
   recyclerRemoveEventName,
-  wasteGeneratorExternalEvents,
-  wasteGeneratorRemoveEventName,
 }: {
   excludeActorTypes?: string[];
   recyclerExternalEvents?: Document['externalEvents'];
   recyclerRemoveEventName?: string;
-  wasteGeneratorExternalEvents?: Document['externalEvents'];
-  wasteGeneratorRemoveEventName?: string;
 }): Document[] =>
   [...participantsAccreditationDocuments.values()]
     .filter(
@@ -452,24 +410,6 @@ const mapParticipantAccreditationDocuments = ({
         };
       }
 
-      if (
-        document.subtype === WASTE_GENERATOR &&
-        wasteGeneratorExternalEvents
-      ) {
-        return {
-          ...document,
-          externalEvents:
-            wasteGeneratorRemoveEventName === undefined
-              ? wasteGeneratorExternalEvents
-              : [
-                  ...(document.externalEvents?.filter(
-                    (event) => event.name !== wasteGeneratorRemoveEventName,
-                  ) ?? []),
-                  ...wasteGeneratorExternalEvents,
-                ],
-        };
-      }
-
       return document;
     });
 
@@ -477,14 +417,6 @@ const makeRecyclerEmissionAndCompostingMetricsEvents = (
   metadataAttributes: MetadataAttributeParameter[],
 ): Document['externalEvents'] => [
   stubBoldEmissionAndCompostingMetricsEvent({ metadataAttributes }),
-];
-
-const makeWasteGeneratorRecyclingBaselinesEvents = (
-  baselinesValue: Record<string, MethodologyBaseline> | undefined,
-): Document['externalEvents'] => [
-  stubBoldRecyclingBaselinesEvent({
-    metadataAttributes: [[BASELINES, baselinesValue]],
-  }),
 ];
 
 export const preventedEmissionsErrorTestCases = [
@@ -498,12 +430,8 @@ export const preventedEmissionsErrorTestCases = [
         recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
           [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
           [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [BASELINES, { [subtype]: baseline }],
         ]),
-        wasteGeneratorExternalEvents:
-          makeWasteGeneratorRecyclingBaselinesEvents({
-            [subtype]: baseline,
-          }),
-        wasteGeneratorRemoveEventName: RECYCLING_BASELINES.toString(),
       }),
     ],
     massIDAuditDocument,
@@ -547,46 +475,17 @@ export const preventedEmissionsErrorTestCases = [
     documents: [
       massIDDocument,
       ...mapParticipantAccreditationDocuments({
-        excludeActorTypes: [WASTE_GENERATOR],
         recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
           [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
           [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [BASELINES, undefined],
         ]),
-        recyclerRemoveEventName: EMISSION_AND_COMPOSTING_METRICS.toString(),
       }),
     ],
     massIDAuditDocument,
-    resultComment:
-      processorErrors.ERROR_MESSAGE
-        .MISSING_WASTE_GENERATOR_VERIFICATION_DOCUMENT,
+    resultComment: processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Waste Generator Accreditation document was not found',
-  },
-  {
-    documents: [
-      massIDDocument,
-      ...mapParticipantAccreditationDocuments({
-        excludeActorTypes: [WASTE_GENERATOR],
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-        ]),
-      }),
-      {
-        ...wasteGeneratorVerificationDocument,
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [[BASELINES, undefined]],
-          }),
-        ],
-      },
-    ],
-    massIDAuditDocument,
-    resultComment:
-      processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the Waste Generator Accreditation document has no valid baselines',
+    scenario: 'the Recycler Accreditation document has no valid baselines',
   },
   {
     documents: [
@@ -606,12 +505,8 @@ export const preventedEmissionsErrorTestCases = [
         recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
           [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
           [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
         ]),
-        wasteGeneratorExternalEvents:
-          makeWasteGeneratorRecyclingBaselinesEvents({
-            [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline,
-          }),
-        wasteGeneratorRemoveEventName: RECYCLING_BASELINES.toString(),
       }),
     ],
     massIDAuditDocument,
@@ -638,12 +533,8 @@ export const preventedEmissionsErrorTestCases = [
         recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
           [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
           [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
         ]),
-        wasteGeneratorExternalEvents:
-          makeWasteGeneratorRecyclingBaselinesEvents({
-            [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline,
-          }),
-        wasteGeneratorRemoveEventName: RECYCLING_BASELINES.toString(),
       }),
     ],
     massIDAuditDocument,
@@ -670,12 +561,8 @@ export const preventedEmissionsErrorTestCases = [
         recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
           [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
           [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
         ]),
-        wasteGeneratorExternalEvents:
-          makeWasteGeneratorRecyclingBaselinesEvents({
-            [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline,
-          }),
-        wasteGeneratorRemoveEventName: RECYCLING_BASELINES.toString(),
       }),
     ],
     massIDAuditDocument,

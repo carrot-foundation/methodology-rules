@@ -19,12 +19,12 @@ export type OthersIfOrganicRuleSubjectIds = {
 };
 
 export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
+  baseline: MethodologyBaseline | undefined;
   exceedingEmissionCoefficient:
     | MethodologyDocumentEventAttributeValue
     | undefined;
   gasType: NonEmptyString;
   massIDDocumentValue: NonNegativeFloat;
-  wasteGeneratorBaseline: MethodologyBaseline | undefined;
   wasteSubtype: MassIDOrganicSubtype;
 }
 
