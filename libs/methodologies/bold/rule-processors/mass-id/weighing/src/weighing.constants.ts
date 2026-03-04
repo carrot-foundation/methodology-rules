@@ -29,6 +29,8 @@ const supportedFormats = Object.values(
 ).join(', ');
 
 export const PASSED_RESULT_COMMENTS = {
+  PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION: (originalPassMessage: string) =>
+    `${originalPassMessage} The omission of the "${CONTAINER_QUANTITY}" is permitted under an approved exception granted to this recycler for the duration of the accreditation period.`,
   PASSED_WITH_EXCEPTION: (originalPassMessage: string) =>
     `${originalPassMessage} The omission of the "${CONTAINER_CAPACITY}" is permitted under an approved exception granted to this recycler for the duration of the accreditation period.`,
   PASSED_WITH_SCALE_TICKET_VALIDATION: (originalPassMessage: string) =>

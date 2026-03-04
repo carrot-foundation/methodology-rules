@@ -61,12 +61,14 @@ const stubBaseAccreditationDocuments = ({
   scaleTypeValue = scaleType,
   tareExceptionValidUntil,
   withContainerCapacityException = false,
+  withContainerQuantityException = false,
   withScaleTicketVerification = false,
   withTareException = false,
 }: {
   scaleTypeValue?: DocumentEventScaleType;
   tareExceptionValidUntil?: string;
   withContainerCapacityException?: boolean;
+  withContainerQuantityException?: boolean;
   withScaleTicketVerification?: boolean;
   withTareException?: boolean;
 } = {}) => {
@@ -84,6 +86,20 @@ const stubBaseAccreditationDocuments = ({
       'Attribute Name': CONTAINER_CAPACITY,
       'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'The container capacity is not required for this event',
+    });
+  }
+
+  if (withContainerQuantityException) {
+    exceptions.push({
+      'Attribute Location': {
+        Asset: {
+          Category: DocumentCategory.MASS_ID,
+        },
+        Event: WEIGHING,
+      },
+      'Attribute Name': CONTAINER_QUANTITY,
+      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      Reason: 'The container quantity is not required for this event',
     });
   }
 
@@ -495,6 +511,25 @@ export const weighingTestCases = [
     ),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the one step ${WEIGHING} event is valid with container capacity exception`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      withContainerQuantityException: true,
+    }),
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [
+          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
+          [CONTAINER_QUANTITY, undefined],
+        ]),
+      ),
+    },
+    resultComment:
+      PASSED_RESULT_COMMENTS.PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION(
+        PASSED_RESULT_COMMENTS.SINGLE_STEP,
+      ),
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the one step ${WEIGHING} event is valid with container quantity exception for non-TRUCK container`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({

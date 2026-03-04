@@ -40,11 +40,13 @@ import {
 } from './weighing.constants';
 import {
   type ContainerCapacityApprovedException,
+  type ContainerQuantityApprovedException,
   type TareApprovedException,
 } from './weighing.types';
 import {
   isAdditionalVerificationAttributeValue,
   isContainerCapacityApprovedException,
+  isContainerQuantityApprovedException,
   isTareApprovedException,
 } from './weighing.typia';
 
@@ -70,6 +72,7 @@ export interface WeighingValues {
   containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
   containerCapacityException: ContainerCapacityApprovedException | undefined;
   containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
+  containerQuantityException: ContainerQuantityApprovedException | undefined;
   containerType: string | undefined;
   description: MethodologyDocumentEventAttributeValue | undefined;
   eventValue: number | undefined;
@@ -175,15 +178,40 @@ export const getContainerCapacityExceptionFromAccreditationDocument = (
     : undefined;
 };
 
+export const getContainerQuantityExceptionFromAccreditationDocument = (
+  recyclerAccreditationDocument: Document,
+): ContainerQuantityApprovedException | undefined => {
+  const exceptions = getApprovedExceptions(
+    recyclerAccreditationDocument,
+    ACCREDITATION_RESULT,
+  );
+
+  if (!exceptions) {
+    return undefined;
+  }
+
+  const containerQuantityException = exceptions.find(
+    (exception) =>
+      exception['Attribute Location'].Event === WEIGHING.toString() &&
+      exception['Attribute Name'] === CONTAINER_QUANTITY.toString(),
+  );
+
+  return isContainerQuantityApprovedException(containerQuantityException)
+    ? containerQuantityException
+    : undefined;
+};
+
 export const isExceptionValid = (
   exception:
     | ContainerCapacityApprovedException
+    | ContainerQuantityApprovedException
     | TareApprovedException
     | undefined,
 ): boolean => {
   const isValidException =
     isTareApprovedException(exception) ||
-    isContainerCapacityApprovedException(exception);
+    isContainerCapacityApprovedException(exception) ||
+    isContainerQuantityApprovedException(exception);
 
   if (!isValidException) {
     return false;
@@ -219,6 +247,10 @@ export const getValuesRelatedToWeighing = (
       recyclerAccreditationDocument,
     ),
   containerQuantity: getEventAttributeValue(weighingEvent, CONTAINER_QUANTITY),
+  containerQuantityException:
+    getContainerQuantityExceptionFromAccreditationDocument(
+      recyclerAccreditationDocument,
+    ),
   containerType: getEventAttributeValue(
     weighingEvent,
     CONTAINER_TYPE,
@@ -281,7 +313,11 @@ const validators: Record<string, Validator> = {
       errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
-    if (!isTruck && !isNonZeroPositiveInt(values.containerQuantity)) {
+    if (
+      !isTruck &&
+      !isNonZeroPositiveInt(values.containerQuantity) &&
+      !isExceptionValid(values.containerQuantityException)
+    ) {
       errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }
 
