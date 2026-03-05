@@ -1,10 +1,8 @@
 import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type Document,
   type DocumentEvent,
   DocumentEventAttributeName,
-  DocumentEventName,
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -21,7 +19,6 @@ import {
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.typia';
 
 const { BASELINES } = DocumentEventAttributeName;
-const { RECYCLING_BASELINES } = DocumentEventName;
 
 const formatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 3,
@@ -31,14 +28,14 @@ const formatter = new Intl.NumberFormat('en-US', {
 
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
-  wasteGeneratorBaseline: MethodologyBaseline,
+  baseline: MethodologyBaseline,
   processorErrors: PreventedEmissionsProcessorErrors,
   othersIfOrganicContext?: OthersIfOrganicContext,
 ): number => {
   if (wasteSubtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
     return PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
       wasteSubtype
-    ][wasteGeneratorBaseline];
+    ][baseline];
   }
 
   const carbonFraction = getCarbonFractionForOthersIfOrganic(
@@ -46,7 +43,7 @@ export const getPreventedEmissionsFactor = (
     processorErrors,
   );
 
-  return calculateOthersIfOrganicFactor(wasteGeneratorBaseline, carbonFraction);
+  return calculateOthersIfOrganicFactor(baseline, carbonFraction);
 };
 
 export const calculatePreventedEmissions = (
@@ -61,21 +58,19 @@ export const calculatePreventedEmissions = (
   return Math.max(0, computedValue);
 };
 
-export const getWasteGeneratorBaselineByWasteSubtype = (
-  wasteGeneratorAccreditationDocument: Document,
+export const getBaselineByWasteSubtype = (
+  emissionAndCompostingMetricsEvent: DocumentEvent | undefined,
   wasteSubtype: MassIDOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
 ): MethodologyBaseline | undefined => {
-  const recyclingBaselineEvent =
-    wasteGeneratorAccreditationDocument.externalEvents?.find(
-      (event) => event.name === RECYCLING_BASELINES.toString(),
-    );
-
-  const baselines = getEventAttributeValue(recyclingBaselineEvent, BASELINES);
+  const baselines = getEventAttributeValue(
+    emissionAndCompostingMetricsEvent,
+    BASELINES,
+  );
 
   if (!isWasteGeneratorBaselineValues(baselines)) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
+      processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
     );
   }
 

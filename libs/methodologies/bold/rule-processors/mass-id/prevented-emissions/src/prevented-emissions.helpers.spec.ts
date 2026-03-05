@@ -1,8 +1,4 @@
-import {
-  stubBoldEmissionAndCompostingMetricsEvent,
-  stubBoldRecyclingBaselinesEvent,
-  stubDocument,
-} from '@carrot-fndn/shared/methodologies/bold/testing';
+import { stubBoldEmissionAndCompostingMetricsEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
   MassIDOrganicSubtype,
@@ -14,9 +10,9 @@ import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors'
 import {
   calculatePreventedEmissions,
   formatNumber,
+  getBaselineByWasteSubtype,
   getGasTypeFromEvent,
   getPreventedEmissionsFactor,
-  getWasteGeneratorBaselineByWasteSubtype,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
@@ -125,28 +121,24 @@ describe('PreventedEmissionsHelpers', () => {
     });
   });
 
-  describe('getWasteGeneratorBaselineByWasteSubtype', () => {
+  describe('getBaselineByWasteSubtype', () => {
     it('should return the baseline for the specified waste subtype', () => {
-      const document = stubDocument({
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [
-              [
-                BASELINES,
-                {
-                  [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
-                    MethodologyBaseline.OPEN_AIR_DUMP,
-                  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                    MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
-                },
-              ],
-            ],
-          }),
+      const event = stubBoldEmissionAndCompostingMetricsEvent({
+        metadataAttributes: [
+          [
+            BASELINES,
+            {
+              [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
+                MethodologyBaseline.OPEN_AIR_DUMP,
+              [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
+                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+            },
+          ],
         ],
       });
 
-      const result = getWasteGeneratorBaselineByWasteSubtype(
-        document,
+      const result = getBaselineByWasteSubtype(
+        event,
         MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
         processorErrors,
       );
@@ -157,24 +149,20 @@ describe('PreventedEmissionsHelpers', () => {
     });
 
     it('should return undefined when baseline for waste subtype is not available', () => {
-      const document = stubDocument({
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [
-              [
-                BASELINES,
-                {
-                  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                    MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
-                },
-              ],
-            ],
-          }),
+      const event = stubBoldEmissionAndCompostingMetricsEvent({
+        metadataAttributes: [
+          [
+            BASELINES,
+            {
+              [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
+                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+            },
+          ],
         ],
       });
 
-      const result = getWasteGeneratorBaselineByWasteSubtype(
-        document,
+      const result = getBaselineByWasteSubtype(
+        event,
         MassIDOrganicSubtype.DOMESTIC_SLUDGE,
         processorErrors,
       );
@@ -183,79 +171,55 @@ describe('PreventedEmissionsHelpers', () => {
     });
 
     it('should throw an error when baselines are invalid', () => {
-      const document = stubDocument({
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [[BASELINES, 'invalid_baselines']],
-          }),
-        ],
+      const event = stubBoldEmissionAndCompostingMetricsEvent({
+        metadataAttributes: [[BASELINES, 'invalid_baselines']],
       });
 
       expect(() =>
-        getWasteGeneratorBaselineByWasteSubtype(
-          document,
+        getBaselineByWasteSubtype(
+          event,
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
-      ).toThrow(
-        processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
-      );
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
     });
 
     it('should throw an error when baselines are null', () => {
-      const document = stubDocument({
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [[BASELINES, null]],
-          }),
-        ],
+      const event = stubBoldEmissionAndCompostingMetricsEvent({
+        metadataAttributes: [[BASELINES, null]],
       });
 
       expect(() =>
-        getWasteGeneratorBaselineByWasteSubtype(
-          document,
+        getBaselineByWasteSubtype(
+          event,
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
-      ).toThrow(
-        processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
-      );
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
     });
 
     it('should throw an error when baselines are undefined', () => {
-      const document = stubDocument({
-        externalEvents: [
-          stubBoldRecyclingBaselinesEvent({
-            metadataAttributes: [[BASELINES, undefined]],
-          }),
-        ],
+      const event = stubBoldEmissionAndCompostingMetricsEvent({
+        metadataAttributes: [[BASELINES, undefined]],
       });
 
       expect(() =>
-        getWasteGeneratorBaselineByWasteSubtype(
-          document,
+        getBaselineByWasteSubtype(
+          event,
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
-      ).toThrow(
-        processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
-      );
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
     });
 
-    it('should throw an error when recycling baselines event is not found', () => {
-      const document = stubDocument({
-        externalEvents: [],
-      });
-
+    it('should throw an error when event is undefined', () => {
       expect(() =>
-        getWasteGeneratorBaselineByWasteSubtype(
-          document,
+        getBaselineByWasteSubtype(
+          undefined,
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           processorErrors,
         ),
-      ).toThrow(
-        processorErrors.ERROR_MESSAGE.INVALID_WASTE_GENERATOR_BASELINES,
-      );
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
     });
   });
 
