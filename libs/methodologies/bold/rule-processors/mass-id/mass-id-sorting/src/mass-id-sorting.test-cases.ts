@@ -155,7 +155,7 @@ const createWeightAttributesWithFormat = (
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
 const grossWeight = valueBeforeSorting;
-const expectedDeductedWeight = grossWeight * (1 - sortingFactor);
+const expectedDeductedWeight = grossWeight * sortingFactor;
 const deductedWeight = expectedDeductedWeight;
 const calculatedSortingValue = grossWeight - expectedDeductedWeight;
 const wrongSortingValue = calculatedSortingValue + 0.15;
@@ -299,7 +299,7 @@ export const massIDSortingTestCases = [
     },
     resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
       mismatchedDeductedWeight,
-      Number((grossWeight * (1 - sortingFactor)).toFixed(3)),
+      Number((grossWeight * sortingFactor).toFixed(3)),
     ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
@@ -311,7 +311,7 @@ export const massIDSortingTestCases = [
     massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight + 0.2,
-      (grossWeight + 0.2) * (1 - sortingFactor),
+      (grossWeight + 0.2) * sortingFactor,
       calculatedSortingValue,
     ),
     partialDocument: {
