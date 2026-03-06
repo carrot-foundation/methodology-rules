@@ -446,9 +446,9 @@ export const weighingTestCases = [
         ]),
       ),
     },
-    resultComment: `${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT} ${INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE}`,
+    resultComment: INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${VEHICLE_LICENSE_PLATE} attribute is missing and is not sensitive`,
+    scenario: `the ${VEHICLE_LICENSE_PLATE} attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
