@@ -31,8 +31,8 @@ export interface ApprovedException {
 export type ApprovedExceptionAttributeValue = ApprovedException[];
 
 export interface MethodologyAdditionalVerification {
-  layoutIds?: NonEmptyString[];
-  verificationType: MethodologyVerificationType | NonEmptyString;
+  'Layout IDs'?: NonEmptyString[];
+  'Verification Type': MethodologyVerificationType | NonEmptyString;
 }
 
 export type MethodologyAdditionalVerificationAttributeValue =
@@ -106,4 +106,4 @@ export interface MethodologyDocumentRelation {
   type?: string | undefined;
 }
 
-export type MethodologyVerificationType = 'cdf' | 'mtr' | 'scaleTicket';
+export type MethodologyVerificationType = 'CDF' | 'MTR' | 'Scale Ticket';

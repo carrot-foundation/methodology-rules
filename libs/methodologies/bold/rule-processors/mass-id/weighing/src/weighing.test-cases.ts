@@ -126,8 +126,8 @@ const stubBaseAccreditationDocuments = ({
 
   if (withScaleTicketVerification) {
     additionalVerifications.push({
-      layoutIds: ['layout-1'],
-      verificationType: 'scaleTicket',
+      'Layout IDs': ['layout-1'],
+      'Verification Type': 'Scale Ticket',
     });
   }
 

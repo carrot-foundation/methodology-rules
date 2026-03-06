@@ -25,7 +25,7 @@ const documentExtractor: DocumentExtractorService =
 
 export const isScaleTicketVerificationConfig = (
   config: MethodologyAdditionalVerification,
-): boolean => config.verificationType === 'scaleTicket';
+): boolean => config['Verification Type'] === 'Scale Ticket';
 
 export const verifyScaleTicketNetWeight = async ({
   config,
@@ -46,7 +46,7 @@ export const verifyScaleTicketNetWeight = async ({
     };
   }
 
-  const layoutIds = config.layoutIds;
+  const layoutIds = config['Layout IDs'];
 
   if (!isNonEmptyArray(layoutIds)) {
     return {

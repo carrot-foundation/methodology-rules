@@ -39,8 +39,8 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-1'],
-        verificationType: 'scaleTicket',
+        'Layout IDs': ['layout-1'],
+        'Verification Type': 'Scale Ticket',
       },
       expectedNetWeight,
       textExtractorInput,
@@ -52,7 +52,7 @@ describe('scale-ticket-verification', () => {
   it('should return no errors when config verificationType is not scaleTicket', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        verificationType: 'otherType',
+        'Verification Type': 'otherType',
       } as MethodologyAdditionalVerification,
       expectedNetWeight: 100,
       textExtractorInput: undefined,
@@ -64,12 +64,9 @@ describe('scale-ticket-verification', () => {
   it('should return no errors when verificationType is not scaleTicket', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-1'],
-        verificationType: 'otherType',
-      } as unknown as {
-        layoutIds: ['layout-1'];
-        verificationType: 'scaleTicket';
-      },
+        'Layout IDs': ['layout-1'],
+        'Verification Type': 'otherType',
+      } as MethodologyAdditionalVerification,
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
     });
@@ -79,8 +76,8 @@ describe('scale-ticket-verification', () => {
 
   it('should return no errors when expected net weight is zero and matches the ticket net weight', async () => {
     const baseConfig: MethodologyAdditionalVerification = {
-      layoutIds: ['layout-1'],
-      verificationType: 'scaleTicket',
+      'Layout IDs': ['layout-1'],
+      'Verification Type': 'Scale Ticket',
     };
 
     jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
@@ -112,8 +109,8 @@ describe('scale-ticket-verification', () => {
   it('should return an error when textract input is missing but config is provided', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-1'],
-        verificationType: 'scaleTicket',
+        'Layout IDs': ['layout-1'],
+        'Verification Type': 'Scale Ticket',
       },
       expectedNetWeight: 100,
       textExtractorInput: undefined,
@@ -125,10 +122,10 @@ describe('scale-ticket-verification', () => {
   it('should return an error when layoutIds is missing or empty', async () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
-        verificationType: 'scaleTicket',
+        'Verification Type': 'Scale Ticket',
       } as unknown as {
-        layoutIds: ['layout-1'];
-        verificationType: 'scaleTicket';
+        'Layout IDs': ['layout-1'];
+        'Verification Type': 'Scale Ticket';
       },
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
@@ -158,8 +155,8 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-1'],
-        verificationType: 'scaleTicket',
+        'Layout IDs': ['layout-1'],
+        'Verification Type': 'Scale Ticket',
       },
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
@@ -176,8 +173,8 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-1'],
-        verificationType: 'scaleTicket',
+        'Layout IDs': ['layout-1'],
+        'Verification Type': 'Scale Ticket',
       },
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
@@ -189,8 +186,8 @@ describe('scale-ticket-verification', () => {
 
   it('should build a scale ticket verification context', () => {
     const config: MethodologyAdditionalVerification = {
-      layoutIds: ['layout-1'],
-      verificationType: 'scaleTicket',
+      'Layout IDs': ['layout-1'],
+      'Verification Type': 'Scale Ticket',
     };
 
     const context = buildScaleTicketVerificationContext({
@@ -212,8 +209,8 @@ describe('scale-ticket-verification', () => {
 
     const result = await verifyScaleTicketNetWeight({
       config: {
-        layoutIds: ['layout-unsupported'],
-        verificationType: 'scaleTicket',
+        'Layout IDs': ['layout-unsupported'],
+        'Verification Type': 'Scale Ticket',
       },
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
