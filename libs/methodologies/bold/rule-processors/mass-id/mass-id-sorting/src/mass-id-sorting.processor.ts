@@ -51,7 +51,7 @@ export const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
   DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
-    `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × (1 - ${SORTING_FACTOR}) (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
+    `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × ${SORTING_FACTOR} (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
   DOCUMENT_VALUE_MISMATCH: (documentValue: number, sortingValue: number) =>
     `The MassID document current value (${documentValue} kg) must equal the sorting event value (${sortingValue} kg).`,
   FAILED: (sortingValueCalculationDifference: number) =>
@@ -114,7 +114,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     }
 
     const expectedDeducted =
-      sortingData.grossWeight * (1 - Number(sortingData.sortingFactor));
+      sortingData.grossWeight * Number(sortingData.sortingFactor);
     const deductedDiff = Math.abs(
       sortingData.deductedWeight - expectedDeducted,
     );
