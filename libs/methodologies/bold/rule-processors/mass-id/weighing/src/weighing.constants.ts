@@ -98,7 +98,6 @@ export const INVALID_RESULT_COMMENTS = {
   }) =>
     `The first weighing "${String(attributeName)}" value "${String(firstValue)}" does not match the second weighing "${String(attributeName)}" value "${String(secondValue)}"`,
   VEHICLE_LICENSE_PLATE_FORMAT: `The "${VEHICLE_LICENSE_PLATE}" format is invalid.`,
-  VEHICLE_LICENSE_PLATE_SENSITIVE: `The "${VEHICLE_LICENSE_PLATE}" attribute should be marked as sensitive.`,
   WEIGHING_CAPTURE_METHOD: (captureMethod: unknown) =>
     `The "${WEIGHING_CAPTURE_METHOD}" "${String(captureMethod)}" is not supported by the methodology.`,
 } as const;

@@ -488,10 +488,6 @@ const validators: Record<string, Validator> = {
       errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
     }
 
-    if (attribute?.sensitive !== true) {
-      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_SENSITIVE);
-    }
-
     return { errors };
   },
 
