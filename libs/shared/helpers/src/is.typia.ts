@@ -1,5 +1,6 @@
 import type {
   LicensePlate,
+  NonNegativeFloat,
   NonZeroPositive,
   NonZeroPositiveInt,
   Uri,
@@ -8,6 +9,7 @@ import type BigNumber from 'bignumber.js';
 
 import { createIs } from 'typia';
 
+export const isNonNegative = createIs<NonNegativeFloat>();
 export const isNonZeroPositive = createIs<NonZeroPositive>();
 export const isNonZeroPositiveInt = createIs<NonZeroPositiveInt>();
 export const isNumber = createIs<number>();

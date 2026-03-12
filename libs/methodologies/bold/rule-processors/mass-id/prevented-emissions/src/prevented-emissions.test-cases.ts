@@ -341,8 +341,15 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultComment: RESULT_COMMENTS.PASSED(
+      massIDDocumentValue * baselineValue,
+      baselineValue,
+      0,
+      massIDDocumentValue,
+    ),
     resultContent: {
+      gasType: 'Methane (CH4)',
+      preventedCo2e: massIDDocumentValue * baselineValue,
       ruleSubject: {
         baseline,
         exceedingEmissionCoefficient: 0,
@@ -351,8 +358,8 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the exceeding emission coefficient is zero (non-positive)`,
+    resultStatus: RuleOutputStatus.PASSED,
+    scenario: `the exceeding emission coefficient is zero (no exceeding emissions)`,
     subtype,
   },
   {

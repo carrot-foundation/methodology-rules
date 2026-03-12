@@ -6,7 +6,7 @@ import {
   getOrUndefined,
   isNil,
   isNonEmptyString,
-  isNonZeroPositive,
+  isNonNegative,
 } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
@@ -110,7 +110,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       wasteSubtype,
     } = ruleSubject;
 
-    if (!isNonZeroPositive(exceedingEmissionCoefficient)) {
+    if (!isNonNegative(exceedingEmissionCoefficient)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
         resultStatus: RuleOutputStatus.FAILED,

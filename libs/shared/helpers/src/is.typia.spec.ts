@@ -1,5 +1,6 @@
 import {
   isBigNumber,
+  isNonNegative,
   isNonZeroPositive,
   isNonZeroPositiveInt,
   isNumber,
@@ -69,6 +70,34 @@ describe('is.typia', () => {
         [],
       ])('should validate %s as false', (input) => {
         expect(isValidLicensePlate(input)).toBeFalsy();
+      });
+    });
+  });
+
+  describe('isNonNegative', () => {
+    describe('valid values', () => {
+      it.each([0, 0.1, 1, 1.5, 100, Number.MAX_SAFE_INTEGER])(
+        'should validate %s as true',
+        (input) => {
+          expect(isNonNegative(input)).toBeTruthy();
+        },
+      );
+    });
+
+    describe('invalid values', () => {
+      it.each([
+        -1,
+        -0.1,
+        Number.NaN,
+        null,
+        undefined,
+        '',
+        'abc',
+        [],
+        {},
+        Number.NEGATIVE_INFINITY,
+      ])('should validate %s as false', (input) => {
+        expect(isNonNegative(input)).toBeFalsy();
       });
     });
   });
