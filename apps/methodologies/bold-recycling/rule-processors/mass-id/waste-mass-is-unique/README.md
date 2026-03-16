@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that no duplicate MassID documents exist with the same combination of drop-off event, pick-up event, recycler event, waste generator event, and vehicle license plate. The rule queries the audit API to find similar MassIDs and ensures that any duplicates found are cancelled. If non-cancelled duplicates exist, the validation fails.
+Validates that no duplicate MassID documents exist with the same combination of drop-off event, pick-up event, recycler event, waste generator event, and vehicle license plate.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/uniqueness-check/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/index.ts)**
 
 ## 👥 Contributors
 

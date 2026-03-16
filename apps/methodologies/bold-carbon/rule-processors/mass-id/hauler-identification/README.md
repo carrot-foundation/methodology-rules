@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Validates hauler identification based on the vehicle type in the PICK_UP event. For most vehicle types (truck, boat, etc.), a hauler actor event is required. For certain vehicle types (sludge pipes, cart), the hauler is optional. The rule ensures proper identification of the transportation provider when required by the vehicle type.
+Validates hauler identification based on the vehicle type, requiring a hauler actor event for most vehicle types while making it optional for sludge pipes and cart.
 
 ## 📂 Implementation
 

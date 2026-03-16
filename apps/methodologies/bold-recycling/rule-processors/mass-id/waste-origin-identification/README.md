@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates waste origin identification in the MassID document. If the waste origin is identified (not UNIDENTIFIED), exactly one waste generator actor event must be present. If the waste origin is UNIDENTIFIED, no waste generator event should be present. The rule ensures consistency between the waste origin attribute and the presence of waste generator events.
+Validates waste origin identification consistency, ensuring that identified origins have exactly one waste generator actor event and unidentified origins have none.
 
 ## 📂 Implementation
 

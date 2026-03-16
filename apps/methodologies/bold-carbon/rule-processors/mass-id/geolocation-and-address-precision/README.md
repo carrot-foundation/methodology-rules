@@ -10,11 +10,11 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Validates that event addresses for all participants (integrator, hauler, recycler, processor, waste generator) are within 2000 meters of their accredited addresses. If GPS geolocation data is provided in events, it must also be within 2000 meters of the accredited address. The rule ensures geographic consistency between declared event locations and participant accreditations.
+Validates that event addresses for all participants are within 2000 meters of their accredited addresses, ensuring geographic consistency between declared locations and accreditations.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-precision/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/index.ts)**
 
 ## 👥 Contributors
 

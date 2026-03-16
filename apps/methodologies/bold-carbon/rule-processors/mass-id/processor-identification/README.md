@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Validates that exactly one processor actor event exists in the MassID document. The rule ensures that the processor is properly identified and that there are no duplicate or missing processor events, which is required for proper waste processing tracking and credit generation.
+Validates that processor actor events in the MassID document are properly identified, ensuring correct waste processing tracking.
 
 ## 📂 Implementation
 

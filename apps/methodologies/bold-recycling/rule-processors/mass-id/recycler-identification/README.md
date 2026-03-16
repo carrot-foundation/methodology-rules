@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that exactly one recycler actor event exists in the MassID document. The rule ensures that the recycler is properly identified and that there are no duplicate or missing recycler events, which is required for proper waste tracking and credit generation.
+Validates that exactly one recycler actor event exists in the MassID document, ensuring proper recycler identification for waste tracking and credit generation.
 
 ## 📂 Implementation
 

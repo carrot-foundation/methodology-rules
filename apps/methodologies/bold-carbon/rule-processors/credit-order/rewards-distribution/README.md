@@ -10,11 +10,11 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Calculates rewards rights, in USDC, for participants that contributed to the Circular Economy cycle in credit order documents. The rule aggregates rewards from related MassID certificates, distributes them based on predefined percentages for different actor types, and calculates the total rewards and any remainder amounts according to the methodology configuration.
+Calculates reward distribution in USDC for participants that contributed to the circular economy cycle in credit order documents.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/rewards-distribution.processor.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/index.ts)**
 
 ## 👥 Contributors
 

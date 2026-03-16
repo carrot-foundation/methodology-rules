@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that the MassID document has the correct qualifications: category must be "MassID", type must be "Organic", measurement unit must be "kg", current value must be greater than 0, and subtype must be a valid organic waste subtype from the allowed enumeration values.
+Validates that the MassID document has the correct qualifications: category must be MassID, type must be Organic, measurement unit must be kg, value must be greater than zero, and subtype must be a valid organic waste subtype.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/mass-id-definition/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/mass-id-qualifications/src/index.ts)**
 
 ## 👥 Contributors
 

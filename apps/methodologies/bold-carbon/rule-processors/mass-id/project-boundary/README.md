@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Calculates and validates the geographic distance between the first PICK_UP event and the last DROP_OFF event addresses. The rule ensures both events are present and calculates the distance in kilometers. This validates the project boundary by confirming that waste collection and delivery locations can be properly geolocated and measured.
+Calculates and validates the distance between the pick-up and drop-off event addresses, determining the geographic scope of the waste collection and processing activity.
 
 ## 📂 Implementation
 

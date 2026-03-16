@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that all participants in the MassID document (integrator, waste generator, hauler, recycler, processor) have valid accreditation documents. For integrator, processor, and recycler, the accreditations must have valid dates. For waste generator, dates are optional. The rule ensures no participant has multiple valid accreditations and that all required accreditations are present and active.
+Validates that all participants in the MassID document have valid accreditation documents with active dates, ensuring proper supply chain certification.
 
 ## 📂 Implementation
 

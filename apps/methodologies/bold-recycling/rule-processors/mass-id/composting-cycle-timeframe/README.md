@@ -10,7 +10,7 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that the time between DROP_OFF and RECYCLED events is within the acceptable range of 60-180 days for composting cycles. The rule calculates the difference in days between these two events and ensures it falls within the specified timeframe to maintain proper composting cycle validation.
+Validates that the time between drop-off and recycled events is within the acceptable range of 60 to 180 days for composting cycles.
 
 ## 📂 Implementation
 

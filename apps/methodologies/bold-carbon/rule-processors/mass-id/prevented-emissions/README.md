@@ -10,7 +10,7 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Calculates prevented emissions (CO2e) based on the exceeding emission coefficient from recycler accreditation, waste generator baseline, waste subtype, and MassID document value. The rule validates that the exceeding emission coefficient is present, that a baseline exists for the waste subtype, and calculates the prevented emissions using the methodology formula: (mass × prevented emissions factor per ton) - (mass × exceeding emission coefficient).
+Calculates prevented emissions in kg CO2e based on the waste subtype, recycler accreditation baselines, and exceeding emission coefficient.
 
 ## 📂 Implementation
 

@@ -10,11 +10,11 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Validates recycling manifest events in MassID documents, ensuring they contain required attributes (document number, document type, issue date) and proper attachments. The rule validates that issue dates are in DATE format, that the recycling manifest event address matches the recycler event address, and that either a recycling manifest attachment or an exemption justification is provided.
+Validates transport and recycling manifest events in MassID documents, ensuring they contain required attributes, proper attachments, and valid exemption justifications.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/recycling-manifest/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/index.ts)**
 
 ## 👥 Contributors
 

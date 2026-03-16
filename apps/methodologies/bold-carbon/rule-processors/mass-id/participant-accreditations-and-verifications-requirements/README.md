@@ -1,6 +1,6 @@
 <div align="center">
 
-# Participant Accreditations & Verifications
+# Participant Accreditations & Verifications Requirements
 
 Methodology: **BOLD-CARBON**
 
@@ -10,11 +10,11 @@ Methodology: **BOLD-CARBON**
 
 ## 📄 Description
 
-Validates that all participants in the MassID document (integrator, waste generator, hauler, recycler, processor) have valid accreditation documents. For integrator, processor, and recycler, the accreditations must have valid dates. For waste generator, dates are optional. The rule ensures no participant has multiple valid accreditations and that all required accreditations are present and active.
+Validates that all participants in the MassID document have valid accreditation documents with active dates, ensuring proper supply chain certification.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/index.ts)**
 
 ## 👥 Contributors
 

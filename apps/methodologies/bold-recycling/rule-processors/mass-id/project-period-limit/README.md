@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that the RECYCLED event occurred on or after the first day of the previous year (January 1st) in UTC time. The rule ensures that only recent recycling events are eligible for credit generation, preventing the use of historical data that may not meet current methodology requirements.
+Validates that the RECYCLED event occurred within the timeframe allowed by the methodology, ensuring only recent recycling events are eligible for credit generation.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/project-period/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/project-period-limit/src/index.ts)**
 
 ## 👥 Contributors
 

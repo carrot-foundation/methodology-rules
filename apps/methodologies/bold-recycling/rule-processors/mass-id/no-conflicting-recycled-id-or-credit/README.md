@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that the MassID document is not already linked to a valid RecycledID certificate or credit order document. The rule also ensures there is no existing MassID audit for the same methodology that has passed or is in progress. This prevents duplicate credit generation from the same waste mass.
+Validates that the MassID document is not already linked to a valid RecycledID certificate or credit order document, preventing duplicate credit generation from the same waste mass.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/certificate-uniqueness-check/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit/src/index.ts)**
 
 ## 👥 Contributors
 

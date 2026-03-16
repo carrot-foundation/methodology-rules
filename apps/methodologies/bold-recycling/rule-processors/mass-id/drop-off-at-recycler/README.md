@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates that the DROP_OFF event includes a receiving operator identifier and that the drop-off address matches the recycler event address. The rule ensures proper tracking of waste delivery to recycling facilities by verifying both the operator identification and address consistency.
+Validates that the drop-off event includes a receiving operator identifier and that the drop-off address matches the recycler event address.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycling-facility/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/src/index.ts)**
 
 ## 👥 Contributors
 

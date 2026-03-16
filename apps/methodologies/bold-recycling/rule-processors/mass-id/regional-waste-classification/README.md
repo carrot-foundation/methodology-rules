@@ -10,11 +10,11 @@ Methodology: **BOLD-RECYCLING**
 
 ## 📄 Description
 
-Validates local waste classification for recyclers in Brazil. The rule checks that both the local waste classification ID and description are provided, and that they match a valid IBAMA code from the Brazilian List of Solid Waste. The classification ID and description must correspond to an accepted IBAMA code in the methodology's classification constants.
+Validates local waste classification codes and descriptions against the official IBAMA Brazilian solid waste list, ensuring proper waste categorization for the jurisdiction.
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/local-waste-classification/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/regional-waste-classification/src/index.ts)**
 
 ## 👥 Contributors
 
