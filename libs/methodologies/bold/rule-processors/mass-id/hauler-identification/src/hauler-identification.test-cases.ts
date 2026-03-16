@@ -10,10 +10,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
-import {
-  OPTIONAL_HAULER_VEHICLE_TYPES,
-  RESULT_COMMENTS,
-} from './hauler-identification.processor';
+import { RESULT_COMMENTS } from './hauler-identification.constants';
+import { OPTIONAL_HAULER_VEHICLE_TYPES } from './hauler-identification.processor';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = MethodologyDocumentEventLabel;
@@ -37,7 +35,7 @@ export const haulerIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.HAULER_EVENT_FOUND,
+    resultComment: RESULT_COMMENTS.passed.HAULER_EVENT_FOUND,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
@@ -53,7 +51,7 @@ export const haulerIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.HAULER_EVENT_MISSING(TRUCK),
+    resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${VEHICLE_TYPE} attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
@@ -69,7 +67,7 @@ export const haulerIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.HAULER_NOT_REQUIRED(
+    resultComment: RESULT_COMMENTS.passed.HAULER_NOT_REQUIRED(
       DocumentEventVehicleType.CART,
     ),
     resultStatus: RuleOutputStatus.PASSED,
@@ -88,7 +86,7 @@ export const haulerIdentificationTestCases = [
       ],
       [PICK_UP, undefined],
     ]),
-    resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
+    resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `no ${PICK_UP} event exists.`,
   },

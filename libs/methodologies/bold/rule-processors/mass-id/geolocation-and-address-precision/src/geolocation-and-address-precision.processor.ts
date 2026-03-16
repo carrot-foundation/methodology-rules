@@ -38,6 +38,7 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
+import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
   getAccreditedAddressByParticipantIdAndActorType,
@@ -66,34 +67,6 @@ interface ParticipantAddressData {
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
 }
-
-export const RESULT_COMMENTS = {
-  INVALID_ACTOR_TYPE: 'Could not extract the event actor type.',
-  INVALID_ADDRESS_DISTANCE: (
-    actorType: string,
-    addressDistance: number,
-  ): string =>
-    `Non-compliant ${actorType} address: the event address is ${addressDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
-  INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-    `Non-compliant ${actorType} address: the captured GPS location is ${gpsDistance}m away from the accredited address, exceeding the ${MAX_ALLOWED_DISTANCE}m limit.`,
-  MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
-    `No accredited address was found for the ${actorType} actor.`,
-  OPTIONAL_VALIDATION_SKIPPED: (actorType: string): string =>
-    `Optional validation skipped for ${actorType} (verification document not found).`,
-  PASSED_WITH_GPS: (
-    actorType: string,
-    addressDistance: number,
-    gpsDistance: number,
-  ): string =>
-    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m), and the GPS location is within ${MAX_ALLOWED_DISTANCE}m of the event address (${gpsDistance}m).`,
-  PASSED_WITH_GPS_EXCEPTION: (
-    actorType: string,
-    addressDistance: number,
-  ): string =>
-    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m). GPS validation skipped due to approved exception.`,
-  PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-    `Compliant ${actorType} address: the event address is within ${MAX_ALLOWED_DISTANCE}m of the accredited address (${addressDistance}m) (note: no GPS data was provided).`,
-} as const;
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private readonly processorErrors =
@@ -187,7 +160,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       if (isNil(actorType)) {
         throw this.processorErrors.getKnownError(
-          RESULT_COMMENTS.INVALID_ACTOR_TYPE,
+          RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
         );
       }
 
@@ -282,7 +255,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         return [
           {
             resultComment:
-              RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(actorType),
+              RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(actorType),
             resultStatus: RuleOutputStatus.PASSED,
           },
         ];
@@ -293,7 +266,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       return [
         {
           resultComment:
-            RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(actorType),
+            RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(actorType),
           resultStatus: RuleOutputStatus.FAILED,
         },
       ];
@@ -307,7 +280,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     if (addressDistance > MAX_ALLOWED_DISTANCE) {
       return [
         {
-          resultComment: RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(
+          resultComment: RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(
             actorType,
             addressDistance,
           ),
@@ -329,7 +302,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       if (shouldSkipGpsValidation(latitudeException, longitudeException)) {
         return [
           {
-            resultComment: RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(
+            resultComment: RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(
               actorType,
               addressDistance,
             ),
@@ -348,7 +321,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       if (gpsDistance > MAX_ALLOWED_DISTANCE) {
         return [
           {
-            resultComment: RESULT_COMMENTS.INVALID_GPS_DISTANCE(
+            resultComment: RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(
               actorType,
               gpsDistance,
             ),
@@ -359,7 +332,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       return [
         {
-          resultComment: RESULT_COMMENTS.PASSED_WITH_GPS(
+          resultComment: RESULT_COMMENTS.passed.PASSED_WITH_GPS(
             actorType,
             addressDistance,
             gpsDistance,
@@ -371,7 +344,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     return [
       {
-        resultComment: RESULT_COMMENTS.PASSED_WITHOUT_GPS(
+        resultComment: RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(
           actorType,
           addressDistance,
         ),

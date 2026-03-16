@@ -37,6 +37,7 @@ import {
 } from '@carrot-fndn/shared/types';
 import { assert } from 'typia';
 
+import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
 const ACTORS_REQUIRING_DATES = new Set([
@@ -52,11 +53,6 @@ interface RuleSubject {
   accreditationDocuments: Map<string, Document[]>;
   massIDDocument: Document;
 }
-
-export const RESULT_COMMENTS = {
-  PASSED:
-    'All participant accreditations-and-verifications are active and approved.',
-} as const;
 
 export class ParticipantAccreditationsAndVerificationsRequirementsProcessor extends RuleDataProcessor {
   readonly errorProcessor =
@@ -118,7 +114,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     }
 
     return {
-      resultComment: RESULT_COMMENTS.PASSED,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

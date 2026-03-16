@@ -13,7 +13,7 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { RESULT_COMMENTS } from './regional-waste-classification.processor';
+import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
@@ -57,7 +57,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
       id: '02 01 01',
@@ -84,7 +84,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
       id: '020101',
@@ -111,7 +111,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: `***${WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description} - (*)`,
       id: '02 01 01',
@@ -138,7 +138,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.CLASSIFICATION_ID_MISSING,
+    resultComment: RESULT_COMMENTS.failed.CLASSIFICATION_ID_MISSING,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
       id: undefined,
@@ -161,7 +161,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.CLASSIFICATION_DESCRIPTION_MISSING,
+    resultComment: RESULT_COMMENTS.failed.CLASSIFICATION_DESCRIPTION_MISSING,
     resultContent: {
       description: undefined,
       id: '02 01 01',
@@ -187,7 +187,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: 'Residuos de tecidos animais',
       id: '02 01 02',
@@ -211,7 +211,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
+    resultComment: RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_DESCRIPTION,
     resultContent: {
       description: randomDescription,
       id: '02 01 01',
@@ -235,7 +235,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.UNSUPPORTED_COUNTRY('US'),
+    resultComment: RESULT_COMMENTS.failed.UNSUPPORTED_COUNTRY('US'),
     resultContent: {
       description: randomDescription,
       id: '02 01 01',
@@ -258,7 +258,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.INVALID_CLASSIFICATION_ID,
+    resultComment: RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_ID,
     resultContent: {
       description: randomDescription,
       id: randomId,
@@ -284,7 +284,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultComment: RESULT_COMMENTS.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
+    resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
       id: '02 01 01',
@@ -311,7 +311,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 02'].description,
       id: '02 01 02',
@@ -338,7 +338,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 07'].description,
       id: '02 01 07',
@@ -365,7 +365,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
     },
-    resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+    resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 02 04'].description,
       id: '02 02 04',
@@ -391,7 +391,7 @@ export const regionalWasteClassificationTestCases = [
     partialDocument: {
       subtype: MassIDOrganicSubtype.TOBACCO,
     },
-    resultComment: RESULT_COMMENTS.INVALID_SUBTYPE_MAPPING,
+    resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
     resultContent: {
       description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
       id: '02 01 01',

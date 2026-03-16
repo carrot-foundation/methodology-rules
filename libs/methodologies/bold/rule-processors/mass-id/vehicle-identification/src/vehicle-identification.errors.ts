@@ -2,7 +2,6 @@ import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/proc
 
 export class VehicleIdentificationProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
-    FAILED_BY_ERROR:
-      'Unable to validate the vehicle-identification process.',
+    FAILED_BY_ERROR: 'Unable to validate the vehicle-identification process.',
   } as const;
 }

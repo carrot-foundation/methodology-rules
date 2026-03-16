@@ -10,10 +10,8 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import {
-  ProjectPeriodLimitProcessor,
-  RESULT_COMMENTS,
-} from './project-period-limit.processor';
+import { RESULT_COMMENTS } from './project-period-limit.constants';
+import { ProjectPeriodLimitProcessor } from './project-period-limit.processor';
 import { projectPeriodLimitTestCases } from './project-period-limit.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
@@ -76,7 +74,7 @@ describe('ProjectPeriodLimitProcessor', () => {
     const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
     expect(ruleOutput).toMatchObject({
-      resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
+      resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
     });
   });

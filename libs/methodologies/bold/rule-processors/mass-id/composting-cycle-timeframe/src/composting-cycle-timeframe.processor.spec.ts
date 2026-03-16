@@ -16,6 +16,7 @@ import {
 import { differenceInDays, parseISO } from 'date-fns';
 import { random } from 'typia';
 
+import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
 import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.processor';
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
@@ -33,8 +34,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
       let resultComment: string;
 
       if (!testCase.dropOffEventDate) {
-        resultComment =
-          ruleDataProcessor['RESULT_COMMENT'].MISSING_DROP_OFF_EVENT;
+        resultComment = RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT;
       } else if (testCase.recycledEventDate) {
         const difference = differenceInDays(
           parseISO(testCase.recycledEventDate),
@@ -43,11 +43,10 @@ describe('CompostingCycleTimeframeProcessor', () => {
 
         resultComment =
           testCase.resultStatus === RuleOutputStatus.PASSED
-            ? ruleDataProcessor['RESULT_COMMENT'].PASSED(difference)
-            : ruleDataProcessor['RESULT_COMMENT'].FAILED(difference);
+            ? RESULT_COMMENTS.passed.PASSED(difference)
+            : RESULT_COMMENTS.failed.FAILED(difference);
       } else {
-        resultComment =
-          ruleDataProcessor['RESULT_COMMENT'].MISSING_RECYCLED_EVENT;
+        resultComment = RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT;
       }
 
       return {

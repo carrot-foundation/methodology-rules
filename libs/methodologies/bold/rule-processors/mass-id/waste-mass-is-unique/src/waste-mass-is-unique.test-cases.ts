@@ -12,8 +12,8 @@ import {
   MethodologyDocumentStatus,
 } from '@carrot-fndn/shared/types';
 
+import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
-import { RESULT_COMMENTS } from './waste-mass-is-unique.processor';
 
 const { CANCELLED, OPEN } = MethodologyDocumentStatus;
 const { DROP_OFF, PICK_UP } = DocumentEventName;
@@ -24,14 +24,14 @@ export const wasteMassIsUniqueTestCases = [
   {
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [],
-    resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
+    resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'the document is unique',
   },
   {
     newDuplicateDocuments: [{ status: CANCELLED }, { status: CANCELLED }],
     oldDuplicateDocuments: [],
-    resultComment: RESULT_COMMENTS.ONLY_CANCELLED_DUPLICATES(2, 2),
+    resultComment: RESULT_COMMENTS.passed.ONLY_CANCELLED_DUPLICATES(2, 2),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'only cancelled duplicates are found',
   },
@@ -42,21 +42,21 @@ export const wasteMassIsUniqueTestCases = [
       { status: CANCELLED },
     ],
     oldDuplicateDocuments: [],
-    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
+    resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found',
   },
   {
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
-    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(2, 2),
+    resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(2, 2),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found in old format',
   },
   {
     newDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     oldDuplicateDocuments: [{ status: CANCELLED }],
-    resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(3, 2),
+    resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'valid duplicates are found in both formats',
   },

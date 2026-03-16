@@ -21,6 +21,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { is } from 'typia';
 
+import { RESULT_COMMENTS } from './vehicle-identification.constants';
+
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   DocumentEventAttributeName;
 const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = DocumentEventVehicleType;
@@ -32,21 +34,6 @@ export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
   SLUDGE_PIPES,
 ]);
 
-export const RESULT_COMMENTS = {
-  INVALID_LICENSE_PLATE_FORMAT: `In the ${PICK_UP} event, the "${VEHICLE_LICENSE_PLATE}" format is invalid.`,
-  INVALID_VEHICLE_TYPE: (vehicleType: string) =>
-    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" "${vehicleType}" is not supported by the methodology.`,
-  LICENSE_PLATE_MISSING: (vehicleType: string) =>
-    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_LICENSE_PLATE}", but none was provided.`,
-  PICK_UP_EVENT_MISSING: `Expected "${PICK_UP}" event to be declared.`,
-  VEHICLE_DESCRIPTION_MISSING: (vehicleType: string) =>
-    `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${vehicleType}", which requires a "${VEHICLE_DESCRIPTION}", but none was provided.`,
-  VEHICLE_IDENTIFIED_WITH_DESCRIPTION: (vehicleType: string) =>
-    `A "${VEHICLE_LICENSE_PLATE}" is not required for "${vehicleType}", and the "${VEHICLE_DESCRIPTION}" was provided.`,
-  VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE: `In the ${PICK_UP} event, a valid "${VEHICLE_TYPE}" and correctly formatted "${VEHICLE_LICENSE_PLATE}" were provided.`,
-  VEHICLE_TYPE_MISSING: `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" was not provided.`,
-} as const;
-
 interface RuleSubject {
   pickUpEvent?: DocumentEvent | undefined;
 }
@@ -56,19 +43,25 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     pickUpEvent: event,
   }: RuleSubject): EvaluateResultOutput {
     if (isNil(event)) {
-      return this.createResult(false, RESULT_COMMENTS.PICK_UP_EVENT_MISSING);
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
+      );
     }
 
     const vehicleTypeValue = getEventAttributeValue(event, VEHICLE_TYPE);
 
     if (!isNonEmptyString(vehicleTypeValue)) {
-      return this.createResult(false, RESULT_COMMENTS.VEHICLE_TYPE_MISSING);
+      return this.createResult(
+        false,
+        RESULT_COMMENTS.failed.VEHICLE_TYPE_MISSING,
+      );
     }
 
     if (!is<DocumentEventVehicleType>(vehicleTypeValue)) {
       return this.createResult(
         false,
-        RESULT_COMMENTS.INVALID_VEHICLE_TYPE(vehicleTypeValue),
+        RESULT_COMMENTS.failed.INVALID_VEHICLE_TYPE(vehicleTypeValue),
       );
     }
 
@@ -81,13 +74,15 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       return hasDescription
         ? this.createResult(
             true,
-            RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(
+            RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(
               vehicleTypeValue,
             ),
           )
         : this.createResult(
             false,
-            RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(vehicleTypeValue),
+            RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING(
+              vehicleTypeValue,
+            ),
           );
     }
 
@@ -97,7 +92,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     if (!needsLicensePlate) {
       return this.createResult(
         true,
-        RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+        RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
       );
     }
 
@@ -110,20 +105,20 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     if (!hasLicensePlate) {
       return this.createResult(
         false,
-        RESULT_COMMENTS.LICENSE_PLATE_MISSING(vehicleTypeValue),
+        RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(vehicleTypeValue),
       );
     }
 
     if (!isValidLicensePlate(licensePlate)) {
       return this.createResult(
         false,
-        RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
+        RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
       );
     }
 
     return this.createResult(
       true,
-      RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     );
   }
 

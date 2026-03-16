@@ -3,7 +3,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
-import { RESULT_COMMENT } from './processor-identification.processor';
+import { RESULT_COMMENTS } from './processor-identification.constants';
 
 const { PROCESSOR } = MethodologyDocumentEventLabel;
 const { ACTOR } = DocumentEventName;
@@ -11,7 +11,7 @@ const { ACTOR } = DocumentEventName;
 export const processorIdentificationTestCases = [
   {
     events: new Map([[`${ACTOR}-${PROCESSOR}`, undefined]]),
-    resultComment: RESULT_COMMENT.NOT_FOUND,
+    resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `no ${PROCESSOR} actor event found`,
   },
@@ -19,7 +19,7 @@ export const processorIdentificationTestCases = [
     events: new Map([
       [`${ACTOR}-${PROCESSOR}`, stubActorEventWithLabel(PROCESSOR)],
     ]),
-    resultComment: RESULT_COMMENT.SINGLE_EVENT,
+    resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `found ${PROCESSOR} actor event`,
   },
@@ -28,7 +28,7 @@ export const processorIdentificationTestCases = [
       [`${ACTOR}-${PROCESSOR}-1`, stubActorEventWithLabel(PROCESSOR)],
       [`${ACTOR}-${PROCESSOR}-2`, stubActorEventWithLabel(PROCESSOR)],
     ]),
-    resultComment: RESULT_COMMENT.MULTIPLE_EVENTS,
+    resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `found multiple ${PROCESSOR} actor events`,
   },

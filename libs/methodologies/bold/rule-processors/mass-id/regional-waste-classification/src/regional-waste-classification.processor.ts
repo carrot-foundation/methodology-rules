@@ -26,6 +26,7 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
+import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import { getCdmCodeFromSubtype } from './regional-waste-classification.helpers';
 
@@ -37,18 +38,6 @@ const {
 } = DocumentEventAttributeName;
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
-
-export const RESULT_COMMENTS = {
-  CLASSIFICATION_DESCRIPTION_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" was not provided.`,
-  CLASSIFICATION_ID_MISSING: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" was not provided.`,
-  INVALID_CLASSIFICATION_DESCRIPTION: `The "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" does not match the expected local waste classification code description.`,
-  INVALID_CLASSIFICATION_ID: `The "${LOCAL_WASTE_CLASSIFICATION_ID}" does not match the local waste classification code accepted by the methodology.`,
-  INVALID_SUBTYPE_CDM_CODE_MISMATCH: `The subtype does not match the CDM code for the provided "${LOCAL_WASTE_CLASSIFICATION_ID}".`,
-  INVALID_SUBTYPE_MAPPING: `The provided subtype does not map to a valid CDM code.`,
-  UNSUPPORTED_COUNTRY: (recyclerCountryCode: string) =>
-    `Local waste classification is only validated for recyclers in Brazil, but the recycler country is ${recyclerCountryCode}.`,
-  VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" match an Ibama code.`,
-} as const;
 
 type Subject = {
   description: MethodologyDocumentEventAttributeValue | string | undefined;
@@ -68,18 +57,21 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (recyclerCountryCode !== 'BR') {
       return this.isFailed(
-        RESULT_COMMENTS.UNSUPPORTED_COUNTRY(recyclerCountryCode),
+        RESULT_COMMENTS.failed.UNSUPPORTED_COUNTRY(recyclerCountryCode),
         subject,
       );
     }
 
     if (!isNonEmptyString(id)) {
-      return this.isFailed(RESULT_COMMENTS.CLASSIFICATION_ID_MISSING, subject);
+      return this.isFailed(
+        RESULT_COMMENTS.failed.CLASSIFICATION_ID_MISSING,
+        subject,
+      );
     }
 
     if (!isNonEmptyString(description)) {
       return this.isFailed(
-        RESULT_COMMENTS.CLASSIFICATION_DESCRIPTION_MISSING,
+        RESULT_COMMENTS.failed.CLASSIFICATION_DESCRIPTION_MISSING,
         subject,
       );
     }
@@ -91,13 +83,19 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     );
 
     if (!normalizedId) {
-      return this.isFailed(RESULT_COMMENTS.INVALID_CLASSIFICATION_ID, subject);
+      return this.isFailed(
+        RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_ID,
+        subject,
+      );
     }
 
     const expectedCdmCode = getCdmCodeFromSubtype(subtype);
 
     if (!expectedCdmCode) {
-      return this.isFailed(RESULT_COMMENTS.INVALID_SUBTYPE_MAPPING, subject);
+      return this.isFailed(
+        RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
+        subject,
+      );
     }
 
     const classificationEntry =
@@ -107,7 +105,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (classificationEntry.CDM_CODE !== expectedCdmCode) {
       return this.isFailed(
-        RESULT_COMMENTS.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
+        RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
         subject,
       );
     }
@@ -122,13 +120,13 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (!isMatch) {
       return this.isFailed(
-        RESULT_COMMENTS.INVALID_CLASSIFICATION_DESCRIPTION,
+        RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_DESCRIPTION,
         subject,
       );
     }
 
     return {
-      resultComment: RESULT_COMMENTS.VALID_CLASSIFICATION,
+      resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: subject,
       resultStatus: RuleOutputStatus.PASSED,
     };

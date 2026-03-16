@@ -11,15 +11,9 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { convertDistance } from 'geolib';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
+import { RESULT_COMMENTS } from './project-boundary.constants';
 
-export const RESULT_COMMENTS = {
-  DISTANCE_CALCULATION_FAILED: `Unable to calculate the distance between the first "${PICK_UP}" and last "${DROP_OFF}".`,
-  MISSING_DROP_OFF_EVENT: `No "${DROP_OFF}" event was found in the document.`,
-  MISSING_PICK_UP_EVENT: `No "${PICK_UP}" event was found in the document.`,
-  SUCCESS: (distance: number) =>
-    `The distance between the first "${PICK_UP}" and last "${DROP_OFF}" is ${distance}km.`,
-} as const;
+const { DROP_OFF, PICK_UP } = DocumentEventName;
 
 interface RuleSubject {
   dropOffEvent: DocumentEvent | undefined;
@@ -33,14 +27,14 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
   }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
     if (isNil(pickUpEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_PICK_UP_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (isNil(dropOffEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -55,7 +49,7 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
         Math.round(convertDistance(distanceInMeters, 'km') * 1000) / 1000;
 
       return {
-        resultComment: RESULT_COMMENTS.SUCCESS(distance),
+        resultComment: RESULT_COMMENTS.passed.SUCCESS(distance),
         resultContent: {
           distance,
         },
@@ -63,7 +57,7 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
       };
     } catch {
       return {
-        resultComment: RESULT_COMMENTS.DISTANCE_CALCULATION_FAILED,
+        resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }

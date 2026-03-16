@@ -6,23 +6,16 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { UTCDate } from '@date-fns/utc';
 import { isAfter, isEqual } from 'date-fns';
 
+import { RESULT_COMMENTS } from './project-period-limit.constants';
+
 interface RuleSubject {
   recycledEvent: DocumentEvent | undefined;
 }
-
-const { RECYCLED } = DocumentEventName;
-
-export const RESULT_COMMENTS = {
-  INVALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred before the first day of the previous year, in UTC time.`,
-  MISSING_RECYCLED_EVENT: `No "${RECYCLED}" event was found in the document.`,
-  VALID_RECYCLED_EVENT_DATE: `The "${RECYCLED}" event occurred on or after the first day of the previous year, in UTC time.`,
-} as const;
 
 export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   protected evaluateResult({
@@ -32,7 +25,7 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
 
     if (isNil(recycledEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_RECYCLED_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -44,8 +37,8 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
 
     return {
       resultComment: isEligible
-        ? RESULT_COMMENTS.VALID_RECYCLED_EVENT_DATE
-        : RESULT_COMMENTS.INVALID_RECYCLED_EVENT_DATE,
+        ? RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE
+        : RESULT_COMMENTS.failed.INVALID_RECYCLED_EVENT_DATE,
       resultStatus: isEligible
         ? RuleOutputStatus.PASSED
         : RuleOutputStatus.FAILED,

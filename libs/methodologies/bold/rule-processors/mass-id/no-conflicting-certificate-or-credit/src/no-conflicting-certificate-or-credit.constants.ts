@@ -8,7 +8,10 @@ import {
 import {
   BoldMethodologyName,
   BoldMethodologySlug,
+  DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+
+const { MASS_ID } = DocumentCategory;
 
 export const buildDocumentsCriteria = (
   massIDCertificateMatcher: DocumentMatcher,
@@ -24,6 +27,14 @@ export const buildDocumentsCriteria = (
     ],
   },
 });
+
+export const RESULT_COMMENTS = {
+  failed: {},
+  passed: {
+    PASSED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+  },
+  reviewRequired: {},
+} as const;
 
 export const METHODOLOGY_NAME_BY_SLUG = {
   [BoldMethodologySlug.CARBON]: BoldMethodologyName.CARBON,

@@ -2,7 +2,6 @@ import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/proc
 
 export class DriverIdentificationProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
-    FAILED_BY_ERROR:
-      'Unable to validate the driver-identification process.',
+    FAILED_BY_ERROR: 'Unable to validate the driver-identification process.',
   } as const;
 }

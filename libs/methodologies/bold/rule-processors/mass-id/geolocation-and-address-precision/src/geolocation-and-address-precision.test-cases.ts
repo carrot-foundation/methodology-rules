@@ -25,8 +25,8 @@ import {
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
+import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
-import { RESULT_COMMENTS } from './geolocation-and-address-precision.processor';
 
 const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 const {
@@ -287,7 +287,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
       ],
     ]),
     actorParticipants,
-    resultComment: `${RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
+    resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the accredited address is not set',
   },
@@ -314,7 +314,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the gps is set and both gps geolocation and event address are valid but nearby',
@@ -342,7 +342,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the address is valid but the gps geolocation is invalid',
   },
@@ -363,7 +363,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         [PICK_UP]: undefined,
       },
     },
-    resultComment: RESULT_COMMENTS.INVALID_ACTOR_TYPE,
+    resultComment: RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the processor cannot extract the actor type',
   },
@@ -386,7 +386,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the gps is not set, but the accredited address is set and is valid',
@@ -410,7 +410,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the gps is not set, but the accredited address is set and not valid',
@@ -450,7 +450,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+    resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the Waste Generator verification document is missing (should pass, not fail)',
@@ -492,7 +492,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
@@ -534,7 +534,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
@@ -578,7 +578,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the Recycler has only latitude GPS exception (should NOT skip GPS validation)',
@@ -623,7 +623,7 @@ export const geolocationAndAddressPrecisionTestCases: Array<{
         ),
       },
     },
-    resultComment: `${RESULT_COMMENTS.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
       'the Recycler has expired GPS exceptions (should NOT skip GPS validation)',

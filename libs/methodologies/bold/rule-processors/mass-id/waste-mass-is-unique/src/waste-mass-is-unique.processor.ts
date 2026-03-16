@@ -14,7 +14,6 @@ import {
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -31,6 +30,7 @@ import {
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
+import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
 import {
   createAuditApiService,
@@ -41,21 +41,6 @@ import {
 const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { MASS_ID } = DocumentCategory;
-
-export const RESULT_COMMENTS = {
-  NO_DUPLICATES_FOUND: `No other ${MASS_ID}s with the same attributes were found.`,
-  ONLY_CANCELLED_DUPLICATES: (
-    totalDuplicates: number,
-    cancelledCount: number,
-  ) =>
-    `${totalDuplicates} similar ${MASS_ID}s were found, but all are cancelled (${cancelledCount}).`,
-  VALID_DUPLICATE_FOUND: (
-    totalDuplicates: number,
-    validDuplicatesCount: number,
-  ) =>
-    `${totalDuplicates} similar ${MASS_ID}s were found, of which ${validDuplicatesCount} are not cancelled.`,
-} as const;
 
 interface RuleSubject {
   cancelledCount: number;
@@ -101,7 +86,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   }: RuleSubject): EvaluateResultOutput {
     if (validDuplicatesCount > 1) {
       return {
-        resultComment: RESULT_COMMENTS.VALID_DUPLICATE_FOUND(
+        resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(
           totalDuplicates,
           validDuplicatesCount,
         ),
@@ -111,7 +96,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     if (cancelledCount > 0) {
       return {
-        resultComment: RESULT_COMMENTS.ONLY_CANCELLED_DUPLICATES(
+        resultComment: RESULT_COMMENTS.passed.ONLY_CANCELLED_DUPLICATES(
           totalDuplicates,
           cancelledCount,
         ),
@@ -120,7 +105,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     }
 
     return {
-      resultComment: RESULT_COMMENTS.NO_DUPLICATES_FOUND,
+      resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

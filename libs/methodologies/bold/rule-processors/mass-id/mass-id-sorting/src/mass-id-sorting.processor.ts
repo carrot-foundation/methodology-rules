@@ -30,6 +30,10 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
+import {
+  RESULT_COMMENTS,
+  SORTING_TOLERANCE,
+} from './mass-id-sorting.constants';
 import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 import {
   calculateSortingValues,
@@ -44,24 +48,7 @@ import {
   ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
-const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
-
-export const SORTING_TOLERANCE = 0.1;
-
-export const RESULT_COMMENTS = {
-  DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
-    `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × ${SORTING_FACTOR} (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
-  DOCUMENT_VALUE_MISMATCH: (documentValue: number, sortingValue: number) =>
-    `The MassID document current value (${documentValue} kg) must equal the sorting event value (${sortingValue} kg).`,
-  FAILED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value differs from the actual value by ${sortingValueCalculationDifference} kg, exceeding the allowed tolerance of ${SORTING_TOLERANCE} kg.`,
-  GROSS_WEIGHT_MISMATCH: (gross: number, before: number) =>
-    `The "${GROSS_WEIGHT}" (${gross} kg) must match the previous event value (${before} kg) within ${SORTING_TOLERANCE} kg.`,
-  MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
-  PASSED: (sortingValueCalculationDifference: number) =>
-    `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
-} as const;
+const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = DocumentEventAttributeName;
 
 interface DocumentPair {
   massIDDocument: Document;
@@ -108,7 +95,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
   protected evaluateResult(sortingData: SortingData): EvaluateResultOutput {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
+        resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -121,7 +108,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (deductedDiff > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
+        resultComment: RESULT_COMMENTS.failed.DEDUCTED_WEIGHT_MISMATCH(
           sortingData.deductedWeight,
           Number(expectedDeducted.toFixed(3)),
         ),
@@ -134,7 +121,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (!grossMatchesPrevious) {
       return {
-        resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
+        resultComment: RESULT_COMMENTS.failed.GROSS_WEIGHT_MISMATCH(
           sortingData.grossWeight,
           sortingData.valueBeforeSorting,
         ),
@@ -147,7 +134,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (!documentValueMatchesSorting) {
       return {
-        resultComment: RESULT_COMMENTS.DOCUMENT_VALUE_MISMATCH(
+        resultComment: RESULT_COMMENTS.failed.DOCUMENT_VALUE_MISMATCH(
           sortingData.documentCurrentValue,
           sortingData.valueAfterSorting,
         ),
@@ -157,7 +144,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.FAILED(
+        resultComment: RESULT_COMMENTS.failed.FAILED(
           sortingData.sortingValueCalculationDifference,
         ),
         resultStatus: RuleOutputStatus.FAILED,
@@ -165,7 +152,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.PASSED(
+      resultComment: RESULT_COMMENTS.passed.PASSED(
         sortingData.sortingValueCalculationDifference,
       ),
       resultStatus: RuleOutputStatus.PASSED,
