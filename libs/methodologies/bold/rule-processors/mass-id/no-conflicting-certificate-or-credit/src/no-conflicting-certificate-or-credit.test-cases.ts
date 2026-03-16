@@ -184,7 +184,8 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       ],
       massIDAuditDocument: massIDWithCreditsStubs.massIDAuditDocument,
       resultComment:
-        processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
+        processorError.ERROR_MESSAGE
+          .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: 'has a valid credit document',
     },
