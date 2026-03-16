@@ -21,14 +21,12 @@ import { random } from 'typia';
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
 
-interface DocumentManifestDataTestCase
-  extends Omit<RuleTestCase, 'resultComment'> {
+interface DocumentManifestDataTestCase extends RuleTestCase {
   crossValidationFailMessages?: string[];
   crossValidationPassMessages?: string[];
   crossValidationReviewReasons?: Array<{ code: string; description: string }>;
   documentManifestType: DocumentManifestType;
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
-  resultComment?: string | undefined;
 }
 
 const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
@@ -83,7 +81,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       ...defaultEvents,
     },
     // eslint-disable-next-line security/detect-object-injection
-    resultComment: attributeErrorMessages[attribute],
+    resultComment: attributeErrorMessages[attribute]!,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event without a ${attribute}`,
   })),
