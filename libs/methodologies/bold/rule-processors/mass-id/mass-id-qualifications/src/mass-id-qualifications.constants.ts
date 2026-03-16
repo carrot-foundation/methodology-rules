@@ -22,7 +22,7 @@ export const RESULT_COMMENTS = {
       `The document value must be greater than 0, but "${value}" was provided.`,
   },
   passed: {
-    PASSED:
+    VALID_QUALIFICATIONS:
       'The document category, measurement unit, subtype, type, and value are correctly defined.',
   },
   reviewRequired: {},

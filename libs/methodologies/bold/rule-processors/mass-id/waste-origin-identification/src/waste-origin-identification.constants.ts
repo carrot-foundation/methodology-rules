@@ -14,7 +14,7 @@ export const RESULT_COMMENTS = {
     WASTE_ORIGIN_CONFLICT: `An "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, but the waste origin is "${UNIDENTIFIED}".`,
   },
   passed: {
-    UNIDENTIFIED_WASTE_ORIGIN: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" event was found, and the waste origin is "${UNIDENTIFIED}".`,
+    UNIDENTIFIED_WASTE_ORIGIN: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, and the waste origin is "${UNIDENTIFIED}".`,
     WASTE_ORIGIN_IDENTIFIED: `A single "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found.`,
   },
   reviewRequired: {},

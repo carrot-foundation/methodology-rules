@@ -62,7 +62,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.passed.PASSED,
+    resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a ${DROP_OFF} event and a ${RECYCLER} event, and the ${DROP_OFF} event address matches the ${RECYCLER} event address`,
   },

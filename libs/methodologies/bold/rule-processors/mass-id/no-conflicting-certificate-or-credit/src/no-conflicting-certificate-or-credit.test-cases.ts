@@ -108,7 +108,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
     {
       documents: [simpleMassIDStubs.massIDDocument],
       massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
       scenario: 'no Credit is linked to the MassID',
     },
@@ -156,7 +156,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         massIDWithAuditDocumentsForDifferentMethodologies,
       ],
       massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
         'has an approved MassID Audit document for a different methodology',
@@ -184,8 +184,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       ],
       massIDAuditDocument: massIDWithCreditsStubs.massIDAuditDocument,
       resultComment:
-        processorError.ERROR_MESSAGE
-          .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
+        processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: 'has a valid credit document',
     },
@@ -199,7 +198,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
       scenario: 'has cancelled certificate document',
     },
@@ -217,7 +216,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
       scenario: 'has cancelled credit document',
     },
