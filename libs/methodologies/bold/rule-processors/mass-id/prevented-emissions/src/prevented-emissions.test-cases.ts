@@ -176,7 +176,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.PASSED(
+    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
       0,
       baselineValue,
       exceedingEmissionCoefficientExceedingBaseline,
@@ -228,7 +228,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.PASSED(
+    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
       expectedPreventedEmissionsValue,
       baselineValue,
       exceedingEmissionCoefficient,
@@ -276,7 +276,7 @@ export const preventedEmissionsTestCases = [
           othersIfOrganicLocalWasteClassificationCode,
         ),
       massIDDocumentValue,
-      resultComment: RESULT_COMMENTS.PASSED(
+      resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
         expectedOthersPreventedEmissions,
         othersFactor,
         exceedingEmissionCoefficient,
@@ -341,7 +341,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.PASSED(
+    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
       massIDDocumentValue * baselineValue,
       baselineValue,
       0,

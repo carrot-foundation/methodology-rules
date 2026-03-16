@@ -302,7 +302,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
     ],
     massIDAuditDocument:
       massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the participants accreditation documents are found and the accreditation is active',
@@ -379,7 +379,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
       ...massIDWithWasteGeneratorNoResult.participantsAccreditationDocuments.values(),
     ],
     massIDAuditDocument: massIDWithWasteGeneratorNoResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'WASTE_GENERATOR has accreditation document without result event (should pass - Waste Generator is ignored)',
@@ -391,7 +391,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
     ],
     massIDAuditDocument:
       massIDWithWasteGeneratorValidResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'WASTE_GENERATOR has valid accreditation result event (should pass - Waste Generator is ignored)',
@@ -403,7 +403,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
     ],
     massIDAuditDocument:
       massIDWithWasteGeneratorInvalidResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'WASTE_GENERATOR has invalid accreditation result event (expired) (should pass - Waste Generator is ignored)',
@@ -418,7 +418,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
       massIDWithWasteGeneratorMultipleValid.massIDAuditDocument,
       wasteGeneratorSecondAccreditation,
     ),
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'WASTE_GENERATOR has multiple valid accreditations (should pass - Waste Generator is ignored)',
@@ -429,7 +429,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
       ...massIDWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
     ],
     massIDAuditDocument: massIDWithParticipantMultipleRoles.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
@@ -441,7 +441,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases = [
     ],
     massIDAuditDocument:
       massIDWithWasteGeneratorButNoAccreditation.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'WASTE_GENERATOR event exists but no accreditation document provided (should pass - Waste Generator is ignored)',

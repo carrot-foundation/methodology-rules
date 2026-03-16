@@ -54,7 +54,7 @@ interface RuleSubject {
 }
 
 export const RESULT_COMMENTS = {
-  PASSED:
+  ALL_ACCREDITATIONS_APPROVED:
     'All participant accreditations-and-verifications are active and approved.',
 } as const;
 
@@ -118,7 +118,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     }
 
     return {
-      resultComment: RESULT_COMMENTS.PASSED,
+      resultComment: RESULT_COMMENTS.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

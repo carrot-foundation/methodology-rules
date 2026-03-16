@@ -30,7 +30,7 @@ export const RESULT_COMMENTS = {
     `The document type must be "${ORGANIC}", but "${type}" was provided.`,
   INVALID_VALUE: (value: number): string =>
     `The document value must be greater than 0, but "${value}" was provided.`,
-  PASSED:
+  VALID_QUALIFICATIONS:
     'The document category, measurement unit, subtype, type, and value are correctly defined.',
 } as const;
 
@@ -88,7 +88,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
 
     return {
       resultComment: isValid
-        ? this.RESULT_COMMENT.PASSED
+        ? this.RESULT_COMMENT.VALID_QUALIFICATIONS
         : errorMessages.join(' '),
       resultStatus: isValid ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };

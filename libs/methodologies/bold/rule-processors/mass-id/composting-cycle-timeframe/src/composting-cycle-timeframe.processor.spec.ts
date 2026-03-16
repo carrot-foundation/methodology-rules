@@ -43,8 +43,12 @@ describe('CompostingCycleTimeframeProcessor', () => {
 
         resultComment =
           testCase.resultStatus === RuleOutputStatus.PASSED
-            ? ruleDataProcessor['RESULT_COMMENT'].PASSED(difference)
-            : ruleDataProcessor['RESULT_COMMENT'].FAILED(difference);
+            ? ruleDataProcessor['RESULT_COMMENT'].TIMEFRAME_WITHIN_RANGE(
+                difference,
+              )
+            : ruleDataProcessor['RESULT_COMMENT'].TIMEFRAME_OUT_OF_RANGE(
+                difference,
+              );
       } else {
         resultComment =
           ruleDataProcessor['RESULT_COMMENT'].MISSING_RECYCLED_EVENT;

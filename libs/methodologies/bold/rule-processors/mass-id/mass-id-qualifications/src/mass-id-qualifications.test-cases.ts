@@ -13,7 +13,7 @@ const processorErrors = new MassIDQualificationsProcessorErrors();
 export const massIDQualificationsTestCases = [
   {
     massIDDocument: massIDStubs.massIDDocument,
-    resultComment: RESULT_COMMENTS.PASSED,
+    resultComment: RESULT_COMMENTS.VALID_QUALIFICATIONS,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'all the criteria are met',
   },

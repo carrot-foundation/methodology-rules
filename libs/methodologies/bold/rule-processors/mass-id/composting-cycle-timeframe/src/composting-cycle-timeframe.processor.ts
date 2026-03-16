@@ -21,11 +21,11 @@ type Subject = {
 export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcessor<Subject> {
   private get RESULT_COMMENT() {
     return {
-      FAILED: (dateDiff: number) =>
-        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, which is outside the valid range (60-180 days).`,
       MISSING_DROP_OFF_EVENT: `Unable to verify the timeframe because the "${DROP_OFF}" event is missing.`,
       MISSING_RECYCLED_EVENT: `Unable to verify the timeframe because the "${RECYCLED}" event is missing.`,
-      PASSED: (dateDiff: number) =>
+      TIMEFRAME_OUT_OF_RANGE: (dateDiff: number) =>
+        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, which is outside the valid range (60-180 days).`,
+      TIMEFRAME_WITHIN_RANGE: (dateDiff: number) =>
         `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, within the valid range (60-180 days).`,
     } as const;
   }
@@ -64,8 +64,8 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     return {
       resultComment:
         resultStatus === RuleOutputStatus.PASSED
-          ? this.RESULT_COMMENT.PASSED(difference)
-          : this.RESULT_COMMENT.FAILED(difference),
+          ? this.RESULT_COMMENT.TIMEFRAME_WITHIN_RANGE(difference)
+          : this.RESULT_COMMENT.TIMEFRAME_OUT_OF_RANGE(difference),
       resultStatus,
     };
   }

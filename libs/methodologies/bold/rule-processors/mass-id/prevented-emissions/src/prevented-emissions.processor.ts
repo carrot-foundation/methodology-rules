@@ -57,18 +57,18 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
   DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {
-  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
-  MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
-    wasteSubtype: MassIDOrganicSubtype,
-  ) =>
-    `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
-  PASSED: (
+  EMISSIONS_CALCULATED: (
     preventedEmissions: number,
     preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
     exceedingEmissionCoefficient: number,
     currentValue: number,
   ) =>
     `The prevented emissions were calculated as ${formatNumber(preventedEmissions)} kg CO₂e using the formula (${currentValue} x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon}) - (${currentValue} x ${exceedingEmissionCoefficient}) = ${formatNumber(preventedEmissions)} [formula: (current_value x prevented_emissions_by_waste_subtype_and_baseline_per_ton) - (current_value x exceeding_emission_coefficient) = prevented_emissions].`,
+  MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
+  MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
+    wasteSubtype: MassIDOrganicSubtype,
+  ) =>
+    `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
 } as const;
 
 interface Documents {
@@ -156,7 +156,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.PASSED(
+      resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
         preventedEmissions,
         preventedEmissionsByWasteSubtypeAndBaselinePerTon,
         exceedingEmissionCoefficient,

@@ -46,7 +46,7 @@ interface RuleSubject {
 }
 
 export const RESULT_COMMENTS = {
-  PASSED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+  NO_CONFLICTING_CERTIFICATE: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
 } as const;
 
 export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor {
@@ -133,7 +133,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     }
 
     return {
-      resultComment: RESULT_COMMENTS.PASSED,
+      resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }
