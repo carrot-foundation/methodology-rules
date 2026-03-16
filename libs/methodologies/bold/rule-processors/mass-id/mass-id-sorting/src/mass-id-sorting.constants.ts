@@ -19,7 +19,7 @@ export const RESULT_COMMENTS = {
   },
   passed: {
     PASSED: (sortingValueCalculationDifference: number) =>
-      `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
+      `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE} kg. The difference is ${sortingValueCalculationDifference} kg.`,
   },
   reviewRequired: {},
 } as const;

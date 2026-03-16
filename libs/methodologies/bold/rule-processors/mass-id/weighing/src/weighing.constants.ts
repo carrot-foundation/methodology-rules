@@ -59,7 +59,7 @@ export const INVALID_RESULT_COMMENTS = {
     grossWeight: number;
     tare: number;
   }) =>
-    `The calculated net weight (${calculatedNetWeight}) differs from the declared "Event Value" (${eventValue}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE}kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
+    `The calculated net weight (${calculatedNetWeight}) differs from the declared "Event Value" (${eventValue}) by more than ${NET_WEIGHT_CALCULATION_TOLERANCE} kg:  ${grossWeight} - (${tare} × ${containerQuantity}) ≈ ${calculatedNetWeight} [formula: gross_weight - (tare * container_quantity)]`,
   SCALE_TICKET_EXTRACTION_FAILED:
     'The scale ticket could not be processed for verification.',
   SCALE_TICKET_MISSING_SOURCE:
