@@ -25,67 +25,33 @@ const APPS_METHODOLOGIES = path.join(ROOT, 'apps', 'methodologies');
 
 // --- Methodology configs ---
 
-interface RulesConfig {
-  [scope: string]: readonly string[];
-}
+function loadMethodologies(): Record<
+  string,
+  Record<string, readonly string[]>
+> {
+  const methodologies: Record<string, Record<string, readonly string[]>> = {};
 
-const METHODOLOGIES: Record<string, RulesConfig> = {
-  'bold-carbon': {
-    'credit-order': ['rewards-distribution'],
-    'gas-id': ['rewards-distribution'],
-    'mass-id': [
-      'waste-mass-is-unique',
-      'no-conflicting-gas-id-or-credit',
-      'project-period-limit',
-      'participant-accreditations-and-verifications-requirements',
-      'mass-id-qualifications',
-      'regional-waste-classification',
-      'geolocation-and-address-precision',
-      'waste-origin-identification',
-      'hauler-identification',
-      'vehicle-identification',
-      'driver-identification',
-      'transport-manifest-data',
-      'processor-identification',
-      'recycler-identification',
-      'weighing',
-      'drop-off-at-recycler',
-      'mass-id-sorting',
-      'composting-cycle-timeframe',
-      'recycling-manifest-data',
-      'project-boundary',
-      'prevented-emissions',
-    ],
-  },
-  'bold-recycling': {
-    'credit-order': ['rewards-distribution'],
-    'mass-id': [
-      'waste-mass-is-unique',
-      'no-conflicting-recycled-id-or-credit',
-      'project-period-limit',
-      'participant-accreditations-and-verifications-requirements',
-      'mass-id-qualifications',
-      'regional-waste-classification',
-      'geolocation-and-address-precision',
-      'waste-origin-identification',
-      'hauler-identification',
-      'vehicle-identification',
-      'driver-identification',
-      'transport-manifest-data',
-      'processor-identification',
-      'recycler-identification',
-      'weighing',
-      'drop-off-at-recycler',
-      'mass-id-sorting',
-      'composting-cycle-timeframe',
-      'recycling-manifest-data',
-    ],
-    'recycled-id': ['rewards-distribution'],
-  },
-  bold: {
-    'mass-certificate': ['rewards-distribution'],
-  },
-};
+  for (const entry of fs.readdirSync(APPS_METHODOLOGIES, {
+    withFileTypes: true,
+  })) {
+    if (!entry.isDirectory()) continue;
+
+    const configPath = path.join(
+      APPS_METHODOLOGIES,
+      entry.name,
+      'rules.config.ts',
+    );
+    if (!fileExists(configPath)) continue;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { rulesConfig } = require(configPath) as {
+      rulesConfig: Record<string, readonly string[]>;
+    };
+    methodologies[entry.name] = rulesConfig;
+  }
+
+  return methodologies;
+}
 
 // Scope names in config that differ from lib directory names
 const SCOPE_TO_LIB: Record<string, string> = {
@@ -611,7 +577,7 @@ function generate(): void {
   let rulesWithErrors = 0;
   const warnings: string[] = [];
 
-  for (const [methodology, scopes] of Object.entries(METHODOLOGIES)) {
+  for (const [methodology, scopes] of Object.entries(loadMethodologies())) {
     manifest.methodologies[methodology] = {};
 
     for (const [scope, slugs] of Object.entries(scopes)) {

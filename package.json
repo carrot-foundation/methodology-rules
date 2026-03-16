@@ -11,7 +11,7 @@
     "create-rule": "node tools/create-rule.js",
     "extract-document": "nx run document-extractor-cli:run --",
     "fix-project-format": "node scripts/fix-project-json-format.js",
-    "generate:manifest": "npx tsx scripts/generate-application-rules-manifest.ts",
+    "generate:manifest": "pnpm exec tsx scripts/generate-application-rules-manifest.ts",
     "lint": "nx lint",
     "lint:affected": "nx affected --target lint --fix",
     "lint:all": "nx run-many --target lint --fix",
@@ -108,6 +108,7 @@
     "ts-node": "10.9.2",
     "ts-patch": "3.3.0",
     "tsconfig-paths": "4.2.0",
+    "tsx": "4.21.0",
     "typescript": "5.7.3",
     "typescript-eslint": "8.32.1"
   },
