@@ -55,8 +55,8 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     return {
       resultComment:
         resultStatus === RuleOutputStatus.PASSED
-          ? RESULT_COMMENTS.passed.PASSED(difference)
-          : RESULT_COMMENTS.failed.FAILED(difference),
+          ? RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference)
+          : RESULT_COMMENTS.failed.TIMEFRAME_OUT_OF_RANGE(difference),
       resultStatus,
     };
   }

@@ -64,7 +64,7 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
     }
 
     return {
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }
