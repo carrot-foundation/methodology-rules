@@ -457,7 +457,7 @@ function extractReadmeData(readmePath: string): ReadmeData {
 
   // Extract verifications
   const verifMatch = content.match(
-    /##\s+(?:✅\s+)?Verification(?:\s+Criteria)?\s*\n([\s\S]*?)(?:\n##|\n---|\z)/,
+    /##\s+(?:✅\s+)?Verification(?:\s+Criteria)?\s*\n([\s\S]*?)(?:\n##|\n---|\n?$)/,
   );
   if (verifMatch?.[1]) {
     const bullets = verifMatch[1].match(/^[-*]\s+(.+)$/gm);
