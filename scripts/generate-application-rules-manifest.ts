@@ -314,27 +314,58 @@ const KNOWN_PLACEHOLDERS: Record<string, string> = {
   vehicleType: 'VEHICLE_TYPE',
 };
 
+function camelToUpperSnake(str: string): string {
+  const snake = str
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/[^a-zA-Z0-9_]/g, '_')
+    .toUpperCase();
+
+  return snake || 'VALUE';
+}
+
+function resolvePlaceholder(ident: string): string {
+  return KNOWN_PLACEHOLDERS[ident] ?? camelToUpperSnake(ident);
+}
+
 function normalizeMessage(str: string): string {
   if (!str) return str;
 
-  // Replace ${identifier} with {{TOKEN}}
-  let result = str.replace(/\$\{([^}]+)\}/g, (_match, inner: string) => {
-    const ident = inner.split(/[.([\]]/)[0]?.trim() ?? '';
-    const token = KNOWN_PLACEHOLDERS[ident];
-    if (token) return `{{${token}}}`;
-
-    // Convert camelCase to UPPER_SNAKE
-    const snake = ident
-      .replace(/([a-z])([A-Z])/g, '$1_$2')
-      .replace(/[^a-zA-Z0-9_]/g, '_')
-      .toUpperCase();
-    return `{{${snake || 'VALUE'}}}`;
-  });
-
-  // Clean up escaped quotes
-  result = result.replace(/\\"/g, '"');
+  // Replace ${String(identifier)} and ${identifier} with {{TOKEN}}
+  const result = str
+    .replace(/\$\{String\((\w+)\)\}/g, (_match, inner: string) => {
+      return `{{${resolvePlaceholder(inner)}}}`;
+    })
+    .replace(/\$\{([^}]+)\}/g, (_match, inner: string) => {
+      const ident = inner.split(/[.([\]]/)[0]?.trim() ?? '';
+      return `{{${resolvePlaceholder(ident)}}}`;
+    })
+    .replace(/\\"/g, '"');
 
   return result.trim();
+}
+
+const CODE_LEAK_PATTERNS = [
+  /\.join\s*\(/,
+  /`,\s*\n/,
+  /\)\s*=>\s*\n/,
+  /^\s*\$\{/,
+];
+
+const PLACEHOLDER_ONLY_RE = /^\{\{[A-Z_]+\}\}$/;
+const KNOWN_RESULT_STATUSES = new Set(['PASSED', 'REVIEW_REQUIRED']);
+
+function isCodeLeak(s: string): boolean {
+  return CODE_LEAK_PATTERNS.some((re) => re.test(s));
+}
+
+function isPlaceholderOnly(s: string): boolean {
+  return PLACEHOLDER_ONLY_RE.test(s);
+}
+
+function normalizeMessages(messages: string[]): string[] {
+  return messages
+    .map((s) => normalizeMessage(s))
+    .filter((s) => !isPlaceholderOnly(s) && !isCodeLeak(s));
 }
 
 // --- Examples extraction ---
@@ -347,6 +378,18 @@ interface RuleExample {
   };
 }
 
+function findEnclosingObjectStart(content: string, position: number): number {
+  let depth = 0;
+  for (let i = position - 1; i >= 0; i--) {
+    if (content[i] === '}') depth++;
+    if (content[i] === '{') {
+      if (depth === 0) return i;
+      depth--;
+    }
+  }
+  return 0;
+}
+
 function extractExamples(srcPath: string): RuleExample[] {
   const examples: RuleExample[] = [];
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
@@ -355,8 +398,6 @@ function extractExamples(srcPath: string): RuleExample[] {
 
   const content = fs.readFileSync(path.join(srcPath, testCasesFile), 'utf8');
 
-  // Find all scenario + resultStatus pairs using regex on full content.
-  // Match scenario strings (simple or template literals with interpolations)
   const scenarioRe =
     /scenario:\s*(?:`((?:[^`]|\$\{[^}]*\})*)`|'([^']*)'|"([^"]*)")/g;
   let scenarioMatch;
@@ -365,31 +406,12 @@ function extractExamples(srcPath: string): RuleExample[] {
     const rawScenario =
       scenarioMatch[1] ?? scenarioMatch[2] ?? scenarioMatch[3] ?? '';
 
-    // Look for resultStatus within a reasonable window after the scenario
-    const searchWindow = content.slice(
-      scenarioMatch.index,
-      scenarioMatch.index + 500,
-    );
-    const statusMatch = searchWindow.match(
+    const objStart = findEnclosingObjectStart(content, scenarioMatch.index);
+    const objectSlice = content.slice(objStart, scenarioMatch.index);
+    const statusMatch = objectSlice.match(
       /resultStatus:\s*RuleOutputStatus\.(\w+)/,
     );
-
-    // Also look backwards (resultStatus may come before scenario)
-    let status: string | undefined;
-    if (statusMatch?.[1]) {
-      status = statusMatch[1];
-    } else {
-      const backWindow = content.slice(
-        Math.max(0, scenarioMatch.index - 500),
-        scenarioMatch.index,
-      );
-      const backStatusMatch = backWindow.match(
-        /resultStatus:\s*RuleOutputStatus\.(\w+)/,
-      );
-      if (backStatusMatch?.[1]) {
-        status = backStatusMatch[1];
-      }
-    }
+    const status = statusMatch?.[1];
 
     if (!status) continue;
 
@@ -400,13 +422,11 @@ function extractExamples(srcPath: string): RuleExample[] {
       })
       .trim();
 
-    // Capitalize first letter
     if (description) {
       description =
         description.charAt(0).toUpperCase() + description.slice(1);
     }
 
-    // Skip descriptions that are too short or contain code
     if (
       description.length < 10 ||
       /\.(join|slice|split)\s*\(/.test(description)
@@ -414,14 +434,14 @@ function extractExamples(srcPath: string): RuleExample[] {
       continue;
     }
 
-    const example: RuleExample = {
-      description,
-      output: {
-        resultStatus: status === 'PASSED' ? 'PASSED' : 'REJECTED',
-      },
-    };
+    const resultStatus = KNOWN_RESULT_STATUSES.has(status)
+      ? status
+      : 'REJECTED';
 
-    examples.push(example);
+    examples.push({
+      description,
+      output: { resultStatus },
+    });
   }
 
   return examples;
@@ -569,7 +589,7 @@ function buildRule(
 
   return {
     description,
-    errors: allErrors.map((e) => normalizeMessage(e)),
+    errors: normalizeMessages(allErrors),
     events: ruleDef?.events ?? [],
     examples,
     implementationPath: relImplementationPath,
@@ -579,7 +599,7 @@ function buildRule(
     readmePath: relReadmePath,
     scope,
     slug,
-    successComments: resultComments.passed.map((s) => normalizeMessage(s)),
+    successComments: normalizeMessages(resultComments.passed),
     verifications,
   };
 }
