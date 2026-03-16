@@ -495,6 +495,13 @@ function buildRule(
   slug: string,
 ): ManifestRule {
   const libSrcPath = getLibSrcPath(scope, slug);
+
+  if (!dirExists(libSrcPath)) {
+    throw new Error(
+      `Rule source directory not found: ${libSrcPath} (methodology=${methodology}, scope=${scope}, slug=${slug})`,
+    );
+  }
+
   const appRulePath = getAppRulePath(methodology, scope, slug);
   const readmePath = path.join(appRulePath, 'README.md');
   const relReadmePath = path
@@ -506,12 +513,20 @@ function buildRule(
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
 
   // Find processor file
-  const files = dirExists(libSrcPath) ? fs.readdirSync(libSrcPath) : [];
+  const files = fs.readdirSync(libSrcPath);
   const processorFile =
     files.find((f) => f.endsWith('.processor.ts') && !f.includes('.spec.')) ??
     `${libSlug}.processor.ts`;
+  const processorFullPath = path.join(libSrcPath, processorFile);
+
+  if (!fileExists(processorFullPath)) {
+    throw new Error(
+      `Processor file not found: ${processorFullPath} (methodology=${methodology}, scope=${scope}, slug=${slug})`,
+    );
+  }
+
   const relImplementationPath = path
-    .relative(ROOT, path.join(libSrcPath, processorFile))
+    .relative(ROOT, processorFullPath)
     .split(path.sep)
     .join('/');
 
@@ -521,6 +536,22 @@ function buildRule(
   const errorMessages = extractErrorMessages(libSrcPath);
   const resultComments = extractResultComments(libSrcPath);
   const examples = extractExamples(libSrcPath);
+
+  // Validate required fields
+  const name = ruleDef?.name ?? readme.name;
+  const description = ruleDef?.description ?? readme.description;
+
+  if (!name) {
+    throw new Error(
+      `Rule name not found in rule definition or README: ${slug} (methodology=${methodology}, scope=${scope})`,
+    );
+  }
+
+  if (!description) {
+    throw new Error(
+      `Rule description not found in rule definition or README: ${slug} (methodology=${methodology}, scope=${scope})`,
+    );
+  }
 
   // Merge errors: errors.ts + RESULT_COMMENTS.failed
   const allErrors = [...errorMessages];
@@ -537,14 +568,14 @@ function buildRule(
       : ['Validation criteria are implemented in the processor.'];
 
   return {
-    description: ruleDef?.description ?? readme.description,
+    description,
     errors: allErrors.map((e) => normalizeMessage(e)),
     events: ruleDef?.events ?? [],
     examples,
     implementationPath: relImplementationPath,
     implementsFrameworkRules: ruleDef?.frameworkRules ?? [],
     methodology,
-    name: ruleDef?.name ?? readme.name ?? slug,
+    name,
     readmePath: relReadmePath,
     scope,
     slug,
