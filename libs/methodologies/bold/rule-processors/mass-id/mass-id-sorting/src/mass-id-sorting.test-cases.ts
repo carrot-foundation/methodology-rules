@@ -23,11 +23,11 @@ import {
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
 
-import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 import {
   RESULT_COMMENTS,
   SORTING_TOLERANCE,
-} from './mass-id-sorting.processor';
+} from './mass-id-sorting.constants';
+import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const processorErrors = new MassIDSortingProcessorErrors();
 
@@ -225,7 +225,7 @@ export const massIDSortingTestCases = [
       ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
-    resultComment: RESULT_COMMENTS.MISSING_SORTING_DESCRIPTION,
+    resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'the sorting description is missing',
   },
@@ -242,7 +242,7 @@ export const massIDSortingTestCases = [
       ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
-    resultComment: RESULT_COMMENTS.SORTING_VALUE_WITHIN_TOLERANCE(0),
+    resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the sorting value calculation difference is less or equal to 0.1',
@@ -260,7 +260,7 @@ export const massIDSortingTestCases = [
       ...massIDDocument,
       currentValue: calculatedSortingValue + 1,
     },
-    resultComment: RESULT_COMMENTS.DOCUMENT_VALUE_MISMATCH(
+    resultComment: RESULT_COMMENTS.failed.DOCUMENT_VALUE_MISMATCH(
       calculatedSortingValue + 1,
       calculatedSortingValue,
     ),
@@ -278,7 +278,7 @@ export const massIDSortingTestCases = [
       wrongSortingValue,
     ),
     partialDocument: { ...massIDDocument, currentValue: wrongSortingValue },
-    resultComment: RESULT_COMMENTS.SORTING_VALUE_EXCEEDS_TOLERANCE(
+    resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
     resultStatus: RuleOutputStatus.FAILED,
@@ -297,7 +297,7 @@ export const massIDSortingTestCases = [
       ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
-    resultComment: RESULT_COMMENTS.DEDUCTED_WEIGHT_MISMATCH(
+    resultComment: RESULT_COMMENTS.failed.DEDUCTED_WEIGHT_MISMATCH(
       mismatchedDeductedWeight,
       Number((grossWeight * sortingFactor).toFixed(3)),
     ),
@@ -318,7 +318,7 @@ export const massIDSortingTestCases = [
       ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
-    resultComment: RESULT_COMMENTS.GROSS_WEIGHT_MISMATCH(
+    resultComment: RESULT_COMMENTS.failed.GROSS_WEIGHT_MISMATCH(
       grossWeight + 0.2,
       valueBeforeSorting,
     ),

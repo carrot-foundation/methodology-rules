@@ -13,10 +13,8 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import {
-  ProjectBoundaryProcessor,
-  RESULT_COMMENTS,
-} from './project-boundary.processor';
+import { RESULT_COMMENTS } from './project-boundary.constants';
+import { ProjectBoundaryProcessor } from './project-boundary.processor';
 import { projectBoundaryTestCases } from './project-boundary.test-cases';
 
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
@@ -101,7 +99,7 @@ describe('ProjectBoundaryProcessor', () => {
         requestId: ruleInput.requestId,
         responseToken: ruleInput.responseToken,
         responseUrl: ruleInput.responseUrl,
-        resultComment: RESULT_COMMENTS.DISTANCE_CALCULATION_FAILED,
+        resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
         resultContent: undefined,
         resultStatus: RuleOutputStatus.FAILED,
       };

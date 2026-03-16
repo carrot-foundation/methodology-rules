@@ -6,7 +6,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 
-import { RESULT_COMMENTS } from './driver-identification.processor';
+import { RESULT_COMMENTS } from './driver-identification.constants';
 
 const {
   DRIVER_IDENTIFIER,
@@ -26,7 +26,7 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, TRUCK],
       ],
     }),
-    resultComment: RESULT_COMMENTS.DRIVER_IDENTIFIER,
+    resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${DRIVER_IDENTIFIER} is provided`,
   },
@@ -38,7 +38,8 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, BICYCLE],
       ],
     }),
-    resultComment: RESULT_COMMENTS.JUSTIFICATION_PROVIDED(someJustification),
+    resultComment:
+      RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(someJustification),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the ${DRIVER_IDENTIFIER} is not provided, but the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is provided`,
   },
@@ -50,7 +51,7 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, BOAT],
       ],
     }),
-    resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(BOAT),
+    resultComment: RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(BOAT),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the ${DRIVER_IDENTIFIER} is not provided and the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is not provided`,
   },
@@ -62,7 +63,7 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, SLUDGE_PIPES],
       ],
     }),
-    resultComment: RESULT_COMMENTS.SLUDGE_PIPES,
+    resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the vehicle type is ${SLUDGE_PIPES}`,
   },
@@ -74,7 +75,7 @@ export const driverIdentificationTestCases = [
         [VEHICLE_TYPE, TRUCK],
       ],
     }),
-    resultComment: RESULT_COMMENTS.DRIVER_AND_JUSTIFICATION_PROVIDED,
+    resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `both ${DRIVER_IDENTIFIER} and ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} are provided`,
   },

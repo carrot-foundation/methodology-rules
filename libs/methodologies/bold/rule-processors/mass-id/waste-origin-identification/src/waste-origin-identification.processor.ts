@@ -17,6 +17,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
+import { RESULT_COMMENTS } from './waste-origin-identification.constants';
+
 const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 
@@ -25,15 +27,6 @@ type Subject = {
   wasteGeneratorEvents?: DocumentEvent[] | undefined;
 };
 
-export const RESULT_COMMENT = {
-  MISSING_PICK_UP_EVENT: `The ${PICK_UP} event was not found.`,
-  MISSING_WASTE_GENERATOR_EVENT: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, and the waste origin is not "${UNIDENTIFIED}".`,
-  MULTIPLE_WASTE_GENERATOR_EVENTS: `More than one "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, but only one is allowed.`,
-  UNIDENTIFIED_WASTE_ORIGIN: `No "${ACTOR}" event with the label "${WASTE_GENERATOR}" event was found, and the waste origin is "${UNIDENTIFIED}".`,
-  WASTE_ORIGIN_CONFLICT: `An "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found, but the waste origin is "${UNIDENTIFIED}".`,
-  WASTE_ORIGIN_IDENTIFIED: `A single "${ACTOR}" event with the label "${WASTE_GENERATOR}" was found.`,
-} as const;
-
 export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
   protected override evaluateResult({
     pickUpEvent,
@@ -41,7 +34,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
   }: Subject): EvaluateResultOutput {
     if (isNil(pickUpEvent)) {
       return {
-        resultComment: RESULT_COMMENT.MISSING_PICK_UP_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -51,7 +44,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       wasteGeneratorEvents.length > 1
     ) {
       return {
-        resultComment: RESULT_COMMENT.MULTIPLE_WASTE_GENERATOR_EVENTS,
+        resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -65,27 +58,27 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
     if (!isUnidentified && hasWasteGenerator) {
       return {
-        resultComment: RESULT_COMMENT.WASTE_ORIGIN_IDENTIFIED,
+        resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
         resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (isUnidentified && !hasWasteGenerator) {
       return {
-        resultComment: RESULT_COMMENT.UNIDENTIFIED_WASTE_ORIGIN,
+        resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
         resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
-        resultComment: RESULT_COMMENT.MISSING_WASTE_GENERATOR_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: RESULT_COMMENT.WASTE_ORIGIN_CONFLICT,
+      resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
       resultStatus: RuleOutputStatus.FAILED,
     };
   }

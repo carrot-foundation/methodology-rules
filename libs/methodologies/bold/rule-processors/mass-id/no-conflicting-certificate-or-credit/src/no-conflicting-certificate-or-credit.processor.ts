@@ -15,7 +15,6 @@ import {
 import {
   BoldMethodologySlug,
   type Document,
-  DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -30,6 +29,7 @@ import { assert } from 'typia';
 import {
   buildDocumentsCriteria,
   METHODOLOGY_NAME_BY_SLUG,
+  RESULT_COMMENTS,
 } from './no-conflicting-certificate-or-credit.constants';
 import {
   hasNonCancelledDocuments,
@@ -37,17 +37,11 @@ import {
 } from './no-conflicting-certificate-or-credit.helpers';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
-const { MASS_ID } = DocumentCategory;
-
 interface RuleSubject {
   creditDocuments: Document[];
   massIDCertificateDocuments: Document[];
   relatedMassIDAuditDocuments: Document[];
 }
-
-export const RESULT_COMMENTS = {
-  NO_CONFLICTING_CERTIFICATE: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
-} as const;
 
 export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor {
   readonly errorProcessor =
@@ -133,7 +127,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     }
 
     return {
-      resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

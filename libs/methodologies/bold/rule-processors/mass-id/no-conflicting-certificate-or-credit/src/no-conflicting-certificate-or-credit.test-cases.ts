@@ -16,7 +16,7 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.processor';
+import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
 const { RELATED } = DocumentEventName;
@@ -100,7 +100,7 @@ export const noConflictingCertificateOrCreditTestCases = [
   {
     documents: [simpleMassIDStubs.massIDDocument],
     massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
+    resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'no Credit is linked to the MassID',
   },
@@ -148,7 +148,7 @@ export const noConflictingCertificateOrCreditTestCases = [
       massIDWithAuditDocumentsForDifferentMethodologies,
     ],
     massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
+    resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'has an approved MassID Audit document for a different methodology',
@@ -190,7 +190,7 @@ export const noConflictingCertificateOrCreditTestCases = [
       },
     ],
     massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
+    resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled certificate document',
   },
@@ -208,7 +208,7 @@ export const noConflictingCertificateOrCreditTestCases = [
       },
     ],
     massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.NO_CONFLICTING_CERTIFICATE,
+    resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'has cancelled credit document',
   },

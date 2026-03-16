@@ -14,6 +14,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
+import { RESULT_COMMENTS } from './processor-identification.constants';
+
 const { ACTOR } = DocumentEventName;
 const { PROCESSOR } = MethodologyDocumentEventLabel;
 
@@ -21,36 +23,26 @@ type Subject = {
   processorActorEvents?: DocumentEvent[] | undefined;
 };
 
-export const RESULT_COMMENT = {
-  MULTIPLE_EVENTS: `More than one "${ACTOR}" event with the label "${PROCESSOR}" was found. Only one is allowed.`,
-  NOT_FOUND: `No "${ACTOR}" event with the label "${PROCESSOR}" was found.`,
-  SINGLE_EVENT: `A single "${ACTOR}" event with the label "${PROCESSOR}" was found.`,
-} as const;
-
 export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
-  private get RESULT_COMMENT() {
-    return RESULT_COMMENT;
-  }
-
   protected override evaluateResult({
     processorActorEvents,
   }: Subject): EvaluateResultOutput {
     if (!isNonEmptyArray(processorActorEvents)) {
       return {
-        resultComment: this.RESULT_COMMENT.NOT_FOUND,
+        resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (processorActorEvents.length > 1) {
       return {
-        resultComment: this.RESULT_COMMENT.MULTIPLE_EVENTS,
+        resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: this.RESULT_COMMENT.SINGLE_EVENT,
+      resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

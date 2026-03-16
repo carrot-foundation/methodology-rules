@@ -11,6 +11,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { differenceInDays, parseISO } from 'date-fns';
 
+import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
+
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 type Subject = {
@@ -19,17 +21,6 @@ type Subject = {
 };
 
 export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcessor<Subject> {
-  private get RESULT_COMMENT() {
-    return {
-      MISSING_DROP_OFF_EVENT: `Unable to verify the timeframe because the "${DROP_OFF}" event is missing.`,
-      MISSING_RECYCLED_EVENT: `Unable to verify the timeframe because the "${RECYCLED}" event is missing.`,
-      TIMEFRAME_OUT_OF_RANGE: (dateDiff: number) =>
-        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, which is outside the valid range (60-180 days).`,
-      TIMEFRAME_WITHIN_RANGE: (dateDiff: number) =>
-        `The time between the "${DROP_OFF}" and "${RECYCLED}" events is ${dateDiff} days, within the valid range (60-180 days).`,
-    } as const;
-  }
-
   protected override evaluateResult({
     dropOffEvent,
     recycledEvent,
@@ -39,14 +30,14 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
 
     if (isNil(dropOffDate)) {
       return {
-        resultComment: this.RESULT_COMMENT.MISSING_DROP_OFF_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (isNil(recycledDate)) {
       return {
-        resultComment: this.RESULT_COMMENT.MISSING_RECYCLED_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
@@ -64,8 +55,8 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     return {
       resultComment:
         resultStatus === RuleOutputStatus.PASSED
-          ? this.RESULT_COMMENT.TIMEFRAME_WITHIN_RANGE(difference)
-          : this.RESULT_COMMENT.TIMEFRAME_OUT_OF_RANGE(difference),
+          ? RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference)
+          : RESULT_COMMENTS.failed.TIMEFRAME_OUT_OF_RANGE(difference),
       resultStatus,
     };
   }

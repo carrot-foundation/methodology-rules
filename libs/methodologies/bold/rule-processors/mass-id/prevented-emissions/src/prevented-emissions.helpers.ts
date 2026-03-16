@@ -20,12 +20,6 @@ import { isWasteGeneratorBaselineValues } from './prevented-emissions.typia';
 
 const { BASELINES } = DocumentEventAttributeName;
 
-const formatter = new Intl.NumberFormat('en-US', {
-  maximumFractionDigits: 3,
-  roundingMode: 'floor',
-  useGrouping: false,
-});
-
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
   baseline: MethodologyBaseline,
@@ -106,5 +100,5 @@ export const getGasTypeFromEvent = (
   return gasType;
 };
 
-export const formatNumber = (number_: number): string =>
-  formatter.format(number_);
+// Re-export formatNumber from constants for backward compatibility
+export { formatNumber } from './prevented-emissions.constants';

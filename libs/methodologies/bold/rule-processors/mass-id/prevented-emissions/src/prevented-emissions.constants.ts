@@ -1,10 +1,43 @@
 import {
+  DocumentEventAttributeName,
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { type OthersIfOrganicCarbonEntry } from './prevented-emissions.types';
+
+const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
+  DocumentEventAttributeName;
+
+const formatter = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 3,
+  roundingMode: 'floor',
+  useGrouping: false,
+});
+
+export const formatNumber = (number_: number): string =>
+  formatter.format(number_);
+
+export const RESULT_COMMENTS = {
+  failed: {
+    MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
+    MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
+      wasteSubtype: MassIDOrganicSubtype,
+    ) =>
+      `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+  },
+  passed: {
+    EMISSIONS_CALCULATED: (
+      preventedEmissions: number,
+      preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
+      exceedingEmissionCoefficient: number,
+      currentValue: number,
+    ) =>
+      `The prevented emissions were calculated as ${formatNumber(preventedEmissions)} kg CO₂e using the formula (${currentValue} x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon}) - (${currentValue} x ${exceedingEmissionCoefficient}) = ${formatNumber(preventedEmissions)} [formula: (current_value x prevented_emissions_by_waste_subtype_and_baseline_per_ton) - (current_value x exceeding_emission_coefficient) = prevented_emissions].`,
+  },
+  reviewRequired: {},
+} as const;
 
 export const CDM_CODE_OTHERS_IF_ORGANIC = '8.7D';
 

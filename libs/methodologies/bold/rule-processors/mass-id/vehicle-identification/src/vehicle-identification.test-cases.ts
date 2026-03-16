@@ -9,10 +9,8 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
-import {
-  RESULT_COMMENTS,
-  VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES,
-} from './vehicle-identification.processor';
+import { RESULT_COMMENTS } from './vehicle-identification.constants';
+import { VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES } from './vehicle-identification.processor';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   DocumentEventAttributeName;
@@ -29,7 +27,9 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.INVALID_VEHICLE_TYPE('INVALID_VEHICLE_TYPE'),
+    resultComment: RESULT_COMMENTS.failed.INVALID_VEHICLE_TYPE(
+      'INVALID_VEHICLE_TYPE',
+    ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not a valid vehicle type`,
   },
@@ -42,7 +42,7 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.VEHICLE_TYPE_MISSING,
+    resultComment: RESULT_COMMENTS.failed.VEHICLE_TYPE_MISSING,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not present`,
   },
@@ -58,7 +58,7 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.VEHICLE_DESCRIPTION_MISSING(OTHERS),
+    resultComment: RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING(OTHERS),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} but the "${VEHICLE_DESCRIPTION}" attribute is not present`,
   },
@@ -74,13 +74,14 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(OTHERS),
+    resultComment:
+      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(OTHERS),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} and the "${VEHICLE_DESCRIPTION}" attribute is present`,
   },
   {
     events: new Map([[PICK_UP, undefined]]),
-    resultComment: RESULT_COMMENTS.PICK_UP_EVENT_MISSING,
+    resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${PICK_UP}" event is not present`,
   },
@@ -93,7 +94,10 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+    resultComment:
+      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
+        vehicleType,
+      ),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
   })),
@@ -109,7 +113,7 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.LICENSE_PLATE_MISSING(TRUCK),
+    resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,
   },
@@ -125,7 +129,7 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+    resultComment: RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
   },
@@ -141,7 +145,7 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.INVALID_LICENSE_PLATE_FORMAT,
+    resultComment: RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
   },

@@ -17,6 +17,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
+import { RESULT_COMMENTS } from './driver-identification.constants';
+
 const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
@@ -24,16 +26,6 @@ const {
 } = DocumentEventAttributeName;
 const { PICK_UP } = DocumentEventName;
 const { SLUDGE_PIPES } = DocumentEventVehicleType;
-
-export const RESULT_COMMENTS = {
-  DRIVER_AND_JUSTIFICATION_PROVIDED: `In the ${PICK_UP} event, both the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" and "${DRIVER_IDENTIFIER}" were provided, but only one is allowed.`,
-  DRIVER_IDENTIFIER: `In the ${PICK_UP} event, the "${DRIVER_IDENTIFIER}" was provided.`,
-  JUSTIFICATION_PROVIDED: (justification: string) =>
-    `In the ${PICK_UP} event, the "${DRIVER_IDENTIFIER}" was not provided, but a "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" was declared: ${justification}.`,
-  MISSING_JUSTIFICATION: (vehicleType: string) =>
-    `In the ${PICK_UP} event, the vehicle "${vehicleType}" requires either a "${DRIVER_IDENTIFIER}" or an "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}".`,
-  SLUDGE_PIPES: `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${SLUDGE_PIPES}", so driver identification is not required.`,
-} as const;
 
 interface RuleSubject {
   driverIdentifier: MethodologyDocumentEventAttributeValue | undefined;
@@ -57,28 +49,29 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
 
     if (vehicleType === SLUDGE_PIPES) {
       return {
-        resultComment: RESULT_COMMENTS.SLUDGE_PIPES,
+        resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
         resultStatus: RuleOutputStatus.PASSED,
       };
     }
 
     if (hasDriverId && hasJustification) {
       return {
-        resultComment: RESULT_COMMENTS.DRIVER_AND_JUSTIFICATION_PROVIDED,
+        resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (!hasDriverId && !hasJustification) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_JUSTIFICATION(vehicleTypeString),
+        resultComment:
+          RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(vehicleTypeString),
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (hasJustification) {
       return {
-        resultComment: RESULT_COMMENTS.JUSTIFICATION_PROVIDED(
+        resultComment: RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(
           String(driverIdentifierExemptionJustification),
         ),
         resultStatus: RuleOutputStatus.PASSED,
@@ -86,7 +79,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     }
 
     return {
-      resultComment: RESULT_COMMENTS.DRIVER_IDENTIFIER,
+      resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

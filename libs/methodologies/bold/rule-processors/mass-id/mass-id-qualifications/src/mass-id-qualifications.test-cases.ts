@@ -1,8 +1,8 @@
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
+import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
-import { RESULT_COMMENTS } from './mass-id-qualifications.processor';
 
 const massIDStubs = new BoldStubsBuilder()
   .createMassIDDocuments()
@@ -13,7 +13,7 @@ const processorErrors = new MassIDQualificationsProcessorErrors();
 export const massIDQualificationsTestCases = [
   {
     massIDDocument: massIDStubs.massIDDocument,
-    resultComment: RESULT_COMMENTS.VALID_QUALIFICATIONS,
+    resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'all the criteria are met',
   },
@@ -22,7 +22,7 @@ export const massIDQualificationsTestCases = [
       ...massIDStubs.massIDDocument,
       category: 'INVALID_CATEGORY',
     },
-    resultComment: RESULT_COMMENTS.INVALID_CATEGORY('INVALID_CATEGORY'),
+    resultComment: RESULT_COMMENTS.failed.INVALID_CATEGORY('INVALID_CATEGORY'),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'category does not match',
   },
@@ -31,7 +31,7 @@ export const massIDQualificationsTestCases = [
       ...massIDStubs.massIDDocument,
       type: 'INVALID_TYPE',
     },
-    resultComment: RESULT_COMMENTS.INVALID_TYPE('INVALID_TYPE'),
+    resultComment: RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'type is not ORGANIC',
   },
@@ -40,7 +40,8 @@ export const massIDQualificationsTestCases = [
       ...massIDStubs.massIDDocument,
       measurementUnit: 'INVALID_UNIT',
     },
-    resultComment: RESULT_COMMENTS.INVALID_MEASUREMENT_UNIT('INVALID_UNIT'),
+    resultComment:
+      RESULT_COMMENTS.failed.INVALID_MEASUREMENT_UNIT('INVALID_UNIT'),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'measurement unit is not "kg"',
   },
@@ -49,7 +50,7 @@ export const massIDQualificationsTestCases = [
       ...massIDStubs.massIDDocument,
       currentValue: 0,
     },
-    resultComment: RESULT_COMMENTS.INVALID_VALUE(0),
+    resultComment: RESULT_COMMENTS.failed.INVALID_VALUE(0),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'current value is not greater than 0',
   },
@@ -58,7 +59,7 @@ export const massIDQualificationsTestCases = [
       ...massIDStubs.massIDDocument,
       subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
     },
-    resultComment: RESULT_COMMENTS.INVALID_SUBTYPE(
+    resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE(
       'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
     ),
     resultStatus: RuleOutputStatus.FAILED,
@@ -83,8 +84,8 @@ export const massIDQualificationsTestCases = [
       type: 'INVALID_TYPE',
     },
     resultComment: [
-      RESULT_COMMENTS.INVALID_TYPE('INVALID_TYPE'),
-      RESULT_COMMENTS.INVALID_SUBTYPE('INVALID_SUBTYPE'),
+      RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
+      RESULT_COMMENTS.failed.INVALID_SUBTYPE('INVALID_SUBTYPE'),
     ].join(' '),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'there are multiple error messages',

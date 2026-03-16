@@ -20,16 +20,11 @@ import {
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
+import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
+
 const { ACTOR, DROP_OFF } = DocumentEventName;
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
-
-export const RESULT_COMMENTS = {
-  ADDRESS_MISMATCH: `The "${DROP_OFF}" event address does not match the "${RECYCLER}" event address.`,
-  MISSING_DROP_OFF_EVENT: `No "${DROP_OFF}" event was found in the document.`,
-  MISSING_RECEIVING_OPERATOR_IDENTIFIER: `The "${DROP_OFF}" event must include a "${RECEIVING_OPERATOR_IDENTIFIER}", but none was provided.`,
-  VALID_DROP_OFF: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
-} as const;
 
 interface RuleSubject {
   lastDropOffEvent: DocumentEvent | undefined;
@@ -48,27 +43,28 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
   }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
     if (isNil(lastDropOffEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
+        resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (!isNonEmptyString(receivingOperatorIdentifier)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
+        resultComment:
+          RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     if (lastDropOffEvent.address.id !== recyclerEvent?.address.id) {
       return {
-        resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
+        resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
         resultStatus: RuleOutputStatus.FAILED,
       };
     }
 
     return {
-      resultComment: RESULT_COMMENTS.VALID_DROP_OFF,
+      resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

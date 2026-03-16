@@ -10,7 +10,7 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 import { convertDistance } from 'geolib';
 
-import { RESULT_COMMENTS } from './project-boundary.processor';
+import { RESULT_COMMENTS } from './project-boundary.constants';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 
@@ -29,7 +29,7 @@ export const projectBoundaryTestCases = [
     events: {
       [DROP_OFF]: undefined,
     },
-    resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
+    resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'missing drop off event',
   },
@@ -37,7 +37,7 @@ export const projectBoundaryTestCases = [
     events: {
       [PICK_UP]: undefined,
     },
-    resultComment: RESULT_COMMENTS.MISSING_PICK_UP_EVENT,
+    resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'missing pick up event',
   },
@@ -60,7 +60,7 @@ export const projectBoundaryTestCases = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.SUCCESS(distanceInKm),
+    resultComment: RESULT_COMMENTS.passed.SUCCESS(distanceInKm),
     resultContent: {
       distance: distanceInKm,
     },

@@ -11,6 +11,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
+import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
@@ -19,28 +20,9 @@ const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;
 const { ORGANIC } = DocumentType;
 
-export const RESULT_COMMENTS = {
-  INVALID_CATEGORY: (category: string): string =>
-    `The document category must be "${MASS_ID}", but "${category}" was provided.`,
-  INVALID_MEASUREMENT_UNIT: (measurementUnit: string): string =>
-    `The measurement unit must be "${KG}", but "${measurementUnit}" was provided.`,
-  INVALID_SUBTYPE: (subtype: unknown): string =>
-    `The subtype "${String(subtype)}" is not among the allowed values.`,
-  INVALID_TYPE: (type: string): string =>
-    `The document type must be "${ORGANIC}", but "${type}" was provided.`,
-  INVALID_VALUE: (value: number): string =>
-    `The document value must be greater than 0, but "${value}" was provided.`,
-  VALID_QUALIFICATIONS:
-    'The document category, measurement unit, subtype, type, and value are correctly defined.',
-} as const;
-
 export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
   protected readonly processorErrors =
     new MassIDQualificationsProcessorErrors();
-
-  private get RESULT_COMMENT() {
-    return RESULT_COMMENTS;
-  }
 
   protected override evaluateResult(
     document: Document,
@@ -55,25 +37,29 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
 
     const validationCriteria = [
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_CATEGORY(document.category),
+        errorMessage: RESULT_COMMENTS.failed.INVALID_CATEGORY(
+          document.category,
+        ),
         isValid: document.category === MASS_ID.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_TYPE(document.type!),
+        errorMessage: RESULT_COMMENTS.failed.INVALID_TYPE(document.type!),
         isValid: document.type === ORGANIC.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_MEASUREMENT_UNIT(
+        errorMessage: RESULT_COMMENTS.failed.INVALID_MEASUREMENT_UNIT(
           document.measurementUnit,
         ),
         isValid: document.measurementUnit === KG.valueOf(),
       },
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_VALUE(document.currentValue),
+        errorMessage: RESULT_COMMENTS.failed.INVALID_VALUE(
+          document.currentValue,
+        ),
         isValid: document.currentValue > 0,
       },
       {
-        errorMessage: this.RESULT_COMMENT.INVALID_SUBTYPE(document.subtype),
+        errorMessage: RESULT_COMMENTS.failed.INVALID_SUBTYPE(document.subtype),
         isValid: this.isValidSubtype(document.subtype),
       },
     ];
@@ -88,7 +74,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
 
     return {
       resultComment: isValid
-        ? this.RESULT_COMMENT.VALID_QUALIFICATIONS
+        ? RESULT_COMMENTS.passed.VALID_QUALIFICATIONS
         : errorMessages.join(' '),
       resultStatus: isValid ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };

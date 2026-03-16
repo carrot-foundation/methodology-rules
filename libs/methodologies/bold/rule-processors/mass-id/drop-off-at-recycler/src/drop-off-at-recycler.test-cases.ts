@@ -10,7 +10,7 @@ import {
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
-import { RESULT_COMMENTS } from './drop-off-at-recycler.processor';
+import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { ACTOR, DROP_OFF } = DocumentEventName;
@@ -21,7 +21,7 @@ const sameRecyclerAndDropOffAddress = stubAddress();
 export const dropOffAtRecyclerTestCases = [
   {
     events: { [DROP_OFF]: undefined },
-    resultComment: RESULT_COMMENTS.MISSING_DROP_OFF_EVENT,
+    resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has no ${DROP_OFF} event`,
   },
@@ -31,7 +31,7 @@ export const dropOffAtRecyclerTestCases = [
         metadataAttributes: [[RECEIVING_OPERATOR_IDENTIFIER, undefined]],
       }),
     },
-    resultComment: RESULT_COMMENTS.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
+    resultComment: RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${DROP_OFF} event but no ${RECEIVING_OPERATOR_IDENTIFIER} attribute`,
   },
@@ -39,7 +39,7 @@ export const dropOffAtRecyclerTestCases = [
     events: {
       [DROP_OFF]: stubBoldMassIDDropOffEvent(),
     },
-    resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
+    resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${DROP_OFF} event, but the ${RECYCLER} event address does not match the ${DROP_OFF} event address`,
   },
@@ -56,7 +56,7 @@ export const dropOffAtRecyclerTestCases = [
         },
       }),
     },
-    resultComment: RESULT_COMMENTS.VALID_DROP_OFF,
+    resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the MassID document has a ${DROP_OFF} event and a ${RECYCLER} event, and the ${DROP_OFF} event address matches the ${RECYCLER} event address`,
   },

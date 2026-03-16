@@ -17,9 +17,11 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { type AnyObject } from '@carrot-fndn/shared/types';
 import { addYears } from 'date-fns';
 
-import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import {
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
+  RESULT_COMMENTS,
+} from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
-import { RESULT_COMMENTS } from './prevented-emissions.processor';
 
 export interface PreventedEmissionsTestCase {
   accreditationDocuments: Map<string, StubBoldDocumentParameters>;
@@ -151,7 +153,8 @@ export const preventedEmissionsTestCases = [
       [BASELINES, { [subtype]: baseline }],
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
-    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultComment:
+      RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         baseline,
@@ -176,7 +179,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
+    resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
       0,
       baselineValue,
       exceedingEmissionCoefficientExceedingBaseline,
@@ -206,7 +209,8 @@ export const preventedEmissionsTestCases = [
       [BASELINES, { [subtype]: baseline }],
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
-    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultComment:
+      RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         baseline,
@@ -228,7 +232,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
+    resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
       expectedPreventedEmissionsValue,
       baselineValue,
       exceedingEmissionCoefficient,
@@ -276,7 +280,7 @@ export const preventedEmissionsTestCases = [
           othersIfOrganicLocalWasteClassificationCode,
         ),
       massIDDocumentValue,
-      resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
+      resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
         expectedOthersPreventedEmissions,
         othersFactor,
         exceedingEmissionCoefficient,
@@ -317,9 +321,10 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
-      MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-    ),
+    resultComment:
+      RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
+        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+      ),
     resultContent: {
       ruleSubject: {
         baseline: undefined,
@@ -341,7 +346,7 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.EMISSIONS_CALCULATED(
+    resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
       massIDDocumentValue * baselineValue,
       baselineValue,
       0,
@@ -370,7 +375,8 @@ export const preventedEmissionsTestCases = [
     ]),
     externalCreatedAt: massIDDocument.externalCreatedAt,
     massIDDocumentValue,
-    resultComment: RESULT_COMMENTS.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+    resultComment:
+      RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
     resultContent: {
       ruleSubject: {
         baseline,
