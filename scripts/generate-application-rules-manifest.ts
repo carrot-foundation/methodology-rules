@@ -192,11 +192,17 @@ function extractRuleDefinition(
 
 // --- Error messages extraction ---
 
-function extractErrorMessages(srcPath: string): string[] {
-  const errors: string[] = [];
+interface ErrorMessagesResult {
+  byKey: Record<string, string>;
+  values: string[];
+}
+
+function extractErrorMessages(srcPath: string): ErrorMessagesResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const errorsFile = files.find((f) => f.endsWith('.errors.ts'));
-  if (!errorsFile) return errors;
+  if (!errorsFile) return { byKey, values };
 
   const content = fs.readFileSync(path.join(srcPath, errorsFile), 'utf8');
 
@@ -204,43 +210,54 @@ function extractErrorMessages(srcPath: string): string[] {
   const objMatch = content.match(
     /ERROR_MESSAGES?\s*=\s*\{([\s\S]*?)\}\s*as\s+const/,
   );
-  if (!objMatch?.[1]) return errors;
+  if (!objMatch?.[1]) return { byKey, values };
 
   const inner = objMatch[1];
 
-  // Extract template literals
-  const templateRe = /`([^`]*)`/g;
+  // Extract keyed template literals
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
   let match;
-  while ((match = templateRe.exec(inner)) !== null) {
-    const msg = normalizeMessage(match[1]?.trim() ?? '');
-    if (msg && msg.length > 10 && !errors.includes(msg)) {
-      errors.push(msg);
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 10) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  // Extract string literals
-  const stringRe = /['"]([^'"]{10,})['"]/g;
-  while ((match = stringRe.exec(inner)) !== null) {
-    const msg = match[1]?.trim() ?? '';
-    if (msg && !errors.includes(msg)) {
-      errors.push(msg);
+  // Extract keyed string literals
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{10,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  return errors;
+  return { byKey, values };
 }
 
 // --- Result comments extraction ---
 
 interface ResultComments {
   failed: string[];
+  failedByKey: Record<string, string>;
   passed: string[];
+  passedByKey: Record<string, string>;
 }
 
 function extractResultComments(srcPath: string): ResultComments {
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const constantsFile = files.find((f) => f.endsWith('.constants.ts'));
-  if (!constantsFile) return { failed: [], passed: [] };
+  if (!constantsFile)
+    return { failed: [], failedByKey: {}, passed: [], passedByKey: {} };
 
   const content = fs.readFileSync(
     path.join(srcPath, constantsFile),
@@ -250,11 +267,25 @@ function extractResultComments(srcPath: string): ResultComments {
   const passed = extractNestedStrings(content, 'passed');
   const failed = extractNestedStrings(content, 'failed');
 
-  return { failed, passed };
+  return {
+    failed: failed.values,
+    failedByKey: failed.byKey,
+    passed: passed.values,
+    passedByKey: passed.byKey,
+  };
 }
 
-function extractNestedStrings(content: string, section: string): string[] {
-  const results: string[] = [];
+interface NestedStringsResult {
+  byKey: Record<string, string>;
+  values: string[];
+}
+
+function extractNestedStrings(
+  content: string,
+  section: string,
+): NestedStringsResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
 
   // Match the section block: passed: { ... } or failed: { ... }
   const sectionRe = new RegExp(
@@ -262,30 +293,37 @@ function extractNestedStrings(content: string, section: string): string[] {
     'm',
   );
   const sectionMatch = content.match(sectionRe);
-  if (!sectionMatch?.[1]) return results;
+  if (!sectionMatch?.[1]) return { byKey, values };
 
   const inner = sectionMatch[1];
 
-  // Extract template literals
-  const templateRe = /`([^`]*)`/g;
+  // Extract keyed entries: KEY_NAME: `value` or KEY_NAME: 'value'
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
   let match;
-  while ((match = templateRe.exec(inner)) !== null) {
-    const msg = normalizeMessage(match[1]?.trim() ?? '');
-    if (msg && msg.length > 5 && !results.includes(msg)) {
-      results.push(msg);
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  // Extract string literals
-  const stringRe = /['"]([^'"]{5,})['"]/g;
-  while ((match = stringRe.exec(inner)) !== null) {
-    const msg = match[1]?.trim() ?? '';
-    if (msg && !results.includes(msg)) {
-      results.push(msg);
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{5,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  return results;
+  return { byKey, values };
 }
 
 // --- Message normalization ---
@@ -317,6 +355,7 @@ const KNOWN_PLACEHOLDERS: Record<string, string> = {
 function camelToUpperSnake(str: string): string {
   const snake = str
     .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
     .replace(/[^a-zA-Z0-9_]/g, '_')
     .toUpperCase();
 
@@ -349,6 +388,7 @@ const CODE_LEAK_PATTERNS = [
   /`,\s*\n/,
   /\)\s*=>\s*\n/,
   /^\s*\$\{/,
+  /\[['"`]/,
 ];
 
 const PLACEHOLDER_ONLY_RE = /^\{\{[A-Z_]+\}\}$/;
@@ -390,7 +430,52 @@ function findEnclosingObjectStart(content: string, position: number): number {
   return 0;
 }
 
-function extractExamples(srcPath: string): RuleExample[] {
+interface ResultCommentMaps {
+  errorsByKey: Record<string, string>;
+  failedByKey: Record<string, string>;
+  passedByKey: Record<string, string>;
+}
+
+function resolveResultComment(
+  objectSlice: string,
+  maps: ResultCommentMaps,
+): string | undefined {
+  // Match RESULT_COMMENTS.passed.KEY or RESULT_COMMENTS.failed.KEY
+  const rcMatch = objectSlice.match(
+    /resultComment:\s*RESULT_COMMENTS\.(passed|failed)\.(\w+)/,
+  );
+  if (rcMatch) {
+    const section = rcMatch[1] as 'passed' | 'failed';
+    const key = rcMatch[2] ?? '';
+    const map =
+      section === 'passed' ? maps.passedByKey : maps.failedByKey;
+    return map[key];
+  }
+
+  // Match ERROR_MESSAGES.KEY or ERROR_MESSAGE.KEY
+  const errMatch = objectSlice.match(
+    /resultComment:\s*ERROR_MESSAGES?\.(\w+)/,
+  );
+  if (errMatch) {
+    const key = errMatch[1] ?? '';
+    return maps.errorsByKey[key];
+  }
+
+  // Match inline string literal: resultComment: 'text' or "text" or `text`
+  const inlineMatch = objectSlice.match(
+    /resultComment:\s*['"`]([^'"`]{5,})['"`]/,
+  );
+  if (inlineMatch?.[1]) {
+    return normalizeMessage(inlineMatch[1].trim());
+  }
+
+  return undefined;
+}
+
+function extractExamples(
+  srcPath: string,
+  commentMaps: ResultCommentMaps,
+): RuleExample[] {
   const examples: RuleExample[] = [];
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const testCasesFile = files.find((f) => f.includes('test-cases'));
@@ -415,12 +500,7 @@ function extractExamples(srcPath: string): RuleExample[] {
 
     if (!status) continue;
 
-    let description = rawScenario
-      .replace(/\$\{[^}]*\}/g, (m) => {
-        const inner = m.slice(2, -1).trim();
-        return inner.split(/[.(]/)[0]?.trim() ?? '';
-      })
-      .trim();
+    let description = normalizeMessage(rawScenario);
 
     if (description) {
       description =
@@ -429,7 +509,8 @@ function extractExamples(srcPath: string): RuleExample[] {
 
     if (
       description.length < 10 ||
-      /\.(join|slice|split)\s*\(/.test(description)
+      isPlaceholderOnly(description) ||
+      isCodeLeak(description)
     ) {
       continue;
     }
@@ -438,9 +519,23 @@ function extractExamples(srcPath: string): RuleExample[] {
       ? status
       : 'REJECTED';
 
+    // Also look ahead after the scenario for resultComment
+    const afterScenarioSlice = content.slice(
+      scenarioMatch.index,
+      scenarioMatch.index + 500,
+    );
+    const resultComment =
+      resolveResultComment(objectSlice, commentMaps) ??
+      resolveResultComment(afterScenarioSlice, commentMaps);
+
+    const output: RuleExample['output'] = { resultStatus };
+    if (resultComment) {
+      output.resultComment = resultComment;
+    }
+
     examples.push({
       description,
-      output: { resultStatus },
+      output,
     });
   }
 
@@ -555,7 +650,12 @@ function buildRule(
   const readme = extractReadmeData(readmePath);
   const errorMessages = extractErrorMessages(libSrcPath);
   const resultComments = extractResultComments(libSrcPath);
-  const examples = extractExamples(libSrcPath);
+  const commentMaps: ResultCommentMaps = {
+    errorsByKey: errorMessages.byKey,
+    failedByKey: resultComments.failedByKey,
+    passedByKey: resultComments.passedByKey,
+  };
+  const examples = extractExamples(libSrcPath, commentMaps);
 
   // Validate required fields
   const name = ruleDef?.name ?? readme.name;
@@ -574,7 +674,7 @@ function buildRule(
   }
 
   // Merge errors: errors.ts + RESULT_COMMENTS.failed
-  const allErrors = [...errorMessages];
+  const allErrors = [...errorMessages.values];
   for (const msg of resultComments.failed) {
     if (!allErrors.includes(msg)) {
       allErrors.push(msg);
@@ -607,7 +707,6 @@ function buildRule(
 // --- Main ---
 
 interface Manifest {
-  $schema: string;
   generatedAt: string;
   methodologies: Record<string, Record<string, ManifestRule[]>>;
   sourceCommit: string;
@@ -616,7 +715,6 @@ interface Manifest {
 
 function generate(): void {
   const manifest: Manifest = {
-    $schema: './schemas/application-rules-manifest.schema.json',
     generatedAt: new Date().toISOString(),
     methodologies: {},
     sourceCommit: getSourceCommit(),
