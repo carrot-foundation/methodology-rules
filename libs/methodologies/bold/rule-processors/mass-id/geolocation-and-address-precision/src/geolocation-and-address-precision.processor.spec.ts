@@ -7,10 +7,7 @@ import {
   expectRuleOutput,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type Document,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { random } from 'typia';
 
@@ -94,23 +91,11 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   );
 
   describe('GeolocationAndAddressPrecisionProcessorErrors', () => {
-    const allErrorCases = geolocationAndAddressPrecisionErrorTestCases.map(
-      (testCase) => ({
-        ...testCase,
-        hasDocuments: Boolean(
-          testCase.massIDAuditDocument && testCase.documents,
-        ),
-      }),
-    );
-
-    it.each(allErrorCases)(
+    it.each(geolocationAndAddressPrecisionErrorTestCases)(
       'should return $resultStatus when $scenario',
       async (testCase) => {
-        if (testCase.hasDocuments) {
-          const { documents, massIDAuditDocument } = testCase as unknown as {
-            documents: Document[];
-            massIDAuditDocument: Document;
-          };
+        if (testCase.massIDAuditDocument) {
+          const { documents, massIDAuditDocument } = testCase;
 
           spyOnLoadDocument(massIDAuditDocument);
           spyOnDocumentQueryServiceLoad(massIDAuditDocument, [

@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   stubAddress,
   stubBoldMassIDDropOffEvent,
@@ -12,13 +14,17 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
+interface DropOffAtRecyclerTestCase extends RuleTestCase {
+  events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
+}
+
 const { RECYCLER } = MethodologyDocumentEventLabel;
 const { ACTOR, DROP_OFF } = DocumentEventName;
 const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
 
 const sameRecyclerAndDropOffAddress = stubAddress();
 
-export const dropOffAtRecyclerTestCases = [
+export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
   {
     events: { [DROP_OFF]: undefined },
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,

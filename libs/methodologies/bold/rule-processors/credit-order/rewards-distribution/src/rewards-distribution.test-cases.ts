@@ -1,3 +1,4 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 import type { AnyObject, NonEmptyArray } from '@carrot-fndn/shared/types';
 
 import {
@@ -40,21 +41,17 @@ type ActorResult = {
 type CertificateDocument = Document;
 type CreditOrderDocument = Document;
 
-type ErrorTestCase = {
+type ErrorTestCase = RuleTestCase & {
   creditOrderDocument: CreditOrderDocument | undefined;
   massIDCertificateDocuments: CertificateDocument[];
-  resultComment: string;
-  resultStatus: RuleOutputStatus;
-  scenario: string;
 };
 
-type TestCase = {
+type TestCase = Omit<RuleTestCase, 'resultComment'> & {
   creditOrderDocument: CreditOrderDocument;
   expectedActorsResult: ActorResult[];
   expectedCertificateTotalValue: number;
   massIDCertificateDocuments: CertificateDocument[];
-  resultStatus: RuleOutputStatus;
-  scenario: string;
+  resultComment?: string;
   unitPrice: number;
 };
 

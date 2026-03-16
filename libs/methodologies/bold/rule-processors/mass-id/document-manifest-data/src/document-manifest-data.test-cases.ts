@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   stubAddress,
   stubBoldMassIDRecyclingManifestEvent,
@@ -18,6 +20,16 @@ import { random } from 'typia';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
+
+interface DocumentManifestDataTestCase
+  extends Omit<RuleTestCase, 'resultComment'> {
+  crossValidationFailMessages?: string[];
+  crossValidationPassMessages?: string[];
+  crossValidationReviewReasons?: Array<{ code: string; description: string }>;
+  documentManifestType: DocumentManifestType;
+  events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
+  resultComment?: string | undefined;
+}
 
 const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 
@@ -49,7 +61,7 @@ const defaultEvents = {
   }),
 };
 
-export const documentManifestDataTestCases = [
+export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
   {
     documentManifestType,
     events: {
@@ -341,7 +353,7 @@ export const documentManifestDataTestCases = [
   },
 ];
 
-export const crossValidationTestCases = [
+export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
   {
     crossValidationFailMessages: ['Document number mismatch'],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
@@ -473,7 +485,7 @@ export const crossValidationTestCases = [
   },
 ];
 
-export const exceptionTestCases = [
+export const exceptionTestCases: DocumentManifestDataTestCase[] = [
   {
     documentManifestType: RECYCLING_MANIFEST as DocumentManifestType,
     events: {},

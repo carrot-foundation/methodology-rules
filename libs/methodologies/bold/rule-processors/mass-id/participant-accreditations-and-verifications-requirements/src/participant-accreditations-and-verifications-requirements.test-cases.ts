@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   BoldStubsBuilder,
   stubBoldAccreditationResultEvent,
@@ -6,6 +8,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type Document,
   DocumentCategory,
   DocumentEventAccreditationStatus,
   DocumentEventAttributeName,
@@ -294,174 +297,181 @@ const massIDWithWasteGeneratorButNoAccreditation =
     ]),
   );
 
-export const participantAccreditationsAndVerificationsRequirementsTestCases = [
-  {
-    documents: [
-      massIDAuditWithAccreditationsAndVerifications.massIDDocument,
-      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the participants accreditation documents are found and the accreditation is active',
-  },
-  {
-    documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
-    massIDAuditDocument:
-      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment:
-      processorError.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the participants accreditation documents are not found',
-  },
-  {
-    documents: [
-      massIDAuditWithAccreditationsAndVerifications.massIDDocument,
-      ...[
+interface ParticipantAccreditationsTestCase extends RuleTestCase {
+  documents: Document[];
+  massIDAuditDocument: Document;
+}
+
+export const participantAccreditationsAndVerificationsRequirementsTestCases: ParticipantAccreditationsTestCase[] =
+  [
+    {
+      documents: [
+        massIDAuditWithAccreditationsAndVerifications.massIDDocument,
         ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
-      ].filter((document) => document.subtype !== INTEGRATOR),
-    ],
-    massIDAuditDocument:
-      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment:
-      processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-        [INTEGRATOR],
+      ],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the participants accreditation documents are found and the accreditation is active',
+    },
+    {
+      documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment:
+        processorError.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the participants accreditation documents are not found',
+    },
+    {
+      documents: [
+        massIDAuditWithAccreditationsAndVerifications.massIDDocument,
+        ...[
+          ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+        ].filter((document) => document.subtype !== INTEGRATOR),
+      ],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment:
+        processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+          [INTEGRATOR],
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'some participants accreditation documents are not found',
+    },
+    {
+      documents: [
+        ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the mass document does not exist',
+    },
+    {
+      documents: [
+        {
+          ...massIDAuditWithAccreditationsAndVerifications.massIDDocument,
+          externalEvents: [],
+        },
+        ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment:
+        processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
+          massIDAuditWithAccreditationsAndVerifications.massIDDocument.id,
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the mass document does not contain events',
+    },
+    {
+      documents: [
+        massIDWithExpiredAccreditation.massIDDocument,
+        ...massIDWithExpiredAccreditation.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument: massIDWithExpiredAccreditation.massIDAuditDocument,
+      resultComment:
+        processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+          [INTEGRATOR],
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the participants accreditation documents are found and the accreditation is not active',
+    },
+    {
+      documents: [
+        massIDWithWasteGeneratorNoResult.massIDDocument,
+        ...massIDWithWasteGeneratorNoResult.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument: massIDWithWasteGeneratorNoResult.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'WASTE_GENERATOR has accreditation document without result event (should pass - Waste Generator is ignored)',
+    },
+    {
+      documents: [
+        massIDWithWasteGeneratorValidResult.massIDDocument,
+        ...massIDWithWasteGeneratorValidResult.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDWithWasteGeneratorValidResult.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'WASTE_GENERATOR has valid accreditation result event (should pass - Waste Generator is ignored)',
+    },
+    {
+      documents: [
+        massIDWithWasteGeneratorInvalidResult.massIDDocument,
+        ...massIDWithWasteGeneratorInvalidResult.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDWithWasteGeneratorInvalidResult.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'WASTE_GENERATOR has invalid accreditation result event (expired) (should pass - Waste Generator is ignored)',
+    },
+    {
+      documents: [
+        massIDWithWasteGeneratorMultipleValid.massIDDocument,
+        ...massIDWithWasteGeneratorMultipleValid.participantsAccreditationDocuments.values(),
+        wasteGeneratorSecondAccreditation,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        massIDWithWasteGeneratorMultipleValid.massIDAuditDocument,
+        wasteGeneratorSecondAccreditation,
       ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'some participants accreditation documents are not found',
-  },
-  {
-    documents: [
-      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the mass document does not exist',
-  },
-  {
-    documents: [
-      {
-        ...massIDAuditWithAccreditationsAndVerifications.massIDDocument,
-        externalEvents: [],
-      },
-      ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
-    resultComment:
-      processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
-        massIDAuditWithAccreditationsAndVerifications.massIDDocument.id,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'WASTE_GENERATOR has multiple valid accreditations (should pass - Waste Generator is ignored)',
+    },
+    {
+      documents: [
+        massIDWithParticipantMultipleRoles.massIDDocument,
+        ...massIDWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDWithParticipantMultipleRoles.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
+    },
+    {
+      documents: [
+        massIDWithWasteGeneratorButNoAccreditation.massIDDocument,
+        ...massIDWithWasteGeneratorButNoAccreditation.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDWithWasteGeneratorButNoAccreditation.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'WASTE_GENERATOR event exists but no accreditation document provided (should pass - Waste Generator is ignored)',
+    },
+    {
+      documents: [
+        massIDWithProcessorMultipleValid.massIDDocument,
+        ...massIDWithProcessorMultipleValid.participantsAccreditationDocuments.values(),
+        processorSecondAccreditation,
+      ],
+      massIDAuditDocument: createMassIDAuditWithLinkEvent(
+        massIDWithProcessorMultipleValid.massIDAuditDocument,
+        processorSecondAccreditation,
       ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the mass document does not contain events',
-  },
-  {
-    documents: [
-      massIDWithExpiredAccreditation.massIDDocument,
-      ...massIDWithExpiredAccreditation.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument: massIDWithExpiredAccreditation.massIDAuditDocument,
-    resultComment:
-      processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-        [INTEGRATOR],
-      ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the participants accreditation documents are found and the accreditation is not active',
-  },
-  {
-    documents: [
-      massIDWithWasteGeneratorNoResult.massIDDocument,
-      ...massIDWithWasteGeneratorNoResult.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument: massIDWithWasteGeneratorNoResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'WASTE_GENERATOR has accreditation document without result event (should pass - Waste Generator is ignored)',
-  },
-  {
-    documents: [
-      massIDWithWasteGeneratorValidResult.massIDDocument,
-      ...massIDWithWasteGeneratorValidResult.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDWithWasteGeneratorValidResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'WASTE_GENERATOR has valid accreditation result event (should pass - Waste Generator is ignored)',
-  },
-  {
-    documents: [
-      massIDWithWasteGeneratorInvalidResult.massIDDocument,
-      ...massIDWithWasteGeneratorInvalidResult.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDWithWasteGeneratorInvalidResult.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'WASTE_GENERATOR has invalid accreditation result event (expired) (should pass - Waste Generator is ignored)',
-  },
-  {
-    documents: [
-      massIDWithWasteGeneratorMultipleValid.massIDDocument,
-      ...massIDWithWasteGeneratorMultipleValid.participantsAccreditationDocuments.values(),
-      wasteGeneratorSecondAccreditation,
-    ],
-    massIDAuditDocument: createMassIDAuditWithLinkEvent(
-      massIDWithWasteGeneratorMultipleValid.massIDAuditDocument,
-      wasteGeneratorSecondAccreditation,
-    ),
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'WASTE_GENERATOR has multiple valid accreditations (should pass - Waste Generator is ignored)',
-  },
-  {
-    documents: [
-      massIDWithParticipantMultipleRoles.massIDDocument,
-      ...massIDWithParticipantMultipleRoles.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument: massIDWithParticipantMultipleRoles.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
-  },
-  {
-    documents: [
-      massIDWithWasteGeneratorButNoAccreditation.massIDDocument,
-      ...massIDWithWasteGeneratorButNoAccreditation.participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument:
-      massIDWithWasteGeneratorButNoAccreditation.massIDAuditDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'WASTE_GENERATOR event exists but no accreditation document provided (should pass - Waste Generator is ignored)',
-  },
-  {
-    documents: [
-      massIDWithProcessorMultipleValid.massIDDocument,
-      ...massIDWithProcessorMultipleValid.participantsAccreditationDocuments.values(),
-      processorSecondAccreditation,
-    ],
-    massIDAuditDocument: createMassIDAuditWithLinkEvent(
-      massIDWithProcessorMultipleValid.massIDAuditDocument,
-      processorSecondAccreditation,
-    ),
-    resultComment:
-      processorError.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
-        processorOriginalAccreditation.primaryParticipant.id,
-        PROCESSOR,
-      ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'PROCESSOR has multiple valid accreditations (should fail)',
-  },
-];
+      resultComment:
+        processorError.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
+          processorOriginalAccreditation.primaryParticipant.id,
+          PROCESSOR,
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'PROCESSOR has multiple valid accreditations (should fail)',
+    },
+  ];

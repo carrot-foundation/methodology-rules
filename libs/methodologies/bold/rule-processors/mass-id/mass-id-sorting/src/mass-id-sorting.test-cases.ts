@@ -1,7 +1,12 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+import type { PartialDeep } from 'type-fest';
+
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  type BoldExternalEventsObject,
   BoldStubsBuilder,
   MASS_ID_ACTOR_PARTICIPANTS,
+  type StubBoldDocumentParameters,
   stubBoldEmissionAndCompostingMetricsEvent,
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDSortingEvent,
@@ -19,6 +24,7 @@ import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyDocumentEventAttributeFormat,
   MethodologyDocumentEventLabel,
+  type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
@@ -211,7 +217,14 @@ const {
   .createParticipantAccreditationDocuments()
   .build();
 
-export const massIDSortingTestCases = [
+interface MassIDSortingTestCase extends RuleTestCase {
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  actorParticipants: Map<string, MethodologyParticipant>;
+  massIDEvents: BoldExternalEventsObject;
+  partialDocument: PartialDeep<Document>;
+}
+
+export const massIDSortingTestCases: MassIDSortingTestCase[] = [
   {
     actorParticipants,
     massIDEvents: createMassIDEvents(
@@ -357,7 +370,12 @@ const invalidSortingValue = new BoldStubsBuilder()
   .createParticipantAccreditationDocuments()
   .build();
 
-export const massIDSortingErrorTestCases = [
+interface MassIDSortingErrorTestCase extends RuleTestCase {
+  documents: Document[];
+  massIDAuditDocument: Document;
+}
+
+export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
   createErrorTestCase(
     'the MassID document does not exist',
     [...participantsAccreditationDocuments.values()],

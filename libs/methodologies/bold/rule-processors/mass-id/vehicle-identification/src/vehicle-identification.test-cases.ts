@@ -1,3 +1,4 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -17,7 +18,11 @@ const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
 const { PICK_UP } = DocumentEventName;
 const { OTHERS, TRUCK } = DocumentEventVehicleType;
 
-export const vehicleIdentificationTestCases = [
+interface VehicleIdentificationTestCase extends RuleTestCase {
+  events: Map<string, ReturnType<typeof stubBoldMassIDPickUpEvent> | undefined>;
+}
+
+export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
   {
     events: new Map([
       [
