@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { addDays, addHours, subDays, subSeconds } from 'date-fns';
 
@@ -21,7 +23,11 @@ const ruleDataProcessor = new TestProjectPeriodLimitProcessor();
 
 const getEligibleDate = () => ruleDataProcessor.getTestEligibleDate();
 
-export const projectPeriodLimitTestCases = [
+interface ProjectPeriodLimitTestCase extends RuleTestCase {
+  externalCreatedAt: string;
+}
+
+export const projectPeriodLimitTestCases: ProjectPeriodLimitTestCase[] = [
   {
     externalCreatedAt: addDays(getEligibleDate(), 1).toISOString(),
     resultComment: RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE,

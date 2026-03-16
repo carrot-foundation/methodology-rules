@@ -1,12 +1,16 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   BoldStubsBuilder,
   type MetadataAttributeParameter,
   stubBoldAccreditationResultEvent,
+  type StubBoldDocumentParameters,
   stubBoldMassIDWeighingEvent,
   stubBoldMonitoringSystemsAndEquipmentEvent,
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type Document,
   DocumentCategory,
   type DocumentEvent,
   DocumentEventAttributeName,
@@ -246,7 +250,13 @@ const createTwoStepWeighingEvents = (
   ),
 });
 
-export const weighingTestCases = [
+interface WeighingTestCase extends RuleTestCase {
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  massIDDocumentEvents: Record<string, DocumentEvent | undefined>;
+  scaleTicketVerificationError?: string;
+}
+
+export const weighingTestCases: WeighingTestCase[] = [
   {
     massIDDocumentEvents: {
       [WEIGHING]: undefined,
@@ -888,7 +898,12 @@ const {
   .createParticipantAccreditationDocuments()
   .build();
 
-export const weighingErrorTestCases = [
+interface WeighingErrorTestCase extends RuleTestCase {
+  documents: Document[];
+  massIDAuditDocument: Document;
+}
+
+export const weighingErrorTestCases: WeighingErrorTestCase[] = [
   {
     documents: [...participantsAccreditationDocuments.values()],
     massIDAuditDocument,

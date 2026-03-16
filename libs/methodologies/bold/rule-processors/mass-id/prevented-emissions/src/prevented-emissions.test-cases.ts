@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   BoldStubsBuilder,
   type MetadataAttributeParameter,
@@ -23,15 +25,12 @@ import {
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 
-export interface PreventedEmissionsTestCase {
+export interface PreventedEmissionsTestCase extends RuleTestCase {
   accreditationDocuments: Map<string, StubBoldDocumentParameters>;
   externalCreatedAt: string;
   massIDDocumentsParams?: StubBoldDocumentParameters;
   massIDDocumentValue?: number;
-  resultComment: string;
   resultContent: AnyObject | undefined;
-  resultStatus: RuleOutputStatus;
-  scenario: string;
   subtype: MassIDOrganicSubtype;
 }
 
@@ -432,159 +431,180 @@ const makeRecyclerEmissionAndCompostingMetricsEvents = (
   stubBoldEmissionAndCompostingMetricsEvent({ metadataAttributes }),
 ];
 
-export const preventedEmissionsErrorTestCases = [
-  {
-    documents: [
-      {
-        ...massIDDocument,
-        subtype: 'INVALID_SUBTYPE' as MassIDOrganicSubtype,
-      },
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-          [BASELINES, { [subtype]: baseline }],
-        ]),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment:
-      processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the MassID document has an invalid subtype',
-  },
-  {
-    documents: [
-      massIDDocument,
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-        ]),
-        recyclerRemoveEventName: EMISSION_AND_COMPOSTING_METRICS.toString(),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
-  },
-  {
-    documents: [...participantsAccreditationDocuments.values()],
-    massIDAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the MassID document was not found',
-  },
-  {
-    documents: [massIDDocument],
-    massIDAuditDocument,
-    resultComment:
-      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Recycler accreditation document was not found',
-  },
-  {
-    documents: [
-      massIDDocument,
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-          [BASELINES, undefined],
-        ]),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the Recycler Accreditation document has no valid baselines',
-  },
-  {
-    documents: [
-      {
-        ...massIDDocument,
-        externalEvents: [
-          ...(massIDDocument.externalEvents?.filter(
-            (event) => event.name !== PICK_UP.toString(),
-          ) ?? []),
-          stubBoldMassIDPickUpEvent({
-            metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, undefined]],
-          }),
-        ],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-      },
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
-        ]),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'Others (if organic) does not provide Local Waste Classification ID on PICK_UP',
-  },
-  {
-    documents: [
-      {
-        ...massIDDocument,
-        externalEvents: [
-          ...(massIDDocument.externalEvents?.filter(
-            (event) => event.name !== PICK_UP.toString(),
-          ) ?? []),
-          stubBoldMassIDPickUpEvent({
-            metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '00 00 00']],
-          }),
-        ],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-      },
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
-        ]),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'Others (if organic) has an unknown Local Waste Classification ID (not an accepted local waste classification code (Ibama, Brazil))',
-  },
-  {
-    documents: [
-      {
-        ...massIDDocument,
-        externalEvents: [
-          ...(massIDDocument.externalEvents?.filter(
-            (event) => event.name !== PICK_UP.toString(),
-          ) ?? []),
-          stubBoldMassIDPickUpEvent({
-            metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '02 02 99']],
-          }),
-        ],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-      },
-      ...mapParticipantAccreditationDocuments({
-        recyclerExternalEvents: makeRecyclerEmissionAndCompostingMetricsEvents([
-          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-          [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
-        ]),
-      }),
-    ],
-    massIDAuditDocument,
-    resultComment:
-      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-        '02 02 99',
-      ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
-  },
-];
+interface PreventedEmissionsErrorTestCase extends RuleTestCase {
+  documents: Document[];
+  massIDAuditDocument: Document;
+}
+
+export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[] =
+  [
+    {
+      documents: [
+        {
+          ...massIDDocument,
+          subtype: 'INVALID_SUBTYPE' as MassIDOrganicSubtype,
+        },
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+              [BASELINES, { [subtype]: baseline }],
+            ]),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment:
+        processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the MassID document has an invalid subtype',
+    },
+    {
+      documents: [
+        massIDDocument,
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+            ]),
+          recyclerRemoveEventName: EMISSION_AND_COMPOSTING_METRICS.toString(),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
+    },
+    {
+      documents: [...participantsAccreditationDocuments.values()],
+      massIDAuditDocument,
+      resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the MassID document was not found',
+    },
+    {
+      documents: [massIDDocument],
+      massIDAuditDocument,
+      resultComment:
+        processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the Recycler accreditation document was not found',
+    },
+    {
+      documents: [
+        massIDDocument,
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+              [BASELINES, undefined],
+            ]),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment: processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the Recycler Accreditation document has no valid baselines',
+    },
+    {
+      documents: [
+        {
+          ...massIDDocument,
+          externalEvents: [
+            ...(massIDDocument.externalEvents?.filter(
+              (event) => event.name !== PICK_UP.toString(),
+            ) ?? []),
+            stubBoldMassIDPickUpEvent({
+              metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, undefined]],
+            }),
+          ],
+          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        },
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+              [
+                BASELINES,
+                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+              ],
+            ]),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'Others (if organic) does not provide Local Waste Classification ID on PICK_UP',
+    },
+    {
+      documents: [
+        {
+          ...massIDDocument,
+          externalEvents: [
+            ...(massIDDocument.externalEvents?.filter(
+              (event) => event.name !== PICK_UP.toString(),
+            ) ?? []),
+            stubBoldMassIDPickUpEvent({
+              metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '00 00 00']],
+            }),
+          ],
+          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        },
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+              [
+                BASELINES,
+                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+              ],
+            ]),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'Others (if organic) has an unknown Local Waste Classification ID (not an accepted local waste classification code (Ibama, Brazil))',
+    },
+    {
+      documents: [
+        {
+          ...massIDDocument,
+          externalEvents: [
+            ...(massIDDocument.externalEvents?.filter(
+              (event) => event.name !== PICK_UP.toString(),
+            ) ?? []),
+            stubBoldMassIDPickUpEvent({
+              metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '02 02 99']],
+            }),
+          ],
+          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        },
+        ...mapParticipantAccreditationDocuments({
+          recyclerExternalEvents:
+            makeRecyclerEmissionAndCompostingMetricsEvents([
+              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+              [
+                BASELINES,
+                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+              ],
+            ]),
+        }),
+      ],
+      massIDAuditDocument,
+      resultComment:
+        processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
+          '02 02 99',
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
+    },
+  ];

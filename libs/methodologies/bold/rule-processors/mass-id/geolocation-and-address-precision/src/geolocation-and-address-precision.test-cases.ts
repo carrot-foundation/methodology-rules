@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
   BoldStubsBuilder,
@@ -13,6 +15,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type Document,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -27,6 +30,17 @@ import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
+
+interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
+  documents: Document[];
+  massIDAuditDocument: Document | undefined;
+}
+
+interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
+  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  actorParticipants: Map<string, MethodologyParticipant>;
+  massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
+}
 
 const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 const {
@@ -259,376 +273,370 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
   participant: wasteGeneratorParticipant,
 });
 
-export const geolocationAndAddressPrecisionTestCases: Array<{
-  accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  actorParticipants: Map<string, MethodologyParticipant>;
-  massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
-  resultComment: string;
-  resultStatus: RuleOutputStatus;
-  scenario: string;
-}> = [
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        {
-          externalEventsMap: {
-            [ACCREDITATION_CONTEXT]: undefined,
+export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPrecisionTestCase[] =
+  [
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          {
+            externalEventsMap: {
+              [ACCREDITATION_CONTEXT]: undefined,
+            },
           },
-        },
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [ACCREDITATION_CONTEXT]: undefined,
+        ],
+        [
+          WASTE_GENERATOR,
+          {
+            externalEventsMap: {
+              [ACCREDITATION_CONTEXT]: undefined,
+            },
           },
+        ],
+      ]),
+      actorParticipants,
+      resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the accredited address is not set',
+    },
+    {
+      accreditationDocuments: validAccreditationDocuments,
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            nearbyRecyclerAddress.latitude,
+            nearbyRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            nearbyWasteGeneratorAddress,
+            wasteGeneratorParticipant,
+            nearbyWasteGeneratorAddress.latitude,
+            nearbyWasteGeneratorAddress.longitude,
+          ),
         },
-      ],
-    ]),
-    actorParticipants,
-    resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the accredited address is not set',
-  },
-  {
-    accreditationDocuments: validAccreditationDocuments,
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          nearbyRecyclerAddress.latitude,
-          nearbyRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          nearbyWasteGeneratorAddress,
-          wasteGeneratorParticipant,
-          nearbyWasteGeneratorAddress.latitude,
-          nearbyWasteGeneratorAddress.longitude,
-        ),
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the gps is set and both gps geolocation and event address are valid but nearby',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the gps is set and both gps geolocation and event address are valid but nearby',
-  },
-  {
-    accreditationDocuments: validAccreditationDocuments,
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          nearbyWasteGeneratorAddress,
-          wasteGeneratorParticipant,
-          invalidWasteGeneratorAddress.latitude,
-          invalidWasteGeneratorAddress.longitude,
-        ),
+    {
+      accreditationDocuments: validAccreditationDocuments,
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            nearbyWasteGeneratorAddress,
+            wasteGeneratorParticipant,
+            invalidWasteGeneratorAddress.latitude,
+            invalidWasteGeneratorAddress.longitude,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the address is valid but the gps geolocation is invalid',
     },
-    resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the address is valid but the gps geolocation is invalid',
-  },
-  {
-    accreditationDocuments: validAccreditationDocuments,
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: undefined,
+    {
+      accreditationDocuments: validAccreditationDocuments,
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: undefined,
+        },
       },
+      resultComment: RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the processor cannot extract the actor type',
     },
-    resultComment: RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the processor cannot extract the actor type',
-  },
-  {
-    accreditationDocuments: validAccreditationDocuments,
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          recyclerAddress,
-          recyclerParticipant,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: validAccreditationDocuments,
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            recyclerAddress,
+            recyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the gps is not set, but the accredited address is set and is valid',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the gps is not set, but the accredited address is set and is valid',
-  },
-  {
-    accreditationDocuments: validAccreditationDocuments,
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          invalidRecyclerAddress,
-          recyclerParticipant,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          invalidWasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: validAccreditationDocuments,
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            invalidRecyclerAddress,
+            recyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            invalidWasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the gps is not set, but the accredited address is set and not valid',
     },
-    resultComment: `${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the gps is not set, but the accredited address is set and not valid',
-  },
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithAddress(
-          recyclerAddress,
-          recyclerParticipant,
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        {
-          externalEventsMap: {
-            [ACCREDITATION_CONTEXT]: undefined,
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            recyclerAddress,
+            recyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          {
+            externalEventsMap: {
+              [ACCREDITATION_CONTEXT]: undefined,
+            },
           },
+        ],
+      ]),
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            recyclerAddress,
+            recyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
         },
-      ],
-    ]),
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          recyclerAddress,
-          recyclerParticipant,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
       },
+      resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the Waste Generator verification document is missing (should pass, not fail)',
     },
-    resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the Waste Generator verification document is missing (should pass, not fail)',
-  },
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithGpsExceptions(
-          recyclerAddress,
-          recyclerParticipant,
-          DROP_OFF,
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        createAccreditationDocumentWithAddress(
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
-      ],
-    ]),
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithGpsExceptions(
+            recyclerAddress,
+            recyclerParticipant,
+            DROP_OFF,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
-  },
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithGpsExceptions(
-          recyclerAddress,
-          recyclerParticipant,
-          DROP_OFF,
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        createAccreditationDocumentWithAddress(
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
-      ],
-    ]),
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithGpsExceptions(
+            recyclerAddress,
+            recyclerParticipant,
+            DROP_OFF,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.PASSED,
-    scenario:
-      'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
-  },
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithGpsExceptions(
-          recyclerAddress,
-          recyclerParticipant,
-          DROP_OFF,
-          true, // includeLatitude
-          false, // includeLongitude - missing longitude exception
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        createAccreditationDocumentWithAddress(
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
-      ],
-    ]),
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithGpsExceptions(
+            recyclerAddress,
+            recyclerParticipant,
+            DROP_OFF,
+            true, // includeLatitude
+            false, // includeLongitude - missing longitude exception
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the Recycler has only latitude GPS exception (should NOT skip GPS validation)',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the Recycler has only latitude GPS exception (should NOT skip GPS validation)',
-  },
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithGpsExceptions(
-          recyclerAddress,
-          recyclerParticipant,
-          DROP_OFF,
-          true, // includeLatitude
-          true, // includeLongitude
-          '2020-01-01', // validUntil - expired exception
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        createAccreditationDocumentWithAddress(
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
-      ],
-    ]),
-    actorParticipants,
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-        [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          nearbyRecyclerAddress,
-          recyclerParticipant,
-          invalidRecyclerAddress.latitude,
-          invalidRecyclerAddress.longitude,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          wasteGeneratorAddress,
-          wasteGeneratorParticipant,
-        ),
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithGpsExceptions(
+            recyclerAddress,
+            recyclerParticipant,
+            DROP_OFF,
+            true, // includeLatitude
+            true, // includeLongitude
+            '2020-01-01', // validUntil - expired exception
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants,
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            nearbyRecyclerAddress,
+            recyclerParticipant,
+            invalidRecyclerAddress.latitude,
+            invalidRecyclerAddress.longitude,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            wasteGeneratorAddress,
+            wasteGeneratorParticipant,
+          ),
+        },
       },
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the Recycler has expired GPS exceptions (should NOT skip GPS validation)',
     },
-    resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the Recycler has expired GPS exceptions (should NOT skip GPS validation)',
-  },
-];
+  ];
 
 const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 
@@ -648,45 +656,48 @@ const {
   .createParticipantAccreditationDocuments()
   .build();
 
-export const geolocationAndAddressPrecisionErrorTestCases = [
-  {
-    documents: [
+export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddressPrecisionErrorTestCase[] =
+  [
+    {
+      documents: [
+        massIDAuditDocument,
+        ...participantsAccreditationDocuments.values(),
+      ],
       massIDAuditDocument,
-      ...participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument,
-    resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the MassID document does not exist',
-  },
-  {
-    documents: [
-      massIDDocument,
+      resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the MassID document does not exist',
+    },
+    {
+      documents: [
+        massIDDocument,
+        massIDAuditDocument,
+        ...participantsAccreditationDocuments.values(),
+      ],
       massIDAuditDocument,
-      ...participantsAccreditationDocuments.values(),
-    ],
-    massIDAuditDocument,
-    resultComment:
-      errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
-        massIDDocument.id,
-      ),
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario:
-      'the MassID document does not contain a DROP_OFF or PICK_UP event',
-  },
-  {
-    documents: [massIDDocument, massIDAuditDocument],
-    massIDAuditDocument,
-    resultComment:
-      errorMessage.ERROR_MESSAGE.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the accreditation documents are not found',
-  },
-  {
-    documents: [],
-    massIDAuditDocument: undefined,
-    resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the MassID Audit document does not exist',
-  },
-];
+      resultComment:
+        errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
+          massIDDocument.id,
+        ),
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario:
+        'the MassID document does not contain a DROP_OFF or PICK_UP event',
+    },
+    {
+      documents: [massIDDocument, massIDAuditDocument],
+      massIDAuditDocument,
+      resultComment:
+        errorMessage.ERROR_MESSAGE
+          .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the accreditation documents are not found',
+    },
+    {
+      documents: [],
+      massIDAuditDocument: undefined,
+      resultComment:
+        errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
+      resultStatus: RuleOutputStatus.FAILED,
+      scenario: 'the MassID Audit document does not exist',
+    },
+  ];

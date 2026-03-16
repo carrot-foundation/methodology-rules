@@ -1,5 +1,8 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
 import {
+  type BoldExternalEventsObject,
   generateNearbyCoordinates,
   stubAddress,
   stubBoldMassIDDropOffEvent,
@@ -24,7 +27,12 @@ const actualDistance = calculateDistance(coordinates.base, coordinates.nearby);
 const distanceInKm =
   Math.round(convertDistance(actualDistance, 'km') * 1000) / 1000;
 
-export const projectBoundaryTestCases = [
+interface ProjectBoundaryTestCase extends RuleTestCase {
+  events: BoldExternalEventsObject;
+  resultContent?: { distance: number };
+}
+
+export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
   {
     events: {
       [DROP_OFF]: undefined,

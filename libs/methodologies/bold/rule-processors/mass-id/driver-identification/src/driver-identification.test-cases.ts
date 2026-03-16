@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
@@ -8,6 +10,10 @@ import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
 
+interface DriverIdentificationTestCase extends RuleTestCase {
+  pickUpEvent: ReturnType<typeof stubBoldMassIDPickUpEvent>;
+}
+
 const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
@@ -17,7 +23,7 @@ const { BICYCLE, BOAT, SLUDGE_PIPES, TRUCK } = DocumentEventVehicleType;
 
 const someJustification = faker.lorem.sentence();
 
-export const driverIdentificationTestCases = [
+export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
   {
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [

@@ -1,4 +1,7 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
@@ -10,7 +13,11 @@ const massIDStubs = new BoldStubsBuilder()
   .build();
 const processorErrors = new MassIDQualificationsProcessorErrors();
 
-export const massIDQualificationsTestCases = [
+interface MassIDQualificationsTestCase extends RuleTestCase {
+  massIDDocument: Document;
+}
+
+export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
   {
     massIDDocument: massIDStubs.massIDDocument,
     resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,

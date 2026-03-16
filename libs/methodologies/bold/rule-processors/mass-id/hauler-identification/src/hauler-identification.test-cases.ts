@@ -1,3 +1,5 @@
+import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
+
 import {
   stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
@@ -13,12 +15,16 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 import { OPTIONAL_HAULER_VEHICLE_TYPES } from './hauler-identification.processor';
 
+interface HaulerIdentificationTestCase extends RuleTestCase {
+  events: Map<string, ReturnType<typeof stubDocumentEvent> | undefined>;
+}
+
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = MethodologyDocumentEventLabel;
 const { VEHICLE_TYPE } = DocumentEventAttributeName;
 const { TRUCK } = DocumentEventVehicleType;
 
-export const haulerIdentificationTestCases = [
+export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
   {
     events: new Map([
       [
