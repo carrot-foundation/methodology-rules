@@ -144,7 +144,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.failed.FAILED(
+        resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
           sortingData.sortingValueCalculationDifference,
         ),
         resultStatus: RuleOutputStatus.FAILED,
@@ -152,7 +152,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.passed.PASSED(
+      resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(
         sortingData.sortingValueCalculationDifference,
       ),
       resultStatus: RuleOutputStatus.PASSED,

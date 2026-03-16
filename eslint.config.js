@@ -217,6 +217,13 @@ const jsFilesConfigs = {
   },
 };
 
+const testCasesFilesConfig = {
+  files: ['**/*.test-cases.ts'],
+  rules: {
+    'security/detect-object-injection': 'off',
+  },
+};
+
 const jestFilesConfigs = [
   {
     ...jestPlugin.configs['flat/recommended'],
@@ -310,6 +317,7 @@ module.exports = defineConfig([
   tsAndJsFilesConfigs,
   commentsPlugin.recommended,
   securityPlugin.configs.recommended,
+  testCasesFilesConfig,
   ...jestFilesConfigs,
   ymlFilesConfigs,
   jsonFilesConfigs,

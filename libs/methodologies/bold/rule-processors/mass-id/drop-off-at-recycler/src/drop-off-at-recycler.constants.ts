@@ -15,7 +15,7 @@ export const RESULT_COMMENTS = {
     MISSING_RECEIVING_OPERATOR_IDENTIFIER: `The "${DROP_OFF}" event must include a "${RECEIVING_OPERATOR_IDENTIFIER}", but none was provided.`,
   },
   passed: {
-    PASSED: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
+    VALID_DROP_OFF: `The "${DROP_OFF}" event was recorded with a valid "${RECEIVING_OPERATOR_IDENTIFIER}", and its address matches the "${RECYCLER}" event address.`,
   },
   reviewRequired: {},
 } as const;

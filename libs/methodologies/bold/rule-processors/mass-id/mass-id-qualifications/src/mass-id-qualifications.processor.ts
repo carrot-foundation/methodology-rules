@@ -74,7 +74,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
 
     return {
       resultComment: isValid
-        ? RESULT_COMMENTS.passed.PASSED
+        ? RESULT_COMMENTS.passed.VALID_QUALIFICATIONS
         : errorMessages.join(' '),
       resultStatus: isValid ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
     };

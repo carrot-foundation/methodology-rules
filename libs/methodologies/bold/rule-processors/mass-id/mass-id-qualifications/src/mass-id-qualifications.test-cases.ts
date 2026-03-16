@@ -20,7 +20,7 @@ interface MassIDQualificationsTestCase extends RuleTestCase {
 export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
   {
     massIDDocument: massIDStubs.massIDDocument,
-    resultComment: RESULT_COMMENTS.passed.PASSED,
+    resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'all the criteria are met',
   },

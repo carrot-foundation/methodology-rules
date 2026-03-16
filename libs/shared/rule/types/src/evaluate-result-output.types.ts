@@ -7,19 +7,19 @@ export type EvaluateResultOutput =
   | PassedResult
   | ReviewRequiredResult;
 
-interface FailedResult {
+interface BaseResult {
   resultComment: string;
+  resultContent?: AnyObject;
+}
+
+interface FailedResult extends BaseResult {
   resultStatus: RuleOutputStatus.FAILED;
 }
 
-interface PassedResult {
-  resultComment: string;
-  resultContent?: AnyObject;
+interface PassedResult extends BaseResult {
   resultStatus: RuleOutputStatus.PASSED;
 }
 
-interface ReviewRequiredResult {
-  resultComment: string;
-  resultContent?: AnyObject;
+interface ReviewRequiredResult extends BaseResult {
   resultStatus: RuleOutputStatus.REVIEW_REQUIRED;
 }

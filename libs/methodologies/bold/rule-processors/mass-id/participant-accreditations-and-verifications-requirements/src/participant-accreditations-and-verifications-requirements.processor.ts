@@ -114,7 +114,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     }
 
     return {
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

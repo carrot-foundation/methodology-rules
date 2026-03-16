@@ -28,7 +28,7 @@ export const RESULT_COMMENTS = {
       `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
   },
   passed: {
-    PASSED: (
+    EMISSIONS_CALCULATED: (
       preventedEmissions: number,
       preventedEmissionsByWasteSubtypeAndBaselinePerTon: number,
       exceedingEmissionCoefficient: number,
