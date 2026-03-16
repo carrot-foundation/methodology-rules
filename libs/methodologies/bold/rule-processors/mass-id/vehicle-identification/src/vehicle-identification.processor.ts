@@ -92,7 +92,9 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     if (!needsLicensePlate) {
       return this.createResult(
         true,
-        RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+        RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
+          vehicleTypeValue,
+        ),
       );
     }
 

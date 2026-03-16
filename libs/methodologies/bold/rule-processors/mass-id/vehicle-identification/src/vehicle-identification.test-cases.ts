@@ -94,7 +94,10 @@ export const vehicleIdentificationTestCases = [
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
+    resultComment:
+      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
+        vehicleType,
+      ),
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
   })),
