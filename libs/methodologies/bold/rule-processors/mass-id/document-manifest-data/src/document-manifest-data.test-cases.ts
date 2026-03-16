@@ -80,7 +80,6 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
-    // eslint-disable-next-line security/detect-object-injection
     resultComment: attributeErrorMessages[attribute]!,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `the MassID document has a ${documentManifestType} event without a ${attribute}`,
