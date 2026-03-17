@@ -31,7 +31,7 @@ export const buildDocumentsCriteria = (
 export const RESULT_COMMENTS = {
   failed: {},
   passed: {
-    PASSED: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+    NO_CONFLICTING_CERTIFICATE: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
   },
   reviewRequired: {},
 } as const;

@@ -127,7 +127,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     }
 
     return {
-      resultComment: RESULT_COMMENTS.passed.PASSED,
+      resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
     };
   }

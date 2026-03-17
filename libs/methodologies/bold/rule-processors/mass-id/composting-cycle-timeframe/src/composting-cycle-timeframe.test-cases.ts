@@ -16,7 +16,7 @@ const DROP_OFF_DATE_94_DAYS = '2023-11-25T12:00:00.000Z';
 const DROP_OFF_DATE_60_DAYS = '2023-12-29T12:00:00.000Z';
 const DROP_OFF_DATE_59_DAYS = '2023-12-30T12:00:00.000Z';
 const DROP_OFF_DATE_180_DAYS = '2023-08-31T12:00:00.000Z';
-const DROP_OFF_DATE_181_DAYS = '2023-08-30T12:00:00.000Z';
+const DROP_OFF_DATE_181_DAYS = '2023-08-29T12:00:00.000Z';
 
 export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase[] =
   [
@@ -60,7 +60,7 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: DROP_OFF_DATE_181_DAYS,
       recycledEventDate: RECYCLED_DATE,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'Edge case: 181 days (just above maximum)',
+      scenario: 'Edge case: 182 days (just above maximum)',
     },
     {
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,

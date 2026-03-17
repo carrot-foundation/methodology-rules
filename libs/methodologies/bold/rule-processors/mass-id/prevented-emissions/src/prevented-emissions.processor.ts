@@ -141,7 +141,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
 
     return {
-      resultComment: RESULT_COMMENTS.passed.PASSED(
+      resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
         preventedEmissions,
         preventedEmissionsByWasteSubtypeAndBaselinePerTon,
         exceedingEmissionCoefficient,

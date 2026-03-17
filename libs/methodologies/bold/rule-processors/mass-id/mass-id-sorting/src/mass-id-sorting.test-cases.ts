@@ -255,7 +255,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       ...massIDDocument,
       currentValue: calculatedSortingValue,
     },
-    resultComment: RESULT_COMMENTS.passed.PASSED(0),
+    resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
       'the sorting value calculation difference is less or equal to 0.1',
@@ -291,7 +291,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       wrongSortingValue,
     ),
     partialDocument: { ...massIDDocument, currentValue: wrongSortingValue },
-    resultComment: RESULT_COMMENTS.failed.FAILED(
+    resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
     resultStatus: RuleOutputStatus.FAILED,

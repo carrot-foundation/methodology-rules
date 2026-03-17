@@ -123,7 +123,7 @@ describe('DocumentManifestDataProcessor', () => {
     expect(ruleOutput.responseUrl).toBe(ruleInput.responseUrl);
     expect(ruleOutput.resultStatus).toBe(resultStatus);
     expect(ruleOutput.resultComment).toContain(
-      resultComment?.split('.')[0] ?? '',
+      resultComment.split('.')[0] ?? '',
     );
   });
 });

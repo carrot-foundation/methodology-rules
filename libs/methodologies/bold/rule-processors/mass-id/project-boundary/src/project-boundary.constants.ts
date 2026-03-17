@@ -10,7 +10,7 @@ export const RESULT_COMMENTS = {
   },
   passed: {
     SUCCESS: (distance: number) =>
-      `The distance between the first "${PICK_UP}" and last "${DROP_OFF}" is ${distance}km.`,
+      `The distance between the first "${PICK_UP}" and last "${DROP_OFF}" is ${distance} km.`,
   },
   reviewRequired: {},
 } as const;

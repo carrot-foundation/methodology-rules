@@ -19,6 +19,22 @@ jest.mock('node:fs/promises', () => ({
   readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
 }));
 
+// Prevent AWS SDK credential chain from reading real config files in Jest workers,
+// which can cause "Cannot read properties of undefined (reading 'then')" when
+// node:fs/promises is mocked (see aws/aws-sdk-js-v3#4756). We mock the loader so
+// config file reads are never attempted; node-config-provider only needs
+// getProfileName and loadSharedConfigFiles.
+jest.mock('@smithy/shared-ini-file-loader', () => {
+  const DEFAULT_PROFILE = 'default';
+  const emptyConfig = { configFile: {}, credentialsFile: {} };
+
+  return {
+    getProfileName: (init?: { profile?: string }) =>
+      init?.profile ?? process.env['AWS_PROFILE'] ?? DEFAULT_PROFILE,
+    loadSharedConfigFiles: () => Promise.resolve(emptyConfig),
+  };
+});
+
 jest.mock('./pdf-splitter.helpers', () => ({
   splitPdfPages: jest.fn(),
 }));

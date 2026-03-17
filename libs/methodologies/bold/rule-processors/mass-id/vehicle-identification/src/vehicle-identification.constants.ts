@@ -23,6 +23,8 @@ export const RESULT_COMMENTS = {
     VEHICLE_IDENTIFIED_WITH_DESCRIPTION: (vehicleType: string) =>
       `A "${VEHICLE_LICENSE_PLATE}" is not required for "${vehicleType}", and the "${VEHICLE_DESCRIPTION}" was provided.`,
     VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE: `In the ${PICK_UP} event, a valid "${VEHICLE_TYPE}" and correctly formatted "${VEHICLE_LICENSE_PLATE}" were provided.`,
+    VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE: (vehicleType: string) =>
+      `In the ${PICK_UP} event, the "${VEHICLE_TYPE}" is "${vehicleType}", which does not require a "${VEHICLE_LICENSE_PLATE}".`,
   },
   reviewRequired: {},
 } as const;

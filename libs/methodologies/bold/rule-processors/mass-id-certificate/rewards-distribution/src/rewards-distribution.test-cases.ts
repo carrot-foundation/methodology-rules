@@ -165,7 +165,6 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
   [
     ...Object.entries(REWARDS_DISTRIBUTION_BY_WASTE_TYPE).map(
       ([wasteType, expectedRewards]) => ({
-        // eslint-disable-next-line security/detect-object-injection
         expectedRewards: EXPECTED_REWARDS[expectedRewards],
         massIDDocumentEvents: {},
         massIDPartialDocument: {

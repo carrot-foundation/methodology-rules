@@ -25,67 +25,33 @@ const APPS_METHODOLOGIES = path.join(ROOT, 'apps', 'methodologies');
 
 // --- Methodology configs ---
 
-interface RulesConfig {
-  [scope: string]: readonly string[];
-}
+function loadMethodologies(): Record<
+  string,
+  Record<string, readonly string[]>
+> {
+  const methodologies: Record<string, Record<string, readonly string[]>> = {};
 
-const METHODOLOGIES: Record<string, RulesConfig> = {
-  'bold-carbon': {
-    'credit-order': ['rewards-distribution'],
-    'gas-id': ['rewards-distribution'],
-    'mass-id': [
-      'waste-mass-is-unique',
-      'no-conflicting-gas-id-or-credit',
-      'project-period-limit',
-      'participant-accreditations-and-verifications-requirements',
-      'mass-id-qualifications',
-      'regional-waste-classification',
-      'geolocation-and-address-precision',
-      'waste-origin-identification',
-      'hauler-identification',
-      'vehicle-identification',
-      'driver-identification',
-      'transport-manifest-data',
-      'processor-identification',
-      'recycler-identification',
-      'weighing',
-      'drop-off-at-recycler',
-      'mass-id-sorting',
-      'composting-cycle-timeframe',
-      'recycling-manifest-data',
-      'project-boundary',
-      'prevented-emissions',
-    ],
-  },
-  'bold-recycling': {
-    'credit-order': ['rewards-distribution'],
-    'mass-id': [
-      'waste-mass-is-unique',
-      'no-conflicting-recycled-id-or-credit',
-      'project-period-limit',
-      'participant-accreditations-and-verifications-requirements',
-      'mass-id-qualifications',
-      'regional-waste-classification',
-      'geolocation-and-address-precision',
-      'waste-origin-identification',
-      'hauler-identification',
-      'vehicle-identification',
-      'driver-identification',
-      'transport-manifest-data',
-      'processor-identification',
-      'recycler-identification',
-      'weighing',
-      'drop-off-at-recycler',
-      'mass-id-sorting',
-      'composting-cycle-timeframe',
-      'recycling-manifest-data',
-    ],
-    'recycled-id': ['rewards-distribution'],
-  },
-  bold: {
-    'mass-certificate': ['rewards-distribution'],
-  },
-};
+  for (const entry of fs.readdirSync(APPS_METHODOLOGIES, {
+    withFileTypes: true,
+  })) {
+    if (!entry.isDirectory()) continue;
+
+    const configPath = path.join(
+      APPS_METHODOLOGIES,
+      entry.name,
+      'rules.config.ts',
+    );
+    if (!fileExists(configPath)) continue;
+
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { rulesConfig } = require(configPath) as {
+      rulesConfig: Record<string, readonly string[]>;
+    };
+    methodologies[entry.name] = rulesConfig;
+  }
+
+  return methodologies;
+}
 
 // Scope names in config that differ from lib directory names
 const SCOPE_TO_LIB: Record<string, string> = {
@@ -226,11 +192,17 @@ function extractRuleDefinition(
 
 // --- Error messages extraction ---
 
-function extractErrorMessages(srcPath: string): string[] {
-  const errors: string[] = [];
+interface ErrorMessagesResult {
+  byKey: Record<string, string>;
+  values: string[];
+}
+
+function extractErrorMessages(srcPath: string): ErrorMessagesResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const errorsFile = files.find((f) => f.endsWith('.errors.ts'));
-  if (!errorsFile) return errors;
+  if (!errorsFile) return { byKey, values };
 
   const content = fs.readFileSync(path.join(srcPath, errorsFile), 'utf8');
 
@@ -238,43 +210,54 @@ function extractErrorMessages(srcPath: string): string[] {
   const objMatch = content.match(
     /ERROR_MESSAGES?\s*=\s*\{([\s\S]*?)\}\s*as\s+const/,
   );
-  if (!objMatch?.[1]) return errors;
+  if (!objMatch?.[1]) return { byKey, values };
 
   const inner = objMatch[1];
 
-  // Extract template literals
-  const templateRe = /`([^`]*)`/g;
+  // Extract keyed template literals
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
   let match;
-  while ((match = templateRe.exec(inner)) !== null) {
-    const msg = normalizeMessage(match[1]?.trim() ?? '');
-    if (msg && msg.length > 10 && !errors.includes(msg)) {
-      errors.push(msg);
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 10) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  // Extract string literals
-  const stringRe = /['"]([^'"]{10,})['"]/g;
-  while ((match = stringRe.exec(inner)) !== null) {
-    const msg = match[1]?.trim() ?? '';
-    if (msg && !errors.includes(msg)) {
-      errors.push(msg);
+  // Extract keyed string literals
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{10,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  return errors;
+  return { byKey, values };
 }
 
 // --- Result comments extraction ---
 
 interface ResultComments {
   failed: string[];
+  failedByKey: Record<string, string>;
   passed: string[];
+  passedByKey: Record<string, string>;
 }
 
 function extractResultComments(srcPath: string): ResultComments {
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const constantsFile = files.find((f) => f.endsWith('.constants.ts'));
-  if (!constantsFile) return { failed: [], passed: [] };
+  if (!constantsFile)
+    return { failed: [], failedByKey: {}, passed: [], passedByKey: {} };
 
   const content = fs.readFileSync(
     path.join(srcPath, constantsFile),
@@ -284,11 +267,25 @@ function extractResultComments(srcPath: string): ResultComments {
   const passed = extractNestedStrings(content, 'passed');
   const failed = extractNestedStrings(content, 'failed');
 
-  return { failed, passed };
+  return {
+    failed: failed.values,
+    failedByKey: failed.byKey,
+    passed: passed.values,
+    passedByKey: passed.byKey,
+  };
 }
 
-function extractNestedStrings(content: string, section: string): string[] {
-  const results: string[] = [];
+interface NestedStringsResult {
+  byKey: Record<string, string>;
+  values: string[];
+}
+
+function extractNestedStrings(
+  content: string,
+  section: string,
+): NestedStringsResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
 
   // Match the section block: passed: { ... } or failed: { ... }
   const sectionRe = new RegExp(
@@ -296,30 +293,37 @@ function extractNestedStrings(content: string, section: string): string[] {
     'm',
   );
   const sectionMatch = content.match(sectionRe);
-  if (!sectionMatch?.[1]) return results;
+  if (!sectionMatch?.[1]) return { byKey, values };
 
   const inner = sectionMatch[1];
 
-  // Extract template literals
-  const templateRe = /`([^`]*)`/g;
+  // Extract keyed entries: KEY_NAME: `value` or KEY_NAME: 'value'
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
   let match;
-  while ((match = templateRe.exec(inner)) !== null) {
-    const msg = normalizeMessage(match[1]?.trim() ?? '');
-    if (msg && msg.length > 5 && !results.includes(msg)) {
-      results.push(msg);
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  // Extract string literals
-  const stringRe = /['"]([^'"]{5,})['"]/g;
-  while ((match = stringRe.exec(inner)) !== null) {
-    const msg = match[1]?.trim() ?? '';
-    if (msg && !results.includes(msg)) {
-      results.push(msg);
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{5,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
     }
   }
 
-  return results;
+  return { byKey, values };
 }
 
 // --- Message normalization ---
@@ -348,27 +352,60 @@ const KNOWN_PLACEHOLDERS: Record<string, string> = {
   vehicleType: 'VEHICLE_TYPE',
 };
 
+function camelToUpperSnake(str: string): string {
+  const snake = str
+    .replace(/([a-z])([A-Z])/g, '$1_$2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+    .replace(/[^a-zA-Z0-9_]/g, '_')
+    .toUpperCase();
+
+  return snake || 'VALUE';
+}
+
+function resolvePlaceholder(ident: string): string {
+  return KNOWN_PLACEHOLDERS[ident] ?? camelToUpperSnake(ident);
+}
+
 function normalizeMessage(str: string): string {
   if (!str) return str;
 
-  // Replace ${identifier} with {{TOKEN}}
-  let result = str.replace(/\$\{([^}]+)\}/g, (_match, inner: string) => {
-    const ident = inner.split(/[.([\]]/)[0]?.trim() ?? '';
-    const token = KNOWN_PLACEHOLDERS[ident];
-    if (token) return `{{${token}}}`;
-
-    // Convert camelCase to UPPER_SNAKE
-    const snake = ident
-      .replace(/([a-z])([A-Z])/g, '$1_$2')
-      .replace(/[^a-zA-Z0-9_]/g, '_')
-      .toUpperCase();
-    return `{{${snake || 'VALUE'}}}`;
-  });
-
-  // Clean up escaped quotes
-  result = result.replace(/\\"/g, '"');
+  // Replace ${String(identifier)} and ${identifier} with {{TOKEN}}
+  const result = str
+    .replace(/\$\{String\((\w+)\)\}/g, (_match, inner: string) => {
+      return `{{${resolvePlaceholder(inner)}}}`;
+    })
+    .replace(/\$\{([^}]+)\}/g, (_match, inner: string) => {
+      const ident = inner.split(/[.([\]]/)[0]?.trim() ?? '';
+      return `{{${resolvePlaceholder(ident)}}}`;
+    })
+    .replace(/\\"/g, '"');
 
   return result.trim();
+}
+
+const CODE_LEAK_PATTERNS = [
+  /\.join\s*\(/,
+  /`,\s*\n/,
+  /\)\s*=>\s*\n/,
+  /^\s*\$\{/,
+  /\[['"`]/,
+];
+
+const PLACEHOLDER_ONLY_RE = /^\{\{[A-Z_]+\}\}$/;
+const KNOWN_RESULT_STATUSES = new Set(['PASSED', 'REVIEW_REQUIRED']);
+
+function isCodeLeak(s: string): boolean {
+  return CODE_LEAK_PATTERNS.some((re) => re.test(s));
+}
+
+function isPlaceholderOnly(s: string): boolean {
+  return PLACEHOLDER_ONLY_RE.test(s);
+}
+
+function normalizeMessages(messages: string[]): string[] {
+  return messages
+    .map((s) => normalizeMessage(s))
+    .filter((s) => !isPlaceholderOnly(s) && !isCodeLeak(s));
 }
 
 // --- Examples extraction ---
@@ -381,7 +418,64 @@ interface RuleExample {
   };
 }
 
-function extractExamples(srcPath: string): RuleExample[] {
+function findEnclosingObjectStart(content: string, position: number): number {
+  let depth = 0;
+  for (let i = position - 1; i >= 0; i--) {
+    if (content[i] === '}') depth++;
+    if (content[i] === '{') {
+      if (depth === 0) return i;
+      depth--;
+    }
+  }
+  return 0;
+}
+
+interface ResultCommentMaps {
+  errorsByKey: Record<string, string>;
+  failedByKey: Record<string, string>;
+  passedByKey: Record<string, string>;
+}
+
+function resolveResultComment(
+  objectSlice: string,
+  maps: ResultCommentMaps,
+): string | undefined {
+  // Match RESULT_COMMENTS.passed.KEY or RESULT_COMMENTS.failed.KEY
+  const rcMatch = objectSlice.match(
+    /resultComment:\s*RESULT_COMMENTS\.(passed|failed)\.(\w+)/,
+  );
+  if (rcMatch) {
+    const section = rcMatch[1] as 'passed' | 'failed';
+    const key = rcMatch[2] ?? '';
+    const map =
+      section === 'passed' ? maps.passedByKey : maps.failedByKey;
+    return map[key];
+  }
+
+  // Match ERROR_MESSAGES.KEY or ERROR_MESSAGE.KEY
+  const errMatch = objectSlice.match(
+    /resultComment:\s*ERROR_MESSAGES?\.(\w+)/,
+  );
+  if (errMatch) {
+    const key = errMatch[1] ?? '';
+    return maps.errorsByKey[key];
+  }
+
+  // Match inline string literal: resultComment: 'text' or "text" or `text`
+  const inlineMatch = objectSlice.match(
+    /resultComment:\s*['"`]([^'"`]{5,})['"`]/,
+  );
+  if (inlineMatch?.[1]) {
+    return normalizeMessage(inlineMatch[1].trim());
+  }
+
+  return undefined;
+}
+
+function extractExamples(
+  srcPath: string,
+  commentMaps: ResultCommentMaps,
+): RuleExample[] {
   const examples: RuleExample[] = [];
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const testCasesFile = files.find((f) => f.includes('test-cases'));
@@ -389,8 +483,6 @@ function extractExamples(srcPath: string): RuleExample[] {
 
   const content = fs.readFileSync(path.join(srcPath, testCasesFile), 'utf8');
 
-  // Find all scenario + resultStatus pairs using regex on full content.
-  // Match scenario strings (simple or template literals with interpolations)
   const scenarioRe =
     /scenario:\s*(?:`((?:[^`]|\$\{[^}]*\})*)`|'([^']*)'|"([^"]*)")/g;
   let scenarioMatch;
@@ -399,63 +491,52 @@ function extractExamples(srcPath: string): RuleExample[] {
     const rawScenario =
       scenarioMatch[1] ?? scenarioMatch[2] ?? scenarioMatch[3] ?? '';
 
-    // Look for resultStatus within a reasonable window after the scenario
-    const searchWindow = content.slice(
-      scenarioMatch.index,
-      scenarioMatch.index + 500,
-    );
-    const statusMatch = searchWindow.match(
+    const objStart = findEnclosingObjectStart(content, scenarioMatch.index);
+    const objectSlice = content.slice(objStart, scenarioMatch.index);
+    const statusMatch = objectSlice.match(
       /resultStatus:\s*RuleOutputStatus\.(\w+)/,
     );
-
-    // Also look backwards (resultStatus may come before scenario)
-    let status: string | undefined;
-    if (statusMatch?.[1]) {
-      status = statusMatch[1];
-    } else {
-      const backWindow = content.slice(
-        Math.max(0, scenarioMatch.index - 500),
-        scenarioMatch.index,
-      );
-      const backStatusMatch = backWindow.match(
-        /resultStatus:\s*RuleOutputStatus\.(\w+)/,
-      );
-      if (backStatusMatch?.[1]) {
-        status = backStatusMatch[1];
-      }
-    }
+    const status = statusMatch?.[1];
 
     if (!status) continue;
 
-    let description = rawScenario
-      .replace(/\$\{[^}]*\}/g, (m) => {
-        const inner = m.slice(2, -1).trim();
-        return inner.split(/[.(]/)[0]?.trim() ?? '';
-      })
-      .trim();
+    let description = normalizeMessage(rawScenario);
 
-    // Capitalize first letter
     if (description) {
       description =
         description.charAt(0).toUpperCase() + description.slice(1);
     }
 
-    // Skip descriptions that are too short or contain code
     if (
       description.length < 10 ||
-      /\.(join|slice|split)\s*\(/.test(description)
+      isPlaceholderOnly(description) ||
+      isCodeLeak(description)
     ) {
       continue;
     }
 
-    const example: RuleExample = {
-      description,
-      output: {
-        resultStatus: status === 'PASSED' ? 'PASSED' : 'REJECTED',
-      },
-    };
+    const resultStatus = KNOWN_RESULT_STATUSES.has(status)
+      ? status
+      : 'REJECTED';
 
-    examples.push(example);
+    // Also look ahead after the scenario for resultComment
+    const afterScenarioSlice = content.slice(
+      scenarioMatch.index,
+      scenarioMatch.index + 500,
+    );
+    const resultComment =
+      resolveResultComment(objectSlice, commentMaps) ??
+      resolveResultComment(afterScenarioSlice, commentMaps);
+
+    const output: RuleExample['output'] = { resultStatus };
+    if (resultComment) {
+      output.resultComment = resultComment;
+    }
+
+    examples.push({
+      description,
+      output,
+    });
   }
 
   return examples;
@@ -491,7 +572,7 @@ function extractReadmeData(readmePath: string): ReadmeData {
 
   // Extract verifications
   const verifMatch = content.match(
-    /##\s+(?:✅\s+)?Verification(?:\s+Criteria)?\s*\n([\s\S]*?)(?:\n##|\n---|\z)/,
+    /##\s+(?:✅\s+)?Verification(?:\s+Criteria)?\s*\n([\s\S]*?)(?:\n##|\n---|\n?$)/,
   );
   if (verifMatch?.[1]) {
     const bullets = verifMatch[1].match(/^[-*]\s+(.+)$/gm);
@@ -529,6 +610,13 @@ function buildRule(
   slug: string,
 ): ManifestRule {
   const libSrcPath = getLibSrcPath(scope, slug);
+
+  if (!dirExists(libSrcPath)) {
+    throw new Error(
+      `Rule source directory not found: ${libSrcPath} (methodology=${methodology}, scope=${scope}, slug=${slug})`,
+    );
+  }
+
   const appRulePath = getAppRulePath(methodology, scope, slug);
   const readmePath = path.join(appRulePath, 'README.md');
   const relReadmePath = path
@@ -540,12 +628,20 @@ function buildRule(
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
 
   // Find processor file
-  const files = dirExists(libSrcPath) ? fs.readdirSync(libSrcPath) : [];
+  const files = fs.readdirSync(libSrcPath);
   const processorFile =
     files.find((f) => f.endsWith('.processor.ts') && !f.includes('.spec.')) ??
     `${libSlug}.processor.ts`;
+  const processorFullPath = path.join(libSrcPath, processorFile);
+
+  if (!fileExists(processorFullPath)) {
+    throw new Error(
+      `Processor file not found: ${processorFullPath} (methodology=${methodology}, scope=${scope}, slug=${slug})`,
+    );
+  }
+
   const relImplementationPath = path
-    .relative(ROOT, path.join(libSrcPath, processorFile))
+    .relative(ROOT, processorFullPath)
     .split(path.sep)
     .join('/');
 
@@ -554,10 +650,31 @@ function buildRule(
   const readme = extractReadmeData(readmePath);
   const errorMessages = extractErrorMessages(libSrcPath);
   const resultComments = extractResultComments(libSrcPath);
-  const examples = extractExamples(libSrcPath);
+  const commentMaps: ResultCommentMaps = {
+    errorsByKey: errorMessages.byKey,
+    failedByKey: resultComments.failedByKey,
+    passedByKey: resultComments.passedByKey,
+  };
+  const examples = extractExamples(libSrcPath, commentMaps);
+
+  // Validate required fields
+  const name = ruleDef?.name ?? readme.name;
+  const description = ruleDef?.description ?? readme.description;
+
+  if (!name) {
+    throw new Error(
+      `Rule name not found in rule definition or README: ${slug} (methodology=${methodology}, scope=${scope})`,
+    );
+  }
+
+  if (!description) {
+    throw new Error(
+      `Rule description not found in rule definition or README: ${slug} (methodology=${methodology}, scope=${scope})`,
+    );
+  }
 
   // Merge errors: errors.ts + RESULT_COMMENTS.failed
-  const allErrors = [...errorMessages];
+  const allErrors = [...errorMessages.values];
   for (const msg of resultComments.failed) {
     if (!allErrors.includes(msg)) {
       allErrors.push(msg);
@@ -571,18 +688,18 @@ function buildRule(
       : ['Validation criteria are implemented in the processor.'];
 
   return {
-    description: ruleDef?.description ?? readme.description,
-    errors: allErrors.map((e) => normalizeMessage(e)),
+    description,
+    errors: normalizeMessages(allErrors),
     events: ruleDef?.events ?? [],
     examples,
     implementationPath: relImplementationPath,
     implementsFrameworkRules: ruleDef?.frameworkRules ?? [],
     methodology,
-    name: ruleDef?.name ?? readme.name ?? slug,
+    name,
     readmePath: relReadmePath,
     scope,
     slug,
-    successComments: resultComments.passed.map((s) => normalizeMessage(s)),
+    successComments: normalizeMessages(resultComments.passed),
     verifications,
   };
 }
@@ -590,7 +707,6 @@ function buildRule(
 // --- Main ---
 
 interface Manifest {
-  $schema: string;
   generatedAt: string;
   methodologies: Record<string, Record<string, ManifestRule[]>>;
   sourceCommit: string;
@@ -599,7 +715,6 @@ interface Manifest {
 
 function generate(): void {
   const manifest: Manifest = {
-    $schema: './schemas/application-rules-manifest.schema.json',
     generatedAt: new Date().toISOString(),
     methodologies: {},
     sourceCommit: getSourceCommit(),
@@ -611,7 +726,7 @@ function generate(): void {
   let rulesWithErrors = 0;
   const warnings: string[] = [];
 
-  for (const [methodology, scopes] of Object.entries(METHODOLOGIES)) {
+  for (const [methodology, scopes] of Object.entries(loadMethodologies())) {
     manifest.methodologies[methodology] = {};
 
     for (const [scope, slugs] of Object.entries(scopes)) {
