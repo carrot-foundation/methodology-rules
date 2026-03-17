@@ -1,6 +1,6 @@
 import type { AnyObject } from '@carrot-fndn/shared/types';
 
-import { tags } from 'typia';
+import { z } from 'zod';
 
 export enum RuleOutputStatus {
   FAILED = 'FAILED',
@@ -20,15 +20,24 @@ export interface RuleInput {
   parentDocumentId?: string;
   requestId: string;
   responseToken: string;
-  responseUrl: string & tags.Format<'url'>;
+  responseUrl: string;
   ruleName?: string;
   // TODO: add environment
 }
 
+export const RuleOutputSchema = z.object({
+  requestId: z.string(),
+  responseToken: z.string(),
+  responseUrl: z.url(),
+  resultComment: z.string().optional(),
+  resultContent: z.record(z.string(), z.any()).optional(),
+  resultStatus: z.enum(RuleOutputStatus),
+});
+
 export interface RuleOutput {
   requestId: string;
   responseToken: string;
-  responseUrl: string & tags.Format<'url'>;
+  responseUrl: string;
   resultComment?: string | undefined;
   resultContent?: AnyObject | undefined;
   resultStatus: RuleOutputStatus;

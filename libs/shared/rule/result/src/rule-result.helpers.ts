@@ -21,7 +21,7 @@ import {
   assertCredentials,
   assertRuleOutput,
   assertString,
-} from './rule-result.typia';
+} from './rule-result.validators';
 
 export const nilSafeRun = <T, R>(
   value: null | T | undefined,

@@ -1,5 +1,3 @@
-import type { Uri } from '@carrot-fndn/shared/types';
+import { UriSchema } from '@carrot-fndn/shared/types';
 
-import { assert } from 'typia';
-
-export const AUDIT_API_URL = assert<Uri>(process.env['AUDIT_URL']);
+export const AUDIT_API_URL = UriSchema.parse(process.env['AUDIT_URL']);

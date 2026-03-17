@@ -75,9 +75,7 @@ describe('mapRuleOutputToPostProcessInput', () => {
 
       delete process.env[variable];
 
-      expect(() => mapRuleOutputToPostProcessInput(ruleOutput)).toThrow(
-        'createAssert',
-      );
+      expect(() => mapRuleOutputToPostProcessInput(ruleOutput)).toThrow();
     },
   );
 
@@ -123,7 +121,10 @@ describe('reportRuleResults', () => {
   });
 
   it('should send a request to the given responseUrl', async () => {
-    const ruleOutput = random<RuleOutput>();
+    const ruleOutput = {
+      ...random<RuleOutput>(),
+      responseUrl: faker.internet.url(),
+    };
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
@@ -165,15 +166,19 @@ describe('reportRuleResults', () => {
   });
 
   it('should throw error when ruleOutput is not valid', async () => {
-    const ruleOutput = random<RuleOutput>();
-
-    ruleOutput.responseUrl = 'not a valid url';
+    const ruleOutput = {
+      ...random<RuleOutput>(),
+      responseUrl: 'not a valid url',
+    };
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
   });
 
   it('should throw error when response code is not ok', async () => {
-    const ruleOutput = random<RuleOutput>();
+    const ruleOutput = {
+      ...random<RuleOutput>(),
+      responseUrl: faker.internet.url(),
+    };
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
@@ -193,7 +198,10 @@ describe('reportRuleResults', () => {
   });
 
   it('should should throw error the request throws error', async () => {
-    const ruleOutput = random<RuleOutput>();
+    const ruleOutput = {
+      ...random<RuleOutput>(),
+      responseUrl: faker.internet.url(),
+    };
 
     const errorResponse = new Response();
 
@@ -288,9 +296,7 @@ describe('signRequest', () => {
       Credentials: undefined,
     } as never);
 
-    await expect(signRequest(input)).rejects.toThrow(
-      'Error on createAssert(): invalid type on $input, expect to be Credentials',
-    );
+    await expect(signRequest(input)).rejects.toThrow();
   });
 
   it.each([
@@ -330,9 +336,7 @@ describe('signRequest', () => {
       Credentials,
     } as never);
 
-    await expect(signRequest(input)).rejects.toThrow(
-      'Error on createAssert(): invalid type on $input, expect to be string',
-    );
+    await expect(signRequest(input)).rejects.toThrow();
   });
 
   it.each(['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN', 'AWS_REGION'])(
@@ -347,9 +351,7 @@ describe('signRequest', () => {
 
       delete process.env[value];
 
-      await expect(signRequest(input)).rejects.toThrow(
-        'Error on createAssert(): invalid type on $input, expect to be string',
-      );
+      await expect(signRequest(input)).rejects.toThrow();
     },
   );
 });

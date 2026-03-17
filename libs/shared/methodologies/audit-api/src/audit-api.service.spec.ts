@@ -34,7 +34,7 @@ describe('AuditApiService', () => {
     it('should throw an error when the dto is invalid', async () => {
       await expect(
         service.checkDuplicateDocuments({} as never),
-      ).rejects.toThrow('Error on createAssertEquals()');
+      ).rejects.toThrow();
     });
   });
 });
