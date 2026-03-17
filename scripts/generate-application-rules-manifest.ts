@@ -135,11 +135,11 @@ interface RuleDefinitionData {
 
 function extractRuleDefinition(
   srcPath: string,
+  srcFiles: string[],
   slug: string,
 ): RuleDefinitionData | undefined {
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const ruleDefFile = files.find((f) => f.endsWith('.rule-definition.ts'));
+  const ruleDefFile = srcFiles.find((f) => f.endsWith('.rule-definition.ts'));
 
   if (!ruleDefFile) return undefined;
 
@@ -197,22 +197,24 @@ interface ErrorMessagesResult {
   values: string[];
 }
 
-function extractErrorMessages(srcPath: string): ErrorMessagesResult {
+function extractErrorMessages(
+  srcPath: string,
+  srcFiles: string[],
+): ErrorMessagesResult {
   const values: string[] = [];
   const byKey: Record<string, string> = {};
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const errorsFile = files.find((f) => f.endsWith('.errors.ts'));
+  const errorsFile = srcFiles.find((f) => f.endsWith('.errors.ts'));
   if (!errorsFile) return { byKey, values };
 
   const content = fs.readFileSync(path.join(srcPath, errorsFile), 'utf8');
 
-  // Match ERROR_MESSAGE or ERROR_MESSAGES object
-  const objMatch = content.match(
-    /ERROR_MESSAGES?\s*=\s*\{([\s\S]*?)\}\s*as\s+const/,
-  );
-  if (!objMatch?.[1]) return { byKey, values };
+  // Find ERROR_MESSAGE(S) assignment and extract its brace-balanced body
+  const assignMatch = content.match(/ERROR_MESSAGES?\s*=\s*\{/);
+  if (!assignMatch?.index) return { byKey, values };
 
-  const inner = objMatch[1];
+  const braceStart = (assignMatch.index ?? 0) + assignMatch[0].length - 1;
+  const { end: braceEnd } = findEnclosingObjectBounds(content, braceStart + 1);
+  const inner = content.slice(braceStart + 1, braceEnd - 1);
 
   // Extract keyed template literals
   const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
@@ -253,9 +255,11 @@ interface ResultComments {
   passedByKey: Record<string, string>;
 }
 
-function extractResultComments(srcPath: string): ResultComments {
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const constantsFile = files.find((f) => f.endsWith('.constants.ts'));
+function extractResultComments(
+  srcPath: string,
+  srcFiles: string[],
+): ResultComments {
+  const constantsFile = srcFiles.find((f) => f.endsWith('.constants.ts'));
   if (!constantsFile)
     return { failed: [], failedByKey: {}, passed: [], passedByKey: {} };
 
@@ -418,16 +422,66 @@ interface RuleExample {
   };
 }
 
-function findEnclosingObjectStart(content: string, position: number): number {
+interface ObjectBounds {
+  end: number;
+  start: number;
+}
+
+function isQuoteChar(ch: string | undefined): ch is '"' | "'" | '`' {
+  return ch === '"' || ch === "'" || ch === '`';
+}
+
+function findEnclosingObjectBounds(
+  content: string,
+  position: number,
+): ObjectBounds {
+  // Scan backward to find the opening brace, skipping over string literals
   let depth = 0;
+  let start = 0;
   for (let i = position - 1; i >= 0; i--) {
-    if (content[i] === '}') depth++;
-    if (content[i] === '{') {
-      if (depth === 0) return i;
+    const ch = content[i];
+    if (isQuoteChar(ch)) {
+      i--;
+      while (i > 0 && content[i] !== ch) {
+        if (content[i] === '\\') i--;
+        i--;
+      }
+      continue;
+    }
+    if (ch === '}') depth++;
+    if (ch === '{') {
+      if (depth === 0) {
+        start = i;
+        break;
+      }
       depth--;
     }
   }
-  return 0;
+
+  // Scan forward from the opening brace, skipping over string literals
+  depth = 0;
+  let end = content.length;
+  for (let i = start; i < content.length; i++) {
+    const ch = content[i];
+    if (isQuoteChar(ch)) {
+      i++;
+      while (i < content.length && content[i] !== ch) {
+        if (content[i] === '\\') i++;
+        i++;
+      }
+      continue;
+    }
+    if (ch === '{') depth++;
+    if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        end = i + 1;
+        break;
+      }
+    }
+  }
+
+  return { end, start };
 }
 
 interface ResultCommentMaps {
@@ -474,11 +528,11 @@ function resolveResultComment(
 
 function extractExamples(
   srcPath: string,
+  srcFiles: string[],
   commentMaps: ResultCommentMaps,
 ): RuleExample[] {
   const examples: RuleExample[] = [];
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const testCasesFile = files.find((f) => f.includes('test-cases'));
+  const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
   if (!testCasesFile) return examples;
 
   const content = fs.readFileSync(path.join(srcPath, testCasesFile), 'utf8');
@@ -491,9 +545,12 @@ function extractExamples(
     const rawScenario =
       scenarioMatch[1] ?? scenarioMatch[2] ?? scenarioMatch[3] ?? '';
 
-    const objStart = findEnclosingObjectStart(content, scenarioMatch.index);
-    const objectSlice = content.slice(objStart, scenarioMatch.index);
-    const statusMatch = objectSlice.match(
+    const { end: objEnd, start: objStart } = findEnclosingObjectBounds(
+      content,
+      scenarioMatch.index,
+    );
+    const fullObjectSlice = content.slice(objStart, objEnd);
+    const statusMatch = fullObjectSlice.match(
       /resultStatus:\s*RuleOutputStatus\.(\w+)/,
     );
     const status = statusMatch?.[1];
@@ -519,14 +576,7 @@ function extractExamples(
       ? status
       : 'REJECTED';
 
-    // Also look ahead after the scenario for resultComment
-    const afterScenarioSlice = content.slice(
-      scenarioMatch.index,
-      scenarioMatch.index + 500,
-    );
-    const resultComment =
-      resolveResultComment(objectSlice, commentMaps) ??
-      resolveResultComment(afterScenarioSlice, commentMaps);
+    const resultComment = resolveResultComment(fullObjectSlice, commentMaps);
 
     const output: RuleExample['output'] = { resultStatus };
     if (resultComment) {
@@ -627,11 +677,14 @@ function buildRule(
   // Get lib slug for processor file resolution
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
 
+  // Read directory once and pass to all extractors
+  const srcFiles = fs.readdirSync(libSrcPath);
+
   // Find processor file
-  const files = fs.readdirSync(libSrcPath);
   const processorFile =
-    files.find((f) => f.endsWith('.processor.ts') && !f.includes('.spec.')) ??
-    `${libSlug}.processor.ts`;
+    srcFiles.find(
+      (f) => f.endsWith('.processor.ts') && !f.includes('.spec.'),
+    ) ?? `${libSlug}.processor.ts`;
   const processorFullPath = path.join(libSrcPath, processorFile);
 
   if (!fileExists(processorFullPath)) {
@@ -646,16 +699,16 @@ function buildRule(
     .join('/');
 
   // Extract data from each source
-  const ruleDef = extractRuleDefinition(libSrcPath, slug);
+  const ruleDef = extractRuleDefinition(libSrcPath, srcFiles, slug);
   const readme = extractReadmeData(readmePath);
-  const errorMessages = extractErrorMessages(libSrcPath);
-  const resultComments = extractResultComments(libSrcPath);
+  const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
+  const resultComments = extractResultComments(libSrcPath, srcFiles);
   const commentMaps: ResultCommentMaps = {
     errorsByKey: errorMessages.byKey,
     failedByKey: resultComments.failedByKey,
     passedByKey: resultComments.passedByKey,
   };
-  const examples = extractExamples(libSrcPath, commentMaps);
+  const examples = extractExamples(libSrcPath, srcFiles, commentMaps);
 
   // Validate required fields
   const name = ruleDef?.name ?? readme.name;
@@ -824,7 +877,7 @@ function generate(): void {
     for (const [scope, slugs] of Object.entries(scopes)) {
       const scopeResult = processScope(methodology, scope, slugs);
 
-      manifest.methodologies[methodology]![scope] = scopeResult.rules;
+      manifest.methodologies[methodology][scope] = scopeResult.rules;
       totalRules += scopeResult.totalRules;
       rulesWithExamples += scopeResult.rulesWithExamples;
       rulesWithErrors += scopeResult.rulesWithErrors;
