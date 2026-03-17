@@ -713,6 +713,30 @@ interface Manifest {
   version: string;
 }
 
+function assertManifest(value: unknown): asserts value is Manifest {
+  const m = value as Record<string, unknown>;
+
+  if (typeof m !== 'object' || m === null) {
+    throw new Error('Manifest must be a non-null object');
+  }
+
+  if (typeof m['generatedAt'] !== 'string') {
+    throw new Error('Manifest.generatedAt must be a string');
+  }
+
+  if (typeof m['sourceCommit'] !== 'string') {
+    throw new Error('Manifest.sourceCommit must be a string');
+  }
+
+  if (typeof m['version'] !== 'string') {
+    throw new Error('Manifest.version must be a string');
+  }
+
+  if (typeof m['methodologies'] !== 'object' || m['methodologies'] === null) {
+    throw new Error('Manifest.methodologies must be a non-null object');
+  }
+}
+
 interface ProcessRuleResult {
   hasErrors: boolean;
   hasExamples: boolean;
@@ -814,6 +838,9 @@ function generate(): void {
   }
 
   const outputPath = path.join(DIST, 'application-rules-manifest.json');
+
+  assertManifest(manifest);
+
   fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2), 'utf8');
 
   // Print summary
