@@ -55,6 +55,13 @@ function getLibSrcPath(scope: string, slug: string): string {
   return path.join(LIB_RULE_PROCESSORS, libScope, libSlug, 'src');
 }
 
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 function extractRuleDefinition(
   srcPath: string,
   slug: string,
@@ -73,9 +80,16 @@ function extractRuleDefinition(
   );
   const slugMatch = content.match(/slug:\s*['"`]([^'"`]+)['"`]/);
 
+  // When the app slug differs from the lib slug (SLUG_TO_LIB mapping),
+  // derive the name from the app slug instead of using the shared lib's name
+  const hasSlugMapping = SLUG_TO_LIB[slug] !== undefined;
+  const name = hasSlugMapping
+    ? slugToTitle(slug)
+    : (nameMatch?.[1] ?? libSlug);
+
   return {
     description: descMatch?.[1]?.trim() ?? '',
-    name: nameMatch?.[1] ?? libSlug,
+    name,
     slug: slugMatch?.[1] ?? libSlug,
   };
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-# Certificate Uniqueness Check
+# No Conflicting Recycled Id Or Credit
 
 Methodology: **BOLD-RECYCLING**
 

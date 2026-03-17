@@ -1,6 +1,6 @@
 <div align="center">
 
-# Recycling Manifest
+# Recycling Manifest Data
 
 Methodology: **BOLD-RECYCLING**
 

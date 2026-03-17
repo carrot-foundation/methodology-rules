@@ -1,6 +1,6 @@
 <div align="center">
 
-# Certificate Uniqueness Check
+# No Conflicting Gas Id Or Credit
 
 Methodology: **BOLD-CARBON**
 
