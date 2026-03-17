@@ -1,14 +1,16 @@
-import type { MethodologyDocumentEventAttachment } from '@carrot-fndn/shared/types';
-import type { tags } from 'typia';
+import type {
+  MethodologyDocumentEventAttachment,
+  NonEmptyArray,
+} from '@carrot-fndn/shared/types';
 
 import type { DocumentEventAttribute } from './document-event.types';
 
 export interface DocumentEventWithAttachments {
-  attachments: MethodologyDocumentEventAttachment[] & tags.MinItems<1>;
+  attachments: NonEmptyArray<MethodologyDocumentEventAttachment>;
 }
 
 export interface DocumentEventWithMetadata {
   metadata: {
-    attributes: DocumentEventAttribute[] & tags.MinItems<1>;
+    attributes: NonEmptyArray<DocumentEventAttribute>;
   };
 }
