@@ -49,7 +49,7 @@ pnpm commit                  # Interactive conventional commit
 ```text
 libs/
 ├── methodologies/bold/rule-processors/
-│   ├── mass-id/              # Mass ID rule processors
+│   ├── mass-id/              # MassID rule processors
 │   ├── credit-order/         # Credit order processors
 │   └── mass-id-certificate/  # Certificate processors
 └── shared/

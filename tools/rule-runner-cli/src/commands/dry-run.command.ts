@@ -54,7 +54,7 @@ export const dryRunCommand = new Command('dry-run')
   .addOption(
     new Option(
       '-d, --document-id <id>',
-      'Mass-ID document ID (Palantir document ID)',
+      'MassID document ID (Palantir document ID)',
     ),
   )
   .addOption(

@@ -54,7 +54,7 @@ describe('Document Matchers', () => {
   });
 
   describe('MASS_ID', () => {
-    it('should return true if the document category is Mass ID', () => {
+    it('should return true if the document category is MassID', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.MASS_ID,
       });
@@ -64,7 +64,7 @@ describe('Document Matchers', () => {
       expect(matchesResult).toBe(true);
     });
 
-    it('should return false if the document category is not Mass ID', () => {
+    it('should return false if the document category is not MassID', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
       });
@@ -111,7 +111,7 @@ describe('Document Matchers', () => {
   });
 
   describe('RECYCLED_ID', () => {
-    it('should return true if the document category is Methodology and type is Recycled ID', () => {
+    it('should return true if the document category is Methodology and type is RecycledID', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.RECYCLED_ID,
@@ -133,7 +133,7 @@ describe('Document Matchers', () => {
       expect(matchesResult).toBe(false);
     });
 
-    it('should return false if the document type is not Recycled ID', () => {
+    it('should return false if the document type is not RecycledID', () => {
       const documentRelation = stubDocumentRelation({
         category: DocumentCategory.METHODOLOGY,
         type: DocumentType.ORGANIC,
