@@ -80,6 +80,9 @@ importers:
       typia:
         specifier: 7.6.4
         version: 7.6.4(@samchon/openapi@2.5.3)(@types/node@22.15.18)(typescript@5.7.3)
+      zod:
+        specifier: 4.3.6
+        version: 4.3.6
     devDependencies:
       '@commitlint/cli':
         specifier: 19.8.1
@@ -294,6 +297,9 @@ importers:
       typescript-eslint:
         specifier: 8.32.1
         version: 8.32.1(eslint@9.27.0(jiti@2.6.1))(typescript@5.7.3)
+      zocker:
+        specifier: 3.0.0
+        version: 3.0.0(zod@4.3.6)
 
 packages:
 
@@ -1858,6 +1864,10 @@ packages:
   '@eslint/plugin-kit@0.3.5':
     resolution: {integrity: sha512-Z5kJ+wU3oA7MMIqVR9tyZRtjYPr4OC004Q4Rw7pgOKUOKkJfZ3O24nz3WYfGRpMDNmcOi3TwQOmgm7B7Tpii0w==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@faker-js/faker@10.3.0':
+    resolution: {integrity: sha512-It0Sne6P3szg7JIi6CgKbvTZoMjxBZhcv91ZrqrNuaZQfB5WoqYYbzCUOq89YR+VY8juY9M1vDWmDDa2TzfXCw==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@faker-js/faker@9.8.0':
     resolution: {integrity: sha512-U9wpuSrJC93jZBxx/Qq2wPjCuYISBueyVUGK7qqdmj7r/nxaxwW8AQDCLeRO7wZnjj94sh3p246cAYjUKuqgfg==}
@@ -8812,6 +8822,14 @@ packages:
     resolution: {integrity: sha512-4LCcse/U2MHZ63HAJVE+v71o7yOdIe4cZ70Wpf8D/IyjDKYQLV5GD46B+hSTjJsvV5PztjvHoU580EftxjDZFQ==}
     engines: {node: '>=12.20'}
 
+  zocker@3.0.0:
+    resolution: {integrity: sha512-xSJz2M9AELZKzgpuuZPbTQdMv9263p/zSHDIj81B58X3334Xl6iJ/C3u6OQiOlsrWAoJSJsveBcIdz1eEPL0EA==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
+  zod@4.3.6:
+    resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
 snapshots:
 
   '@adobe/css-tools@4.3.3': {}
@@ -11542,6 +11560,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.15.2
       levn: 0.4.1
+
+  '@faker-js/faker@10.3.0': {}
 
   '@faker-js/faker@9.8.0': {}
 
@@ -19978,3 +19998,11 @@ snapshots:
   yocto-queue@0.1.0: {}
 
   yocto-queue@1.2.2: {}
+
+  zocker@3.0.0(zod@4.3.6):
+    dependencies:
+      '@faker-js/faker': 10.3.0
+      randexp: 0.5.3
+      zod: 4.3.6
+
+  zod@4.3.6: {}
