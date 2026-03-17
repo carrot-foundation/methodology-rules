@@ -152,7 +152,13 @@
       "@carrot-fndn/shared/text-extractor": [
         "libs/shared/text-extractor/src/index.ts"
       ],
-      "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"]
+      "@carrot-fndn/shared/types": ["libs/shared/types/src/index.ts"],
+      "@carrot-fndn/methodologies/bold-carbon/rules": [
+        "libs/methodologies/bold-carbon/rules/src/index.ts"
+      ],
+      "@carrot-fndn/methodologies/bold-recycling/rules": [
+        "libs/methodologies/bold-recycling/rules/src/index.ts"
+      ]
     }
   }
 }

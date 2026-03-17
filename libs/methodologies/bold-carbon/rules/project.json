@@ -1,0 +1,11 @@
+{
+  "name": "methodologies-bold-carbon-rules",
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["methodology:bold", "processor:shared", "type:library"],
+  "sourceRoot": "libs/methodologies/bold-carbon/rules/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "ts": {}
+  }
+}

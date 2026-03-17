@@ -4,7 +4,7 @@
  * Generates application-rules-manifest.json — the cross-repo contract
  * between methodology-rules and carrot-docs.
  *
- * Usage: npx tsx scripts/generate-application-rules-manifest.ts
+ * Usage: pnpm exec tsx scripts/generate-application-rules-manifest.ts
  * Output: dist/application-rules-manifest.json
  */
 
@@ -22,8 +22,26 @@ const LIB_RULE_PROCESSORS = path.join(
   'rule-processors',
 );
 const APPS_METHODOLOGIES = path.join(ROOT, 'apps', 'methodologies');
+const LIBS_METHODOLOGIES = path.join(ROOT, 'libs', 'methodologies');
 
 // --- Methodology configs ---
+
+function getRulesConfigPath(methodology: string): string | undefined {
+  // Prefer lib-level rules config, fall back to apps-level
+  const libPath = path.join(
+    LIBS_METHODOLOGIES,
+    methodology,
+    'rules',
+    'src',
+    'rules.config.ts',
+  );
+  if (fileExists(libPath)) return libPath;
+
+  const appPath = path.join(APPS_METHODOLOGIES, methodology, 'rules.config.ts');
+  if (fileExists(appPath)) return appPath;
+
+  return undefined;
+}
 
 function loadMethodologies(): Record<
   string,
@@ -36,12 +54,8 @@ function loadMethodologies(): Record<
   })) {
     if (!entry.isDirectory()) continue;
 
-    const configPath = path.join(
-      APPS_METHODOLOGIES,
-      entry.name,
-      'rules.config.ts',
-    );
-    if (!fileExists(configPath)) continue;
+    const configPath = getRulesConfigPath(entry.name);
+    if (!configPath) continue;
 
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { rulesConfig } = require(configPath) as {
@@ -123,6 +137,59 @@ function getSourceCommit(): string {
   }
 }
 
+// --- Framework rule slugs loader ---
+
+function loadFrameworkRuleSlugs(methodology: string): Set<string> {
+  const fwPath = path.join(
+    ROOT,
+    'libs',
+    'methodologies',
+    methodology,
+    'rules',
+    'src',
+    'framework-rules.ts',
+  );
+
+  if (!fileExists(fwPath)) {
+    return new Set<string>();
+  }
+
+  const content = fs.readFileSync(fwPath, 'utf8');
+  const slugs = new Set<string>();
+  const slugRe = /slug:\s*['"`]([^'"`]+)['"`]/g;
+  let match;
+
+  while ((match = slugRe.exec(content)) !== null) {
+    if (match[1]) slugs.add(match[1]);
+  }
+
+  return slugs;
+}
+
+// --- App-level frameworkRules extraction ---
+
+function extractAppFrameworkRules(
+  appRulePath: string,
+): string[] | undefined {
+  const ruleDefPath = path.join(appRulePath, 'src', 'rule-definition.ts');
+
+  if (!fileExists(ruleDefPath)) return undefined;
+
+  const content = fs.readFileSync(ruleDefPath, 'utf8');
+  const fwMatch = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
+
+  if (!fwMatch?.[1]) return [];
+
+  const rules: string[] = [];
+  const strMatches = fwMatch[1].matchAll(/['"`]([^'"`]+)['"`]/g);
+
+  for (const m of strMatches) {
+    if (m[1]) rules.push(m[1]);
+  }
+
+  return rules;
+}
+
 // --- Rule Definition extraction ---
 
 interface RuleDefinitionData {
@@ -135,11 +202,11 @@ interface RuleDefinitionData {
 
 function extractRuleDefinition(
   srcPath: string,
+  srcFiles: string[],
   slug: string,
 ): RuleDefinitionData | undefined {
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const ruleDefFile = files.find((f) => f.endsWith('.rule-definition.ts'));
+  const ruleDefFile = srcFiles.find((f) => f.endsWith('.rule-definition.ts'));
 
   if (!ruleDefFile) return undefined;
 
@@ -197,22 +264,24 @@ interface ErrorMessagesResult {
   values: string[];
 }
 
-function extractErrorMessages(srcPath: string): ErrorMessagesResult {
+function extractErrorMessages(
+  srcPath: string,
+  srcFiles: string[],
+): ErrorMessagesResult {
   const values: string[] = [];
   const byKey: Record<string, string> = {};
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const errorsFile = files.find((f) => f.endsWith('.errors.ts'));
+  const errorsFile = srcFiles.find((f) => f.endsWith('.errors.ts'));
   if (!errorsFile) return { byKey, values };
 
   const content = fs.readFileSync(path.join(srcPath, errorsFile), 'utf8');
 
-  // Match ERROR_MESSAGE or ERROR_MESSAGES object
-  const objMatch = content.match(
-    /ERROR_MESSAGES?\s*=\s*\{([\s\S]*?)\}\s*as\s+const/,
-  );
-  if (!objMatch?.[1]) return { byKey, values };
+  // Find ERROR_MESSAGE(S) assignment and extract its brace-balanced body
+  const assignMatch = content.match(/ERROR_MESSAGES?\s*=\s*\{/);
+  if (!assignMatch?.index) return { byKey, values };
 
-  const inner = objMatch[1];
+  const braceStart = (assignMatch.index ?? 0) + assignMatch[0].length - 1;
+  const { end: braceEnd } = findEnclosingObjectBounds(content, braceStart + 1);
+  const inner = content.slice(braceStart + 1, braceEnd - 1);
 
   // Extract keyed template literals
   const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
@@ -253,9 +322,11 @@ interface ResultComments {
   passedByKey: Record<string, string>;
 }
 
-function extractResultComments(srcPath: string): ResultComments {
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const constantsFile = files.find((f) => f.endsWith('.constants.ts'));
+function extractResultComments(
+  srcPath: string,
+  srcFiles: string[],
+): ResultComments {
+  const constantsFile = srcFiles.find((f) => f.endsWith('.constants.ts'));
   if (!constantsFile)
     return { failed: [], failedByKey: {}, passed: [], passedByKey: {} };
 
@@ -418,16 +489,66 @@ interface RuleExample {
   };
 }
 
-function findEnclosingObjectStart(content: string, position: number): number {
+interface ObjectBounds {
+  end: number;
+  start: number;
+}
+
+function isQuoteChar(ch: string | undefined): ch is '"' | "'" | '`' {
+  return ch === '"' || ch === "'" || ch === '`';
+}
+
+function findEnclosingObjectBounds(
+  content: string,
+  position: number,
+): ObjectBounds {
+  // Scan backward to find the opening brace, skipping over string literals
   let depth = 0;
+  let start = 0;
   for (let i = position - 1; i >= 0; i--) {
-    if (content[i] === '}') depth++;
-    if (content[i] === '{') {
-      if (depth === 0) return i;
+    const ch = content[i];
+    if (isQuoteChar(ch)) {
+      i--;
+      while (i > 0 && content[i] !== ch) {
+        if (content[i] === '\\') i--;
+        i--;
+      }
+      continue;
+    }
+    if (ch === '}') depth++;
+    if (ch === '{') {
+      if (depth === 0) {
+        start = i;
+        break;
+      }
       depth--;
     }
   }
-  return 0;
+
+  // Scan forward from the opening brace, skipping over string literals
+  depth = 0;
+  let end = content.length;
+  for (let i = start; i < content.length; i++) {
+    const ch = content[i];
+    if (isQuoteChar(ch)) {
+      i++;
+      while (i < content.length && content[i] !== ch) {
+        if (content[i] === '\\') i++;
+        i++;
+      }
+      continue;
+    }
+    if (ch === '{') depth++;
+    if (ch === '}') {
+      depth--;
+      if (depth === 0) {
+        end = i + 1;
+        break;
+      }
+    }
+  }
+
+  return { end, start };
 }
 
 interface ResultCommentMaps {
@@ -474,11 +595,11 @@ function resolveResultComment(
 
 function extractExamples(
   srcPath: string,
+  srcFiles: string[],
   commentMaps: ResultCommentMaps,
 ): RuleExample[] {
   const examples: RuleExample[] = [];
-  const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
-  const testCasesFile = files.find((f) => f.includes('test-cases'));
+  const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
   if (!testCasesFile) return examples;
 
   const content = fs.readFileSync(path.join(srcPath, testCasesFile), 'utf8');
@@ -491,9 +612,12 @@ function extractExamples(
     const rawScenario =
       scenarioMatch[1] ?? scenarioMatch[2] ?? scenarioMatch[3] ?? '';
 
-    const objStart = findEnclosingObjectStart(content, scenarioMatch.index);
-    const objectSlice = content.slice(objStart, scenarioMatch.index);
-    const statusMatch = objectSlice.match(
+    const { end: objEnd, start: objStart } = findEnclosingObjectBounds(
+      content,
+      scenarioMatch.index,
+    );
+    const fullObjectSlice = content.slice(objStart, objEnd);
+    const statusMatch = fullObjectSlice.match(
       /resultStatus:\s*RuleOutputStatus\.(\w+)/,
     );
     const status = statusMatch?.[1];
@@ -519,14 +643,7 @@ function extractExamples(
       ? status
       : 'REJECTED';
 
-    // Also look ahead after the scenario for resultComment
-    const afterScenarioSlice = content.slice(
-      scenarioMatch.index,
-      scenarioMatch.index + 500,
-    );
-    const resultComment =
-      resolveResultComment(objectSlice, commentMaps) ??
-      resolveResultComment(afterScenarioSlice, commentMaps);
+    const resultComment = resolveResultComment(fullObjectSlice, commentMaps);
 
     const output: RuleExample['output'] = { resultStatus };
     if (resultComment) {
@@ -608,6 +725,7 @@ function buildRule(
   methodology: string,
   scope: string,
   slug: string,
+  validFrameworkSlugs: Set<string>,
 ): ManifestRule {
   const libSrcPath = getLibSrcPath(scope, slug);
 
@@ -627,11 +745,14 @@ function buildRule(
   // Get lib slug for processor file resolution
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
 
+  // Read directory once and pass to all extractors
+  const srcFiles = fs.readdirSync(libSrcPath);
+
   // Find processor file
-  const files = fs.readdirSync(libSrcPath);
   const processorFile =
-    files.find((f) => f.endsWith('.processor.ts') && !f.includes('.spec.')) ??
-    `${libSlug}.processor.ts`;
+    srcFiles.find(
+      (f) => f.endsWith('.processor.ts') && !f.includes('.spec.'),
+    ) ?? `${libSlug}.processor.ts`;
   const processorFullPath = path.join(libSrcPath, processorFile);
 
   if (!fileExists(processorFullPath)) {
@@ -646,16 +767,31 @@ function buildRule(
     .join('/');
 
   // Extract data from each source
-  const ruleDef = extractRuleDefinition(libSrcPath, slug);
+  const ruleDef = extractRuleDefinition(libSrcPath, srcFiles, slug);
   const readme = extractReadmeData(readmePath);
-  const errorMessages = extractErrorMessages(libSrcPath);
-  const resultComments = extractResultComments(libSrcPath);
+  const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
+  const resultComments = extractResultComments(libSrcPath, srcFiles);
   const commentMaps: ResultCommentMaps = {
     errorsByKey: errorMessages.byKey,
     failedByKey: resultComments.failedByKey,
     passedByKey: resultComments.passedByKey,
   };
-  const examples = extractExamples(libSrcPath, commentMaps);
+  const examples = extractExamples(libSrcPath, srcFiles, commentMaps);
+
+  // Resolve frameworkRules: prefer app-level, fall back to shared lib
+  const appRuleFrameworkRules = extractAppFrameworkRules(appRulePath);
+  const frameworkRules = appRuleFrameworkRules ?? ruleDef?.frameworkRules ?? [];
+
+  // Validate framework rule slugs against the methodology's framework-rules.ts
+  const invalidSlugs = frameworkRules.filter(
+    (s) => !validFrameworkSlugs.has(s),
+  );
+  if (invalidSlugs.length > 0) {
+    throw new Error(
+      `Invalid framework rule slug(s) [${invalidSlugs.join(', ')}] in ${methodology}/${scope}/${slug}. ` +
+        `Valid slugs: ${[...validFrameworkSlugs].join(', ')}`,
+    );
+  }
 
   // Validate required fields
   const name = ruleDef?.name ?? readme.name;
@@ -693,7 +829,7 @@ function buildRule(
     events: ruleDef?.events ?? [],
     examples,
     implementationPath: relImplementationPath,
-    implementsFrameworkRules: ruleDef?.frameworkRules ?? [],
+    implementsFrameworkRules: frameworkRules,
     methodology,
     name,
     readmePath: relReadmePath,
@@ -713,6 +849,101 @@ interface Manifest {
   version: string;
 }
 
+function assertManifest(value: unknown): asserts value is Manifest {
+  const m = value as Record<string, unknown>;
+
+  if (typeof m !== 'object' || m === null) {
+    throw new Error('Manifest must be a non-null object');
+  }
+
+  if (typeof m['generatedAt'] !== 'string') {
+    throw new Error('Manifest.generatedAt must be a string');
+  }
+
+  if (typeof m['sourceCommit'] !== 'string') {
+    throw new Error('Manifest.sourceCommit must be a string');
+  }
+
+  if (typeof m['version'] !== 'string') {
+    throw new Error('Manifest.version must be a string');
+  }
+
+  if (typeof m['methodologies'] !== 'object' || m['methodologies'] === null) {
+    throw new Error('Manifest.methodologies must be a non-null object');
+  }
+}
+
+interface ProcessRuleResult {
+  hasErrors: boolean;
+  hasExamples: boolean;
+  rule: ManifestRule;
+  warnings: string[];
+}
+
+function processRule(
+  methodology: string,
+  scope: string,
+  slug: string,
+  validFrameworkSlugs: Set<string>,
+): ProcessRuleResult {
+  const rule = buildRule(methodology, scope, slug, validFrameworkSlugs);
+  const warnings: string[] = [];
+
+  if (rule.examples.length === 0) {
+    warnings.push(`${methodology}/${scope}/${slug}: no examples`);
+  }
+  if (rule.errors.length === 0) {
+    warnings.push(`${methodology}/${scope}/${slug}: no errors`);
+  }
+
+  return {
+    hasErrors: rule.errors.length > 0,
+    hasExamples: rule.examples.length > 0,
+    rule,
+    warnings,
+  };
+}
+
+interface ProcessScopeResult {
+  rules: ManifestRule[];
+  rulesWithErrors: number;
+  rulesWithExamples: number;
+  totalRules: number;
+  warnings: string[];
+}
+
+function processScope(
+  methodology: string,
+  scope: string,
+  slugs: readonly string[],
+  validFrameworkSlugs: Set<string>,
+): ProcessScopeResult {
+  const result: ProcessScopeResult = {
+    rules: [],
+    rulesWithErrors: 0,
+    rulesWithExamples: 0,
+    totalRules: 0,
+    warnings: [],
+  };
+
+  for (const slug of slugs) {
+    const { hasErrors, hasExamples, rule, warnings } = processRule(
+      methodology,
+      scope,
+      slug,
+      validFrameworkSlugs,
+    );
+
+    result.rules.push(rule);
+    result.totalRules++;
+    if (hasExamples) result.rulesWithExamples++;
+    if (hasErrors) result.rulesWithErrors++;
+    result.warnings.push(...warnings);
+  }
+
+  return result;
+}
+
 function generate(): void {
   const manifest: Manifest = {
     generatedAt: new Date().toISOString(),
@@ -728,27 +959,16 @@ function generate(): void {
 
   for (const [methodology, scopes] of Object.entries(loadMethodologies())) {
     manifest.methodologies[methodology] = {};
+    const validFrameworkSlugs = loadFrameworkRuleSlugs(methodology);
 
     for (const [scope, slugs] of Object.entries(scopes)) {
-      const rules: ManifestRule[] = [];
+      const scopeResult = processScope(methodology, scope, slugs, validFrameworkSlugs);
 
-      for (const slug of slugs) {
-        const rule = buildRule(methodology, scope, slug);
-        rules.push(rule);
-        totalRules++;
-
-        if (rule.examples.length > 0) rulesWithExamples++;
-        if (rule.errors.length > 0) rulesWithErrors++;
-
-        if (rule.examples.length === 0) {
-          warnings.push(`${methodology}/${scope}/${slug}: no examples`);
-        }
-        if (rule.errors.length === 0) {
-          warnings.push(`${methodology}/${scope}/${slug}: no errors`);
-        }
-      }
-
-      manifest.methodologies[methodology]![scope] = rules;
+      manifest.methodologies[methodology][scope] = scopeResult.rules;
+      totalRules += scopeResult.totalRules;
+      rulesWithExamples += scopeResult.rulesWithExamples;
+      rulesWithErrors += scopeResult.rulesWithErrors;
+      warnings.push(...scopeResult.warnings);
     }
   }
 
@@ -758,6 +978,9 @@ function generate(): void {
   }
 
   const outputPath = path.join(DIST, 'application-rules-manifest.json');
+
+  assertManifest(manifest);
+
   fs.writeFileSync(outputPath, JSON.stringify(manifest, null, 2), 'utf8');
 
   // Print summary

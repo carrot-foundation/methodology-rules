@@ -1,4 +1,4 @@
-import type { RuleDefinition } from '@carrot-fndn/shared/rule/types';
+import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
@@ -10,12 +10,6 @@ export const ruleDefinition = {
     DocumentEventName.PICK_UP,
     DocumentEventName.WASTE_GENERATOR,
   ],
-  frameworkRules: [
-    'fip-address',
-    'first-identified-participant-fip',
-    'one-waste-source',
-    'waste-origin-identified',
-  ],
   name: 'Waste Origin Identification',
   slug: 'waste-origin-identification',
-} as const satisfies RuleDefinition;
+} as const satisfies BaseRuleDefinition;
