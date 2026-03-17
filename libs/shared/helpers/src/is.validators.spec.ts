@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 import {
   isBigNumber,
   isNonNegative,
@@ -6,9 +8,9 @@ import {
   isNumber,
   isUri,
   isValidLicensePlate,
-} from './is.typia';
+} from './is.validators';
 
-describe('is.typia', () => {
+describe('is.validators', () => {
   describe('isValidLicensePlate', () => {
     describe('valid formats', () => {
       it.each([
@@ -174,21 +176,26 @@ describe('is.typia', () => {
         -0.1,
         Number.MAX_SAFE_INTEGER,
         Number.MIN_SAFE_INTEGER,
-        Number.NaN,
-        Number.POSITIVE_INFINITY,
-        Number.NEGATIVE_INFINITY,
       ])('should validate %s as true', (input) => {
         expect(isNumber(input)).toBeTruthy();
       });
     });
 
     describe('invalid values', () => {
-      it.each([null, undefined, '', 'abc', '123', [], {}])(
-        'should validate %s as false',
-        (input) => {
-          expect(isNumber(input)).toBeFalsy();
-        },
-      );
+      it.each([
+        Number.NaN,
+        Number.POSITIVE_INFINITY,
+        Number.NEGATIVE_INFINITY,
+        null,
+        undefined,
+        '',
+        'abc',
+        '123',
+        [],
+        {},
+      ])('should validate %s as false', (input) => {
+        expect(isNumber(input)).toBeFalsy();
+      });
     });
   });
 
@@ -204,7 +211,6 @@ describe('is.typia', () => {
         'http://example.com/path?query=value',
         'http://example.com:8080',
         'http:/example.com',
-        'http://',
       ])('should validate %s as true', (input) => {
         expect(isUri(input)).toBeTruthy();
       });
@@ -216,6 +222,7 @@ describe('is.typia', () => {
         null,
         undefined,
         'example.com',
+        'http://',
         'http//example.com',
         'http:',
         'http',
@@ -229,28 +236,27 @@ describe('is.typia', () => {
   });
 
   describe('isBigNumber', () => {
-    describe('expected behavior', () => {
-      it('validates most values as true', () => {
-        const validBigNumberValues = [
-          { isEqualTo: () => true, toString: () => '123' } as any,
-          { isEqualTo: () => true, toString: () => '0' } as any,
-          { isEqualTo: () => true, toString: () => '-123' } as any,
-          null,
-          undefined,
-          '',
-          'abc',
-          123,
-          {} as any,
-          [] as any,
-          { toString: 'not a function' } as any,
-          { isEqualTo: 'not a function' } as any,
-          { toString: () => '123' } as any,
-          { isEqualTo: () => true } as any,
-        ];
-
-        for (const input of validBigNumberValues) {
+    describe('valid values', () => {
+      it.each([new BigNumber(123), new BigNumber(0), new BigNumber(-123)])(
+        'should validate BigNumber instance as true',
+        (input) => {
           expect(isBigNumber(input)).toBeTruthy();
-        }
+        },
+      );
+    });
+
+    describe('invalid values', () => {
+      it.each<unknown>([
+        null,
+        undefined,
+        '',
+        'abc',
+        123,
+        {},
+        [],
+        { isEqualTo: () => true, toString: () => '123' },
+      ])('should validate %s as false', (input) => {
+        expect(isBigNumber(input)).toBeFalsy();
       });
     });
   });
