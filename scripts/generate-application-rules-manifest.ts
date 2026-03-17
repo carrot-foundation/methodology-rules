@@ -4,7 +4,7 @@
  * Generates application-rules-manifest.json — the cross-repo contract
  * between methodology-rules and carrot-docs.
  *
- * Usage: npx tsx scripts/generate-application-rules-manifest.ts
+ * Usage: pnpm exec tsx scripts/generate-application-rules-manifest.ts
  * Output: dist/application-rules-manifest.json
  */
 
