@@ -1,10 +1,12 @@
-import type { tags } from 'typia';
+import { z } from 'zod';
 
 import { type Latitude, type Longitude } from './number.types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyObject = Record<string, any>;
-export type DateTime = string & tags.Format<'date-time'>;
+
+export const DateTimeSchema = z.iso.datetime();
+export type DateTime = z.infer<typeof DateTimeSchema>;
 
 export interface Geolocation {
   latitude: Latitude;
