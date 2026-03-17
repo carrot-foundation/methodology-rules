@@ -14,6 +14,21 @@ Methodology: **BOLD Recycling**
 
 Validates that no duplicate MassID documents exist with the same combination of drop-off event, pick-up event, recycler event, waste generator event, and vehicle license plate.
 
+## 📋 Framework Rules
+
+| Rule                                    | Description                                                                                                                                                                                                                                                                            |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Double-checking Recycler Emitted Masses | Checks the operational capacity in the recycler's accreditation page. If the sum of masses processed by the same recycler in the same month exceeds the operational capacity by more than 3%, the MassID is blocked for credit generation until approved by the operations department. |
+| Double-checking Source Emitted Masses   | Checks the monthly waste generation ceiling in the source's accreditation page. If the sum of masses from the same generator in the same month exceeds the ceiling by more than 20%, the MassID is blocked for credit generation until reviewed by the operations department.          |
+| Duplicate Check                         | Verifies that no other mass documents exist with the same document value, same date and time of receipt at the recycling yard, same generator, and same vehicle. Duplicate documents are rejected to prevent inconsistencies.                                                          |
+| Route Check                             | Verifies that the date, time of the 'Drop-Off' event, and 'vehicle-license-plate' of the audited MassID are unique. If there is a conflict with another MassID, the mass is rejected to prevent duplicate or inconsistent records.                                                     |
+
+## 📡 Events
+
+- `ACTOR`
+- `Drop-off`
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/index.ts)**

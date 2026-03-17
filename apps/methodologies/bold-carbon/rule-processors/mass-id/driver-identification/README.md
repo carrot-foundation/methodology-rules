@@ -14,6 +14,16 @@ Methodology: **BOLD Carbon**
 
 Validates driver identification in the pick-up event, ensuring either a driver identifier or an exemption justification is provided based on the vehicle type.
 
+## 📋 Framework Rules
+
+| Rule              | Description                                                                                                                                                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Driver Identifier | When the 'Vehicle Type' is not 'Sludge Pipes', the 'Driver Identifier' metadata must be declared. If identified, the 'Internal DriverID' must be provided. If not identified, a 'Reason Dismissal DriverID' justification is required. |
+
+## 📡 Events
+
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/driver-identification/src/index.ts)**

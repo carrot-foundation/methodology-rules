@@ -14,6 +14,18 @@ Methodology: **BOLD Carbon**
 
 Validates sorting events in MassID documents, ensuring that gross weight, deducted weight, sorting factor, and event values are correctly calculated and formatted.
 
+## 📋 Framework Rules
+
+| Rule                | Description                                                                                                                                                                                                             |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Mass Sorting Event  | A 'Sorting' event must be declared after all 'Weighing' events in the MassID document.                                                                                                                                  |
+| Sorting Calculation | Verifies that the sorting calculation is correct by executing the equation: document value \* (100% - conversion factor) = mass sorting value, and comparing the result with the value declared in the 'Sorting' event. |
+| Sorting Value Field | The 'Sorting' event must contain a 'value' metadata, and the 'value' field of the 'Sorting' event must update the MassID document value.                                                                                |
+
+## 📡 Events
+
+- `Sorting`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/index.ts)**

@@ -14,6 +14,18 @@ Methodology: **BOLD Recycling**
 
 Validates that event addresses for all participants are within 2000 meters of their accredited addresses, ensuring geographic consistency between declared locations and accreditations.
 
+## 📋 Framework Rules
+
+| Rule                           | Description                                                                                                                                                                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Drop-off Geolocation Precision | In the 'Drop-off' event, the geolocation declared in the 'app-gps-latitude' and 'app-gps-longitude' metadata must be compatible with the event address data, within a 2 km radius. If GPS data is unavailable, validation falls back to the address registered in the participant's accreditation. |
+| Pick-up Geolocation Precision  | In the 'Pick-up' event, the geolocation declared in the 'app-gps-latitude' and 'app-gps-longitude' metadata must be compatible with the event address data, within a 2 km radius. If GPS data is unavailable, validation falls back to the address registered in the accreditation.                |
+
+## 📡 Events
+
+- `Drop-off`
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/index.ts)**

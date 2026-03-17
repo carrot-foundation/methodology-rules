@@ -2,7 +2,7 @@
 
 # Rewards Distribution
 
-Methodology: **BOLD**
+Methodology: **bold**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
 [![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
@@ -13,6 +13,10 @@ Methodology: **BOLD**
 ## 📄 Description
 
 Calculates reward distribution for MassID certificate documents based on actor participation, waste characteristics, and methodology configuration.
+
+## 📡 Events
+
+- `ACTOR`
 
 ## 📂 Implementation
 

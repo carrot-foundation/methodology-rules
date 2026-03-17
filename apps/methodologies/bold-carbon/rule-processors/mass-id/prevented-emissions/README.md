@@ -14,6 +14,17 @@ Methodology: **BOLD Carbon**
 
 Calculates prevented emissions in kg CO2e based on the waste subtype, recycler accreditation baselines, and exceeding emission coefficient.
 
+## 📋 Framework Rules
+
+| Rule                         | Description                                                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GasID Output                 | Checks the compensation index for the waste type in the recycler's accreditation page and executes the TCC calculation: document-value \* compensation index = GasID, ensuring carbon credits are correctly calculated based on waste type and volume. |
+| Recycled-to-Input Conversion | Verifies the composting fertilizer coefficient in the recycler's accreditation page and checks whether the declared quantity is compatible with the calculation, ensuring accuracy in recycled-to-input conversion reporting.                          |
+
+## 📡 Events
+
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/index.ts)**

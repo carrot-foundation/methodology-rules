@@ -14,6 +14,16 @@ Methodology: **BOLD Carbon**
 
 Validates that exactly one recycler actor event exists in the MassID document, ensuring proper recycler identification for waste tracking and credit generation.
 
+## 📋 Framework Rules
+
+| Rule           | Description                                                                                                                                                                              |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Recycler Actor | The MassID must contain exactly one 'Recycler' actor event, ensuring there is a single identified recycler responsible for transforming the waste and reintroducing it into the economy. |
+
+## 📡 Events
+
+- `ACTOR`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/recycler-identification/src/index.ts)**

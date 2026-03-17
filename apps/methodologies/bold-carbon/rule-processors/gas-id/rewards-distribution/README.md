@@ -14,6 +14,10 @@ Methodology: **BOLD Carbon**
 
 Calculates reward distribution for MassID certificate documents based on actor participation, waste characteristics, and methodology configuration.
 
+## 📡 Events
+
+- `ACTOR`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src/index.ts)**

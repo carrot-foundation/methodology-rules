@@ -14,6 +14,16 @@ Methodology: **BOLD Carbon**
 
 Validates that the MassID document has the correct qualifications: category must be MassID, type must be Organic, measurement unit must be kg, value must be greater than zero, and subtype must be a valid organic waste subtype.
 
+## 📋 Framework Rules
+
+| Rule                      | Description                                                                                                                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Document Category         | Verifies that the document is declared with the 'MassID' category, as required by the BOLD methodologies for mass verification.                                                   |
+| Document Measurement Unit | Verifies that the document's measurement unit is kilograms (kg), the standard unit adopted by the Carrot Platform.                                                                |
+| Document Subtype          | Verifies that the MassID organic waste subtype belongs to the group of subtypes approved by the BOLD methodologies, as defined by CDM TOOL04 eligible organic waste type classes. |
+| Document Type             | Verifies that the document type is declared as 'Organic'. The BOLD Carbon and BOLD Recycling methodologies are designed for organic waste types.                                  |
+| Document Value            | Verifies that the document has a value greater than zero. The document value represents the weight of the mass registered on the platform.                                        |
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/mass-id-qualifications/src/index.ts)**

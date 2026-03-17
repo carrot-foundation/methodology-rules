@@ -14,6 +14,17 @@ Methodology: **BOLD Recycling**
 
 Validates hauler identification based on the vehicle type, requiring a hauler actor event for most vehicle types while making it optional for sludge pipes and cart.
 
+## 📋 Framework Rules
+
+| Rule                  | Description                                                                                                                                                                                         |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Hauler Identification | When the 'Vehicle Type' metadata is not 'sludge-pipes' or 'cart', the MassID must contain at least one 'Hauler' actor event identifying the transport participant responsible for moving the waste. |
+
+## 📡 Events
+
+- `ACTOR`
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/hauler-identification/src/index.ts)**

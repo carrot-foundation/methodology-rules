@@ -21,7 +21,6 @@ const LIB_RULE_PROCESSORS = path.join(
 );
 const APPS_METHODOLOGIES = path.join(ROOT, 'apps', 'methodologies');
 
-// Same mappings as manifest generation
 const SCOPE_TO_LIB: Record<string, string> = {
   'gas-id': 'mass-id-certificate',
   'mass-certificate': 'mass-id-certificate',
@@ -37,7 +36,6 @@ const SLUG_TO_LIB: Record<string, string> = {
 };
 
 const METHODOLOGY_DISPLAY_NAMES: Record<string, string> = {
-  'bold': 'BOLD',
   'bold-carbon': 'BOLD Carbon',
   'bold-recycling': 'BOLD Recycling',
 };
@@ -61,8 +59,15 @@ const BOT_ACCOUNTS = new Set([
   'solidos-admin',
 ]);
 
+interface FrameworkRule {
+  description: string;
+  name: string;
+  slug: string;
+}
+
 interface RuleDefinitionData {
   description: string;
+  events: string[];
   name: string;
   slug: string;
 }
@@ -70,6 +75,8 @@ interface RuleDefinitionData {
 interface ReadmeInput {
   contributors: string[];
   description: string;
+  events: string[];
+  frameworkRules: FrameworkRule[];
   implRelPath: string;
   methodology: string;
   name: string;
@@ -104,9 +111,34 @@ function slugToTitle(slug: string): string {
     .join(' ');
 }
 
+/**
+ * Dynamically loads the MethodologyDocumentEventName enum from the source file.
+ * This file has no Typia in its import chain, so it's safe to import at runtime.
+ * Bold's DocumentEventName extends it with END and MOVE (added via BOLD_EXTRA_EVENT_NAMES).
+ */
+async function loadDocumentEventNames(): Promise<Record<string, string>> {
+  const enumFilePath = path.join(
+    ROOT,
+    'libs',
+    'shared',
+    'types',
+    'src',
+    'methodology',
+    'methodology-enum.types.ts',
+  );
+
+  const mod = await import(enumFilePath);
+  const baseEnum: Record<string, string> =
+    mod.MethodologyDocumentEventName ??
+    mod.default?.MethodologyDocumentEventName;
+
+  return baseEnum;
+}
+
 function extractRuleDefinition(
   srcPath: string,
   slug: string,
+  documentEventNames: Record<string, string>,
 ): RuleDefinitionData | undefined {
   const libSlug = SLUG_TO_LIB[slug] ?? slug;
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
@@ -129,11 +161,73 @@ function extractRuleDefinition(
     ? slugToTitle(slug)
     : (nameMatch?.[1] ?? libSlug);
 
+  // Extract events: DocumentEventName.MEMBER references
+  const eventsMatch = content.match(/events:\s*\[([\s\S]*?)\]/);
+  const events: string[] = [];
+  if (eventsMatch) {
+    const memberMatches = eventsMatch[1].matchAll(
+      /DocumentEventName\.(\w+)/g,
+    );
+    for (const m of memberMatches) {
+      const value = documentEventNames[m[1]];
+      if (value) {
+        events.push(value);
+      }
+    }
+  }
+
   return {
     description: descMatch?.[1]?.trim() ?? '',
+    events,
     name,
     slug: slugMatch?.[1] ?? libSlug,
   };
+}
+
+function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
+  if (!fileExists(appRuleDefPath)) return [];
+
+  const content = fs.readFileSync(appRuleDefPath, 'utf8');
+  const match = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
+  if (!match) return [];
+
+  const slugs: string[] = [];
+  const stringMatches = match[1].matchAll(/['"`]([^'"`]+)['"`]/g);
+  for (const m of stringMatches) {
+    slugs.push(m[1]);
+  }
+
+  return slugs;
+}
+
+async function loadFrameworkRules(
+  methodology: string,
+): Promise<Map<string, FrameworkRule>> {
+  const filePath = path.join(
+    ROOT,
+    'libs',
+    'methodologies',
+    methodology,
+    'rules',
+    'src',
+    'framework-rules.ts',
+  );
+
+  if (!fileExists(filePath)) {
+    return new Map();
+  }
+
+  // Dynamic import: tsx puts named exports under .default for CJS compat
+  const mod = await import(filePath);
+  const rules: FrameworkRule[] =
+    mod.frameworkRules ?? mod.default?.frameworkRules ?? mod.default;
+  const map = new Map<string, FrameworkRule>();
+
+  for (const rule of rules) {
+    map.set(rule.slug, rule);
+  }
+
+  return map;
 }
 
 function resolveGitHubUsername(email: string): string | undefined {
@@ -195,10 +289,40 @@ function formatContributorSection(usernames: string[]): string {
 }
 
 function generateReadme(input: ReadmeInput): string {
-  const { contributors, description, implRelPath, methodology, name } = input;
+  const {
+    contributors,
+    description,
+    events,
+    frameworkRules,
+    implRelPath,
+    methodology,
+    name,
+  } = input;
   const methodologyDisplay =
     METHODOLOGY_DISPLAY_NAMES[methodology] ?? methodology;
   const contributorSection = formatContributorSection(contributors);
+
+  let frameworkRulesSection = '';
+  if (frameworkRules.length > 0) {
+    const rows = frameworkRules
+      .map((r) => `| ${r.name} | ${r.description} |`)
+      .join('\n');
+    frameworkRulesSection = `\n## 📋 Framework Rules
+
+| Rule | Description |
+|------|-------------|
+${rows}
+`;
+  }
+
+  let eventsSection = '';
+  if (events.length > 0) {
+    const items = events.map((e) => `- \`${e}\``).join('\n');
+    eventsSection = `\n## 📡 Events
+
+${items}
+`;
+  }
 
   return `<div align="center">
 
@@ -215,7 +339,7 @@ Methodology: **${methodologyDisplay}**
 ## 📄 Description
 
 ${description}
-
+${frameworkRulesSection}${eventsSection}
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/${implRelPath})**
@@ -281,14 +405,26 @@ function discoverRules(): Array<{
   return rules;
 }
 
-function main(): void {
+async function main(): Promise<void> {
   const rules = discoverRules();
+
+  // Dynamically load enum values and framework rules (Typia-free import chains)
+  const documentEventNames = await loadDocumentEventNames();
+
+  const methodologies = [...new Set(rules.map((r) => r.methodology))];
+  const frameworkRulesMap = new Map<string, Map<string, FrameworkRule>>();
+
+  for (const methodology of methodologies) {
+    frameworkRulesMap.set(methodology, await loadFrameworkRules(methodology));
+  }
+
+  const readmePaths: string[] = [];
   let updated = 0;
   let skipped = 0;
 
   for (const { appPath, methodology, scope, slug } of rules) {
     const libSrcPath = getLibSrcPath(scope, slug);
-    const ruleDef = extractRuleDefinition(libSrcPath, slug);
+    const ruleDef = extractRuleDefinition(libSrcPath, slug, documentEventNames);
 
     if (!ruleDef) {
       console.log(`  Skipping ${methodology}/${scope}/${slug}: no rule definition`);
@@ -310,17 +446,42 @@ function main(): void {
 
     const contributors = getContributors(libSrcPath);
 
+    // Extract frameworkRules slugs from app-level definition, resolve to full objects
+    const appRuleDefPath = path.join(appPath, 'src', 'rule-definition.ts');
+    const frSlugs = extractFrameworkRuleSlugs(appRuleDefPath);
+    const methodologyFrameworkRules = frameworkRulesMap.get(methodology);
+    const resolvedFrameworkRules: FrameworkRule[] = [];
+
+    for (const frSlug of frSlugs) {
+      const fr = methodologyFrameworkRules?.get(frSlug);
+      if (fr) {
+        resolvedFrameworkRules.push(fr);
+      }
+    }
+
     const readmePath = path.join(appPath, 'README.md');
     const readme = generateReadme({
       contributors,
       description: ruleDef.description,
+      events: ruleDef.events,
+      frameworkRules: resolvedFrameworkRules,
       implRelPath,
       methodology,
       name: ruleDef.name,
     });
 
     fs.writeFileSync(readmePath, readme, 'utf8');
+    readmePaths.push(readmePath);
     updated++;
+  }
+
+  if (readmePaths.length > 0) {
+    console.log(`Formatting ${readmePaths.length} README files with prettier...`);
+    execFileSync('npx', ['prettier', '--write', ...readmePaths], {
+      cwd: ROOT,
+      encoding: 'utf8',
+      stdio: 'ignore',
+    });
   }
 
   console.log(`Generated ${updated} README files (skipped ${skipped})`);

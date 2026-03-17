@@ -14,6 +14,16 @@ Methodology: **BOLD Recycling**
 
 Validates that processor actor events in the MassID document are properly identified, ensuring correct waste processing tracking.
 
+## 📋 Framework Rules
+
+| Rule                   | Description                                                                                                                                                                                                                                                               |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Processor and Drop-Off | When a Drop-Off event has a 'Responsible Party' matching a 'Processor' participant, there must be a subsequent Drop-Off event whose 'Responsible Party' matches the 'Recycler' participant, ensuring the waste is forwarded from the processor to the recycling facility. |
+
+## 📡 Events
+
+- `ACTOR`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/index.ts)**

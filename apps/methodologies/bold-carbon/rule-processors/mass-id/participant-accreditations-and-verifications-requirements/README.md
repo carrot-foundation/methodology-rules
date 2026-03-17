@@ -14,6 +14,16 @@ Methodology: **BOLD Carbon**
 
 Validates that all participants in the MassID document have valid accreditation documents with active dates, ensuring proper supply chain certification.
 
+## 📋 Framework Rules
+
+| Rule                             | Description                                                                                                                                                                              |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Check Participants Accreditation | Validates that all participants involved in the supply chain are accredited by the Carrot system. Verifies that accreditation documents exist and that their due dates have not expired. |
+
+## 📡 Events
+
+- `ACTOR`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/index.ts)**

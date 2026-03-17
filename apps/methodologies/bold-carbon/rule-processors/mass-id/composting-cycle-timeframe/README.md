@@ -14,6 +14,17 @@ Methodology: **BOLD Carbon**
 
 Validates that the time between drop-off and recycled events is within the acceptable range of 60 to 180 days for composting cycles.
 
+## 📋 Framework Rules
+
+| Rule                | Description                                                                                                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Time Interval Check | The time difference between the 'Drop-Off' and 'Recycled' events must be between 60 and 180 days, ensuring the composting cycle meets quality standards for fertilizer production. |
+
+## 📡 Events
+
+- `Drop-off`
+- `Recycled`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/composting-cycle-timeframe/src/index.ts)**

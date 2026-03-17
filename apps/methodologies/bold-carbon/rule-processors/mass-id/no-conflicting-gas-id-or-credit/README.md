@@ -14,6 +14,12 @@ Methodology: **BOLD Carbon**
 
 Validates that the MassID document is not already linked to a valid RecycledID certificate or credit order document, preventing duplicate credit generation from the same waste mass.
 
+## 📋 Framework Rules
+
+| Rule        | Description                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| TCC Absence | Verifies that the MassID document does not already have a carbon credit event linked to it, ensuring no double counting of carbon credits (TCC). |
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit/src/index.ts)**

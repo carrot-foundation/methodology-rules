@@ -14,6 +14,19 @@ Methodology: **BOLD Carbon**
 
 Validates that the drop-off event includes a receiving operator identifier and that the drop-off address matches the recycler event address.
 
+## 📋 Framework Rules
+
+| Rule                                  | Description                                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Check Recycler and Drop-Off Addresses | At least one 'Drop-off' event must have its 'Responsible Party' address matching the address declared for the 'Recycler' actor event. Address validation is performed based on registered address IDs.                      |
+| Drop-off Event                        | A 'Drop-off' event must be declared in the MassID, confirming that the waste was delivered to the correct destination and transferred to the composting facility.                                                           |
+| Receiving Operator Identifier         | The 'Drop-off' event must contain the 'Receiving Operator Identifier' metadata, ensuring a responsible operator is registered for receiving the waste at the composting facility, enabling traceability and accountability. |
+
+## 📡 Events
+
+- `ACTOR`
+- `Drop-off`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/src/index.ts)**

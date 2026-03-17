@@ -14,6 +14,17 @@ Methodology: **BOLD Carbon**
 
 Calculates and validates the distance between the pick-up and drop-off event addresses, determining the geographic scope of the waste collection and processing activity.
 
+## 📋 Framework Rules
+
+| Rule                       | Description                                                                                                                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Methodology Distance Limit | Verifies the distance between the 'Pick-up' and 'Drop-off' event geolocations. Distances exceeding 200 km are flagged for review in the Carrot Operations Dashboard, as the project boundary established under UNFCCC AMS-III.F. is 200 km. |
+
+## 📡 Events
+
+- `Drop-off`
+- `Pick-up`
+
 ## 📂 Implementation
 
 - **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/project-boundary/src/index.ts)**
