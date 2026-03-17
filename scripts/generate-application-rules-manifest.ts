@@ -713,6 +713,74 @@ interface Manifest {
   version: string;
 }
 
+interface ProcessRuleResult {
+  hasErrors: boolean;
+  hasExamples: boolean;
+  rule: ManifestRule;
+  warnings: string[];
+}
+
+function processRule(
+  methodology: string,
+  scope: string,
+  slug: string,
+): ProcessRuleResult {
+  const rule = buildRule(methodology, scope, slug);
+  const warnings: string[] = [];
+
+  if (rule.examples.length === 0) {
+    warnings.push(`${methodology}/${scope}/${slug}: no examples`);
+  }
+  if (rule.errors.length === 0) {
+    warnings.push(`${methodology}/${scope}/${slug}: no errors`);
+  }
+
+  return {
+    hasErrors: rule.errors.length > 0,
+    hasExamples: rule.examples.length > 0,
+    rule,
+    warnings,
+  };
+}
+
+interface ProcessScopeResult {
+  rules: ManifestRule[];
+  rulesWithErrors: number;
+  rulesWithExamples: number;
+  totalRules: number;
+  warnings: string[];
+}
+
+function processScope(
+  methodology: string,
+  scope: string,
+  slugs: readonly string[],
+): ProcessScopeResult {
+  const result: ProcessScopeResult = {
+    rules: [],
+    rulesWithErrors: 0,
+    rulesWithExamples: 0,
+    totalRules: 0,
+    warnings: [],
+  };
+
+  for (const slug of slugs) {
+    const { hasErrors, hasExamples, rule, warnings } = processRule(
+      methodology,
+      scope,
+      slug,
+    );
+
+    result.rules.push(rule);
+    result.totalRules++;
+    if (hasExamples) result.rulesWithExamples++;
+    if (hasErrors) result.rulesWithErrors++;
+    result.warnings.push(...warnings);
+  }
+
+  return result;
+}
+
 function generate(): void {
   const manifest: Manifest = {
     generatedAt: new Date().toISOString(),
@@ -730,25 +798,13 @@ function generate(): void {
     manifest.methodologies[methodology] = {};
 
     for (const [scope, slugs] of Object.entries(scopes)) {
-      const rules: ManifestRule[] = [];
+      const scopeResult = processScope(methodology, scope, slugs);
 
-      for (const slug of slugs) {
-        const rule = buildRule(methodology, scope, slug);
-        rules.push(rule);
-        totalRules++;
-
-        if (rule.examples.length > 0) rulesWithExamples++;
-        if (rule.errors.length > 0) rulesWithErrors++;
-
-        if (rule.examples.length === 0) {
-          warnings.push(`${methodology}/${scope}/${slug}: no examples`);
-        }
-        if (rule.errors.length === 0) {
-          warnings.push(`${methodology}/${scope}/${slug}: no errors`);
-        }
-      }
-
-      manifest.methodologies[methodology]![scope] = rules;
+      manifest.methodologies[methodology]![scope] = scopeResult.rules;
+      totalRules += scopeResult.totalRules;
+      rulesWithExamples += scopeResult.rulesWithExamples;
+      rulesWithErrors += scopeResult.rulesWithErrors;
+      warnings.push(...scopeResult.warnings);
     }
   }
 
