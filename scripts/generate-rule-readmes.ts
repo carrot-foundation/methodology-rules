@@ -7,6 +7,7 @@
  * Usage: npx tsx scripts/generate-rule-readmes.ts
  */
 
+import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -35,15 +36,56 @@ const SLUG_TO_LIB: Record<string, string> = {
   'transport-manifest-data': 'document-manifest-data',
 };
 
+const METHODOLOGY_DISPLAY_NAMES: Record<string, string> = {
+  'bold': 'BOLD',
+  'bold-carbon': 'BOLD Carbon',
+  'bold-recycling': 'BOLD Recycling',
+};
+
+const EMAIL_TO_GITHUB: Record<string, string> = {
+  'marcos-12marcos@hotmail.com': 'AMarcosCastelo',
+  'amarcoscastelo@gmail.com': 'AMarcosCastelo',
+  'andtankian@gmail.com': 'andtankian',
+  'cristianorsantos.95@gmail.com': 'cris-santos',
+  'gabrielopes31@gmail.com': 'gabrielsl96',
+  '49005645+gabrielsl96@users.noreply.github.com': 'gabrielsl96',
+  'gsousalucas@outlook.com': 'gabrielsl96',
+  'rafaeldonizetip@gmail.com': 'RafaPalau',
+  'sangalli@gmail.com': 'sangalli',
+  'rafael.sangalli@solidos.com': 'sangalli',
+};
+
+const BOT_ACCOUNTS = new Set([
+  'renovate[bot]',
+  'carrot-fndn-admin',
+  'solidos-admin',
+]);
+
 interface RuleDefinitionData {
   description: string;
   name: string;
   slug: string;
 }
 
+interface ReadmeInput {
+  contributors: string[];
+  description: string;
+  implRelPath: string;
+  methodology: string;
+  name: string;
+}
+
 function dirExists(dirPath: string): boolean {
   try {
     return fs.statSync(dirPath).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+function fileExists(filePath: string): boolean {
+  try {
+    return fs.statSync(filePath).isFile();
   } catch {
     return false;
   }
@@ -94,38 +136,79 @@ function extractRuleDefinition(
   };
 }
 
+function resolveGitHubUsername(email: string): string | undefined {
+  if (email.includes('[bot]')) return undefined;
 
-function generateReadme(
-  name: string,
-  methodology: string,
-  description: string,
-  libSrcPath: string,
-  existingReadme: string | undefined,
-): string {
-  const methodologyUpper = methodology.toUpperCase();
-  const implRelPath = path
-    .relative(ROOT, path.join(libSrcPath, 'index.ts'))
-    .split(path.sep)
-    .join('/');
+  const mapped = EMAIL_TO_GITHUB[email];
+  if (mapped) return mapped;
 
-  // Preserve existing contributor section if present
-  let contributorSection = '_No contributors found_';
-  if (existingReadme) {
-    const contribMatch = existingReadme.match(
-      /## 👥 Contributors\n\n([\s\S]*?)(?=\n## )/,
+  // Handle GitHub noreply emails: ID+username@users.noreply.github.com
+  const noreplyMatch = email.match(
+    /^\d+\+([^@]+)@users\.noreply\.github\.com$/,
+  );
+  if (noreplyMatch) return noreplyMatch[1];
+
+  return undefined;
+}
+
+function getContributors(dirPath: string): string[] {
+  let output: string;
+  try {
+    output = execFileSync(
+      'git',
+      ['log', '--format=%aE', '--', dirPath],
+      { cwd: ROOT, encoding: 'utf8' },
     );
-    if (contribMatch?.[1]?.trim()) {
-      contributorSection = contribMatch[1].trim();
+  } catch {
+    return [];
+  }
+
+  const emails = new Set(
+    output
+      .split('\n')
+      .map((e) => e.trim())
+      .filter(Boolean),
+  );
+
+  const usernames = new Set<string>();
+  for (const email of emails) {
+    const username = resolveGitHubUsername(email);
+    if (username && !BOT_ACCOUNTS.has(username)) {
+      usernames.add(username);
     }
   }
+
+  return [...usernames].sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase()),
+  );
+}
+
+function formatContributorSection(usernames: string[]): string {
+  if (usernames.length === 0) return '_No contributors found_';
+
+  return usernames
+    .map(
+      (u) =>
+        `[![${u}](https://images.weserv.nl/?url=avatars.githubusercontent.com/${u}&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/${u})`,
+    )
+    .join('\n');
+}
+
+function generateReadme(input: ReadmeInput): string {
+  const { contributors, description, implRelPath, methodology, name } = input;
+  const methodologyDisplay =
+    METHODOLOGY_DISPLAY_NAMES[methodology] ?? methodology;
+  const contributorSection = formatContributorSection(contributors);
 
   return `<div align="center">
 
 # ${name}
 
-Methodology: **${methodologyUpper}**
+Methodology: **${methodologyDisplay}**
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
 </div>
 
@@ -213,17 +296,28 @@ function main(): void {
       continue;
     }
 
+    const indexPath = path.join(libSrcPath, 'index.ts');
+    if (!fileExists(indexPath)) {
+      throw new Error(
+        `Implementation file not found: ${indexPath} (methodology=${methodology}, scope=${scope}, slug=${slug})`,
+      );
+    }
+
+    const implRelPath = path
+      .relative(ROOT, indexPath)
+      .split(path.sep)
+      .join('/');
+
+    const contributors = getContributors(libSrcPath);
+
     const readmePath = path.join(appPath, 'README.md');
-    const existingReadme = fs.existsSync(readmePath)
-      ? fs.readFileSync(readmePath, 'utf8')
-      : undefined;
-    const readme = generateReadme(
-      ruleDef.name,
+    const readme = generateReadme({
+      contributors,
+      description: ruleDef.description,
+      implRelPath,
       methodology,
-      ruleDef.description,
-      libSrcPath,
-      existingReadme,
-    );
+      name: ruleDef.name,
+    });
 
     fs.writeFileSync(readmePath, readme, 'utf8');
     updated++;
