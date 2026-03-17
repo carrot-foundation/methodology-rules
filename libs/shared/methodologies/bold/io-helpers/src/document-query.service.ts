@@ -27,7 +27,7 @@ import {
   isObject,
   isRelatedDocumentCriteria,
   validateDocument,
-} from './document-query.service.typia';
+} from './document-query.service.validators';
 
 export class DocumentQueryService extends BaseDocumentQueryService<
   Document,
@@ -49,11 +49,11 @@ export class DocumentQueryService extends BaseDocumentQueryService<
 
         if (!validation.success) {
           throw new Error(
-            `Invalid document: ${documentKey}: ${JSON.stringify(validation.errors)}`,
+            `Invalid document: ${documentKey}: ${JSON.stringify(validation.error.issues)}`,
           );
         }
 
-        return validation.data;
+        return validation.data as unknown as Document;
       },
     };
 
