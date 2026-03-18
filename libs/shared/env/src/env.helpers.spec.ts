@@ -4,15 +4,15 @@ import {
   getArtifactChecksum,
   getAuditUrl,
   getAwsRegion,
-  getBooleanEnv,
+  getBooleanEnv as getBooleanEnvironment,
   getCloudwatchMetricsNamespace,
   getDocumentAttachmentBucketName,
   getDocumentBucketName,
   getEnableCloudwatchMetrics,
   getEnvironment,
-  getNodeEnv,
-  getOptionalEnv,
-  getRequiredEnv,
+  getNodeEnv as getNodeEnvironment,
+  getOptionalEnv as getOptionalEnvironment,
+  getRequiredEnv as getRequiredEnvironment,
   getSentryDsn,
   getSmaugApiGatewayAssumeRoleArn,
   getSourceCodeUrl,
@@ -20,111 +20,111 @@ import {
 } from './env.helpers';
 
 describe('getRequiredEnv', () => {
-  const originalEnv = process.env;
+  const originalEnvironment = process.env;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnvironment };
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalEnvironment;
   });
 
   it('should return the value when present', () => {
     process.env['TEST_VAR'] = 'test-value';
 
-    expect(getRequiredEnv('TEST_VAR')).toBe('test-value');
+    expect(getRequiredEnvironment('TEST_VAR')).toBe('test-value');
   });
 
   it('should throw ZodError when variable is missing', () => {
     delete process.env['TEST_VAR'];
 
-    expect(() => getRequiredEnv('TEST_VAR')).toThrow(ZodError);
+    expect(() => getRequiredEnvironment('TEST_VAR')).toThrow(ZodError);
   });
 
   it('should throw ZodError when variable is empty', () => {
     process.env['TEST_VAR'] = '';
 
-    expect(() => getRequiredEnv('TEST_VAR')).toThrow(ZodError);
+    expect(() => getRequiredEnvironment('TEST_VAR')).toThrow(ZodError);
   });
 });
 
 describe('getOptionalEnv', () => {
-  const originalEnv = process.env;
+  const originalEnvironment = process.env;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnvironment };
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalEnvironment;
   });
 
   it('should return the value when present', () => {
     process.env['TEST_VAR'] = 'test-value';
 
-    expect(getOptionalEnv('TEST_VAR')).toBe('test-value');
+    expect(getOptionalEnvironment('TEST_VAR')).toBe('test-value');
   });
 
   it('should return undefined when missing and no default', () => {
     delete process.env['TEST_VAR'];
 
-    expect(getOptionalEnv('TEST_VAR')).toBeUndefined();
+    expect(getOptionalEnvironment('TEST_VAR')).toBeUndefined();
   });
 
   it('should return default value when missing', () => {
     delete process.env['TEST_VAR'];
 
-    expect(getOptionalEnv('TEST_VAR', 'default')).toBe('default');
+    expect(getOptionalEnvironment('TEST_VAR', 'default')).toBe('default');
   });
 });
 
 describe('getBooleanEnv', () => {
-  const originalEnv = process.env;
+  const originalEnvironment = process.env;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnvironment };
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalEnvironment;
   });
 
   it('should return true for "true"', () => {
     process.env['TEST_VAR'] = 'true';
 
-    expect(getBooleanEnv('TEST_VAR')).toBe(true);
+    expect(getBooleanEnvironment('TEST_VAR')).toBe(true);
   });
 
   it('should return false for "false"', () => {
     process.env['TEST_VAR'] = 'false';
 
-    expect(getBooleanEnv('TEST_VAR')).toBe(false);
+    expect(getBooleanEnvironment('TEST_VAR')).toBe(false);
   });
 
   it('should handle case-insensitive values', () => {
     process.env['TEST_VAR'] = 'TRUE';
 
-    expect(getBooleanEnv('TEST_VAR')).toBe(true);
+    expect(getBooleanEnvironment('TEST_VAR')).toBe(true);
   });
 
   it('should return default value when missing', () => {
     delete process.env['TEST_VAR'];
 
-    expect(getBooleanEnv('TEST_VAR')).toBe(false);
-    expect(getBooleanEnv('TEST_VAR', true)).toBe(true);
+    expect(getBooleanEnvironment('TEST_VAR')).toBe(false);
+    expect(getBooleanEnvironment('TEST_VAR', true)).toBe(true);
   });
 });
 
 describe('specific env helpers', () => {
-  const originalEnv = process.env;
+  const originalEnvironment = process.env;
 
   beforeEach(() => {
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnvironment };
   });
 
   afterAll(() => {
-    process.env = originalEnv;
+    process.env = originalEnvironment;
   });
 
   describe('required env helpers', () => {
@@ -134,7 +134,7 @@ describe('specific env helpers', () => {
       { fn: getAwsRegion, key: 'AWS_REGION' },
       { fn: getDocumentBucketName, key: 'DOCUMENT_BUCKET_NAME' },
       { fn: getEnvironment, key: 'ENVIRONMENT' },
-      { fn: getNodeEnv, key: 'NODE_ENV' },
+      { fn: getNodeEnvironment, key: 'NODE_ENV' },
       {
         fn: getSmaugApiGatewayAssumeRoleArn,
         key: 'SMAUG_API_GATEWAY_ASSUME_ROLE_ARN',
@@ -153,7 +153,7 @@ describe('specific env helpers', () => {
       { fn: getAwsRegion, key: 'AWS_REGION' },
       { fn: getDocumentBucketName, key: 'DOCUMENT_BUCKET_NAME' },
       { fn: getEnvironment, key: 'ENVIRONMENT' },
-      { fn: getNodeEnv, key: 'NODE_ENV' },
+      { fn: getNodeEnvironment, key: 'NODE_ENV' },
       {
         fn: getSmaugApiGatewayAssumeRoleArn,
         key: 'SMAUG_API_GATEWAY_ASSUME_ROLE_ARN',

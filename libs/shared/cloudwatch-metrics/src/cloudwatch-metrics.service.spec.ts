@@ -25,7 +25,7 @@ jest.mock('@carrot-fndn/shared/env', () => ({
 
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);
 
-const setMockEnv = (
+const setMockEnvironment = (
   overrides: {
     awsRegion?: string;
     cloudwatchMetricsNamespace?: string | undefined;
@@ -53,7 +53,7 @@ describe('CloudWatchMetricsService', () => {
     jest.clearAllMocks();
     CloudWatchMetricsService['instance'] = null;
     setModuleCloudWatchClient(null);
-    setMockEnv();
+    setMockEnvironment();
   });
 
   describe('getInstance', () => {
@@ -86,7 +86,7 @@ describe('CloudWatchMetricsService', () => {
 
   describe('constructor and configuration', () => {
     it('should use default configuration when no env vars are set', () => {
-      setMockEnv({
+      setMockEnvironment({
         awsRegion: 'us-east-1',
         cloudwatchMetricsNamespace: undefined,
         enableCloudwatchMetrics: false,
@@ -101,7 +101,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should use custom CLOUDWATCH_METRICS_NAMESPACE when provided', () => {
-      setMockEnv({
+      setMockEnvironment({
         cloudwatchMetricsNamespace: 'Custom/Namespace',
       });
 
@@ -111,7 +111,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should use configured AWS region', async () => {
-      setMockEnv({
+      setMockEnvironment({
         awsRegion: 'ap-southeast-1',
         enableCloudwatchMetrics: true,
       });
@@ -129,7 +129,7 @@ describe('CloudWatchMetricsService', () => {
 
   describe('isEnabled', () => {
     it('should be disabled when ENABLE_CLOUDWATCH_METRICS is undefined', () => {
-      setMockEnv({
+      setMockEnvironment({
         enableCloudwatchMetrics: false,
       });
 
@@ -139,7 +139,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should be enabled when ENABLE_CLOUDWATCH_METRICS is true', () => {
-      setMockEnv({
+      setMockEnvironment({
         enableCloudwatchMetrics: true,
       });
 
@@ -149,7 +149,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should be disabled when ENABLE_CLOUDWATCH_METRICS is false', () => {
-      setMockEnv({
+      setMockEnvironment({
         enableCloudwatchMetrics: false,
       });
 
@@ -169,7 +169,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should handle valid CloudWatchMetricData without throwing', async () => {
-      setMockEnv({
+      setMockEnvironment({
         enableCloudwatchMetrics: true,
       });
 
@@ -186,7 +186,7 @@ describe('CloudWatchMetricsService', () => {
 
   describe('CloudWatch integration', () => {
     it('should instantiate CloudWatchClient with correct region configuration', async () => {
-      setMockEnv({
+      setMockEnvironment({
         awsRegion: 'us-west-2',
         enableCloudwatchMetrics: true,
       });
@@ -202,7 +202,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should reuse the same CloudWatchClient instance (singleton behavior)', async () => {
-      setMockEnv({
+      setMockEnvironment({
         enableCloudwatchMetrics: true,
       });
 
@@ -216,7 +216,7 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should use correct namespace from configuration', () => {
-      setMockEnv({
+      setMockEnvironment({
         cloudwatchMetricsNamespace: 'Custom/TestNamespace',
       });
 
@@ -239,8 +239,8 @@ describe('CloudWatchMetricsService', () => {
   });
 
   describe('Error handling', () => {
-    it('should handle empty namespace by using default', async () => {
-      setMockEnv({
+    it('should use default when namespace is undefined', async () => {
+      setMockEnvironment({
         cloudwatchMetricsNamespace: undefined,
         enableCloudwatchMetrics: true,
       });
