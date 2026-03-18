@@ -5,8 +5,8 @@ export interface ManifestFieldsOverride {
   additionalAttributes?: string[];
   /** Attribute names to exclude from the auto-detected list */
   excludeAttributes?: string[];
-  /** Include event address in output (default: false) */
-  includeAddress?: boolean;
+  /** Address fields to include in the output (e.g. ['latitude', 'longitude']). Omit to strip addresses. */
+  addressFields?: string[];
   /** Include document currentValue in output (default: false) */
   includeCurrentValue?: boolean;
   /** Include event value in output (default: false) */

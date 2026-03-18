@@ -62,7 +62,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
         },
       }),
     },
-    manifestFields: { includeAddress: true },
+    manifestFields: { addressFields: ['latitude', 'longitude'] },
     resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: `The MassID document has a "${DROP_OFF}" event and a "${RECYCLER}" event, and the "${DROP_OFF}" event address matches the "${RECYCLER}" event address`,

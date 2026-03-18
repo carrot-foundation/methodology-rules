@@ -68,7 +68,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
         },
       }),
     },
-    manifestFields: { includeAddress: true },
+    manifestFields: { addressFields: ['latitude', 'longitude'] },
     resultComment: RESULT_COMMENTS.passed.SUCCESS(distanceInKm),
     resultContent: {
       distance: distanceInKm,

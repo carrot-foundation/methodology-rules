@@ -583,7 +583,7 @@ interface ManifestExample {
 interface ManifestFieldsOverride {
   additionalAttributes?: string[];
   excludeAttributes?: string[];
-  includeAddress?: boolean;
+  addressFields?: string[];
   includeCurrentValue?: boolean;
   includeValue?: boolean;
 }
@@ -746,29 +746,19 @@ function normalizeParticipant(
   return { type: obj['type'] };
 }
 
-const ADDRESS_RELEVANT_KEYS = new Set([
-  'latitude',
-  'longitude',
-  'countryCode',
-  'city',
-  'state',
-  'street',
-  'number',
-  'zipCode',
-]);
-
 function normalizeAddress(
   address: Record<string, unknown>,
+  fields: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
-  for (const key of ADDRESS_RELEVANT_KEYS) {
+  for (const key of fields) {
     if (address[key] !== undefined) {
       result[key] = address[key];
     }
   }
 
-  return Object.keys(result).length > 0 ? result : address;
+  return result;
 }
 
 /**
@@ -861,9 +851,14 @@ function normalizeDocumentEvent(
   }
 
   if (event['address'] !== undefined) {
-    result['address'] = fieldsOverride?.includeAddress === true
-      ? normalizeAddress(event['address'] as Record<string, unknown>)
-      : {};
+    const addressFields = fieldsOverride?.addressFields;
+    result['address'] =
+      addressFields && addressFields.length > 0
+        ? normalizeAddress(
+            event['address'] as Record<string, unknown>,
+            addressFields,
+          )
+        : {};
   }
 
   // Filter metadata attributes based on explicit attributes + overrides

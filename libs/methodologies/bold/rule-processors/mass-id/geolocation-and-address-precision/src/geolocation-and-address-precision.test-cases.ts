@@ -387,7 +387,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       accreditationDocuments: manifestValidAccreditationDocuments,
       actorParticipants: manifestActorParticipants,
       manifestExample: true,
-      manifestFields: { includeAddress: true },
+      manifestFields: { addressFields: ['latitude', 'longitude'] },
       massIDDocumentParameters: {
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
@@ -416,7 +416,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       accreditationDocuments: manifestValidAccreditationDocuments,
       actorParticipants: manifestActorParticipants,
       manifestExample: true,
-      manifestFields: { includeAddress: true },
+      manifestFields: { addressFields: ['latitude', 'longitude'] },
       massIDDocumentParameters: {
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
@@ -466,7 +466,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       accreditationDocuments: manifestValidAccreditationDocuments,
       actorParticipants: manifestActorParticipants,
       manifestExample: true,
-      manifestFields: { includeAddress: true },
+      manifestFields: { addressFields: ['latitude', 'longitude'] },
       massIDDocumentParameters: {
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
