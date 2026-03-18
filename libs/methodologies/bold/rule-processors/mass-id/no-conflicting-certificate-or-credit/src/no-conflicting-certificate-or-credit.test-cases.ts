@@ -220,6 +220,6 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'Has a cancelled credit document',
+      scenario: 'The MassID has a cancelled credit document',
     },
   ];

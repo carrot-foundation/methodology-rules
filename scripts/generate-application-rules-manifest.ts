@@ -287,7 +287,7 @@ function extractErrorMessages(
 
   // Find ERROR_MESSAGE(S) assignment and extract its brace-balanced body
   const assignMatch = content.match(/ERROR_MESSAGES?\s*=\s*\{/);
-  if (!assignMatch?.index) return { byKey, values };
+  if (!assignMatch || assignMatch.index === undefined) return { byKey, values };
 
   const braceStart = (assignMatch.index ?? 0) + assignMatch[0].length - 1;
   const { end: braceEnd } = findEnclosingObjectBounds(content, braceStart + 1);
