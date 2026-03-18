@@ -34,7 +34,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { getYear } from 'date-fns';
-import { is } from 'typia';
 
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -186,15 +185,21 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     const gasType = getGasTypeFromEvent(lastEmissionAndCompostingMetricsEvent);
 
-    if (!is<MassIDOrganicSubtype>(massIDDocument.subtype)) {
+    if (
+      !(Object.values(MassIDOrganicSubtype) as unknown[]).includes(
+        massIDDocument.subtype,
+      )
+    ) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
       );
     }
 
+    const wasteSubtype = massIDDocument.subtype as MassIDOrganicSubtype;
+
     const baseline = getBaselineByWasteSubtype(
       lastEmissionAndCompostingMetricsEvent,
-      massIDDocument.subtype,
+      wasteSubtype,
       this.processorErrors,
     );
 
@@ -215,7 +220,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         normalizedLocalWasteClassificationId,
       }),
       baseline,
-      wasteSubtype: massIDDocument.subtype,
+      wasteSubtype,
     };
   }
 

@@ -1,7 +1,6 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type RuleInput } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import { DocumentManifestDataProcessor } from './document-manifest-data.processor';
@@ -106,7 +105,7 @@ describe('DocumentManifestDataProcessor', () => {
       documentManifestType,
     });
 
-    const ruleInput = random<Required<RuleInput>>();
+    const ruleInput = stubRuleInput();
 
     const { massIDDocument } = new BoldStubsBuilder()
       .createMassIDDocuments({

@@ -5,14 +5,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
-import {
-  MethodologyActorType,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { MethodologyActorType } from '@carrot-fndn/shared/types';
+import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
-import { random } from 'typia';
 
 import type { RewardsDistribution } from './rewards-distribution.types';
 
@@ -130,10 +126,9 @@ describe('RewardsDistributionProcessor', () => {
           massIDCertificateDocuments,
         );
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
-          documentId: creditOrderDocument?.id ?? random<NonEmptyString>(),
-        };
+        const ruleInput = stubRuleInput({
+          documentId: creditOrderDocument?.id ?? faker.string.uuid(),
+        });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

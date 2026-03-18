@@ -16,7 +16,7 @@ import {
   calculateOthersIfOrganicFactor,
   getCarbonFractionForOthersIfOrganic,
 } from './prevented-emissions.others-organic.helpers';
-import { isWasteGeneratorBaselineValues } from './prevented-emissions.typia';
+import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
 const { BASELINES } = DocumentEventAttributeName;
 

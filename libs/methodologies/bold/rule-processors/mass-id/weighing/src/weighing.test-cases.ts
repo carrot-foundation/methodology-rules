@@ -21,13 +21,13 @@ import {
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   ApprovedException,
   MethodologyApprovedExceptionType,
   MethodologyDocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import {
   INVALID_RESULT_COMMENTS,
@@ -55,7 +55,7 @@ const {
 const { RECYCLER } = MassIDDocumentActorType;
 const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
-const scaleType = random<DocumentEventScaleType>();
+const scaleType = stubEnumValue(DocumentEventScaleType);
 const twoStepScaleType = DocumentEventScaleType.WEIGHBRIDGE;
 const scaleTypeMismatch = faker.string.sample();
 const weighingCaptureMethodMismatch = faker.string.sample();

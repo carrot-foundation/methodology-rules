@@ -1,5 +1,5 @@
+import { faker } from '@faker-js/faker';
 import { afterEach } from 'node:test';
-import { random } from 'typia';
 
 import type { CheckDuplicatesDto } from './audit.api.dto';
 
@@ -19,7 +19,9 @@ describe('AuditApiService', () => {
 
   describe('checkDuplicates', () => {
     it('should call the post method with the correct arguments', async () => {
-      const dto = random<CheckDuplicatesDto>();
+      const dto: CheckDuplicatesDto = {
+        match: { [faker.string.sample()]: faker.string.sample() },
+      };
 
       jest.spyOn(service as any, 'post').mockResolvedValue(undefined);
 

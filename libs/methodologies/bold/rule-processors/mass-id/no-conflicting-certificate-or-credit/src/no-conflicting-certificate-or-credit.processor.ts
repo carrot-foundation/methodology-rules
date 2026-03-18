@@ -24,7 +24,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
-import { assert } from 'typia';
 
 import {
   buildDocumentsCriteria,
@@ -108,7 +107,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
     if (hasNonCancelledDocuments(massIDCertificateDocuments)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
-          assert<NonEmptyString>(this.massIDCertificateMatcher.match.type),
+          this.massIDCertificateMatcher.match.type as NonEmptyString,
         ),
       );
     }

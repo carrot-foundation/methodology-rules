@@ -30,7 +30,6 @@ import {
   MethodologyDocumentEventAttributeFormat,
   type MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
-import { is } from 'typia';
 
 import {
   INVALID_RESULT_COMMENTS,
@@ -48,7 +47,7 @@ import {
   isContainerCapacityApprovedException,
   isContainerQuantityApprovedException,
   isTareApprovedException,
-} from './weighing.typia';
+} from './weighing.validators';
 
 const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   DocumentEventName;
@@ -86,7 +85,10 @@ export interface WeighingValues {
 
 const hasValidAttributeFormat = (
   attribute?: MethodologyDocumentEventAttribute,
-): boolean => is<MethodologyDocumentEventAttributeFormat>(attribute?.format);
+): boolean =>
+  (
+    Object.values(MethodologyDocumentEventAttributeFormat) as unknown[]
+  ).includes(attribute?.format);
 
 const hasPositiveFloatAttributeValue = (
   attribute?: MethodologyDocumentEventAttribute,
@@ -439,7 +441,11 @@ const validators: Record<string, Validator> = {
       );
     }
 
-    if (!is<DocumentEventScaleType>(values.scaleType)) {
+    if (
+      !(Object.values(DocumentEventScaleType) as unknown[]).includes(
+        values.scaleType,
+      )
+    ) {
       errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
     }
 
@@ -492,7 +498,11 @@ const validators: Record<string, Validator> = {
   },
 
   weighingCaptureMethod: (values) => {
-    if (is<DocumentEventWeighingCaptureMethod>(values.weighingCaptureMethod)) {
+    if (
+      (Object.values(DocumentEventWeighingCaptureMethod) as unknown[]).includes(
+        values.weighingCaptureMethod,
+      )
+    ) {
       return { errors: [] };
     }
 

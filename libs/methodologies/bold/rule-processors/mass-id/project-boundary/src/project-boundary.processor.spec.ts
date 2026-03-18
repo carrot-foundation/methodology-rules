@@ -7,11 +7,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
 import { ProjectBoundaryProcessor } from './project-boundary.processor';
@@ -37,7 +36,7 @@ describe('ProjectBoundaryProcessor', () => {
   it.each(projectBoundaryTestCases)(
     'should return $resultStatus when $scenario',
     async ({ events, resultComment, resultContent, resultStatus }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({
@@ -80,7 +79,7 @@ describe('ProjectBoundaryProcessor', () => {
     });
 
     it('should return FAILED when the distance is not calculated', async () => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({

@@ -3,12 +3,10 @@ import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import { random } from 'typia';
+import { stubEnumValue, stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { MassIDQualificationsProcessor } from './mass-id-qualifications.processor';
 import { massIDQualificationsTestCases } from './mass-id-qualifications.test-cases';
@@ -54,7 +52,7 @@ describe('MassIDQualificationsProcessor', () => {
       resultComment: string;
       resultStatus: RuleOutputStatus;
     }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       documentLoaderService.mockResolvedValueOnce(massIDDocument);
 

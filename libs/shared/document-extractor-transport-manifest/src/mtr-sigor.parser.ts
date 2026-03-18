@@ -107,8 +107,8 @@ const extractEntityFromSigorSection = (
   return {
     rawMatch: section,
     value: {
-      name: name as NonEmptyString,
-      taxId: normalizedCnpj as NonEmptyString,
+      name,
+      taxId: normalizedCnpj,
       ...addressData,
     },
   };
@@ -234,7 +234,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
 
     if (match?.[1]) {
       partialData.documentNumber = createHighConfidenceField(
-        match[1] as NonEmptyString,
+        match[1],
         match[0],
       );
     }

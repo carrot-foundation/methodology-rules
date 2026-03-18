@@ -1,10 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { HaulerIdentificationProcessor } from './hauler-identification.processor';
 import { haulerIdentificationTestCases } from './hauler-identification.test-cases';
@@ -22,7 +19,7 @@ describe('HaulerIdentificationProcessor', () => {
         externalEventsMap: events,
       });
 
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       documentLoaderService.mockResolvedValueOnce(massIDDocumentStub);
 

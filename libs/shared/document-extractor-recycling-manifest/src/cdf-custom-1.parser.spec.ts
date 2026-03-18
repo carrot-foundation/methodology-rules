@@ -1,5 +1,4 @@
 import type { TextExtractionResult } from '@carrot-fndn/shared/text-extractor';
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
 import { stubTextExtractionResult } from '@carrot-fndn/shared/text-extractor';
@@ -333,7 +332,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(3);
@@ -365,7 +364,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       expect(result.data.processingPeriod?.parsed).toBe(
@@ -547,7 +546,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(3);
@@ -607,7 +606,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       expect(result.data.receiptEntries?.parsed).toHaveLength(4);
@@ -630,7 +629,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       // Block extraction yields 0 valid rows, no receipt entries
@@ -651,7 +650,7 @@ describe('CdfCustom1Parser', () => {
 
       const result = parser.parse({
         blocks,
-        rawText: validCustomCdfText as NonEmptyString,
+        rawText: validCustomCdfText,
       });
 
       // Block extraction yields 0 valid rows, no receipt entries

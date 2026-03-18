@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import type { ApprovedExceptionAttributeValue } from './methodology-document-event.types';
+
 import { NonEmptyStringSchema } from '../string.types';
 
 const ApprovedExceptionSchema = z.object({
@@ -21,5 +23,5 @@ export const ApprovedExceptionAttributeValueSchema = z.array(
 
 export const isApprovedExceptionAttributeValue = (
   v: unknown,
-): v is z.infer<typeof ApprovedExceptionAttributeValueSchema> =>
+): v is ApprovedExceptionAttributeValue =>
   ApprovedExceptionAttributeValueSchema.safeParse(v).success;

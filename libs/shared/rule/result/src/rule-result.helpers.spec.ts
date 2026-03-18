@@ -1,13 +1,12 @@
-import type {
-  RuleInput,
-  RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
-
 import { STSClient } from '@aws-sdk/client-sts';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import {
+  stubEnumValue,
+  stubRuleInput,
+  stubRuleOutput,
+} from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import {
   mapRuleOutputToPostProcessInput,
@@ -16,12 +15,10 @@ import {
   signRequest,
 } from './rule-result.helpers';
 
-type Query = Record<string, null | string | string[]>;
-
 describe('mapToRuleOutput', () => {
   it('should map to RuleOutput without resultComment or resultContent', () => {
-    const ruleInput = random<RuleInput>();
-    const resultStatus = random<RuleOutputStatus>();
+    const ruleInput = stubRuleInput();
+    const resultStatus = stubEnumValue(RuleOutputStatus);
 
     const result = mapToRuleOutput(ruleInput, resultStatus);
 
@@ -36,10 +33,10 @@ describe('mapToRuleOutput', () => {
   });
 
   it('should map to RuleOutput with resultComment and resultContent', () => {
-    const ruleInput = random<RuleInput>();
-    const resultStatus = random<RuleOutputStatus>();
-    const resultComment = random<string>();
-    const resultContent = random<Record<string, string>>();
+    const ruleInput = stubRuleInput();
+    const resultStatus = stubEnumValue(RuleOutputStatus);
+    const resultComment = faker.string.sample();
+    const resultContent = { [faker.string.sample()]: faker.string.sample() };
 
     const result = mapToRuleOutput(ruleInput, resultStatus, {
       resultComment,
@@ -71,7 +68,7 @@ describe('mapRuleOutputToPostProcessInput', () => {
   it.each(['ARTIFACT_CHECKSUM', 'SOURCE_CODE_URL', 'SOURCE_CODE_VERSION'])(
     'should throw error when variable %s is not set',
     (variable) => {
-      const ruleOutput = random<RuleOutput>();
+      const ruleOutput = stubRuleOutput();
 
       delete process.env[variable];
 
@@ -82,7 +79,7 @@ describe('mapRuleOutputToPostProcessInput', () => {
   it('should return comment', () => {
     const resultComment = faker.lorem.sentence();
     const result = mapRuleOutputToPostProcessInput({
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       resultComment,
     });
 
@@ -90,10 +87,13 @@ describe('mapRuleOutputToPostProcessInput', () => {
   });
 
   it('should not return comment if undefined', () => {
-    const result =
-      mapRuleOutputToPostProcessInput(
-        random<Omit<RuleOutput, 'resultComment'>>(),
-      );
+    const result = mapRuleOutputToPostProcessInput({
+      requestId: faker.string.uuid(),
+      responseToken: faker.string.uuid(),
+      responseUrl: faker.internet.url(),
+      resultContent: undefined,
+      resultStatus: stubEnumValue(RuleOutputStatus),
+    });
 
     expect(result.output.comment).not.toBeDefined();
   });
@@ -122,7 +122,7 @@ describe('reportRuleResults', () => {
 
   it('should send a request to the given responseUrl', async () => {
     const ruleOutput = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
     };
 
@@ -167,7 +167,7 @@ describe('reportRuleResults', () => {
 
   it('should throw error when ruleOutput is not valid', async () => {
     const ruleOutput = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       responseUrl: 'not a valid url',
     };
 
@@ -176,7 +176,7 @@ describe('reportRuleResults', () => {
 
   it('should throw error when response code is not ok', async () => {
     const ruleOutput = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
     };
 
@@ -199,7 +199,7 @@ describe('reportRuleResults', () => {
 
   it('should should throw error the request throws error', async () => {
     const ruleOutput = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
     };
 
@@ -249,12 +249,12 @@ describe('signRequest', () => {
   });
 
   it('should return http request object with authorization header', async () => {
-    const input = random<{
-      body: unknown;
-      method: string;
-      query: Query;
-      url: URL;
-    }>();
+    const input = {
+      body: { [faker.string.sample()]: faker.string.sample() },
+      method: faker.internet.httpMethod(),
+      query: { [faker.string.sample()]: faker.string.sample() },
+      url: new URL(faker.internet.url()),
+    };
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
@@ -285,12 +285,12 @@ describe('signRequest', () => {
   });
 
   it('should throw error when Credentials for the assumed role are not found', async () => {
-    const input = random<{
-      body: unknown;
-      method: string;
-      query: Query;
-      url: URL;
-    }>();
+    const input = {
+      body: { [faker.string.sample()]: faker.string.sample() },
+      method: faker.internet.httpMethod(),
+      query: { [faker.string.sample()]: faker.string.sample() },
+      url: new URL(faker.internet.url()),
+    };
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: undefined,
@@ -325,12 +325,12 @@ describe('signRequest', () => {
       field: 'SessionToken',
     },
   ])('should throw error when $field is undefined', async ({ Credentials }) => {
-    const input = random<{
-      body: unknown;
-      method: string;
-      query: Query;
-      url: URL;
-    }>();
+    const input = {
+      body: { [faker.string.sample()]: faker.string.sample() },
+      method: faker.internet.httpMethod(),
+      query: { [faker.string.sample()]: faker.string.sample() },
+      url: new URL(faker.internet.url()),
+    };
 
     jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials,
@@ -342,12 +342,12 @@ describe('signRequest', () => {
   it.each(['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN', 'AWS_REGION'])(
     'should throw error when %s is not found',
     async (value) => {
-      const input = random<{
-        body: unknown;
-        method: string;
-        query: Query;
-        url: URL;
-      }>();
+      const input = {
+        body: { [faker.string.sample()]: faker.string.sample() },
+        method: faker.internet.httpMethod(),
+        query: { [faker.string.sample()]: faker.string.sample() },
+        url: new URL(faker.internet.url()),
+      };
 
       delete process.env[value];
 

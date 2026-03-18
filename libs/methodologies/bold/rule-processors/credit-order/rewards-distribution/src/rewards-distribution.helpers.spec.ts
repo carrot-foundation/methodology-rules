@@ -1,9 +1,8 @@
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
-import { stubArray } from '@carrot-fndn/shared/testing';
+import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
 import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
-import { random } from 'typia';
 
 import type {
   ActorsByType,
@@ -212,12 +211,18 @@ describe('Rewards Distribution Helpers', () => {
 
       const actors = new Map(
         Array.from({ length: 3 }).map(() => [
-          `${random<RewardsDistributionActorType>()}-${faker.string.uuid()}`,
+          `${stubEnumValue(RewardsDistributionActorType)}-${faker.string.uuid()}`,
           {
-            ...random<RewardsDistributionActor>(),
+            actorType: stubEnumValue(RewardsDistributionActorType),
+            address: { id: faker.string.uuid() },
             amount: '12.503982',
+            participant: {
+              id: faker.string.uuid(),
+              name: faker.company.name(),
+            },
             percentage: '33.333333',
-          },
+            preserveSensitiveData: faker.datatype.boolean(),
+          } satisfies RewardsDistributionActor,
         ]),
       );
 
@@ -241,10 +246,12 @@ describe('Rewards Distribution Helpers', () => {
       };
 
       actors.set(MethodologyActorType.NETWORK, {
-        ...random<RewardsDistributionActor>(),
         actorType: RewardsDistributionActorType.NETWORK,
+        address: { id: faker.string.uuid() },
         amount: '8.023876',
+        participant: { id: faker.string.uuid(), name: faker.company.name() },
         percentage: '0',
+        preserveSensitiveData: false,
       });
 
       addParticipantRemainder({
@@ -290,12 +297,14 @@ describe('Rewards Distribution Helpers', () => {
   describe('aggregateCertificateRewards', () => {
     it('should add amount, actorType and name to participant', () => {
       const actorsData = stubArray(
-        () =>
-          random<
-            Omit<RewardsDistributionActor, 'actorType'> & {
-              actorType: RewardsDistributionActorType;
-            }
-          >(),
+        () => ({
+          actorType: stubEnumValue(RewardsDistributionActorType),
+          address: { id: faker.string.uuid() },
+          amount: faker.string.numeric(5),
+          participant: { id: faker.string.uuid(), name: faker.company.name() },
+          percentage: faker.string.numeric(2),
+          preserveSensitiveData: faker.datatype.boolean(),
+        }),
         4,
       );
 

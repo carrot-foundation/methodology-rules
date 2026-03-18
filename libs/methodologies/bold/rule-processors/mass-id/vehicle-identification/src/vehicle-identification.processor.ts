@@ -19,7 +19,6 @@ import {
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { is } from 'typia';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 
@@ -58,7 +57,11 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       );
     }
 
-    if (!is<DocumentEventVehicleType>(vehicleTypeValue)) {
+    if (
+      !(Object.values(DocumentEventVehicleType) as unknown[]).includes(
+        vehicleTypeValue,
+      )
+    ) {
       return this.createResult(
         false,
         RESULT_COMMENTS.failed.INVALID_VEHICLE_TYPE(vehicleTypeValue),
@@ -70,7 +73,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       VEHICLE_DESCRIPTION,
     );
 
-    if (vehicleTypeValue === OTHERS) {
+    if (vehicleTypeValue === (OTHERS as string)) {
       return hasDescription
         ? this.createResult(
             true,
@@ -86,8 +89,9 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
           );
     }
 
-    const needsLicensePlate =
-      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
+    const needsLicensePlate = !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(
+      vehicleTypeValue as DocumentEventVehicleType,
+    );
 
     if (!needsLicensePlate) {
       return this.createResult(

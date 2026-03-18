@@ -4,11 +4,8 @@ import {
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type RuleInput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
 import { ProjectPeriodLimitProcessor } from './project-period-limit.processor';
@@ -31,7 +28,7 @@ describe('ProjectPeriodLimitProcessor', () => {
   it.each(projectPeriodLimitTestCases)(
     'should return $resultStatus when $scenario',
     async ({ externalCreatedAt, resultComment, resultStatus }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
@@ -63,7 +60,7 @@ describe('ProjectPeriodLimitProcessor', () => {
   );
 
   it('should FAIL the rule if the Recycled event is not found', async () => {
-    const ruleInput = random<Required<RuleInput>>();
+    const ruleInput = stubRuleInput();
 
     const document = stubBoldMassIDDocument({
       externalEventsMap: new Map([[RECYCLED, undefined]]),

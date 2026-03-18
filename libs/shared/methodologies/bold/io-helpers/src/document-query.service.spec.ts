@@ -16,7 +16,6 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import type { DocumentQueryCriteria } from './document-query.service.types';
 
@@ -454,7 +453,7 @@ describe('DocumenQueryService', () => {
     });
 
     it('should return empty array when externalEvents is undefined', async () => {
-      const document = { ...random<Document>(), externalEvents: undefined };
+      const document = { ...stubDocument(), externalEvents: undefined };
       const documentEntity = stubDocumentEntity({ document });
 
       const criteria: DocumentQueryCriteria = {

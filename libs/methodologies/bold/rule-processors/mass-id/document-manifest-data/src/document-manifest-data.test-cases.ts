@@ -16,7 +16,7 @@ import {
   MethodologyDocumentEventAttributeFormat,
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
-import { random } from 'typia';
+import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
@@ -42,7 +42,10 @@ const attributeErrorMessages: Record<string, string> = {
   [ISSUE_DATE]: RESULT_COMMENTS.MISSING_ISSUE_DATE,
 };
 
-const documentManifestType = random<DocumentManifestType>();
+const documentManifestType: DocumentManifestType = faker.helpers.arrayElement([
+  RECYCLING_MANIFEST,
+  TRANSPORT_MANIFEST,
+]);
 
 const documentManifestTypeStub = {
   [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent,

@@ -18,7 +18,6 @@ import {
   MethodologyDocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
-import { random } from 'typia';
 
 import {
   type EventsData,
@@ -35,7 +34,7 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
   let v2DocumentId: NonEmptyString;
   let v2DocumentStub: MethodologyDocument;
 
-  const vehicleLicensePlate = random<LicensePlate>();
+  const vehicleLicensePlate = 'ABC1D23' as LicensePlate;
   const eventsData: EventsData = {
     dropOffEvent: stubBoldMassIDDropOffEvent(),
     pickUpEvent: stubBoldMassIDPickUpEvent({
@@ -94,7 +93,7 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
             label: RECYCLER,
             name: ACTOR,
           }),
-          vehicleLicensePlate: random<LicensePlate>(),
+          vehicleLicensePlate: 'DEF2G45' as LicensePlate,
           wasteGeneratorEvent: stubDocumentEvent({
             label: WASTE_GENERATOR,
             name: ACTOR,

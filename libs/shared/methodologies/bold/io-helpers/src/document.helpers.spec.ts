@@ -7,7 +7,6 @@ import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 import { createMock } from '@golevelup/ts-jest';
-import { random } from 'typia';
 
 import { loadDocument } from './document.helpers';
 
@@ -37,7 +36,7 @@ describe('Document Helpers', () => {
       jest
         .spyOn(loaderService, 'load')
         .mockResolvedValueOnce(
-          random<DocumentEntity>() as DocumentEntity<Document>,
+          stubDocumentEntity() as DocumentEntity<Document>,
         );
 
       const result = await loadDocument(loaderService, key);

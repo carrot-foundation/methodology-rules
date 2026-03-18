@@ -9,12 +9,11 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { differenceInDays, parseISO } from 'date-fns';
-import { random } from 'typia';
 
 import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
 import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.processor';
@@ -62,7 +61,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
       resultComment,
       resultStatus,
     }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
       const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [

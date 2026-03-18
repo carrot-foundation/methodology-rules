@@ -321,8 +321,8 @@ const extractEntityByLabel = (
   return {
     rawMatch: textAfterLabel.slice(0, cnpjMatch.index + cnpjMatch[0].length),
     value: {
-      name: name as NonEmptyString,
-      taxId: cnpjMatch[1] as NonEmptyString,
+      name,
+      taxId: cnpjMatch[1],
     },
   };
 };
@@ -441,10 +441,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
       const formatted = parseLongDate(match[1], match[2], match[3]);
 
       if (formatted) {
-        partialData.issueDate = createHighConfidenceField(
-          formatted as NonEmptyString,
-          match[0],
-        );
+        partialData.issueDate = createHighConfidenceField(formatted, match[0]);
       }
     }
   }
@@ -491,7 +488,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
 
       if (period) {
         partialData.processingPeriod = createHighConfidenceField(
-          period as NonEmptyString,
+          period,
           period,
         );
       }
@@ -528,7 +525,7 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
 
     if (match?.[1]) {
       partialData.treatmentMethod = createHighConfidenceField(
-        match[1].trim() as NonEmptyString,
+        match[1].trim(),
         match[0],
       );
     }

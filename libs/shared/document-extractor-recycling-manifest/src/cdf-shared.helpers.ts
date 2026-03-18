@@ -3,7 +3,6 @@ import type {
   TableColumnConfig,
   TextExtractionResult,
 } from '@carrot-fndn/shared/text-extractor';
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
   createExtractedEntity,
@@ -58,8 +57,8 @@ export const createRecyclerEntity = (
       ? {
           rawMatch: recyclerExtracted.rawMatch,
           value: {
-            name: recyclerExtracted.value.name as NonEmptyString,
-            taxId: recyclerExtracted.value.taxId as NonEmptyString,
+            name: recyclerExtracted.value.name,
+            taxId: recyclerExtracted.value.taxId,
           },
         }
       : undefined,
@@ -101,8 +100,8 @@ export const extractGenerator = (
   const name = nameMatch[1].replaceAll(/\s+/g, ' ').trim();
 
   const entity: EntityWithAddressInfo = {
-    name: name as NonEmptyString,
-    taxId: taxIdMatch[1] as NonEmptyString,
+    name,
+    taxId: taxIdMatch[1],
   };
 
   const addressMatch = patterns.generatorAddress.exec(rawText);
@@ -263,7 +262,7 @@ export const parseCdfDocument = (
 
   if (documentNumberExtracted) {
     partialData.documentNumber = createHighConfidenceField(
-      documentNumberExtracted.value as NonEmptyString,
+      documentNumberExtracted.value,
       documentNumberExtracted.rawMatch,
     );
   }
@@ -288,7 +287,7 @@ export const parseCdfDocument = (
 
     if (issueDateMatch?.[1]) {
       partialData.issueDate = createHighConfidenceField(
-        issueDateMatch[1] as NonEmptyString,
+        issueDateMatch[1],
         issueDateMatch[0],
       );
 
@@ -307,7 +306,7 @@ export const parseCdfDocument = (
       .replaceAll(/\s+/g, ' ');
 
     partialData.processingPeriod = createHighConfidenceField(
-      normalizedPeriod as NonEmptyString,
+      normalizedPeriod,
       processingPeriodExtracted.rawMatch,
     );
   }
@@ -319,7 +318,7 @@ export const parseCdfDocument = (
 
   if (environmentalLicenseExtracted) {
     partialData.environmentalLicense = createHighConfidenceField(
-      environmentalLicenseExtracted.value as NonEmptyString,
+      environmentalLicenseExtracted.value,
       environmentalLicenseExtracted.rawMatch,
     );
   }

@@ -8,7 +8,6 @@ import {
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 import { VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES } from './vehicle-identification.processor';
@@ -129,7 +128,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, TRUCK],
-            [VEHICLE_LICENSE_PLATE, random<LicensePlate>()],
+            [VEHICLE_LICENSE_PLATE, 'ABC1D23' as LicensePlate],
           ],
         }),
       ],
