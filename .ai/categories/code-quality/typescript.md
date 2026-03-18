@@ -33,7 +33,7 @@ relatedRules: ['code-style.md']
 ### Error handling
 
 - Use `Result`-like patterns or typed errors. Do not swallow errors; add context.
-- Use `zod` for input validation at module boundaries; prefer `type-fest` utility types and `@project-name/shared/types` where possible.
+- Use `typia` for input validation at module boundaries; prefer `type-fest` utility types and `@project-name/shared/types` where possible.
 
 ### Lint integration
 
