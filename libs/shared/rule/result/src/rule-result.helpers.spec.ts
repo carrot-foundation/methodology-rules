@@ -15,6 +15,21 @@ import {
   signRequest,
 } from './rule-result.helpers';
 
+const mockArtifactChecksum = jest.fn(() => faker.string.uuid());
+const mockSourceCodeUrl = jest.fn(() => faker.internet.url());
+const mockSourceCodeVersion = jest.fn(() => faker.string.uuid());
+const mockSmaugArn = jest.fn(() => faker.string.uuid());
+const mockAwsRegion = jest.fn(() => faker.string.uuid());
+
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getArtifactChecksum: () => mockArtifactChecksum(),
+  getAwsRegion: () => mockAwsRegion(),
+  getOptionalEnv: jest.fn(),
+  getSmaugApiGatewayAssumeRoleArn: () => mockSmaugArn(),
+  getSourceCodeUrl: () => mockSourceCodeUrl(),
+  getSourceCodeVersion: () => mockSourceCodeVersion(),
+}));
+
 describe('mapToRuleOutput', () => {
   it('should map to RuleOutput without resultComment or resultContent', () => {
     const ruleInput = stubRuleInput();
@@ -55,26 +70,18 @@ describe('mapToRuleOutput', () => {
 });
 
 describe('mapRuleOutputToPostProcessInput', () => {
-  const environment = { ...process.env };
+  let artifactChecksum: string;
+  let sourceCodeUrl: string;
+  let sourceCodeVersion: string;
 
   beforeEach(() => {
-    process.env = { ...environment };
+    artifactChecksum = faker.string.uuid();
+    sourceCodeUrl = faker.internet.url();
+    sourceCodeVersion = faker.string.uuid();
+    mockArtifactChecksum.mockReturnValue(artifactChecksum);
+    mockSourceCodeUrl.mockReturnValue(sourceCodeUrl);
+    mockSourceCodeVersion.mockReturnValue(sourceCodeVersion);
   });
-
-  afterEach(() => {
-    process.env = environment;
-  });
-
-  it.each(['ARTIFACT_CHECKSUM', 'SOURCE_CODE_URL', 'SOURCE_CODE_VERSION'])(
-    'should throw error when variable %s is not set',
-    (variable) => {
-      const ruleOutput = stubRuleOutput();
-
-      delete process.env[variable];
-
-      expect(() => mapRuleOutputToPostProcessInput(ruleOutput)).toThrow();
-    },
-  );
 
   it('should return comment', () => {
     const resultComment = faker.lorem.sentence();
@@ -100,20 +107,29 @@ describe('mapRuleOutputToPostProcessInput', () => {
 });
 
 describe('reportRuleResults', () => {
-  const environment = { ...process.env };
+  const originalEnvironment = { ...process.env };
 
   beforeEach(() => {
+    const awsRegion = faker.string.uuid();
+    const smaugArn = faker.string.uuid();
+
+    mockArtifactChecksum.mockReturnValue(faker.string.uuid());
+    mockSourceCodeUrl.mockReturnValue(faker.internet.url());
+    mockSourceCodeVersion.mockReturnValue(faker.string.uuid());
+    mockSmaugArn.mockReturnValue(smaugArn);
+    mockAwsRegion.mockReturnValue(awsRegion);
+
     process.env = {
-      ...environment,
+      ...originalEnvironment,
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
-      AWS_REGION: faker.string.uuid(),
+      AWS_REGION: awsRegion,
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: smaugArn,
     };
   });
 
   afterEach(() => {
-    process.env = environment;
+    process.env = originalEnvironment;
   });
 
   afterAll(() => {
@@ -148,11 +164,11 @@ describe('reportRuleResults', () => {
       ...request,
       body: JSON.stringify({
         output: {
-          artifactChecksum: process.env['ARTIFACT_CHECKSUM'],
+          artifactChecksum: mockArtifactChecksum(),
           comment: ruleOutput.resultComment,
           content: ruleOutput.resultContent,
-          sourceCodeUrl: process.env['SOURCE_CODE_URL'],
-          sourceCodeVersion: process.env['SOURCE_CODE_VERSION'],
+          sourceCodeUrl: mockSourceCodeUrl(),
+          sourceCodeVersion: mockSourceCodeVersion(),
           status: ruleOutput.resultStatus,
         },
         taskToken: ruleOutput.responseToken,
@@ -228,20 +244,26 @@ describe('reportRuleResults', () => {
 });
 
 describe('signRequest', () => {
-  const environment = { ...process.env };
+  const originalEnvironment = { ...process.env };
 
   beforeEach(() => {
+    const awsRegion = faker.string.uuid();
+    const smaugArn = faker.string.uuid();
+
+    mockSmaugArn.mockReturnValue(smaugArn);
+    mockAwsRegion.mockReturnValue(awsRegion);
+
     process.env = {
-      ...environment,
+      ...originalEnvironment,
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
-      AWS_REGION: faker.string.uuid(),
+      AWS_REGION: awsRegion,
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: smaugArn,
     };
   });
 
   afterEach(() => {
-    process.env = environment;
+    process.env = originalEnvironment;
   });
 
   afterAll(() => {
@@ -340,20 +362,4 @@ describe('signRequest', () => {
 
     await expect(signRequest(input)).rejects.toThrow();
   });
-
-  it.each(['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN', 'AWS_REGION'])(
-    'should throw error when %s is not found',
-    async (value) => {
-      const input = {
-        body: { [faker.string.sample()]: faker.string.sample() },
-        method: faker.internet.httpMethod(),
-        query: { [faker.string.sample()]: faker.string.sample() },
-        url: new URL(faker.internet.url()),
-      };
-
-      delete process.env[value];
-
-      await expect(signRequest(input)).rejects.toThrow();
-    },
-  );
 });

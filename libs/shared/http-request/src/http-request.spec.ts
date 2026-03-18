@@ -7,6 +7,10 @@ import { httpRequest } from './http-request';
 
 jest.mock('axios');
 jest.mock('@carrot-fndn/shared/aws-http');
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getAwsRegion: () => 'us-east-1',
+  getOptionalEnv: jest.fn(),
+}));
 
 describe('request helpers', () => {
   const mockedAxios = jest.mocked(axios);

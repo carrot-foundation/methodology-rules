@@ -3,6 +3,11 @@ import { type AxiosInstance } from 'axios';
 import { AwsHttpService } from './aws-http.service';
 import * as awsHelpers from './aws-http.service.helpers';
 
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getAwsRegion: () => 'us-east-1',
+  getOptionalEnv: jest.fn(),
+}));
+
 jest.mock('./aws-http.service.helpers', () => ({
   signRequest: jest.fn(),
 }));
@@ -10,12 +15,8 @@ jest.mock('./aws-http.service.helpers', () => ({
 describe('HttpService', () => {
   let service: AwsHttpService;
   let mockAxios: jest.Mocked<AxiosInstance>;
-  const originalEnvironment = process.env;
 
   beforeEach(() => {
-    process.env = { ...originalEnvironment };
-    process.env['AWS_REGION'] = 'us-east-1';
-
     mockAxios = {
       request: jest.fn(),
     } as unknown as jest.Mocked<AxiosInstance>;
@@ -29,7 +30,6 @@ describe('HttpService', () => {
   });
 
   afterEach(() => {
-    process.env = originalEnvironment;
     jest.clearAllMocks();
   });
 
@@ -60,14 +60,6 @@ describe('HttpService', () => {
         },
         'us-east-1',
       );
-    });
-
-    it('should throw error when AWS_REGION is not set', async () => {
-      delete process.env['AWS_REGION'];
-
-      await expect(
-        service['post']('https://api.example.com', { data: 'test' }),
-      ).rejects.toThrow('AWS_REGION is not set');
     });
 
     it('should throw error when request fails', async () => {

@@ -1,7 +1,7 @@
 import type { AnyObject, Uri } from '@carrot-fndn/shared/types';
 import type { AxiosInstance } from 'axios';
 
-import { isNonEmptyString } from '@carrot-fndn/shared/helpers';
+import { getAwsRegion } from '@carrot-fndn/shared/env';
 
 import { signRequest, type SignRequestInput } from './aws-http.service.helpers';
 
@@ -57,12 +57,6 @@ export class AwsHttpService {
     method: 'GET' | 'POST' | 'PUT';
     url: Uri;
   }) {
-    const awsRegion = process.env['AWS_REGION'];
-
-    if (!isNonEmptyString(awsRegion)) {
-      throw new Error('AWS_REGION is not set');
-    }
-
     return signRequest(
       {
         body: method === 'GET' ? undefined : dto,
@@ -70,7 +64,7 @@ export class AwsHttpService {
         query: method === 'GET' ? dto : undefined,
         url: new URL(url),
       },
-      awsRegion,
+      getAwsRegion(),
     );
   }
 }

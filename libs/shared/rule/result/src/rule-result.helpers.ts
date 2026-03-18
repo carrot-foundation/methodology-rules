@@ -3,7 +3,14 @@ import type { AnyObject } from '@carrot-fndn/shared/types';
 import { Sha256 } from '@aws-crypto/sha256-js';
 import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { fromEnv } from '@aws-sdk/credential-providers';
-import { assertString, logger } from '@carrot-fndn/shared/helpers';
+import {
+  getArtifactChecksum,
+  getAwsRegion,
+  getSmaugApiGatewayAssumeRoleArn,
+  getSourceCodeUrl,
+  getSourceCodeVersion,
+} from '@carrot-fndn/shared/env';
+import { logger } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,
   type RuleOutput,
@@ -30,11 +37,11 @@ export const mapRuleOutputToPostProcessInput = (
 ): PostProcessInput =>
   PostProcessInputSchema.parse({
     output: {
-      artifactChecksum: process.env['ARTIFACT_CHECKSUM'],
+      artifactChecksum: getArtifactChecksum(),
       comment: ruleOutput.resultComment,
       content: ruleOutput.resultContent,
-      sourceCodeUrl: process.env['SOURCE_CODE_URL'],
-      sourceCodeVersion: process.env['SOURCE_CODE_VERSION'],
+      sourceCodeUrl: getSourceCodeUrl(),
+      sourceCodeVersion: getSourceCodeVersion(),
       status: ruleOutput.resultStatus,
     },
     taskToken: ruleOutput.responseToken,
@@ -93,10 +100,8 @@ export const signRequest = async ({
   query?: Record<string, null | string | string[]>;
   url: URL;
 }) => {
-  const smaugApiGatewayAssumeRoleArn = assertString(
-    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'],
-  );
-  const smaugAwsRegion = assertString(process.env['AWS_REGION']);
+  const smaugApiGatewayAssumeRoleArn = getSmaugApiGatewayAssumeRoleArn();
+  const smaugAwsRegion = getAwsRegion();
 
   const credentials = await assumeRoleSmaugCredentials({
     assumeRoleArn: smaugApiGatewayAssumeRoleArn,

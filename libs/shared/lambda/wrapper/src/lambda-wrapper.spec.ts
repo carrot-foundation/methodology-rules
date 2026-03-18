@@ -13,12 +13,26 @@ import * as Sentry from '@sentry/serverless';
 
 import { wrapRuleIntoLambdaHandler } from './lambda-wrapper';
 
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getArtifactChecksum: () => 'test-checksum',
+  getAuditUrl: () => 'https://test.example.com',
+  getAwsRegion: () => 'us-east-1',
+  getDocumentBucketName: () => 'test-bucket',
+  getEnvironment: () => 'development',
+  getNodeEnv: () => 'test',
+  getOptionalEnv: jest.fn(),
+  getSentryDsn: () => undefined,
+  getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
+  getSourceCodeUrl: () => 'https://test.example.com/repo',
+  getSourceCodeVersion: () => 'test-version',
+}));
+
 process.env = {
   ...process.env,
   AWS_ACCESS_KEY_ID: faker.string.uuid(),
-  AWS_REGION: faker.string.uuid(),
+  AWS_REGION: 'us-east-1',
   AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-  SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
+  SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: 'arn:aws:iam::123456:role/test',
 };
 
 describe('wrapRuleIntoLambdaHandler', () => {

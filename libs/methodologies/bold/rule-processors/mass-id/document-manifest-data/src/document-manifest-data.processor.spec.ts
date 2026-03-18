@@ -13,12 +13,20 @@ import {
 jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 jest.mock('./document-manifest-data.extractor');
 
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getDocumentAttachmentBucketName: () => mockBucketName,
+  getDocumentBucketName: () => 'test-bucket',
+  getOptionalEnv: jest.fn(),
+}));
+
+let mockBucketName: string | undefined = 'test-bucket';
+
 describe('DocumentManifestDataProcessor', () => {
   const documentLoaderService = jest.mocked(loadDocument);
   const crossValidateWithTextractMock = jest.mocked(crossValidateWithTextract);
 
   beforeEach(() => {
-    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+    mockBucketName = 'test-bucket';
     jest.useFakeTimers();
     jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
     crossValidateWithTextractMock.mockResolvedValue({
@@ -33,7 +41,7 @@ describe('DocumentManifestDataProcessor', () => {
   });
 
   afterEach(() => {
-    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+    mockBucketName = undefined;
     jest.useRealTimers();
   });
 
