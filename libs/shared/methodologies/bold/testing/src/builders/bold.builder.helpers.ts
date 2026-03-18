@@ -9,6 +9,8 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
+
 export type MergeEventsMapsParameter =
   | Map<DocumentEventName | string, DocumentEvent | undefined>
   | Record<string, DocumentEvent | undefined>
@@ -68,6 +70,26 @@ export type MetadataAttributeTupleResponse = [
   DocumentEventAttributeName,
   MethodologyDocumentEventAttributeValue,
 ];
+
+/**
+ * Attaches the list of explicitly-provided metadata attribute names to a
+ * DocumentEvent.  Used by the manifest generator to filter out default
+ * (noise) attributes from examples.
+ */
+export const attachExplicitAttributes = (
+  event: DocumentEvent,
+  metadataAttributes?: MetadataAttributeParameter[],
+): DocumentEvent => {
+  if (metadataAttributes !== undefined && metadataAttributes.length > 0) {
+    Object.defineProperty(event, EXPLICIT_ATTRIBUTES, {
+      configurable: true,
+      enumerable: false,
+      value: metadataAttributes.map((attribute) => getAttributeName(attribute)),
+    });
+  }
+
+  return event;
+};
 
 export const isTuple = (
   attribute: MetadataAttributeParameter,

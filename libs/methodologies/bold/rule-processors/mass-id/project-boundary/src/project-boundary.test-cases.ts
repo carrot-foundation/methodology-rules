@@ -39,7 +39,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'missing drop off event',
+    scenario: `The MassID document has no "${DROP_OFF}" event`,
   },
   {
     events: {
@@ -47,7 +47,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'missing pick up event',
+    scenario: `The MassID document has no "${PICK_UP}" event`,
   },
   {
     events: {
@@ -68,11 +68,12 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
         },
       }),
     },
+    manifestFields: { includeAddress: true },
     resultComment: RESULT_COMMENTS.passed.SUCCESS(distanceInKm),
     resultContent: {
       distance: distanceInKm,
     },
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'there are more than one drop off event and all criteria are met',
+    scenario: `The MassID document has multiple "${DROP_OFF}" events and all criteria are met`,
   },
 ];

@@ -13,6 +13,6 @@ export const ruleDefinition = {
     DocumentEventName.TRANSPORT_MANIFEST,
     DocumentEventName.WEIGHING,
   ],
-  name: 'Recycling Manifest',
+  name: 'Document Manifest Data',
   slug: 'document-manifest-data',
 } as const satisfies BaseRuleDefinition;

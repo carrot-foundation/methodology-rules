@@ -34,14 +34,14 @@ export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'the document is unique',
+    scenario: 'The document is unique',
   },
   {
     newDuplicateDocuments: [{ status: CANCELLED }, { status: CANCELLED }],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.passed.ONLY_CANCELLED_DUPLICATES(2, 2),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'only cancelled duplicates are found',
+    scenario: 'Only cancelled duplicates were found',
   },
   {
     newDuplicateDocuments: [
@@ -52,21 +52,21 @@ export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'valid duplicates are found',
+    scenario: 'Valid duplicates were found',
   },
   {
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(2, 2),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'valid duplicates are found in old format',
+    scenario: 'Valid duplicates were found in old format',
   },
   {
     newDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     oldDuplicateDocuments: [{ status: CANCELLED }],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'valid duplicates are found in both formats',
+    scenario: 'Valid duplicates were found in both formats',
   },
 ];
 
@@ -89,7 +89,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       massIDDocument: undefined,
       resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'when the MassID document is missing',
+      scenario: 'The MassID document is missing',
     },
     {
       massIDAuditDocument,
@@ -101,7 +101,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_DROP_OFF_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `when the "${DROP_OFF}" event is missing`,
+      scenario: `The "${DROP_OFF}" event is missing`,
     },
     {
       massIDAuditDocument,
@@ -113,7 +113,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_PICK_UP_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `when the "${PICK_UP}" event is missing`,
+      scenario: `The "${PICK_UP}" event is missing`,
     },
     {
       massIDAuditDocument,
@@ -126,7 +126,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_WASTE_GENERATOR_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `when the "${WASTE_GENERATOR}" event is missing`,
+      scenario: `The "${WASTE_GENERATOR}" event is missing`,
     },
     {
       massIDAuditDocument,
@@ -138,7 +138,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `when the "${RECYCLER}" event is missing`,
+      scenario: `The "${RECYCLER}" event is missing`,
     },
     {
       massIDAuditDocument,
@@ -156,6 +156,6 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `when the "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
+      scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
     },
   ];

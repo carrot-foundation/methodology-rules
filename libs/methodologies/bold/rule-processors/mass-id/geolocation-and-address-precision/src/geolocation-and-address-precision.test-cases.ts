@@ -28,7 +28,10 @@ import {
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
+import {
+  MAX_ALLOWED_DISTANCE,
+  RESULT_COMMENTS,
+} from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 
 interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
@@ -92,9 +95,6 @@ const invalidWasteGeneratorAddress = stubAddress({
 const nearbyRecyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.nearby,
 });
-const nearbyWasteGeneratorAddress = stubAddress({
-  ...actorsCoordinates.get(WASTE_GENERATOR)!.nearby,
-});
 
 const invalidRecyclerAddressDistance = calculateDistance(
   recyclerAddress,
@@ -108,9 +108,64 @@ const nearbyRecyclerAddressDistance = calculateDistance(
   recyclerAddress,
   nearbyRecyclerAddress,
 );
-const nearbyWasteGeneratorAddressDistance = calculateDistance(
-  wasteGeneratorAddress,
-  nearbyWasteGeneratorAddress,
+
+// Deterministic values for manifestExample test cases
+const manifestActorParticipants = new Map(
+  MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
+    subtype,
+    stubParticipant({
+      id: `manifest-participant-${subtype}`,
+      type: subtype,
+    }),
+  ]),
+);
+const manifestRecyclerParticipant = manifestActorParticipants.get(
+  RECYCLER,
+) as MethodologyParticipant;
+const manifestWasteGeneratorParticipant = manifestActorParticipants.get(
+  WASTE_GENERATOR,
+) as MethodologyParticipant;
+
+const manifestRecyclerAddress = stubAddress({
+  latitude: -23.5505,
+  longitude: -46.6333,
+});
+const manifestWasteGeneratorAddress = stubAddress({
+  latitude: -22.9068,
+  longitude: -43.1729,
+});
+const manifestNearbyRecyclerAddress = stubAddress({
+  latitude: -23.5506,
+  longitude: -46.6334,
+});
+const manifestNearbyWasteGeneratorAddress = stubAddress({
+  latitude: -22.9069,
+  longitude: -43.173,
+});
+const manifestInvalidRecyclerAddress = stubAddress({
+  latitude: 40.7128,
+  longitude: -74.006,
+});
+const manifestInvalidWasteGeneratorAddress = stubAddress({
+  latitude: 34.0522,
+  longitude: -118.2437,
+});
+
+const manifestNearbyRecyclerAddressDistance = calculateDistance(
+  manifestRecyclerAddress,
+  manifestNearbyRecyclerAddress,
+);
+const manifestNearbyWasteGeneratorAddressDistance = calculateDistance(
+  manifestWasteGeneratorAddress,
+  manifestNearbyWasteGeneratorAddress,
+);
+const manifestInvalidRecyclerAddressDistance = calculateDistance(
+  manifestRecyclerAddress,
+  manifestInvalidRecyclerAddress,
+);
+const manifestInvalidWasteGeneratorAddressDistance = calculateDistance(
+  manifestWasteGeneratorAddress,
+  manifestInvalidWasteGeneratorAddress,
 );
 
 const createGpsException = (
@@ -273,6 +328,35 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
   participant: wasteGeneratorParticipant,
 });
 
+const manifestValidAccreditationDocuments = new Map([
+  [
+    RECYCLER,
+    createAccreditationDocumentWithAddress(
+      manifestRecyclerAddress,
+      manifestRecyclerParticipant,
+    ),
+  ],
+  [
+    WASTE_GENERATOR,
+    createAccreditationDocumentWithAddress(
+      manifestWasteGeneratorAddress,
+      manifestWasteGeneratorParticipant,
+    ),
+  ],
+]);
+const manifestRecyclerActorEvent = stubDocumentEvent({
+  address: manifestRecyclerAddress,
+  label: RECYCLER,
+  name: ACTOR,
+  participant: manifestRecyclerParticipant,
+});
+const manifestWasteGeneratorActorEvent = stubDocumentEvent({
+  address: manifestWasteGeneratorAddress,
+  label: WASTE_GENERATOR,
+  name: ACTOR,
+  participant: manifestWasteGeneratorParticipant,
+});
+
 export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPrecisionTestCase[] =
   [
     {
@@ -297,62 +381,65 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       actorParticipants,
       resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the accredited address is not set',
+      scenario: 'The accredited address is not set',
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
+      manifestExample: true,
+      manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            nearbyRecyclerAddress,
-            recyclerParticipant,
-            nearbyRecyclerAddress.latitude,
-            nearbyRecyclerAddress.longitude,
+            manifestNearbyRecyclerAddress,
+            manifestRecyclerParticipant,
+            manifestNearbyRecyclerAddress.latitude,
+            manifestNearbyRecyclerAddress.longitude,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            nearbyWasteGeneratorAddress,
-            wasteGeneratorParticipant,
-            nearbyWasteGeneratorAddress.latitude,
-            nearbyWasteGeneratorAddress.longitude,
+            manifestNearbyWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
+            manifestNearbyWasteGeneratorAddress.latitude,
+            manifestNearbyWasteGeneratorAddress.longitude,
           ),
         },
       },
-      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, manifestNearbyWasteGeneratorAddressDistance, manifestNearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, manifestNearbyRecyclerAddressDistance, manifestNearbyRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario:
-        'the gps is set and both gps geolocation and event address are valid but nearby',
+      scenario: `The GPS is set and both GPS coordinates and event address are valid and within the ${MAX_ALLOWED_DISTANCE} m radius`,
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
+      manifestExample: true,
+      manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            nearbyRecyclerAddress,
-            recyclerParticipant,
-            invalidRecyclerAddress.latitude,
-            invalidRecyclerAddress.longitude,
+            manifestNearbyRecyclerAddress,
+            manifestRecyclerParticipant,
+            manifestInvalidRecyclerAddress.latitude,
+            manifestInvalidRecyclerAddress.longitude,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            nearbyWasteGeneratorAddress,
-            wasteGeneratorParticipant,
-            invalidWasteGeneratorAddress.latitude,
-            invalidWasteGeneratorAddress.longitude,
+            manifestNearbyWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
+            manifestInvalidWasteGeneratorAddress.latitude,
+            manifestInvalidWasteGeneratorAddress.longitude,
           ),
         },
       },
-      resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, manifestInvalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, manifestInvalidRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the address is valid but the gps geolocation is invalid',
+      scenario: 'The address is valid but the GPS geolocation is invalid',
     },
     {
       accreditationDocuments: validAccreditationDocuments,
@@ -373,31 +460,33 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the processor cannot extract the actor type',
+      scenario: 'The processor cannot extract the actor type',
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
+      manifestExample: true,
+      manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            recyclerAddress,
-            recyclerParticipant,
+            manifestRecyclerAddress,
+            manifestRecyclerParticipant,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            wasteGeneratorAddress,
-            wasteGeneratorParticipant,
+            manifestWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
           ),
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the gps is not set, but the accredited address is set and is valid',
+        'The GPS is not set, but the accredited address is set and is valid',
     },
     {
       accreditationDocuments: validAccreditationDocuments,
@@ -421,7 +510,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the gps is not set, but the accredited address is set and not valid',
+        'The GPS is not set, but the accredited address is set and not valid',
     },
     {
       accreditationDocuments: new Map([
@@ -461,7 +550,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the Waste Generator verification document is missing (should pass, not fail)',
+        'The Waste Generator verification document is missing (should pass, not fail)',
     },
     {
       accreditationDocuments: new Map([
@@ -503,7 +592,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
+        'The Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
     },
     {
       accreditationDocuments: new Map([
@@ -545,7 +634,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
+        'The Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
     },
     {
       accreditationDocuments: new Map([
@@ -589,7 +678,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the Recycler has only latitude GPS exception (should NOT skip GPS validation)',
+        'The Recycler has only latitude GPS exception (should NOT skip GPS validation)',
     },
     {
       accreditationDocuments: new Map([
@@ -634,7 +723,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the Recycler has expired GPS exceptions (should NOT skip GPS validation)',
+        'The Recycler has expired GPS exceptions (should NOT skip GPS validation)',
     },
   ];
 
@@ -666,7 +755,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
       massIDAuditDocument,
       resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the MassID document does not exist',
+      scenario: 'The MassID document does not exist',
     },
     {
       documents: [
@@ -681,7 +770,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
         ),
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the MassID document does not contain a DROP_OFF or PICK_UP event',
+        'The MassID document does not contain a DROP_OFF or PICK_UP event',
     },
     {
       documents: [massIDDocument, massIDAuditDocument],
@@ -690,7 +779,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
         errorMessage.ERROR_MESSAGE
           .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the accreditation documents are not found',
+      scenario: 'The accreditation documents were not found',
     },
     {
       documents: [],
@@ -698,6 +787,6 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
       resultComment:
         errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the MassID Audit document does not exist',
+      scenario: 'The MassID Audit document does not exist',
     },
   ];

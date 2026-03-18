@@ -29,7 +29,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     events: { [DROP_OFF]: undefined },
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has no ${DROP_OFF} event`,
+    scenario: `The MassID document has no "${DROP_OFF}" event`,
   },
   {
     events: {
@@ -39,7 +39,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${DROP_OFF} event but no ${RECEIVING_OPERATOR_IDENTIFIER} attribute`,
+    scenario: `The MassID document has a "${DROP_OFF}" event but no "${RECEIVING_OPERATOR_IDENTIFIER}" attribute`,
   },
   {
     events: {
@@ -47,7 +47,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${DROP_OFF} event, but the ${RECYCLER} event address does not match the ${DROP_OFF} event address`,
+    scenario: `The MassID document has a "${DROP_OFF}" event, but the "${RECYCLER}" event address does not match the "${DROP_OFF}" event address`,
   },
   {
     events: {
@@ -62,8 +62,9 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
         },
       }),
     },
+    manifestFields: { includeAddress: true },
     resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the MassID document has a ${DROP_OFF} event and a ${RECYCLER} event, and the ${DROP_OFF} event address matches the ${RECYCLER} event address`,
+    scenario: `The MassID document has a "${DROP_OFF}" event and a "${RECYCLER}" event, and the "${DROP_OFF}" event address matches the "${RECYCLER}" event address`,
   },
 ];

@@ -1,4 +1,4 @@
-const MAX_ALLOWED_DISTANCE = 2000;
+export const MAX_ALLOWED_DISTANCE = 2000;
 
 export const RESULT_COMMENTS = {
   failed: {
