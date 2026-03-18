@@ -42,7 +42,7 @@ These extensions take precedence over generic rules for project-specific details
 - **Structure**: One responsibility per module, organize by file type (`*.constants.ts`, `*.types.ts`, `*.helpers.ts`, `*.dtos.ts`)
 - **Control Flow**: Favor guard clauses and early returns, keep nesting ≤ 2 levels
 - **Dependencies**: Use path aliases from `tsconfig.base.json`, respect ESLint module boundaries
-- **Error Handling**: Validate inputs with `typia` assertions, enrich errors with context
+- **Error Handling**: Validate inputs with `zod` schemas, enrich errors with context
 - **Testing**: Tests in `__tests__` folders using `*.spec.ts(x)`, strive for 100% coverage
 - **Performance**: Prefer pure functions and immutable data structures
 - **Formatting**: End files with single trailing empty line, run formatter/linter with `--fix`
@@ -66,7 +66,7 @@ These extensions take precedence over generic rules for project-specific details
 ### Best Practices
 
 - Use `Result`-like patterns for error handling
-- Input validation with `typia` at module boundaries
+- Input validation with `zod` at module boundaries
 - Leverage `type-fest` utilities and `@project-name/shared/types`
 - Follow ESLint config (Airbnb, SonarJS, Unicorn, Security, Promise, Perfectionist, Prettier)
 - Avoid default exports except when required by frameworks or intentional API design
@@ -78,7 +78,7 @@ These extensions take precedence over generic rules for project-specific details
 - Tests in `__tests__/` folders with `*.spec.ts(x)` pattern
 - Use framework-specific testing libraries
 - Aim for 100% coverage where feasible
-- Use `faker` and `typia.random<T>()` for test fixtures
+- Use `faker` and `zocker` with Zod schemas for test fixtures
 - Prefer `jest.mock` for external modules, `jest.spyOn` for side effects
 - Use table-driven tests with `it.each`
 - Prefer `expect.objectContaining` for partial assertions

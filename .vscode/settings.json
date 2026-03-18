@@ -27,8 +27,7 @@
     "nrwl",
     "oidc",
     "Smaug",
-    "sonarjs",
-    "typia"
+    "sonarjs"
   ],
   "[json]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"

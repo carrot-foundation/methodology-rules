@@ -39,7 +39,7 @@ relatedRules: ['typescript.md']
 
 ### Error handling & validation
 
-- Validate inputs at boundaries using `typia` assertions; return typed results.
+- Validate inputs at boundaries using `zod` schemas; return typed results.
 - Enrich errors with context; avoid silent failures.
 
 ### Testing discipline
