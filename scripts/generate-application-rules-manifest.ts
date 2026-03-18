@@ -599,6 +599,7 @@ interface RuleTestCaseShape {
 function extractManifestExamples(
   srcPath: string,
   srcFiles: string[],
+  ruleEvents?: string[],
 ): ManifestExample[] {
   const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
   if (!testCasesFile) return [];
@@ -614,7 +615,6 @@ function extractManifestExamples(
     return [];
   }
 
-  // Collect all exported arrays (there may be multiple, e.g. testCases + errorTestCases)
   const allTestCases: RuleTestCaseShape[] = [];
   for (const value of Object.values(mod)) {
     if (Array.isArray(value)) {
@@ -622,7 +622,6 @@ function extractManifestExamples(
     }
   }
 
-  // Filter to manifest-flagged cases
   const manifestCases = allTestCases.filter(
     (tc) => tc.manifestExample === true,
   );
@@ -631,6 +630,7 @@ function extractManifestExamples(
     exampleDocuments: normalizeTestCasePayload(
       tc as unknown as Record<string, unknown>,
       tc.manifestFields,
+      ruleEvents,
     ),
     resultComment: String(tc.resultComment ?? ''),
     resultStatus: String(tc.resultStatus ?? ''),
@@ -653,12 +653,13 @@ const TEST_CASE_META_KEYS = new Set([
 function normalizeTestCasePayload(
   testCase: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(testCase)) {
     if (TEST_CASE_META_KEYS.has(key)) continue;
-    result[key] = normalizeValue(value, fieldsOverride);
+    result[key] = normalizeValue(value, fieldsOverride, ruleEvents);
   }
 
   return result;
@@ -682,6 +683,7 @@ function isDocumentEventLike(obj: Record<string, unknown>): boolean {
 function normalizeValue(
   value: unknown,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): unknown {
   if (value === null || value === undefined) return value;
   if (typeof value !== 'object') return value;
@@ -690,37 +692,33 @@ function normalizeValue(
     return Object.fromEntries(
       [...value.entries()].map(([k, v]) => [
         k,
-        normalizeValue(v, fieldsOverride),
+        normalizeValue(v, fieldsOverride, ruleEvents),
       ]),
     );
   }
 
   if (Array.isArray(value)) {
-    return value.map((v) => normalizeValue(v, fieldsOverride));
+    return value.map((v) => normalizeValue(v, fieldsOverride, ruleEvents));
   }
 
   const obj = value as Record<string, unknown>;
 
-  // DocumentEvent shape detection
   if (isDocumentEventLike(obj)) {
     return normalizeDocumentEvent(obj, fieldsOverride);
   }
 
-  // Document shape detection
   if ('category' in obj && 'externalEvents' in obj) {
-    return normalizeDocument(obj, fieldsOverride);
+    return normalizeDocument(obj, fieldsOverride, ruleEvents);
   }
 
-  // Participant shape detection — strip random noise
   if (isParticipantLike(obj)) {
     return normalizeParticipant(obj);
   }
 
-  // Generic object — recurse
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => [
       k,
-      normalizeValue(v, fieldsOverride),
+      normalizeValue(v, fieldsOverride, ruleEvents),
     ]),
   );
 }
@@ -767,12 +765,72 @@ function normalizeAddress(
  * Random strings are long lowercase alphanumeric strings without spaces.
  */
 function isValidAttributeName(name: string): boolean {
-  // Real attribute names contain spaces and are relatively short
   if (name.includes(' ') && name.length < 80) return true;
-  // Single-word names are valid if they look like real identifiers (not random strings)
   if (name.length <= 30 && /^[A-Z]/.test(name)) return true;
 
   return false;
+}
+
+// --- Value sanitizers ---
+
+const LATIN_SUFFIXES = ['us', 'um', 'ae', 'is', 'io', 'ia', 'or', 'it', 'am', 'em', 'as', 'os', 'ibus'];
+const COMMON_ENGLISH_WORDS = new Set([
+  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can',
+  'was', 'her', 'one', 'our', 'out', 'has', 'had', 'from', 'with',
+  'this', 'that', 'have', 'been', 'will', 'they', 'each', 'which',
+  'more', 'than', 'were', 'what', 'when', 'your', 'into', 'some',
+  'document', 'event', 'value', 'type', 'scale', 'weight', 'waste',
+  'vehicle', 'driver', 'date', 'number', 'description', 'address',
+]);
+
+function isFakerGibberish(value: string): boolean {
+  if (typeof value !== 'string' || value.length < 10) return false;
+
+  const words = value.replace(/[.,;:!?]/g, '').split(/\s+/).filter(Boolean);
+  if (words.length < 2) return false;
+
+  const lowerWords = words.map((w) => w.toLowerCase());
+
+  const knownEnglishCount = lowerWords.filter((w) => COMMON_ENGLISH_WORDS.has(w)).length;
+  if (knownEnglishCount > 0) return false;
+
+  const latinLikeCount = lowerWords.filter((w) =>
+    w.length >= 4 && LATIN_SUFFIXES.some((suffix) => w.endsWith(suffix)),
+  ).length;
+
+  return latinLikeCount / words.length >= 0.4;
+}
+
+function isAbsurdNumber(value: unknown): boolean {
+  return typeof value === 'number' && Math.abs(value) > 1_000_000;
+}
+
+function roundIfOverlyPrecise(value: unknown): unknown {
+  if (typeof value !== 'number' || Number.isInteger(value)) return value;
+
+  const str = String(value);
+  const decimalPart = str.split('.')[1];
+  if (decimalPart && decimalPart.length > 4) {
+    return Math.round(value * 100) / 100;
+  }
+
+  return value;
+}
+
+function sanitizeAttributeValue(value: unknown): unknown {
+  if (typeof value === 'string' && isFakerGibberish(value)) {
+    return undefined;
+  }
+
+  if (value === false) {
+    return undefined;
+  }
+
+  if (isAbsurdNumber(value)) {
+    return undefined;
+  }
+
+  return roundIfOverlyPrecise(value);
 }
 
 function buildAllowedAttributeSet(
@@ -874,17 +932,22 @@ function normalizeDocumentEvent(
       ? attributes.filter((attr) => allowedSet.has(String(attr['name'])))
       : attributes.filter((attr) => isValidAttributeName(String(attr['name'])));
 
-    if (filtered.length) {
-      result['metadata'] = {
-        attributes: filtered.map((attr) => {
-          const normalized: Record<string, unknown> = {
-            name: attr['name'],
-            value: attr['value'],
-          };
-          if (attr['format']) normalized['format'] = attr['format'];
-          return normalized;
-        }),
-      };
+    const sanitized = filtered
+      .map((attr) => {
+        const sanitizedValue = sanitizeAttributeValue(attr['value']);
+        if (sanitizedValue === undefined) return undefined;
+
+        const normalized: Record<string, unknown> = {
+          name: attr['name'],
+          value: sanitizedValue,
+        };
+        if (attr['format']) normalized['format'] = attr['format'];
+        return normalized;
+      })
+      .filter((attr): attr is Record<string, unknown> => attr !== undefined);
+
+    if (sanitized.length) {
+      result['metadata'] = { attributes: sanitized };
     }
   }
 
@@ -894,13 +957,13 @@ function normalizeDocumentEvent(
 function normalizeDocument(
   doc: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { category: doc['category'] };
 
   if (doc['type']) result['type'] = doc['type'];
   if (doc['subtype']) result['subtype'] = doc['subtype'];
 
-  // Exclude currentValue by default, include only when explicitly requested
   if (
     fieldsOverride?.includeCurrentValue === true &&
     doc['currentValue'] !== undefined
@@ -910,12 +973,53 @@ function normalizeDocument(
 
   const events = doc['externalEvents'] as unknown[] | undefined;
   if (events?.length) {
-    result['externalEvents'] = events.map((e) =>
+    let normalizedEvents = events.map((e) =>
       normalizeValue(e, fieldsOverride),
     );
+
+    if (ruleEvents && ruleEvents.length > 0) {
+      normalizedEvents = filterEventsForRule(
+        normalizedEvents as Array<Record<string, unknown>>,
+        ruleEvents,
+      );
+    }
+
+    if (normalizedEvents.length > 0) {
+      result['externalEvents'] = normalizedEvents;
+    }
   }
 
   return result;
+}
+
+function filterEventsForRule(
+  events: Array<Record<string, unknown>>,
+  ruleEvents: string[],
+): Array<Record<string, unknown>> {
+  const ruleEventNames = new Set<string>();
+  const ruleActorLabels = new Set<string>();
+
+  for (const ev of ruleEvents) {
+    if (ev.includes(':')) {
+      const [eventName, label] = ev.split(':');
+      if (eventName) ruleEventNames.add(eventName);
+      if (label) ruleActorLabels.add(label);
+    } else {
+      ruleEventNames.add(ev);
+    }
+  }
+
+  return events.filter((event) => {
+    const name = String(event['name'] ?? '');
+    const label = event['label'] as string | undefined;
+
+    if (name === 'ACTOR') {
+      if (ruleEventNames.has('ACTOR')) return true;
+      return label !== undefined && ruleActorLabels.has(label);
+    }
+
+    return ruleEventNames.has(name);
+  });
 }
 
 // --- Brace-balanced object extraction (used by error/comment extractors) ---
@@ -1094,7 +1198,12 @@ function buildRule(
   const readme = extractReadmeData(readmePath);
   const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
   const resultComments = extractResultComments(libSrcPath, srcFiles);
-  const examples = extractManifestExamples(libSrcPath, srcFiles);
+
+  // Enrich events early so we can pass them to example extraction for filtering
+  const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
+  const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
+
+  const examples = extractManifestExamples(libSrcPath, srcFiles, events);
 
   // Resolve frameworkRules: prefer app-level, fall back to shared lib
   const appRuleFrameworkRules = extractAppFrameworkRules(appRulePath);
@@ -1134,10 +1243,6 @@ function buildRule(
       allErrors.push(msg);
     }
   }
-
-  // Enrich ACTOR events with actor labels from the processor
-  const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
-  const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
 
   // Determine verifications
   const verifications =
