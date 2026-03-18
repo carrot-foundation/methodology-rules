@@ -380,12 +380,9 @@ describe('Document getters', () => {
 
     it('should return undefined when the document has no external events', () => {
       const event = stubDocumentEvent({ name: PICK_UP });
-      const document = stubDocument(
-        {
-          externalEvents: undefined,
-        },
-        false,
-      );
+      const document = stubDocument({}, false);
+
+      document.externalEvents = undefined;
 
       const participantActorType = getParticipantActorType({
         document,

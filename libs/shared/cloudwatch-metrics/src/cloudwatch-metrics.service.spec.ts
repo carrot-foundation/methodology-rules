@@ -128,10 +128,8 @@ describe('CloudWatchMetricsService', () => {
   });
 
   describe('isEnabled', () => {
-    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is undefined', () => {
-      setMockEnvironment({
-        enableCloudwatchMetrics: false,
-      });
+    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is not set', () => {
+      setMockEnvironment({});
 
       const instance = CloudWatchMetricsService.getInstance();
 
