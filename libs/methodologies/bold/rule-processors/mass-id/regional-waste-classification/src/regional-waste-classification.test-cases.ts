@@ -69,6 +69,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
           ],
         }),
       },
+      manifestExample: true,
       partialDocument: {
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
@@ -81,7 +82,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the local waste classification ID and description match a local waste classification code with matching subtype.',
+        'The local waste classification ID and description match a local waste classification code with matching subtype',
     },
     {
       events: {
@@ -108,7 +109,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the local waste classification ID and description match the local waste classification code without spaces with matching subtype.',
+        'The local waste classification ID and description match the local waste classification code without spaces with matching subtype',
     },
     {
       events: {
@@ -135,7 +136,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the local waste classification description has leading/trailing special characters but matches after normalization with matching subtype.',
+        'The local waste classification description has leading/trailing special characters but matches after normalization with matching subtype',
     },
     {
       events: {
@@ -161,7 +162,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the local waste classification ID is missing.',
+      scenario: 'The local waste classification ID is missing',
     },
     {
       events: {
@@ -184,7 +185,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the local waste classification description is missing.',
+      scenario: 'The local waste classification description is missing',
     },
     {
       events: {
@@ -199,6 +200,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
           ],
         }),
       },
+      manifestExample: true,
       partialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
@@ -211,7 +213,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the local waste classification description matches after aggressive normalization (accent stripped).',
+        'The local waste classification description matches after normalization (accent stripped)',
     },
     {
       events: {
@@ -235,7 +237,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the local waste classification description does not match the expected local waste classification code.',
+        'The local waste classification description does not match the expected local waste classification code',
     },
     {
       events: {
@@ -258,7 +260,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the recycler is not from Brazil.',
+      scenario: 'The recycler is not from Brazil',
     },
     {
       events: {
@@ -281,7 +283,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the local waste classification ID is not valid.',
+      scenario: 'The local waste classification ID is not valid',
     },
     {
       events: {
@@ -308,7 +310,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the subtype does not match the CDM_CODE for the provided classification ID.',
+        'The subtype does not match the CDM_CODE for the provided classification ID',
     },
     {
       events: {
@@ -335,7 +337,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the subtype matches the CDM_CODE for the provided classification ID.',
+        'The subtype matches the CDM_CODE for the provided classification ID',
     },
     {
       events: {
@@ -362,7 +364,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the subtype matches the CDM_CODE 8.1 for Wood and Wood Products.',
+        'The subtype matches the CDM_CODE 8.1 for Wood and Wood Products',
     },
     {
       events: {
@@ -388,7 +390,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'the subtype matches the CDM_CODE 8.7C for Domestic Sludge.',
+      scenario: 'The subtype matches the CDM_CODE 8.7C for Domestic Sludge',
     },
     {
       events: {
@@ -415,7 +417,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the subtype does not map to a valid CDM_CODE (TOBACCO has no mapping).',
+        'The subtype does not map to a valid CDM_CODE (TOBACCO has no mapping)',
     },
     {
       events: {
@@ -436,6 +438,6 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       resultComment: 'Rule not applicable',
       resultContent: undefined,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'the document does not have a subtype (rule not applicable).',
+      scenario: 'The document does not have a subtype (rule not applicable)',
     },
   ];

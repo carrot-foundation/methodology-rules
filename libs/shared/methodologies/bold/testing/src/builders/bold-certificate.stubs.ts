@@ -16,6 +16,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
+  attachExplicitAttributes,
   mergeEventsMaps,
   mergeMetadataAttributes,
   type MetadataAttributeParameter,
@@ -55,12 +56,18 @@ export const stubBoldCertificateRewardsDistributionMetadataEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: REWARDS_DISTRIBUTION_RULE_SLUG,
-    },
-    mergeMetadataAttributes(defaultRulesMetadataAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: REWARDS_DISTRIBUTION_RULE_SLUG,
+      },
+      mergeMetadataAttributes(
+        defaultRulesMetadataAttributes,
+        metadataAttributes,
+      ),
+    ),
+    metadataAttributes,
   );
 
 const boldCertificateExternalEventsMap = new Map([

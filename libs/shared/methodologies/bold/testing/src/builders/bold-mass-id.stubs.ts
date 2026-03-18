@@ -29,6 +29,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
+  attachExplicitAttributes,
   mergeEventsMaps,
   mergeMetadataAttributes,
   type MetadataAttributeParameter,
@@ -102,13 +103,16 @@ export const stubBoldMassIDPickUpEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: PICK_UP,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultPickUpAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: PICK_UP,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultPickUpAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 
 const defaultTransportManifestWithExemptionAttributes: MetadataAttributeParameter[] =
@@ -136,21 +140,24 @@ export const stubBoldMassIDTransportManifestEvent = ({
       ? defaultTransportManifestWithExemptionAttributes
       : defaultTransportManifestAttributes;
 
-  return stubDocumentEventWithMetadataAttributes(
-    {
-      attachments:
-        withExemptionJustification === true
-          ? []
-          : [
-              stubDocumentEventAttachment({
-                label: DocumentEventAttachmentLabel.TRANSPORT_MANIFEST,
-              }),
-            ],
-      ...partialDocumentEvent,
-      name: TRANSPORT_MANIFEST,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultAttributes, metadataAttributes),
+  return attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        attachments:
+          withExemptionJustification === true
+            ? []
+            : [
+                stubDocumentEventAttachment({
+                  label: DocumentEventAttachmentLabel.TRANSPORT_MANIFEST,
+                }),
+              ],
+        ...partialDocumentEvent,
+        name: TRANSPORT_MANIFEST,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 };
 
@@ -194,13 +201,16 @@ export const stubBoldMassIDWeighingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: WEIGHING,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultWeighingAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: WEIGHING,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultWeighingAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 
 const defaultDropOffAttributes: MetadataAttributeParameter[] = [
@@ -215,13 +225,16 @@ export const stubBoldMassIDDropOffEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: DROP_OFF,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultDropOffAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: DROP_OFF,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultDropOffAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 
 const defaultRecyclingManifestWithExemptionAttributes: MetadataAttributeParameter[] =
@@ -249,21 +262,24 @@ export const stubBoldMassIDRecyclingManifestEvent = ({
       ? defaultRecyclingManifestWithExemptionAttributes
       : defaultRecyclingManifestAttributes;
 
-  return stubDocumentEventWithMetadataAttributes(
-    {
-      attachments:
-        withExemptionJustification === true
-          ? []
-          : [
-              stubDocumentEventAttachment({
-                label: DocumentEventAttachmentLabel.RECYCLING_MANIFEST,
-              }),
-            ],
-      ...partialDocumentEvent,
-      name: RECYCLING_MANIFEST,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultAttributes, metadataAttributes),
+  return attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        attachments:
+          withExemptionJustification === true
+            ? []
+            : [
+                stubDocumentEventAttachment({
+                  label: DocumentEventAttachmentLabel.RECYCLING_MANIFEST,
+                }),
+              ],
+        ...partialDocumentEvent,
+        name: RECYCLING_MANIFEST,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 };
 
@@ -271,13 +287,16 @@ export const stubBoldMassIDRecycledEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: RECYCLED,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes([], metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: RECYCLED,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes([], metadataAttributes),
+    ),
+    metadataAttributes,
   );
 
 const defaultSortingAttributes: MetadataAttributeParameter[] = [
@@ -289,13 +308,16 @@ export const stubBoldMassIDSortingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: SORTING,
-      value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
-    },
-    mergeMetadataAttributes(defaultSortingAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: SORTING,
+        value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
+      },
+      mergeMetadataAttributes(defaultSortingAttributes, metadataAttributes),
+    ),
+    metadataAttributes,
   );
 
 export type BoldMassIDExternalEventsMap = Map<

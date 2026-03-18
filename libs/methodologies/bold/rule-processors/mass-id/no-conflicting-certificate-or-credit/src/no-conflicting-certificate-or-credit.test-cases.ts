@@ -110,7 +110,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'no Credit is linked to the MassID',
+      scenario: 'No credit is linked to the MassID document',
     },
     {
       documents: [
@@ -125,7 +125,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         ),
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'has an approved MassID audit document for the same methodology name',
+        'The MassID has an approved audit document for the same methodology name',
     },
     {
       documents: [
@@ -147,7 +147,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         ),
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'has an in-progress MassID audit document for the same methodology name',
+        'The MassID has an in-progress audit document for the same methodology name',
     },
     {
       documents: [
@@ -159,7 +159,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'has an approved MassID Audit document for a different methodology',
+        'The MassID has an approved audit document for a different methodology',
     },
     {
       documents: [
@@ -173,7 +173,8 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
           DocumentType.RECYCLED_ID,
         ),
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'has a valid certificate document of the specified type',
+      scenario:
+        'The MassID has a valid certificate document of the specified type',
     },
     {
       documents: [
@@ -187,7 +188,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         processorError.ERROR_MESSAGE
           .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'has a valid credit document',
+      scenario: 'The MassID has a valid credit document',
     },
     {
       documents: [
@@ -201,7 +202,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'has cancelled certificate document',
+      scenario: 'The MassID has a cancelled certificate document',
     },
     {
       documents: [
@@ -219,6 +220,6 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: 'has cancelled credit document',
+      scenario: 'The MassID has a cancelled credit document',
     },
   ];

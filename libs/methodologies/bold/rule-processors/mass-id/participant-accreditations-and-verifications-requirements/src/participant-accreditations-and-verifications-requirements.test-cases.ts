@@ -314,7 +314,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the participants accreditation documents are found and the accreditation is active',
+        "The participants' accreditation documents exist and the accreditation is active",
     },
     {
       documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
@@ -323,7 +323,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment:
         processorError.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the participants accreditation documents are not found',
+      scenario: "The participants' accreditation documents were not found",
     },
     {
       documents: [
@@ -335,7 +335,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'the participants accreditation documents are found and the accreditation is active',
+        "The participants' accreditation documents exist and the accreditation is active",
     },
     {
       documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
@@ -344,7 +344,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment:
         processorError.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the participants accreditation documents are not found',
+      scenario: "The participants' accreditation documents were not found",
     },
     {
       documents: [
@@ -360,7 +360,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
           [INTEGRATOR],
         ),
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'some participants accreditation documents are not found',
+      scenario: "Some participants' accreditation documents were not found",
     },
     {
       documents: [
@@ -370,7 +370,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the mass document does not exist',
+      scenario: 'The MassID document does not exist',
     },
     {
       documents: [
@@ -387,7 +387,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
           massIDAuditWithAccreditationsAndVerifications.massIDDocument.id,
         ),
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the mass document does not contain events',
+      scenario: 'The MassID document does not contain events',
     },
     {
       documents: [
@@ -401,7 +401,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
         ),
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the participants accreditation documents are found and the accreditation is not active',
+        "The participants' accreditation documents exist and the accreditation is not active",
     },
     {
       documents: [
@@ -412,7 +412,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'WASTE_GENERATOR has accreditation document without result event (should pass - Waste Generator is ignored)',
+        'The WASTE_GENERATOR has an accreditation document without a result event (should pass - Waste Generator is ignored)',
     },
     {
       documents: [
@@ -424,7 +424,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'WASTE_GENERATOR has valid accreditation result event (should pass - Waste Generator is ignored)',
+        'The WASTE_GENERATOR has a valid accreditation result event (should pass - Waste Generator is ignored)',
     },
     {
       documents: [
@@ -436,7 +436,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'WASTE_GENERATOR has invalid accreditation result event (expired) (should pass - Waste Generator is ignored)',
+        'The WASTE_GENERATOR has an invalid accreditation result event (expired) (should pass - Waste Generator is ignored)',
     },
     {
       documents: [
@@ -451,7 +451,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'WASTE_GENERATOR has multiple valid accreditations (should pass - Waste Generator is ignored)',
+        'The WASTE_GENERATOR has multiple valid accreditations (should pass - Waste Generator is ignored)',
     },
     {
       documents: [
@@ -463,7 +463,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
+        'The participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
     },
     {
       documents: [
@@ -475,7 +475,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
       resultStatus: RuleOutputStatus.PASSED,
       scenario:
-        'WASTE_GENERATOR event exists but no accreditation document provided (should pass - Waste Generator is ignored)',
+        'The WASTE_GENERATOR event exists but no accreditation document provided (should pass - Waste Generator is ignored)',
     },
     {
       documents: [
@@ -493,6 +493,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
           PROCESSOR,
         ),
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'PROCESSOR has multiple valid accreditations (should fail)',
+      scenario:
+        'The MassID document has a PROCESSOR with multiple valid accreditations (should fail)',
     },
   ];

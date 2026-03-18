@@ -22,6 +22,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
+  attachExplicitAttributes,
   mergeEventsMaps,
   mergeMetadataAttributes,
   type MetadataAttributeParameter,
@@ -68,12 +69,15 @@ export const stubBoldAccreditationResultEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
-  stubDocumentEventWithMetadataAttributes(
-    { ...partialDocumentEvent, name: ACCREDITATION_RESULT },
-    mergeMetadataAttributes(
-      defaultAccreditationResultEventMetadataAttributes,
-      metadataAttributes,
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      { ...partialDocumentEvent, name: ACCREDITATION_RESULT },
+      mergeMetadataAttributes(
+        defaultAccreditationResultEventMetadataAttributes,
+        metadataAttributes,
+      ),
     ),
+    metadataAttributes,
   );
 
 const defaultEmissionAndCompostingMetricsEventMetadataAttributes: MetadataAttributeParameter[] =
@@ -94,15 +98,18 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
-    },
-    mergeMetadataAttributes(
-      defaultEmissionAndCompostingMetricsEventMetadataAttributes,
-      metadataAttributes,
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+      },
+      mergeMetadataAttributes(
+        defaultEmissionAndCompostingMetricsEventMetadataAttributes,
+        metadataAttributes,
+      ),
     ),
+    metadataAttributes,
   );
 
 const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParameter[] =
@@ -120,15 +127,18 @@ export const stubBoldRecyclingBaselinesEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: RECYCLING_BASELINES,
-    },
-    mergeMetadataAttributes(
-      defaultRecyclingBaselinesEventMetadataAttributes,
-      metadataAttributes,
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: RECYCLING_BASELINES,
+      },
+      mergeMetadataAttributes(
+        defaultRecyclingBaselinesEventMetadataAttributes,
+        metadataAttributes,
+      ),
     ),
+    metadataAttributes,
   );
 
 const defaultMonitoringSystemsAndEquipmentEventMetadataAttributes: MetadataAttributeParameter[] =
@@ -138,15 +148,18 @@ export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}) =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: MONITORING_SYSTEMS_AND_EQUIPMENT,
-    },
-    mergeMetadataAttributes(
-      defaultMonitoringSystemsAndEquipmentEventMetadataAttributes,
-      metadataAttributes,
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: MONITORING_SYSTEMS_AND_EQUIPMENT,
+      },
+      mergeMetadataAttributes(
+        defaultMonitoringSystemsAndEquipmentEventMetadataAttributes,
+        metadataAttributes,
+      ),
     ),
+    metadataAttributes,
   );
 
 const boldAccreditationExternalEventsMap = new Map([

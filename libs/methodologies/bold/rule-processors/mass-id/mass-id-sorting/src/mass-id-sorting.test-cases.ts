@@ -158,6 +158,14 @@ const createWeightAttributesWithFormat = (
   },
 ];
 
+// Deterministic values for manifestExample test cases
+const MANIFEST_SORTING_FACTOR = 0.3;
+const MANIFEST_VALUE_BEFORE_SORTING = 100;
+const MANIFEST_GROSS_WEIGHT = MANIFEST_VALUE_BEFORE_SORTING;
+const MANIFEST_DEDUCTED_WEIGHT =
+  MANIFEST_GROSS_WEIGHT * MANIFEST_SORTING_FACTOR;
+const MANIFEST_SORTING_VALUE = MANIFEST_GROSS_WEIGHT - MANIFEST_DEDUCTED_WEIGHT;
+
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
 const grossWeight = valueBeforeSorting;
@@ -227,6 +235,7 @@ interface MassIDSortingTestCase extends RuleTestCase {
 export const massIDSortingTestCases: MassIDSortingTestCase[] = [
   {
     actorParticipants,
+    manifestFields: { includeCurrentValue: true, includeValue: true },
     massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
@@ -240,29 +249,34 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the sorting description is missing',
+    scenario: 'The sorting description is missing',
   },
   {
-    accreditationDocuments: createAccreditationDocuments(sortingFactor),
+    accreditationDocuments: createAccreditationDocuments(
+      MANIFEST_SORTING_FACTOR,
+    ),
     actorParticipants,
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true, includeValue: true },
     massIDEvents: createMassIDEvents(
-      valueBeforeSorting,
-      grossWeight,
-      deductedWeight,
-      calculatedSortingValue,
+      MANIFEST_VALUE_BEFORE_SORTING,
+      MANIFEST_GROSS_WEIGHT,
+      MANIFEST_DEDUCTED_WEIGHT,
+      MANIFEST_SORTING_VALUE,
     ),
     partialDocument: {
       ...massIDDocument,
-      currentValue: calculatedSortingValue,
+      currentValue: MANIFEST_SORTING_VALUE,
     },
     resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the sorting value calculation difference is less or equal to 0.1',
+      'The sorting value calculation difference is less or equal to 0.1',
   },
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
+    manifestFields: { includeCurrentValue: true, includeValue: true },
     massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
@@ -279,7 +293,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the document current value does not match the sorting event value',
+      'The document current value does not match the sorting event value',
   },
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
@@ -295,11 +309,12 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the sorting value calculation difference is greater than 0.1',
+    scenario: 'The sorting value calculation difference is greater than 0.1',
   },
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
+    manifestFields: { includeCurrentValue: true, includeValue: true },
     massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
@@ -316,7 +331,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     ),
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'the deducted weight does not match the expected value based on sorting factor',
+      'The deducted weight does not match the expected value based on sorting factor',
   },
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
@@ -336,7 +351,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       valueBeforeSorting,
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the gross weight does not match the previous event value',
+    scenario: 'The gross weight does not match the previous event value',
   },
 ];
 
@@ -377,12 +392,12 @@ interface MassIDSortingErrorTestCase extends RuleTestCase {
 
 export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
   createErrorTestCase(
-    'the MassID document does not exist',
+    'The MassID document does not exist',
     [...participantsAccreditationDocuments.values()],
     processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
   ),
   createErrorTestCase(
-    'the MassID document does not contain external events',
+    'The MassID document does not contain external events',
     [
       { ...massIDDocument, externalEvents: [] },
       ...participantsAccreditationDocuments.values(),
@@ -390,12 +405,12 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
   ),
   createErrorTestCase(
-    `the ${RECYCLER} accreditation does not exist`,
+    `The ${RECYCLER} accreditation does not exist`,
     [massIDDocument],
     processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
   ),
   createErrorTestCase(
-    `the MassID document does not contain a ${SORTING} event`,
+    `The MassID document does not contain a ${SORTING} event`,
     [
       {
         ...massIDDocument,
@@ -408,7 +423,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
   ),
   createErrorTestCase(
-    'the value after sorting is not valid',
+    'The value after sorting is not valid',
     [
       invalidSortingValue.massIDDocument,
       invalidSortingValue.massIDAuditDocument,
@@ -417,7 +432,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
   ),
   createErrorTestCase(
-    `the ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
+    `The ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
     [
       modifyDocumentEvents(massIDDocument, {
         [String(SORTING)]: stubBoldMassIDSortingEvent({
@@ -444,12 +459,12 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
   ),
   createErrorTestCase(
-    'the value before sorting is not greater than 0',
+    'The value before sorting is not greater than 0',
     [massIDDocument, ...participantsAccreditationDocuments.values()],
     processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(0),
   ),
   createErrorTestCase(
-    'the gross weight has invalid format',
+    'The gross weight has invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -473,7 +488,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT,
   ),
   createErrorTestCase(
-    'the deducted weight has invalid format',
+    'The deducted weight has invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -497,7 +512,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT,
   ),
   createErrorTestCase(
-    'the gross weight is not greater than 0',
+    'The gross weight is not greater than 0',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -516,7 +531,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(0),
   ),
   createErrorTestCase(
-    'the deducted weight is not greater than 0',
+    'The deducted weight is not greater than 0',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -535,7 +550,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(0),
   ),
   createErrorTestCase(
-    'the gross weight has valid value but invalid format',
+    'The gross weight has valid value but invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -559,7 +574,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT,
   ),
   createErrorTestCase(
-    'the deducted weight has valid value but invalid format',
+    'The deducted weight has valid value but invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {
@@ -583,7 +598,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT_FORMAT,
   ),
   createErrorTestCase(
-    'the deducted weight is greater than or equal to gross weight',
+    'The deducted weight is greater than or equal to gross weight',
     [
       modifyDocumentEvents(massIDDocument, {
         [String(DROP_OFF)]: {

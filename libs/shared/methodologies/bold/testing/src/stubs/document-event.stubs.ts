@@ -17,6 +17,16 @@ import { faker } from '@faker-js/faker';
 import { stubAddress } from './address.stubs';
 import { stubAuthor, stubParticipant } from './participant.stubs';
 
+/**
+ * Well-known Symbol used to attach the list of explicitly-provided metadata
+ * attribute names to a DocumentEvent stub.  The normalizer in
+ * generate-application-rules-manifest.ts reads this to filter out default
+ * (noise) attributes from manifest examples.
+ */
+export const EXPLICIT_ATTRIBUTES: unique symbol = Symbol.for(
+  'manifest:explicitAttributes',
+);
+
 const isPropertyOverridenWithUndefined = <T extends AnyObject>(
   item: T,
   key: keyof T,

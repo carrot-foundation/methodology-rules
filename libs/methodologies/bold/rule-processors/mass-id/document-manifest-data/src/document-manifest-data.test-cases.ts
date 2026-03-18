@@ -70,7 +70,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.MISSING_EVENT(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document does not have a ${documentManifestType} event`,
+    scenario: `The MassID document does not have a ${documentManifestType} event`,
   },
   ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
     documentManifestType,
@@ -85,7 +85,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: attributeErrorMessages[attribute]!,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event without a ${attribute}`,
+    scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
   })),
   {
     documentManifestType,
@@ -103,7 +103,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: `${RESULT_COMMENTS.MISSING_DOCUMENT_TYPE} ${RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
+    scenario: `The MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
   },
   {
     documentManifestType,
@@ -123,7 +123,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     resultComment:
       RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event with a wrong attachment label`,
+    scenario: `The MassID document has a ${documentManifestType} event with a wrong attachment label`,
   },
   {
     documentManifestType,
@@ -144,7 +144,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(CUBIC_METER),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event ${ISSUE_DATE} with a wrong format`,
+    scenario: `The MassID document has a ${documentManifestType} event ${ISSUE_DATE} with a wrong format`,
   },
   {
     documentManifestType,
@@ -166,7 +166,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE('EMITIARE'),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${documentManifestType} event ${DOCUMENT_TYPE} with a wrong format`,
+    scenario: `The MassID document has a ${documentManifestType} event ${DOCUMENT_TYPE} with a wrong format`,
   },
   {
     documentManifestType,
@@ -189,7 +189,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType,
       ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} and a attachment`,
+    scenario: `The MassID document has an ${EXEMPTION_JUSTIFICATION} and an attachment`,
   },
   {
     documentManifestType,
@@ -205,7 +205,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.MISSING_ATTRIBUTES(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
+    scenario: `The MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
   },
   {
     documentManifestType,
@@ -214,7 +214,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has no ${RECYCLER} event`,
+    scenario: `The MassID document has no ${RECYCLER} event`,
   },
   {
     documentManifestType,
@@ -227,10 +227,11 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment:
       RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION(documentManifestType),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the MassID document has a ${EXEMPTION_JUSTIFICATION} without attachment`,
+    scenario: `The MassID document has a ${EXEMPTION_JUSTIFICATION} without attachment`,
   },
   {
     documentManifestType,
@@ -257,6 +258,8 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
+    manifestFields: { includeValue: true },
     resultComment: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
       documentNumber: '0',
       documentType: 'MTR',
@@ -264,7 +267,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       value: 100,
     }),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the MassID document has a valid ${TRANSPORT_MANIFEST} event and attachment`,
+    scenario: `The MassID document has a valid ${TRANSPORT_MANIFEST} event and attachment`,
   },
   {
     documentManifestType,
@@ -328,7 +331,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       value: 200,
     })}`,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the MassID document has two valid ${documentManifestType} events and attachments`,
+    scenario: `The MassID document has two valid ${documentManifestType} events and attachments`,
   },
   {
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
@@ -349,7 +352,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     resultComment:
       RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(TRANSPORT_MANIFEST),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
+    scenario: `The MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
   },
 ];
 
@@ -382,7 +385,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: 'Document number mismatch',
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'cross-validation finds mismatches in the document',
+    scenario: 'Cross-validation finds mismatches in the document',
   },
   {
     crossValidationReviewReasons: [
@@ -414,7 +417,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: 'Review required: Low confidence extraction',
     resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
-    scenario: 'cross-validation requires review',
+    scenario: 'Cross-validation requires review',
   },
   {
     crossValidationPassMessages: [
@@ -446,7 +449,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: 'The attachment pass message from extraction',
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'cross-validation provides pass messages',
+    scenario: 'Cross-validation provides pass messages',
   },
   {
     crossValidationFailMessages: ['Document number mismatch'],
@@ -481,7 +484,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
       'Document number mismatch Review required: Low confidence extraction',
     resultStatus: RuleOutputStatus.FAILED,
     scenario:
-      'cross-validation finds mismatches and also requires review for other fields',
+      'Cross-validation finds mismatches and also requires review for other fields',
   },
 ];
 
@@ -491,6 +494,6 @@ export const exceptionTestCases: DocumentManifestDataTestCase[] = [
     events: {},
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has a ${RECYCLING_MANIFEST} event with a different address than the ${RECYCLER} event`,
+    scenario: `The MassID document has a ${RECYCLING_MANIFEST} event with a different address than the ${RECYCLER} event`,
   },
 ];
