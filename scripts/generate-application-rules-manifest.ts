@@ -1,16 +1,26 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env ts-node
 
 /**
  * Generates application-rules-manifest.json — the cross-repo contract
  * between methodology-rules and carrot-docs.
  *
- * Usage: pnpm exec tsx scripts/generate-application-rules-manifest.ts
+ * Usage: pnpm exec ts-node --compiler ts-patch/compiler --project scripts/tsconfig.manifest.json scripts/generate-application-rules-manifest.ts
  * Output: dist/application-rules-manifest.json
  */
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { register } from 'tsconfig-paths';
+
+// Register tsconfig path aliases so that require() resolves @carrot-fndn/* imports
+const tsConfig = JSON.parse(
+  fs.readFileSync(path.resolve(__dirname, '..', 'tsconfig.paths.json'), 'utf8'),
+) as { compilerOptions: { paths: Record<string, string[]> } };
+register({
+  baseUrl: path.resolve(__dirname, '..'),
+  paths: tsConfig.compilerOptions.paths,
+});
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST = path.join(ROOT, 'dist');
@@ -463,8 +473,6 @@ const CODE_LEAK_PATTERNS = [
 ];
 
 const PLACEHOLDER_ONLY_RE = /^\{\{[A-Z_]+\}\}$/;
-const KNOWN_RESULT_STATUSES = new Set(['PASSED', 'REVIEW_REQUIRED']);
-
 function isCodeLeak(s: string): boolean {
   return CODE_LEAK_PATTERNS.some((re) => re.test(s));
 }
@@ -479,15 +487,316 @@ function normalizeMessages(messages: string[]): string[] {
     .filter((s) => !isPlaceholderOnly(s) && !isCodeLeak(s));
 }
 
-// --- Examples extraction ---
+// --- Examples extraction (runtime require) ---
 
-interface RuleExample {
-  description: string;
-  output: {
-    resultComment?: string;
-    resultStatus: string;
-  };
+interface ManifestExample {
+  exampleDocuments: Record<string, unknown>;
+  resultComment: string;
+  resultStatus: string;
+  scenario: string;
 }
+
+interface ManifestFieldsOverride {
+  additionalAttributes?: string[];
+  excludeAttributes?: string[];
+  includeAddress?: boolean;
+  includeCurrentValue?: boolean;
+  includeValue?: boolean;
+}
+
+interface RuleTestCaseShape {
+  manifestExample?: boolean;
+  manifestFields?: ManifestFieldsOverride;
+  resultComment: unknown;
+  resultStatus: unknown;
+  scenario: string;
+}
+
+function extractManifestExamples(
+  srcPath: string,
+  srcFiles: string[],
+): ManifestExample[] {
+  const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
+  if (!testCasesFile) return [];
+
+  const testCasesPath = path.join(srcPath, testCasesFile);
+
+  let mod: Record<string, unknown>;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    mod = require(testCasesPath) as Record<string, unknown>;
+  } catch (error) {
+    console.warn(`  Warning: could not require ${testCasesPath}: ${error}`);
+    return [];
+  }
+
+  // Collect all exported arrays (there may be multiple, e.g. testCases + errorTestCases)
+  const allTestCases: RuleTestCaseShape[] = [];
+  for (const value of Object.values(mod)) {
+    if (Array.isArray(value)) {
+      allTestCases.push(...(value as RuleTestCaseShape[]));
+    }
+  }
+
+  // Filter to manifest-flagged cases
+  const manifestCases = allTestCases.filter(
+    (tc) => tc.manifestExample === true,
+  );
+
+  return manifestCases.map((tc) => ({
+    exampleDocuments: normalizeTestCasePayload(
+      tc as unknown as Record<string, unknown>,
+      tc.manifestFields,
+    ),
+    resultComment: String(tc.resultComment ?? ''),
+    resultStatus: String(tc.resultStatus ?? ''),
+    scenario: tc.scenario,
+  }));
+}
+
+// --- Document normalizer ---
+
+const EXPLICIT_ATTRIBUTES = Symbol.for('manifest:explicitAttributes');
+
+const TEST_CASE_META_KEYS = new Set([
+  'scenario',
+  'resultComment',
+  'resultStatus',
+  'manifestExample',
+  'manifestFields',
+]);
+
+function normalizeTestCasePayload(
+  testCase: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(testCase)) {
+    if (TEST_CASE_META_KEYS.has(key)) continue;
+    result[key] = normalizeValue(value, fieldsOverride);
+  }
+
+  return result;
+}
+
+function normalizeValue(
+  value: unknown,
+  fieldsOverride?: ManifestFieldsOverride,
+): unknown {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+
+  if (value instanceof Map) {
+    return Object.fromEntries(
+      [...value.entries()].map(([k, v]) => [
+        k,
+        normalizeValue(v, fieldsOverride),
+      ]),
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((v) => normalizeValue(v, fieldsOverride));
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  // DocumentEvent shape detection
+  if ('name' in obj && ('metadata' in obj || 'value' in obj)) {
+    return normalizeDocumentEvent(obj, fieldsOverride);
+  }
+
+  // Document shape detection
+  if ('category' in obj && 'externalEvents' in obj) {
+    return normalizeDocument(obj, fieldsOverride);
+  }
+
+  // Participant shape detection — strip random typia noise
+  if (isParticipantLike(obj)) {
+    return normalizeParticipant(obj);
+  }
+
+  // Generic object — recurse
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [
+      k,
+      normalizeValue(v, fieldsOverride),
+    ]),
+  );
+}
+
+const PARTICIPANT_MARKER_KEYS = new Set([
+  'businessName',
+  'taxId',
+  'piiSnapshotId',
+  'taxIdType',
+]);
+
+function isParticipantLike(obj: Record<string, unknown>): boolean {
+  if (typeof obj['type'] !== 'string' || typeof obj['id'] !== 'string') {
+    return false;
+  }
+
+  return Object.keys(obj).some((k) => PARTICIPANT_MARKER_KEYS.has(k));
+}
+
+function normalizeParticipant(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {
+    id: obj['id'],
+    type: obj['type'],
+  };
+
+  return result;
+}
+
+const ADDRESS_RELEVANT_KEYS = new Set([
+  'latitude',
+  'longitude',
+  'countryCode',
+  'city',
+  'state',
+  'street',
+  'number',
+  'zipCode',
+]);
+
+function normalizeAddress(
+  address: Record<string, unknown>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const key of ADDRESS_RELEVANT_KEYS) {
+    if (address[key] !== undefined) {
+      result[key] = address[key];
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : address;
+}
+
+/**
+ * Filters out obviously random attribute names generated by typia's random<>().
+ * Real attribute names follow a "Title Case With Spaces" pattern (e.g., "Driver Identifier").
+ * Random typia strings are long lowercase alphanumeric strings without spaces.
+ */
+function isValidAttributeName(name: string): boolean {
+  // Real attribute names contain spaces and are relatively short
+  if (name.includes(' ') && name.length < 80) return true;
+  // Single-word names are valid if they look like real identifiers (not random strings)
+  if (name.length <= 30 && /^[A-Z]/.test(name)) return true;
+
+  return false;
+}
+
+function buildAllowedAttributeSet(
+  event: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Set<string> | undefined {
+  // Get auto-detected explicit attributes from the stub builder
+  const explicitAttrs = (event as Record<symbol, unknown>)[
+    EXPLICIT_ATTRIBUTES
+  ] as string[] | undefined;
+
+  if (
+    !explicitAttrs &&
+    !fieldsOverride?.additionalAttributes &&
+    !fieldsOverride?.excludeAttributes
+  ) {
+    return undefined; // No filter info — include all (fallback)
+  }
+
+  const allowedSet = new Set(explicitAttrs ?? []);
+
+  for (const attr of fieldsOverride?.additionalAttributes ?? []) {
+    allowedSet.add(attr);
+  }
+
+  for (const attr of fieldsOverride?.excludeAttributes ?? []) {
+    allowedSet.delete(attr);
+  }
+
+  return allowedSet;
+}
+
+function normalizeDocumentEvent(
+  event: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { name: event['name'] };
+
+  // Exclude value by default, include only when explicitly requested
+  if (fieldsOverride?.includeValue === true && event['value'] !== undefined) {
+    result['value'] = event['value'];
+  }
+
+  // Include address only if explicitly requested
+  if (fieldsOverride?.includeAddress === true && event['address']) {
+    result['address'] = normalizeAddress(
+      event['address'] as Record<string, unknown>,
+    );
+  }
+
+  // Filter metadata attributes based on explicit attributes + overrides
+  const allowedSet = buildAllowedAttributeSet(event, fieldsOverride);
+
+  const metadata = event['metadata'] as Record<string, unknown> | undefined;
+  const attributes = metadata?.['attributes'] as
+    | Array<Record<string, unknown>>
+    | undefined;
+
+  if (attributes?.length) {
+    const filtered = allowedSet
+      ? attributes.filter((attr) => allowedSet.has(String(attr['name'])))
+      : attributes.filter((attr) => isValidAttributeName(String(attr['name'])));
+
+    if (filtered.length) {
+      result['metadata'] = {
+        attributes: filtered.map((attr) => {
+          const normalized: Record<string, unknown> = {
+            name: attr['name'],
+            value: attr['value'],
+          };
+          if (attr['format']) normalized['format'] = attr['format'];
+          return normalized;
+        }),
+      };
+    }
+  }
+
+  return result;
+}
+
+function normalizeDocument(
+  doc: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { category: doc['category'] };
+
+  if (doc['type']) result['type'] = doc['type'];
+  if (doc['subtype']) result['subtype'] = doc['subtype'];
+
+  // Exclude currentValue by default, include only when explicitly requested
+  if (
+    fieldsOverride?.includeCurrentValue === true &&
+    doc['currentValue'] !== undefined
+  ) {
+    result['currentValue'] = doc['currentValue'];
+  }
+
+  const events = doc['externalEvents'] as unknown[] | undefined;
+  if (events?.length) {
+    result['externalEvents'] = events.map((e) =>
+      normalizeValue(e, fieldsOverride),
+    );
+  }
+
+  return result;
+}
+
+// --- Brace-balanced object extraction (used by error/comment extractors) ---
 
 interface ObjectBounds {
   end: number;
@@ -551,114 +860,6 @@ function findEnclosingObjectBounds(
   return { end, start };
 }
 
-interface ResultCommentMaps {
-  errorsByKey: Record<string, string>;
-  failedByKey: Record<string, string>;
-  passedByKey: Record<string, string>;
-}
-
-function resolveResultComment(
-  objectSlice: string,
-  maps: ResultCommentMaps,
-): string | undefined {
-  // Match RESULT_COMMENTS.passed.KEY or RESULT_COMMENTS.failed.KEY
-  const rcMatch = objectSlice.match(
-    /resultComment:\s*RESULT_COMMENTS\.(passed|failed)\.(\w+)/,
-  );
-  if (rcMatch) {
-    const section = rcMatch[1] as 'passed' | 'failed';
-    const key = rcMatch[2] ?? '';
-    const map =
-      section === 'passed' ? maps.passedByKey : maps.failedByKey;
-    return map[key];
-  }
-
-  // Match ERROR_MESSAGES.KEY or ERROR_MESSAGE.KEY
-  const errMatch = objectSlice.match(
-    /resultComment:\s*ERROR_MESSAGES?\.(\w+)/,
-  );
-  if (errMatch) {
-    const key = errMatch[1] ?? '';
-    return maps.errorsByKey[key];
-  }
-
-  // Match inline string literal: resultComment: 'text' or "text" or `text`
-  const inlineMatch = objectSlice.match(
-    /resultComment:\s*['"`]([^'"`]{5,})['"`]/,
-  );
-  if (inlineMatch?.[1]) {
-    return normalizeMessage(inlineMatch[1].trim());
-  }
-
-  return undefined;
-}
-
-function extractExamples(
-  srcPath: string,
-  srcFiles: string[],
-  commentMaps: ResultCommentMaps,
-): RuleExample[] {
-  const examples: RuleExample[] = [];
-  const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
-  if (!testCasesFile) return examples;
-
-  const content = fs.readFileSync(path.join(srcPath, testCasesFile), 'utf8');
-
-  const scenarioRe =
-    /scenario:\s*(?:`((?:[^`]|\$\{[^}]*\})*)`|'([^']*)'|"([^"]*)")/g;
-  let scenarioMatch;
-
-  while ((scenarioMatch = scenarioRe.exec(content)) !== null) {
-    const rawScenario =
-      scenarioMatch[1] ?? scenarioMatch[2] ?? scenarioMatch[3] ?? '';
-
-    const { end: objEnd, start: objStart } = findEnclosingObjectBounds(
-      content,
-      scenarioMatch.index,
-    );
-    const fullObjectSlice = content.slice(objStart, objEnd);
-    const statusMatch = fullObjectSlice.match(
-      /resultStatus:\s*RuleOutputStatus\.(\w+)/,
-    );
-    const status = statusMatch?.[1];
-
-    if (!status) continue;
-
-    let description = normalizeMessage(rawScenario);
-
-    if (description) {
-      description =
-        description.charAt(0).toUpperCase() + description.slice(1);
-    }
-
-    if (
-      description.length < 10 ||
-      isPlaceholderOnly(description) ||
-      isCodeLeak(description)
-    ) {
-      continue;
-    }
-
-    const resultStatus = KNOWN_RESULT_STATUSES.has(status)
-      ? status
-      : 'REJECTED';
-
-    const resultComment = resolveResultComment(fullObjectSlice, commentMaps);
-
-    const output: RuleExample['output'] = { resultStatus };
-    if (resultComment) {
-      output.resultComment = resultComment;
-    }
-
-    examples.push({
-      description,
-      output,
-    });
-  }
-
-  return examples;
-}
-
 // --- README extraction ---
 
 interface ReadmeData {
@@ -709,7 +910,7 @@ interface ManifestRule {
   description: string;
   errors: string[];
   events: string[];
-  examples: RuleExample[];
+  examples: ManifestExample[];
   implementationPath: string;
   implementsFrameworkRules: string[];
   methodology: string;
@@ -771,12 +972,7 @@ function buildRule(
   const readme = extractReadmeData(readmePath);
   const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
   const resultComments = extractResultComments(libSrcPath, srcFiles);
-  const commentMaps: ResultCommentMaps = {
-    errorsByKey: errorMessages.byKey,
-    failedByKey: resultComments.failedByKey,
-    passedByKey: resultComments.passedByKey,
-  };
-  const examples = extractExamples(libSrcPath, srcFiles, commentMaps);
+  const examples = extractManifestExamples(libSrcPath, srcFiles);
 
   // Resolve frameworkRules: prefer app-level, fall back to shared lib
   const appRuleFrameworkRules = extractAppFrameworkRules(appRulePath);

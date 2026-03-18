@@ -263,7 +263,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document does not have ${WEIGHING} events`,
+    scenario: `The MassID document does not have "${WEIGHING}" events`,
   },
   {
     massIDDocumentEvents: {
@@ -273,7 +273,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document has more than two ${WEIGHING} events`,
+    scenario: `The MassID document has more than two "${WEIGHING}" events`,
   },
   {
     accreditationDocuments: new Map([
@@ -296,7 +296,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Accreditation document does not have a ${SCALE_TYPE} attribute`,
+    scenario: `The Recycler Accreditation document does not have a "${SCALE_TYPE}" attribute`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -309,7 +309,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${CONTAINER_CAPACITY} attribute is missing`,
+    scenario: `The "${CONTAINER_CAPACITY}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -323,7 +323,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${CONTAINER_QUANTITY} attribute is missing and the ${CONTAINER_TYPE} is ${DocumentEventContainerType.BAG}`,
+    scenario: `The "${CONTAINER_QUANTITY}" attribute is missing and the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.BAG}"`,
   },
   {
     accreditationDocuments: new Map([
@@ -345,7 +345,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${ACCREDITATION_RESULT} event is missing`,
+    scenario: `The "${ACCREDITATION_RESULT}" event is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -359,7 +359,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${CONTAINER_QUANTITY} attribute is defined, but the ${CONTAINER_TYPE} is ${DocumentEventContainerType.TRUCK}`,
+    scenario: `The "${CONTAINER_QUANTITY}" attribute is defined, but the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.TRUCK}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -370,7 +370,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${GROSS_WEIGHT} attribute is missing`,
+    scenario: `The "${GROSS_WEIGHT}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -379,7 +379,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the event value field is missing`,
+    scenario: 'The event value field is missing',
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -390,7 +390,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${TARE} attribute is missing`,
+    scenario: `The "${TARE}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -401,7 +401,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${DESCRIPTION} attribute is missing`,
+    scenario: `The "${DESCRIPTION}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -412,7 +412,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${DESCRIPTION} attribute is an empty string`,
+    scenario: `The "${DESCRIPTION}" attribute is an empty string`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -429,7 +429,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       scaleType,
     )} ${INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleTypeMismatch)}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${SCALE_TYPE} attribute is not equal to the ${SCALE_TYPE} attribute in the Recycler Accreditation document and is not supported by the methodology`,
+    scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -445,7 +445,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       weighingCaptureMethodMismatch,
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is not supported by the methodology`,
+    scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is not supported by the methodology`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -458,7 +458,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${VEHICLE_LICENSE_PLATE} attribute is missing`,
+    scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -469,16 +469,18 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${CONTAINER_TYPE} attribute is missing`,
+    scenario: `The "${CONTAINER_TYPE}" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
+    manifestExample: true,
+    manifestFields: { includeValue: true },
     massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the one step ${WEIGHING} event is valid`,
+    scenario: `The one step "${WEIGHING}" event is valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -491,7 +493,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the one step ${WEIGHING} event is valid with scale ticket verification configured`,
+    scenario: `The one step "${WEIGHING}" event is valid with scale ticket verification configured`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -503,7 +505,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: 'Scale ticket mismatch',
     resultStatus: RuleOutputStatus.FAILED,
     scaleTicketVerificationError: 'Scale ticket mismatch',
-    scenario: `scale ticket verification fails for ${WEIGHING} event`,
+    scenario: `Scale ticket verification fails for "${WEIGHING}" event`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -520,7 +522,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the one step ${WEIGHING} event is valid with container capacity exception`,
+    scenario: `The one step "${WEIGHING}" event is valid with container capacity exception`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -539,7 +541,7 @@ export const weighingTestCases: WeighingTestCase[] = [
         PASSED_RESULT_COMMENTS.SINGLE_STEP,
       ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the one step ${WEIGHING} event is valid with container quantity exception for non-TRUCK container`,
+    scenario: `The one step "${WEIGHING}" event is valid with container quantity exception for non-TRUCK container`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -566,7 +568,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment:
       INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the two step ${WEIGHING} event participant ids do not match`,
+    scenario: `The two step "${WEIGHING}" event participant ids do not match`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -582,19 +584,21 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.TWO_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the two step ${WEIGHING} events are valid with container capacity exception`,
+    scenario: `The two step "${WEIGHING}" events are valid with container capacity exception`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
+    manifestExample: true,
+    manifestFields: { includeValue: true },
     massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
     ),
     resultComment: PASSED_RESULT_COMMENTS.TWO_STEP,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the two step ${WEIGHING} events are valid`,
+    scenario: `The two step "${WEIGHING}" events are valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -612,7 +616,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       secondValue: 1,
     }),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the two step ${WEIGHING} event ${CONTAINER_CAPACITY} attribute values do not match`,
+    scenario: `The two step "${WEIGHING}" event "${CONTAINER_CAPACITY}" attribute values do not match`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -626,7 +630,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       DocumentEventScaleType.CONVEYOR_BELT_SCALE,
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the two step ${WEIGHING} event scale type is not ${DocumentEventScaleType.WEIGHBRIDGE}`,
+    scenario: `The two step "${WEIGHING}" event scale type is not "${DocumentEventScaleType.WEIGHBRIDGE}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -654,7 +658,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       DocumentEventContainerType.BAG,
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the two step ${WEIGHING} event container type is not ${DocumentEventContainerType.TRUCK}`,
+    scenario: `The two step "${WEIGHING}" event container type is not "${DocumentEventContainerType.TRUCK}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -673,10 +677,12 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING_CAPTURE_METHOD} attribute is ${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST} and the ${WEIGHING} event is valid`,
+    scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is "${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST}" and the "${WEIGHING}" event is valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
+    manifestExample: true,
+    manifestFields: { includeValue: true },
     massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes, 98),
     },
@@ -688,7 +694,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       tare: 1,
     }),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'the calculated net weight is not equal to the mass net weight',
+    scenario: 'The calculated net weight is not equal to the mass net weight',
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -708,7 +714,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and missing Tare`,
+    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -724,7 +730,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined' as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for TRUCK container without tareException and missing Tare`,
+    scenario: `The "${WEIGHING}" event fails for TRUCK container without tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -744,7 +750,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for non-TRUCK (BIN) container with tareException and missing Tare`,
+    scenario: `The "${WEIGHING}" event is valid for non-TRUCK (BIN) container with tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -771,7 +777,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       tare: 1,
     }),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for non-TRUCK (BIN) container with tareException when net weight calculation fails`,
+    scenario: `The "${WEIGHING}" event fails for non-TRUCK (BIN) container with tare exception when net weight calculation fails`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -789,7 +795,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and Tare provided`,
+    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and Tare provided`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -807,7 +813,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and missing Gross Weight`,
+    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Gross Weight`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -827,7 +833,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for TRUCK container with tareException and both Tare and Gross Weight missing`,
+    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and both Tare and Gross Weight missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -846,7 +852,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for TRUCK container with expired tareException (Valid Until in past) and missing Tare`,
+    scenario: `The "${WEIGHING}" event fails for TRUCK container with expired tare exception (Valid Until in past) and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -865,7 +871,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${WEIGHING} event fails for TRUCK container with invalid tareException Valid Until date format and missing Tare`,
+    scenario: `The "${WEIGHING}" event fails for TRUCK container with invalid tare exception Valid Until date format and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
@@ -881,7 +887,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${WEIGHING} event is valid for TRUCK container without tareException and both Tare and Gross Weight provided`,
+    scenario: `The "${WEIGHING}" event is valid for TRUCK container without tare exception and both Tare and Gross Weight provided`,
   },
 ];
 
@@ -909,7 +915,7 @@ export const weighingErrorTestCases: WeighingErrorTestCase[] = [
     massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the MassID document was not found`,
+    scenario: `The MassID document was not found`,
   },
   {
     documents: [massIDDocument],
@@ -917,6 +923,6 @@ export const weighingErrorTestCases: WeighingErrorTestCase[] = [
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler accreditation document was not found`,
+    scenario: `The Recycler accreditation document was not found`,
   },
 ];

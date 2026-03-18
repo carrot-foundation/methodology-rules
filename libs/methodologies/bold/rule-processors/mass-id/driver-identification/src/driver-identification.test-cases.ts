@@ -21,20 +21,22 @@ const {
 } = DocumentEventAttributeName;
 const { BICYCLE, BOAT, SLUDGE_PIPES, TRUCK } = DocumentEventVehicleType;
 
-const someJustification = faker.lorem.sentence();
+const someJustification =
+  'The driver is exempt from identification requirements.';
 
 export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
   {
+    manifestExample: true,
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
-        [DRIVER_IDENTIFIER, faker.lorem.sentence()],
+        [DRIVER_IDENTIFIER, faker.string.uuid()],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
         [VEHICLE_TYPE, TRUCK],
       ],
     }),
     resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${DRIVER_IDENTIFIER} is provided`,
+    scenario: `The "${DRIVER_IDENTIFIER}" is provided`,
   },
   {
     pickUpEvent: stubBoldMassIDPickUpEvent({
@@ -47,7 +49,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     resultComment:
       RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(someJustification),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the ${DRIVER_IDENTIFIER} is not provided, but the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is provided`,
+    scenario: `The "${DRIVER_IDENTIFIER}" is not provided, but the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is provided`,
   },
   {
     pickUpEvent: stubBoldMassIDPickUpEvent({
@@ -59,9 +61,10 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment: RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(BOAT),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the ${DRIVER_IDENTIFIER} is not provided and the ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} is not provided`,
+    scenario: `The "${DRIVER_IDENTIFIER}" is not provided and the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is not provided`,
   },
   {
+    manifestExample: true,
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, undefined],
@@ -71,18 +74,18 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the vehicle type is ${SLUDGE_PIPES}`,
+    scenario: `The vehicle type is "${SLUDGE_PIPES}"`,
   },
   {
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
-        [DRIVER_IDENTIFIER, faker.lorem.sentence()],
+        [DRIVER_IDENTIFIER, faker.string.uuid()],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, someJustification],
         [VEHICLE_TYPE, TRUCK],
       ],
     }),
     resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `both ${DRIVER_IDENTIFIER} and ${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION} are provided`,
+    scenario: `Both "${DRIVER_IDENTIFIER}" and "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" are provided`,
   },
 ];

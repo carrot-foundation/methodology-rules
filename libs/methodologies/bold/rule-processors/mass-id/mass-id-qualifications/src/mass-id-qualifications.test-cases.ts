@@ -19,10 +19,11 @@ interface MassIDQualificationsTestCase extends RuleTestCase {
 
 export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
   {
+    manifestExample: true,
     massIDDocument: massIDStubs.massIDDocument,
     resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: 'all the criteria are met',
+    scenario: 'All the criteria are met',
   },
   {
     massIDDocument: {
@@ -31,7 +32,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_CATEGORY('INVALID_CATEGORY'),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'category does not match',
+    scenario: 'The category does not match',
   },
   {
     massIDDocument: {
@@ -40,7 +41,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_TYPE('INVALID_TYPE'),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'type is not ORGANIC',
+    scenario: 'The type is not ORGANIC',
   },
   {
     massIDDocument: {
@@ -50,16 +51,17 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     resultComment:
       RESULT_COMMENTS.failed.INVALID_MEASUREMENT_UNIT('INVALID_UNIT'),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'measurement unit is not "kg"',
+    scenario: 'The measurement unit is not "kg"',
   },
   {
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
       currentValue: 0,
     },
     resultComment: RESULT_COMMENTS.failed.INVALID_VALUE(0),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'current value is not greater than 0',
+    scenario: 'The current value is not greater than 0',
   },
   {
     massIDDocument: {
@@ -70,19 +72,19 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'subtype is defined but not in the allowed list',
+    scenario: 'The subtype is defined but not in the allowed list',
   },
   {
     massIDDocument: { ...massIDStubs.massIDDocument, type: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'document type is not found',
+    scenario: 'The document type was not found',
   },
   {
     massIDDocument: { ...massIDStubs.massIDDocument, subtype: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'document subtype is not found',
+    scenario: 'The document subtype was not found',
   },
   {
     massIDDocument: {
@@ -95,6 +97,6 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
       RESULT_COMMENTS.failed.INVALID_SUBTYPE('INVALID_SUBTYPE'),
     ].join(' '),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: 'there are multiple error messages',
+    scenario: 'Multiple errors were found',
   },
 ];

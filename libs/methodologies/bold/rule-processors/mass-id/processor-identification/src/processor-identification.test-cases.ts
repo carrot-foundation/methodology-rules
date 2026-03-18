@@ -20,7 +20,7 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
       events: new Map([[`${ACTOR}-${PROCESSOR}`, undefined]]),
       resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `no ${PROCESSOR} actor event found`,
+      scenario: `The MassID document has no "${PROCESSOR}" actor event`,
     },
     {
       events: new Map([
@@ -28,7 +28,7 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
       ]),
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
       resultStatus: RuleOutputStatus.PASSED,
-      scenario: `found ${PROCESSOR} actor event`,
+      scenario: `The MassID document has a "${PROCESSOR}" actor event`,
     },
     {
       events: new Map([
@@ -37,6 +37,6 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
       ]),
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: `found multiple ${PROCESSOR} actor events`,
+      scenario: `The MassID document has multiple "${PROCESSOR}" actor events`,
     },
   ];

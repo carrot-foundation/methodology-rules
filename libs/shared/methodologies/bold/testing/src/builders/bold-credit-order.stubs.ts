@@ -15,6 +15,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '../stubs';
 import {
+  attachExplicitAttributes,
   mergeEventsMaps,
   mergeMetadataAttributes,
   type MetadataAttributeParameter,
@@ -36,12 +37,18 @@ export const stubBoldCreditOrderCreditsEvent = ({
   metadataAttributes,
   partialDocumentEvent,
 }: StubBoldDocumentEventParameters = {}): DocumentEvent =>
-  stubDocumentEventWithMetadataAttributes(
-    {
-      ...partialDocumentEvent,
-      name: CREDITS_EVENT_NAME,
-    },
-    mergeMetadataAttributes(defaultRulesMetadataAttributes, metadataAttributes),
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: CREDITS_EVENT_NAME,
+      },
+      mergeMetadataAttributes(
+        defaultRulesMetadataAttributes,
+        metadataAttributes,
+      ),
+    ),
+    metadataAttributes,
   );
 
 const boldCreditOrderExternalEventsMap = new Map([

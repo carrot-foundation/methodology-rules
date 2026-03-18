@@ -164,7 +164,7 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the exceeding emission coefficient is undefined (missing)`,
+    scenario: 'The exceeding emission coefficient is undefined (missing)',
     subtype,
   },
   {
@@ -198,7 +198,7 @@ export const preventedEmissionsTestCases = [
     },
     resultStatus: RuleOutputStatus.PASSED,
     scenario:
-      'the calculated prevented emissions would be negative, so they are clamped to zero',
+      'The calculated prevented emissions would be negative, so they are clamped to zero',
     subtype,
   },
   {
@@ -220,7 +220,7 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the exceeding emission coefficient is null (non-positive)`,
+    scenario: 'The exceeding emission coefficient is null (non-positive)',
     subtype,
   },
   {
@@ -249,7 +249,7 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the calculation is correct with all required attributes`,
+    scenario: 'The calculation is correct with all required attributes',
     subtype,
   },
   ...[
@@ -334,7 +334,7 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
+    scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
     subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   },
   {
@@ -363,7 +363,8 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the exceeding emission coefficient is zero (no exceeding emissions)`,
+    scenario:
+      'The exceeding emission coefficient is zero (no exceeding emissions)',
     subtype,
   },
   {
@@ -386,7 +387,7 @@ export const preventedEmissionsTestCases = [
       },
     },
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the exceeding emission coefficient is negative`,
+    scenario: 'The exceeding emission coefficient is negative',
     subtype,
   },
 ];
@@ -457,7 +458,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       resultComment:
         processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the MassID document has an invalid subtype',
+      scenario: 'The MassID document has an invalid subtype',
     },
     {
       documents: [
@@ -474,14 +475,14 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'the Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
+        'The Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
     },
     {
       documents: [...participantsAccreditationDocuments.values()],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the MassID document was not found',
+      scenario: 'The MassID document was not found',
     },
     {
       documents: [massIDDocument],
@@ -489,7 +490,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the Recycler accreditation document was not found',
+      scenario: 'The Recycler accreditation document was not found',
     },
     {
       documents: [
@@ -506,7 +507,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'the Recycler Accreditation document has no valid baselines',
+      scenario: 'The Recycler Accreditation document has no valid baselines',
     },
     {
       documents: [
@@ -538,7 +539,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
       resultStatus: RuleOutputStatus.FAILED,
       scenario:
-        'Others (if organic) does not provide Local Waste Classification ID on PICK_UP',
+        'The Others (if organic) does not provide Local Waste Classification ID on PICK_UP',
     },
     {
       documents: [
