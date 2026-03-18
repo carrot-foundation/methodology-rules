@@ -200,6 +200,89 @@ function extractAppFrameworkRules(
   return rules;
 }
 
+// --- Enum resolution ---
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { DocumentEventName } = require(
+  '@carrot-fndn/shared/methodologies/bold/types',
+) as { DocumentEventName: Record<string, string> };
+
+// --- Actor label extraction from processor files ---
+
+/**
+ * Converts an UPPER_SNAKE_CASE enum key to PascalCase.
+ * e.g. "WASTE_GENERATOR" → "WasteGenerator", "HAULER" → "Hauler"
+ */
+function upperSnakeToPascalCase(str: string): string {
+  return str
+    .toLowerCase()
+    .split('_')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('');
+}
+
+/**
+ * Parses a processor file to extract which actor labels are used with ACTOR events.
+ * Looks for patterns like:
+ *   - eventLabelIsAnyOf([HAULER, RECYCLER])
+ *   - eventHasLabel(event, PROCESSOR)
+ * Returns PascalCase labels, e.g. ["Hauler", "Recycler"]
+ */
+function extractActorLabelsFromProcessor(processorPath: string): string[] {
+  const content = fs.readFileSync(processorPath, 'utf8');
+  const labels = new Set<string>();
+
+  // Match eventLabelIsAnyOf([LABEL1, MethodologyDocumentEventLabel.LABEL2, ...])
+  const labelIsAnyOfRe = /eventLabelIsAnyOf\(\[([^\]]+)\]/g;
+  let match;
+  while ((match = labelIsAnyOfRe.exec(content)) !== null) {
+    const inner = match[1] ?? '';
+    for (const token of inner.split(',')) {
+      const trimmed = token.trim();
+      // Handle fully qualified: MethodologyDocumentEventLabel.HAULER
+      const qualifiedMatch = trimmed.match(
+        /MethodologyDocumentEventLabel\.([A-Z_]+)/,
+      );
+      if (qualifiedMatch?.[1]) {
+        labels.add(qualifiedMatch[1]);
+      } else if (trimmed && /^[A-Z_]+$/.test(trimmed)) {
+        labels.add(trimmed);
+      }
+    }
+  }
+
+  // Match eventHasLabel(event, LABEL) or eventHasLabel(event, MethodologyDocumentEventLabel.LABEL)
+  const hasLabelRe =
+    /eventHasLabel\(\w+,\s*(?:MethodologyDocumentEventLabel\.)?([A-Z_]+)\)/g;
+  while ((match = hasLabelRe.exec(content)) !== null) {
+    if (match[1]) {
+      labels.add(match[1]);
+    }
+  }
+
+  return [...labels].sort().map(upperSnakeToPascalCase);
+}
+
+/**
+ * Enriches the events list by replacing plain "ACTOR" entries with
+ * "ACTOR:Label" entries based on the actor labels found in the processor.
+ * If no actor labels are found, the "ACTOR" entry is kept as-is.
+ */
+function enrichActorEvents(
+  events: string[],
+  actorLabels: string[],
+): string[] {
+  if (actorLabels.length === 0) return events;
+
+  const actorValue = DocumentEventName['ACTOR'] ?? 'ACTOR';
+
+  return events.flatMap((event) =>
+    event === actorValue
+      ? actorLabels.map((label) => `${actorValue}:${label}`)
+      : [event],
+  );
+}
+
 // --- Rule Definition extraction ---
 
 interface RuleDefinitionData {
@@ -240,7 +323,8 @@ function extractRuleDefinition(
     for (const entry of eventEntries) {
       const enumMatch = entry.match(/DocumentEventName\.(\w+)/);
       if (enumMatch?.[1]) {
-        events.push(enumMatch[1]);
+        const enumKey = enumMatch[1];
+        events.push(DocumentEventName[enumKey] ?? enumKey);
       } else {
         const strMatch = entry.match(/['"`]([^'"`]+)['"`]/);
         if (strMatch?.[1]) events.push(strMatch[1]);
@@ -727,6 +811,11 @@ function normalizeDocumentEvent(
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { name: event['name'] };
 
+  // Include label for ACTOR events (e.g., "Waste Generator", "Hauler")
+  if (event['label'] !== undefined) {
+    result['label'] = event['label'];
+  }
+
   // Exclude value by default, include only when explicitly requested
   if (fieldsOverride?.includeValue === true && event['value'] !== undefined) {
     result['value'] = event['value'];
@@ -1013,6 +1102,10 @@ function buildRule(
     }
   }
 
+  // Enrich ACTOR events with actor labels from the processor
+  const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
+  const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
+
   // Determine verifications
   const verifications =
     readme.verifications.length > 0
@@ -1022,7 +1115,7 @@ function buildRule(
   return {
     description,
     errors: normalizeMessages(allErrors),
-    events: ruleDef?.events ?? [],
+    events,
     examples,
     implementationPath: relImplementationPath,
     implementsFrameworkRules: frameworkRules,
