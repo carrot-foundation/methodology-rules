@@ -2,6 +2,7 @@ import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
 import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { getSentryDsn } from '@carrot-fndn/shared/env';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   stubContext,
@@ -21,7 +22,7 @@ jest.mock('@carrot-fndn/shared/env', () => ({
   getEnvironment: () => 'development',
   getNodeEnv: () => 'test',
   getOptionalEnv: jest.fn(),
-  getSentryDsn: () => undefined,
+  getSentryDsn: jest.fn(() => undefined),
   getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
   getSourceCodeUrl: () => 'https://test.example.com/repo',
   getSourceCodeVersion: () => 'test-version',
@@ -122,5 +123,34 @@ describe('wrapRuleIntoLambdaHandler', () => {
       requestId: ruleEvent.requestId,
       ruleName: ruleEvent.ruleName,
     });
+  });
+
+  it('should pass the Sentry DSN when getSentryDsn returns a value', async () => {
+    const sentryDsn = faker.internet.url();
+
+    jest.mocked(getSentryDsn).mockReturnValueOnce(sentryDsn);
+
+    const initSpy = jest.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
+
+    const response = {
+      ...stubRuleOutput(),
+      resultStatus: RuleOutputStatus.PASSED,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve({ ...response });
+      }
+    }
+
+    mockStsAndFetch();
+
+    const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
+    const result = await wrapper(stubRuleInput(), stubContext(), () => {});
+
+    expect(result).toEqual(response);
+    expect(initSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ dsn: sentryDsn }),
+    );
   });
 });
