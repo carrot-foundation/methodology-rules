@@ -30,7 +30,7 @@ export const loadDocument = async (
       return undefined;
     }
 
-    return validation.data as unknown as Document;
+    return validation.data as Document;
   } catch (error) {
     logger.warn({ error }, `[loadDocument] Failed to load document: ${key}`);
 

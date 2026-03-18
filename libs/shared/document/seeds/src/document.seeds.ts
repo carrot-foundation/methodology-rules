@@ -8,15 +8,13 @@ import { httpRequest } from '@carrot-fndn/shared/http-request';
 import {
   type MethodologyDocument,
   type NonEmptyString,
+  NonEmptyStringSchema,
   type Uri,
   UriSchema,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
-import type {
-  ApiDocumentCreateDto,
-  AuditApiDocumentPrimitiveEntity,
-} from './document.seeds.types';
+import type { ApiDocumentCreateDto } from './document.seeds.types';
 
 const stubMethodologyDocument = (): MethodologyDocument => ({
   category: faker.string.sample(),
@@ -121,9 +119,18 @@ export const seedDocument = async ({
     );
   }
 
-  const {
-    document: { id },
-  } = response.data as AuditApiDocumentPrimitiveEntity;
+  const responseData: unknown = response.data;
+
+  if (
+    !isNonEmptyObject(responseData) ||
+    !isNonEmptyObject(responseData['document'])
+  ) {
+    throw new Error(
+      `Unexpected response shape from ${endpoint}: expected { document: { id: string } }, got ${JSON.stringify(responseData)}`,
+    );
+  }
+
+  const id = NonEmptyStringSchema.parse(responseData['document']['id']);
 
   logger.info(`Created document with { documentId: ${id} }`);
 

@@ -13,6 +13,7 @@ const CertificateRewardDistributionOutputSchema = z.object({
         id: z.string().nonempty(),
         name: z.string().nonempty(),
       }),
+      preserveSensitiveData: z.boolean().optional(),
     }),
   ),
 });

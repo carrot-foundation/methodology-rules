@@ -5,6 +5,7 @@ const DocumentEventWithMetadataSchema = z.looseObject({
     attributes: z
       .array(
         z.looseObject({
+          isPublic: z.boolean(),
           name: z.string(),
           value: z.unknown().optional(),
         }),

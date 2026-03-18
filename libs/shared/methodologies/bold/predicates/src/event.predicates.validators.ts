@@ -16,7 +16,10 @@ const DocumentEventSchema = z.looseObject({
     })
     .optional(),
   name: z.string(),
-  participant: z.looseObject({}),
+  participant: z.looseObject({
+    id: z.string(),
+    type: z.string(),
+  }),
 });
 
 export const validateDocumentEvent = (input: unknown) =>

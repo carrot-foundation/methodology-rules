@@ -18,6 +18,12 @@ export const createStubFromSchema = <T extends z.ZodType>(
   }
 
   if (overrides && Array.isArray(generated)) {
+    if (!Array.isArray(overrides)) {
+      throw new TypeError(
+        'createStubFromSchema: schema generates an array but overrides is not an array',
+      );
+    }
+
     return overrides as z.infer<T>;
   }
 

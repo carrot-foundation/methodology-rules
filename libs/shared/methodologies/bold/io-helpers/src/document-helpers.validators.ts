@@ -1,5 +1,10 @@
 import { z } from 'zod';
 
+import {
+  MethodologyAddressSchema,
+  MethodologyParticipantSchema,
+} from './document.schemas';
+
 const DocumentSchema = z.looseObject({
   category: z.string(),
   createdAt: z.string(),
@@ -9,8 +14,8 @@ const DocumentSchema = z.looseObject({
   id: z.string(),
   isPubliclySearchable: z.boolean(),
   measurementUnit: z.string(),
-  primaryAddress: z.looseObject({}),
-  primaryParticipant: z.looseObject({}),
+  primaryAddress: MethodologyAddressSchema,
+  primaryParticipant: MethodologyParticipantSchema,
   status: z.string(),
   updatedAt: z.string(),
 });
