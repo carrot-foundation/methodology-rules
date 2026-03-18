@@ -4,8 +4,8 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyApprovedExceptionType,
   type MethodologyAdditionalVerificationAttributeValue,
+  MethodologyApprovedExceptionType,
 } from '@carrot-fndn/shared/types';
 
 import {
@@ -67,6 +67,8 @@ describe('weighing.validators', () => {
       Reason: 'validated',
     };
 
-    expect(tareException['Attribute Name']).toBe(DocumentEventAttributeName.TARE);
+    expect(tareException['Attribute Name']).toBe(
+      DocumentEventAttributeName.TARE,
+    );
   });
 });
