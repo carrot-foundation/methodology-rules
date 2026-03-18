@@ -58,6 +58,7 @@ export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
         }),
       ],
     ]),
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The "${VEHICLE_TYPE}" attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(

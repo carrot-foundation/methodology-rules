@@ -65,7 +65,9 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
           label: WASTE_GENERATOR,
           name: ACTOR,
         }),
-        [PICK_UP]: stubBoldMassIDPickUpEvent(),
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [],
+        }),
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,

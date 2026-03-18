@@ -298,6 +298,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
   {
     accreditationDocuments: createAccreditationDocuments(sortingFactor),
     actorParticipants,
+    manifestExample: true,
     massIDEvents: createMassIDEvents(
       valueBeforeSorting,
       grossWeight,
