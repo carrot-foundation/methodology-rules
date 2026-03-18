@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import type { WasteGeneratorBaselineValues } from './prevented-emissions.types';
 
-const WasteGeneratorBaselineValuesSchema = z.record(
+const WasteGeneratorBaselineValuesSchema = z.partialRecord(
   z.enum(MassIDOrganicSubtype),
   z.enum(MethodologyBaseline),
 );

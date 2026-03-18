@@ -2,14 +2,14 @@ import type { CertificateRewardDistributionOutput } from '@carrot-fndn/shared/me
 
 import { z } from 'zod';
 
-const CertificateRewardDistributionOutputSchema = z.looseObject({
+const CertificateRewardDistributionOutputSchema = z.object({
   massIDDocumentId: z.string().nonempty(),
   massIDRewards: z.array(
-    z.looseObject({
+    z.object({
       actorType: z.string().nonempty(),
-      address: z.looseObject({ id: z.string().nonempty() }),
+      address: z.object({ id: z.string().nonempty() }),
       massIDPercentage: z.string().nonempty(),
-      participant: z.looseObject({
+      participant: z.object({
         id: z.string().nonempty(),
         name: z.string().nonempty(),
       }),

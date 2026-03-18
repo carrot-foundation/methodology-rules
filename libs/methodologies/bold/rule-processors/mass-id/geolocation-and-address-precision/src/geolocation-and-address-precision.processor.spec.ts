@@ -102,7 +102,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
             ...documents,
           ]);
 
-          const ruleInput: Required<RuleInput> = stubRuleInput({
+          const ruleInput: RuleInput = stubRuleInput({
             documentId: massIDAuditDocument.id,
           });
 
