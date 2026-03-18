@@ -158,6 +158,14 @@ const createWeightAttributesWithFormat = (
   },
 ];
 
+// Deterministic values for manifestExample test cases
+const MANIFEST_SORTING_FACTOR = 0.3;
+const MANIFEST_VALUE_BEFORE_SORTING = 100;
+const MANIFEST_GROSS_WEIGHT = MANIFEST_VALUE_BEFORE_SORTING;
+const MANIFEST_DEDUCTED_WEIGHT =
+  MANIFEST_GROSS_WEIGHT * MANIFEST_SORTING_FACTOR;
+const MANIFEST_SORTING_VALUE = MANIFEST_GROSS_WEIGHT - MANIFEST_DEDUCTED_WEIGHT;
+
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
 const grossWeight = valueBeforeSorting;
@@ -244,19 +252,21 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     scenario: 'The sorting description is missing',
   },
   {
-    accreditationDocuments: createAccreditationDocuments(sortingFactor),
+    accreditationDocuments: createAccreditationDocuments(
+      MANIFEST_SORTING_FACTOR,
+    ),
     actorParticipants,
     manifestExample: true,
     manifestFields: { includeCurrentValue: true, includeValue: true },
     massIDEvents: createMassIDEvents(
-      valueBeforeSorting,
-      grossWeight,
-      deductedWeight,
-      calculatedSortingValue,
+      MANIFEST_VALUE_BEFORE_SORTING,
+      MANIFEST_GROSS_WEIGHT,
+      MANIFEST_DEDUCTED_WEIGHT,
+      MANIFEST_SORTING_VALUE,
     ),
     partialDocument: {
       ...massIDDocument,
-      currentValue: calculatedSortingValue,
+      currentValue: MANIFEST_SORTING_VALUE,
     },
     resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
     resultStatus: RuleOutputStatus.PASSED,

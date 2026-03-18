@@ -29,7 +29,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     manifestExample: true,
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
-        [DRIVER_IDENTIFIER, faker.string.uuid()],
+        [DRIVER_IDENTIFIER, '550e8400-e29b-41d4-a716-446655440000'],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
         [VEHICLE_TYPE, TRUCK],
       ],

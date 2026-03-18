@@ -95,9 +95,6 @@ const invalidWasteGeneratorAddress = stubAddress({
 const nearbyRecyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.nearby,
 });
-const nearbyWasteGeneratorAddress = stubAddress({
-  ...actorsCoordinates.get(WASTE_GENERATOR)!.nearby,
-});
 
 const invalidRecyclerAddressDistance = calculateDistance(
   recyclerAddress,
@@ -111,9 +108,64 @@ const nearbyRecyclerAddressDistance = calculateDistance(
   recyclerAddress,
   nearbyRecyclerAddress,
 );
-const nearbyWasteGeneratorAddressDistance = calculateDistance(
-  wasteGeneratorAddress,
-  nearbyWasteGeneratorAddress,
+
+// Deterministic values for manifestExample test cases
+const manifestActorParticipants = new Map(
+  MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
+    subtype,
+    stubParticipant({
+      id: `manifest-participant-${subtype}`,
+      type: subtype,
+    }),
+  ]),
+);
+const manifestRecyclerParticipant = manifestActorParticipants.get(
+  RECYCLER,
+) as MethodologyParticipant;
+const manifestWasteGeneratorParticipant = manifestActorParticipants.get(
+  WASTE_GENERATOR,
+) as MethodologyParticipant;
+
+const manifestRecyclerAddress = stubAddress({
+  latitude: -23.5505,
+  longitude: -46.6333,
+});
+const manifestWasteGeneratorAddress = stubAddress({
+  latitude: -22.9068,
+  longitude: -43.1729,
+});
+const manifestNearbyRecyclerAddress = stubAddress({
+  latitude: -23.5506,
+  longitude: -46.6334,
+});
+const manifestNearbyWasteGeneratorAddress = stubAddress({
+  latitude: -22.9069,
+  longitude: -43.173,
+});
+const manifestInvalidRecyclerAddress = stubAddress({
+  latitude: 40.7128,
+  longitude: -74.006,
+});
+const manifestInvalidWasteGeneratorAddress = stubAddress({
+  latitude: 34.0522,
+  longitude: -118.2437,
+});
+
+const manifestNearbyRecyclerAddressDistance = calculateDistance(
+  manifestRecyclerAddress,
+  manifestNearbyRecyclerAddress,
+);
+const manifestNearbyWasteGeneratorAddressDistance = calculateDistance(
+  manifestWasteGeneratorAddress,
+  manifestNearbyWasteGeneratorAddress,
+);
+const manifestInvalidRecyclerAddressDistance = calculateDistance(
+  manifestRecyclerAddress,
+  manifestInvalidRecyclerAddress,
+);
+const manifestInvalidWasteGeneratorAddressDistance = calculateDistance(
+  manifestWasteGeneratorAddress,
+  manifestInvalidWasteGeneratorAddress,
 );
 
 const createGpsException = (
@@ -276,6 +328,35 @@ const wasteGeneratorActorEvent = stubDocumentEvent({
   participant: wasteGeneratorParticipant,
 });
 
+const manifestValidAccreditationDocuments = new Map([
+  [
+    RECYCLER,
+    createAccreditationDocumentWithAddress(
+      manifestRecyclerAddress,
+      manifestRecyclerParticipant,
+    ),
+  ],
+  [
+    WASTE_GENERATOR,
+    createAccreditationDocumentWithAddress(
+      manifestWasteGeneratorAddress,
+      manifestWasteGeneratorParticipant,
+    ),
+  ],
+]);
+const manifestRecyclerActorEvent = stubDocumentEvent({
+  address: manifestRecyclerAddress,
+  label: RECYCLER,
+  name: ACTOR,
+  participant: manifestRecyclerParticipant,
+});
+const manifestWasteGeneratorActorEvent = stubDocumentEvent({
+  address: manifestWasteGeneratorAddress,
+  label: WASTE_GENERATOR,
+  name: ACTOR,
+  participant: manifestWasteGeneratorParticipant,
+});
+
 export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPrecisionTestCase[] =
   [
     {
@@ -303,60 +384,60 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       scenario: 'The accredited address is not set',
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
       manifestExample: true,
       manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            nearbyRecyclerAddress,
-            recyclerParticipant,
-            nearbyRecyclerAddress.latitude,
-            nearbyRecyclerAddress.longitude,
+            manifestNearbyRecyclerAddress,
+            manifestRecyclerParticipant,
+            manifestNearbyRecyclerAddress.latitude,
+            manifestNearbyRecyclerAddress.longitude,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            nearbyWasteGeneratorAddress,
-            wasteGeneratorParticipant,
-            nearbyWasteGeneratorAddress.latitude,
-            nearbyWasteGeneratorAddress.longitude,
+            manifestNearbyWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
+            manifestNearbyWasteGeneratorAddress.latitude,
+            manifestNearbyWasteGeneratorAddress.longitude,
           ),
         },
       },
-      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, nearbyWasteGeneratorAddressDistance, nearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, nearbyRecyclerAddressDistance, nearbyRecyclerAddressDistance)}`,
+      resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, manifestNearbyWasteGeneratorAddressDistance, manifestNearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, manifestNearbyRecyclerAddressDistance, manifestNearbyRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.PASSED,
       scenario: `The GPS is set and both GPS coordinates and event address are valid and within the ${MAX_ALLOWED_DISTANCE} m radius`,
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
       manifestExample: true,
       manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            nearbyRecyclerAddress,
-            recyclerParticipant,
-            invalidRecyclerAddress.latitude,
-            invalidRecyclerAddress.longitude,
+            manifestNearbyRecyclerAddress,
+            manifestRecyclerParticipant,
+            manifestInvalidRecyclerAddress.latitude,
+            manifestInvalidRecyclerAddress.longitude,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            nearbyWasteGeneratorAddress,
-            wasteGeneratorParticipant,
-            invalidWasteGeneratorAddress.latitude,
-            invalidWasteGeneratorAddress.longitude,
+            manifestNearbyWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
+            manifestInvalidWasteGeneratorAddress.latitude,
+            manifestInvalidWasteGeneratorAddress.longitude,
           ),
         },
       },
-      resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
+      resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, manifestInvalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, manifestInvalidRecyclerAddressDistance)}`,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: 'The address is valid but the GPS geolocation is invalid',
     },
@@ -382,23 +463,23 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       scenario: 'The processor cannot extract the actor type',
     },
     {
-      accreditationDocuments: validAccreditationDocuments,
-      actorParticipants,
+      accreditationDocuments: manifestValidAccreditationDocuments,
+      actorParticipants: manifestActorParticipants,
       manifestExample: true,
       manifestFields: { includeAddress: true },
       massIDDocumentParameters: {
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: recyclerActorEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
+          [`${ACTOR}-${RECYCLER}`]: manifestRecyclerActorEvent,
+          [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            recyclerAddress,
-            recyclerParticipant,
+            manifestRecyclerAddress,
+            manifestRecyclerParticipant,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            wasteGeneratorAddress,
-            wasteGeneratorParticipant,
+            manifestWasteGeneratorAddress,
+            manifestWasteGeneratorParticipant,
           ),
         },
       },

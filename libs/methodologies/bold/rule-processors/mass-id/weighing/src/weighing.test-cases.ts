@@ -61,6 +61,12 @@ const scaleTypeMismatch = faker.string.sample();
 const weighingCaptureMethodMismatch = faker.string.sample();
 const twoStepWeighingEventParticipant = stubParticipant();
 
+// Deterministic values for manifestExample test cases
+const MANIFEST_SCALE_TYPE = DocumentEventScaleType.FLOOR_SCALE;
+const MANIFEST_TWO_STEP_PARTICIPANT = stubParticipant({
+  id: '550e8400-e29b-41d4-a716-446655440001',
+});
+
 const stubBaseAccreditationDocuments = ({
   scaleTypeValue = scaleType,
   tareExceptionValidUntil,
@@ -211,6 +217,14 @@ const mergeAttributes = (
 const validWeighingAttributes: MetadataAttributeParameter[] = [
   [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
   [SCALE_TYPE, scaleType],
+  [CONTAINER_QUANTITY, 1],
+  { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
+  { format: KILOGRAM, name: TARE, value: 1 },
+];
+
+const manifestWeighingAttributes: MetadataAttributeParameter[] = [
+  [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
+  [SCALE_TYPE, MANIFEST_SCALE_TYPE],
   [CONTAINER_QUANTITY, 1],
   { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
   { format: KILOGRAM, name: TARE, value: 1 },
@@ -472,11 +486,13 @@ export const weighingTestCases: WeighingTestCase[] = [
     scenario: `The "${CONTAINER_TYPE}" attribute is missing`,
   },
   {
-    accreditationDocuments: stubBaseAccreditationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTypeValue: MANIFEST_SCALE_TYPE,
+    }),
     manifestExample: true,
     manifestFields: { includeValue: true },
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+      [WEIGHING]: createWeighingEvent(manifestWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: RuleOutputStatus.PASSED,
@@ -594,7 +610,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     manifestFields: { includeValue: true },
     massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
-      twoStepWeighingEventParticipant,
+      MANIFEST_TWO_STEP_PARTICIPANT,
     ),
     resultComment: PASSED_RESULT_COMMENTS.TWO_STEP,
     resultStatus: RuleOutputStatus.PASSED,
@@ -680,11 +696,13 @@ export const weighingTestCases: WeighingTestCase[] = [
     scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is "${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST}" and the "${WEIGHING}" event is valid`,
   },
   {
-    accreditationDocuments: stubBaseAccreditationDocuments(),
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTypeValue: MANIFEST_SCALE_TYPE,
+    }),
     manifestExample: true,
     manifestFields: { includeValue: true },
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(validWeighingAttributes, 98),
+      [WEIGHING]: createWeighingEvent(manifestWeighingAttributes, 98),
     },
     resultComment: INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
       calculatedNetWeight: 99,
