@@ -1,10 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ProcessorIdentificationProcessor } from './processor-identification.processor';
 import { processorIdentificationTestCases } from './processor-identification.test-cases';
@@ -19,7 +16,7 @@ describe('ProcessorIdentificationProcessor', () => {
   it.each(processorIdentificationTestCases)(
     `should return $resultStatus when $scenario`,
     async ({ events, resultComment, resultStatus }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
       const massIDDocumentStub = stubBoldMassIDDocument({
         externalEventsMap: events,
       });

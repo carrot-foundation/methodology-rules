@@ -17,7 +17,7 @@ import {
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
-import { validateDocumentEvent } from './event.predicates.typia';
+import { validateDocumentEvent } from './event.predicates.validators';
 
 export const eventHasName = (
   event: DocumentEvent,

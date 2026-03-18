@@ -1,10 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RegionalWasteClassificationProcessor } from './regional-waste-classification.processor';
 import { regionalWasteClassificationTestCases } from './regional-waste-classification.test-cases';
@@ -25,7 +22,7 @@ describe('RegionalWasteClassificationProcessor', () => {
       resultContent,
       resultStatus,
     }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({

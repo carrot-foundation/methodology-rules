@@ -9,11 +9,12 @@ import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentEvent,
   DocumentEventAttributeName,
-  type DocumentEventWithAttachments,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { createValidate, validate } from 'typia';
 
-import { validateDocumentEventWithMetadata } from './event.getters.typia';
+import {
+  validateDocumentEventWithAttachments,
+  validateDocumentEventWithMetadata,
+} from './event.getters.validators';
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
@@ -26,7 +27,9 @@ export const getEventAttributeValue = (
       (attribute) => attribute.name === attributeName,
     );
 
-    return foundAttribute?.value;
+    return foundAttribute?.value as
+      | MethodologyDocumentEventAttributeValue
+      | undefined;
   }
 
   return undefined;
@@ -41,7 +44,7 @@ export const getEventAttributeByName = (
   if (validation.success) {
     return validation.data.metadata.attributes.find(
       (attribute) => attribute.name === attributeName,
-    );
+    ) as MethodologyDocumentEventAttribute | undefined;
   }
 
   return undefined;
@@ -50,7 +53,9 @@ export const getEventAttributeByName = (
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
-  validateValue: ReturnType<typeof createValidate<T>>,
+  validateValue: (
+    input: unknown,
+  ) => { data: T; success: true } | { success: false },
 ): T => {
   const value = getEventAttributeValue(event, attributeName);
   const validation = validateValue(value);
@@ -66,7 +71,7 @@ export const getDocumentEventAttachmentByLabel = (
   event: DocumentEvent,
   label: string,
 ): MethodologyDocumentEventAttachment | undefined => {
-  const validation = validate<DocumentEventWithAttachments>(event);
+  const validation = validateDocumentEventWithAttachments(event);
 
   if (validation.success) {
     return validation.data.attachments.find(

@@ -1,13 +1,50 @@
 import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
+import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Context } from 'aws-lambda';
 
-import { random } from 'typia';
+import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { faker } from '@faker-js/faker';
 
-export const stubRuleInput = (partial?: Partial<MethodologyRuleEvent>) => ({
-  ...random<MethodologyRuleEvent>(),
+import { stubEnumValue } from './enum.stubs';
+
+export const stubRuleInput = (
+  partial?: Partial<MethodologyRuleEvent>,
+): MethodologyRuleEvent => ({
+  documentId: faker.string.uuid(),
+  documentKeyPrefix: faker.string.uuid(),
+  parentDocumentId: faker.string.uuid(),
+  requestId: faker.string.uuid(),
+  responseToken: faker.string.uuid(),
+  responseUrl: faker.internet.url(),
+  ruleName: faker.string.sample(),
   ...partial,
 });
 
-export const stubContext = () => random<Context>();
+export const stubContext = (): Context => ({
+  awsRequestId: faker.string.uuid(),
+  callbackWaitsForEmptyEventLoop: false,
+  done: () => {},
+  fail: () => {},
+  functionName: faker.string.sample(),
+  functionVersion: faker.string.sample(),
+  getRemainingTimeInMillis: () => faker.number.int(),
+  invokedFunctionArn: faker.string.sample(),
+  logGroupName: faker.string.sample(),
+  logStreamName: faker.string.sample(),
+  memoryLimitInMB: faker.string.numeric(),
+  succeed: () => {},
+});
 
-export const stubRuleResponse = () => random<unknown>();
+export const stubRuleOutput = (partial?: Partial<RuleOutput>): RuleOutput => ({
+  requestId: faker.string.uuid(),
+  responseToken: faker.string.uuid(),
+  responseUrl: faker.internet.url(),
+  resultComment: faker.lorem.sentence(),
+  resultContent: { [faker.string.sample()]: faker.string.sample() },
+  resultStatus: stubEnumValue(RuleOutputStatus),
+  ...partial,
+});
+
+export const stubRuleResponse = () => ({
+  [faker.string.sample()]: faker.string.sample(),
+});

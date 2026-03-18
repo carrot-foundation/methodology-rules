@@ -102,7 +102,8 @@ fix(shared): prevent racing of requests
 ## TypeScript Configuration
 
 - Strict mode enabled with additional checks: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`
-- Uses Typia for runtime type validation
+- Uses Zod for runtime type validation (schemas defined alongside types, validated with `.safeParse()` / `.parse()`)
+- Test data generated with `@faker-js/faker` and `zocker` (schema-driven); use `stubRuleInput()`, `stubDocument()`, `createStubFromSchema()` etc. from `@carrot-fndn/shared/testing`
 - Path aliases configured in `tsconfig.paths.json`
 
 ## Testing
@@ -155,7 +156,7 @@ Parsers (`DocumentParser<T>`) are field-neutral — they do not determine which 
 - All extracted fields are optional; parsers return `undefined` for missing ones
 - Rule processors decide what fields are required for their context
 - `reviewRequired` is triggered only by low confidence fields or low layout match score (< 0.5)
-- `layoutId` and `layouts` use the `NonEmptyString` branded type; use `as NonEmptyString` casts on literals
+- `layoutId` and `layouts` use the `NonEmptyString` type (plain `string` validated by `NonEmptyStringSchema`); use `as NonEmptyString` casts on string literals
 - Only add default layouts in `defaults.ts` if a document type has stable, well-known layouts
 
 ## Troubleshooting

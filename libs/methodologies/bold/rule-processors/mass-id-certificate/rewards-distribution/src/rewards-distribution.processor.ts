@@ -1,6 +1,10 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
+import {
+  isBigNumber,
+  isNil,
+  isNonEmptyArray,
+} from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -25,7 +29,6 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import BigNumber from 'bignumber.js';
-import { is } from 'typia';
 
 import {
   REQUIRED_ACTOR_TYPES,
@@ -143,7 +146,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private extractMassIDSubtype(document: Document): MassIDOrganicSubtype {
-    if (!is<MassIDOrganicSubtype>(document.subtype)) {
+    if (
+      !(Object.values(MassIDOrganicSubtype) as unknown[]).includes(
+        document.subtype,
+      )
+    ) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.UNEXPECTED_DOCUMENT_SUBTYPE(
           String(document.subtype),
@@ -151,7 +158,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       );
     }
 
-    return document.subtype;
+    return document.subtype as MassIDOrganicSubtype;
   }
 
   private getActorMassIDPercentage(
@@ -231,19 +238,22 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       distributions,
     )) {
       if (
-        is<RewardsDistributionActorType>(actorType) &&
-        is<BigNumber>(rewardDistribution)
+        (Object.values(RewardsDistributionActorType) as unknown[]).includes(
+          actorType,
+        ) &&
+        isBigNumber(rewardDistribution)
       ) {
+        const validActorType = actorType as RewardsDistributionActorType;
         const actorsByType = getActorsByType({
           actors,
-          actorType,
+          actorType: validActorType,
           methodologyDocument,
         });
 
         if (isNonEmptyArray(actorsByType)) {
           const massIDPercentage = this.getActorMassIDPercentage({
             actors,
-            actorType,
+            actorType: validActorType,
             massIDDocument,
             rewardDistribution,
             wasteGeneratorVerificationDocument,
@@ -289,7 +299,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     for (const event of actorEvents) {
       const actorType = event.label;
 
-      if (is<RewardsDistributionActorType>(actorType)) {
+      if (
+        (Object.values(RewardsDistributionActorType) as unknown[]).includes(
+          actorType,
+        )
+      ) {
         actors.push({
           address: {
             id: event.address.id,
@@ -299,7 +313,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
             name: event.participant.name,
           },
           preserveSensitiveData: event.preserveSensitiveData,
-          type: actorType,
+          type: actorType as RewardsDistributionActorType,
         });
       }
     }

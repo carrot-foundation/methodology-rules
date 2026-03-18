@@ -3,15 +3,17 @@ import type { PartialDeep } from 'type-fest';
 import {
   type Document,
   DocumentCategory,
-  type DocumentEvent,
   type DocumentRelation,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
+import {
+  DataSetName,
+  MethodologyDocumentStatus,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { computeDestinationPoint } from 'geolib';
-import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
 import { stubDocumentEvent } from './document-event.stubs';
@@ -26,11 +28,23 @@ export const stubDocument = (
     [];
 
   return {
-    ...random<Document>(),
     category: stubEnumValue(DocumentCategory),
+    createdAt: faker.date.recent().toISOString(),
+    currentValue: faker.number.float({ max: 10_000, min: 0 }),
+    dataSetName: stubEnumValue(DataSetName),
+    externalCreatedAt: faker.date.recent().toISOString(),
+    id: faker.string.uuid(),
+    isPubliclySearchable: faker.datatype.boolean(),
+    measurementUnit: faker.helpers.arrayElement(['kg', 't', 'unit']),
+    status: stubEnumValue(MethodologyDocumentStatus),
+    updatedAt: faker.date.recent().toISOString(),
     ...partialDocument,
     externalEvents: [
-      ...(stubExternalEvents ? random<DocumentEvent[]>() : []),
+      ...(stubExternalEvents
+        ? Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () =>
+            stubDocumentEvent(),
+          )
+        : []),
       ...externalEvents,
     ],
     primaryAddress: stubAddress(partialDocument?.primaryAddress),
@@ -41,7 +55,11 @@ export const stubDocument = (
 export const stubDocumentRelation = (
   partial?: Partial<DocumentRelation>,
 ): DocumentRelation => ({
-  ...random<Required<DocumentRelation>>(),
+  bidirectional: faker.datatype.boolean(),
+  category: stubEnumValue(DocumentCategory),
+  documentId: faker.string.uuid(),
+  subtype: stubEnumValue(DocumentSubtype),
+  type: stubEnumValue(DocumentType),
   ...partial,
 });
 

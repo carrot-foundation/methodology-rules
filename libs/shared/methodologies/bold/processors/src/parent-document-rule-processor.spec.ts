@@ -3,11 +3,12 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type RuleInput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ParentDocumentRuleProcessor } from './parent-document-rule-processor';
 
@@ -45,7 +46,7 @@ describe('ParentDocumentRuleProcessor', () => {
 
   describe('loadDocument', () => {
     it('should return undefined if document does not exist', async () => {
-      const ruleInput = random<RuleInput>();
+      const ruleInput = stubRuleInput();
 
       const result = await processor['loadDocument'](ruleInput);
 
@@ -53,8 +54,8 @@ describe('ParentDocumentRuleProcessor', () => {
     });
 
     it('should return document if it exists', async () => {
-      const ruleInput = random<RuleInput>();
-      const document = random<Document>();
+      const ruleInput = stubRuleInput();
+      const document = stubDocument();
 
       mockedloadDocument.mockResolvedValueOnce(document);
 

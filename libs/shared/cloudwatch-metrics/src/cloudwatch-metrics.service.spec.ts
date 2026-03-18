@@ -1,5 +1,5 @@
 import { CloudWatchClient } from '@aws-sdk/client-cloudwatch';
-import { random } from 'typia';
+import { faker } from '@faker-js/faker';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
 import {
@@ -33,7 +33,7 @@ const resetEnvironmentVariables = () => {
 const createMockCloudWatchMetricData = (
   overrides: Partial<CloudWatchMetricData> = {},
 ): CloudWatchMetricData => ({
-  ...random<CloudWatchMetricData>(),
+  documentManifestType: faker.string.sample(),
   ...overrides,
 });
 

@@ -1,5 +1,14 @@
-import { createAssert } from 'typia';
+import { DateTimeSchema } from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
 import type { DocumentEntity } from './document-loader.types';
 
-export const assertDocumentEntity = createAssert<DocumentEntity>();
+const DocumentEntitySchema = z.object({
+  createdAt: DateTimeSchema,
+  document: z.record(z.string(), z.any()),
+  id: z.string(),
+  versionDate: DateTimeSchema,
+});
+
+export const assertDocumentEntity = (v: unknown): DocumentEntity =>
+  DocumentEntitySchema.parse(v);

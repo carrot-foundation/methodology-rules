@@ -2,11 +2,8 @@ import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { NoConflictingCertificateOrCreditProcessor } from './no-conflicting-certificate-or-credit.processor';
 import { noConflictingCertificateOrCreditTestCases } from './no-conflicting-certificate-or-credit.test-cases';
@@ -28,10 +25,9 @@ describe('NoConflictingCertificateOrCreditProcessor', () => {
 
       spyOnDocumentQueryServiceLoad(stubDocument(), allDocuments);
 
-      const ruleInput = {
-        ...random<Required<RuleInput>>(),
+      const ruleInput = stubRuleInput({
         documentId: massIDAuditDocument.id,
-      };
+      });
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

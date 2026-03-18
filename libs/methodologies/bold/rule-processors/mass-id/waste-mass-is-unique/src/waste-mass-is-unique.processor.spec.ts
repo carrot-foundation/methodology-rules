@@ -1,10 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { WasteMassIsUniqueProcessor } from './waste-mass-is-unique.processor';
 import {
@@ -38,7 +35,7 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
         resultComment,
         resultStatus,
       }) => {
-        const ruleInput = random<Required<RuleInput>>();
+        const ruleInput = stubRuleInput();
 
         const { massIDDocument } = new BoldStubsBuilder()
           .createMassIDDocuments()
@@ -69,7 +66,7 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
     it.each(wasteMassIsUniqueErrorTestCases)(
       `should return $resultStatus when $scenario`,
       async ({ massIDDocument, resultComment, resultStatus }) => {
-        const ruleInput = random<Required<RuleInput>>();
+        const ruleInput = stubRuleInput();
 
         documentLoaderService.mockResolvedValueOnce(massIDDocument);
 

@@ -27,7 +27,6 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { type NonZeroPositive } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
-import { is } from 'typia';
 
 import type {
   ResultContentsWithMassIDCertificateValue,
@@ -36,6 +35,7 @@ import type {
 
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
+import { isCertificateRewardDistributionOutput } from './rewards-distribution.validators';
 
 const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
@@ -114,7 +114,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     );
 
     if (
-      !is<CertificateRewardDistributionOutput>(
+      !isCertificateRewardDistributionOutput(
         rewardsDistributionRuleResultContent,
       )
     ) {

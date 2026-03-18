@@ -6,9 +6,9 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type DateTime, type NonEmptyString } from '@carrot-fndn/shared/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
+import { DateTimeSchema } from '@carrot-fndn/shared/types';
 import { isAfter, isBefore, isToday } from 'date-fns';
-import { is } from 'typia';
 
 export const getParticipantAccreditationDocumentByParticipantId = ({
   accreditationDocuments,
@@ -46,18 +46,21 @@ export const isAccreditationValid = (document: Document): boolean => {
   const expirationDateExists = expirationDate !== undefined;
 
   if (
-    !is<DateTime>(effectiveDate) ||
-    (expirationDateExists && !is<DateTime>(expirationDate)) ||
-    !is<DocumentEventAccreditationStatus>(status) ||
+    !DateTimeSchema.safeParse(effectiveDate).success ||
+    (expirationDateExists &&
+      !DateTimeSchema.safeParse(expirationDate).success) ||
+    !(Object.values(DocumentEventAccreditationStatus) as unknown[]).includes(
+      status,
+    ) ||
     status !== DocumentEventAccreditationStatus.APPROVED
   ) {
     return false;
   }
 
   const today = new Date();
-  const effectiveDateObject = new Date(effectiveDate);
+  const effectiveDateObject = new Date(effectiveDate as string);
   const expirationDateObject = expirationDateExists
-    ? new Date(expirationDate)
+    ? new Date(expirationDate as string)
     : new Date();
 
   const isEffectiveValid =

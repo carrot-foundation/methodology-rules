@@ -1,7 +1,7 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { stubObject } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
-import { createValidate } from 'typia';
+import { z } from 'zod';
 
 import { S3BucketRepository } from './s3-bucket.repository';
 import {
@@ -28,7 +28,9 @@ describe('S3BucketRepository', () => {
       jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({} as never);
 
       await expect(
-        repository.readFromS3(faker.string.uuid(), createValidate),
+        repository.readFromS3(faker.string.uuid(), (input: unknown) =>
+          z.unknown().parse(input),
+        ),
       ).rejects.toThrow('"undefined" is not valid JSON');
     });
 
@@ -43,7 +45,7 @@ describe('S3BucketRepository', () => {
 
       await expect(
         repository.readFromS3(faker.string.uuid(), assertS3BucketTestData),
-      ).rejects.toThrow('Error on createAssert()');
+      ).rejects.toThrow(z.ZodError);
     });
 
     it('should return the stored data', async () => {

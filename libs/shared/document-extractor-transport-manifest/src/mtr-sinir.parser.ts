@@ -76,7 +76,7 @@ export class MtrSinirParser implements DocumentParser<MtrExtractedData> {
 
     if (documentNumberExtracted) {
       partialData.documentNumber = createHighConfidenceField(
-        documentNumberExtracted.value as NonEmptyString,
+        documentNumberExtracted.value,
         documentNumberExtracted.rawMatch,
       );
     }

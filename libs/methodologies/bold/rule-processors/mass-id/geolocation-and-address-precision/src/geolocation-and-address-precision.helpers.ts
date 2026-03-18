@@ -18,11 +18,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type Geolocation,
-  type Latitude,
-  type Longitude,
   type MethodologyAddress,
 } from '@carrot-fndn/shared/types';
-import { is } from 'typia';
+import { LatitudeSchema, LongitudeSchema } from '@carrot-fndn/shared/types';
 
 import type {
   GpsLatitudeApprovedException,
@@ -32,7 +30,7 @@ import type {
 import {
   isGpsLatitudeApprovedException,
   isGpsLongitudeApprovedException,
-} from './geolocation-and-address-precision.typia';
+} from './geolocation-and-address-precision.validators';
 
 export const hasVerificationDocument = (
   massIDAuditDocument: Document,
@@ -135,10 +133,13 @@ export const getEventGpsGeolocation = (
     DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
   );
 
-  if (is<Latitude>(gpsLatitude) && is<Longitude>(gpsLongitude)) {
+  if (
+    LatitudeSchema.safeParse(gpsLatitude).success &&
+    LongitudeSchema.safeParse(gpsLongitude).success
+  ) {
     return {
-      latitude: gpsLatitude,
-      longitude: gpsLongitude,
+      latitude: gpsLatitude as number,
+      longitude: gpsLongitude as number,
     };
   }
 

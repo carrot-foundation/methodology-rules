@@ -1,11 +1,19 @@
-import { createAssert, random } from 'typia';
+import { faker } from '@faker-js/faker';
+import { z } from 'zod';
 
-interface S3BucketTestData {
-  a: number;
-  b: string;
-  c: boolean;
-}
+const S3BucketTestDataSchema = z.object({
+  a: z.number(),
+  b: z.string(),
+  c: z.boolean(),
+});
 
-export const assertS3BucketTestData = createAssert<S3BucketTestData>();
+type S3BucketTestData = z.infer<typeof S3BucketTestDataSchema>;
 
-export const stubS3BucketTestData = () => random<S3BucketTestData>();
+export const assertS3BucketTestData = (input: unknown): S3BucketTestData =>
+  S3BucketTestDataSchema.parse(input);
+
+export const stubS3BucketTestData = (): S3BucketTestData => ({
+  a: faker.number.int(),
+  b: faker.string.alpha(),
+  c: faker.datatype.boolean(),
+});

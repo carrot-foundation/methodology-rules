@@ -16,7 +16,7 @@ import { splitPdfPages } from './pdf-splitter.helpers';
 import {
   assertTextExtractionInput,
   assertTextExtractionResultRawText,
-} from './text-extractor.typia';
+} from './text-extractor.validators';
 
 const isUnsupportedDocumentException = (error: unknown): boolean => {
   /* istanbul ignore next -- defensive: AWS SDK always throws Error objects */

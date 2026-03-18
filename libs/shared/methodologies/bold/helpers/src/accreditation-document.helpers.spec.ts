@@ -201,6 +201,8 @@ describe('Accreditation Document Helpers', () => {
         externalEvents: [],
       });
 
+      document.externalEvents = [];
+
       expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
@@ -208,6 +210,8 @@ describe('Accreditation Document Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: undefined,
       });
+
+      document.externalEvents = undefined;
 
       expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });

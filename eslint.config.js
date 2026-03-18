@@ -230,7 +230,7 @@ const jestFilesConfigs = [
     files: [
       '**/*.spec.ts',
       '**/*.spec.js',
-      '**/typia.matchers.ts',
+      '**/zod.matchers.ts',
       '**/helpers/rule-processor.helpers.ts',
       '**/testing.helpers.ts',
     ],

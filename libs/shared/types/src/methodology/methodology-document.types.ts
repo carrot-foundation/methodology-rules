@@ -1,5 +1,3 @@
-import type { tags } from 'typia';
-
 import type { DateTime, UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
 import type { MethodologyDocumentEvent } from './methodology-document-event.types';
@@ -15,7 +13,7 @@ export interface MethodologyDocument {
   attachments?: MethodologyDocumentAttachment[] | undefined;
   category: string;
   createdAt: DateTime;
-  currentValue: number & tags.Minimum<0> & tags.Type<'float'>;
+  currentValue: number;
   dataSetName: DataSetName;
   deduplicationId?: string | undefined;
   externalCreatedAt: DateTime;
@@ -37,7 +35,7 @@ export interface MethodologyDocument {
 }
 
 export interface MethodologyDocumentAttachment {
-  contentLength: number & tags.Minimum<0>;
+  contentLength: number;
   fileName: string;
   id: string;
 }

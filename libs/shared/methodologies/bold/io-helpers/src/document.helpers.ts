@@ -4,7 +4,7 @@ import type { Maybe } from '@carrot-fndn/shared/types';
 import { type DocumentLoader } from '@carrot-fndn/shared/document/loader';
 import { isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 
-import { validateDocument } from './document-helpers.typia';
+import { validateDocument } from './document-helpers.validators';
 
 export const loadDocument = async (
   loaderService: DocumentLoader,
@@ -23,14 +23,14 @@ export const loadDocument = async (
 
     if (!validation.success) {
       logger.warn(
-        { validationErrors: validation.errors },
+        { validationErrors: validation.error.issues },
         `[loadDocument] Invalid document ${key}`,
       );
 
       return undefined;
     }
 
-    return validation.data;
+    return validation.data as Document;
   } catch (error) {
     logger.warn({ error }, `[loadDocument] Failed to load document: ${key}`);
 
