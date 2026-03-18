@@ -4,6 +4,7 @@ intent: Ensure consistent, safe, and maintainable test practices using Jest and 
 scope:
   - "*.spec.ts"
   - "*.e2e.spec.ts"
+  - "*.test-cases.ts"
 requirements:
   - Use Jest with ts-jest as the test runner; test environment is configured via `.env-files/.env.test`
   - Generate test data with `@faker-js/faker` for primitives and `zocker` for schema-driven object generation
