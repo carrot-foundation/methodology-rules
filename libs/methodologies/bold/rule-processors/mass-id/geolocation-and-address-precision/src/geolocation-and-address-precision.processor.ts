@@ -38,7 +38,10 @@ import {
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
-import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
+import {
+  MAX_ALLOWED_DISTANCE,
+  RESULT_COMMENTS,
+} from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
   getAccreditedAddressByParticipantIdAndActorType,
@@ -49,8 +52,6 @@ import {
 } from './geolocation-and-address-precision.helpers';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
-
-const MAX_ALLOWED_DISTANCE = 2000;
 
 export interface RuleSubject {
   accreditationDocuments: Document[];

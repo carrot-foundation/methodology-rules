@@ -1,5 +1,6 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 interface CompostingCycleTimeframeTestCase
@@ -18,6 +19,8 @@ const DROP_OFF_DATE_59_DAYS = '2023-12-30T12:00:00.000Z';
 const DROP_OFF_DATE_180_DAYS = '2023-08-31T12:00:00.000Z';
 const DROP_OFF_DATE_181_DAYS = '2023-08-29T12:00:00.000Z';
 
+const { DROP_OFF, RECYCLED } = DocumentEventName;
+
 export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase[] =
   [
     {
@@ -30,10 +33,11 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: undefined,
       recycledEventDate: RECYCLED_DATE,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'Drop off event date is missing',
+      scenario: `The "${DROP_OFF}" event date is missing`,
     },
     {
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,
+      manifestExample: true,
       recycledEventDate: RECYCLED_DATE_EARLIER,
       resultStatus: RuleOutputStatus.PASSED,
       scenario: 'Time interval is within range (94 days)',
@@ -66,6 +70,6 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,
       recycledEventDate: undefined,
       resultStatus: RuleOutputStatus.FAILED,
-      scenario: 'Recycled event date is missing',
+      scenario: `The "${RECYCLED}" event date is missing`,
     },
   ];

@@ -36,7 +36,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
       'INVALID_VEHICLE_TYPE',
     ),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is not a valid vehicle type`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is not a valid vehicle type`,
   },
   {
     events: new Map([
@@ -49,7 +49,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.VEHICLE_TYPE_MISSING,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is not present`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is not present`,
   },
   {
     events: new Map([
@@ -65,7 +65,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING(OTHERS),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} but the "${VEHICLE_DESCRIPTION}" attribute is not present`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} but the "${VEHICLE_DESCRIPTION}" attribute is not present`,
   },
   {
     events: new Map([
@@ -79,16 +79,17 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         }),
       ],
     ]),
+    manifestExample: true,
     resultComment:
       RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(OTHERS),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} and the "${VEHICLE_DESCRIPTION}" attribute is present`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} and the "${VEHICLE_DESCRIPTION}" attribute is present`,
   },
   {
     events: new Map([[PICK_UP, undefined]]),
     resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${PICK_UP}" event is not present`,
+    scenario: `The "${PICK_UP}" event is not present`,
   },
   ...[...VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES].map((vehicleType) => ({
     events: new Map([
@@ -104,7 +105,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         vehicleType,
       ),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
   })),
   {
     events: new Map([
@@ -120,7 +121,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,
   },
   {
     events: new Map([
@@ -136,7 +137,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `the "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
+    scenario: `The "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
   },
   {
     events: new Map([
@@ -152,6 +153,6 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
     resultStatus: RuleOutputStatus.FAILED,
-    scenario: `the "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
+    scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
   },
 ];

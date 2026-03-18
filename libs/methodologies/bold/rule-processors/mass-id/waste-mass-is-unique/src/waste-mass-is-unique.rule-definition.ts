@@ -1,4 +1,4 @@
-import type { RuleDefinition } from '@carrot-fndn/shared/rule/types';
+import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
@@ -10,12 +10,6 @@ export const ruleDefinition = {
     DocumentEventName.DROP_OFF,
     DocumentEventName.PICK_UP,
   ],
-  frameworkRules: [
-    'double-checking-recycler-emitted-masses',
-    'double-checking-source-emitted-masses',
-    'duplicate-check',
-    'route-check',
-  ],
   name: 'Uniqueness Check',
   slug: 'waste-mass-is-unique',
-} as const satisfies RuleDefinition;
+} as const satisfies BaseRuleDefinition;
