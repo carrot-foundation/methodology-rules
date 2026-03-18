@@ -205,28 +205,25 @@ function extractAppFrameworkRules(
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { DocumentEventName } = require(
   '@carrot-fndn/shared/methodologies/bold/types',
-) as { DocumentEventName: Record<string, string> };
+) as {
+  DocumentEventName: Record<string, string>;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { MethodologyDocumentEventLabel } = require(
+  '@carrot-fndn/shared/types',
+) as {
+  MethodologyDocumentEventLabel: Record<string, string>;
+};
 
 // --- Actor label extraction from processor files ---
-
-/**
- * Converts an UPPER_SNAKE_CASE enum key to PascalCase.
- * e.g. "WASTE_GENERATOR" → "WasteGenerator", "HAULER" → "Hauler"
- */
-function upperSnakeToPascalCase(str: string): string {
-  return str
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-}
 
 /**
  * Parses a processor file to extract which actor labels are used with ACTOR events.
  * Looks for patterns like:
  *   - eventLabelIsAnyOf([HAULER, RECYCLER])
  *   - eventHasLabel(event, PROCESSOR)
- * Returns PascalCase labels, e.g. ["Hauler", "Recycler"]
+ * Returns the enum values as-is, e.g. ["Hauler", "Waste Generator"]
  */
 function extractActorLabelsFromProcessor(processorPath: string): string[] {
   const content = fs.readFileSync(processorPath, 'utf8');
@@ -260,7 +257,10 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     }
   }
 
-  return [...labels].sort().map(upperSnakeToPascalCase);
+  // Resolve enum keys to their actual values via MethodologyDocumentEventLabel
+  return [...labels]
+    .sort()
+    .map((key) => MethodologyDocumentEventLabel[key] ?? key);
 }
 
 /**
@@ -811,8 +811,9 @@ function normalizeDocumentEvent(
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { name: event['name'] };
 
-  // Include label for ACTOR events (e.g., "Waste Generator", "Hauler")
-  if (event['label'] !== undefined) {
+  // Include label for ACTOR events only (e.g., "Waste Generator", "Hauler")
+  const actorValue = DocumentEventName['ACTOR'] ?? 'ACTOR';
+  if (event['name'] === actorValue && event['label'] !== undefined) {
     result['label'] = event['label'];
   }
 
