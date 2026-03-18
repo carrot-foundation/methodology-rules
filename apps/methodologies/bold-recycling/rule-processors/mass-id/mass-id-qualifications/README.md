@@ -1,6 +1,6 @@
 <div align="center">
 
-# Mass ID Qualifications
+# MassID Qualifications
 
 Methodology: **BOLD Recycling**
 
