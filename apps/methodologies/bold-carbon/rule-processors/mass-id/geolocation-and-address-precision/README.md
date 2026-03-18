@@ -2,28 +2,41 @@
 
 # Geolocation Precision
 
-Methodology: **BOLD-CARBON**
+Methodology: **BOLD Carbon**
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
 </div>
 
 ## 📄 Description
 
-Validates that event addresses for all participants (integrator, hauler, recycler, processor, waste generator) are within 2000 meters of their accredited addresses. If GPS geolocation data is provided in events, it must also be within 2000 meters of the accredited address. The rule ensures geographic consistency between declared event locations and participant accreditations.
+Validates that event addresses for all participants are within 2000 meters of their accredited addresses, ensuring geographic consistency between declared locations and accreditations.
+
+## 📋 Framework Rules
+
+| Rule                           | Description                                                                                                                                                                                                                                                                                        |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Drop-off Geolocation Precision | In the 'Drop-off' event, the geolocation declared in the 'app-gps-latitude' and 'app-gps-longitude' metadata must be compatible with the event address data, within a 2 km radius. If GPS data is unavailable, validation falls back to the address registered in the participant's accreditation. |
+| Pick-up Geolocation Precision  | In the 'Pick-up' event, the geolocation declared in the 'app-gps-latitude' and 'app-gps-longitude' metadata must be compatible with the event address data, within a 2 km radius. If GPS data is unavailable, validation falls back to the address registered in the accreditation.                |
+
+## 📡 Events
+
+- `Drop-off`
+- `Pick-up`
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-precision/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/index.ts)**
 
 ## 👥 Contributors
 
-[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
-[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
-[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/7927374?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
-[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/49005645?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
-[![GLGuilherme](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26340386?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/GLGuilherme)
-[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/11515359?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
+[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/AMarcosCastelo&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
+[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/andtankian&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
+[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/cris-santos&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
+[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/gabrielsl96&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
+[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/sangalli&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
 
 ## 🔑 License
 

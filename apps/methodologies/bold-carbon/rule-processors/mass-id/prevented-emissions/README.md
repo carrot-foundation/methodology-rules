@@ -2,15 +2,28 @@
 
 # Prevented Emissions
 
-Methodology: **BOLD-CARBON**
+Methodology: **BOLD Carbon**
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
 </div>
 
 ## 📄 Description
 
-Calculates prevented emissions (CO2e) based on the exceeding emission coefficient from recycler accreditation, waste generator baseline, waste subtype, and MassID document value. The rule validates that the exceeding emission coefficient is present, that a baseline exists for the waste subtype, and calculates the prevented emissions using the methodology formula: (mass × prevented emissions factor per ton) - (mass × exceeding emission coefficient).
+Calculates prevented emissions in kg CO2e based on the waste subtype, recycler accreditation baselines, and exceeding emission coefficient.
+
+## 📋 Framework Rules
+
+| Rule                         | Description                                                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GasID Output                 | Checks the compensation index for the waste type in the recycler's accreditation page and executes the TCC calculation: document-value \* compensation index = GasID, ensuring carbon credits are correctly calculated based on waste type and volume. |
+| Recycled-to-Input Conversion | Verifies the composting fertilizer coefficient in the recycler's accreditation page and checks whether the declared quantity is compatible with the calculation, ensuring accuracy in recycled-to-input conversion reporting.                          |
+
+## 📡 Events
+
+- `Pick-up`
 
 ## 📂 Implementation
 
@@ -18,12 +31,11 @@ Calculates prevented emissions (CO2e) based on the exceeding emission coefficien
 
 ## 👥 Contributors
 
-[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
-[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
-[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/7927374?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
-[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/49005645?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
-[![GLGuilherme](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26340386?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/GLGuilherme)
-[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/11515359?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
+[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/AMarcosCastelo&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
+[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/andtankian&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
+[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/cris-santos&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
+[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/gabrielsl96&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
+[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/sangalli&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
 
 ## 🔑 License
 

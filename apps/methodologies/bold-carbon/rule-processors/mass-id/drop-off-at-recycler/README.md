@@ -2,28 +2,40 @@
 
 # Drop-off At Recycling Facility
 
-Methodology: **BOLD-CARBON**
+Methodology: **BOLD Carbon**
 
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/smaug/actions)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
+[![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
+[![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
 </div>
 
 ## 📄 Description
 
-Validates that the DROP_OFF event includes a receiving operator identifier and that the drop-off address matches the recycler event address. The rule ensures proper tracking of waste delivery to recycling facilities by verifying both the operator identification and address consistency.
+Validates that the drop-off event includes a receiving operator identifier and that the drop-off address matches the recycler event address.
+
+## 📋 Framework Rules
+
+| Rule                                  | Description                                                                                                                                                                                                                 |
+| ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Check Recycler and Drop-Off Addresses | At least one 'Drop-off' event must have its 'Responsible Party' address matching the address declared for the 'Recycler' actor event. Address validation is performed based on registered address IDs.                      |
+| Drop-off Event                        | A 'Drop-off' event must be declared in the MassID, confirming that the waste was delivered to the correct destination and transferred to the composting facility.                                                           |
+| Receiving Operator Identifier         | The 'Drop-off' event must contain the 'Receiving Operator Identifier' metadata, ensuring a responsible operator is registered for receiving the waste at the composting facility, enabling traceability and accountability. |
+
+## 📡 Events
+
+- `ACTOR`
+- `Drop-off`
 
 ## 📂 Implementation
 
-- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycling-facility/src/index.ts)**
+- **[Main Implementation File](https://github.com/carrot-foundation/methodology-rules/tree/main/libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/src/index.ts)**
 
 ## 👥 Contributors
 
-[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/43973049?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
-[![andtankian](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/12521890?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/andtankian)
-[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/7927374?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
-[![gabrielsl96](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/49005645?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/gabrielsl96)
-[![GLGuilherme](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/26340386?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/GLGuilherme)
-[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/u/11515359?v=4&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
+[![AMarcosCastelo](https://images.weserv.nl/?url=avatars.githubusercontent.com/AMarcosCastelo&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/AMarcosCastelo)
+[![cris-santos](https://images.weserv.nl/?url=avatars.githubusercontent.com/cris-santos&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/cris-santos)
+[![sangalli](https://images.weserv.nl/?url=avatars.githubusercontent.com/sangalli&h=60&w=60&fit=cover&mask=circle&maxage=7d)](https://github.com/sangalli)
 
 ## 🔑 License
 
