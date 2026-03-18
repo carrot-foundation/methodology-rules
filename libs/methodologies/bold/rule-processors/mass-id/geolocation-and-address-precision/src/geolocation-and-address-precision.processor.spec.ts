@@ -9,7 +9,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { GeolocationAndAddressPrecisionProcessor } from './geolocation-and-address-precision.processor';
 import {
@@ -74,10 +74,9 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       spyOnLoadDocument(massIDAuditDocument);
       spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
-      const ruleInput = {
-        ...random<Required<RuleInput>>(),
+      const ruleInput = stubRuleInput({
         documentId: massIDAuditDocument.id,
-      };
+      });
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -103,10 +102,9 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
             ...documents,
           ]);
 
-          const ruleInput: Required<RuleInput> = {
-            ...random<Required<RuleInput>>(),
+          const ruleInput: RuleInput = stubRuleInput({
             documentId: massIDAuditDocument.id,
-          };
+          });
 
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
@@ -119,7 +117,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
         } else {
           spyOnLoadDocument(undefined);
 
-          const ruleInput = random<Required<RuleInput>>();
+          const ruleInput = stubRuleInput();
 
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

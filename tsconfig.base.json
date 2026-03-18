@@ -29,12 +29,7 @@
     "noUnusedParameters": true,
     "resolveJsonModule": true,
     "skipDefaultLibCheck": true,
-    "skipLibCheck": true,
-    "plugins": [
-      {
-        "transform": "typia/lib/transform"
-      }
-    ]
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "tmp"],
   "extends": "./tsconfig.paths.json"

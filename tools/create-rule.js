@@ -170,12 +170,8 @@ export class ${pascalCase}ProcessorErrors extends BaseProcessorErrors {
     content: `import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  type RuleInput,
-  type RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput, RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ${pascalCase}Processor } from './${fileName}.processor';
 import { ${camelCase}TestCases } from './${fileName}.test-cases';
@@ -198,7 +194,7 @@ describe('${pascalCase}Processor', () => {
       resultComment: string;
       resultStatus: RuleOutputStatus;
     }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       documentLoaderService.mockResolvedValueOnce(document);
 

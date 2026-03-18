@@ -117,7 +117,7 @@ const extractWeightWithTimestamp = (
 
   const timestamp = extractTimestamp(text, weightPattern, dateTimePattern);
   const value: WeightData = {
-    unit: weightMatch[2] as NonEmptyString,
+    unit: weightMatch[2],
     value: numericValue,
   };
 
@@ -146,7 +146,7 @@ const extractNetWeight = (
   return {
     rawMatch: match[0],
     value: {
-      unit: match[2] as NonEmptyString,
+      unit: match[2],
       value: numericValue,
     },
   };
@@ -171,8 +171,8 @@ const extractTransporter = (
   return {
     rawMatch: match[0],
     value: {
-      code: match[1] as NonEmptyString,
-      name: name as NonEmptyString,
+      code: match[1],
+      name,
     },
   };
 };

@@ -1,11 +1,8 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { DriverIdentificationProcessor } from './driver-identification.processor';
 import { driverIdentificationTestCases } from './driver-identification.test-cases';
@@ -22,7 +19,7 @@ describe('DriverIdentificationProcessor', () => {
   it.each(driverIdentificationTestCases)(
     'should return $resultStatus when $scenario',
     async ({ pickUpEvent, resultComment, resultStatus }) => {
-      const ruleInput = random<Required<RuleInput>>();
+      const ruleInput = stubRuleInput();
 
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({

@@ -1,12 +1,11 @@
-import type { AnyObject } from '@carrot-fndn/shared/types';
-
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
+import { faker } from '@faker-js/faker';
 
 import {
   type EvaluateResultOutput,
@@ -34,7 +33,7 @@ describe('RuleStandardDataProcessor', () => {
       parentDocumentId,
     }: RuleInput): Promise<string[] | undefined> {
       if (parentDocumentId === 'valid-id') {
-        return Promise.resolve(random<string[]>());
+        return Promise.resolve([faker.string.sample(), faker.string.sample()]);
       }
 
       return Promise.resolve(undefined);
@@ -48,7 +47,7 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a result with a fail comment when the document is not found', async () => {
-    const ruleInput = random<RuleInput>();
+    const ruleInput = stubRuleInput();
     const parentDocumentId = 'invalid-id';
 
     const result = await ruleStandardDataProcessor.process({
@@ -71,7 +70,7 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a resultStatus PASSED if the rule is not applicable', async () => {
-    const ruleInput = random<RuleInput>();
+    const ruleInput = stubRuleInput();
 
     (ruleStandardDataProcessor as any)['getRuleSubject'] = jest.fn(
       () => undefined,
@@ -95,7 +94,7 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a resultStatus PASSED if the rule is applicable and passed', async () => {
-    const ruleInput = random<RuleInput>();
+    const ruleInput = stubRuleInput();
 
     const result = await ruleStandardDataProcessor.process({
       ...ruleInput,
@@ -113,7 +112,7 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a resultStatus FAILED if the rule is applicable and failed', async () => {
-    const ruleInput = random<RuleInput>();
+    const ruleInput = stubRuleInput();
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultStatus: RuleOutputStatus.FAILED,
@@ -135,7 +134,7 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a result with a fail comment when the rule is applicable and failed', async () => {
-    const ruleInput = random<RuleInput>();
+    const ruleInput = stubRuleInput();
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultComment: 'Failed',
@@ -159,8 +158,8 @@ describe('RuleStandardDataProcessor', () => {
   });
 
   it('should return a resultContent when the rule is applicable and failed', async () => {
-    const ruleInput = random<RuleInput>();
-    const resultContent = random<AnyObject>();
+    const ruleInput = stubRuleInput();
+    const resultContent = { [faker.string.sample()]: faker.string.sample() };
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
       resultComment: 'Failed',

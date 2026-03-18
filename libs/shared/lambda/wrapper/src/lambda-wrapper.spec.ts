@@ -1,13 +1,15 @@
-import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
-import type { Context } from 'aws-lambda';
 
 import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import {
+  stubContext,
+  stubRuleInput,
+  stubRuleOutput,
+} from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import * as Sentry from '@sentry/serverless';
-import { random } from 'typia';
 
 import { wrapRuleIntoLambdaHandler } from './lambda-wrapper';
 
@@ -40,7 +42,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
   it('should work', async () => {
     const response = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       resultStatus: RuleOutputStatus.PASSED,
     };
 
@@ -53,18 +55,14 @@ describe('wrapRuleIntoLambdaHandler', () => {
     mockStsAndFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
-    const result = await wrapper(
-      random<MethodologyRuleEvent>(),
-      random<Context>(),
-      () => {},
-    );
+    const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
     expect(result).toEqual(response);
   });
 
   it('should convert REVIEW_REQUIRED to FAILED before reporting and returning', async () => {
     const response = {
-      ...random<RuleOutput>(),
+      ...stubRuleOutput(),
       resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
     };
 
@@ -77,11 +75,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
     mockStsAndFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
-    const result = await wrapper(
-      random<MethodologyRuleEvent>(),
-      random<Context>(),
-      () => {},
-    );
+    const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
     expect(result).toEqual({
       ...response,
@@ -100,9 +94,9 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
 
-    const ruleEvent = random<MethodologyRuleEvent>();
+    const ruleEvent = stubRuleInput();
 
-    const lambdaContext = random<Context>();
+    const lambdaContext = stubContext();
 
     await expect(wrapper(ruleEvent, lambdaContext, () => {})).rejects.toThrow(
       'Just a controlled test error.',

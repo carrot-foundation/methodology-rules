@@ -1,10 +1,19 @@
-import type { tags } from 'typia';
+import { z } from 'zod';
 
-export type NonEmptyString = string & tags.MinLength<1>;
+export const NonEmptyStringSchema = z.string().nonempty();
+export type NonEmptyString = z.infer<typeof NonEmptyStringSchema>;
 
-export type PercentageString = NonEmptyString &
-  tags.Pattern<`^(0|1|0\\.\\d+|1\\.0+)$`>;
+export const PercentageStringSchema = z
+  .string()
+  .nonempty()
+  .regex(/^(0|1|0\.\d+|1\.0+)$/);
+export type PercentageString = z.infer<typeof PercentageStringSchema>;
 
-export type Uri = string & tags.Format<'uri'>;
+export const UriSchema = z.url();
+export type Uri = z.infer<typeof UriSchema>;
 
-export type Url = string & tags.Format<'url'>;
+export const UrlSchema = z.url({
+  hostname: z.regexes.domain,
+  protocol: /^https?$/,
+});
+export type Url = z.infer<typeof UrlSchema>;

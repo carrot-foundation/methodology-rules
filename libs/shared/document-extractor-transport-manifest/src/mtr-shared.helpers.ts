@@ -1,5 +1,3 @@
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
-
 import {
   createExtractedEntityWithAddress,
   createHighConfidenceField,
@@ -111,9 +109,7 @@ export const extractMtrEntityWithAddress = (
           rawMatch: entityExtracted.rawMatch,
           value: {
             ...entityExtracted.value,
-            name: stripTrailingRegistrationNumber(
-              entityExtracted.value.name,
-            ) as NonEmptyString,
+            name: stripTrailingRegistrationNumber(entityExtracted.value.name),
             ...addressFields,
           },
         }

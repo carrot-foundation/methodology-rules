@@ -13,13 +13,13 @@ import {
   MassIDDocumentActorType,
   MethodologyDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type Geolocation,
   type MethodologyAddress,
   type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import type { StubBoldDocumentParameters } from './bold.stubs.types';
 
@@ -164,7 +164,7 @@ export class BoldStubsBuilder {
   constructor(options: BoldStubsBuilderOptions = {}) {
     this.count = options.count ?? 1;
     this.boldMethodologyName =
-      options.methodologyName ?? random<BoldMethodologyName>();
+      options.methodologyName ?? stubEnumValue(BoldMethodologyName);
 
     this.massIDDocumentIds =
       options.massIDDocumentIds ??

@@ -1,10 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  type RuleOutput,
-} from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessor } from './participant-accreditations-and-verifications-requirements.processor';
 import { participantAccreditationsAndVerificationsRequirementsTestCases } from './participant-accreditations-and-verifications-requirements.test-cases';
@@ -21,10 +18,9 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
         ...documents,
       ]);
 
-      const ruleInput = {
-        ...random<Required<RuleInput>>(),
+      const ruleInput = stubRuleInput({
         documentId: massIDAuditDocument.id,
-      };
+      });
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

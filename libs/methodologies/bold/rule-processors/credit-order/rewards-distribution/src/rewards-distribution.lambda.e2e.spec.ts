@@ -7,13 +7,9 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import {
-  MethodologyActorType,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
-import { random } from 'typia';
 
 import type { RewardsDistribution } from './rewards-distribution.types';
 
@@ -106,7 +102,7 @@ describe('RewardsDistributionProcessor E2E', () => {
             (document) => ({
               document,
               documentKey: toDocumentKey({
-                documentId: document?.id ?? random<NonEmptyString>(),
+                documentId: document?.id ?? faker.string.uuid(),
                 documentKeyPrefix,
               }),
             }),
@@ -115,7 +111,7 @@ describe('RewardsDistributionProcessor E2E', () => {
 
         const response = (await rewardsDistributionLambda(RECYCLED_ID)(
           stubRuleInput({
-            documentId: creditOrderDocument?.id ?? random<NonEmptyString>(),
+            documentId: creditOrderDocument?.id ?? faker.string.uuid(),
             documentKeyPrefix,
           }),
           stubContext(),

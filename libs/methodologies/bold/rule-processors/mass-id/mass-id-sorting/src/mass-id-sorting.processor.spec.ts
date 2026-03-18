@@ -3,8 +3,7 @@ import {
   createRuleTestFixture,
   expectRuleOutput,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type RuleInput } from '@carrot-fndn/shared/rule/types';
-import { random } from 'typia';
+import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { MassIDSortingProcessor } from './mass-id-sorting.processor';
 import {
@@ -64,10 +63,9 @@ describe('MassIDSortingProcessor', () => {
 
         spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
-        const ruleInput = {
-          ...random<Required<RuleInput>>(),
+        const ruleInput = stubRuleInput({
           documentId: massIDAuditDocument.id,
-        };
+        });
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 

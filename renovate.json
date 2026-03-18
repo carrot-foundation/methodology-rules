@@ -81,7 +81,6 @@
       "groupSlug": "typescript-minor-patch",
       "matchPackageNames": [
         "typescript",
-        "typia",
         "/ts-/",
         "tslib",
         "/tsconfig/"

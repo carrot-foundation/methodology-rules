@@ -6,7 +6,7 @@ import axios from 'axios';
 import type { CheckDuplicatesDto } from './audit.api.dto';
 
 import { AUDIT_API_URL } from './audit-api.constants';
-import { assertCheckDuplicatesDto } from './audit-api.typia';
+import { assertCheckDuplicatesDto } from './audit-api.validators';
 
 export interface ApiDocumentCheckDuplicatesResponse {
   id: NonEmptyString;

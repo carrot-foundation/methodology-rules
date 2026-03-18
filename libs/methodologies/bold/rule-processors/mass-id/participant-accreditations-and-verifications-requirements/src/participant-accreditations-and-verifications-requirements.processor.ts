@@ -31,11 +31,7 @@ import {
   type RuleOutput,
   RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
-import {
-  MethodologyDocumentEventLabel,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
-import { assert } from 'typia';
+import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
@@ -134,7 +130,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
         )
         .map((event) => [
           event.participant.id,
-          assert<MethodologyDocumentEventLabel>(event.label),
+          event.label as MethodologyDocumentEventLabel,
         ]),
     );
   }
@@ -293,10 +289,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
             MethodologyDocumentEventLabel.RECYCLER,
           ]),
         )
-        .map((event) => [
-          event.participant.id,
-          assert<NonEmptyString>(event.label),
-        ]),
+        .map((event) => [event.participant.id, event.label as string]),
     );
 
     const participantsWithoutAccreditationDocuments = [

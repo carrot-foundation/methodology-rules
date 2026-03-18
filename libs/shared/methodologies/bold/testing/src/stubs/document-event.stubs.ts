@@ -5,15 +5,14 @@ import {
   type DocumentEventAttribute,
   DocumentEventAttributeName,
   DocumentEventName,
-  type DocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type AnyObject,
   type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import { stubAddress } from './address.stubs';
 import { stubAuthor, stubParticipant } from './participant.stubs';
@@ -37,7 +36,10 @@ const isPropertyOverridenWithUndefined = <T extends AnyObject>(
 export const stubDocumentEvent = (
   partialEvent: PartialDeep<DocumentEvent> = {},
 ): DocumentEvent => ({
-  ...random<DocumentEvent>(),
+  externalCreatedAt: faker.date.recent().toISOString(),
+  id: faker.string.uuid(),
+  isPublic: faker.datatype.boolean(),
+  name: stubEnumValue(DocumentEventName),
   ...partialEvent,
   address: stubAddress(partialEvent.address),
   author: stubAuthor(partialEvent.author),
@@ -48,7 +50,7 @@ export const stubDocumentEvent = (
   )
     ? undefined
     : {
-        ...random<DocumentRelation>(),
+        documentId: faker.string.uuid(),
         ...partialEvent.relatedDocument,
       },
 });
@@ -56,7 +58,10 @@ export const stubDocumentEvent = (
 export const stubDocumentEventAttachment = (
   partialInput: Partial<MethodologyDocumentEventAttachment> = {},
 ): MethodologyDocumentEventAttachment => ({
-  ...random<MethodologyDocumentEventAttachment>(),
+  attachmentId: faker.string.uuid(),
+  contentLength: faker.number.int({ max: 10_000, min: 0 }),
+  isPublic: faker.datatype.boolean(),
+  label: faker.lorem.word(),
   ...partialInput,
 });
 
@@ -72,7 +77,9 @@ export const stubDocumentEventWithMetadata = (
 export const stubDocumentEventAttribute = (
   partialInput: Partial<DocumentEventAttribute> = {},
 ): DocumentEventAttribute => ({
-  ...random<DocumentEventAttribute>(),
+  isPublic: faker.datatype.boolean(),
+  name: stubEnumValue(DocumentEventAttributeName),
+  value: faker.lorem.word(),
   ...partialInput,
 });
 

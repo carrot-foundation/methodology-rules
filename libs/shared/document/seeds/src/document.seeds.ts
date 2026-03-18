@@ -8,20 +8,53 @@ import { httpRequest } from '@carrot-fndn/shared/http-request';
 import {
   type MethodologyDocument,
   type NonEmptyString,
+  NonEmptyStringSchema,
   type Uri,
+  UriSchema,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { assert, random } from 'typia';
 
-import type {
-  ApiDocumentCreateDto,
-  AuditApiDocumentPartSnapshotEntity,
-  AuditApiDocumentPrimitiveEntity,
-} from './document.seeds.types';
+import type { ApiDocumentCreateDto } from './document.seeds.types';
+
+const stubMethodologyDocument = (): MethodologyDocument => ({
+  category: faker.string.sample(),
+  createdAt: new Date().toISOString(),
+  currentValue: faker.number.int(),
+  dataSetName: 'TEST' as MethodologyDocument['dataSetName'],
+  externalCreatedAt: new Date().toISOString(),
+  id: faker.string.uuid(),
+  isPubliclySearchable: faker.datatype.boolean(),
+  measurementUnit: faker.string.sample(),
+  primaryAddress: {
+    city: faker.location.city(),
+    countryCode: faker.location.countryCode(),
+    countryState: faker.location.state(),
+    id: faker.string.uuid(),
+    latitude: faker.location.latitude(),
+    longitude: faker.location.longitude(),
+    neighborhood: faker.string.sample(),
+    number: faker.string.numeric(),
+    participantId: faker.string.uuid(),
+    piiSnapshotId: faker.string.uuid(),
+    street: faker.location.street(),
+    zipCode: faker.location.zipCode(),
+  },
+  primaryParticipant: {
+    countryCode: faker.location.countryCode(),
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    piiSnapshotId: faker.string.uuid(),
+    taxId: faker.string.numeric(14),
+    taxIdType: faker.string.sample(),
+    type: faker.string.sample(),
+  },
+  status: 'OPEN',
+  updatedAt: new Date().toISOString(),
+});
 
 const mapDocumentParts = (
   document: Partial<MethodologyDocument>,
-): AuditApiDocumentPartSnapshotEntity[] =>
+): ApiDocumentCreateDto['parts'] =>
   document.externalEvents?.map((event) => ({
     part: event,
     partId: event.id,
@@ -36,24 +69,38 @@ export const seedDocument = async ({
   partialDocument?: Partial<MethodologyDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
-  const endpoint = `${assert<Uri>(process.env['AUDIT_URL'])}/documents`;
+  const auditUrlFromEnvironment = process.env['AUDIT_URL'];
+
+  let endpoint: Uri;
+
+  try {
+    const auditUrl = UriSchema.parse(auditUrlFromEnvironment);
+
+    endpoint = `${auditUrl}/documents`;
+  } catch {
+    throw new Error(
+      "Invalid process.env['AUDIT_URL']: unable to build endpoint as type Uri. Please set AUDIT_URL to a valid non-empty URI.",
+    );
+  }
+
+  const document: MethodologyDocument = {
+    ...stubMethodologyDocument(),
+    ...partialDocument,
+    createdAt: new Date().toISOString(),
+    externalCreatedAt: new Date().toISOString(),
+    id: documentId,
+    status: 'OPEN',
+    tags: {
+      'e2e-test': 'true',
+      'test-source': 'methodology-rules',
+    },
+  };
 
   const data: ApiDocumentCreateDto = {
-    ...random<ApiDocumentCreateDto>(),
-    document: {
-      ...random<MethodologyDocument>(),
-      ...partialDocument,
-      createdAt: new Date().toISOString(),
-      externalCreatedAt: new Date().toISOString(),
-      id: documentId,
-      status: 'OPEN',
-      tags: {
-        'e2e-test': 'true',
-        'test-source': 'methodology-rules',
-      },
-    },
+    document,
     documentId,
     parts: mapDocumentParts(partialDocument),
+    snapshotId: faker.string.uuid(),
     versionDate: new Date().toISOString(),
   };
 
@@ -72,9 +119,18 @@ export const seedDocument = async ({
     );
   }
 
-  const {
-    document: { id },
-  } = assert<AuditApiDocumentPrimitiveEntity>(response.data);
+  const responseData: unknown = response.data;
+
+  if (
+    !isNonEmptyObject(responseData) ||
+    !isNonEmptyObject(responseData['document'])
+  ) {
+    throw new Error(
+      `Unexpected response shape from ${endpoint}: expected { document: { id: string } }, got ${JSON.stringify(responseData)}`,
+    );
+  }
+
+  const id = NonEmptyStringSchema.parse(responseData['document']['id']);
 
   logger.info(`Created document with { documentId: ${id} }`);
 

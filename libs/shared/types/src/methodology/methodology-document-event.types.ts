@@ -1,5 +1,3 @@
-import { tags } from 'typia';
-
 import type { DateTime, UnknownObject } from '../common.types';
 import type { MethodologyAddress } from './methodology-address.types';
 import type {
@@ -32,7 +30,7 @@ export type ApprovedExceptionAttributeValue = ApprovedException[];
 
 export interface MethodologyAdditionalVerification {
   'Layout IDs'?: NonEmptyString[];
-  'Verification Type': MethodologyVerificationType | NonEmptyString;
+  'Verification Type': string;
 }
 
 export type MethodologyAdditionalVerificationAttributeValue =
@@ -58,12 +56,12 @@ export interface MethodologyDocumentEvent {
   relatedDocument?: MethodologyDocumentRelation | undefined;
   target?: undefined | UnknownObject;
   updates?: undefined | UnknownObject;
-  value?: (number & tags.Minimum<0>) | undefined;
+  value?: number | undefined;
 }
 
 export interface MethodologyDocumentEventAttachment {
   attachmentId: string;
-  contentLength: number & tags.Minimum<0>;
+  contentLength: number;
   isPublic: boolean;
   label: string;
 }

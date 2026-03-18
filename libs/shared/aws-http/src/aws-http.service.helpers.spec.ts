@@ -1,11 +1,13 @@
-import type { StringObject } from '@carrot-fndn/shared/types';
-
 import { STSClient } from '@aws-sdk/client-sts';
 import { fromContainerMetadata } from '@aws-sdk/credential-providers';
 import { faker } from '@faker-js/faker';
-import { random } from 'typia';
 
 import { signRequest, type SignRequestInput } from './aws-http.service.helpers';
+
+const stubSignRequestInput = (): SignRequestInput => ({
+  method: faker.internet.httpMethod(),
+  url: new URL(faker.internet.url()),
+});
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
 jest.mock('@aws-sdk/credential-providers', () => ({
@@ -43,7 +45,7 @@ describe('signRequest', () => {
 
   it.each([undefined, null, ''])('should omit the body if %s', async (body) => {
     const input: SignRequestInput = {
-      ...random<SignRequestInput>(),
+      ...stubSignRequestInput(),
       body,
     };
 
@@ -54,9 +56,9 @@ describe('signRequest', () => {
 
   it('should return http request object with authorization header, body and query', async () => {
     const input: SignRequestInput = {
-      ...random<SignRequestInput>(),
-      body: random<StringObject>(),
-      query: random<StringObject>(),
+      ...stubSignRequestInput(),
+      body: { [faker.string.sample()]: faker.string.sample() },
+      query: { [faker.string.sample()]: faker.string.sample() },
     };
 
     const result = await signRequest(input, faker.string.uuid());
@@ -74,7 +76,7 @@ describe('signRequest', () => {
   it.each(['development', 'production'])(
     'should return http request object with authorization header for %s',
     async (nodeEnvironment) => {
-      const input = random<SignRequestInput>();
+      const input = stubSignRequestInput();
 
       const awsExecutionEnvironment =
         nodeEnvironment === 'production'

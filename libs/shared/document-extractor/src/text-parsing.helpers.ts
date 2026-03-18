@@ -98,10 +98,7 @@ export const extractFieldWithLabelFallback = (
   const extracted = extractStringField(text, valuePattern);
 
   if (extracted) {
-    return createHighConfidenceField(
-      extracted.value as NonEmptyString,
-      extracted.rawMatch,
-    );
+    return createHighConfidenceField(extracted.value, extracted.rawMatch);
   }
 
   if (labelPattern.test(text)) {
@@ -139,15 +136,15 @@ export const createExtractedEntityWithAddress = (
     return {
       ...base,
       address: createHighConfidenceField(
-        extracted.value.address as NonEmptyString,
+        extracted.value.address,
         extracted.rawMatch,
       ),
       city: createHighConfidenceField(
-        (extracted.value.city ?? '') as NonEmptyString,
+        extracted.value.city ?? '',
         extracted.rawMatch,
       ),
       state: createHighConfidenceField(
-        (extracted.value.state ?? '') as NonEmptyString,
+        extracted.value.state ?? '',
         extracted.rawMatch,
       ),
     };
@@ -223,8 +220,8 @@ export const extractEntityFromSection = (
   return {
     rawMatch: section,
     value: {
-      name: name as NonEmptyString,
-      taxId: normalizedCnpj as NonEmptyString,
+      name,
+      taxId: normalizedCnpj,
     },
   };
 };
