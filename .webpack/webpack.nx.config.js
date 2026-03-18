@@ -10,14 +10,5 @@ module.exports = composePlugins(withNx(), (config) => {
     type: 'commonjs2'
   };
 
-  for (const rule of config.module.rules) {
-    if (rule.loader?.includes('ts-loader')) {
-      rule.options = {
-        transpileOnly: false,
-        compiler: 'ts-patch/compiler',
-      };
-    }
-  }
-
   return config;
 });
