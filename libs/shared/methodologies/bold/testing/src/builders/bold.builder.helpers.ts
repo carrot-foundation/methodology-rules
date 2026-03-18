@@ -117,8 +117,12 @@ export const mergeMetadataAttributes = (
       : attribute.value !== undefined,
   );
 
-  if (!overridenAttributes || overridenAttributes.length === 0) {
+  if (overridenAttributes === undefined) {
     return filteredDefaults as MetadataAttributeResponse[];
+  }
+
+  if (overridenAttributes.length === 0) {
+    return [];
   }
 
   const attributesMap = new Map<string, MetadataAttributeParameter>();
