@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "license": "LGPL-3.0",
   "scripts": {
+    "ai:check": "node scripts/check-ai-instructions.mjs",
+    "ai:sync": "node scripts/sync-ai-instructions.mjs",
     "apply-methodology-rule": "node tools/apply-methodology-rule.js",
     "build-lambda": "nx build-lambda",
     "build-lambda:affected": "nx affected --target build-lambda",

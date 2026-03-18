@@ -1,0 +1,30 @@
+type: object
+required:
+  - id
+  - name
+  - purpose
+  - when_to_delegate
+  - checklist
+  - report_format
+  - tool_limits
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  purpose:
+    type: string
+  when_to_delegate:
+    type: array
+    items:
+      type: string
+  checklist:
+    type: array
+    items:
+      type: string
+  report_format:
+    type: string
+  tool_limits:
+    type: array
+    items:
+      type: string

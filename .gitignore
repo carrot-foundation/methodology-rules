@@ -54,4 +54,5 @@ temp-rules-metadata.json
 docs/plans/
 
 # Claude
-.claude
+.claude/projects
+.claude/todos

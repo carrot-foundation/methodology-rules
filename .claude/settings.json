@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(cat:*)",
+      "Bash(sed:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm ts:*)",
+      "Bash(pnpm build-lambda:*)",
+      "Bash(pnpm nx:*)",
+      "Bash(pnpm ai\\:check:*)",
+      "Bash(pnpm ai\\:sync:*)",
+      "Bash(npx prettier:*)",
+      "Bash(npx eslint:*)"
+    ]
+  }
+}
