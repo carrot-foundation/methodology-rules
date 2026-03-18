@@ -71,11 +71,13 @@ export const seedDocument = async ({
   partialDocument?: Partial<MethodologyDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
-  const auditUrlFromEnv = process.env['AUDIT_URL'];
+  const auditUrlFromEnvironment = process.env['AUDIT_URL'];
 
   let endpoint: Uri;
+
   try {
-    const auditUrl = UriSchema.parse(auditUrlFromEnv);
+    const auditUrl = UriSchema.parse(auditUrlFromEnvironment);
+
     endpoint = `${auditUrl}/documents`;
   } catch {
     throw new Error(

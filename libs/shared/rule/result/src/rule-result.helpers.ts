@@ -1,27 +1,23 @@
-import type {
-  RuleInput,
-  RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
 import type { AnyObject } from '@carrot-fndn/shared/types';
 
 import { Sha256 } from '@aws-crypto/sha256-js';
-import {
-  AssumeRoleCommand,
-  type Credentials,
-  STSClient,
-} from '@aws-sdk/client-sts';
+import { AssumeRoleCommand, STSClient } from '@aws-sdk/client-sts';
 import { fromEnv } from '@aws-sdk/credential-providers';
-import { logger } from '@carrot-fndn/shared/helpers';
+import { assertString, logger } from '@carrot-fndn/shared/helpers';
+import {
+  type RuleInput,
+  type RuleOutput,
+  RuleOutputSchema,
+  type RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
 import { SignatureV4 } from '@smithy/signature-v4';
 
-import type { PostProcessInput } from './rule-result.types';
-
 import {
-  assertCredentials,
-  assertRuleOutput,
-  assertString,
-} from './rule-result.validators';
+  type Credentials,
+  CredentialsSchema,
+  type PostProcessInput,
+  PostProcessInputSchema,
+} from './rule-result.schemas';
 
 export const nilSafeRun = <T, R>(
   value: null | T | undefined,
@@ -31,17 +27,18 @@ export const nilSafeRun = <T, R>(
 
 export const mapRuleOutputToPostProcessInput = (
   ruleOutput: RuleOutput,
-): PostProcessInput => ({
-  output: {
-    artifactChecksum: assertString(process.env['ARTIFACT_CHECKSUM']),
-    ...(ruleOutput.resultComment && { comment: ruleOutput.resultComment }),
-    ...(ruleOutput.resultContent && { content: ruleOutput.resultContent }),
-    sourceCodeUrl: assertString(process.env['SOURCE_CODE_URL']),
-    sourceCodeVersion: assertString(process.env['SOURCE_CODE_VERSION']),
-    status: ruleOutput.resultStatus,
-  },
-  taskToken: ruleOutput.responseToken,
-});
+): PostProcessInput =>
+  PostProcessInputSchema.parse({
+    output: {
+      artifactChecksum: process.env['ARTIFACT_CHECKSUM'],
+      comment: ruleOutput.resultComment,
+      content: ruleOutput.resultContent,
+      sourceCodeUrl: process.env['SOURCE_CODE_URL'],
+      sourceCodeVersion: process.env['SOURCE_CODE_VERSION'],
+      status: ruleOutput.resultStatus,
+    },
+    taskToken: ruleOutput.responseToken,
+  });
 
 export const mapToRuleOutput = (
   ruleInput: RuleInput,
@@ -53,14 +50,15 @@ export const mapToRuleOutput = (
     resultComment?: string | undefined;
     resultContent?: AnyObject | undefined;
   } = {},
-): RuleOutput => ({
-  requestId: ruleInput.requestId,
-  responseToken: ruleInput.responseToken,
-  responseUrl: ruleInput.responseUrl,
-  resultComment,
-  resultContent,
-  resultStatus,
-});
+): RuleOutput =>
+  RuleOutputSchema.parse({
+    requestId: ruleInput.requestId,
+    responseToken: ruleInput.responseToken,
+    responseUrl: ruleInput.responseUrl,
+    resultComment,
+    resultContent,
+    resultStatus,
+  });
 
 export const assumeRoleSmaugCredentials = async ({
   assumeRoleArn,
@@ -81,7 +79,7 @@ export const assumeRoleSmaugCredentials = async ({
 
   const assumeRoleResponse = await stsClient.send(assumeRoleCommand);
 
-  return assertCredentials(assumeRoleResponse.Credentials);
+  return CredentialsSchema.parse(assumeRoleResponse.Credentials);
 };
 
 export const signRequest = async ({
@@ -107,9 +105,9 @@ export const signRequest = async ({
 
   const signer = new SignatureV4({
     credentials: {
-      accessKeyId: assertString(credentials.AccessKeyId),
-      secretAccessKey: assertString(credentials.SecretAccessKey),
-      sessionToken: assertString(credentials.SessionToken),
+      accessKeyId: credentials.AccessKeyId,
+      secretAccessKey: credentials.SecretAccessKey,
+      sessionToken: credentials.SessionToken,
     },
     region: smaugAwsRegion,
     service: 'execute-api',
@@ -133,7 +131,7 @@ export const signRequest = async ({
 export const reportRuleResults = async (
   ruleOutput: RuleOutput,
 ): Promise<void> => {
-  assertRuleOutput(ruleOutput);
+  RuleOutputSchema.parse(ruleOutput);
 
   try {
     const url = new URL(ruleOutput.responseUrl);

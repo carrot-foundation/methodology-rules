@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { assertNonEmptyString } from './assert.validators';
+import { assertNonEmptyString, assertString } from './assert.validators';
 
 describe('assertNonEmptyString', () => {
   it('should return the string if it is non-empty', () => {
@@ -18,6 +18,20 @@ describe('assertNonEmptyString', () => {
 
     for (const value of invalidValues) {
       expect(() => assertNonEmptyString(value)).toThrow(z.ZodError);
+    }
+  });
+});
+
+describe('assertString', () => {
+  it('should return the string if it is a string', () => {
+    expect(assertString('hello')).toBe('hello');
+  });
+
+  it('should throw ZodError for non-string values', () => {
+    const invalidValues = [null, undefined, 123, {}, [], true, false];
+
+    for (const value of invalidValues) {
+      expect(() => assertString(value)).toThrow(z.ZodError);
     }
   });
 });

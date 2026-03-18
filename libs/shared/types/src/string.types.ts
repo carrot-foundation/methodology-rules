@@ -13,7 +13,7 @@ export const UriSchema = z.url();
 export type Uri = z.infer<typeof UriSchema>;
 
 export const UrlSchema = z.url({
-  protocol: /^https?$/,
   hostname: z.regexes.domain,
+  protocol: /^https?$/,
 });
 export type Url = z.infer<typeof UrlSchema>;

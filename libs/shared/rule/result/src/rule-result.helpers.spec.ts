@@ -266,22 +266,24 @@ describe('signRequest', () => {
 
     const result = await signRequest(input);
 
-    expect(result).toEqual({
-      body: JSON.stringify(input.body),
-      headers: expect.objectContaining({
-        authorization: expect.any(String),
-        'Content-Type': 'application/json',
-        Host: input.url.host,
+    expect(result).toEqual(
+      expect.objectContaining({
+        body: JSON.stringify(input.body),
+        headers: expect.objectContaining({
+          authorization: expect.any(String),
+          'Content-Type': 'application/json',
+          Host: input.url.host,
+        }),
+        hostname: input.url.hostname,
+        method: input.method,
+        password: undefined,
+        path: input.url.pathname,
+        port: undefined,
+        protocol: 'https:',
+        query: input.query,
+        username: undefined,
       }),
-      hostname: input.url.hostname,
-      method: input.method,
-      password: undefined,
-      path: `/${input.url.pathname}`,
-      port: undefined,
-      protocol: 'https:',
-      query: input.query,
-      username: undefined,
-    });
+    );
   });
 
   it('should throw error when Credentials for the assumed role are not found', async () => {

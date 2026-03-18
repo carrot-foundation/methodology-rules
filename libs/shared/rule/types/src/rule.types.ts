@@ -1,5 +1,3 @@
-import type { AnyObject } from '@carrot-fndn/shared/types';
-
 import { z } from 'zod';
 
 export enum RuleOutputStatus {
@@ -33,12 +31,4 @@ export const RuleOutputSchema = z.object({
   resultContent: z.record(z.string(), z.any()).optional(),
   resultStatus: z.enum(RuleOutputStatus),
 });
-
-export interface RuleOutput {
-  requestId: string;
-  responseToken: string;
-  responseUrl: string;
-  resultComment?: string | undefined;
-  resultContent?: AnyObject | undefined;
-  resultStatus: RuleOutputStatus;
-}
+export type RuleOutput = z.infer<typeof RuleOutputSchema>;
