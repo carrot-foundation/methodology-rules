@@ -236,9 +236,7 @@ describe('Document getters', () => {
     it('should return undefined if the rules metadata event was not found', () => {
       const document = stubDocument(
         {
-          externalEvents: stubArray(() =>
-            stubDocumentEvent({ name: PICK_UP }),
-          ),
+          externalEvents: stubArray(() => stubDocumentEvent({ name: PICK_UP })),
         },
         false,
       );
