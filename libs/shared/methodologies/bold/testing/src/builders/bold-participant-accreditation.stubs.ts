@@ -2,7 +2,7 @@ import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   DocumentEventAccreditationStatus,
-  type DocumentEventScaleType,
+  DocumentEventScaleType,
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -12,10 +12,10 @@ import {
   DocumentEventName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addDays, getYear, subDays } from 'date-fns';
-import { random } from 'typia';
 
 import {
   stubDocument,
@@ -109,7 +109,10 @@ const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParamet
   [
     [
       BASELINES,
-      { [random<MassIDOrganicSubtype>()]: random<MethodologyBaseline>() },
+      {
+        [stubEnumValue(MassIDOrganicSubtype)]:
+          stubEnumValue(MethodologyBaseline),
+      },
     ],
   ];
 
@@ -129,7 +132,7 @@ export const stubBoldRecyclingBaselinesEvent = ({
   );
 
 const defaultMonitoringSystemsAndEquipmentEventMetadataAttributes: MetadataAttributeParameter[] =
-  [[SCALE_TYPE, random<DocumentEventScaleType>()]];
+  [[SCALE_TYPE, stubEnumValue(DocumentEventScaleType)]];
 
 export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
   metadataAttributes,

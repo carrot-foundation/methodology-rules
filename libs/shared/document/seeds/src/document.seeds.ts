@@ -11,17 +11,51 @@ import {
   type Uri,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
-import { assert, random } from 'typia';
 
 import type {
   ApiDocumentCreateDto,
-  AuditApiDocumentPartSnapshotEntity,
   AuditApiDocumentPrimitiveEntity,
 } from './document.seeds.types';
 
+const stubMethodologyDocument = (): MethodologyDocument => ({
+  category: faker.string.sample(),
+  createdAt: new Date().toISOString(),
+  currentValue: faker.number.int(),
+  dataSetName: 'TEST' as MethodologyDocument['dataSetName'],
+  externalCreatedAt: new Date().toISOString(),
+  id: faker.string.uuid(),
+  isPubliclySearchable: faker.datatype.boolean(),
+  measurementUnit: faker.string.sample(),
+  primaryAddress: {
+    city: faker.location.city(),
+    countryCode: faker.location.countryCode(),
+    countryState: faker.location.state(),
+    id: faker.string.uuid(),
+    latitude: faker.location.latitude(),
+    longitude: faker.location.longitude(),
+    neighborhood: faker.string.sample(),
+    number: faker.string.numeric(),
+    participantId: faker.string.uuid(),
+    piiSnapshotId: faker.string.uuid(),
+    street: faker.location.street(),
+    zipCode: faker.location.zipCode(),
+  },
+  primaryParticipant: {
+    countryCode: faker.location.countryCode(),
+    id: faker.string.uuid(),
+    name: faker.person.fullName(),
+    piiSnapshotId: faker.string.uuid(),
+    taxId: faker.string.numeric(14),
+    taxIdType: faker.string.sample(),
+    type: faker.string.sample(),
+  },
+  status: 'OPEN',
+  updatedAt: new Date().toISOString(),
+});
+
 const mapDocumentParts = (
   document: Partial<MethodologyDocument>,
-): AuditApiDocumentPartSnapshotEntity[] =>
+): ApiDocumentCreateDto['parts'] =>
   document.externalEvents?.map((event) => ({
     part: event,
     partId: event.id,
@@ -36,24 +70,26 @@ export const seedDocument = async ({
   partialDocument?: Partial<MethodologyDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
-  const endpoint = `${assert<Uri>(process.env['AUDIT_URL'])}/documents`;
+  const endpoint = `${process.env['AUDIT_URL'] as Uri}/documents`;
+
+  const document: MethodologyDocument = {
+    ...stubMethodologyDocument(),
+    ...partialDocument,
+    createdAt: new Date().toISOString(),
+    externalCreatedAt: new Date().toISOString(),
+    id: documentId,
+    status: 'OPEN',
+    tags: {
+      'e2e-test': 'true',
+      'test-source': 'methodology-rules',
+    },
+  };
 
   const data: ApiDocumentCreateDto = {
-    ...random<ApiDocumentCreateDto>(),
-    document: {
-      ...random<MethodologyDocument>(),
-      ...partialDocument,
-      createdAt: new Date().toISOString(),
-      externalCreatedAt: new Date().toISOString(),
-      id: documentId,
-      status: 'OPEN',
-      tags: {
-        'e2e-test': 'true',
-        'test-source': 'methodology-rules',
-      },
-    },
+    document,
     documentId,
     parts: mapDocumentParts(partialDocument),
+    snapshotId: faker.string.uuid(),
     versionDate: new Date().toISOString(),
   };
 
@@ -74,7 +110,7 @@ export const seedDocument = async ({
 
   const {
     document: { id },
-  } = assert<AuditApiDocumentPrimitiveEntity>(response.data);
+  } = response.data as AuditApiDocumentPrimitiveEntity;
 
   logger.info(`Created document with { documentId: ${id} }`);
 

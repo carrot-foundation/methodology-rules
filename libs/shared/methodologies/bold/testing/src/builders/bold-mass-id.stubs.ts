@@ -19,11 +19,9 @@ import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type LicensePlate,
   MethodologyDocumentEventAttributeFormat,
-  type MethodologyDocumentEventAttributeReference,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { format } from 'date-fns';
-import { random } from 'typia';
 
 import {
   stubDocument,
@@ -81,7 +79,7 @@ const {
 const { DATE, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
 const defaultPickUpAttributes: MetadataAttributeParameter[] = [
-  [WASTE_ORIGIN, random<boolean>()],
+  [WASTE_ORIGIN, faker.datatype.boolean()],
   [CAPTURED_GPS_LATITUDE, faker.location.latitude()],
   [CAPTURED_GPS_LONGITUDE, faker.location.longitude()],
   [DESCRIPTION, faker.lorem.sentence()],
@@ -95,9 +93,9 @@ const defaultPickUpAttributes: MetadataAttributeParameter[] = [
   {
     name: VEHICLE_LICENSE_PLATE,
     sensitive: true,
-    value: random<LicensePlate>(),
+    value: 'FKE1A23' as LicensePlate,
   },
-  [VEHICLE_TYPE, random<DocumentEventVehicleType>()],
+  [VEHICLE_TYPE, stubEnumValue(DocumentEventVehicleType)],
 ];
 
 export const stubBoldMassIDPickUpEvent = ({
@@ -158,9 +156,9 @@ export const stubBoldMassIDTransportManifestEvent = ({
 
 const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   [DESCRIPTION, faker.lorem.sentence()],
-  [WEIGHING_CAPTURE_METHOD, random<DocumentEventWeighingCaptureMethod>()],
-  [SCALE_TYPE, random<DocumentEventScaleType>()],
-  [SCALE_ACCREDITATION, random<MethodologyDocumentEventAttributeReference>()],
+  [WEIGHING_CAPTURE_METHOD, stubEnumValue(DocumentEventWeighingCaptureMethod)],
+  [SCALE_TYPE, stubEnumValue(DocumentEventScaleType)],
+  [SCALE_ACCREDITATION, { documentId: faker.string.uuid() }],
   [
     CONTAINER_TYPE,
     faker.helpers.arrayElement(
@@ -188,7 +186,7 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   {
     name: VEHICLE_LICENSE_PLATE,
     sensitive: true,
-    value: random<LicensePlate>(),
+    value: 'FKE1A23' as LicensePlate,
   },
 ];
 

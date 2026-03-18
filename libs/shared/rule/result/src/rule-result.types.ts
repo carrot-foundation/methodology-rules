@@ -1,5 +1,4 @@
 import type { AnyObject } from '@carrot-fndn/shared/types';
-import type { tags } from 'typia';
 
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -8,7 +7,7 @@ export interface PostProcessInput {
     artifactChecksum: string;
     comment?: string;
     content?: AnyObject | undefined;
-    sourceCodeUrl: string & tags.Format<'url'>;
+    sourceCodeUrl: string;
     sourceCodeVersion: string;
     status: RuleOutputStatus;
   };

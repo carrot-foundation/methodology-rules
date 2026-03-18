@@ -4,7 +4,6 @@ import type {
   MethodologyDocument,
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
-import type { Primitive } from 'typia';
 
 export interface ApiDocumentCreateDto
   extends Omit<
@@ -25,7 +24,7 @@ export interface AuditApiDocumentPartSnapshotEntity<
 
 export interface AuditApiDocumentPrimitiveEntity {
   createdAt: DateTime;
-  document: Primitive<MethodologyDocument>;
+  document: MethodologyDocument;
   documentId: string;
   snapshotId: string;
   versionDate: DateTime;

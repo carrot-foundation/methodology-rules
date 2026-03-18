@@ -2,7 +2,7 @@ import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { AnyObject, MethodologyParticipant } from '@carrot-fndn/shared/types';
-import { random } from 'typia';
+import { faker } from '@faker-js/faker';
 
 import { BoldStubsBuilder, type StubBoldDocumentParameters } from '../builders';
 
@@ -74,9 +74,14 @@ export async function createRuleTestFixture({
 
   spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
 
-  const ruleInput = {
-    ...random<Required<RuleInput>>(),
+  const ruleInput: RuleInput = {
     documentId: massIDAuditDocument.id,
+    documentKeyPrefix: faker.string.uuid(),
+    parentDocumentId: faker.string.uuid(),
+    requestId: faker.string.uuid(),
+    responseToken: faker.string.uuid(),
+    responseUrl: faker.internet.url(),
+    ruleName: faker.string.sample(),
   };
 
   return { ruleInput, ruleOutput: await ruleDataProcessor.process(ruleInput) };

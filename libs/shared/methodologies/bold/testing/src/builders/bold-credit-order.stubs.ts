@@ -1,5 +1,3 @@
-import type { NonZeroPositive } from '@carrot-fndn/shared/types';
-
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
@@ -8,7 +6,7 @@ import {
   DocumentEventAttributeName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { random } from 'typia';
+import { faker } from '@faker-js/faker';
 
 import {
   stubDocument,
@@ -29,7 +27,7 @@ const { CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
 export const CREDITS_EVENT_NAME = 'Credits';
 
 const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
-  [CREDIT_UNIT_PRICE, random<NonZeroPositive>()],
+  [CREDIT_UNIT_PRICE, faker.number.float({ min: 0.01 })],
 ];
 
 export const stubBoldCreditOrderCreditsEvent = ({
