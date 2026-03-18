@@ -108,14 +108,21 @@ describe('mapRuleOutputToPostProcessInput', () => {
 
 describe('reportRuleResults', () => {
   const originalEnvironment = { ...process.env };
+  let artifactChecksum: string;
+  let sourceCodeUrl: string;
+  let sourceCodeVersion: string;
 
   beforeEach(() => {
     const awsRegion = faker.string.uuid();
     const smaugArn = faker.string.uuid();
 
-    mockArtifactChecksum.mockReturnValue(faker.string.uuid());
-    mockSourceCodeUrl.mockReturnValue(faker.internet.url());
-    mockSourceCodeVersion.mockReturnValue(faker.string.uuid());
+    artifactChecksum = faker.string.uuid();
+    sourceCodeUrl = faker.internet.url();
+    sourceCodeVersion = faker.string.uuid();
+
+    mockArtifactChecksum.mockReturnValue(artifactChecksum);
+    mockSourceCodeUrl.mockReturnValue(sourceCodeUrl);
+    mockSourceCodeVersion.mockReturnValue(sourceCodeVersion);
     mockSmaugArn.mockReturnValue(smaugArn);
     mockAwsRegion.mockReturnValue(awsRegion);
 
@@ -164,11 +171,11 @@ describe('reportRuleResults', () => {
       ...request,
       body: JSON.stringify({
         output: {
-          artifactChecksum: mockArtifactChecksum(),
+          artifactChecksum,
           comment: ruleOutput.resultComment,
           content: ruleOutput.resultContent,
-          sourceCodeUrl: mockSourceCodeUrl(),
-          sourceCodeVersion: mockSourceCodeVersion(),
+          sourceCodeUrl,
+          sourceCodeVersion,
           status: ruleOutput.resultStatus,
         },
         taskToken: ruleOutput.responseToken,
