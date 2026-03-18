@@ -197,7 +197,7 @@ describe('reportRuleResults', () => {
     expect(fetch).toHaveBeenCalled();
   });
 
-  it('should should throw error the request throws error', async () => {
+  it('should throw error when the request throws error', async () => {
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),

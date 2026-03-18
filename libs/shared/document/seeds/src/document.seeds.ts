@@ -9,6 +9,7 @@ import {
   type MethodologyDocument,
   type NonEmptyString,
   type Uri,
+  UriSchema,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -70,7 +71,17 @@ export const seedDocument = async ({
   partialDocument?: Partial<MethodologyDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
-  const endpoint = `${process.env['AUDIT_URL'] as Uri}/documents`;
+  const auditUrlFromEnv = process.env['AUDIT_URL'];
+
+  let endpoint: Uri;
+  try {
+    const auditUrl = UriSchema.parse(auditUrlFromEnv);
+    endpoint = `${auditUrl}/documents`;
+  } catch {
+    throw new Error(
+      "Invalid process.env['AUDIT_URL']: unable to build endpoint as type Uri. Please set AUDIT_URL to a valid non-empty URI.",
+    );
+  }
 
   const document: MethodologyDocument = {
     ...stubMethodologyDocument(),

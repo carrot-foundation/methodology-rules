@@ -12,5 +12,8 @@ export type PercentageString = z.infer<typeof PercentageStringSchema>;
 export const UriSchema = z.url();
 export type Uri = z.infer<typeof UriSchema>;
 
-export const UrlSchema = z.url();
+export const UrlSchema = z.url({
+  protocol: /^https?$/,
+  hostname: z.regexes.domain,
+});
 export type Url = z.infer<typeof UrlSchema>;

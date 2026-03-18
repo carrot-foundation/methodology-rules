@@ -1,5 +1,4 @@
 import { faker } from '@faker-js/faker';
-import { afterEach } from 'node:test';
 
 import type { CheckDuplicatesDto } from './audit.api.dto';
 

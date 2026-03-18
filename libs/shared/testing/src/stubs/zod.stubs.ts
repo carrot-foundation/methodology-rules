@@ -8,8 +8,17 @@ export const createStubFromSchema = <T extends z.ZodType>(
 ): z.infer<T> => {
   const generated = zocker(schema).generate() as z.infer<T>;
 
-  if (overrides && typeof generated === 'object' && generated != null) {
+  if (
+    overrides &&
+    typeof generated === 'object' &&
+    generated != null &&
+    !Array.isArray(generated)
+  ) {
     return { ...generated, ...overrides } as z.infer<T>;
+  }
+
+  if (overrides && Array.isArray(generated)) {
+    return overrides as z.infer<T>;
   }
 
   return generated;
