@@ -664,6 +664,21 @@ function normalizeTestCasePayload(
   return result;
 }
 
+const EVENT_MARKER_KEYS = new Set([
+  'metadata',
+  'value',
+  'isPublic',
+  'externalCreatedAt',
+  'participant',
+  'relatedDocument',
+  'author',
+]);
+
+function isDocumentEventLike(obj: Record<string, unknown>): boolean {
+  if (!('name' in obj) || typeof obj['name'] !== 'string') return false;
+  return Object.keys(obj).some((k) => EVENT_MARKER_KEYS.has(k));
+}
+
 function normalizeValue(
   value: unknown,
   fieldsOverride?: ManifestFieldsOverride,
@@ -687,7 +702,7 @@ function normalizeValue(
   const obj = value as Record<string, unknown>;
 
   // DocumentEvent shape detection
-  if ('name' in obj && ('metadata' in obj || 'value' in obj)) {
+  if (isDocumentEventLike(obj)) {
     return normalizeDocumentEvent(obj, fieldsOverride);
   }
 
@@ -728,12 +743,7 @@ function isParticipantLike(obj: Record<string, unknown>): boolean {
 function normalizeParticipant(
   obj: Record<string, unknown>,
 ): Record<string, unknown> {
-  const result: Record<string, unknown> = {
-    id: obj['id'],
-    type: obj['type'],
-  };
-
-  return result;
+  return { type: obj['type'] };
 }
 
 const ADDRESS_RELEVANT_KEYS = new Set([
@@ -805,16 +815,44 @@ function buildAllowedAttributeSet(
   return allowedSet;
 }
 
+const RELATED_DOCUMENT_KEYS = new Set(['category', 'subtype', 'type']);
+
+function normalizeRelatedDocument(
+  relDoc: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const result: Record<string, unknown> = {};
+
+  for (const key of RELATED_DOCUMENT_KEYS) {
+    if (relDoc[key] !== undefined) {
+      result[key] = relDoc[key];
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 function normalizeDocumentEvent(
   event: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { name: event['name'] };
 
-  // Include label for ACTOR events only (e.g., "Waste Generator", "Hauler")
-  const actorValue = DocumentEventName['ACTOR'] ?? 'ACTOR';
-  if (event['name'] === actorValue && event['label'] !== undefined) {
+  if (event['label'] !== undefined) {
     result['label'] = event['label'];
+  }
+
+  // Include slimmed relatedDocument (category, subtype, type only)
+  if (event['relatedDocument'] !== undefined) {
+    const slimmed = normalizeRelatedDocument(
+      event['relatedDocument'] as Record<string, unknown>,
+    );
+    if (slimmed) {
+      result['relatedDocument'] = slimmed;
+    }
+  }
+
+  if (event['participant'] !== undefined) {
+    result['participant'] = {};
   }
 
   // Exclude value by default, include only when explicitly requested
@@ -822,11 +860,10 @@ function normalizeDocumentEvent(
     result['value'] = event['value'];
   }
 
-  // Include address only if explicitly requested
-  if (fieldsOverride?.includeAddress === true && event['address']) {
-    result['address'] = normalizeAddress(
-      event['address'] as Record<string, unknown>,
-    );
+  if (event['address'] !== undefined) {
+    result['address'] = fieldsOverride?.includeAddress === true
+      ? normalizeAddress(event['address'] as Record<string, unknown>)
+      : {};
   }
 
   // Filter metadata attributes based on explicit attributes + overrides
