@@ -4,7 +4,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 
 export const ruleDefinition = {
   description:
-    'Validates that Processor ACTOR events in the MassID document are properly identified, ensuring correct waste processing tracking.',
+    'Validates that exactly one Processor ACTOR event exists in the MassID document, ensuring proper processor identification in the waste processing chain.',
   events: [DocumentEventName.ACTOR],
   name: 'Processor Identification',
   slug: 'processor-identification',

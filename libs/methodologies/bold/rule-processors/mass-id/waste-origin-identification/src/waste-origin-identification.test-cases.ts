@@ -26,6 +26,7 @@ interface WasteOriginIdentificationTestCase extends RuleTestCase {
 export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCase[] =
   [
     {
+      manifestExample: true,
       events: {
         [PICK_UP]: undefined,
       },
@@ -46,6 +47,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}"`,
     },
     {
+      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
           label: WASTE_GENERATOR,
@@ -75,6 +77,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
+      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}`]: undefined,
         [PICK_UP]: stubBoldMassIDPickUpEvent(),
@@ -84,6 +87,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and no "${WASTE_GENERATOR}" event`,
     },
     {
+      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}-1`]: stubDocumentEvent({
           label: WASTE_GENERATOR,

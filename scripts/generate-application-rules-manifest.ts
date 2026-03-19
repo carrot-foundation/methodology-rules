@@ -224,6 +224,7 @@ const BoldTypes = require(
   DocumentEventName: StringEnum;
   DocumentEventVehicleType: StringEnum;
   DocumentType: StringEnum;
+  MeasurementUnit: StringEnum;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -241,6 +242,7 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
   ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventAttributeFormat),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
   ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
+  ...enumKeyToValueMap(BoldTypes.MeasurementUnit),
 };
 
 const DocumentEventName = BoldTypes.DocumentEventName;
@@ -459,8 +461,96 @@ function extractResultComments(
     'utf8',
   );
 
-  const passed = extractNestedStrings(content, 'passed');
-  const failed = extractNestedStrings(content, 'failed');
+  let passed = extractNestedStrings(content, 'passed');
+  let failed = extractNestedStrings(content, 'failed');
+
+  // Weighing rule uses PASSED_RESULT_COMMENTS, INVALID_RESULT_COMMENTS, etc.
+  if (content.includes('PASSED_RESULT_COMMENTS')) {
+    const passedInner = extractExportedObjectInner(
+      content,
+      'PASSED_RESULT_COMMENTS',
+    );
+    if (passedInner) {
+      const fromPassed = extractFromObjectInner(passedInner);
+      passed = {
+        values: [...passed.values, ...fromPassed.values],
+        byKey: { ...passed.byKey, ...fromPassed.byKey },
+      };
+    }
+    const failedSources = [
+      'INVALID_RESULT_COMMENTS',
+      'WRONG_FORMAT_RESULT_COMMENTS',
+      'NOT_FOUND_RESULT_COMMENTS',
+    ];
+    for (const name of failedSources) {
+      const failedInner = extractExportedObjectInner(content, name);
+      if (failedInner) {
+        const fromFailed = extractFromObjectInner(failedInner);
+        failed = {
+          values: [...failed.values, ...fromFailed.values],
+          byKey: { ...failed.byKey, ...fromFailed.byKey },
+        };
+      }
+    }
+  }
+
+  // Document-manifest-data uses flat RESULT_COMMENTS + CROSS_VALIDATION_COMMENTS (no passed/failed nesting).
+  if (content.includes('CROSS_VALIDATION_COMMENTS')) {
+    const resultCommentsInner = extractExportedObjectInner(
+      content,
+      'RESULT_COMMENTS',
+    );
+    if (resultCommentsInner) {
+      const fromResult = extractFromObjectInner(resultCommentsInner);
+      const passedKeys = new Set(
+        Object.keys(fromResult.byKey).filter((k) =>
+          k.startsWith('VALID_'),
+        ),
+      );
+      const passedFromFlat: string[] = [];
+      const failedFromFlat: string[] = [];
+      for (const v of fromResult.values) {
+        const key = Object.entries(fromResult.byKey).find(
+          ([, msg]) => msg === v,
+        )?.[0];
+        if (key && passedKeys.has(key)) passedFromFlat.push(v);
+        else failedFromFlat.push(v);
+      }
+      passed = {
+        values: [...passed.values, ...passedFromFlat],
+        byKey: {
+          ...passed.byKey,
+          ...Object.fromEntries(
+            Object.entries(fromResult.byKey).filter(([k]) =>
+              passedKeys.has(k),
+            ),
+          ),
+        },
+      };
+      failed = {
+        values: [...failed.values, ...failedFromFlat],
+        byKey: {
+          ...failed.byKey,
+          ...Object.fromEntries(
+            Object.entries(fromResult.byKey).filter(
+              ([k]) => !passedKeys.has(k),
+            ),
+          ),
+        },
+      };
+    }
+    const crossInner = extractExportedObjectInner(
+      content,
+      'CROSS_VALIDATION_COMMENTS',
+    );
+    if (crossInner) {
+      const fromCross = extractFromObjectInner(crossInner);
+      failed = {
+        values: [...failed.values, ...fromCross.values],
+        byKey: { ...failed.byKey, ...fromCross.byKey },
+      };
+    }
+  }
 
   return {
     failed: failed.values,
@@ -468,6 +558,67 @@ function extractResultComments(
     passed: passed.values,
     passedByKey: passed.byKey,
   };
+}
+
+/**
+ * Finds the inner content of an exported object assignment (e.g. PASSED_RESULT_COMMENTS = { ... }).
+ * Returns undefined if not found.
+ */
+function extractExportedObjectInner(
+  content: string,
+  objectName: string,
+): string | undefined {
+  const re = new RegExp(
+    `(?:export\\s+)?const\\s+${objectName}\\s*=\\s*\\{`,
+    'g',
+  );
+  const match = re.exec(content);
+  if (!match || match.index === undefined) return undefined;
+  const braceStart = match.index + match[0].length - 1;
+  const bounds = findEnclosingObjectBounds(content, braceStart + 1);
+  return content.slice(bounds.start + 1, bounds.end - 1);
+}
+
+/**
+ * Extracts passed/failed messages from inner object content (same patterns as extractNestedStrings).
+ */
+function extractFromObjectInner(inner: string): NestedStringsResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
+
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
+  let match: RegExpExecArray | null;
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  const keyedArrowTemplateRe =
+    /(\w+)\s*:\s*\([^)]*\)(?:\s*:\s*\w+)?\s*=>\s*`([^`]*)`/g;
+  while ((match = keyedArrowTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5 && !byKey[key]) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{5,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  return { byKey, values };
 }
 
 interface NestedStringsResult {
@@ -499,6 +650,20 @@ function extractNestedStrings(
     const key = match[1] ?? '';
     const msg = normalizeMessage(match[2]?.trim() ?? '');
     if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
+    }
+  }
+
+  // Extract arrow functions returning template literals: KEY_NAME: (params) => `value`
+  const keyedArrowTemplateRe =
+    /(\w+)\s*:\s*\([^)]*\)(?:\s*:\s*\w+)?\s*=>\s*`([^`]*)`/g;
+  while ((match = keyedArrowTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5 && !byKey[key]) {
       byKey[key] = msg;
       if (!values.includes(msg)) {
         values.push(msg);
@@ -561,8 +726,13 @@ function resolvePlaceholder(ident: string): string {
   return KNOWN_PLACEHOLDERS[ident] ?? camelToUpperSnake(ident);
 }
 
+// Placeholder keys that represent dynamic parameter values (e.g. vehicleType in arrow functions).
+// We keep these as {{KEY}} so docs show a placeholder instead of resolving to the wrong enum (e.g. "Vehicle Type" attribute name).
+const PARAMETER_PLACEHOLDERS = new Set(['VEHICLE_TYPE']);
+
 function resolveEnumPlaceholders(message: string): string {
   return message.replace(/\{\{([A-Z_]+)\}\}/g, (_match, key: string) => {
+    if (PARAMETER_PLACEHOLDERS.has(key)) return `{{${key}}}`;
     return ENUM_KEY_TO_VALUE[key] ?? `{{${key}}}`;
   });
 }
@@ -955,8 +1125,14 @@ function normalizeDocumentEvent(
     }
   }
 
+  // Only include participant when the rule example has meaningful participant data
   if (event['participant'] !== undefined) {
-    result['participant'] = {};
+    const participantNorm = normalizeParticipant(
+      event['participant'] as Record<string, unknown>,
+    );
+    if (Object.keys(participantNorm).length > 0) {
+      result['participant'] = participantNorm;
+    }
   }
 
   // Exclude value by default, include only when explicitly requested
@@ -964,15 +1140,19 @@ function normalizeDocumentEvent(
     result['value'] = event['value'];
   }
 
+  // Only include address when the rule example has meaningful address data (e.g. addressFields specified)
   if (event['address'] !== undefined) {
     const addressFields = fieldsOverride?.addressFields;
-    result['address'] =
+    const addressNorm =
       addressFields && addressFields.length > 0
         ? normalizeAddress(
             event['address'] as Record<string, unknown>,
             addressFields,
           )
         : {};
+    if (Object.keys(addressNorm).length > 0) {
+      result['address'] = addressNorm;
+    }
   }
 
   // Filter metadata attributes based on explicit attributes + overrides
@@ -1019,6 +1199,7 @@ function normalizeDocument(
 
   if (doc['type']) result['type'] = doc['type'];
   if (doc['subtype']) result['subtype'] = doc['subtype'];
+  if (doc['measurementUnit']) result['measurementUnit'] = doc['measurementUnit'];
 
   if (
     fieldsOverride?.includeCurrentValue === true &&
@@ -1028,7 +1209,9 @@ function normalizeDocument(
   }
 
   const events = doc['externalEvents'] as unknown[] | undefined;
-  if (events?.length) {
+  const ruleHasNoEvents = ruleEvents?.length === 0;
+
+  if (events?.length && !ruleHasNoEvents) {
     let normalizedEvents = events.map((e) =>
       normalizeValue(e, fieldsOverride),
     );

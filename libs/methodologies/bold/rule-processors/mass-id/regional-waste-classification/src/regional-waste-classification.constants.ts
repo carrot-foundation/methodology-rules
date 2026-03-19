@@ -17,7 +17,7 @@ export const RESULT_COMMENTS = {
       `Local waste classification is only validated for recyclers in Brazil, but the recycler country is ${recyclerCountryCode}.`,
   },
   passed: {
-    VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" match an Ibama code.`,
+    VALID_CLASSIFICATION: `The local waste classification "${LOCAL_WASTE_CLASSIFICATION_ID}" and "${LOCAL_WASTE_CLASSIFICATION_DESCRIPTION}" provided in the Pick-up event match a valid Ibama code for the recycler's country.`,
   },
   reviewRequired: {},
 } as const;

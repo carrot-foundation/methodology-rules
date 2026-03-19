@@ -12,14 +12,14 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates local waste classification codes and descriptions against the official IBAMA Brazilian solid waste list, ensuring proper waste categorization for the jurisdiction.
+Validates local waste classification codes and descriptions against the official Ibama Brazilian solid waste list, ensuring proper waste categorization for the jurisdiction.
 
 ## 📋 Framework Rules
 
 | Rule                             | Description                                                                                                                                                                                                                                                                                                                                                              |
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Local Waste Classification       | The 'Pick-up' event must contain a 'Local Waste Classification ID' attribute with a code from the official waste classification of the jurisdiction where the waste was collected, and a 'Local Waste Classification Desc' attribute with the corresponding description. When the country code is 'BR', the fields must match the Brazilian solid waste list from IBAMA. |
-| Local Waste Classification x CDM | When the country code of the collection address is 'BR', the 'Local Waste Classification ID' must correspond to an organic waste type from CDM Tool 04, mapped according to the IBAMA-CDM correspondence table.                                                                                                                                                          |
+| Local Waste Classification       | The 'Pick-up' event must contain a 'Local Waste Classification ID' attribute with a code from the official waste classification of the jurisdiction where the waste was collected, and a 'Local Waste Classification Desc' attribute with the corresponding description. When the country code is 'BR', the fields must match the Brazilian solid waste list from Ibama. |
+| Local Waste Classification x CDM | When the country code of the collection address is 'BR', the 'Local Waste Classification ID' must correspond to an organic waste type from CDM Tool 04, mapped according to the Ibama-CDM correspondence table.                                                                                                                                                          |
 
 ## 📡 Events
 

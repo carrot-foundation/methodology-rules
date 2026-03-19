@@ -4,7 +4,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 
 export const ruleDefinition = {
   description:
-    'Validates local waste classification codes and descriptions against the official IBAMA Brazilian solid waste list, ensuring proper waste categorization for the jurisdiction.',
+    'Validates local waste classification codes and descriptions against the official Ibama Brazilian solid waste list, verifying code existence, description accuracy, and CDM code alignment with the document subtype.',
   events: [DocumentEventName.ACTOR, DocumentEventName.PICK_UP],
   name: 'Local Waste Classification',
   slug: 'regional-waste-classification',

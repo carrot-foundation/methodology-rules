@@ -68,6 +68,7 @@ const defaultEvents = {
 
 export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
   {
+    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: undefined,
@@ -77,6 +78,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document does not have a ${documentManifestType} event`,
   },
   ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
+    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -92,6 +94,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
   })),
   {
+    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -110,6 +113,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
   },
   {
+    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -209,6 +213,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
   },
   {
+    manifestExample: true,
     documentManifestType,
     events: {
       [`${ACTOR}-${RECYCLER}`]: undefined,
