@@ -179,6 +179,19 @@ describe('CloudWatchMetricsService', () => {
         instance.recordAIValidationFailure(mockData),
       ).resolves.not.toThrow();
     });
+
+    it('should not call putMetric when disabled', async () => {
+      setMockEnvironment({
+        enableCloudwatchMetrics: false,
+      });
+
+      const instance = CloudWatchMetricsService.getInstance();
+      const mockData = createMockCloudWatchMetricData();
+
+      await instance.recordAIValidationFailure(mockData);
+
+      expect(mockCloudWatchClient).not.toHaveBeenCalled();
+    });
   });
 
   describe('CloudWatch integration', () => {

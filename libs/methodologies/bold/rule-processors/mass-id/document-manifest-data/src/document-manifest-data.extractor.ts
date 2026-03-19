@@ -119,12 +119,13 @@ export const crossValidateWithTextract = async ({
           return validateMtrExtractedData(extractionResult, eventData);
         }
 
+        /* v8 ignore start -- all events are enriched as MTR or CDF above */
         if (isCdfEventData(eventData)) {
           return validateCdfExtractedData(extractionResult, eventData);
         }
 
-        // istanbul ignore next -- all events are enriched as MTR or CDF above
         return { failMessages: [] };
+        /* v8 ignore stop */
       },
     },
     documentExtractor,

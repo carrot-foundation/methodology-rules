@@ -80,10 +80,7 @@ export const getVitestBaseConfig = (dirname: string) => {
           '**/*.formatter.ts',
         ],
         thresholds: {
-          // v8 counts branches more strictly than istanbul (ternaries,
-          // short-circuit, nullish-coalescing all create extra branches).
-          // 80% keeps meaningful enforcement while avoiding false negatives.
-          branches: 80,
+          branches: 100,
           functions: 100,
           lines: 100,
           statements: 100,
