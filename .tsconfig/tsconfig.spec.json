@@ -2,9 +2,8 @@
   "extends": "../tsconfig.base.json",
   "files": [],
   "compilerOptions": {
-    "module": "commonjs",
     "verbatimModuleSyntax": false,
-    "types": ["jest", "node", "methodology-rules-jest-matchers"]
+    "types": ["vitest/globals", "node", "methodology-rules-jest-matchers"]
   },
-  "include": ["jest.config.ts", "**/*.spec.ts", "**/testing/**/*.ts"]
+  "include": ["vitest.config.ts", "**/*.spec.ts", "**/testing/**/*.ts"]
 }
