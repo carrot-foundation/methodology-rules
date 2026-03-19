@@ -73,7 +73,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
             [VEHICLE_TYPE, OTHERS],
-            [VEHICLE_DESCRIPTION, 'VEHICLE_DESCRIPTION'],
+            [VEHICLE_DESCRIPTION, 'Blue flatbed truck - 8 ton capacity'],
           ],
         }),
       ],
@@ -118,6 +118,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         }),
       ],
     ]),
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(TRUCK),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,

@@ -8,7 +8,7 @@ export const SORTING_TOLERANCE = 0.1;
 export const RESULT_COMMENTS = {
   failed: {
     DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
-      `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal ${GROSS_WEIGHT} × ${SORTING_FACTOR} (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
+      `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal "${GROSS_WEIGHT}" × "${SORTING_FACTOR}" (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
     DOCUMENT_VALUE_MISMATCH: (documentValue: number, sortingValue: number) =>
       `The MassID document current value (${documentValue} kg) must equal the sorting event value (${sortingValue} kg).`,
     GROSS_WEIGHT_MISMATCH: (gross: number, before: number) =>
@@ -23,7 +23,7 @@ export const RESULT_COMMENTS = {
     SORTING_VALUE_WITHIN_TOLERANCE: (
       sortingValueCalculationDifference: number,
     ) =>
-      `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE}kg. The difference is ${sortingValueCalculationDifference} kg.`,
+      `The calculated sorting value is within the allowed tolerance of ${SORTING_TOLERANCE} kg. The difference is ${sortingValueCalculationDifference} kg.`,
   },
   reviewRequired: {},
 } as const;

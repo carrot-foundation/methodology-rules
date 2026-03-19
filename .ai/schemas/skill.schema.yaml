@@ -1,0 +1,37 @@
+type: object
+required:
+  - id
+  - name
+  - description
+  - when_to_use
+  - workflow
+  - inputs
+  - outputs
+  - references
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  description:
+    type: string
+  when_to_use:
+    type: array
+    items:
+      type: string
+  workflow:
+    type: array
+    items:
+      type: string
+  inputs:
+    type: array
+    items:
+      type: string
+  outputs:
+    type: array
+    items:
+      type: string
+  references:
+    type: array
+    items:
+      type: string

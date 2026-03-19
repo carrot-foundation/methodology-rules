@@ -1,167 +1,34 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Claude adapter for Methodology Rules AI instructions. This file is generated from canonical `.ai/`.
 
-## Project Overview
+## Equality rule
 
-This is an Nx monorepo for implementing rule processors for Bold methodologies (carbon, recycling, organic waste management). Rule processors are deployed as AWS Lambda functions.
+- Cursor, Claude, and Codex are configured as equals.
+- Capability parity is mandatory across all three.
+- Canonical source remains tool-agnostic in `.ai/`.
 
-**Stack**: TypeScript, Nx 21.0.3, pnpm 10.18.3, Node.js 22.15.0, AWS Lambda, Jest
+## Claude runtime
 
-## Common Commands
+- Baseline settings: `.claude/settings.json`
+- Skills: `.claude/skills/*/SKILL.md`
+- Agents: `.claude/agents/*.md`
 
-```bash
-# Development
-pnpm test:affected           # Run tests for affected projects
-pnpm lint:affected           # Lint affected projects
-pnpm ts:affected             # Type check affected projects
+## Required workflow
 
-# Run all
-pnpm test:all                # Run all tests
-pnpm lint:all                # Lint all projects
-pnpm ts:all                  # Type check all projects
+1. Update canonical docs under `.ai/`.
+2. Run `pnpm ai:sync`.
+3. Run `pnpm ai:check`.
 
-# Build
-pnpm build-lambda            # Build all Lambda functions
-pnpm build-lambda:affected   # Build affected Lambda functions
+## Canonical references
 
-# Single project (replace <project-name>)
-pnpm nx test <project-name>
-pnpm nx lint <project-name>
-pnpm nx ts <project-name>       # Type check
+- `.ai/README.md`
+- `.ai/DEFINITIONS.md`
+- `.ai/STANDARDS.md`
+- `.ai/PARITY_MATRIX.md`
 
-# Rule management
-pnpm create-rule <name> <scope> <description>
-pnpm apply-methodology-rule <methodology> <rule> <scope>
+## Capability counts
 
-# Example: create a new rule
-pnpm create-rule vehicle-validation mass-id "Validates vehicle data"
-
-# Example: apply rule to methodology
-pnpm apply-methodology-rule carbon-organic geolocation-precision mass-id
-
-# Commits (use conventional commits)
-pnpm commit                  # Interactive conventional commit
-```
-
-## Architecture
-
-```text
-libs/
-├── methodologies/bold/rule-processors/
-│   ├── mass-id/              # MassID rule processors
-│   ├── credit-order/         # Credit order processors
-│   └── mass-id-certificate/  # Certificate processors
-└── shared/
-    ├── methodologies/bold/   # Shared Bold utilities (getters, helpers, types)
-    ├── document-extractor/   # Document parsing/extraction
-    ├── lambda/               # Shared Lambda utilities
-    ├── rule/                 # Rule framework
-    └── ...                   # Other shared modules
-
-apps/methodologies/           # Methodology applications (bold-carbon, bold-recycling)
-tools/                        # Scripts (create-rule.js, apply-methodology-rule.js)
-```
-
-## Rule Processor Pattern
-
-Each rule processor follows this structure:
-
-```text
-{rule-name}/
-├── {rule-name}.processor.ts       # Core logic (extends ParentDocumentRuleProcessor)
-├── {rule-name}.lambda.ts          # Lambda handler
-├── {rule-name}.processor.spec.ts  # Unit tests
-├── {rule-name}.lambda.e2e.spec.ts # E2E tests
-├── {rule-name}.test-cases.ts      # Shared test data
-├── index.ts
-├── project.json
-└── vitest.config.ts
-```
-
-Processors extend `ParentDocumentRuleProcessor<RuleSubject>` and implement `evaluateResult()`.
-
-## Module Boundaries
-
-Nx enforces module boundaries via tags:
-
-- Processors can only import from `shared` libraries
-- `mass-id` processors cannot import from `credit-order` processors
-- Use path aliases: `@carrot-fndn/shared/methodologies/bold/helpers`
-
-## Commit Conventions
-
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`, `revert`
-Scopes: `nx`, `rule`, `shared`, `script`
-
-```text
-feat(rule): add vehicle definition validation
-fix(shared): prevent racing of requests
-```
-
-## TypeScript Configuration
-
-- Strict mode enabled with additional checks: `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `noImplicitReturns`
-- Uses Zod for runtime type validation (schemas defined alongside types, validated with `.safeParse()` / `.parse()`)
-- Test data generated with `@faker-js/faker` and `zocker` (schema-driven); use `stubRuleInput()`, `stubDocument()`, `createStubFromSchema()` etc. from `@carrot-fndn/shared/testing`
-- Path aliases configured in `tsconfig.paths.json`
-
-## Testing
-
-- Vitest with native TypeScript support
-- Test files: `*.spec.ts`, `*.e2e.spec.ts`
-- Test env: `.env-files/.env.test`
-- Coverage output: `./coverage/{projectRoot}`
-
-### No Real Data in Tests
-
-**Never commit real data in test files or any file in the repository.** This includes:
-
-- Company names (e.g. real client or partner names)
-- Tax IDs (CPF, CNPJ)
-- Vehicle license plates
-- Addresses (street names, cities that identify real locations)
-- Person names tied to real individuals
-- Phone numbers, emails, or any other PII
-
-Always use obviously fake, synthetic values. Examples:
-
-- Companies: `VERDE CAMPO LTDA`, `EXEMPLO INDUSTRIAS`
-- CNPJs: `11.222.333/0004-55`, `77.888.999/0001-22`
-- Plates: `FKE1A23`, `HIJ3K56`
-- Addresses: `Rua Modelo, 100`, `Av. Principal, 500`, `Cidade Centro`
-- People: `Pedro Santos`, `Ana Ferreira`
-
-When writing parser tests that include raw OCR text, ensure both the input text and the expected assertion values use fake data consistently.
-
-## Pull Requests
-
-Use gh CLI with these repo-specific settings:
-
-```bash
-gh pr create \
-  -a @me \
-  -r @carrot-foundation/developers \
-  --label feature \
-  -R carrot-foundation/methodology-rules \
-  -t "feat(rule): your title here"
-```
-
-Labels: `feature`, `bug`, `chore`, `docs`, `refactoring`
-
-## Document Extractor Framework
-
-Parsers (`DocumentParser<T>`) are field-neutral — they do not determine which fields are required:
-
-- All extracted fields are optional; parsers return `undefined` for missing ones
-- Rule processors decide what fields are required for their context
-- `reviewRequired` is triggered only by low confidence fields or low layout match score (< 0.5)
-- `layoutId` and `layouts` use the `NonEmptyString` type (plain `string` validated by `NonEmptyStringSchema`); use `as NonEmptyString` casts on string literals
-- Only add default layouts in `defaults.ts` if a document type has stable, well-known layouts
-
-## Troubleshooting
-
-1. Check Node.js version matches `.nvmrc` (22.15.0)
-2. Run `pnpm install` to ensure dependencies are installed
-3. Check for lint errors with `pnpm lint:all`
-4. Verify rule follows the correct processor structure
+- Rules: 14
+- Skills: 13
+- Agents/Roles: 3

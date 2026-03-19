@@ -4,7 +4,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 
 export const ruleDefinition = {
   description:
-    'Calculates and validates the distance between the pick-up and drop-off event addresses, determining the geographic scope of the waste collection and processing activity.',
+    'Calculates the geographic distance in kilometers between the Pick-up and Drop-off event addresses, determining the project boundary scope.',
   events: [DocumentEventName.DROP_OFF, DocumentEventName.PICK_UP],
   name: 'Project Boundary',
   slug: 'project-boundary',

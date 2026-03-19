@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that all participants in the MassID document have valid accreditation documents with active dates, ensuring proper supply chain certification.
+Validates that all participants in the MassID document have valid accreditation documents with active dates and no duplicate accreditations of the same type.
 
 ## 📋 Framework Rules
 

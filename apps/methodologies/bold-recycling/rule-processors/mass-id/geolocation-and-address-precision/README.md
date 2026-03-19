@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that event addresses for all participants are within 2000 meters of their accredited addresses, ensuring geographic consistency between declared locations and accreditations.
+Validates that event addresses for all participants are within 2000 meters of their accredited addresses. For recyclers, also validates GPS coordinates against the accredited address when available.
 
 ## 📋 Framework Rules
 

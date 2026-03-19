@@ -19,11 +19,11 @@ const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
 const { MTR } = ReportType;
 
 export const RESULT_COMMENTS = {
-  ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" event address.`,
+  ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" ACTOR event address.`,
   ATTACHMENT_AND_JUSTIFICATION_PROVIDED: (manifestType: string) =>
     `The "${EXEMPTION_JUSTIFICATION}" should not be provided when a "${manifestType}" attachment is present.`,
   INCORRECT_ATTACHMENT_LABEL: (manifestType: string) =>
-    `Expected an attachment with the "${manifestType}" label, but no one was found.`,
+    `Expected an attachment with the "${manifestType}" label, but none was found.`,
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "${DOCUMENT_TYPE}" must be "${MTR}" for recyclers in Brazil, but "${documentType}" was provided.`,
   INVALID_ISSUE_DATE_FORMAT: (dateFormat: string) =>
@@ -35,7 +35,7 @@ export const RESULT_COMMENTS = {
   MISSING_EVENT: (manifestType: string) =>
     `At least one "${manifestType}" event must be provided.`,
   MISSING_ISSUE_DATE: `The "${ISSUE_DATE}" was not provided.`,
-  MISSING_RECYCLER_EVENT: `The "${RECYCLER}" event was not provided.`,
+  MISSING_RECYCLER_EVENT: `The "${RECYCLER}" ACTOR event was not provided.`,
   PROVIDE_EXEMPTION_JUSTIFICATION: (manifestType: string) =>
     `The "${manifestType}" attachment was not provided, but an "${EXEMPTION_JUSTIFICATION}" was declared.`,
   VALID_ATTACHMENT_DECLARATION: ({
@@ -89,7 +89,7 @@ export const CROSS_VALIDATION_COMMENTS = {
     return `The ${field} could not be extracted from the document for cross-validation${suffix}.`;
   },
   GENERATOR_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
-    `The generator address extracted from the document does not match the "${WASTE_GENERATOR}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
+    `The generator address extracted from the document does not match the "${WASTE_GENERATOR}" ACTOR event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   GENERATOR_TAX_ID_MISMATCH: `The generator tax ID extracted from the document does not match the "${WASTE_GENERATOR}" participant tax ID.`,
   HAULER_TAX_ID_MISMATCH: `The hauler tax ID extracted from the document does not match the "${HAULER}" participant tax ID.`,
   ISSUE_DATE_MISMATCH: ({
@@ -103,7 +103,7 @@ export const CROSS_VALIDATION_COMMENTS = {
   MTR_NUMBER_NOT_IN_CDF: ({ mtrNumber }: { mtrNumber: string }) =>
     `The MTR number ("${mtrNumber}") from this mass-id was not found in the CDF's transport manifests list.`,
   RECEIVER_ADDRESS_MISMATCH: ({ score }: { score: number }) =>
-    `The receiver address extracted from the document does not match the "${RECYCLER}" event address. Similarity: ${(score * 100).toFixed(0)}%.`,
+    `The receiver address extracted from the document does not match the "${RECYCLER}" ACTOR event address. Similarity: ${(score * 100).toFixed(0)}%.`,
   RECEIVER_TAX_ID_MISMATCH: `The receiver tax ID extracted from the document does not match the "${RECYCLER}" participant tax ID.`,
   RECEIVING_DATE_MISMATCH: ({
     daysDiff,

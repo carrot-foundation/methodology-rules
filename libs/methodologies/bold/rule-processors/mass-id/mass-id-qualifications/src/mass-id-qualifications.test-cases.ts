@@ -20,12 +20,15 @@ interface MassIDQualificationsTestCase extends RuleTestCase {
 export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
   {
     manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: massIDStubs.massIDDocument,
     resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,
     resultStatus: RuleOutputStatus.PASSED,
     scenario: 'All the criteria are met',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
       category: 'INVALID_CATEGORY',
@@ -35,6 +38,8 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     scenario: 'The category does not match',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
       type: 'INVALID_TYPE',
@@ -44,6 +49,8 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     scenario: 'The type is not ORGANIC',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
       measurementUnit: 'INVALID_UNIT',
@@ -54,6 +61,7 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     scenario: 'The measurement unit is not "kg"',
   },
   {
+    manifestExample: true,
     manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
@@ -64,23 +72,27 @@ export const massIDQualificationsTestCases: MassIDQualificationsTestCase[] = [
     scenario: 'The current value is not greater than 0',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: {
       ...massIDStubs.massIDDocument,
-      subtype: 'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
+      subtype: 'Invalid Subtype',
     },
-    resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE(
-      'THIS_IS_DEFINITELY_NOT_IN_MASS_SUBTYPE_ENUM',
-    ),
+    resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE('Invalid Subtype'),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'The subtype is defined but not in the allowed list',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: { ...massIDStubs.massIDDocument, type: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: 'The document type was not found',
   },
   {
+    manifestExample: true,
+    manifestFields: { includeCurrentValue: true },
     massIDDocument: { ...massIDStubs.massIDDocument, subtype: undefined },
     resultComment: processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
     resultStatus: RuleOutputStatus.FAILED,

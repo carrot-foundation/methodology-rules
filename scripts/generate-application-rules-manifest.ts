@@ -202,31 +202,60 @@ function extractAppFrameworkRules(
 
 // --- Enum resolution ---
 
+type StringEnum = Record<string, string>;
+
+function enumKeyToValueMap(enumObj: StringEnum): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const [key, value] of Object.entries(enumObj)) {
+    if (typeof value === 'string') {
+      map[key] = value;
+    }
+  }
+  return map;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { DocumentEventName } = require(
+const BoldTypes = require(
   '@carrot-fndn/shared/methodologies/bold/types',
-) as { DocumentEventName: Record<string, string> };
+) as {
+  DocumentCategory: StringEnum;
+  DocumentEventAttributeName: StringEnum;
+  DocumentEventAttributeValue: StringEnum;
+  DocumentEventName: StringEnum;
+  DocumentEventVehicleType: StringEnum;
+  DocumentType: StringEnum;
+  MeasurementUnit: StringEnum;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const SharedTypes = require('@carrot-fndn/shared/types') as {
+  MethodologyDocumentEventAttributeFormat: StringEnum;
+  MethodologyDocumentEventLabel: StringEnum;
+};
+
+const ENUM_KEY_TO_VALUE: Record<string, string> = {
+  ...enumKeyToValueMap(BoldTypes.DocumentCategory),
+  ...enumKeyToValueMap(BoldTypes.DocumentType),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventName),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeName),
+  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventLabel),
+  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventAttributeFormat),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
+  ...enumKeyToValueMap(BoldTypes.MeasurementUnit),
+};
+
+const DocumentEventName = BoldTypes.DocumentEventName;
+const MethodologyDocumentEventLabel = SharedTypes.MethodologyDocumentEventLabel;
 
 // --- Actor label extraction from processor files ---
-
-/**
- * Converts an UPPER_SNAKE_CASE enum key to PascalCase.
- * e.g. "WASTE_GENERATOR" → "WasteGenerator", "HAULER" → "Hauler"
- */
-function upperSnakeToPascalCase(str: string): string {
-  return str
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join('');
-}
 
 /**
  * Parses a processor file to extract which actor labels are used with ACTOR events.
  * Looks for patterns like:
  *   - eventLabelIsAnyOf([HAULER, RECYCLER])
  *   - eventHasLabel(event, PROCESSOR)
- * Returns PascalCase labels, e.g. ["Hauler", "Recycler"]
+ * Returns the enum values as-is, e.g. ["Hauler", "Waste Generator"]
  */
 function extractActorLabelsFromProcessor(processorPath: string): string[] {
   const content = fs.readFileSync(processorPath, 'utf8');
@@ -260,7 +289,10 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     }
   }
 
-  return [...labels].sort().map(upperSnakeToPascalCase);
+  // Resolve enum keys to their actual values via MethodologyDocumentEventLabel
+  return [...labels]
+    .sort()
+    .map((key) => MethodologyDocumentEventLabel[key] ?? key);
 }
 
 /**
@@ -429,8 +461,96 @@ function extractResultComments(
     'utf8',
   );
 
-  const passed = extractNestedStrings(content, 'passed');
-  const failed = extractNestedStrings(content, 'failed');
+  let passed = extractNestedStrings(content, 'passed');
+  let failed = extractNestedStrings(content, 'failed');
+
+  // Weighing rule uses PASSED_RESULT_COMMENTS, INVALID_RESULT_COMMENTS, etc.
+  if (content.includes('PASSED_RESULT_COMMENTS')) {
+    const passedInner = extractExportedObjectInner(
+      content,
+      'PASSED_RESULT_COMMENTS',
+    );
+    if (passedInner) {
+      const fromPassed = extractFromObjectInner(passedInner);
+      passed = {
+        values: [...passed.values, ...fromPassed.values],
+        byKey: { ...passed.byKey, ...fromPassed.byKey },
+      };
+    }
+    const failedSources = [
+      'INVALID_RESULT_COMMENTS',
+      'WRONG_FORMAT_RESULT_COMMENTS',
+      'NOT_FOUND_RESULT_COMMENTS',
+    ];
+    for (const name of failedSources) {
+      const failedInner = extractExportedObjectInner(content, name);
+      if (failedInner) {
+        const fromFailed = extractFromObjectInner(failedInner);
+        failed = {
+          values: [...failed.values, ...fromFailed.values],
+          byKey: { ...failed.byKey, ...fromFailed.byKey },
+        };
+      }
+    }
+  }
+
+  // Document-manifest-data uses flat RESULT_COMMENTS + CROSS_VALIDATION_COMMENTS (no passed/failed nesting).
+  if (content.includes('CROSS_VALIDATION_COMMENTS')) {
+    const resultCommentsInner = extractExportedObjectInner(
+      content,
+      'RESULT_COMMENTS',
+    );
+    if (resultCommentsInner) {
+      const fromResult = extractFromObjectInner(resultCommentsInner);
+      const passedKeys = new Set(
+        Object.keys(fromResult.byKey).filter((k) =>
+          k.startsWith('VALID_'),
+        ),
+      );
+      const passedFromFlat: string[] = [];
+      const failedFromFlat: string[] = [];
+      for (const v of fromResult.values) {
+        const key = Object.entries(fromResult.byKey).find(
+          ([, msg]) => msg === v,
+        )?.[0];
+        if (key && passedKeys.has(key)) passedFromFlat.push(v);
+        else failedFromFlat.push(v);
+      }
+      passed = {
+        values: [...passed.values, ...passedFromFlat],
+        byKey: {
+          ...passed.byKey,
+          ...Object.fromEntries(
+            Object.entries(fromResult.byKey).filter(([k]) =>
+              passedKeys.has(k),
+            ),
+          ),
+        },
+      };
+      failed = {
+        values: [...failed.values, ...failedFromFlat],
+        byKey: {
+          ...failed.byKey,
+          ...Object.fromEntries(
+            Object.entries(fromResult.byKey).filter(
+              ([k]) => !passedKeys.has(k),
+            ),
+          ),
+        },
+      };
+    }
+    const crossInner = extractExportedObjectInner(
+      content,
+      'CROSS_VALIDATION_COMMENTS',
+    );
+    if (crossInner) {
+      const fromCross = extractFromObjectInner(crossInner);
+      failed = {
+        values: [...failed.values, ...fromCross.values],
+        byKey: { ...failed.byKey, ...fromCross.byKey },
+      };
+    }
+  }
 
   return {
     failed: failed.values,
@@ -438,6 +558,67 @@ function extractResultComments(
     passed: passed.values,
     passedByKey: passed.byKey,
   };
+}
+
+/**
+ * Finds the inner content of an exported object assignment (e.g. PASSED_RESULT_COMMENTS = { ... }).
+ * Returns undefined if not found.
+ */
+function extractExportedObjectInner(
+  content: string,
+  objectName: string,
+): string | undefined {
+  const re = new RegExp(
+    `(?:export\\s+)?const\\s+${objectName}\\s*=\\s*\\{`,
+    'g',
+  );
+  const match = re.exec(content);
+  if (!match || match.index === undefined) return undefined;
+  const braceStart = match.index + match[0].length - 1;
+  const bounds = findEnclosingObjectBounds(content, braceStart + 1);
+  return content.slice(bounds.start + 1, bounds.end - 1);
+}
+
+/**
+ * Extracts passed/failed messages from inner object content (same patterns as extractNestedStrings).
+ */
+function extractFromObjectInner(inner: string): NestedStringsResult {
+  const values: string[] = [];
+  const byKey: Record<string, string> = {};
+
+  const keyedTemplateRe = /(\w+)\s*:\s*`([^`]*)`/g;
+  let match: RegExpExecArray | null;
+  while ((match = keyedTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  const keyedArrowTemplateRe =
+    /(\w+)\s*:\s*\([^)]*\)(?:\s*:\s*\w+)?\s*=>\s*`([^`]*)`/g;
+  while ((match = keyedArrowTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5 && !byKey[key]) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  const keyedStringRe = /(\w+)\s*:\s*['"]([^'"]{5,})['"]/g;
+  while ((match = keyedStringRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = match[2]?.trim() ?? '';
+    if (msg) {
+      if (!byKey[key]) byKey[key] = msg;
+      if (!values.includes(msg)) values.push(msg);
+    }
+  }
+
+  return { byKey, values };
 }
 
 interface NestedStringsResult {
@@ -469,6 +650,20 @@ function extractNestedStrings(
     const key = match[1] ?? '';
     const msg = normalizeMessage(match[2]?.trim() ?? '');
     if (msg && msg.length > 5) {
+      byKey[key] = msg;
+      if (!values.includes(msg)) {
+        values.push(msg);
+      }
+    }
+  }
+
+  // Extract arrow functions returning template literals: KEY_NAME: (params) => `value`
+  const keyedArrowTemplateRe =
+    /(\w+)\s*:\s*\([^)]*\)(?:\s*:\s*\w+)?\s*=>\s*`([^`]*)`/g;
+  while ((match = keyedArrowTemplateRe.exec(inner)) !== null) {
+    const key = match[1] ?? '';
+    const msg = normalizeMessage(match[2]?.trim() ?? '');
+    if (msg && msg.length > 5 && !byKey[key]) {
       byKey[key] = msg;
       if (!values.includes(msg)) {
         values.push(msg);
@@ -531,11 +726,22 @@ function resolvePlaceholder(ident: string): string {
   return KNOWN_PLACEHOLDERS[ident] ?? camelToUpperSnake(ident);
 }
 
+// Placeholder keys that represent dynamic parameter values (e.g. vehicleType in arrow functions).
+// We keep these as {{KEY}} so docs show a placeholder instead of resolving to the wrong enum (e.g. "Vehicle Type" attribute name).
+const PARAMETER_PLACEHOLDERS = new Set(['VEHICLE_TYPE']);
+
+function resolveEnumPlaceholders(message: string): string {
+  return message.replace(/\{\{([A-Z_]+)\}\}/g, (_match, key: string) => {
+    if (PARAMETER_PLACEHOLDERS.has(key)) return `{{${key}}}`;
+    return ENUM_KEY_TO_VALUE[key] ?? `{{${key}}}`;
+  });
+}
+
 function normalizeMessage(str: string): string {
   if (!str) return str;
 
   // Replace ${String(identifier)} and ${identifier} with {{TOKEN}}
-  const result = str
+  const withPlaceholders = str
     .replace(/\$\{String\((\w+)\)\}/g, (_match, inner: string) => {
       return `{{${resolvePlaceholder(inner)}}}`;
     })
@@ -545,6 +751,7 @@ function normalizeMessage(str: string): string {
     })
     .replace(/\\"/g, '"');
 
+  const result = resolveEnumPlaceholders(withPlaceholders);
   return result.trim();
 }
 
@@ -565,9 +772,32 @@ function isPlaceholderOnly(s: string): boolean {
   return PLACEHOLDER_ONLY_RE.test(s);
 }
 
+// Document/category/type display names that should be quoted when they appear unquoted (longest first to avoid partial matches)
+const DOCUMENT_TYPE_DISPLAY_NAMES = [
+  ...new Set([
+    ...Object.values(BoldTypes.DocumentCategory),
+    ...Object.values(BoldTypes.DocumentType),
+  ]),
+].sort((a, b) => b.length - a.length);
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function quoteUnquotedDocumentTypeNames(message: string): string {
+  let result = message;
+  for (const name of DOCUMENT_TYPE_DISPLAY_NAMES) {
+    const escaped = escapeRegex(name);
+    const re = new RegExp(`(^|[^"])(${escaped})([^"]|$)`, 'g');
+    result = result.replace(re, '$1"$2"$3');
+  }
+  return result;
+}
+
 function normalizeMessages(messages: string[]): string[] {
   return messages
     .map((s) => normalizeMessage(s))
+    .map(quoteUnquotedDocumentTypeNames)
     .filter((s) => !isPlaceholderOnly(s) && !isCodeLeak(s));
 }
 
@@ -583,7 +813,7 @@ interface ManifestExample {
 interface ManifestFieldsOverride {
   additionalAttributes?: string[];
   excludeAttributes?: string[];
-  includeAddress?: boolean;
+  addressFields?: string[];
   includeCurrentValue?: boolean;
   includeValue?: boolean;
 }
@@ -599,6 +829,7 @@ interface RuleTestCaseShape {
 function extractManifestExamples(
   srcPath: string,
   srcFiles: string[],
+  ruleEvents?: string[],
 ): ManifestExample[] {
   const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
   if (!testCasesFile) return [];
@@ -614,7 +845,6 @@ function extractManifestExamples(
     return [];
   }
 
-  // Collect all exported arrays (there may be multiple, e.g. testCases + errorTestCases)
   const allTestCases: RuleTestCaseShape[] = [];
   for (const value of Object.values(mod)) {
     if (Array.isArray(value)) {
@@ -622,7 +852,6 @@ function extractManifestExamples(
     }
   }
 
-  // Filter to manifest-flagged cases
   const manifestCases = allTestCases.filter(
     (tc) => tc.manifestExample === true,
   );
@@ -631,6 +860,7 @@ function extractManifestExamples(
     exampleDocuments: normalizeTestCasePayload(
       tc as unknown as Record<string, unknown>,
       tc.manifestFields,
+      ruleEvents,
     ),
     resultComment: String(tc.resultComment ?? ''),
     resultStatus: String(tc.resultStatus ?? ''),
@@ -653,20 +883,37 @@ const TEST_CASE_META_KEYS = new Set([
 function normalizeTestCasePayload(
   testCase: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
   for (const [key, value] of Object.entries(testCase)) {
     if (TEST_CASE_META_KEYS.has(key)) continue;
-    result[key] = normalizeValue(value, fieldsOverride);
+    result[key] = normalizeValue(value, fieldsOverride, ruleEvents);
   }
 
   return result;
 }
 
+const EVENT_MARKER_KEYS = new Set([
+  'metadata',
+  'value',
+  'isPublic',
+  'externalCreatedAt',
+  'participant',
+  'relatedDocument',
+  'author',
+]);
+
+function isDocumentEventLike(obj: Record<string, unknown>): boolean {
+  if (!('name' in obj) || typeof obj['name'] !== 'string') return false;
+  return Object.keys(obj).some((k) => EVENT_MARKER_KEYS.has(k));
+}
+
 function normalizeValue(
   value: unknown,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): unknown {
   if (value === null || value === undefined) return value;
   if (typeof value !== 'object') return value;
@@ -675,37 +922,33 @@ function normalizeValue(
     return Object.fromEntries(
       [...value.entries()].map(([k, v]) => [
         k,
-        normalizeValue(v, fieldsOverride),
+        normalizeValue(v, fieldsOverride, ruleEvents),
       ]),
     );
   }
 
   if (Array.isArray(value)) {
-    return value.map((v) => normalizeValue(v, fieldsOverride));
+    return value.map((v) => normalizeValue(v, fieldsOverride, ruleEvents));
   }
 
   const obj = value as Record<string, unknown>;
 
-  // DocumentEvent shape detection
-  if ('name' in obj && ('metadata' in obj || 'value' in obj)) {
+  if (isDocumentEventLike(obj)) {
     return normalizeDocumentEvent(obj, fieldsOverride);
   }
 
-  // Document shape detection
   if ('category' in obj && 'externalEvents' in obj) {
-    return normalizeDocument(obj, fieldsOverride);
+    return normalizeDocument(obj, fieldsOverride, ruleEvents);
   }
 
-  // Participant shape detection — strip random noise
   if (isParticipantLike(obj)) {
     return normalizeParticipant(obj);
   }
 
-  // Generic object — recurse
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => [
       k,
-      normalizeValue(v, fieldsOverride),
+      normalizeValue(v, fieldsOverride, ruleEvents),
     ]),
   );
 }
@@ -728,37 +971,22 @@ function isParticipantLike(obj: Record<string, unknown>): boolean {
 function normalizeParticipant(
   obj: Record<string, unknown>,
 ): Record<string, unknown> {
-  const result: Record<string, unknown> = {
-    id: obj['id'],
-    type: obj['type'],
-  };
-
-  return result;
+  return { type: obj['type'] };
 }
-
-const ADDRESS_RELEVANT_KEYS = new Set([
-  'latitude',
-  'longitude',
-  'countryCode',
-  'city',
-  'state',
-  'street',
-  'number',
-  'zipCode',
-]);
 
 function normalizeAddress(
   address: Record<string, unknown>,
+  fields: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
 
-  for (const key of ADDRESS_RELEVANT_KEYS) {
+  for (const key of fields) {
     if (address[key] !== undefined) {
       result[key] = address[key];
     }
   }
 
-  return Object.keys(result).length > 0 ? result : address;
+  return result;
 }
 
 /**
@@ -767,12 +995,68 @@ function normalizeAddress(
  * Random strings are long lowercase alphanumeric strings without spaces.
  */
 function isValidAttributeName(name: string): boolean {
-  // Real attribute names contain spaces and are relatively short
   if (name.includes(' ') && name.length < 80) return true;
-  // Single-word names are valid if they look like real identifiers (not random strings)
   if (name.length <= 30 && /^[A-Z]/.test(name)) return true;
 
   return false;
+}
+
+// --- Value sanitizers ---
+
+const LATIN_SUFFIXES = ['us', 'um', 'ae', 'is', 'io', 'ia', 'or', 'it', 'am', 'em', 'as', 'os', 'ibus'];
+const COMMON_ENGLISH_WORDS = new Set([
+  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can',
+  'was', 'her', 'one', 'our', 'out', 'has', 'had', 'from', 'with',
+  'this', 'that', 'have', 'been', 'will', 'they', 'each', 'which',
+  'more', 'than', 'were', 'what', 'when', 'your', 'into', 'some',
+  'document', 'event', 'value', 'type', 'scale', 'weight', 'waste',
+  'vehicle', 'driver', 'date', 'number', 'description', 'address',
+]);
+
+function isFakerGibberish(value: string): boolean {
+  if (typeof value !== 'string' || value.length < 10) return false;
+
+  const words = value.replace(/[.,;:!?]/g, '').split(/\s+/).filter(Boolean);
+  if (words.length < 2) return false;
+
+  const lowerWords = words.map((w) => w.toLowerCase());
+
+  const knownEnglishCount = lowerWords.filter((w) => COMMON_ENGLISH_WORDS.has(w)).length;
+  if (knownEnglishCount > 0) return false;
+
+  const latinLikeCount = lowerWords.filter((w) =>
+    w.length >= 4 && LATIN_SUFFIXES.some((suffix) => w.endsWith(suffix)),
+  ).length;
+
+  return latinLikeCount / words.length >= 0.4;
+}
+
+function isAbsurdNumber(value: unknown): boolean {
+  return typeof value === 'number' && Math.abs(value) > 1_000_000;
+}
+
+function roundIfOverlyPrecise(value: unknown): unknown {
+  if (typeof value !== 'number' || Number.isInteger(value)) return value;
+
+  const str = String(value);
+  const decimalPart = str.split('.')[1];
+  if (decimalPart && decimalPart.length > 4) {
+    return Math.round(value * 100) / 100;
+  }
+
+  return value;
+}
+
+function sanitizeAttributeValue(value: unknown): unknown {
+  if (typeof value === 'string' && isFakerGibberish(value)) {
+    return undefined;
+  }
+
+  if (isAbsurdNumber(value)) {
+    return undefined;
+  }
+
+  return roundIfOverlyPrecise(value);
 }
 
 function buildAllowedAttributeSet(
@@ -805,15 +1089,50 @@ function buildAllowedAttributeSet(
   return allowedSet;
 }
 
+const RELATED_DOCUMENT_KEYS = new Set(['category', 'subtype', 'type']);
+
+function normalizeRelatedDocument(
+  relDoc: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const result: Record<string, unknown> = {};
+
+  for (const key of RELATED_DOCUMENT_KEYS) {
+    if (relDoc[key] !== undefined) {
+      result[key] = relDoc[key];
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 function normalizeDocumentEvent(
   event: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { name: event['name'] };
 
-  // Include label for ACTOR events (e.g., "Waste Generator", "Hauler")
   if (event['label'] !== undefined) {
     result['label'] = event['label'];
+  }
+
+  // Include slimmed relatedDocument (category, subtype, type only)
+  if (event['relatedDocument'] !== undefined) {
+    const slimmed = normalizeRelatedDocument(
+      event['relatedDocument'] as Record<string, unknown>,
+    );
+    if (slimmed) {
+      result['relatedDocument'] = slimmed;
+    }
+  }
+
+  // Only include participant when the rule example has meaningful participant data
+  if (event['participant'] !== undefined) {
+    const participantNorm = normalizeParticipant(
+      event['participant'] as Record<string, unknown>,
+    );
+    if (Object.keys(participantNorm).length > 0) {
+      result['participant'] = participantNorm;
+    }
   }
 
   // Exclude value by default, include only when explicitly requested
@@ -821,11 +1140,19 @@ function normalizeDocumentEvent(
     result['value'] = event['value'];
   }
 
-  // Include address only if explicitly requested
-  if (fieldsOverride?.includeAddress === true && event['address']) {
-    result['address'] = normalizeAddress(
-      event['address'] as Record<string, unknown>,
-    );
+  // Only include address when the rule example has meaningful address data (e.g. addressFields specified)
+  if (event['address'] !== undefined) {
+    const addressFields = fieldsOverride?.addressFields;
+    const addressNorm =
+      addressFields && addressFields.length > 0
+        ? normalizeAddress(
+            event['address'] as Record<string, unknown>,
+            addressFields,
+          )
+        : {};
+    if (Object.keys(addressNorm).length > 0) {
+      result['address'] = addressNorm;
+    }
   }
 
   // Filter metadata attributes based on explicit attributes + overrides
@@ -841,17 +1168,22 @@ function normalizeDocumentEvent(
       ? attributes.filter((attr) => allowedSet.has(String(attr['name'])))
       : attributes.filter((attr) => isValidAttributeName(String(attr['name'])));
 
-    if (filtered.length) {
-      result['metadata'] = {
-        attributes: filtered.map((attr) => {
-          const normalized: Record<string, unknown> = {
-            name: attr['name'],
-            value: attr['value'],
-          };
-          if (attr['format']) normalized['format'] = attr['format'];
-          return normalized;
-        }),
-      };
+    const sanitized = filtered
+      .map((attr) => {
+        const sanitizedValue = sanitizeAttributeValue(attr['value']);
+        if (sanitizedValue === undefined) return undefined;
+
+        const normalized: Record<string, unknown> = {
+          name: attr['name'],
+          value: sanitizedValue,
+        };
+        if (attr['format']) normalized['format'] = attr['format'];
+        return normalized;
+      })
+      .filter((attr): attr is Record<string, unknown> => attr !== undefined);
+
+    if (sanitized.length) {
+      result['metadata'] = { attributes: sanitized };
     }
   }
 
@@ -861,13 +1193,14 @@ function normalizeDocumentEvent(
 function normalizeDocument(
   doc: Record<string, unknown>,
   fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { category: doc['category'] };
 
   if (doc['type']) result['type'] = doc['type'];
   if (doc['subtype']) result['subtype'] = doc['subtype'];
+  if (doc['measurementUnit']) result['measurementUnit'] = doc['measurementUnit'];
 
-  // Exclude currentValue by default, include only when explicitly requested
   if (
     fieldsOverride?.includeCurrentValue === true &&
     doc['currentValue'] !== undefined
@@ -876,13 +1209,58 @@ function normalizeDocument(
   }
 
   const events = doc['externalEvents'] as unknown[] | undefined;
-  if (events?.length) {
-    result['externalEvents'] = events.map((e) =>
+  const ruleHasNoEvents = ruleEvents?.length === 0;
+
+  if (events?.length && !ruleHasNoEvents) {
+    let normalizedEvents = events.map((e) =>
       normalizeValue(e, fieldsOverride),
     );
+
+    if (ruleEvents && ruleEvents.length > 0) {
+      normalizedEvents = filterEventsForRule(
+        normalizedEvents as Array<Record<string, unknown>>,
+        ruleEvents,
+      );
+    }
+
+    if (normalizedEvents.length > 0) {
+      result['externalEvents'] = normalizedEvents;
+    }
   }
 
   return result;
+}
+
+function filterEventsForRule(
+  events: Array<Record<string, unknown>>,
+  ruleEvents: string[],
+): Array<Record<string, unknown>> {
+  const ruleEventNames = new Set<string>();
+  const ruleActorLabels = new Set<string>();
+
+  for (const ev of ruleEvents) {
+    if (ev.includes(':')) {
+      const [eventName, label] = ev.split(':');
+      if (eventName) ruleEventNames.add(eventName);
+      if (label) ruleActorLabels.add(label);
+    } else {
+      ruleEventNames.add(ev);
+    }
+  }
+
+  return events.filter((event) => {
+    const name = String(event['name'] ?? '');
+    const label = event['label'] as string | undefined;
+
+    if (name === 'ACTOR') {
+      if (ruleActorLabels.size > 0) {
+        return label !== undefined && ruleActorLabels.has(label);
+      }
+      return ruleEventNames.has('ACTOR');
+    }
+
+    return ruleEventNames.has(name);
+  });
 }
 
 // --- Brace-balanced object extraction (used by error/comment extractors) ---
@@ -1061,7 +1439,12 @@ function buildRule(
   const readme = extractReadmeData(readmePath);
   const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
   const resultComments = extractResultComments(libSrcPath, srcFiles);
-  const examples = extractManifestExamples(libSrcPath, srcFiles);
+
+  // Enrich events early so we can pass them to example extraction for filtering
+  const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
+  const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
+
+  const examples = extractManifestExamples(libSrcPath, srcFiles, events);
 
   // Resolve frameworkRules: prefer app-level, fall back to shared lib
   const appRuleFrameworkRules = extractAppFrameworkRules(appRulePath);
@@ -1101,10 +1484,6 @@ function buildRule(
       allErrors.push(msg);
     }
   }
-
-  // Enrich ACTOR events with actor labels from the processor
-  const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
-  const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
 
   // Determine verifications
   const verifications =

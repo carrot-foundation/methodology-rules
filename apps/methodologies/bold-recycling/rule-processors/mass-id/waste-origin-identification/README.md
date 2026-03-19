@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates waste origin identification consistency, ensuring that identified origins have exactly one waste generator actor event and unidentified origins have none.
+Validates waste origin identification consistency, ensuring that identified origins have exactly one Waste Generator ACTOR event and unidentified origins have none.
 
 ## 📋 Framework Rules
 

@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that no duplicate MassID documents exist with the same combination of drop-off event, pick-up event, recycler event, waste generator event, and vehicle license plate.
+Validates that no duplicate MassID documents exist with the same combination of Drop-off event, Pick-up event, Recycler ACTOR event, Waste Generator ACTOR event, and vehicle license plate.
 
 ## 📋 Framework Rules
 
