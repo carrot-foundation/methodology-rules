@@ -139,10 +139,6 @@ describe('reportRuleResults', () => {
     process.env = originalEnvironment;
   });
 
-  afterAll(() => {
-    vi.restoreAllMocks();
-  });
-
   it('should send a request to the given responseUrl', async () => {
     const ruleOutput = {
       ...stubRuleOutput(),
@@ -271,10 +267,6 @@ describe('signRequest', () => {
 
   afterEach(() => {
     process.env = originalEnvironment;
-  });
-
-  afterAll(() => {
-    vi.restoreAllMocks();
   });
 
   it('should return http request object with authorization header', async () => {

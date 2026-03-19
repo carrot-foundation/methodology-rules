@@ -231,8 +231,7 @@ const testCasesFilesConfig = {
 const vitestFilesConfigs = [
   {
     files: [
-      '**/*.spec.ts',
-      '**/*.spec.js',
+      '**/*.{test,spec}.{ts,js}',
       '**/zod.matchers.ts',
       '**/helpers/rule-processor.helpers.ts',
       '**/testing.helpers.ts',

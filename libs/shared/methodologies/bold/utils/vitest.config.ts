@@ -1,12 +1,7 @@
 import { getVitestBaseConfig } from '../../../../../.vitest/config/vitest.base.config';
 import { getVitestBasePlugins } from '../../../../../.vitest/config/vitest.base.plugins';
 
-const baseConfig = getVitestBaseConfig(import.meta.dirname);
-
 export default {
-  ...baseConfig,
+  ...getVitestBaseConfig(import.meta.dirname),
   plugins: getVitestBasePlugins({ dirname: import.meta.dirname }),
-  test: {
-    ...baseConfig.test,
-  },
 };

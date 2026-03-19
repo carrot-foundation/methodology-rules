@@ -19,7 +19,7 @@ vi.mock('node:fs/promises', () => ({
   readFile: vi.fn().mockResolvedValue(Buffer.from('test')),
 }));
 
-// Prevent AWS SDK credential chain from reading real config files in test workers,
+// Prevent AWS SDK credential chain from reading real config files in Vitest workers,
 // which can cause "Cannot read properties of undefined (reading 'then')" when
 // node:fs/promises is mocked (see aws/aws-sdk-js-v3#4756). We mock the loader so
 // config file reads are never attempted; node-config-provider only needs

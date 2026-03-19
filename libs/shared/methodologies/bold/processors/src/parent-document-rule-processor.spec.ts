@@ -15,7 +15,7 @@ import { ParentDocumentRuleProcessor } from './parent-document-rule-processor';
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('ParentDocumentRuleProcessor', () => {
-  const mockedloadDocument = vi.mocked(loadDocument);
+  const mockedLoadDocument = vi.mocked(loadDocument);
 
   class TestParentDocumentRuleProcessor extends ParentDocumentRuleProcessor<
     []
@@ -57,7 +57,7 @@ describe('ParentDocumentRuleProcessor', () => {
       const ruleInput = stubRuleInput();
       const document = stubDocument();
 
-      mockedloadDocument.mockResolvedValueOnce(document);
+      mockedLoadDocument.mockResolvedValueOnce(document);
 
       const result = await processor['loadDocument'](ruleInput);
 

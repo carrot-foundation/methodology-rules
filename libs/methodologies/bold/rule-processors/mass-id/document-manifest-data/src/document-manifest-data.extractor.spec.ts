@@ -40,10 +40,6 @@ const noRelatedEvents: {
 };
 
 describe('crossValidateWithTextract', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('should return empty result when attachmentInfos is empty', async () => {
     const result = await crossValidateWithTextract({
       attachmentInfos: [],

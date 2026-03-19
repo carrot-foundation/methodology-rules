@@ -1,4 +1,5 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
+import type { Mocked } from 'vitest';
 
 import {
   stubTextExtractionResult,
@@ -73,7 +74,7 @@ class StubParser2 implements DocumentParser<BaseExtractedData> {
 }
 
 describe('DocumentExtractor', () => {
-  let mockTextExtractor: vi.Mocked<TextExtractor>;
+  let mockTextExtractor: Mocked<TextExtractor>;
   let extractor: DocumentExtractor;
   let stubExtractionResult: TextExtractionResult;
 

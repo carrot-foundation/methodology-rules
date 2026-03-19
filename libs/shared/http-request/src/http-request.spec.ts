@@ -23,8 +23,8 @@ describe('request helpers', () => {
     protocol: 'https',
   };
 
-  afterAll(() => {
-    vi.clearAllMocks();
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('httpRequest', () => {
