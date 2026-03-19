@@ -9,12 +9,16 @@ import type {
 import { CachedTextExtractor } from './cached-text-extractor';
 import { loadCachedResult, saveCachedResult } from './textract-cache';
 
-vi.mock('./textract-cache', () => ({
-  computeFileHash: vi.importActual('./textract-cache').computeFileHash,
-  computeStringHash: vi.importActual('./textract-cache').computeStringHash,
-  loadCachedResult: vi.fn(),
-  saveCachedResult: vi.fn(),
-}));
+vi.mock('./textract-cache', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./textract-cache')>();
+
+  return {
+    computeFileHash: actual.computeFileHash,
+    computeStringHash: actual.computeStringHash,
+    loadCachedResult: vi.fn(),
+    saveCachedResult: vi.fn(),
+  };
+});
 
 const mockLoadCachedResult = vi.mocked(loadCachedResult);
 const mockSaveCachedResult = vi.mocked(saveCachedResult);

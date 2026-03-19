@@ -10,8 +10,8 @@ const stubSignRequestInput = (): SignRequestInput => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-vi.mock('@aws-sdk/credential-providers', () => ({
-  ...vi.importActual('@aws-sdk/credential-providers'),
+vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@aws-sdk/credential-providers')>()),
   fromContainerMetadata: vi.fn(),
 }));
 

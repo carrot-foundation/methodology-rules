@@ -18,75 +18,63 @@ describe('text-extractor.provider', () => {
     vi.resetModules();
   });
 
-  it('should provide a TextractService-backed instance when AWS_REGION is set', () => {
+  it('should provide a TextractService-backed instance when AWS_REGION is set', async () => {
     process.env['AWS_REGION'] = 'us-east-1';
     delete process.env['TEXTRACT_CACHE_DIR'];
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { TextractService } = require('./textract.service');
+    const { textExtractor } = await import('./text-extractor.provider');
+    const { TextractService } = await import('./textract.service');
 
     expect(textExtractor).toBeInstanceOf(TextractService);
   });
 
-  it('should create service with TextractClient dependency when AWS_REGION is set', () => {
+  it('should create service with TextractClient dependency when AWS_REGION is set', async () => {
     process.env['AWS_REGION'] = 'us-east-1';
     delete process.env['TEXTRACT_CACHE_DIR'];
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { TextractClient } = require('@aws-sdk/client-textract');
+    const { TextractClient } = await import('@aws-sdk/client-textract');
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
+    const { textExtractor } = await import('./text-extractor.provider');
 
     expect(textExtractor['textractClient']).toBeInstanceOf(TextractClient);
   });
 
-  it('should provide a TextractService-backed instance when AWS_REGION is not set', () => {
+  it('should provide a TextractService-backed instance when AWS_REGION is not set', async () => {
     delete process.env['AWS_REGION'];
     delete process.env['TEXTRACT_CACHE_DIR'];
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { TextractService } = require('./textract.service');
+    const { textExtractor } = await import('./text-extractor.provider');
+    const { TextractService } = await import('./textract.service');
 
     expect(textExtractor).toBeInstanceOf(TextractService);
   });
 
-  it('should create service with TextractClient dependency when AWS_REGION is not set', () => {
+  it('should create service with TextractClient dependency when AWS_REGION is not set', async () => {
     delete process.env['AWS_REGION'];
     delete process.env['TEXTRACT_CACHE_DIR'];
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { TextractClient } = require('@aws-sdk/client-textract');
+    const { TextractClient } = await import('@aws-sdk/client-textract');
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
+    const { textExtractor } = await import('./text-extractor.provider');
 
     expect(textExtractor['textractClient']).toBeInstanceOf(TextractClient);
   });
 
-  it('should wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is set', () => {
+  it('should wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is set', async () => {
     // eslint-disable-next-line sonarjs/publicly-writable-directories
     process.env['TEXTRACT_CACHE_DIR'] = '/tmp/cache';
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { CachedTextExtractor } = require('./cached-text-extractor');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
+    const { CachedTextExtractor } = await import('./cached-text-extractor');
+    const { textExtractor } = await import('./text-extractor.provider');
 
     expect(textExtractor).toBeInstanceOf(CachedTextExtractor);
   });
 
-  it('should not wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is not set', () => {
+  it('should not wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is not set', async () => {
     delete process.env['TEXTRACT_CACHE_DIR'];
     vi.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { textExtractor } = require('./text-extractor.provider');
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { TextractService } = require('./textract.service');
+    const { textExtractor } = await import('./text-extractor.provider');
+    const { TextractService } = await import('./textract.service');
 
     expect(textExtractor).toBeInstanceOf(TextractService);
   });

@@ -18,9 +18,8 @@ const mockAuditApiService = {
   checkDuplicateDocuments: mockCheckDuplicateDocuments,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-vi.mock('./waste-mass-is-unique.helpers', () => ({
-  ...vi.importActual('./waste-mass-is-unique.helpers'),
+vi.mock('./waste-mass-is-unique.helpers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./waste-mass-is-unique.helpers')>()),
   createAuditApiService: () => mockAuditApiService,
 }));
 

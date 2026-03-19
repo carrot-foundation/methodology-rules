@@ -16,10 +16,8 @@ vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
 }));
 
-vi.mock('@carrot-fndn/shared/cli', () => {
-  const actual: Record<string, unknown> = vi.importActual(
-    '@carrot-fndn/shared/cli',
-  );
+vi.mock('@carrot-fndn/shared/cli', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
@@ -38,10 +36,8 @@ vi.mock('../utils/config-parser', () => ({
   parseConfig: vi.fn().mockReturnValue(undefined),
 }));
 
-vi.mock('../utils/batch-summary', () => {
-  const actual: Record<string, unknown> = vi.importActual(
-    '../utils/batch-summary',
-  );
+vi.mock('../utils/batch-summary', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,

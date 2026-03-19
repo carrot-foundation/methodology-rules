@@ -7,7 +7,7 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { faker } from '@faker-js/faker/.';
+import { faker } from '@faker-js/faker';
 
 import { vehicleIdentificationLambda } from './vehicle-identification.lambda';
 import { vehicleIdentificationTestCases } from './vehicle-identification.test-cases';

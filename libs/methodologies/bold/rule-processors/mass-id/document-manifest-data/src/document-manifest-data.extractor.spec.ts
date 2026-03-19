@@ -5,17 +5,18 @@ import type {
   DocumentManifestEventSubject,
 } from './document-manifest-data.helpers';
 
-const mockExtract = vi.fn();
+const { mockExtract } = vi.hoisted(() => ({
+  mockExtract: vi.fn(),
+}));
 
-vi.mock('@carrot-fndn/shared/document-extractor', () =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  ({
-    ...vi.importActual('@carrot-fndn/shared/document-extractor'),
-    createDocumentExtractor: () => ({
-      extract: mockExtract,
-    }),
+vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import('@carrot-fndn/shared/document-extractor')
+  >()),
+  createDocumentExtractor: () => ({
+    extract: mockExtract,
   }),
-);
+}));
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';

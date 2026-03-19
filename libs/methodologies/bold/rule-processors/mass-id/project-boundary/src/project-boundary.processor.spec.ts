@@ -17,9 +17,8 @@ import { ProjectBoundaryProcessor } from './project-boundary.processor';
 import { projectBoundaryTestCases } from './project-boundary.test-cases';
 
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-vi.mock('@carrot-fndn/shared/helpers', () => ({
-  ...vi.importActual('@carrot-fndn/shared/helpers'),
+vi.mock('@carrot-fndn/shared/helpers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@carrot-fndn/shared/helpers')>()),
   calculateDistance: vi.fn(),
 }));
 
