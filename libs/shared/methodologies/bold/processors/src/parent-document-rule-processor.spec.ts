@@ -12,10 +12,10 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ParentDocumentRuleProcessor } from './parent-document-rule-processor';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('ParentDocumentRuleProcessor', () => {
-  const mockedloadDocument = jest.mocked(loadDocument);
+  const mockedloadDocument = vi.mocked(loadDocument);
 
   class TestParentDocumentRuleProcessor extends ParentDocumentRuleProcessor<
     []

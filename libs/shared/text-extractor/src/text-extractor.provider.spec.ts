@@ -15,13 +15,13 @@ describe('text-extractor.provider', () => {
       process.env['TEXTRACT_CACHE_DIR'] = originalCacheDirectory;
     }
 
-    jest.resetModules();
+    vi.resetModules();
   });
 
   it('should provide a TextractService-backed instance when AWS_REGION is set', () => {
     process.env['AWS_REGION'] = 'us-east-1';
     delete process.env['TEXTRACT_CACHE_DIR'];
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { textExtractor } = require('./text-extractor.provider');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -33,7 +33,7 @@ describe('text-extractor.provider', () => {
   it('should create service with TextractClient dependency when AWS_REGION is set', () => {
     process.env['AWS_REGION'] = 'us-east-1';
     delete process.env['TEXTRACT_CACHE_DIR'];
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { TextractClient } = require('@aws-sdk/client-textract');
 
@@ -46,7 +46,7 @@ describe('text-extractor.provider', () => {
   it('should provide a TextractService-backed instance when AWS_REGION is not set', () => {
     delete process.env['AWS_REGION'];
     delete process.env['TEXTRACT_CACHE_DIR'];
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { textExtractor } = require('./text-extractor.provider');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -58,7 +58,7 @@ describe('text-extractor.provider', () => {
   it('should create service with TextractClient dependency when AWS_REGION is not set', () => {
     delete process.env['AWS_REGION'];
     delete process.env['TEXTRACT_CACHE_DIR'];
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { TextractClient } = require('@aws-sdk/client-textract');
 
@@ -71,7 +71,7 @@ describe('text-extractor.provider', () => {
   it('should wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is set', () => {
     // eslint-disable-next-line sonarjs/publicly-writable-directories
     process.env['TEXTRACT_CACHE_DIR'] = '/tmp/cache';
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { CachedTextExtractor } = require('./cached-text-extractor');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -82,7 +82,7 @@ describe('text-extractor.provider', () => {
 
   it('should not wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is not set', () => {
     delete process.env['TEXTRACT_CACHE_DIR'];
-    jest.resetModules();
+    vi.resetModules();
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { textExtractor } = require('./text-extractor.provider');
     // eslint-disable-next-line @typescript-eslint/no-require-imports

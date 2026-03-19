@@ -9,15 +9,15 @@ import type {
 import { CachedTextExtractor } from './cached-text-extractor';
 import { loadCachedResult, saveCachedResult } from './textract-cache';
 
-jest.mock('./textract-cache', () => ({
-  computeFileHash: jest.requireActual('./textract-cache').computeFileHash,
-  computeStringHash: jest.requireActual('./textract-cache').computeStringHash,
-  loadCachedResult: jest.fn(),
-  saveCachedResult: jest.fn(),
+vi.mock('./textract-cache', () => ({
+  computeFileHash: vi.importActual('./textract-cache').computeFileHash,
+  computeStringHash: vi.importActual('./textract-cache').computeStringHash,
+  loadCachedResult: vi.fn(),
+  saveCachedResult: vi.fn(),
 }));
 
-const mockLoadCachedResult = jest.mocked(loadCachedResult);
-const mockSaveCachedResult = jest.mocked(saveCachedResult);
+const mockLoadCachedResult = vi.mocked(loadCachedResult);
+const mockSaveCachedResult = vi.mocked(saveCachedResult);
 
 const stubResult: TextExtractionResult = {
   blocks: [{ blockType: 'LINE', id: 'b1', text: 'hello' }],
@@ -27,20 +27,20 @@ const stubResult: TextExtractionResult = {
 describe('CachedTextExtractor', () => {
   // eslint-disable-next-line sonarjs/publicly-writable-directories
   const cacheDirectory = '/tmp/test-cache';
-  let delegate: jest.Mocked<TextExtractor>;
+  let delegate: vi.Mocked<TextExtractor>;
   let extractor: CachedTextExtractor;
 
   beforeEach(() => {
     delegate = {
-      extractText: jest.fn().mockResolvedValue(stubResult),
+      extractText: vi.fn().mockResolvedValue(stubResult),
     };
     extractor = new CachedTextExtractor(delegate, cacheDirectory);
 
-    jest.spyOn(logger, 'info').mockImplementation();
+    vi.spyOn(logger, 'info').mockImplementation();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('cache miss', () => {

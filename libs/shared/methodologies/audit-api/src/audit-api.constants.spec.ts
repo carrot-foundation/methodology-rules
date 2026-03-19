@@ -1,4 +1,4 @@
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getAuditUrl: () => mockAuditUrl,
 }));
 
@@ -6,13 +6,13 @@ let mockAuditUrl: string | undefined;
 
 describe('Audit API Constants', () => {
   beforeEach(() => {
-    jest.resetModules();
+    vi.resetModules();
   });
 
   describe('AUDIT_API_URL', () => {
     it('should use the value from getAuditUrl', () => {
       mockAuditUrl = 'https://test.carrot.eco';
-      jest.resetModules();
+      vi.resetModules();
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { AUDIT_API_URL } = require('./audit-api.constants');
 
@@ -20,8 +20,8 @@ describe('Audit API Constants', () => {
     });
 
     it('should throw when getAuditUrl throws', () => {
-      jest.resetModules();
-      jest.doMock('@carrot-fndn/shared/env', () => ({
+      vi.resetModules();
+      vi.doMock('@carrot-fndn/shared/env', () => ({
         getAuditUrl: () => {
           throw new Error('AUDIT_URL is required');
         },

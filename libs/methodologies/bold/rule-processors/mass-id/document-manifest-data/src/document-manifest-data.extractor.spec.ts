@@ -5,12 +5,12 @@ import type {
   DocumentManifestEventSubject,
 } from './document-manifest-data.helpers';
 
-const mockExtract = jest.fn();
+const mockExtract = vi.fn();
 
-jest.mock('@carrot-fndn/shared/document-extractor', () =>
+vi.mock('@carrot-fndn/shared/document-extractor', () =>
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   ({
-    ...jest.requireActual('@carrot-fndn/shared/document-extractor'),
+    ...vi.importActual('@carrot-fndn/shared/document-extractor'),
     createDocumentExtractor: () => ({
       extract: mockExtract,
     }),
@@ -40,7 +40,7 @@ const noRelatedEvents: {
 
 describe('crossValidateWithTextract', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should return empty result when attachmentInfos is empty', async () => {

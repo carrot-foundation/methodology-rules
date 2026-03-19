@@ -10,7 +10,7 @@ import { noConflictingCertificateOrCreditTestCases } from './no-conflicting-cert
 
 describe('NoConflictingCertificateOrCreditProcessor', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const ruleDataProcessor = new NoConflictingCertificateOrCreditProcessor(

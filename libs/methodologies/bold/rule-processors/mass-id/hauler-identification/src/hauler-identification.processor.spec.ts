@@ -6,11 +6,11 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { HaulerIdentificationProcessor } from './hauler-identification.processor';
 import { haulerIdentificationTestCases } from './hauler-identification.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('HaulerIdentificationProcessor', () => {
   const ruleDataProcessor = new HaulerIdentificationProcessor();
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(haulerIdentificationTestCases)(
     `should return $resultStatus when $scenario`,

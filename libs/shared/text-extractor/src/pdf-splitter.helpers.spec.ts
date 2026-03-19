@@ -15,11 +15,11 @@ const createTestPdf = async (pageCount: number): Promise<Uint8Array> => {
 
 describe('splitPdfPages', () => {
   beforeEach(() => {
-    jest.spyOn(logger, 'info').mockImplementation();
+    vi.spyOn(logger, 'info').mockImplementation();
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should split a 2-page PDF into 2 single-page PDFs', async () => {

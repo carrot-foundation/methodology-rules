@@ -15,16 +15,16 @@ import {
   signRequest,
 } from './rule-result.helpers';
 
-const mockArtifactChecksum = jest.fn(() => faker.string.uuid());
-const mockSourceCodeUrl = jest.fn(() => faker.internet.url());
-const mockSourceCodeVersion = jest.fn(() => faker.string.uuid());
-const mockSmaugArn = jest.fn(() => faker.string.uuid());
-const mockAwsRegion = jest.fn(() => faker.string.uuid());
+const mockArtifactChecksum = vi.fn(() => faker.string.uuid());
+const mockSourceCodeUrl = vi.fn(() => faker.internet.url());
+const mockSourceCodeVersion = vi.fn(() => faker.string.uuid());
+const mockSmaugArn = vi.fn(() => faker.string.uuid());
+const mockAwsRegion = vi.fn(() => faker.string.uuid());
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getArtifactChecksum: () => mockArtifactChecksum(),
   getAwsRegion: () => mockAwsRegion(),
-  getOptionalEnv: jest.fn(),
+  getOptionalEnv: vi.fn(),
   getSmaugApiGatewayAssumeRoleArn: () => mockSmaugArn(),
   getSourceCodeUrl: () => mockSourceCodeUrl(),
   getSourceCodeVersion: () => mockSourceCodeVersion(),
@@ -140,7 +140,7 @@ describe('reportRuleResults', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should send a request to the given responseUrl', async () => {
@@ -149,7 +149,7 @@ describe('reportRuleResults', () => {
       responseUrl: faker.internet.url(),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -163,7 +163,7 @@ describe('reportRuleResults', () => {
       url: new URL(ruleOutput.responseUrl),
     });
 
-    jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
 
     await expect(reportRuleResults(ruleOutput)).resolves.not.toThrow();
 
@@ -203,7 +203,7 @@ describe('reportRuleResults', () => {
       responseUrl: faker.internet.url(),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -211,7 +211,7 @@ describe('reportRuleResults', () => {
       },
     } as never);
 
-    jest
+    vi
       .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(new Response(null, { status: 400 }));
 
@@ -228,7 +228,7 @@ describe('reportRuleResults', () => {
 
     const errorResponse = new Response();
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -236,8 +236,8 @@ describe('reportRuleResults', () => {
       },
     } as never);
 
-    jest.spyOn(globalThis, 'fetch').mockRejectedValueOnce(errorResponse);
-    jest.spyOn(logger, 'error').mockImplementationOnce(() => {});
+    vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(errorResponse);
+    vi.spyOn(logger, 'error').mockImplementationOnce(() => {});
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBe(errorResponse);
 
@@ -274,7 +274,7 @@ describe('signRequest', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return http request object with authorization header', async () => {
@@ -285,7 +285,7 @@ describe('signRequest', () => {
       url: new URL(faker.internet.url()),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -323,7 +323,7 @@ describe('signRequest', () => {
       url: new URL(faker.internet.url()),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: undefined,
     } as never);
 
@@ -363,7 +363,7 @@ describe('signRequest', () => {
       url: new URL(faker.internet.url()),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials,
     } as never);
 

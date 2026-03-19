@@ -10,19 +10,19 @@ import {
 
 describe('scale-ticket-verification', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should pass when extracted net weight matches the event value', async () => {
     const textExtractorInput = { filePath: 'dummy-path' };
     const expectedNetWeight = 200.25;
 
-    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
+    vi.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
 
-    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+    vi.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
       data: {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
@@ -80,12 +80,12 @@ describe('scale-ticket-verification', () => {
       'Verification Type': 'Scale Ticket',
     };
 
-    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
+    vi.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
 
-    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+    vi.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
       data: {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
@@ -136,12 +136,12 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return a mismatch error when ticket net weight differs from event value', async () => {
-    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
+    vi.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);
 
-    jest.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
+    vi.spyOn(ScaleTicketLayout1Parser.prototype, 'parse').mockReturnValue({
       data: {
         documentType: 'scaleTicket',
         extractionConfidence: 'high',
@@ -167,7 +167,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return an extraction failed error when text extractor throws', async () => {
-    jest
+    vi
       .spyOn(textExtractor, 'extractText')
       .mockRejectedValue(new Error('boom'));
 
@@ -202,7 +202,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should build an unsupported layout error message', async () => {
-    jest.spyOn(textExtractor, 'extractText').mockResolvedValue({
+    vi.spyOn(textExtractor, 'extractText').mockResolvedValue({
       blocks: [],
       rawText: '',
     } as never);

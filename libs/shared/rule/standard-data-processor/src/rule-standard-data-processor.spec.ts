@@ -72,7 +72,7 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a resultStatus PASSED if the rule is not applicable', async () => {
     const ruleInput = stubRuleInput();
 
-    (ruleStandardDataProcessor as any)['getRuleSubject'] = jest.fn(
+    (ruleStandardDataProcessor as any)['getRuleSubject'] = vi.fn(
       () => undefined,
     );
 
@@ -114,7 +114,7 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a resultStatus FAILED if the rule is applicable and failed', async () => {
     const ruleInput = stubRuleInput();
 
-    (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
+    (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultStatus: RuleOutputStatus.FAILED,
     }));
 
@@ -136,7 +136,7 @@ describe('RuleStandardDataProcessor', () => {
   it('should return a result with a fail comment when the rule is applicable and failed', async () => {
     const ruleInput = stubRuleInput();
 
-    (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
+    (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
       resultStatus: RuleOutputStatus.FAILED,
     }));
@@ -161,7 +161,7 @@ describe('RuleStandardDataProcessor', () => {
     const ruleInput = stubRuleInput();
     const resultContent = { [faker.string.sample()]: faker.string.sample() };
 
-    (ruleStandardDataProcessor as any)['evaluateResult'] = jest.fn(() => ({
+    (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
       resultContent,
       resultStatus: RuleOutputStatus.FAILED,

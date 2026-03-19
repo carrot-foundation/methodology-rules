@@ -27,7 +27,7 @@ const createMockExtractor = (
   extractResult?: ExtractionOutput<TestExtractedData>,
   error?: Error,
 ): DocumentExtractorService => ({
-  extract: jest.fn().mockImplementation(() => {
+  extract: vi.fn().mockImplementation(() => {
     if (error) {
       return Promise.reject(error);
     }
@@ -141,7 +141,7 @@ describe('crossValidateAttachments', () => {
   it('should extract document and call validate function', async () => {
     const extractionOutput = createExtractionOutput();
     const extractor = createMockExtractor(extractionOutput);
-    const validateFunction = jest.fn().mockReturnValue({ failMessages: [] });
+    const validateFunction = vi.fn().mockReturnValue({ failMessages: [] });
     const config = createConfig({ validate: validateFunction });
     const eventData = createEventData('CDF', 'expected');
     const inputs: CrossValidationInput<TestEventData>[] = [
@@ -315,7 +315,7 @@ describe('crossValidateAttachments', () => {
   it('should fail with unknown error for non-Error exceptions', async () => {
     const extractor = createMockExtractor();
 
-    (extractor.extract as jest.Mock).mockRejectedValue('string error');
+    (extractor.extract as vi.Mock).mockRejectedValue('string error');
     const config = createConfig();
     const inputs: CrossValidationInput<TestEventData>[] = [
       {
@@ -364,7 +364,7 @@ describe('crossValidateAttachments', () => {
   it('should continue processing after unknown document type', async () => {
     const extractionOutput = createExtractionOutput();
     const extractor = createMockExtractor(extractionOutput);
-    const validateFunction = jest.fn().mockReturnValue({ failMessages: [] });
+    const validateFunction = vi.fn().mockReturnValue({ failMessages: [] });
     const config = createConfig({ validate: validateFunction });
     const inputs: CrossValidationInput<TestEventData>[] = [
       {
@@ -511,7 +511,7 @@ describe('crossValidateAttachments', () => {
     const extractor = createMockExtractor(extractionOutput);
     let callCount = 0;
 
-    (extractor.extract as jest.Mock).mockImplementation(() => {
+    (extractor.extract as vi.Mock).mockImplementation(() => {
       callCount++;
 
       if (callCount === 1) {
@@ -520,7 +520,7 @@ describe('crossValidateAttachments', () => {
 
       return Promise.resolve(extractionOutput);
     });
-    const validateFunction = jest.fn().mockReturnValue({ failMessages: [] });
+    const validateFunction = vi.fn().mockReturnValue({ failMessages: [] });
     const config = createConfig({ validate: validateFunction });
     const inputs: CrossValidationInput<TestEventData>[] = [
       {

@@ -15,14 +15,14 @@ import {
   wasteMassIsUniqueTestCases,
 } from './waste-mass-is-unique.test-cases';
 
-const mockCheckDuplicateDocuments = jest.fn();
+const mockCheckDuplicateDocuments = vi.fn();
 const mockAuditApiService = {
   checkDuplicateDocuments: mockCheckDuplicateDocuments,
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('./waste-mass-is-unique.helpers', () => ({
-  ...jest.requireActual('./waste-mass-is-unique.helpers'),
+vi.mock('./waste-mass-is-unique.helpers', () => ({
+  ...vi.importActual('./waste-mass-is-unique.helpers'),
   createAuditApiService: () => mockAuditApiService,
 }));
 
@@ -30,7 +30,7 @@ describe('WasteMassIsUniqueLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('wasteMassIsUniqueTestCases', () => {

@@ -2,7 +2,7 @@ import dotenv from 'dotenv';
 
 import { loadEnvironment } from './environment-loader';
 
-jest.mock('dotenv');
+vi.mock('dotenv');
 
 describe('loadEnvironment', () => {
   it('should load default env file', () => {

@@ -8,21 +8,21 @@ import {
   setModuleCloudWatchClient,
 } from './cloudwatch-metrics.service';
 
-jest.mock('@aws-sdk/client-cloudwatch');
+vi.mock('@aws-sdk/client-cloudwatch');
 
-const mockGetAwsRegion = jest.fn(() => 'us-east-1');
-const mockGetEnableCloudwatchMetrics = jest.fn(() => false);
-const mockGetCloudwatchMetricsNamespace = jest.fn(
+const mockGetAwsRegion = vi.fn(() => 'us-east-1');
+const mockGetEnableCloudwatchMetrics = vi.fn(() => false);
+const mockGetCloudwatchMetricsNamespace = vi.fn(
   () => undefined as string | undefined,
 );
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getAwsRegion: () => mockGetAwsRegion(),
   getCloudwatchMetricsNamespace: () => mockGetCloudwatchMetricsNamespace(),
   getEnableCloudwatchMetrics: () => mockGetEnableCloudwatchMetrics(),
 }));
 
-const mockCloudWatchClient = jest.mocked(CloudWatchClient);
+const mockCloudWatchClient = vi.mocked(CloudWatchClient);
 
 const setMockEnvironment = (
   overrides: {
@@ -49,7 +49,7 @@ const createMockCloudWatchMetricData = (
 
 describe('CloudWatchMetricsService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     CloudWatchMetricsService['instance'] = null;
     setModuleCloudWatchClient(null);
     setMockEnvironment();

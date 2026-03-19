@@ -73,7 +73,7 @@ class StubParser2 implements DocumentParser<BaseExtractedData> {
 }
 
 describe('DocumentExtractor', () => {
-  let mockTextExtractor: jest.Mocked<TextExtractor>;
+  let mockTextExtractor: vi.Mocked<TextExtractor>;
   let extractor: DocumentExtractor;
   let stubExtractionResult: TextExtractionResult;
 
@@ -84,7 +84,7 @@ describe('DocumentExtractor', () => {
     stubExtractionResult = stubTextExtractionResult(STUB_TEXT);
 
     mockTextExtractor = {
-      extractText: jest.fn().mockResolvedValue(stubExtractionResult),
+      extractText: vi.fn().mockResolvedValue(stubExtractionResult),
     };
 
     extractor = new DocumentExtractor(mockTextExtractor);

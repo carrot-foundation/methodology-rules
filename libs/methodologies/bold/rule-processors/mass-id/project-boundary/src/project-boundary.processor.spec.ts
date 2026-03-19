@@ -16,21 +16,21 @@ import { RESULT_COMMENTS } from './project-boundary.constants';
 import { ProjectBoundaryProcessor } from './project-boundary.processor';
 import { projectBoundaryTestCases } from './project-boundary.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@carrot-fndn/shared/helpers', () => ({
-  ...jest.requireActual('@carrot-fndn/shared/helpers'),
-  calculateDistance: jest.fn(),
+vi.mock('@carrot-fndn/shared/helpers', () => ({
+  ...vi.importActual('@carrot-fndn/shared/helpers'),
+  calculateDistance: vi.fn(),
 }));
 
 describe('ProjectBoundaryProcessor', () => {
   const ruleDataProcessor = new ProjectBoundaryProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
-  const calculateDistanceMock = jest.mocked(calculateDistance);
+  const documentLoaderService = vi.mocked(loadDocument);
+  const calculateDistanceMock = vi.mocked(calculateDistance);
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it.each(projectBoundaryTestCases)(

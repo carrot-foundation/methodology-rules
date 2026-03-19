@@ -14,16 +14,16 @@ import {
   resolveProcessorPath,
 } from './dry-run.handler';
 
-jest.mock('../utils/smaug-client', () => ({
-  prepareDryRun: jest.fn(),
+vi.mock('../utils/smaug-client', () => ({
+  prepareDryRun: vi.fn(),
 }));
 
-jest.mock('../utils/processor-loader', () => ({
-  loadProcessor: jest.fn(),
+vi.mock('../utils/processor-loader', () => ({
+  loadProcessor: vi.fn(),
 }));
 
-jest.mock('../utils/rule-input.builder', () => ({
-  buildRuleInput: jest.fn().mockReturnValue({
+vi.mock('../utils/rule-input.builder', () => ({
+  buildRuleInput: vi.fn().mockReturnValue({
     documentId: 'audit-123',
     documentKeyPrefix: 'dry-run/exec-1/documents',
     parentDocumentId: 'mass-id-456',
@@ -33,13 +33,13 @@ jest.mock('../utils/rule-input.builder', () => ({
   }),
 }));
 
-const mockPrepareDryRun = prepareDryRun as jest.MockedFunction<
+const mockPrepareDryRun = prepareDryRun as vi.MockedFunction<
   typeof prepareDryRun
 >;
-const mockLoadProcessor = loadProcessor as jest.MockedFunction<
+const mockLoadProcessor = loadProcessor as vi.MockedFunction<
   typeof loadProcessor
 >;
-const mockBuildRuleInput = buildRuleInput as jest.MockedFunction<
+const mockBuildRuleInput = buildRuleInput as vi.MockedFunction<
   typeof buildRuleInput
 >;
 
@@ -86,10 +86,10 @@ const mockRuleOutput: RuleOutput = {
 };
 
 describe('handleDryRun', () => {
-  const mockProcess = jest.fn();
+  const mockProcess = vi.fn();
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     delete process.env['AUDIT_URL'];
     delete process.env['TEXTRACT_CACHE_DIR'];
     delete process.env['DEBUG'];
@@ -222,7 +222,7 @@ describe('handleDryRun', () => {
   });
 
   it('should output as JSON when --json option is set', async () => {
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await handleDryRun('some/path', { ...baseOptions, json: true });
 
@@ -248,7 +248,7 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce(error)
       .mockResolvedValueOnce(mockRuleOutput);
 
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRun('some/path', { ...baseOptions, debug: true });
 
@@ -263,7 +263,7 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce('string-error')
       .mockResolvedValueOnce(mockRuleOutput);
 
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRun('some/path', baseOptions);
 
@@ -277,7 +277,7 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce(new Error('Failure'))
       .mockResolvedValueOnce(mockRuleOutput);
 
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRun('some/path', baseOptions);
 
@@ -288,7 +288,7 @@ describe('handleDryRun', () => {
   it('should log DOCUMENT_BUCKET_NAME when env var is set', async () => {
     process.env['DOCUMENT_BUCKET_NAME'] = 'test-bucket';
 
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await handleDryRun('some/path', baseOptions);
 
@@ -305,7 +305,7 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce(error)
       .mockResolvedValueOnce(mockRuleOutput);
 
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRun('some/path', { ...baseOptions, debug: true });
 

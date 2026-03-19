@@ -25,7 +25,7 @@ import { stubQueryContext } from './document-query.stubs';
 describe('DocumenQueryService', () => {
   const loadDocuments = new DocumentQueryService(provideDocumentLoaderService);
 
-  afterEach(() => jest.restoreAllMocks());
+  afterEach(() => vi.restoreAllMocks());
 
   it.each([
     {
@@ -46,7 +46,7 @@ describe('DocumenQueryService', () => {
   ])('should throw error when $scenario', async ({ document, error }) => {
     const documentId = faker.string.uuid();
 
-    jest
+    vi
       .spyOn(provideDocumentLoaderService, 'load')
       .mockResolvedValueOnce(document as never);
 
@@ -74,7 +74,7 @@ describe('DocumenQueryService', () => {
         parentDocument: {},
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(
@@ -110,7 +110,7 @@ describe('DocumenQueryService', () => {
       const documentEntity = stubDocumentEntity({ document });
 
       // Mock implementation based on document id instead of sequence
-      const mockLoad = jest
+      const mockLoad = vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockImplementation(({ key }) => {
           // Extract document ID from the key format
@@ -191,7 +191,7 @@ describe('DocumenQueryService', () => {
         },
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
@@ -291,7 +291,7 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(document as DocumentEntity<Document>)
         .mockResolvedValueOnce(
@@ -367,7 +367,7 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
@@ -405,7 +405,7 @@ describe('DocumenQueryService', () => {
         relatedDocuments: [{ category, subtype, type }],
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
@@ -434,7 +434,7 @@ describe('DocumenQueryService', () => {
         relatedDocuments: [],
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>);
 
@@ -464,7 +464,7 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>);
 
@@ -512,7 +512,7 @@ describe('DocumenQueryService', () => {
         },
       };
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<Document>)
@@ -544,7 +544,7 @@ describe('DocumenQueryService', () => {
       });
       const documentEntity = stubDocumentEntity({ document });
 
-      jest
+      vi
         .spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(

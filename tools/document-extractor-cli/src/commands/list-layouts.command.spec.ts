@@ -34,7 +34,7 @@ describe('listLayoutsCommand', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.exitCode = undefined;
   });
 

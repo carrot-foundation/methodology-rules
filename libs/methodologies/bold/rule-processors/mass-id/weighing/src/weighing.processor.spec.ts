@@ -15,14 +15,14 @@ import {
 describe('WeighingProcessor', () => {
   const ruleDataProcessor = new WeighingProcessor();
 
-  let verifyScaleTicketNetWeightSpy: jest.SpiedFunction<
+  let verifyScaleTicketNetWeightSpy: vi.SpiedFunction<
     typeof scaleTicketVerification.verifyScaleTicketNetWeight
   >;
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
 
-    verifyScaleTicketNetWeightSpy = jest
+    verifyScaleTicketNetWeightSpy = vi
       .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
       .mockResolvedValue({ errors: [] });
   });

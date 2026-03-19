@@ -21,7 +21,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   const ruleDataProcessor = new GeolocationAndAddressPrecisionProcessor();
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it.each(geolocationAndAddressPrecisionTestCases)(

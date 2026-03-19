@@ -17,14 +17,14 @@ import {
 } from './weighing.test-cases';
 
 describe('WeighingProcessor E2E', () => {
-  let verifyScaleTicketNetWeightSpy: jest.SpiedFunction<
+  let verifyScaleTicketNetWeightSpy: vi.SpiedFunction<
     typeof scaleTicketVerification.verifyScaleTicketNetWeight
   >;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    verifyScaleTicketNetWeightSpy = jest
+    verifyScaleTicketNetWeightSpy = vi
       .spyOn(scaleTicketVerification, 'verifyScaleTicketNetWeight')
       .mockResolvedValue({ errors: [] });
   });

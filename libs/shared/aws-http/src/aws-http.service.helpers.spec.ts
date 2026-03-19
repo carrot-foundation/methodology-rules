@@ -10,14 +10,14 @@ const stubSignRequestInput = (): SignRequestInput => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@aws-sdk/credential-providers', () => ({
-  ...jest.requireActual('@aws-sdk/credential-providers'),
-  fromContainerMetadata: jest.fn(),
+vi.mock('@aws-sdk/credential-providers', () => ({
+  ...vi.importActual('@aws-sdk/credential-providers'),
+  fromContainerMetadata: vi.fn(),
 }));
 
 describe('signRequest', () => {
   const environment = { ...process.env };
-  const mockFromContainerMetadata = fromContainerMetadata as jest.Mock;
+  const mockFromContainerMetadata = fromContainerMetadata as vi.Mock;
 
   beforeEach(() => {
     process.env = {
@@ -26,7 +26,7 @@ describe('signRequest', () => {
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -40,7 +40,7 @@ describe('signRequest', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it.each([undefined, null, ''])('should omit the body if %s', async (body) => {
