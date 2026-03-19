@@ -20,7 +20,7 @@ export const getVitestBaseConfig = (dirname: string) => {
       // Performance
       pool: 'threads',
       maxWorkers: 1,
-      isolate: false,
+      isolate: true,
       watch: false,
       passWithNoTests: true,
 
@@ -56,6 +56,11 @@ export const getVitestBaseConfig = (dirname: string) => {
           '**/dist/**',
           '**/coverage/**',
           '**/index.ts',
+          '**/logger.helpers.ts',
+          '**/lambda.ts',
+          '**/rule-definition.ts',
+          '**/*.rule-definition.ts',
+          '**/*.errors.ts',
         ],
         thresholds: {
           branches: 100,

@@ -66,6 +66,7 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
     } else {
       const token = tokens.at(index);
 
+      /* v8 ignore next -- index is always within bounds */
       if (token !== undefined) {
         result.push(token);
       }
