@@ -1,8 +1,8 @@
 import {
   type DocumentEntity,
   type DocumentLoaderService,
-  stubDocumentEntity,
 } from '@carrot-fndn/shared/document/loader';
+import { stubDocumentEntity } from '@carrot-fndn/shared/document/loader/stubs';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
