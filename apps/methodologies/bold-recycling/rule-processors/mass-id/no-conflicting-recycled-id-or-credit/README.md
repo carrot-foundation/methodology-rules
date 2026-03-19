@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that the MassID document is not already linked to a valid RecycledID certificate or credit order document, preventing duplicate credit generation from the same waste mass.
+Validates that the MassID document is not already linked to a valid certificate or credit order document and that no other audit for the same methodology is in progress, preventing duplicate credit generation.
 
 ## 📋 Framework Rules
 

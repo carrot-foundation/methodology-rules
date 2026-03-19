@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that the RECYCLED event occurred within the timeframe allowed by the methodology, ensuring only recent recycling events are eligible for credit generation.
+Validates that the Recycled event occurred within the timeframe allowed by the methodology, ensuring only recent recycling events are eligible for credit generation.
 
 ## 📋 Framework Rules
 

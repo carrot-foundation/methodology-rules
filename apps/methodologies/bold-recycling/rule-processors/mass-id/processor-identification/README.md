@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Validates that processor actor events in the MassID document are properly identified, ensuring correct waste processing tracking.
+Validates that exactly one Processor ACTOR event exists in the MassID document, ensuring proper processor identification in the waste processing chain.
 
 ## 📋 Framework Rules
 

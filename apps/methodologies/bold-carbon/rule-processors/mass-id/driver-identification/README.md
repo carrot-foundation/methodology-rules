@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates driver identification in the pick-up event, ensuring either a driver identifier or an exemption justification is provided based on the vehicle type.
+Validates driver identification in the Pick-up event, ensuring either a driver identifier or an exemption justification is provided based on the vehicle type.
 
 ## 📋 Framework Rules
 

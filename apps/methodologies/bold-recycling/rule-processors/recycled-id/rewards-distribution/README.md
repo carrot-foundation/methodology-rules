@@ -12,7 +12,7 @@ Methodology: **BOLD Recycling**
 
 ## 📄 Description
 
-Calculates reward distribution for MassID certificate documents based on actor participation, waste characteristics, and methodology configuration.
+Calculates reward distribution percentages across participant actor types based on waste characteristics, waste origin identification status, and methodology-defined reward configurations.
 
 ## 📡 Events
 

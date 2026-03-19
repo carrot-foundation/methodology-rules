@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Calculates and validates the distance between the pick-up and drop-off event addresses, determining the geographic scope of the waste collection and processing activity.
+Calculates the geographic distance in kilometers between the Pick-up and Drop-off event addresses, determining the project boundary scope.
 
 ## 📋 Framework Rules
 

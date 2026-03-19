@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates local waste classification codes and descriptions against the official Ibama Brazilian solid waste list, ensuring proper waste categorization for the jurisdiction.
+Validates local waste classification codes and descriptions against the official Ibama Brazilian solid waste list, verifying code existence, description accuracy, and CDM code alignment with the document subtype.
 
 ## 📋 Framework Rules
 
