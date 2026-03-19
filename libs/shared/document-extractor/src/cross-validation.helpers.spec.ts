@@ -315,7 +315,9 @@ describe('crossValidateAttachments', () => {
   it('should fail with unknown error for non-Error exceptions', async () => {
     const extractor = createMockExtractor();
 
-    vi.mocked(extractor.extract as (...args: unknown[]) => unknown).mockRejectedValue('string error');
+    vi.mocked(
+      extractor.extract as (...arguments_: unknown[]) => unknown,
+    ).mockRejectedValue('string error');
     const config = createConfig();
     const inputs: CrossValidationInput<TestEventData>[] = [
       {
@@ -533,7 +535,9 @@ describe('crossValidateAttachments', () => {
     const extractor = createMockExtractor(extractionOutput);
     let callCount = 0;
 
-    vi.mocked(extractor.extract as (...args: unknown[]) => unknown).mockImplementation(() => {
+    vi.mocked(
+      extractor.extract as (...arguments_: unknown[]) => unknown,
+    ).mockImplementation(() => {
       callCount++;
 
       if (callCount === 1) {

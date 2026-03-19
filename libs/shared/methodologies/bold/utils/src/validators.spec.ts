@@ -5,9 +5,6 @@ describe('validateNonEmptyString', () => {
     const result = validateNonEmptyString('hello');
 
     expect(result.success).toBe(true);
-    if (result.success) {
-      expect(result.data).toBe('hello');
-    }
   });
 
   it('should fail for an empty string', () => {

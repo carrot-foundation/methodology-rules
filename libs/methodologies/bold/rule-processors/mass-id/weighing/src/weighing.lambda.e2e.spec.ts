@@ -17,7 +17,7 @@ import {
 } from './weighing.test-cases';
 
 describe('WeighingProcessor E2E', () => {
-  let verifyScaleTicketNetWeightSpy: vi.SpiedFunction<
+  let verifyScaleTicketNetWeightSpy: vi.MockInstance<
     typeof scaleTicketVerification.verifyScaleTicketNetWeight
   >;
 

@@ -15,7 +15,7 @@ import {
 describe('WeighingProcessor', () => {
   const ruleDataProcessor = new WeighingProcessor();
 
-  let verifyScaleTicketNetWeightSpy: vi.SpiedFunction<
+  let verifyScaleTicketNetWeightSpy: vi.MockInstance<
     typeof scaleTicketVerification.verifyScaleTicketNetWeight
   >;
 
