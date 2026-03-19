@@ -10,7 +10,7 @@ Apply this rule whenever work touches:
 - `*.e2e.spec.ts`
 - `*.test-cases.ts`
 
-All test code in this repository runs under Jest with ts-jest. Tests must be deterministic, isolated, and free of real-world data.
+All test code in this repository runs under Vitest. Tests must be deterministic, isolated, and free of real-world data.
 
 ### Test file conventions
 

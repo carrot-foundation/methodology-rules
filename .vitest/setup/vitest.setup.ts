@@ -2,12 +2,12 @@ import dotenv from 'dotenv';
 import path from 'node:path';
 import { vi } from 'vitest';
 
-// Load test environment variables (replaces .jest/config/dotenv-config.ts)
+// Load test environment variables
 dotenv.config({
   path: path.resolve(import.meta.dirname, '../../.env-files/.env.test'),
 });
 
-// Mock pino to be silent in tests (replaces .jest/config/setup-logger.ts)
+// Mock pino to be silent in tests
 vi.mock('pino', () => ({
   default: vi.fn(() => ({
     info: vi.fn(),
@@ -20,5 +20,5 @@ vi.mock('pino', () => ({
   })),
 }));
 
-// Import custom matchers (replaces .jest/config/setup-after-env.ts)
+// Import custom matchers
 import '../../libs/shared/testing/src/matchers';
