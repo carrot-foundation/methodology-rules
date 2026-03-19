@@ -76,7 +76,7 @@ Each rule processor follows this structure:
 ├── {rule-name}.test-cases.ts      # Shared test data
 ├── index.ts
 ├── project.json
-└── jest.config.ts
+└── vitest.config.ts
 ```
 
 Processors extend `ParentDocumentRuleProcessor<RuleSubject>` and implement `evaluateResult()`.
@@ -108,7 +108,7 @@ fix(shared): prevent racing of requests
 
 ## Testing
 
-- Jest with ts-jest
+- Vitest with native TypeScript support
 - Test files: `*.spec.ts`, `*.e2e.spec.ts`
 - Test env: `.env-files/.env.test`
 - Coverage output: `./coverage/{projectRoot}`

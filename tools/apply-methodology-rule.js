@@ -148,10 +148,10 @@ Methodology: **BOLD-${methodologyName.toUpperCase()}**
 `,
   },
   {
-    name: 'jest.config.ts',
-    content: `import { getJestBaseConfig } from '../../../../../../.jest/config/jest.base.config';
+    name: 'vitest.config.ts',
+    content: `import { getVitestBaseConfig } from '../../../../../../.vitest/config/vitest.base.config';
 
-export default getJestBaseConfig(__dirname);
+export default getVitestBaseConfig(__dirname);
 `,
   },
   {

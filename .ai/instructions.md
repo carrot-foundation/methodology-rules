@@ -79,7 +79,7 @@ These extensions take precedence over generic rules for project-specific details
 - Use framework-specific testing libraries
 - Aim for 100% coverage where feasible
 - Use `faker` and `typia.random<T>()` for test fixtures
-- Prefer `jest.mock` for external modules, `jest.spyOn` for side effects
+- Prefer `vi.mock` for external modules, `vi.spyOn` for side effects
 - Use table-driven tests with `it.each`
 - Prefer `expect.objectContaining` for partial assertions
 

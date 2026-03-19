@@ -1,6 +1,6 @@
 ---
 title: 'Testing Standards'
-description: 'Unit and component testing expectations for Jest-based test suites'
+description: 'Unit and component testing expectations for Vitest-based test suites'
 category: 'code-quality'
 priority: 'required'
 appliesTo: ['typescript', 'javascript']
@@ -12,7 +12,7 @@ relatedRules: ['code-style.md', 'typescript.md']
 
 # Testing Standards
 
-### Unit tests (Jest)
+### Unit tests (Vitest)
 
 - Tests live in `__tests__/` folders within the same directory as source files
 - Example: `src/my-service.ts` → `src/__tests__/my-service.spec.ts`
@@ -22,7 +22,7 @@ relatedRules: ['code-style.md', 'typescript.md']
 - Aim for 100% coverage where feasible; write tests that target behavior, not implementation details
 - Use `faker` for generating random inputs where helpful, but avoid randomness for expected values; prefer deterministic assertions
 - Use type-safe fixture generators (e.g., `typia.random<T>()`) for type-shaped fixtures when appropriate
-- Prefer `jest.mock` for external modules (e.g., `axios`, shared libs) and `jest.spyOn` for logger and side effects
+- Prefer `vi.mock` for external modules (e.g., `axios`, shared libs) and `vi.spyOn` for logger and side effects
 - Use table-driven tests with `it.each` for input/output matrices
 - Prefer matchers like `expect.objectContaining`/`not.objectContaining` for partial assertions
 - Disallow `.only` (lint rule enabled) and skipped tests except when justified

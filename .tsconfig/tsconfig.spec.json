@@ -3,7 +3,7 @@
   "files": [],
   "compilerOptions": {
     "verbatimModuleSyntax": false,
-    "types": ["vitest/globals", "node", "methodology-rules-jest-matchers"]
+    "types": ["vitest/globals", "node", "methodology-rules-vitest-matchers"]
   },
   "include": ["vitest.config.ts", "**/*.spec.ts", "**/testing/**/*.ts"]
 }
