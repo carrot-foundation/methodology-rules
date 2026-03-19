@@ -21,23 +21,23 @@ const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
 const { ACCREDITATION_RESULT } = DocumentEventName;
 
+const stubAccreditationDocumentWithExternalEvents = ({
+  externalEvents,
+}: {
+  externalEvents:
+    | ReturnType<typeof stubParticipantAccreditationDocument>['externalEvents']
+    | undefined;
+}) => {
+  const document = stubParticipantAccreditationDocument({
+    externalEvents: [],
+  });
+
+  document.externalEvents = externalEvents;
+
+  return document;
+};
+
 describe('Accreditation Document Helpers', () => {
-  const stubAccreditationDocumentWithExternalEvents = ({
-    externalEvents,
-  }: {
-    externalEvents:
-      | ReturnType<typeof stubParticipantAccreditationDocument>['externalEvents']
-      | undefined;
-  }) => {
-    const document = stubParticipantAccreditationDocument({
-      externalEvents: [],
-    });
-
-    document.externalEvents = externalEvents;
-
-    return document;
-  };
-
   describe('isAccreditationValid', () => {
     it.each([
       {

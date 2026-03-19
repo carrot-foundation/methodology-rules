@@ -26,19 +26,19 @@ const sameRecyclerAndDropOffAddress = stubAddress();
 
 export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
   {
-    manifestExample: true,
     events: { [DROP_OFF]: undefined },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has no "${DROP_OFF}" event`,
   },
   {
-    manifestExample: true,
     events: {
       [DROP_OFF]: stubBoldMassIDDropOffEvent({
         metadataAttributes: [[RECEIVING_OPERATOR_IDENTIFIER, undefined]],
       }),
     },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has a "${DROP_OFF}" event but no "${RECEIVING_OPERATOR_IDENTIFIER}" attribute`,
@@ -52,7 +52,6 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     scenario: `The MassID document has a "${DROP_OFF}" event, but the "${RECYCLER}" event address does not match the "${DROP_OFF}" event address`,
   },
   {
-    manifestExample: true,
     events: {
       [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
         address: sameRecyclerAndDropOffAddress,
@@ -65,6 +64,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
         },
       }),
     },
+    manifestExample: true,
     manifestFields: { addressFields: ['latitude', 'longitude'] },
     resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: RuleOutputStatus.PASSED,

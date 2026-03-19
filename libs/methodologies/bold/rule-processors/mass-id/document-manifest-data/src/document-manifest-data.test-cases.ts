@@ -68,17 +68,16 @@ const defaultEvents = {
 
 export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
   {
-    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: undefined,
     },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.MISSING_EVENT(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document does not have a ${documentManifestType} event`,
   },
   ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
-    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -89,12 +88,12 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment: attributeErrorMessages[attribute]!,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
   })),
   {
-    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -108,12 +107,12 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment: `${RESULT_COMMENTS.MISSING_DOCUMENT_TYPE} ${RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
   },
   {
-    manifestExample: true,
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
@@ -128,6 +127,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment:
       RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
@@ -213,11 +213,11 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
   },
   {
-    manifestExample: true,
     documentManifestType,
     events: {
       [`${ACTOR}-${RECYCLER}`]: undefined,
     },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has no ${RECYCLER} event`,

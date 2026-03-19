@@ -26,10 +26,10 @@ interface WasteOriginIdentificationTestCase extends RuleTestCase {
 export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCase[] =
   [
     {
-      manifestExample: true,
       events: {
         [PICK_UP]: undefined,
       },
+      manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: `The "${PICK_UP}" event is missing`,
@@ -47,7 +47,6 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}"`,
     },
     {
-      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
           label: WASTE_GENERATOR,
@@ -57,6 +56,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
           metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
         }),
       },
+      manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}" and the "${WASTE_GENERATOR}" event is defined`,
@@ -77,17 +77,16 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
-      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}`]: undefined,
         [PICK_UP]: stubBoldMassIDPickUpEvent(),
       },
+      manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and no "${WASTE_GENERATOR}" event`,
     },
     {
-      manifestExample: true,
       events: {
         [`${ACTOR}-${WASTE_GENERATOR}-1`]: stubDocumentEvent({
           label: WASTE_GENERATOR,
@@ -99,6 +98,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
         }),
         [PICK_UP]: stubBoldMassIDPickUpEvent(),
       },
+      manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
       resultStatus: RuleOutputStatus.FAILED,
       scenario: `The MassID document with multiple "${WASTE_GENERATOR}" events`,
