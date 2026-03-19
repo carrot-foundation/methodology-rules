@@ -154,10 +154,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     documentManifestType,
     events: {
       [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-        address: {
-          ...sameAddress,
-          countryCode: 'BR',
-        },
+        address: sameAddress,
         label: RECYCLER,
         name: ACTOR,
       }),

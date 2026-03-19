@@ -202,19 +202,49 @@ function extractAppFrameworkRules(
 
 // --- Enum resolution ---
 
+type StringEnum = Record<string, string>;
+
+function enumKeyToValueMap(enumObj: StringEnum): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const [key, value] of Object.entries(enumObj)) {
+    if (typeof value === 'string') {
+      map[key] = value;
+    }
+  }
+  return map;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { DocumentEventName } = require(
+const BoldTypes = require(
   '@carrot-fndn/shared/methodologies/bold/types',
 ) as {
-  DocumentEventName: Record<string, string>;
+  DocumentCategory: StringEnum;
+  DocumentEventAttributeName: StringEnum;
+  DocumentEventAttributeValue: StringEnum;
+  DocumentEventName: StringEnum;
+  DocumentEventVehicleType: StringEnum;
+  DocumentType: StringEnum;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const { MethodologyDocumentEventLabel } = require(
-  '@carrot-fndn/shared/types',
-) as {
-  MethodologyDocumentEventLabel: Record<string, string>;
+const SharedTypes = require('@carrot-fndn/shared/types') as {
+  MethodologyDocumentEventAttributeFormat: StringEnum;
+  MethodologyDocumentEventLabel: StringEnum;
 };
+
+const ENUM_KEY_TO_VALUE: Record<string, string> = {
+  ...enumKeyToValueMap(BoldTypes.DocumentCategory),
+  ...enumKeyToValueMap(BoldTypes.DocumentType),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventName),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeName),
+  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventLabel),
+  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventAttributeFormat),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
+};
+
+const DocumentEventName = BoldTypes.DocumentEventName;
+const MethodologyDocumentEventLabel = SharedTypes.MethodologyDocumentEventLabel;
 
 // --- Actor label extraction from processor files ---
 
@@ -531,11 +561,17 @@ function resolvePlaceholder(ident: string): string {
   return KNOWN_PLACEHOLDERS[ident] ?? camelToUpperSnake(ident);
 }
 
+function resolveEnumPlaceholders(message: string): string {
+  return message.replace(/\{\{([A-Z_]+)\}\}/g, (_match, key: string) => {
+    return ENUM_KEY_TO_VALUE[key] ?? `{{${key}}}`;
+  });
+}
+
 function normalizeMessage(str: string): string {
   if (!str) return str;
 
   // Replace ${String(identifier)} and ${identifier} with {{TOKEN}}
-  const result = str
+  const withPlaceholders = str
     .replace(/\$\{String\((\w+)\)\}/g, (_match, inner: string) => {
       return `{{${resolvePlaceholder(inner)}}}`;
     })
@@ -545,6 +581,7 @@ function normalizeMessage(str: string): string {
     })
     .replace(/\\"/g, '"');
 
+  const result = resolveEnumPlaceholders(withPlaceholders);
   return result.trim();
 }
 
@@ -565,9 +602,32 @@ function isPlaceholderOnly(s: string): boolean {
   return PLACEHOLDER_ONLY_RE.test(s);
 }
 
+// Document/category/type display names that should be quoted when they appear unquoted (longest first to avoid partial matches)
+const DOCUMENT_TYPE_DISPLAY_NAMES = [
+  ...new Set([
+    ...Object.values(BoldTypes.DocumentCategory),
+    ...Object.values(BoldTypes.DocumentType),
+  ]),
+].sort((a, b) => b.length - a.length);
+
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function quoteUnquotedDocumentTypeNames(message: string): string {
+  let result = message;
+  for (const name of DOCUMENT_TYPE_DISPLAY_NAMES) {
+    const escaped = escapeRegex(name);
+    const re = new RegExp(`(^|[^"])(${escaped})([^"]|$)`, 'g');
+    result = result.replace(re, '$1"$2"$3');
+  }
+  return result;
+}
+
 function normalizeMessages(messages: string[]): string[] {
   return messages
     .map((s) => normalizeMessage(s))
+    .map(quoteUnquotedDocumentTypeNames)
     .filter((s) => !isPlaceholderOnly(s) && !isCodeLeak(s));
 }
 
@@ -822,10 +882,6 @@ function sanitizeAttributeValue(value: unknown): unknown {
     return undefined;
   }
 
-  if (value === false) {
-    return undefined;
-  }
-
   if (isAbsurdNumber(value)) {
     return undefined;
   }
@@ -1014,8 +1070,10 @@ function filterEventsForRule(
     const label = event['label'] as string | undefined;
 
     if (name === 'ACTOR') {
-      if (ruleEventNames.has('ACTOR')) return true;
-      return label !== undefined && ruleActorLabels.has(label);
+      if (ruleActorLabels.size > 0) {
+        return label !== undefined && ruleActorLabels.has(label);
+      }
+      return ruleEventNames.has('ACTOR');
     }
 
     return ruleEventNames.has(name);
