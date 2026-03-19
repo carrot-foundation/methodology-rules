@@ -156,9 +156,6 @@ importers:
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
-      aws-sdk-client-mock-jest:
-        specifier: 4.1.0
-        version: 4.1.0(aws-sdk-client-mock@4.1.0)(vitest@4.1.0(@opentelemetry/api@1.9.0)(@types/node@22.15.18)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)))
       cspell:
         specifier: 9.0.1
         version: 9.0.1
@@ -276,9 +273,6 @@ importers:
       vite:
         specifier: 8.0.1
         version: 8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)
-      vite-tsconfig-paths:
-        specifier: 6.1.1
-        version: 6.1.1(typescript@5.7.3)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
       vitest:
         specifier: 4.1.0
         version: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@22.15.18)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
@@ -2049,10 +2043,6 @@ packages:
     resolution: {integrity: sha512-GlsNBWiFQFCVi9QVSx7f5AgMeLxe9YCCs5PuP2O2LdjDAA8Jh9eX7lA1Jq/xdXw3Wb3hyvlFNfZIfcRetSzYcA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  '@jest/expect-utils@30.3.0':
-    resolution: {integrity: sha512-j0+W5iQQ8hBh7tHZkTQv3q2Fh/M7Je72cIsYqC4OaktgtO7v1So9UTjp6uPBHIaB6beoF/RRsCgMJKvti0wADA==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
   '@jest/expect@29.7.0':
     resolution: {integrity: sha512-8uMeAMycttpva3P1lBHB8VciS9V0XAr3GymPpipdyQXbBcuhkLQOSe8E/p92RyAdToS6ZD1tFkX+CkhoECE0dQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -2068,10 +2058,6 @@ packages:
   '@jest/globals@29.7.0':
     resolution: {integrity: sha512-mpiz3dutLbkW2MNFubUGUEVLkTGiqW6yLVTA+JbP6fI6J5iL9Y0Nlg8k95pcF8ctKwCS7WVxteBs29hhfAotzQ==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  '@jest/pattern@30.0.1':
-    resolution: {integrity: sha512-gWp7NfQW27LaBQz3TITS8L7ZCQ0TLvtmI//4OwlQRx4rnWxcPNIYjxZpDcN4+UlGxgm3jS5QPz8IPTCkb59wZA==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
 
   '@jest/reporters@29.7.0':
     resolution: {integrity: sha512-DApq0KJbJOEzAFYjHADNNxAE3KbhxQB1y5Kplb5Waqw6zVbuWatSnMjE5gs8FUgEPmNsnZA3NCWl9NG0ia04Pg==}
@@ -2109,10 +2095,6 @@ packages:
   '@jest/types@29.6.3':
     resolution: {integrity: sha512-u3UPsIilWKOM3F9CXtrG8LEJmNxwoCQC/XVj4IKYXvvpx7QIi/Kg1LI5uDmDpKlac62NUtX7eLjRh+jVZcLOzw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  '@jest/types@30.3.0':
-    resolution: {integrity: sha512-JHm87k7bA33hpBngtU8h6UBub/fqqA9uXfw+21j5Hmk7ooPHlboRNxHq0JcMtC+n8VJGP1mcfnD3Mk+XKe1oSw==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
 
   '@jridgewell/gen-mapping@0.3.13':
     resolution: {integrity: sha512-2kkt/7niJ6MgEPxF0bYdQ6etZaA+fQvDcLKckhy1yIQOzaoKjBBjSj63/aLVjYE3qhRt5dvM+uUyfCg6UKCBbA==}
@@ -4259,15 +4241,6 @@ packages:
     resolution: {integrity: sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==}
     engines: {node: '>= 0.4'}
 
-  aws-sdk-client-mock-jest@4.1.0:
-    resolution: {integrity: sha512-+g4a5Hp+MmPqqNnvwfLitByggrqf+xSbk1pm6fBYHNcon6+aQjL5iB+3YB6HuGPemY+/mUKN34iP62S14R61bA==}
-    peerDependencies:
-      aws-sdk-client-mock: 4.1.0
-      vitest: '>1.6.0'
-    peerDependenciesMeta:
-      vitest:
-        optional: true
-
   aws-sdk-client-mock@4.1.0:
     resolution: {integrity: sha512-h/tOYTkXEsAcV3//6C1/7U4ifSpKyJvb6auveAepqqNJl6TdZaPFEtKjBQNf8UxQdDP850knB2i/whq4zlsxJw==}
 
@@ -5582,10 +5555,6 @@ packages:
     resolution: {integrity: sha512-2Zks0hf1VLFYI1kbh0I5jP3KHHyCHpkfyHBzsSXRFgl/Bg9mWYfMW8oD+PdMPlEwy5HNsR9JutYy6pMeOh61nw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  expect@30.3.0:
-    resolution: {integrity: sha512-1zQrciTiQfRdo7qJM1uG4navm8DayFa2TgCSRlzUyNkhcJ6XUZF3hjnpkyr3VhAqPH7i/9GkG7Tv5abz6fqz0Q==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
   express@4.22.1:
     resolution: {integrity: sha512-F2X8g9P1X7uCPZMA3MVf9wcTqlyNp7IhH5qPCI0izhaOIYXaW9L535tGA3qmjRzpH+bZczqq7hVKxTR4NWnu+g==}
     engines: {node: '>= 0.10.0'}
@@ -5919,9 +5888,6 @@ packages:
   globby@12.2.0:
     resolution: {integrity: sha512-wiSuFQLZ+urS9x2gGPl1H5drc5twabmm4m2gTR27XDFyjUHJUNsS8o/2aKyIF6IoBaR630atdher0XJ5g6OMmA==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
-
-  globrex@0.1.2:
-    resolution: {integrity: sha512-uHJgbwAMwNFf5mLst7IWLNg14x1CkeqglJb/K3doi4dw6q2IvAAmM/Y81kevy83wP+Sst+nutFTYOGg3d1lsxg==}
 
   gopd@1.2.0:
     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
@@ -6419,25 +6385,13 @@ packages:
     resolution: {integrity: sha512-sBkD+Xi9DtcChsI3L3u0+N0opgPYnCRPtGcQYrgXmR+hmt/fYfWAL0xRXYU8eWOdfuLgBe0YCW3AFtnRLagq/g==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  jest-matcher-utils@30.3.0:
-    resolution: {integrity: sha512-HEtc9uFQgaUHkC7nLSlQL3Tph4Pjxt/yiPvkIrrDCt9jhoLIgxaubo1G+CFOnmHYMxHwwdaSN7mkIFs6ZK8OhA==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
   jest-message-util@29.7.0:
     resolution: {integrity: sha512-GBEV4GRADeP+qtB2+6u61stea8mGcOT4mCtrYISZwfu9/ISHFJ/5zOMXYbpBE9RsS5+Gb63DW4FgmnKJ79Kf6w==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
 
-  jest-message-util@30.3.0:
-    resolution: {integrity: sha512-Z/j4Bo+4ySJ+JPJN3b2Qbl9hDq3VrXmnjjGEWD/x0BCXeOXPTV1iZYYzl2X8c1MaCOL+ewMyNBcm88sboE6YWw==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
-
   jest-mock@29.7.0:
     resolution: {integrity: sha512-ITOMZn+UkYS4ZFh83xYAOzWStloNzJFO2s8DWrE4lhtGD+AorgnbkiKERe4wQVBydIGPx059g6riW5Btp6Llnw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  jest-mock@30.3.0:
-    resolution: {integrity: sha512-OTzICK8CpE+t4ndhKrwlIdbM6Pn8j00lvmSmq5ejiO+KxukbLjgOflKWMn3KE34EZdQm5RqTuKj+5RIEniYhog==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
 
   jest-pnp-resolver@1.2.3:
     resolution: {integrity: sha512-+3NpwQEnRoIBtx4fyhblQDPgJI0H1IEIkX7ShLUjPGA7TtUTvI1oiKi3SR4oBR0hQhQR80l4WAe5RrXBwWMA8w==}
@@ -6451,10 +6405,6 @@ packages:
   jest-regex-util@29.6.3:
     resolution: {integrity: sha512-KJJBsRCyyLNWCNBOvZyRDnAIfUiRJ8v+hOBQYGn8gDyF3UegwiP4gwRR3/SDa42g1YbVycTidUF3rKjyLFDWbg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  jest-regex-util@30.0.1:
-    resolution: {integrity: sha512-jHEQgBXAgc+Gh4g0p3bCevgRCVRkB4VB70zhoAE48gxeSr1hfUOsM/C2WoJgVL7Eyg//hudYENbm3Ne+/dRVVA==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
 
   jest-resolve@29.7.0:
     resolution: {integrity: sha512-IOVhZSrg+UvVAshDSDtHyFCCBUl/Q3AAJv8iZ6ZjnZ74xzvwuzLXid9IIIPgTnY62SJjfuupMKZsZQRsCvxEgA==}
@@ -6475,10 +6425,6 @@ packages:
   jest-util@29.7.0:
     resolution: {integrity: sha512-z6EbKajIpqGKU56y5KBUgy1dt1ihhQJgWzUlZHArA/+X2ad7Cb5iF+AK1EWVL/Bo7Rz9uurpqw6SiBCefUbCGA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
-
-  jest-util@30.3.0:
-    resolution: {integrity: sha512-/jZDa00a3Sz7rdyu55NLrQCIrbyIkbBxareejQI315f/i8HjYN+ZWsDLLpoQSiUIEIyZF/R8fDg3BmB8AtHttg==}
-    engines: {node: ^18.14.0 || ^20.0.0 || ^22.0.0 || >=24.0.0}
 
   jest-validate@29.7.0:
     resolution: {integrity: sha512-ZB7wHqaRGVw/9hST/OuFUReG7M8vKeq0/J2egIGLdvjHCmYqGARhzXmtgi+gVeZ5uXFF219aOc3Ls2yLg27tkw==}
@@ -8569,16 +8515,6 @@ packages:
       '@swc/wasm':
         optional: true
 
-  tsconfck@3.1.6:
-    resolution: {integrity: sha512-ks6Vjr/jEw0P1gmOVwutM3B7fWxoWBL2KRDb1JfqGVawBmO5UsvmWOQFGHBPl5yxYz4eERr19E6L7NMv+Fej4w==}
-    engines: {node: ^18 || >=20}
-    hasBin: true
-    peerDependencies:
-      typescript: ^5.0.0
-    peerDependenciesMeta:
-      typescript:
-        optional: true
-
   tsconfig-paths-webpack-plugin@4.0.0:
     resolution: {integrity: sha512-fw/7265mIWukrSHd0i+wSwx64kYUSAKPfxRDksjKIYTxSAp9W9/xcZVBF4Kl0eqQd5eBpAQ/oQrc5RyM/0c1GQ==}
     engines: {node: '>=10.13.0'}
@@ -8768,11 +8704,6 @@ packages:
   vary@1.1.2:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
-
-  vite-tsconfig-paths@6.1.1:
-    resolution: {integrity: sha512-2cihq7zliibCCZ8P9cKJrQBkfgdvcFkOOc3Y02o3GWUDLgqjWsZudaoiuOwO/gzTzy17cS5F7ZPo4bsnS4DGkg==}
-    peerDependencies:
-      vite: '*'
 
   vite@8.0.1:
     resolution: {integrity: sha512-wt+Z2qIhfFt85uiyRt5LPU4oVEJBXj8hZNWKeqFG4gRG/0RaRGJ7njQCwzFVjO+v4+Ipmf5CY7VdmZRAYYBPHw==}
@@ -11980,10 +11911,6 @@ snapshots:
     dependencies:
       jest-get-type: 29.6.3
 
-  '@jest/expect-utils@30.3.0':
-    dependencies:
-      '@jest/get-type': 30.1.0
-
   '@jest/expect@29.7.0':
     dependencies:
       expect: 29.7.0
@@ -12010,11 +11937,6 @@ snapshots:
       jest-mock: 29.7.0
     transitivePeerDependencies:
       - supports-color
-
-  '@jest/pattern@30.0.1':
-    dependencies:
-      '@types/node': 22.15.18
-      jest-regex-util: 30.0.1
 
   '@jest/reporters@29.7.0':
     dependencies:
@@ -12096,16 +12018,6 @@ snapshots:
   '@jest/types@29.6.3':
     dependencies:
       '@jest/schemas': 29.6.3
-      '@types/istanbul-lib-coverage': 2.0.6
-      '@types/istanbul-reports': 3.0.4
-      '@types/node': 22.15.18
-      '@types/yargs': 17.0.35
-      chalk: 4.1.2
-
-  '@jest/types@30.3.0':
-    dependencies:
-      '@jest/pattern': 30.0.1
-      '@jest/schemas': 30.0.5
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
       '@types/node': 22.15.18
@@ -14914,15 +14826,6 @@ snapshots:
     dependencies:
       possible-typed-array-names: 1.1.0
 
-  aws-sdk-client-mock-jest@4.1.0(aws-sdk-client-mock@4.1.0)(vitest@4.1.0(@opentelemetry/api@1.9.0)(@types/node@22.15.18)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))):
-    dependencies:
-      '@vitest/expect': 4.1.0
-      aws-sdk-client-mock: 4.1.0
-      expect: 30.3.0
-      tslib: 2.8.1
-    optionalDependencies:
-      vitest: 4.1.0(@opentelemetry/api@1.9.0)(@types/node@22.15.18)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2))
-
   aws-sdk-client-mock@4.1.0:
     dependencies:
       '@types/sinon': 17.0.4
@@ -16500,15 +16403,6 @@ snapshots:
       jest-message-util: 29.7.0
       jest-util: 29.7.0
 
-  expect@30.3.0:
-    dependencies:
-      '@jest/expect-utils': 30.3.0
-      '@jest/get-type': 30.1.0
-      jest-matcher-utils: 30.3.0
-      jest-message-util: 30.3.0
-      jest-mock: 30.3.0
-      jest-util: 30.3.0
-
   express@4.22.1:
     dependencies:
       accepts: 1.3.8
@@ -16891,8 +16785,6 @@ snapshots:
       ignore: 5.3.2
       merge2: 1.4.1
       slash: 4.0.0
-
-  globrex@0.1.2: {}
 
   gopd@1.2.0: {}
 
@@ -17437,13 +17329,6 @@ snapshots:
       jest-get-type: 29.6.3
       pretty-format: 29.7.0
 
-  jest-matcher-utils@30.3.0:
-    dependencies:
-      '@jest/get-type': 30.1.0
-      chalk: 4.1.2
-      jest-diff: 30.3.0
-      pretty-format: 30.3.0
-
   jest-message-util@29.7.0:
     dependencies:
       '@babel/code-frame': 7.29.0
@@ -17456,37 +17341,17 @@ snapshots:
       slash: 3.0.0
       stack-utils: 2.0.6
 
-  jest-message-util@30.3.0:
-    dependencies:
-      '@babel/code-frame': 7.29.0
-      '@jest/types': 30.3.0
-      '@types/stack-utils': 2.0.3
-      chalk: 4.1.2
-      graceful-fs: 4.2.11
-      picomatch: 4.0.3
-      pretty-format: 30.3.0
-      slash: 3.0.0
-      stack-utils: 2.0.6
-
   jest-mock@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
       '@types/node': 22.15.18
       jest-util: 29.7.0
 
-  jest-mock@30.3.0:
-    dependencies:
-      '@jest/types': 30.3.0
-      '@types/node': 22.15.18
-      jest-util: 30.3.0
-
   jest-pnp-resolver@1.2.3(jest-resolve@29.7.0):
     optionalDependencies:
       jest-resolve: 29.7.0
 
   jest-regex-util@29.6.3: {}
-
-  jest-regex-util@30.0.1: {}
 
   jest-resolve@29.7.0:
     dependencies:
@@ -17586,15 +17451,6 @@ snapshots:
       ci-info: 3.9.0
       graceful-fs: 4.2.11
       picomatch: 2.3.1
-
-  jest-util@30.3.0:
-    dependencies:
-      '@jest/types': 30.3.0
-      '@types/node': 22.15.18
-      chalk: 4.1.2
-      ci-info: 4.4.0
-      graceful-fs: 4.2.11
-      picomatch: 4.0.3
 
   jest-validate@29.7.0:
     dependencies:
@@ -19914,10 +19770,6 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.11.24
 
-  tsconfck@3.1.6(typescript@5.7.3):
-    optionalDependencies:
-      typescript: 5.7.3
-
   tsconfig-paths-webpack-plugin@4.0.0:
     dependencies:
       chalk: 4.1.2
@@ -20126,16 +19978,6 @@ snapshots:
   varint@6.0.0: {}
 
   vary@1.1.2: {}
-
-  vite-tsconfig-paths@6.1.1(typescript@5.7.3)(vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)):
-    dependencies:
-      debug: 4.4.3
-      globrex: 0.1.2
-      tsconfck: 3.1.6(typescript@5.7.3)
-      vite: 8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2)
-    transitivePeerDependencies:
-      - supports-color
-      - typescript
 
   vite@8.0.1(@types/node@22.15.18)(esbuild@0.27.4)(jiti@2.6.1)(less@4.1.3)(sass-embedded@1.98.0)(sass@1.98.0)(stylus@0.64.0)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.2):
     dependencies:

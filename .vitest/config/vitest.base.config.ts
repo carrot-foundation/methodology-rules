@@ -12,6 +12,10 @@ export const getVitestBaseConfig = (dirname: string) => {
     path.join(workspaceRoot, '.vitest', filePath);
 
   return {
+    resolve: {
+      tsconfigPaths: true,
+    },
+    oxc: false as const,
     test: {
       name,
       globals: true,
