@@ -138,6 +138,50 @@ describe('Accreditation Document Helpers', () => {
       expect(isAccreditationValid(document)).toBe(false);
     });
 
+    it('should return false if the document has no externalEvents', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: undefined,
+      });
+
+      document.externalEvents = undefined;
+
+      expect(isAccreditationValid(document)).toBe(false);
+    });
+
+    it('should return false if the document has ACCREDITATION_RESULT event with invalid expiration date format', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, 'not-a-valid-datetime'],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValid(document)).toBe(false);
+    });
+
+    it('should return false if the document has ACCREDITATION_RESULT event with status not in enum', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
+              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+              [ACCREDITATION_STATUS, 'Unknown'],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValid(document)).toBe(false);
+    });
+
     it('should return false if the document has a ACCREDITATION_RESULT event but no expiration date', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
@@ -157,6 +201,23 @@ describe('Accreditation Document Helpers', () => {
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
             [[EXPIRATION_DATE, subDays(new Date(), 5).toISOString()]],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValid(document)).toBe(false);
+    });
+
+    it('should return false if the document has ACCREDITATION_RESULT event with invalid effective date format', () => {
+      const document = stubParticipantAccreditationDocument({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, 'not-a-valid-datetime'],
+              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
           ),
         ],
       });

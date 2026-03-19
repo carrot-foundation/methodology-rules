@@ -1,0 +1,24 @@
+type: object
+required:
+  - id
+  - intent
+  - scope
+  - requirements
+  - anti_patterns
+properties:
+  id:
+    type: string
+  intent:
+    type: string
+  scope:
+    type: array
+    items:
+      type: string
+  requirements:
+    type: array
+    items:
+      type: string
+  anti_patterns:
+    type: array
+    items:
+      type: string

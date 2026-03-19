@@ -4,6 +4,7 @@ import {
   type DocumentType,
   getDefaultLayouts,
 } from '@carrot-fndn/shared/document-extractor';
+import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
@@ -77,7 +78,7 @@ export const getAttachmentInfos = ({
   documentId: string;
   events: DocumentManifestEventSubject[];
 }): AttachmentInfo[] => {
-  const bucketName = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+  const bucketName = getDocumentAttachmentBucketName();
 
   if (!bucketName) {
     logger.warn(

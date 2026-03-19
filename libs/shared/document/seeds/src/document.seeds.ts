@@ -1,5 +1,6 @@
 import type { Logger } from 'pino';
 
+import { getAuditUrl } from '@carrot-fndn/shared/env';
 import {
   isNonEmptyObject,
   logger as pinoLogger,
@@ -10,7 +11,6 @@ import {
   type NonEmptyString,
   NonEmptyStringSchema,
   type Uri,
-  UriSchema,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -69,19 +69,7 @@ export const seedDocument = async ({
   partialDocument?: Partial<MethodologyDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
-  const auditUrlFromEnvironment = process.env['AUDIT_URL'];
-
-  let endpoint: Uri;
-
-  try {
-    const auditUrl = UriSchema.parse(auditUrlFromEnvironment);
-
-    endpoint = `${auditUrl}/documents`;
-  } catch {
-    throw new Error(
-      "Invalid process.env['AUDIT_URL']: unable to build endpoint as type Uri. Please set AUDIT_URL to a valid non-empty URI.",
-    );
-  }
+  const endpoint: Uri = `${getAuditUrl()}/documents`;
 
   const document: MethodologyDocument = {
     ...stubMethodologyDocument(),

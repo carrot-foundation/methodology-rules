@@ -18,11 +18,27 @@ import {
 
 jest.mock('./document-manifest-data.extractor');
 
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getArtifactChecksum: () => 'test-checksum',
+  getAwsRegion: () => 'us-east-1',
+  getDocumentAttachmentBucketName: () => mockBucketName,
+  getDocumentBucketName: () => 'test-bucket',
+  getEnvironment: () => 'development',
+  getNodeEnv: () => 'test',
+  getOptionalEnv: jest.fn(),
+  getSentryDsn: () => undefined,
+  getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
+  getSourceCodeUrl: () => 'https://test.example.com/repo',
+  getSourceCodeVersion: () => 'test-version',
+}));
+
+let mockBucketName: string | undefined = 'test-bucket';
+
 describe('DocumentManifestDataLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
   beforeEach(() => {
-    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+    mockBucketName = 'test-bucket';
     jest.mocked(crossValidateWithTextract).mockResolvedValue({
       crossValidation: {},
       extractionMetadata: {},
@@ -35,7 +51,7 @@ describe('DocumentManifestDataLambda E2E', () => {
   });
 
   afterEach(() => {
-    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+    mockBucketName = undefined;
   });
 
   it.each([...documentManifestDataTestCases, ...exceptionTestCases])(

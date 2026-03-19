@@ -5,20 +5,19 @@ import {
   getLayoutValidationConfig,
 } from './document-manifest-data.helpers';
 
+const mockGetDocumentAttachmentBucketName = jest.fn(
+  () => undefined as string | undefined,
+);
+
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getDocumentAttachmentBucketName: () => mockGetDocumentAttachmentBucketName(),
+  getDocumentBucketName: () => 'test-bucket',
+}));
+
 describe('document-manifest-data.helpers', () => {
   describe('getAttachmentInfos', () => {
-    const originalEnvironment = process.env;
-
-    beforeEach(() => {
-      process.env = { ...originalEnvironment };
-    });
-
-    afterEach(() => {
-      process.env = originalEnvironment;
-    });
-
     it('should return empty array when DOCUMENT_ATTACHMENT_BUCKET_NAME is not set', () => {
-      delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+      mockGetDocumentAttachmentBucketName.mockReturnValue(undefined);
 
       const events: DocumentManifestEventSubject[] = [
         {
@@ -35,7 +34,7 @@ describe('document-manifest-data.helpers', () => {
     });
 
     it('should return attachment infos when bucket name is set', () => {
-      process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+      mockGetDocumentAttachmentBucketName.mockReturnValue('test-bucket');
 
       const events: DocumentManifestEventSubject[] = [
         {
@@ -57,7 +56,7 @@ describe('document-manifest-data.helpers', () => {
     });
 
     it('should filter out events without attachmentId', () => {
-      process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'test-bucket';
+      mockGetDocumentAttachmentBucketName.mockReturnValue('test-bucket');
 
       const events: DocumentManifestEventSubject[] = [
         {

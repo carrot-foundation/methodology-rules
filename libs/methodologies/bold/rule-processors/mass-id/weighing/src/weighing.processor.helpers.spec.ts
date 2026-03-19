@@ -5,14 +5,16 @@ import {
 
 import { WeighingProcessor } from './weighing.processor';
 
+const mockGetDocumentAttachmentBucketName = jest.fn(
+  () => undefined as string | undefined,
+);
+
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getDocumentAttachmentBucketName: () => mockGetDocumentAttachmentBucketName(),
+  getDocumentBucketName: () => 'test-bucket',
+}));
+
 describe('WeighingProcessor helpers', () => {
-  const originalScaleTicketBucket =
-    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
-
-  afterEach(() => {
-    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = originalScaleTicketBucket;
-  });
-
   it('should build a text extractor input when attachment and bucket are present', () => {
     const processor = new WeighingProcessor();
 
@@ -27,7 +29,7 @@ describe('WeighingProcessor helpers', () => {
       ],
     } as unknown as DocumentEvent;
 
-    process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'] = 'bucket-name';
+    mockGetDocumentAttachmentBucketName.mockReturnValue('bucket-name');
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,
@@ -54,7 +56,7 @@ describe('WeighingProcessor helpers', () => {
       ],
     } as unknown as DocumentEvent;
 
-    delete process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+    mockGetDocumentAttachmentBucketName.mockReturnValue(undefined);
 
     const input = processor['buildScaleTicketTextExtractorInput'](
       weighingEvent,

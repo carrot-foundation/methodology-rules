@@ -107,6 +107,7 @@
       "@carrot-fndn/shared/http-request": [
         "libs/shared/http-request/src/index.ts"
       ],
+      "@carrot-fndn/shared/env": ["libs/shared/env/src/index.ts"],
       "@carrot-fndn/shared/helpers": ["libs/shared/helpers/src/index.ts"],
       "@carrot-fndn/shared/aws-http": ["libs/shared/aws-http/src/index.ts"],
       "@carrot-fndn/shared/cloudwatch-metrics": [
