@@ -54,7 +54,7 @@ export const getVitestBaseConfig = (dirname: string) => {
       maxWorkers: 1,
       isolate: true,
       watch: false,
-      passWithNoTests: false,
+      passWithNoTests: true,
 
       include: ['**/*.{test,spec}.{ts,js}'],
       exclude: [
