@@ -4,7 +4,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 
 export const ruleDefinition = {
   description:
-    'Validates waste origin identification consistency, ensuring that identified origins have exactly one waste generator actor event and unidentified origins have none.',
+    'Validates waste origin identification consistency, ensuring that identified origins have exactly one Waste Generator ACTOR event and unidentified origins have none.',
   events: [
     DocumentEventName.ACTOR,
     DocumentEventName.PICK_UP,
