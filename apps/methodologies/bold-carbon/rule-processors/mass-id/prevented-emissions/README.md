@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Calculates prevented emissions in kg CO2e based on the waste subtype, recycler accreditation baselines, and exceeding emission coefficient.
+Calculates prevented emissions in kg CO2e based on the waste subtype, recycler accreditation baselines, exceeding emission coefficient, and gas type configuration.
 
 ## 📋 Framework Rules
 

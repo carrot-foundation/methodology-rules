@@ -4,7 +4,7 @@ import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types'
 
 export const ruleDefinition = {
   description:
-    'Validates transport and recycling manifest events in MassID documents, ensuring they contain required attributes, proper attachments, and valid exemption justifications.',
+    'Validates transport and recycling manifest events in MassID documents, ensuring they contain required attributes, proper document attachments, and valid exemption justifications. Cross-validates manifest data against extracted document content when available.',
   events: [
     DocumentEventName.ACTOR,
     DocumentEventName.DROP_OFF,

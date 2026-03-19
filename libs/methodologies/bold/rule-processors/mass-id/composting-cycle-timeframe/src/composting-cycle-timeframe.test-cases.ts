@@ -25,7 +25,10 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
   [
     {
       dropOffEventDate: DROP_OFF_DATE_RECENT,
+      manifestExample: true,
       recycledEventDate: RECYCLED_DATE_EARLIER,
+      resultComment:
+        'The composting cycle duration of 2 days is below the minimum accepted range of 60 days.',
       resultStatus: RuleOutputStatus.FAILED,
       scenario: 'Time interval is less than 60 days (2 days)',
     },
@@ -39,6 +42,8 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,
       manifestExample: true,
       recycledEventDate: RECYCLED_DATE_EARLIER,
+      resultComment:
+        'The composting cycle duration of 94 days is within the accepted range of 60 to 180 days.',
       resultStatus: RuleOutputStatus.PASSED,
       scenario: 'Time interval is within range (94 days)',
     },

@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates vehicle identification in the pick-up event, ensuring the appropriate identification method is used based on the vehicle type: license plate, description, or no identification required.
+Validates vehicle identification in the Pick-up event, ensuring the appropriate identification method is used based on the vehicle type: license plate, description, or no identification required.
 
 ## 📋 Framework Rules
 

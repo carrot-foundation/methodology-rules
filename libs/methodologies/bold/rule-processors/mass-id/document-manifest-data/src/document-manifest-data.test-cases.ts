@@ -16,7 +16,6 @@ import {
   MethodologyDocumentEventAttributeFormat,
   MethodologyDocumentEventLabel,
 } from '@carrot-fndn/shared/types';
-import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
@@ -42,17 +41,22 @@ const attributeErrorMessages: Record<string, string> = {
   [ISSUE_DATE]: RESULT_COMMENTS.MISSING_ISSUE_DATE,
 };
 
-const documentManifestType: DocumentManifestType = faker.helpers.arrayElement([
-  RECYCLING_MANIFEST,
-  TRANSPORT_MANIFEST,
-]);
+const documentManifestType: DocumentManifestType = RECYCLING_MANIFEST;
 
 const documentManifestTypeStub = {
   [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent,
   [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent,
 };
 
-const sameAddress = stubAddress();
+const sameAddress = stubAddress({
+  city: 'Cidade Centro',
+  countryCode: 'BR',
+  latitude: -23.5505,
+  longitude: -46.6333,
+  number: '100',
+  street: 'Rua Modelo',
+  zipCode: '01310-100',
+});
 
 const defaultEvents = {
   [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
@@ -68,6 +72,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     events: {
       [documentManifestType]: undefined,
     },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.MISSING_EVENT(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document does not have a ${documentManifestType} event`,
@@ -83,6 +88,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment: attributeErrorMessages[attribute]!,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
@@ -101,6 +107,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment: `${RESULT_COMMENTS.MISSING_DOCUMENT_TYPE} ${RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER}`,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
@@ -120,6 +127,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
+    manifestExample: true,
     resultComment:
       RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(documentManifestType),
     resultStatus: RuleOutputStatus.FAILED,
@@ -150,10 +158,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     documentManifestType,
     events: {
       [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-        address: {
-          ...sameAddress,
-          countryCode: 'BR',
-        },
+        address: sameAddress,
         label: RECYCLER,
         name: ACTOR,
       }),
@@ -212,6 +217,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     events: {
       [`${ACTOR}-${RECYCLER}`]: undefined,
     },
+    manifestExample: true,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
     resultStatus: RuleOutputStatus.FAILED,
     scenario: `The MassID document has no ${RECYCLER} event`,
@@ -220,6 +226,12 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
+        metadataAttributes: [
+          [
+            EXEMPTION_JUSTIFICATION,
+            'Equipment undergoing scheduled maintenance',
+          ],
+        ],
         partialDocumentEvent: {
           address: sameAddress,
         },
@@ -238,8 +250,8 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '0'],
+          [DOCUMENT_TYPE, 'CDF'],
+          [DOCUMENT_NUMBER, 'CDF-2024-001234'],
           {
             format: DATE,
             name: ISSUE_DATE,
@@ -261,13 +273,13 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     manifestExample: true,
     manifestFields: { includeValue: true },
     resultComment: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
-      documentNumber: '0',
-      documentType: 'MTR',
+      documentNumber: 'CDF-2024-001234',
+      documentType: 'CDF',
       issueDate: '2025-03-20',
       value: 100,
     }),
     resultStatus: RuleOutputStatus.PASSED,
-    scenario: `The MassID document has a valid ${TRANSPORT_MANIFEST} event and attachment`,
+    scenario: `The MassID document has a valid ${documentManifestType} event and attachment`,
   },
   {
     documentManifestType,
@@ -276,7 +288,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType
       ]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_TYPE, 'CDF'],
           [DOCUMENT_NUMBER, '1'],
           {
             format: DATE,
@@ -298,7 +310,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType
       ]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
+          [DOCUMENT_TYPE, 'CDF'],
           [DOCUMENT_NUMBER, '2'],
           {
             format: DATE,
@@ -321,12 +333,12 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: `${RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
       documentNumber: '1',
-      documentType: 'MTR',
+      documentType: 'CDF',
       issueDate: '2025-03-21',
       value: 1000,
     })} ${RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
       documentNumber: '2',
-      documentType: 'MTR',
+      documentType: 'CDF',
       issueDate: '2025-03-18',
       value: 200,
     })}`,

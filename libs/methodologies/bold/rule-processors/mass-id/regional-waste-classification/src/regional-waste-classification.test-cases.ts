@@ -225,6 +225,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
           ],
         }),
       },
+      manifestExample: true,
       partialDocument: {
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },

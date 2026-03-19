@@ -22,8 +22,7 @@ export const RESULT_COMMENTS = {
       `The document value must be greater than 0, but "${value}" was provided.`,
   },
   passed: {
-    VALID_QUALIFICATIONS:
-      'The document category, measurement unit, subtype, type, and value are correctly defined.',
+    VALID_QUALIFICATIONS: `The document qualifications are valid: category is "${MASS_ID}", type is "${ORGANIC}", measurement unit is "${KG}", and value is greater than 0.`,
   },
   reviewRequired: {},
 } as const;

@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates that the time between drop-off and recycled events is within the acceptable range of 60 to 180 days for composting cycles.
+Validates that the time between Drop-off and Recycled events is within the acceptable range of 60 to 180 days for composting cycles.
 
 ## 📋 Framework Rules
 

@@ -21,6 +21,22 @@ const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
   DocumentEventAttributeName;
 const { ACCREDITATION_RESULT } = DocumentEventName;
 
+const stubAccreditationDocumentWithExternalEvents = ({
+  externalEvents,
+}: {
+  externalEvents:
+    | ReturnType<typeof stubParticipantAccreditationDocument>['externalEvents']
+    | undefined;
+}) => {
+  const document = stubParticipantAccreditationDocument({
+    externalEvents: [],
+  });
+
+  document.externalEvents = externalEvents;
+
+  return document;
+};
+
 describe('Accreditation Document Helpers', () => {
   describe('isAccreditationValid', () => {
     it.each([
@@ -81,7 +97,7 @@ describe('Accreditation Document Helpers', () => {
           'should return false if the effective date is today and the expiration date is in the past',
       },
     ])('$scenario', ({ date, dueDate, expected }) => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -98,7 +114,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has a ACCREDITATION_RESULT event but the status is not APPROVED', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -115,7 +131,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has no ACCREDITATION_RESULT event', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [],
       });
 
@@ -167,7 +183,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has a ACCREDITATION_RESULT event but no expiration date', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -180,7 +196,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has a ACCREDITATION_RESULT event but no effective date', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -210,7 +226,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return true if the document has a ACCREDITATION_RESULT event with valid effective date but no expiration date', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -258,27 +274,23 @@ describe('Accreditation Document Helpers', () => {
 
   describe('isAccreditationValidWithOptionalDates', () => {
     it('should return true if the document has no ACCREDITATION_RESULT event', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [],
       });
-
-      document.externalEvents = [];
 
       expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
     it('should return true if the document has no externalEvents', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: undefined,
       });
-
-      document.externalEvents = undefined;
 
       expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
     it('should return true if the document has a valid ACCREDITATION_RESULT event', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -295,7 +307,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has an invalid ACCREDITATION_RESULT event', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
@@ -312,7 +324,7 @@ describe('Accreditation Document Helpers', () => {
     });
 
     it('should return false if the document has ACCREDITATION_RESULT event with invalid status', () => {
-      const document = stubParticipantAccreditationDocument({
+      const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },

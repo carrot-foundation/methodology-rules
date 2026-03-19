@@ -29,7 +29,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     manifestExample: true,
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
-        [DRIVER_IDENTIFIER, '550e8400-e29b-41d4-a716-446655440000'],
+        [DRIVER_IDENTIFIER, '123.456.789-00'],
         [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, undefined],
         [VEHICLE_TYPE, TRUCK],
       ],
@@ -52,6 +52,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     scenario: `The "${DRIVER_IDENTIFIER}" is not provided, but the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is provided`,
   },
   {
+    manifestExample: true,
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         [DRIVER_IDENTIFIER, undefined],

@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates hauler identification based on the vehicle type, requiring a hauler actor event for most vehicle types while making it optional for sludge pipes and cart.
+Validates hauler identification based on the vehicle type, requiring a Hauler ACTOR event for most vehicle types while making it optional for sludge pipes and cart.
 
 ## 📋 Framework Rules
 
