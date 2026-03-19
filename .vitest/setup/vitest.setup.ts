@@ -3,9 +3,15 @@ import path from 'node:path';
 import { vi } from 'vitest';
 
 // Load test environment variables
-dotenv.config({
+const dotenvResult = dotenv.config({
   path: path.resolve(import.meta.dirname, '../../.env-files/.env.test'),
 });
+
+if (dotenvResult.error) {
+  throw new Error(
+    `Failed to load test environment from .env-files/.env.test: ${dotenvResult.error.message}`,
+  );
+}
 
 // Mock pino to be silent in tests
 vi.mock('pino', () => ({

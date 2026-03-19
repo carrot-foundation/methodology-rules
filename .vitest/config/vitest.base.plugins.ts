@@ -5,6 +5,13 @@ import _swc from 'unplugin-swc';
 const swc =
   'vite' in _swc ? _swc : (_swc as unknown as { default: typeof _swc }).default;
 
+if (!swc?.vite) {
+  throw new Error(
+    'Failed to resolve unplugin-swc: unexpected export shape. ' +
+      'Verify that the installed version of unplugin-swc is compatible.',
+  );
+}
+
 export interface VitestPluginsOptions {
   dirname: string;
 }

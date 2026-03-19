@@ -3,10 +3,38 @@ import path from 'node:path';
 
 const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 
+const readProjectName = (dirname: string): string => {
+  const projectJsonPath = path.join(dirname, 'project.json');
+
+  let raw: string;
+  try {
+    raw = readFileSync(projectJsonPath, 'utf8');
+  } catch (error) {
+    throw new Error(
+      `Failed to read ${projectJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  let parsed: { name?: string };
+  try {
+    parsed = JSON.parse(raw) as { name?: string };
+  } catch (error) {
+    throw new Error(
+      `Failed to parse ${projectJsonPath}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
+  if (!parsed.name) {
+    throw new Error(
+      `Missing "name" field in ${projectJsonPath}. Every project must have a name for Vitest config.`,
+    );
+  }
+
+  return parsed.name;
+};
+
 export const getVitestBaseConfig = (dirname: string) => {
-  const { name } = JSON.parse(
-    readFileSync(path.join(dirname, 'project.json'), 'utf8'),
-  );
+  const name = readProjectName(dirname);
 
   const getVitestSetupPath = (filePath: string) =>
     path.join(workspaceRoot, '.vitest', filePath);
@@ -51,7 +79,7 @@ export const getVitestBaseConfig = (dirname: string) => {
       coverage: {
         enabled: true,
         provider: 'v8' as const,
-        all: false,
+        all: true,
         include: ['src/**/*.{ts,js}'],
         exclude: [
           '**/*.spec.{ts,js}',
