@@ -392,6 +392,28 @@ describe('crossValidateAttachments', () => {
     expect(validateFunction).toHaveBeenCalledTimes(1);
   });
 
+  it('should set reviewRequired without reviewReasons when validate omits them', async () => {
+    const extractionOutput = createExtractionOutput();
+    const extractor = createMockExtractor(extractionOutput);
+    const config = createConfig({
+      validate: () => ({
+        failMessages: [],
+        reviewRequired: true,
+      }),
+    });
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('CDF', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+
+    expect(result.reviewRequired).toBe(true);
+    expect(result.reviewReasons).toHaveLength(0);
+  });
+
   it('should collect reviewReasons from validate callback', async () => {
     const extractionOutput = createExtractionOutput();
     const extractor = createMockExtractor(extractionOutput);

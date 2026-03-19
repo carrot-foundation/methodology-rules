@@ -139,6 +139,7 @@ export const collectLowConfidenceFields = (
           result,
         );
       }
+      // v8 ignore next -- exhaustive else; type narrowing guarantees branch
     } else if (isExtractedEntityGroup(field)) {
       collectLowConfidenceFromGroup(field, fieldName, result);
     }

@@ -211,9 +211,9 @@ describe('reportRuleResults', () => {
       },
     } as never);
 
-    vi
-      .spyOn(globalThis, 'fetch')
-      .mockResolvedValueOnce(new Response(null, { status: 400 }));
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(null, { status: 400 }),
+    );
 
     await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
 

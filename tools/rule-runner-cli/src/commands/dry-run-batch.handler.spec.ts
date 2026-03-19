@@ -46,9 +46,7 @@ vi.mock('../utils/batch-summary', async (importOriginal) => {
 });
 
 const mockReadFile = readFile as vi.MockedFunction<typeof readFile>;
-const mockProcessBatch = processBatch as vi.MockedFunction<
-  typeof processBatch
->;
+const mockProcessBatch = processBatch as vi.MockedFunction<typeof processBatch>;
 const mockResolveDryRunEnvironment =
   resolveDryRunEnvironment as vi.MockedFunction<
     typeof resolveDryRunEnvironment
@@ -56,9 +54,7 @@ const mockResolveDryRunEnvironment =
 const mockProcessDryRunDocument = processDryRunDocument as vi.MockedFunction<
   typeof processDryRunDocument
 >;
-const mockWriteJsonLog = writeJsonLog as vi.MockedFunction<
-  typeof writeJsonLog
->;
+const mockWriteJsonLog = writeJsonLog as vi.MockedFunction<typeof writeJsonLog>;
 
 const INPUT_FILE_PATH = 'test-data/docs.json';
 

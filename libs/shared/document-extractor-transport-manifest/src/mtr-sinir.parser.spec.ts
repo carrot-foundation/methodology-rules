@@ -480,6 +480,33 @@ IBAMA`;
       expect(result.data.vehiclePlate?.confidence).toBe('high');
     });
 
+    it('should parse document without issue date', () => {
+      const text = `MANIFESTO DE TRANSPORTE DE RESÍDUOS - MTR
+MTR Nº: 123456789
+Data de Transporte: 16/03/2024
+Data de Recebimento: 18/03/2024
+
+Gerador
+EMPRESA GERADORA LTDA
+CNPJ: 12.345.678/0001-90
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+
+Destinatário
+RECICLAGEM SUSTENTÁVEL LTDA
+CNPJ: 11.222.333/0001-44
+
+Tipo de Resíduo: Plástico
+IBAMA - Instituto Brasileiro do Meio Ambiente`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.issueDate).toBeUndefined();
+      expect(result.data.transportDate?.parsed).toBe('16/03/2024');
+    });
+
     it('should handle section extraction with empty lines array', () => {
       // Text that triggers section parsing with potential edge cases
       const minimalSectionText = `

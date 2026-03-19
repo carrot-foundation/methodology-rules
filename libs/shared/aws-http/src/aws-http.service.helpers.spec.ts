@@ -9,7 +9,6 @@ const stubSignRequestInput = (): SignRequestInput => ({
   url: new URL(faker.internet.url()),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@aws-sdk/credential-providers')>()),
   fromContainerMetadata: vi.fn(),

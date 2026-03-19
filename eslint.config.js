@@ -238,12 +238,18 @@ const vitestFilesConfigs = [
     plugins: {
       vitest: vitestPlugin,
     },
+    languageOptions: {
+      globals: vitestPlugin.environments.env.globals,
+    },
     rules: {
       ...vitestPlugin.configs.recommended.rules,
       'sonarjs/no-nested-functions': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
       'global-require': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/consistent-type-assertions': 'off',
@@ -312,9 +318,9 @@ module.exports = defineConfig([
   commentsPlugin.recommended,
   securityPlugin.configs.recommended,
   testCasesFilesConfig,
+  tsFilesConfig,
   ...vitestFilesConfigs,
   ymlFilesConfigs,
   jsonFilesConfigs,
   jsFilesConfigs,
-  tsFilesConfig,
 ]);

@@ -46,9 +46,9 @@ describe('DocumenQueryService', () => {
   ])('should throw error when $scenario', async ({ document, error }) => {
     const documentId = faker.string.uuid();
 
-    vi
-      .spyOn(provideDocumentLoaderService, 'load')
-      .mockResolvedValueOnce(document as never);
+    vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
+      document as never,
+    );
 
     const context = stubQueryContext();
 
@@ -74,8 +74,7 @@ describe('DocumenQueryService', () => {
         parentDocument: {},
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(
           parentDocumentEntity as DocumentEntity<Document>,
@@ -191,8 +190,7 @@ describe('DocumenQueryService', () => {
         },
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
           stubDocumentEntity({
@@ -291,8 +289,7 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(document as DocumentEntity<Document>)
         .mockResolvedValueOnce(
           stubDocumentEntity({
@@ -367,8 +364,7 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
           stubDocumentEntity({
@@ -405,8 +401,7 @@ describe('DocumenQueryService', () => {
         relatedDocuments: [{ category, subtype, type }],
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(stubDocumentEntity({ document }))
         .mockResolvedValueOnce(
           stubDocumentEntity({ document: relatedDocument }),
@@ -434,9 +429,9 @@ describe('DocumenQueryService', () => {
         relatedDocuments: [],
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>);
+      vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
+        documentEntity as DocumentEntity<Document>,
+      );
 
       const loaderDocuments = await loadDocuments.load({
         context: stubQueryContext(),
@@ -464,9 +459,9 @@ describe('DocumenQueryService', () => {
         ],
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>);
+      vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
+        documentEntity as DocumentEntity<Document>,
+      );
 
       const loaderDocuments = await loadDocuments.load({
         context: stubQueryContext(),
@@ -512,8 +507,7 @@ describe('DocumenQueryService', () => {
         },
       };
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(
@@ -544,8 +538,7 @@ describe('DocumenQueryService', () => {
       });
       const documentEntity = stubDocumentEntity({ document });
 
-      vi
-        .spyOn(provideDocumentLoaderService, 'load')
+      vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
         .mockResolvedValueOnce(
           parentDocumentEntity as DocumentEntity<Document>,

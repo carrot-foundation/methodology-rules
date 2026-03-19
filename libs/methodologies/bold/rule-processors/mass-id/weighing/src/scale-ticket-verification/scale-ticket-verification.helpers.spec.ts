@@ -167,9 +167,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return an extraction failed error when text extractor throws', async () => {
-    vi
-      .spyOn(textExtractor, 'extractText')
-      .mockRejectedValue(new Error('boom'));
+    vi.spyOn(textExtractor, 'extractText').mockRejectedValue(new Error('boom'));
 
     const result = await verifyScaleTicketNetWeight({
       config: {
