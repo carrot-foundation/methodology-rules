@@ -5,7 +5,6 @@ import * as awsHelpers from './aws-http.service.helpers';
 
 jest.mock('@carrot-fndn/shared/env', () => ({
   getAwsRegion: () => 'us-east-1',
-  getOptionalEnv: jest.fn(),
 }));
 
 jest.mock('./aws-http.service.helpers', () => ({

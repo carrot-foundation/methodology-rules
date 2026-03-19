@@ -48,10 +48,15 @@ export const wrapRuleIntoLambdaHandler = (
   process.setMaxListeners(20);
 
   const sentryDsn = getSentryDsn();
+  const isProduction = getNodeEnv() === 'production';
+
+  if (isProduction && !sentryDsn) {
+    logger.warn('SENTRY_DSN is not set — error monitoring is disabled');
+  }
 
   AWSLambda.init({
     ...(sentryDsn ? { dsn: sentryDsn } : {}),
-    enabled: getNodeEnv() === 'production',
+    enabled: isProduction,
     environment: getEnvironment(),
   });
 

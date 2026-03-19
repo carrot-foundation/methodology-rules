@@ -11,6 +11,7 @@ export {
   getNodeEnv,
   getOptionalEnv,
   getRequiredEnv,
+  getRequiredUriEnv,
   getSentryDsn,
   getSmaugApiGatewayAssumeRoleArn,
   getSourceCodeUrl,

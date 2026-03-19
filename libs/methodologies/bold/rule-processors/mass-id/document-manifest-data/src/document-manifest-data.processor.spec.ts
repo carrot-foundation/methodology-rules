@@ -16,7 +16,6 @@ jest.mock('./document-manifest-data.extractor');
 jest.mock('@carrot-fndn/shared/env', () => ({
   getDocumentAttachmentBucketName: () => mockBucketName,
   getDocumentBucketName: () => 'test-bucket',
-  getOptionalEnv: jest.fn(),
 }));
 
 let mockBucketName: string | undefined = 'test-bucket';

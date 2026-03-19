@@ -12,7 +12,6 @@ const mockGetDocumentAttachmentBucketName = jest.fn(
 jest.mock('@carrot-fndn/shared/env', () => ({
   getDocumentAttachmentBucketName: () => mockGetDocumentAttachmentBucketName(),
   getDocumentBucketName: () => 'test-bucket',
-  getOptionalEnv: jest.fn(),
 }));
 
 describe('document-manifest-data.helpers', () => {

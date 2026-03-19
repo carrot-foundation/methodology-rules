@@ -10,7 +10,6 @@ jest.mock('@aws-sdk/client-s3');
 
 jest.mock('@carrot-fndn/shared/env', () => ({
   getDocumentBucketName: () => 'test-bucket',
-  getOptionalEnv: jest.fn(),
 }));
 
 const S3ClientMock = new S3Client({});

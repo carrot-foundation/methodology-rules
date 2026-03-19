@@ -20,7 +20,6 @@ jest.mock('@carrot-fndn/shared/env', () => ({
   getAwsRegion: () => mockGetAwsRegion(),
   getCloudwatchMetricsNamespace: () => mockGetCloudwatchMetricsNamespace(),
   getEnableCloudwatchMetrics: () => mockGetEnableCloudwatchMetrics(),
-  getOptionalEnv: jest.fn(),
 }));
 
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);

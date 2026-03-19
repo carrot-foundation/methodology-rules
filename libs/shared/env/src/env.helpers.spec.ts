@@ -13,6 +13,7 @@ import {
   getNodeEnv as getNodeEnvironment,
   getOptionalEnv as getOptionalEnvironment,
   getRequiredEnv as getRequiredEnvironment,
+  getRequiredUriEnv as getRequiredUriEnvironment,
   getSentryDsn,
   getSmaugApiGatewayAssumeRoleArn,
   getSourceCodeUrl,
@@ -49,6 +50,36 @@ describe('getRequiredEnv', () => {
   });
 });
 
+describe('getRequiredUriEnv', () => {
+  const originalEnvironment = process.env;
+
+  beforeEach(() => {
+    process.env = { ...originalEnvironment };
+  });
+
+  afterAll(() => {
+    process.env = originalEnvironment;
+  });
+
+  it('should return the value when a valid URL is present', () => {
+    process.env['TEST_VAR'] = 'https://example.com';
+
+    expect(getRequiredUriEnvironment('TEST_VAR')).toBe('https://example.com');
+  });
+
+  it('should throw ZodError when variable is missing', () => {
+    delete process.env['TEST_VAR'];
+
+    expect(() => getRequiredUriEnvironment('TEST_VAR')).toThrow(ZodError);
+  });
+
+  it('should throw ZodError when variable is not a valid URL', () => {
+    process.env['TEST_VAR'] = 'not-a-url';
+
+    expect(() => getRequiredUriEnvironment('TEST_VAR')).toThrow(ZodError);
+  });
+});
+
 describe('getOptionalEnv', () => {
   const originalEnvironment = process.env;
 
@@ -76,6 +107,12 @@ describe('getOptionalEnv', () => {
     delete process.env['TEST_VAR'];
 
     expect(getOptionalEnvironment('TEST_VAR', 'default')).toBe('default');
+  });
+
+  it('should return empty string when variable is empty (not the default)', () => {
+    process.env['TEST_VAR'] = '';
+
+    expect(getOptionalEnvironment('TEST_VAR', 'default')).toBe('');
   });
 });
 
@@ -114,6 +151,20 @@ describe('getBooleanEnv', () => {
     expect(getBooleanEnvironment('TEST_VAR')).toBe(false);
     expect(getBooleanEnvironment('TEST_VAR', true)).toBe(true);
   });
+
+  it('should handle whitespace-padded values', () => {
+    process.env['TEST_VAR'] = '  true  ';
+
+    expect(getBooleanEnvironment('TEST_VAR')).toBe(true);
+  });
+
+  it('should return false for non-boolean string values', () => {
+    for (const value of ['1', '0', 'yes', 'no', 'invalid']) {
+      process.env['TEST_VAR'] = value;
+
+      expect(getBooleanEnvironment('TEST_VAR')).toBe(false);
+    }
+  });
 });
 
 describe('specific env helpers', () => {
@@ -130,7 +181,6 @@ describe('specific env helpers', () => {
   describe('required env helpers', () => {
     it.each([
       { fn: getArtifactChecksum, key: 'ARTIFACT_CHECKSUM' },
-      { fn: getAuditUrl, key: 'AUDIT_URL' },
       { fn: getAwsRegion, key: 'AWS_REGION' },
       { fn: getDocumentBucketName, key: 'DOCUMENT_BUCKET_NAME' },
       { fn: getEnvironment, key: 'ENVIRONMENT' },
@@ -147,9 +197,14 @@ describe('specific env helpers', () => {
       expect(fn()).toBe('test-value');
     });
 
+    it('AUDIT_URL should return value when set to a valid URL', () => {
+      process.env['AUDIT_URL'] = 'https://audit.example.com';
+
+      expect(getAuditUrl()).toBe('https://audit.example.com');
+    });
+
     it.each([
       { fn: getArtifactChecksum, key: 'ARTIFACT_CHECKSUM' },
-      { fn: getAuditUrl, key: 'AUDIT_URL' },
       { fn: getAwsRegion, key: 'AWS_REGION' },
       { fn: getDocumentBucketName, key: 'DOCUMENT_BUCKET_NAME' },
       { fn: getEnvironment, key: 'ENVIRONMENT' },
@@ -164,6 +219,18 @@ describe('specific env helpers', () => {
       delete process.env[key];
 
       expect(() => fn()).toThrow(ZodError);
+    });
+
+    it('AUDIT_URL should throw when not set', () => {
+      delete process.env['AUDIT_URL'];
+
+      expect(() => getAuditUrl()).toThrow(ZodError);
+    });
+
+    it('AUDIT_URL should throw when set to an invalid URL', () => {
+      process.env['AUDIT_URL'] = 'not-a-url';
+
+      expect(() => getAuditUrl()).toThrow(ZodError);
     });
   });
 

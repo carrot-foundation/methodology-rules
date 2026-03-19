@@ -7,6 +7,12 @@ export const getRequiredEnv = (key: string): string =>
     // eslint-disable-next-line security/detect-object-injection
     .parse(process.env[key]);
 
+export const getRequiredUriEnv = (key: string): string =>
+  z
+    .url(`Environment variable ${key} must be a valid URL`)
+    // eslint-disable-next-line security/detect-object-injection
+    .parse(process.env[key]);
+
 export const getOptionalEnv = (
   key: string,
   defaultValue?: string,
@@ -27,7 +33,7 @@ export const getBooleanEnv = (key: string, defaultValue = false): boolean => {
 // Required env vars
 export const getArtifactChecksum = (): string =>
   getRequiredEnv('ARTIFACT_CHECKSUM');
-export const getAuditUrl = (): string => getRequiredEnv('AUDIT_URL');
+export const getAuditUrl = (): string => getRequiredUriEnv('AUDIT_URL');
 export const getAwsRegion = (): string => getRequiredEnv('AWS_REGION');
 export const getDocumentBucketName = (): string =>
   getRequiredEnv('DOCUMENT_BUCKET_NAME');
