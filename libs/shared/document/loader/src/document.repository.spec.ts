@@ -8,6 +8,10 @@ import { assertDocumentEntity } from './document.validators';
 
 jest.mock('@aws-sdk/client-s3');
 
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getDocumentBucketName: () => 'test-bucket',
+}));
+
 const S3ClientMock = new S3Client({});
 
 describe('DocumentRepository', () => {

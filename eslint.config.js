@@ -148,6 +148,8 @@ const tsFilesConfig = {
         allowList: {
           props: true,
           Props: true,
+          env: true,
+          Env: true,
         },
         replacements: { e: false, lib: false },
       },
@@ -197,6 +199,8 @@ const tsAndJsFilesConfigs = {
         allowList: {
           props: true,
           Props: true,
+          env: true,
+          Env: true,
         },
         replacements: { e: false, lib: false },
       },

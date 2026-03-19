@@ -1,4 +1,5 @@
 import { signRequest } from '@carrot-fndn/shared/aws-http';
+import { getAwsRegion } from '@carrot-fndn/shared/env';
 import {
   isNonEmptyString,
   logger as pinoLogger,
@@ -28,7 +29,7 @@ export const prepareHttpRequestConfig = async (
       query: config.method === 'GET' ? config.params : undefined,
       url,
     },
-    process.env['AWS_REGION'] as string,
+    getAwsRegion(),
   );
 
   return {

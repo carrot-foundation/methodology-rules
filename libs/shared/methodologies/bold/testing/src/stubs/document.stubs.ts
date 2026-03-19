@@ -40,12 +40,12 @@ export const stubDocument = (
     updatedAt: faker.date.recent().toISOString(),
     ...partialDocument,
     externalEvents: [
+      ...externalEvents,
       ...(stubExternalEvents
         ? Array.from({ length: faker.number.int({ max: 3, min: 1 }) }, () =>
             stubDocumentEvent(),
           )
         : []),
-      ...externalEvents,
     ],
     primaryAddress: stubAddress(partialDocument?.primaryAddress),
     primaryParticipant: stubParticipant(partialDocument?.primaryParticipant),

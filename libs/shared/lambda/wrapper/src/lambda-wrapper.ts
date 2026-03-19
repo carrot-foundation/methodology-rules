@@ -3,6 +3,11 @@ import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Handler } from 'aws-lambda';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import {
+  getEnvironment,
+  getNodeEnv,
+  getSentryDsn,
+} from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
@@ -42,10 +47,17 @@ export const wrapRuleIntoLambdaHandler = (
   // This addresses the issue with multiple uncaughtException listeners added by Sentry
   process.setMaxListeners(20);
 
+  const sentryDsn = getSentryDsn();
+  const isProduction = getNodeEnv() === 'production';
+
+  if (isProduction && !sentryDsn) {
+    logger.warn('SENTRY_DSN is not set — error monitoring is disabled');
+  }
+
   AWSLambda.init({
-    dsn: String(process.env['SENTRY_DSN']),
-    enabled: String(process.env['NODE_ENV']) === 'production',
-    environment: String(process.env['ENVIRONMENT']),
+    ...(sentryDsn ? { dsn: sentryDsn } : {}),
+    enabled: isProduction,
+    environment: getEnvironment(),
   });
 
   const handler = async (event: MethodologyRuleEvent): Promise<unknown> => {

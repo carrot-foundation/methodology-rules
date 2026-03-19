@@ -1,3 +1,3 @@
-import { UriSchema } from '@carrot-fndn/shared/types';
+import { getAuditUrl } from '@carrot-fndn/shared/env';
 
-export const AUDIT_API_URL = UriSchema.parse(process.env['AUDIT_URL']);
+export const AUDIT_API_URL = getAuditUrl();

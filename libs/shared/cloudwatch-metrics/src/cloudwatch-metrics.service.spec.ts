@@ -10,24 +10,34 @@ import {
 
 jest.mock('@aws-sdk/client-cloudwatch');
 
+const mockGetAwsRegion = jest.fn(() => 'us-east-1');
+const mockGetEnableCloudwatchMetrics = jest.fn(() => false);
+const mockGetCloudwatchMetricsNamespace = jest.fn(
+  () => undefined as string | undefined,
+);
+
+jest.mock('@carrot-fndn/shared/env', () => ({
+  getAwsRegion: () => mockGetAwsRegion(),
+  getCloudwatchMetricsNamespace: () => mockGetCloudwatchMetricsNamespace(),
+  getEnableCloudwatchMetrics: () => mockGetEnableCloudwatchMetrics(),
+}));
+
 const mockCloudWatchClient = jest.mocked(CloudWatchClient);
 
-const originalEnvironment = { ...process.env };
-
-const setEnvironmentVariables = (
-  environmentVariables: Record<string, string | undefined>,
+const setMockEnvironment = (
+  overrides: {
+    awsRegion?: string;
+    cloudwatchMetricsNamespace?: string | undefined;
+    enableCloudwatchMetrics?: boolean;
+  } = {},
 ) => {
-  for (const key of Object.keys(environmentVariables)) {
-    if (environmentVariables[key] === undefined) {
-      delete process.env[key];
-    } else {
-      process.env[key] = environmentVariables[key];
-    }
-  }
-};
-
-const resetEnvironmentVariables = () => {
-  process.env = { ...originalEnvironment };
+  mockGetAwsRegion.mockReturnValue(overrides.awsRegion ?? 'us-east-1');
+  mockGetEnableCloudwatchMetrics.mockReturnValue(
+    overrides.enableCloudwatchMetrics ?? false,
+  );
+  mockGetCloudwatchMetricsNamespace.mockReturnValue(
+    overrides.cloudwatchMetricsNamespace,
+  );
 };
 
 const createMockCloudWatchMetricData = (
@@ -41,10 +51,8 @@ describe('CloudWatchMetricsService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     CloudWatchMetricsService['instance'] = null;
-
     setModuleCloudWatchClient(null);
-
-    resetEnvironmentVariables();
+    setMockEnvironment();
   });
 
   describe('getInstance', () => {
@@ -77,37 +85,34 @@ describe('CloudWatchMetricsService', () => {
 
   describe('constructor and configuration', () => {
     it('should use default configuration when no env vars are set', () => {
-      setEnvironmentVariables({
-        AWS_REGION: undefined,
-        CLOUDWATCH_METRICS_NAMESPACE: undefined,
-        ENABLE_CLOUDWATCH_METRICS: undefined,
-        NODE_ENV: undefined,
+      setMockEnvironment({
+        awsRegion: 'us-east-1',
+        cloudwatchMetricsNamespace: undefined,
+        enableCloudwatchMetrics: false,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
-      const config = instance['config'];
 
-      expect(config.namespace).toBe(CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE);
-      expect(config.enabled).toBe(false);
+      expect(instance['namespace']).toBe(
+        CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
+      );
+      expect(instance.isEnabled()).toBe(false);
     });
 
     it('should use custom CLOUDWATCH_METRICS_NAMESPACE when provided', () => {
-      setEnvironmentVariables({
-        CLOUDWATCH_METRICS_NAMESPACE: 'Custom/Namespace',
-        NODE_ENV: undefined,
+      setMockEnvironment({
+        cloudwatchMetricsNamespace: 'Custom/Namespace',
       });
 
       const instance = CloudWatchMetricsService.getInstance();
-      const config = instance['config'];
 
-      expect(config.namespace).toBe('Custom/Namespace');
+      expect(instance['namespace']).toBe('Custom/Namespace');
     });
 
-    it('should use default AWS region when AWS_REGION not set', async () => {
-      setEnvironmentVariables({
-        AWS_REGION: undefined,
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+    it('should use configured AWS region', async () => {
+      setMockEnvironment({
+        awsRegion: 'ap-southeast-1',
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
@@ -116,121 +121,43 @@ describe('CloudWatchMetricsService', () => {
       await instance.recordAIValidationFailure(mockData);
 
       expect(mockCloudWatchClient).toHaveBeenCalledWith({
-        region: CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
-      });
-    });
-
-    it('should use custom AWS region when AWS_REGION is provided', async () => {
-      setEnvironmentVariables({
-        AWS_REGION: 'eu-west-1',
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
-      });
-
-      const instance = CloudWatchMetricsService.getInstance();
-      const mockData = createMockCloudWatchMetricData();
-
-      await instance.recordAIValidationFailure(mockData);
-
-      expect(mockCloudWatchClient).toHaveBeenCalledWith({
-        region: 'eu-west-1',
+        region: 'ap-southeast-1',
       });
     });
   });
 
   describe('isEnabled', () => {
-    it('should be disabled when NODE_ENV is test', () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: undefined,
-        NODE_ENV: 'test',
-      });
+    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is not set', () => {
+      setMockEnvironment({});
 
       const instance = CloudWatchMetricsService.getInstance();
 
       expect(instance.isEnabled()).toBe(false);
     });
 
-    it('should be disabled when jest is defined (always true in test environment)', () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+    it('should be enabled when ENABLE_CLOUDWATCH_METRICS is true', () => {
+      setMockEnvironment({
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
 
       expect(instance.isEnabled()).toBe(true);
-      expect(typeof jest).toBe('object');
     });
 
-    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is undefined and not in test env', () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: undefined,
-        NODE_ENV: 'production',
+    it('should be disabled when ENABLE_CLOUDWATCH_METRICS is false', () => {
+      setMockEnvironment({
+        enableCloudwatchMetrics: false,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
 
       expect(instance.isEnabled()).toBe(false);
     });
-
-    it('should respect ENABLE_CLOUDWATCH_METRICS=true (case insensitive)', () => {
-      const testCases = ['true', 'TRUE', 'True', 'tRuE'];
-
-      for (const value of testCases) {
-        CloudWatchMetricsService['instance'] = null;
-
-        setEnvironmentVariables({
-          ENABLE_CLOUDWATCH_METRICS: value,
-          NODE_ENV: 'production',
-        });
-
-        const instance = CloudWatchMetricsService.getInstance();
-
-        expect(instance.isEnabled()).toBe(true);
-      }
-    });
-
-    it('should respect ENABLE_CLOUDWATCH_METRICS=false (case insensitive)', () => {
-      const testCases = ['false', 'FALSE', 'False', 'fAlSe'];
-
-      for (const value of testCases) {
-        CloudWatchMetricsService['instance'] = null;
-
-        setEnvironmentVariables({
-          ENABLE_CLOUDWATCH_METRICS: value,
-          NODE_ENV: 'production',
-        });
-
-        const instance = CloudWatchMetricsService.getInstance();
-
-        expect(instance.isEnabled()).toBe(false);
-      }
-    });
-
-    it('should handle invalid ENABLE_CLOUDWATCH_METRICS values as false', () => {
-      const testCases = ['invalid', '1', '0', 'yes', 'no'];
-
-      for (const value of testCases) {
-        CloudWatchMetricsService['instance'] = null;
-
-        setEnvironmentVariables({
-          ENABLE_CLOUDWATCH_METRICS: value,
-          NODE_ENV: 'production',
-        });
-
-        const instance = CloudWatchMetricsService.getInstance();
-
-        expect(instance.isEnabled()).toBe(false);
-      }
-    });
   });
 
   describe('recordAIValidationFailure', () => {
     it('should return a boolean from isEnabled method', () => {
-      setEnvironmentVariables({
-        NODE_ENV: 'test',
-      });
-
       const instance = CloudWatchMetricsService.getInstance();
       const result = instance.isEnabled();
 
@@ -239,9 +166,8 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should handle valid CloudWatchMetricData without throwing', async () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+      setMockEnvironment({
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
@@ -257,10 +183,9 @@ describe('CloudWatchMetricsService', () => {
 
   describe('CloudWatch integration', () => {
     it('should instantiate CloudWatchClient with correct region configuration', async () => {
-      setEnvironmentVariables({
-        AWS_REGION: 'us-west-2',
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+      setMockEnvironment({
+        awsRegion: 'us-west-2',
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
@@ -274,9 +199,8 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should reuse the same CloudWatchClient instance (singleton behavior)', async () => {
-      setEnvironmentVariables({
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+      setMockEnvironment({
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
@@ -289,15 +213,13 @@ describe('CloudWatchMetricsService', () => {
     });
 
     it('should use correct namespace from configuration', () => {
-      setEnvironmentVariables({
-        CLOUDWATCH_METRICS_NAMESPACE: 'Custom/TestNamespace',
-        NODE_ENV: 'production',
+      setMockEnvironment({
+        cloudwatchMetricsNamespace: 'Custom/TestNamespace',
       });
 
       const instance = CloudWatchMetricsService.getInstance();
-      const config = instance['config'];
 
-      expect(config.namespace).toBe('Custom/TestNamespace');
+      expect(instance['namespace']).toBe('Custom/TestNamespace');
     });
 
     it('should handle timestamp creation for metrics', () => {
@@ -314,25 +236,24 @@ describe('CloudWatchMetricsService', () => {
   });
 
   describe('Error handling', () => {
-    it('should handle empty string environment variables', async () => {
-      setEnvironmentVariables({
-        AWS_REGION: undefined,
-        CLOUDWATCH_METRICS_NAMESPACE: '',
-        ENABLE_CLOUDWATCH_METRICS: 'true',
-        NODE_ENV: 'production',
+    it('should use default when namespace is undefined', async () => {
+      setMockEnvironment({
+        cloudwatchMetricsNamespace: undefined,
+        enableCloudwatchMetrics: true,
       });
 
       const instance = CloudWatchMetricsService.getInstance();
-      const config = instance['config'];
 
-      expect(config.namespace).toBe(CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE);
+      expect(instance['namespace']).toBe(
+        CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
+      );
 
       const mockData = createMockCloudWatchMetricData();
 
       await instance.recordAIValidationFailure(mockData);
 
       expect(mockCloudWatchClient).toHaveBeenCalledWith({
-        region: CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
+        region: 'us-east-1',
       });
     });
   });

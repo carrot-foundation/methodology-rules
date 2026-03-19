@@ -3,6 +3,7 @@ import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
@@ -305,7 +306,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       return undefined;
     }
 
-    const bucket = process.env['DOCUMENT_ATTACHMENT_BUCKET_NAME'];
+    const bucket = getDocumentAttachmentBucketName();
 
     if (!bucket) {
       logger.warn(

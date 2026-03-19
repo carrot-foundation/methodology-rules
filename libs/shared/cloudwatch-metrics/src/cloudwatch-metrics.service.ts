@@ -2,15 +2,14 @@ import {
   CloudWatchClient,
   PutMetricDataCommand,
 } from '@aws-sdk/client-cloudwatch';
-import { getNonEmptyStringOrDefault, isNil } from '@carrot-fndn/shared/helpers';
+import {
+  getAwsRegion,
+  getCloudwatchMetricsNamespace,
+  getEnableCloudwatchMetrics,
+} from '@carrot-fndn/shared/env';
 import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { CLOUDWATCH_CONSTANTS } from './cloudwatch-metrics.constants';
-
-export interface CloudWatchConfig {
-  enabled: boolean;
-  namespace: string;
-}
 
 export interface CloudWatchMetricData {
   documentManifestType: NonEmptyString;
@@ -21,10 +20,7 @@ let cloudWatchClient: CloudWatchClient | null = null;
 const getCloudWatchClient = (): CloudWatchClient => {
   if (!cloudWatchClient) {
     cloudWatchClient = new CloudWatchClient({
-      region: getNonEmptyStringOrDefault(
-        process.env['AWS_REGION'],
-        CLOUDWATCH_CONSTANTS.DEFAULT_REGION,
-      ),
+      region: getAwsRegion(),
     });
   }
 
@@ -39,16 +35,13 @@ export const setModuleCloudWatchClient = (
 
 export class CloudWatchMetricsService {
   private static instance: CloudWatchMetricsService | null = null;
-  private readonly config: CloudWatchConfig;
+  private readonly enabled: boolean;
+  private readonly namespace: string;
 
   private constructor() {
-    this.config = {
-      enabled: this.isCloudWatchMetricsEnabled(),
-      namespace: getNonEmptyStringOrDefault(
-        process.env['CLOUDWATCH_METRICS_NAMESPACE'],
-        CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE,
-      ),
-    };
+    this.enabled = getEnableCloudwatchMetrics();
+    this.namespace =
+      getCloudwatchMetricsNamespace() ?? CLOUDWATCH_CONSTANTS.DEFAULT_NAMESPACE;
   }
 
   static getInstance(): CloudWatchMetricsService {
@@ -60,23 +53,13 @@ export class CloudWatchMetricsService {
   }
 
   isEnabled(): boolean {
-    return this.config.enabled;
+    return this.enabled;
   }
 
   async recordAIValidationFailure(data: CloudWatchMetricData): Promise<void> {
     if (this.isEnabled()) {
       await this.putMetric(data);
     }
-  }
-
-  private isCloudWatchMetricsEnabled(): boolean {
-    if (process.env['NODE_ENV'] === 'test') {
-      return false;
-    }
-
-    const value = process.env['ENABLE_CLOUDWATCH_METRICS'];
-
-    return !isNil(value) && value.trim().toLowerCase() === 'true';
   }
 
   private async putMetric(data: CloudWatchMetricData): Promise<void> {
@@ -97,7 +80,7 @@ export class CloudWatchMetricsService {
           Value: CLOUDWATCH_CONSTANTS.METRIC_VALUE,
         },
       ],
-      Namespace: this.config.namespace,
+      Namespace: this.namespace,
     });
 
     await client.send(command);
