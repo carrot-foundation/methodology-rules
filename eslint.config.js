@@ -11,10 +11,8 @@ const unicornPlugin = require('eslint-plugin-unicorn');
 const commentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments/configs');
 const securityPlugin = require('eslint-plugin-security');
 const globals = require('globals');
-const jestFormattingPlugin = require('eslint-plugin-jest-formatting');
-const jestAsyncPlugin = require('eslint-plugin-jest-async');
 const ymlPlugin = require('eslint-plugin-yml');
-const jestPlugin = require('eslint-plugin-jest');
+const vitestPlugin = require('@vitest/eslint-plugin');
 const jsoncPlugin = require('eslint-plugin-jsonc');
 
 const methodologies = ['bold'];
@@ -228,9 +226,8 @@ const testCasesFilesConfig = {
   },
 };
 
-const jestFilesConfigs = [
+const vitestFilesConfigs = [
   {
-    ...jestPlugin.configs['flat/recommended'],
     files: [
       '**/*.spec.ts',
       '**/*.spec.js',
@@ -239,13 +236,11 @@ const jestFilesConfigs = [
       '**/testing.helpers.ts',
     ],
     plugins: {
-      'jest-formatting': jestFormattingPlugin,
-      'jest-async': jestAsyncPlugin,
-      jest: jestPlugin,
+      vitest: vitestPlugin,
     },
     rules: {
+      ...vitestPlugin.configs.recommended.rules,
       'sonarjs/no-nested-functions': 'off',
-      'jest-async/expect-return': 'error',
       '@typescript-eslint/no-unsafe-assignment': 'off',
       '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
@@ -265,7 +260,7 @@ const jestFilesConfigs = [
       'max-classes-per-file': 'off',
       'import/no-namespace': 'off',
       '@typescript-eslint/dot-notation': 'off',
-      'jest/expect-expect': [
+      'vitest/expect-expect': [
         'error',
         {
           assertFunctionNames: ['expect', 'expectRequest', 'expectRuleOutput'],
@@ -274,12 +269,7 @@ const jestFilesConfigs = [
     },
   },
   {
-    files: ['**/jest.config.ts'],
-    languageOptions: {
-      globals: {
-        __dirname: 'readonly',
-      },
-    },
+    files: ['**/vitest.config.ts'],
     rules: {
       '@nx/enforce-module-boundaries': 'off',
       'import/no-relative-packages': 'off',
@@ -322,7 +312,7 @@ module.exports = defineConfig([
   commentsPlugin.recommended,
   securityPlugin.configs.recommended,
   testCasesFilesConfig,
-  ...jestFilesConfigs,
+  ...vitestFilesConfigs,
   ymlFilesConfigs,
   jsonFilesConfigs,
   jsFilesConfigs,
