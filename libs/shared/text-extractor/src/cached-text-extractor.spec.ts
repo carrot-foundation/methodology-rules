@@ -40,7 +40,7 @@ describe('CachedTextExtractor', () => {
     };
     extractor = new CachedTextExtractor(delegate, cacheDirectory);
 
-    vi.spyOn(logger, 'info').mockImplementation();
+    vi.spyOn(logger, 'info').mockImplementation(() => {});
   });
 
   afterEach(() => {

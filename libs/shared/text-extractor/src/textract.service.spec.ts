@@ -51,10 +51,10 @@ describe('TextractService', () => {
     s3ClientMock = mockClient(S3Client);
     service = new TextractService(new TextractClient({}), new S3Client({}));
 
-    vi.spyOn(logger, 'debug').mockImplementation();
-    vi.spyOn(logger, 'info').mockImplementation();
-    vi.spyOn(logger, 'error').mockImplementation();
-    vi.spyOn(logger, 'warn').mockImplementation();
+    vi.spyOn(logger, 'debug').mockImplementation(() => {});
+    vi.spyOn(logger, 'info').mockImplementation(() => {});
+    vi.spyOn(logger, 'error').mockImplementation(() => {});
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {

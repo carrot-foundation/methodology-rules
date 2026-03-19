@@ -43,7 +43,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
     vi.restoreAllMocks();
   });
 
-  vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
+  vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation(() => {});
 
   const mockStsAndFetch = () => {
     vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
@@ -161,7 +161,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     vi.mocked(getSentryDsn).mockReturnValueOnce(sentryDsn);
 
-    const initSpy = vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
+    const initSpy = vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation(() => {});
 
     const response = {
       ...stubRuleOutput(),

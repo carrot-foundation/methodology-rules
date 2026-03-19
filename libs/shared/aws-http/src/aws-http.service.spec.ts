@@ -20,10 +20,10 @@ describe('HttpService', () => {
       request: vi.fn(),
     } as unknown as vi.Mocked<AxiosInstance>;
 
-    (awsHelpers.signRequest as vi.Mock).mockResolvedValue({
+    vi.mocked(awsHelpers.signRequest).mockResolvedValue({
       body: { data: 'signed' },
       headers: { Authorization: 'AWS4-HMAC-SHA256' },
-    });
+    } as never);
 
     service = new AwsHttpService(mockAxios);
   });

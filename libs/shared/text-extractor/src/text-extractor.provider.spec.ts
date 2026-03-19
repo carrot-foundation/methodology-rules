@@ -36,7 +36,7 @@ describe('text-extractor.provider', () => {
 
     const { textExtractor } = await import('./text-extractor.provider');
 
-    expect(textExtractor['textractClient']).toBeInstanceOf(TextractClient);
+    expect((textExtractor as unknown as Record<string, unknown>)['textractClient']).toBeInstanceOf(TextractClient);
   });
 
   it('should provide a TextractService-backed instance when AWS_REGION is not set', async () => {
@@ -57,7 +57,7 @@ describe('text-extractor.provider', () => {
 
     const { textExtractor } = await import('./text-extractor.provider');
 
-    expect(textExtractor['textractClient']).toBeInstanceOf(TextractClient);
+    expect((textExtractor as unknown as Record<string, unknown>)['textractClient']).toBeInstanceOf(TextractClient);
   });
 
   it('should wrap with CachedTextExtractor when TEXTRACT_CACHE_DIR is set', async () => {

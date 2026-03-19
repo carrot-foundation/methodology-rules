@@ -16,7 +16,7 @@ vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
 
 describe('signRequest', () => {
   const environment = { ...process.env };
-  const mockFromContainerMetadata = fromContainerMetadata as vi.Mock;
+  const mockFromContainerMetadata = vi.mocked(fromContainerMetadata);
 
   beforeEach(() => {
     process.env = {
@@ -82,11 +82,13 @@ describe('signRequest', () => {
           ? { AWS_EXECUTION_ENV: 'AWS_ECS' }
           : {};
 
-      mockFromContainerMetadata.mockReturnValue({
-        accessKeyId: faker.string.uuid(),
-        secretAccessKey: faker.string.uuid(),
-        sessionToken: faker.string.uuid(),
-      });
+      mockFromContainerMetadata.mockReturnValue(
+        vi.fn().mockResolvedValue({
+          accessKeyId: faker.string.uuid(),
+          secretAccessKey: faker.string.uuid(),
+          sessionToken: faker.string.uuid(),
+        }),
+      );
 
       process.env = {
         AWS_ACCESS_KEY_ID: faker.string.uuid(), // required by "fromEnv()"

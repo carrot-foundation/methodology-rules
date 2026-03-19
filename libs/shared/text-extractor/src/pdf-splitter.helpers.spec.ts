@@ -15,7 +15,7 @@ const createTestPdf = async (pageCount: number): Promise<Uint8Array> => {
 
 describe('splitPdfPages', () => {
   beforeEach(() => {
-    vi.spyOn(logger, 'info').mockImplementation();
+    vi.spyOn(logger, 'info').mockImplementation(() => {});
   });
 
   afterEach(() => {

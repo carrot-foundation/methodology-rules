@@ -41,9 +41,10 @@ export const getVitestBaseConfig = (dirname: string) => {
       testTimeout: 10_000,
       hookTimeout: 10_000,
 
-      // Mock reset behavior
+      // Mock reset behavior (clearMocks + restoreMocks matches Jest's resetMocks;
+      // mockReset is omitted because it resets vi.mock() factory implementations,
+      // which Jest's resetMocks does not do)
       clearMocks: true,
-      mockReset: true,
       restoreMocks: true,
 
       // Coverage configuration

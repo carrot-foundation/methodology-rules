@@ -83,6 +83,8 @@ const ignorePatterns = {
     'coverage.json',
     'local',
     'eslint.config.js',
+    '**/vitest.config.ts',
+    'vitest.workspace.ts',
   ],
 };
 
