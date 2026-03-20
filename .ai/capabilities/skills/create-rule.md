@@ -46,7 +46,7 @@ references:
    ├── {rule-name}.test-cases.ts
    ├── index.ts
    ├── project.json
-   └── jest.config.ts
+   └── vitest.config.ts
    ```
 
 2. **Implement the processor**: In `{rule-name}.processor.ts`, implement the `evaluateResult()` method. The processor extends `ParentDocumentRuleProcessor<RuleSubject>`.

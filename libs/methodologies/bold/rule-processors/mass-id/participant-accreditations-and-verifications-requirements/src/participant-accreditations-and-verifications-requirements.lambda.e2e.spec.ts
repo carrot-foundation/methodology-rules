@@ -13,7 +13,7 @@ import { participantAccreditationsAndVerificationsRequirementsTestCases } from '
 
 describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();

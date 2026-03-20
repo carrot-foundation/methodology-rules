@@ -11,12 +11,12 @@ import { stubEnumValue, stubRuleInput } from '@carrot-fndn/shared/testing';
 import { MassIDQualificationsProcessor } from './mass-id-qualifications.processor';
 import { massIDQualificationsTestCases } from './mass-id-qualifications.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('MassIDQualificationsProcessor', () => {
   const ruleDataProcessor = new MassIDQualificationsProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   describe('isValidSubtype', () => {
     it('should return false when subtype is undefined', () => {

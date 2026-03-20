@@ -14,7 +14,7 @@ import { haulerIdentificationTestCases } from './hauler-identification.test-case
 
 describe('HaulerIdentificationProcessor E2E', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();

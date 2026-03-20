@@ -5,11 +5,11 @@ import {
   getLayoutValidationConfig,
 } from './document-manifest-data.helpers';
 
-const mockGetDocumentAttachmentBucketName = jest.fn(
+const mockGetDocumentAttachmentBucketName = vi.fn(
   () => undefined as string | undefined,
 );
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getDocumentAttachmentBucketName: () => mockGetDocumentAttachmentBucketName(),
   getDocumentBucketName: () => 'test-bucket',
 }));

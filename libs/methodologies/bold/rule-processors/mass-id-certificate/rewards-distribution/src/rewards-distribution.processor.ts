@@ -237,6 +237,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     for (const [actorType, rewardDistribution] of Object.entries(
       distributions,
     )) {
+      // v8 ignore next 5 -- defensive type narrowing from Object.entries
       if (
         (Object.values(RewardsDistributionActorType) as unknown[]).includes(
           actorType,
@@ -299,6 +300,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     for (const event of actorEvents) {
       const actorType = event.label;
 
+      // v8 ignore next 4 -- defensive type narrowing from Object.entries
       if (
         (Object.values(RewardsDistributionActorType) as unknown[]).includes(
           actorType,

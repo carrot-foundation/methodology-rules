@@ -1,0 +1,34 @@
+import dotenv from 'dotenv';
+import path from 'node:path';
+import { vi } from 'vitest';
+
+// Load test environment variables
+const dotenvResult = dotenv.config({
+  path: path.resolve(import.meta.dirname, '../../.env-files/.env.test'),
+});
+
+if (dotenvResult.error) {
+  throw new Error(
+    `Failed to load test environment from .env-files/.env.test: ${dotenvResult.error.message}`,
+  );
+}
+
+// Mock pino to be silent in tests
+vi.mock('pino', () => ({
+  default: vi.fn(() => {
+    const logger = {
+      info: vi.fn(),
+      error: vi.fn(),
+      warn: vi.fn(),
+      debug: vi.fn(),
+      trace: vi.fn(),
+      fatal: vi.fn(),
+      child: vi.fn(),
+    };
+    logger.child.mockReturnValue(logger);
+    return logger;
+  }),
+}));
+
+// Import custom matchers
+import '../../libs/shared/testing/src/matchers';

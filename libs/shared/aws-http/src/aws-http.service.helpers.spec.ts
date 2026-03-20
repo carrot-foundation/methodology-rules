@@ -9,15 +9,14 @@ const stubSignRequestInput = (): SignRequestInput => ({
   url: new URL(faker.internet.url()),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('@aws-sdk/credential-providers', () => ({
-  ...jest.requireActual('@aws-sdk/credential-providers'),
-  fromContainerMetadata: jest.fn(),
+vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@aws-sdk/credential-providers')>()),
+  fromContainerMetadata: vi.fn(),
 }));
 
 describe('signRequest', () => {
   const environment = { ...process.env };
-  const mockFromContainerMetadata = fromContainerMetadata as jest.Mock;
+  const mockFromContainerMetadata = vi.mocked(fromContainerMetadata);
 
   beforeEach(() => {
     process.env = {
@@ -26,7 +25,7 @@ describe('signRequest', () => {
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
     };
 
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -40,7 +39,7 @@ describe('signRequest', () => {
   });
 
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it.each([undefined, null, ''])('should omit the body if %s', async (body) => {
@@ -83,11 +82,13 @@ describe('signRequest', () => {
           ? { AWS_EXECUTION_ENV: 'AWS_ECS' }
           : {};
 
-      mockFromContainerMetadata.mockReturnValue({
-        accessKeyId: faker.string.uuid(),
-        secretAccessKey: faker.string.uuid(),
-        sessionToken: faker.string.uuid(),
-      });
+      mockFromContainerMetadata.mockReturnValue(
+        vi.fn().mockResolvedValue({
+          accessKeyId: faker.string.uuid(),
+          secretAccessKey: faker.string.uuid(),
+          sessionToken: faker.string.uuid(),
+        }),
+      );
 
       process.env = {
         AWS_ACCESS_KEY_ID: faker.string.uuid(), // required by "fromEnv()"

@@ -6,13 +6,11 @@ import { DocumentRepository } from './document.repository';
 import { stubDocumentEntity } from './document.stubs';
 import { assertDocumentEntity } from './document.validators';
 
-jest.mock('@aws-sdk/client-s3');
+vi.mock('@aws-sdk/client-s3');
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getDocumentBucketName: () => 'test-bucket',
 }));
-
-const S3ClientMock = new S3Client({});
 
 describe('DocumentRepository', () => {
   const repository = new DocumentRepository();
@@ -21,7 +19,7 @@ describe('DocumentRepository', () => {
     it('should throw error if stored data is invalid', async () => {
       const data = stubObject();
 
-      jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
+      vi.spyOn(S3Client.prototype, 'send').mockResolvedValueOnce({
         Body: {
           transformToString: () => JSON.stringify(data),
         },
@@ -35,7 +33,7 @@ describe('DocumentRepository', () => {
     it('should return the stored data', async () => {
       const data = stubDocumentEntity();
 
-      jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
+      vi.spyOn(S3Client.prototype, 'send').mockResolvedValueOnce({
         Body: {
           transformToString: () => JSON.stringify(data),
         },

@@ -1,4 +1,8 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["../prevented-emissions/**/*.ts"]
+  "compilerOptions": {
+    "types": ["vitest-globals", "node", "methodology-rules-vitest-matchers"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["vitest.config.ts"]
 }

@@ -11,7 +11,7 @@ import { RESULT_COMMENTS } from './project-period-limit.constants';
 import { ProjectPeriodLimitProcessor } from './project-period-limit.processor';
 import { projectPeriodLimitTestCases } from './project-period-limit.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 class TestProjectPeriodLimitProcessor extends ProjectPeriodLimitProcessor {
   public getTestEligibleDate(): Date {
@@ -23,7 +23,7 @@ const { RECYCLED } = DocumentEventName;
 
 describe('ProjectPeriodLimitProcessor', () => {
   const ruleDataProcessor = new TestProjectPeriodLimitProcessor();
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(projectPeriodLimitTestCases)(
     'should return $resultStatus when $scenario',

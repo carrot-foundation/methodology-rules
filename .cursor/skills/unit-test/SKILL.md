@@ -1,11 +1,11 @@
 ---
 name: 'Write Unit Tests'
-description: 'Write Jest unit tests following project conventions with proper stubs and assertions.'
+description: 'Write Vitest unit tests following project conventions with proper stubs and assertions.'
 ---
 
 1. **File naming**: Use `*.spec.ts` for unit tests and `*.e2e.spec.ts` for end-to-end tests. Place test files alongside the source file they test.
 
-2. **Test framework**: Use Jest with ts-jest. Test environment variables are loaded from `.env-files/.env.test`.
+2. **Test framework**: Use Vitest. Test environment variables are loaded from `.env-files/.env.test`.
 
 3. **Test data generation**:
    - Use `@faker-js/faker` for random synthetic data (names, dates, numbers)

@@ -148,10 +148,14 @@ Methodology: **BOLD-${methodologyName.toUpperCase()}**
 `,
   },
   {
-    name: 'jest.config.ts',
-    content: `import { getJestBaseConfig } from '../../../../../../.jest/config/jest.base.config';
+    name: 'vitest.config.ts',
+    content: `import { getVitestBaseConfig } from '../../../../../../.vitest/config/vitest.base.config';
+import { getVitestBasePlugins } from '../../../../../../.vitest/config/vitest.base.plugins';
 
-export default getJestBaseConfig(__dirname);
+export default {
+  ...getVitestBaseConfig(import.meta.dirname),
+  plugins: getVitestBasePlugins({ dirname: import.meta.dirname }),
+};
 `,
   },
   {

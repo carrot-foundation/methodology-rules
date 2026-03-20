@@ -9,22 +9,21 @@ import {
   wasteMassIsUniqueTestCases,
 } from './waste-mass-is-unique.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
-const mockCheckDuplicateDocuments = jest.fn();
+const mockCheckDuplicateDocuments = vi.fn();
 const mockAuditApiService = {
   checkDuplicateDocuments: mockCheckDuplicateDocuments,
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-return
-jest.mock('./waste-mass-is-unique.helpers', () => ({
-  ...jest.requireActual('./waste-mass-is-unique.helpers'),
+vi.mock('./waste-mass-is-unique.helpers', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('./waste-mass-is-unique.helpers')>()),
   createAuditApiService: () => mockAuditApiService,
 }));
 
 describe('WasteMassIsUniqueProcessor Rule', () => {
   const ruleDataProcessor = new WasteMassIsUniqueProcessor();
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   describe('WasteMassIsUniqueProcessor', () => {
     it.each(wasteMassIsUniqueTestCases)(

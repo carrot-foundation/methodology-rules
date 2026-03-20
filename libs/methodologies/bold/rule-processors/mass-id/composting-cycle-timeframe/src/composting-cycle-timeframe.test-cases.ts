@@ -3,8 +3,10 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
-interface CompostingCycleTimeframeTestCase
-  extends Omit<RuleTestCase, 'resultComment'> {
+interface CompostingCycleTimeframeTestCase extends Omit<
+  RuleTestCase,
+  'resultComment'
+> {
   dropOffEventDate: string | undefined;
   recycledEventDate: string | undefined;
   resultComment?: string;

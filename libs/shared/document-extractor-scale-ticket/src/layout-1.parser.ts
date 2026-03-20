@@ -59,7 +59,7 @@ const parseDate = (
   const [day, month, year] = dateString.split('/');
   const [hours, minutes] = timeString.split(':');
 
-  // istanbul ignore next -- defensive check; regex ensures valid format
+  // v8 ignore next -- defensive check; regex ensures valid format
   if (!day || !month || !year || !hours || !minutes) {
     return undefined;
   }
@@ -72,7 +72,7 @@ const parseDate = (
     Number(minutes),
   );
 
-  // istanbul ignore next -- defensive check; JS Date rolls over invalid values
+  // v8 ignore next -- defensive check; JS Date rolls over invalid values
   return Number.isNaN(date.getTime()) ? undefined : date;
 };
 
@@ -83,7 +83,7 @@ const extractTimestamp = (
 ): Date | undefined => {
   const anchorMatch = anchorPattern.exec(text);
 
-  // istanbul ignore next -- defensive check; called after weight pattern matched
+  // v8 ignore next -- defensive check; called after weight pattern matched
   if (!anchorMatch?.[0]) {
     return undefined;
   }
@@ -177,9 +177,7 @@ const extractTransporter = (
   };
 };
 
-export class ScaleTicketLayout1Parser
-  implements DocumentParser<ScaleTicketExtractedData>
-{
+export class ScaleTicketLayout1Parser implements DocumentParser<ScaleTicketExtractedData> {
   readonly documentType = 'scaleTicket' as const;
   readonly layoutId = 'layout-1' as NonEmptyString;
   readonly textractMode = 'detect' as const;

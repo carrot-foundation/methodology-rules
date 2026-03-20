@@ -7,7 +7,7 @@ requirements:
   - Scaffold new rules using `pnpm create-rule <name> <scope> <description>` instead of manual file creation
   - Extend `ParentDocumentRuleProcessor<RuleSubject>` and implement the `evaluateResult()` method in the processor file
   - Follow the standard file naming convention with the rule name as prefix for all files in the rule directory
-  - Include all required files: processor, lambda handler, unit spec, e2e spec, test-cases, index, project.json, jest.config.ts
+  - Include all required files: processor, lambda handler, unit spec, e2e spec, test-cases, index, project.json, vitest.config.ts
   - Apply rules to methodologies using `pnpm apply-methodology-rule <methodology> <rule> <scope>`
   - Import shared utilities only from `@carrot-fndn/shared/*` path aliases
   - Define test data in `{rule-name}.test-cases.ts` and share it between unit and e2e tests
@@ -39,7 +39,7 @@ Every rule processor must contain the following files:
 ├── {rule-name}.test-cases.ts      # Shared test data
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
-└── jest.config.ts                 # Jest config
+└── vitest.config.ts               # Vitest config
 ```
 
 ### Scaffolding

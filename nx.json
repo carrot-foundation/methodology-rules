@@ -20,24 +20,6 @@
     "bucket": "carrot-nx-cache"
   },
   "targetDefaults": {
-    "test": {
-      "executor": "@nx/jest:jest",
-      "inputs": ["test", "^production"],
-      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
-      "options": {
-        "jestConfig": "{projectRoot}/jest.config.ts",
-        "coverageDirectory": "{workspaceRoot}/coverage/{projectRoot}",
-        "maxWorkers": "50%",
-        "resetMocks": true,
-        "codeCoverage": true
-      },
-      "configurations": {
-        "ci": {
-          "ci": true,
-          "reporters": ["github-actions", "jest-silent-reporter"]
-        }
-      }
-    },
     "lint": {
       "executor": "@nx/linter:eslint",
       "inputs": ["lint", "^production"],
@@ -114,9 +96,26 @@
       }
     }
   },
-  "pluginsConfig": { "@nx/js": { "analyzeSourceFiles": true } },
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true
+    }
+  },
+  "plugins": [
+    {
+      "plugin": "@nx/vitest",
+      "options": {
+        "testTargetName": "test"
+      },
+      "exclude": ["vitest.config.ts"]
+    }
+  ],
   "namedInputs": {
-    "node": [{ "runtime": "node --version" }],
+    "node": [
+      {
+        "runtime": "node --version"
+      }
+    ],
     "src": ["{projectRoot}/src/**/*"],
     "production": [
       "src",
@@ -148,14 +147,14 @@
       "{workspaceRoot}/tsconfig.base.json",
       "{workspaceRoot}/.env-files/.env.test",
       "{workspaceRoot}/.tsconfig/tsconfig.spec.json",
-      "{workspaceRoot}/jest.preset.js",
-      "{workspaceRoot}/jest.config.ts",
-      "{workspaceRoot}/.jest/**/*.ts",
-      "{projectRoot}/jest.config.ts",
+      "{workspaceRoot}/.vitest/**/*.ts",
+      "{workspaceRoot}/vitest.workspace.ts",
+      "{projectRoot}/vitest.config.ts",
       "{projectRoot}/tsconfig.spec.json"
     ]
   },
   "tui": {
     "enabled": false
-  }
+  },
+  "analytics": true
 }

@@ -15,7 +15,7 @@ import { noConflictingCertificateOrCreditTestCases } from './no-conflicting-cert
 
 describe('NoConflictingCertificateOrCreditProcessor E2E', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const lambda = noConflictingCertificateOrCreditLambda(

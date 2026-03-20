@@ -6,12 +6,12 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { DropOffAtRecyclerProcessor } from './drop-off-at-recycler.processor';
 import { dropOffAtRecyclerTestCases } from './drop-off-at-recycler.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DropOffAtRecyclerProcessor', () => {
   const ruleDataProcessor = new DropOffAtRecyclerProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(dropOffAtRecyclerTestCases)(
     'should return $resultStatus when $scenario',

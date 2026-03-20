@@ -176,12 +176,12 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { ${pascalCase}Processor } from './${fileName}.processor';
 import { ${camelCase}TestCases } from './${fileName}.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('${pascalCase}Processor', () => {
   const ruleDataProcessor = new ${pascalCase}Processor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(${camelCase}TestCases)(
     'should return $resultStatus when $scenario',

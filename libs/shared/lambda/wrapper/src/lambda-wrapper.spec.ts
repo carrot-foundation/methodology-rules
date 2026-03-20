@@ -15,16 +15,16 @@ import * as Sentry from '@sentry/serverless';
 
 import { wrapRuleIntoLambdaHandler } from './lambda-wrapper';
 
-const mockGetNodeEnv = jest.fn(() => 'test');
+const mockGetNodeEnv = vi.fn(() => 'test');
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getArtifactChecksum: () => 'test-checksum',
   getAuditUrl: () => 'https://test.example.com',
   getAwsRegion: () => 'us-east-1',
   getDocumentBucketName: () => 'test-bucket',
   getEnvironment: () => 'development',
   getNodeEnv: () => mockGetNodeEnv(),
-  getSentryDsn: jest.fn(() => undefined),
+  getSentryDsn: vi.fn(() => undefined),
   getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
   getSourceCodeUrl: () => 'https://test.example.com/repo',
   getSourceCodeVersion: () => 'test-version',
@@ -40,13 +40,13 @@ process.env = {
 
 describe('wrapRuleIntoLambdaHandler', () => {
   afterAll(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
-  jest.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
+  vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation(() => {});
 
   const mockStsAndFetch = () => {
-    jest.spyOn(STSClient.prototype, 'send').mockResolvedValue({
+    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
       Credentials: {
         AccessKeyId: faker.string.uuid(),
         SecretAccessKey: faker.string.uuid(),
@@ -54,7 +54,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       },
     } as never);
 
-    jest.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
   };
 
   it('should work', async () => {
@@ -107,7 +107,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
-    const setTagsSpy = jest.spyOn(Sentry, 'setTags');
+    const setTagsSpy = vi.spyOn(Sentry, 'setTags');
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
 
@@ -130,7 +130,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should log a warning when SENTRY_DSN is missing in production', async () => {
     mockGetNodeEnv.mockReturnValueOnce('production');
 
-    const warnSpy = jest.spyOn(logger, 'warn');
+    const warnSpy = vi.spyOn(logger, 'warn');
 
     const response = {
       ...stubRuleOutput(),
@@ -178,9 +178,11 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should pass the Sentry DSN when getSentryDsn returns a value', async () => {
     const sentryDsn = faker.internet.url();
 
-    jest.mocked(getSentryDsn).mockReturnValueOnce(sentryDsn);
+    vi.mocked(getSentryDsn).mockReturnValueOnce(sentryDsn);
 
-    const initSpy = jest.spyOn(Sentry.AWSLambda, 'init').mockImplementation();
+    const initSpy = vi
+      .spyOn(Sentry.AWSLambda, 'init')
+      .mockImplementation(() => {});
 
     const response = {
       ...stubRuleOutput(),

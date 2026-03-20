@@ -6,12 +6,12 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { RegionalWasteClassificationProcessor } from './regional-waste-classification.processor';
 import { regionalWasteClassificationTestCases } from './regional-waste-classification.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('RegionalWasteClassificationProcessor', () => {
   const ruleDataProcessor = new RegionalWasteClassificationProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(regionalWasteClassificationTestCases)(
     'should return $resultStatus when $scenario',
