@@ -82,7 +82,7 @@ jobs:
           aws_account_id_development: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
           nx_key: ${{ secrets.NX_KEY }}
 
-      - run: pnpm nx affected --target=test --ci --parallel=1 --runInBand --configuration=ci
+      - run: pnpm nx affected --target=test --parallel=1
         env:
           DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
 

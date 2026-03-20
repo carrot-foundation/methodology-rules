@@ -33,7 +33,7 @@ Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capab
 - `finish-work` - Run quality gates, commit changes, push branch, and create a pull request.
 - `review-pr` - Analyze a pull request diff and provide structured feedback on correctness, conventions, and quality.
 - `task-exec` - Autonomously implement a task following project conventions with iterative verification.
-- `unit-test` - Write Jest unit tests following project conventions with proper stubs and assertions.
+- `unit-test` - Write Vitest unit tests following project conventions with proper stubs and assertions.
 - `zod` - Create and modify Zod schemas for runtime validation with proper type inference.
 
 ## Rule mappings
@@ -50,7 +50,7 @@ Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capab
 - `rule-pull-request` - Standardize pull request creation and review workflow using gh CLI
 - `rule-rule-processors` - Enforce the standard structure and patterns for methodology rule processors
 - `rule-schemas` - Enforce Zod schema conventions for runtime validation and type derivation
-- `rule-testing` - Ensure consistent, safe, and maintainable test practices using Jest and schema-driven data generation
+- `rule-testing` - Ensure consistent, safe, and maintainable test practices using Vitest and schema-driven data generation
 - `rule-typescript` - Enforce TypeScript strict-mode conventions and type safety across the codebase
 
 ## Agent roles

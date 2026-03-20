@@ -11,10 +11,8 @@ const unicornPlugin = require('eslint-plugin-unicorn');
 const commentsPlugin = require('@eslint-community/eslint-plugin-eslint-comments/configs');
 const securityPlugin = require('eslint-plugin-security');
 const globals = require('globals');
-const jestFormattingPlugin = require('eslint-plugin-jest-formatting');
-const jestAsyncPlugin = require('eslint-plugin-jest-async');
 const ymlPlugin = require('eslint-plugin-yml');
-const jestPlugin = require('eslint-plugin-jest');
+const vitestPlugin = require('@vitest/eslint-plugin');
 const jsoncPlugin = require('eslint-plugin-jsonc');
 
 const methodologies = ['bold'];
@@ -85,6 +83,8 @@ const ignorePatterns = {
     'coverage.json',
     'local',
     'eslint.config.js',
+    '**/vitest.config.ts',
+    'vitest.workspace.ts',
   ],
 };
 
@@ -228,27 +228,29 @@ const testCasesFilesConfig = {
   },
 };
 
-const jestFilesConfigs = [
+const vitestFilesConfigs = [
   {
-    ...jestPlugin.configs['flat/recommended'],
     files: [
-      '**/*.spec.ts',
-      '**/*.spec.js',
+      '**/*.{test,spec}.{ts,js}',
       '**/zod.matchers.ts',
       '**/helpers/rule-processor.helpers.ts',
       '**/testing.helpers.ts',
     ],
     plugins: {
-      'jest-formatting': jestFormattingPlugin,
-      'jest-async': jestAsyncPlugin,
-      jest: jestPlugin,
+      vitest: vitestPlugin,
+    },
+    languageOptions: {
+      globals: vitestPlugin.environments.env.globals,
     },
     rules: {
+      ...vitestPlugin.configs.recommended.rules,
       'sonarjs/no-nested-functions': 'off',
-      'jest-async/expect-return': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'off',
       '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/strict-boolean-expressions': 'off',
       'global-require': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/consistent-type-assertions': 'off',
@@ -265,7 +267,7 @@ const jestFilesConfigs = [
       'max-classes-per-file': 'off',
       'import/no-namespace': 'off',
       '@typescript-eslint/dot-notation': 'off',
-      'jest/expect-expect': [
+      'vitest/expect-expect': [
         'error',
         {
           assertFunctionNames: ['expect', 'expectRequest', 'expectRuleOutput'],
@@ -274,12 +276,7 @@ const jestFilesConfigs = [
     },
   },
   {
-    files: ['**/jest.config.ts'],
-    languageOptions: {
-      globals: {
-        __dirname: 'readonly',
-      },
-    },
+    files: ['**/vitest.config.ts'],
     rules: {
       '@nx/enforce-module-boundaries': 'off',
       'import/no-relative-packages': 'off',
@@ -322,9 +319,9 @@ module.exports = defineConfig([
   commentsPlugin.recommended,
   securityPlugin.configs.recommended,
   testCasesFilesConfig,
-  ...jestFilesConfigs,
+  tsFilesConfig,
+  ...vitestFilesConfigs,
   ymlFilesConfigs,
   jsonFilesConfigs,
   jsFilesConfigs,
-  tsFilesConfig,
 ]);

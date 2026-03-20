@@ -2,13 +2,13 @@ import { logger } from '@carrot-fndn/shared/helpers';
 
 import { handleCommandError } from './command-error-handler';
 
-jest.mock('@carrot-fndn/shared/helpers', () => ({
-  logger: { error: jest.fn() },
+vi.mock('@carrot-fndn/shared/helpers', () => ({
+  logger: { error: vi.fn() },
 }));
 
 describe('handleCommandError', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.exitCode = undefined;
   });
 

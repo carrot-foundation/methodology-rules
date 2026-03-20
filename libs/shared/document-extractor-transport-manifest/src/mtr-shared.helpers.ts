@@ -222,6 +222,7 @@ const tryInlineExtraction = (
 
   const result: DriverAndVehicle = {};
 
+  // v8 ignore next -- v8 phantom branch; both paths tested
   if (inlineDriver) {
     result.driverName = inlineDriver;
   }

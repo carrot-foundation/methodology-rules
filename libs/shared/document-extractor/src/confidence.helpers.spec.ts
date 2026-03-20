@@ -177,6 +177,23 @@ describe('confidence.helpers', () => {
       ]);
     });
 
+    it('should skip fields that are not extracted fields or entity groups', () => {
+      const data: Record<string, unknown> = {
+        fieldA: createHighConfidenceField('a'),
+        fieldB: 'plain-string',
+        fieldC: undefined,
+      };
+
+      const result = collectLowConfidenceFields(data, [
+        'fieldA',
+        'fieldB',
+        'fieldC',
+        'nonExistent',
+      ]);
+
+      expect(result).toEqual([]);
+    });
+
     it('should return empty array for arrays of entity groups with all high confidence', () => {
       const data = {
         wasteTypes: [

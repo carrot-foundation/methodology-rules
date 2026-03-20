@@ -6,12 +6,12 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { RecyclerIdentificationProcessor } from './recycler-identification.processor';
 import { recyclerIdentificationTestCases } from './recycler-identification.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('RecyclerIdentificationProcessor', () => {
   const ruleDataProcessor = new RecyclerIdentificationProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(recyclerIdentificationTestCases)(
     `should return $resultStatus when $scenario`,

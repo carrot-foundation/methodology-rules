@@ -231,6 +231,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
           participantsWithMultipleValid,
           isAccreditationValid,
         );
+        /* v8 ignore start -- actorType is always in one of the two sets */
       } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
         this.validateActor(
           participantId,
@@ -241,6 +242,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
           isAccreditationValidWithOptionalDates,
         );
       }
+      /* v8 ignore stop */
     }
 
     if (isNonEmptyArray(missingParticipants)) {

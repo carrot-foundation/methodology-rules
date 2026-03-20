@@ -708,6 +708,44 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    it('should handle waste row with unparseable quantity', () => {
+      const rawText = [
+        'MTR n° 123456',
+        'Data da emissão: 01/01/2024',
+        'CETESB',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.35),
+            text: 'Código IBAMA e Denominação',
+          },
+          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+          {
+            boundingBox: stubBoundingBox(0.624, 0.35),
+            text: 'Acondicionamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190812-Lodos de tratamento',
+          },
+          { boundingBox: stubBoundingBox(0.767, 0.4), text: '...' },
+          { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { code: '190812', description: 'Lodos de tratamento', unit: 'TON' },
+      ]);
+    });
+
     it('should skip rows without description column', () => {
       const rawText = [
         'MTR n° 123456',

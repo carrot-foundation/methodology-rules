@@ -363,6 +363,124 @@ CNPJ: 11.222.333/0001-44
       ]);
     });
 
+    it('should handle waste row with unparseable quantity in table extraction', () => {
+      const headerY = 0.68;
+      const dataY = 0.71;
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: headerY,
+              width: 0.18,
+            },
+            text: 'Item. Código IBAMA e Denominação',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: headerY, width: 0.07 },
+            text: 'Estado Físico',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.49,
+              top: headerY,
+              width: 0.03,
+            },
+            text: 'Classe',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.54,
+              top: headerY,
+              width: 0.09,
+            },
+            text: 'Acondicionamento',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.65,
+              top: headerY,
+              width: 0.02,
+            },
+            text: 'Qtde',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.72,
+              top: headerY,
+              width: 0.04,
+            },
+            text: 'Unidade',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.84,
+              top: headerY,
+              width: 0.05,
+            },
+            text: 'Tecnologia',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.04, top: dataY, width: 0.31 },
+            text: '1. 020501 Materiais impróprios para consumo',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.49, top: dataY, width: 0.03 },
+            text: 'IIA',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.65, top: dataY, width: 0.05 },
+            text: '...',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.72, top: dataY, width: 0.04 },
+            text: 'Tonelada',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          classification: 'IIA',
+          code: '020501',
+          description: 'Materiais impróprios para consumo',
+          unit: 'Tonelada',
+        },
+      ]);
+    });
+
+    it('should parse document without issue date', () => {
+      const text = `Manifesto de Transporte de Resíduos
+Fundação Estadual de Proteção Ambiental
+MTR nº 0124048986
+Data de Transporte: 16/03/2024
+
+Gerador
+EMPRESA GERADORA LTDA
+CNPJ: 12.345.678/0001-90
+
+Transportador
+TRANSPORTES AMBIENTAIS S.A.
+CNPJ: 98.765.432/0001-10
+
+Destinatário
+RECICLAGEM SUSTENTÁVEL LTDA
+CNPJ: 11.222.333/0001-44
+Tecnologia: Compostagem`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.issueDate).toBeUndefined();
+      expect(result.data.transportDate?.parsed).toBe('16/03/2024');
+    });
+
     it('should skip rows without description in table extraction', () => {
       const headerY = 0.68;
       const dataY = 0.71;

@@ -5,15 +5,15 @@ import axios from 'axios';
 
 import { httpRequest } from './http-request';
 
-jest.mock('axios');
-jest.mock('@carrot-fndn/shared/aws-http');
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('axios');
+vi.mock('@carrot-fndn/shared/aws-http');
+vi.mock('@carrot-fndn/shared/env', () => ({
   getAwsRegion: () => 'us-east-1',
 }));
 
 describe('request helpers', () => {
-  const mockedAxios = jest.mocked(axios);
-  const mockedSignRequest = jest.mocked(signRequest);
+  const mockedAxios = vi.mocked(axios);
+  const mockedSignRequest = vi.mocked(signRequest);
   const mockSignedRequestResponse = {
     body: undefined,
     headers: { 'X-Signed': 'true' },
@@ -23,8 +23,8 @@ describe('request helpers', () => {
     protocol: 'https',
   };
 
-  afterAll(() => {
-    jest.clearAllMocks();
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   describe('httpRequest', () => {
@@ -101,10 +101,10 @@ describe('request helpers', () => {
       };
 
       mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
-      jest.spyOn(logger, 'error');
-      jest.spyOn(logger, 'debug');
+      vi.spyOn(logger, 'error');
+      vi.spyOn(logger, 'debug');
       mockedAxios.mockRejectedValue(mockError);
-      jest.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
 
       const result = await httpRequest(
         {
@@ -126,9 +126,9 @@ describe('request helpers', () => {
       };
 
       mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
-      jest.spyOn(logger, 'error');
+      vi.spyOn(logger, 'error');
       mockedAxios.mockRejectedValue(mockError);
-      jest.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
 
       await expect(
         httpRequest(
@@ -146,9 +146,9 @@ describe('request helpers', () => {
       };
 
       mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
-      jest.spyOn(logger, 'error');
+      vi.spyOn(logger, 'error');
       mockedAxios.mockRejectedValue(mockError);
-      jest.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
 
       const result = await httpRequest(
         { baseURL: faker.internet.url(), method: 'GET' },
@@ -166,9 +166,9 @@ describe('request helpers', () => {
       };
 
       mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
-      jest.spyOn(logger, 'error');
+      vi.spyOn(logger, 'error');
       mockedAxios.mockRejectedValue(mockError);
-      jest.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
 
       await expect(
         httpRequest(

@@ -7,13 +7,13 @@ import {
   writeJsonLog,
 } from './batch-summary';
 
-jest.mock('node:fs/promises', () => ({
-  mkdir: jest.fn(),
-  writeFile: jest.fn(),
+vi.mock('node:fs/promises', () => ({
+  mkdir: vi.fn(),
+  writeFile: vi.fn(),
 }));
 
-const mockMkdir = mkdir as jest.MockedFunction<typeof mkdir>;
-const mockWriteFile = writeFile as jest.MockedFunction<typeof writeFile>;
+const mockMkdir = mkdir as vi.MockedFunction<typeof mkdir>;
+const mockWriteFile = writeFile as vi.MockedFunction<typeof writeFile>;
 
 describe('buildReasonCodeBreakdown', () => {
   it('should count reason codes from resultContent', () => {
@@ -127,7 +127,7 @@ describe('appendBreakdown', () => {
 
 describe('writeJsonLog', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     mockMkdir.mockResolvedValue(undefined);
     mockWriteFile.mockResolvedValue(undefined);
   });
@@ -160,7 +160,7 @@ describe('writeJsonLog', () => {
   });
 
   it('should log the file path', async () => {
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await writeJsonLog([{ id: 1 }], 'my-prefix');
 

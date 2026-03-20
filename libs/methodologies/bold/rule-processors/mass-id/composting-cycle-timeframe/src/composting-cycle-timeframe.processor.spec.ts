@@ -19,14 +19,14 @@ import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
 import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.processor';
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 describe('CompostingCycleTimeframeProcessor', () => {
   const ruleDataProcessor = new CompostingCycleTimeframeProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(
     compostingCycleTimeframeTestCases.map((testCase) => {

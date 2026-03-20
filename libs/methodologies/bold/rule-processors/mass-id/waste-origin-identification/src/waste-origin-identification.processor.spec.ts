@@ -6,11 +6,11 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { WasteOriginIdentificationProcessor } from './waste-origin-identification.processor';
 import { wasteOriginIdentificationTestCases } from './waste-origin-identification.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('WasteOriginIdentificationProcessor', () => {
   const ruleDataProcessor = new WasteOriginIdentificationProcessor();
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(wasteOriginIdentificationTestCases)(
     `should return $resultStatus when $scenario`,

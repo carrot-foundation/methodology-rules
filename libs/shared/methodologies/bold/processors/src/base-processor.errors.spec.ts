@@ -12,14 +12,14 @@ class TestProcessorErrors extends BaseProcessorErrors {
   };
 }
 
-jest.mock('@carrot-fndn/shared/helpers', () => ({
+vi.mock('@carrot-fndn/shared/helpers', () => ({
   logger: {
-    error: jest.fn(),
+    error: vi.fn(),
   },
 }));
 
-jest.mock('@sentry/aws-serverless', () => ({
-  captureException: jest.fn(),
+vi.mock('@sentry/aws-serverless', () => ({
+  captureException: vi.fn(),
 }));
 
 describe('BaseProcessorErrors', () => {
@@ -27,7 +27,7 @@ describe('BaseProcessorErrors', () => {
 
   beforeEach(() => {
     processor = new TestProcessorErrors();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getKnownError', () => {

@@ -146,12 +146,24 @@ describe('MTR shared helpers', () => {
       });
     });
 
+    it('should return empty when only driver label present but no valid name lines', () => {
+      const section = ['Nome do Motorista', ''].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
+    });
+
     it('should extract only plate when only plate label is present', () => {
       const section = ['Placa do Veiculo', 'FKE2B34'].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
         vehiclePlate: 'FKE2B34',
       });
+    });
+
+    it('should return empty when only plate label present but no matching plate', () => {
+      const section = ['Placa do Veiculo', ''].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({});
     });
 
     it('should return empty when no labels are found', () => {

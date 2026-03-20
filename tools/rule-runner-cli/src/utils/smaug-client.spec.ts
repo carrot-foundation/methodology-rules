@@ -2,11 +2,11 @@ import { httpRequest } from '@carrot-fndn/shared/http-request';
 
 import { prepareDryRun } from './smaug-client';
 
-jest.mock('@carrot-fndn/shared/http-request', () => ({
-  httpRequest: jest.fn(),
+vi.mock('@carrot-fndn/shared/http-request', () => ({
+  httpRequest: vi.fn(),
 }));
 
-const mockHttpRequest = httpRequest as jest.MockedFunction<typeof httpRequest>;
+const mockHttpRequest = httpRequest as vi.MockedFunction<typeof httpRequest>;
 
 describe('prepareDryRun', () => {
   const smaugUrl = 'https://smaug.carrot.eco';
@@ -27,7 +27,7 @@ describe('prepareDryRun', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should call Smaug dry-run prepare endpoint', async () => {

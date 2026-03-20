@@ -23,7 +23,7 @@ Every rule processor must contain the following files:
 ├── {rule-name}.test-cases.ts      # Shared test data
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
-└── jest.config.ts                 # Jest config
+└── vitest.config.ts               # Vitest config
 ```
 
 ### Scaffolding

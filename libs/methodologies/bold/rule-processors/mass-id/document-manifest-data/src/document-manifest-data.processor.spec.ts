@@ -10,10 +10,10 @@ import {
   exceptionTestCases,
 } from './document-manifest-data.test-cases';
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
-jest.mock('./document-manifest-data.extractor');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('./document-manifest-data.extractor');
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getDocumentAttachmentBucketName: () => mockBucketName,
   getDocumentBucketName: () => 'test-bucket',
 }));
@@ -21,13 +21,13 @@ jest.mock('@carrot-fndn/shared/env', () => ({
 let mockBucketName: string | undefined = 'test-bucket';
 
 describe('DocumentManifestDataProcessor', () => {
-  const documentLoaderService = jest.mocked(loadDocument);
-  const crossValidateWithTextractMock = jest.mocked(crossValidateWithTextract);
+  const documentLoaderService = vi.mocked(loadDocument);
+  const crossValidateWithTextractMock = vi.mocked(crossValidateWithTextract);
 
   beforeEach(() => {
     mockBucketName = 'test-bucket';
-    jest.useFakeTimers();
-    jest.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
     crossValidateWithTextractMock.mockResolvedValue({
       crossValidation: {},
       extractionMetadata: {},
@@ -41,7 +41,7 @@ describe('DocumentManifestDataProcessor', () => {
 
   afterEach(() => {
     mockBucketName = undefined;
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   it('should throw when documentManifestType is invalid', () => {

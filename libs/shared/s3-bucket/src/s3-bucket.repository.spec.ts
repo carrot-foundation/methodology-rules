@@ -9,7 +9,7 @@ import {
   stubS3BucketTestData,
 } from './s3-bucket.stubs';
 
-jest.mock('@aws-sdk/client-s3');
+vi.mock('@aws-sdk/client-s3');
 
 const S3ClientMock = new S3Client({});
 
@@ -25,7 +25,7 @@ describe('S3BucketRepository', () => {
 
   describe('readFromS3', () => {
     it('should throw error if Body was not returned', async () => {
-      jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({} as never);
+      vi.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({} as never);
 
       await expect(
         repository.readFromS3(faker.string.uuid(), (input: unknown) =>
@@ -37,7 +37,7 @@ describe('S3BucketRepository', () => {
     it('should throw error if stored data is invalid', async () => {
       const data = stubObject();
 
-      jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
+      vi.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
         Body: {
           transformToString: () => JSON.stringify(data),
         },
@@ -51,7 +51,7 @@ describe('S3BucketRepository', () => {
     it('should return the stored data', async () => {
       const data = stubS3BucketTestData();
 
-      jest.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
+      vi.spyOn(S3ClientMock, 'send').mockResolvedValueOnce({
         Body: {
           transformToString: () => JSON.stringify(data),
         },
