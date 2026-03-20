@@ -156,6 +156,25 @@ describe('wrapRuleIntoLambdaHandler', () => {
     warnSpy.mockRestore();
   });
 
+  it('should throw when event fails schema validation', async () => {
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve(stubRuleOutput());
+      }
+    }
+
+    const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
+
+    const invalidEvent = {
+      ...stubRuleInput(),
+      responseUrl: 'not-a-url',
+    };
+
+    await expect(
+      wrapper(invalidEvent, stubContext(), () => {}),
+    ).rejects.toThrow();
+  });
+
   it('should pass the Sentry DSN when getSentryDsn returns a value', async () => {
     const sentryDsn = faker.internet.url();
 

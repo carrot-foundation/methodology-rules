@@ -10,12 +10,14 @@ import {
 } from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import {
+  RuleInputSchema,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
 import { AWSLambda, setTags } from '@sentry/serverless';
 
-const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput => ({
-  ...event,
-});
+const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput =>
+  RuleInputSchema.parse(event);
 
 const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
   ruleOutput;
@@ -61,11 +63,11 @@ export const wrapRuleIntoLambdaHandler = (
   });
 
   const handler = async (event: MethodologyRuleEvent): Promise<unknown> => {
-    const ruleInput = mapEventToRuleInput(event);
-
-    logger.info({ ruleInput }, 'Rule invoked');
-
     try {
+      const ruleInput = mapEventToRuleInput(event);
+
+      logger.info({ ruleInput }, 'Rule invoked');
+
       const ruleOutput = toUpstreamCompatibleOutput(
         await rule.process(ruleInput),
       );
@@ -74,7 +76,7 @@ export const wrapRuleIntoLambdaHandler = (
 
       return mapRuleOutputToLambdaResult(ruleOutput);
     } catch (error) {
-      setRuleSentryTags(ruleInput);
+      setRuleSentryTags(event);
       throw error;
     }
   };

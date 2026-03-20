@@ -17,3 +17,6 @@ export const UrlSchema = z.url({
   protocol: /^https?$/,
 });
 export type Url = z.infer<typeof UrlSchema>;
+
+export const DocumentIdSchema = z.string().nonempty();
+export type DocumentId = z.infer<typeof DocumentIdSchema>;
