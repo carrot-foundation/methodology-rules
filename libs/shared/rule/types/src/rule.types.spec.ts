@@ -2,6 +2,7 @@ import {
   RuleInputSchema,
   RuleOutputSchema,
   RuleOutputStatus,
+  RuleOutputStatusSchema,
 } from './rule.types';
 
 describe('RuleInputSchema', () => {
@@ -185,7 +186,7 @@ describe('RuleOutputSchema', () => {
   });
 
   it('should accept all valid RuleOutputStatus values', () => {
-    for (const status of Object.values(RuleOutputStatus)) {
+    for (const status of RuleOutputStatusSchema.options) {
       const result = RuleOutputSchema.safeParse({
         ...validInput,
         resultStatus: status,

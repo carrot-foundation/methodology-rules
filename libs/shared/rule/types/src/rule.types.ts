@@ -1,11 +1,14 @@
 import { DocumentIdSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-export enum RuleOutputStatus {
-  FAILED = 'FAILED',
-  PASSED = 'PASSED',
-  REVIEW_REQUIRED = 'REVIEW_REQUIRED',
-}
+export const RuleOutputStatusSchema = z.enum([
+  'FAILED',
+  'PASSED',
+  'REVIEW_REQUIRED',
+]);
+export type RuleOutputStatus = z.infer<typeof RuleOutputStatusSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const RuleOutputStatus = RuleOutputStatusSchema.enum;
 
 export const RuleEnvironmentSchema = z.enum(['DEVELOPMENT', 'PRODUCTION']);
 export interface IRuleDataProcessor {
@@ -32,6 +35,6 @@ export const RuleOutputSchema = z.object({
   responseUrl: z.url(),
   resultComment: z.string().optional(),
   resultContent: z.record(z.string(), z.any()).optional(),
-  resultStatus: z.enum(RuleOutputStatus),
+  resultStatus: RuleOutputStatusSchema,
 });
 export type RuleOutput = z.infer<typeof RuleOutputSchema>;

@@ -13,13 +13,13 @@ interface BaseResult {
 }
 
 interface FailedResult extends BaseResult {
-  resultStatus: RuleOutputStatus.FAILED;
+  resultStatus: typeof RuleOutputStatus.FAILED;
 }
 
 interface PassedResult extends BaseResult {
-  resultStatus: RuleOutputStatus.PASSED;
+  resultStatus: typeof RuleOutputStatus.PASSED;
 }
 
 interface ReviewRequiredResult extends BaseResult {
-  resultStatus: RuleOutputStatus.REVIEW_REQUIRED;
+  resultStatus: typeof RuleOutputStatus.REVIEW_REQUIRED;
 }
