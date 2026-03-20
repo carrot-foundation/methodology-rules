@@ -1,21 +1,25 @@
-import {
-  DataSetName,
-  MethodologyParticipantType,
-} from './methodology-enum.types';
+import { z } from 'zod';
 
-export interface MethodologyAuthor {
-  clientId: string;
-  dataSetName: DataSetName;
-  participantId: string;
-}
+import { NonEmptyStringSchema } from '../string.types';
+import { DataSetNameSchema } from './methodology-enum.types';
 
-export interface MethodologyParticipant {
-  businessName?: string | undefined;
-  countryCode: string;
-  id: string;
-  name: string;
-  piiSnapshotId: string;
-  taxId: string;
-  taxIdType: string;
-  type: MethodologyParticipantType | string;
-}
+export const MethodologyAuthorSchema = z.looseObject({
+  clientId: z.string(),
+  dataSetName: DataSetNameSchema,
+  participantId: z.string(),
+});
+export type MethodologyAuthor = z.infer<typeof MethodologyAuthorSchema>;
+
+export const MethodologyParticipantSchema = z.looseObject({
+  businessName: NonEmptyStringSchema.optional(),
+  countryCode: NonEmptyStringSchema,
+  id: NonEmptyStringSchema,
+  name: NonEmptyStringSchema,
+  piiSnapshotId: NonEmptyStringSchema,
+  taxId: NonEmptyStringSchema,
+  taxIdType: NonEmptyStringSchema,
+  type: NonEmptyStringSchema,
+});
+export type MethodologyParticipant = z.infer<
+  typeof MethodologyParticipantSchema
+>;

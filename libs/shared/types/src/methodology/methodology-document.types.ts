@@ -1,41 +1,46 @@
-import type { DateTime, UnknownObject } from '../common.types';
-import type { MethodologyAddress } from './methodology-address.types';
+import { z } from 'zod';
+
 import type { MethodologyDocumentEvent } from './methodology-document-event.types';
-import type { MethodologyParticipant } from './methodology-participant.types';
 
+import { DateTimeSchema } from '../common.types';
+import { MethodologyAddressSchema } from './methodology-address.types';
 import {
-  DataSetName,
-  MethodologyDocumentStatus,
+  DataSetNameSchema,
+  MethodologyDocumentStatusSchema,
 } from './methodology-enum.types';
+import { MethodologyParticipantSchema } from './methodology-participant.types';
 
-// TODO: Think about to abstract these generics from the codebase
-export interface MethodologyDocument {
-  attachments?: MethodologyDocumentAttachment[] | undefined;
-  category: string;
-  createdAt: DateTime;
-  currentValue: number;
-  dataSetName: DataSetName;
-  deduplicationId?: string | undefined;
-  externalCreatedAt: DateTime;
-  externalEvents?: MethodologyDocumentEvent[] | undefined;
-  externalId?: string | undefined;
-  id: string;
-  isPublic?: boolean | undefined;
-  isPubliclySearchable: boolean;
-  measurementUnit: string;
-  parentDocumentId?: string | undefined;
-  permissions?: undefined | UnknownObject[];
-  primaryAddress: MethodologyAddress;
-  primaryParticipant: MethodologyParticipant;
-  status: MethodologyDocumentStatus | string;
-  subtype?: string | undefined;
-  tags?: Record<string, null | string | undefined> | undefined;
-  type?: string | undefined;
-  updatedAt: DateTime;
-}
+export const MethodologyDocumentAttachmentSchema = z.looseObject({
+  contentLength: z.number(),
+  fileName: z.string(),
+  id: z.string(),
+});
+export type MethodologyDocumentAttachment = z.infer<
+  typeof MethodologyDocumentAttachmentSchema
+>;
 
-export interface MethodologyDocumentAttachment {
-  contentLength: number;
-  fileName: string;
-  id: string;
-}
+export const MethodologyDocumentSchema = z.looseObject({
+  attachments: z.array(MethodologyDocumentAttachmentSchema).optional(),
+  category: z.string(),
+  createdAt: DateTimeSchema,
+  currentValue: z.number(),
+  dataSetName: DataSetNameSchema,
+  deduplicationId: z.string().optional(),
+  externalCreatedAt: DateTimeSchema,
+  externalEvents: z.array(z.custom<MethodologyDocumentEvent>()).optional(),
+  externalId: z.string().optional(),
+  id: z.string(),
+  isPublic: z.boolean().optional(),
+  isPubliclySearchable: z.boolean(),
+  measurementUnit: z.string(),
+  parentDocumentId: z.string().optional(),
+  permissions: z.array(z.record(z.string(), z.unknown())).optional(),
+  primaryAddress: MethodologyAddressSchema,
+  primaryParticipant: MethodologyParticipantSchema,
+  status: MethodologyDocumentStatusSchema,
+  subtype: z.string().optional(),
+  tags: z.record(z.string(), z.string().nullable().optional()).optional(),
+  type: z.string().optional(),
+  updatedAt: DateTimeSchema,
+});
+export type MethodologyDocument = z.infer<typeof MethodologyDocumentSchema>;
