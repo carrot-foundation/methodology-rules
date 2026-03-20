@@ -142,6 +142,7 @@ describe('reportRuleResults', () => {
   it('should send a request to the given responseUrl', async () => {
     const ruleOutput = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       responseUrl: faker.internet.url(),
     };
 
@@ -196,6 +197,7 @@ describe('reportRuleResults', () => {
   it('should throw error when response code is not ok', async () => {
     const ruleOutput = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       responseUrl: faker.internet.url(),
     };
 
@@ -219,6 +221,7 @@ describe('reportRuleResults', () => {
   it('should throw error when the request throws error', async () => {
     const ruleOutput = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       responseUrl: faker.internet.url(),
     };
 
