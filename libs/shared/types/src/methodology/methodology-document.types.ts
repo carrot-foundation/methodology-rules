@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-import type { MethodologyDocumentEvent } from './methodology-document-event.types';
-
 import { DateTimeSchema } from '../common.types';
+import { NonNegativeFloatSchema } from '../number.types';
+import { NonEmptyStringSchema } from '../string.types';
 import { MethodologyAddressSchema } from './methodology-address.types';
+import { MethodologyDocumentEventSchema } from './methodology-document-event.types';
 import {
   DataSetNameSchema,
   MethodologyDocumentStatusSchema,
@@ -11,9 +12,9 @@ import {
 import { MethodologyParticipantSchema } from './methodology-participant.types';
 
 export const MethodologyDocumentAttachmentSchema = z.looseObject({
-  contentLength: z.number(),
-  fileName: z.string(),
-  id: z.string(),
+  contentLength: NonNegativeFloatSchema,
+  fileName: NonEmptyStringSchema,
+  id: NonEmptyStringSchema,
 });
 export type MethodologyDocumentAttachment = z.infer<
   typeof MethodologyDocumentAttachmentSchema
@@ -23,13 +24,13 @@ export const MethodologyDocumentSchema = z.looseObject({
   attachments: z.array(MethodologyDocumentAttachmentSchema).optional(),
   category: z.string(),
   createdAt: DateTimeSchema,
-  currentValue: z.number(),
+  currentValue: NonNegativeFloatSchema,
   dataSetName: DataSetNameSchema,
   deduplicationId: z.string().optional(),
   externalCreatedAt: DateTimeSchema,
-  externalEvents: z.array(z.custom<MethodologyDocumentEvent>()).optional(),
+  externalEvents: z.array(MethodologyDocumentEventSchema).optional(),
   externalId: z.string().optional(),
-  id: z.string(),
+  id: NonEmptyStringSchema,
   isPublic: z.boolean().optional(),
   isPubliclySearchable: z.boolean(),
   measurementUnit: z.string(),

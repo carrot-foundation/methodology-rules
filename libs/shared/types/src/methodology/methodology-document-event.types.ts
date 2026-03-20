@@ -1,17 +1,19 @@
-import type { DateTime, UnknownObject } from '../common.types';
-import type { MethodologyAddress } from './methodology-address.types';
+import { z } from 'zod';
+
+import type { UnknownObject } from '../common.types';
 import type {
   MethodologyDocumentEventAttributeFormat,
   MethodologyDocumentEventAttributeType,
-  MethodologyDocumentEventLabel,
-  MethodologyDocumentEventName,
 } from './methodology-enum.types';
-import type {
-  MethodologyAuthor,
-  MethodologyParticipant,
-} from './methodology-participant.types';
 
-import { type NonEmptyString } from '../string.types';
+import { DateTimeSchema } from '../common.types';
+import { NonNegativeFloatSchema } from '../number.types';
+import { type NonEmptyString, NonEmptyStringSchema } from '../string.types';
+import { MethodologyAddressSchema } from './methodology-address.types';
+import {
+  MethodologyAuthorSchema,
+  MethodologyParticipantSchema,
+} from './methodology-participant.types';
 
 export interface ApprovedException {
   'Attribute Location': {
@@ -36,28 +38,49 @@ export interface MethodologyAdditionalVerification {
 export type MethodologyAdditionalVerificationAttributeValue =
   MethodologyAdditionalVerification[];
 
-export interface MethodologyDocumentEvent {
-  address: MethodologyAddress;
-  attachments?: MethodologyDocumentEventAttachment[] | undefined;
-  author: MethodologyAuthor;
-  deduplicationId?: string | undefined;
-  documentSideEffectUpdates?: undefined | UnknownObject;
-  externalCreatedAt: DateTime;
-  externalId?: string | undefined;
-  id: string;
-  isPublic: boolean;
-  label?: MethodologyDocumentEventLabel | string | undefined;
-  metadata?: MethodologyDocumentEventMetadata | undefined;
-  name: MethodologyDocumentEventName | string;
-  participant: MethodologyParticipant;
-  preserveSensitiveData?: boolean | undefined;
-  propagatedFrom?: undefined | UnknownObject;
-  propagateEvent?: boolean | undefined;
-  relatedDocument?: MethodologyDocumentRelation | undefined;
-  target?: undefined | UnknownObject;
-  updates?: undefined | UnknownObject;
-  value?: number | undefined;
-}
+const MethodologyDocumentEventAttachmentBaseSchema = z.object({
+  attachmentId: NonEmptyStringSchema,
+  contentLength: NonNegativeFloatSchema,
+  isPublic: z.boolean(),
+  label: z.string(),
+});
+
+const MethodologyDocumentEventMetadataBaseSchema = z.object({
+  attributes: z.array(z.unknown()).optional(),
+});
+
+const MethodologyDocumentRelationBaseSchema = z.object({
+  category: z.string().optional(),
+  documentId: NonEmptyStringSchema,
+  subtype: z.string().optional(),
+  type: z.string().optional(),
+});
+
+export const MethodologyDocumentEventSchema = z.looseObject({
+  address: MethodologyAddressSchema,
+  attachments: z.array(MethodologyDocumentEventAttachmentBaseSchema).optional(),
+  author: MethodologyAuthorSchema,
+  deduplicationId: z.string().optional(),
+  documentSideEffectUpdates: z.record(z.string(), z.unknown()).optional(),
+  externalCreatedAt: DateTimeSchema,
+  externalId: z.string().optional(),
+  id: NonEmptyStringSchema,
+  isPublic: z.boolean(),
+  label: z.string().optional(),
+  metadata: MethodologyDocumentEventMetadataBaseSchema.optional(),
+  name: z.string(),
+  participant: MethodologyParticipantSchema,
+  preserveSensitiveData: z.boolean().optional(),
+  propagatedFrom: z.record(z.string(), z.unknown()).optional(),
+  propagateEvent: z.boolean().optional(),
+  relatedDocument: MethodologyDocumentRelationBaseSchema.optional(),
+  target: z.record(z.string(), z.unknown()).optional(),
+  updates: z.record(z.string(), z.unknown()).optional(),
+  value: z.number().optional(),
+});
+export type MethodologyDocumentEvent = z.infer<
+  typeof MethodologyDocumentEventSchema
+>;
 
 export interface MethodologyDocumentEventAttachment {
   attachmentId: string;

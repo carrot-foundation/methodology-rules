@@ -4,9 +4,9 @@ import { NonEmptyStringSchema } from '../string.types';
 import { DataSetNameSchema } from './methodology-enum.types';
 
 export const MethodologyAuthorSchema = z.looseObject({
-  clientId: z.string(),
+  clientId: NonEmptyStringSchema,
   dataSetName: DataSetNameSchema,
-  participantId: z.string(),
+  participantId: NonEmptyStringSchema,
 });
 export type MethodologyAuthor = z.infer<typeof MethodologyAuthorSchema>;
 
@@ -18,6 +18,7 @@ export const MethodologyParticipantSchema = z.looseObject({
   piiSnapshotId: NonEmptyStringSchema,
   taxId: NonEmptyStringSchema,
   taxIdType: NonEmptyStringSchema,
+  // TODO: replace with MethodologyParticipantTypeSchema once migrated to Zod
   type: NonEmptyStringSchema,
 });
 export type MethodologyParticipant = z.infer<
