@@ -43,7 +43,7 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
     if (isNil(lastDropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -51,20 +51,20 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (lastDropOffEvent.address.id !== recyclerEvent?.address.id) {
       return {
         resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

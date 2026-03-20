@@ -8,7 +8,7 @@ describe('formatAsHuman', () => {
         responseToken: 'token',
         responseUrl: 'https://localhost/placeholder' as never,
         resultComment: 'All checks passed',
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       },
       { elapsedMs: 150 },
     );
@@ -24,7 +24,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultComment: 'Validation failed',
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     });
 
     expect(output).toContain('✗ FAILED');
@@ -37,7 +37,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultComment: 'Review required: vehicle plate mismatch',
-      resultStatus: 'REVIEW_REQUIRED' as const,
+      resultStatus: 'REVIEW_REQUIRED',
     });
 
     expect(output).toContain('⚠ REVIEW_REQUIRED');
@@ -50,7 +50,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultContent: { distance: 42 },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     });
 
     expect(output).toContain('Result Content');
@@ -63,7 +63,7 @@ describe('formatAsHuman', () => {
         requestId: 'req-1',
         responseToken: 'token',
         responseUrl: 'https://localhost/placeholder' as never,
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       },
       { debug: true },
     );

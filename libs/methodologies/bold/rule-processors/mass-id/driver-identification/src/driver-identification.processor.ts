@@ -49,14 +49,14 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     if (vehicleType === SLUDGE_PIPES) {
       return {
         resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
     if (hasDriverId && hasJustification) {
       return {
         resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -64,7 +64,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(vehicleTypeString),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -73,13 +73,13 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
         resultComment: RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(
           String(driverIdentifierExemptionJustification),
         ),
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

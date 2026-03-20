@@ -18,7 +18,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
     {
       events: new Map([[`${ACTOR}-${RECYCLER}`, undefined]]),
       resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The MassID document has no "${RECYCLER}" actor event`,
     },
     {
@@ -26,7 +26,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
         [`${ACTOR}-${RECYCLER}`, stubActorEventWithLabel(RECYCLER)],
       ]),
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: `The MassID document has a "${RECYCLER}" actor event`,
     },
     {
@@ -35,7 +35,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
         [`${ACTOR}-${RECYCLER}-2`, stubActorEventWithLabel(RECYCLER)],
       ]),
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The MassID document has multiple "${RECYCLER}" actor events`,
     },
   ];

@@ -81,7 +81,7 @@ const mockRuleOutput: RuleOutput = {
   responseToken: 'cli-placeholder-token',
   responseUrl: 'https://localhost/placeholder' as RuleOutput['responseUrl'],
   resultComment: 'Test passed',
-  resultStatus: 'PASSED' as const,
+  resultStatus: 'PASSED',
 };
 
 describe('handleDryRun', () => {
@@ -159,7 +159,7 @@ describe('handleDryRun', () => {
   it('should return review_required status for REVIEW_REQUIRED rule output', async () => {
     mockProcess.mockResolvedValue({
       ...mockRuleOutput,
-      resultStatus: 'REVIEW_REQUIRED' as const,
+      resultStatus: 'REVIEW_REQUIRED',
     });
 
     const result = await handleDryRun('some/path', baseOptions);
@@ -170,7 +170,7 @@ describe('handleDryRun', () => {
   it('should return failed status for FAILED rule output', async () => {
     mockProcess.mockResolvedValue({
       ...mockRuleOutput,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     });
 
     const result = await handleDryRun('some/path', baseOptions);

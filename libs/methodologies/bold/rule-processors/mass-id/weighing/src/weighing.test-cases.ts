@@ -275,7 +275,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [WEIGHING]: undefined,
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The MassID document does not have "${WEIGHING}" events`,
   },
   {
@@ -285,7 +285,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [`${WEIGHING}-3`]: stubBoldMassIDWeighingEvent(),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The MassID document has more than two "${WEIGHING}" events`,
   },
   {
@@ -308,7 +308,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       }),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The Recycler Accreditation document does not have a "${SCALE_TYPE}" attribute`,
   },
   {
@@ -321,7 +321,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${CONTAINER_CAPACITY}" attribute is missing`,
   },
   {
@@ -335,7 +335,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${CONTAINER_QUANTITY}" attribute is missing and the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.BAG}"`,
   },
   {
@@ -357,7 +357,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${ACCREDITATION_RESULT}" event is missing`,
   },
   {
@@ -371,7 +371,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${CONTAINER_QUANTITY}" attribute is defined, but the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.TRUCK}"`,
   },
   {
@@ -382,7 +382,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${GROSS_WEIGHT}" attribute is missing`,
   },
   {
@@ -391,7 +391,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [WEIGHING]: createWeighingEvent(validWeighingAttributes, 0),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The event value field is missing',
   },
   {
@@ -402,7 +402,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${TARE}" attribute is missing`,
   },
   {
@@ -413,7 +413,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${DESCRIPTION}" attribute is missing`,
   },
   {
@@ -424,7 +424,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${DESCRIPTION}" attribute is an empty string`,
   },
   {
@@ -441,7 +441,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       scaleTypeMismatch,
       scaleType,
     )} ${INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleTypeMismatch)}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
   },
   {
@@ -457,7 +457,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
       weighingCaptureMethodMismatch,
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is not supported by the methodology`,
   },
   {
@@ -470,7 +470,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
   },
   {
@@ -481,7 +481,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${CONTAINER_TYPE}" attribute is missing`,
   },
   {
@@ -494,7 +494,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [WEIGHING]: createWeighingEvent(manifestWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The one step "${WEIGHING}" event is valid`,
   },
   {
@@ -507,7 +507,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The one step "${WEIGHING}" event is valid with scale ticket verification configured`,
   },
   {
@@ -518,7 +518,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: 'Scale ticket mismatch',
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scaleTicketVerificationError: 'Scale ticket mismatch',
     scenario: `Scale ticket verification fails for "${WEIGHING}" event`,
   },
@@ -536,7 +536,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The one step "${WEIGHING}" event is valid with container capacity exception`,
   },
   {
@@ -555,7 +555,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION(
         PASSED_RESULT_COMMENTS.SINGLE_STEP,
       ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The one step "${WEIGHING}" event is valid with container quantity exception for non-TRUCK container`,
   },
   {
@@ -582,7 +582,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment:
       INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The two step "${WEIGHING}" event participant ids do not match`,
   },
   {
@@ -598,7 +598,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(
       PASSED_RESULT_COMMENTS.TWO_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The two step "${WEIGHING}" events are valid with container capacity exception`,
   },
   {
@@ -612,7 +612,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       MANIFEST_TWO_STEP_PARTICIPANT,
     ),
     resultComment: PASSED_RESULT_COMMENTS.TWO_STEP,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The two step "${WEIGHING}" events are valid`,
   },
   {
@@ -630,7 +630,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       firstValue: 2,
       secondValue: 1,
     }),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The two step "${WEIGHING}" event "${CONTAINER_CAPACITY}" attribute values do not match`,
   },
   {
@@ -644,7 +644,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
       DocumentEventScaleType.CONVEYOR_BELT_SCALE,
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The two step "${WEIGHING}" event scale type is not "${DocumentEventScaleType.WEIGHBRIDGE}"`,
   },
   {
@@ -672,7 +672,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(
       DocumentEventContainerType.BAG,
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The two step "${WEIGHING}" event container type is not "${DocumentEventContainerType.TRUCK}"`,
   },
   {
@@ -691,7 +691,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ),
     },
     resultComment: PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is "${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST}" and the "${WEIGHING}" event is valid`,
   },
   {
@@ -710,7 +710,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       grossWeight: 100,
       tare: 1,
     }),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The calculated net weight is not equal to the mass net weight',
   },
   {
@@ -730,7 +730,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Tare`,
   },
   {
@@ -746,7 +746,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined' as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${WEIGHING}" event fails for TRUCK container without tare exception and missing Tare`,
   },
   {
@@ -766,7 +766,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for non-TRUCK (BIN) container with tare exception and missing Tare`,
   },
   {
@@ -793,7 +793,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       grossWeight: 100,
       tare: 1,
     }),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${WEIGHING}" event fails for non-TRUCK (BIN) container with tare exception when net weight calculation fails`,
   },
   {
@@ -811,7 +811,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and Tare provided`,
   },
   {
@@ -829,7 +829,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Gross Weight`,
   },
   {
@@ -849,7 +849,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and both Tare and Gross Weight missing`,
   },
   {
@@ -868,7 +868,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${WEIGHING}" event fails for TRUCK container with expired tare exception (Valid Until in past) and missing Tare`,
   },
   {
@@ -887,7 +887,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${WEIGHING}" event fails for TRUCK container with invalid tare exception Valid Until date format and missing Tare`,
   },
   {
@@ -903,7 +903,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${WEIGHING}" event is valid for TRUCK container without tare exception and both Tare and Gross Weight provided`,
   },
 ];
@@ -931,7 +931,7 @@ export const weighingErrorTestCases: WeighingErrorTestCase[] = [
     documents: [...participantsAccreditationDocuments.values()],
     massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The MassID document was not found`,
   },
   {
@@ -939,7 +939,7 @@ export const weighingErrorTestCases: WeighingErrorTestCase[] = [
     massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The Recycler accreditation document was not found`,
   },
 ];

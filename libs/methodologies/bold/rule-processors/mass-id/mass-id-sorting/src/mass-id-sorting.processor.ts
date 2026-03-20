@@ -95,7 +95,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -111,7 +111,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.deductedWeight,
           Number(expectedDeducted.toFixed(3)),
         ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -124,7 +124,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.grossWeight,
           sortingData.valueBeforeSorting,
         ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -137,7 +137,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.documentCurrentValue,
           sortingData.valueAfterSorting,
         ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -146,7 +146,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
           sortingData.sortingValueCalculationDifference,
         ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -154,7 +154,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
       resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(
         sortingData.sortingValueCalculationDifference,
       ),
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

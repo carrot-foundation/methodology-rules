@@ -162,7 +162,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       if (twoStepValidationMessages.errors.length > 0) {
         return {
           resultComment: twoStepValidationMessages.errors.join(' '),
-          resultStatus: 'FAILED' as const,
+          resultStatus: 'FAILED',
         };
       }
     }
@@ -181,7 +181,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (validationMessages.errors.length > 0) {
       return {
         resultComment: validationMessages.errors.join(' '),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -215,7 +215,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     return {
       resultComment: passMessage,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 
@@ -282,7 +282,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       return {
         errorResult: {
           resultComment: scaleTicketValidation.errors.join(' '),
-          resultStatus: 'FAILED' as const,
+          resultStatus: 'FAILED',
         },
         validated: false,
       };
@@ -378,14 +378,14 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (isNil(weighingEvents) || weighingEvents.length === 0) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (weighingEvents.length > 2) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 

@@ -30,7 +30,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event is missing`,
     },
     {
@@ -42,7 +42,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}"`,
     },
     {
@@ -57,7 +57,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}" and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
@@ -72,7 +72,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
@@ -82,7 +82,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and no "${WASTE_GENERATOR}" event`,
     },
     {
@@ -99,7 +99,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The MassID document with multiple "${WASTE_GENERATOR}" events`,
     },
   ];

@@ -32,14 +32,14 @@ export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: 'The document is unique',
   },
   {
     newDuplicateDocuments: [{ status: CANCELLED }, { status: CANCELLED }],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.passed.ONLY_CANCELLED_DUPLICATES(2, 2),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: 'Only cancelled duplicates were found',
   },
   {
@@ -50,21 +50,21 @@ export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [
     ],
     oldDuplicateDocuments: [],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'Valid duplicates were found',
   },
   {
     newDuplicateDocuments: [],
     oldDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(2, 2),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'Valid duplicates were found in old format',
   },
   {
     newDuplicateDocuments: [{ status: OPEN }, { status: OPEN }],
     oldDuplicateDocuments: [{ status: CANCELLED }],
     resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(3, 2),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'Valid duplicates were found in both formats',
   },
 ];
@@ -87,7 +87,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       massIDAuditDocument,
       massIDDocument: undefined,
       resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The MassID document is missing',
     },
     {
@@ -99,7 +99,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
         ),
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_DROP_OFF_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${DROP_OFF}" event is missing`,
     },
     {
@@ -111,7 +111,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
         ),
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_PICK_UP_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event is missing`,
     },
     {
@@ -124,7 +124,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       },
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_WASTE_GENERATOR_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${WASTE_GENERATOR}" event is missing`,
     },
     {
@@ -136,7 +136,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
         ),
       },
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${RECYCLER}" event is missing`,
     },
     {
@@ -154,7 +154,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       },
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
     },
   ];

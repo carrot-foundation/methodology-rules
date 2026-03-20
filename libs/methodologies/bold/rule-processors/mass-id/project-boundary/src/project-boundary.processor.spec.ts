@@ -96,7 +96,7 @@ describe('ProjectBoundaryProcessor', () => {
         responseUrl: ruleInput.responseUrl,
         resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
         resultContent: undefined,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
 
       expect(ruleOutput).toEqual(expectedRuleOutput);

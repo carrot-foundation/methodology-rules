@@ -98,7 +98,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -106,7 +106,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 

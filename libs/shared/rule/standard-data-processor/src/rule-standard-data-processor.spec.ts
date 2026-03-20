@@ -60,7 +60,7 @@ describe('RuleStandardDataProcessor', () => {
         ruleStandardDataProcessor['getDocumentNotFoundResultComment'](
           parentDocumentId,
         ),
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -84,7 +84,7 @@ describe('RuleStandardDataProcessor', () => {
       responseUrl: ruleInput.responseUrl,
       resultComment:
         ruleStandardDataProcessor['getMissingRuleSubjectResultComment'](),
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -102,7 +102,7 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -112,7 +112,7 @@ describe('RuleStandardDataProcessor', () => {
     const ruleInput = stubRuleInput();
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -124,7 +124,7 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -135,7 +135,7 @@ describe('RuleStandardDataProcessor', () => {
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -148,7 +148,7 @@ describe('RuleStandardDataProcessor', () => {
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
       resultComment: 'Failed',
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -161,7 +161,7 @@ describe('RuleStandardDataProcessor', () => {
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
       resultContent,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -175,7 +175,7 @@ describe('RuleStandardDataProcessor', () => {
       responseUrl: ruleInput.responseUrl,
       resultComment: 'Failed',
       resultContent,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);

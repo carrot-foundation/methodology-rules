@@ -135,7 +135,7 @@ const createErrorTestCase = (
   documents,
   massIDAuditDocument,
   resultComment,
-  resultStatus: 'FAILED' as const,
+  resultStatus: 'FAILED',
   scenario,
 });
 
@@ -247,7 +247,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The sorting description is missing',
   },
   {
@@ -268,7 +268,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       currentValue: MANIFEST_SORTING_VALUE,
     },
     resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario:
       'The sorting value calculation difference is less or equal to 0.1',
   },
@@ -290,7 +290,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       calculatedSortingValue + 1,
       calculatedSortingValue,
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario:
       'The document current value does not match the sorting event value',
   },
@@ -308,7 +308,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The sorting value calculation difference is greater than 0.1',
   },
   {
@@ -329,7 +329,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       mismatchedDeductedWeight,
       Number((grossWeight * sortingFactor).toFixed(3)),
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario:
       'The deducted weight does not match the expected value based on sorting factor',
   },
@@ -350,7 +350,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       grossWeight + 0.2,
       valueBeforeSorting,
     ),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The gross weight does not match the previous event value',
   },
 ];

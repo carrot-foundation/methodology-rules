@@ -34,7 +34,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${DRIVER_IDENTIFIER}" is provided`,
   },
   {
@@ -47,7 +47,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment:
       RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(someJustification),
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The "${DRIVER_IDENTIFIER}" is not provided, but the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is provided`,
   },
   {
@@ -60,7 +60,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(BOAT),
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The "${DRIVER_IDENTIFIER}" is not provided and the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is not provided`,
   },
   {
@@ -73,7 +73,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: `The vehicle type is "${SLUDGE_PIPES}"`,
   },
   {
@@ -85,7 +85,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `Both "${DRIVER_IDENTIFIER}" and "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" are provided`,
   },
 ];

@@ -71,7 +71,7 @@ describe('ProjectPeriodLimitProcessor', () => {
 
     expect(ruleOutput).toMatchObject({
       resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     });
   });
 });

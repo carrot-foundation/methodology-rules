@@ -25,7 +25,7 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
     if (isNil(recycledEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 

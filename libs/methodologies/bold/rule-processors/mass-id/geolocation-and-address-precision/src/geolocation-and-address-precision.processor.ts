@@ -256,7 +256,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment:
               RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(actorType),
-            resultStatus: 'PASSED' as const,
+            resultStatus: 'PASSED',
           },
         ];
       }
@@ -267,7 +267,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         {
           resultComment:
             RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(actorType),
-          resultStatus: 'FAILED' as const,
+          resultStatus: 'FAILED',
         },
       ];
     }
@@ -284,7 +284,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             actorType,
             addressDistance,
           ),
-          resultStatus: 'FAILED' as const,
+          resultStatus: 'FAILED',
         },
       ];
     }
@@ -306,7 +306,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               actorType,
               addressDistance,
             ),
-            resultStatus: 'PASSED' as const,
+            resultStatus: 'PASSED',
           },
         ];
       }
@@ -325,7 +325,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               actorType,
               gpsDistance,
             ),
-            resultStatus: 'FAILED' as const,
+            resultStatus: 'FAILED',
           },
         ];
       }
@@ -337,7 +337,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             addressDistance,
             gpsDistance,
           ),
-          resultStatus: 'PASSED' as const,
+          resultStatus: 'PASSED',
         },
       ];
     }
@@ -348,7 +348,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           actorType,
           addressDistance,
         ),
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       },
     ];
   }

@@ -126,7 +126,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
 
     return {
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

@@ -89,7 +89,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
           totalDuplicates,
           validDuplicatesCount,
         ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -99,13 +99,13 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
           totalDuplicates,
           cancelledCount,
         ),
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

@@ -127,7 +127,7 @@ describe('RuleOutputSchema', () => {
     requestId: 'req-123',
     responseToken: 'token-abc',
     responseUrl: 'https://example.com/callback',
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
   };
 
   it('should accept a valid input with required fields', () => {

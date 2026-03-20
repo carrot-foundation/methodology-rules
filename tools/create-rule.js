@@ -126,7 +126,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -144,7 +144,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
 
     return {
       resultComment: this.RESULT_COMMENT.PASSED,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 
@@ -224,7 +224,7 @@ export const ${camelCase}TestCases = [
   {
     document: stubs.massIdDocumentStub,
     resultComment: RESULT_COMMENTS.PASSED,
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: 'all the criteria are met',
   },
   // Add more test cases as needed

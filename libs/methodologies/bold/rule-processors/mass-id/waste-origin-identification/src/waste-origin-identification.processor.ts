@@ -34,7 +34,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -44,7 +44,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     ) {
       return {
         resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -58,27 +58,27 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (!isUnidentified && hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
     if (isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
   }
 

@@ -42,14 +42,14 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (!isNil(haulerEvent)) {
       return {
         resultComment: RESULT_COMMENTS.passed.HAULER_EVENT_FOUND,
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
@@ -66,7 +66,7 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
         resultComment: RESULT_COMMENTS.passed.HAULER_NOT_REQUIRED(
           vehicleType as string,
         ),
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     }
 
@@ -74,7 +74,7 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
       resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(
         vehicleType as string,
       ),
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
   }
 

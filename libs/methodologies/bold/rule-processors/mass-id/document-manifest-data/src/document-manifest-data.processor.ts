@@ -108,14 +108,14 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EVENT(this.documentManifestType),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (isNil(ruleSubject.recyclerEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -135,7 +135,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     if (allFailMessages.length > 0) {
       return {
         resultComment: allFailMessages.join(' '),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -167,7 +167,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           failReasons: crossValidationResult.failReasons,
           ...(reviewReasons.length > 0 && { reviewReasons }),
         },
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -184,7 +184,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           extractionMetadata,
           reviewReasons: crossValidationResult.reviewReasons,
         },
-        resultStatus: 'REVIEW_REQUIRED' as const,
+        resultStatus: 'REVIEW_REQUIRED',
       };
     }
 
@@ -194,7 +194,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         crossValidation: crossValidationResult.crossValidation,
         extractionMetadata,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

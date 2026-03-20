@@ -30,14 +30,14 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     if (isNil(dropOffDate)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (isNil(recycledDate)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 

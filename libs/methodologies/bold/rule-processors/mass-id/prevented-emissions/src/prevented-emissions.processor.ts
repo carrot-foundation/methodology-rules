@@ -96,7 +96,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -106,7 +106,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
           RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
             wasteSubtype,
           ),
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -150,7 +150,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         ...(othersIfOrganicAudit && { othersIfOrganicAudit }),
         preventedCo2e: preventedEmissions,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 

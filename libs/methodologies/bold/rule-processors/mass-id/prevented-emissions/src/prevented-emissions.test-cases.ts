@@ -162,7 +162,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The exceeding emission coefficient is undefined (missing)',
     subtype,
   },
@@ -195,7 +195,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario:
       'The calculated prevented emissions would be negative, so they are clamped to zero',
     subtype,
@@ -218,7 +218,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The exceeding emission coefficient is null (non-positive)',
     subtype,
   },
@@ -247,7 +247,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario: 'The calculation is correct with all required attributes',
     subtype,
   },
@@ -306,7 +306,7 @@ export const preventedEmissionsTestCases = [
           wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
         },
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: `Others (if organic) calculates factor dynamically for baseline "${othersBaseline}" and local waste classification "${othersIfOrganicLocalWasteClassificationCode}"`,
       subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
     };
@@ -332,7 +332,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },
     },
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
     subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   },
@@ -361,7 +361,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'PASSED' as const,
+    resultStatus: 'PASSED',
     scenario:
       'The exceeding emission coefficient is zero (no exceeding emissions)',
     subtype,
@@ -385,7 +385,7 @@ export const preventedEmissionsTestCases = [
         wasteSubtype: subtype,
       },
     },
-    resultStatus: 'FAILED' as const,
+    resultStatus: 'FAILED',
     scenario: 'The exceeding emission coefficient is negative',
     subtype,
   },
@@ -456,7 +456,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       massIDAuditDocument,
       resultComment:
         processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The MassID document has an invalid subtype',
     },
     {
@@ -472,7 +472,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       ],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'The Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
     },
@@ -480,7 +480,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       documents: [...participantsAccreditationDocuments.values()],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The MassID document was not found',
     },
     {
@@ -488,7 +488,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       massIDAuditDocument,
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The Recycler accreditation document was not found',
     },
     {
@@ -505,7 +505,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       ],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The Recycler Accreditation document has no valid baselines',
     },
     {
@@ -536,7 +536,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       ],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'The Others (if organic) does not provide Local Waste Classification ID on PICK_UP',
     },
@@ -568,7 +568,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       ],
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'Others (if organic) has an unknown Local Waste Classification ID (not an accepted local waste classification code (Ibama, Brazil))',
     },
@@ -603,7 +603,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
         processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
           '02 02 99',
         ),
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
     },

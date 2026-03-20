@@ -127,7 +127,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     return {
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: subject,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
     };
   }
 
@@ -161,7 +161,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     return {
       resultComment,
       ...(resultContent && { resultContent }),
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
     };
   }
 }

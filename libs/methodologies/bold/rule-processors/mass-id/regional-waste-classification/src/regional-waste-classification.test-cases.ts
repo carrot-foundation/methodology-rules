@@ -79,7 +79,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The local waste classification ID and description match a local waste classification code with matching subtype',
     },
@@ -106,7 +106,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The local waste classification ID and description match the local waste classification code without spaces with matching subtype',
     },
@@ -133,7 +133,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The local waste classification description has leading/trailing special characters but matches after normalization with matching subtype',
     },
@@ -160,7 +160,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The local waste classification ID is missing',
     },
     {
@@ -183,7 +183,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The local waste classification description is missing',
     },
     {
@@ -210,7 +210,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The local waste classification description matches after normalization (accent stripped)',
     },
@@ -235,7 +235,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'The local waste classification description does not match the expected local waste classification code',
     },
@@ -259,7 +259,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'US',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The recycler is not from Brazil',
     },
     {
@@ -282,7 +282,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario: 'The local waste classification ID is not valid',
     },
     {
@@ -308,7 +308,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'The subtype does not match the CDM_CODE for the provided classification ID',
     },
@@ -335,7 +335,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The subtype matches the CDM_CODE for the provided classification ID',
     },
@@ -362,7 +362,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario:
         'The subtype matches the CDM_CODE 8.1 for Wood and Wood Products',
     },
@@ -389,7 +389,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
       },
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: 'The subtype matches the CDM_CODE 8.7C for Domestic Sludge',
     },
     {
@@ -415,7 +415,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         recyclerCountryCode: 'BR',
         subtype: MassIDOrganicSubtype.TOBACCO,
       },
-      resultStatus: 'FAILED' as const,
+      resultStatus: 'FAILED',
       scenario:
         'The subtype does not map to a valid CDM_CODE (TOBACCO has no mapping)',
     },
@@ -437,7 +437,7 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       resultComment: 'Rule not applicable',
       resultContent: undefined,
-      resultStatus: 'PASSED' as const,
+      resultStatus: 'PASSED',
       scenario: 'The document does not have a subtype (rule not applicable)',
     },
   ];

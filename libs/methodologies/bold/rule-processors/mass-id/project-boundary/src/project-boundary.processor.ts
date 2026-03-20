@@ -27,14 +27,14 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
     if (isNil(dropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -52,12 +52,12 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
         resultContent: {
           distance,
         },
-        resultStatus: 'PASSED' as const,
+        resultStatus: 'PASSED',
       };
     } catch {
       return {
         resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
-        resultStatus: 'FAILED' as const,
+        resultStatus: 'FAILED',
       };
     }
   }

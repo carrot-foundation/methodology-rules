@@ -22,7 +22,7 @@ const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
 // TODO: remove once Smaug supports REVIEW_REQUIRED
 const toUpstreamCompatibleOutput = (ruleOutput: RuleOutput): RuleOutput =>
   ruleOutput.resultStatus === 'REVIEW_REQUIRED'
-    ? { ...ruleOutput, resultStatus: 'FAILED' as const }
+    ? { ...ruleOutput, resultStatus: 'FAILED' }
     : ruleOutput;
 
 const setRuleSentryTags = ({
