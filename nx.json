@@ -96,7 +96,11 @@
       }
     }
   },
-  "pluginsConfig": { "@nx/js": { "analyzeSourceFiles": true } },
+  "pluginsConfig": {
+    "@nx/js": {
+      "analyzeSourceFiles": true
+    }
+  },
   "plugins": [
     {
       "plugin": "@nx/vitest",
@@ -107,7 +111,11 @@
     }
   ],
   "namedInputs": {
-    "node": [{ "runtime": "node --version" }],
+    "node": [
+      {
+        "runtime": "node --version"
+      }
+    ],
     "src": ["{projectRoot}/src/**/*"],
     "production": [
       "src",
@@ -147,5 +155,6 @@
   },
   "tui": {
     "enabled": false
-  }
+  },
+  "analytics": true
 }
