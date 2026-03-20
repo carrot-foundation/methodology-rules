@@ -59,6 +59,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should work', async () => {
     const response = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       resultStatus: 'PASSED' as const,
     };
 
@@ -79,6 +80,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should convert REVIEW_REQUIRED to FAILED before reporting and returning', async () => {
     const response = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       resultStatus: 'REVIEW_REQUIRED' as const,
     };
 
@@ -133,6 +135,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     const response = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       resultStatus: 'PASSED' as const,
     };
 
@@ -185,6 +188,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     const response = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       resultStatus: 'PASSED' as const,
     };
 
