@@ -1,64 +1,119 @@
 import { z } from 'zod';
 
-import type { UnknownObject } from '../common.types';
-import type {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventAttributeType,
-} from './methodology-enum.types';
-
 import { DateTimeSchema } from '../common.types';
 import { NonNegativeFloatSchema } from '../number.types';
-import { type NonEmptyString, NonEmptyStringSchema } from '../string.types';
+import { NonEmptyStringSchema } from '../string.types';
 import { MethodologyAddressSchema } from './methodology-address.types';
+import {
+  MethodologyDocumentEventAttributeFormatSchema,
+  MethodologyDocumentEventAttributeTypeSchema,
+} from './methodology-enum.types';
 import {
   MethodologyAuthorSchema,
   MethodologyParticipantSchema,
 } from './methodology-participant.types';
 
-export interface ApprovedException {
-  'Attribute Location': {
-    Asset: {
-      Category: NonEmptyString;
-    };
-    Event: NonEmptyString;
-  };
-  'Attribute Name': NonEmptyString;
-  'Exception Type': NonEmptyString;
-  Reason: NonEmptyString;
-  'Valid Until'?: string;
-}
+export const ApprovedExceptionSchema = z.object({
+  'Attribute Location': z.object({
+    Asset: z.object({ Category: NonEmptyStringSchema }),
+    Event: NonEmptyStringSchema,
+  }),
+  'Attribute Name': NonEmptyStringSchema,
+  'Exception Type': NonEmptyStringSchema,
+  Reason: NonEmptyStringSchema,
+  'Valid Until': z.string().optional(),
+});
+export type ApprovedException = z.infer<typeof ApprovedExceptionSchema>;
 
-export type ApprovedExceptionAttributeValue = ApprovedException[];
+export const ApprovedExceptionAttributeValueSchema = z.array(
+  ApprovedExceptionSchema,
+);
+export type ApprovedExceptionAttributeValue = z.infer<
+  typeof ApprovedExceptionAttributeValueSchema
+>;
 
-export interface MethodologyAdditionalVerification {
-  'Layout IDs'?: NonEmptyString[];
-  'Verification Type': string;
-}
+export const MethodologyAdditionalVerificationSchema = z.object({
+  'Layout IDs': z.array(NonEmptyStringSchema).optional(),
+  'Verification Type': z.string(),
+});
+export type MethodologyAdditionalVerification = z.infer<
+  typeof MethodologyAdditionalVerificationSchema
+>;
 
-export type MethodologyAdditionalVerificationAttributeValue =
-  MethodologyAdditionalVerification[];
+export const MethodologyAdditionalVerificationAttributeValueSchema = z.array(
+  MethodologyAdditionalVerificationSchema,
+);
+export type MethodologyAdditionalVerificationAttributeValue = z.infer<
+  typeof MethodologyAdditionalVerificationAttributeValueSchema
+>;
 
-const MethodologyDocumentEventAttachmentBaseSchema = z.object({
+export const MethodologyDocumentEventAttributeReferenceSchema = z.object({
+  documentId: NonEmptyStringSchema,
+  eventId: NonEmptyStringSchema.optional(),
+});
+export type MethodologyDocumentEventAttributeReference = z.infer<
+  typeof MethodologyDocumentEventAttributeReferenceSchema
+>;
+
+export const MethodologyDocumentEventAttributeValueSchema = z.union([
+  ApprovedExceptionAttributeValueSchema,
+  MethodologyAdditionalVerificationAttributeValueSchema,
+  MethodologyDocumentEventAttributeReferenceSchema,
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(z.unknown()),
+  z.record(z.string(), z.unknown()),
+]);
+export type MethodologyDocumentEventAttributeValue = z.infer<
+  typeof MethodologyDocumentEventAttributeValueSchema
+>;
+
+export const MethodologyDocumentEventAttributeSchema = z.object({
+  format: MethodologyDocumentEventAttributeFormatSchema.optional(),
+  isPublic: z.boolean(),
+  name: z.string(),
+  sensitive: z.boolean().optional(),
+  type: MethodologyDocumentEventAttributeTypeSchema.optional(),
+  value: MethodologyDocumentEventAttributeValueSchema.optional(),
+  valuePrefix: NonEmptyStringSchema.optional(),
+  valueSuffix: NonEmptyStringSchema.optional(),
+});
+export type MethodologyDocumentEventAttribute = z.infer<
+  typeof MethodologyDocumentEventAttributeSchema
+>;
+
+export const MethodologyDocumentEventAttachmentSchema = z.object({
   attachmentId: NonEmptyStringSchema,
   contentLength: NonNegativeFloatSchema,
   isPublic: z.boolean(),
   label: z.string(),
 });
+export type MethodologyDocumentEventAttachment = z.infer<
+  typeof MethodologyDocumentEventAttachmentSchema
+>;
 
-const MethodologyDocumentEventMetadataBaseSchema = z.object({
-  attributes: z.array(z.unknown()).optional(),
+export const MethodologyDocumentEventMetadataSchema = z.object({
+  attributes: z.array(MethodologyDocumentEventAttributeSchema).optional(),
 });
+export type MethodologyDocumentEventMetadata = z.infer<
+  typeof MethodologyDocumentEventMetadataSchema
+>;
 
-const MethodologyDocumentRelationBaseSchema = z.object({
+export const MethodologyDocumentRelationSchema = z.object({
   category: z.string().optional(),
   documentId: NonEmptyStringSchema,
   subtype: z.string().optional(),
   type: z.string().optional(),
 });
+export type MethodologyDocumentRelation = z.infer<
+  typeof MethodologyDocumentRelationSchema
+>;
 
 export const MethodologyDocumentEventSchema = z.looseObject({
   address: MethodologyAddressSchema,
-  attachments: z.array(MethodologyDocumentEventAttachmentBaseSchema).optional(),
+  attachments: z.array(MethodologyDocumentEventAttachmentSchema).optional(),
   author: MethodologyAuthorSchema,
   deduplicationId: z.string().optional(),
   documentSideEffectUpdates: z.record(z.string(), z.unknown()).optional(),
@@ -67,13 +122,13 @@ export const MethodologyDocumentEventSchema = z.looseObject({
   id: NonEmptyStringSchema,
   isPublic: z.boolean(),
   label: z.string().optional(),
-  metadata: MethodologyDocumentEventMetadataBaseSchema.optional(),
+  metadata: MethodologyDocumentEventMetadataSchema.optional(),
   name: z.string(),
   participant: MethodologyParticipantSchema,
   preserveSensitiveData: z.boolean().optional(),
   propagatedFrom: z.record(z.string(), z.unknown()).optional(),
   propagateEvent: z.boolean().optional(),
-  relatedDocument: MethodologyDocumentRelationBaseSchema.optional(),
+  relatedDocument: MethodologyDocumentRelationSchema.optional(),
   target: z.record(z.string(), z.unknown()).optional(),
   updates: z.record(z.string(), z.unknown()).optional(),
   value: z.number().optional(),
@@ -81,50 +136,5 @@ export const MethodologyDocumentEventSchema = z.looseObject({
 export type MethodologyDocumentEvent = z.infer<
   typeof MethodologyDocumentEventSchema
 >;
-
-export interface MethodologyDocumentEventAttachment {
-  attachmentId: string;
-  contentLength: number;
-  isPublic: boolean;
-  label: string;
-}
-
-export interface MethodologyDocumentEventAttribute {
-  format?: MethodologyDocumentEventAttributeFormat | undefined;
-  isPublic: boolean;
-  name: string;
-  sensitive?: boolean | undefined;
-  type?: MethodologyDocumentEventAttributeType | undefined;
-  value: MethodologyDocumentEventAttributeValue | undefined;
-  valuePrefix?: NonEmptyString | undefined;
-  valueSuffix?: NonEmptyString | undefined;
-}
-
-export interface MethodologyDocumentEventAttributeReference {
-  documentId: string;
-  eventId?: string | undefined;
-}
-
-export type MethodologyDocumentEventAttributeValue =
-  | ApprovedExceptionAttributeValue
-  | boolean
-  | MethodologyAdditionalVerificationAttributeValue
-  | MethodologyDocumentEventAttributeReference
-  | null
-  | number
-  | string
-  | unknown[]
-  | UnknownObject;
-
-export interface MethodologyDocumentEventMetadata {
-  attributes?: MethodologyDocumentEventAttribute[] | undefined;
-}
-
-export interface MethodologyDocumentRelation {
-  category?: string | undefined;
-  documentId: string;
-  subtype?: string | undefined;
-  type?: string | undefined;
-}
 
 export type MethodologyVerificationType = 'CDF' | 'MTR' | 'Scale Ticket';
