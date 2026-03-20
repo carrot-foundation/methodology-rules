@@ -11,7 +11,6 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
@@ -30,20 +29,20 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
     if (!isNonEmptyArray(processorActorEvents)) {
       return {
         resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     if (processorActorEvents.length > 1) {
       return {
         resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 

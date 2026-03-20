@@ -9,7 +9,6 @@ import {
   MassIDOrganicSubtype,
   MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
@@ -76,7 +75,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
       resultComment: isValid
         ? RESULT_COMMENTS.passed.VALID_QUALIFICATIONS
         : errorMessages.join(' '),
-      resultStatus: isValid ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
+      resultStatus: isValid ? 'PASSED' : 'FAILED',
     };
   }
 
@@ -99,7 +98,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -107,7 +106,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 

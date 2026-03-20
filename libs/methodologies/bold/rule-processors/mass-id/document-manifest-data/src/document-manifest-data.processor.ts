@@ -24,7 +24,6 @@ import {
   DocumentEventName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type MethodologyDocumentEventAttachment,
   type MethodologyDocumentEventAttribute,
@@ -109,14 +108,14 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_EVENT(this.documentManifestType),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     if (isNil(ruleSubject.recyclerEvent)) {
       return {
         resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -136,7 +135,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     if (allFailMessages.length > 0) {
       return {
         resultComment: allFailMessages.join(' '),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -168,7 +167,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           failReasons: crossValidationResult.failReasons,
           ...(reviewReasons.length > 0 && { reviewReasons }),
         },
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -185,7 +184,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           extractionMetadata,
           reviewReasons: crossValidationResult.reviewReasons,
         },
-        resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+        resultStatus: 'REVIEW_REQUIRED' as const,
       };
     }
 
@@ -195,7 +194,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         crossValidation: crossValidationResult.crossValidation,
         extractionMetadata,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 

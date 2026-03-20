@@ -26,7 +26,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import BigNumber from 'bignumber.js';
 
@@ -132,14 +131,14 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
         wasteGeneratorVerificationDocument,
       });
 
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
+      return mapToRuleOutput(ruleInput, 'PASSED', {
         resultContent: {
           massIDDocumentId: massIDDocument.id,
           massIDRewards: mapMassIDRewards(actorRewards),
         },
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }

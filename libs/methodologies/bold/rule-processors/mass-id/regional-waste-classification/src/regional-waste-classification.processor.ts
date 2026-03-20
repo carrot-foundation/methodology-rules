@@ -19,7 +19,6 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type AnyObject,
   type MethodologyDocumentEventAttributeValue,
@@ -128,7 +127,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     return {
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: subject,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 
@@ -162,7 +161,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     return {
       resultComment,
       ...(resultContent && { resultContent }),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
     };
   }
 }

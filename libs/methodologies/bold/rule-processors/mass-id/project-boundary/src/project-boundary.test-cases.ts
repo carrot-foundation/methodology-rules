@@ -9,7 +9,6 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 import { convertDistance } from 'geolib';
 
@@ -38,7 +37,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
       [DROP_OFF]: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `The MassID document has no "${DROP_OFF}" event`,
   },
   {
@@ -46,7 +45,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
       [PICK_UP]: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `The MassID document has no "${PICK_UP}" event`,
   },
   {
@@ -73,7 +72,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
     resultContent: {
       distance: distanceInKm,
     },
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The MassID document has multiple "${DROP_OFF}" events and all criteria are met`,
   },
 ];

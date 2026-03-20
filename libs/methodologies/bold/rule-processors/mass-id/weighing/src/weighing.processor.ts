@@ -28,7 +28,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyAdditionalVerification,
@@ -84,7 +83,7 @@ export class WeighingProcessor extends RuleDataProcessor {
         message: `Error in weighing processor for document ${ruleInput.documentId}`,
       });
 
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -163,7 +162,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       if (twoStepValidationMessages.errors.length > 0) {
         return {
           resultComment: twoStepValidationMessages.errors.join(' '),
-          resultStatus: RuleOutputStatus.FAILED,
+          resultStatus: 'FAILED' as const,
         };
       }
     }
@@ -182,7 +181,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (validationMessages.errors.length > 0) {
       return {
         resultComment: validationMessages.errors.join(' '),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -216,7 +215,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     return {
       resultComment: passMessage,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 
@@ -283,7 +282,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       return {
         errorResult: {
           resultComment: scaleTicketValidation.errors.join(' '),
-          resultStatus: RuleOutputStatus.FAILED,
+          resultStatus: 'FAILED' as const,
         },
         validated: false,
       };
@@ -379,14 +378,14 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (isNil(weighingEvents) || weighingEvents.length === 0) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     if (weighingEvents.length > 2) {
       return {
         resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 

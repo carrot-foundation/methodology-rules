@@ -20,7 +20,6 @@ import {
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyDocumentEventAttributeFormat,
   MethodologyDocumentEventLabel,
@@ -136,7 +135,7 @@ const createErrorTestCase = (
   documents,
   massIDAuditDocument,
   resultComment,
-  resultStatus: RuleOutputStatus.FAILED,
+  resultStatus: 'FAILED' as const,
   scenario,
 });
 
@@ -248,7 +247,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       currentValue: calculatedSortingValue,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: 'The sorting description is missing',
   },
   {
@@ -269,7 +268,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       currentValue: MANIFEST_SORTING_VALUE,
     },
     resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario:
       'The sorting value calculation difference is less or equal to 0.1',
   },
@@ -291,7 +290,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       calculatedSortingValue + 1,
       calculatedSortingValue,
     ),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario:
       'The document current value does not match the sorting event value',
   },
@@ -309,7 +308,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: 'The sorting value calculation difference is greater than 0.1',
   },
   {
@@ -330,7 +329,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       mismatchedDeductedWeight,
       Number((grossWeight * sortingFactor).toFixed(3)),
     ),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario:
       'The deducted weight does not match the expected value based on sorting factor',
   },
@@ -351,7 +350,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       grossWeight + 0.2,
       valueBeforeSorting,
     ),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: 'The gross weight does not match the previous event value',
   },
 ];

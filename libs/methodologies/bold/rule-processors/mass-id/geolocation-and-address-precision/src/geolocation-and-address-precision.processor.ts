@@ -35,7 +35,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
 import {
@@ -100,7 +99,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -129,7 +128,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     const allResults = [...actorResults.values()].flat();
 
     const passed = allResults.every(
-      (result) => result.resultStatus === RuleOutputStatus.PASSED,
+      (result) => result.resultStatus === 'PASSED',
     );
 
     const resultComment = allResults
@@ -138,7 +137,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     return {
       resultComment,
-      resultStatus: passed ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
+      resultStatus: passed ? 'PASSED' : 'FAILED',
     };
   }
 
@@ -257,7 +256,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment:
               RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(actorType),
-            resultStatus: RuleOutputStatus.PASSED,
+            resultStatus: 'PASSED' as const,
           },
         ];
       }
@@ -268,7 +267,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         {
           resultComment:
             RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(actorType),
-          resultStatus: RuleOutputStatus.FAILED,
+          resultStatus: 'FAILED' as const,
         },
       ];
     }
@@ -285,7 +284,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             actorType,
             addressDistance,
           ),
-          resultStatus: RuleOutputStatus.FAILED,
+          resultStatus: 'FAILED' as const,
         },
       ];
     }
@@ -307,7 +306,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               actorType,
               addressDistance,
             ),
-            resultStatus: RuleOutputStatus.PASSED,
+            resultStatus: 'PASSED' as const,
           },
         ];
       }
@@ -326,7 +325,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               actorType,
               gpsDistance,
             ),
-            resultStatus: RuleOutputStatus.FAILED,
+            resultStatus: 'FAILED' as const,
           },
         ];
       }
@@ -338,7 +337,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             addressDistance,
             gpsDistance,
           ),
-          resultStatus: RuleOutputStatus.PASSED,
+          resultStatus: 'PASSED' as const,
         },
       ];
     }
@@ -349,7 +348,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           actorType,
           addressDistance,
         ),
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       },
     ];
   }

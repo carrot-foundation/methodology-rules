@@ -29,7 +29,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
@@ -66,7 +65,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -111,7 +110,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     return {
       resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 

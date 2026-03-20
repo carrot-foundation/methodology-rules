@@ -9,7 +9,6 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
@@ -43,7 +42,7 @@ export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
     ]),
     manifestExample: true,
     resultComment: RESULT_COMMENTS.passed.HAULER_EVENT_FOUND,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The "${VEHICLE_TYPE}" attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the "${HAULER}" actor event exists`,
@@ -60,7 +59,7 @@ export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
     ]),
     manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(TRUCK),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `The "${VEHICLE_TYPE}" attribute is set with a vehicle type that is not ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the "${HAULER}" actor event does not exist`,
@@ -79,7 +78,7 @@ export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
     resultComment: RESULT_COMMENTS.passed.HAULER_NOT_REQUIRED(
       DocumentEventVehicleType.CART,
     ),
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The "${VEHICLE_TYPE}" attribute is set with a vehicle type that is ${OPTIONAL_HAULER_VEHICLE_TYPES.join(
       ', ',
     )} and the "${HAULER}" actor event does not exist`,
@@ -96,7 +95,7 @@ export const haulerIdentificationTestCases: HaulerIdentificationTestCase[] = [
       [PICK_UP, undefined],
     ]),
     resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `The "${PICK_UP}" event is missing`,
   },
 ];

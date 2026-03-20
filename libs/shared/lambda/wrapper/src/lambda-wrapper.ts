@@ -10,10 +10,7 @@ import {
 } from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
-import {
-  RuleInputSchema,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { RuleInputSchema } from '@carrot-fndn/shared/rule/types';
 import { AWSLambda, setTags } from '@sentry/serverless';
 
 const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput =>
@@ -24,8 +21,8 @@ const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
 
 // TODO: remove once Smaug supports REVIEW_REQUIRED
 const toUpstreamCompatibleOutput = (ruleOutput: RuleOutput): RuleOutput =>
-  ruleOutput.resultStatus === RuleOutputStatus.REVIEW_REQUIRED
-    ? { ...ruleOutput, resultStatus: RuleOutputStatus.FAILED }
+  ruleOutput.resultStatus === 'REVIEW_REQUIRED'
+    ? { ...ruleOutput, resultStatus: 'FAILED' as const }
     : ruleOutput;
 
 const setRuleSentryTags = ({

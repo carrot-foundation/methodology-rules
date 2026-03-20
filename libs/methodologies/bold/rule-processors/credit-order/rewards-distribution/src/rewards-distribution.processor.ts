@@ -23,7 +23,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type NonZeroPositive } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
@@ -160,11 +159,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
       const resultContent = calculateRewardsDistribution(ruleSubject);
 
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
+      return mapToRuleOutput(ruleInput, 'PASSED', {
         resultContent,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }

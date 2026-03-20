@@ -9,7 +9,6 @@ import {
   yellow,
 } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -178,9 +177,9 @@ export const handleRunBatch = async (
       logger.error(`Error [${entry.methodologyExecutionId}]: ${error}`);
     },
     onItemSuccess: (entry, { elapsedMs, output }) => {
-      if (output.resultStatus === RuleOutputStatus.PASSED) {
+      if (output.resultStatus === 'PASSED') {
         passedCount++;
-      } else if (output.resultStatus === RuleOutputStatus.REVIEW_REQUIRED) {
+      } else if (output.resultStatus === 'REVIEW_REQUIRED') {
         reviewRequiredCount++;
         reviewRequiredResults.push({
           entry,

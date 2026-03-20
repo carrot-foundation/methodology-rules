@@ -8,7 +8,6 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { convertDistance } from 'geolib';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
@@ -28,14 +27,14 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     if (isNil(dropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -53,12 +52,12 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
         resultContent: {
           distance,
         },
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       };
     } catch {
       return {
         resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
   }

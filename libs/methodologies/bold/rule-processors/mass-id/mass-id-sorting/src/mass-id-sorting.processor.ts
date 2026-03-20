@@ -26,7 +26,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
@@ -86,7 +85,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -96,7 +95,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -112,7 +111,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.deductedWeight,
           Number(expectedDeducted.toFixed(3)),
         ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -125,7 +124,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.grossWeight,
           sortingData.valueBeforeSorting,
         ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -138,7 +137,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           sortingData.documentCurrentValue,
           sortingData.valueAfterSorting,
         ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -147,7 +146,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
           sortingData.sortingValueCalculationDifference,
         ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -155,7 +154,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
       resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(
         sortingData.sortingValueCalculationDifference,
       ),
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 

@@ -5,7 +5,6 @@ import {
   DocumentEventAttributeName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
@@ -35,7 +34,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The "${DRIVER_IDENTIFIER}" is provided`,
   },
   {
@@ -48,7 +47,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment:
       RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(someJustification),
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The "${DRIVER_IDENTIFIER}" is not provided, but the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is provided`,
   },
   {
@@ -61,7 +60,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(BOAT),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `The "${DRIVER_IDENTIFIER}" is not provided and the "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" is not provided`,
   },
   {
@@ -74,7 +73,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: `The vehicle type is "${SLUDGE_PIPES}"`,
   },
   {
@@ -86,7 +85,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
       ],
     }),
     resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED' as const,
     scenario: `Both "${DRIVER_IDENTIFIER}" and "${DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION}" are provided`,
   },
 ];

@@ -4,7 +4,6 @@ import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { getSentryDsn } from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   stubContext,
   stubRuleInput,
@@ -60,7 +59,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should work', async () => {
     const response = {
       ...stubRuleOutput(),
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
 
     class Wrapped extends RuleDataProcessor {
@@ -80,7 +79,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should convert REVIEW_REQUIRED to FAILED before reporting and returning', async () => {
     const response = {
       ...stubRuleOutput(),
-      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+      resultStatus: 'REVIEW_REQUIRED' as const,
     };
 
     class Wrapped extends RuleDataProcessor {
@@ -96,7 +95,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     expect(result).toEqual({
       ...response,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
     });
   });
 
@@ -134,7 +133,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     const response = {
       ...stubRuleOutput(),
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
 
     class Wrapped extends RuleDataProcessor {
@@ -186,7 +185,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
     const response = {
       ...stubRuleOutput(),
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
 
     class Wrapped extends RuleDataProcessor {

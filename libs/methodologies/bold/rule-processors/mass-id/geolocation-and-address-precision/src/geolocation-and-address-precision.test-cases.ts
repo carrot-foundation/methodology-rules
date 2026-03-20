@@ -21,7 +21,6 @@ import {
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyApprovedExceptionType,
   type MethodologyParticipant,
@@ -380,7 +379,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       ]),
       actorParticipants,
       resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(RECYCLER)}`,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The accredited address is not set',
     },
     {
@@ -409,7 +408,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, manifestNearbyWasteGeneratorAddressDistance, manifestNearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, manifestNearbyRecyclerAddressDistance, manifestNearbyRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `The GPS is set and both GPS coordinates and event address are valid and within the ${MAX_ALLOWED_DISTANCE} m radius`,
     },
     {
@@ -438,7 +437,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(WASTE_GENERATOR, manifestInvalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, manifestInvalidRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The address is valid but the GPS geolocation is invalid',
     },
     {
@@ -459,7 +458,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The processor cannot extract the actor type',
     },
     {
@@ -484,7 +483,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario:
         'The GPS is not set, but the accredited address is set and is valid',
     },
@@ -508,7 +507,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(WASTE_GENERATOR, invalidWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario:
         'The GPS is not set, but the accredited address is set and not valid',
     },
@@ -548,7 +547,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.OPTIONAL_VALIDATION_SKIPPED(WASTE_GENERATOR)} ${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(RECYCLER, 0)}`,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario:
         'The Waste Generator verification document is missing (should pass, not fail)',
     },
@@ -590,7 +589,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario:
         'The Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped for Recycler on DROP_OFF)',
     },
@@ -632,7 +631,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(RECYCLER, nearbyRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario:
         'The Recycler has GPS exceptions for DROP_OFF event (GPS validation should be skipped)',
     },
@@ -676,7 +675,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario:
         'The Recycler has only latitude GPS exception (should NOT skip GPS validation)',
     },
@@ -721,7 +720,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(WASTE_GENERATOR, 0)} ${RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(RECYCLER, invalidRecyclerAddressDistance)}`,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario:
         'The Recycler has expired GPS exceptions (should NOT skip GPS validation)',
     },
@@ -754,7 +753,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
       ],
       massIDAuditDocument,
       resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The MassID document does not exist',
     },
     {
@@ -768,7 +767,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
         errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
           massIDDocument.id,
         ),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario:
         'The MassID document does not contain a DROP_OFF or PICK_UP event',
     },
@@ -778,7 +777,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
       resultComment:
         errorMessage.ERROR_MESSAGE
           .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The accreditation documents were not found',
     },
     {
@@ -786,7 +785,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
       massIDAuditDocument: undefined,
       resultComment:
         errorMessage.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: 'The MassID Audit document does not exist',
     },
   ];

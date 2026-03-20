@@ -15,7 +15,6 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
 
@@ -50,14 +49,14 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     if (vehicleType === SLUDGE_PIPES) {
       return {
         resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       };
     }
 
     if (hasDriverId && hasJustification) {
       return {
         resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -65,7 +64,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(vehicleTypeString),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -74,13 +73,13 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
         resultComment: RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(
           String(driverIdentifierExemptionJustification),
         ),
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.DRIVER_IDENTIFIER,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 

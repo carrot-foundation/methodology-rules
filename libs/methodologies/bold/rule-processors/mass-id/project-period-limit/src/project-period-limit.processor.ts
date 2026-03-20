@@ -7,7 +7,6 @@ import {
   type Document,
   type DocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { UTCDate } from '@date-fns/utc';
 import { isAfter, isEqual } from 'date-fns';
 
@@ -26,7 +25,7 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
     if (isNil(recycledEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -39,9 +38,7 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
       resultComment: isEligible
         ? RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE
         : RESULT_COMMENTS.failed.INVALID_RECYCLED_EVENT_DATE,
-      resultStatus: isEligible
-        ? RuleOutputStatus.PASSED
-        : RuleOutputStatus.FAILED,
+      resultStatus: isEligible ? 'PASSED' : 'FAILED',
     };
   }
 

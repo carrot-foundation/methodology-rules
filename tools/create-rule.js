@@ -104,7 +104,6 @@ export const ${camelCase}Lambda = wrapRuleIntoLambdaHandler(instance);\n`,
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { ${pascalCase}ProcessorErrors } from './${fileName}.errors';
 
@@ -127,7 +126,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
@@ -145,7 +144,7 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
 
     return {
       resultComment: this.RESULT_COMMENT.PASSED,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     };
   }
 
@@ -170,7 +169,7 @@ export class ${pascalCase}ProcessorErrors extends BaseProcessorErrors {
     content: `import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { type RuleOutput, RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import { type RuleOutput, type RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ${pascalCase}Processor } from './${fileName}.processor';
@@ -216,7 +215,6 @@ describe('${pascalCase}Processor', () => {
   {
     name: `${fileName}.test-cases.ts`,
     content: `import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './${fileName}.processor';
 
@@ -226,7 +224,7 @@ export const ${camelCase}TestCases = [
   {
     document: stubs.massIdDocumentStub,
     resultComment: RESULT_COMMENTS.PASSED,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED' as const,
     scenario: 'all the criteria are met',
   },
   // Add more test cases as needed

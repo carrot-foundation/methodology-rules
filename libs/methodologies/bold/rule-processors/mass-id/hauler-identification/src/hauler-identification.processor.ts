@@ -16,7 +16,6 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
@@ -43,14 +42,14 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED' as const,
       };
     }
 
     if (!isNil(haulerEvent)) {
       return {
         resultComment: RESULT_COMMENTS.passed.HAULER_EVENT_FOUND,
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       };
     }
 
@@ -67,7 +66,7 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
         resultComment: RESULT_COMMENTS.passed.HAULER_NOT_REQUIRED(
           vehicleType as string,
         ),
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       };
     }
 
@@ -75,7 +74,7 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
       resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(
         vehicleType as string,
       ),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
     };
   }
 

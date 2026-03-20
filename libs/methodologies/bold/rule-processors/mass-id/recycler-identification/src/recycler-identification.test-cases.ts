@@ -2,7 +2,6 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
@@ -19,7 +18,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
     {
       events: new Map([[`${ACTOR}-${RECYCLER}`, undefined]]),
       resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `The MassID document has no "${RECYCLER}" actor event`,
     },
     {
@@ -27,7 +26,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
         [`${ACTOR}-${RECYCLER}`, stubActorEventWithLabel(RECYCLER)],
       ]),
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `The MassID document has a "${RECYCLER}" actor event`,
     },
     {
@@ -36,7 +35,7 @@ export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
         [`${ACTOR}-${RECYCLER}-2`, stubActorEventWithLabel(RECYCLER)],
       ]),
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `The MassID document has multiple "${RECYCLER}" actor events`,
     },
   ];

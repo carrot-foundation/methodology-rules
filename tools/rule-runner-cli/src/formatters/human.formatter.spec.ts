@@ -1,5 +1,3 @@
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
-
 import { formatAsHuman } from './human.formatter';
 
 describe('formatAsHuman', () => {
@@ -10,7 +8,7 @@ describe('formatAsHuman', () => {
         responseToken: 'token',
         responseUrl: 'https://localhost/placeholder' as never,
         resultComment: 'All checks passed',
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       },
       { elapsedMs: 150 },
     );
@@ -26,7 +24,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultComment: 'Validation failed',
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
     });
 
     expect(output).toContain('✗ FAILED');
@@ -39,7 +37,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultComment: 'Review required: vehicle plate mismatch',
-      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+      resultStatus: 'REVIEW_REQUIRED' as const,
     });
 
     expect(output).toContain('⚠ REVIEW_REQUIRED');
@@ -52,7 +50,7 @@ describe('formatAsHuman', () => {
       responseToken: 'token',
       responseUrl: 'https://localhost/placeholder' as never,
       resultContent: { distance: 42 },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
     });
 
     expect(output).toContain('Result Content');
@@ -65,7 +63,7 @@ describe('formatAsHuman', () => {
         requestId: 'req-1',
         responseToken: 'token',
         responseUrl: 'https://localhost/placeholder' as never,
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
       },
       { debug: true },
     );

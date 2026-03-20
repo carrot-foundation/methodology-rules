@@ -6,7 +6,6 @@ import type {
 import { getOrDefault } from '@carrot-fndn/shared/helpers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
 
 const { CANCELLED } = MethodologyDocumentStatus;
@@ -28,7 +27,7 @@ const isMassIDAuditPassed = (document: Document): boolean =>
     eventHasMetadataAttribute({
       event,
       metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
-      metadataValues: RuleOutputStatus.PASSED,
+      metadataValues: 'PASSED',
     }),
   );
 
