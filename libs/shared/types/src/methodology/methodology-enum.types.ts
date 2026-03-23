@@ -1,8 +1,9 @@
-export enum DataSetName {
-  PROD = 'PROD',
-  PROD_SIMULATION = 'PROD_SIMULATION',
-  TEST = 'TEST',
-}
+import { z } from 'zod';
+
+export const DataSetNameSchema = z.enum(['PROD', 'PROD_SIMULATION', 'TEST']);
+export type DataSetName = z.infer<typeof DataSetNameSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DataSetName = DataSetNameSchema.enum;
 
 export enum MethodologyActorType {
   AUDITOR = 'Auditor',
@@ -77,10 +78,16 @@ export enum MethodologyDocumentEventName {
   WEIGHING = 'Weighing',
 }
 
-export enum MethodologyDocumentStatus {
-  CANCELLED = 'CANCELLED',
-  OPEN = 'OPEN',
-}
+export const MethodologyDocumentStatusSchema = z.enum([
+  'CANCELLED',
+  'CLOSED',
+  'OPEN',
+]);
+export type MethodologyDocumentStatus = z.infer<
+  typeof MethodologyDocumentStatusSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyDocumentStatus = MethodologyDocumentStatusSchema.enum;
 
 export enum MethodologyEvaluationResult {
   PASSED = 'PASSED',

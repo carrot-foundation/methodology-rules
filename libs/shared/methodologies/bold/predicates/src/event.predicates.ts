@@ -36,8 +36,7 @@ export const isRecycledEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.RECYCLED);
 
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-  event.participant.type === MethodologyParticipantType.ACTOR;
+  event.participant.type === MethodologyParticipantType.ACTOR.toString();
 
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,
@@ -108,8 +107,13 @@ export const eventHasMetadataAttribute = (options: {
 export const eventHasCarrotParticipant = (
   event: DocumentEvent,
   dataSetName: DataSetName,
-): boolean =>
-  event.participant.id ===
-    CARROT_PARTICIPANT_BY_ENVIRONMENT.development[dataSetName].id ||
-  event.participant.id ===
-    CARROT_PARTICIPANT_BY_ENVIRONMENT.production[dataSetName].id;
+): boolean => {
+  const development =
+    CARROT_PARTICIPANT_BY_ENVIRONMENT.development[dataSetName];
+  const production = CARROT_PARTICIPANT_BY_ENVIRONMENT.production[dataSetName];
+
+  return (
+    event.participant.id === development.id ||
+    event.participant.id === production.id
+  );
+};

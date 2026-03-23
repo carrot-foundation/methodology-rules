@@ -143,6 +143,7 @@ describe('reportRuleResults', () => {
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
 
     vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
@@ -197,6 +198,7 @@ describe('reportRuleResults', () => {
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
 
     vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
@@ -220,6 +222,7 @@ describe('reportRuleResults', () => {
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
 
     const errorResponse = new Response();

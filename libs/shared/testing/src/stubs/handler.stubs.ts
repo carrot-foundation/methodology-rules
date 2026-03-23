@@ -21,7 +21,7 @@ export const stubContext = (): Context => ({
   fail: () => {},
   functionName: faker.string.sample(),
   functionVersion: faker.string.sample(),
-  getRemainingTimeInMillis: () => faker.number.int(),
+  getRemainingTimeInMillis: () => faker.number.int({ max: 900_000 }),
   invokedFunctionArn: faker.string.sample(),
   logGroupName: faker.string.sample(),
   logStreamName: faker.string.sample(),
