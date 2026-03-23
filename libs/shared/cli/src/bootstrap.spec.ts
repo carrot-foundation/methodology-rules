@@ -4,8 +4,8 @@ import { logger } from '@carrot-fndn/shared/helpers';
 
 import { runProgram } from './bootstrap';
 
-jest.mock('@carrot-fndn/shared/helpers', () => ({
-  logger: { fatal: jest.fn() },
+vi.mock('@carrot-fndn/shared/helpers', () => ({
+  logger: { fatal: vi.fn() },
 }));
 
 const createMockProgram = (parseAsync: () => Promise<unknown>): Command =>
@@ -13,12 +13,12 @@ const createMockProgram = (parseAsync: () => Promise<unknown>): Command =>
 
 describe('runProgram', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.exitCode = undefined;
   });
 
   it('should call parseAsync on the program', async () => {
-    const parseAsync = jest.fn().mockResolvedValue(undefined);
+    const parseAsync = vi.fn().mockResolvedValue(undefined);
     const program = createMockProgram(parseAsync);
 
     await runProgram(program);

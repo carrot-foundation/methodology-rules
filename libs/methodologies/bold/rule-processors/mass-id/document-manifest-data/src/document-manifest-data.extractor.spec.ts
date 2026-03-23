@@ -5,17 +5,18 @@ import type {
   DocumentManifestEventSubject,
 } from './document-manifest-data.helpers';
 
-const mockExtract = jest.fn();
+const { mockExtract } = vi.hoisted(() => ({
+  mockExtract: vi.fn(),
+}));
 
-jest.mock('@carrot-fndn/shared/document-extractor', () =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  ({
-    ...jest.requireActual('@carrot-fndn/shared/document-extractor'),
-    createDocumentExtractor: () => ({
-      extract: mockExtract,
-    }),
+vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
+  ...(await importOriginal<
+    typeof import('@carrot-fndn/shared/document-extractor')
+  >()),
+  createDocumentExtractor: () => ({
+    extract: mockExtract,
   }),
-);
+}));
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
@@ -39,10 +40,6 @@ const noRelatedEvents: {
 };
 
 describe('crossValidateWithTextract', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('should return empty result when attachmentInfos is empty', async () => {
     const result = await crossValidateWithTextract({
       attachmentInfos: [],

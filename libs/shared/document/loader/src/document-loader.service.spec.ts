@@ -2,11 +2,11 @@ import { DocumentLoaderService } from './document-loader.service';
 import { DocumentRepository } from './document.repository';
 import { stubDocumentEntity, stubDocumentKeyDto } from './document.stubs';
 
-jest.mock('./document.repository');
+vi.mock('./document.repository');
 
 describe('DocumentLoader', () => {
   const documentLoader = new DocumentLoaderService(new DocumentRepository());
-  const documentRepository = jest.mocked(DocumentRepository.prototype);
+  const documentRepository = vi.mocked(DocumentRepository.prototype);
 
   describe('load', () => {
     it('should load document', async () => {

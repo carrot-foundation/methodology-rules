@@ -22,7 +22,7 @@ describe('RewardsDistributionProcessor', () => {
   const ruleDataProcessor = new RewardsDistributionProcessor(RECYCLED_ID);
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('rewardsDistributionProcessorTestCases', () => {

@@ -15,7 +15,7 @@ describe('MassIDSortingProcessor', () => {
   const ruleDataProcessor = new MassIDSortingProcessor();
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('MassIDSortingProcessor', () => {

@@ -9,12 +9,12 @@ import { driverIdentificationTestCases } from './driver-identification.test-case
 
 const { PICK_UP } = DocumentEventName;
 
-jest.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
+vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
 describe('DriverIdentificationProcessor', () => {
   const ruleDataProcessor = new DriverIdentificationProcessor();
 
-  const documentLoaderService = jest.mocked(loadDocument);
+  const documentLoaderService = vi.mocked(loadDocument);
 
   it.each(driverIdentificationTestCases)(
     'should return $resultStatus when $scenario',

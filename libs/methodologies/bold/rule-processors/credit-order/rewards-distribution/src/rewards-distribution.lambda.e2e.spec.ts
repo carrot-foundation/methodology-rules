@@ -21,7 +21,7 @@ import {
 
 describe('RewardsDistributionProcessor E2E', () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   const documentKeyPrefix = faker.string.uuid();

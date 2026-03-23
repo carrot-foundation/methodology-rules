@@ -80,8 +80,7 @@ export const extractSection = (
   let sectionEndIndex = lines.length;
 
   for (let index = sectionStartIndex + 1; index < lines.length; index++) {
-    // istanbul ignore next -- defensive for noUncheckedIndexedAccess; index is within bounds
-    if (nextSectionPatterns.some((p) => p.test(lines[index] ?? ''))) {
+    if (nextSectionPatterns.some((p) => p.test(lines[index]!))) {
       sectionEndIndex = index;
       break;
     }

@@ -13,7 +13,7 @@ describe('AuditApiService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('checkDuplicates', () => {
@@ -22,7 +22,7 @@ describe('AuditApiService', () => {
         match: { [faker.string.sample()]: faker.string.sample() },
       };
 
-      jest.spyOn(service as any, 'post').mockResolvedValue(undefined);
+      vi.spyOn(service as any, 'post').mockResolvedValue(undefined);
 
       await service.checkDuplicateDocuments(dto);
 

@@ -170,7 +170,7 @@ const parseCdfWasteRow = (
 ): undefined | WasteEntry => {
   const wasteText = row[config.anchorColumn]?.trim();
 
-  // istanbul ignore next -- anchor-based row extraction guarantees non-empty waste text
+  // v8 ignore next -- anchor-based row extraction guarantees non-empty waste text
   if (!wasteText) {
     return undefined;
   }

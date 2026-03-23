@@ -3,11 +3,11 @@ import { convertDistance, getDistance } from 'geolib';
 
 import { calculateDistance } from './calculate-distance-between-coordinates';
 
-jest.mock('geolib');
+vi.mock('geolib');
 
 describe('calculateDistance', () => {
-  const getDistanceMocked = jest.mocked(getDistance);
-  const convertDistanceMocked = jest.mocked(convertDistance);
+  const getDistanceMocked = vi.mocked(getDistance);
+  const convertDistanceMocked = vi.mocked(convertDistance);
 
   it('should call getDistance with the correct parameters and return the result', () => {
     const coordinateA = {

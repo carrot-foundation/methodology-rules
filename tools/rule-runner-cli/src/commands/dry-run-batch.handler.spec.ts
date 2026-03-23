@@ -12,57 +12,49 @@ import {
   resolveDryRunEnvironment,
 } from './dry-run.handler';
 
-jest.mock('node:fs/promises', () => ({
-  readFile: jest.fn(),
+vi.mock('node:fs/promises', () => ({
+  readFile: vi.fn(),
 }));
 
-jest.mock('@carrot-fndn/shared/cli', () => {
-  const actual: Record<string, unknown> = jest.requireActual(
-    '@carrot-fndn/shared/cli',
-  );
+vi.mock('@carrot-fndn/shared/cli', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
-    processBatch: jest.fn(),
+    processBatch: vi.fn(),
   };
 });
 
-jest.mock('./dry-run.handler', () => ({
-  processDryRunDocument: jest.fn(),
-  resolveDryRunEnvironment: jest.fn().mockReturnValue({
+vi.mock('./dry-run.handler', () => ({
+  processDryRunDocument: vi.fn(),
+  resolveDryRunEnvironment: vi.fn().mockReturnValue({
     smaugUrl: 'https://smaug.carrot.eco',
   }),
 }));
 
-jest.mock('../utils/config-parser', () => ({
-  parseConfig: jest.fn().mockReturnValue(undefined),
+vi.mock('../utils/config-parser', () => ({
+  parseConfig: vi.fn().mockReturnValue(undefined),
 }));
 
-jest.mock('../utils/batch-summary', () => {
-  const actual: Record<string, unknown> = jest.requireActual(
-    '../utils/batch-summary',
-  );
+vi.mock('../utils/batch-summary', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
 
   return {
     ...actual,
-    writeJsonLog: jest.fn(),
+    writeJsonLog: vi.fn(),
   };
 });
 
-const mockReadFile = readFile as jest.MockedFunction<typeof readFile>;
-const mockProcessBatch = processBatch as jest.MockedFunction<
-  typeof processBatch
->;
+const mockReadFile = readFile as vi.MockedFunction<typeof readFile>;
+const mockProcessBatch = processBatch as vi.MockedFunction<typeof processBatch>;
 const mockResolveDryRunEnvironment =
-  resolveDryRunEnvironment as jest.MockedFunction<
+  resolveDryRunEnvironment as vi.MockedFunction<
     typeof resolveDryRunEnvironment
   >;
-const mockProcessDryRunDocument = processDryRunDocument as jest.MockedFunction<
+const mockProcessDryRunDocument = processDryRunDocument as vi.MockedFunction<
   typeof processDryRunDocument
 >;
-const mockWriteJsonLog = writeJsonLog as jest.MockedFunction<
-  typeof writeJsonLog
->;
+const mockWriteJsonLog = writeJsonLog as vi.MockedFunction<typeof writeJsonLog>;
 
 const INPUT_FILE_PATH = 'test-data/docs.json';
 
@@ -96,7 +88,7 @@ const makeDocumentResult = (
 
 describe('handleDryRunBatch', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.exitCode = undefined;
     mockResolveDryRunEnvironment.mockReturnValue({
       smaugUrl: 'https://smaug.carrot.eco',
@@ -240,7 +232,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await handleDryRunBatch(undefined, baseOptions);
 
@@ -289,7 +281,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await handleDryRunBatch(undefined, baseOptions);
 
@@ -455,7 +447,7 @@ describe('handleDryRunBatch', () => {
       return Promise.resolve({ failures: [], successes: [] });
     });
 
-    const infoSpy = jest.spyOn(logger, 'info');
+    const infoSpy = vi.spyOn(logger, 'info');
 
     await handleDryRunBatch(undefined, baseOptions);
 
@@ -475,7 +467,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    const errorSpy = jest.spyOn(logger, 'error');
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRunBatch(undefined, baseOptions);
 

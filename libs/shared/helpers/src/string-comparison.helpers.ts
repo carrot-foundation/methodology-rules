@@ -64,12 +64,7 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
     if (runLength > 0) {
       index += runLength;
     } else {
-      const token = tokens.at(index);
-
-      if (token !== undefined) {
-        result.push(token);
-      }
-
+      result.push(tokens[index]!);
       index++;
     }
   }

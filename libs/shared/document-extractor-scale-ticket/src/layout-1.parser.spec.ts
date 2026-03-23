@@ -115,6 +115,20 @@ describe('ScaleTicketLayout1Parser', () => {
       expect(result.data.netWeight.parsed.value).toBe(100);
     });
 
+    it('should handle text with no ticket number pattern', () => {
+      const noTicketText = `
+        Placa Veículo ABC1234
+        Transportadora: 987 - TRANSPORTES TESTE LTDA
+        Peso Líquido: 200,25 kg
+      `;
+
+      const result = parser.parse(stubTextExtractionResult(noTicketText));
+
+      expect(result.data.ticketNumber).toBeUndefined();
+      expect(result.data.vehiclePlate?.parsed).toBe('ABC1234');
+      expect(result.data.netWeight.parsed.value).toBeCloseTo(200.25);
+    });
+
     it('should handle transporter with newline in name', () => {
       const newlineNameText = `
         Ticket de pesagem   12345

@@ -15,16 +15,16 @@ import type { TextExtractionResult } from './text-extractor.types';
 import { splitPdfPages } from './pdf-splitter.helpers';
 import { TextractService } from './textract.service';
 
-jest.mock('node:fs/promises', () => ({
-  readFile: jest.fn().mockResolvedValue(Buffer.from('test')),
+vi.mock('node:fs/promises', () => ({
+  readFile: vi.fn().mockResolvedValue(Buffer.from('test')),
 }));
 
-// Prevent AWS SDK credential chain from reading real config files in Jest workers,
+// Prevent AWS SDK credential chain from reading real config files in Vitest workers,
 // which can cause "Cannot read properties of undefined (reading 'then')" when
 // node:fs/promises is mocked (see aws/aws-sdk-js-v3#4756). We mock the loader so
 // config file reads are never attempted; node-config-provider only needs
 // getProfileName and loadSharedConfigFiles.
-jest.mock('@smithy/shared-ini-file-loader', () => {
+vi.mock('@smithy/shared-ini-file-loader', () => {
   const DEFAULT_PROFILE = 'default';
   const emptyConfig = { configFile: {}, credentialsFile: {} };
 
@@ -35,11 +35,11 @@ jest.mock('@smithy/shared-ini-file-loader', () => {
   };
 });
 
-jest.mock('./pdf-splitter.helpers', () => ({
-  splitPdfPages: jest.fn(),
+vi.mock('./pdf-splitter.helpers', () => ({
+  splitPdfPages: vi.fn(),
 }));
 
-const mockSplitPdfPages = jest.mocked(splitPdfPages);
+const mockSplitPdfPages = vi.mocked(splitPdfPages);
 
 describe('TextractService', () => {
   let textractClientMock: AwsClientStub<TextractClient>;
@@ -51,16 +51,16 @@ describe('TextractService', () => {
     s3ClientMock = mockClient(S3Client);
     service = new TextractService(new TextractClient({}), new S3Client({}));
 
-    jest.spyOn(logger, 'debug').mockImplementation();
-    jest.spyOn(logger, 'info').mockImplementation();
-    jest.spyOn(logger, 'error').mockImplementation();
-    jest.spyOn(logger, 'warn').mockImplementation();
+    vi.spyOn(logger, 'debug').mockImplementation(() => {});
+    vi.spyOn(logger, 'info').mockImplementation(() => {});
+    vi.spyOn(logger, 'error').mockImplementation(() => {});
+    vi.spyOn(logger, 'warn').mockImplementation(() => {});
   });
 
   afterEach(() => {
     textractClientMock.reset();
     s3ClientMock.reset();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('should throw when input is invalid', async () => {

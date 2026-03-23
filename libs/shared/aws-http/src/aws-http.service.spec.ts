@@ -3,33 +3,33 @@ import { type AxiosInstance } from 'axios';
 import { AwsHttpService } from './aws-http.service';
 import * as awsHelpers from './aws-http.service.helpers';
 
-jest.mock('@carrot-fndn/shared/env', () => ({
+vi.mock('@carrot-fndn/shared/env', () => ({
   getAwsRegion: () => 'us-east-1',
 }));
 
-jest.mock('./aws-http.service.helpers', () => ({
-  signRequest: jest.fn(),
+vi.mock('./aws-http.service.helpers', () => ({
+  signRequest: vi.fn(),
 }));
 
 describe('HttpService', () => {
   let service: AwsHttpService;
-  let mockAxios: jest.Mocked<AxiosInstance>;
+  let mockAxios: vi.Mocked<AxiosInstance>;
 
   beforeEach(() => {
     mockAxios = {
-      request: jest.fn(),
-    } as unknown as jest.Mocked<AxiosInstance>;
+      request: vi.fn(),
+    } as unknown as vi.Mocked<AxiosInstance>;
 
-    (awsHelpers.signRequest as jest.Mock).mockResolvedValue({
+    vi.mocked(awsHelpers.signRequest).mockResolvedValue({
       body: { data: 'signed' },
       headers: { Authorization: 'AWS4-HMAC-SHA256' },
-    });
+    } as never);
 
     service = new AwsHttpService(mockAxios);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('post', () => {

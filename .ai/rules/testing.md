@@ -1,12 +1,12 @@
 ---
 id: testing
-intent: Ensure consistent, safe, and maintainable test practices using Jest and schema-driven data generation
+intent: Ensure consistent, safe, and maintainable test practices using Vitest and schema-driven data generation
 scope:
   - "*.spec.ts"
   - "*.e2e.spec.ts"
   - "*.test-cases.ts"
 requirements:
-  - Use Jest with ts-jest as the test runner; test environment is configured via `.env-files/.env.test`
+  - Use Vitest as the test runner; test environment is configured via `.env-files/.env.test`
   - Generate test data with `@faker-js/faker` for primitives and `zocker` for schema-driven object generation
   - Use shared test helpers from `@carrot-fndn/shared/testing` including `stubRuleInput()`, `stubDocument()`, and `createStubFromSchema()`
   - Use `it.each` for table-driven tests when verifying the same logic across multiple input/output combinations
@@ -18,7 +18,7 @@ anti_patterns:
   - Hardcoding UUIDs, dates, or numeric IDs when faker or zocker can generate them dynamically
   - Writing test logic inside `beforeAll`/`beforeEach` that should be a standalone test case
   - Sharing mutable state between test cases without proper setup/teardown isolation
-  - Using `jest.mock` at the module level when a dependency-injection approach or per-test spy would be narrower and safer
+  - Using `vi.mock` at the module level when a dependency-injection approach or per-test spy would be narrower and safer
   - Asserting on snapshot strings for logic validation; reserve snapshots for serialized output stability only
 ---
 
@@ -26,7 +26,7 @@ anti_patterns:
 
 ## Rule body
 
-All test code in this repository runs under Jest with ts-jest. Tests must be deterministic, isolated, and free of real-world data.
+All test code in this repository runs under Vitest. Tests must be deterministic, isolated, and free of real-world data.
 
 ### Test file conventions
 

@@ -1,10 +1,6 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import {
-  isBigNumber,
-  isNil,
-  isNonEmptyArray,
-} from '@carrot-fndn/shared/helpers';
+import { isNil, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
@@ -234,45 +230,36 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const distributions =
       this.getRewardsDistributionActorTypePercentages(massIDDocument);
 
-    for (const [actorType, rewardDistribution] of Object.entries(
-      distributions,
-    )) {
-      if (
-        (Object.values(RewardsDistributionActorType) as unknown[]).includes(
-          actorType,
-        ) &&
-        isBigNumber(rewardDistribution)
-      ) {
-        const validActorType = actorType as RewardsDistributionActorType;
-        const actorsByType = getActorsByType({
+    for (const actorType of Object.values(RewardsDistributionActorType)) {
+      const rewardDistribution = distributions[actorType];
+      const actorsByType = getActorsByType({
+        actors,
+        actorType,
+        methodologyDocument,
+      });
+
+      if (isNonEmptyArray(actorsByType)) {
+        const massIDPercentage = this.getActorMassIDPercentage({
           actors,
-          actorType: validActorType,
-          methodologyDocument,
-        });
+          actorType,
+          massIDDocument,
+          rewardDistribution,
+          wasteGeneratorVerificationDocument,
+        }).div(actorsByType.length);
 
-        if (isNonEmptyArray(actorsByType)) {
-          const massIDPercentage = this.getActorMassIDPercentage({
-            actors,
-            actorType: validActorType,
-            massIDDocument,
-            rewardDistribution,
-            wasteGeneratorVerificationDocument,
-          }).div(actorsByType.length);
-
-          result.push(
-            ...actorsByType.map(
-              ({ address, participant, preserveSensitiveData, type }) =>
-                mapActorReward({
-                  actorType: type,
-                  address,
-                  massIDDocument,
-                  massIDPercentage,
-                  participant,
-                  preserveSensitiveData,
-                }),
-            ),
-          );
-        }
+        result.push(
+          ...actorsByType.map(
+            ({ address, participant, preserveSensitiveData, type }) =>
+              mapActorReward({
+                actorType: type,
+                address,
+                massIDDocument,
+                massIDPercentage,
+                participant,
+                preserveSensitiveData,
+              }),
+          ),
+        );
       }
     }
 

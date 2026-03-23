@@ -16,7 +16,7 @@ describe('PreventedEmissionsProcessor', () => {
   const ruleDataProcessor = new PreventedEmissionsProcessor();
 
   beforeEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('PreventedEmissionsProcessor', () => {

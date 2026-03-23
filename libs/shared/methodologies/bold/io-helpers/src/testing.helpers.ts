@@ -7,7 +7,7 @@ export const spyOnDocumentQueryServiceLoad = (
   rootDocument: Document,
   documents: Document[],
 ) => {
-  jest.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
+  vi.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
     iterator: () => ({
       each: (callback) =>
         Promise.resolve(
@@ -24,5 +24,5 @@ export const spyOnDocumentQueryServiceLoad = (
 export const spyOnLoadDocument = (
   result: Awaited<ReturnType<(typeof documentHelpers)['loadDocument']>>,
 ) => {
-  jest.spyOn(documentHelpers, 'loadDocument').mockResolvedValueOnce(result);
+  vi.spyOn(documentHelpers, 'loadDocument').mockResolvedValueOnce(result);
 };
