@@ -79,7 +79,7 @@ export class DocumentExtractor implements DocumentExtractorService {
     if (resolvedLayouts.length === 1) {
       const layoutId = resolvedLayouts[0];
 
-      /* istanbul ignore next -- unreachable: guarded by length === 1 check */
+      /* v8 ignore next -- unreachable: guarded by length === 1 check */
       if (layoutId === undefined) {
         throw new Error('At least one layout must be provided');
       }

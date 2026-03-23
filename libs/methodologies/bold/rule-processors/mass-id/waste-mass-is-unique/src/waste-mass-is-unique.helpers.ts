@@ -46,7 +46,7 @@ export const createLicensePlateRegex = (
   return `^${escapedPattern.slice(0, -6)}$`;
 };
 
-/* istanbul ignore next */
+/* v8 ignore next */
 export const createAuditApiService = (): AuditApiService =>
   new AuditApiService();
 
