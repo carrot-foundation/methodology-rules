@@ -1,3 +1,4 @@
+import { DocumentIdSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
 export enum RuleOutputStatus {
@@ -6,22 +7,24 @@ export enum RuleOutputStatus {
   REVIEW_REQUIRED = 'REVIEW_REQUIRED',
 }
 
+export const RuleEnvironmentSchema = z.enum(['DEVELOPMENT', 'PRODUCTION']);
 export interface IRuleDataProcessor {
   process(data: RuleInput): Promise<RuleOutput>;
 }
 
-export type RuleEnvironment = 'DEVELOPMENT' | 'PRODUCTION';
+export type RuleEnvironment = z.infer<typeof RuleEnvironmentSchema>;
 
-export interface RuleInput {
-  documentId: string;
-  documentKeyPrefix: string;
-  parentDocumentId?: string;
-  requestId: string;
-  responseToken: string;
-  responseUrl: string;
-  ruleName?: string;
-  // TODO: add environment
-}
+export const RuleInputSchema = z.object({
+  documentId: DocumentIdSchema,
+  documentKeyPrefix: z.string().nonempty(),
+  environment: RuleEnvironmentSchema.optional(),
+  parentDocumentId: DocumentIdSchema.optional(),
+  requestId: z.string(),
+  responseToken: z.string(),
+  responseUrl: z.url(),
+  ruleName: z.string().optional(),
+});
+export type RuleInput = z.infer<typeof RuleInputSchema>;
 
 export const RuleOutputSchema = z.object({
   requestId: z.string(),

@@ -2,23 +2,18 @@ import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 import type { Context } from 'aws-lambda';
 
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
+import {
+  RuleInputSchema,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 
 import { stubEnumValue } from './enum.stubs';
+import { createStubFromSchema } from './zod.stubs';
 
 export const stubRuleInput = (
   partial?: Partial<MethodologyRuleEvent>,
-): MethodologyRuleEvent => ({
-  documentId: faker.string.uuid(),
-  documentKeyPrefix: faker.string.uuid(),
-  parentDocumentId: faker.string.uuid(),
-  requestId: faker.string.uuid(),
-  responseToken: faker.string.uuid(),
-  responseUrl: faker.internet.url(),
-  ruleName: faker.string.sample(),
-  ...partial,
-});
+): MethodologyRuleEvent => createStubFromSchema(RuleInputSchema, partial);
 
 export const stubContext = (): Context => ({
   awsRequestId: faker.string.uuid(),
