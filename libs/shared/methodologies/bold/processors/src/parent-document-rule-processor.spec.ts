@@ -4,10 +4,7 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type RuleInput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { ParentDocumentRuleProcessor } from './parent-document-rule-processor';
@@ -22,9 +19,7 @@ describe('ParentDocumentRuleProcessor', () => {
   > {
     evaluateResult(data: []): EvaluateResultOutput {
       return {
-        resultStatus: isNil(data)
-          ? RuleOutputStatus.FAILED
-          : RuleOutputStatus.PASSED,
+        resultStatus: isNil(data) ? 'FAILED' : 'PASSED',
       };
     }
 

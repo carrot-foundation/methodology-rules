@@ -6,7 +6,7 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
+  type RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 
 export interface EvaluateResultOutput {
@@ -23,7 +23,7 @@ export abstract class RuleStandardDataProcessor<
     const document = await this.loadDocument(ruleInput);
 
     if (isNil(document)) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.getDocumentNotFoundResultComment(
           ruleInput.parentDocumentId as string,
         ),
@@ -33,7 +33,7 @@ export abstract class RuleStandardDataProcessor<
     const ruleSubject = await this.getRuleSubject(document);
 
     if (isNil(ruleSubject)) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.PASSED, {
+      return mapToRuleOutput(ruleInput, 'PASSED', {
         resultComment: this.getMissingRuleSubjectResultComment(),
       });
     }

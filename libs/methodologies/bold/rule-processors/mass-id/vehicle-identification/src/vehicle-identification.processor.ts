@@ -18,7 +18,6 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 
@@ -140,7 +139,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
   ): EvaluateResultOutput {
     return {
       resultComment,
-      resultStatus: passed ? RuleOutputStatus.PASSED : RuleOutputStatus.FAILED,
+      resultStatus: passed ? 'PASSED' : 'FAILED',
     };
   }
 }

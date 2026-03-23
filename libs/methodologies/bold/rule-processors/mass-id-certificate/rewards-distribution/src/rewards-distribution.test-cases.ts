@@ -19,7 +19,6 @@ import {
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.constants';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
@@ -173,7 +172,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
         massIDPartialDocument: {
           subtype: wasteType,
         },
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED' as const,
         scenario: `the massRewards is calculated successfully for ${wasteType} waste type and ${expectedRewards} rewards`,
       }),
     ),
@@ -189,7 +188,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is not present`,
     },
     {
@@ -203,7 +202,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is present`,
     },
     {
@@ -212,7 +211,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `all rewards are applied for the ${REWARDS_DISTRIBUTION_BY_WASTE_TYPE['Food, Food Waste and Beverages']}`,
     },
     {
@@ -221,7 +220,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `Large Business discount is applied when Waste Generator Verification Document is missing (defaults to Large Business)`,
     },
     {
@@ -230,7 +229,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
       wasteGeneratorVerificationDocument:
         createWasteGeneratorVerificationDocument(LARGE_BUSINESS),
@@ -244,7 +243,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED' as const,
       scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
       wasteGeneratorVerificationDocument:
         createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
@@ -285,14 +284,14 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       documents: [],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `${MASS_ID} document is not found`,
     },
     {
       documents: [massIDDocument],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `${METHODOLOGY} document is not found`,
     },
     {
@@ -309,7 +308,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIDDocument.id, [
         RewardsDistributionActorType.INTEGRATOR,
       ]),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document does not have the required actors`,
     },
     {
@@ -322,7 +321,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `the ${METHODOLOGY} document does not have the required actors`,
     },
     {
@@ -337,7 +336,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(
         massIDDocument.id,
       ),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document does not have external events`,
     },
     {
@@ -350,7 +349,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document has an unexpected subtype`,
     },
     {
@@ -367,7 +366,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED' as const,
       scenario: `the ${METHODOLOGY} document does not have the required address in actors`,
     },
   ];

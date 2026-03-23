@@ -1,8 +1,10 @@
-import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
+import type {
+  RuleOutput,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
 
 import { formatAsJson } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import path from 'node:path';
 
 import type { DryRunOptions } from './dry-run.command';
@@ -107,15 +109,15 @@ const mapOutputStatus = (
   status: RuleOutputStatus,
 ): DryRunRuleResult['status'] => {
   switch (status) {
-    case RuleOutputStatus.FAILED: {
+    case 'FAILED': {
       return 'failed';
     }
 
-    case RuleOutputStatus.PASSED: {
+    case 'PASSED': {
       return 'passed';
     }
 
-    case RuleOutputStatus.REVIEW_REQUIRED: {
+    case 'REVIEW_REQUIRED': {
       return 'review_required';
     }
   }

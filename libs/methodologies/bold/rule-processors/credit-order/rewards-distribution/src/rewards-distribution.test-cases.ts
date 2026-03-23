@@ -26,7 +26,6 @@ import {
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -551,7 +550,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedActorsResult: expectedResults.singleCertificateStandard,
     expectedCertificateTotalValue: documents.massID1Value,
     massIDCertificateDocuments: documents.standard.massIDCertificateDocuments,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED',
     scenario: 'single certificate with equal distribution',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -561,7 +560,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedCertificateTotalValue: documents.massID1Value,
     massIDCertificateDocuments:
       documents.multiHauler.massIDCertificateDocuments,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED',
     scenario: 'single certificate with multiple HAULER participants',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -571,7 +570,7 @@ export const rewardsDistributionProcessorTestCases: TestCase[] = [
     expectedCertificateTotalValue: documents.multipleCertificates.totalValue,
     massIDCertificateDocuments:
       documents.multipleCertificates.massIDCertificateDocuments,
-    resultStatus: RuleOutputStatus.PASSED,
+    resultStatus: 'PASSED',
     scenario: 'multiple certificates with the same participants',
     unitPrice: UNIT_PRICE_VALUE,
   },
@@ -620,7 +619,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
     massIDCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND(RECYCLED_ID),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED',
     scenario: `the ${RECYCLED_ID} documents is not found`,
   },
   {
@@ -629,7 +628,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ...errorTestData.errorStubs.massIDCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED',
     scenario: `the ${CREDIT_ORDER} document is not found`,
   },
   {
@@ -638,7 +637,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ...errorTestData.errorStubs.massIDCertificateDocuments,
     ],
     resultComment: ERROR_MESSAGES.INVALID_CREDIT_UNIT_PRICE,
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED',
     scenario: `the "${CREDIT_UNIT_PRICE}" attribute in the ${CREDIT_ORDER} document is invalid`,
   },
   {
@@ -650,7 +649,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
       ERROR_MESSAGES.REWARDS_DISTRIBUTION_RULE_RESULT_CONTENT_NOT_FOUND(
         errorTestData.errorStubs.massIDCertificateDocuments[0]!.id,
       ),
-    resultStatus: RuleOutputStatus.FAILED,
+    resultStatus: 'FAILED',
     scenario: `a certificate document has no "${RULE_RESULT_DETAILS}" attribute`,
   },
 ];

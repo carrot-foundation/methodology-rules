@@ -8,10 +8,7 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { differenceInDays, parseISO } from 'date-fns';
 
@@ -41,7 +38,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
         );
 
         resultComment =
-          testCase.resultStatus === RuleOutputStatus.PASSED
+          testCase.resultStatus === 'PASSED'
             ? RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference)
             : RESULT_COMMENTS.failed.TIMEFRAME_OUT_OF_RANGE(difference);
       } else {

@@ -4,7 +4,6 @@ import {
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
@@ -72,7 +71,7 @@ describe('ProjectPeriodLimitProcessor', () => {
 
     expect(ruleOutput).toMatchObject({
       resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     });
   });
 });

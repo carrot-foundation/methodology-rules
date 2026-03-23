@@ -1,7 +1,6 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import type { DryRunOptions } from './dry-run.command';
 
@@ -82,7 +81,7 @@ const mockRuleOutput: RuleOutput = {
   responseToken: 'cli-placeholder-token',
   responseUrl: 'https://localhost/placeholder' as RuleOutput['responseUrl'],
   resultComment: 'Test passed',
-  resultStatus: RuleOutputStatus.PASSED,
+  resultStatus: 'PASSED',
 };
 
 describe('handleDryRun', () => {
@@ -160,7 +159,7 @@ describe('handleDryRun', () => {
   it('should return review_required status for REVIEW_REQUIRED rule output', async () => {
     mockProcess.mockResolvedValue({
       ...mockRuleOutput,
-      resultStatus: RuleOutputStatus.REVIEW_REQUIRED,
+      resultStatus: 'REVIEW_REQUIRED',
     });
 
     const result = await handleDryRun('some/path', baseOptions);
@@ -171,7 +170,7 @@ describe('handleDryRun', () => {
   it('should return failed status for FAILED rule output', async () => {
     mockProcess.mockResolvedValue({
       ...mockRuleOutput,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     });
 
     const result = await handleDryRun('some/path', baseOptions);

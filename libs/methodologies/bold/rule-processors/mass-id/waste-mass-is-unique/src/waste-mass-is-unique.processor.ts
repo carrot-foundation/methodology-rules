@@ -22,7 +22,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import {
   MethodologyDocumentEventLabel,
@@ -56,7 +55,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
       const document = await this.loadDocument(ruleInput);
 
       if (isNil(document)) {
-        return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+        return mapToRuleOutput(ruleInput, 'FAILED', {
           resultComment: this.errorProcessor.getResultCommentFromError(
             this.errorProcessor.getKnownError(
               this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -73,7 +72,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -90,7 +89,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
           totalDuplicates,
           validDuplicatesCount,
         ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -100,13 +99,13 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
           totalDuplicates,
           cancelledCount,
         ),
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.NO_DUPLICATES_FOUND,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
   }
 

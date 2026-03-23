@@ -2,7 +2,6 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
@@ -19,7 +18,7 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
     {
       events: new Map([[`${ACTOR}-${PROCESSOR}`, undefined]]),
       resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The MassID document has no "${PROCESSOR}" actor event`,
     },
     {
@@ -27,7 +26,7 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
         [`${ACTOR}-${PROCESSOR}`, stubActorEventWithLabel(PROCESSOR)],
       ]),
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
       scenario: `The MassID document has a "${PROCESSOR}" actor event`,
     },
     {
@@ -36,7 +35,7 @@ export const processorIdentificationTestCases: ProcessorIdentificationTestCase[]
         [`${ACTOR}-${PROCESSOR}-2`, stubActorEventWithLabel(PROCESSOR)],
       ]),
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The MassID document has multiple "${PROCESSOR}" actor events`,
     },
   ];

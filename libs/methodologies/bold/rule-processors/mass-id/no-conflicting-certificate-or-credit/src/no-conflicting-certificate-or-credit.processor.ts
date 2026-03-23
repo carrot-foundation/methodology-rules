@@ -21,7 +21,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
@@ -72,7 +71,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.errorProcessor.getResultCommentFromError(error),
       });
     }
@@ -127,7 +126,7 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
 
     return {
       resultComment: RESULT_COMMENTS.passed.NO_CONFLICTING_CERTIFICATE,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
   }
 

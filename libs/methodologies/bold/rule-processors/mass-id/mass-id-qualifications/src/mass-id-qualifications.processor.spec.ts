@@ -4,7 +4,7 @@ import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers'
 import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleOutput,
-  RuleOutputStatus,
+  type RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubEnumValue, stubRuleInput } from '@carrot-fndn/shared/testing';
 

@@ -2,7 +2,6 @@ import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -19,9 +18,7 @@ describe('RuleStandardDataProcessor', () => {
   > {
     protected evaluateResult(data: string[]): EvaluateResultOutput {
       return {
-        resultStatus: isNil(data)
-          ? RuleOutputStatus.FAILED
-          : RuleOutputStatus.PASSED,
+        resultStatus: isNil(data) ? 'FAILED' : 'PASSED',
       };
     }
 
@@ -63,7 +60,7 @@ describe('RuleStandardDataProcessor', () => {
         ruleStandardDataProcessor['getDocumentNotFoundResultComment'](
           parentDocumentId,
         ),
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -87,7 +84,7 @@ describe('RuleStandardDataProcessor', () => {
       responseUrl: ruleInput.responseUrl,
       resultComment:
         ruleStandardDataProcessor['getMissingRuleSubjectResultComment'](),
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -105,7 +102,7 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -115,7 +112,7 @@ describe('RuleStandardDataProcessor', () => {
     const ruleInput = stubRuleInput();
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -127,7 +124,7 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -138,7 +135,7 @@ describe('RuleStandardDataProcessor', () => {
 
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -151,7 +148,7 @@ describe('RuleStandardDataProcessor', () => {
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
       resultComment: 'Failed',
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);
@@ -164,7 +161,7 @@ describe('RuleStandardDataProcessor', () => {
     (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
       resultContent,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     }));
 
     const result = await ruleStandardDataProcessor.process({
@@ -178,7 +175,7 @@ describe('RuleStandardDataProcessor', () => {
       responseUrl: ruleInput.responseUrl,
       resultComment: 'Failed',
       resultContent,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     };
 
     expect(result).toEqual(expectedRuleOutput);

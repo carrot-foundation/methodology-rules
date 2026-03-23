@@ -9,7 +9,6 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
@@ -31,7 +30,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event is missing`,
     },
     {
@@ -43,7 +42,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}"`,
     },
     {
@@ -58,7 +57,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event has the metadata "${WASTE_ORIGIN}" with the value "${UNIDENTIFIED}" and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
@@ -73,7 +72,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and the "${WASTE_GENERATOR}" event is defined`,
     },
     {
@@ -83,7 +82,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The "${PICK_UP}" event without "${WASTE_ORIGIN}" metadata and no "${WASTE_GENERATOR}" event`,
     },
     {
@@ -100,7 +99,7 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       },
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
       scenario: `The MassID document with multiple "${WASTE_GENERATOR}" events`,
     },
   ];

@@ -15,7 +15,6 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
@@ -35,7 +34,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (isNil(pickUpEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -45,7 +44,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     ) {
       return {
         resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -59,27 +58,27 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     if (!isUnidentified && hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED',
       };
     }
 
     if (isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
-        resultStatus: RuleOutputStatus.PASSED,
+        resultStatus: 'PASSED',
       };
     }
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
-      resultStatus: RuleOutputStatus.FAILED,
+      resultStatus: 'FAILED',
     };
   }
 

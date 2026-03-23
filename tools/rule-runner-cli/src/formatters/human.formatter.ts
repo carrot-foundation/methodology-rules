@@ -1,7 +1,9 @@
-import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
+import type {
+  RuleOutput,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
 
 import { blue, bold, gray, green, red, yellow } from '@carrot-fndn/shared/cli';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
 interface HumanFormatOptions {
   debug?: boolean;
@@ -12,9 +14,9 @@ const STATUS_DISPLAY: Record<
   RuleOutputStatus,
   { color: (text: string) => string; icon: string }
 > = {
-  [RuleOutputStatus.FAILED]: { color: red, icon: '✗' },
-  [RuleOutputStatus.PASSED]: { color: green, icon: '✓' },
-  [RuleOutputStatus.REVIEW_REQUIRED]: { color: yellow, icon: '⚠' },
+  FAILED: { color: red, icon: '✗' },
+  PASSED: { color: green, icon: '✓' },
+  REVIEW_REQUIRED: { color: yellow, icon: '⚠' },
 };
 
 export const formatAsHuman = (

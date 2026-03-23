@@ -6,10 +6,7 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type RuleOutput,
-  RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
@@ -99,7 +96,7 @@ describe('ProjectBoundaryProcessor', () => {
         responseUrl: ruleInput.responseUrl,
         resultComment: RESULT_COMMENTS.failed.DISTANCE_CALCULATION_FAILED,
         resultContent: undefined,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
 
       expect(ruleOutput).toEqual(expectedRuleOutput);

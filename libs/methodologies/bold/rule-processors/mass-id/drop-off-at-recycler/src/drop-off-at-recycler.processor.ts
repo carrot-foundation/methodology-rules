@@ -14,7 +14,6 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
   type MethodologyDocumentEventAttributeValue,
   MethodologyDocumentEventLabel,
@@ -44,7 +43,7 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
     if (isNil(lastDropOffEvent)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -52,20 +51,20 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
     if (lastDropOffEvent.address.id !== recyclerEvent?.address.id) {
       return {
         resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
     return {
       resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
   }
 

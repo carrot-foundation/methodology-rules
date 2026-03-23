@@ -8,7 +8,6 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import { differenceInDays, parseISO } from 'date-fns';
 
 import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
@@ -31,14 +30,14 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     if (isNil(dropOffDate)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
     if (isNil(recycledDate)) {
       return {
         resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -48,13 +47,11 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     );
 
     const resultStatus =
-      difference >= 60 && difference <= 180
-        ? RuleOutputStatus.PASSED
-        : RuleOutputStatus.FAILED;
+      difference >= 60 && difference <= 180 ? 'PASSED' : 'FAILED';
 
     return {
       resultComment:
-        resultStatus === RuleOutputStatus.PASSED
+        resultStatus === 'PASSED'
           ? RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference)
           : RESULT_COMMENTS.failed.TIMEFRAME_OUT_OF_RANGE(difference),
       resultStatus,

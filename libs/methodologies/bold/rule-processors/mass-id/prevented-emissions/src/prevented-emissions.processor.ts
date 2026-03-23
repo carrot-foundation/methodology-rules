@@ -31,7 +31,6 @@ import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
-  RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
 import { getYear } from 'date-fns';
 
@@ -79,7 +78,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         },
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, RuleOutputStatus.FAILED, {
+      return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
@@ -97,7 +96,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       return {
         resultComment:
           RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -107,7 +106,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
           RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
             wasteSubtype,
           ),
-        resultStatus: RuleOutputStatus.FAILED,
+        resultStatus: 'FAILED',
       };
     }
 
@@ -151,7 +150,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         ...(othersIfOrganicAudit && { othersIfOrganicAudit }),
         preventedCo2e: preventedEmissions,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
     };
   }
 
