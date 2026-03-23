@@ -28,6 +28,23 @@ then
   exit 1
 fi
 
+# Validate bundle does not contain devDependencies
+LEAKED=$(node -p "
+  const buildPkg = require('./$BUILD_PATH/package.json');
+  const rootPkg = require('./package.json');
+  const prodDeps = Object.keys(buildPkg.dependencies || {});
+  Object.keys(rootPkg.devDependencies || {})
+    .filter(d => !prodDeps.includes(d))
+    .filter(d => require('fs').readFileSync('$BUILD_PATH/main.js','utf8').includes(d))
+    .join('\n')
+" 2>/dev/null)
+if [ -n "$LEAKED" ]; then
+  echo "Error: devDependencies leaked into bundle:"
+  echo "$LEAKED"
+  exit 1
+fi
+
+
 # Create the zip folder if it doesn't exist
 if ! mkdir -p "$ZIP_DIR"
 then
