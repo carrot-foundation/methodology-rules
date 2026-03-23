@@ -12,13 +12,7 @@ if (!swc?.vite) {
   );
 }
 
-export interface VitestPluginsOptions {
-  dirname: string;
-}
-
-export const getVitestBasePlugins = ({
-  dirname: _dirname,
-}: VitestPluginsOptions): PluginOption[] => {
+export const getVitestBasePlugins = (): PluginOption[] => {
   return [
     swc.vite({
       jsc: {

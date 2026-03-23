@@ -5,6 +5,7 @@ import {
   type BoldExternalEventsObject,
   BoldStubsBuilder,
   stubBoldMassIDPickUpEvent,
+  stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
@@ -23,7 +24,7 @@ import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.const
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
+const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
 const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = DocumentEventAttributeName;
 const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } =
   DocumentEventAttributeValue;
@@ -246,6 +247,22 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
       wasteGeneratorVerificationDocument:
         createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
+    },
+    {
+      expectedRewards:
+        EXPECTED_REWARDS[RewardsDistributionWasteType.MIXED_ORGANIC_WASTE],
+      massIDDocumentEvents: {
+        [`${ACTOR}-InvalidActorType`]: stubDocumentEvent({
+          label: 'Invalid Actor Type',
+          name: ACTOR,
+        }),
+      },
+      massIDPartialDocument: {
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultStatus: RuleOutputStatus.PASSED,
+      scenario:
+        'actor events with invalid labels are ignored and do not affect rewards calculation',
     },
   ];
 

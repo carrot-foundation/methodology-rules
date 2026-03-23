@@ -154,7 +154,7 @@ import { getVitestBasePlugins } from '../../../../../../.vitest/config/vitest.ba
 
 export default {
   ...getVitestBaseConfig(import.meta.dirname),
-  plugins: getVitestBasePlugins({ dirname: import.meta.dirname }),
+  plugins: getVitestBasePlugins(),
 };
 `,
   },

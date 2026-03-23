@@ -3,5 +3,5 @@ import { getVitestBasePlugins } from '../../../.vitest/config/vitest.base.plugin
 
 export default {
   ...getVitestBaseConfig(import.meta.dirname),
-  plugins: getVitestBasePlugins({ dirname: import.meta.dirname }),
+  plugins: getVitestBasePlugins(),
 };

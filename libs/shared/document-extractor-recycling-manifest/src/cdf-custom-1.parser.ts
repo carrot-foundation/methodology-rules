@@ -175,13 +175,10 @@ const extractWasteTypeDescriptions = (
   const linePattern = /^([^:]+):\s*(.+?)\s*$/gm;
 
   for (const match of section.matchAll(linePattern)) {
-    /* v8 ignore next -- regex groups always captured when pattern matches */
-    if (match[1] && match[2]) {
-      descriptions.push({
-        description: match[2].trim(),
-        wasteType: match[1].trim(),
-      });
-    }
+    descriptions.push({
+      description: match[2]!.trim(),
+      wasteType: match[1]!.trim(),
+    });
   }
 
   return descriptions;
