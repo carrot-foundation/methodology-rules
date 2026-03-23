@@ -1,18 +1,12 @@
+import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+
 import {
   MethodologyAuthorSchema,
   MethodologyParticipantSchema,
 } from './methodology-participant.types';
 
 describe('MethodologyParticipantSchema', () => {
-  const validParticipant = {
-    countryCode: 'BR',
-    id: 'participant-123',
-    name: 'Test Participant',
-    piiSnapshotId: 'pii-snapshot-456',
-    taxId: '12345678000100',
-    taxIdType: 'CNPJ',
-    type: 'ACTOR',
-  };
+  const validParticipant = createStubFromSchema(MethodologyParticipantSchema);
 
   it('should accept participant with non-ACTOR type (polymorphic)', () => {
     expect(
@@ -47,11 +41,7 @@ describe('MethodologyParticipantSchema', () => {
 });
 
 describe('MethodologyAuthorSchema', () => {
-  const validAuthor = {
-    clientId: 'client-123',
-    dataSetName: 'PROD',
-    participantId: 'participant-456',
-  };
+  const validAuthor = createStubFromSchema(MethodologyAuthorSchema);
 
   it('should reject invalid dataSetName', () => {
     expect(

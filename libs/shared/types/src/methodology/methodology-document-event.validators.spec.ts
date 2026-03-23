@@ -1,18 +1,11 @@
+import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+
+import { ApprovedExceptionSchema } from './methodology-document-event.types';
 import { isApprovedExceptionAttributeValue } from './methodology-document-event.validators';
 
 describe('isApprovedExceptionAttributeValue', () => {
   it('should return true for a valid approved exception array', () => {
-    const valid = [
-      {
-        'Attribute Location': {
-          Asset: { Category: 'MassID' },
-          Event: 'Weighing',
-        },
-        'Attribute Name': 'Vehicle License Plate',
-        'Exception Type': 'Exemption for Mandatory Attribute',
-        Reason: 'Vehicle does not have a license plate',
-      },
-    ];
+    const valid = [createStubFromSchema(ApprovedExceptionSchema)];
 
     expect(isApprovedExceptionAttributeValue(valid)).toBe(true);
   });

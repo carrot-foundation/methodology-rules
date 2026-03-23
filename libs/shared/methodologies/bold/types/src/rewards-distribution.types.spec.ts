@@ -1,18 +1,17 @@
+import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+
 import {
   CertificateRewardSchema,
   MassIDRewardSchema,
+  RewardActorAddressSchema,
+  RewardActorParticipantSchema,
   RewardDistributionResultContentSchema,
   RewardsDistributionActorType,
 } from './rewards-distribution.types';
 
-const validParticipant = {
-  id: 'participant-1',
-  name: 'Test Participant',
-};
+const validParticipant = createStubFromSchema(RewardActorParticipantSchema);
 
-const validAddress = {
-  id: 'address-1',
-};
+const validAddress = createStubFromSchema(RewardActorAddressSchema);
 
 describe('CertificateRewardSchema', () => {
   const validCertificateReward = {

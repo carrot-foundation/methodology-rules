@@ -8,10 +8,11 @@ import {
 
 describe('DocumentEventAttributeSchema', () => {
   it('should reject empty name', () => {
-    expect(
-      DocumentEventAttributeSchema.safeParse({ isPublic: true, name: '' })
-        .success,
-    ).toBe(false);
+    const stub = createStubFromSchema(DocumentEventAttributeSchema, {
+      name: '',
+    });
+
+    expect(DocumentEventAttributeSchema.safeParse(stub).success).toBe(false);
   });
 });
 
