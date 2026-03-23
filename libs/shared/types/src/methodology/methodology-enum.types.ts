@@ -24,16 +24,28 @@ export enum MethodologyApprovedExceptionType {
   MANDATORY_ATTRIBUTE = 'Exemption for Mandatory Attribute',
 }
 
-export enum MethodologyDocumentEventAttributeFormat {
-  CUBIC_METER = 'CUBIC_METER',
-  DATE = 'DATE',
-  KILOGRAM = 'KILOGRAM',
-  LITER = 'LITER',
-}
+export const MethodologyDocumentEventAttributeFormatSchema = z.enum([
+  'CUBIC_METER',
+  'DATE',
+  'KILOGRAM',
+  'LITER',
+]);
+export type MethodologyDocumentEventAttributeFormat = z.infer<
+  typeof MethodologyDocumentEventAttributeFormatSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyDocumentEventAttributeFormat =
+  MethodologyDocumentEventAttributeFormatSchema.enum;
 
-export enum MethodologyDocumentEventAttributeType {
-  REFERENCE = 'REFERENCE',
-}
+export const MethodologyDocumentEventAttributeTypeSchema = z.enum([
+  'REFERENCE',
+]);
+export type MethodologyDocumentEventAttributeType = z.infer<
+  typeof MethodologyDocumentEventAttributeTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyDocumentEventAttributeType =
+  MethodologyDocumentEventAttributeTypeSchema.enum;
 
 export enum MethodologyDocumentEventLabel {
   AUDITOR = MethodologyActorType.AUDITOR,
@@ -89,9 +101,13 @@ export type MethodologyDocumentStatus = z.infer<
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
 export const MethodologyDocumentStatus = MethodologyDocumentStatusSchema.enum;
 
-export enum MethodologyEvaluationResult {
-  PASSED = 'PASSED',
-}
+export const MethodologyEvaluationResultSchema = z.enum(['PASSED']);
+export type MethodologyEvaluationResult = z.infer<
+  typeof MethodologyEvaluationResultSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyEvaluationResult =
+  MethodologyEvaluationResultSchema.enum;
 
 export enum MethodologyParticipantType {
   ACTOR = 'ACTOR',
