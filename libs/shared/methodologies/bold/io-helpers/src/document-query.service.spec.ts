@@ -1,8 +1,8 @@
 import {
   type DocumentEntity,
   provideDocumentLoaderService,
-  stubDocumentEntity,
 } from '@carrot-fndn/shared/document/loader';
+import { stubDocumentEntity } from '@carrot-fndn/shared/document/loader/stubs';
 import {
   stubDocument,
   stubDocumentEvent,

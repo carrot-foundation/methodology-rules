@@ -101,6 +101,9 @@
       "@carrot-fndn/shared/document/loader": [
         "libs/shared/document/loader/src/index.ts"
       ],
+       "@carrot-fndn/shared/document/loader/stubs": [
+        "libs/shared/document/loader/src/document.stubs.ts"
+      ],
       "@carrot-fndn/shared/document/seeds": [
         "libs/shared/document/seeds/src/index.ts"
       ],
