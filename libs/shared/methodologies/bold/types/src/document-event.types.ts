@@ -19,13 +19,11 @@ export interface DocumentEvent extends MethodologyDocumentEvent {
   relatedDocument?: DocumentRelation | undefined;
 }
 
-export interface DocumentEventAttribute
-  extends MethodologyDocumentEventAttribute {
+export interface DocumentEventAttribute extends MethodologyDocumentEventAttribute {
   name: DocumentEventAttributeName | string;
 }
 
-export interface DocumentEventMetadata
-  extends MethodologyDocumentEventMetadata {
+export interface DocumentEventMetadata extends MethodologyDocumentEventMetadata {
   attributes?: DocumentEventAttribute[] | undefined;
 }
 
