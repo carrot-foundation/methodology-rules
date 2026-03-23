@@ -4,11 +4,10 @@ import type { Context } from 'aws-lambda';
 
 import {
   RuleInputSchema,
-  RuleOutputStatus,
+  RuleOutputSchema,
 } from '@carrot-fndn/shared/rule/types';
 import { faker } from '@faker-js/faker';
 
-import { stubEnumValue } from './enum.stubs';
 import { createStubFromSchema } from './zod.stubs';
 
 export const stubRuleInput = (
@@ -30,15 +29,8 @@ export const stubContext = (): Context => ({
   succeed: () => {},
 });
 
-export const stubRuleOutput = (partial?: Partial<RuleOutput>): RuleOutput => ({
-  requestId: faker.string.uuid(),
-  responseToken: faker.string.uuid(),
-  responseUrl: faker.internet.url(),
-  resultComment: faker.lorem.sentence(),
-  resultContent: { [faker.string.sample()]: faker.string.sample() },
-  resultStatus: stubEnumValue(RuleOutputStatus),
-  ...partial,
-});
+export const stubRuleOutput = (partial?: Partial<RuleOutput>): RuleOutput =>
+  createStubFromSchema(RuleOutputSchema, partial);
 
 export const stubRuleResponse = () => ({
   [faker.string.sample()]: faker.string.sample(),
