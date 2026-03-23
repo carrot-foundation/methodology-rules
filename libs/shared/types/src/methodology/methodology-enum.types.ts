@@ -109,6 +109,9 @@ export type MethodologyEvaluationResult = z.infer<
 export const MethodologyEvaluationResult =
   MethodologyEvaluationResultSchema.enum;
 
-export enum MethodologyParticipantType {
-  ACTOR = 'ACTOR',
-}
+export const MethodologyParticipantTypeSchema = z.enum(['ACTOR']);
+export type MethodologyParticipantType = z.infer<
+  typeof MethodologyParticipantTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyParticipantType = MethodologyParticipantTypeSchema.enum;

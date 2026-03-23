@@ -1,16 +1,20 @@
-import type {
-  MethodologyDocumentEventAttachment,
-  NonEmptyArray,
-} from '@carrot-fndn/shared/types';
+import { MethodologyDocumentEventAttachmentSchema } from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
-import type { DocumentEventAttribute } from './document-event.types';
+import { DocumentEventAttributeSchema } from './document-event.types';
 
-export interface DocumentEventWithAttachments {
-  attachments: NonEmptyArray<MethodologyDocumentEventAttachment>;
-}
+export const DocumentEventWithAttachmentsSchema = z.object({
+  attachments: z.array(MethodologyDocumentEventAttachmentSchema).nonempty(),
+});
+export type DocumentEventWithAttachments = z.infer<
+  typeof DocumentEventWithAttachmentsSchema
+>;
 
-export interface DocumentEventWithMetadata {
-  metadata: {
-    attributes: NonEmptyArray<DocumentEventAttribute>;
-  };
-}
+export const DocumentEventWithMetadataSchema = z.object({
+  metadata: z.object({
+    attributes: z.array(DocumentEventAttributeSchema).nonempty(),
+  }),
+});
+export type DocumentEventWithMetadata = z.infer<
+  typeof DocumentEventWithMetadataSchema
+>;
