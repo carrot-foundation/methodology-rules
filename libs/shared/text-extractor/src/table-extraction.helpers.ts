@@ -88,10 +88,7 @@ const clusterBlocksByY = (
     if (lastTop === undefined || Math.abs(top - lastTop) <= yTolerance) {
       currentCluster.push(block);
     } else {
-      if (currentCluster.length > 0) {
-        clusters.push(currentCluster);
-      }
-
+      clusters.push(currentCluster);
       currentCluster = [block];
     }
 

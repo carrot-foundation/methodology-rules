@@ -414,6 +414,19 @@ describe('text-parsing.helpers', () => {
       expect(result?.value.name).toBe('Company Valid Name');
     });
 
+    it('should return undefined when all cleaned names are too short', () => {
+      const text = 'Gerador\nNome: AB\nCNPJ: 12.345.678/0001-90\nDestinador';
+
+      const result = extractEntityFromSection(
+        text,
+        /^\s*Gerador\s*$/i,
+        sectionPatterns,
+        cnpjPattern,
+      );
+
+      expect(result).toBeUndefined();
+    });
+
     it('should clean common prefixes from entity name', () => {
       const text =
         'Gerador\nRazao Social: Company XYZ\nCNPJ: 12.345.678/0001-90\nDestinador';
