@@ -5,11 +5,10 @@ import type {
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
-export interface ApiDocumentCreateDto
-  extends Omit<
-    AuditApiDocumentPrimitiveEntity,
-    'createdAt' | 'id' | 'versionDate'
-  > {
+export interface ApiDocumentCreateDto extends Omit<
+  AuditApiDocumentPrimitiveEntity,
+  'createdAt' | 'id' | 'versionDate'
+> {
   parts?: AuditApiDocumentPartSnapshotEntity[] | undefined;
   versionDate: DateTime;
 }

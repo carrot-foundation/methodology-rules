@@ -177,9 +177,7 @@ const extractTransporter = (
   };
 };
 
-export class ScaleTicketLayout1Parser
-  implements DocumentParser<ScaleTicketExtractedData>
-{
+export class ScaleTicketLayout1Parser implements DocumentParser<ScaleTicketExtractedData> {
   readonly documentType = 'scaleTicket' as const;
   readonly layoutId = 'layout-1' as NonEmptyString;
   readonly textractMode = 'detect' as const;
