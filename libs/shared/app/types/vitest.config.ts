@@ -5,7 +5,7 @@ const baseConfig = getVitestBaseConfig(import.meta.dirname);
 
 export default {
   ...baseConfig,
-  plugins: getVitestBasePlugins({ dirname: import.meta.dirname }),
+  plugins: getVitestBasePlugins(),
   test: {
     ...baseConfig.test,
     coverage: {

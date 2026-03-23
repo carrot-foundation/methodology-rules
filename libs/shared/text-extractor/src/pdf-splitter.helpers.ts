@@ -17,7 +17,7 @@ export const splitPdfPages = async (
       index,
     ]);
 
-    /* istanbul ignore next -- defensive: copyPages always returns requested pages */
+    /* v8 ignore next -- defensive: copyPages always returns requested pages */
     if (!copiedPage) {
       throw new Error(`Failed to copy page ${index + 1} from PDF`);
     }

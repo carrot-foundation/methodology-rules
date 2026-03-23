@@ -75,6 +75,11 @@ export const getVitestBaseConfig = (dirname: string) => {
       clearMocks: true,
       restoreMocks: true,
 
+      // Use GitHub Actions reporter in CI for inline PR annotations
+      reporters: process.env['CI']
+        ? ['default', 'github-actions']
+        : ['default'],
+
       // Coverage configuration
       coverage: {
         enabled: true,

@@ -80,8 +80,7 @@ export const extractSection = (
   let sectionEndIndex = lines.length;
 
   for (let index = sectionStartIndex + 1; index < lines.length; index++) {
-    // istanbul ignore next -- defensive for noUncheckedIndexedAccess; index is within bounds
-    if (nextSectionPatterns.some((p) => p.test(lines[index] ?? ''))) {
+    if (nextSectionPatterns.some((p) => p.test(lines[index]!))) {
       sectionEndIndex = index;
       break;
     }
@@ -207,7 +206,6 @@ export const extractEntityFromSection = (
       .replace(/Nome\s*:?\s*/i, '')
       .trim();
 
-    // v8 ignore next -- v8 phantom branch on loop condition
     if (cleanedLine.length > 3) {
       name = cleanedLine;
       break;

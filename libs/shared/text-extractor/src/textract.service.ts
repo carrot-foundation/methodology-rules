@@ -19,7 +19,7 @@ import {
 } from './text-extractor.validators';
 
 const isUnsupportedDocumentException = (error: unknown): boolean => {
-  /* istanbul ignore next -- defensive: AWS SDK always throws Error objects */
+  /* v8 ignore next -- defensive: AWS SDK always throws Error objects */
   if (typeof error !== 'object' || error === null) {
     return false;
   }
