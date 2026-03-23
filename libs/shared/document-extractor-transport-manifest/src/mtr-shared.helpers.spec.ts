@@ -218,6 +218,14 @@ describe('MTR shared helpers', () => {
       });
     });
 
+    it('should extract inline plate only when no driver label is present', () => {
+      const section = 'Placa do Veiculo: ABC1D23';
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        vehiclePlate: 'ABC1D23',
+      });
+    });
+
     it('should extract only plate when both labels present but no name-like value', () => {
       const section = ['Nome do Motorista', 'Placa do Veiculo', 'FKE2B34'].join(
         '\n',
