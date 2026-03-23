@@ -1,4 +1,4 @@
-import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+import { zocker } from 'zocker';
 
 import {
   MethodologyAuthorSchema,
@@ -6,7 +6,7 @@ import {
 } from './methodology-participant.types';
 
 describe('MethodologyParticipantSchema', () => {
-  const validParticipant = createStubFromSchema(MethodologyParticipantSchema);
+  const validParticipant = zocker(MethodologyParticipantSchema).generate();
 
   it('should accept participant with non-ACTOR type (polymorphic)', () => {
     expect(
@@ -41,7 +41,7 @@ describe('MethodologyParticipantSchema', () => {
 });
 
 describe('MethodologyAuthorSchema', () => {
-  const validAuthor = createStubFromSchema(MethodologyAuthorSchema);
+  const validAuthor = zocker(MethodologyAuthorSchema).generate();
 
   it('should reject invalid dataSetName', () => {
     expect(

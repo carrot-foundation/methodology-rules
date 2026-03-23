@@ -1,11 +1,11 @@
-import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+import { zocker } from 'zocker';
 
 import { ApprovedExceptionSchema } from './methodology-document-event.types';
 import { isApprovedExceptionAttributeValue } from './methodology-document-event.validators';
 
 describe('isApprovedExceptionAttributeValue', () => {
   it('should return true for a valid approved exception array', () => {
-    const valid = [createStubFromSchema(ApprovedExceptionSchema)];
+    const valid = [zocker(ApprovedExceptionSchema).generate()];
 
     expect(isApprovedExceptionAttributeValue(valid)).toBe(true);
   });
