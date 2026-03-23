@@ -153,10 +153,8 @@ const EXPECTED_REWARDS = {
   },
 };
 
-interface RewardsDistributionTestCase extends Omit<
-  RuleTestCase,
-  'resultComment'
-> {
+interface RewardsDistributionTestCase
+  extends Omit<RuleTestCase, 'resultComment'> {
   expectedRewards: Record<string, string>;
   massIDDocumentEvents?: BoldExternalEventsObject | undefined;
   massIDPartialDocument: PartialDeep<Document>;

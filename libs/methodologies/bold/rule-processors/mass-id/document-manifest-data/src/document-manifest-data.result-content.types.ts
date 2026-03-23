@@ -71,10 +71,8 @@ export interface ProcessingPeriodComparison extends FieldComparisonBase {
   start?: string;
 }
 
-export interface WasteQuantityComparison extends FieldComparisonBase<
-  null | number,
-  null | number
-> {
+export interface WasteQuantityComparison
+  extends FieldComparisonBase<null | number, null | number> {
   extractedQuantity: null | number;
   extractedUnit: null | string;
   source: 'matched-entry' | 'total-weight';

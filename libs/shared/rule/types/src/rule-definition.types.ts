@@ -5,8 +5,7 @@ export interface BaseRuleDefinition {
   slug: string;
 }
 
-export interface RuleDefinition<
-  TFrameworkRuleSlug extends string = string,
-> extends BaseRuleDefinition {
+export interface RuleDefinition<TFrameworkRuleSlug extends string = string>
+  extends BaseRuleDefinition {
   frameworkRules: TFrameworkRuleSlug[];
 }

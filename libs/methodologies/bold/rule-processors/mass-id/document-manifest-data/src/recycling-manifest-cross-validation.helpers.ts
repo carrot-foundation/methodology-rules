@@ -34,7 +34,8 @@ import {
 } from './document-manifest-data.constants';
 import { getLayoutValidationConfig } from './document-manifest-data.helpers';
 
-export interface CdfCrossValidationEventData extends DocumentManifestEventSubject {
+export interface CdfCrossValidationEventData
+  extends DocumentManifestEventSubject {
   dropOffEvent: DocumentEvent | undefined;
   manifestType: 'cdf';
   mtrDocumentNumbers: string[];

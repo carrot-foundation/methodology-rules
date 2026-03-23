@@ -33,7 +33,8 @@ import {
 } from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
-export interface MtrCrossValidationEventData extends DocumentManifestEventSubject {
+export interface MtrCrossValidationEventData
+  extends DocumentManifestEventSubject {
   dropOffEvent: DocumentEvent | undefined;
   haulerEvent: DocumentEvent | undefined;
   manifestType: 'mtr';

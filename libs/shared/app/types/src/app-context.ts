@@ -17,9 +17,9 @@ export const defaultAppContext: AppContext = {
   documentLoaderService: provideDocumentLoaderService,
 };
 
-export abstract class RuleDataProcessor<
-  Context extends AppContext = AppContext,
-> implements IRuleDataProcessor {
+export abstract class RuleDataProcessor<Context extends AppContext = AppContext>
+  implements IRuleDataProcessor
+{
   protected context: Context;
 
   constructor(context?: Omit<Context, keyof AppContext> & Partial<AppContext>) {

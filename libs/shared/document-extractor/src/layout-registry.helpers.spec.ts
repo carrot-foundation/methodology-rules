@@ -37,7 +37,9 @@ const buildMockExtractionOutput = (
   reviewRequired: false,
 });
 
-class MockScaleTicketLayout2Parser implements DocumentParser<BaseExtractedData> {
+class MockScaleTicketLayout2Parser
+  implements DocumentParser<BaseExtractedData>
+{
   readonly documentType = 'scaleTicket' as const;
   readonly layoutId = 'layout-2' as NonEmptyString;
 
