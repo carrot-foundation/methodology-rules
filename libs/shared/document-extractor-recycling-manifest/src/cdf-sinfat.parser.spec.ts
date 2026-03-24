@@ -465,12 +465,10 @@ describe('CdfSinfatParser', () => {
             text: 'efluentes recolhidos separadamente e tratados noutro local',
           },
           {
-            blockType: 'LINE',
             boundingBox: { height: 0.02, left: 0.05, top: 0.38, width: 0.1 },
             text: 'Observacoes',
           },
           {
-            blockType: 'LINE',
             boundingBox: { height: 0.02, left: 0.05, top: 0.45, width: 0.3 },
             text: '1224249738, 0125173306, 0125074115',
           },
