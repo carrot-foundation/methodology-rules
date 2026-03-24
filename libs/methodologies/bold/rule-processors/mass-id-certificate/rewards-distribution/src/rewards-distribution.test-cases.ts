@@ -260,7 +260,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       massIDPartialDocument: {
         subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
       },
-      resultStatus: RuleOutputStatus.PASSED,
+      resultStatus: 'PASSED',
       scenario:
         'actor events with invalid labels are ignored and do not affect rewards calculation',
     },

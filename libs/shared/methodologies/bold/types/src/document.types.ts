@@ -1,16 +1,15 @@
-import type { MethodologyDocument } from '@carrot-fndn/shared/types';
+import {
+  MethodologyDocumentSchema,
+  NonEmptyStringSchema,
+} from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
-import type { DocumentEvent } from './document-event.types';
-import type {
-  DocumentCategory,
-  DocumentSubtype,
-  DocumentType,
-  MassIDOrganicSubtype,
-} from './enum.types';
+import { DocumentEventSchema } from './document-event.types';
 
-export interface Document extends MethodologyDocument {
-  category: DocumentCategory | string;
-  externalEvents?: DocumentEvent[] | undefined;
-  subtype?: DocumentSubtype | MassIDOrganicSubtype | string | undefined;
-  type?: DocumentType | string | undefined;
-}
+export const DocumentSchema = MethodologyDocumentSchema.extend({
+  category: NonEmptyStringSchema,
+  externalEvents: z.array(DocumentEventSchema).optional(),
+  subtype: NonEmptyStringSchema.optional(),
+  type: NonEmptyStringSchema.optional(),
+});
+export type Document = z.infer<typeof DocumentSchema>;
