@@ -1,35 +1,37 @@
-import type {
-  MethodologyDocumentEvent,
-  MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventMetadata,
-  MethodologyDocumentRelation,
+import {
+  MethodologyDocumentEventAttributeSchema,
+  MethodologyDocumentEventMetadataSchema,
+  MethodologyDocumentEventSchema,
+  MethodologyDocumentRelationSchema,
+  NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
-import type {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentSubtype,
-  DocumentType,
-} from './enum.types';
+export const DocumentEventAttributeSchema =
+  MethodologyDocumentEventAttributeSchema.extend({
+    name: NonEmptyStringSchema,
+  });
+export type DocumentEventAttribute = z.infer<
+  typeof DocumentEventAttributeSchema
+>;
 
-export interface DocumentEvent extends MethodologyDocumentEvent {
-  metadata?: DocumentEventMetadata | undefined;
-  name: DocumentEventName | string;
-  relatedDocument?: DocumentRelation | undefined;
-}
+export const DocumentEventMetadataSchema =
+  MethodologyDocumentEventMetadataSchema.extend({
+    attributes: z.array(DocumentEventAttributeSchema).optional(),
+  });
+export type DocumentEventMetadata = z.infer<typeof DocumentEventMetadataSchema>;
 
-export interface DocumentEventAttribute extends MethodologyDocumentEventAttribute {
-  name: DocumentEventAttributeName | string;
-}
+export const DocumentRelationSchema = MethodologyDocumentRelationSchema.extend({
+  bidirectional: z.boolean().optional(),
+  category: NonEmptyStringSchema.optional(),
+  subtype: NonEmptyStringSchema.optional(),
+  type: NonEmptyStringSchema.optional(),
+});
+export type DocumentRelation = z.infer<typeof DocumentRelationSchema>;
 
-export interface DocumentEventMetadata extends MethodologyDocumentEventMetadata {
-  attributes?: DocumentEventAttribute[] | undefined;
-}
-
-export interface DocumentRelation extends MethodologyDocumentRelation {
-  bidirectional?: boolean | undefined;
-  category?: DocumentCategory | string | undefined;
-  subtype?: DocumentSubtype | string | undefined;
-  type?: DocumentType | string | undefined;
-}
+export const DocumentEventSchema = MethodologyDocumentEventSchema.extend({
+  metadata: DocumentEventMetadataSchema.optional(),
+  name: NonEmptyStringSchema,
+  relatedDocument: DocumentRelationSchema.optional(),
+});
+export type DocumentEvent = z.infer<typeof DocumentEventSchema>;

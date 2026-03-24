@@ -18,7 +18,6 @@ export const MethodologyParticipantSchema = z.looseObject({
   piiSnapshotId: NonEmptyStringSchema,
   taxId: NonEmptyStringSchema,
   taxIdType: NonEmptyStringSchema,
-  // TODO: replace with MethodologyParticipantTypeSchema once migrated to Zod
   type: NonEmptyStringSchema,
 });
 export type MethodologyParticipant = z.infer<

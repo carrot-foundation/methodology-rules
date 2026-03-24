@@ -1,4 +1,20 @@
+import BigNumber from 'bignumber.js';
 import { z } from 'zod';
+
+export const BigNumberStringSchema = z
+  .string()
+  .nonempty()
+  .refine(
+    (v) => {
+      try {
+        return new BigNumber(v).isFinite();
+      } catch {
+        return false;
+      }
+    },
+    { message: 'String must be a valid BigNumber' },
+  );
+export type BigNumberString = z.infer<typeof BigNumberStringSchema>;
 
 export const NonEmptyStringSchema = z.string().nonempty();
 export type NonEmptyString = z.infer<typeof NonEmptyStringSchema>;
