@@ -64,6 +64,7 @@ const CDF_SINIR_CONFIG: CdfParseConfig = {
       { headerPattern: /^Unidade$/i, name: 'unit' },
       { headerPattern: /^Tratamento$/i, name: 'treatment' },
     ],
+    tableEndPattern: /^Observacoes$/i,
     technologyColumn: 'treatment',
   },
 };

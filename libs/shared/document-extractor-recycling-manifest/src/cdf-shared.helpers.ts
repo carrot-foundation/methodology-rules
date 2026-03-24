@@ -161,6 +161,7 @@ export interface CdfWasteTableConfig {
   anchorColumn: string;
   codePattern: RegExp;
   headerDefs: [HeaderColumnDefinition, ...Array<HeaderColumnDefinition>];
+  tableEndPattern?: RegExp;
   technologyColumn: string;
 }
 
@@ -213,6 +214,62 @@ const parseCdfWasteRow = (
   return entry;
 };
 
+type TextBlock = TextExtractionResult['blocks'][number];
+
+const findTableEndY = (
+  blocks: readonly TextBlock[],
+  pattern: RegExp,
+  headerTop: number,
+): number | undefined => {
+  for (const block of blocks) {
+    if (
+      block.blockType === 'LINE' &&
+      block.text &&
+      block.boundingBox &&
+      block.boundingBox.top > headerTop &&
+      pattern.test(stripAccents(block.text))
+    ) {
+      return block.boundingBox.top;
+    }
+  }
+
+  return undefined;
+};
+
+/**
+ * Merges continuation rows (where the anchor column text does not match the
+ * waste code pattern) into the preceding row.  This handles multi-line waste
+ * descriptions that Textract splits across separate LINE blocks.
+ */
+const mergeWasteContinuationRows = (
+  rows: Array<Record<string, string | undefined>>,
+  anchorColumn: string,
+  codePattern: RegExp,
+): Array<Record<string, string | undefined>> => {
+  const merged: Array<Record<string, string | undefined>> = [];
+
+  for (const row of rows) {
+    // v8 ignore next -- anchor-based extraction guarantees non-empty anchor text
+    const anchorText = row[anchorColumn]?.trim() ?? '';
+    const isCodeRow = codePattern.test(anchorText);
+
+    if (isCodeRow || merged.length === 0) {
+      merged.push({ ...row });
+    } else {
+      const previous = merged.at(-1)!;
+      // v8 ignore next -- anchor-based extraction guarantees non-empty text
+      const previousAnchor = previous[anchorColumn]?.trim() ?? '';
+
+      // v8 ignore next -- anchor-based extraction guarantees non-empty anchor text
+      previous[anchorColumn] = anchorText
+        ? `${previousAnchor} ${anchorText}`
+        : previousAnchor;
+    }
+  }
+
+  return merged;
+};
+
 export const extractCdfWasteEntries = (
   extractionResult: TextExtractionResult,
   config: CdfWasteTableConfig,
@@ -224,6 +281,11 @@ export const extractCdfWasteEntries = (
     return undefined;
   }
 
+  // v8 ignore next -- fallback when tableEndPattern is not configured
+  const tableEndY = config.tableEndPattern
+    ? findTableEndY(blocks, config.tableEndPattern, detected.headerTop)
+    : undefined;
+
   const { rows } = extractTableFromBlocks(blocks, {
     anchorColumn: config.anchorColumn,
     columns: detected.columns as [
@@ -232,10 +294,19 @@ export const extractCdfWasteEntries = (
     ],
     maxRowGap: 0.03,
     xTolerance: 0.2,
-    yRange: { max: 100, min: detected.headerTop + 0.01 },
+    yRange: {
+      max: tableEndY === undefined ? 100 : tableEndY - 0.005,
+      min: detected.headerTop + 0.01,
+    },
   });
 
-  const entries = rows
+  const mergedRows = mergeWasteContinuationRows(
+    rows,
+    config.anchorColumn,
+    config.codePattern,
+  );
+
+  const entries = mergedRows
     .map((row) => parseCdfWasteRow(row, config))
     .filter((r): r is WasteEntry => r !== undefined);
 
