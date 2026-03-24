@@ -40,6 +40,7 @@ import {
 
 import {
   DISTANCE_THRESHOLD_PASS,
+  ADDRESS_SIMILARITY_THRESHOLD,
   DISTANCE_THRESHOLD_SIMILARITY,
   GPS_MAX_ALLOWED_DISTANCE,
   RESULT_COMMENTS,
@@ -342,10 +343,11 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     const { isMatch, score } = isAddressMatch(
       eventAddressString,
       accreditedAddressString,
+      ADDRESS_SIMILARITY_THRESHOLD,
     );
     const similarityPercent = Math.round(score * 100);
 
-    if (isMatch) {
+    if (isMatch && score >= ADDRESS_SIMILARITY_THRESHOLD) {
       return [
         {
           resultComment:
