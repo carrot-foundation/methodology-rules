@@ -21,9 +21,9 @@ describe('DocumentEventNameSchema', () => {
   });
 
   it('should exclude Recycling Baseline', () => {
-    expect(DocumentEventNameSchema.safeParse('Recycling Baseline').success).toBe(
-      false,
-    );
+    expect(
+      DocumentEventNameSchema.safeParse('Recycling Baseline').success,
+    ).toBe(false);
   });
 
   it('should reject invalid values', () => {

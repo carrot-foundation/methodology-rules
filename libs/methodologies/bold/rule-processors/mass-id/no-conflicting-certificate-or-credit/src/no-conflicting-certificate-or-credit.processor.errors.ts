@@ -9,8 +9,7 @@ const ERROR_MESSAGES = {
     `There is already a "MassID Audit" for "${methodologyName}" linked to this "MassID".`,
   MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT: (
     certificateSubtype: string,
-  ) =>
-    `There is already a "${certificateSubtype}" linked to this "MassID".`,
+  ) => `There is already a "${certificateSubtype}" linked to this "MassID".`,
   MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT: `There is already a "Credit Order" document linked to this "MassID".`,
 } as const;
 

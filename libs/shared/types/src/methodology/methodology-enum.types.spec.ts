@@ -148,9 +148,9 @@ describe('MethodologyDocumentEventNameSchema', () => {
   it.each(['ACTOR', 'Drop-off', 'Pick-up', 'Recycled', 'Weighing'])(
     'should accept valid event name: %s',
     (value) => {
-      expect(
-        MethodologyDocumentEventNameSchema.safeParse(value).success,
-      ).toBe(true);
+      expect(MethodologyDocumentEventNameSchema.safeParse(value).success).toBe(
+        true,
+      );
     },
   );
 
@@ -171,9 +171,9 @@ describe('MethodologyDocumentEventLabelSchema', () => {
   it.each(['Hauler', 'Recycler', 'Waste Generator'])(
     'should accept valid label: %s',
     (value) => {
-      expect(
-        MethodologyDocumentEventLabelSchema.safeParse(value).success,
-      ).toBe(true);
+      expect(MethodologyDocumentEventLabelSchema.safeParse(value).success).toBe(
+        true,
+      );
     },
   );
 

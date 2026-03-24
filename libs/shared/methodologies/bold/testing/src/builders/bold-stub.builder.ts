@@ -298,7 +298,12 @@ export class BoldStubsBuilder {
                 name: methodologyEventName,
                 relatedDocument: this.methodologyRelation,
               },
-              [['Methodology Slug', METHODOLOGY_SLUG_BY_NAME[this.boldMethodologyName]]],
+              [
+                [
+                  'Methodology Slug',
+                  METHODOLOGY_SLUG_BY_NAME[this.boldMethodologyName],
+                ],
+              ],
             ),
             ...externalEventsMap,
           },
