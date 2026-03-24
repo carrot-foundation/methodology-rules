@@ -229,8 +229,7 @@ describe('Accreditation Document Helpers', () => {
       const pastDate = subDays(new Date(), 5);
       const futureDate = addDays(new Date(), 5);
       const offset = '-03:00';
-      const toOffsetISO = (d: Date) =>
-        d.toISOString().replace('Z', offset);
+      const toOffsetISO = (d: Date) => d.toISOString().replace('Z', offset);
 
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
