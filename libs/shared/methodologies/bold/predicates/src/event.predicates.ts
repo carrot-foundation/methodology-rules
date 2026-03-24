@@ -64,7 +64,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: DocumentEventName[];
-  metadataName: string;
+  metadataName: DocumentEventAttributeName | (string & {});
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

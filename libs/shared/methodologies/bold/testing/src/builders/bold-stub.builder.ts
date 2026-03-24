@@ -4,6 +4,7 @@ import {
   type Document,
   type DocumentEvent,
   type DocumentRelation,
+  type DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
@@ -80,7 +81,7 @@ export const METHODOLOGY_ACTOR_PARTICIPANTS = [
 const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
   'BOLD Carbon': 'GasID',
   'BOLD Recycling': 'RecycledID',
-} as const;
+} as const satisfies Record<BoldMethodologyName, DocumentType>;
 
 export class BoldStubsBuilder {
   private _creditOrderDocument?: Document;

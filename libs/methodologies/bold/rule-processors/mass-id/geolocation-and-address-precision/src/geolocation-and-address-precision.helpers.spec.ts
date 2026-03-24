@@ -9,9 +9,9 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type MassIDDocumentActorType,
   DocumentEventAttributeName,
   DocumentEventName,
-  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -148,7 +148,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getAccreditedAddressByParticipantIdAndActorType', () => {
     it('should return the accredited address by participant id and actor type', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.RECYCLER;
+      const actorType: MassIDDocumentActorType = 'Recycler';
       const addressId = faker.string.uuid();
 
       const accreditationDocument = stubBoldAccreditationDocument({
@@ -184,7 +184,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.HAULER;
+      const actorType: MassIDDocumentActorType = 'Hauler';
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -205,7 +205,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.PROCESSOR;
+      const actorType: MassIDDocumentActorType = 'Processor';
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -228,7 +228,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
+      const actorType: MassIDDocumentActorType = 'Waste Generator';
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
@@ -250,7 +250,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when facility address event is not found in accreditation document', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.INTEGRATOR;
+      const actorType: MassIDDocumentActorType = 'Integrator';
 
       const accreditationDocument = stubBoldAccreditationDocument({
         externalEventsMap: new Map(),
@@ -320,7 +320,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('hasVerificationDocument', () => {
     it('should return true when verification document exists', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
+      const actorType: MassIDDocumentActorType = 'Waste Generator';
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -342,7 +342,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.RECYCLER;
+      const actorType: MassIDDocumentActorType = 'Recycler';
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -362,7 +362,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.PROCESSOR;
+      const actorType: MassIDDocumentActorType = 'Processor';
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -385,7 +385,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.HAULER;
+      const actorType: MassIDDocumentActorType = 'Hauler';
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 

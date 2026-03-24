@@ -1,12 +1,4 @@
-import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type MethodologyAdditionalVerificationAttributeValue,
-  MethodologyApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
+import { type MethodologyAdditionalVerificationAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   isAdditionalVerificationAttributeValue,
@@ -59,16 +51,14 @@ describe('weighing.validators', () => {
   it('keeps approved exception literals compatible with weighing enums', () => {
     const tareException = {
       'Attribute Location': {
-        Asset: { Category: DocumentCategory.MASS_ID },
-        Event: DocumentEventName.WEIGHING,
+        Asset: { Category: 'MassID' },
+        Event: 'Weighing',
       },
-      'Attribute Name': DocumentEventAttributeName.TARE,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': 'Tare',
+      'Exception Type': 'Exemption for Mandatory Attribute',
       Reason: 'validated',
     };
 
-    expect(tareException['Attribute Name']).toBe(
-      DocumentEventAttributeName.TARE,
-    );
+    expect(tareException['Attribute Name']).toBe('Tare');
   });
 });

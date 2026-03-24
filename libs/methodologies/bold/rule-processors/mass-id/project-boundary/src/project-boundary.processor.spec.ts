@@ -5,7 +5,6 @@ import {
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
@@ -80,8 +79,8 @@ describe('ProjectBoundaryProcessor', () => {
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({
           externalEventsMap: {
-            [DocumentEventName.DROP_OFF]: stubBoldMassIDDropOffEvent(),
-            [DocumentEventName.PICK_UP]: stubBoldMassIDPickUpEvent(),
+            ['Drop-off']: stubBoldMassIDDropOffEvent(),
+            ['Pick-up']: stubBoldMassIDPickUpEvent(),
           },
         })
         .build();

@@ -6,7 +6,10 @@ import type {
 } from '@carrot-fndn/shared/types';
 
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
-import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  type DocumentEvent,
+  type DocumentEventAttributeName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   validateDocumentEventWithAttachments,
@@ -15,7 +18,7 @@ import {
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
-  attributeName: string,
+  attributeName: DocumentEventAttributeName | (string & {}),
 ): MethodologyDocumentEventAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -34,7 +37,7 @@ export const getEventAttributeValue = (
 
 export const getEventAttributeByName = (
   event: Maybe<DocumentEvent>,
-  attributeName: string,
+  attributeName: DocumentEventAttributeName | (string & {}),
 ): MethodologyDocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -49,7 +52,7 @@ export const getEventAttributeByName = (
 
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
-  attributeName: string,
+  attributeName: DocumentEventAttributeName | (string & {}),
   validateValue: (
     input: unknown,
   ) => { data: T; success: true } | { success: false },

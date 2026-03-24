@@ -11,9 +11,6 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
@@ -45,13 +42,9 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       };
     }
 
-    const wasteOrigin = getEventAttributeValue(
-      pickUpEvent,
-      DocumentEventAttributeName['Waste Origin'],
-    );
+    const wasteOrigin = getEventAttributeValue(pickUpEvent, 'Waste Origin');
     const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
-    const isUnidentified =
-      wasteOrigin === DocumentEventAttributeValue.Unidentified;
+    const isUnidentified = wasteOrigin === 'Unidentified';
 
     if (!isUnidentified && hasWasteGenerator) {
       return {
@@ -82,13 +75,13 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
+      eventNameIsAnyOf(['Pick-up']),
     );
 
     const wasteGeneratorEvents = document.externalEvents?.filter(
       and(
-        eventNameIsAnyOf([DocumentEventName.ACTOR]),
-        eventLabelIsAnyOf([DocumentEventName['Waste Generator']]),
+        eventNameIsAnyOf(['ACTOR']),
+        eventLabelIsAnyOf(['Waste Generator']),
       ),
     );
 
