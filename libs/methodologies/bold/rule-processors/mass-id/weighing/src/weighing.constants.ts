@@ -64,7 +64,7 @@ export const INVALID_RESULT_COMMENTS = {
     `The "Scale Type" "${String(scaleType)}" is not supported by the methodology.`,
   SCALE_TYPE_MISMATCH: (scaleType: unknown, accreditationScaleType: unknown) =>
     `The provided "Scale Type" "${String(scaleType)}" does not match the accreditation scale type "${String(accreditationScaleType)}".`,
-  TARE_FORMAT: `The "Tare" format must be one of the supported formats.`,
+  TARE_FORMAT: `The "Tare" format must be one of the supported formats: ${supportedFormats}.`,
   TWO_STEP_CONTAINER_TYPE: (containerType: unknown) =>
     `The "Container Type" for two-step weighing must be ${DocumentEventContainerType.Truck}, but "${String(containerType)}" was provided.`,
   TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS:
@@ -100,7 +100,7 @@ export const WRONG_FORMAT_RESULT_COMMENTS = {
 } as const;
 
 export const NOT_FOUND_RESULT_COMMENTS = {
-  ACCREDITATION_EVENT: `The related "Scale Validation" event was not found.`,
+  ACCREDITATION_EVENT: `Missing accreditation event for item with attribute "Scale Validation".`,
   MORE_THAN_TWO_WEIGHING_EVENTS: `More than two "${DocumentEventName.Weighing}" events were found, which is not supported.`,
   NO_WEIGHING_EVENTS: `No "${DocumentEventName.Weighing}" events were found in the document.`,
 } as const;

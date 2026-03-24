@@ -3,7 +3,7 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -29,7 +29,7 @@ describe('ProjectPeriodLimitLambda E2E', () => {
       const massIDDocument = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
-            'Recycled' as DocumentEventName,
+            DocumentEventName.Recycled,
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: externalCreatedAt
                 ? { externalCreatedAt }

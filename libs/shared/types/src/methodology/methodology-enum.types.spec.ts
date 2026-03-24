@@ -1,7 +1,11 @@
 import {
   DataSetNameSchema,
+  MethodologyActorTypeSchema,
+  MethodologyApprovedExceptionTypeSchema,
   MethodologyDocumentEventAttributeFormatSchema,
   MethodologyDocumentEventAttributeTypeSchema,
+  MethodologyDocumentEventLabelSchema,
+  MethodologyDocumentEventNameSchema,
   MethodologyDocumentStatusSchema,
   MethodologyEvaluationResultSchema,
   MethodologyParticipantTypeSchema,
@@ -97,5 +101,85 @@ describe('MethodologyEvaluationResultSchema', () => {
     expect(MethodologyEvaluationResultSchema.safeParse('FAILED').success).toBe(
       false,
     );
+  });
+});
+
+describe('MethodologyActorTypeSchema', () => {
+  it.each([
+    'Auditor',
+    'Community Impact Pool',
+    'Hauler',
+    'Integrator',
+    'Methodology Author',
+    'Methodology Developer',
+    'Network',
+    'Processor',
+    'Recycler',
+    'Remainder',
+    'Source',
+    'Waste Generator',
+  ])('should accept valid actor type: %s', (value) => {
+    expect(MethodologyActorTypeSchema.safeParse(value).success).toBe(true);
+  });
+
+  it('should reject invalid value', () => {
+    expect(MethodologyActorTypeSchema.safeParse('Admin').success).toBe(false);
+  });
+});
+
+describe('MethodologyApprovedExceptionTypeSchema', () => {
+  it('should accept Exemption for Mandatory Attribute', () => {
+    expect(
+      MethodologyApprovedExceptionTypeSchema.safeParse(
+        'Exemption for Mandatory Attribute',
+      ).success,
+    ).toBe(true);
+  });
+
+  it('should reject invalid value', () => {
+    expect(
+      MethodologyApprovedExceptionTypeSchema.safeParse('Other Exception')
+        .success,
+    ).toBe(false);
+  });
+});
+
+describe('MethodologyDocumentEventNameSchema', () => {
+  it.each(['ACTOR', 'Drop-off', 'Pick-up', 'Recycled', 'Weighing'])(
+    'should accept valid event name: %s',
+    (value) => {
+      expect(
+        MethodologyDocumentEventNameSchema.safeParse(value).success,
+      ).toBe(true);
+    },
+  );
+
+  it('should reject invalid value', () => {
+    expect(
+      MethodologyDocumentEventNameSchema.safeParse('INVALID_EVENT').success,
+    ).toBe(false);
+  });
+});
+
+describe('MethodologyDocumentEventLabelSchema', () => {
+  it('should contain exactly the same members as MethodologyActorTypeSchema', () => {
+    expect(MethodologyDocumentEventLabelSchema.options).toEqual(
+      MethodologyActorTypeSchema.options,
+    );
+  });
+
+  it.each(['Hauler', 'Recycler', 'Waste Generator'])(
+    'should accept valid label: %s',
+    (value) => {
+      expect(
+        MethodologyDocumentEventLabelSchema.safeParse(value).success,
+      ).toBe(true);
+    },
+  );
+
+  it('should reject invalid value', () => {
+    expect(
+      MethodologyDocumentEventLabelSchema.safeParse('INVALID').success,
+    ).toBe(false);
   });
 });

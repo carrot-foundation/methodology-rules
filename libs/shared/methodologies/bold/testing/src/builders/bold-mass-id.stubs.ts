@@ -45,8 +45,6 @@ const defaultPickUpAttributes: MetadataAttributeParameter[] = [
   ['Local Waste Classification Description', faker.lorem.sentence()],
   ['Local Waste Classification ID', faker.string.uuid()],
   ['Vehicle Description', faker.vehicle.vehicle()],
-  ['Captured GPS Latitude', faker.location.latitude()],
-  ['Captured GPS Longitude', faker.location.longitude()],
   {
     name: 'Vehicle License Plate',
     sensitive: true,

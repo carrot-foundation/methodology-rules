@@ -6,7 +6,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
-  type DocumentEventName,
+  DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
@@ -30,7 +30,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
 
       if (dropOffEventDate) {
         externalEvents.set(
-          'Drop-off' as DocumentEventName,
+          DocumentEventName['Drop-off'],
           stubBoldMassIDDropOffEvent({
             partialDocumentEvent: {
               externalCreatedAt: dropOffEventDate,
@@ -41,7 +41,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
 
       if (recycledEventDate) {
         externalEvents.set(
-          'Recycled' as DocumentEventName,
+          DocumentEventName.Recycled,
           stubBoldMassIDRecycledEvent({
             partialDocumentEvent: {
               externalCreatedAt: recycledEventDate,

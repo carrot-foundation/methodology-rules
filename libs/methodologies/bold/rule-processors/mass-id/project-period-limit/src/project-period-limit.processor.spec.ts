@@ -3,7 +3,7 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
@@ -30,7 +30,7 @@ describe('ProjectPeriodLimitProcessor', () => {
       const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
-            'Recycled' as DocumentEventName,
+            DocumentEventName.Recycled,
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt,
@@ -61,7 +61,7 @@ describe('ProjectPeriodLimitProcessor', () => {
 
     const document = stubBoldMassIDDocument({
       externalEventsMap: new Map([
-        ['Recycled' as DocumentEventName, undefined],
+        [DocumentEventName.Recycled, undefined],
       ]),
     });
 

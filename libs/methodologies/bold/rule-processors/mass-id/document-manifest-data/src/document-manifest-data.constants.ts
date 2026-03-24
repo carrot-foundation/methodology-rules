@@ -9,7 +9,7 @@ export const RESULT_COMMENTS = {
   INVALID_BR_DOCUMENT_TYPE: (documentType: string) =>
     `The "Document Type" must be "MTR" for recyclers in Brazil, but "${documentType}" was provided.`,
   INVALID_ISSUE_DATE_FORMAT: (dateFormat: string) =>
-    `The "Issue Date" format must be "Date", but the declared format is "${dateFormat}".`,
+    `The "Issue Date" format must be "DATE", but the declared format is "${dateFormat}".`,
   MISSING_ATTRIBUTES: (manifestType: string) =>
     `Either the "${manifestType}" attachment or an "Exemption Justification" must be provided.`,
   MISSING_DOCUMENT_NUMBER: `The "Document Number" was not provided.`,
@@ -31,7 +31,7 @@ export const RESULT_COMMENTS = {
     issueDate: string;
     value: number;
   }) =>
-    `The ${documentType} attachment (No. ${documentNumber}), issued on ${issueDate}, with a value of ${value}kg, was provided.`,
+    `The ${documentType} attachment (No. ${documentNumber}), issued on ${issueDate}, with a value of ${value} kg, was provided.`,
 } as const;
 
 export const CROSS_VALIDATION_COMMENTS = {

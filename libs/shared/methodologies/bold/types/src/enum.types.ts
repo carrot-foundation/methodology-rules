@@ -189,6 +189,15 @@ export type DocumentEventWeighingCaptureMethod = z.infer<
 export const DocumentEventWeighingCaptureMethod =
   DocumentEventWeighingCaptureMethodSchema.enum;
 
+export const MassIDDocumentActorTypeSchema = MethodologyActorTypeSchema.extract(
+  ['Hauler', 'Integrator', 'Processor', 'Recycler', 'Waste Generator'],
+);
+export type MassIDDocumentActorType = z.infer<
+  typeof MassIDDocumentActorTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MassIDDocumentActorType = MassIDDocumentActorTypeSchema.enum;
+
 export const MassIDOrganicSubtypeSchema = z.enum([
   'Domestic Sludge',
   'EFB similar to Garden, Yard and Park Waste',
@@ -205,16 +214,12 @@ export const MassIDOrganicSubtype = MassIDOrganicSubtypeSchema.enum;
 
 export const DocumentSubtypeSchema = z.enum([
   ...MassIDOrganicSubtypeSchema.options,
+  ...MassIDDocumentActorTypeSchema.options,
   'Group',
-  'Hauler',
-  'Integrator',
   'Process',
-  'Processor',
-  'Recycler',
   'Source',
   'TCC',
   'TRC',
-  'Waste Generator',
 ]);
 export type DocumentSubtype = z.infer<typeof DocumentSubtypeSchema>;
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
@@ -232,15 +237,6 @@ export const DocumentTypeSchema = z.enum([
 export type DocumentType = z.infer<typeof DocumentTypeSchema>;
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
 export const DocumentType = DocumentTypeSchema.enum;
-
-export const MassIDDocumentActorTypeSchema = MethodologyActorTypeSchema.extract(
-  ['Hauler', 'Integrator', 'Processor', 'Recycler', 'Waste Generator'],
-);
-export type MassIDDocumentActorType = z.infer<
-  typeof MassIDDocumentActorTypeSchema
->;
-// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
-export const MassIDDocumentActorType = MassIDDocumentActorTypeSchema.enum;
 
 export const MeasurementUnitSchema = z.enum(['kg']);
 export type MeasurementUnit = z.infer<typeof MeasurementUnitSchema>;

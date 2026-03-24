@@ -1,6 +1,7 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   BoldMethodologyName,
+  type BoldMethodologySlug,
   type Document,
   type DocumentEvent,
   type DocumentRelation,
@@ -82,6 +83,11 @@ const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
   'BOLD Carbon': 'GasID',
   'BOLD Recycling': 'RecycledID',
 } as const satisfies Record<BoldMethodologyName, DocumentType>;
+
+const METHODOLOGY_SLUG_BY_NAME = {
+  'BOLD Carbon': 'bold-carbon',
+  'BOLD Recycling': 'bold-recycling',
+} as const satisfies Record<BoldMethodologyName, BoldMethodologySlug>;
 
 export class BoldStubsBuilder {
   private _creditOrderDocument?: Document;
@@ -292,7 +298,7 @@ export class BoldStubsBuilder {
                 name: methodologyEventName,
                 relatedDocument: this.methodologyRelation,
               },
-              [['Methodology Slug', 'bold-recycling']],
+              [['Methodology Slug', METHODOLOGY_SLUG_BY_NAME[this.boldMethodologyName]]],
             ),
             ...externalEventsMap,
           },
