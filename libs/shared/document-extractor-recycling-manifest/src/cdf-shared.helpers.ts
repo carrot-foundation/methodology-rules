@@ -161,6 +161,11 @@ export interface CdfWasteTableConfig {
   anchorColumn: string;
   codePattern: RegExp;
   headerDefs: [HeaderColumnDefinition, ...Array<HeaderColumnDefinition>];
+  /**
+   * Regex tested against each accent-stripped LINE block below the table header.
+   * Must match the stripped form (e.g. `/^Observacoes$/i`, not `/^Observações$/i`).
+   * When matched, the block's Y position becomes the table bottom boundary.
+   */
   tableEndPattern?: RegExp;
   technologyColumn: string;
 }

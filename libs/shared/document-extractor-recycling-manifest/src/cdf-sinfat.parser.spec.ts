@@ -519,6 +519,9 @@ describe('CdfSinfatParser', () => {
 
       expect(result.data.wasteEntries?.parsed).toHaveLength(1);
       expect(result.data.wasteEntries?.parsed[0]?.code).toBe('020106');
+      expect(result.data.wasteEntries?.parsed[0]?.description).not.toContain(
+        '1224249738',
+      );
     });
 
     it('should extract generator without address', () => {
