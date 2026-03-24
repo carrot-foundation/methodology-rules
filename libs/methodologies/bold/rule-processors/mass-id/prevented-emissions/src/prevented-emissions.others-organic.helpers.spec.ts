@@ -3,12 +3,6 @@ import {
   stubDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  MassIDOrganicSubtype,
-  MethodologyBaseline,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-
-import {
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
   OthersIfOrganicCarbonFractionsByCode,
 } from './prevented-emissions.constants';
@@ -21,8 +15,6 @@ import {
   getOthersIfOrganicContextFromMassIdDocument,
   resolveCanonicalLocalWasteClassificationId,
 } from './prevented-emissions.others-organic.helpers';
-
-const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
 
 describe('PreventedEmissionsOthersOrganicHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
@@ -64,7 +56,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
   describe('getOthersIfOrganicContextFromMassIdDocument', () => {
     it('should return empty context when document subtype is not OTHERS_IF_ORGANIC', () => {
       const document = stubDocument({
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       });
 
       const result = getOthersIfOrganicContextFromMassIdDocument(document);
@@ -75,7 +67,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
     it('should return empty context when pick up event is not found', () => {
       const document = stubDocument({
         externalEvents: [],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        subtype: 'Others (if organic)',
       });
 
       const result = getOthersIfOrganicContextFromMassIdDocument(document);
@@ -87,10 +79,10 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       const document = stubDocument({
         externalEvents: [
           stubBoldMassIDPickUpEvent({
-            metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, undefined]],
+            metadataAttributes: [['Local Waste Classification ID', undefined]],
           }),
         ],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        subtype: 'Others (if organic)',
       });
 
       const result = getOthersIfOrganicContextFromMassIdDocument(document);
@@ -102,10 +94,10 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       const document = stubDocument({
         externalEvents: [
           stubBoldMassIDPickUpEvent({
-            metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '02 01 06']],
+            metadataAttributes: [['Local Waste Classification ID', '02 01 06']],
           }),
         ],
-        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        subtype: 'Others (if organic)',
       });
 
       const result = getOthersIfOrganicContextFromMassIdDocument(document);
@@ -164,7 +156,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
   describe('calculateOthersIfOrganicFactor', () => {
     it('should calculate factor for OPEN_AIR_DUMP with 15% carbon', () => {
       const result = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
         '0.15',
       );
 
@@ -173,7 +165,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should calculate factor for LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS with 22% carbon', () => {
       const result = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        'Landfills without flaring of methane gas',
         '0.22',
       );
 
@@ -182,7 +174,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should calculate factor for LANDFILLS_WITH_FLARING_OF_METHANE_GAS with 37% carbon', () => {
       const result = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        'Landfills with flaring of methane gas (and/or capture of biogas)',
         '0.37',
       );
 
@@ -191,7 +183,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should calculate factor for OPEN_AIR_DUMP with 58% carbon', () => {
       const result = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
         '0.58',
       );
 
@@ -200,7 +192,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should round to 6 decimal places using ROUND_HALF_DOWN', () => {
       const result = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
         '0.15',
       );
 
@@ -209,15 +201,15 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should clamp negative results to zero when carbonFraction is 0', () => {
       const resultFlaring = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        'Landfills with flaring of methane gas (and/or capture of biogas)',
         '0',
       );
       const resultWithoutFlaring = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        'Landfills without flaring of methane gas',
         '0',
       );
       const resultDump = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
         '0',
       );
 
@@ -228,15 +220,15 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should clamp negative results to zero when carbonFraction is 1%', () => {
       const resultFlaring = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        'Landfills with flaring of methane gas (and/or capture of biogas)',
         '0.01',
       );
       const resultWithoutFlaring = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        'Landfills without flaring of methane gas',
         '0.01',
       );
       const resultDump = calculateOthersIfOrganicFactor(
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
         '0.01',
       );
 
@@ -343,7 +335,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       expect(() => {
         getOthersIfOrganicAuditDetails(
           '00 00 00',
-          MethodologyBaseline.OPEN_AIR_DUMP,
+          'Open-air dump',
         );
       }).toThrow(
         'getOthersIfOrganicAuditDetails: no carbon entry for "00 00 00"',
@@ -362,7 +354,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
         expect(() => {
           getOthersIfOrganicAuditDetails(
             canonicalLocalWasteClassificationCode,
-            MethodologyBaseline.OPEN_AIR_DUMP,
+            'Open-air dump',
           );
         }).toThrow(
           `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalLocalWasteClassificationCode}"`,
@@ -377,7 +369,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       expect(
         getOthersIfOrganicAuditDetails(
           '02 01 06',
-          MethodologyBaseline.OPEN_AIR_DUMP,
+          'Open-air dump',
         ),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
@@ -394,7 +386,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       expect(
         getOthersIfOrganicAuditDetails(
           '02 01 06',
-          MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+          'Landfills without flaring of methane gas',
         ),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
@@ -411,7 +403,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
       expect(
         getOthersIfOrganicAuditDetails(
           '02 01 06',
-          MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+          'Landfills with flaring of methane gas (and/or capture of biogas)',
         ),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
@@ -427,7 +419,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
     it('should use BigNumber for formula coefficients', () => {
       const result = getOthersIfOrganicAuditDetails(
         '02 01 06',
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Open-air dump',
       );
 
       expect(typeof result.formulaCoeffs.intercept).toBe('number');

@@ -15,7 +15,6 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -36,10 +35,6 @@ import {
   type EventsData,
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
-
-const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 interface RuleSubject {
   cancelledCount: number;
@@ -134,25 +129,31 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   private collectRequiredEventsData(document: Document): EventsData {
     const dropOffEvent = this.getEventOrThrow(
       document,
-      { name: [DROP_OFF] },
+      { name: ['Drop-off'] },
       'MISSING_DROP_OFF_EVENT',
     );
 
     const pickUpEvent = this.getEventOrThrow(
       document,
-      { name: [PICK_UP] },
+      { name: ['Pick-up'] },
       'MISSING_PICK_UP_EVENT',
     );
 
     const recyclerEvent = this.getEventOrThrow(
       document,
-      { label: [RECYCLER], name: [ACTOR] },
+      {
+        label: [MethodologyDocumentEventLabel.Recycler],
+        name: [DocumentEventName.ACTOR],
+      },
       'MISSING_RECYCLER_EVENT',
     );
 
     const wasteGeneratorEvent = this.getEventOrThrow(
       document,
-      { label: [WASTE_GENERATOR], name: [ACTOR] },
+      {
+        label: [MethodologyDocumentEventLabel['Waste Generator']],
+        name: [DocumentEventName.ACTOR],
+      },
       'MISSING_WASTE_GENERATOR_EVENT',
     );
 
@@ -196,7 +197,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   private getVehicleLicensePlate(pickUpEvent: DocumentEvent): NonEmptyString {
     const vehicleLicensePlate = getEventAttributeValue(
       pickUpEvent,
-      VEHICLE_LICENSE_PLATE,
+      'Vehicle License Plate',
     );
 
     if (!isNonEmptyString(vehicleLicensePlate)) {

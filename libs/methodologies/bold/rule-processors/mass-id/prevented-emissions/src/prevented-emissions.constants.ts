@@ -7,9 +7,6 @@ import { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { type OthersIfOrganicCarbonEntry } from './prevented-emissions.types';
 
-const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT } =
-  DocumentEventAttributeName;
-
 const formatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 3,
   roundingMode: 'floor',
@@ -21,11 +18,11 @@ export const formatNumber = (number_: number): string =>
 
 export const RESULT_COMMENTS = {
   failed: {
-    MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${EXCEEDING_EMISSION_COEFFICIENT}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
+    MISSING_EXCEEDING_EMISSION_COEFFICIENT: `The "${DocumentEventAttributeName['Exceeding Emission Coefficient (per ton)']}" attribute was not found in the "Recycler Accreditation" document or it is invalid.`,
     MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE: (
       wasteSubtype: MassIDOrganicSubtype,
     ) =>
-      `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+      `The "${DocumentEventAttributeName.Baselines}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
   },
   passed: {
     EMISSIONS_CALCULATED: (
@@ -44,7 +41,7 @@ export const CDM_CODE_OTHERS_IF_ORGANIC = '8.7D';
 /** Subtypes that use static factors. OTHERS_IF_ORGANIC is computed by formula. */
 export type StaticFactorSubtype = Exclude<
   MassIDOrganicSubtype,
-  MassIDOrganicSubtype.OTHERS_IF_ORGANIC
+  (typeof MassIDOrganicSubtype)['Others (if organic)']
 >;
 
 /**
@@ -56,40 +53,60 @@ export const PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON: Record<
   StaticFactorSubtype,
   Record<MethodologyBaseline, number>
 > = {
-  [MassIDOrganicSubtype.DOMESTIC_SLUDGE]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.066_584,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.227_18,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.155_804,
+  [MassIDOrganicSubtype.Tobacco]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.459_152,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      0.940_301,
+    [MethodologyBaseline['Open-air dump']]: 0.726_812,
   },
-  [MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.629_488,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 1.250_643,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.974_574,
+  [MassIDOrganicSubtype['Domestic Sludge']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.066_584,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]: 0.227_18,
+    [MethodologyBaseline['Open-air dump']]: 0.155_804,
   },
-  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459_152,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.940_301,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.726_812,
+  [MassIDOrganicSubtype['EFB similar to Garden, Yard and Park Waste']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.629_488,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      1.250_643,
+    [MethodologyBaseline['Open-air dump']]: 0.974_574,
   },
-  [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.499_788,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 1.120_943,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.844_874,
+  [MassIDOrganicSubtype['Food, Food Waste and Beverages']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.459_152,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      0.940_301,
+    [MethodologyBaseline['Open-air dump']]: 0.726_812,
   },
-  [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.223_611,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.512_684,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.384_207,
+  [MassIDOrganicSubtype['Garden, Yard and Park Waste']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.499_788,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      1.120_943,
+    [MethodologyBaseline['Open-air dump']]: 0.844_874,
   },
-  [MassIDOrganicSubtype.TOBACCO]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.459_152,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 0.940_301,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 0.726_812,
+  [MassIDOrganicSubtype['Industrial Sludge']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.223_611,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      0.512_684,
+    [MethodologyBaseline['Open-air dump']]: 0.384_207,
   },
-  [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]: {
-    [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: 0.720_371,
-    [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: 1.415_883,
-    [MethodologyBaseline.OPEN_AIR_DUMP]: 1.106_767,
+  [MassIDOrganicSubtype['Wood and Wood Products']]: {
+    [MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ]]: 0.720_371,
+    [MethodologyBaseline['Landfills without flaring of methane gas']]:
+      1.415_883,
+    [MethodologyBaseline['Open-air dump']]: 1.106_767,
   },
 };
 
@@ -97,15 +114,17 @@ export const OTHERS_IF_ORGANIC_BASELINE_FORMULA: Record<
   MethodologyBaseline,
   { intercept: string; slope: string }
 > = {
-  [MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS]: {
+  [MethodologyBaseline[
+    'Landfills with flaring of methane gas (and/or capture of biogas)'
+  ]]: {
     intercept: '-0.129701',
     slope: '3.795947',
   },
-  [MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS]: {
+  [MethodologyBaseline['Landfills without flaring of methane gas']]: {
     intercept: '-0.1297003',
     slope: '6.901715',
   },
-  [MethodologyBaseline.OPEN_AIR_DUMP]: {
+  [MethodologyBaseline['Open-air dump']]: {
     intercept: '-0.1297013',
     slope: '5.521373',
   },

@@ -6,18 +6,14 @@ import {
   type Document,
   DocumentCategory,
   DocumentType,
-  MassIDOrganicSubtype,
+  MassIDOrganicSubtypeSchema,
   MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
 
-const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
-
-const { MASS_ID } = DocumentCategory;
-const { KG } = MeasurementUnit;
-const { ORGANIC } = DocumentType;
+const ALLOWED_SUBTYPES: string[] = MassIDOrganicSubtypeSchema.options;
 
 export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
   protected readonly processorErrors =
@@ -39,17 +35,17 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
         errorMessage: RESULT_COMMENTS.failed.INVALID_CATEGORY(
           document.category,
         ),
-        isValid: document.category === MASS_ID.valueOf(),
+        isValid: document.category === DocumentCategory.MassID.valueOf(),
       },
       {
         errorMessage: RESULT_COMMENTS.failed.INVALID_TYPE(document.type!),
-        isValid: document.type === ORGANIC.valueOf(),
+        isValid: document.type === DocumentType.Organic.valueOf(),
       },
       {
         errorMessage: RESULT_COMMENTS.failed.INVALID_MEASUREMENT_UNIT(
           document.measurementUnit,
         ),
-        isValid: document.measurementUnit === KG.valueOf(),
+        isValid: document.measurementUnit === MeasurementUnit.kg.valueOf(),
       },
       {
         errorMessage: RESULT_COMMENTS.failed.INVALID_VALUE(

@@ -18,9 +18,6 @@ import {
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
-const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-
 type Subject = {
   pickUpEvent?: DocumentEvent | undefined;
   wasteGeneratorEvents?: DocumentEvent[] | undefined;
@@ -50,10 +47,11 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
     const wasteOrigin = getEventAttributeValue(
       pickUpEvent,
-      DocumentEventAttributeName.WASTE_ORIGIN,
+      DocumentEventAttributeName['Waste Origin'],
     );
     const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
-    const isUnidentified = wasteOrigin === UNIDENTIFIED;
+    const isUnidentified =
+      wasteOrigin === DocumentEventAttributeValue.Unidentified;
 
     if (!isUnidentified && hasWasteGenerator) {
       return {
@@ -84,11 +82,14 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
+      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
     );
 
     const wasteGeneratorEvents = document.externalEvents?.filter(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([DocumentEventName['Waste Generator']]),
+      ),
     );
 
     return {

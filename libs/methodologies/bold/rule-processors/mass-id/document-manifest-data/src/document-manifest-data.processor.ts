@@ -41,26 +41,13 @@ import {
   type ValidationResult,
 } from './document-manifest-data.helpers';
 
-const {
-  ACTOR,
-  DROP_OFF,
-  PICK_UP,
-  RECYCLING_MANIFEST,
-  TRANSPORT_MANIFEST,
-  WEIGHING,
-} = DocumentEventName;
-const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
-
 export type DocumentManifestType =
-  | typeof RECYCLING_MANIFEST
-  | typeof TRANSPORT_MANIFEST;
+  | (typeof DocumentEventName)['Recycling Manifest']
+  | (typeof DocumentEventName)['Transport Manifest'];
 
 const VALID_MANIFEST_TYPES: ReadonlySet<string> = new Set<string>([
-  RECYCLING_MANIFEST,
-  TRANSPORT_MANIFEST,
+  DocumentEventName['Recycling Manifest'],
+  DocumentEventName['Transport Manifest'],
 ]);
 
 type RuleSubject = {
@@ -77,8 +64,8 @@ type RuleSubject = {
 };
 
 const DOCUMENT_TYPE_MAPPING = {
-  [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
-  [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
+  [DocumentEventName['Recycling Manifest']]: ReportType.CDF.toString(),
+  [DocumentEventName['Transport Manifest']]: ReportType.MTR.toString(),
 } as const;
 
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -203,22 +190,33 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       eventNameIsAnyOf([this.documentManifestType]),
     );
     const recyclerEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel.Recycler]),
+      ),
     );
     const wasteGeneratorEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([WASTE_GENERATOR])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel['Waste Generator']]),
+      ),
     );
     const haulerEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([HAULER])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel.Hauler]),
+      ),
     );
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
+      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
     );
     const dropOffEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([DROP_OFF]),
+      eventNameIsAnyOf([DocumentEventName['Drop-off']]),
     );
     const weighingEvents = getOrDefault(
-      document.externalEvents?.filter(eventNameIsAnyOf([WEIGHING])),
+      document.externalEvents?.filter(
+        eventNameIsAnyOf([DocumentEventName.Weighing]),
+      ),
       [],
     );
 
@@ -234,16 +232,25 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
         return {
           attachment: correctLabelAttachment,
-          documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
-          documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
+          documentNumber: getEventAttributeValue(
+            event,
+            DocumentEventAttributeName['Document Number'],
+          ),
+          documentType: getEventAttributeValue(
+            event,
+            DocumentEventAttributeName['Document Type'],
+          ),
           eventAddressId: event.address.id,
           eventValue: event.value,
           exemptionJustification: getEventAttributeValue(
             event,
-            EXEMPTION_JUSTIFICATION,
+            DocumentEventAttributeName['Exemption Justification'],
           ),
           hasWrongLabelAttachment,
-          issueDateAttribute: getEventAttributeByName(event, ISSUE_DATE),
+          issueDateAttribute: getEventAttributeByName(
+            event,
+            DocumentEventAttributeName['Issue Date'],
+          ),
           recyclerCountryCode: recyclerEvent?.address.countryCode,
         };
       }),
@@ -251,12 +258,17 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     );
 
     const mtrEventDocumentNumbers =
-      this.documentManifestType === RECYCLING_MANIFEST
+      this.documentManifestType === DocumentEventName['Recycling Manifest']
         ? getOrDefault(
             document.externalEvents
-              ?.filter(eventNameIsAnyOf([TRANSPORT_MANIFEST]))
+              ?.filter(
+                eventNameIsAnyOf([DocumentEventName['Transport Manifest']]),
+              )
               .map((event) =>
-                getEventAttributeValue(event, DOCUMENT_NUMBER)?.toString(),
+                getEventAttributeValue(
+                  event,
+                  DocumentEventAttributeName['Document Number'],
+                )?.toString(),
               )
               .filter((v): v is string => isNonEmptyString(v)),
             [],
@@ -329,7 +341,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     if (
       eventAddressId !== recyclerEvent.address.id &&
-      this.documentManifestType === RECYCLING_MANIFEST
+      this.documentManifestType === DocumentEventName['Recycling Manifest']
     ) {
       return {
         failMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
@@ -429,7 +441,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     if (!isNonEmptyString(issueDateAttribute?.name)) {
       failMessages.push(RESULT_COMMENTS.MISSING_ISSUE_DATE);
-    } else if (issueDateAttribute.format !== DATE) {
+    } else if (
+      issueDateAttribute.format !== MethodologyDocumentEventAttributeFormat.DATE
+    ) {
       failMessages.push(
         RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(
           issueDateAttribute.format as string,

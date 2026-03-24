@@ -7,13 +7,11 @@ import {
   type DocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   DataSetName,
-  MethodologyDocumentEventLabel,
   MethodologyParticipantType,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -51,30 +49,28 @@ describe('Event Predicates', () => {
   });
 
   describe('eventHasLabel', () => {
-    const { RECYCLER } = MethodologyDocumentEventLabel;
-
     it('should return true if the event has the label', () => {
-      const event = stubDocumentEvent({ label: RECYCLER });
+      const event = stubDocumentEvent({ label: 'Recycler' });
 
-      expect(eventHasLabel(event, RECYCLER)).toBe(true);
+      expect(eventHasLabel(event, 'Recycler')).toBe(true);
     });
 
     it('should return false if the event does not have the label', () => {
       const event = stubDocumentEvent({ label: faker.string.sample() });
 
-      expect(eventHasLabel(event, RECYCLER)).toBe(false);
+      expect(eventHasLabel(event, 'Recycler')).toBe(false);
     });
   });
 
   describe('isRecycledEvent', () => {
     it('should return true if the event is a recycled event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.RECYCLED });
+      const event = stubDocumentEvent({ name: 'Recycled' });
 
       expect(isRecycledEvent(event)).toBe(true);
     });
 
     it('should return false if the event is not a recycled event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.ACTOR });
+      const event = stubDocumentEvent({ name: 'ACTOR' });
 
       expect(isRecycledEvent(event)).toBe(false);
     });
@@ -92,10 +88,10 @@ describe('Event Predicates', () => {
 
     it('should return false if the event does not have the event name', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.CLOSE,
+        name: 'CLOSE',
       });
 
-      const result = eventHasName(event, DocumentEventName.ACTOR);
+      const result = eventHasName(event, 'ACTOR');
 
       expect(result).toBe(false);
     });
@@ -104,7 +100,7 @@ describe('Event Predicates', () => {
   describe('isActorEvent', () => {
     it('should return true if the event is an actor event', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.ACTOR,
+        name: 'ACTOR',
       });
 
       const result = isActorEvent(event);
@@ -114,7 +110,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is not an actor event', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.CLOSE,
+        name: 'CLOSE',
       });
 
       const result = isActorEvent(event);
@@ -180,7 +176,7 @@ describe('Event Predicates', () => {
 
   describe('hasWeightFormat', () => {
     it('should return true if the weight format is valid', () => {
-      const weight = `${faker.number.float()} ${MeasurementUnit.KG}`;
+      const weight = `${faker.number.float()} ${'kg'}`;
 
       const result = hasWeightFormat(weight);
 
@@ -206,14 +202,14 @@ describe('Event Predicates', () => {
     it('should return true if the event has the metadata attribute name', () => {
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.WASTE_ORIGIN,
+          name: 'Waste Origin',
           value: faker.string.sample(),
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: 'Waste Origin',
       });
 
       expect(result).toBe(true);
@@ -222,7 +218,7 @@ describe('Event Predicates', () => {
     it('should return false if the event is undefined', () => {
       const result = eventHasMetadataAttribute({
         event: {} as DocumentEvent,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: 'Waste Origin',
       });
 
       expect(result).toBe(false);
@@ -233,8 +229,8 @@ describe('Event Predicates', () => {
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [DocumentEventName.ACTOR],
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        eventNames: ['ACTOR'],
+        metadataName: 'Waste Origin',
       });
 
       expect(result).toBe(false);
@@ -243,14 +239,14 @@ describe('Event Predicates', () => {
     it('should return false if the event metadata name is not equal to the metadata value', () => {
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.WASTE_ORIGIN,
+          name: 'Waste Origin',
           value: faker.string.sample(),
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: 'Waste Origin',
         metadataValues: faker.string.sample(),
       });
 
@@ -262,18 +258,18 @@ describe('Event Predicates', () => {
       const description2 = faker.string.sample();
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.DESCRIPTION,
+          name: 'Description',
           value: description1,
         }),
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.DESCRIPTION,
+          name: 'Description',
           value: description2,
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.DESCRIPTION,
+        metadataName: 'Description',
         metadataValues: [description1, description2],
       });
 
@@ -285,17 +281,17 @@ describe('Event Predicates', () => {
       const event = stubDocumentEvent({
         ...stubDocumentEventWithMetadata([
           stubDocumentEventAttribute({
-            name: DocumentEventAttributeName.DESCRIPTION,
+            name: 'Description',
             value: description,
           }),
         ]),
-        name: DocumentEventName.DROP_OFF,
+        name: 'Drop-off',
       });
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [DocumentEventName.DROP_OFF, DocumentEventName.MOVE],
-        metadataName: DocumentEventAttributeName.DESCRIPTION,
+        eventNames: ['Drop-off', 'MOVE'],
+        metadataName: 'Description',
         metadataValues: [description],
       });
 
@@ -308,7 +304,7 @@ describe('Event Predicates', () => {
       const events = stubArray(() =>
         stubDocumentEventWithMetadata([
           stubDocumentEventAttribute({
-            name: DocumentEventAttributeName.WASTE_ORIGIN,
+            name: 'Waste Origin',
             value: 1234,
           }),
         ]),
@@ -316,7 +312,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        'Waste Origin',
       );
 
       expect(result).toBe(true);
@@ -327,7 +323,7 @@ describe('Event Predicates', () => {
         () =>
           stubDocumentEventWithMetadata([
             stubDocumentEventAttribute({
-              name: DocumentEventAttributeName.WASTE_ORIGIN,
+              name: 'Waste Origin',
               value: faker.number.float(),
             }),
           ]),
@@ -336,7 +332,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        'Waste Origin',
       );
 
       expect(result).toBe(false);
@@ -347,7 +343,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        'Waste Origin',
       );
 
       expect(result).toBe(false);

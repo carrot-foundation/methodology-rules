@@ -3,7 +3,7 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -15,8 +15,6 @@ import { faker } from '@faker-js/faker';
 
 import { projectPeriodLimitLambda } from './project-period-limit.lambda';
 import { projectPeriodLimitTestCases } from './project-period-limit.test-cases';
-
-const { RECYCLED } = DocumentEventName;
 
 describe('ProjectPeriodLimitLambda E2E', () => {
   beforeEach(() => {
@@ -31,7 +29,7 @@ describe('ProjectPeriodLimitLambda E2E', () => {
       const massIDDocument = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
-            RECYCLED,
+            'Recycled' as DocumentEventName,
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: externalCreatedAt
                 ? { externalCreatedAt }

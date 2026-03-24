@@ -1,17 +1,9 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   BoldMethodologyName,
-  BoldMethodologySlug,
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
   type DocumentRelation,
-  DocumentSubtype,
-  DocumentType,
-  MassIDDocumentActorType,
-  MethodologyDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
@@ -42,20 +34,6 @@ import {
 import { stubBoldMethodologyDefinitionDocument } from './bold-methodology-definition.stubs';
 import { stubBoldAccreditationDocument } from './bold-participant-accreditation.stubs';
 
-const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const {
-  CREDIT_ORDER,
-  DEFINITION,
-  GAS_ID,
-  MASS_ID_AUDIT,
-  ORGANIC,
-  PARTICIPANT_ACCREDITATION,
-  RECYCLED_ID,
-} = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
-
 export interface BoldStubsBuilderOptions {
   count?: number;
   massIDActorParticipants?: Map<string, MethodologyParticipant>;
@@ -85,24 +63,24 @@ export interface BoldStubsBuilderResult {
 }
 
 export const MASS_ID_ACTOR_PARTICIPANTS = [
-  MassIDDocumentActorType.HAULER,
-  MassIDDocumentActorType.INTEGRATOR,
-  MassIDDocumentActorType.PROCESSOR,
-  MassIDDocumentActorType.RECYCLER,
-  MassIDDocumentActorType.WASTE_GENERATOR,
+  'Hauler',
+  'Integrator',
+  'Processor',
+  'Recycler',
+  'Waste Generator',
 ] as const;
 
 export const METHODOLOGY_ACTOR_PARTICIPANTS = [
-  MethodologyDocumentActorType.COMMUNITY_IMPACT_POOL,
-  MethodologyDocumentActorType.NETWORK,
-  MethodologyDocumentActorType.METHODOLOGY_AUTHOR,
-  MethodologyDocumentActorType.METHODOLOGY_DEVELOPER,
+  'Community Impact Pool',
+  'Network',
+  'Methodology Author',
+  'Methodology Developer',
 ] as const;
 
 const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
-  [BoldMethodologyName.CARBON]: GAS_ID,
-  [BoldMethodologyName.RECYCLING]: RECYCLED_ID,
-} as const satisfies Record<BoldMethodologyName, DocumentType>;
+  'BOLD Carbon': 'GasID',
+  'BOLD Recycling': 'RecycledID',
+} as const;
 
 export class BoldStubsBuilder {
   private _creditOrderDocument?: Document;
@@ -201,7 +179,7 @@ export class BoldStubsBuilder {
         this.addExternalEventToDocument(
           document,
           stubDocumentEvent({
-            name: RELATED,
+            name: 'RELATED',
             relatedDocument: this.massIDCertificateDocumentRelations[index],
           }),
         ),
@@ -304,8 +282,8 @@ export class BoldStubsBuilder {
       (massIDDocument, index) =>
         stubBoldMassIDAuditDocument({
           externalEventsMap: {
-            [LINK]: stubDocumentEvent({
-              name: LINK,
+            ['LINK']: stubDocumentEvent({
+              name: 'LINK',
               relatedDocument: this.massIDRelations[index],
             }),
             [methodologyEventName]: stubDocumentEventWithMetadataAttributes(
@@ -313,7 +291,7 @@ export class BoldStubsBuilder {
                 name: methodologyEventName,
                 relatedDocument: this.methodologyRelation,
               },
-              [[METHODOLOGY_SLUG, BoldMethodologySlug.RECYCLING]],
+              [['Methodology Slug', 'bold-recycling']],
             ),
             ...externalEventsMap,
           },
@@ -433,9 +411,9 @@ export class BoldStubsBuilder {
     const defaultEventsMap = new Map([
       ...Object.entries(actorEvents),
       [
-        OUTPUT,
+        'OUTPUT',
         stubDocumentEvent({
-          name: OUTPUT,
+          name: 'OUTPUT',
           relatedDocument: this.participantAccreditationGroupRelation!,
         }),
       ],
@@ -447,16 +425,16 @@ export class BoldStubsBuilder {
 
     this.methodologyRelation = {
       bidirectional: false,
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId: faker.string.uuid(),
-      type: DEFINITION,
+      type: 'Definition',
     };
 
     this.participantAccreditationGroupRelation = {
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId: faker.string.uuid(),
-      subtype: GROUP,
-      type: PARTICIPANT_ACCREDITATION,
+      subtype: 'Group',
+      type: 'Participant Accreditation',
     };
 
     this.participantAccreditationGroupDocument =
@@ -478,7 +456,7 @@ export class BoldStubsBuilder {
         this.addExternalEventToDocument(
           auditDocument,
           stubDocumentEvent({
-            name: LINK,
+            name: 'LINK',
             relatedDocument: this.methodologyRelation,
           }),
         ),
@@ -500,10 +478,10 @@ export class BoldStubsBuilder {
 
       const defaultEventsMap = new Map([
         [
-          DocumentEventName.ACCREDITATION_CONTEXT,
+          'Accreditation Context',
           stubDocumentEvent({
             address: primaryAddress,
-            name: DocumentEventName.ACCREDITATION_CONTEXT,
+            name: 'Accreditation Context',
             participant: primaryParticipant,
           }),
         ],
@@ -533,7 +511,7 @@ export class BoldStubsBuilder {
           this.participantAccreditationGroupDocument!,
           stubDocumentEvent({
             address: primaryAddress,
-            name: OUTPUT,
+            name: 'OUTPUT',
             participant: primaryParticipant,
             relatedDocument: relation,
           }),
@@ -545,7 +523,7 @@ export class BoldStubsBuilder {
             auditDocument,
             stubDocumentEvent({
               address: primaryAddress,
-              name: LINK,
+              name: 'LINK',
               participant: primaryParticipant,
               relatedDocument: { ...relation, bidirectional: false },
             }),
@@ -566,7 +544,7 @@ export class BoldStubsBuilder {
         ...(this._creditOrderDocument?.externalEvents ?? []),
         ...this.massIDCertificateDocumentRelations.map((relation) =>
           stubDocumentEvent({
-            name: RELATED,
+            name: 'RELATED',
             relatedDocument: relation,
           }),
         ),
@@ -582,7 +560,7 @@ export class BoldStubsBuilder {
       externalEvents: [
         ...(massIDCertificateDocument.externalEvents ?? []),
         stubDocumentEvent({
-          name: RELATED,
+          name: 'RELATED',
           relatedDocument: this.creditOrderRelation,
         }),
       ],
@@ -604,7 +582,7 @@ export class BoldStubsBuilder {
       this.addExternalEventToDocument(
         document,
         stubDocumentEvent({
-          name: LINK,
+          name: 'LINK',
           relatedDocument: this.massIDAuditRelations[index],
         }),
       ),
@@ -616,7 +594,7 @@ export class BoldStubsBuilder {
       this.addExternalEventToDocument(
         document,
         stubDocumentEvent({
-          name: RELATED,
+          name: 'RELATED',
           relatedDocument: this.massIDCertificateDocumentRelations[index],
         }),
       ),
@@ -625,9 +603,9 @@ export class BoldStubsBuilder {
 
   private createCreditOrderDocumentRelation(): DocumentRelation {
     return {
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId: faker.string.uuid(),
-      type: CREDIT_ORDER,
+      type: 'Credit Order',
     };
   }
 
@@ -638,16 +616,16 @@ export class BoldStubsBuilder {
 
     return new Map([
       [
-        MASS_ID,
+        'MassID',
         stubDocumentEvent({
-          name: MASS_ID,
+          name: 'MassID',
           relatedDocument: this.massIDRelations[index]!,
         }),
       ],
       [
-        MASS_ID_AUDIT,
+        'MassID Audit',
         stubDocumentEvent({
-          name: MASS_ID_AUDIT,
+          name: 'MassID Audit',
           relatedDocument: this.massIDAuditRelations[index]!,
         }),
       ],
@@ -667,35 +645,28 @@ export class BoldStubsBuilder {
   ): Map<string, DocumentEvent> {
     return new Map([
       [
-        DROP_OFF,
+        'Drop-off',
         stubBoldMassIDDropOffEvent({
           partialDocumentEvent: {
-            address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.RECYCLER,
-            )!,
-            participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
-            )!,
+            address: this.massIDActorParticipantsAddresses.get('Recycler')!,
+            participant: this.massIDActorParticipants.get('Recycler')!,
           },
         }),
       ],
       [
-        OUTPUT,
+        'OUTPUT',
         stubDocumentEvent({
-          name: OUTPUT,
+          name: 'OUTPUT',
           relatedDocument: this.massIDAuditRelations[index],
         }),
       ],
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           partialDocumentEvent: {
-            address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
-            )!,
-            participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
-            )!,
+            address:
+              this.massIDActorParticipantsAddresses.get('Waste Generator')!,
+            participant: this.massIDActorParticipants.get('Waste Generator')!,
           },
         }),
       ],
@@ -706,11 +677,11 @@ export class BoldStubsBuilder {
   private createMassIDActorEvents(): Record<string, DocumentEvent> {
     return Object.fromEntries(
       Array.from(this.massIDActorParticipants, ([actorType, participant]) => [
-        `${ACTOR}-${actorType}`,
+        `${'ACTOR'}-${actorType}`,
         stubDocumentEvent({
           address: this.massIDActorParticipantsAddresses.get(actorType)!,
           label: actorType,
-          name: ACTOR,
+          name: 'ACTOR',
           participant,
         }),
       ]),
@@ -719,16 +690,16 @@ export class BoldStubsBuilder {
 
   private createMassIDAuditRelations(): DocumentRelation[] {
     return this.massIDAuditDocumentIds.map((documentId) => ({
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId,
-      subtype: PROCESS,
-      type: MASS_ID_AUDIT,
+      subtype: 'Process',
+      type: 'MassID Audit',
     }));
   }
 
   private createMassIDCertificateDocumentRelations(): DocumentRelation[] {
     return this.massIDCertificateDocumentIds.map((documentId) => ({
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId,
       type: MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME[this.boldMethodologyName],
     }));
@@ -737,10 +708,10 @@ export class BoldStubsBuilder {
   private createMassIDRelations(): DocumentRelation[] {
     return this.massIDDocumentIds.map((documentId) => ({
       bidirectional: false,
-      category: MASS_ID,
+      category: 'MassID',
       documentId,
-      subtype: FOOD_FOOD_WASTE_AND_BEVERAGES,
-      type: ORGANIC,
+      subtype: 'Food, Food Waste and Beverages',
+      type: 'Organic',
     }));
   }
 
@@ -749,10 +720,10 @@ export class BoldStubsBuilder {
       Array.from(
         this.methodologyActorParticipants,
         ([actorType, participant]) => [
-          `${ACTOR}-${actorType}`,
+          `${'ACTOR'}-${actorType}`,
           stubDocumentEvent({
             label: actorType,
-            name: ACTOR,
+            name: 'ACTOR',
             participant,
           }),
         ],
@@ -764,10 +735,10 @@ export class BoldStubsBuilder {
     subtype: string,
   ): DocumentRelation {
     return {
-      category: METHODOLOGY,
+      category: 'Methodology',
       documentId: faker.string.uuid(),
       subtype,
-      type: PARTICIPANT_ACCREDITATION,
+      type: 'Participant Accreditation',
     };
   }
 

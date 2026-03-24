@@ -18,15 +18,13 @@ import {
 } from './prevented-emissions.others-organic.helpers';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
-const { BASELINES } = DocumentEventAttributeName;
-
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
   baseline: MethodologyBaseline,
   processorErrors: PreventedEmissionsProcessorErrors,
   othersIfOrganicContext?: OthersIfOrganicContext,
 ): number => {
-  if (wasteSubtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
+  if (wasteSubtype !== MassIDOrganicSubtype['Others (if organic)']) {
     return PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
       wasteSubtype
     ][baseline];
@@ -59,7 +57,7 @@ export const getBaselineByWasteSubtype = (
 ): MethodologyBaseline | undefined => {
   const baselines = getEventAttributeValue(
     emissionAndCompostingMetricsEvent,
-    BASELINES,
+    DocumentEventAttributeName.Baselines,
   );
 
   if (!isWasteGeneratorBaselineValues(baselines)) {
@@ -86,7 +84,7 @@ export const getGasTypeFromEvent = (
 ): NonEmptyString => {
   const gasType = getEventAttributeValue(
     lastEmissionAndCompostingMetricsEvent,
-    DocumentEventAttributeName.GREENHOUSE_GAS_TYPE,
+    'Greenhouse Gas Type (GHG)',
   );
 
   if (!isNonEmptyString(gasType)) {

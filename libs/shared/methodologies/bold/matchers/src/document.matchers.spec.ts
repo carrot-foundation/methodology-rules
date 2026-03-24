@@ -1,9 +1,4 @@
 import { stubDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentCategory,
-  DocumentSubtype,
-  DocumentType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   CREDIT_ORDER_MATCH,
@@ -21,9 +16,9 @@ describe('Document Matchers', () => {
   describe('matches', () => {
     it('should return true if document has the same values passed in match', () => {
       const documentMatch: DocumentMatch = {
-        category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        type: DocumentType.ORGANIC,
+        category: 'MassID',
+        subtype: 'Food, Food Waste and Beverages',
+        type: 'Organic',
       };
       const documentRelation = stubDocumentRelation(documentMatch);
 
@@ -36,15 +31,15 @@ describe('Document Matchers', () => {
 
     it('should return false if document has at least one value different from those passed in match', () => {
       const documentMatch: DocumentMatch = {
-        category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        type: DocumentType.ORGANIC,
+        category: 'MassID',
+        subtype: 'Food, Food Waste and Beverages',
+        type: 'Organic',
       };
       const documentRelation = stubDocumentRelation(documentMatch);
 
       const documentMatcher = new DocumentMatcher({
         ...documentMatch,
-        type: DocumentType.MASS_ID_AUDIT,
+        type: 'MassID Audit',
       });
 
       const matchesResult = documentMatcher.matches(documentRelation);
@@ -56,7 +51,7 @@ describe('Document Matchers', () => {
   describe('MASS_ID', () => {
     it('should return true if the document category is MassID', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
+        category: 'MassID',
       });
 
       const matchesResult = MASS_ID.matches(documentRelation);
@@ -66,7 +61,7 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not MassID', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
+        category: 'Methodology',
       });
 
       const matchesResult = MASS_ID.matches(documentRelation);
@@ -78,8 +73,8 @@ describe('Document Matchers', () => {
   describe('MASS_ID_AUDIT', () => {
     it('should return true if the document category is Methodology and type is Mass ID Audit', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.MASS_ID_AUDIT,
+        category: 'Methodology',
+        type: 'MassID Audit',
       });
 
       const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
@@ -89,8 +84,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        type: DocumentType.MASS_ID_AUDIT,
+        category: 'MassID',
+        type: 'MassID Audit',
       });
 
       const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
@@ -100,8 +95,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document type is not Mass ID Audit', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.ORGANIC,
+        category: 'Methodology',
+        type: 'Organic',
       });
 
       const matchesResult = MASS_ID_AUDIT.matches(documentRelation);
@@ -113,8 +108,8 @@ describe('Document Matchers', () => {
   describe('RECYCLED_ID', () => {
     it('should return true if the document category is Methodology and type is RecycledID', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.RECYCLED_ID,
+        category: 'Methodology',
+        type: 'RecycledID',
       });
 
       const matchesResult = RECYCLED_ID.matches(documentRelation);
@@ -124,8 +119,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        type: DocumentType.RECYCLED_ID,
+        category: 'MassID',
+        type: 'RecycledID',
       });
 
       const matchesResult = RECYCLED_ID.matches(documentRelation);
@@ -135,8 +130,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document type is not RecycledID', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.ORGANIC,
+        category: 'Methodology',
+        type: 'Organic',
       });
 
       const matchesResult = RECYCLED_ID.matches(documentRelation);
@@ -148,8 +143,8 @@ describe('Document Matchers', () => {
   describe('METHODOLOGY_DEFINITION', () => {
     it('should return true if the document category is Methodology and type is Definition', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.DEFINITION,
+        category: 'Methodology',
+        type: 'Definition',
       });
 
       const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
@@ -159,8 +154,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        type: DocumentType.DEFINITION,
+        category: 'MassID',
+        type: 'Definition',
       });
 
       const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
@@ -170,8 +165,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document type is not Definition', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.ORGANIC,
+        category: 'Methodology',
+        type: 'Organic',
       });
 
       const matchesResult = METHODOLOGY_DEFINITION.matches(documentRelation);
@@ -183,9 +178,9 @@ describe('Document Matchers', () => {
   describe('PARTICIPANT_ACCREDITATION_GROUP', () => {
     it('should return true if document matches category, type and subtype', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.GROUP,
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        category: 'Methodology',
+        subtype: 'Group',
+        type: 'Participant Accreditation',
       });
 
       const matchesResult =
@@ -196,9 +191,9 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        subtype: DocumentSubtype.GROUP,
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        category: 'MassID',
+        subtype: 'Group',
+        type: 'Participant Accreditation',
       });
 
       const matchesResult =
@@ -209,9 +204,9 @@ describe('Document Matchers', () => {
 
     it('should return false if the document subtype is not Group', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        subtype: DocumentSubtype.TCC,
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        category: 'Methodology',
+        subtype: 'TCC',
+        type: 'Participant Accreditation',
       });
 
       const matchesResult =
@@ -224,8 +219,8 @@ describe('Document Matchers', () => {
   describe('PARTICIPANT_ACCREDITATION_PARTIAL_MATCH', () => {
     it('should return true if document matches category and type', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        category: 'Methodology',
+        type: 'Participant Accreditation',
       });
 
       const matchesResult =
@@ -236,8 +231,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        category: 'MassID',
+        type: 'Participant Accreditation',
       });
 
       const matchesResult =
@@ -248,8 +243,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document type is not Participant Accreditation', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.ORGANIC,
+        category: 'Methodology',
+        type: 'Organic',
       });
 
       const matchesResult =
@@ -262,8 +257,8 @@ describe('Document Matchers', () => {
   describe('CREDIT_ORDER_MATCH', () => {
     it('should return true if document matches category and type', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.METHODOLOGY,
-        type: DocumentType.CREDIT_ORDER,
+        category: 'Methodology',
+        type: 'Credit Order',
       });
 
       const matchesResult = CREDIT_ORDER_MATCH.matches(documentRelation);
@@ -273,8 +268,8 @@ describe('Document Matchers', () => {
 
     it('should return false if the document category is not Methodology', () => {
       const documentRelation = stubDocumentRelation({
-        category: DocumentCategory.MASS_ID,
-        type: DocumentType.CREDIT_ORDER,
+        category: 'MassID',
+        type: 'Credit Order',
       });
 
       const matchesResult = CREDIT_ORDER_MATCH.matches(documentRelation);

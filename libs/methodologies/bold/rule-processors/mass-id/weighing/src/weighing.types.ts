@@ -11,35 +11,35 @@ import {
 export interface ContainerCapacityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof DocumentCategory.MassID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof DocumentEventName.Weighing;
   };
-  'Attribute Name': DocumentEventAttributeName.CONTAINER_CAPACITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': (typeof DocumentEventAttributeName)['Container Capacity'];
+  'Exception Type': (typeof MethodologyApprovedExceptionType)['Exemption for Mandatory Attribute'];
   Reason: string;
 }
 
 export interface ContainerQuantityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof DocumentCategory.MassID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof DocumentEventName.Weighing;
   };
-  'Attribute Name': DocumentEventAttributeName.CONTAINER_QUANTITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': (typeof DocumentEventAttributeName)['Container Quantity'];
+  'Exception Type': (typeof MethodologyApprovedExceptionType)['Exemption for Mandatory Attribute'];
   Reason: string;
 }
 
 export interface TareApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof DocumentCategory.MassID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof DocumentEventName.Weighing;
   };
-  'Attribute Name': DocumentEventAttributeName.TARE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof DocumentEventAttributeName.Tare;
+  'Exception Type': (typeof MethodologyApprovedExceptionType)['Exemption for Mandatory Attribute'];
   Reason: string;
 }

@@ -1,6 +1,5 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -20,7 +19,7 @@ describe('NoConflictingCertificateOrCreditProcessor E2E', () => {
 
   const lambda = noConflictingCertificateOrCreditLambda(
     RECYCLED_ID,
-    BoldMethodologySlug.RECYCLING,
+    'bold-recycling',
   );
   const documentKeyPrefix = faker.string.uuid();
 

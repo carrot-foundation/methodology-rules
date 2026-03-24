@@ -12,8 +12,6 @@ import { convertDistance } from 'geolib';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-
 interface RuleSubject {
   dropOffEvent: DocumentEvent | undefined;
   pickUpEvent: DocumentEvent | undefined;
@@ -64,11 +62,11 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
 
   protected override getRuleSubject(document: Document): RuleSubject {
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
+      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
     );
 
     const dropOffEvent = document.externalEvents
-      ?.filter(eventNameIsAnyOf([DROP_OFF]))
+      ?.filter(eventNameIsAnyOf([DocumentEventName['Drop-off']]))
       .at(-1);
 
     return {

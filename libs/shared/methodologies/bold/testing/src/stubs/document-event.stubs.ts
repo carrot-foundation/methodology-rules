@@ -96,10 +96,7 @@ export const stubActorEventWithLabel = (
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
-    | [
-        DocumentEventAttributeName | string,
-        MethodologyDocumentEventAttributeValue,
-      ]
+    | [string, MethodologyDocumentEventAttributeValue]
     | Omit<DocumentEventAttribute, 'isPublic'>
   >,
 ) =>

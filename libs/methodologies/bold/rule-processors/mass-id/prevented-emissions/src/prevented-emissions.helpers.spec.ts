@@ -1,9 +1,4 @@
 import { stubBoldEmissionAndCompostingMetricsEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  MassIDOrganicSubtype,
-  MethodologyBaseline,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
@@ -16,8 +11,9 @@ import {
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
-const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
-  DocumentEventAttributeName;
+const BASELINES = 'Baselines';
+const EXCEEDING_EMISSION_COEFFICIENT = 'Exceeding Emission Coefficient (per ton)';
+const GREENHOUSE_GAS_TYPE = 'Greenhouse Gas Type (GHG)';
 
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
@@ -25,36 +21,36 @@ describe('PreventedEmissionsHelpers', () => {
   describe('getPreventedEmissionsFactor', () => {
     it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
       const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        'Food, Food Waste and Beverages',
+        'Landfills without flaring of methane gas',
         processorErrors,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
-          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
-        ][MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
+          'Food, Food Waste and Beverages'
+        ]['Landfills without flaring of methane gas'],
       );
     });
 
     it('should return the correct prevented emissions factor for domestic sludge and open air dump', () => {
       const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Domestic Sludge',
+        'Open-air dump',
         processorErrors,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
-          MassIDOrganicSubtype.DOMESTIC_SLUDGE
-        ][MethodologyBaseline.OPEN_AIR_DUMP],
+          'Domestic Sludge'
+        ]['Open-air dump'],
       );
     });
 
     it('should calculate factor for Others (if organic) when valid context is provided', () => {
       const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        'Others (if organic)',
+        'Open-air dump',
         processorErrors,
         { normalizedLocalWasteClassificationId: '02 01 06' },
       );
@@ -128,10 +124,10 @@ describe('PreventedEmissionsHelpers', () => {
           [
             BASELINES,
             {
-              [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
-                MethodologyBaseline.OPEN_AIR_DUMP,
-              [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+              ['Domestic Sludge']:
+                'Open-air dump',
+              ['Food, Food Waste and Beverages']:
+                'Landfills with flaring of methane gas (and/or capture of biogas)',
             },
           ],
         ],
@@ -139,12 +135,12 @@ describe('PreventedEmissionsHelpers', () => {
 
       const result = getBaselineByWasteSubtype(
         event,
-        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        'Food, Food Waste and Beverages',
         processorErrors,
       );
 
       expect(result).toBe(
-        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        'Landfills with flaring of methane gas (and/or capture of biogas)',
       );
     });
 
@@ -154,8 +150,8 @@ describe('PreventedEmissionsHelpers', () => {
           [
             BASELINES,
             {
-              [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+              ['Food, Food Waste and Beverages']:
+                'Landfills with flaring of methane gas (and/or capture of biogas)',
             },
           ],
         ],
@@ -163,7 +159,7 @@ describe('PreventedEmissionsHelpers', () => {
 
       const result = getBaselineByWasteSubtype(
         event,
-        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+        'Domestic Sludge',
         processorErrors,
       );
 
@@ -178,7 +174,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getBaselineByWasteSubtype(
           event,
-          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          'Food, Food Waste and Beverages',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
@@ -192,7 +188,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getBaselineByWasteSubtype(
           event,
-          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          'Food, Food Waste and Beverages',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
@@ -206,7 +202,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getBaselineByWasteSubtype(
           event,
-          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          'Food, Food Waste and Beverages',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);
@@ -216,7 +212,7 @@ describe('PreventedEmissionsHelpers', () => {
       expect(() =>
         getBaselineByWasteSubtype(
           undefined,
-          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          'Food, Food Waste and Beverages',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_BASELINES);

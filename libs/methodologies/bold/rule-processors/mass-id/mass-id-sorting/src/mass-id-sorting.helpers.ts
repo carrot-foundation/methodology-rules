@@ -1,3 +1,9 @@
+import type {
+  Document,
+  DocumentEvent,
+  DocumentEventAttribute,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+
 import {
   isNonEmptyArray,
   isNonZeroPositive,
@@ -8,33 +14,26 @@ import {
   getLastYearEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
-import {
-  type Document,
-  type DocumentEvent,
-  type DocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { getYear } from 'date-fns';
+import { z } from 'zod';
 
-const { SORTING } = DocumentEventName;
-const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
-
-export enum ValidationErrorCode {
-  EVENT_BEFORE_SORTING_UNDEFINED = 'EVENT_BEFORE_SORTING_UNDEFINED',
-  INVALID_DEDUCTED_WEIGHT = 'INVALID_DEDUCTED_WEIGHT',
-  INVALID_DEDUCTED_WEIGHT_FORMAT = 'INVALID_DEDUCTED_WEIGHT_FORMAT',
-  INVALID_GROSS_WEIGHT = 'INVALID_GROSS_WEIGHT',
-  INVALID_GROSS_WEIGHT_FORMAT = 'INVALID_GROSS_WEIGHT_FORMAT',
-  INVALID_VALUE_AFTER_SORTING = 'INVALID_VALUE_AFTER_SORTING',
-  INVALID_VALUE_BEFORE_SORTING = 'INVALID_VALUE_BEFORE_SORTING',
-  INVALID_WEIGHT_COMPARISON = 'INVALID_WEIGHT_COMPARISON',
-  MISSING_EXTERNAL_EVENTS = 'MISSING_EXTERNAL_EVENTS',
-  MISSING_SORTING_EVENT = 'MISSING_SORTING_EVENT',
-  MISSING_SORTING_FACTOR = 'MISSING_SORTING_FACTOR',
-}
+export const ValidationErrorCodeSchema = z.enum([
+  'EVENT_BEFORE_SORTING_UNDEFINED',
+  'INVALID_DEDUCTED_WEIGHT',
+  'INVALID_DEDUCTED_WEIGHT_FORMAT',
+  'INVALID_GROSS_WEIGHT',
+  'INVALID_GROSS_WEIGHT_FORMAT',
+  'INVALID_VALUE_AFTER_SORTING',
+  'INVALID_VALUE_BEFORE_SORTING',
+  'INVALID_WEIGHT_COMPARISON',
+  'MISSING_EXTERNAL_EVENTS',
+  'MISSING_SORTING_EVENT',
+  'MISSING_SORTING_FACTOR',
+]);
+export type ValidationErrorCode = z.infer<typeof ValidationErrorCodeSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const ValidationErrorCode = ValidationErrorCodeSchema.enum;
 
 export interface EventValues {
   valueAfterSorting: number;
@@ -88,7 +87,7 @@ export const findSortingEvents = (
   externalEvents: DocumentEvent[],
 ): SortingEvents | ValidationError => {
   const sortingEventIndex = externalEvents.findIndex(
-    eventNameIsAnyOf([SORTING]),
+    eventNameIsAnyOf(['Sorting']),
   );
 
   if (sortingEventIndex === -1) {
@@ -109,7 +108,7 @@ export const findSortingEvents = (
 };
 
 export const getSortingDescription = (sortingEvent: DocumentEvent) =>
-  getEventAttributeValue(sortingEvent, DESCRIPTION);
+  getEventAttributeValue(sortingEvent, 'Description');
 
 export const getSortingFactor = (
   recyclerAccreditationDocument: Document,
@@ -124,7 +123,7 @@ export const getSortingFactor = (
 
   const sortingFactor = getEventAttributeValue(
     emissionAndCompostingMetricsEvent,
-    SORTING_FACTOR,
+    'Sorting Factor',
   );
 
   if (!isNonZeroPositive(sortingFactor)) {
@@ -189,11 +188,11 @@ export const getValidatedWeightAttributes = (
 ): ValidationError | WeightAttributes => {
   const grossWeightAttribute = getEventAttributeByName(
     sortingEvent,
-    GROSS_WEIGHT,
+    'Gross Weight',
   );
   const deductedWeightAttribute = getEventAttributeByName(
     sortingEvent,
-    DEDUCTED_WEIGHT,
+    'Deducted Weight',
   );
 
   const grossWeightError = validateWeightAttribute(

@@ -6,71 +6,58 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  MassIDOrganicSubtype,
-  RewardsDistributionActorType,
-  RewardsDistributionWasteType,
+  type MassIDOrganicSubtype,
+  type RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
 import { type RewardsDistribution } from './rewards-distribution.types';
 
-const {
-  COMMUNITY_IMPACT_POOL,
-  HAULER,
-  INTEGRATOR,
-  METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER,
-  NETWORK,
-  PROCESSOR,
-  RECYCLER,
-  WASTE_GENERATOR,
-} = RewardsDistributionActorType;
-
 export const LARGE_REVENUE_BUSINESS_DISCOUNT = 0.5;
 
 export const REQUIRED_ACTOR_TYPES = {
-  MASS_ID: [RECYCLER, PROCESSOR, INTEGRATOR],
+  MASS_ID: ['Recycler' as const, 'Processor' as const, 'Integrator' as const],
   METHODOLOGY: [
-    COMMUNITY_IMPACT_POOL,
-    METHODOLOGY_AUTHOR,
-    METHODOLOGY_DEVELOPER,
-    NETWORK,
+    'Community Impact Pool' as const,
+    'Methodology Author' as const,
+    'Methodology Developer' as const,
+    'Network' as const,
   ],
 };
 
 export const REWARDS_DISTRIBUTION: RewardsDistribution = {
-  [RewardsDistributionWasteType.MIXED_ORGANIC_WASTE]: {
-    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
-    [HAULER]: BigNumber(0.1),
-    [INTEGRATOR]: BigNumber(0.08),
-    [METHODOLOGY_AUTHOR]: BigNumber(0.01),
-    [METHODOLOGY_DEVELOPER]: BigNumber(0.01),
-    [NETWORK]: BigNumber(0.2),
-    [PROCESSOR]: BigNumber(0.1),
-    [RECYCLER]: BigNumber(0.2),
-    [WASTE_GENERATOR]: BigNumber(0.3),
+  'Mixed Organic Waste': {
+    'Community Impact Pool': BigNumber(0),
+    Hauler: BigNumber(0.1),
+    Integrator: BigNumber(0.08),
+    'Methodology Author': BigNumber(0.01),
+    'Methodology Developer': BigNumber(0.01),
+    Network: BigNumber(0.2),
+    Processor: BigNumber(0.1),
+    Recycler: BigNumber(0.2),
+    'Waste Generator': BigNumber(0.3),
   },
-  [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
-    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
-    [HAULER]: BigNumber(0.05),
-    [INTEGRATOR]: BigNumber(0.08),
-    [METHODOLOGY_AUTHOR]: BigNumber(0.01),
-    [METHODOLOGY_DEVELOPER]: BigNumber(0.01),
-    [NETWORK]: BigNumber(0.2),
-    [PROCESSOR]: BigNumber(0.1),
-    [RECYCLER]: BigNumber(0.3),
-    [WASTE_GENERATOR]: BigNumber(0.25),
+  'Sludge from Waste Treatment': {
+    'Community Impact Pool': BigNumber(0),
+    Hauler: BigNumber(0.05),
+    Integrator: BigNumber(0.08),
+    'Methodology Author': BigNumber(0.01),
+    'Methodology Developer': BigNumber(0.01),
+    Network: BigNumber(0.2),
+    Processor: BigNumber(0.1),
+    Recycler: BigNumber(0.3),
+    'Waste Generator': BigNumber(0.25),
   },
-  [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
-    [COMMUNITY_IMPACT_POOL]: BigNumber(0),
-    [HAULER]: BigNumber(0.05),
-    [INTEGRATOR]: BigNumber(0.08),
-    [METHODOLOGY_AUTHOR]: BigNumber(0.01),
-    [METHODOLOGY_DEVELOPER]: BigNumber(0.01),
-    [NETWORK]: BigNumber(0.2),
-    [PROCESSOR]: BigNumber(0.1),
-    [RECYCLER]: BigNumber(0.3),
-    [WASTE_GENERATOR]: BigNumber(0.25),
+  'Tobacco Industry Residues': {
+    'Community Impact Pool': BigNumber(0),
+    Hauler: BigNumber(0.05),
+    Integrator: BigNumber(0.08),
+    'Methodology Author': BigNumber(0.01),
+    'Methodology Developer': BigNumber(0.01),
+    Network: BigNumber(0.2),
+    Processor: BigNumber(0.1),
+    Recycler: BigNumber(0.3),
+    'Waste Generator': BigNumber(0.25),
   },
 };
 
@@ -78,22 +65,14 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
   MassIDOrganicSubtype,
   RewardsDistributionWasteType
 > = {
-  [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
-    RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT,
-  [MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE]:
-    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE]:
-    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIDOrganicSubtype.INDUSTRIAL_SLUDGE]:
-    RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT,
-  [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]:
-    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
-  [MassIDOrganicSubtype.TOBACCO]:
-    RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES,
-  [MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS]:
-    RewardsDistributionWasteType.MIXED_ORGANIC_WASTE,
+  'Domestic Sludge': 'Sludge from Waste Treatment',
+  'EFB similar to Garden, Yard and Park Waste': 'Mixed Organic Waste',
+  'Food, Food Waste and Beverages': 'Mixed Organic Waste',
+  'Garden, Yard and Park Waste': 'Mixed Organic Waste',
+  'Industrial Sludge': 'Sludge from Waste Treatment',
+  'Others (if organic)': 'Mixed Organic Waste',
+  Tobacco: 'Tobacco Industry Residues',
+  'Wood and Wood Products': 'Mixed Organic Waste',
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {

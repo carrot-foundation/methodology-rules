@@ -7,7 +7,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -65,7 +64,7 @@ describe('RewardsDistributionProcessor E2E', () => {
         }));
 
         actorsResult.push({
-          actorType: MethodologyActorType.REMAINDER,
+          actorType: 'Remainder',
           amount: remainder.amount,
           percentage: remainder.percentage,
         });

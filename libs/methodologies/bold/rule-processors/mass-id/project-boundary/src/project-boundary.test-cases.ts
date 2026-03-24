@@ -8,13 +8,10 @@ import {
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 import { convertDistance } from 'geolib';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
-
-const { DROP_OFF, PICK_UP } = DocumentEventName;
 
 const distance = faker.number.float({ max: 5000, min: 100 });
 
@@ -34,23 +31,23 @@ interface ProjectBoundaryTestCase extends RuleTestCase {
 export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
   {
     events: {
-      [DROP_OFF]: undefined,
+      ['Drop-off']: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has no "${DROP_OFF}" event`,
+    scenario: 'The MassID document has no "Drop-off" event',
   },
   {
     events: {
-      [PICK_UP]: undefined,
+      ['Pick-up']: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has no "${PICK_UP}" event`,
+    scenario: 'The MassID document has no "Pick-up" event',
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIDDropOffEvent({
+      ['Drop-off']: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           address: {
             ...stubAddress(),
@@ -58,7 +55,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
           },
         },
       }),
-      [PICK_UP]: stubBoldMassIDPickUpEvent({
+      ['Pick-up']: stubBoldMassIDPickUpEvent({
         partialDocumentEvent: {
           address: {
             ...stubAddress(),
@@ -73,6 +70,6 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
       distance: distanceInKm,
     },
     resultStatus: 'PASSED',
-    scenario: `The MassID document has multiple "${DROP_OFF}" events and all criteria are met`,
+    scenario: 'The MassID document has multiple "Drop-off" events and all criteria are met',
   },
 ];

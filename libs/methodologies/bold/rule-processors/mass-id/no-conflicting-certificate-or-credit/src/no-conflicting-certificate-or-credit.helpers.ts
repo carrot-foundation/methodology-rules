@@ -8,8 +8,6 @@ import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bol
 import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
 
-const { CANCELLED } = MethodologyDocumentStatus;
-
 export const hasMethodologySlugAttribute = (
   document: Document,
   methodologySlug: BoldMethodologySlug,
@@ -17,7 +15,7 @@ export const hasMethodologySlugAttribute = (
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
-      metadataName: DocumentEventAttributeName.METHODOLOGY_SLUG,
+      metadataName: DocumentEventAttributeName['Methodology Slug'],
       metadataValues: methodologySlug,
     }),
   );
@@ -26,13 +24,13 @@ const isMassIDAuditPassed = (document: Document): boolean =>
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
-      metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
+      metadataName: DocumentEventAttributeName['Evaluation Result'],
       metadataValues: 'PASSED',
     }),
   );
 
 const isDocumentCancelled = (document: Document): boolean =>
-  document.status === CANCELLED.toString();
+  document.status === MethodologyDocumentStatus.CANCELLED.toString();
 
 export const hasNonCancelledDocuments = (documents: Document[]): boolean =>
   documents.some((document) => !isDocumentCancelled(document));
@@ -43,7 +41,7 @@ export const isMassIDAuditInProgress = (document: Document): boolean =>
     (event) =>
       !eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
+        metadataName: DocumentEventAttributeName['Evaluation Result'],
       }),
   );
 

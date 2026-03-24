@@ -2,11 +2,6 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubParticipantAccreditationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAccreditationStatus,
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 import { addDays, subDays } from 'date-fns';
@@ -16,10 +11,6 @@ import {
   isAccreditationValid,
   isAccreditationValidWithOptionalDates,
 } from './accreditation-document.helpers';
-
-const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
-  DocumentEventAttributeName;
-const { ACCREDITATION_RESULT } = DocumentEventName;
 
 const stubAccreditationDocumentWithExternalEvents = ({
   externalEvents,
@@ -100,11 +91,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EXPIRATION_DATE, dueDate.toISOString()],
-              [EFFECTIVE_DATE, date.toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Expiration Date', dueDate.toISOString()],
+              ['Effective Date', date.toISOString()],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -117,11 +108,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.REJECTED],
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
+              ['Accreditation Status', 'Rejected'],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Expiration Date', addDays(new Date(), 10).toISOString()],
             ],
           ),
         ],
@@ -152,11 +143,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, 'not-a-valid-datetime'],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Expiration Date', 'not-a-valid-datetime'],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -169,11 +160,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-              [ACCREDITATION_STATUS, 'Unknown'],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Expiration Date', addDays(new Date(), 5).toISOString()],
+              ['Accreditation Status', 'Unknown'],
             ],
           ),
         ],
@@ -186,8 +177,8 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[EFFECTIVE_DATE, addDays(new Date(), 5).toISOString()]],
+            { name: 'Accreditation Result' },
+            [['Effective Date', addDays(new Date(), 5).toISOString()]],
           ),
         ],
       });
@@ -199,8 +190,8 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[EXPIRATION_DATE, subDays(new Date(), 5).toISOString()]],
+            { name: 'Accreditation Result' },
+            [['Expiration Date', subDays(new Date(), 5).toISOString()]],
           ),
         ],
       });
@@ -212,11 +203,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, 'not-a-valid-datetime'],
-              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Effective Date', 'not-a-valid-datetime'],
+              ['Expiration Date', addDays(new Date(), 5).toISOString()],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -229,10 +220,10 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -293,11 +284,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Expiration Date', addDays(new Date(), 5).toISOString()],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -310,11 +301,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, addDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+              ['Effective Date', addDays(new Date(), 5).toISOString()],
+              ['Expiration Date', addDays(new Date(), 10).toISOString()],
+              ['Accreditation Status', 'Approved'],
             ],
           ),
         ],
@@ -327,11 +318,11 @@ describe('Accreditation Document Helpers', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [
-              [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-              [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.REJECTED],
+              ['Effective Date', subDays(new Date(), 5).toISOString()],
+              ['Expiration Date', addDays(new Date(), 5).toISOString()],
+              ['Accreditation Status', 'Rejected'],
             ],
           ),
         ],

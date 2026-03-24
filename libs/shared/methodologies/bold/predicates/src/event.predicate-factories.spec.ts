@@ -2,12 +2,7 @@ import {
   stubDocumentEvent,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -69,72 +64,65 @@ describe('Predicate Factories', () => {
 
   describe('eventNameIsAnyOf', () => {
     it('should return true if the event has any of the specified names', () => {
-      const { ACTOR, MOVE } = DocumentEventName;
-      const event = stubDocumentEvent({ name: MOVE });
+      const event = stubDocumentEvent({ name: 'MOVE' });
 
-      expect(eventNameIsAnyOf([MOVE, ACTOR])(event)).toBe(true);
+      expect(eventNameIsAnyOf(['MOVE', 'ACTOR'])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified names', () => {
-      const { ACTOR, DROP_OFF, MOVE } = DocumentEventName;
-      const event = stubDocumentEvent({ name: ACTOR });
+      const event = stubDocumentEvent({ name: 'ACTOR' });
 
-      expect(eventNameIsAnyOf([MOVE, DROP_OFF])(event)).toBe(false);
+      expect(eventNameIsAnyOf(['MOVE', 'Drop-off'])(event)).toBe(false);
     });
   });
 
   describe('eventLabelIsAnyOf', () => {
     it('should return true if the event has any of the specified labels', () => {
-      const { HAULER, RECYCLER } = MethodologyDocumentEventLabel;
-      const event = stubDocumentEvent({ label: HAULER });
+      const event = stubDocumentEvent({ label: 'Hauler' });
 
-      expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(true);
+      expect(eventLabelIsAnyOf(['Hauler', 'Recycler'])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified labels', () => {
-      const { HAULER, RECYCLER, WASTE_GENERATOR } =
-        MethodologyDocumentEventLabel;
-      const event = stubDocumentEvent({ label: WASTE_GENERATOR });
+      const event = stubDocumentEvent({ label: 'Waste Generator' });
 
-      expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(false);
+      expect(eventLabelIsAnyOf(['Hauler', 'Recycler'])(event)).toBe(false);
     });
   });
 
   describe('metadataAttributeNameIsAnyOf', () => {
     it('should return true if the event has any of the specified metadata attribute names', () => {
-      const { DESCRIPTION, DOCUMENT_NUMBER } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, faker.string.sample()],
+        ['Description', faker.string.sample()],
       ]);
 
       expect(
-        metadataAttributeNameIsAnyOf([DESCRIPTION, DOCUMENT_NUMBER])(event),
+        metadataAttributeNameIsAnyOf(['Description', 'Document Number'])(event),
       ).toBe(true);
     });
 
     it('should return false if the event has none of the specified metadata attribute names', () => {
-      const { CONTAINER_TYPE, DESCRIPTION, DOCUMENT_NUMBER } =
-        DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, faker.string.sample()],
+        ['Description', faker.string.sample()],
       ]);
 
       expect(
-        metadataAttributeNameIsAnyOf([CONTAINER_TYPE, DOCUMENT_NUMBER])(event),
+        metadataAttributeNameIsAnyOf(['Container Type', 'Document Number'])(
+          event,
+        ),
       ).toBe(false);
     });
   });
 
   describe('metadataAttributeValueIsAnyOf', () => {
     it('should return true if the metadata attribute has any of the specified values', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
       const description = faker.string.sample();
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, description],
+        ['Description', description],
       ]);
 
       expect(
-        metadataAttributeValueIsAnyOf(DESCRIPTION, [
+        metadataAttributeValueIsAnyOf('Description', [
           description,
           faker.string.sample(),
         ])(event),
@@ -142,13 +130,12 @@ describe('Predicate Factories', () => {
     });
 
     it('should return false if the metadata attribute has none of the specified values', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, faker.string.sample()],
+        ['Description', faker.string.sample()],
       ]);
 
       expect(
-        metadataAttributeValueIsAnyOf(DESCRIPTION, [
+        metadataAttributeValueIsAnyOf('Description', [
           faker.string.sample(),
           faker.string.sample(),
         ])(event),
@@ -158,21 +145,21 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeValueIsNotEmpty', () => {
     it('should return true if the metadata attribute value is not empty', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, faker.string.sample()],
+        ['Description', faker.string.sample()],
       ]);
 
-      expect(metadataAttributeValueIsNotEmpty(DESCRIPTION)(event)).toBe(true);
+      expect(metadataAttributeValueIsNotEmpty('Description')(event)).toBe(true);
     });
 
     it('should return false if the metadata attribute value is empty', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
-        [DESCRIPTION, undefined as any], // necessary cast to reuse stub
+        ['Description', undefined as any], // necessary cast to reuse stub
       ]);
 
-      expect(metadataAttributeValueIsNotEmpty(DESCRIPTION)(event)).toBe(false);
+      expect(metadataAttributeValueIsNotEmpty('Description')(event)).toBe(
+        false,
+      );
     });
   });
 });

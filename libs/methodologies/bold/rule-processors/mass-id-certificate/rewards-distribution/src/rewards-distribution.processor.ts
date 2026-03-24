@@ -13,9 +13,10 @@ import {
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  DocumentSubtype,
-  MassIDOrganicSubtype,
-  RewardsDistributionActorType,
+  type MassIDOrganicSubtype,
+  MassIDOrganicSubtypeSchema,
+  type RewardsDistributionActorType,
+  RewardsDistributionActorTypeSchema,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -78,7 +79,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
+        documentRelation.subtype === 'Waste Generator'
       ) {
         wasteGeneratorVerificationDocument = document;
       }
@@ -142,7 +143,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
   private extractMassIDSubtype(document: Document): MassIDOrganicSubtype {
     if (
-      !(Object.values(MassIDOrganicSubtype) as unknown[]).includes(
+      !(MassIDOrganicSubtypeSchema.options as unknown[]).includes(
         document.subtype,
       )
     ) {
@@ -173,7 +174,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const wasteGeneratorRewardDistribution =
       rewardDistributions['Waste Generator'];
 
-    if (actorType === RewardsDistributionActorType.WASTE_GENERATOR) {
+    if (actorType === 'Waste Generator') {
       actorMassIDPercentage = this.getWasteGeneratorActorMassIDPercentage(
         massIDDocument,
         wasteGeneratorRewardDistribution,
@@ -183,7 +184,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       );
     }
 
-    if (actorType === RewardsDistributionActorType.COMMUNITY_IMPACT_POOL) {
+    if (actorType === 'Community Impact Pool') {
       const sourcePercentage = getNgoActorMassIDPercentage(
         massIDDocument,
         wasteGeneratorRewardDistribution,
@@ -229,7 +230,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const distributions =
       this.getRewardsDistributionActorTypePercentages(massIDDocument);
 
-    for (const actorType of Object.values(RewardsDistributionActorType)) {
+    for (const actorType of RewardsDistributionActorTypeSchema.options) {
       const rewardDistribution = distributions[actorType];
       const actorsByType = getActorsByType({
         actors,
@@ -286,7 +287,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       const actorType = event.label;
 
       if (
-        (Object.values(RewardsDistributionActorType) as unknown[]).includes(
+        (RewardsDistributionActorTypeSchema.options as unknown[]).includes(
           actorType,
         )
       ) {

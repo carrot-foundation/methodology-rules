@@ -17,16 +17,18 @@ import type {
 const GpsLatitudeApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(DocumentCategory.MassID),
     }),
     Event: z.union([
-      z.literal(DocumentEventName.DROP_OFF),
-      z.literal(DocumentEventName.PICK_UP),
+      z.literal(DocumentEventName['Drop-off']),
+      z.literal(DocumentEventName['Pick-up']),
     ]),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CAPTURED_GPS_LATITUDE),
+  'Attribute Name': z.literal(
+    DocumentEventAttributeName['Captured GPS Latitude'],
+  ),
   'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+    MethodologyApprovedExceptionType['Exemption for Mandatory Attribute'],
   ),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
@@ -35,18 +37,18 @@ const GpsLatitudeApprovedExceptionSchema = z.object({
 const GpsLongitudeApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(DocumentCategory.MassID),
     }),
     Event: z.union([
-      z.literal(DocumentEventName.DROP_OFF),
-      z.literal(DocumentEventName.PICK_UP),
+      z.literal(DocumentEventName['Drop-off']),
+      z.literal(DocumentEventName['Pick-up']),
     ]),
   }),
   'Attribute Name': z.literal(
-    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    DocumentEventAttributeName['Captured GPS Longitude'],
   ),
   'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+    MethodologyApprovedExceptionType['Exemption for Mandatory Attribute'],
   ),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),

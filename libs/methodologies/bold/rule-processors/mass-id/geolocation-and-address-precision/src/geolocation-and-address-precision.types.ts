@@ -11,23 +11,27 @@ import {
 export interface GpsLatitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof DocumentCategory.MassID;
     };
-    Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    Event:
+      | (typeof DocumentEventName)['Drop-off']
+      | (typeof DocumentEventName)['Pick-up'];
   };
-  'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LATITUDE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': (typeof DocumentEventAttributeName)['Captured GPS Latitude'];
+  'Exception Type': (typeof MethodologyApprovedExceptionType)['Exemption for Mandatory Attribute'];
   Reason: string;
 }
 
 export interface GpsLongitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof DocumentCategory.MassID;
     };
-    Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    Event:
+      | (typeof DocumentEventName)['Drop-off']
+      | (typeof DocumentEventName)['Pick-up'];
   };
-  'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': (typeof DocumentEventAttributeName)['Captured GPS Longitude'];
+  'Exception Type': (typeof MethodologyApprovedExceptionType)['Exemption for Mandatory Attribute'];
   Reason: string;
 }

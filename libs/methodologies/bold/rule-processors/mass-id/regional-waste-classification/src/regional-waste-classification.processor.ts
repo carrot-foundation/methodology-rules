@@ -31,13 +31,6 @@ import { getCdmCodeFromSubtype } from './regional-waste-classification.helpers';
 
 const DESCRIPTION_SIMILARITY_THRESHOLD = 0.9;
 
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-
 type Subject = {
   description: MethodologyDocumentEventAttributeValue | string | undefined;
   id: MethodologyDocumentEventAttributeValue | string | undefined;
@@ -133,10 +126,13 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([PICK_UP]),
+      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
     );
     const recyclerEvent = document.externalEvents?.find(
-      and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel.Recycler]),
+      ),
     );
 
     if (!document.subtype) {
@@ -146,9 +142,12 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     return {
       description: getEventAttributeValue(
         pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+        DocumentEventAttributeName['Local Waste Classification Description'],
       ),
-      id: getEventAttributeValue(pickUpEvent, LOCAL_WASTE_CLASSIFICATION_ID),
+      id: getEventAttributeValue(
+        pickUpEvent,
+        DocumentEventAttributeName['Local Waste Classification ID'],
+      ),
       recyclerCountryCode: getOrDefault(recyclerEvent?.address.countryCode, ''),
       subtype: document.subtype,
     };

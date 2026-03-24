@@ -12,13 +12,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
   type MassIDReward,
   RewardActorAddress,
   type RewardActorParticipant,
-  RewardsDistributionActorType,
+  type RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
@@ -34,14 +31,11 @@ import {
   REQUIRED_ACTOR_TYPES,
 } from './rewards-distribution.constants';
 
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
 const WASTE_GENERATOR = 'Waste Generator';
 
 export const isHaulerActorDefined = (
   participants: RewardsDistributionActor[],
-): boolean =>
-  participants.some(({ type }) => type === RewardsDistributionActorType.HAULER);
+): boolean => participants.some(({ type }) => type === 'Hauler');
 
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
@@ -95,12 +89,11 @@ export const getActorsByType = ({
   actorType: RewardsDistributionActorType;
   methodologyDocument: Document;
 }): RewardsDistributionActor[] => {
-  if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
+  if (
+    (REQUIRED_ACTOR_TYPES.METHODOLOGY as readonly string[]).includes(actorType)
+  ) {
     const actorEvent = methodologyDocument.externalEvents?.find(
-      and(
-        eventNameIsAnyOf([DocumentEventName.ACTOR]),
-        eventLabelIsAnyOf([actorType]),
-      ),
+      and(eventNameIsAnyOf(['ACTOR']), eventLabelIsAnyOf([actorType])),
     );
 
     const methodologyParticipant = actorEvent?.participant;
@@ -137,11 +130,9 @@ export const getActorsByType = ({
 export const isLogisticsOrServiceProvider = (
   actorType: RewardsDistributionActorType,
 ): boolean =>
-  [
-    RewardsDistributionActorType.HAULER,
-    RewardsDistributionActorType.PROCESSOR,
-    RewardsDistributionActorType.RECYCLER,
-  ].includes(actorType);
+  (
+    ['Hauler', 'Processor', 'Recycler'] as RewardsDistributionActorType[]
+  ).includes(actorType);
 
 export const applySupplyChainDigitizationDiscount = (
   basePercentage: BigNumber,
@@ -178,7 +169,7 @@ export const calculatePercentageForUnidentifiedWasteOrigin = (
 ): BigNumber => {
   const { actorType, basePercentage } = dto;
 
-  if (actorType === RewardsDistributionActorType.NETWORK) {
+  if (actorType === 'Network') {
     return calculateNetworkPercentageForUnidentifiedWasteOrigin(dto);
   }
 
@@ -194,7 +185,7 @@ export const isWasteOriginIdentified = (document: Document): boolean => {
     document.externalEvents,
     [],
   ).some(
-    (event) => getEventAttributeValue(event, WASTE_ORIGIN) === UNIDENTIFIED,
+    (event) => getEventAttributeValue(event, 'Waste Origin') === 'Unidentified',
   );
 
   const hasWasteGeneratorEvent = getOrDefault(document.externalEvents, []).some(
@@ -225,8 +216,7 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const onboardingDeclarationEvent =
     wasteGeneratorVerificationDocument.externalEvents?.find(
-      (event) =>
-        event.name === String(DocumentEventName.ONBOARDING_DECLARATION),
+      (event) => event.name === 'Onboarding Declaration',
     );
 
   if (isNil(onboardingDeclarationEvent)) {
@@ -235,16 +225,14 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const businessSize = getEventAttributeValue(
     onboardingDeclarationEvent,
-    DocumentEventAttributeName.BUSINESS_SIZE_DECLARATION,
+    'Business Size Declaration',
   );
 
   if (isNil(businessSize)) {
     return true;
   }
 
-  return (
-    String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
-  );
+  return String(businessSize) === 'Large Business';
 };
 
 export const applyLargeBusinessDiscount = (

@@ -6,7 +6,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type DocumentEvent,
-  DocumentEventName,
+  type DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
@@ -20,8 +20,6 @@ import { faker } from '@faker-js/faker';
 import { compostingCycleTimeframeLambda } from './composting-cycle-timeframe.lambda';
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
-
 describe('CompostingCycleTimeframeProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
@@ -32,7 +30,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
 
       if (dropOffEventDate) {
         externalEvents.set(
-          DROP_OFF,
+          'Drop-off' as DocumentEventName,
           stubBoldMassIDDropOffEvent({
             partialDocumentEvent: {
               externalCreatedAt: dropOffEventDate,
@@ -43,7 +41,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
 
       if (recycledEventDate) {
         externalEvents.set(
-          RECYCLED,
+          'Recycled' as DocumentEventName,
           stubBoldMassIDRecycledEvent({
             partialDocumentEvent: {
               externalCreatedAt: recycledEventDate,

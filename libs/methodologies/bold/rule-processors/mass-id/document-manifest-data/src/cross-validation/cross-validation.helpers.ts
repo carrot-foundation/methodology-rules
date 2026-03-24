@@ -47,24 +47,19 @@ export const collectResults = (
   return { failReasons, reviewReasons };
 };
 
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-
 export const getWasteClassification = (
   pickUpEvent: DocumentEvent | undefined,
 ): { code: string | undefined; description: string | undefined } => ({
   code: pickUpEvent
     ? getEventAttributeValue(
         pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_ID,
+        DocumentEventAttributeName['Local Waste Classification ID'],
       )?.toString()
     : undefined,
   description: pickUpEvent
     ? getEventAttributeValue(
         pickUpEvent,
-        LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+        DocumentEventAttributeName['Local Waste Classification Description'],
       )?.toString()
     : undefined,
 });

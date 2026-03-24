@@ -7,8 +7,8 @@ export const ruleDefinition = {
     'Validates that no duplicate MassID documents exist with the same combination of Drop-off event, Pick-up event, Recycler ACTOR event, Waste Generator ACTOR event, and vehicle license plate.',
   events: [
     DocumentEventName.ACTOR,
-    DocumentEventName.DROP_OFF,
-    DocumentEventName.PICK_UP,
+    DocumentEventName['Drop-off'],
+    DocumentEventName['Pick-up'],
   ],
   name: 'Uniqueness Check',
   slug: 'waste-mass-is-unique',

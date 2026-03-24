@@ -1,13 +1,8 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
-
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { ACTOR } = DocumentEventName;
 
 interface RecyclerIdentificationTestCase extends RuleTestCase {
   events: Map<string, ReturnType<typeof stubActorEventWithLabel> | undefined>;
@@ -16,26 +11,26 @@ interface RecyclerIdentificationTestCase extends RuleTestCase {
 export const recyclerIdentificationTestCases: RecyclerIdentificationTestCase[] =
   [
     {
-      events: new Map([[`${ACTOR}-${RECYCLER}`, undefined]]),
+      events: new Map([['ACTOR-Recycler', undefined]]),
       resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
       resultStatus: 'FAILED',
-      scenario: `The MassID document has no "${RECYCLER}" actor event`,
+      scenario: 'The MassID document has no "Recycler" actor event',
     },
     {
       events: new Map([
-        [`${ACTOR}-${RECYCLER}`, stubActorEventWithLabel(RECYCLER)],
+        ['ACTOR-Recycler', stubActorEventWithLabel('Recycler')],
       ]),
       resultComment: RESULT_COMMENTS.passed.SINGLE_EVENT,
       resultStatus: 'PASSED',
-      scenario: `The MassID document has a "${RECYCLER}" actor event`,
+      scenario: 'The MassID document has a "Recycler" actor event',
     },
     {
       events: new Map([
-        [`${ACTOR}-${RECYCLER}-1`, stubActorEventWithLabel(RECYCLER)],
-        [`${ACTOR}-${RECYCLER}-2`, stubActorEventWithLabel(RECYCLER)],
+        ['ACTOR-Recycler-1', stubActorEventWithLabel('Recycler')],
+        ['ACTOR-Recycler-2', stubActorEventWithLabel('Recycler')],
       ]),
       resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
       resultStatus: 'FAILED',
-      scenario: `The MassID document has multiple "${RECYCLER}" actor events`,
+      scenario: 'The MassID document has multiple "Recycler" actor events',
     },
   ];

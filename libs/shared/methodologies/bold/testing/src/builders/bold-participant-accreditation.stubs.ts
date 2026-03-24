@@ -1,16 +1,9 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentEventAccreditationStatus,
   DocumentEventScaleType,
   MassIDOrganicSubtype,
   MethodologyBaseline,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
@@ -32,37 +25,21 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const {
-  ACCREDITATION_RESULT,
-  EMISSION_AND_COMPOSTING_METRICS,
-  MONITORING_SYSTEMS_AND_EQUIPMENT,
-  RECYCLING_BASELINES,
-} = DocumentEventName;
-const {
-  ACCREDITATION_STATUS,
-  BASELINES,
-  EFFECTIVE_DATE,
-  EXCEEDING_EMISSION_COEFFICIENT,
-  EXPIRATION_DATE,
-  REFERENCE_YEAR,
-  SCALE_TYPE,
-  SORTING_FACTOR,
-} = DocumentEventAttributeName;
 const { DATE } = MethodologyDocumentEventAttributeFormat;
 
 const defaultAccreditationResultEventMetadataAttributes: MetadataAttributeParameter[] =
   [
     {
       format: DATE,
-      name: EFFECTIVE_DATE,
+      name: 'Effective Date',
       value: subDays(new Date(), 2).toISOString(),
     },
     {
       format: DATE,
-      name: EXPIRATION_DATE,
+      name: 'Expiration Date',
       value: addDays(new Date(), 2).toISOString(),
     },
-    [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+    ['Accreditation Status', 'Approved'],
   ];
 
 export const stubBoldAccreditationResultEvent = ({
@@ -71,7 +48,7 @@ export const stubBoldAccreditationResultEvent = ({
 }: StubBoldDocumentEventParameters = {}) =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
-      { ...partialDocumentEvent, name: ACCREDITATION_RESULT },
+      { ...partialDocumentEvent, name: 'Accreditation Result' },
       mergeMetadataAttributes(
         defaultAccreditationResultEventMetadataAttributes,
         metadataAttributes,
@@ -83,13 +60,13 @@ export const stubBoldAccreditationResultEvent = ({
 const defaultEmissionAndCompostingMetricsEventMetadataAttributes: MetadataAttributeParameter[] =
   [
     {
-      name: EXCEEDING_EMISSION_COEFFICIENT,
+      name: 'Exceeding Emission Coefficient (per ton)',
       value: faker.number.float({ max: 1, min: 0 }),
       valueSuffix: 'tCO2e/ton',
     },
-    [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
+    ['Sorting Factor', faker.number.float({ max: 1, min: 0 })],
     {
-      name: REFERENCE_YEAR,
+      name: 'Reference Year',
       value: getYear(new Date()),
     },
   ];
@@ -102,7 +79,7 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+        name: `${'Emissions & Composting Metrics'} (${getYear(new Date())})`,
       },
       mergeMetadataAttributes(
         defaultEmissionAndCompostingMetricsEventMetadataAttributes,
@@ -115,7 +92,7 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
 const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParameter[] =
   [
     [
-      BASELINES,
+      'Baselines',
       {
         [stubEnumValue(MassIDOrganicSubtype)]:
           stubEnumValue(MethodologyBaseline),
@@ -131,7 +108,7 @@ export const stubBoldRecyclingBaselinesEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: RECYCLING_BASELINES,
+        name: 'Recycling Baselines',
       },
       mergeMetadataAttributes(
         defaultRecyclingBaselinesEventMetadataAttributes,
@@ -142,7 +119,7 @@ export const stubBoldRecyclingBaselinesEvent = ({
   );
 
 const defaultMonitoringSystemsAndEquipmentEventMetadataAttributes: MetadataAttributeParameter[] =
-  [[SCALE_TYPE, stubEnumValue(DocumentEventScaleType)]];
+  [['Scale Type', stubEnumValue(DocumentEventScaleType)]];
 
 export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
   metadataAttributes,
@@ -152,7 +129,7 @@ export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: MONITORING_SYSTEMS_AND_EQUIPMENT,
+        name: 'Monitoring Systems & Equipment',
       },
       mergeMetadataAttributes(
         defaultMonitoringSystemsAndEquipmentEventMetadataAttributes,
@@ -163,9 +140,9 @@ export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
   );
 
 const boldAccreditationExternalEventsMap = new Map([
-  [ACCREDITATION_RESULT, stubBoldAccreditationResultEvent()],
+  ['Accreditation Result', stubBoldAccreditationResultEvent()],
   [
-    EMISSION_AND_COMPOSTING_METRICS,
+    'Emissions & Composting Metrics',
     stubBoldEmissionAndCompostingMetricsEvent(),
   ],
 ]);
@@ -182,12 +159,12 @@ export const stubBoldAccreditationDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: 'Methodology',
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        type: 'Participant Accreditation',
       },
       false,
     ),

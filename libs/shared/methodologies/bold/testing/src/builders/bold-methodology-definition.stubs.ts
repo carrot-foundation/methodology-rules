@@ -1,15 +1,9 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
-import {
-  type Document,
-  DocumentCategory,
-  DocumentType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { stubDocument } from '../stubs';
 import { mergeEventsMaps } from './bold.builder.helpers';
 import { type StubBoldDocumentParameters } from './bold.stubs.types';
-
-const { METHODOLOGY } = DocumentCategory;
 
 export const stubBoldMethodologyDefinitionDocument = ({
   externalEventsMap,
@@ -23,12 +17,12 @@ export const stubBoldMethodologyDefinitionDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: METHODOLOGY,
+        category: 'Methodology',
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.DEFINITION,
+        type: 'Definition',
       },
       false,
     ),

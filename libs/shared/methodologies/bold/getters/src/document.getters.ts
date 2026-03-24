@@ -2,17 +2,11 @@ import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  type MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from './event.getters';
-
-const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
-  DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
 
 interface LastYearEmissionAndCompostingMetricsEventParameters {
   documentWithEmissionAndCompostingMetricsEvent: Document;
@@ -29,11 +23,8 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
 
   return documentWithEmissionAndCompostingMetricsEvent.externalEvents?.find(
     (event) => {
-      if (event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS)) {
-        const referenceYear = getEventAttributeValue(
-          event,
-          DocumentEventAttributeName.REFERENCE_YEAR,
-        );
+      if (event.name.toString().includes('Emissions & Composting Metrics')) {
+        const referenceYear = getEventAttributeValue(event, 'Reference Year');
 
         return referenceYear?.toString() === lastDocumentYearYear.toString();
       }
@@ -52,9 +43,7 @@ export const getDocumentEventById = (
 export const getRulesMetadataEvent = (
   document: Document | undefined,
 ): DocumentEvent | undefined =>
-  document?.externalEvents?.find(
-    (event) => event.name === RULES_METADATA.toString(),
-  );
+  document?.externalEvents?.find((event) => event.name === 'RULES METADATA');
 
 export const getParticipantActorType = ({
   document,
@@ -69,8 +58,8 @@ export const getParticipantActorType = ({
     return undefined;
   }
 
-  const pickUpEvents = events.filter((e) => e.name === PICK_UP.toString());
-  const dropOffEvents = events.filter((e) => e.name === DROP_OFF.toString());
+  const pickUpEvents = events.filter((e) => e.name === 'Pick-up');
+  const dropOffEvents = events.filter((e) => e.name === 'Drop-off');
 
   if (!isNonEmptyArray(pickUpEvents) || !isNonEmptyArray(dropOffEvents)) {
     return undefined;
@@ -80,15 +69,15 @@ export const getParticipantActorType = ({
   const finalDropOff = dropOffEvents.at(-1) as DocumentEvent;
 
   if (sourcePickUp.id === event.id) {
-    return WASTE_GENERATOR;
+    return 'Waste Generator';
   }
 
   if (finalDropOff.id === event.id) {
-    return RECYCLER;
+    return 'Recycler';
   }
 
-  if (event.name === PICK_UP.toString() || event.name === DROP_OFF.toString()) {
-    return PROCESSOR;
+  if (event.name === 'Pick-up' || event.name === 'Drop-off') {
+    return 'Processor';
   }
 
   return undefined;

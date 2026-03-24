@@ -6,16 +6,11 @@ import {
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MeasurementUnit,
+  type DocumentEventAttributeName,
+  type DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
-import {
-  DataSetName,
-  MethodologyParticipantType,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { DataSetName, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.validators';
 
@@ -30,13 +25,13 @@ export const eventHasLabel = (
 ): boolean => event.label === eventLabel;
 
 export const isActorEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.ACTOR);
+  eventHasName(event, 'ACTOR');
 
 export const isRecycledEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.RECYCLED);
+  eventHasName(event, 'Recycled');
 
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
-  event.participant.type === MethodologyParticipantType.ACTOR.toString();
+  event.participant.type === 'ACTOR';
 
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,
@@ -48,11 +43,7 @@ export const hasWeightFormat = (
 ): boolean => {
   const parts = unparsedWeightValue?.split(' ');
 
-  return (
-    parts?.length === 2 &&
-    !Number.isNaN(parts[0]) &&
-    parts[1] === MeasurementUnit.KG
-  );
+  return parts?.length === 2 && !Number.isNaN(parts[0]) && parts[1] === 'kg';
 };
 
 export const eventsHasSameMetadataAttributeValue = (
@@ -73,7 +64,7 @@ export const eventsHasSameMetadataAttributeValue = (
 export const eventHasMetadataAttribute = (options: {
   event: DocumentEvent;
   eventNames?: DocumentEventName[];
-  metadataName: DocumentEventAttributeName | string;
+  metadataName: string;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

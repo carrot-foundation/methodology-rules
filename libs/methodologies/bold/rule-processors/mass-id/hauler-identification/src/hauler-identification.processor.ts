@@ -20,18 +20,14 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = MethodologyDocumentEventLabel;
-const { VEHICLE_TYPE } = DocumentEventAttributeName;
-
 type Subject = {
   haulerEvent: DocumentEvent | undefined;
   pickUpEvent: DocumentEvent | undefined;
 };
 
 export const OPTIONAL_HAULER_VEHICLE_TYPES = [
-  DocumentEventVehicleType.SLUDGE_PIPES,
-  DocumentEventVehicleType.CART,
+  DocumentEventVehicleType['Sludge Pipes'],
+  DocumentEventVehicleType.Cart,
 ] as const;
 
 export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -53,11 +49,14 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
       };
     }
 
-    const vehicleType = getEventAttributeValue(pickUpEvent, VEHICLE_TYPE);
+    const vehicleType = getEventAttributeValue(
+      pickUpEvent,
+      DocumentEventAttributeName['Vehicle Type'],
+    );
 
     const isHaulerOptional = eventHasMetadataAttribute({
       event: pickUpEvent,
-      metadataName: VEHICLE_TYPE,
+      metadataName: DocumentEventAttributeName['Vehicle Type'],
       metadataValues: OPTIONAL_HAULER_VEHICLE_TYPES,
     });
 
@@ -82,11 +81,16 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     return {
       haulerEvent: getOrUndefined(
         document.externalEvents?.find(
-          and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([HAULER])),
+          and(
+            eventNameIsAnyOf([DocumentEventName.ACTOR]),
+            eventLabelIsAnyOf([MethodologyDocumentEventLabel.Hauler]),
+          ),
         ),
       ),
       pickUpEvent: getOrUndefined(
-        document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
+        document.externalEvents?.find(
+          eventNameIsAnyOf([DocumentEventName['Pick-up']]),
+        ),
       ),
     };
   }

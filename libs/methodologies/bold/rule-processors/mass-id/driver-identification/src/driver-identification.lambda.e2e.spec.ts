@@ -1,6 +1,5 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -13,8 +12,6 @@ import { faker } from '@faker-js/faker';
 import { driverIdentificationLambda } from './driver-identification.lambda';
 import { driverIdentificationTestCases } from './driver-identification.test-cases';
 
-const { PICK_UP } = DocumentEventName;
-
 describe('DriverIdentificationLambda E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
 
@@ -24,7 +21,7 @@ describe('DriverIdentificationLambda E2E', () => {
       const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({
           externalEventsMap: {
-            [PICK_UP]: pickUpEvent,
+            ['Pick-up']: pickUpEvent,
           },
         })
         .createMassIDAuditDocuments()

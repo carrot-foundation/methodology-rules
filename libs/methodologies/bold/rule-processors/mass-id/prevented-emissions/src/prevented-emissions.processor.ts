@@ -25,6 +25,7 @@ import {
   DocumentEventAttributeName,
   DocumentSubtype,
   MassIDOrganicSubtype,
+  MassIDOrganicSubtypeSchema,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -50,8 +51,6 @@ import {
   OthersIfOrganicAuditDetails,
 } from './prevented-emissions.others-organic.helpers';
 import { type RuleSubject } from './prevented-emissions.types';
-
-const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
 
 interface Documents {
   massIDDocument: Document;
@@ -129,7 +128,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     let othersIfOrganicAudit: OthersIfOrganicAuditDetails | undefined;
 
     if (
-      wasteSubtype === MassIDOrganicSubtype.OTHERS_IF_ORGANIC &&
+      wasteSubtype === MassIDOrganicSubtype['Others (if organic)'] &&
       isNonEmptyString(ruleSubject.normalizedLocalWasteClassificationId)
     ) {
       othersIfOrganicAudit = getOthersIfOrganicAuditDetails(
@@ -185,7 +184,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     const gasType = getGasTypeFromEvent(lastEmissionAndCompostingMetricsEvent);
 
     if (
-      !(Object.values(MassIDOrganicSubtype) as unknown[]).includes(
+      !(MassIDOrganicSubtypeSchema.options as unknown[]).includes(
         massIDDocument.subtype,
       )
     ) {
@@ -208,7 +207,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     return {
       exceedingEmissionCoefficient: getEventAttributeValue(
         lastEmissionAndCompostingMetricsEvent,
-        EXCEEDING_EMISSION_COEFFICIENT,
+        DocumentEventAttributeName['Exceeding Emission Coefficient (per ton)'],
       ),
       gasType,
       massIDDocumentValue: massIDDocument.currentValue,
@@ -234,7 +233,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER.toString()
+        documentRelation.subtype === DocumentSubtype.Recycler.toString()
       ) {
         recyclerAccreditationDocument = document;
       }

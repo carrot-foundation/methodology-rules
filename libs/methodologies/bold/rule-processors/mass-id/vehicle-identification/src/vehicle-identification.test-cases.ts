@@ -2,19 +2,9 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 import { VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES } from './vehicle-identification.processor';
-
-const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { OTHERS, TRUCK } = DocumentEventVehicleType;
 
 interface VehicleIdentificationTestCase extends RuleTestCase {
   events: Map<string, ReturnType<typeof stubBoldMassIDPickUpEvent> | undefined>;
@@ -24,9 +14,9 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[VEHICLE_TYPE, 'INVALID_VEHICLE_TYPE']],
+          metadataAttributes: [['Vehicle Type', 'INVALID_VEHICLE_TYPE']],
         }),
       ],
     ]),
@@ -34,67 +24,67 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
       'INVALID_VEHICLE_TYPE',
     ),
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is not a valid vehicle type`,
+    scenario: 'The "Vehicle Type" attribute is not a valid vehicle type',
   },
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[VEHICLE_TYPE, undefined]],
+          metadataAttributes: [['Vehicle Type', undefined]],
         }),
       ],
     ]),
     resultComment: RESULT_COMMENTS.failed.VEHICLE_TYPE_MISSING,
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is not present`,
+    scenario: 'The "Vehicle Type" attribute is not present',
   },
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [VEHICLE_TYPE, OTHERS],
-            [VEHICLE_DESCRIPTION, undefined],
+            ['Vehicle Type', 'Others'],
+            ['Vehicle Description', undefined],
           ],
         }),
       ],
     ]),
-    resultComment: RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING(OTHERS),
+    resultComment: RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING('Others'),
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} but the "${VEHICLE_DESCRIPTION}" attribute is not present`,
+    scenario: 'The "Vehicle Type" attribute is declared as Others but the "Vehicle Description" attribute is not present',
   },
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [VEHICLE_TYPE, OTHERS],
-            [VEHICLE_DESCRIPTION, 'Blue flatbed truck - 8 ton capacity'],
+            ['Vehicle Type', 'Others'],
+            ['Vehicle Description', 'Blue flatbed truck - 8 ton capacity'],
           ],
         }),
       ],
     ]),
     manifestExample: true,
     resultComment:
-      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(OTHERS),
+      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION('Others'),
     resultStatus: 'PASSED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${OTHERS} and the "${VEHICLE_DESCRIPTION}" attribute is present`,
+    scenario: 'The "Vehicle Type" attribute is declared as Others and the "Vehicle Description" attribute is present',
   },
   {
-    events: new Map([[PICK_UP, undefined]]),
+    events: new Map([['Pick-up', undefined]]),
     resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
     resultStatus: 'FAILED',
-    scenario: `The "${PICK_UP}" event is not present`,
+    scenario: 'The "Pick-up" event is not present',
   },
   ...[...VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES].map((vehicleType) => ({
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[VEHICLE_TYPE, vehicleType]],
+          metadataAttributes: [['Vehicle Type', vehicleType]],
         }),
       ],
     ]),
@@ -103,55 +93,55 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
         vehicleType,
       ),
     resultStatus: 'PASSED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
+    scenario: `The "Vehicle Type" attribute is declared as ${vehicleType} and no license plate is needed`,
   })),
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [VEHICLE_TYPE, TRUCK],
-            [VEHICLE_LICENSE_PLATE, undefined],
+            ['Vehicle Type', 'Truck'],
+            ['Vehicle License Plate', undefined],
           ],
         }),
       ],
     ]),
     manifestExample: true,
-    resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(TRUCK),
+    resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING('Truck'),
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement but no license plate is provided`,
+    scenario: 'The "Vehicle Type" attribute is not exempt from license plate requirement but no license plate is provided',
   },
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [VEHICLE_TYPE, TRUCK],
-            [VEHICLE_LICENSE_PLATE, 'ABC1D23' as LicensePlate],
+            ['Vehicle Type', 'Truck'],
+            ['Vehicle License Plate', 'ABC1D23' as LicensePlate],
           ],
         }),
       ],
     ]),
     resultComment: RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     resultStatus: 'PASSED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is not exempt from license plate requirement and license plate is provided`,
+    scenario: 'The "Vehicle Type" attribute is not exempt from license plate requirement and license plate is provided',
   },
   {
     events: new Map([
       [
-        PICK_UP,
+        'Pick-up',
         stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [VEHICLE_TYPE, TRUCK],
-            [VEHICLE_LICENSE_PLATE, 'INVALID_LICENSE_PLATE'],
+            ['Vehicle Type', 'Truck'],
+            ['Vehicle License Plate', 'INVALID_LICENSE_PLATE'],
           ],
         }),
       ],
     ]),
     resultComment: RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is not a valid license plate`,
+    scenario: 'The "Vehicle License Plate" attribute is not a valid license plate',
   },
 ];

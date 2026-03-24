@@ -6,12 +6,8 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  BoldMethodologyName,
   BoldMethodologySlug,
   type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
@@ -19,10 +15,6 @@ import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
-
-const { RELATED } = DocumentEventName;
-const { CARBON, RECYCLING } = BoldMethodologyName;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
 const processorError = new NoConflictingCertificateOrCreditProcessorErrors();
 
@@ -33,13 +25,13 @@ const openDocumentField = {
 };
 
 const simpleMassIDStubs = new BoldStubsBuilder({
-  methodologyName: RECYCLING,
+  methodologyName: 'BOLD Recycling',
 })
   .createMassIDDocuments(openDocumentField)
   .createMassIDAuditDocuments(openDocumentField)
   .build();
 const massIDWithAuditStubs = new BoldStubsBuilder({
-  methodologyName: RECYCLING,
+  methodologyName: 'BOLD Recycling',
 })
   .createMassIDDocuments(openDocumentField)
   .createMassIDAuditDocuments(openDocumentField)
@@ -47,7 +39,7 @@ const massIDWithAuditStubs = new BoldStubsBuilder({
   .build();
 
 const massIDWithCreditsStubs = new BoldStubsBuilder({
-  methodologyName: RECYCLING,
+  methodologyName: 'BOLD Recycling',
 })
   .createMassIDDocuments(openDocumentField)
   .createMassIDAuditDocuments(openDocumentField)
@@ -65,24 +57,24 @@ const massIDWithTwoAuditDocuments: Document = {
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
     stubDocumentEvent({
-      name: RELATED,
+      name: 'RELATED',
       relatedDocument: mapDocumentRelation(duplicatedMassIDAuditDocument),
     }),
   ],
 };
 
-const boldCarbonEventName = `${CARBON} Methodology`;
+const boldCarbonEventName = 'BOLD Carbon Methodology';
 const massIDAuditForOtherMethodology: Document = {
   ...duplicatedMassIDAuditDocument,
   externalEvents: [
     ...(duplicatedMassIDAuditDocument.externalEvents?.filter(
-      (event) => !event.name.includes(RECYCLING),
+      (event) => !event.name.includes('BOLD Recycling'),
     ) ?? []),
     stubDocumentEventWithMetadataAttributes(
       {
         name: boldCarbonEventName,
       },
-      [[METHODOLOGY_SLUG, BoldMethodologySlug.CARBON]],
+      [['Methodology Slug', BoldMethodologySlug['bold-carbon']]],
     ),
   ],
 };
@@ -91,7 +83,7 @@ const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
     stubDocumentEvent({
-      name: RELATED,
+      name: 'RELATED',
       relatedDocument: mapDocumentRelation(massIDAuditForOtherMethodology),
     }),
   ],
@@ -120,7 +112,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
-          BoldMethodologyName.RECYCLING,
+          'BOLD Recycling',
         ),
       resultStatus: 'FAILED',
       scenario:
@@ -142,7 +134,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: simpleMassIDStubs.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
-          BoldMethodologyName.RECYCLING,
+          'BOLD Recycling',
         ),
       resultStatus: 'FAILED',
       scenario:
@@ -169,7 +161,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
-          DocumentType.RECYCLED_ID,
+          'RecycledID',
         ),
       resultStatus: 'FAILED',
       scenario:

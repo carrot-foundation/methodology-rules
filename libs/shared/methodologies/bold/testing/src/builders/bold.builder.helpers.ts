@@ -4,15 +4,12 @@ import type {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
 
 export type MergeEventsMapsParameter =
-  | Map<DocumentEventName | string, DocumentEvent | undefined>
+  | Map<string, DocumentEvent | undefined>
   | Record<string, DocumentEvent | undefined>
   | undefined;
 
@@ -24,7 +21,7 @@ export type MergeEventsMapsParameter =
  * @param overridenEventsMap - Optional Map or object containing events that should override the defaults
  * @returns A new Map with the merged events
  */
-export const mergeEventsMaps = <T extends DocumentEventName | string>(
+export const mergeEventsMaps = <T extends string>(
   defaultEventsMap: Map<T, DocumentEvent>,
   overridenEventsMap:
     | Map<T, DocumentEvent | undefined>

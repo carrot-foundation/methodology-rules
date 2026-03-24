@@ -1,7 +1,5 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-
 interface CompostingCycleTimeframeTestCase extends Omit<
   RuleTestCase,
   'resultComment'
@@ -20,8 +18,6 @@ const DROP_OFF_DATE_59_DAYS = '2023-12-30T12:00:00.000Z';
 const DROP_OFF_DATE_180_DAYS = '2023-08-31T12:00:00.000Z';
 const DROP_OFF_DATE_181_DAYS = '2023-08-29T12:00:00.000Z';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
-
 export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase[] =
   [
     {
@@ -37,7 +33,7 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: undefined,
       recycledEventDate: RECYCLED_DATE,
       resultStatus: 'FAILED',
-      scenario: `The "${DROP_OFF}" event date is missing`,
+      scenario: 'The "Drop-off" event date is missing',
     },
     {
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,
@@ -76,6 +72,6 @@ export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase
       dropOffEventDate: DROP_OFF_DATE_94_DAYS,
       recycledEventDate: undefined,
       resultStatus: 'FAILED',
-      scenario: `The "${RECYCLED}" event date is missing`,
+      scenario: 'The "Recycled" event date is missing',
     },
   ];

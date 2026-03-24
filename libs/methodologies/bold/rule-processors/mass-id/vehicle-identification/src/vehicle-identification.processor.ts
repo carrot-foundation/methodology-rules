@@ -17,20 +17,17 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
+  DocumentEventVehicleTypeSchema,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 
-const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  DocumentEventAttributeName;
-const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = DocumentEventVehicleType;
-const { PICK_UP } = DocumentEventName;
-
-export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
-  BICYCLE,
-  CART,
-  SLUDGE_PIPES,
-]);
+export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES: Set<DocumentEventVehicleType> =
+  new Set([
+    DocumentEventVehicleType.Bicycle,
+    DocumentEventVehicleType.Cart,
+    DocumentEventVehicleType['Sludge Pipes'],
+  ]);
 
 interface RuleSubject {
   pickUpEvent?: DocumentEvent | undefined;
@@ -47,7 +44,10 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       );
     }
 
-    const vehicleTypeValue = getEventAttributeValue(event, VEHICLE_TYPE);
+    const vehicleTypeValue = getEventAttributeValue(
+      event,
+      DocumentEventAttributeName['Vehicle Type'],
+    );
 
     if (!isNonEmptyString(vehicleTypeValue)) {
       return this.createResult(
@@ -57,7 +57,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     }
 
     if (
-      !(Object.values(DocumentEventVehicleType) as unknown[]).includes(
+      !(DocumentEventVehicleTypeSchema.options as unknown[]).includes(
         vehicleTypeValue,
       )
     ) {
@@ -69,10 +69,10 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
     const hasDescription = eventHasNonEmptyStringAttribute(
       event,
-      VEHICLE_DESCRIPTION,
+      DocumentEventAttributeName['Vehicle Description'],
     );
 
-    if (vehicleTypeValue === (OTHERS as string)) {
+    if (vehicleTypeValue === (DocumentEventVehicleType.Others as string)) {
       return hasDescription
         ? this.createResult(
             true,
@@ -101,10 +101,13 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
       );
     }
 
-    const licensePlate = getEventAttributeValue(event, VEHICLE_LICENSE_PLATE);
+    const licensePlate = getEventAttributeValue(
+      event,
+      DocumentEventAttributeName['Vehicle License Plate'],
+    );
     const hasLicensePlate = eventHasNonEmptyStringAttribute(
       event,
-      VEHICLE_LICENSE_PLATE,
+      DocumentEventAttributeName['Vehicle License Plate'],
     );
 
     if (!hasLicensePlate) {
@@ -129,7 +132,9 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
   protected override getRuleSubject(document: Document): RuleSubject {
     return {
-      pickUpEvent: document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
+      pickUpEvent: document.externalEvents?.find(
+        eventNameIsAnyOf([DocumentEventName['Pick-up']]),
+      ),
     };
   }
 

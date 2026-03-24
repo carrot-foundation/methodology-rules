@@ -50,8 +50,6 @@ import {
   shouldSkipGpsValidation,
 } from './geolocation-and-address-precision.helpers';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-
 export interface RuleSubject {
   accreditationDocuments: Document[];
   massIDAuditDocument: Document;
@@ -63,7 +61,7 @@ interface ParticipantAddressData {
   accreditedAddress: MethodologyAddress | undefined;
   actorType: MassIDDocumentActorType;
   eventAddress: MethodologyAddress;
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+  eventName: 'Drop-off' | 'Pick-up';
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
 }
@@ -173,9 +171,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         ),
         actorType,
         eventAddress: event.address,
-        eventName: event.name as
-          | DocumentEventName.DROP_OFF
-          | DocumentEventName.PICK_UP,
+        eventName: event.name as 'Drop-off' | 'Pick-up',
         gpsGeolocation: getEventGpsGeolocation(event),
         participantId: event.participant.id,
       });
@@ -241,7 +237,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       participantId,
     } = addressData;
 
-    if (actorType === MassIDDocumentActorType.WASTE_GENERATOR) {
+    if (actorType === MassIDDocumentActorType['Waste Generator']) {
       const verificationDocumentExists: boolean = Boolean(
         hasVerificationDocument(
           massIDAuditDocument,
@@ -291,7 +287,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (
       !isNil(gpsGeolocation) &&
-      actorType === MassIDDocumentActorType.RECYCLER
+      actorType === MassIDDocumentActorType.Recycler
     ) {
       const { latitudeException, longitudeException } =
         getGpsExceptionsFromRecyclerAccreditation(
@@ -381,7 +377,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
   private extractRequiredEvents(massIDDocument: Document) {
     const events = massIDDocument.externalEvents?.filter(
-      eventNameIsAnyOf([DROP_OFF, PICK_UP]),
+      eventNameIsAnyOf([
+        DocumentEventName['Drop-off'],
+        DocumentEventName['Pick-up'],
+      ]),
     );
 
     if (!isNonEmptyArray(events)) {
@@ -411,7 +410,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
         return (
           PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
-          relation.subtype === DocumentSubtype.RECYCLER
+          relation.subtype === DocumentSubtype.Recycler
         );
       },
     );

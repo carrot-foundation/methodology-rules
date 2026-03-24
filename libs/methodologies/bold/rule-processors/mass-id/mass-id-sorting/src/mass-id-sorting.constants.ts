@@ -1,19 +1,14 @@
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
-
-const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
-
 export const SORTING_TOLERANCE = 0.1;
 
 export const RESULT_COMMENTS = {
   failed: {
     DEDUCTED_WEIGHT_MISMATCH: (deducted: number, expected: number) =>
-      `The "${DEDUCTED_WEIGHT}" (${deducted} kg) must equal "${GROSS_WEIGHT}" × "${SORTING_FACTOR}" (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
+      `The "Deducted Weight" (${deducted} kg) must equal "Gross Weight" × "Sorting Factor" (${expected} kg) within ${SORTING_TOLERANCE} kg.`,
     DOCUMENT_VALUE_MISMATCH: (documentValue: number, sortingValue: number) =>
       `The MassID document current value (${documentValue} kg) must equal the sorting event value (${sortingValue} kg).`,
     GROSS_WEIGHT_MISMATCH: (gross: number, before: number) =>
-      `The "${GROSS_WEIGHT}" (${gross} kg) must match the previous event value (${before} kg) within ${SORTING_TOLERANCE} kg.`,
-    MISSING_SORTING_DESCRIPTION: `The "${DESCRIPTION}" must be provided.`,
+      `The "Gross Weight" (${gross} kg) must match the previous event value (${before} kg) within ${SORTING_TOLERANCE} kg.`,
+    MISSING_SORTING_DESCRIPTION: `The "Description" must be provided.`,
     SORTING_VALUE_EXCEEDS_TOLERANCE: (
       sortingValueCalculationDifference: number,
     ) =>

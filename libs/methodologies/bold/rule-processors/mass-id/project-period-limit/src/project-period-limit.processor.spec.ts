@@ -3,7 +3,7 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
@@ -18,8 +18,6 @@ class TestProjectPeriodLimitProcessor extends ProjectPeriodLimitProcessor {
   }
 }
 
-const { RECYCLED } = DocumentEventName;
-
 describe('ProjectPeriodLimitProcessor', () => {
   const ruleDataProcessor = new TestProjectPeriodLimitProcessor();
   const documentLoaderService = vi.mocked(loadDocument);
@@ -32,7 +30,7 @@ describe('ProjectPeriodLimitProcessor', () => {
       const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
-            RECYCLED,
+            'Recycled' as DocumentEventName,
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt,
@@ -62,7 +60,7 @@ describe('ProjectPeriodLimitProcessor', () => {
     const ruleInput = stubRuleInput();
 
     const document = stubBoldMassIDDocument({
-      externalEventsMap: new Map([[RECYCLED, undefined]]),
+      externalEventsMap: new Map([['Recycled' as DocumentEventName, undefined]]),
     });
 
     documentLoaderService.mockResolvedValueOnce(document);

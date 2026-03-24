@@ -2,21 +2,12 @@ import {
   stubDocumentEventWithMetadataAttributes,
   stubParticipantAccreditationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { addDays, subDays } from 'date-fns';
 
 import {
   getApprovedExceptions,
   isApprovedExceptionValid,
 } from './approved-exception.helpers';
-
-const { ACCREDITATION_RESULT } = DocumentEventName;
-const { APPROVED_EXCEPTIONS } = DocumentEventAttributeName;
 
 describe('Approved Exception Helpers', () => {
   describe('getApprovedExceptions', () => {
@@ -33,13 +24,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: 'MassID',
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: 'Weighing',
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': 'Tare',
+          'Exception Type': 'Exemption for Mandatory Attribute',
           Reason: 'Test exception reason',
         },
       ];
@@ -47,13 +37,13 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, exceptions]],
+            { name: 'Accreditation Result' },
+            [['Approved Exceptions', exceptions]],
           ),
         ],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toEqual(exceptions);
     });
@@ -63,7 +53,7 @@ describe('Approved Exception Helpers', () => {
         externalEvents: [],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toBeUndefined();
     });
@@ -72,13 +62,13 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: 'Accreditation Result' },
             [],
           ),
         ],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toBeUndefined();
     });
@@ -87,13 +77,13 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, 'invalid']],
+            { name: 'Accreditation Result' },
+            [['Approved Exceptions', 'invalid']],
           ),
         ],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toBeUndefined();
     });
@@ -103,7 +93,7 @@ describe('Approved Exception Helpers', () => {
         externalEvents: undefined,
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toBeUndefined();
     });
@@ -113,13 +103,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: 'MassID',
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: 'Weighing',
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': 'Tare',
+          'Exception Type': 'Exemption for Mandatory Attribute',
           Reason: 'Test exception',
         },
       ];
@@ -127,17 +116,17 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, exceptions]],
+            { name: 'Accreditation Result' },
+            [['Approved Exceptions', exceptions]],
           ),
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.FACILITY_ADDRESS },
+            { name: 'Facility Address' },
             [],
           ),
         ],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(document, 'Accreditation Result');
 
       expect(result).toEqual(exceptions);
     });
@@ -147,13 +136,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: 'MassID',
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: 'Weighing',
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': 'Tare',
+          'Exception Type': 'Exemption for Mandatory Attribute',
           Reason: 'Test exception',
         },
       ];
@@ -161,16 +149,13 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, exceptions]],
+            { name: 'Accreditation Result' },
+            [['Approved Exceptions', exceptions]],
           ),
         ],
       });
 
-      const result = getApprovedExceptions(
-        document,
-        DocumentEventName.FACILITY_ADDRESS,
-      );
+      const result = getApprovedExceptions(document, 'Facility Address');
 
       expect(result).toBeUndefined();
     });
@@ -185,12 +170,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
       };
 
@@ -201,12 +186,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 5).toISOString(),
       };
@@ -218,12 +203,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 5).toISOString(),
       };
@@ -235,12 +220,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': 'invalid-date',
       };
@@ -257,12 +242,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': fixedDate.toISOString(),
       };
@@ -276,12 +261,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 1).toISOString(),
       };
@@ -293,12 +278,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: 'MassID',
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: 'Weighing',
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': 'Tare',
+        'Exception Type': 'Exemption for Mandatory Attribute',
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 1).toISOString(),
       };

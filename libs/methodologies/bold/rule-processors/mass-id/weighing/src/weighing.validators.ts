@@ -23,13 +23,13 @@ import type {
 const TareApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(DocumentCategory.MassID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(DocumentEventName.Weighing),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.TARE),
+  'Attribute Name': z.literal(DocumentEventAttributeName.Tare),
   'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+    MethodologyApprovedExceptionType['Exemption for Mandatory Attribute'],
   ),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
@@ -38,13 +38,13 @@ const TareApprovedExceptionSchema = z.object({
 const ContainerCapacityApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(DocumentCategory.MassID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(DocumentEventName.Weighing),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_CAPACITY),
+  'Attribute Name': z.literal(DocumentEventAttributeName['Container Capacity']),
   'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+    MethodologyApprovedExceptionType['Exemption for Mandatory Attribute'],
   ),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
@@ -53,13 +53,13 @@ const ContainerCapacityApprovedExceptionSchema = z.object({
 const ContainerQuantityApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(DocumentCategory.MassID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(DocumentEventName.Weighing),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_QUANTITY),
+  'Attribute Name': z.literal(DocumentEventAttributeName['Container Quantity']),
   'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+    MethodologyApprovedExceptionType['Exemption for Mandatory Attribute'],
   ),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),

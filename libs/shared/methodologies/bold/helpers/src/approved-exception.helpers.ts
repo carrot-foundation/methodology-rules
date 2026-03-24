@@ -2,7 +2,6 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
-  DocumentEventAttributeName,
   type DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
@@ -10,8 +9,6 @@ import {
   isApprovedExceptionAttributeValue,
 } from '@carrot-fndn/shared/types';
 import { isAfter, isValid, parseISO } from 'date-fns';
-
-const { APPROVED_EXCEPTIONS } = DocumentEventAttributeName;
 
 export const getApprovedExceptions = (
   accreditationDocument: Document,
@@ -25,7 +22,10 @@ export const getApprovedExceptions = (
     return undefined;
   }
 
-  const approvedExceptions = getEventAttributeValue(event, APPROVED_EXCEPTIONS);
+  const approvedExceptions = getEventAttributeValue(
+    event,
+    'Approved Exceptions',
+  );
 
   if (!isApprovedExceptionAttributeValue(approvedExceptions)) {
     return undefined;

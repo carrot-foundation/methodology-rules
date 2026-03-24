@@ -21,10 +21,6 @@ import {
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
-const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
-
 interface RuleSubject {
   lastDropOffEvent: DocumentEvent | undefined;
   receivingOperatorIdentifier:
@@ -70,17 +66,20 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
 
   protected override getRuleSubject(document: Document): RuleSubject {
     const recyclerEvent = document.externalEvents?.find(
-      and(eventLabelIsAnyOf([RECYCLER]), eventNameIsAnyOf([ACTOR])),
+      and(
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel.Recycler]),
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+      ),
     );
     const lastDropOffEvent = document.externalEvents
-      ?.filter(eventNameIsAnyOf([DROP_OFF]))
+      ?.filter(eventNameIsAnyOf([DocumentEventName['Drop-off']]))
       .at(-1);
 
     return {
       lastDropOffEvent,
       receivingOperatorIdentifier: getEventAttributeValue(
         lastDropOffEvent,
-        RECEIVING_OPERATOR_IDENTIFIER,
+        DocumentEventAttributeName['Receiving Operator Identifier'],
       ),
       recyclerEvent,
     };

@@ -1,7 +1,6 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { BoldMethodologySlug } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
@@ -15,7 +14,7 @@ describe('NoConflictingCertificateOrCreditProcessor', () => {
 
   const ruleDataProcessor = new NoConflictingCertificateOrCreditProcessor(
     RECYCLED_ID,
-    BoldMethodologySlug.RECYCLING,
+    'bold-recycling',
   );
 
   it.each(noConflictingCertificateOrCreditTestCases)(

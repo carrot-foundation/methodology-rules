@@ -7,28 +7,12 @@ import {
   stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDOrganicSubtype,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
-import {
-  type AnyObject,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { type AnyObject } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
-
-const {
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
 
 const randomId = faker.lorem.word();
 const randomDescription = faker.lorem.sentence();
@@ -36,15 +20,15 @@ const brazilianRecyclerEvent = stubDocumentEvent({
   address: stubAddress({
     countryCode: 'BR',
   }),
-  label: RECYCLER,
-  name: ACTOR,
+  label: 'Recycler',
+  name: 'ACTOR',
 });
 const americanRecyclerEvent = stubDocumentEvent({
   address: stubAddress({
     countryCode: 'US',
   }),
-  label: RECYCLER,
-  name: ACTOR,
+  label: 'Recycler',
+  name: 'ACTOR',
 });
 
 interface RegionalWasteClassificationTestCase extends RuleTestCase {
@@ -57,12 +41,12 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
   [
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+            ['Local Waste Classification ID', '02 01 01'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],
@@ -70,14 +54,14 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       manifestExample: true,
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -85,26 +69,26 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '020101'],
+            ['Local Waste Classification ID', '020101'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '020101',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -112,26 +96,26 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+            ['Local Waste Classification ID', '02 01 01'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               `***${WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description} - (*)`,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: `***${WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description} - (*)`,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -139,61 +123,61 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, undefined],
+            ['Local Waste Classification ID', undefined],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.failed.CLASSIFICATION_ID_MISSING,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: undefined,
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'FAILED',
       scenario: 'The local waste classification ID is missing',
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-            [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, undefined],
+            ['Local Waste Classification ID', '02 01 01'],
+            ['Local Waste Classification Description', undefined],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.failed.CLASSIFICATION_DESCRIPTION_MISSING,
       resultContent: {
         description: undefined,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'FAILED',
       scenario: 'The local waste classification description is missing',
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 02'],
+            ['Local Waste Classification ID', '02 01 02'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               'Residuos de tecidos animais',
             ],
           ],
@@ -201,14 +185,14 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
       },
       manifestExample: true,
       partialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: 'Residuos de tecidos animais',
         id: '02 01 02',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -216,24 +200,24 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-            [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
+            ['Local Waste Classification ID', '02 01 01'],
+            ['Local Waste Classification Description', randomDescription],
           ],
         }),
       },
       manifestExample: true,
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_DESCRIPTION,
       resultContent: {
         description: randomDescription,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'FAILED',
       scenario:
@@ -241,72 +225,72 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: americanRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': americanRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
-            [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
+            ['Local Waste Classification ID', '02 01 01'],
+            ['Local Waste Classification Description', randomDescription],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.failed.UNSUPPORTED_COUNTRY('US'),
       resultContent: {
         description: randomDescription,
         id: '02 01 01',
         recyclerCountryCode: 'US',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'FAILED',
       scenario: 'The recycler is not from Brazil',
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, randomId],
-            [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, randomDescription],
+            ['Local Waste Classification ID', randomId],
+            ['Local Waste Classification Description', randomDescription],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_ID,
       resultContent: {
         description: randomDescription,
         id: randomId,
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+        subtype: 'Industrial Sludge',
       },
       resultStatus: 'FAILED',
       scenario: 'The local waste classification ID is not valid',
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+            ['Local Waste Classification ID', '02 01 01'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'FAILED',
       scenario:
@@ -314,26 +298,26 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 02'],
+            ['Local Waste Classification ID', '02 01 02'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 02'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 02'].description,
         id: '02 01 02',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -341,26 +325,26 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 07'],
+            ['Local Waste Classification ID', '02 01 07'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 07'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
+        subtype: 'Wood and Wood Products',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 07'].description,
         id: '02 01 07',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
+        subtype: 'Wood and Wood Products',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -368,52 +352,52 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 02 04'],
+            ['Local Waste Classification ID', '02 02 04'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 02 04'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+        subtype: 'Domestic Sludge',
       },
       resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 02 04'].description,
         id: '02 02 04',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+        subtype: 'Domestic Sludge',
       },
       resultStatus: 'PASSED',
       scenario: 'The subtype matches the CDM_CODE 8.7C for Domestic Sludge',
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+            ['Local Waste Classification ID', '02 01 01'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],
         }),
       },
       partialDocument: {
-        subtype: MassIDOrganicSubtype.TOBACCO,
+        subtype: 'Tobacco',
       },
       resultComment: RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
       resultContent: {
         description: WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
         id: '02 01 01',
         recyclerCountryCode: 'BR',
-        subtype: MassIDOrganicSubtype.TOBACCO,
+        subtype: 'Tobacco',
       },
       resultStatus: 'FAILED',
       scenario:
@@ -421,12 +405,12 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
-        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
+        'ACTOR-Recycler': brazilianRecyclerEvent,
+        'Pick-up': stubBoldMassIDPickUpEvent({
           metadataAttributes: [
-            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
+            ['Local Waste Classification ID', '02 01 01'],
             [
-              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Local Waste Classification Description',
               WASTE_CLASSIFICATION_CODES.BR['02 01 01'].description,
             ],
           ],

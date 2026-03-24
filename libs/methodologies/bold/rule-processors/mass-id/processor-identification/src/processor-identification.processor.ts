@@ -15,9 +15,6 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 
-const { ACTOR } = DocumentEventName;
-const { PROCESSOR } = MethodologyDocumentEventLabel;
-
 type Subject = {
   processorActorEvents?: DocumentEvent[] | undefined;
 };
@@ -48,7 +45,9 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const processorActorEvents = document.externalEvents?.filter(
-      (event) => eventHasLabel(event, PROCESSOR) && eventHasName(event, ACTOR),
+      (event) =>
+        eventHasLabel(event, MethodologyDocumentEventLabel.Processor) &&
+        eventHasName(event, DocumentEventName.ACTOR),
     );
 
     return {

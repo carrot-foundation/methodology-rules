@@ -1,10 +1,7 @@
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentCategory,
   type DocumentRelation,
-  DocumentSubtype,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface DocumentMatch {
@@ -31,41 +28,41 @@ export class DocumentMatcher {
 }
 
 export const MASS_ID = new DocumentMatcher({
-  category: DocumentCategory.MASS_ID,
+  category: 'MassID',
 });
 
 export const MASS_ID_AUDIT = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_ID_AUDIT,
+  category: 'Methodology',
+  type: 'MassID Audit',
 });
 
 export const RECYCLED_ID = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.RECYCLED_ID,
+  category: 'Methodology',
+  type: 'RecycledID',
 });
 
 export const GAS_ID = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.GAS_ID,
+  category: 'Methodology',
+  type: 'GasID',
 });
 
 export const METHODOLOGY_DEFINITION = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.DEFINITION,
+  category: 'Methodology',
+  type: 'Definition',
 });
 
 export const PARTICIPANT_ACCREDITATION_GROUP = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  subtype: DocumentSubtype.GROUP,
-  type: DocumentType.PARTICIPANT_ACCREDITATION,
+  category: 'Methodology',
+  subtype: 'Group',
+  type: 'Participant Accreditation',
 });
 
 export const PARTICIPANT_ACCREDITATION_PARTIAL_MATCH = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.PARTICIPANT_ACCREDITATION,
+  category: 'Methodology',
+  type: 'Participant Accreditation',
 });
 
 export const CREDIT_ORDER_MATCH = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.CREDIT_ORDER,
+  category: 'Methodology',
+  type: 'Credit Order',
 });

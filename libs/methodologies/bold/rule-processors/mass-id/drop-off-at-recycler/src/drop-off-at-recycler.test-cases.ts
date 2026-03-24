@@ -5,11 +5,6 @@ import {
   stubBoldMassIDDropOffEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
@@ -17,47 +12,43 @@ interface DropOffAtRecyclerTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
-
 const sameRecyclerAndDropOffAddress = stubAddress();
 
 export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
   {
-    events: { [DROP_OFF]: undefined },
+    events: { 'Drop-off': undefined },
     manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has no "${DROP_OFF}" event`,
+    scenario: 'The MassID document has no "Drop-off" event',
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIDDropOffEvent({
-        metadataAttributes: [[RECEIVING_OPERATOR_IDENTIFIER, undefined]],
+      'Drop-off': stubBoldMassIDDropOffEvent({
+        metadataAttributes: [['Receiving Operator Identifier', undefined]],
       }),
     },
     manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a "${DROP_OFF}" event but no "${RECEIVING_OPERATOR_IDENTIFIER}" attribute`,
+    scenario: 'The MassID document has a "Drop-off" event but no "Receiving Operator Identifier" attribute',
   },
   {
     events: {
-      [DROP_OFF]: stubBoldMassIDDropOffEvent(),
+      'Drop-off': stubBoldMassIDDropOffEvent(),
     },
     resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a "${DROP_OFF}" event, but the "${RECYCLER}" event address does not match the "${DROP_OFF}" event address`,
+    scenario: 'The MassID document has a "Drop-off" event, but the "Recycler" event address does not match the "Drop-off" event address',
   },
   {
     events: {
-      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+      'ACTOR-Recycler': stubDocumentEvent({
         address: sameRecyclerAndDropOffAddress,
-        label: RECYCLER,
-        name: ACTOR,
+        label: 'Recycler',
+        name: 'ACTOR',
       }),
-      [DROP_OFF]: stubBoldMassIDDropOffEvent({
+      'Drop-off': stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           address: sameRecyclerAndDropOffAddress,
         },
@@ -67,6 +58,6 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     manifestFields: { addressFields: ['latitude', 'longitude'] },
     resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: 'PASSED',
-    scenario: `The MassID document has a "${DROP_OFF}" event and a "${RECYCLER}" event, and the "${DROP_OFF}" event address matches the "${RECYCLER}" event address`,
+    scenario: 'The MassID document has a "Drop-off" event and a "Recycler" event, and the "Drop-off" event address matches the "Recycler" event address',
   },
 ];

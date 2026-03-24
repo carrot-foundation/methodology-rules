@@ -5,11 +5,6 @@ import {
   stubDocumentEvent,
   stubMassIDDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { getYear } from 'date-fns';
 
@@ -20,15 +15,6 @@ import {
   getRulesMetadataEvent,
 } from './document.getters';
 
-const {
-  ACCREDITATION_CONTEXT,
-  DROP_OFF,
-  EMISSION_AND_COMPOSTING_METRICS,
-  PICK_UP,
-  RULES_METADATA,
-} = DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
-
 const testEmissionAndCompostingMetricsEvent = (
   documentYear: number,
   referenceYear: number,
@@ -38,12 +24,12 @@ const testEmissionAndCompostingMetricsEvent = (
       attributes: [
         {
           isPublic: true,
-          name: DocumentEventAttributeName.REFERENCE_YEAR,
+          name: 'Reference Year',
           value: referenceYear,
         },
       ],
     },
-    name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+    name: `${'Emissions & Composting Metrics'} (${getYear(new Date())})`,
   });
 
   const documentWithEmissionAndCompostingMetricsEvent = stubDocument(
@@ -92,12 +78,12 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: 'Reference Year',
               value: '',
             },
           ],
         },
-        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+        name: `${'Emissions & Composting Metrics'} (${getYear(new Date())})`,
       });
 
       const documentWithEmissionAndCompostingMetricsEvent = stubDocument(
@@ -121,12 +107,12 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: 'Reference Year',
               value: 0,
             },
           ],
         },
-        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+        name: `${'Emissions & Composting Metrics'} (${getYear(new Date())})`,
       });
 
       const documentWithEmissionAndCompostingMetricsEvent = stubDocument(
@@ -150,12 +136,12 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: 'Reference Year',
               value: -1,
             },
           ],
         },
-        name: `${EMISSION_AND_COMPOSTING_METRICS} (${getYear(new Date())})`,
+        name: `${'Emissions & Composting Metrics'} (${getYear(new Date())})`,
       });
 
       const documentWithEmissionAndCompostingMetricsEvent = stubDocument(
@@ -190,7 +176,7 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: 'Reference Year',
               value: 2023,
             },
           ],
@@ -216,7 +202,7 @@ describe('Document getters', () => {
 
   describe('getRulesMetadataEvent', () => {
     it('should return the rules metadata event', () => {
-      const rulesMetadataEvent = stubDocumentEvent({ name: RULES_METADATA });
+      const rulesMetadataEvent = stubDocumentEvent({ name: 'RULES METADATA' });
 
       const document = stubDocument(
         {
@@ -236,7 +222,9 @@ describe('Document getters', () => {
     it('should return undefined if the rules metadata event was not found', () => {
       const document = stubDocument(
         {
-          externalEvents: stubArray(() => stubDocumentEvent({ name: PICK_UP })),
+          externalEvents: stubArray(() =>
+            stubDocumentEvent({ name: 'Pick-up' }),
+          ),
         },
         false,
       );
@@ -254,15 +242,15 @@ describe('Document getters', () => {
   });
 
   describe('getParticipantActorType', () => {
-    it(`should return "${WASTE_GENERATOR}" when the event is a pick up at the source`, () => {
-      const sourcePickUpEvent = stubDocumentEvent({ name: PICK_UP });
+    it(`should return "Waste Generator" when the event is a pick up at the source`, () => {
+      const sourcePickUpEvent = stubDocumentEvent({ name: 'Pick-up' });
       const document = stubDocument(
         {
           externalEvents: [
             sourcePickUpEvent,
-            stubDocumentEvent({ name: DROP_OFF }),
-            stubDocumentEvent({ name: PICK_UP }),
-            stubDocumentEvent({ name: DROP_OFF }),
+            stubDocumentEvent({ name: 'Drop-off' }),
+            stubDocumentEvent({ name: 'Pick-up' }),
+            stubDocumentEvent({ name: 'Drop-off' }),
           ],
         },
         false,
@@ -273,18 +261,18 @@ describe('Document getters', () => {
         event: sourcePickUpEvent,
       });
 
-      expect(participantActorType).toEqual(WASTE_GENERATOR);
+      expect(participantActorType).toEqual('Waste Generator');
     });
 
-    it(`should return "${PROCESSOR}" when the event is a drop off at processor`, () => {
-      const processorDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+    it(`should return "Processor" when the event is a drop off at processor`, () => {
+      const processorDropOffEvent = stubDocumentEvent({ name: 'Drop-off' });
       const document = stubDocument(
         {
           externalEvents: [
-            stubDocumentEvent({ name: PICK_UP }),
+            stubDocumentEvent({ name: 'Pick-up' }),
             processorDropOffEvent,
-            stubDocumentEvent({ name: PICK_UP }),
-            stubDocumentEvent({ name: DROP_OFF }),
+            stubDocumentEvent({ name: 'Pick-up' }),
+            stubDocumentEvent({ name: 'Drop-off' }),
           ],
         },
         false,
@@ -295,18 +283,18 @@ describe('Document getters', () => {
         event: processorDropOffEvent,
       });
 
-      expect(participantActorType).toEqual(PROCESSOR);
+      expect(participantActorType).toEqual('Processor');
     });
 
-    it(`should return "${PROCESSOR}" when the event is a pick up at processor`, () => {
-      const processorPickUpEvent = stubDocumentEvent({ name: PICK_UP });
+    it(`should return "Processor" when the event is a pick up at processor`, () => {
+      const processorPickUpEvent = stubDocumentEvent({ name: 'Pick-up' });
       const document = stubDocument(
         {
           externalEvents: [
-            stubDocumentEvent({ name: PICK_UP }),
-            stubDocumentEvent({ name: DROP_OFF }),
+            stubDocumentEvent({ name: 'Pick-up' }),
+            stubDocumentEvent({ name: 'Drop-off' }),
             processorPickUpEvent,
-            stubDocumentEvent({ name: DROP_OFF }),
+            stubDocumentEvent({ name: 'Drop-off' }),
           ],
         },
         false,
@@ -317,17 +305,17 @@ describe('Document getters', () => {
         event: processorPickUpEvent,
       });
 
-      expect(participantActorType).toEqual(PROCESSOR);
+      expect(participantActorType).toEqual('Processor');
     });
 
-    it(`should return "${RECYCLER}" when the event is a drop off at recycler`, () => {
-      const recyclerDropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+    it(`should return "Recycler" when the event is a drop off at recycler`, () => {
+      const recyclerDropOffEvent = stubDocumentEvent({ name: 'Drop-off' });
       const document = stubDocument(
         {
           externalEvents: [
-            stubDocumentEvent({ name: PICK_UP }),
-            stubDocumentEvent({ name: DROP_OFF }),
-            stubDocumentEvent({ name: PICK_UP }),
+            stubDocumentEvent({ name: 'Pick-up' }),
+            stubDocumentEvent({ name: 'Drop-off' }),
+            stubDocumentEvent({ name: 'Pick-up' }),
             recyclerDropOffEvent,
           ],
         },
@@ -339,11 +327,11 @@ describe('Document getters', () => {
         event: recyclerDropOffEvent,
       });
 
-      expect(participantActorType).toEqual(RECYCLER);
+      expect(participantActorType).toEqual('Recycler');
     });
 
     it('should return undefined when the document has no pick up events', () => {
-      const dropOffEvent = stubDocumentEvent({ name: DROP_OFF });
+      const dropOffEvent = stubDocumentEvent({ name: 'Drop-off' });
       const document = stubDocument(
         {
           externalEvents: [dropOffEvent],
@@ -360,7 +348,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document has no drop off events', () => {
-      const pickUpEvent = stubDocumentEvent({ name: PICK_UP });
+      const pickUpEvent = stubDocumentEvent({ name: 'Pick-up' });
       const document = stubDocument(
         {
           externalEvents: [pickUpEvent],
@@ -377,7 +365,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document has no external events', () => {
-      const event = stubDocumentEvent({ name: PICK_UP });
+      const event = stubDocumentEvent({ name: 'Pick-up' });
       const document = stubDocument({}, false);
 
       document.externalEvents = undefined;
@@ -391,7 +379,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document has empty external events array', () => {
-      const event = stubDocumentEvent({ name: PICK_UP });
+      const event = stubDocumentEvent({ name: 'Pick-up' });
       const document = stubDocument(
         {
           externalEvents: [],
@@ -408,7 +396,7 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the document has non-array external events', () => {
-      const event = stubDocumentEvent({ name: PICK_UP });
+      const event = stubDocumentEvent({ name: 'Pick-up' });
       const document = {
         ...stubDocument(undefined, false),
         externalEvents: 'not an array',
@@ -423,12 +411,12 @@ describe('Document getters', () => {
     });
 
     it('should return undefined when the event is neither a pick-up nor a drop-off event', () => {
-      const otherEvent = stubDocumentEvent({ name: ACCREDITATION_CONTEXT });
+      const otherEvent = stubDocumentEvent({ name: 'Accreditation Context' });
       const document = stubDocument(
         {
           externalEvents: [
-            stubDocumentEvent({ name: PICK_UP }),
-            stubDocumentEvent({ name: DROP_OFF }),
+            stubDocumentEvent({ name: 'Pick-up' }),
+            stubDocumentEvent({ name: 'Drop-off' }),
             otherEvent,
           ],
         },

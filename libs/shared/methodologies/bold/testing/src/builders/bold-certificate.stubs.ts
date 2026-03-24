@@ -1,10 +1,7 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentType,
   type RewardDistributionResultContent,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,13 +23,11 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { RULE_RESULT_DETAILS, SLUG } = DocumentEventAttributeName;
-
 export const REWARDS_DISTRIBUTION_RULE_SLUG = 'rewards-distribution';
 
 const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
   [
-    RULE_RESULT_DETAILS,
+    'Rule Result Details',
     {
       massIDDocumentId: faker.string.uuid(),
       massIDRewards: [
@@ -49,7 +44,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
       ],
     } satisfies RewardDistributionResultContent,
   ],
-  [SLUG, REWARDS_DISTRIBUTION_RULE_SLUG],
+  ['Slug', REWARDS_DISTRIBUTION_RULE_SLUG],
 ];
 
 export const stubBoldCertificateRewardsDistributionMetadataEvent = ({
@@ -88,12 +83,9 @@ export const stubBoldCertificateDocument = ({
   return {
     ...stubDocument(
       {
-        type: faker.helpers.arrayElement([
-          DocumentType.GAS_ID,
-          DocumentType.RECYCLED_ID,
-        ]),
+        type: faker.helpers.arrayElement(['GasID', 'RecycledID']),
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: 'Methodology',
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),

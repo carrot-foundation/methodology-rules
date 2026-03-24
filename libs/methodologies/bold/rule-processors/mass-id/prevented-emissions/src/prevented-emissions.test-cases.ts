@@ -33,17 +33,23 @@ export interface PreventedEmissionsTestCase extends RuleTestCase {
   subtype: MassIDOrganicSubtype;
 }
 
-const {
-  BASELINES,
-  EXCEEDING_EMISSION_COEFFICIENT,
-  GREENHOUSE_GAS_TYPE,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-const { RECYCLER } = MassIDDocumentActorType;
-const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP } = DocumentEventName;
+const BASELINES = DocumentEventAttributeName.Baselines;
+const EXCEEDING_EMISSION_COEFFICIENT =
+  DocumentEventAttributeName['Exceeding Emission Coefficient (per ton)'];
+const GREENHOUSE_GAS_TYPE =
+  DocumentEventAttributeName['Greenhouse Gas Type (GHG)'];
+const LOCAL_WASTE_CLASSIFICATION_ID =
+  DocumentEventAttributeName['Local Waste Classification ID'];
+const RECYCLER = MassIDDocumentActorType.Recycler;
+const EMISSION_AND_COMPOSTING_METRICS =
+  DocumentEventName['Emissions & Composting Metrics'];
+const PICK_UP = DocumentEventName['Pick-up'];
 
-const subtype = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
-const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
+const subtype = MassIDOrganicSubtype['Food, Food Waste and Beverages'];
+const baseline =
+  MethodologyBaseline[
+    'Landfills with flaring of methane gas (and/or capture of biogas)'
+  ];
 const exceedingEmissionCoefficient = 0.02;
 const massIDDocumentValue = 100;
 const baselineValue =
@@ -60,13 +66,14 @@ const computeOthersIfOrganicFactor = (
   baseline_: MethodologyBaseline,
 ): number => {
   if (
-    baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
+    baseline_ ===
+    MethodologyBaseline['Landfills without flaring of methane gas']
   ) {
     // Coefficients aligned with internal calculator, rounded to 6 decimals.
     return Number.parseFloat('0.905557');
   }
 
-  if (baseline_ === MethodologyBaseline.OPEN_AIR_DUMP) {
+  if (baseline_ === MethodologyBaseline['Open-air dump']) {
     return Number.parseFloat('0.698505');
   }
 
@@ -77,7 +84,8 @@ const getOthersIfOrganicFormulaCoeffs = (
   baseline_: MethodologyBaseline,
 ): { intercept: number; slope: number } => {
   if (
-    baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
+    baseline_ ===
+    MethodologyBaseline['Landfills without flaring of methane gas']
   ) {
     return {
       intercept: Number.parseFloat('-0.1297003'),
@@ -85,7 +93,7 @@ const getOthersIfOrganicFormulaCoeffs = (
     };
   }
 
-  if (baseline_ === MethodologyBaseline.OPEN_AIR_DUMP) {
+  if (baseline_ === MethodologyBaseline['Open-air dump']) {
     return {
       intercept: Number.parseFloat('-0.1297013'),
       slope: Number.parseFloat('5.521373'),
@@ -252,9 +260,11 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   ...[
-    MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
-    MethodologyBaseline.OPEN_AIR_DUMP,
-    MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+    MethodologyBaseline['Landfills without flaring of methane gas'],
+    MethodologyBaseline['Open-air dump'],
+    MethodologyBaseline[
+      'Landfills with flaring of methane gas (and/or capture of biogas)'
+    ],
   ].map((othersBaseline) => {
     const othersFactor = computeOthersIfOrganicFactor(othersBaseline);
     const expectedOthersPreventedEmissions =
@@ -269,7 +279,7 @@ export const preventedEmissionsTestCases = [
         [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
         [
           BASELINES,
-          { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: othersBaseline },
+          { [MassIDOrganicSubtype['Others (if organic)']]: othersBaseline },
         ],
       ]),
       externalCreatedAt: massIDDocument.externalCreatedAt,
@@ -303,12 +313,12 @@ export const preventedEmissionsTestCases = [
           massIDDocumentValue,
           normalizedLocalWasteClassificationId:
             othersIfOrganicLocalWasteClassificationCode,
-          wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          wasteSubtype: MassIDOrganicSubtype['Others (if organic)'],
         },
       },
       resultStatus: 'PASSED',
       scenario: `Others (if organic) calculates factor dynamically for baseline "${othersBaseline}" and local waste classification "${othersIfOrganicLocalWasteClassificationCode}"`,
-      subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+      subtype: MassIDOrganicSubtype['Others (if organic)'],
     };
   }),
   {
@@ -321,7 +331,7 @@ export const preventedEmissionsTestCases = [
     massIDDocumentValue,
     resultComment:
       RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
-        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+        MassIDOrganicSubtype['Domestic Sludge'],
       ),
     resultContent: {
       ruleSubject: {
@@ -329,12 +339,12 @@ export const preventedEmissionsTestCases = [
         exceedingEmissionCoefficient,
         gasType: 'Methane (CH4)',
         massIDDocumentValue,
-        wasteSubtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+        wasteSubtype: MassIDOrganicSubtype['Domestic Sludge'],
       },
     },
     resultStatus: 'FAILED',
-    scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
-    subtype: MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+    scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype['Domestic Sludge']}"`,
+    subtype: MassIDOrganicSubtype['Domestic Sludge'],
   },
   {
     accreditationDocuments: makeAccreditationDocuments([
@@ -467,7 +477,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
             makeRecyclerEmissionAndCompostingMetricsEvents([
               [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
             ]),
-          recyclerRemoveEventName: EMISSION_AND_COMPOSTING_METRICS.toString(),
+          recyclerRemoveEventName: EMISSION_AND_COMPOSTING_METRICS,
         }),
       ],
       massIDAuditDocument,
@@ -514,13 +524,13 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
           ...massIDDocument,
           externalEvents: [
             ...(massIDDocument.externalEvents?.filter(
-              (event) => event.name !== PICK_UP.toString(),
+              (event) => event.name !== PICK_UP,
             ) ?? []),
             stubBoldMassIDPickUpEvent({
               metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, undefined]],
             }),
           ],
-          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          subtype: MassIDOrganicSubtype['Others (if organic)'],
         },
         ...mapParticipantAccreditationDocuments({
           recyclerExternalEvents:
@@ -529,7 +539,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
               [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
               [
                 BASELINES,
-                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+                { [MassIDOrganicSubtype['Others (if organic)']]: baseline },
               ],
             ]),
         }),
@@ -546,13 +556,13 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
           ...massIDDocument,
           externalEvents: [
             ...(massIDDocument.externalEvents?.filter(
-              (event) => event.name !== PICK_UP.toString(),
+              (event) => event.name !== PICK_UP,
             ) ?? []),
             stubBoldMassIDPickUpEvent({
               metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '00 00 00']],
             }),
           ],
-          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          subtype: MassIDOrganicSubtype['Others (if organic)'],
         },
         ...mapParticipantAccreditationDocuments({
           recyclerExternalEvents:
@@ -561,7 +571,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
               [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
               [
                 BASELINES,
-                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+                { [MassIDOrganicSubtype['Others (if organic)']]: baseline },
               ],
             ]),
         }),
@@ -578,13 +588,13 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
           ...massIDDocument,
           externalEvents: [
             ...(massIDDocument.externalEvents?.filter(
-              (event) => event.name !== PICK_UP.toString(),
+              (event) => event.name !== PICK_UP,
             ) ?? []),
             stubBoldMassIDPickUpEvent({
               metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '02 02 99']],
             }),
           ],
-          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+          subtype: MassIDOrganicSubtype['Others (if organic)'],
         },
         ...mapParticipantAccreditationDocuments({
           recyclerExternalEvents:
@@ -593,7 +603,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
               [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
               [
                 BASELINES,
-                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
+                { [MassIDOrganicSubtype['Others (if organic)']]: baseline },
               ],
             ]),
         }),

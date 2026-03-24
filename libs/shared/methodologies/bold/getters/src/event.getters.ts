@@ -6,10 +6,7 @@ import type {
 } from '@carrot-fndn/shared/types';
 
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
-import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   validateDocumentEventWithAttachments,
@@ -18,7 +15,7 @@ import {
 
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  attributeName: string,
 ): MethodologyDocumentEventAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -37,7 +34,7 @@ export const getEventAttributeValue = (
 
 export const getEventAttributeByName = (
   event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  attributeName: string,
 ): MethodologyDocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -52,7 +49,7 @@ export const getEventAttributeByName = (
 
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  attributeName: string,
   validateValue: (
     input: unknown,
   ) => { data: T; success: true } | { success: false },
@@ -85,6 +82,4 @@ export const getDocumentEventAttachmentByLabel = (
 export const getEventMethodologySlug = (
   event: Maybe<DocumentEvent>,
 ): MethodologyDocumentEventAttributeValue | undefined =>
-  getNonEmptyString(
-    getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
-  );
+  getNonEmptyString(getEventAttributeValue(event, 'Methodology Slug'));

@@ -6,8 +6,6 @@ import {
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
   MassIDOrganicSubtype,
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,9 +24,6 @@ import {
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { type OthersIfOrganicRuleSubjectIds } from './prevented-emissions.types';
-
-const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
 
 export interface OthersIfOrganicAuditDetails {
   canonicalLocalWasteClassificationCode: NonEmptyString;
@@ -74,16 +69,16 @@ export const resolveCanonicalLocalWasteClassificationId = (
 export const getOthersIfOrganicContextFromMassIdDocument = (
   massIDDocument: Document,
 ): OthersIfOrganicContext => {
-  if (massIDDocument.subtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
+  if (massIDDocument.subtype !== MassIDOrganicSubtype['Others (if organic)']) {
     return {};
   }
 
   const pickUpEvent = massIDDocument.externalEvents?.find(
-    (event) => event.name === PICK_UP.toString(),
+    (event) => event.name === 'Pick-up',
   );
   const localWasteClassificationIdRaw = getEventAttributeValue(
     pickUpEvent,
-    LOCAL_WASTE_CLASSIFICATION_ID,
+    'Local Waste Classification ID',
   );
 
   return resolveCanonicalLocalWasteClassificationId(

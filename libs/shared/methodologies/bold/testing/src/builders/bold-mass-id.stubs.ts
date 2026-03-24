@@ -1,19 +1,13 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttachmentLabel,
-  DocumentEventAttributeName,
   DocumentEventContainerType,
-  DocumentEventName,
+  type DocumentEventName,
   DocumentEventScaleType,
   DocumentEventVehicleType,
   DocumentEventWeighingCaptureMethod,
-  DocumentType,
   MassIDOrganicSubtype,
-  MeasurementUnit,
-  ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
@@ -39,64 +33,26 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { MASS_ID } = DocumentCategory;
-const {
-  DROP_OFF,
-  PICK_UP,
-  RECYCLED,
-  RECYCLING_MANIFEST,
-  SORTING,
-  TRANSPORT_MANIFEST,
-  WEIGHING,
-} = DocumentEventName;
-const {
-  CAPTURED_GPS_LATITUDE,
-  CAPTURED_GPS_LONGITUDE,
-  CONTAINER_CAPACITY,
-  CONTAINER_QUANTITY,
-  CONTAINER_TYPE,
-  DESCRIPTION,
-  DOCUMENT_NUMBER,
-  DOCUMENT_TYPE,
-  DRIVER_IDENTIFIER,
-  DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
-  EXEMPTION_JUSTIFICATION,
-  GROSS_WEIGHT,
-  ISSUE_DATE,
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
-  LOCAL_WASTE_CLASSIFICATION_ID,
-  RECEIVING_OPERATOR_IDENTIFIER,
-  RECYCLER_OPERATOR_IDENTIFIER,
-  SCALE_TYPE,
-  SCALE_VALIDATION: SCALE_ACCREDITATION,
-  SORTING_FACTOR,
-  TARE,
-  VEHICLE_DESCRIPTION,
-  VEHICLE_LICENSE_PLATE,
-  VEHICLE_TYPE,
-  WASTE_ORIGIN,
-  WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
 const { DATE, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
 
 const defaultPickUpAttributes: MetadataAttributeParameter[] = [
-  [WASTE_ORIGIN, faker.datatype.boolean()],
-  [CAPTURED_GPS_LATITUDE, faker.location.latitude()],
-  [CAPTURED_GPS_LONGITUDE, faker.location.longitude()],
-  [DESCRIPTION, faker.lorem.sentence()],
-  [DRIVER_IDENTIFIER, faker.string.uuid()],
-  [DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION, faker.lorem.sentence()],
-  [LOCAL_WASTE_CLASSIFICATION_DESCRIPTION, faker.lorem.sentence()],
-  [LOCAL_WASTE_CLASSIFICATION_ID, faker.string.uuid()],
-  [VEHICLE_DESCRIPTION, faker.vehicle.vehicle()],
-  [CAPTURED_GPS_LATITUDE, faker.location.latitude()],
-  [CAPTURED_GPS_LONGITUDE, faker.location.longitude()],
+  ['Waste Origin', faker.datatype.boolean()],
+  ['Captured GPS Latitude', faker.location.latitude()],
+  ['Captured GPS Longitude', faker.location.longitude()],
+  ['Description', faker.lorem.sentence()],
+  ['Driver Identifier', faker.string.uuid()],
+  ['Driver Identifier Exemption Justification', faker.lorem.sentence()],
+  ['Local Waste Classification Description', faker.lorem.sentence()],
+  ['Local Waste Classification ID', faker.string.uuid()],
+  ['Vehicle Description', faker.vehicle.vehicle()],
+  ['Captured GPS Latitude', faker.location.latitude()],
+  ['Captured GPS Longitude', faker.location.longitude()],
   {
-    name: VEHICLE_LICENSE_PLATE,
+    name: 'Vehicle License Plate',
     sensitive: true,
     value: 'FKE1A23' as LicensePlate,
   },
-  [VEHICLE_TYPE, stubEnumValue(DocumentEventVehicleType)],
+  ['Vehicle Type', stubEnumValue(DocumentEventVehicleType)],
 ];
 
 export const stubBoldMassIDPickUpEvent = ({
@@ -107,7 +63,7 @@ export const stubBoldMassIDPickUpEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: PICK_UP,
+        name: 'Pick-up',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultPickUpAttributes, metadataAttributes),
@@ -116,14 +72,14 @@ export const stubBoldMassIDPickUpEvent = ({
   );
 
 const defaultTransportManifestWithExemptionAttributes: MetadataAttributeParameter[] =
-  [[EXEMPTION_JUSTIFICATION, faker.lorem.sentence()]];
+  [['Exemption Justification', faker.lorem.sentence()]];
 
 const defaultTransportManifestAttributes: MetadataAttributeParameter[] = [
-  [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.MTR],
+  ['Document Number', faker.string.uuid()],
+  ['Document Type', 'MTR'],
   {
     format: DATE,
-    name: ISSUE_DATE,
+    name: 'Issue Date',
     value: format(faker.date.recent(), 'yyyy-MM-dd'),
   },
 ];
@@ -148,11 +104,11 @@ export const stubBoldMassIDTransportManifestEvent = ({
             ? []
             : [
                 stubDocumentEventAttachment({
-                  label: DocumentEventAttachmentLabel.TRANSPORT_MANIFEST,
+                  label: 'Transport Manifest',
                 }),
               ],
         ...partialDocumentEvent,
-        name: TRANSPORT_MANIFEST,
+        name: 'Transport Manifest',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultAttributes, metadataAttributes),
@@ -162,36 +118,39 @@ export const stubBoldMassIDTransportManifestEvent = ({
 };
 
 const defaultWeighingAttributes: MetadataAttributeParameter[] = [
-  [DESCRIPTION, faker.lorem.sentence()],
-  [WEIGHING_CAPTURE_METHOD, stubEnumValue(DocumentEventWeighingCaptureMethod)],
-  [SCALE_TYPE, stubEnumValue(DocumentEventScaleType)],
-  [SCALE_ACCREDITATION, { documentId: faker.string.uuid() }],
+  ['Description', faker.lorem.sentence()],
   [
-    CONTAINER_TYPE,
+    'Weighing Capture Method',
+    stubEnumValue(DocumentEventWeighingCaptureMethod),
+  ],
+  ['Scale Type', stubEnumValue(DocumentEventScaleType)],
+  ['Scale Validation', { documentId: faker.string.uuid() }],
+  [
+    'Container Type',
     faker.helpers.arrayElement(
       Object.values(DocumentEventContainerType).filter(
-        (type) => type !== DocumentEventContainerType.TRUCK,
+        (type) => type !== DocumentEventContainerType.Truck,
       ),
     ),
   ],
-  [CONTAINER_QUANTITY, faker.number.int({ min: 1 })],
+  ['Container Quantity', faker.number.int({ min: 1 })],
   {
     format: KILOGRAM,
-    name: CONTAINER_CAPACITY,
+    name: 'Container Capacity',
     value: faker.number.float({ min: 1 }),
   },
   {
     format: KILOGRAM,
-    name: GROSS_WEIGHT,
+    name: 'Gross Weight',
     value: faker.number.float({ min: 1 }),
   },
   {
     format: KILOGRAM,
-    name: TARE,
+    name: 'Tare',
     value: faker.number.float({ min: 1 }),
   },
   {
-    name: VEHICLE_LICENSE_PLATE,
+    name: 'Vehicle License Plate',
     sensitive: true,
     value: 'FKE1A23' as LicensePlate,
   },
@@ -205,7 +164,7 @@ export const stubBoldMassIDWeighingEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: WEIGHING,
+        name: 'Weighing',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultWeighingAttributes, metadataAttributes),
@@ -214,11 +173,11 @@ export const stubBoldMassIDWeighingEvent = ({
   );
 
 const defaultDropOffAttributes: MetadataAttributeParameter[] = [
-  [RECEIVING_OPERATOR_IDENTIFIER, faker.string.uuid()],
-  [RECYCLER_OPERATOR_IDENTIFIER, faker.string.uuid()],
-  [DESCRIPTION, faker.lorem.sentence()],
-  [CAPTURED_GPS_LATITUDE, faker.location.latitude()],
-  [CAPTURED_GPS_LONGITUDE, faker.location.longitude()],
+  ['Receiving Operator Identifier', faker.string.uuid()],
+  ['Recycler Operator Identifier', faker.string.uuid()],
+  ['Description', faker.lorem.sentence()],
+  ['Captured GPS Latitude', faker.location.latitude()],
+  ['Captured GPS Longitude', faker.location.longitude()],
 ];
 
 export const stubBoldMassIDDropOffEvent = ({
@@ -229,7 +188,7 @@ export const stubBoldMassIDDropOffEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: DROP_OFF,
+        name: 'Drop-off',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultDropOffAttributes, metadataAttributes),
@@ -238,14 +197,14 @@ export const stubBoldMassIDDropOffEvent = ({
   );
 
 const defaultRecyclingManifestWithExemptionAttributes: MetadataAttributeParameter[] =
-  [[EXEMPTION_JUSTIFICATION, faker.lorem.sentence()]];
+  [['Exemption Justification', faker.lorem.sentence()]];
 
 const defaultRecyclingManifestAttributes: MetadataAttributeParameter[] = [
-  [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.CDF],
+  ['Document Number', faker.string.uuid()],
+  ['Document Type', 'CDF'],
   {
     format: DATE,
-    name: ISSUE_DATE,
+    name: 'Issue Date',
     value: format(faker.date.recent(), 'yyyy-MM-dd'),
   },
 ];
@@ -270,11 +229,11 @@ export const stubBoldMassIDRecyclingManifestEvent = ({
             ? []
             : [
                 stubDocumentEventAttachment({
-                  label: DocumentEventAttachmentLabel.RECYCLING_MANIFEST,
+                  label: 'Recycling Manifest',
                 }),
               ],
         ...partialDocumentEvent,
-        name: RECYCLING_MANIFEST,
+        name: 'Recycling Manifest',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultAttributes, metadataAttributes),
@@ -291,7 +250,7 @@ export const stubBoldMassIDRecycledEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: RECYCLED,
+        name: 'Recycled',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes([], metadataAttributes),
@@ -300,8 +259,8 @@ export const stubBoldMassIDRecycledEvent = ({
   );
 
 const defaultSortingAttributes: MetadataAttributeParameter[] = [
-  [DESCRIPTION, faker.lorem.sentence()],
-  [SORTING_FACTOR, faker.number.float({ max: 1, min: 0 })],
+  ['Description', faker.lorem.sentence()],
+  ['Sorting Factor', faker.number.float({ max: 1, min: 0 })],
 ];
 
 export const stubBoldMassIDSortingEvent = ({
@@ -312,7 +271,7 @@ export const stubBoldMassIDSortingEvent = ({
     stubDocumentEventWithMetadataAttributes(
       {
         ...partialDocumentEvent,
-        name: SORTING,
+        name: 'Sorting',
         value: partialDocumentEvent?.value ?? faker.number.float({ min: 1 }),
       },
       mergeMetadataAttributes(defaultSortingAttributes, metadataAttributes),
@@ -320,36 +279,33 @@ export const stubBoldMassIDSortingEvent = ({
     metadataAttributes,
   );
 
-export type BoldMassIDExternalEventsMap = Map<
-  DocumentEventName | string,
-  DocumentEvent
->;
+export type BoldMassIDExternalEventsMap = Map<string, DocumentEvent>;
 export type BoldMassIDExternalEventsObject = Partial<
   Record<DocumentEventName, DocumentEvent>
 >;
 
 export const boldMassIDExternalEventsMap: BoldMassIDExternalEventsMap = new Map(
   [
-    [PICK_UP, stubBoldMassIDPickUpEvent()],
+    ['Pick-up', stubBoldMassIDPickUpEvent()],
     [
-      TRANSPORT_MANIFEST,
+      'Transport Manifest',
       stubBoldMassIDTransportManifestEvent({
         withExemptionJustification: false,
       }),
     ],
-    [WEIGHING, stubBoldMassIDWeighingEvent()],
+    ['Weighing', stubBoldMassIDWeighingEvent()],
     // eslint-disable-next-line perfectionist/sort-maps
-    [DROP_OFF, stubBoldMassIDDropOffEvent()],
-    [SORTING, stubBoldMassIDSortingEvent()],
+    ['Drop-off', stubBoldMassIDDropOffEvent()],
+    ['Sorting', stubBoldMassIDSortingEvent()],
     // eslint-disable-next-line perfectionist/sort-maps
     [
-      RECYCLING_MANIFEST,
+      'Recycling Manifest',
       stubBoldMassIDRecyclingManifestEvent({
         withExemptionJustification: false,
       }),
     ],
     // eslint-disable-next-line perfectionist/sort-maps
-    [RECYCLED, stubBoldMassIDRecycledEvent()],
+    ['Recycled', stubBoldMassIDRecycledEvent()],
   ],
 );
 
@@ -366,7 +322,7 @@ export const stubBoldMassIDDocument = ({
       {
         subtype: stubEnumValue(MassIDOrganicSubtype),
         ...partialDocument,
-        category: MASS_ID,
+        category: 'MassID',
         currentValue: isNil(partialDocument?.currentValue)
           ? faker.number.float({ min: 1 })
           : partialDocument.currentValue,
@@ -374,8 +330,8 @@ export const stubBoldMassIDDocument = ({
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        measurementUnit: MeasurementUnit.KG,
-        type: DocumentType.ORGANIC,
+        measurementUnit: 'kg',
+        type: 'Organic',
       },
       false,
     ),

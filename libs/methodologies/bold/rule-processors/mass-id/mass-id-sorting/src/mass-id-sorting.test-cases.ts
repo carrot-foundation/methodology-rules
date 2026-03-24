@@ -16,15 +16,9 @@ import {
 import {
   type Document,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  type DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
-  type MethodologyParticipant,
-} from '@carrot-fndn/shared/types';
+import { type MethodologyParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
 
@@ -36,36 +30,25 @@ import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const processorErrors = new MassIDSortingProcessorErrors();
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const {
-  ACCREDITATION_CONTEXT,
-  DROP_OFF,
-  EMISSION_AND_COMPOSTING_METRICS,
-  SORTING,
-} = DocumentEventName;
-const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
-const { CUBIC_METER, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
-
 // Helper functions to reduce duplication
 const createAccreditationDocuments = (sortingFactor: number) =>
   new Map([
     [
-      RECYCLER,
+      'Recycler',
       {
         externalEventsMap: {
-          [ACCREDITATION_CONTEXT]: stubDocumentEvent({
-            name: ACCREDITATION_CONTEXT,
+          ['Accreditation Context']: stubDocumentEvent({
+            name: 'Accreditation Context',
             participant: actorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
+              'Recycler',
             )!,
           }),
-          [EMISSION_AND_COMPOSTING_METRICS]:
+          ['Emissions & Composting Metrics']:
             stubBoldEmissionAndCompostingMetricsEvent({
-              metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
+              metadataAttributes: [['Sorting Factor', sortingFactor]],
               partialDocumentEvent: {
                 participant: actorParticipants.get(
-                  MassIDDocumentActorType.RECYCLER,
+                  'Recycler',
                 )!,
               },
             }),
@@ -79,13 +62,13 @@ const createWeightAttributes = (
   deductedWeight: number,
 ) => [
   {
-    format: KILOGRAM,
-    name: GROSS_WEIGHT,
+    format: 'KILOGRAM',
+    name: 'Gross Weight',
     value: grossWeight,
   },
   {
-    format: KILOGRAM,
-    name: DEDUCTED_WEIGHT,
+    format: 'KILOGRAM',
+    name: 'Deducted Weight',
     value: deductedWeight,
   },
 ];
@@ -97,16 +80,16 @@ const createMassIDEvents = (
   sortingValue?: number,
   includeDescription = true,
 ) => ({
-  [DROP_OFF]: stubBoldMassIDDropOffEvent({
+  ['Drop-off']: stubBoldMassIDDropOffEvent({
     partialDocumentEvent: { value: valueBeforeSorting },
   }),
-  [SORTING]: stubBoldMassIDSortingEvent({
+  ['Sorting']: stubBoldMassIDSortingEvent({
     metadataAttributes: [
       ...createWeightAttributes(grossWeight, deductedWeight),
       ...(includeDescription
         ? []
         : [
-            [DESCRIPTION, undefined] as [DocumentEventAttributeName, undefined],
+            ['Description', undefined] as [DocumentEventAttributeName, undefined],
           ]),
     ],
     ...(sortingValue !== undefined && {
@@ -142,17 +125,17 @@ const createErrorTestCase = (
 const createWeightAttributesWithFormat = (
   grossWeight: number,
   deductedWeight: number,
-  grossFormat = KILOGRAM,
-  deductedFormat = KILOGRAM,
+  grossFormat = 'KILOGRAM',
+  deductedFormat = 'KILOGRAM',
 ) => [
   {
     format: grossFormat,
-    name: GROSS_WEIGHT,
+    name: 'Gross Weight',
     value: grossWeight,
   },
   {
     format: deductedFormat,
-    name: DEDUCTED_WEIGHT,
+    name: 'Deducted Weight',
     value: deductedWeight,
   },
 ];
@@ -192,21 +175,21 @@ const {
 } = new BoldStubsBuilder()
   .createMassIDDocuments({
     externalEventsMap: {
-      [DROP_OFF]: stubBoldMassIDDropOffEvent({
+      ['Drop-off']: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
           value: 0,
         },
       }),
-      [SORTING]: stubBoldMassIDSortingEvent({
+      ['Sorting']: stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
-            format: KILOGRAM,
-            name: GROSS_WEIGHT,
+            format: 'KILOGRAM',
+            name: 'Gross Weight',
             value: valueBeforeSorting,
           },
           {
-            format: KILOGRAM,
-            name: DEDUCTED_WEIGHT,
+            format: 'KILOGRAM',
+            name: 'Deducted Weight',
             value: faker.number.float({
               max: valueBeforeSorting / 2,
               min: 0.1,
@@ -358,16 +341,16 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
 const invalidSortingValue = new BoldStubsBuilder()
   .createMassIDDocuments({
     externalEventsMap: {
-      [SORTING]: stubBoldMassIDSortingEvent({
+      ['Sorting']: stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
-            format: KILOGRAM,
-            name: GROSS_WEIGHT,
+            format: 'KILOGRAM',
+            name: 'Gross Weight',
             value: faker.number.float({ min: 1 }),
           },
           {
-            format: KILOGRAM,
-            name: DEDUCTED_WEIGHT,
+            format: 'KILOGRAM',
+            name: 'Deducted Weight',
             value: faker.number.float({ min: 0.1 }),
           },
         ],
@@ -405,17 +388,17 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
   ),
   createErrorTestCase(
-    `The ${RECYCLER} accreditation does not exist`,
+    'The Recycler accreditation does not exist',
     [massIDDocument],
     processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
   ),
   createErrorTestCase(
-    `The MassID document does not contain a ${SORTING} event`,
+    'The MassID document does not contain a Sorting event',
     [
       {
         ...massIDDocument,
         externalEvents: massIDDocument.externalEvents?.filter(
-          (event) => event.name !== SORTING.toString(),
+          (event) => event.name !== 'Sorting',
         ),
       },
       ...participantsAccreditationDocuments.values(),
@@ -432,27 +415,27 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
   ),
   createErrorTestCase(
-    `The ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
+    'The Recycler accreditation does not contain a Sorting Factor attribute',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(
             valueBeforeSorting,
             deductedWeight,
           ),
           partialDocumentEvent: {
             value: massIDDocument.externalEvents?.find(
-              eventNameIsAnyOf([DROP_OFF]),
+              eventNameIsAnyOf(['Drop-off']),
             )?.value,
           },
         }),
       }),
       {
-        ...participantsAccreditationDocuments.get(RECYCLER),
+        ...participantsAccreditationDocuments.get('Recycler'),
         externalEvents: participantsAccreditationDocuments
-          .get(RECYCLER)
+          .get('Recycler')
           ?.externalEvents?.filter(
-            (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
+            (event) => !event.name.includes('Emissions & Composting Metrics'),
           ),
       } as Document,
     ],
@@ -467,18 +450,18 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The gross weight has invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             10,
             deductedWeight,
-            CUBIC_METER,
-            KILOGRAM,
+            'CUBIC_METER',
+            'KILOGRAM',
           ),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -491,18 +474,18 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The deducted weight has invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             valueBeforeSorting,
             5,
-            KILOGRAM,
-            CUBIC_METER,
+            'KILOGRAM',
+            'CUBIC_METER',
           ),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -515,13 +498,13 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The gross weight is not greater than 0',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(0, deductedWeight),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -534,13 +517,13 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The deducted weight is not greater than 0',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(valueBeforeSorting, 0),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),
@@ -553,18 +536,18 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The gross weight has valid value but invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             15,
             8,
-            CUBIC_METER,
-            KILOGRAM,
+            'CUBIC_METER',
+            'KILOGRAM',
           ),
           partialDocumentEvent: { value: 7 },
         }),
@@ -577,18 +560,18 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The deducted weight has valid value but invalid format',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributesWithFormat(
             15,
             8,
-            KILOGRAM,
-            CUBIC_METER,
+            'KILOGRAM',
+            'CUBIC_METER',
           ),
           partialDocumentEvent: { value: 7 },
         }),
@@ -601,13 +584,13 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     'The deducted weight is greater than or equal to gross weight',
     [
       modifyDocumentEvents(massIDDocument, {
-        [String(DROP_OFF)]: {
+        ['Drop-off']: {
           ...massIDDocument.externalEvents?.find(
-            (e) => e.name === String(DROP_OFF),
+            (e) => e.name === 'Drop-off',
           ),
           value: valueBeforeSorting,
         },
-        [String(SORTING)]: stubBoldMassIDSortingEvent({
+        ['Sorting']: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(5, 10),
           partialDocumentEvent: { value: calculatedSortingValue },
         }),

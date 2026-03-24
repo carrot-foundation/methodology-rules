@@ -16,15 +16,11 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
-  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyApprovedExceptionType,
-  type MethodologyParticipant,
-} from '@carrot-fndn/shared/types';
+import { type MethodologyParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -44,18 +40,22 @@ interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
   massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
 }
 
-const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+const { Recycler: RECYCLER, 'Waste Generator': WASTE_GENERATOR } =
+  MassIDDocumentActorType;
 const {
-  ACCREDITATION_CONTEXT,
-  ACCREDITATION_RESULT,
+  'Accreditation Context': ACCREDITATION_CONTEXT,
+  'Accreditation Result': ACCREDITATION_RESULT,
   ACTOR,
-  DROP_OFF,
-  FACILITY_ADDRESS,
-  LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-  PICK_UP,
+  'Drop-off': DROP_OFF,
+  'Facility Address': FACILITY_ADDRESS,
+  'Legal & Administrative Compliance': LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
+  'Pick-up': PICK_UP,
 } = DocumentEventName;
-const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  DocumentEventAttributeName;
+const {
+  'Approved Exceptions': APPROVED_EXCEPTIONS,
+  'Captured GPS Latitude': CAPTURED_GPS_LATITUDE,
+  'Captured GPS Longitude': CAPTURED_GPS_LONGITUDE,
+} = DocumentEventAttributeName;
 
 const actorParticipants = new Map(
   MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
@@ -168,27 +168,25 @@ const manifestInvalidWasteGeneratorAddressDistance = calculateDistance(
 );
 
 const createGpsException = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
-  attributeName:
-    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
-    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+  eventName: 'Drop-off' | 'Pick-up',
+  attributeName: 'Captured GPS Latitude' | 'Captured GPS Longitude',
   reason: string,
   validUntil?: string,
 ) => ({
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID,
+      Category: 'MassID',
     },
     Event: eventName.toString(),
   },
   'Attribute Name': attributeName.toString(),
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  'Exception Type': 'Exemption for Mandatory Attribute',
   Reason: reason,
   ...(validUntil && { 'Valid Until': validUntil }),
 });
 
 const createGpsExceptions = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName: 'Drop-off' | 'Pick-up',
   includeLatitude = true,
   includeLongitude = true,
   validUntil?: string,
@@ -241,7 +239,7 @@ const createAccreditationDocumentWithAddress = (
 const createAccreditationDocumentWithGpsExceptions = (
   address: ReturnType<typeof stubAddress>,
   participant: MethodologyParticipant,
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName: 'Drop-off' | 'Pick-up',
   includeLatitude = true,
   includeLongitude = true,
   validUntil?: string,
@@ -274,7 +272,7 @@ const createAccreditationDocumentWithGpsExceptions = (
 });
 
 const createMassIDEvent = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName: 'Drop-off' | 'Pick-up',
   address: ReturnType<typeof stubAddress>,
   participant: MethodologyParticipant,
   gpsLatitude?: number,

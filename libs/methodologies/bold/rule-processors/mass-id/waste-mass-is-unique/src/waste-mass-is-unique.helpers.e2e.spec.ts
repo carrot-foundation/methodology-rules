@@ -9,13 +9,8 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import {
   type LicensePlate,
   type MethodologyDocument,
-  MethodologyDocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -23,11 +18,6 @@ import {
   type EventsData,
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
-
-const { ACTOR } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 describe('Waste Mass Is Unique Helpers E2E', () => {
   let auditApiService: AuditApiService;
@@ -40,19 +30,19 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
     pickUpEvent: stubBoldMassIDPickUpEvent({
       metadataAttributes: [
         {
-          name: VEHICLE_LICENSE_PLATE,
+          name: 'Vehicle License Plate',
           value: vehicleLicensePlate,
         },
       ],
     }),
     recyclerEvent: stubDocumentEvent({
-      label: RECYCLER,
-      name: ACTOR,
+      label: 'Recycler',
+      name: 'ACTOR',
     }),
     vehicleLicensePlate,
     wasteGeneratorEvent: stubDocumentEvent({
-      label: WASTE_GENERATOR,
-      name: ACTOR,
+      label: 'Waste Generator',
+      name: 'ACTOR',
     }),
   };
 
@@ -62,10 +52,10 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
     const { massIDDocument } = new BoldStubsBuilder()
       .createMassIDDocuments({
         externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: eventsData.recyclerEvent,
-          [`${ACTOR}-${WASTE_GENERATOR}`]: eventsData.wasteGeneratorEvent,
-          [DROP_OFF]: eventsData.dropOffEvent,
-          [PICK_UP]: eventsData.pickUpEvent,
+          'ACTOR-Recycler': eventsData.recyclerEvent,
+          'ACTOR-Waste Generator': eventsData.wasteGeneratorEvent,
+          'Drop-off': eventsData.dropOffEvent,
+          'Pick-up': eventsData.pickUpEvent,
         },
       })
       .build();
@@ -90,13 +80,13 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
           dropOffEvent: stubBoldMassIDDropOffEvent(),
           pickUpEvent: stubBoldMassIDPickUpEvent(),
           recyclerEvent: stubDocumentEvent({
-            label: RECYCLER,
-            name: ACTOR,
+            label: 'Recycler',
+            name: 'ACTOR',
           }),
           vehicleLicensePlate: 'DEF2G45' as LicensePlate,
           wasteGeneratorEvent: stubDocumentEvent({
-            label: WASTE_GENERATOR,
-            name: ACTOR,
+            label: 'Waste Generator',
+            name: 'ACTOR',
           }),
         },
       });
@@ -145,21 +135,21 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.dropOffEvent,
-              name: MOVE,
+              name: 'MOVE',
             },
             [['move-type', 'Drop-off']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.recyclerEvent,
-              name: ACTOR,
+              name: 'ACTOR',
             },
             [['actor-type', 'RECYCLER']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.wasteGeneratorEvent,
-              name: ACTOR,
+              name: 'ACTOR',
             },
             [['actor-type', 'SOURCE']],
           ),

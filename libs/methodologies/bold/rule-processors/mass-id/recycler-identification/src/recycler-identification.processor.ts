@@ -15,9 +15,6 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
 
-const { ACTOR } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-
 type Subject = {
   recyclerActorEvents?: DocumentEvent[] | undefined;
 };
@@ -48,7 +45,9 @@ export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const recyclerActorEvents = document.externalEvents?.filter(
-      (event) => eventHasLabel(event, RECYCLER) && eventHasName(event, ACTOR),
+      (event) =>
+        eventHasLabel(event, MethodologyDocumentEventLabel.Recycler) &&
+        eventHasName(event, DocumentEventName.ACTOR),
     );
 
     return {

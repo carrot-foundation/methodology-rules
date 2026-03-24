@@ -1,7 +1,6 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
-import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -103,7 +102,7 @@ export const addParticipantRemainder = (options: {
   const { actors, remainder } = options;
 
   for (const [key, actor] of actors) {
-    if (actor.actorType === RewardsDistributionActorType.NETWORK) {
+    if (actor.actorType === 'Network') {
       actors.set(key, {
         ...actor,
         amount: remainder.amount.plus(actor.amount).toString(),
@@ -119,7 +118,7 @@ const calculateCertificateTotalValue = (certificateValues: BigNumber[]) =>
   sumBigNumbers(certificateValues);
 
 export const getAggregateParticipantKey = (
-  actorType: RewardsDistributionActorType | string | undefined,
+  actorType: string | undefined,
   participantId: string | undefined,
 ): string => {
   if (!actorType || !participantId) {

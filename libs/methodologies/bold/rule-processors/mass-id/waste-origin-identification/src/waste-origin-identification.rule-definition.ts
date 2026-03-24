@@ -7,8 +7,8 @@ export const ruleDefinition = {
     'Validates waste origin identification consistency, ensuring that identified origins have exactly one Waste Generator ACTOR event and unidentified origins have none.',
   events: [
     DocumentEventName.ACTOR,
-    DocumentEventName.PICK_UP,
-    DocumentEventName.WASTE_GENERATOR,
+    DocumentEventName['Pick-up'],
+    DocumentEventName['Waste Generator'],
   ],
   name: 'Waste Origin Identification',
   slug: 'waste-origin-identification',

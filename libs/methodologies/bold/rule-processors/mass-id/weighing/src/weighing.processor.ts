@@ -100,7 +100,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }): string {
     const isTransportManifest =
       weighingValues.weighingCaptureMethod ===
-      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
+      DocumentEventWeighingCaptureMethod['Transport Manifest'];
 
     let passMessage = '';
 
@@ -298,7 +298,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
         String(attachment.label) ===
-        String(DocumentEventAttachmentLabel.WEIGHING_TICKET),
+        String(DocumentEventAttachmentLabel['Weighing Ticket']),
     );
 
     if (!scaleTicketAttachment) {
@@ -339,7 +339,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === DocumentSubtype.Recycler
       ) {
         recyclerAccreditationDocument = document;
       }

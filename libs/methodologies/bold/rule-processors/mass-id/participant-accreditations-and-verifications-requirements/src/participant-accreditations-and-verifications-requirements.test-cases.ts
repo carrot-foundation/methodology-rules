@@ -9,12 +9,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
-  DocumentCategory,
-  DocumentEventAccreditationStatus,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
-  MassIDDocumentActorType,
+  type DocumentEventName,
+  type MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { addDays, subDays } from 'date-fns';
@@ -22,30 +18,24 @@ import { addDays, subDays } from 'date-fns';
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
-const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
-  MassIDDocumentActorType;
-const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } = DocumentEventName;
-const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
-  DocumentEventAttributeName;
-
 const processorError =
   new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors();
 
 const createValidAccreditationResultEvent = () =>
   stubBoldAccreditationResultEvent({
     metadataAttributes: [
-      [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
-      [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
-      [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+      ['Effective Date', subDays(new Date(), 10).toISOString()],
+      ['Expiration Date', addDays(new Date(), 10).toISOString()],
+      ['Accreditation Status', 'Approved'],
     ],
   });
 
 const createExpiredAccreditationResultEvent = () =>
   stubBoldAccreditationResultEvent({
     metadataAttributes: [
-      [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
-      [EXPIRATION_DATE, subDays(new Date(), 2).toISOString()],
-      [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+      ['Effective Date', subDays(new Date(), 10).toISOString()],
+      ['Expiration Date', subDays(new Date(), 2).toISOString()],
+      ['Accreditation Status', 'Approved'],
     ],
   });
 
@@ -102,7 +92,7 @@ const createMassIDAuditWithLinkEvent = (
   externalEvents: [
     ...(massIDAuditDocument.externalEvents ?? []),
     stubDocumentEvent({
-      name: LINK,
+      name: 'LINK',
       relatedDocument: {
         ...mapDocumentRelation(secondAccreditation),
         bidirectional: false,
@@ -124,7 +114,7 @@ const createMultipleValidAccreditationsTestData = (
           actorType,
           {
             externalEventsMap: new Map([
-              [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+              ['Accreditation Result', createValidAccreditationResultEvent()],
             ]),
           },
         ],
@@ -137,19 +127,19 @@ const createMultipleValidAccreditationsTestData = (
 
   const secondAccreditation = stubDocument(
     {
-      category: DocumentCategory.METHODOLOGY,
+      category: 'Methodology',
       externalEvents: [
         stubBoldAccreditationResultEvent({
           metadataAttributes: [
-            [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
-            [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-            [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ['Effective Date', subDays(new Date(), 5).toISOString()],
+            ['Expiration Date', addDays(new Date(), 5).toISOString()],
+            ['Accreditation Status', 'Approved'],
           ],
         }),
       ],
       primaryParticipant: originalAccreditation.primaryParticipant,
       subtype: actorType,
-      type: DocumentType.PARTICIPANT_ACCREDITATION,
+      type: 'Participant Accreditation',
     },
     false, // stubExternalEvents = false to avoid random events
   );
@@ -169,82 +159,82 @@ const massIDAuditWithAccreditationsAndVerifications = new BoldStubsBuilder()
   .build();
 
 const massIDWithExpiredAccreditation = createMassIDWithActorAccreditation(
-  INTEGRATOR,
-  new Map([[ACCREDITATION_RESULT, createExpiredAccreditationResultEvent()]]),
+  'Integrator',
+  new Map([['Accreditation Result', createExpiredAccreditationResultEvent()]]),
 );
 
 const massIDWithWasteGeneratorNoResult = createMassIDWithActorAccreditation(
-  WASTE_GENERATOR,
+  'Waste Generator',
   new Map([
     [
-      ACCREDITATION_CONTEXT,
+      'Accreditation Context',
       stubDocumentEvent({
-        name: ACCREDITATION_CONTEXT,
+        name: 'Accreditation Context',
       }),
     ],
   ]),
 );
 
 const massIDWithWasteGeneratorValidResult = createMassIDWithActorAccreditation(
-  WASTE_GENERATOR,
-  new Map([[ACCREDITATION_RESULT, createValidAccreditationResultEvent()]]),
+  'Waste Generator',
+  new Map([['Accreditation Result', createValidAccreditationResultEvent()]]),
 );
 
 const massIDWithWasteGeneratorInvalidResult =
   createMassIDWithActorAccreditation(
-    WASTE_GENERATOR,
-    new Map([[ACCREDITATION_RESULT, createExpiredAccreditationResultEvent()]]),
+    'Waste Generator',
+    new Map([['Accreditation Result', createExpiredAccreditationResultEvent()]]),
   );
 
 const {
   massIDWithMultipleValid: massIDWithWasteGeneratorMultipleValid,
   secondAccreditation: wasteGeneratorSecondAccreditation,
-} = createMultipleValidAccreditationsTestData(WASTE_GENERATOR);
+} = createMultipleValidAccreditationsTestData('Waste Generator');
 
 const {
   massIDWithMultipleValid: massIDWithProcessorMultipleValid,
   originalAccreditation: processorOriginalAccreditation,
   secondAccreditation: processorSecondAccreditation,
-} = createMultipleValidAccreditationsTestData(PROCESSOR);
+} = createMultipleValidAccreditationsTestData('Processor');
 
 // Create a participant that has both PROCESSOR and RECYCLER roles
-const sharedParticipant = stubParticipant({ type: PROCESSOR });
+const sharedParticipant = stubParticipant({ type: 'Processor' });
 
 const massIDWithParticipantMultipleRoles =
   createMassIDWithMultipleActorAccreditations(
     new Map([
       [
-        INTEGRATOR,
+        'Integrator',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
       [
-        PROCESSOR,
+        'Processor',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
       [
-        RECYCLER,
+        'Recycler',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
       [
-        WASTE_GENERATOR,
+        'Waste Generator',
         {
           externalEventsMap: new Map([
             [
-              ACCREDITATION_CONTEXT,
+              'Accreditation Context',
               stubDocumentEvent({
-                name: ACCREDITATION_CONTEXT,
+                name: 'Accreditation Context',
               }),
             ],
           ]),
@@ -252,11 +242,11 @@ const massIDWithParticipantMultipleRoles =
       ],
     ]),
     new Map([
-      [HAULER, stubParticipant({ type: HAULER })],
-      [INTEGRATOR, stubParticipant({ type: INTEGRATOR })],
-      [PROCESSOR, sharedParticipant],
-      [RECYCLER, sharedParticipant],
-      [WASTE_GENERATOR, stubParticipant({ type: WASTE_GENERATOR })],
+      ['Hauler', stubParticipant({ type: 'Hauler' })],
+      ['Integrator', stubParticipant({ type: 'Integrator' })],
+      ['Processor', sharedParticipant],
+      ['Recycler', sharedParticipant],
+      ['Waste Generator', stubParticipant({ type: 'Waste Generator' })],
     ]),
   );
 
@@ -264,35 +254,35 @@ const massIDWithWasteGeneratorButNoAccreditation =
   createMassIDWithMultipleActorAccreditations(
     new Map([
       [
-        INTEGRATOR,
+        'Integrator',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
       [
-        PROCESSOR,
+        'Processor',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
       [
-        RECYCLER,
+        'Recycler',
         {
           externalEventsMap: new Map([
-            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+            ['Accreditation Result', createValidAccreditationResultEvent()],
           ]),
         },
       ],
     ]),
     new Map([
-      [INTEGRATOR, stubParticipant({ type: INTEGRATOR })],
-      [PROCESSOR, stubParticipant({ type: PROCESSOR })],
-      [RECYCLER, stubParticipant({ type: RECYCLER })],
-      [WASTE_GENERATOR, stubParticipant({ type: WASTE_GENERATOR })],
+      ['Integrator', stubParticipant({ type: 'Integrator' })],
+      ['Processor', stubParticipant({ type: 'Processor' })],
+      ['Recycler', stubParticipant({ type: 'Recycler' })],
+      ['Waste Generator', stubParticipant({ type: 'Waste Generator' })],
     ]),
   );
 
@@ -350,13 +340,13 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
         massIDAuditWithAccreditationsAndVerifications.massIDDocument,
         ...[
           ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
-        ].filter((document) => document.subtype !== INTEGRATOR),
+        ].filter((document) => document.subtype !== 'Integrator'),
       ],
       massIDAuditDocument:
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-          [INTEGRATOR],
+          ['Integrator'],
         ),
       resultStatus: 'FAILED',
       scenario: "Some participants' accreditation documents were not found",
@@ -396,7 +386,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       massIDAuditDocument: massIDWithExpiredAccreditation.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-          [INTEGRATOR],
+          ['Integrator'],
         ),
       resultStatus: 'FAILED',
       scenario:
@@ -489,7 +479,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultComment:
         processorError.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
           processorOriginalAccreditation.primaryParticipant.id,
-          PROCESSOR,
+          'Processor',
         ),
       resultStatus: 'FAILED',
       scenario:

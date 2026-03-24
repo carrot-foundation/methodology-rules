@@ -11,21 +11,11 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventContainerType,
-  DocumentEventName,
   DocumentEventScaleType,
-  DocumentEventWeighingCaptureMethod,
-  MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import {
-  ApprovedException,
-  MethodologyApprovedExceptionType,
-  MethodologyDocumentEventAttributeFormat,
-} from '@carrot-fndn/shared/types';
+import { type ApprovedException } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -36,32 +26,14 @@ import {
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 
-const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
-  DocumentEventName;
-const {
-  APPROVED_EXCEPTIONS,
-  CONTAINER_CAPACITY,
-  CONTAINER_QUANTITY,
-  CONTAINER_TYPE,
-  DESCRIPTION,
-  GROSS_WEIGHT,
-  REQUIRED_ADDITIONAL_VERIFICATIONS,
-  SCALE_TYPE,
-  TARE,
-  VEHICLE_LICENSE_PLATE,
-  WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
-const { RECYCLER } = MassIDDocumentActorType;
-const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
-
 const scaleType = stubEnumValue(DocumentEventScaleType);
-const twoStepScaleType = DocumentEventScaleType.WEIGHBRIDGE;
+const twoStepScaleType = DocumentEventScaleType['Weighbridge (Truck Scale)'];
 const scaleTypeMismatch = faker.string.sample();
 const weighingCaptureMethodMismatch = faker.string.sample();
 const twoStepWeighingEventParticipant = stubParticipant();
 
 // Deterministic values for manifestExample test cases
-const MANIFEST_SCALE_TYPE = DocumentEventScaleType.FLOOR_SCALE;
+const MANIFEST_SCALE_TYPE = 'Floor Scale';
 const MANIFEST_TWO_STEP_PARTICIPANT = stubParticipant({
   id: '550e8400-e29b-41d4-a716-446655440001',
 });
@@ -88,12 +60,12 @@ const stubBaseAccreditationDocuments = ({
     exceptions.push({
       'Attribute Location': {
         Asset: {
-          Category: DocumentCategory.MASS_ID,
+          Category: 'MassID',
         },
-        Event: WEIGHING,
+        Event: 'Weighing',
       },
-      'Attribute Name': CONTAINER_CAPACITY,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': 'Container Capacity',
+      'Exception Type': 'Exemption for Mandatory Attribute',
       Reason: 'The container capacity is not required for this event',
     });
   }
@@ -102,12 +74,12 @@ const stubBaseAccreditationDocuments = ({
     exceptions.push({
       'Attribute Location': {
         Asset: {
-          Category: DocumentCategory.MASS_ID,
+          Category: 'MassID',
         },
-        Event: WEIGHING,
+        Event: 'Weighing',
       },
-      'Attribute Name': CONTAINER_QUANTITY,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': 'Container Quantity',
+      'Exception Type': 'Exemption for Mandatory Attribute',
       Reason: 'The container quantity is not required for this event',
     });
   }
@@ -116,12 +88,12 @@ const stubBaseAccreditationDocuments = ({
     const tareException: ApprovedException = {
       'Attribute Location': {
         Asset: {
-          Category: DocumentCategory.MASS_ID,
+          Category: 'MassID',
         },
-        Event: WEIGHING,
+        Event: 'Weighing',
       },
-      'Attribute Name': TARE,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': 'Tare',
+      'Exception Type': 'Exemption for Mandatory Attribute',
       Reason:
         'Legacy manual weighing system only captured net weight for TRUCK containers',
     };
@@ -142,29 +114,29 @@ const stubBaseAccreditationDocuments = ({
 
   return new Map([
     [
-      RECYCLER,
+      'Recycler',
       {
         externalEventsMap: {
-          [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
+          ['Accreditation Result']: stubBoldAccreditationResultEvent({
             metadataAttributes: [
               ...(exceptions.length > 0
                 ? ([
-                    [APPROVED_EXCEPTIONS, exceptions],
+                    ['Approved Exceptions', exceptions],
                   ] as MetadataAttributeParameter[])
                 : []),
               ...(additionalVerifications.length > 0
                 ? ([
                     [
-                      REQUIRED_ADDITIONAL_VERIFICATIONS,
+                      'Required Additional Verifications',
                       additionalVerifications,
                     ],
                   ] as MetadataAttributeParameter[])
                 : []),
             ],
           }),
-          [MONITORING_SYSTEMS_AND_EQUIPMENT]:
+          ['Monitoring Systems & Equipment']:
             stubBoldMonitoringSystemsAndEquipmentEvent({
-              metadataAttributes: [[SCALE_TYPE, scaleTypeValue]],
+              metadataAttributes: [['Scale Type', scaleTypeValue]],
             }),
         },
       },
@@ -214,27 +186,27 @@ const mergeAttributes = (
 };
 
 const validWeighingAttributes: MetadataAttributeParameter[] = [
-  [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-  [SCALE_TYPE, scaleType],
-  [CONTAINER_QUANTITY, 1],
-  { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-  { format: KILOGRAM, name: TARE, value: 1 },
+  ['Weighing Capture Method', 'Digital'],
+  ['Scale Type', scaleType],
+  ['Container Quantity', 1],
+  { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+  { format: 'KILOGRAM', name: 'Tare', value: 1 },
 ];
 
 const manifestWeighingAttributes: MetadataAttributeParameter[] = [
-  [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-  [SCALE_TYPE, MANIFEST_SCALE_TYPE],
-  [CONTAINER_QUANTITY, 1],
-  { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-  { format: KILOGRAM, name: TARE, value: 1 },
+  ['Weighing Capture Method', 'Digital'],
+  ['Scale Type', MANIFEST_SCALE_TYPE],
+  ['Container Quantity', 1],
+  { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+  { format: 'KILOGRAM', name: 'Tare', value: 1 },
 ];
 
 const validWeighingAttributesWithoutQuantity: MetadataAttributeParameter[] = [
-  [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-  [SCALE_TYPE, scaleType],
-  [CONTAINER_QUANTITY, undefined],
-  { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-  { format: KILOGRAM, name: TARE, value: 1 },
+  ['Weighing Capture Method', 'Digital'],
+  ['Scale Type', scaleType],
+  ['Container Quantity', undefined],
+  { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+  { format: 'KILOGRAM', name: 'Tare', value: 1 },
 ];
 
 const createTwoStepWeighingEvents = (
@@ -243,19 +215,19 @@ const createTwoStepWeighingEvents = (
   firstEventOverrides: MetadataAttributeParameter[] = [],
   secondEventOverrides: MetadataAttributeParameter[] = firstEventOverrides,
 ) => ({
-  [`${WEIGHING}-2`]: createWeighingEvent(
+  ['Weighing-2']: createWeighingEvent(
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
-      [SCALE_TYPE, scaleTypeValue],
-      [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+      ['Scale Type', scaleTypeValue],
+      ['Container Type', 'Truck'],
       ...firstEventOverrides,
     ]),
     eventValue,
     participant,
   ),
-  [WEIGHING]: createWeighingEvent(
+  ['Weighing']: createWeighingEvent(
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
-      [SCALE_TYPE, scaleTypeValue],
-      [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+      ['Scale Type', scaleTypeValue],
+      ['Container Type', 'Truck'],
       ...secondEventOverrides,
     ]),
     eventValue,
@@ -272,35 +244,35 @@ interface WeighingTestCase extends RuleTestCase {
 export const weighingTestCases: WeighingTestCase[] = [
   {
     massIDDocumentEvents: {
-      [WEIGHING]: undefined,
+      ['Weighing']: undefined,
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
     resultStatus: 'FAILED',
-    scenario: `The MassID document does not have "${WEIGHING}" events`,
+    scenario: `The MassID document does not have "Weighing" events`,
   },
   {
     massIDDocumentEvents: {
-      [`${WEIGHING}-1`]: stubBoldMassIDWeighingEvent(),
-      [`${WEIGHING}-2`]: stubBoldMassIDWeighingEvent(),
-      [`${WEIGHING}-3`]: stubBoldMassIDWeighingEvent(),
+      ['Weighing-1']: stubBoldMassIDWeighingEvent(),
+      ['Weighing-2']: stubBoldMassIDWeighingEvent(),
+      ['Weighing-3']: stubBoldMassIDWeighingEvent(),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has more than two "${WEIGHING}" events`,
+    scenario: `The MassID document has more than two "Weighing" events`,
   },
   {
     accreditationDocuments: new Map([
       [
-        RECYCLER,
+        'Recycler',
         {
           externalEventsMap: {
-            [MONITORING_SYSTEMS_AND_EQUIPMENT]: undefined,
+            ['Monitoring Systems & Equipment']: undefined,
           },
         },
       ],
     ]),
     massIDDocumentEvents: {
-      [WEIGHING]: stubBoldMassIDWeighingEvent({
+      ['Weighing']: stubBoldMassIDWeighingEvent({
         metadataAttributes: validWeighingAttributes,
         partialDocumentEvent: {
           value: eventValue,
@@ -309,86 +281,86 @@ export const weighingTestCases: WeighingTestCase[] = [
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The Recycler Accreditation document does not have a "${SCALE_TYPE}" attribute`,
+    scenario: `The Recycler Accreditation document does not have a "Scale Type" attribute`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_CAPACITY, undefined],
+          ['Container Capacity', undefined],
         ]),
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${CONTAINER_CAPACITY}" attribute is missing`,
+    scenario: `The "Container Capacity" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
-          [CONTAINER_QUANTITY, undefined],
+          ['Container Type', 'Bag'],
+          ['Container Quantity', undefined],
         ]),
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: 'FAILED',
-    scenario: `The "${CONTAINER_QUANTITY}" attribute is missing and the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.BAG}"`,
+    scenario: `The "Container Quantity" attribute is missing and the "Container Type" is "${'Bag'}"`,
   },
   {
     accreditationDocuments: new Map([
       [
-        RECYCLER,
+        'Recycler',
         {
           externalEventsMap: {
-            [ACCREDITATION_RESULT]: undefined,
+            ['Accreditation Result']: undefined,
           },
         },
       ],
     ]),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
+          ['Container Type', 'Bag'],
         ]),
       ),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The "${ACCREDITATION_RESULT}" event is missing`,
+    scenario: `The "Accreditation Result" event is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_QUANTITY, 1],
-          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          ['Container Quantity', 1],
+          ['Container Type', 'Truck'],
         ]),
       ),
     },
     resultComment: INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY,
     resultStatus: 'FAILED',
-    scenario: `The "${CONTAINER_QUANTITY}" attribute is defined, but the "${CONTAINER_TYPE}" is "${DocumentEventContainerType.TRUCK}"`,
+    scenario: `The "Container Quantity" attribute is defined, but the "Container Type" is "${'Truck'}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [[GROSS_WEIGHT, undefined]]),
+      ['Weighing']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [['Gross Weight', undefined]]),
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(undefined as unknown)} ${INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${GROSS_WEIGHT}" attribute is missing`,
+    scenario: `The "Gross Weight" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(validWeighingAttributes, 0),
+      ['Weighing']: createWeighingEvent(validWeighingAttributes, 0),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(0),
     resultStatus: 'FAILED',
@@ -397,43 +369,43 @@ export const weighingTestCases: WeighingTestCase[] = [
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [[TARE, undefined]]),
+      ['Weighing']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [['Tare', undefined]]),
       ),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE(undefined as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${TARE}" attribute is missing`,
+    scenario: `The "Tare" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [[DESCRIPTION, undefined]]),
+      ['Weighing']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [['Description', undefined]]),
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: 'FAILED',
-    scenario: `The "${DESCRIPTION}" attribute is missing`,
+    scenario: `The "Description" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [[DESCRIPTION, '']]),
+      ['Weighing']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [['Description', '']]),
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION,
     resultStatus: 'FAILED',
-    scenario: `The "${DESCRIPTION}" attribute is an empty string`,
+    scenario: `The "Description" attribute is an empty string`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-          [SCALE_TYPE, scaleTypeMismatch],
+          ['Weighing Capture Method', 'Digital'],
+          ['Scale Type', scaleTypeMismatch],
         ]),
       ),
     },
@@ -442,15 +414,15 @@ export const weighingTestCases: WeighingTestCase[] = [
       scaleType,
     )} ${INVALID_RESULT_COMMENTS.SCALE_TYPE(scaleTypeMismatch)}`,
     resultStatus: 'FAILED',
-    scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
+    scenario: `The "Scale Type" attribute is not equal to the "Scale Type" attribute in the Recycler Accreditation document and is not supported by the methodology`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [WEIGHING_CAPTURE_METHOD, weighingCaptureMethodMismatch],
-          [SCALE_TYPE, scaleType],
+          ['Weighing Capture Method', weighingCaptureMethodMismatch],
+          ['Scale Type', scaleType],
         ]),
       ),
     },
@@ -458,31 +430,31 @@ export const weighingTestCases: WeighingTestCase[] = [
       weighingCaptureMethodMismatch,
     ),
     resultStatus: 'FAILED',
-    scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is not supported by the methodology`,
+    scenario: `The "Weighing Capture Method" attribute is not supported by the methodology`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [VEHICLE_LICENSE_PLATE, undefined],
+          ['Vehicle License Plate', undefined],
         ]),
       ),
     },
     resultComment: INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT,
     resultStatus: 'FAILED',
-    scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
+    scenario: `The "Vehicle License Plate" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [[CONTAINER_TYPE, undefined]]),
+      ['Weighing']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [['Container Type', undefined]]),
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
     resultStatus: 'FAILED',
-    scenario: `The "${CONTAINER_TYPE}" attribute is missing`,
+    scenario: `The "Container Type" attribute is missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -491,45 +463,45 @@ export const weighingTestCases: WeighingTestCase[] = [
     manifestExample: true,
     manifestFields: { includeValue: true },
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(manifestWeighingAttributes),
+      ['Weighing']: createWeighingEvent(manifestWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: 'PASSED',
-    scenario: `The one step "${WEIGHING}" event is valid`,
+    scenario: `The one step "Weighing" event is valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withScaleTicketVerification: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+      ['Weighing']: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_SCALE_TICKET_VALIDATION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The one step "${WEIGHING}" event is valid with scale ticket verification configured`,
+    scenario: `The one step "Weighing" event is valid with scale ticket verification configured`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withScaleTicketVerification: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+      ['Weighing']: createWeighingEvent(validWeighingAttributes),
     },
     resultComment: 'Scale ticket mismatch',
     resultStatus: 'FAILED',
     scaleTicketVerificationError: 'Scale ticket mismatch',
-    scenario: `Scale ticket verification fails for "${WEIGHING}" event`,
+    scenario: `Scale ticket verification fails for "Weighing" event`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withContainerCapacityException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_CAPACITY, undefined],
+          ['Container Capacity', undefined],
         ]),
       ),
     },
@@ -537,17 +509,17 @@ export const weighingTestCases: WeighingTestCase[] = [
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The one step "${WEIGHING}" event is valid with container capacity exception`,
+    scenario: `The one step "Weighing" event is valid with container capacity exception`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withContainerQuantityException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
-          [CONTAINER_QUANTITY, undefined],
+          ['Container Type', 'Bag'],
+          ['Container Quantity', undefined],
         ]),
       ),
     },
@@ -556,25 +528,25 @@ export const weighingTestCases: WeighingTestCase[] = [
         PASSED_RESULT_COMMENTS.SINGLE_STEP,
       ),
     resultStatus: 'PASSED',
-    scenario: `The one step "${WEIGHING}" event is valid with container quantity exception for non-TRUCK container`,
+    scenario: `The one step "Weighing" event is valid with container quantity exception for non-TRUCK container`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIDDocumentEvents: {
-      [`${WEIGHING}-2`]: createWeighingEvent(
+      ['Weighing-2']: createWeighingEvent(
         mergeAttributes(validWeighingAttributesWithoutQuantity, [
-          [SCALE_TYPE, twoStepScaleType],
-          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          ['Scale Type', twoStepScaleType],
+          ['Container Type', 'Truck'],
         ]),
         eventValue,
         stubParticipant(),
       ),
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributesWithoutQuantity, [
-          [SCALE_TYPE, twoStepScaleType],
-          [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
+          ['Scale Type', twoStepScaleType],
+          ['Container Type', 'Truck'],
         ]),
         eventValue,
         stubParticipant(),
@@ -583,7 +555,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     resultComment:
       INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
     resultStatus: 'FAILED',
-    scenario: `The two step "${WEIGHING}" event participant ids do not match`,
+    scenario: `The two step "Weighing" event participant ids do not match`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -593,13 +565,13 @@ export const weighingTestCases: WeighingTestCase[] = [
     massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
-      [[CONTAINER_CAPACITY, undefined]],
+      [['Container Capacity', undefined]],
     ),
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(
       PASSED_RESULT_COMMENTS.TWO_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The two step "${WEIGHING}" events are valid with container capacity exception`,
+    scenario: `The two step "Weighing" events are valid with container capacity exception`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -613,7 +585,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     ),
     resultComment: PASSED_RESULT_COMMENTS.TWO_STEP,
     resultStatus: 'PASSED',
-    scenario: `The two step "${WEIGHING}" events are valid`,
+    scenario: `The two step "Weighing" events are valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -623,76 +595,76 @@ export const weighingTestCases: WeighingTestCase[] = [
       twoStepScaleType,
       twoStepWeighingEventParticipant,
       [],
-      [{ format: KILOGRAM, name: CONTAINER_CAPACITY, value: 2 }],
+      [{ format: 'KILOGRAM', name: 'Container Capacity', value: 2 }],
     ),
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
-      attributeName: CONTAINER_CAPACITY,
+      attributeName: 'Container Capacity',
       firstValue: 2,
       secondValue: 1,
     }),
     resultStatus: 'FAILED',
-    scenario: `The two step "${WEIGHING}" event "${CONTAINER_CAPACITY}" attribute values do not match`,
+    scenario: `The two step "Weighing" event "Container Capacity" attribute values do not match`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
-      scaleTypeValue: DocumentEventScaleType.CONVEYOR_BELT_SCALE,
+      scaleTypeValue: 'Conveyor Belt Scale',
     }),
     massIDDocumentEvents: createTwoStepWeighingEvents(
-      DocumentEventScaleType.CONVEYOR_BELT_SCALE,
+      'Conveyor Belt Scale',
       twoStepWeighingEventParticipant,
     ),
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
-      DocumentEventScaleType.CONVEYOR_BELT_SCALE,
+      'Conveyor Belt Scale',
     ),
     resultStatus: 'FAILED',
-    scenario: `The two step "${WEIGHING}" event scale type is not "${DocumentEventScaleType.WEIGHBRIDGE}"`,
+    scenario: `The two step "Weighing" event scale type is not "Weighbridge (Truck Scale)"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: twoStepScaleType,
     }),
     massIDDocumentEvents: {
-      [`${WEIGHING}-2`]: createWeighingEvent(
+      ['Weighing-2']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [SCALE_TYPE, twoStepScaleType],
-          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
+          ['Scale Type', twoStepScaleType],
+          ['Container Type', 'Bag'],
         ]),
         eventValue,
         twoStepWeighingEventParticipant,
       ),
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [SCALE_TYPE, twoStepScaleType],
-          [CONTAINER_TYPE, DocumentEventContainerType.BAG],
+          ['Scale Type', twoStepScaleType],
+          ['Container Type', 'Bag'],
         ]),
         eventValue,
         twoStepWeighingEventParticipant,
       ),
     },
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(
-      DocumentEventContainerType.BAG,
+      'Bag',
     ),
     resultStatus: 'FAILED',
-    scenario: `The two step "${WEIGHING}" event container type is not "${DocumentEventContainerType.TRUCK}"`,
+    scenario: `The two step "Weighing" event container type is not "${'Truck'}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       scaleTypeValue: scaleType,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           [
-            WEIGHING_CAPTURE_METHOD,
-            DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST,
+            'Weighing Capture Method',
+            'Transport Manifest',
           ],
-          [SCALE_TYPE, scaleType],
+          ['Scale Type', scaleType],
         ]),
       ),
     },
     resultComment: PASSED_RESULT_COMMENTS.TRANSPORT_MANIFEST,
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING_CAPTURE_METHOD}" attribute is "${DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST}" and the "${WEIGHING}" event is valid`,
+    scenario: `The "Weighing Capture Method" attribute is "${'Transport Manifest'}" and the "Weighing" event is valid`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -701,7 +673,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     manifestExample: true,
     manifestFields: { includeValue: true },
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(manifestWeighingAttributes, 98),
+      ['Weighing']: createWeighingEvent(manifestWeighingAttributes, 98),
     },
     resultComment: INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
       calculatedNetWeight: 99,
@@ -718,70 +690,70 @@ export const weighingTestCases: WeighingTestCase[] = [
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        ['Tare', undefined],
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Tare`,
+    scenario: `The "Weighing" event is valid for TRUCK container with tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        ['Tare', undefined],
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined' as unknown)} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${WEIGHING}" event fails for TRUCK container without tare exception and missing Tare`,
+    scenario: `The "Weighing" event fails for TRUCK container without tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.BIN],
-        [CONTAINER_QUANTITY, 1],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Bin'],
+        ['Container Quantity', 1],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        ['Tare', undefined],
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for non-TRUCK (BIN) container with tare exception and missing Tare`,
+    scenario: `The "Weighing" event is valid for non-TRUCK (BIN) container with tare exception and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         [
-          [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-          [SCALE_TYPE, scaleType],
-          [CONTAINER_TYPE, DocumentEventContainerType.BIN],
-          [CONTAINER_QUANTITY, 1],
-          { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-          { format: KILOGRAM, name: TARE, value: 1 },
+          ['Weighing Capture Method', 'Digital'],
+          ['Scale Type', scaleType],
+          ['Container Type', 'Bin'],
+          ['Container Quantity', 1],
+          { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+          { format: 'KILOGRAM', name: 'Tare', value: 1 },
         ],
         98,
       ),
@@ -794,63 +766,63 @@ export const weighingTestCases: WeighingTestCase[] = [
       tare: 1,
     }),
     resultStatus: 'FAILED',
-    scenario: `The "${WEIGHING}" event fails for non-TRUCK (BIN) container with tare exception when net weight calculation fails`,
+    scenario: `The "Weighing" event fails for non-TRUCK (BIN) container with tare exception when net weight calculation fails`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        { format: KILOGRAM, name: TARE, value: 1 },
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        { format: 'KILOGRAM', name: 'Tare', value: 1 },
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and Tare provided`,
+    scenario: `The "Weighing" event is valid for TRUCK container with tare exception and Tare provided`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        [GROSS_WEIGHT, undefined],
-        { format: KILOGRAM, name: TARE, value: 1 },
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        ['Gross Weight', undefined],
+        { format: 'KILOGRAM', name: 'Tare', value: 1 },
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and missing Gross Weight`,
+    scenario: `The "Weighing" event is valid for TRUCK container with tare exception and missing Gross Weight`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        [GROSS_WEIGHT, undefined],
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        ['Gross Weight', undefined],
+        ['Tare', undefined],
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.PASSED_WITH_TARE_EXCEPTION(
       PASSED_RESULT_COMMENTS.SINGLE_STEP,
     ),
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for TRUCK container with tare exception and both Tare and Gross Weight missing`,
+    scenario: `The "Weighing" event is valid for TRUCK container with tare exception and both Tare and Gross Weight missing`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -858,18 +830,18 @@ export const weighingTestCases: WeighingTestCase[] = [
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        ['Tare', undefined],
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${WEIGHING}" event fails for TRUCK container with expired tare exception (Valid Until in past) and missing Tare`,
+    scenario: `The "Weighing" event fails for TRUCK container with expired tare exception (Valid Until in past) and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
@@ -877,34 +849,34 @@ export const weighingTestCases: WeighingTestCase[] = [
       withTareException: true,
     }),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        [TARE, undefined],
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        ['Tare', undefined],
       ]),
     },
     resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.TARE('undefined')} ${INVALID_RESULT_COMMENTS.TARE_FORMAT}`,
     resultStatus: 'FAILED',
-    scenario: `The "${WEIGHING}" event fails for TRUCK container with invalid tare exception Valid Until date format and missing Tare`,
+    scenario: `The "Weighing" event fails for TRUCK container with invalid tare exception Valid Until date format and missing Tare`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
-      [WEIGHING]: createWeighingEvent([
-        [WEIGHING_CAPTURE_METHOD, DocumentEventWeighingCaptureMethod.DIGITAL],
-        [SCALE_TYPE, scaleType],
-        [CONTAINER_TYPE, DocumentEventContainerType.TRUCK],
-        [CONTAINER_QUANTITY, undefined],
-        { format: KILOGRAM, name: GROSS_WEIGHT, value: 100 },
-        { format: KILOGRAM, name: TARE, value: 1 },
+      ['Weighing']: createWeighingEvent([
+        ['Weighing Capture Method', 'Digital'],
+        ['Scale Type', scaleType],
+        ['Container Type', 'Truck'],
+        ['Container Quantity', undefined],
+        { format: 'KILOGRAM', name: 'Gross Weight', value: 100 },
+        { format: 'KILOGRAM', name: 'Tare', value: 1 },
       ]),
     },
     resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
     resultStatus: 'PASSED',
-    scenario: `The "${WEIGHING}" event is valid for TRUCK container without tare exception and both Tare and Gross Weight provided`,
+    scenario: `The "Weighing" event is valid for TRUCK container without tare exception and both Tare and Gross Weight provided`,
   },
 ];
 

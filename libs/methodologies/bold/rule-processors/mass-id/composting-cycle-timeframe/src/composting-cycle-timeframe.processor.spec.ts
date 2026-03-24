@@ -4,10 +4,7 @@ import {
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  type DocumentEvent,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { differenceInDays, parseISO } from 'date-fns';
@@ -17,8 +14,6 @@ import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
-
-const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 describe('CompostingCycleTimeframeProcessor', () => {
   const ruleDataProcessor = new CompostingCycleTimeframeProcessor();
@@ -62,7 +57,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
       const document = stubBoldMassIDDocument({
         externalEventsMap: new Map([
           [
-            DROP_OFF,
+            'Drop-off',
             stubBoldMassIDDropOffEvent({
               partialDocumentEvent: {
                 externalCreatedAt:
@@ -71,7 +66,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
             }),
           ],
           [
-            RECYCLED,
+            'Recycled',
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt:

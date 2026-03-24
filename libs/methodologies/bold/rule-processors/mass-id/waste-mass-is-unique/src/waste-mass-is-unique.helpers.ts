@@ -13,10 +13,6 @@ import {
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-
 export type EventsData = {
   dropOffEvent: DocumentEvent;
   pickUpEvent: DocumentEvent;
@@ -74,11 +70,11 @@ export const mapMassIDV2Query = (
               externalCreatedAt: pickUpEvent.externalCreatedAt,
               'metadata.attributes': {
                 $elemMatch: {
-                  name: VEHICLE_LICENSE_PLATE,
+                  name: DocumentEventAttributeName['Vehicle License Plate'],
                   value: { $options: 'i', $regex: licensePlateRegex },
                 },
               },
-              name: PICK_UP,
+              name: DocumentEventName['Pick-up'],
             },
           },
         },
@@ -87,15 +83,15 @@ export const mapMassIDV2Query = (
             $elemMatch: {
               'address.id': dropOffEvent.address.id,
               externalCreatedAt: dropOffEvent.externalCreatedAt,
-              name: DROP_OFF,
+              name: DocumentEventName['Drop-off'],
             },
           },
         },
         {
           externalEvents: {
             $elemMatch: {
-              label: WASTE_GENERATOR,
-              name: ACTOR,
+              label: MethodologyDocumentEventLabel['Waste Generator'],
+              name: DocumentEventName.ACTOR,
               'participant.id': wasteGeneratorEvent.participant.id,
             },
           },
@@ -103,8 +99,8 @@ export const mapMassIDV2Query = (
         {
           externalEvents: {
             $elemMatch: {
-              label: RECYCLER,
-              name: ACTOR,
+              label: MethodologyDocumentEventLabel.Recycler,
+              name: DocumentEventName.ACTOR,
               'participant.id': recyclerEvent.participant.id,
             },
           },
@@ -159,7 +155,7 @@ export const mapMassIDV1Query = (document: Document, events: EventsData) => {
                   value: 'Drop-off',
                 },
               },
-              name: MOVE,
+              name: DocumentEventName.MOVE,
             },
           },
         },
@@ -172,7 +168,7 @@ export const mapMassIDV1Query = (document: Document, events: EventsData) => {
                   value: 'SOURCE',
                 },
               },
-              name: ACTOR,
+              name: 'ACTOR',
               'participant.id': wasteGeneratorEvent.participant.id,
             },
           },
@@ -186,7 +182,7 @@ export const mapMassIDV1Query = (document: Document, events: EventsData) => {
                   value: 'RECYCLER',
                 },
               },
-              name: ACTOR,
+              name: 'ACTOR',
               'participant.id': recyclerEvent.participant.id,
             },
           },

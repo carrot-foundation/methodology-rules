@@ -7,14 +7,6 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
@@ -27,24 +19,17 @@ interface DocumentManifestDataTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
 
-const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
-
-const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { CUBIC_METER, DATE } = MethodologyDocumentEventAttributeFormat;
-
 const attributeErrorMessages: Record<string, string> = {
-  [DOCUMENT_NUMBER]: RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER,
-  [DOCUMENT_TYPE]: RESULT_COMMENTS.MISSING_DOCUMENT_TYPE,
-  [ISSUE_DATE]: RESULT_COMMENTS.MISSING_ISSUE_DATE,
+  'Document Number': RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER,
+  'Document Type': RESULT_COMMENTS.MISSING_DOCUMENT_TYPE,
+  'Issue Date': RESULT_COMMENTS.MISSING_ISSUE_DATE,
 };
 
-const documentManifestType: DocumentManifestType = RECYCLING_MANIFEST;
+const documentManifestType: DocumentManifestType = 'Recycling Manifest';
 
 const documentManifestTypeStub = {
-  [RECYCLING_MANIFEST]: stubBoldMassIDRecyclingManifestEvent,
-  [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent,
+  'Recycling Manifest': stubBoldMassIDRecyclingManifestEvent,
+  'Transport Manifest': stubBoldMassIDTransportManifestEvent,
 };
 
 const sameAddress = stubAddress({
@@ -58,10 +43,10 @@ const sameAddress = stubAddress({
 });
 
 const defaultEvents = {
-  [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+  'ACTOR-Recycler': stubDocumentEvent({
     address: sameAddress,
-    label: RECYCLER,
-    name: ACTOR,
+    label: 'Recycler',
+    name: 'ACTOR',
   }),
 };
 
@@ -76,29 +61,31 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     resultStatus: 'FAILED',
     scenario: `The MassID document does not have a ${documentManifestType} event`,
   },
-  ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
-    documentManifestType,
-    events: {
-      [documentManifestType]: documentManifestTypeStub[documentManifestType]({
-        metadataAttributes: [[attribute, undefined]],
-        partialDocumentEvent: {
-          address: sameAddress,
-        },
-      }),
-      ...defaultEvents,
-    },
-    manifestExample: true,
-    resultComment: attributeErrorMessages[attribute]!,
-    resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
-  })),
+  ...(['Issue Date', 'Document Number', 'Document Type'] as const).map(
+    (attribute) => ({
+      documentManifestType,
+      events: {
+        [documentManifestType]: documentManifestTypeStub[documentManifestType]({
+          metadataAttributes: [[attribute, undefined]],
+          partialDocumentEvent: {
+            address: sameAddress,
+          },
+        }),
+        ...defaultEvents,
+      },
+      manifestExample: true,
+      resultComment: attributeErrorMessages[attribute]!,
+      resultStatus: 'FAILED',
+      scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
+    }),
+  ),
   {
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [
-          [DOCUMENT_NUMBER, undefined],
-          [DOCUMENT_TYPE, undefined],
+          ['Document Number', undefined],
+          ['Document Type', undefined],
         ],
         partialDocumentEvent: {
           address: sameAddress,
@@ -109,7 +96,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     manifestExample: true,
     resultComment: `${RESULT_COMMENTS.MISSING_DOCUMENT_TYPE} ${RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER}`,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${documentManifestType} event without a ${DOCUMENT_NUMBER} and ${DOCUMENT_TYPE}`,
+    scenario: `The MassID document has a ${documentManifestType} event without a Document Number and Document Type`,
   },
   {
     documentManifestType,
@@ -138,8 +125,8 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [
           {
-            format: CUBIC_METER,
-            name: ISSUE_DATE,
+            format: 'CUBIC_METER',
+            name: 'Issue Date',
             value: '2025-03-19',
           },
         ],
@@ -149,20 +136,20 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       }),
       ...defaultEvents,
     },
-    resultComment: RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(CUBIC_METER),
+    resultComment: RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT('CUBIC_METER'),
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${documentManifestType} event ${ISSUE_DATE} with a wrong format`,
+    scenario: `The MassID document has a ${documentManifestType} event Issue Date with a wrong format`,
   },
   {
     documentManifestType,
     events: {
-      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+      'ACTOR-Recycler': stubDocumentEvent({
         address: sameAddress,
-        label: RECYCLER,
-        name: ACTOR,
+        label: 'Recycler',
+        name: 'ACTOR',
       }),
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
-        metadataAttributes: [[DOCUMENT_TYPE, 'EMITIARE']],
+        metadataAttributes: [['Document Type', 'EMITIARE']],
         partialDocumentEvent: {
           address: sameAddress,
         },
@@ -170,7 +157,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE('EMITIARE'),
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${documentManifestType} event ${DOCUMENT_TYPE} with a wrong format`,
+    scenario: `The MassID document has a ${documentManifestType} event Document Type with a wrong format`,
   },
   {
     documentManifestType,
@@ -193,13 +180,13 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType,
       ),
     resultStatus: 'FAILED',
-    scenario: `The MassID document has an ${EXEMPTION_JUSTIFICATION} and an attachment`,
+    scenario: `The MassID document has an Exemption Justification and an attachment`,
   },
   {
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
-        metadataAttributes: [[EXEMPTION_JUSTIFICATION, undefined]],
+        metadataAttributes: [['Exemption Justification', undefined]],
         partialDocumentEvent: {
           address: sameAddress,
         },
@@ -209,17 +196,17 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.MISSING_ATTRIBUTES(documentManifestType),
     resultStatus: 'FAILED',
-    scenario: `The MassID document has no attachment and no ${EXEMPTION_JUSTIFICATION}`,
+    scenario: `The MassID document has no attachment and no Exemption Justification`,
   },
   {
     documentManifestType,
     events: {
-      [`${ACTOR}-${RECYCLER}`]: undefined,
+      'ACTOR-Recycler': undefined,
     },
     manifestExample: true,
     resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has no ${RECYCLER} event`,
+    scenario: `The MassID document has no Recycler event`,
   },
   {
     documentManifestType,
@@ -227,7 +214,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [
           [
-            EXEMPTION_JUSTIFICATION,
+            'Exemption Justification',
             'Equipment undergoing scheduled maintenance',
           ],
         ],
@@ -242,18 +229,18 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     resultComment:
       RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION(documentManifestType),
     resultStatus: 'PASSED',
-    scenario: `The MassID document has a ${EXEMPTION_JUSTIFICATION} without attachment`,
+    scenario: `The MassID document has a Exemption Justification without attachment`,
   },
   {
     documentManifestType,
     events: {
       [documentManifestType]: documentManifestTypeStub[documentManifestType]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'CDF'],
-          [DOCUMENT_NUMBER, 'CDF-2024-001234'],
+          ['Document Type', 'CDF'],
+          ['Document Number', 'CDF-2024-001234'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-03-20',
           },
         ],
@@ -287,11 +274,11 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType
       ]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'CDF'],
-          [DOCUMENT_NUMBER, '1'],
+          ['Document Type', 'CDF'],
+          ['Document Number', '1'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-03-21',
           },
         ],
@@ -309,11 +296,11 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
         documentManifestType
       ]({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'CDF'],
-          [DOCUMENT_NUMBER, '2'],
+          ['Document Type', 'CDF'],
+          ['Document Number', '2'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-03-18',
           },
         ],
@@ -345,15 +332,17 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has two valid ${documentManifestType} events and attachments`,
   },
   {
-    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
-      [TRANSPORT_MANIFEST]: documentManifestTypeStub[TRANSPORT_MANIFEST]({
-        metadataAttributes: [[EXEMPTION_JUSTIFICATION, 'Some justification']],
+      'Transport Manifest': documentManifestTypeStub['Transport Manifest']({
+        metadataAttributes: [
+          ['Exemption Justification', 'Some justification'],
+        ],
         partialDocumentEvent: {
           address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
+              label: 'Transport Manifest',
             }),
           ],
         },
@@ -361,24 +350,26 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
       ...defaultEvents,
     },
     resultComment:
-      RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(TRANSPORT_MANIFEST),
+      RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(
+        'Transport Manifest',
+      ),
     resultStatus: 'FAILED',
-    scenario: `The MassID document has both a valid ${TRANSPORT_MANIFEST} attachment and ${EXEMPTION_JUSTIFICATION}`,
+    scenario: `The MassID document has both a valid Transport Manifest attachment and Exemption Justification`,
   },
 ];
 
 export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
   {
     crossValidationFailMessages: ['Document number mismatch'],
-    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+      'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
+          ['Document Type', 'MTR'],
+          ['Document Number', '123'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-01-01',
           },
         ],
@@ -386,7 +377,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
           address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
+              label: 'Transport Manifest',
             }),
           ],
           value: 100,
@@ -402,15 +393,15 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationReviewReasons: [
       { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
     ],
-    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+      'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
+          ['Document Type', 'MTR'],
+          ['Document Number', '123'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-01-01',
           },
         ],
@@ -418,7 +409,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
           address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
+              label: 'Transport Manifest',
             }),
           ],
           value: 100,
@@ -434,15 +425,15 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationPassMessages: [
       'The attachment pass message from extraction',
     ],
-    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+      'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
+          ['Document Type', 'MTR'],
+          ['Document Number', '123'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-01-01',
           },
         ],
@@ -450,7 +441,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
           address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
+              label: 'Transport Manifest',
             }),
           ],
           value: 100,
@@ -467,15 +458,15 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationReviewReasons: [
       { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
     ],
-    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+      'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
+          ['Document Type', 'MTR'],
+          ['Document Number', '123'],
           {
-            format: DATE,
-            name: ISSUE_DATE,
+            format: 'DATE',
+            name: 'Issue Date',
             value: '2025-01-01',
           },
         ],
@@ -483,7 +474,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
           address: sameAddress,
           attachments: [
             stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
+              label: 'Transport Manifest',
             }),
           ],
           value: 100,
@@ -501,10 +492,10 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
 
 export const exceptionTestCases: DocumentManifestDataTestCase[] = [
   {
-    documentManifestType: RECYCLING_MANIFEST as DocumentManifestType,
+    documentManifestType: 'Recycling Manifest' as DocumentManifestType,
     events: {},
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
     resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${RECYCLING_MANIFEST} event with a different address than the ${RECYCLER} event`,
+    scenario: `The MassID document has a Recycling Manifest event with a different address than the Recycler event`,
   },
 ];

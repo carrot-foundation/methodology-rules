@@ -47,8 +47,6 @@ import {
   ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
-const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = DocumentEventAttributeName;
-
 interface DocumentPair {
   massIDDocument: Document;
   recyclerAccreditationDocument: Document;
@@ -186,7 +184,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === DocumentSubtype.Recycler
       ) {
         recyclerAccreditationDocument = document;
       }
@@ -259,7 +257,10 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
         if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT) {
           return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
-            getEventAttributeValue(sortingEvent, GROSS_WEIGHT),
+            getEventAttributeValue(
+              sortingEvent,
+              DocumentEventAttributeName['Gross Weight'],
+            ),
           );
         }
 
@@ -270,12 +271,12 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         if (error.code === ValidationErrorCode.INVALID_WEIGHT_COMPARISON) {
           const grossWeight = getEventAttributeValue(
             sortingEvent,
-            GROSS_WEIGHT,
+            DocumentEventAttributeName['Gross Weight'],
           ) as number;
 
           const deductedWeight = getEventAttributeValue(
             sortingEvent,
-            DEDUCTED_WEIGHT,
+            DocumentEventAttributeName['Deducted Weight'],
           ) as number;
 
           return this.processorErrors.ERROR_MESSAGE.INVALID_WEIGHT_COMPARISON(
@@ -285,7 +286,10 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         }
 
         return this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
-          getEventAttributeValue(sortingEvent, DEDUCTED_WEIGHT),
+          getEventAttributeValue(
+            sortingEvent,
+            DocumentEventAttributeName['Deducted Weight'],
+          ),
         );
       },
     );

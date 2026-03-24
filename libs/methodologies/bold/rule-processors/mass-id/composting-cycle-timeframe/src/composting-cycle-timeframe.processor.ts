@@ -12,8 +12,6 @@ import { differenceInDays, parseISO } from 'date-fns';
 
 import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
-
 type Subject = {
   dropOffEvent?: DocumentEvent | undefined;
   recycledEvent?: DocumentEvent | undefined;
@@ -60,10 +58,10 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const dropOffEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([DROP_OFF]),
+      eventNameIsAnyOf([DocumentEventName['Drop-off']]),
     );
     const recycledEvent = document.externalEvents?.find(
-      eventNameIsAnyOf([RECYCLED]),
+      eventNameIsAnyOf([DocumentEventName.Recycled]),
     );
 
     return {

@@ -6,7 +6,7 @@ import {
   RewardActorAddressSchema,
   RewardActorParticipantSchema,
   RewardDistributionResultContentSchema,
-  RewardsDistributionActorType,
+  RewardsDistributionActorTypeSchema,
 } from './rewards-distribution.types';
 
 const validParticipant = createStubFromSchema(RewardActorParticipantSchema);
@@ -15,13 +15,13 @@ const validAddress = createStubFromSchema(RewardActorAddressSchema);
 
 describe('CertificateRewardSchema', () => {
   const validCertificateReward = {
-    actorType: RewardsDistributionActorType.HAULER,
+    actorType: 'Hauler',
     participant: validParticipant,
     percentage: '25.5',
   };
 
   it('should accept all valid actor types', () => {
-    for (const actorType of Object.values(RewardsDistributionActorType)) {
+    for (const actorType of RewardsDistributionActorTypeSchema.options) {
       const result = CertificateRewardSchema.safeParse({
         ...validCertificateReward,
         actorType,
@@ -52,7 +52,7 @@ describe('CertificateRewardSchema', () => {
 
 describe('MassIDRewardSchema', () => {
   const validMassIDReward = {
-    actorType: RewardsDistributionActorType.RECYCLER,
+    actorType: 'Recycler',
     address: validAddress,
     massIDPercentage: '50.123',
     participant: validParticipant,
@@ -86,7 +86,7 @@ describe('RewardDistributionResultContentSchema', () => {
     massIDDocumentId: 'doc-123',
     massIDRewards: [
       {
-        actorType: RewardsDistributionActorType.HAULER,
+        actorType: 'Hauler',
         address: validAddress,
         massIDPercentage: '100',
         participant: validParticipant,

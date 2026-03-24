@@ -18,14 +18,6 @@ import {
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
 
-const {
-  DRIVER_IDENTIFIER,
-  DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
-  VEHICLE_TYPE,
-} = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { SLUDGE_PIPES } = DocumentEventVehicleType;
-
 interface RuleSubject {
   driverIdentifier: MethodologyDocumentEventAttributeValue | undefined;
   driverIdentifierExemptionJustification:
@@ -46,7 +38,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     );
     const vehicleTypeString = getOrDefault(vehicleType?.toString(), '');
 
-    if (vehicleType === SLUDGE_PIPES) {
+    if (vehicleType === DocumentEventVehicleType['Sludge Pipes']) {
       return {
         resultComment: RESULT_COMMENTS.passed.SLUDGE_PIPES,
         resultStatus: 'PASSED',
@@ -85,16 +77,22 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
 
   protected override getRuleSubject(document: Document): RuleSubject {
     const pickUpEvent = document.externalEvents?.find((event) =>
-      eventHasName(event, PICK_UP),
+      eventHasName(event, DocumentEventName['Pick-up']),
     );
 
     return {
-      driverIdentifier: getEventAttributeValue(pickUpEvent, DRIVER_IDENTIFIER),
+      driverIdentifier: getEventAttributeValue(
+        pickUpEvent,
+        DocumentEventAttributeName['Driver Identifier'],
+      ),
       driverIdentifierExemptionJustification: getEventAttributeValue(
         pickUpEvent,
-        DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
+        DocumentEventAttributeName['Driver Identifier Exemption Justification'],
       ),
-      vehicleType: getEventAttributeValue(pickUpEvent, VEHICLE_TYPE),
+      vehicleType: getEventAttributeValue(
+        pickUpEvent,
+        DocumentEventAttributeName['Vehicle Type'],
+      ),
     };
   }
 }

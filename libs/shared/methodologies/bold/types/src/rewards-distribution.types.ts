@@ -1,28 +1,41 @@
 import {
   BigNumberStringSchema,
-  MethodologyActorType,
+  MethodologyActorTypeSchema,
   MethodologyParticipantSchema,
   NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-export enum RewardsDistributionActorType {
-  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
-  HAULER = MethodologyActorType.HAULER,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
-  NETWORK = MethodologyActorType.NETWORK,
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
-}
+export const RewardsDistributionActorTypeSchema =
+  MethodologyActorTypeSchema.extract([
+    'Community Impact Pool',
+    'Hauler',
+    'Integrator',
+    'Methodology Author',
+    'Methodology Developer',
+    'Network',
+    'Processor',
+    'Recycler',
+    'Waste Generator',
+  ]);
+export type RewardsDistributionActorType = z.infer<
+  typeof RewardsDistributionActorTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const RewardsDistributionActorType =
+  RewardsDistributionActorTypeSchema.enum;
 
-export enum RewardsDistributionWasteType {
-  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
-  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
-  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
-}
+export const RewardsDistributionWasteTypeSchema = z.enum([
+  'Mixed Organic Waste',
+  'Sludge from Waste Treatment',
+  'Tobacco Industry Residues',
+]);
+export type RewardsDistributionWasteType = z.infer<
+  typeof RewardsDistributionWasteTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const RewardsDistributionWasteType =
+  RewardsDistributionWasteTypeSchema.enum;
 
 export const RewardActorAddressSchema = z.object({
   id: NonEmptyStringSchema,
@@ -38,7 +51,7 @@ export type RewardActorParticipant = z.infer<
 >;
 
 export const CertificateRewardSchema = z.object({
-  actorType: z.enum(RewardsDistributionActorType),
+  actorType: RewardsDistributionActorTypeSchema,
   participant: RewardActorParticipantSchema,
   percentage: BigNumberStringSchema,
 });
@@ -49,7 +62,7 @@ export type CertificateRewardDistributionOutput =
   RewardDistributionResultContent;
 
 export const MassIDRewardSchema = z.object({
-  actorType: z.enum(RewardsDistributionActorType),
+  actorType: RewardsDistributionActorTypeSchema,
   address: RewardActorAddressSchema,
   massIDPercentage: BigNumberStringSchema,
   participant: RewardActorParticipantSchema,

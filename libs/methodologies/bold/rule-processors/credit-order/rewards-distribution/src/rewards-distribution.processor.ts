@@ -17,7 +17,6 @@ import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bol
 import {
   type CertificateRewardDistributionOutput,
   type Document,
-  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -35,8 +34,6 @@ import type {
 import { RewardsDistributionProcessorErrors } from './rewards-distribution.errors';
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 import { isCertificateRewardDistributionOutput } from './rewards-distribution.validators';
-
-const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -81,11 +78,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const creditsEvent = creditOrderDocument.externalEvents?.find((event) =>
       eventHasMetadataAttribute({
         event,
-        metadataName: CREDIT_UNIT_PRICE,
+        metadataName: 'Credit Unit Price',
       }),
     );
 
-    const unitPrice = getEventAttributeValue(creditsEvent, CREDIT_UNIT_PRICE);
+    const unitPrice = getEventAttributeValue(creditsEvent, 'Credit Unit Price');
 
     if (!isNonZeroPositive(unitPrice)) {
       throw this.errorProcessor.getKnownError(
@@ -103,13 +100,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       massIDCertificateDocument.externalEvents?.find((event) =>
         eventHasMetadataAttribute({
           event,
-          metadataName: DocumentEventAttributeName.SLUG,
+          metadataName: 'Slug',
           metadataValues: 'rewards-distribution',
         }),
       );
     const rewardsDistributionRuleResultContent = getEventAttributeValue(
       rewardsDistributionRuleEvent,
-      RULE_RESULT_DETAILS,
+      'Rule Result Details',
     );
 
     if (

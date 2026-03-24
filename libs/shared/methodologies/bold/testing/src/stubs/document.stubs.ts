@@ -67,8 +67,8 @@ export const stubMassIDDocument = (
   partialDocument?: PartialDeep<Document>,
 ): Document =>
   stubDocument({
-    category: DocumentCategory.MASS_ID,
-    type: DocumentType.ORGANIC,
+    category: 'MassID',
+    type: 'Organic',
     ...partialDocument,
   });
 
@@ -113,9 +113,9 @@ export const stubParticipantAccreditationGroupDocument = (
 ): Document =>
   stubDocument({
     ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    subtype: DocumentSubtype.GROUP,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
+    category: 'Methodology',
+    subtype: 'Group',
+    type: 'Participant Accreditation',
   });
 
 export const stubParticipantAccreditationDocument = (
@@ -123,6 +123,6 @@ export const stubParticipantAccreditationDocument = (
 ): Document =>
   stubDocument({
     ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
+    category: 'Methodology',
+    type: 'Participant Accreditation',
   });

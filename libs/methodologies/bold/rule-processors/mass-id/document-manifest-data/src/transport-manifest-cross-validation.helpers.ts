@@ -43,8 +43,6 @@ export interface MtrCrossValidationEventData extends DocumentManifestEventSubjec
   weighingEvents: DocumentEvent[];
 }
 
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-
 export const validateMtrExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,
   eventData: MtrCrossValidationEventData,
@@ -61,7 +59,10 @@ export const validateMtrExtractedData = (
   );
 
   const eventPlateValue = eventData.pickUpEvent
-    ? getEventAttributeValue(eventData.pickUpEvent, VEHICLE_LICENSE_PLATE)
+    ? getEventAttributeValue(
+        eventData.pickUpEvent,
+        DocumentEventAttributeName['Vehicle License Plate'],
+      )
     : undefined;
   const eventPlateString = eventPlateValue?.toString();
 

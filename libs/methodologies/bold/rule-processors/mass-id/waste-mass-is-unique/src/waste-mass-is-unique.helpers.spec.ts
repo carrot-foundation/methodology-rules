@@ -6,12 +6,10 @@ import {
   stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import * as helpers from './waste-mass-is-unique.helpers';
 
-const { MASS_ID } = DocumentCategory;
 
 const mockCheckDuplicateDocuments = vi.fn();
 const mockAuditApiService = {
@@ -48,7 +46,7 @@ describe('waste-mass-is-unique.helpers', () => {
       expect(query).toHaveProperty('match.$and');
       expect(query.match.$and).toBeInstanceOf(Array);
       expect(query.match.$and).toHaveLength(4);
-      expect(query.match).toHaveProperty('category', MASS_ID);
+      expect(query.match).toHaveProperty('category', 'MassID');
       expect(query.match).toHaveProperty('type', massIDDocument.type);
       expect(query.match).toHaveProperty('subtype', massIDDocument.subtype);
     });
@@ -117,7 +115,7 @@ describe('waste-mass-is-unique.helpers', () => {
 
       expect(calls.length).toBeGreaterThanOrEqual(2);
 
-      expect(calls[0][0].match.category).toBe(MASS_ID);
+      expect(calls[0][0].match.category).toBe('MassID');
 
       expect(calls[1][0].match.category).toBe('Mass');
     });

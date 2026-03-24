@@ -9,13 +9,11 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -25,21 +23,25 @@ import {
   hasVerificationDocument,
 } from './geolocation-and-address-precision.helpers';
 
-const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = DocumentEventName;
-const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  DocumentEventAttributeName;
+const {
+  'Accreditation Result': ACCREDITATION_RESULT,
+  'Facility Address': FACILITY_ADDRESS,
+} = DocumentEventName;
+const {
+  'Approved Exceptions': APPROVED_EXCEPTIONS,
+  'Captured GPS Latitude': CAPTURED_GPS_LATITUDE,
+  'Captured GPS Longitude': CAPTURED_GPS_LONGITUDE,
+} = DocumentEventAttributeName;
 
 const createGpsException = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
-  attributeName:
-    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
-    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+  eventName: 'Drop-off' | 'Pick-up',
+  attributeName: 'Captured GPS Latitude' | 'Captured GPS Longitude',
   reason: string,
-  exceptionType: string = MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  exceptionType: string = 'Exemption for Mandatory Attribute',
 ) => ({
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID,
+      Category: 'MassID',
     },
     Event: eventName.toString(),
   },
@@ -49,7 +51,7 @@ const createGpsException = (
 });
 
 const createGpsExceptions = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName: 'Drop-off' | 'Pick-up',
   includeLatitude = true,
   includeLongitude = true,
   exceptionType?: string,
@@ -408,7 +410,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return undefined exceptions when recyclerAccreditationDocument is undefined', () => {
       const result = getGpsExceptionsFromRecyclerAccreditation(
         undefined,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -422,7 +424,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -443,7 +445,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -451,12 +453,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for DROP_OFF', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.DROP_OFF);
+      const exceptions = createGpsExceptions('Drop-off');
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeDefined();
@@ -470,12 +472,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for PICK_UP', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const exceptions = createGpsExceptions('Pick-up');
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.PICK_UP,
+        'Pick-up',
       );
 
       expect(result.latitudeException).toBeDefined();
@@ -489,12 +491,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return undefined for exceptions that do not match the event name', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const exceptions = createGpsExceptions('Pick-up');
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -506,13 +508,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: 'MassID',
             },
-            Event: DocumentEventName.DROP_OFF.toString(),
+            Event: 'Drop-off',
           },
-          'Attribute Name': DocumentEventAttributeName.TARE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': 'Tare',
+          'Exception Type': 'Exemption for Mandatory Attribute',
           Reason: 'Tare exception (not GPS)',
         },
       ];
@@ -520,7 +521,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -530,13 +531,13 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return undefined for latitude when exception does not pass type guard', () => {
       const exceptions = [
         createGpsException(
-          DocumentEventName.DROP_OFF,
+          'Drop-off',
           CAPTURED_GPS_LATITUDE,
           'Invalid exception type',
           'INVALID_TYPE',
         ),
         createGpsException(
-          DocumentEventName.DROP_OFF,
+          'Drop-off',
           CAPTURED_GPS_LONGITUDE,
           'GPS longitude exception for DROP_OFF',
         ),
@@ -545,7 +546,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        'Drop-off',
       );
 
       expect(result.latitudeException).toBeUndefined();

@@ -1,13 +1,10 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { DriverIdentificationProcessor } from './driver-identification.processor';
 import { driverIdentificationTestCases } from './driver-identification.test-cases';
-
-const { PICK_UP } = DocumentEventName;
 
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 
@@ -24,7 +21,7 @@ describe('DriverIdentificationProcessor', () => {
       const { massIDDocument } = new BoldStubsBuilder()
         .createMassIDDocuments({
           externalEventsMap: {
-            [PICK_UP]: pickUpEvent,
+            ['Pick-up']: pickUpEvent,
           },
         })
         .build();

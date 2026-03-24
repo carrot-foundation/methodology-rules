@@ -2,19 +2,8 @@ import {
   BoldStubsBuilder,
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  DocumentSubtype,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { shouldApplyLargeBusinessDiscount } from './rewards-distribution.helpers';
-
-const { ONBOARDING_DECLARATION } = DocumentEventName;
-const { BUSINESS_SIZE_DECLARATION } = DocumentEventAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS } = DocumentEventAttributeValue;
-const { WASTE_GENERATOR } = DocumentSubtype;
 
 describe('shouldApplyLargeBusinessDiscount', () => {
   it('should return true when document is undefined (defaults to Large Business)', () => {
@@ -27,10 +16,10 @@ describe('shouldApplyLargeBusinessDiscount', () => {
       .createMassIDAuditDocuments()
       .createMethodologyDocument()
       .createParticipantAccreditationDocuments(
-        new Map([[WASTE_GENERATOR, { externalEventsMap: {} }]]),
+        new Map([['Waste Generator', { externalEventsMap: {} }]]),
       )
       .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
+      .participantsAccreditationDocuments.get('Waste Generator')!;
 
     expect(shouldApplyLargeBusinessDiscount(document)).toBe(true);
   });
@@ -43,15 +32,15 @@ describe('shouldApplyLargeBusinessDiscount', () => {
       .createParticipantAccreditationDocuments(
         new Map([
           [
-            WASTE_GENERATOR,
+            'Waste Generator',
             {
               externalEventsMap: {
-                [ONBOARDING_DECLARATION]:
+                ['Onboarding Declaration']:
                   stubDocumentEventWithMetadataAttributes(
                     {
-                      name: ONBOARDING_DECLARATION,
+                      name: 'Onboarding Declaration',
                     },
-                    [[BUSINESS_SIZE_DECLARATION, LARGE_BUSINESS]],
+                    [['Business Size Declaration', 'Large Business']],
                   ),
               },
             },
@@ -59,7 +48,7 @@ describe('shouldApplyLargeBusinessDiscount', () => {
         ]),
       )
       .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
+      .participantsAccreditationDocuments.get('Waste Generator')!;
 
     expect(shouldApplyLargeBusinessDiscount(document)).toBe(true);
   });
@@ -72,15 +61,15 @@ describe('shouldApplyLargeBusinessDiscount', () => {
       .createParticipantAccreditationDocuments(
         new Map([
           [
-            WASTE_GENERATOR,
+            'Waste Generator',
             {
               externalEventsMap: {
-                [ONBOARDING_DECLARATION]:
+                ['Onboarding Declaration']:
                   stubDocumentEventWithMetadataAttributes(
                     {
-                      name: ONBOARDING_DECLARATION,
+                      name: 'Onboarding Declaration',
                     },
-                    [[BUSINESS_SIZE_DECLARATION, SMALL_BUSINESS]],
+                    [['Business Size Declaration', 'Small Business']],
                   ),
               },
             },
@@ -88,7 +77,7 @@ describe('shouldApplyLargeBusinessDiscount', () => {
         ]),
       )
       .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
+      .participantsAccreditationDocuments.get('Waste Generator')!;
 
     expect(shouldApplyLargeBusinessDiscount(document)).toBe(false);
   });
@@ -101,13 +90,13 @@ describe('shouldApplyLargeBusinessDiscount', () => {
       .createParticipantAccreditationDocuments(
         new Map([
           [
-            WASTE_GENERATOR,
+            'Waste Generator',
             {
               externalEventsMap: {
-                [ONBOARDING_DECLARATION]:
+                ['Onboarding Declaration']:
                   stubDocumentEventWithMetadataAttributes(
                     {
-                      name: ONBOARDING_DECLARATION,
+                      name: 'Onboarding Declaration',
                     },
                     [],
                   ),
@@ -117,7 +106,7 @@ describe('shouldApplyLargeBusinessDiscount', () => {
         ]),
       )
       .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
+      .participantsAccreditationDocuments.get('Waste Generator')!;
 
     expect(shouldApplyLargeBusinessDiscount(document)).toBe(true);
   });

@@ -1,6 +1,5 @@
 import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -29,11 +28,8 @@ describe('Rewards Distribution Helpers', () => {
   describe('getAggregateParticipantKey', () => {
     it('should return the correct key format when given valid inputs', () => {
       expect(
-        getAggregateParticipantKey(
-          RewardsDistributionActorType.HAULER,
-          'participant-id-123',
-        ),
-      ).toEqual(`${RewardsDistributionActorType.HAULER}-participant-id-123`);
+        getAggregateParticipantKey('Hauler', 'participant-id-123'),
+      ).toEqual('Hauler-participant-id-123');
 
       expect(
         getAggregateParticipantKey('CUSTOM_TYPE', 'custom-id-456'),
@@ -47,12 +43,9 @@ describe('Rewards Distribution Helpers', () => {
     });
 
     it('should throw an error when participantId is undefined', () => {
-      expect(() =>
-        getAggregateParticipantKey(
-          RewardsDistributionActorType.RECYCLER,
-          undefined,
-        ),
-      ).toThrow('Actor type and participant ID are required');
+      expect(() => getAggregateParticipantKey('Recycler', undefined)).toThrow(
+        'Actor type and participant ID are required',
+      );
     });
 
     it('should throw an error when both actorType and participantId are undefined', () => {
@@ -245,8 +238,8 @@ describe('Rewards Distribution Helpers', () => {
         percentage: new BigNumber('0.027105'),
       };
 
-      actors.set(MethodologyActorType.NETWORK, {
-        actorType: RewardsDistributionActorType.NETWORK,
+      actors.set('Network', {
+        actorType: 'Network',
         address: { id: faker.string.uuid() },
         amount: '8.023876',
         participant: { id: faker.string.uuid(), name: faker.company.name() },
@@ -259,7 +252,7 @@ describe('Rewards Distribution Helpers', () => {
         remainder,
       });
 
-      expect(actors.get(MethodologyActorType.NETWORK)).toMatchObject({
+      expect(actors.get('Network')).toMatchObject({
         amount: formatDecimalPlaces(
           new BigNumber('8.023876').plus('3.543984'),
         ).toString(),
@@ -273,7 +266,7 @@ describe('Rewards Distribution Helpers', () => {
       const actors: ActorsByType = new Map();
 
       actors.set('OTHER-1', {
-        actorType: RewardsDistributionActorType.HAULER,
+        actorType: 'Hauler',
         address: { id: '1' },
         amount: '1',
         participant: { id: '1', name: 'A' },
@@ -400,8 +393,8 @@ describe('Rewards Distribution Helpers', () => {
         id: faker.string.uuid(),
       };
 
-      const actorType1 = RewardsDistributionActorType.WASTE_GENERATOR;
-      const actorType2 = RewardsDistributionActorType.HAULER;
+      const actorType1 = 'Waste Generator' as const;
+      const actorType2 = 'Hauler' as const;
 
       const resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[] =
         [

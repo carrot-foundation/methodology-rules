@@ -1,7 +1,4 @@
-import {
-  type DocumentEvent,
-  DocumentEventAttachmentLabel,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { WeighingProcessor } from './weighing.processor';
 
@@ -24,7 +21,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
+          label: 'Weighing Ticket',
         },
       ],
     } as unknown as DocumentEvent;
@@ -51,7 +48,7 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
+          label: 'Weighing Ticket',
         },
       ],
     } as unknown as DocumentEvent;

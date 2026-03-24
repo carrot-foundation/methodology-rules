@@ -1,230 +1,276 @@
 import {
-  MethodologyActorType,
-  MethodologyDocumentEventName,
+  MethodologyActorTypeSchema,
+  MethodologyDocumentEventNameSchema,
 } from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
-export enum BoldMethodologyName {
-  CARBON = 'BOLD Carbon',
-  RECYCLING = 'BOLD Recycling',
-}
+export const BoldMethodologyNameSchema = z.enum([
+  'BOLD Carbon',
+  'BOLD Recycling',
+]);
+export type BoldMethodologyName = z.infer<typeof BoldMethodologyNameSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const BoldMethodologyName = BoldMethodologyNameSchema.enum;
 
-export enum BoldMethodologySlug {
-  CARBON = 'bold-carbon',
-  RECYCLING = 'bold-recycling',
-}
+export const BoldMethodologySlugSchema = z.enum([
+  'bold-carbon',
+  'bold-recycling',
+]);
+export type BoldMethodologySlug = z.infer<typeof BoldMethodologySlugSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const BoldMethodologySlug = BoldMethodologySlugSchema.enum;
 
-export enum DocumentCategory {
-  MASS_ID = 'MassID',
-  METHODOLOGY = 'Methodology',
-}
+export const DocumentCategorySchema = z.enum(['MassID', 'Methodology']);
+export type DocumentCategory = z.infer<typeof DocumentCategorySchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentCategory = DocumentCategorySchema.enum;
 
-export enum DocumentEventAccreditationStatus {
-  APPROVED = 'Approved',
-  REJECTED = 'Rejected',
-}
+export const DocumentEventAccreditationStatusSchema = z.enum([
+  'Approved',
+  'Rejected',
+]);
+export type DocumentEventAccreditationStatus = z.infer<
+  typeof DocumentEventAccreditationStatusSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventAccreditationStatus =
+  DocumentEventAccreditationStatusSchema.enum;
 
-export enum DocumentEventAttachmentLabel {
-  RECYCLING_MANIFEST = 'Recycling Manifest',
-  TRANSPORT_MANIFEST = 'Transport Manifest',
-  WEIGHING_TICKET = 'Weighing Ticket',
-}
+export const DocumentEventAttachmentLabelSchema = z.enum([
+  'Recycling Manifest',
+  'Transport Manifest',
+  'Weighing Ticket',
+]);
+export type DocumentEventAttachmentLabel = z.infer<
+  typeof DocumentEventAttachmentLabelSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventAttachmentLabel =
+  DocumentEventAttachmentLabelSchema.enum;
 
-export enum DocumentEventAttributeName {
-  ACCREDITATION_STATUS = 'Accreditation Status',
-  APPROVED_EXCEPTIONS = 'Approved Exceptions',
-  BASELINES = 'Baselines',
-  BUSINESS_SIZE_DECLARATION = 'Business Size Declaration',
-  CAPTURED_GPS_LATITUDE = 'Captured GPS Latitude',
-  CAPTURED_GPS_LONGITUDE = 'Captured GPS Longitude',
-  CONTAINER_CAPACITY = 'Container Capacity',
-  CONTAINER_QUANTITY = 'Container Quantity',
-  CONTAINER_TYPE = 'Container Type',
-  CREDIT_UNIT_PRICE = 'Credit Unit Price',
-  DEDUCTED_WEIGHT = 'Deducted Weight',
-  DESCRIPTION = 'Description',
-  DOCUMENT_NUMBER = 'Document Number',
-  DOCUMENT_TYPE = 'Document Type',
-  DRIVER_IDENTIFIER = 'Driver Identifier',
-  DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION = 'Driver Identifier Exemption Justification',
-  EFFECTIVE_DATE = 'Effective Date',
-  EVALUATION_RESULT = 'Evaluation Result',
-  EXCEEDING_EMISSION_COEFFICIENT = 'Exceeding Emission Coefficient (per ton)',
-  EXEMPTION_JUSTIFICATION = 'Exemption Justification',
-  EXPIRATION_DATE = 'Expiration Date',
-  GREENHOUSE_GAS_TYPE = 'Greenhouse Gas Type (GHG)',
-  GROSS_WEIGHT = 'Gross Weight',
-  ISSUE_DATE = 'Issue Date',
-  LOCAL_WASTE_CLASSIFICATION_DESCRIPTION = 'Local Waste Classification Description',
-  LOCAL_WASTE_CLASSIFICATION_ID = 'Local Waste Classification ID',
-  METHODOLOGY_SLUG = 'Methodology Slug',
-  RECEIVING_OPERATOR_IDENTIFIER = 'Receiving Operator Identifier',
-  RECYCLER_OPERATOR_IDENTIFIER = 'Recycler Operator Identifier',
-  REFERENCE_YEAR = 'Reference Year',
-  REQUIRED_ADDITIONAL_VERIFICATIONS = 'Required Additional Verifications',
-  RULE_PROCESSOR_RESULT_CONTENT = 'Rule Processor Result Content',
-  RULE_RESULT_DETAILS = 'Rule Result Details',
-  SCALE_TYPE = 'Scale Type',
-  SCALE_VALIDATION = 'Scale Validation',
-  SLUG = 'Slug',
-  SORTING_FACTOR = 'Sorting Factor',
-  TARE = 'Tare',
-  VEHICLE_DESCRIPTION = 'Vehicle Description',
-  VEHICLE_LICENSE_PLATE = 'Vehicle License Plate',
-  VEHICLE_TYPE = 'Vehicle Type',
-  WASTE_ORIGIN = 'Waste Origin',
-  WEIGHING_CAPTURE_METHOD = 'Weighing Capture Method',
-}
+export const DocumentEventAttributeNameSchema = z.enum([
+  'Accreditation Status',
+  'Approved Exceptions',
+  'Baselines',
+  'Business Size Declaration',
+  'Captured GPS Latitude',
+  'Captured GPS Longitude',
+  'Container Capacity',
+  'Container Quantity',
+  'Container Type',
+  'Credit Unit Price',
+  'Deducted Weight',
+  'Description',
+  'Document Number',
+  'Document Type',
+  'Driver Identifier',
+  'Driver Identifier Exemption Justification',
+  'Effective Date',
+  'Evaluation Result',
+  'Exceeding Emission Coefficient (per ton)',
+  'Exemption Justification',
+  'Expiration Date',
+  'Greenhouse Gas Type (GHG)',
+  'Gross Weight',
+  'Issue Date',
+  'Local Waste Classification Description',
+  'Local Waste Classification ID',
+  'Methodology Slug',
+  'Receiving Operator Identifier',
+  'Recycler Operator Identifier',
+  'Reference Year',
+  'Required Additional Verifications',
+  'Rule Processor Result Content',
+  'Rule Result Details',
+  'Scale Type',
+  'Scale Validation',
+  'Slug',
+  'Sorting Factor',
+  'Tare',
+  'Vehicle Description',
+  'Vehicle License Plate',
+  'Vehicle Type',
+  'Waste Origin',
+  'Weighing Capture Method',
+]);
+export type DocumentEventAttributeName = z.infer<
+  typeof DocumentEventAttributeNameSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventAttributeName = DocumentEventAttributeNameSchema.enum;
 
-export enum DocumentEventAttributeValue {
-  LARGE_BUSINESS = 'Large Business',
-  SMALL_BUSINESS = 'Small Business',
-  UNIDENTIFIED = 'Unidentified',
-}
+export const DocumentEventAttributeValueSchema = z.enum([
+  'Large Business',
+  'Small Business',
+  'Unidentified',
+]);
+export type DocumentEventAttributeValue = z.infer<
+  typeof DocumentEventAttributeValueSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventAttributeValue =
+  DocumentEventAttributeValueSchema.enum;
 
-export enum DocumentEventContainerType {
-  BAG = 'Bag',
-  BIN = 'Bin',
-  DRUM = 'Drum',
-  PAIL = 'Pail',
-  STREET_BIN = 'Street Bin',
-  TRUCK = 'Truck',
-  WASTE_BOX = 'Waste Box',
-}
+export const DocumentEventContainerTypeSchema = z.enum([
+  'Bag',
+  'Bin',
+  'Drum',
+  'Pail',
+  'Street Bin',
+  'Truck',
+  'Waste Box',
+]);
+export type DocumentEventContainerType = z.infer<
+  typeof DocumentEventContainerTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventContainerType = DocumentEventContainerTypeSchema.enum;
 
-export enum DocumentEventName {
-  ACCREDITATION_CONTEXT = MethodologyDocumentEventName.ACCREDITATION_CONTEXT,
-  ACCREDITATION_RESULT = MethodologyDocumentEventName.ACCREDITATION_RESULT,
-  ACTOR = MethodologyDocumentEventName.ACTOR,
-  CLOSE = MethodologyDocumentEventName.CLOSE,
-  DROP_OFF = MethodologyDocumentEventName.DROP_OFF,
-  EMISSION_AND_COMPOSTING_METRICS = MethodologyDocumentEventName.EMISSION_AND_COMPOSTING_METRICS,
-  END = 'END',
-  FACILITY_ADDRESS = MethodologyDocumentEventName.FACILITY_ADDRESS,
-  LEGAL_AND_ADMINISTRATIVE_COMPLIANCE = MethodologyDocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-  LINK = MethodologyDocumentEventName.LINK,
-  MONITORING_SYSTEMS_AND_EQUIPMENT = MethodologyDocumentEventName.MONITORING_SYSTEMS_AND_EQUIPMENT,
-  MOVE = 'MOVE',
-  NOTICE = MethodologyDocumentEventName.NOTICE,
-  ONBOARDING_DECLARATION = MethodologyDocumentEventName.ONBOARDING_DECLARATION,
-  OUTPUT = MethodologyDocumentEventName.OUTPUT,
-  PICK_UP = MethodologyDocumentEventName.PICK_UP,
-  RECYCLED = MethodologyDocumentEventName.RECYCLED,
-  RECYCLING_BASELINES = MethodologyDocumentEventName.RECYCLING_BASELINES,
-  RECYCLING_MANIFEST = MethodologyDocumentEventName.RECYCLING_MANIFEST,
-  RELATED = MethodologyDocumentEventName.RELATED,
-  RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
-  RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
-  SORTING = MethodologyDocumentEventName.SORTING,
-  TRANSPORT_MANIFEST = MethodologyDocumentEventName.TRANSPORT_MANIFEST,
-  WASTE_GENERATOR = MethodologyDocumentEventName.WASTE_GENERATOR,
-  WEIGHING = MethodologyDocumentEventName.WEIGHING,
-}
+export const DocumentEventNameSchema = z.enum([
+  ...MethodologyDocumentEventNameSchema.exclude(['Recycling Baseline']).options,
+  'END',
+  'MOVE',
+]);
+export type DocumentEventName = z.infer<typeof DocumentEventNameSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventName = DocumentEventNameSchema.enum;
 
-export enum DocumentEventRuleSlug {
-  REWARDS_DISTRIBUTION = 'rewards-distribution',
-}
+export const DocumentEventRuleSlugSchema = z.enum(['rewards-distribution']);
+export type DocumentEventRuleSlug = z.infer<typeof DocumentEventRuleSlugSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventRuleSlug = DocumentEventRuleSlugSchema.enum;
 
-export enum DocumentEventScaleType {
-  BIN_SCALE = 'Bin Scale',
-  CONVEYOR_BELT_SCALE = 'Conveyor Belt Scale',
-  FLOOR_SCALE = 'Floor Scale',
-  FORKLIFT_SCALE = 'Forklift Scale',
-  HANGING_OR_CRANE_SCALE = 'Hanging / Crane Scale',
-  ONBOARD_TRUCK_SCALE = 'Onboard Truck Scale',
-  PALLET_SCALE = 'Pallet Scale',
-  PORTABLE_AXLE_WEIGHER = 'Portable Axle Weigher',
-  PRECISION_OR_BENCH_SCALE = 'Precision / Bench Scale',
-  WEIGHBRIDGE = 'Weighbridge (Truck Scale)',
-}
+export const DocumentEventScaleTypeSchema = z.enum([
+  'Bin Scale',
+  'Conveyor Belt Scale',
+  'Floor Scale',
+  'Forklift Scale',
+  'Hanging / Crane Scale',
+  'Onboard Truck Scale',
+  'Pallet Scale',
+  'Portable Axle Weigher',
+  'Precision / Bench Scale',
+  'Weighbridge (Truck Scale)',
+]);
+export type DocumentEventScaleType = z.infer<
+  typeof DocumentEventScaleTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventScaleType = DocumentEventScaleTypeSchema.enum;
 
-export enum DocumentEventVehicleType {
-  BICYCLE = 'Bicycle',
-  BOAT = 'Boat',
-  CAR = 'Car',
-  CARGO_SHIP = 'Cargo Ship',
-  CART = 'Cart',
-  MINI_VAN = 'Mini Van',
-  MOTORCYCLE = 'Motorcycle',
-  OTHERS = 'Others',
-  SLUDGE_PIPES = 'Sludge Pipes',
-  TRUCK = 'Truck',
-}
+export const DocumentEventVehicleTypeSchema = z.enum([
+  'Bicycle',
+  'Boat',
+  'Car',
+  'Cargo Ship',
+  'Cart',
+  'Mini Van',
+  'Motorcycle',
+  'Others',
+  'Sludge Pipes',
+  'Truck',
+]);
+export type DocumentEventVehicleType = z.infer<
+  typeof DocumentEventVehicleTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventVehicleType = DocumentEventVehicleTypeSchema.enum;
 
-export enum DocumentEventWeighingCaptureMethod {
-  DIGITAL = 'Digital',
-  MANUAL = 'Manual',
-  PHOTO = 'Photo (Scale + Cargo)',
-  TRANSPORT_MANIFEST = 'Transport Manifest',
-}
+export const DocumentEventWeighingCaptureMethodSchema = z.enum([
+  'Digital',
+  'Manual',
+  'Photo (Scale + Cargo)',
+  'Transport Manifest',
+]);
+export type DocumentEventWeighingCaptureMethod = z.infer<
+  typeof DocumentEventWeighingCaptureMethodSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentEventWeighingCaptureMethod =
+  DocumentEventWeighingCaptureMethodSchema.enum;
 
-export enum MassIDOrganicSubtype {
-  DOMESTIC_SLUDGE = 'Domestic Sludge',
-  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = 'EFB similar to Garden, Yard and Park Waste',
-  FOOD_FOOD_WASTE_AND_BEVERAGES = 'Food, Food Waste and Beverages',
-  GARDEN_YARD_AND_PARK_WASTE = 'Garden, Yard and Park Waste',
-  INDUSTRIAL_SLUDGE = 'Industrial Sludge',
-  OTHERS_IF_ORGANIC = 'Others (if organic)',
-  TOBACCO = 'Tobacco',
-  WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
-}
+export const MassIDOrganicSubtypeSchema = z.enum([
+  'Domestic Sludge',
+  'EFB similar to Garden, Yard and Park Waste',
+  'Food, Food Waste and Beverages',
+  'Garden, Yard and Park Waste',
+  'Industrial Sludge',
+  'Others (if organic)',
+  'Tobacco',
+  'Wood and Wood Products',
+]);
+export type MassIDOrganicSubtype = z.infer<typeof MassIDOrganicSubtypeSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MassIDOrganicSubtype = MassIDOrganicSubtypeSchema.enum;
 
-export enum DocumentSubtype {
-  DOMESTIC_SLUDGE = MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-  EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
-  FOOD_FOOD_WASTE_AND_BEVERAGES = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-  GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE,
-  GROUP = 'Group',
-  HAULER = MethodologyActorType.HAULER,
-  INDUSTRIAL_SLUDGE = MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  OTHERS_IF_ORGANIC = MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-  PROCESS = 'Process',
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
-  SOURCE = 'Source',
-  TCC = 'TCC',
-  TOBACCO = MassIDOrganicSubtype.TOBACCO,
-  TRC = 'TRC',
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
-  WOOD_AND_WOOD_PRODUCTS = MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
-}
+export const DocumentSubtypeSchema = z.enum([
+  ...MassIDOrganicSubtypeSchema.options,
+  'Group',
+  'Hauler',
+  'Integrator',
+  'Process',
+  'Processor',
+  'Recycler',
+  'Source',
+  'TCC',
+  'TRC',
+  'Waste Generator',
+]);
+export type DocumentSubtype = z.infer<typeof DocumentSubtypeSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentSubtype = DocumentSubtypeSchema.enum;
 
-export enum DocumentType {
-  CREDIT_ORDER = 'Credit Order',
-  DEFINITION = 'Definition',
-  GAS_ID = 'GasID',
-  MASS_ID_AUDIT = 'MassID Audit',
-  ORGANIC = 'Organic',
-  PARTICIPANT_ACCREDITATION = 'Participant Accreditation',
-  RECYCLED_ID = 'RecycledID',
-}
+export const DocumentTypeSchema = z.enum([
+  'Credit Order',
+  'Definition',
+  'GasID',
+  'MassID Audit',
+  'Organic',
+  'Participant Accreditation',
+  'RecycledID',
+]);
+export type DocumentType = z.infer<typeof DocumentTypeSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const DocumentType = DocumentTypeSchema.enum;
 
-export enum MassIDDocumentActorType {
-  HAULER = MethodologyActorType.HAULER,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
-}
+export const MassIDDocumentActorTypeSchema = MethodologyActorTypeSchema.extract(
+  ['Hauler', 'Integrator', 'Processor', 'Recycler', 'Waste Generator'],
+);
+export type MassIDDocumentActorType = z.infer<
+  typeof MassIDDocumentActorTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MassIDDocumentActorType = MassIDDocumentActorTypeSchema.enum;
 
-export enum MeasurementUnit {
-  KG = 'kg',
-}
+export const MeasurementUnitSchema = z.enum(['kg']);
+export type MeasurementUnit = z.infer<typeof MeasurementUnitSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MeasurementUnit = MeasurementUnitSchema.enum;
 
-export enum MethodologyBaseline {
-  LANDFILLS_WITH_FLARING_OF_METHANE_GAS = 'Landfills with flaring of methane gas (and/or capture of biogas)',
-  LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS = 'Landfills without flaring of methane gas',
-  OPEN_AIR_DUMP = 'Open-air dump',
-}
+export const MethodologyBaselineSchema = z.enum([
+  'Landfills with flaring of methane gas (and/or capture of biogas)',
+  'Landfills without flaring of methane gas',
+  'Open-air dump',
+]);
+export type MethodologyBaseline = z.infer<typeof MethodologyBaselineSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyBaseline = MethodologyBaselineSchema.enum;
 
-export enum MethodologyDocumentActorType {
-  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
-  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
-  NETWORK = MethodologyActorType.NETWORK,
-}
+export const MethodologyDocumentActorTypeSchema =
+  MethodologyActorTypeSchema.extract([
+    'Community Impact Pool',
+    'Methodology Author',
+    'Methodology Developer',
+    'Network',
+  ]);
+export type MethodologyDocumentActorType = z.infer<
+  typeof MethodologyDocumentActorTypeSchema
+>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const MethodologyDocumentActorType =
+  MethodologyDocumentActorTypeSchema.enum;
 
-export enum ReportType {
-  CDF = 'CDF',
-  MTR = 'MTR',
-}
+export const ReportTypeSchema = z.enum(['CDF', 'MTR']);
+export type ReportType = z.infer<typeof ReportTypeSchema>;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export const ReportType = ReportTypeSchema.enum;

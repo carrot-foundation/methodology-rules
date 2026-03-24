@@ -1,10 +1,7 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type Document,
-  DocumentCategory,
   type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
@@ -23,12 +20,10 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
-
 export const CREDITS_EVENT_NAME = 'Credits';
 
 const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
-  [CREDIT_UNIT_PRICE, faker.number.float({ min: 0.01 })],
+  ['Credit Unit Price', faker.number.float({ min: 0.01 })],
 ];
 
 export const stubBoldCreditOrderCreditsEvent = ({
@@ -65,12 +60,12 @@ export const stubBoldCreditOrderDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: 'Methodology',
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.CREDIT_ORDER,
+        type: 'Credit Order',
       },
       false,
     ),

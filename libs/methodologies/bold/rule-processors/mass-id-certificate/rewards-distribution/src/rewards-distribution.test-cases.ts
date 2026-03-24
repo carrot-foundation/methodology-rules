@@ -10,36 +10,92 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type Document,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  DocumentSubtype,
-  MassIDOrganicSubtype,
-  RewardsDistributionActorType,
-  RewardsDistributionWasteType,
+  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.constants';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
-const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = DocumentEventAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } =
-  DocumentEventAttributeValue;
-const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = DocumentSubtype;
-const {
-  COMMUNITY_IMPACT_POOL,
-  HAULER,
-  INTEGRATOR,
-  METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER,
-  NETWORK,
-  PROCESSOR,
-  RECYCLER,
-  WASTE_GENERATOR,
-} = RewardsDistributionActorType;
+const DEFAULT_REWARDS = {
+  'Community Impact Pool': '0',
+  Integrator: '8',
+  'Methodology Author': '1',
+  'Methodology Developer': '1',
+};
+
+const EXPECTED_REWARDS = {
+  'Mixed Organic Waste': {
+    Hauler: '10',
+    Network: '20',
+    Processor: '10',
+    Recycler: '20',
+    'Waste Generator': '15',
+    ...DEFAULT_REWARDS,
+    'Community Impact Pool': '15',
+  },
+  'Sludge from Waste Treatment': {
+    Hauler: '5',
+    Network: '20',
+    Processor: '10',
+    Recycler: '30',
+    'Waste Generator': '12.5',
+    ...DEFAULT_REWARDS,
+    'Community Impact Pool': '12.5',
+  },
+  SMALL_BUSINESS: {
+    'Mixed Organic Waste': {
+      Hauler: '10',
+      Network: '20',
+      Processor: '10',
+      Recycler: '20',
+      'Waste Generator': '30',
+      ...DEFAULT_REWARDS,
+      'Community Impact Pool': '0',
+    },
+    'Sludge from Waste Treatment': {
+      Hauler: '5',
+      Network: '20',
+      Processor: '10',
+      Recycler: '30',
+      'Waste Generator': '25',
+      ...DEFAULT_REWARDS,
+      'Community Impact Pool': '0',
+    },
+    'Tobacco Industry Residues': {
+      Hauler: '5',
+      Network: '20',
+      Processor: '10',
+      Recycler: '30',
+      'Waste Generator': '25',
+      ...DEFAULT_REWARDS,
+      'Community Impact Pool': '0',
+    },
+  },
+  'Tobacco Industry Residues': {
+    Hauler: '5',
+    Network: '20',
+    Processor: '10',
+    Recycler: '30',
+    'Waste Generator': '12.5',
+    ...DEFAULT_REWARDS,
+    'Community Impact Pool': '12.5',
+  },
+  WITHOUT_WASTE_GENERATOR: {
+    WITH_HAULER: {
+      Hauler: '7.5',
+      Network: '60',
+      Processor: '7.5',
+      Recycler: '15',
+      ...DEFAULT_REWARDS,
+    },
+    WITHOUT_HAULER: {
+      Network: '67.5',
+      Processor: '7.5',
+      Recycler: '15',
+      ...DEFAULT_REWARDS,
+    },
+  },
+};
 
 const createWasteGeneratorVerificationDocument = (
   businessSize: DocumentEventAttributeValue,
@@ -52,15 +108,15 @@ const createWasteGeneratorVerificationDocument = (
       .createParticipantAccreditationDocuments(
         new Map([
           [
-            WASTE_GENERATOR_SUBTYPE,
+            'Waste Generator',
             {
               externalEventsMap: {
-                [ONBOARDING_DECLARATION]:
+                ['Onboarding Declaration']:
                   stubDocumentEventWithMetadataAttributes(
                     {
-                      name: ONBOARDING_DECLARATION,
+                      name: 'Onboarding Declaration',
                     },
-                    [[BUSINESS_SIZE_DECLARATION, businessSize]],
+                    [['Business Size Declaration', businessSize]],
                   ),
               },
             },
@@ -68,89 +124,8 @@ const createWasteGeneratorVerificationDocument = (
         ]),
       )
       .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
+      .participantsAccreditationDocuments.get('Waste Generator')!,
   }) as Document;
-
-const DEFAULT_REWARDS = {
-  [COMMUNITY_IMPACT_POOL]: '0',
-  [INTEGRATOR]: '8',
-  [METHODOLOGY_AUTHOR]: '1',
-  [METHODOLOGY_DEVELOPER]: '1',
-};
-
-const EXPECTED_REWARDS = {
-  [RewardsDistributionWasteType.MIXED_ORGANIC_WASTE]: {
-    [HAULER]: '10',
-    [NETWORK]: '20',
-    [PROCESSOR]: '10',
-    [RECYCLER]: '20',
-    [WASTE_GENERATOR]: '15',
-    ...DEFAULT_REWARDS,
-    [COMMUNITY_IMPACT_POOL]: '15',
-  },
-  [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
-    [HAULER]: '5',
-    [NETWORK]: '20',
-    [PROCESSOR]: '10',
-    [RECYCLER]: '30',
-    [WASTE_GENERATOR]: '12.5',
-    ...DEFAULT_REWARDS,
-    [COMMUNITY_IMPACT_POOL]: '12.5',
-  },
-  [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
-    [HAULER]: '5',
-    [NETWORK]: '20',
-    [PROCESSOR]: '10',
-    [RECYCLER]: '30',
-    [WASTE_GENERATOR]: '12.5',
-    ...DEFAULT_REWARDS,
-    [COMMUNITY_IMPACT_POOL]: '12.5',
-  },
-  SMALL_BUSINESS: {
-    [RewardsDistributionWasteType.MIXED_ORGANIC_WASTE]: {
-      [HAULER]: '10',
-      [NETWORK]: '20',
-      [PROCESSOR]: '10',
-      [RECYCLER]: '20',
-      [WASTE_GENERATOR]: '30',
-      ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
-    },
-    [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
-      [HAULER]: '5',
-      [NETWORK]: '20',
-      [PROCESSOR]: '10',
-      [RECYCLER]: '30',
-      [WASTE_GENERATOR]: '25',
-      ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
-    },
-    [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
-      [HAULER]: '5',
-      [NETWORK]: '20',
-      [PROCESSOR]: '10',
-      [RECYCLER]: '30',
-      [WASTE_GENERATOR]: '25',
-      ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
-    },
-  },
-  WITHOUT_WASTE_GENERATOR: {
-    WITH_HAULER: {
-      [HAULER]: '7.5',
-      [NETWORK]: '60',
-      [PROCESSOR]: '7.5',
-      [RECYCLER]: '15',
-      ...DEFAULT_REWARDS,
-    },
-    WITHOUT_HAULER: {
-      [NETWORK]: '67.5',
-      [PROCESSOR]: '7.5',
-      [RECYCLER]: '15',
-      ...DEFAULT_REWARDS,
-    },
-  },
-};
 
 interface RewardsDistributionTestCase extends Omit<
   RuleTestCase,
@@ -179,37 +154,37 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
     {
       expectedRewards: EXPECTED_REWARDS.WITHOUT_WASTE_GENERATOR.WITHOUT_HAULER,
       massIDDocumentEvents: {
-        [`ACTOR-${HAULER}`]: undefined,
-        [`ACTOR-${WASTE_GENERATOR}`]: undefined,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
+        ['ACTOR-Hauler']: undefined,
+        ['ACTOR-Waste Generator']: undefined,
+        ['Pick-up']: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [['Waste Origin', 'Unidentified']],
         }),
       },
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
-      scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is not present`,
+      scenario: `the rewards discount is applied if the origin is not identified and the ${'Hauler'} actor is not present`,
     },
     {
       expectedRewards: EXPECTED_REWARDS.WITHOUT_WASTE_GENERATOR.WITH_HAULER,
       massIDDocumentEvents: {
-        [`ACTOR-${WASTE_GENERATOR}`]: undefined,
-        [PICK_UP]: stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[WASTE_ORIGIN, UNIDENTIFIED]],
+        ['ACTOR-Waste Generator']: undefined,
+        ['Pick-up']: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [['Waste Origin', 'Unidentified']],
         }),
       },
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
-      scenario: `the rewards discount is applied if the origin is not identified and the ${HAULER} actor is present`,
+      scenario: `the rewards discount is applied if the origin is not identified and the ${'Hauler'} actor is present`,
     },
     {
       expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
       massIDDocumentEvents: {},
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
       scenario: `all rewards are applied for the ${REWARDS_DISTRIBUTION_BY_WASTE_TYPE['Food, Food Waste and Beverages']}`,
@@ -218,7 +193,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
       massIDDocumentEvents: {},
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
       scenario: `Large Business discount is applied when Waste Generator Verification Document is missing (defaults to Large Business)`,
@@ -227,38 +202,34 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
       massIDDocumentEvents: {},
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
       scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
       wasteGeneratorVerificationDocument:
-        createWasteGeneratorVerificationDocument(LARGE_BUSINESS),
+        createWasteGeneratorVerificationDocument('Large Business'),
     },
     {
-      expectedRewards:
-        EXPECTED_REWARDS.SMALL_BUSINESS[
-          RewardsDistributionWasteType.MIXED_ORGANIC_WASTE
-        ],
+      expectedRewards: EXPECTED_REWARDS.SMALL_BUSINESS['Mixed Organic Waste'],
       massIDDocumentEvents: {},
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED' as const,
       scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
       wasteGeneratorVerificationDocument:
-        createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
+        createWasteGeneratorVerificationDocument('Small Business'),
     },
     {
-      expectedRewards:
-        EXPECTED_REWARDS[RewardsDistributionWasteType.MIXED_ORGANIC_WASTE],
+      expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
       massIDDocumentEvents: {
-        [`${ACTOR}-InvalidActorType`]: stubDocumentEvent({
+        ['ACTOR-InvalidActorType']: stubDocumentEvent({
           label: 'Invalid Actor Type',
-          name: ACTOR,
+          name: 'ACTOR',
         }),
       },
       massIDPartialDocument: {
-        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+        subtype: 'Food, Food Waste and Beverages',
       },
       resultStatus: 'PASSED',
       scenario:
@@ -285,31 +256,31 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: 'FAILED' as const,
-      scenario: `${MASS_ID} document is not found`,
+      scenario: `${'MassID'} document is not found`,
     },
     {
       documents: [massIDDocument],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
       resultStatus: 'FAILED' as const,
-      scenario: `${METHODOLOGY} document is not found`,
+      scenario: `${'Methodology'} document is not found`,
     },
     {
       documents: [
         {
           ...massIDDocument,
           externalEvents: massIDDocument.externalEvents?.filter(
-            ({ label }) => label !== RewardsDistributionActorType.INTEGRATOR,
+            ({ label }) => label !== 'Integrator',
           ),
         },
         methodologyDocument as Document,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIDDocument.id, [
-        RewardsDistributionActorType.INTEGRATOR,
+        'Integrator',
       ]),
       resultStatus: 'FAILED' as const,
-      scenario: `the ${MASS_ID} document does not have the required actors`,
+      scenario: `the ${'MassID'} document does not have the required actors`,
     },
     {
       documents: [
@@ -322,7 +293,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
       resultStatus: 'FAILED' as const,
-      scenario: `the ${METHODOLOGY} document does not have the required actors`,
+      scenario: `the ${'Methodology'} document does not have the required actors`,
     },
     {
       documents: [
@@ -337,7 +308,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         massIDDocument.id,
       ),
       resultStatus: 'FAILED' as const,
-      scenario: `the ${MASS_ID} document does not have external events`,
+      scenario: `the ${'MassID'} document does not have external events`,
     },
     {
       documents: [
@@ -350,7 +321,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
       resultStatus: 'FAILED' as const,
-      scenario: `the ${MASS_ID} document has an unexpected subtype`,
+      scenario: `the ${'MassID'} document has an unexpected subtype`,
     },
     {
       documents: [
@@ -358,15 +329,13 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...methodologyDocument,
           externalEvents: methodologyDocument?.externalEvents?.map((event) =>
-            event.name === String(DocumentEventName.ACTOR)
-              ? { ...event, address: undefined }
-              : event,
+            event.name === 'ACTOR' ? { ...event, address: undefined } : event,
           ),
         } as Document,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
       resultStatus: 'FAILED' as const,
-      scenario: `the ${METHODOLOGY} document does not have the required address in actors`,
+      scenario: `the ${'Methodology'} document does not have the required address in actors`,
     },
   ];

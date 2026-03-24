@@ -107,7 +107,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   const facilityAddressEvent =
     participantAccreditationDocument.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
+      eventNameIsAnyOf([DocumentEventName['Facility Address']]),
     );
 
   if (!facilityAddressEvent) {
@@ -126,11 +126,11 @@ export const getEventGpsGeolocation = (
 ): Geolocation | undefined => {
   const gpsLatitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LATITUDE,
+    DocumentEventAttributeName['Captured GPS Latitude'],
   );
   const gpsLongitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    DocumentEventAttributeName['Captured GPS Longitude'],
   );
 
   if (
@@ -148,7 +148,7 @@ export const getEventGpsGeolocation = (
 
 export const getGpsExceptionsFromRecyclerAccreditation = (
   recyclerAccreditationDocument: Document | undefined,
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName: 'Drop-off' | 'Pick-up',
 ): {
   latitudeException: GpsLatitudeApprovedException | undefined;
   longitudeException: GpsLongitudeApprovedException | undefined;
@@ -157,10 +157,9 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     return { latitudeException: undefined, longitudeException: undefined };
   }
 
-  const { ACCREDITATION_RESULT } = DocumentEventName;
   const approvedExceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
-    ACCREDITATION_RESULT,
+    DocumentEventName['Accreditation Result'],
   );
 
   if (!approvedExceptions) {
@@ -171,14 +170,14 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LATITUDE.toString(),
+        DocumentEventAttributeName['Captured GPS Latitude'].toString(),
   );
 
   const longitudeException = approvedExceptions.find(
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
+        DocumentEventAttributeName['Captured GPS Longitude'].toString(),
   );
 
   return {

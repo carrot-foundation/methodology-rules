@@ -35,13 +35,13 @@ import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
-const ACTORS_REQUIRING_DATES = new Set([
-  MethodologyDocumentEventLabel.PROCESSOR,
-  MethodologyDocumentEventLabel.RECYCLER,
+const ACTORS_REQUIRING_DATES: Set<MethodologyDocumentEventLabel> = new Set([
+  MethodologyDocumentEventLabel.Processor,
+  MethodologyDocumentEventLabel.Recycler,
 ]);
 
-const ACTORS_WITH_OPTIONAL_DATES = new Set([
-  MethodologyDocumentEventLabel.INTEGRATOR,
+const ACTORS_WITH_OPTIONAL_DATES: Set<MethodologyDocumentEventLabel> = new Set([
+  MethodologyDocumentEventLabel.Integrator,
 ]);
 
 interface RuleSubject {
@@ -122,9 +122,9 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIDDocument
         .externalEvents!.filter(
           eventLabelIsAnyOf([
-            MethodologyDocumentEventLabel.INTEGRATOR,
-            MethodologyDocumentEventLabel.PROCESSOR,
-            MethodologyDocumentEventLabel.RECYCLER,
+            MethodologyDocumentEventLabel.Integrator,
+            MethodologyDocumentEventLabel.Processor,
+            MethodologyDocumentEventLabel.Recycler,
           ]),
         )
         .map((event) => [
@@ -285,9 +285,9 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIDDocument.externalEvents
         .filter(
           eventLabelIsAnyOf([
-            MethodologyDocumentEventLabel.INTEGRATOR,
-            MethodologyDocumentEventLabel.PROCESSOR,
-            MethodologyDocumentEventLabel.RECYCLER,
+            MethodologyDocumentEventLabel.Integrator,
+            MethodologyDocumentEventLabel.Processor,
+            MethodologyDocumentEventLabel.Recycler,
           ]),
         )
         .map((event) => [event.participant.id, event.label as string]),

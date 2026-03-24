@@ -11,8 +11,6 @@ import {
   DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { MASS_ID } = DocumentCategory;
-
 export const buildDocumentsCriteria = (
   massIDCertificateMatcher: DocumentMatcher,
 ): DocumentCriteria => ({
@@ -31,12 +29,13 @@ export const buildDocumentsCriteria = (
 export const RESULT_COMMENTS = {
   failed: {},
   passed: {
-    NO_CONFLICTING_CERTIFICATE: `The ${MASS_ID} is not linked to a valid ${MASS_ID} Certificate`,
+    NO_CONFLICTING_CERTIFICATE: `The ${DocumentCategory.MassID} is not linked to a valid ${DocumentCategory.MassID} Certificate`,
   },
   reviewRequired: {},
 } as const;
 
 export const METHODOLOGY_NAME_BY_SLUG = {
-  [BoldMethodologySlug.CARBON]: BoldMethodologyName.CARBON,
-  [BoldMethodologySlug.RECYCLING]: BoldMethodologyName.RECYCLING,
+  [BoldMethodologySlug['bold-carbon']]: BoldMethodologyName['BOLD Carbon'],
+  [BoldMethodologySlug['bold-recycling']]:
+    BoldMethodologyName['BOLD Recycling'],
 } as const satisfies Record<BoldMethodologySlug, BoldMethodologyName>;
