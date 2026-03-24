@@ -12,7 +12,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates that event addresses for all participants are within 2000 meters of their accredited addresses. For recyclers, also validates GPS coordinates against the accredited address when available.
+Validates event addresses against accredited addresses using tiered distance thresholds: ≤2 km passes with GPS check, 2–30 km requires address similarity review, >30 km fails. For recyclers, also validates GPS coordinates against the accredited address when available.
 
 ## 📋 Framework Rules
 
