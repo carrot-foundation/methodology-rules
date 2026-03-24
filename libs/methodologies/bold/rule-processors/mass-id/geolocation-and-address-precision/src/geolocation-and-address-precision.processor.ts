@@ -9,6 +9,7 @@ import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loade
 import {
   calculateDistance,
   getOrUndefined,
+  isAddressMatch,
   isNil,
   isNonEmptyArray,
   toDocumentKey,
@@ -38,7 +39,9 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
-  MAX_ALLOWED_DISTANCE,
+  DISTANCE_THRESHOLD_PASS,
+  DISTANCE_THRESHOLD_SIMILARITY,
+  GPS_MAX_ALLOWED_DISTANCE,
   RESULT_COMMENTS,
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
@@ -127,18 +130,33 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   ): EvaluateResultOutput {
     const allResults = [...actorResults.values()].flat();
 
-    const passed = allResults.every(
-      (result) => result.resultStatus === 'PASSED',
-    );
-
     const resultComment = allResults
       .map((result) => result.resultComment)
       .join(' ');
 
-    return {
-      resultComment,
-      resultStatus: passed ? 'PASSED' : 'FAILED',
-    };
+    const hasFailed = allResults.some(
+      (result) => result.resultStatus === 'FAILED',
+    );
+
+    if (hasFailed) {
+      return { resultComment, resultStatus: 'FAILED' };
+    }
+
+    const hasReviewRequired = allResults.some(
+      (result) => result.resultStatus === 'REVIEW_REQUIRED',
+    );
+
+    if (hasReviewRequired) {
+      return { resultComment, resultStatus: 'REVIEW_REQUIRED' };
+    }
+
+    return { resultComment, resultStatus: 'PASSED' };
+  }
+
+  private buildAddressComparisonString(address: MethodologyAddress): string {
+    return [address.street, address.number, address.city]
+      .filter(Boolean)
+      .join(', ');
   }
 
   private buildParticipantsAddressData(
@@ -277,7 +295,20 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       accreditedAddress,
     );
 
-    if (addressDistance > MAX_ALLOWED_DISTANCE) {
+    // Tier 1: ≤2km — pass, continue to GPS check
+    if (addressDistance <= DISTANCE_THRESHOLD_PASS) {
+      return this.evaluateGpsData({
+        accreditedAddress,
+        actorType,
+        addressDistance,
+        eventName,
+        gpsGeolocation,
+        recyclerAccreditationDocument,
+      });
+    }
+
+    // Tier 3: >30km — hard fail
+    if (addressDistance > DISTANCE_THRESHOLD_SIMILARITY) {
       return [
         {
           resultComment: RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(
@@ -289,6 +320,72 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       ];
     }
 
+    // Tier 2: 2-30km — check country/state then address similarity
+    if (
+      eventAddress.countryCode !== accreditedAddress.countryCode ||
+      eventAddress.countryState !== accreditedAddress.countryState
+    ) {
+      return [
+        {
+          resultComment: RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE(
+            actorType,
+            addressDistance,
+          ),
+          resultStatus: 'FAILED',
+        },
+      ];
+    }
+
+    const eventAddressString = this.buildAddressComparisonString(eventAddress);
+    const accreditedAddressString =
+      this.buildAddressComparisonString(accreditedAddress);
+    const { isMatch, score } = isAddressMatch(
+      eventAddressString,
+      accreditedAddressString,
+    );
+    const similarityPercent = Math.round(score * 100);
+
+    if (isMatch) {
+      return [
+        {
+          resultComment:
+            RESULT_COMMENTS.reviewRequired.PASSED_WITH_ADDRESS_SIMILARITY(
+              actorType,
+              addressDistance,
+              similarityPercent,
+            ),
+          resultStatus: 'REVIEW_REQUIRED',
+        },
+      ];
+    }
+
+    return [
+      {
+        resultComment: RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY(
+          actorType,
+          addressDistance,
+          similarityPercent,
+        ),
+        resultStatus: 'FAILED',
+      },
+    ];
+  }
+
+  private evaluateGpsData({
+    accreditedAddress,
+    actorType,
+    addressDistance,
+    eventName,
+    gpsGeolocation,
+    recyclerAccreditationDocument,
+  }: {
+    accreditedAddress: MethodologyAddress;
+    actorType: MassIDDocumentActorType;
+    addressDistance: number;
+    eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    gpsGeolocation: Geolocation | undefined;
+    recyclerAccreditationDocument: Document | undefined;
+  }): EvaluateResultOutput[] {
     if (
       !isNil(gpsGeolocation) &&
       actorType === MassIDDocumentActorType.RECYCLER
@@ -318,7 +415,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         gpsGeolocation,
       );
 
-      if (gpsDistance > MAX_ALLOWED_DISTANCE) {
+      if (gpsDistance > GPS_MAX_ALLOWED_DISTANCE) {
         return [
           {
             resultComment: RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(

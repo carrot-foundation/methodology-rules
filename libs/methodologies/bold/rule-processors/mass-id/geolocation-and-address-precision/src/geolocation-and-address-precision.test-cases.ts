@@ -26,9 +26,10 @@ import {
   type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
+import { expect } from 'vitest';
 
 import {
-  MAX_ALLOWED_DISTANCE,
+  DISTANCE_THRESHOLD_SIMILARITY,
   RESULT_COMMENTS,
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
@@ -166,6 +167,60 @@ const manifestInvalidWasteGeneratorAddressDistance = calculateDistance(
   manifestWasteGeneratorAddress,
   manifestInvalidWasteGeneratorAddress,
 );
+
+// Addresses for similarity tier testing (2-30km band)
+// Fictional addresses ~16km apart in the same city, similar street names
+const similarRecyclerEventAddress = stubAddress({
+  city: 'Vila Verde',
+  countryCode: 'XX',
+  countryState: 'Norte',
+  latitude: -10.0,
+  longitude: -40.0,
+  number: '100',
+  street: 'Rua das Flores',
+});
+const similarRecyclerAccreditedAddress = stubAddress({
+  city: 'Vila Verde',
+  countryCode: 'XX',
+  countryState: 'Norte',
+  latitude: -10.14,
+  longitude: -40.03,
+  number: '100',
+  street: 'R. das Flores',
+});
+const mismatchedStateAddress = stubAddress({
+  ...similarRecyclerAccreditedAddress,
+  countryState: 'Sul',
+});
+
+const dissimilarRecyclerAccreditedAddress = stubAddress({
+  city: 'Cidade Nova',
+  countryCode: 'XX',
+  countryState: 'Norte',
+  latitude: -10.14,
+  longitude: -40.03,
+  number: '500',
+  street: 'Av. Central',
+});
+const farRecyclerAccreditedAddress = stubAddress({
+  city: 'Porto Distante',
+  countryCode: 'XX',
+  countryState: 'Sul',
+  latitude: -13.0,
+  longitude: -43.0,
+});
+
+const similarRecyclerParticipant = stubParticipant({
+  id: faker.string.uuid(),
+  type: RECYCLER,
+});
+const similarWasteGeneratorParticipant = stubParticipant({
+  id: faker.string.uuid(),
+  type: WASTE_GENERATOR,
+});
+const similarWasteGeneratorAddress = stubAddress({
+  ...actorsCoordinates.get(WASTE_GENERATOR)!.base,
+});
 
 const createGpsException = (
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
@@ -409,7 +464,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       },
       resultComment: `${RESULT_COMMENTS.passed.PASSED_WITH_GPS(WASTE_GENERATOR, manifestNearbyWasteGeneratorAddressDistance, manifestNearbyWasteGeneratorAddressDistance)} ${RESULT_COMMENTS.passed.PASSED_WITH_GPS(RECYCLER, manifestNearbyRecyclerAddressDistance, manifestNearbyRecyclerAddressDistance)}`,
       resultStatus: 'PASSED',
-      scenario: `The GPS is set and both GPS coordinates and event address are valid and within the ${MAX_ALLOWED_DISTANCE} m radius`,
+      scenario:
+        'The GPS is set and both GPS coordinates and event address are valid and within the allowed radius',
     },
     {
       accreditationDocuments: manifestValidAccreditationDocuments,
@@ -723,6 +779,223 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultStatus: 'FAILED',
       scenario:
         'The Recycler has expired GPS exceptions (should NOT skip GPS validation)',
+    },
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            similarRecyclerAccreditedAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        ...actorParticipants,
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddress,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddress,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining('similarity'),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'Recycler address is 2-30km away but textual address matches by similarity (REVIEW_REQUIRED)',
+    },
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            dissimilarRecyclerAccreditedAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        ...actorParticipants,
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddress,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddress,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining('similarity is only'),
+      resultStatus: 'FAILED',
+      scenario:
+        'Recycler address is 2-30km away and textual address does not match (FAILED)',
+    },
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            mismatchedStateAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        ...actorParticipants,
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddress,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddress,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining('country or state do not match'),
+      resultStatus: 'FAILED',
+      scenario:
+        'Recycler address is 2-30km away but state does not match (FAILED)',
+    },
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            farRecyclerAccreditedAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        ...actorParticipants,
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddress,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddress,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining(
+        `exceeding the ${DISTANCE_THRESHOLD_SIMILARITY} m limit`,
+      ),
+      resultStatus: 'FAILED',
+      scenario: 'Recycler address is beyond 30km (FAILED)',
     },
   ];
 
