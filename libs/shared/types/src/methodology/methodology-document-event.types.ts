@@ -76,7 +76,7 @@ export const MethodologyDocumentEventAttributeSchema = z.object({
   name: z.string(),
   sensitive: z.boolean().optional(),
   type: MethodologyDocumentEventAttributeTypeSchema.optional(),
-  value: MethodologyDocumentEventAttributeValueSchema.optional(),
+  value: z.union([MethodologyDocumentEventAttributeValueSchema, z.undefined()]),
   valuePrefix: NonEmptyStringSchema.optional(),
   valueSuffix: NonEmptyStringSchema.optional(),
 });
