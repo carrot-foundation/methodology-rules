@@ -53,7 +53,8 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING('Others'),
     resultStatus: 'FAILED',
-    scenario: 'The "Vehicle Type" attribute is declared as Others but the "Vehicle Description" attribute is not present',
+    scenario:
+      'The "Vehicle Type" attribute is declared as Others but the "Vehicle Description" attribute is not present',
   },
   {
     events: new Map([
@@ -71,7 +72,8 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     resultComment:
       RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION('Others'),
     resultStatus: 'PASSED',
-    scenario: 'The "Vehicle Type" attribute is declared as Others and the "Vehicle Description" attribute is present',
+    scenario:
+      'The "Vehicle Type" attribute is declared as Others and the "Vehicle Description" attribute is present',
   },
   {
     events: new Map([['Pick-up', undefined]]),
@@ -110,7 +112,8 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING('Truck'),
     resultStatus: 'FAILED',
-    scenario: 'The "Vehicle Type" attribute is not exempt from license plate requirement but no license plate is provided',
+    scenario:
+      'The "Vehicle Type" attribute is not exempt from license plate requirement but no license plate is provided',
   },
   {
     events: new Map([
@@ -126,7 +129,8 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     resultStatus: 'PASSED',
-    scenario: 'The "Vehicle Type" attribute is not exempt from license plate requirement and license plate is provided',
+    scenario:
+      'The "Vehicle Type" attribute is not exempt from license plate requirement and license plate is provided',
   },
   {
     events: new Map([
@@ -142,6 +146,7 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     ]),
     resultComment: RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
     resultStatus: 'FAILED',
-    scenario: 'The "Vehicle License Plate" attribute is not a valid license plate',
+    scenario:
+      'The "Vehicle License Plate" attribute is not a valid license plate',
   },
 ];

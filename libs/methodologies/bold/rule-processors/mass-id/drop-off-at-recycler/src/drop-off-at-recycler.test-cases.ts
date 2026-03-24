@@ -31,7 +31,8 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     manifestExample: true,
     resultComment: RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
     resultStatus: 'FAILED',
-    scenario: 'The MassID document has a "Drop-off" event but no "Receiving Operator Identifier" attribute',
+    scenario:
+      'The MassID document has a "Drop-off" event but no "Receiving Operator Identifier" attribute',
   },
   {
     events: {
@@ -39,7 +40,8 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     },
     resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
     resultStatus: 'FAILED',
-    scenario: 'The MassID document has a "Drop-off" event, but the "Recycler" event address does not match the "Drop-off" event address',
+    scenario:
+      'The MassID document has a "Drop-off" event, but the "Recycler" event address does not match the "Drop-off" event address',
   },
   {
     events: {
@@ -58,6 +60,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
     manifestFields: { addressFields: ['latitude', 'longitude'] },
     resultComment: RESULT_COMMENTS.passed.VALID_DROP_OFF,
     resultStatus: 'PASSED',
-    scenario: 'The MassID document has a "Drop-off" event and a "Recycler" event, and the "Drop-off" event address matches the "Recycler" event address',
+    scenario:
+      'The MassID document has a "Drop-off" event and a "Recycler" event, and the "Drop-off" event address matches the "Recycler" event address',
   },
 ];

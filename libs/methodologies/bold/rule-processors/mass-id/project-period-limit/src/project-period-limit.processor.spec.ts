@@ -60,7 +60,9 @@ describe('ProjectPeriodLimitProcessor', () => {
     const ruleInput = stubRuleInput();
 
     const document = stubBoldMassIDDocument({
-      externalEventsMap: new Map([['Recycled' as DocumentEventName, undefined]]),
+      externalEventsMap: new Map([
+        ['Recycled' as DocumentEventName, undefined],
+      ]),
     });
 
     documentLoaderService.mockResolvedValueOnce(document);

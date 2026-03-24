@@ -70,6 +70,7 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
       distance: distanceInKm,
     },
     resultStatus: 'PASSED',
-    scenario: 'The MassID document has multiple "Drop-off" events and all criteria are met',
+    scenario:
+      'The MassID document has multiple "Drop-off" events and all criteria are met',
   },
 ];

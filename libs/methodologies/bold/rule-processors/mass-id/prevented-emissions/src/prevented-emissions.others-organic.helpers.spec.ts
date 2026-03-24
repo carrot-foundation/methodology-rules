@@ -2,6 +2,7 @@ import {
   stubBoldMassIDPickUpEvent,
   stubDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
+
 import {
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
   OthersIfOrganicCarbonFractionsByCode,
@@ -155,10 +156,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
   describe('calculateOthersIfOrganicFactor', () => {
     it('should calculate factor for OPEN_AIR_DUMP with 15% carbon', () => {
-      const result = calculateOthersIfOrganicFactor(
-        'Open-air dump',
-        '0.15',
-      );
+      const result = calculateOthersIfOrganicFactor('Open-air dump', '0.15');
 
       expect(result).toBe(0.698_505);
     });
@@ -182,19 +180,13 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
     });
 
     it('should calculate factor for OPEN_AIR_DUMP with 58% carbon', () => {
-      const result = calculateOthersIfOrganicFactor(
-        'Open-air dump',
-        '0.58',
-      );
+      const result = calculateOthersIfOrganicFactor('Open-air dump', '0.58');
 
       expect(result).toBe(3.072_695);
     });
 
     it('should round to 6 decimal places using ROUND_HALF_DOWN', () => {
-      const result = calculateOthersIfOrganicFactor(
-        'Open-air dump',
-        '0.15',
-      );
+      const result = calculateOthersIfOrganicFactor('Open-air dump', '0.15');
 
       expect(result.toString()).toMatch(/^\d+\.\d{6}$/);
     });
@@ -208,10 +200,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
         'Landfills without flaring of methane gas',
         '0',
       );
-      const resultDump = calculateOthersIfOrganicFactor(
-        'Open-air dump',
-        '0',
-      );
+      const resultDump = calculateOthersIfOrganicFactor('Open-air dump', '0');
 
       expect(resultFlaring).toBe(0);
       expect(resultWithoutFlaring).toBe(0);
@@ -333,10 +322,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
   describe('getOthersIfOrganicAuditDetails', () => {
     it('should throw when local waste classification code is not configured', () => {
       expect(() => {
-        getOthersIfOrganicAuditDetails(
-          '00 00 00',
-          'Open-air dump',
-        );
+        getOthersIfOrganicAuditDetails('00 00 00', 'Open-air dump');
       }).toThrow(
         'getOthersIfOrganicAuditDetails: no carbon entry for "00 00 00"',
       );
@@ -367,10 +353,7 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should return audit details for OPEN_AIR_DUMP baseline', () => {
       expect(
-        getOthersIfOrganicAuditDetails(
-          '02 01 06',
-          'Open-air dump',
-        ),
+        getOthersIfOrganicAuditDetails('02 01 06', 'Open-air dump'),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
         carbonFraction: '0.15',

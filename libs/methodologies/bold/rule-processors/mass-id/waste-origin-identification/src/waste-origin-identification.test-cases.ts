@@ -32,7 +32,8 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.UNIDENTIFIED_WASTE_ORIGIN,
       resultStatus: 'PASSED',
-      scenario: 'The "Pick-up" event has the metadata "Waste Origin" with the value "Unidentified"',
+      scenario:
+        'The "Pick-up" event has the metadata "Waste Origin" with the value "Unidentified"',
     },
     {
       events: {
@@ -47,7 +48,8 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
       resultStatus: 'FAILED',
-      scenario: 'The "Pick-up" event has the metadata "Waste Origin" with the value "Unidentified" and the "Waste Generator" event is defined',
+      scenario:
+        'The "Pick-up" event has the metadata "Waste Origin" with the value "Unidentified" and the "Waste Generator" event is defined',
     },
     {
       events: {
@@ -62,7 +64,8 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       manifestExample: true,
       resultComment: RESULT_COMMENTS.passed.WASTE_ORIGIN_IDENTIFIED,
       resultStatus: 'PASSED',
-      scenario: 'The "Pick-up" event without "Waste Origin" metadata and the "Waste Generator" event is defined',
+      scenario:
+        'The "Pick-up" event without "Waste Origin" metadata and the "Waste Generator" event is defined',
     },
     {
       events: {
@@ -72,7 +75,8 @@ export const wasteOriginIdentificationTestCases: WasteOriginIdentificationTestCa
       manifestExample: true,
       resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
       resultStatus: 'FAILED',
-      scenario: 'The "Pick-up" event without "Waste Origin" metadata and no "Waste Generator" event',
+      scenario:
+        'The "Pick-up" event without "Waste Origin" metadata and no "Waste Generator" event',
     },
     {
       events: {

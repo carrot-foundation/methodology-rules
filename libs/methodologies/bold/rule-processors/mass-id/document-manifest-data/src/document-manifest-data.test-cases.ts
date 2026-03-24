@@ -335,9 +335,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     documentManifestType: 'Transport Manifest' as DocumentManifestType,
     events: {
       'Transport Manifest': documentManifestTypeStub['Transport Manifest']({
-        metadataAttributes: [
-          ['Exemption Justification', 'Some justification'],
-        ],
+        metadataAttributes: [['Exemption Justification', 'Some justification']],
         partialDocumentEvent: {
           address: sameAddress,
           attachments: [

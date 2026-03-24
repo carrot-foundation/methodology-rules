@@ -49,12 +49,14 @@ export const projectPeriodLimitTestCases: ProjectPeriodLimitTestCase[] = [
     externalCreatedAt: createBRTDateString(subSeconds(getEligibleDate(), 1)),
     resultComment: RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE,
     resultStatus: 'PASSED',
-    scenario: 'The "Recycled" event was created 1 second before the eligible date in UTC but appears after in BRT timezone',
+    scenario:
+      'The "Recycled" event was created 1 second before the eligible date in UTC but appears after in BRT timezone',
   },
   {
     externalCreatedAt: createBRTDateString(getEligibleDate()),
     resultComment: RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE,
     resultStatus: 'PASSED',
-    scenario: 'The "Recycled" event was created exactly at the eligible date (BRT timezone)',
+    scenario:
+      'The "Recycled" event was created exactly at the eligible date (BRT timezone)',
   },
 ];

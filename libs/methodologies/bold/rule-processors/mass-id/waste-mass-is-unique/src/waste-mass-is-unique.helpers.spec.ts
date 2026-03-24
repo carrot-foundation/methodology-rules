@@ -10,7 +10,6 @@ import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import * as helpers from './waste-mass-is-unique.helpers';
 
-
 const mockCheckDuplicateDocuments = vi.fn();
 const mockAuditApiService = {
   checkDuplicateDocuments: mockCheckDuplicateDocuments,

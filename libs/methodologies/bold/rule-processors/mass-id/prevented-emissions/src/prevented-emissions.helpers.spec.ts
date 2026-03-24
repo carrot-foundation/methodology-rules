@@ -12,7 +12,8 @@ import {
 } from './prevented-emissions.helpers';
 
 const BASELINES = 'Baselines';
-const EXCEEDING_EMISSION_COEFFICIENT = 'Exceeding Emission Coefficient (per ton)';
+const EXCEEDING_EMISSION_COEFFICIENT =
+  'Exceeding Emission Coefficient (per ton)';
 const GREENHOUSE_GAS_TYPE = 'Greenhouse Gas Type (GHG)';
 
 describe('PreventedEmissionsHelpers', () => {
@@ -124,8 +125,7 @@ describe('PreventedEmissionsHelpers', () => {
           [
             BASELINES,
             {
-              ['Domestic Sludge']:
-                'Open-air dump',
+              ['Domestic Sludge']: 'Open-air dump',
               ['Food, Food Waste and Beverages']:
                 'Landfills with flaring of methane gas (and/or capture of biogas)',
             },

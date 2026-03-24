@@ -79,10 +79,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     );
 
     const wasteGeneratorEvents = document.externalEvents?.filter(
-      and(
-        eventNameIsAnyOf(['ACTOR']),
-        eventLabelIsAnyOf(['Waste Generator']),
-      ),
+      and(eventNameIsAnyOf(['ACTOR']), eventLabelIsAnyOf(['Waste Generator'])),
     );
 
     return {

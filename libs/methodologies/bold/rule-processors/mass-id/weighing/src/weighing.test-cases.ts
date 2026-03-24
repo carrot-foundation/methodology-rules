@@ -215,20 +215,20 @@ const createTwoStepWeighingEvents = (
   firstEventOverrides: MetadataAttributeParameter[] = [],
   secondEventOverrides: MetadataAttributeParameter[] = firstEventOverrides,
 ) => ({
-  ['Weighing-2']: createWeighingEvent(
-    mergeAttributes(validWeighingAttributesWithoutQuantity, [
-      ['Scale Type', scaleTypeValue],
-      ['Container Type', 'Truck'],
-      ...firstEventOverrides,
-    ]),
-    eventValue,
-    participant,
-  ),
   ['Weighing']: createWeighingEvent(
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
       ['Scale Type', scaleTypeValue],
       ['Container Type', 'Truck'],
       ...secondEventOverrides,
+    ]),
+    eventValue,
+    participant,
+  ),
+  ['Weighing-2']: createWeighingEvent(
+    mergeAttributes(validWeighingAttributesWithoutQuantity, [
+      ['Scale Type', scaleTypeValue],
+      ['Container Type', 'Truck'],
+      ...firstEventOverrides,
     ]),
     eventValue,
     participant,
@@ -323,9 +323,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     ]),
     massIDDocumentEvents: {
       ['Weighing']: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [
-          ['Container Type', 'Bag'],
-        ]),
+        mergeAttributes(validWeighingAttributes, [['Container Type', 'Bag']]),
       ),
     },
     resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
@@ -449,7 +447,9 @@ export const weighingTestCases: WeighingTestCase[] = [
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
       ['Weighing']: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [['Container Type', undefined]]),
+        mergeAttributes(validWeighingAttributes, [
+          ['Container Type', undefined],
+        ]),
       ),
     },
     resultComment: WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE,
@@ -535,7 +535,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       scaleTypeValue: twoStepScaleType,
     }),
     massIDDocumentEvents: {
-      ['Weighing-2']: createWeighingEvent(
+      ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributesWithoutQuantity, [
           ['Scale Type', twoStepScaleType],
           ['Container Type', 'Truck'],
@@ -543,7 +543,7 @@ export const weighingTestCases: WeighingTestCase[] = [
         eventValue,
         stubParticipant(),
       ),
-      ['Weighing']: createWeighingEvent(
+      ['Weighing-2']: createWeighingEvent(
         mergeAttributes(validWeighingAttributesWithoutQuantity, [
           ['Scale Type', twoStepScaleType],
           ['Container Type', 'Truck'],
@@ -624,14 +624,6 @@ export const weighingTestCases: WeighingTestCase[] = [
       scaleTypeValue: twoStepScaleType,
     }),
     massIDDocumentEvents: {
-      ['Weighing-2']: createWeighingEvent(
-        mergeAttributes(validWeighingAttributes, [
-          ['Scale Type', twoStepScaleType],
-          ['Container Type', 'Bag'],
-        ]),
-        eventValue,
-        twoStepWeighingEventParticipant,
-      ),
       ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
           ['Scale Type', twoStepScaleType],
@@ -640,10 +632,16 @@ export const weighingTestCases: WeighingTestCase[] = [
         eventValue,
         twoStepWeighingEventParticipant,
       ),
+      ['Weighing-2']: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [
+          ['Scale Type', twoStepScaleType],
+          ['Container Type', 'Bag'],
+        ]),
+        eventValue,
+        twoStepWeighingEventParticipant,
+      ),
     },
-    resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(
-      'Bag',
-    ),
+    resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE('Bag'),
     resultStatus: 'FAILED',
     scenario: `The two step "Weighing" event container type is not "${'Truck'}"`,
   },
@@ -654,10 +652,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     massIDDocumentEvents: {
       ['Weighing']: createWeighingEvent(
         mergeAttributes(validWeighingAttributes, [
-          [
-            'Weighing Capture Method',
-            'Transport Manifest',
-          ],
+          ['Weighing Capture Method', 'Transport Manifest'],
           ['Scale Type', scaleType],
         ]),
       ),

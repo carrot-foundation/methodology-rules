@@ -37,7 +37,8 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     resultComment:
       RESULT_COMMENTS.passed.JUSTIFICATION_PROVIDED(someJustification),
     resultStatus: 'PASSED',
-    scenario: 'The "Driver Identifier" is not provided, but the "Driver Identifier Exemption Justification" is provided',
+    scenario:
+      'The "Driver Identifier" is not provided, but the "Driver Identifier Exemption Justification" is provided',
   },
   {
     manifestExample: true,
@@ -50,7 +51,8 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment: RESULT_COMMENTS.failed.MISSING_JUSTIFICATION('Boat'),
     resultStatus: 'FAILED',
-    scenario: 'The "Driver Identifier" is not provided and the "Driver Identifier Exemption Justification" is not provided',
+    scenario:
+      'The "Driver Identifier" is not provided and the "Driver Identifier Exemption Justification" is not provided',
   },
   {
     manifestExample: true,
@@ -75,6 +77,7 @@ export const driverIdentificationTestCases: DriverIdentificationTestCase[] = [
     }),
     resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
     resultStatus: 'FAILED',
-    scenario: 'Both "Driver Identifier" and "Driver Identifier Exemption Justification" are provided',
+    scenario:
+      'Both "Driver Identifier" and "Driver Identifier Exemption Justification" are provided',
   },
 ];

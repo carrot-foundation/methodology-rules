@@ -183,7 +183,9 @@ const massIDWithWasteGeneratorValidResult = createMassIDWithActorAccreditation(
 const massIDWithWasteGeneratorInvalidResult =
   createMassIDWithActorAccreditation(
     'Waste Generator',
-    new Map([['Accreditation Result', createExpiredAccreditationResultEvent()]]),
+    new Map([
+      ['Accreditation Result', createExpiredAccreditationResultEvent()],
+    ]),
   );
 
 const {

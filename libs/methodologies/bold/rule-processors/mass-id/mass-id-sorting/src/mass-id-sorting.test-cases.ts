@@ -39,17 +39,13 @@ const createAccreditationDocuments = (sortingFactor: number) =>
         externalEventsMap: {
           ['Accreditation Context']: stubDocumentEvent({
             name: 'Accreditation Context',
-            participant: actorParticipants.get(
-              'Recycler',
-            )!,
+            participant: actorParticipants.get('Recycler')!,
           }),
           ['Emissions & Composting Metrics']:
             stubBoldEmissionAndCompostingMetricsEvent({
               metadataAttributes: [['Sorting Factor', sortingFactor]],
               partialDocumentEvent: {
-                participant: actorParticipants.get(
-                  'Recycler',
-                )!,
+                participant: actorParticipants.get('Recycler')!,
               },
             }),
         },
@@ -89,7 +85,10 @@ const createMassIDEvents = (
       ...(includeDescription
         ? []
         : [
-            ['Description', undefined] as [DocumentEventAttributeName, undefined],
+            ['Description', undefined] as [
+              DocumentEventAttributeName,
+              undefined,
+            ],
           ]),
     ],
     ...(sortingValue !== undefined && {
@@ -451,9 +450,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -475,9 +472,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -499,9 +494,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -518,9 +511,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -537,9 +528,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -561,9 +550,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
@@ -585,9 +572,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     [
       modifyDocumentEvents(massIDDocument, {
         ['Drop-off']: {
-          ...massIDDocument.externalEvents?.find(
-            (e) => e.name === 'Drop-off',
-          ),
+          ...massIDDocument.externalEvents?.find((e) => e.name === 'Drop-off'),
           value: valueBeforeSorting,
         },
         ['Sorting']: stubBoldMassIDSortingEvent({
