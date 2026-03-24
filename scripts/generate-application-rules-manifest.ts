@@ -253,37 +253,59 @@ const MethodologyDocumentEventLabel = SharedTypes.MethodologyDocumentEventLabel;
 /**
  * Parses a processor file to extract which actor labels are used with ACTOR events.
  * Looks for patterns like:
- *   - eventLabelIsAnyOf([HAULER, RECYCLER])
- *   - eventHasLabel(event, PROCESSOR)
+ *   - eventLabelIsAnyOf([MethodologyDocumentEventLabel.Hauler])
+ *   - eventLabelIsAnyOf([MethodologyDocumentEventLabel['Waste Generator']])
+ *   - eventHasLabel(event, MethodologyDocumentEventLabel.Processor)
  * Returns the enum values as-is, e.g. ["Hauler", "Waste Generator"]
  */
 function extractActorLabelsFromProcessor(processorPath: string): string[] {
   const content = fs.readFileSync(processorPath, 'utf8');
   const labels = new Set<string>();
 
-  // Match eventLabelIsAnyOf([LABEL1, MethodologyDocumentEventLabel.LABEL2, ...])
+  // Match eventLabelIsAnyOf([...])
   const labelIsAnyOfRe = /eventLabelIsAnyOf\(\[([^\]]+)\]/g;
   let match;
   while ((match = labelIsAnyOfRe.exec(content)) !== null) {
     const inner = match[1] ?? '';
     for (const token of inner.split(',')) {
       const trimmed = token.trim();
-      // Handle fully qualified: MethodologyDocumentEventLabel.HAULER
-      const qualifiedMatch = trimmed.match(
-        /MethodologyDocumentEventLabel\.([A-Z_]+)/,
+      // Handle bracket notation: MethodologyDocumentEventLabel['Waste Generator']
+      const bracketMatch = trimmed.match(
+        /MethodologyDocumentEventLabel\[['"]([^'"]+)['"]\]/,
       );
-      if (qualifiedMatch?.[1]) {
-        labels.add(qualifiedMatch[1]);
-      } else if (trimmed && /^[A-Z_]+$/.test(trimmed)) {
-        labels.add(trimmed);
+      if (bracketMatch?.[1]) {
+        labels.add(bracketMatch[1]);
+        continue;
+      }
+      // Handle dot notation: MethodologyDocumentEventLabel.Hauler
+      const dotMatch = trimmed.match(
+        /MethodologyDocumentEventLabel\.(\w+)/,
+      );
+      if (dotMatch?.[1]) {
+        labels.add(dotMatch[1]);
+        continue;
+      }
+      // Handle string literals: 'Hauler' or "Hauler"
+      const stringMatch = trimmed.match(/^['"]([^'"]+)['"]$/);
+      if (stringMatch?.[1]) {
+        labels.add(stringMatch[1]);
       }
     }
   }
 
-  // Match eventHasLabel(event, LABEL) or eventHasLabel(event, MethodologyDocumentEventLabel.LABEL)
-  const hasLabelRe =
-    /eventHasLabel\(\w+,\s*(?:MethodologyDocumentEventLabel\.)?([A-Z_]+)\)/g;
-  while ((match = hasLabelRe.exec(content)) !== null) {
+  // Match eventHasLabel(event, MethodologyDocumentEventLabel.Label) — dot notation
+  const hasLabelDotRe =
+    /eventHasLabel\(\w+,\s*MethodologyDocumentEventLabel\.(\w+)\)/g;
+  while ((match = hasLabelDotRe.exec(content)) !== null) {
+    if (match[1]) {
+      labels.add(match[1]);
+    }
+  }
+
+  // Match eventHasLabel(event, MethodologyDocumentEventLabel['Label']) — bracket notation
+  const hasLabelBracketRe =
+    /eventHasLabel\(\w+,\s*MethodologyDocumentEventLabel\[['"]([^'"]+)['"]\]\)/g;
+  while ((match = hasLabelBracketRe.exec(content)) !== null) {
     if (match[1]) {
       labels.add(match[1]);
     }

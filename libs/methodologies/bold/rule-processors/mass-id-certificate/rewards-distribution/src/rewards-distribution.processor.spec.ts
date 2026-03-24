@@ -4,7 +4,6 @@ import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing
 import {
   type Document,
   type RewardDistributionResultContent,
-  type RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import BigNumber from 'bignumber.js';
@@ -81,9 +80,7 @@ describe('RewardsDistributionProcessor', () => {
 
         for (const actorType of Object.keys(expectedRewards)) {
           const reward = massIDRewards.find(
-            (massIDReward) =>
-              massIDReward.actorType ===
-              (actorType as RewardsDistributionActorType),
+            (massIDReward) => massIDReward.actorType === actorType,
           );
 
           expect(reward).toBeDefined();

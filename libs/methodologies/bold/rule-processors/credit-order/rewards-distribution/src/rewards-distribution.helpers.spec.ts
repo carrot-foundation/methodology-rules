@@ -393,8 +393,8 @@ describe('Rewards Distribution Helpers', () => {
         id: faker.string.uuid(),
       };
 
-      const actorType1 = 'Waste Generator' as const;
-      const actorType2 = 'Hauler' as const;
+      const actorType1 = RewardsDistributionActorType['Waste Generator'];
+      const actorType2 = RewardsDistributionActorType.Hauler;
 
       const resultContentsWithMassIDCertificateValue: ResultContentsWithMassIDCertificateValue[] =
         [

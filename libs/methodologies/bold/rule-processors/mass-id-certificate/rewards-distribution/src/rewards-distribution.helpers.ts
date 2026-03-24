@@ -12,11 +12,15 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type Document,
+  DocumentEventAttributeName,
+  DocumentEventAttributeValue,
+  DocumentEventName,
   type MassIDReward,
   RewardActorAddress,
   type RewardActorParticipant,
-  type RewardsDistributionActorType,
+  RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
 
 import type {
@@ -31,11 +35,10 @@ import {
   REQUIRED_ACTOR_TYPES,
 } from './rewards-distribution.constants';
 
-const WASTE_GENERATOR = 'Waste Generator';
-
 export const isHaulerActorDefined = (
   participants: RewardsDistributionActor[],
-): boolean => participants.some(({ type }) => type === 'Hauler');
+): boolean =>
+  participants.some(({ type }) => type === RewardsDistributionActorType.Hauler);
 
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
@@ -89,11 +92,12 @@ export const getActorsByType = ({
   actorType: RewardsDistributionActorType;
   methodologyDocument: Document;
 }): RewardsDistributionActor[] => {
-  if (
-    (REQUIRED_ACTOR_TYPES.METHODOLOGY as readonly string[]).includes(actorType)
-  ) {
+  if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
     const actorEvent = methodologyDocument.externalEvents?.find(
-      and(eventNameIsAnyOf(['ACTOR']), eventLabelIsAnyOf([actorType])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([actorType]),
+      ),
     );
 
     const methodologyParticipant = actorEvent?.participant;
@@ -127,12 +131,15 @@ export const getActorsByType = ({
   return actors.filter(({ type }) => type === actorType);
 };
 
+const LOGISTICS_OR_SERVICE_PROVIDERS = new Set<RewardsDistributionActorType>([
+  RewardsDistributionActorType.Hauler,
+  RewardsDistributionActorType.Processor,
+  RewardsDistributionActorType.Recycler,
+]);
+
 export const isLogisticsOrServiceProvider = (
   actorType: RewardsDistributionActorType,
-): boolean =>
-  (
-    ['Hauler', 'Processor', 'Recycler'] as RewardsDistributionActorType[]
-  ).includes(actorType);
+): boolean => LOGISTICS_OR_SERVICE_PROVIDERS.has(actorType);
 
 export const applySupplyChainDigitizationDiscount = (
   basePercentage: BigNumber,
@@ -169,7 +176,7 @@ export const calculatePercentageForUnidentifiedWasteOrigin = (
 ): BigNumber => {
   const { actorType, basePercentage } = dto;
 
-  if (actorType === 'Network') {
+  if (actorType === RewardsDistributionActorType.Network) {
     return calculateNetworkPercentageForUnidentifiedWasteOrigin(dto);
   }
 
@@ -185,12 +192,19 @@ export const isWasteOriginIdentified = (document: Document): boolean => {
     document.externalEvents,
     [],
   ).some(
-    (event) => getEventAttributeValue(event, 'Waste Origin') === 'Unidentified',
+    (event) =>
+      getEventAttributeValue(
+        event,
+        DocumentEventAttributeName['Waste Origin'],
+      ) === DocumentEventAttributeValue.Unidentified,
   );
 
   const hasWasteGeneratorEvent = getOrDefault(document.externalEvents, []).some(
     (event) =>
-      isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
+      isActorEvent(event) &&
+      eventLabelIsAnyOf([MethodologyDocumentEventLabel['Waste Generator']])(
+        event,
+      ),
   );
 
   return !hasUnidentifiedOriginAttribute || hasWasteGeneratorEvent;
@@ -216,7 +230,7 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const onboardingDeclarationEvent =
     wasteGeneratorVerificationDocument.externalEvents?.find(
-      (event) => event.name === 'Onboarding Declaration',
+      (event) => event.name === DocumentEventName['Onboarding Declaration'],
     );
 
   if (isNil(onboardingDeclarationEvent)) {
@@ -225,14 +239,14 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const businessSize = getEventAttributeValue(
     onboardingDeclarationEvent,
-    'Business Size Declaration',
+    DocumentEventAttributeName['Business Size Declaration'],
   );
 
   if (isNil(businessSize)) {
     return true;
   }
 
-  return String(businessSize) === 'Large Business';
+  return String(businessSize) === DocumentEventAttributeValue['Large Business'];
 };
 
 export const applyLargeBusinessDiscount = (

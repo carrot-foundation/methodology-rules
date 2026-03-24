@@ -15,7 +15,7 @@ import {
   type Document,
   type MassIDOrganicSubtype,
   MassIDOrganicSubtypeSchema,
-  type RewardsDistributionActorType,
+  RewardsDistributionActorType,
   RewardsDistributionActorTypeSchema,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -79,7 +79,8 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === 'Waste Generator'
+        documentRelation.subtype ===
+          RewardsDistributionActorType['Waste Generator']
       ) {
         wasteGeneratorVerificationDocument = document;
       }
@@ -174,7 +175,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     const wasteGeneratorRewardDistribution =
       rewardDistributions['Waste Generator'];
 
-    if (actorType === 'Waste Generator') {
+    if (actorType === RewardsDistributionActorType['Waste Generator']) {
       actorMassIDPercentage = this.getWasteGeneratorActorMassIDPercentage(
         massIDDocument,
         wasteGeneratorRewardDistribution,
@@ -184,7 +185,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       );
     }
 
-    if (actorType === 'Community Impact Pool') {
+    if (actorType === RewardsDistributionActorType['Community Impact Pool']) {
       const sourcePercentage = getNgoActorMassIDPercentage(
         massIDDocument,
         wasteGeneratorRewardDistribution,
@@ -286,11 +287,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     for (const event of actorEvents) {
       const actorType = event.label;
 
-      if (
-        (RewardsDistributionActorTypeSchema.options as unknown[]).includes(
-          actorType,
-        )
-      ) {
+      const parsedActorType =
+        RewardsDistributionActorTypeSchema.safeParse(actorType);
+
+      if (parsedActorType.success) {
         actors.push({
           address: {
             id: event.address.id,
@@ -300,7 +300,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
             name: event.participant.name,
           },
           preserveSensitiveData: event.preserveSensitiveData,
-          type: actorType as RewardsDistributionActorType,
+          type: parsedActorType.data,
         });
       }
     }

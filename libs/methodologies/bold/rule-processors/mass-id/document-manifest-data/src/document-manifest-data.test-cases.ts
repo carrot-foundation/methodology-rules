@@ -7,6 +7,7 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
@@ -25,7 +26,8 @@ const attributeErrorMessages: Record<string, string> = {
   'Issue Date': RESULT_COMMENTS.MISSING_ISSUE_DATE,
 };
 
-const documentManifestType: DocumentManifestType = 'Recycling Manifest';
+const documentManifestType: DocumentManifestType =
+  DocumentEventName['Recycling Manifest'];
 
 const documentManifestTypeStub = {
   'Recycling Manifest': stubBoldMassIDRecyclingManifestEvent,
@@ -332,7 +334,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has two valid ${documentManifestType} events and attachments`,
   },
   {
-    documentManifestType: 'Transport Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Transport Manifest'],
     events: {
       'Transport Manifest': documentManifestTypeStub['Transport Manifest']({
         metadataAttributes: [['Exemption Justification', 'Some justification']],
@@ -359,7 +361,7 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
 export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
   {
     crossValidationFailMessages: ['Document number mismatch'],
-    documentManifestType: 'Transport Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Transport Manifest'],
     events: {
       'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
@@ -391,7 +393,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationReviewReasons: [
       { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
     ],
-    documentManifestType: 'Transport Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Transport Manifest'],
     events: {
       'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
@@ -423,7 +425,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationPassMessages: [
       'The attachment pass message from extraction',
     ],
-    documentManifestType: 'Transport Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Transport Manifest'],
     events: {
       'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
@@ -456,7 +458,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
     crossValidationReviewReasons: [
       { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
     ],
-    documentManifestType: 'Transport Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Transport Manifest'],
     events: {
       'Transport Manifest': stubBoldMassIDTransportManifestEvent({
         metadataAttributes: [
@@ -490,7 +492,7 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
 
 export const exceptionTestCases: DocumentManifestDataTestCase[] = [
   {
-    documentManifestType: 'Recycling Manifest' as DocumentManifestType,
+    documentManifestType: DocumentEventName['Recycling Manifest'],
     events: {},
     resultComment: RESULT_COMMENTS.ADDRESS_MISMATCH,
     resultStatus: 'FAILED',

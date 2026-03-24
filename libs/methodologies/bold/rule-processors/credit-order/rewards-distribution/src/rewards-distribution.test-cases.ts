@@ -179,7 +179,7 @@ const createMultiHaulerRewardsDistribution = (
     {
       id:
         massIDActorParticipants.get(
-          'Hauler' as unknown as MassIDDocumentActorType,
+          RewardsDistributionActorType.Hauler as unknown as MassIDDocumentActorType,
         )?.id ?? '',
       name: 'Tera',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION['Hauler'][0],
@@ -198,7 +198,7 @@ const createMultiHaulerRewardsDistribution = (
 
   const createHaulerRewards = () =>
     haulerParticipants.map(({ id, name, percentage }) => ({
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       address: {
         id: faker.string.uuid(),
       },
@@ -209,35 +209,35 @@ const createMultiHaulerRewardsDistribution = (
   const massIDRewards = [
     ...createHaulerRewards(),
     createMassIDActorReward(
-      'Waste Generator',
+      RewardsDistributionActorType['Waste Generator'],
       MULTI_HAULER_REWARDS_DISTRIBUTION['Waste Generator'],
     ),
     createMassIDActorReward(
-      'Processor',
+      RewardsDistributionActorType.Processor,
       MULTI_HAULER_REWARDS_DISTRIBUTION['Processor'],
     ),
     createMassIDActorReward(
-      'Recycler',
+      RewardsDistributionActorType.Recycler,
       MULTI_HAULER_REWARDS_DISTRIBUTION['Recycler'],
     ),
     createMassIDActorReward(
-      'Integrator',
+      RewardsDistributionActorType.Integrator,
       MULTI_HAULER_REWARDS_DISTRIBUTION['Integrator'],
     ),
     createMassIDActorReward(
-      'Community Impact Pool',
+      RewardsDistributionActorType['Community Impact Pool'],
       MULTI_HAULER_REWARDS_DISTRIBUTION['Community Impact Pool'],
     ),
     createMethodologyActorReward(
-      'Methodology Author',
+      RewardsDistributionActorType['Methodology Author'],
       MULTI_HAULER_REWARDS_DISTRIBUTION['Methodology Author'],
     ),
     createMethodologyActorReward(
-      'Methodology Developer',
+      RewardsDistributionActorType['Methodology Developer'],
       MULTI_HAULER_REWARDS_DISTRIBUTION['Methodology Developer'],
     ),
     createMethodologyActorReward(
-      'Network',
+      RewardsDistributionActorType.Network,
       MULTI_HAULER_REWARDS_DISTRIBUTION['Network'],
     ),
   ] as unknown as NonEmptyArray<MassIDReward>;
@@ -354,47 +354,47 @@ const documents = createTestDocuments();
 const expectedResults = {
   multipleCertificates: [
     {
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       amount: '22.9995',
       percentage: '10',
     },
     {
-      actorType: 'Integrator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Integrator,
       amount: '18.3996',
       percentage: '8',
     },
     {
-      actorType: 'Processor' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Processor,
       amount: '22.9995',
       percentage: '10',
     },
     {
-      actorType: 'Recycler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Recycler,
       amount: '45.999',
       percentage: '20',
     },
     {
-      actorType: 'Waste Generator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Waste Generator'],
       amount: '34.49925',
       percentage: '15',
     },
     {
-      actorType: 'Community Impact Pool' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Community Impact Pool'],
       amount: '34.49925',
       percentage: '15',
     },
     {
-      actorType: 'Network' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Network,
       amount: '45.999',
       percentage: '20',
     },
     {
-      actorType: 'Methodology Author' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Author'],
       amount: '2.29995',
       percentage: '1',
     },
     {
-      actorType: 'Methodology Developer' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Developer'],
       amount: '2.29995',
       percentage: '1',
     },
@@ -407,57 +407,57 @@ const expectedResults = {
 
   multipleHaulers: [
     {
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       amount: '5.110999',
       percentage: '3.333332',
     },
     {
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       amount: '5.110999',
       percentage: '3.333332',
     },
     {
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       amount: '5.111001',
       percentage: '3.333333',
     },
     {
-      actorType: 'Waste Generator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Waste Generator'],
       amount: '45.999',
       percentage: '30',
     },
     {
-      actorType: 'Processor' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Processor,
       amount: '15.333',
       percentage: '10',
     },
     {
-      actorType: 'Recycler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Recycler,
       amount: '30.666',
       percentage: '20',
     },
     {
-      actorType: 'Integrator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Integrator,
       amount: '12.2664',
       percentage: '8',
     },
     {
-      actorType: 'Community Impact Pool' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Community Impact Pool'],
       amount: '0',
       percentage: '0',
     },
     {
-      actorType: 'Methodology Author' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Author'],
       amount: '1.5333',
       percentage: '1',
     },
     {
-      actorType: 'Methodology Developer' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Developer'],
       amount: '1.5333',
       percentage: '1',
     },
     {
-      actorType: 'Network' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Network,
       amount: '30.666001',
       percentage: '20.000003',
     },
@@ -470,47 +470,47 @@ const expectedResults = {
 
   singleCertificateStandard: [
     {
-      actorType: 'Hauler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Hauler,
       amount: '15.333',
       percentage: '10',
     },
     {
-      actorType: 'Integrator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Integrator,
       amount: '12.2664',
       percentage: '8',
     },
     {
-      actorType: 'Processor' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Processor,
       amount: '15.333',
       percentage: '10',
     },
     {
-      actorType: 'Recycler' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Recycler,
       amount: '30.666',
       percentage: '20',
     },
     {
-      actorType: 'Waste Generator' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Waste Generator'],
       amount: '22.9995',
       percentage: '15',
     },
     {
-      actorType: 'Community Impact Pool' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Community Impact Pool'],
       amount: '22.9995',
       percentage: '15',
     },
     {
-      actorType: 'Network' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType.Network,
       amount: '30.666',
       percentage: '20',
     },
     {
-      actorType: 'Methodology Author' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Author'],
       amount: '1.5333',
       percentage: '1',
     },
     {
-      actorType: 'Methodology Developer' as RewardsDistributionActorType,
+      actorType: RewardsDistributionActorType['Methodology Developer'],
       amount: '1.5333',
       percentage: '1',
     },
@@ -598,7 +598,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     massIDCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND('RecycledID'),
     resultStatus: 'FAILED',
-    scenario: `the ${'RecycledID'} documents is not found`,
+    scenario: 'the RecycledID documents is not found',
   },
   {
     creditOrderDocument: undefined,
@@ -607,7 +607,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     ],
     resultComment: ERROR_MESSAGES.CREDIT_ORDER_DOCUMENT_NOT_FOUND,
     resultStatus: 'FAILED',
-    scenario: `the ${'Credit Order'} document is not found`,
+    scenario: 'the Credit Order document is not found',
   },
   {
     creditOrderDocument: errorTestData.creditOrderDocumentWithoutRulesMetadata,
@@ -616,7 +616,8 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
     ],
     resultComment: ERROR_MESSAGES.INVALID_CREDIT_UNIT_PRICE,
     resultStatus: 'FAILED',
-    scenario: `the "${'Credit Unit Price'}" attribute in the ${'Credit Order'} document is invalid`,
+    scenario:
+      'the "Credit Unit Price" attribute in the Credit Order document is invalid',
   },
   {
     creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
@@ -628,6 +629,6 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
         errorTestData.errorStubs.massIDCertificateDocuments[0]!.id,
       ),
     resultStatus: 'FAILED',
-    scenario: `a certificate document has no "${'Rule Result Details'}" attribute`,
+    scenario: 'a certificate document has no "Rule Result Details" attribute',
   },
 ];

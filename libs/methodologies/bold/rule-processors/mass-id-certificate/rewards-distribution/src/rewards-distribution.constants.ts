@@ -7,6 +7,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   type MassIDOrganicSubtype,
+  RewardsDistributionActorType,
   type RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
@@ -15,13 +16,20 @@ import { type RewardsDistribution } from './rewards-distribution.types';
 
 export const LARGE_REVENUE_BUSINESS_DISCOUNT = 0.5;
 
-export const REQUIRED_ACTOR_TYPES = {
-  MASS_ID: ['Recycler' as const, 'Processor' as const, 'Integrator' as const],
+export const REQUIRED_ACTOR_TYPES: {
+  MASS_ID: RewardsDistributionActorType[];
+  METHODOLOGY: RewardsDistributionActorType[];
+} = {
+  MASS_ID: [
+    RewardsDistributionActorType.Recycler,
+    RewardsDistributionActorType.Processor,
+    RewardsDistributionActorType.Integrator,
+  ],
   METHODOLOGY: [
-    'Community Impact Pool' as const,
-    'Methodology Author' as const,
-    'Methodology Developer' as const,
-    'Network' as const,
+    RewardsDistributionActorType['Community Impact Pool'],
+    RewardsDistributionActorType['Methodology Author'],
+    RewardsDistributionActorType['Methodology Developer'],
+    RewardsDistributionActorType.Network,
   ],
 };
 

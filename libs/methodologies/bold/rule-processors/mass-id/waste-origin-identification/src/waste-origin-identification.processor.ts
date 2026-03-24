@@ -11,7 +11,9 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type Document,
   type DocumentEvent,
+  DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
@@ -75,11 +77,14 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
   protected override getRuleSubject(document: Document): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
-      eventNameIsAnyOf(['Pick-up']),
+      eventNameIsAnyOf([DocumentEventName['Pick-up']]),
     );
 
     const wasteGeneratorEvents = document.externalEvents?.filter(
-      and(eventNameIsAnyOf(['ACTOR']), eventLabelIsAnyOf(['Waste Generator'])),
+      and(
+        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventLabelIsAnyOf([MethodologyDocumentEventLabel['Waste Generator']]),
+      ),
     );
 
     return {

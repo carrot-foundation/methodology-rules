@@ -14,6 +14,7 @@ import {
   getLastYearEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { getYear } from 'date-fns';
 import { z } from 'zod';
@@ -87,7 +88,7 @@ export const findSortingEvents = (
   externalEvents: DocumentEvent[],
 ): SortingEvents | ValidationError => {
   const sortingEventIndex = externalEvents.findIndex(
-    eventNameIsAnyOf(['Sorting']),
+    eventNameIsAnyOf([DocumentEventName.Sorting]),
   );
 
   if (sortingEventIndex === -1) {
