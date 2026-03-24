@@ -174,8 +174,8 @@ const similarRecyclerEventAddress = stubAddress({
   city: 'Vila Verde',
   countryCode: 'XX',
   countryState: 'Norte',
-  latitude: -10.0,
-  longitude: -40.0,
+  latitude: -10,
+  longitude: -40,
   number: '100',
   street: 'Rua das Flores',
 });
@@ -206,8 +206,8 @@ const farRecyclerAccreditedAddress = stubAddress({
   city: 'Porto Distante',
   countryCode: 'XX',
   countryState: 'Sul',
-  latitude: -13.0,
-  longitude: -43.0,
+  latitude: -13,
+  longitude: -43,
 });
 
 const similarRecyclerParticipant = stubParticipant({
