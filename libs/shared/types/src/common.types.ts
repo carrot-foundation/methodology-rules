@@ -5,7 +5,7 @@ import { type Latitude, type Longitude } from './number.types';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AnyObject = Record<string, any>;
 
-export const DateTimeSchema = z.iso.datetime({ local: true, offset: true });
+export const DateTimeSchema = z.iso.datetime({ offset: true });
 export type DateTime = z.infer<typeof DateTimeSchema>;
 
 export interface Geolocation {
