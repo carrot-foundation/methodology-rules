@@ -345,13 +345,13 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       accreditedAddressString,
       ADDRESS_SIMILARITY_THRESHOLD,
     );
-    const similarityPercent = Math.round(score * 100);
+    const similarityPercent = Math.floor(score * 100);
 
     if (isMatch && score >= ADDRESS_SIMILARITY_THRESHOLD) {
       return [
         {
           resultComment:
-            RESULT_COMMENTS.reviewRequired.PASSED_WITH_ADDRESS_SIMILARITY(
+            RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
               actorType,
               addressDistance,
               similarityPercent,

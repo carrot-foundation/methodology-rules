@@ -45,7 +45,7 @@ export const RESULT_COMMENTS = {
       `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m (note: no GPS data was provided).`,
   },
   reviewRequired: {
-    PASSED_WITH_ADDRESS_SIMILARITY: (
+    REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY: (
       actorType: string,
       addressDistance: number,
       similarityPercent: number,
