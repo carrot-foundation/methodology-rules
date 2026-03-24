@@ -8,9 +8,15 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { differenceInDays, parseISO } from 'date-fns';
+import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
 
-import { RESULT_COMMENTS } from './composting-cycle-timeframe.constants';
+import {
+  COMPOSTING_CYCLE_MAX_DAYS,
+  COMPOSTING_CYCLE_MIN_DAYS,
+  HOURS_PER_DAY,
+  RESULT_COMMENTS,
+  TOLERANCE_IN_HOURS,
+} from './composting-cycle-timeframe.constants';
 
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
@@ -41,13 +47,23 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
       };
     }
 
-    const difference = differenceInDays(
-      parseISO(recycledDate),
-      parseISO(dropOffDate),
-    );
+    const parsedRecycledDate = parseISO(recycledDate);
+    const parsedDropOffDate = parseISO(dropOffDate);
 
-    const resultStatus =
-      difference >= 60 && difference <= 180 ? 'PASSED' : 'FAILED';
+    const diffInHours = differenceInHours(
+      parsedRecycledDate,
+      parsedDropOffDate,
+    );
+    const difference = differenceInDays(parsedRecycledDate, parsedDropOffDate);
+
+    const meetsMinimum =
+      diffInHours >=
+      COMPOSTING_CYCLE_MIN_DAYS * HOURS_PER_DAY - TOLERANCE_IN_HOURS;
+    const meetsMaximum =
+      diffInHours <=
+      COMPOSTING_CYCLE_MAX_DAYS * HOURS_PER_DAY + TOLERANCE_IN_HOURS;
+
+    const resultStatus = meetsMinimum && meetsMaximum ? 'PASSED' : 'FAILED';
 
     return {
       resultComment:
