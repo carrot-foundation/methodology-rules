@@ -58,6 +58,7 @@ const CDF_SINFAT_CONFIG: CdfParseConfig = {
       { headerPattern: /^Unidade$/i, name: 'unit' },
       { headerPattern: /^Tecnologia$/i, name: 'technology' },
     ],
+    tableEndPattern: /^Observacoes$/i,
     technologyColumn: 'technology',
   },
 };
