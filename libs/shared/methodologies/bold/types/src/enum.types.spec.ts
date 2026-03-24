@@ -39,11 +39,12 @@ describe('MassIDDocumentActorTypeSchema', () => {
     },
   );
 
-  it('should be a strict subset of MethodologyActorTypeSchema', () => {
-    for (const value of MassIDDocumentActorTypeSchema.options) {
+  it.each(MassIDDocumentActorTypeSchema.options)(
+    'should be accepted by MethodologyActorTypeSchema: %s',
+    (value) => {
       expect(MethodologyActorTypeSchema.safeParse(value).success).toBe(true);
-    }
-  });
+    },
+  );
 
   it('should reject actor types not in the subset', () => {
     expect(MassIDDocumentActorTypeSchema.safeParse('Auditor').success).toBe(
@@ -56,17 +57,19 @@ describe('MassIDDocumentActorTypeSchema', () => {
 });
 
 describe('DocumentSubtypeSchema', () => {
-  it('should include all MassIDOrganicSubtype members', () => {
-    for (const value of MassIDOrganicSubtypeSchema.options) {
+  it.each(MassIDOrganicSubtypeSchema.options)(
+    'should include MassIDOrganicSubtype member: %s',
+    (value) => {
       expect(DocumentSubtypeSchema.safeParse(value).success).toBe(true);
-    }
-  });
+    },
+  );
 
-  it('should include all MassIDDocumentActorType members', () => {
-    for (const value of MassIDDocumentActorTypeSchema.options) {
+  it.each(MassIDDocumentActorTypeSchema.options)(
+    'should include MassIDDocumentActorType member: %s',
+    (value) => {
       expect(DocumentSubtypeSchema.safeParse(value).success).toBe(true);
-    }
-  });
+    },
+  );
 
   it('should include additional non-actor, non-organic subtypes', () => {
     expect(DocumentSubtypeSchema.safeParse('Group').success).toBe(true);

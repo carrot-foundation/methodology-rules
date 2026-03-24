@@ -53,7 +53,7 @@ const stubBaseAccreditationDocuments = ({
   withScaleTicketVerification?: boolean;
   withTareException?: boolean;
 } = {}) => {
-  const exceptions = [];
+  const exceptions: ApprovedException[] = [];
   const additionalVerifications = [];
 
   if (withContainerCapacityException) {
@@ -219,7 +219,7 @@ const createTwoStepWeighingEvents = (
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
       ['Scale Type', scaleTypeValue],
       ['Container Type', 'Truck'],
-      ...secondEventOverrides,
+      ...firstEventOverrides,
     ]),
     eventValue,
     participant,
@@ -228,7 +228,7 @@ const createTwoStepWeighingEvents = (
     mergeAttributes(validWeighingAttributesWithoutQuantity, [
       ['Scale Type', scaleTypeValue],
       ['Container Type', 'Truck'],
-      ...firstEventOverrides,
+      ...secondEventOverrides,
     ]),
     eventValue,
     participant,
@@ -594,8 +594,8 @@ export const weighingTestCases: WeighingTestCase[] = [
     massIDDocumentEvents: createTwoStepWeighingEvents(
       twoStepScaleType,
       twoStepWeighingEventParticipant,
-      [],
       [{ format: 'KILOGRAM', name: 'Container Capacity', value: 2 }],
+      [],
     ),
     resultComment: INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
       attributeName: 'Container Capacity',

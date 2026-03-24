@@ -3,6 +3,7 @@ import { type MethodologyAdditionalVerificationAttributeValue } from '@carrot-fn
 import {
   isAdditionalVerificationAttributeValue,
   isMethodologyAdditionalVerification,
+  isTareApprovedException,
 } from './weighing.validators';
 
 describe('weighing.validators', () => {
@@ -59,6 +60,6 @@ describe('weighing.validators', () => {
       Reason: 'validated',
     };
 
-    expect(tareException['Attribute Name']).toBe('Tare');
+    expect(isTareApprovedException(tareException)).toBe(true);
   });
 });

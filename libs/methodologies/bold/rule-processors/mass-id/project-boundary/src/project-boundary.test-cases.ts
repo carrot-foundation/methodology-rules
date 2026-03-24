@@ -71,6 +71,6 @@ export const projectBoundaryTestCases: ProjectBoundaryTestCase[] = [
     },
     resultStatus: 'PASSED',
     scenario:
-      'The MassID document has multiple "Drop-off" events and all criteria are met',
+      'The MassID document has "Drop-off" and "Pick-up" events and all criteria are met',
   },
 ];
