@@ -225,6 +225,29 @@ describe('Accreditation Document Helpers', () => {
       expect(isAccreditationValid(document)).toBe(false);
     });
 
+    it('should return true when dates use timezone offsets instead of UTC', () => {
+      const pastDate = subDays(new Date(), 5);
+      const futureDate = addDays(new Date(), 5);
+      const offset = '-03:00';
+      const toOffsetISO = (d: Date) =>
+        d.toISOString().replace('Z', offset);
+
+      const document = stubAccreditationDocumentWithExternalEvents({
+        externalEvents: [
+          stubDocumentEventWithMetadataAttributes(
+            { name: ACCREDITATION_RESULT },
+            [
+              [EFFECTIVE_DATE, toOffsetISO(pastDate)],
+              [EXPIRATION_DATE, toOffsetISO(futureDate)],
+              [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            ],
+          ),
+        ],
+      });
+
+      expect(isAccreditationValid(document)).toBe(true);
+    });
+
     it('should return true if the document has a ACCREDITATION_RESULT event with valid effective date but no expiration date', () => {
       const document = stubAccreditationDocumentWithExternalEvents({
         externalEvents: [
