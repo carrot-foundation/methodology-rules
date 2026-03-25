@@ -56,3 +56,6 @@ docs/plans/
 # Claude
 .claude/projects
 .claude/todos
+
+# Worktrees
+.worktrees/
