@@ -26,6 +26,13 @@ const METHODOLOGY_DIRS = fs
     ),
   );
 
+if (METHODOLOGY_DIRS.length === 0) {
+  console.error(
+    `FATAL: No methodology directories with framework-rules.ts found under ${LIBS_METHODOLOGIES}`,
+  );
+  process.exit(1);
+}
+
 function loadFrameworkRules(
   methodology: string,
 ): Array<{ name: string; description: string; slug: string }> {
@@ -48,6 +55,13 @@ function main(): void {
 
   for (const methodology of METHODOLOGY_DIRS) {
     const rules = loadFrameworkRules(methodology);
+
+    if (rules.length === 0) {
+      console.error(
+        `FATAL: Methodology "${methodology}" has an empty frameworkRules array`,
+      );
+      process.exit(1);
+    }
 
     const manifest = {
       version: '1.0.0',
