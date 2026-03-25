@@ -1,0 +1,54 @@
+name: Sync Rules to Docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: read # needed for artifact upload
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  generate-and-dispatch:
+    name: Generate Manifests & Dispatch to Docs
+    runs-on: ubuntu-latest
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]')
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
+      - uses: ./.github/actions/install-node-dependencies
+
+      - name: Generate application rules manifest
+        run: pnpm generate:manifest
+
+      - name: Generate framework rules manifests
+        run: pnpm generate:framework-rules
+
+      - name: Upload manifests
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: rules-manifests
+          path: |
+            dist/application-rules-manifest.json
+            dist/framework-rules/bold-carbon.json
+            dist/framework-rules/bold-recycling.json
+          retention-days: 7
+
+      - name: Dispatch to carrot-docs
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          repository: carrot-foundation/carrot-docs
+          event-type: rules-manifest-updated
+          client-payload: >-
+            {
+              "run_id": "${{ github.run_id }}",
+              "source_commit": "${{ github.sha }}"
+            }
