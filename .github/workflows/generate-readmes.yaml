@@ -1,0 +1,61 @@
+name: Generate READMEs
+
+on:
+  push:
+    branches:
+      - '**'
+      - '!main' # READMEs are generated on feature branches only; main receives them via PR merge
+
+permissions:
+  contents: read # Least-privilege for GITHUB_TOKEN; the PAT (ADMIN_GITHUB_TOKEN) provides its own write access for push-back
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Rule READMEs
+    runs-on: ubuntu-latest
+    # Skip bot commits to prevent infinite loops.
+    # Because ADMIN_GITHUB_TOKEN (a PAT) is used for the push-back,
+    # the push DOES trigger new workflow runs (unlike GITHUB_TOKEN).
+    # The `if` condition below is the primary guard: it checks the
+    # commit message for [skip ci] and skips the job if found.
+    # The author check is a secondary guard in case the tag is lost.
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]')
+      && github.event.head_commit.author.username != 'github-actions[bot]'
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0 # fetch full history for git contributor extraction
+          token: ${{ secrets.ADMIN_GITHUB_TOKEN }} # PAT to bypass branch protection for push-back
+
+      - uses: ./.github/actions/install-node-dependencies
+
+      - name: Generate READMEs
+        run: pnpm generate:readmes
+
+      - name: Commit and push if changed
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          git add 'apps/methodologies/**/README.md'
+          if git diff --cached --quiet; then
+            echo "No README changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: regenerate rule READMEs [skip ci]" # [skip ci] prevents re-triggering this workflow
+          git pull --rebase origin "$BRANCH" 2>&1 || {
+            echo "::error::Rebase failed. See output above for conflict details."
+            git rebase --abort 2>/dev/null || true
+            exit 1
+          }
+          git push || {
+            echo "::error::Failed to push auto-generated READMEs. Possible causes: concurrent push, branch protection rules, or ADMIN_GITHUB_TOKEN permission issue. Re-run the workflow or push manually."
+            exit 1
+          }
