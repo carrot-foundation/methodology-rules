@@ -118,7 +118,7 @@ jobs:
         id: coverage-exists
         if: ${{ !cancelled() && steps.run-tests.outcome == 'success' && steps.codecov-check.outputs.available == 'true' }}
         run: |
-          if [ -d "./coverage" ] && compgen -G "./coverage/**/*.info" > /dev/null 2>&1; then
+          if [ -d "./coverage" ] && find ./coverage -type f -name '*.info' -print -quit | grep -q .; then
             echo "has_coverage=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::No coverage files found (nx affected may have matched zero test targets) -- skipping coverage uploads"
