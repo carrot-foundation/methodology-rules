@@ -17,7 +17,7 @@ on:
       SLACK_WEBHOOK_URL:
         required: true
       DOPPLER_TOKEN:
-        required: true
+        required: false
       nx_key:
         required: true
       CODECOV_TOKEN:
@@ -212,16 +212,18 @@ jobs:
 
       - name: Upload test results to Codecov
         id: upload-test-results
-        # Intentionally runs even when tests fail so Codecov shows which tests broke
+        # Intentionally runs even when tests fail so Codecov shows which tests broke.
+        # continue-on-error keeps the job green; fail_ci_if_error surfaces the real
+        # step outcome so the follow-up warning step can detect upload failures.
         if: ${{ !cancelled() && steps.run-tests.outcome != 'skipped' && steps.codecov-check.outputs.available == 'true' }}
+        continue-on-error: true
         uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           directory: ./coverage
           token: ${{ secrets.CODECOV_TOKEN }}
           report_type: test_results
           files: "**/junit.xml"
-          # Best-effort: don't fail the build if test result upload fails
-          fail_ci_if_error: false
+          fail_ci_if_error: true
 
       - name: Warn if test results upload failed
         if: ${{ !cancelled() && steps.upload-test-results.outcome == 'failure' }}

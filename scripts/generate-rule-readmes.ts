@@ -307,9 +307,11 @@ function getContributors(dirPath: string): string[] {
     ) {
       throw new Error(
         `git is not installed or not in PATH: ${error.message}`,
+        { cause: error },
       );
     }
-    const message = error instanceof Error ? error.message : String(error);
+    const message =
+      error instanceof Error ? (error.stack ?? error.message) : String(error);
     console.warn(`  Warning: git log failed for ${dirPath}: ${message}`);
     return [];
   }
