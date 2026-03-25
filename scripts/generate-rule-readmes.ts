@@ -310,10 +310,9 @@ function getContributors(dirPath: string): string[] {
         { cause: error },
       );
     }
-    const message =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
-    console.warn(`  Warning: git log failed for ${dirPath}: ${message}`);
-    return [];
+    // Non-ENOENT errors (permissions, corrupt repo, etc.) must propagate so
+    // formatContributorSection does not receive a misleading empty array.
+    throw new Error(`git log failed for ${dirPath}`, { cause: error });
   }
 
   const emails = new Set(
@@ -622,6 +621,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((error: unknown) => {
-  console.error(error instanceof Error ? error.message : String(error));
+  console.error(error);
   process.exitCode = 1;
 });
