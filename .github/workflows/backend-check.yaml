@@ -114,8 +114,19 @@ jobs:
         if: ${{ !cancelled() && steps.run-tests.outcome == 'failure' && steps.codecov-check.outputs.available == 'true' }}
         run: echo "::notice::Tests failed -- coverage upload will not run"
 
-      - name: Upload overall coverage to Codecov
+      - name: Check if coverage was generated
+        id: coverage-exists
         if: ${{ !cancelled() && steps.run-tests.outcome == 'success' && steps.codecov-check.outputs.available == 'true' }}
+        run: |
+          if [ -d "./coverage" ] && compgen -G "./coverage/**/*.info" > /dev/null 2>&1; then
+            echo "has_coverage=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::No coverage files found (nx affected may have matched zero test targets) -- skipping coverage uploads"
+            echo "has_coverage=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload overall coverage to Codecov
+        if: ${{ !cancelled() && steps.coverage-exists.outputs.has_coverage == 'true' }}
         uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
         with:
           directory: ./coverage
@@ -124,7 +135,7 @@ jobs:
 
       - name: Download Codecov CLI
         id: download-cli
-        if: ${{ !cancelled() && steps.run-tests.outcome == 'success' && steps.codecov-check.outputs.available == 'true' }}
+        if: ${{ !cancelled() && steps.coverage-exists.outputs.has_coverage == 'true' }}
         run: |
           # Pinned for reproducibility; bump manually after verifying CLI compatibility
           # Releases: https://github.com/codecov/codecov-cli/releases
@@ -138,7 +149,7 @@ jobs:
           chmod +x ./codecov
 
       - name: Upload flagged coverage per rule processor
-        if: ${{ !cancelled() && steps.download-cli.outcome == 'success' && steps.codecov-check.outputs.available == 'true' }}
+        if: ${{ !cancelled() && steps.download-cli.outcome == 'success' }}
         shell: bash
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
