@@ -5,12 +5,16 @@
  * data and git contributor information) and the repository's codecov.yml
  * configuration.
  *
- * Usage: npx tsx scripts/generate-rule-readmes.ts
+ * Usage: pnpm generate:readmes
  */
+
+import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { z } from 'zod';
 
 const ROOT = path.resolve(__dirname, '..');
 const LIB_RULE_PROCESSORS = path.join(
@@ -60,17 +64,23 @@ const BOT_ACCOUNTS = new Set([
   'solidos-admin',
 ]);
 
-interface FrameworkRule {
-  description: string;
-  name: string;
-  slug: string;
-}
+const BaseRuleDefinitionSchema = z.object({
+  description: z.string().nonempty(),
+  events: z.array(z.string()),
+  name: z.string().nonempty(),
+  slug: z.string(),
+});
 
-interface RuleDefinitionData {
-  description: string;
-  events: string[];
-  name: string;
-  slug: string;
+const FrameworkRuleSchema = z.object({
+  description: z.string(),
+  name: z.string(),
+  slug: z.string(),
+});
+
+type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;
+
+class ValidationError extends Error {
+  override readonly name = 'ValidationError';
 }
 
 interface ReadmeInput {
@@ -88,13 +98,7 @@ function dirExists(dirPath: string): boolean {
   try {
     return fs.statSync(dirPath).isDirectory();
   } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      'code' in error &&
-      (error as NodeJS.ErrnoException).code === 'ENOENT'
-    ) {
-      return false;
-    }
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
   }
 }
@@ -103,13 +107,7 @@ function fileExists(filePath: string): boolean {
   try {
     return fs.statSync(filePath).isFile();
   } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      'code' in error &&
-      (error as NodeJS.ErrnoException).code === 'ENOENT'
-    ) {
-      return false;
-    }
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
     throw error;
   }
 }
@@ -141,100 +139,94 @@ function slugToTitle(slug: string): string {
     .join(' ');
 }
 
-/**
- * Dynamically loads the MethodologyDocumentEventName enum from the source file.
- * This file has no Typia in its import chain, so it's safe to import at runtime.
- * Bold's DocumentEventName extends it with END and MOVE (added via BOLD_EXTRA_EVENT_NAMES).
- */
-async function loadDocumentEventNames(): Promise<Record<string, string>> {
-  const enumFilePath = path.join(
-    ROOT,
-    'libs',
-    'shared',
-    'types',
-    'src',
-    'methodology',
-    'methodology-enum.types.ts',
-  );
+async function importRuleDefinition(
+  filePath: string,
+): Promise<BaseRuleDefinition | undefined> {
+  let mod: Record<string, unknown>;
+  try {
+    mod = await import(pathToFileURL(filePath).href);
+  } catch (error) {
+    throw new Error(`Failed to import rule definition from ${filePath}`, {
+      cause: error,
+    });
+  }
 
-  const mod = await import(enumFilePath);
-  const baseEnum: Record<string, string> =
-    mod.MethodologyDocumentEventName ??
-    mod.default?.MethodologyDocumentEventName;
+  const raw =
+    mod.ruleDefinition ??
+    (mod.default as Record<string, unknown> | undefined)?.ruleDefinition;
 
-  if (!baseEnum || typeof baseEnum !== 'object') {
-    throw new Error(
-      `Failed to load MethodologyDocumentEventName from ${enumFilePath}. ` +
-        `Got: ${typeof baseEnum}. Ensure the enum is exported correctly.`,
+  if (!raw) {
+    console.warn(
+      `Warning: ${filePath} exists but has no "ruleDefinition" export. ` +
+        `Available exports: ${Object.keys(mod).join(', ')}`,
+    );
+    return undefined;
+  }
+
+  const result = BaseRuleDefinitionSchema.safeParse(raw);
+
+  if (!result.success) {
+    throw new ValidationError(
+      `Invalid rule definition in ${filePath}: ${result.error.message}`,
+      { cause: result.error },
     );
   }
 
-  return baseEnum;
+  return result.data;
 }
 
-function extractRuleDefinition(
+async function extractRuleDefinition(
   srcPath: string,
   slug: string,
-  documentEventNames: Record<string, string>,
-): RuleDefinitionData | undefined {
-  const libSlug = SLUG_TO_LIB[slug] ?? slug;
+): Promise<BaseRuleDefinition | undefined> {
   const files = dirExists(srcPath) ? fs.readdirSync(srcPath) : [];
   const ruleDefFile = files.find((f) => f.endsWith('.rule-definition.ts'));
 
   if (!ruleDefFile) return undefined;
 
-  const content = fs.readFileSync(path.join(srcPath, ruleDefFile), 'utf8');
+  const def = await importRuleDefinition(path.join(srcPath, ruleDefFile));
 
-  const nameMatch = content.match(/name:\s*['"`]([^'"`]+)['"`]/);
-  const descMatch = content.match(
-    /description:\s*\n?\s*['"`]([^'"`]+)['"`]/s,
-  );
-  const slugMatch = content.match(/slug:\s*['"`]([^'"`]+)['"`]/);
+  if (!def) return undefined;
 
   // When the app slug differs from the lib slug (SLUG_TO_LIB mapping),
   // derive the name from the app slug instead of using the shared lib's name
   const hasSlugMapping = SLUG_TO_LIB[slug] !== undefined;
-  const name = hasSlugMapping
-    ? slugToTitle(slug)
-    : (nameMatch?.[1] ?? libSlug);
+  const name = hasSlugMapping ? slugToTitle(slug) : def.name;
 
-  // Extract events: DocumentEventName.MEMBER references
-  const eventsMatch = content.match(/events:\s*\[([\s\S]*?)\]/);
-  const events: string[] = [];
-  if (eventsMatch) {
-    const memberMatches = eventsMatch[1].matchAll(
-      /DocumentEventName\.(\w+)/g,
-    );
-    for (const m of memberMatches) {
-      const value = documentEventNames[m[1]];
-      if (value) {
-        events.push(value);
-      }
-    }
-  }
-
-  return {
-    description: descMatch?.[1]?.trim() ?? '',
-    events,
-    name,
-    slug: slugMatch?.[1] ?? libSlug,
-  };
+  return { ...def, name };
 }
 
+/**
+ * Extracts frameworkRules slugs from the app-level rule-definition.ts via regex.
+ * Dynamic import is not used here because the app-level file imports
+ * baseRuleDefinition from the lib barrel (e.g., .../weighing/src/index.ts),
+ * which also re-exports the lambda handler. That handler calls
+ * wrapRuleIntoLambdaHandler at module scope, which reads process.env.
+ */
 function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
   if (!fileExists(appRuleDefPath)) return [];
 
-  const content = fs.readFileSync(appRuleDefPath, 'utf8');
+  let content: string;
+  try {
+    content = fs.readFileSync(appRuleDefPath, 'utf8');
+  } catch (error) {
+    throw new Error(`Failed to read app rule definition: ${appRuleDefPath}`, {
+      cause: error,
+    });
+  }
   const match = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
-  if (!match) return [];
+  if (!match?.[1]) return [];
 
-  const slugs: string[] = [];
-  const stringMatches = match[1].matchAll(/['"`]([^'"`]+)['"`]/g);
-  for (const m of stringMatches) {
-    slugs.push(m[1]);
+  const results: string[] = [];
+  const re = /['"`]([^'"`]+)['"`]/g;
+
+  while (true) {
+    const r = re.exec(match[1]);
+    if (!r) break;
+    if (r[1] !== undefined) results.push(r[1]);
   }
 
-  return slugs;
+  return results;
 }
 
 async function loadFrameworkRules(
@@ -251,24 +243,35 @@ async function loadFrameworkRules(
   );
 
   if (!fileExists(filePath)) {
+    console.log(`  No framework rules file for ${methodology}: ${filePath}`);
     return new Map();
   }
+  let mod: Record<string, unknown>;
+  try {
+    mod = await import(pathToFileURL(filePath).href);
+  } catch (error) {
+    throw new Error(`Failed to load framework rules from ${filePath}`, {
+      cause: error,
+    });
+  }
 
-  // Dynamic import: tsx puts named exports under .default for CJS compat
-  const mod = await import(filePath);
-  const rules: unknown =
-    mod.frameworkRules ?? mod.default?.frameworkRules ?? mod.default;
+  const raw: unknown =
+    mod.frameworkRules ??
+    (mod.default as Record<string, unknown> | undefined)?.frameworkRules ??
+    mod.default;
 
-  if (!Array.isArray(rules)) {
-    throw new Error(
-      `Failed to load frameworkRules from ${filePath}. ` +
-        `Got: ${typeof rules}. Ensure the array is exported correctly.`,
+  const result = z.array(FrameworkRuleSchema).safeParse(raw);
+
+  if (!result.success) {
+    throw new ValidationError(
+      `Invalid framework rules in ${filePath}: expected an array of {slug, name, description}. ` +
+        `Available exports: ${Object.keys(mod).join(', ')}`,
+      { cause: result.error },
     );
   }
 
   const map = new Map<string, FrameworkRule>();
-
-  for (const rule of rules as FrameworkRule[]) {
+  for (const rule of result.data) {
     map.set(rule.slug, rule);
   }
 
@@ -299,20 +302,28 @@ function getContributors(dirPath: string): string[] {
       { cwd: ROOT, encoding: 'utf8' },
     );
   } catch (error: unknown) {
-    // If git itself is not available, this is a fatal error -- not a per-directory issue
-    if (
-      error instanceof Error &&
-      'code' in error &&
-      (error as NodeJS.ErrnoException).code === 'ENOENT'
-    ) {
+    const exitCode = (error as { status?: number }).status;
+    const signal = (error as { signal?: string }).signal;
+    const message = error instanceof Error ? error.message : String(error);
+
+    // Exit code 128 = git fatal error (e.g., not a git repo, git not found, corrupt repo) — systemic, not per-directory
+    if (exitCode === 128 || message.includes('not a git repository')) {
       throw new Error(
-        `git is not installed or not in PATH: ${error.message}`,
-        { cause: error },
+        `Git operation failed for ${dirPath}. Is this a git repository? ${message}`,
       );
     }
-    // Non-ENOENT errors (permissions, corrupt repo, etc.) must propagate so
-    // formatContributorSection does not receive a misleading empty array.
-    throw new Error(`git log failed for ${dirPath}`, { cause: error });
+
+    // Signal-killed processes indicate systemic issues, not per-directory problems
+    if (signal) {
+      throw new Error(
+        `Git process was killed by signal ${signal} for ${dirPath}: ${message}`,
+      );
+    }
+
+    console.warn(
+      `Warning: failed to extract contributors for ${dirPath} (exit code ${exitCode}): ${message}`,
+    );
+    return [];
   }
 
   const emails = new Set(
@@ -498,6 +509,13 @@ function discoverRules(): Array<{
     slug: string;
   }> = [];
 
+  if (!dirExists(APPS_METHODOLOGIES)) {
+    throw new Error(
+      `Methodologies directory not found: ${APPS_METHODOLOGIES}. ` +
+        `Ensure the script is run from the repository root.`,
+    );
+  }
+
   const methodologies = fs
     .readdirSync(APPS_METHODOLOGIES)
     .filter((d) =>
@@ -521,12 +539,12 @@ function discoverRules(): Array<{
         .filter((d) => dirExists(path.join(rulesDir, d)));
 
       for (const slug of slugs) {
-        rules.push({
-          appPath: path.join(rulesDir, slug),
-          methodology,
-          scope,
-          slug,
-        });
+        const appPath = path.join(rulesDir, slug);
+
+        // Skip legacy stub directories that have no src/ (no deployable rule)
+        if (!dirExists(path.join(appPath, 'src'))) continue;
+
+        rules.push({ appPath, methodology, scope, slug });
       }
     }
   }
@@ -534,11 +552,31 @@ function discoverRules(): Array<{
   return rules;
 }
 
+function resolveFrameworkRules(
+  frSlugs: string[],
+  methodologyFrameworkRules: Map<string, FrameworkRule> | undefined,
+  methodology: string,
+  appRuleDefPath: string,
+): FrameworkRule[] {
+  const resolved: FrameworkRule[] = [];
+
+  for (const frSlug of frSlugs) {
+    const fr = methodologyFrameworkRules?.get(frSlug);
+    if (fr) {
+      resolved.push(fr);
+    } else {
+      console.warn(
+        `Warning: framework rule slug "${frSlug}" not found in ${methodology} ` +
+          `(referenced by ${appRuleDefPath})`,
+      );
+    }
+  }
+
+  return resolved;
+}
+
 async function main(): Promise<void> {
   const rules = discoverRules();
-
-  // Dynamically load enum values and framework rules (Typia-free import chains)
-  const documentEventNames = await loadDocumentEventNames();
 
   const methodologies = [...new Set(rules.map((r) => r.methodology))];
   const frameworkRulesMap = new Map<string, Map<string, FrameworkRule>>();
@@ -553,7 +591,7 @@ async function main(): Promise<void> {
 
   for (const { appPath, methodology, scope, slug } of rules) {
     const libSrcPath = getLibSrcPath(scope, slug);
-    const ruleDef = extractRuleDefinition(libSrcPath, slug, documentEventNames);
+    const ruleDef = await extractRuleDefinition(libSrcPath, slug);
 
     if (!ruleDef) {
       console.log(`  Skipping ${methodology}/${scope}/${slug}: no rule definition`);
@@ -575,18 +613,13 @@ async function main(): Promise<void> {
 
     const contributors = getContributors(libSrcPath);
 
-    // Extract frameworkRules slugs from app-level definition, resolve to full objects
     const appRuleDefPath = path.join(appPath, 'src', 'rule-definition.ts');
-    const frSlugs = extractFrameworkRuleSlugs(appRuleDefPath);
-    const methodologyFrameworkRules = frameworkRulesMap.get(methodology);
-    const resolvedFrameworkRules: FrameworkRule[] = [];
-
-    for (const frSlug of frSlugs) {
-      const fr = methodologyFrameworkRules?.get(frSlug);
-      if (fr) {
-        resolvedFrameworkRules.push(fr);
-      }
-    }
+    const resolvedFrameworkRules = resolveFrameworkRules(
+      extractFrameworkRuleSlugs(appRuleDefPath),
+      frameworkRulesMap.get(methodology),
+      methodology,
+      appRuleDefPath,
+    );
 
     const readmePath = path.join(appPath, 'README.md');
     const readme = generateReadme({
@@ -600,18 +633,32 @@ async function main(): Promise<void> {
       name: ruleDef.name,
     });
 
-    fs.writeFileSync(readmePath, readme, 'utf8');
+    try {
+      fs.writeFileSync(readmePath, readme, 'utf8');
+    } catch (error) {
+      throw new Error(
+        `Failed to write README for ${methodology}/${scope}/${slug} at ${readmePath}`,
+        { cause: error },
+      );
+    }
     readmePaths.push(readmePath);
     updated++;
   }
 
   if (readmePaths.length > 0) {
     console.log(`Formatting ${readmePaths.length} README files with prettier...`);
-    execFileSync('npx', ['prettier', '--write', ...readmePaths], {
-      cwd: ROOT,
-      encoding: 'utf8',
-      stdio: 'inherit',
-    });
+    try {
+      execFileSync('pnpm', ['exec', 'prettier', '--write', ...readmePaths], {
+        cwd: ROOT,
+        encoding: 'utf8',
+        stdio: ['ignore', 'ignore', 'inherit'],
+      });
+    } catch (error) {
+      throw new Error(
+        `Prettier formatting failed for ${readmePaths.length} README files`,
+        { cause: error },
+      );
+    }
   }
 
   console.log(`Generated ${updated} README files (skipped ${skipped})`);
@@ -620,7 +667,12 @@ async function main(): Promise<void> {
   console.log('Generated codecov.yml');
 }
 
-main().catch((error: unknown) => {
-  console.error(error);
+main().catch((error) => {
+  console.error('README generation failed:', error);
+  let current = error;
+  while (current instanceof Error && current.cause) {
+    console.error('Caused by:', current.cause);
+    current = current.cause;
+  }
   process.exitCode = 1;
 });
