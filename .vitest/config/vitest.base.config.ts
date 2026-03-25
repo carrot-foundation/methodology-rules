@@ -75,10 +75,13 @@ export const getVitestBaseConfig = (dirname: string) => {
       clearMocks: true,
       restoreMocks: true,
 
-      // Use GitHub Actions reporter in CI for inline PR annotations
+      // CI reporters: default + github-actions (PR annotations) + junit (Codecov Test Analytics)
       reporters: process.env['CI']
-        ? ['default', 'github-actions']
+        ? ['default', 'github-actions', 'junit']
         : ['default'],
+      outputFile: process.env['CI']
+        ? { junit: path.join(workspaceRoot, 'coverage', name, 'junit.xml') }
+        : undefined,
 
       // Coverage configuration
       coverage: {
