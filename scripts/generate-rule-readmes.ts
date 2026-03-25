@@ -12,6 +12,8 @@ import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { z } from 'zod';
 
 const ROOT = path.resolve(__dirname, '..');
 const LIB_RULE_PROCESSORS = path.join(
@@ -61,10 +63,23 @@ const BOT_ACCOUNTS = new Set([
   'solidos-admin',
 ]);
 
-interface FrameworkRule {
-  description: string;
-  name: string;
-  slug: string;
+const BaseRuleDefinitionSchema = z.object({
+  description: z.string().nonempty(),
+  events: z.array(z.string()),
+  name: z.string().nonempty(),
+  slug: z.string(),
+});
+
+const FrameworkRuleSchema = z.object({
+  description: z.string(),
+  name: z.string(),
+  slug: z.string(),
+});
+
+type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;
+
+class ValidationError extends Error {
+  override readonly name = 'ValidationError';
 }
 
 interface ReadmeInput {
@@ -113,23 +128,35 @@ async function importRuleDefinition(
 ): Promise<BaseRuleDefinition | undefined> {
   let mod: Record<string, unknown>;
   try {
-    mod = await import(filePath);
+    mod = await import(pathToFileURL(filePath).href);
   } catch (error) {
     throw new Error(`Failed to import rule definition from ${filePath}`, {
       cause: error,
     });
   }
 
-  const def = mod.ruleDefinition ?? mod.default?.ruleDefinition;
+  const raw =
+    mod.ruleDefinition ??
+    (mod.default as Record<string, unknown> | undefined)?.ruleDefinition;
 
-  if (!def) {
+  if (!raw) {
     console.warn(
       `Warning: ${filePath} exists but has no "ruleDefinition" export. ` +
         `Available exports: ${Object.keys(mod).join(', ')}`,
     );
+    return undefined;
   }
 
-  return def as BaseRuleDefinition | undefined;
+  const result = BaseRuleDefinitionSchema.safeParse(raw);
+
+  if (!result.success) {
+    throw new ValidationError(
+      `Invalid rule definition in ${filePath}: ${result.error.message}`,
+      { cause: result.error },
+    );
+  }
+
+  return result.data;
 }
 
 async function extractRuleDefinition(
@@ -144,21 +171,6 @@ async function extractRuleDefinition(
   const def = await importRuleDefinition(path.join(srcPath, ruleDefFile));
 
   if (!def) return undefined;
-
-  if (!def.name || !def.description || !Array.isArray(def.events)) {
-    throw new Error(
-      `Rule definition in ${srcPath} is missing required fields. ` +
-        `Got: name=${def.name}, description=${typeof def.description}, ` +
-        `events=${typeof def.events}`,
-    );
-  }
-
-  const invalidEvent = def.events.find((e) => typeof e !== 'string');
-  if (invalidEvent !== undefined) {
-    throw new Error(
-      `Rule definition in ${srcPath} has non-string event: ${JSON.stringify(invalidEvent)}`,
-    );
-  }
 
   // When the app slug differs from the lib slug (SLUG_TO_LIB mapping),
   // derive the name from the app slug instead of using the shared lib's name
@@ -211,40 +223,31 @@ async function loadFrameworkRules(
   }
   let mod: Record<string, unknown>;
   try {
-    mod = await import(filePath);
+    mod = await import(pathToFileURL(filePath).href);
   } catch (error) {
     throw new Error(`Failed to load framework rules from ${filePath}`, {
       cause: error,
     });
   }
 
-  const rules: unknown =
-    mod.frameworkRules ?? mod.default?.frameworkRules ?? mod.default;
+  const raw: unknown =
+    mod.frameworkRules ??
+    (mod.default as Record<string, unknown> | undefined)?.frameworkRules ??
+    mod.default;
 
-  if (!Array.isArray(rules)) {
-    throw new Error(
-      `Could not load frameworkRules from ${filePath}. ` +
-        `Expected an array, got ${typeof rules}. ` +
+  const result = z.array(FrameworkRuleSchema).safeParse(raw);
+
+  if (!result.success) {
+    throw new ValidationError(
+      `Invalid framework rules in ${filePath}: expected an array of {slug, name, description}. ` +
         `Available exports: ${Object.keys(mod).join(', ')}`,
+      { cause: result.error },
     );
   }
 
   const map = new Map<string, FrameworkRule>();
-
-  for (const [index, rule] of (rules as unknown[]).entries()) {
-    if (
-      !rule ||
-      typeof rule !== 'object' ||
-      typeof (rule as FrameworkRule).slug !== 'string' ||
-      typeof (rule as FrameworkRule).name !== 'string' ||
-      typeof (rule as FrameworkRule).description !== 'string'
-    ) {
-      throw new Error(
-        `Invalid framework rule at index ${index} in ${filePath}: ` +
-          `expected object with slug, name, and description. Got: ${JSON.stringify(rule)}`,
-      );
-    }
-    map.set((rule as FrameworkRule).slug, rule as FrameworkRule);
+  for (const rule of result.data) {
+    map.set(rule.slug, rule);
   }
 
   return map;

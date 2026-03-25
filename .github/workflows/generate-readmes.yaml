@@ -27,24 +27,63 @@ jobs:
       !contains(github.event.head_commit.message, '[skip ci]')
       && github.event.head_commit.author.username != 'github-actions[bot]'
 
+    outputs:
+      has-changes: ${{ steps.check-changes.outputs.has-changes }}
+
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # fetch full history for git contributor extraction
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }} # PAT to bypass branch protection for push-back
+          # No PAT here — this job runs untrusted branch code and must not have write credentials
 
       - uses: ./.github/actions/install-node-dependencies
 
       - name: Generate READMEs
         run: pnpm generate:readmes
 
-      - name: Commit and push if changed
+      - name: Check for changes
+        id: check-changes
+        run: |
+          if git diff --quiet -- 'apps/methodologies/**/README.md'; then
+            echo "No README changes detected."
+            echo "has-changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has-changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Upload generated READMEs
+        if: steps.check-changes.outputs.has-changes == 'true'
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: generated-readmes
+          path: apps/methodologies/**/README.md
+          retention-days: 1
+
+  commit-push:
+    name: Commit and Push READMEs
+    needs: generate
+    if: needs.generate.outputs.has-changes == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.ADMIN_GITHUB_TOKEN }} # PAT to bypass branch protection for push-back
+
+      - name: Download generated READMEs
+        uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
+        with:
+          name: generated-readmes
+          path: apps/methodologies
+
+      - name: Commit and push
         env:
           BRANCH: ${{ github.ref_name }}
         run: |
           git add 'apps/methodologies/**/README.md'
           if git diff --cached --quiet; then
-            echo "No README changes detected."
+            echo "No README changes detected after overlay."
             exit 0
           fi
           git config user.name "github-actions[bot]"
