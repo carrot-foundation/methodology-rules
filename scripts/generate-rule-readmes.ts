@@ -465,6 +465,29 @@ function discoverRules(): Array<{
   return rules;
 }
 
+function resolveFrameworkRules(
+  frSlugs: string[],
+  methodologyFrameworkRules: Map<string, FrameworkRule> | undefined,
+  methodology: string,
+  appRuleDefPath: string,
+): FrameworkRule[] {
+  const resolved: FrameworkRule[] = [];
+
+  for (const frSlug of frSlugs) {
+    const fr = methodologyFrameworkRules?.get(frSlug);
+    if (fr) {
+      resolved.push(fr);
+    } else {
+      console.warn(
+        `Warning: framework rule slug "${frSlug}" not found in ${methodology} ` +
+          `(referenced by ${appRuleDefPath})`,
+      );
+    }
+  }
+
+  return resolved;
+}
+
 async function main(): Promise<void> {
   const rules = discoverRules();
 
@@ -503,23 +526,13 @@ async function main(): Promise<void> {
 
     const contributors = getContributors(libSrcPath);
 
-    // Extract frameworkRules slugs from app-level definition, resolve to full objects
     const appRuleDefPath = path.join(appPath, 'src', 'rule-definition.ts');
-    const frSlugs = extractFrameworkRuleSlugs(appRuleDefPath);
-    const methodologyFrameworkRules = frameworkRulesMap.get(methodology);
-    const resolvedFrameworkRules: FrameworkRule[] = [];
-
-    for (const frSlug of frSlugs) {
-      const fr = methodologyFrameworkRules?.get(frSlug);
-      if (fr) {
-        resolvedFrameworkRules.push(fr);
-      } else {
-        console.warn(
-          `Warning: framework rule slug "${frSlug}" not found in ${methodology} ` +
-            `(referenced by ${appRuleDefPath})`,
-        );
-      }
-    }
+    const resolvedFrameworkRules = resolveFrameworkRules(
+      extractFrameworkRuleSlugs(appRuleDefPath),
+      frameworkRulesMap.get(methodology),
+      methodology,
+      appRuleDefPath,
+    );
 
     const readmePath = path.join(appPath, 'README.md');
     const readme = generateReadme({
@@ -563,9 +576,7 @@ async function main(): Promise<void> {
   console.log(`Generated ${updated} README files (skipped ${skipped})`);
 }
 
-try {
-  await main();
-} catch (error) {
+main().catch((error) => {
   console.error('README generation failed:', error);
   let current = error;
   while (current instanceof Error && current.cause) {
@@ -573,4 +584,4 @@ try {
     current = current.cause;
   }
   process.exitCode = 1;
-}
+});
