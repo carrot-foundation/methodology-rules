@@ -199,9 +199,18 @@ function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
     });
   }
   const match = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
-  if (!match) return [];
+  if (!match?.[1]) return [];
 
-  return [...match[1].matchAll(/['"`]([^'"`]+)['"`]/g)].map((m) => m[1]);
+  const results: string[] = [];
+  const re = /['"`]([^'"`]+)['"`]/g;
+
+  while (true) {
+    const r = re.exec(match[1]);
+    if (!r) break;
+    if (r[1] !== undefined) results.push(r[1]);
+  }
+
+  return results;
 }
 
 async function loadFrameworkRules(
@@ -554,7 +563,9 @@ async function main(): Promise<void> {
   console.log(`Generated ${updated} README files (skipped ${skipped})`);
 }
 
-main().catch((error) => {
+try {
+  await main();
+} catch (error) {
   console.error('README generation failed:', error);
   let current = error;
   while (current instanceof Error && current.cause) {
@@ -562,4 +573,4 @@ main().catch((error) => {
     current = current.cause;
   }
   process.exitCode = 1;
-});
+}
