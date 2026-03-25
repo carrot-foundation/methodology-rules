@@ -1,8 +1,9 @@
 #!/usr/bin/env tsx
 
 /**
- * Generates README.md files for each rule from rule-definition.ts data
- * and git contributor information.
+ * Generates README.md files for each rule processor (from rule-definition.ts
+ * data and git contributor information) and the repository's codecov.yml
+ * configuration.
  *
  * Usage: npx tsx scripts/generate-rule-readmes.ts
  */
@@ -73,6 +74,7 @@ interface RuleDefinitionData {
 }
 
 interface ReadmeInput {
+  codecovFlag: string;
   contributors: string[];
   description: string;
   events: string[];
@@ -85,23 +87,51 @@ interface ReadmeInput {
 function dirExists(dirPath: string): boolean {
   try {
     return fs.statSync(dirPath).isDirectory();
-  } catch {
-    return false;
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      'code' in error &&
+      (error as NodeJS.ErrnoException).code === 'ENOENT'
+    ) {
+      return false;
+    }
+    throw error;
   }
 }
 
 function fileExists(filePath: string): boolean {
   try {
     return fs.statSync(filePath).isFile();
-  } catch {
-    return false;
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      'code' in error &&
+      (error as NodeJS.ErrnoException).code === 'ENOENT'
+    ) {
+      return false;
+    }
+    throw error;
   }
 }
 
+function resolveLibCoordinates(
+  scope: string,
+  slug: string,
+): { libScope: string; libSlug: string } {
+  return {
+    libScope: SCOPE_TO_LIB[scope] ?? scope,
+    libSlug: SLUG_TO_LIB[slug] ?? slug,
+  };
+}
+
 function getLibSrcPath(scope: string, slug: string): string {
-  const libScope = SCOPE_TO_LIB[scope] ?? scope;
-  const libSlug = SLUG_TO_LIB[slug] ?? slug;
+  const { libScope, libSlug } = resolveLibCoordinates(scope, slug);
   return path.join(LIB_RULE_PROCESSORS, libScope, libSlug, 'src');
+}
+
+function getCodecovFlag(scope: string, slug: string): string {
+  const { libScope, libSlug } = resolveLibCoordinates(scope, slug);
+  return `${libScope}--${libSlug}`;
 }
 
 function slugToTitle(slug: string): string {
@@ -131,6 +161,13 @@ async function loadDocumentEventNames(): Promise<Record<string, string>> {
   const baseEnum: Record<string, string> =
     mod.MethodologyDocumentEventName ??
     mod.default?.MethodologyDocumentEventName;
+
+  if (!baseEnum || typeof baseEnum !== 'object') {
+    throw new Error(
+      `Failed to load MethodologyDocumentEventName from ${enumFilePath}. ` +
+        `Got: ${typeof baseEnum}. Ensure the enum is exported correctly.`,
+    );
+  }
 
   return baseEnum;
 }
@@ -219,11 +256,19 @@ async function loadFrameworkRules(
 
   // Dynamic import: tsx puts named exports under .default for CJS compat
   const mod = await import(filePath);
-  const rules: FrameworkRule[] =
+  const rules: unknown =
     mod.frameworkRules ?? mod.default?.frameworkRules ?? mod.default;
+
+  if (!Array.isArray(rules)) {
+    throw new Error(
+      `Failed to load frameworkRules from ${filePath}. ` +
+        `Got: ${typeof rules}. Ensure the array is exported correctly.`,
+    );
+  }
+
   const map = new Map<string, FrameworkRule>();
 
-  for (const rule of rules) {
+  for (const rule of rules as FrameworkRule[]) {
     map.set(rule.slug, rule);
   }
 
@@ -253,7 +298,19 @@ function getContributors(dirPath: string): string[] {
       ['log', '--format=%aE', '--', dirPath],
       { cwd: ROOT, encoding: 'utf8' },
     );
-  } catch {
+  } catch (error: unknown) {
+    // If git itself is not available, this is a fatal error -- not a per-directory issue
+    if (
+      error instanceof Error &&
+      'code' in error &&
+      (error as NodeJS.ErrnoException).code === 'ENOENT'
+    ) {
+      throw new Error(
+        `git is not installed or not in PATH: ${error.message}`,
+      );
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    console.warn(`  Warning: git log failed for ${dirPath}: ${message}`);
     return [];
   }
 
@@ -290,6 +347,7 @@ function formatContributorSection(usernames: string[]): string {
 
 function generateReadme(input: ReadmeInput): string {
   const {
+    codecovFlag,
     contributors,
     description,
     events,
@@ -331,7 +389,7 @@ ${items}
 Methodology: **${methodologyDisplay}**
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
-[![Codecov](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules)](https://codecov.io/gh/carrot-foundation/methodology-rules)
+[![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=${codecovFlag})](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=${codecovFlag})
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
 </div>
@@ -352,6 +410,76 @@ ${contributorSection}
 
 [License](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 `;
+}
+
+function generateCodecovYaml(): void {
+  const scopes = fs
+    .readdirSync(LIB_RULE_PROCESSORS)
+    .filter((d) => dirExists(path.join(LIB_RULE_PROCESSORS, d)))
+    .sort();
+
+  const flags: Array<{ name: string; path: string }> = [];
+
+  for (const scope of scopes) {
+    const scopeDir = path.join(LIB_RULE_PROCESSORS, scope);
+    const slugs = fs
+      .readdirSync(scopeDir)
+      .filter((d) => dirExists(path.join(scopeDir, d)))
+      .sort();
+
+    for (const slug of slugs) {
+      flags.push({
+        name: `${scope}--${slug}`,
+        path: `libs/methodologies/bold/rule-processors/${scope}/${slug}/src/`,
+      });
+    }
+  }
+
+  const flagsYaml = flags
+    .map(
+      (f) =>
+        `  ${f.name}:\n    paths:\n      - ${f.path}\n    carryforward: true`,
+    )
+    .join('\n\n');
+
+  const content = `# Codecov configuration: coverage targets, PR comment layout, GitHub checks, and per-rule-processor flags.
+# Flags are auto-uploaded by the "Upload flagged coverage per rule processor" CI step in backend-check.yaml.
+# This file is generated by scripts/generate-rule-readmes.ts -- do not edit manually.
+
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  precision: 2
+  round: down
+  range: "90...100"
+
+  status:
+    project:
+      default:
+        target: 100%
+        threshold: 1%
+    patch:
+      default:
+        target: 100%
+        threshold: 1%
+
+comment:
+  layout: "condensed_header,condensed_files,condensed_footer"
+  behavior: default
+  require_changes: false
+  require_base: false
+  require_head: true
+  show_flags: true
+
+github_checks:
+  annotations: true
+
+flags:
+${flagsYaml}
+`;
+
+  fs.writeFileSync(path.join(ROOT, 'codecov.yml'), content, 'utf8');
 }
 
 // --- Main ---
@@ -461,6 +589,7 @@ async function main(): Promise<void> {
 
     const readmePath = path.join(appPath, 'README.md');
     const readme = generateReadme({
+      codecovFlag: getCodecovFlag(scope, slug),
       contributors,
       description: ruleDef.description,
       events: ruleDef.events,
@@ -480,11 +609,17 @@ async function main(): Promise<void> {
     execFileSync('npx', ['prettier', '--write', ...readmePaths], {
       cwd: ROOT,
       encoding: 'utf8',
-      stdio: 'ignore',
+      stdio: 'inherit',
     });
   }
 
   console.log(`Generated ${updated} README files (skipped ${skipped})`);
+
+  generateCodecovYaml();
+  console.log('Generated codecov.yml');
 }
 
-main();
+main().catch((error: unknown) => {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+});
