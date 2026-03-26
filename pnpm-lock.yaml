@@ -138,9 +138,6 @@ importers:
       '@types/aws-lambda':
         specifier: 8.10.161
         version: 8.10.161
-      '@types/conventional-commits-parser':
-        specifier: 5.0.2
-        version: 5.0.2
       '@types/node':
         specifier: 25.5.0
         version: 25.5.0
@@ -165,9 +162,6 @@ importers:
       aws-sdk-client-mock:
         specifier: 4.1.0
         version: 4.1.0
-      conventional-commits-parser:
-        specifier: 6.3.0
-        version: 6.3.0
       cspell:
         specifier: 9.7.0
         version: 9.7.0
@@ -3578,9 +3572,6 @@ packages:
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
-
-  '@types/conventional-commits-parser@5.0.2':
-    resolution: {integrity: sha512-BgT2szDXnVypgpNxOK8aL5SGjUdaQbC++WZNjF1Qge3Og2+zhHj+RWhmehLhYyvQwqAmvezruVfOf8+3m74W+g==}
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
@@ -13658,10 +13649,6 @@ snapshots:
       '@types/node': 25.5.0
 
   '@types/connect@3.4.38':
-    dependencies:
-      '@types/node': 25.5.0
-
-  '@types/conventional-commits-parser@5.0.2':
     dependencies:
       '@types/node': 25.5.0
 

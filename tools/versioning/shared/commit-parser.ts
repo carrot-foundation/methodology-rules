@@ -1,5 +1,3 @@
-import { CommitParser } from 'conventional-commits-parser';
-
 import type { BumpLevel } from './types';
 import { RELEASE_RULES } from './types';
 
@@ -9,10 +7,29 @@ const BUMP_PRECEDENCE: Record<BumpLevel, number> = {
   patch: 1,
 };
 
-const commitParser = new CommitParser({
-  headerCorrespondence: ['type', 'scope', 'subject'],
-  headerPattern: /^(\w*)(?:\(([\w$.* -]*)\))?!?: (.*)$/,
-});
+const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
+
+interface ParsedCommit {
+  isBreaking: boolean;
+  scope: string | undefined;
+  subject: string;
+  type: string;
+}
+
+function parseCommitMessage(message: string): ParsedCommit | undefined {
+  const match = HEADER_PATTERN.exec(message);
+  if (!match) return undefined;
+
+  const [, type, scope, bang, subject] = match;
+  if (!type) return undefined;
+
+  return {
+    isBreaking: bang === '!' || message.includes('BREAKING CHANGE'),
+    scope: scope ?? undefined,
+    subject: subject ?? '',
+    type,
+  };
+}
 
 export function parseCommitsForRules(
   commitMessages: string[],
@@ -20,14 +37,10 @@ export function parseCommitsForRules(
   const ruleBumps = new Map<string, BumpLevel>();
 
   for (const message of commitMessages) {
-    const parsed = commitParser.parse(message);
-    if (!parsed.type || !parsed.scope) continue;
+    const parsed = parseCommitMessage(message);
+    if (!parsed?.type || !parsed.scope) continue;
 
-    const isBreaking =
-      message.includes('!:') ||
-      (parsed.notes ?? []).some((n) => n.title === 'BREAKING CHANGE');
-
-    const bumpLevel: BumpLevel | null = isBreaking
+    const bumpLevel: BumpLevel | null = parsed.isBreaking
       ? 'major'
       : (RELEASE_RULES[parsed.type] ?? null);
 
