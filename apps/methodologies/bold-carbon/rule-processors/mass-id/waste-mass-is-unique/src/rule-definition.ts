@@ -6,8 +6,6 @@ import { ruleDefinition as baseRuleDefinition } from '@carrot-fndn/shared/method
 export const ruleDefinition = {
   ...baseRuleDefinition,
   methodologyFrameworkRules: [
-    'double-checking-recycler-emitted-masses',
-    'double-checking-source-emitted-masses',
     'duplicate-check',
     'route-check',
   ],
