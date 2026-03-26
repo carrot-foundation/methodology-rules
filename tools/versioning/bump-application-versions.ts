@@ -4,6 +4,8 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { z } from 'zod';
+
 import { diffFrameworkRules } from './shared/framework-rules-diff';
 import type { ApplicationBump, BumpLevel, RuleBump } from './shared/types';
 import { bumpVersion, highestBump } from './shared/version-utils';
@@ -67,24 +69,20 @@ function discoverMethodologies(): DiscoveredMethodology[] {
 function getLatestTagForMethodology(
   methodology: string,
 ): string | undefined {
-  try {
-    const output = execFileSync(
-      'git',
-      [
-        'tag',
-        '--list',
-        `methodology-application/${methodology}@*`,
-        '--sort=-creatordate',
-      ],
-      { cwd: ROOT, encoding: 'utf8' },
-    ).trim();
+  const output = execFileSync(
+    'git',
+    [
+      'tag',
+      '--list',
+      `methodology-application/${methodology}@*`,
+      '--sort=-creatordate',
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  ).trim();
 
-    const firstTag = output.split('\n')[0];
+  const firstTag = output.split('\n')[0];
 
-    return firstTag || undefined;
-  } catch {
-    return undefined;
-  }
+  return firstTag || undefined;
 }
 
 function getFrameworkRuleSlugsAtRef(
@@ -102,16 +100,25 @@ function getFrameworkRuleSlugsAtRef(
         ['show', `${ref}:${relativePath}`],
         { cwd: ROOT, encoding: 'utf8' },
       );
-    } catch {
-      // File did not exist at that ref
-      return [];
+    } catch (error: unknown) {
+      // git show exits 128 when path doesn't exist at ref — expected on first run
+      const exitCode =
+        error instanceof Error && 'status' in error
+          ? (error as { status: number }).status
+          : undefined;
+
+      if (exitCode === 128) return [];
+
+      throw new Error(
+        `Failed to read ${filePath} at ref ${ref}: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   } else {
     if (!fs.existsSync(filePath)) return [];
     content = fs.readFileSync(filePath, 'utf8');
   }
 
-  const slugRegex = /slug:\s*'([^']+)'/g;
+  const slugRegex = /slug:\s*['"`]([^'"`]+)['"`]/g;
   const slugs: string[] = [];
   let match: RegExpExecArray | null;
 
@@ -124,6 +131,10 @@ function getFrameworkRuleSlugsAtRef(
   return slugs;
 }
 
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function updateConfigVersion(
   configPath: string,
   oldVersion: string,
@@ -133,7 +144,7 @@ function updateConfigVersion(
 
   // Match `version: '...'` but NOT `methodologyFrameworkVersion: '...'`
   const regex = new RegExp(
-    `((?<!\\w)version:\\s*')${oldVersion.replaceAll('.', '\\.')}(')`
+    `((?<!\\w)version:\\s*')${escapeRegex(oldVersion)}(')`
   );
 
   const updated = content.replace(regex, `$1${newVersion}$2`);
@@ -221,6 +232,14 @@ function createGitTag(methodology: string, version: string): void {
   );
 }
 
+const RuleBumpSchema = z.object({
+  bumpLevel: z.enum(['major', 'minor', 'patch']),
+  commits: z.array(z.string()),
+  newVersion: z.string(),
+  previousVersion: z.string(),
+  slug: z.string(),
+});
+
 function loadRuleBumps(): RuleBump[] {
   const ruleBumpsPath = path.join(ROOT, 'dist', 'rule-bumps.json');
 
@@ -230,8 +249,16 @@ function loadRuleBumps(): RuleBump[] {
   }
 
   const content = fs.readFileSync(ruleBumpsPath, 'utf8');
+  const parsed: unknown = JSON.parse(content);
+  const result = z.array(RuleBumpSchema).safeParse(parsed);
 
-  return JSON.parse(content) as RuleBump[];
+  if (!result.success) {
+    throw new Error(
+      `Invalid rule-bumps.json format: ${result.error.message}`,
+    );
+  }
+
+  return result.data;
 }
 
 function main(): void {

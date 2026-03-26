@@ -26,19 +26,15 @@ interface DiscoveredRule {
 }
 
 function getLatestMvaTag(): string | undefined {
-  try {
-    const output = execFileSync(
-      'git',
-      ['tag', '--list', 'methodology-application/*', '--sort=-creatordate'],
-      { cwd: ROOT, encoding: 'utf8' },
-    ).trim();
+  const output = execFileSync(
+    'git',
+    ['tag', '--list', 'methodology-application/*', '--sort=-creatordate'],
+    { cwd: ROOT, encoding: 'utf8' },
+  ).trim();
 
-    const firstTag = output.split('\n')[0];
+  const firstTag = output.split('\n')[0];
 
-    return firstTag || undefined;
-  } catch {
-    return undefined;
-  }
+  return firstTag || undefined;
 }
 
 function getCommitsSince(ref?: string): string[] {
@@ -46,14 +42,20 @@ function getCommitsSince(ref?: string): string[] {
     ? ['log', `${ref}..HEAD`, '--format=%s']
     : ['log', '--format=%s'];
 
-  const output = execFileSync('git', args, {
-    cwd: ROOT,
-    encoding: 'utf8',
-  }).trim();
+  try {
+    const output = execFileSync('git', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }).trim();
 
-  if (!output) return [];
+    if (!output) return [];
 
-  return output.split('\n');
+    return output.split('\n');
+  } catch (error: unknown) {
+    throw new Error(
+      `Failed to retrieve commits${ref ? ` since ${ref}` : ''}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
@@ -79,8 +81,8 @@ function collectCommitsPerSlug(
 
 function discoverRuleDefinitions(): DiscoveredRule[] {
   const rules: DiscoveredRule[] = [];
-  const slugRegex = /slug:\s*'([^']+)'/;
-  const versionRegex = /version:\s*'([^']+)'/;
+  const slugRegex = /slug:\s*['"`]([^'"`]+)['"`]/;
+  const versionRegex = /version:\s*['"`]([^'"`]+)['"`]/;
 
   const scopes = fs
     .readdirSync(LIB_RULE_PROCESSORS, { withFileTypes: true })
@@ -109,7 +111,9 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
       const versionMatch = versionRegex.exec(content);
 
       if (!slugMatch?.[1] || !versionMatch?.[1]) {
-        console.warn(`  SKIP ${filePath}: missing slug or version`);
+        console.warn(
+          `  SKIP ${filePath}: slug=${slugMatch?.[1] ?? 'NOT FOUND'}, version=${versionMatch?.[1] ?? 'NOT FOUND'}`,
+        );
         continue;
       }
 
