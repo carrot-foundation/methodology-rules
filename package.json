@@ -9,6 +9,7 @@
     "build-lambda": "nx build-lambda",
     "build-lambda:affected": "nx affected --target build-lambda",
     "build-lambda:all": "nx run-many --target build-lambda",
+    "bump:applications": "pnpm exec tsx tools/versioning/bump-application-versions.ts",
     "bump:rules": "pnpm exec tsx tools/versioning/bump-rule-versions.ts",
     "commit": "czg",
     "create-rule": "node tools/create-rule.js",
