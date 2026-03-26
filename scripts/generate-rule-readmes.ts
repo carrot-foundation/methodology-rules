@@ -73,8 +73,10 @@ const BaseRuleDefinitionSchema = z.object({
 
 const FrameworkRuleSchema = z.object({
   description: z.string(),
+  methodologyReference: z.string().optional(),
   name: z.string(),
   slug: z.string(),
+  type: z.enum(['structural', 'methodology', 'audit']),
 });
 
 type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;

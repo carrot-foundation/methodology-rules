@@ -8,6 +8,8 @@
  * Output: dist/framework-rules/bold-carbon.json, dist/framework-rules/bold-recycling.json
  */
 
+import type { BaseFrameworkRule } from '@carrot-fndn/shared/rule/types';
+
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
@@ -33,9 +35,7 @@ if (METHODOLOGY_DIRS.length === 0) {
   process.exit(1);
 }
 
-function loadFrameworkRules(
-  methodology: string,
-): Array<{ name: string; description: string; slug: string }> {
+function loadFrameworkRules(methodology: string): BaseFrameworkRule[] {
   const filePath = path.join(
     LIBS_METHODOLOGIES,
     methodology,
@@ -45,7 +45,7 @@ function loadFrameworkRules(
   );
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { frameworkRules } = require(filePath) as {
-    frameworkRules: Array<{ name: string; description: string; slug: string }>;
+    frameworkRules: BaseFrameworkRule[];
   };
   return frameworkRules;
 }
@@ -71,6 +71,10 @@ function main(): void {
         name: rule.name,
         number: index + 1,
         description: rule.description,
+        type: rule.type,
+        ...(rule.methodologyReference && {
+          methodologyReference: rule.methodologyReference,
+        }),
       })),
     };
 
