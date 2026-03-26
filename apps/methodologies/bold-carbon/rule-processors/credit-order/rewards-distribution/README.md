@@ -8,6 +8,10 @@ Methodology: **BOLD Carbon**
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=credit-order--rewards-distribution)](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=credit-order--rewards-distribution)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
+**Version:** 1.0.0
+
+**[Changelog](../../../../../../libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/CHANGELOG.md)**
+
 </div>
 
 ## 📄 Description

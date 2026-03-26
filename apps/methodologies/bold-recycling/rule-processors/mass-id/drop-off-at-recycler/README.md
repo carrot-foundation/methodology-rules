@@ -8,6 +8,10 @@ Methodology: **BOLD Recycling**
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=mass-id--drop-off-at-recycler)](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=mass-id--drop-off-at-recycler)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
+**Version:** 1.0.0
+
+**[Changelog](../../../../../../libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/CHANGELOG.md)**
+
 </div>
 
 ## 📄 Description
