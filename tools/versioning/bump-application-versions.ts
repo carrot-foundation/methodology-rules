@@ -110,17 +110,29 @@ function getFrameworkRuleSlugsAtRef(
         { cwd: ROOT, encoding: 'utf8' },
       );
     } catch (error: unknown) {
-      // git show exits 128 when path doesn't exist at ref — expected on first run
-      const exitCode =
-        error instanceof Error && 'status' in error
-          ? (error as { status: number }).status
-          : undefined;
+      const message =
+        error instanceof Error ? error.message : String(error);
 
-      if (exitCode === 128) return [];
+      if (/does not exist|path .* does not exist/i.test(message)) {
+        // File may have been renamed; retry with legacy filename
+        const legacyPath = relativePath.replace(
+          'methodology-framework-rules.ts',
+          'framework-rules.ts',
+        );
 
-      throw new Error(
-        `Failed to read ${filePath} at ref ${ref}: ${error instanceof Error ? error.message : String(error)}`,
-      );
+        try {
+          content = execFileSync(
+            'git',
+            ['show', `${ref}:${legacyPath}`],
+            { cwd: ROOT, encoding: 'utf8' },
+          );
+        } catch {
+          // File did not exist at that ref under either name
+          return [];
+        }
+      } else {
+        throw error;
+      }
     }
   } else {
     if (!fs.existsSync(filePath)) return [];
@@ -465,7 +477,10 @@ function main(): void {
 
   if (results.length === 0) {
     console.log('\nNo application bumps to apply.');
-    removeStaleOutputFile();
+
+    if (!DRY_RUN) {
+      removeStaleOutputFile();
+    }
 
     return;
   }
