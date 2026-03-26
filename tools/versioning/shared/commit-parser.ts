@@ -24,7 +24,9 @@ function parseCommitMessage(message: string): ParsedCommit | undefined {
   if (!type) return undefined;
 
   return {
-    isBreaking: bang === '!' || message.includes('BREAKING CHANGE'),
+    // Only the '!' notation (e.g. feat(scope)!:) is supported for breaking changes,
+    // since commits are parsed from subject lines only.
+    isBreaking: bang === '!',
     scope: scope ?? undefined,
     subject: subject ?? '',
     type,
