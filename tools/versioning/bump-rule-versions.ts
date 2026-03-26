@@ -27,13 +27,15 @@ interface DiscoveredRule {
 
 function getLatestMvaTag(): string | undefined {
   try {
-    const tag = execFileSync(
+    const output = execFileSync(
       'git',
-      ['describe', '--tags', '--match', 'methodology-application/*', '--abbrev=0'],
+      ['tag', '--list', 'methodology-application/*', '--sort=-creatordate'],
       { cwd: ROOT, encoding: 'utf8' },
     ).trim();
 
-    return tag || undefined;
+    const firstTag = output.split('\n')[0];
+
+    return firstTag || undefined;
   } catch {
     return undefined;
   }

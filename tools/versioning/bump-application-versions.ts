@@ -68,19 +68,20 @@ function getLatestTagForMethodology(
   methodology: string,
 ): string | undefined {
   try {
-    const tag = execFileSync(
+    const output = execFileSync(
       'git',
       [
-        'describe',
-        '--tags',
-        '--match',
+        'tag',
+        '--list',
         `methodology-application/${methodology}@*`,
-        '--abbrev=0',
+        '--sort=-creatordate',
       ],
       { cwd: ROOT, encoding: 'utf8' },
     ).trim();
 
-    return tag || undefined;
+    const firstTag = output.split('\n')[0];
+
+    return firstTag || undefined;
   } catch {
     return undefined;
   }
@@ -352,9 +353,10 @@ function main(): void {
       appendToChangelog(methodology.key, newVersion, applicationBump);
       console.log(`  Updated CHANGELOG.md`);
 
-      createGitTag(methodology.key, newVersion);
+      // Tags are NOT created here — they must be created AFTER git commit
+      // in CI so the tag points at the commit containing the version bump.
       console.log(
-        `  Created tag: methodology-application/${methodology.key}@${newVersion}`,
+        `  Pending tag: methodology-application/${methodology.key}@${newVersion}`,
       );
     } else {
       console.log(`  Would update ${methodology.configPath}`);
