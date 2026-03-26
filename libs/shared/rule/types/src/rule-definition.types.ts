@@ -3,6 +3,7 @@ export interface BaseRuleDefinition {
   events: string[];
   name: string;
   slug: string;
+  version: string;
 }
 
 export interface RuleDefinition<
