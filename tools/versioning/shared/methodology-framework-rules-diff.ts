@@ -1,12 +1,12 @@
-export interface FrameworkRulesDiff {
+export interface MethodologyFrameworkRulesDiff {
   added: string[];
   removed: string[];
 }
 
-export function diffFrameworkRules(
+export function diffMethodologyFrameworkRules(
   previousSlugs: string[],
   currentSlugs: string[],
-): FrameworkRulesDiff {
+): MethodologyFrameworkRulesDiff {
   const previousSet = new Set(previousSlugs);
   const currentSet = new Set(currentSlugs);
 

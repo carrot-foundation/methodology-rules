@@ -34,8 +34,15 @@ function getLatestMvaTag(): string | undefined {
     ).trim();
 
     return tag || undefined;
-  } catch {
-    return undefined;
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      /No names found|cannot describe/i.test(error.message)
+    ) {
+      return undefined;
+    }
+
+    throw error;
   }
 }
 
@@ -77,6 +84,7 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
   const rules: DiscoveredRule[] = [];
   const slugRegex = /slug:\s*'([^']+)'/;
   const versionRegex = /version:\s*'([^']+)'/;
+  const slugLocations = new Map<string, string>();
 
   const scopes = fs
     .readdirSync(LIB_RULE_PROCESSORS, { withFileTypes: true })
@@ -109,10 +117,22 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
         continue;
       }
 
+      const slug = slugMatch[1];
+      const previousLocation = slugLocations.get(slug);
+
+      if (previousLocation) {
+        throw new Error(
+          `Duplicate slug "${slug}" found in ${filePath} and ${previousLocation}. ` +
+            'Slugs must be unique across all processor scopes.',
+        );
+      }
+
+      slugLocations.set(slug, filePath);
+
       rules.push({
         filePath,
         ruleDir: path.join(scopeDir, ruleDir),
-        slug: slugMatch[1],
+        slug,
         version: versionMatch[1],
       });
     }
