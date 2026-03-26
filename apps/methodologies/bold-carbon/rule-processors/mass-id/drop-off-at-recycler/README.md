@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that the Drop-off event includes a receiving operator identifier and that the Drop-off address matches the Recycler ACTOR event address.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                                  | Description                                                                                                                                                                                                                 |
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

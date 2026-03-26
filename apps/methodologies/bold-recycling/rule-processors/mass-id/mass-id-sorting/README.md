@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates sorting events in MassID documents, ensuring that gross weight, deducted weight, sorting factor, and event values are correctly calculated and formatted.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                | Description                                                                                                                                                                                                             |
 | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

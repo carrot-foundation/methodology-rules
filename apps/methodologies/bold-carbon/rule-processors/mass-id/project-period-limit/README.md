@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that the Recycled event occurred within the timeframe allowed by the methodology, ensuring only recent recycling events are eligible for credit generation.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                    | Description                                                                                                                                                                                                                 |
 | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

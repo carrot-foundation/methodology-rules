@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates weighing events in MassID documents, including event values, container types, capture methods, scale types, and scale ticket verification. Supports both single-step and two-step weighing processes.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                    | Description                                                                                                                                                                                                                                                                                                                                                       |
 | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that exactly one Processor ACTOR event exists in the MassID document, ensuring proper processor identification in the waste processing chain.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                   | Description                                                                                                                                                                                                                                                               |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

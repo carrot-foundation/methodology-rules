@@ -28,8 +28,8 @@ jobs:
       - name: Generate application rules manifest
         run: pnpm generate:manifest
 
-      - name: Generate framework rules manifests
-        run: pnpm generate:framework-rules
+      - name: Generate methodology framework rules manifests
+        run: pnpm generate:methodology-framework-rules
 
       - name: Upload manifests
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
@@ -38,7 +38,7 @@ jobs:
           if-no-files-found: error
           path: |
             dist/application-rules-manifest.json
-            dist/framework-rules/*.json
+            dist/methodology-framework-rules/*.json
           retention-days: 7
 
       - name: Dispatch to carrot-docs

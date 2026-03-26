@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Calculates the geographic distance in kilometers between the Pick-up and Drop-off event addresses, determining the project boundary scope.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                       | Description                                                                                                                                                                                                                                 |
 | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

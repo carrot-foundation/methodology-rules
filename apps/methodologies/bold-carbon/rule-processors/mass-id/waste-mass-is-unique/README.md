@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that no duplicate MassID documents exist with the same combination of Drop-off event, Pick-up event, Recycler ACTOR event, Waste Generator ACTOR event, and vehicle license plate.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                                    | Description                                                                                                                                                                                                                                                                            |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

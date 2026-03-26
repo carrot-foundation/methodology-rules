@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that the MassID document is not already linked to a valid certificate or credit order document and that no other audit for the same methodology is in progress, preventing duplicate credit generation.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule        | Description                                                                                                                                      |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |

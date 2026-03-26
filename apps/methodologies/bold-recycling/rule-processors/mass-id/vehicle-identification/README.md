@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates vehicle identification in the Pick-up event, ensuring the appropriate identification method is used based on the vehicle type: license plate, description, or no identification required.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                  | Description                                                                                                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates hauler identification based on the vehicle type, requiring a Hauler ACTOR event for most vehicle types while making it optional for sludge pipes and cart.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                  | Description                                                                                                                                                                                         |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

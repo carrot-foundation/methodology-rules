@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates that the time between Drop-off and Recycled events is within the acceptable range of 60 to 180 days for composting cycles.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                | Description                                                                                                                                                                        |
 | ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
