@@ -8,5 +8,5 @@ export interface BaseRuleDefinition {
 export interface RuleDefinition<
   TFrameworkRuleSlug extends string = string,
 > extends BaseRuleDefinition {
-  frameworkRules: TFrameworkRuleSlug[];
+  methodologyFrameworkRules: TFrameworkRuleSlug[];
 }
