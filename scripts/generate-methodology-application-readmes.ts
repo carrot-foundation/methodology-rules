@@ -26,13 +26,10 @@ interface MethodologyConfig {
   version: string;
 }
 
-interface FrameworkRule {
+interface RuleProcessorInfo {
+  directoryPath: string;
   name: string;
   slug: string;
-}
-
-interface RuleVersion {
-  name: string;
   version: string;
 }
 
@@ -75,30 +72,51 @@ function readConfig(configPath: string): MethodologyConfig | undefined {
   };
 }
 
-function readFrameworkRules(rulesPath: string): FrameworkRule[] {
-  if (!fileExists(rulesPath)) return [];
+function readRulesConfig(configPath: string): Map<string, string[]> {
+  const map = new Map<string, string[]>();
 
-  const content = fs.readFileSync(rulesPath, 'utf8');
-  const rules: FrameworkRule[] = [];
+  if (!fileExists(configPath)) return map;
 
-  // Match each object block with name and slug fields
-  const blockRegex = /\{[^}]*?name:\s*'([^']+)'[^}]*?slug:\s*'([^']+)'[^}]*?\}/gs;
+  const content = fs.readFileSync(configPath, 'utf8');
+  const scopeRegex = /'([^']+)':\s*\[([\s\S]*?)\]/g;
 
   let match: RegExpExecArray | null;
 
-  while ((match = blockRegex.exec(content)) !== null) {
-    if (match[1] && match[2]) {
-      rules.push({ name: match[1], slug: match[2] });
+  while ((match = scopeRegex.exec(content)) !== null) {
+    const scope = match[1];
+    const slugsContent = match[2];
+
+    if (!scope || !slugsContent) continue;
+
+    const slugs: string[] = [];
+    const slugRegex = /'([^']+)'/g;
+
+    let slugMatch: RegExpExecArray | null;
+
+    while ((slugMatch = slugRegex.exec(slugsContent)) !== null) {
+      if (slugMatch[1]) {
+        slugs.push(slugMatch[1]);
+      }
+    }
+
+    if (slugs.length > 0) {
+      map.set(scope, slugs);
     }
   }
 
-  return rules;
+  return map;
 }
 
-function buildRuleVersionMap(): Map<string, RuleVersion> {
-  const map = new Map<string, RuleVersion>();
+function buildRuleProcessorIndex(): {
+  byDirSlug: Map<string, RuleProcessorInfo>;
+  byScopedDirSlug: Map<string, RuleProcessorInfo>;
+} {
+  const byDirSlug = new Map<string, RuleProcessorInfo>();
+  const byScopedDirSlug = new Map<string, RuleProcessorInfo>();
 
-  if (!dirExists(LIB_RULE_PROCESSORS)) return map;
+  if (!dirExists(LIB_RULE_PROCESSORS)) {
+    return { byDirSlug, byScopedDirSlug };
+  }
 
   const scopes = fs
     .readdirSync(LIB_RULE_PROCESSORS)
@@ -106,12 +124,14 @@ function buildRuleVersionMap(): Map<string, RuleVersion> {
 
   for (const scope of scopes) {
     const scopeDir = path.join(LIB_RULE_PROCESSORS, scope);
-    const slugs = fs
+    const dirs = fs
       .readdirSync(scopeDir)
       .filter((d) => dirExists(path.join(scopeDir, d)));
 
-    for (const slug of slugs) {
-      const srcDir = path.join(scopeDir, slug, 'src');
+    for (const dirName of dirs) {
+      const ruleDir = path.join(scopeDir, dirName);
+      const srcDir = path.join(ruleDir, 'src');
+
       if (!dirExists(srcDir)) continue;
 
       const files = fs.readdirSync(srcDir);
@@ -122,45 +142,79 @@ function buildRuleVersionMap(): Map<string, RuleVersion> {
       const content = fs.readFileSync(path.join(srcDir, ruleDefFile), 'utf8');
 
       const nameMatch = /name:\s*'([^']+)'/.exec(content);
-      const versionMatch = /version:\s*'([^']+)'/.exec(content);
+      const versionMatch = /(?<!\w)version:\s*'([^']+)'/.exec(content);
       const slugMatch = /slug:\s*'([^']+)'/.exec(content);
 
-      const ruleSlug = slugMatch?.[1] ?? slug;
+      const info: RuleProcessorInfo = {
+        directoryPath: ruleDir,
+        name: nameMatch?.[1] ?? dirName,
+        slug: slugMatch?.[1] ?? dirName,
+        version: versionMatch?.[1] ?? '-',
+      };
 
-      if (nameMatch?.[1] && versionMatch?.[1]) {
-        map.set(ruleSlug, {
-          name: nameMatch[1],
-          version: versionMatch[1],
-        });
-      }
+      byDirSlug.set(dirName, info);
+      byScopedDirSlug.set(`${scope}/${dirName}`, info);
     }
   }
 
-  return map;
+  return { byDirSlug, byScopedDirSlug };
+}
+
+function resolveProcessor(
+  configScope: string,
+  configSlug: string,
+  index: {
+    byDirSlug: Map<string, RuleProcessorInfo>;
+    byScopedDirSlug: Map<string, RuleProcessorInfo>;
+  },
+): RuleProcessorInfo | undefined {
+  return (
+    index.byScopedDirSlug.get(`${configScope}/${configSlug}`) ??
+    index.byDirSlug.get(configSlug)
+  );
+}
+
+function slugToTitle(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }
 
 function generateReadme(
   config: MethodologyConfig,
-  frameworkRules: FrameworkRule[],
-  ruleVersionMap: Map<string, RuleVersion>,
+  rulesConfig: Map<string, string[]>,
+  processorIndex: {
+    byDirSlug: Map<string, RuleProcessorInfo>;
+    byScopedDirSlug: Map<string, RuleProcessorInfo>;
+  },
+  readmeDir: string,
 ): string {
-  const rows = frameworkRules
-    .map((rule, index) => {
-      const ruleVersion = ruleVersionMap.get(rule.slug);
-      const version = ruleVersion?.version ?? '-';
+  const scopeSections: string[] = [];
 
-      return `| ${String(index + 1)} | ${rule.name} | \`${rule.slug}\` | ${version} |`;
-    })
-    .join('\n');
+  for (const [scope, slugs] of rulesConfig) {
+    const rows = slugs.map((slug, index) => {
+      const processor = resolveProcessor(scope, slug, processorIndex);
+
+      if (processor) {
+        const relativePath = path.relative(readmeDir, processor.directoryPath);
+        const nameLink = `[${processor.name}](${relativePath})`;
+
+        return `| ${String(index + 1)} | ${nameLink} | ${processor.version} |`;
+      }
+
+      return `| ${String(index + 1)} | ${slugToTitle(slug)} | - |`;
+    });
+
+    scopeSections.push(
+      `### ${scope}\n\n| # | Name | Version |\n|---|------|---------|` +
+        `\n${rows.join('\n')}`,
+    );
+  }
 
   const rulesSection =
-    frameworkRules.length > 0
-      ? `## Rules
-
-| # | Name | Slug | Version |
-|---|------|------|---------|
-${rows}
-`
+    scopeSections.length > 0
+      ? `## Rules\n\n${scopeSections.join('\n\n')}\n`
       : '';
 
   return `# ${config.displayName}
@@ -181,15 +235,15 @@ LGPL-3.0
 
 function discoverMethodologies(): Array<{
   configPath: string;
-  frameworkRulesPath: string;
   key: string;
   readmePath: string;
+  rulesConfigPath: string;
 }> {
   const methodologies: Array<{
     configPath: string;
-    frameworkRulesPath: string;
     key: string;
     readmePath: string;
+    rulesConfigPath: string;
   }> = [];
 
   if (!dirExists(LIBS_METHODOLOGIES)) {
@@ -216,19 +270,19 @@ function discoverMethodologies(): Array<{
 
     methodologies.push({
       configPath,
-      frameworkRulesPath: path.join(
-        LIBS_METHODOLOGIES,
-        entry.name,
-        'rules',
-        'src',
-        'methodology-framework-rules.ts',
-      ),
       key: entry.name,
       readmePath: path.join(
         LIBS_METHODOLOGIES,
         entry.name,
         'rules',
         'README.md',
+      ),
+      rulesConfigPath: path.join(
+        LIBS_METHODOLOGIES,
+        entry.name,
+        'rules',
+        'src',
+        'rules.config.ts',
       ),
     });
   }
@@ -248,9 +302,9 @@ function main(): void {
     `Discovered ${String(methodologies.length)} methodology application(s): ${methodologies.map((m) => m.key).join(', ')}`,
   );
 
-  const ruleVersionMap = buildRuleVersionMap();
+  const processorIndex = buildRuleProcessorIndex();
   console.log(
-    `Loaded ${String(ruleVersionMap.size)} rule definition(s) with version info`,
+    `Loaded ${String(processorIndex.byDirSlug.size)} rule processor(s) with version info`,
   );
 
   const readmePaths: string[] = [];
@@ -265,12 +319,23 @@ function main(): void {
       continue;
     }
 
-    const frameworkRules = readFrameworkRules(methodology.frameworkRulesPath);
-    console.log(
-      `  ${methodology.key}: ${config.displayName} v${config.version} (MvF v${config.methodologyFrameworkVersion}), ${String(frameworkRules.length)} framework rules`,
+    const rulesConfig = readRulesConfig(methodology.rulesConfigPath);
+    const ruleCount = [...rulesConfig.values()].reduce(
+      (sum, slugs) => sum + slugs.length,
+      0,
     );
 
-    const readme = generateReadme(config, frameworkRules, ruleVersionMap);
+    console.log(
+      `  ${methodology.key}: ${config.displayName} v${config.version} (MvF v${config.methodologyFrameworkVersion}), ${String(ruleCount)} rule(s) in ${String(rulesConfig.size)} scope(s)`,
+    );
+
+    const readmeDir = path.dirname(methodology.readmePath);
+    const readme = generateReadme(
+      config,
+      rulesConfig,
+      processorIndex,
+      readmeDir,
+    );
 
     try {
       fs.writeFileSync(methodology.readmePath, readme, 'utf8');
