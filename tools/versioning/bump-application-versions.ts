@@ -110,9 +110,30 @@ function getFrameworkRuleSlugsAtRef(
         ['show', `${ref}:${relativePath}`],
         { cwd: ROOT, encoding: 'utf8' },
       );
-    } catch {
-      // File did not exist at that ref
-      return [];
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : String(error);
+
+      if (/does not exist|path .* does not exist/i.test(message)) {
+        // File may have been renamed; retry with legacy filename
+        const legacyPath = relativePath.replace(
+          'methodology-framework-rules.ts',
+          'framework-rules.ts',
+        );
+
+        try {
+          content = execFileSync(
+            'git',
+            ['show', `${ref}:${legacyPath}`],
+            { cwd: ROOT, encoding: 'utf8' },
+          );
+        } catch {
+          // File did not exist at that ref under either name
+          return [];
+        }
+      } else {
+        throw error;
+      }
     }
   } else {
     if (!fs.existsSync(filePath)) return [];
@@ -437,7 +458,10 @@ function main(): void {
 
   if (results.length === 0) {
     console.log('\nNo application bumps to apply.');
-    removeStaleOutputFile();
+
+    if (!DRY_RUN) {
+      removeStaleOutputFile();
+    }
 
     return;
   }

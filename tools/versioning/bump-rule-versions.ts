@@ -261,17 +261,23 @@ function main(): void {
     }
   }
 
-  if (results.length === 0) {
-    console.log('No rule bumps to apply.');
-    return;
-  }
-
   const distDir = path.join(ROOT, 'dist');
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
   }
 
   const outputPath = path.join(distDir, 'rule-bumps.json');
+
+  if (results.length === 0) {
+    console.log('No rule bumps to apply.');
+
+    if (!DRY_RUN) {
+      fs.writeFileSync(outputPath, JSON.stringify([], null, 2), 'utf8');
+      console.log(`Wrote empty rule-bumps.json to ${outputPath}`);
+    }
+
+    return;
+  }
   if (!DRY_RUN) {
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
     console.log(`\nWrote ${String(results.length)} bump(s) to ${outputPath}`);
