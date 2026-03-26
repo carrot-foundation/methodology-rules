@@ -8,7 +8,7 @@ Methodology: **BOLD Carbon**
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=mass-id--waste-origin-identification)](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=mass-id--waste-origin-identification)
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
-**Version:** 1.0.0
+[![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-blue)](../../../../../../libs/methodologies/bold/rule-processors/mass-id/waste-origin-identification/CHANGELOG.md)
 
 **[Changelog](../../../../../../libs/methodologies/bold/rule-processors/mass-id/waste-origin-identification/CHANGELOG.md)**
 

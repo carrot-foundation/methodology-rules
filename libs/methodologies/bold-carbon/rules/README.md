@@ -1,8 +1,9 @@
-# BOLD Carbon (CH₄) — MvA v1.0.0
+# BOLD Carbon (CH₄)
 
 > Methodology Verification Application
 
-**Implements MvF:** v1.0.2
+[![MvA: v1.0.0](https://img.shields.io/badge/MvA-v1.0.0-blue)](./CHANGELOG.md)
+[![MvF: v1.0.2](https://img.shields.io/badge/MvF-v1.0.2-green)](./CHANGELOG.md)
 
 **[Changelog](./CHANGELOG.md)**
 

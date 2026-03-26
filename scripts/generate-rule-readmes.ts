@@ -412,7 +412,7 @@ Methodology: **${methodologyDisplay}**
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=${codecovFlag})](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=${codecovFlag})
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 
-**Version:** ${version}
+[![Version: ${version}](https://img.shields.io/badge/Version-${version}-blue)](${changelogRelPath})
 
 **[Changelog](${changelogRelPath})**
 

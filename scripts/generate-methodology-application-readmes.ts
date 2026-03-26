@@ -163,11 +163,12 @@ ${rows}
 `
       : '';
 
-  return `# ${config.displayName} — MvA v${config.version}
+  return `# ${config.displayName}
 
 > Methodology Verification Application
 
-**Implements MvF:** v${config.methodologyFrameworkVersion}
+[![MvA: v${config.version}](https://img.shields.io/badge/MvA-v${config.version}-blue)](./CHANGELOG.md)
+[![MvF: v${config.methodologyFrameworkVersion}](https://img.shields.io/badge/MvF-v${config.methodologyFrameworkVersion}-green)](./CHANGELOG.md)
 
 **[Changelog](./CHANGELOG.md)**
 
