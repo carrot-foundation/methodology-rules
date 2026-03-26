@@ -6,7 +6,7 @@ export interface BaseRuleDefinition {
 }
 
 export interface RuleDefinition<
-  TFrameworkRuleSlug extends string = string,
+  TMethodologyFrameworkRuleSlug extends string = string,
 > extends BaseRuleDefinition {
-  methodologyFrameworkRules: TFrameworkRuleSlug[];
+  methodologyFrameworkRules: TMethodologyFrameworkRuleSlug[];
 }
