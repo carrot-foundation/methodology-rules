@@ -17,6 +17,8 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
 
+import { dirExists, fileExists } from './shared/fs-utils';
+
 const ROOT = path.resolve(__dirname, '..');
 const LIB_RULE_PROCESSORS = path.join(
   ROOT,
@@ -100,23 +102,7 @@ interface ReadmeInput {
   version: string;
 }
 
-function dirExists(dirPath: string): boolean {
-  try {
-    return fs.statSync(dirPath).isDirectory();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
 
-function fileExists(filePath: string): boolean {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
 
 function resolveLibCoordinates(
   scope: string,

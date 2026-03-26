@@ -7,7 +7,9 @@ import * as path from 'node:path';
 import { z } from 'zod';
 
 import { diffMethodologyFrameworkRules } from './shared/methodology-framework-rules-diff';
+import { escapeRegex } from './shared/string-utils';
 import type { ApplicationBump, BumpLevel, RuleBump } from './shared/types';
+import { RuleBumpSchema } from './shared/types';
 import { bumpVersion, highestBump } from './shared/version-utils';
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -152,10 +154,6 @@ function getFrameworkRuleSlugsAtRef(
   return slugs;
 }
 
-function escapeRegex(str: string): string {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function updateConfigVersion(
   configPath: string,
   oldVersion: string,
@@ -163,9 +161,9 @@ function updateConfigVersion(
 ): void {
   const content = fs.readFileSync(configPath, 'utf8');
 
-  // Match `version: '...'` but NOT `methodologyFrameworkVersion: '...'`
+  // Match `version: '...'` (or `"` / backtick) but NOT `methodologyFrameworkVersion: '...'`
   const regex = new RegExp(
-    `((?<!\\w)version:\\s*')${escapeRegex(oldVersion)}(')`
+    `((?<!\\w)version:\\s*(['"\`]))${escapeRegex(oldVersion)}(\\2)`
   );
 
   const updated = content.replace(regex, `$1${newVersion}$2`);
@@ -267,22 +265,6 @@ function commitVersionBump(
   );
 }
 
-function createGitTag(methodology: string, version: string): void {
-  execFileSync(
-    'git',
-    ['tag', `methodology-application/${methodology}@${version}`],
-    { cwd: ROOT, encoding: 'utf8' },
-  );
-}
-
-const RuleBumpSchema = z.object({
-  bumpLevel: z.enum(['major', 'minor', 'patch']),
-  commits: z.array(z.string()),
-  newVersion: z.string(),
-  previousVersion: z.string(),
-  slug: z.string(),
-});
-
 function loadRuleBumps(): RuleBump[] {
   const ruleBumpsPath = path.join(ROOT, 'dist', 'rule-bumps.json');
 
@@ -298,9 +280,9 @@ function loadRuleBumps(): RuleBump[] {
   const result = z.array(RuleBumpSchema).safeParse(parsed);
 
   if (!result.success) {
-    throw new Error(
-      `Invalid rule-bumps.json format: ${result.error.message}`,
-    );
+    throw new Error('Invalid rule-bumps.json format', {
+      cause: result.error,
+    });
   }
 
   return result.data;
@@ -430,11 +412,6 @@ function persistMethodologyBumps(
     console.log(
       `  Committed version bump for ${methodology.key}@${applicationBump.newVersion}`,
     );
-
-    createGitTag(methodology.key, applicationBump.newVersion);
-    console.log(
-      `  Created tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
-    );
   }
 
   const distDir = path.join(ROOT, 'dist');
@@ -492,9 +469,6 @@ function main(): void {
       );
       console.log(`  Would update ${methodology.configPath}`);
       console.log(`  Would update CHANGELOG.md`);
-      console.log(
-        `  Would create tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
-      );
     }
 
     console.log(

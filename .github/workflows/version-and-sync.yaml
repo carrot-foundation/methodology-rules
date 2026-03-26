@@ -45,6 +45,7 @@ jobs:
         run: pnpm generate:manifest
 
       - name: Commit version bumps and create tags
+        id: commit
         env:
           GIT_AUTHOR_NAME: github-actions[bot]
           GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
@@ -58,12 +59,19 @@ jobs:
           # Create tags AFTER commit so they point at the version-bumped commit
           if [ -f dist/application-bumps.json ]; then
             for tag in $(jq -r '.[] | "methodology-application/\(.methodology)@\(.newVersion)"' dist/application-bumps.json); do
-              git tag "$tag"
-              echo "Created tag: $tag"
+              if git rev-parse --verify "$tag" >/dev/null 2>&1; then
+                echo "Tag already exists, skipping: $tag"
+              else
+                git tag "$tag"
+                echo "Created tag: $tag"
+              fi
             done
           fi
 
           git push --follow-tags
+
+          # Capture post-commit SHA for downstream dispatch
+          echo "new_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: Upload manifest artifact
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
@@ -82,5 +90,5 @@ jobs:
           client-payload: >-
             {
               "run_id": "${{ github.run_id }}",
-              "source_commit": "${{ github.sha }}"
+              "source_commit": "${{ steps.commit.outputs.new_sha || github.sha }}"
             }

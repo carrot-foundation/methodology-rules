@@ -70,13 +70,16 @@ describe('parseCommitsForRules', () => {
     expect(result).toEqual(new Map([['document-manifest-data', 'patch']]));
   });
 
-  it('should detect BREAKING CHANGE in commit body as major', () => {
+  it('should treat BREAKING CHANGE in body as feat (body detection not supported)', () => {
+    // Only the '!' header notation triggers a major bump.
+    // Body-level "BREAKING CHANGE:" is ignored because commits are parsed
+    // from subject lines only (git log --format=%s).
     const commits = [
       'feat(document-value): rework API\n\nBREAKING CHANGE: output format changed',
     ];
     const result = parseCommitsForRules(commits);
 
-    expect(result).toEqual(new Map([['document-value', 'major']]));
+    expect(result).toEqual(new Map([['document-value', 'minor']]));
   });
 
   it('should keep major even when a subsequent commit is patch', () => {

@@ -20,6 +20,7 @@ import { register } from 'tsconfig-paths';
 import { z } from 'zod';
 
 import { METHODOLOGY_FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/methodology-framework-rule.types';
+import { dirExists, fileExists } from './shared/fs-utils';
 
 // ---------------------------------------------------------------------------
 // Bootstrap: register tsconfig path aliases for require() resolution
@@ -69,11 +70,15 @@ const SLUG_TO_LIB: Record<string, string> = {
 // Methodology discovery
 // ---------------------------------------------------------------------------
 
-interface MethodologyApplicationConfig {
-  displayName: string;
-  methodologyFrameworkVersion: string;
-  version: string;
-}
+const MethodologyApplicationConfigSchema = z.object({
+  displayName: z.string().min(1),
+  methodologyFrameworkVersion: z.string().min(1),
+  version: z.string().min(1),
+});
+
+type MethodologyApplicationConfig = z.infer<
+  typeof MethodologyApplicationConfigSchema
+>;
 
 /**
  * Discover methodologies that have a methodology-application.config.ts file
@@ -108,12 +113,36 @@ function loadMethodologyApplicationConfig(
     'methodology-application.config.ts',
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { methodologyApplicationConfig } = require(configPath) as {
-    methodologyApplicationConfig: MethodologyApplicationConfig;
-  };
+  let mod: Record<string, unknown>;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    mod = require(configPath) as Record<string, unknown>;
+  } catch (error) {
+    throw new Error(
+      `Failed to load methodology application config for "${methodology}" from ${configPath}`,
+      { cause: error },
+    );
+  }
 
-  return methodologyApplicationConfig;
+  const raw = mod.methodologyApplicationConfig;
+
+  if (!raw) {
+    throw new Error(
+      `Missing "methodologyApplicationConfig" export in ${configPath}. ` +
+        `Available exports: ${Object.keys(mod).join(', ')}`,
+    );
+  }
+
+  const result = MethodologyApplicationConfigSchema.safeParse(raw);
+
+  if (!result.success) {
+    throw new Error(
+      `Invalid methodology application config for "${methodology}" in ${configPath}`,
+      { cause: result.error },
+    );
+  }
+
+  return result.data;
 }
 
 // ---------------------------------------------------------------------------
@@ -149,7 +178,14 @@ function loadMethodologyFrameworkRules(
   };
 
   for (const rule of methodologyFrameworkRules) {
-    BaseMethodologyFrameworkRuleSchema.parse(rule);
+    try {
+      BaseMethodologyFrameworkRuleSchema.parse(rule);
+    } catch (error) {
+      throw new Error(
+        `Invalid methodology framework rule in ${methodology}: ${JSON.stringify(rule)}`,
+        { cause: error },
+      );
+    }
   }
 
   // Duplicate slug check
@@ -202,32 +238,32 @@ function loadRulesConfig(
   const configPath = getRulesConfigPath(methodology);
   if (!configPath) return undefined;
 
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { rulesConfig } = require(configPath) as {
-    rulesConfig: Record<string, readonly string[]>;
-  };
+  let mod: Record<string, unknown>;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    mod = require(configPath) as Record<string, unknown>;
+  } catch (error) {
+    throw new Error(
+      `Failed to load rules config for "${methodology}" from ${configPath}`,
+      { cause: error },
+    );
+  }
+
+  const rulesConfig = mod.rulesConfig as
+    | Record<string, readonly string[]>
+    | undefined;
+
+  if (!rulesConfig) {
+    throw new Error(
+      `Missing "rulesConfig" export in ${configPath}. ` +
+        `Available exports: ${Object.keys(mod).join(', ')}`,
+    );
+  }
+
   return rulesConfig;
 }
 
-// ---------------------------------------------------------------------------
-// Filesystem helpers
-// ---------------------------------------------------------------------------
 
-function fileExists(filePath: string): boolean {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch {
-    return false;
-  }
-}
-
-function dirExists(dirPath: string): boolean {
-  try {
-    return fs.statSync(dirPath).isDirectory();
-  } catch {
-    return false;
-  }
-}
 
 function readFileIfExists(filePath: string): string | undefined {
   if (!fileExists(filePath)) return undefined;
@@ -260,7 +296,10 @@ function getSourceCommit(): string {
       cwd: ROOT,
       encoding: 'utf8',
     }).trim();
-  } catch {
+  } catch (error) {
+    console.warn(
+      `Warning: could not determine source commit: ${error instanceof Error ? error.message : String(error)}`,
+    );
     return 'unknown';
   }
 }
@@ -400,6 +439,19 @@ function extractRuleDefinition(
   );
   const slugMatch = content.match(/slug:\s*['"`]([^'"`]+)['"`]/);
   const versionMatch = content.match(/version:\s*['"`]([^'"`]+)['"`]/);
+
+  const missing = [
+    !nameMatch && 'name',
+    !descMatch && 'description',
+    !slugMatch && 'slug',
+    !versionMatch && 'version',
+  ].filter(Boolean);
+
+  if (missing.length > 0) {
+    console.warn(
+      `  Warning: ${slug} rule-definition regex missed: ${missing.join(', ')} (fallback values used)`,
+    );
+  }
 
   // Extract events array
   const eventsMatch = content.match(/events:\s*\[([\s\S]*?)\]/);

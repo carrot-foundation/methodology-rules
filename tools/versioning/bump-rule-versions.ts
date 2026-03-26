@@ -4,7 +4,8 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { parseCommitsForRules } from './shared/commit-parser';
+import { HEADER_PATTERN, parseCommitsForRules } from './shared/commit-parser';
+import { escapeRegex } from './shared/string-utils';
 import type { RuleBump } from './shared/types';
 import { bumpVersion } from './shared/version-utils';
 
@@ -57,8 +58,6 @@ function getCommitsSince(ref?: string): string[] {
     );
   }
 }
-
-const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
 
 function collectCommitsPerSlug(
   commitMessages: string[],
@@ -148,10 +147,10 @@ function updateRuleDefinitionVersion(
   newVersion: string,
 ): void {
   const content = fs.readFileSync(filePath, 'utf8');
-  const updated = content.replace(
-    `version: '${oldVersion}'`,
-    `version: '${newVersion}'`,
+  const regex = new RegExp(
+    `(version:\\s*(['"\`]))${escapeRegex(oldVersion)}\\2`,
   );
+  const updated = content.replace(regex, `$1${newVersion}$2`);
 
   if (updated === content) {
     throw new Error(

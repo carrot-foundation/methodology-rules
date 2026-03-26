@@ -12,6 +12,8 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { dirExists, fileExists } from './shared/fs-utils';
+
 const ROOT = path.resolve(__dirname, '..');
 const LIBS_METHODOLOGIES = path.join(ROOT, 'libs', 'methodologies');
 const LIB_RULE_PROCESSORS = path.join(
@@ -33,24 +35,6 @@ interface RuleProcessorInfo {
   version: string;
 }
 
-function fileExists(filePath: string): boolean {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
-
-function dirExists(dirPath: string): boolean {
-  try {
-    return fs.statSync(dirPath).isDirectory();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
-
 function readConfig(configPath: string): MethodologyConfig | undefined {
   if (!fileExists(configPath)) return undefined;
 
@@ -61,7 +45,16 @@ function readConfig(configPath: string): MethodologyConfig | undefined {
   const frameworkVersionMatch =
     /methodologyFrameworkVersion:\s*'([^']+)'/.exec(content);
 
-  if (!displayNameMatch?.[1] || !versionMatch?.[1] || !frameworkVersionMatch?.[1]) {
+  const missing = [
+    !displayNameMatch?.[1] && 'displayName',
+    !versionMatch?.[1] && 'version',
+    !frameworkVersionMatch?.[1] && 'methodologyFrameworkVersion',
+  ].filter(Boolean);
+
+  if (missing.length > 0) {
+    console.warn(
+      `  Warning: ${configPath}: could not extract ${missing.join(', ')}`,
+    );
     return undefined;
   }
 
@@ -102,6 +95,12 @@ function readRulesConfig(configPath: string): Map<string, string[]> {
     if (slugs.length > 0) {
       map.set(scope, slugs);
     }
+  }
+
+  if (map.size === 0 && content.trim().length > 0) {
+    console.warn(
+      `  Warning: ${configPath} exists but no rule scopes were extracted — check file format`,
+    );
   }
 
   return map;

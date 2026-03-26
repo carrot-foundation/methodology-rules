@@ -1,12 +1,16 @@
+import { z } from 'zod';
+
 export type BumpLevel = 'major' | 'minor' | 'patch';
 
-export interface RuleBump {
-  bumpLevel: BumpLevel;
-  commits: string[];
-  newVersion: string;
-  previousVersion: string;
-  slug: string;
-}
+export const RuleBumpSchema = z.object({
+  bumpLevel: z.enum(['major', 'minor', 'patch']),
+  commits: z.array(z.string()),
+  newVersion: z.string(),
+  previousVersion: z.string(),
+  slug: z.string(),
+});
+
+export type RuleBump = z.infer<typeof RuleBumpSchema>;
 
 export interface ApplicationBump {
   addedRules: string[];
