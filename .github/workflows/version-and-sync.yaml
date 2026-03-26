@@ -1,0 +1,78 @@
+name: Version and Sync Rules to Docs
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  version-and-sync:
+    name: Bump Versions, Generate Manifests & Dispatch to Docs
+    runs-on: ubuntu-latest
+    if: >-
+      !contains(github.event.head_commit.message, '[skip ci]')
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          token: ${{ secrets.CI_BOT_TOKEN }}
+
+      - uses: ./.github/actions/install-node-dependencies
+
+      - name: Bump rule versions
+        run: pnpm bump:rules
+
+      - name: Bump application versions
+        run: pnpm bump:applications
+
+      - name: Generate rule READMEs
+        run: pnpm generate:readmes
+
+      - name: Generate methodology READMEs
+        run: pnpm generate:methodology-readmes
+
+      - name: Generate unified manifest
+        run: pnpm generate:manifest
+
+      - name: Commit version bumps
+        env:
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: |
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore: bump versions [skip ci]"
+          git push
+          git push --tags
+
+      - name: Upload manifest artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: methodology-rules-manifest
+          if-no-files-found: error
+          path: dist/methodology-rules-manifest.json
+          retention-days: 7
+
+      - name: Dispatch to carrot-docs
+        uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
+        with:
+          token: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          repository: carrot-foundation/docs
+          event-type: rules-manifest-updated
+          client-payload: >-
+            {
+              "run_id": "${{ github.run_id }}",
+              "source_commit": "${{ github.sha }}"
+            }

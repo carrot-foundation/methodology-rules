@@ -1,9 +1,8 @@
-name: Sync Rules to Docs
+# @deprecated — replaced by version-and-sync.yaml
+name: Sync Rules to Docs (DEPRECATED)
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch: # Manual trigger only — no longer runs on push
 
 permissions:
   contents: read
