@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR],
   name: 'Rewards Distribution',
   slug: 'rewards-distribution',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

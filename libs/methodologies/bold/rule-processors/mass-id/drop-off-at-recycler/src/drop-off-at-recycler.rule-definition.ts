@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR, DocumentEventName.DROP_OFF],
   name: 'Drop-off At Recycling Facility',
   slug: 'drop-off-at-recycler',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

@@ -12,4 +12,5 @@ export const ruleDefinition = {
   ],
   name: 'Waste Origin Identification',
   slug: 'waste-origin-identification',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

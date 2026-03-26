@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR, DocumentEventName.PICK_UP],
   name: 'Local Waste Classification',
   slug: 'regional-waste-classification',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

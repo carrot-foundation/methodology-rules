@@ -12,4 +12,5 @@ export const ruleDefinition = {
   ],
   name: 'Uniqueness Check',
   slug: 'waste-mass-is-unique',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

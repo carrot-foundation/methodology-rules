@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR, DocumentEventName.PICK_UP],
   name: 'Hauler Identification',
   slug: 'hauler-identification',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

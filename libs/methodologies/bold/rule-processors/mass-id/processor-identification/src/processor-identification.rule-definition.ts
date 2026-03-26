@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR],
   name: 'Processor Identification',
   slug: 'processor-identification',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;
