@@ -54,17 +54,19 @@ function getCommitsSince(ref?: string): string[] {
   return output.split('\n');
 }
 
+const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
+
 function collectCommitsPerSlug(
   commitMessages: string[],
 ): Map<string, string[]> {
   const commitsPerSlug = new Map<string, string[]>();
-  const scopeRegex = /^\w+\(([^)]+)\)!?:/;
 
   for (const message of commitMessages) {
-    const match = scopeRegex.exec(message);
-    if (!match?.[1]) continue;
+    const header = message.split('\n')[0];
+    const match = HEADER_PATTERN.exec(header);
+    if (!match?.[2]) continue;
 
-    const scope = match[1];
+    const scope = match[2];
     const existing = commitsPerSlug.get(scope) ?? [];
     existing.push(message);
     commitsPerSlug.set(scope, existing);
