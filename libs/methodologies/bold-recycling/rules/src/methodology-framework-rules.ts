@@ -392,4 +392,5 @@ export const methodologyFrameworkRules = [
   },
 ] as const satisfies readonly BaseMethodologyFrameworkRule[];
 
-export type MethodologyFrameworkRuleSlug = (typeof methodologyFrameworkRules)[number]['slug'];
+export type MethodologyFrameworkRuleSlug =
+  (typeof methodologyFrameworkRules)[number]['slug'];

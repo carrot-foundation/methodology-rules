@@ -6,7 +6,7 @@ import * as path from 'node:path';
 
 import { z } from 'zod';
 
-import { diffFrameworkRules } from './shared/framework-rules-diff';
+import { diffMethodologyFrameworkRules } from './shared/methodology-framework-rules-diff';
 import type { ApplicationBump, BumpLevel, RuleBump } from './shared/types';
 import { bumpVersion, highestBump } from './shared/version-utils';
 
@@ -19,6 +19,15 @@ interface DiscoveredMethodology {
   currentVersion: string;
   frameworkRulesPath: string;
   key: string;
+}
+
+interface MethodologyBumpResult {
+  applicationBump: ApplicationBump;
+  methodology: DiscoveredMethodology;
+}
+
+interface AnalysisResult {
+  results: MethodologyBumpResult[];
 }
 
 function discoverMethodologies(): DiscoveredMethodology[] {
@@ -158,17 +167,21 @@ function updateConfigVersion(
   fs.writeFileSync(configPath, updated, 'utf8');
 }
 
-function appendToChangelog(
-  methodologyKey: string,
-  version: string,
-  applicationBump: ApplicationBump,
-): void {
-  const changelogPath = path.join(
+function getChangelogPath(methodologyKey: string): string {
+  return path.join(
     LIBS_METHODOLOGIES,
     methodologyKey,
     'rules',
     'CHANGELOG.md',
   );
+}
+
+function appendToChangelog(
+  methodologyKey: string,
+  version: string,
+  applicationBump: ApplicationBump,
+): void {
+  const changelogPath = getChangelogPath(methodologyKey);
 
   const date = new Date().toISOString().split('T')[0];
   const sections: string[] = [];
@@ -186,7 +199,7 @@ function appendToChangelog(
   if (applicationBump.ruleBumps.length > 0) {
     const lines = applicationBump.ruleBumps.map(
       (rb) =>
-        `- ${rb.slug}: ${rb.previousVersion} \u2192 ${rb.newVersion} (${rb.bumpLevel})`,
+        `- ${rb.slug}: ${rb.previousVersion} → ${rb.newVersion} (${rb.bumpLevel})`,
     );
     sections.push(`### Rule updates\n\n${lines.join('\n')}`);
   }
@@ -224,6 +237,24 @@ function appendToChangelog(
   }
 }
 
+function commitVersionBump(
+  methodology: DiscoveredMethodology,
+  newVersion: string,
+): void {
+  const changelogPath = getChangelogPath(methodology.key);
+
+  execFileSync(
+    'git',
+    ['add', methodology.configPath, changelogPath],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+  execFileSync(
+    'git',
+    ['commit', '-m', `chore(${methodology.key}): bump to ${newVersion}`],
+    { cwd: ROOT, encoding: 'utf8' },
+  );
+}
+
 function createGitTag(methodology: string, version: string): void {
   execFileSync(
     'git',
@@ -244,8 +275,10 @@ function loadRuleBumps(): RuleBump[] {
   const ruleBumpsPath = path.join(ROOT, 'dist', 'rule-bumps.json');
 
   if (!fs.existsSync(ruleBumpsPath)) {
-    console.log('No dist/rule-bumps.json found, assuming no rule bumps.');
-    return [];
+    throw new Error(
+      `Required artifact not found: ${ruleBumpsPath}. ` +
+        'Run bump:rules before bump:applications.',
+    );
   }
 
   const content = fs.readFileSync(ruleBumpsPath, 'utf8');
@@ -261,27 +294,13 @@ function loadRuleBumps(): RuleBump[] {
   return result.data;
 }
 
-function main(): void {
-  console.log(
-    DRY_RUN
-      ? '=== DRY RUN (no files will be changed) ==='
-      : '=== Bumping application versions ===',
-  );
-
-  const ruleBumps = loadRuleBumps();
-  console.log(`Loaded ${String(ruleBumps.length)} rule bump(s)`);
-
-  const ruleBumpsBySlug = new Map<string, RuleBump>();
-  for (const rb of ruleBumps) {
-    ruleBumpsBySlug.set(rb.slug, rb);
-  }
-
+function analyzeMethodologyBumps(ruleBumps: RuleBump[]): AnalysisResult {
   const methodologies = discoverMethodologies();
   console.log(
     `Discovered ${String(methodologies.length)} methodology application(s): ${methodologies.map((m) => m.key).join(', ')}`,
   );
 
-  const results: ApplicationBump[] = [];
+  const results: MethodologyBumpResult[] = [];
 
   for (const methodology of methodologies) {
     console.log(`\nProcessing ${methodology.key}...`);
@@ -293,23 +312,24 @@ function main(): void {
         : '  No previous tag found',
     );
 
-    // Get framework rule slugs at the tag ref and at current HEAD
-    const previousSlugs = latestTag
-      ? getFrameworkRuleSlugsAtRef(methodology.frameworkRulesPath, latestTag)
-      : [];
-
     const currentSlugs = getFrameworkRuleSlugsAtRef(
       methodology.frameworkRulesPath,
     );
 
-    console.log(
-      `  Framework rules: ${String(previousSlugs.length)} at tag, ${String(currentSlugs.length)} at HEAD`,
-    );
+    // When no tag exists there is no baseline to diff against,
+    // so treat framework rules as unchanged to avoid false "added" bumps.
+    const { added, removed } = latestTag
+      ? diffMethodologyFrameworkRules(
+          getFrameworkRuleSlugsAtRef(
+            methodology.frameworkRulesPath,
+            latestTag,
+          ),
+          currentSlugs,
+        )
+      : { added: [] as string[], removed: [] as string[] };
 
-    // Diff framework rules to find added/removed
-    const { added, removed } = diffFrameworkRules(
-      previousSlugs,
-      currentSlugs,
+    console.log(
+      `  Framework rules: ${String(currentSlugs.length)} at HEAD`,
     );
 
     if (added.length > 0) {
@@ -359,46 +379,50 @@ function main(): void {
       `  Bump: ${methodology.currentVersion} -> ${newVersion} (${rollupLevel})`,
     );
 
-    const applicationBump: ApplicationBump = {
-      addedRules: added,
-      bumpLevel: rollupLevel,
-      methodology: methodology.key,
-      newVersion,
-      previousVersion: methodology.currentVersion,
-      removedRules: removed,
-      ruleBumps: matchingRuleBumps,
-    };
-
-    if (!DRY_RUN) {
-      updateConfigVersion(
-        methodology.configPath,
-        methodology.currentVersion,
+    results.push({
+      applicationBump: {
+        addedRules: added,
+        bumpLevel: rollupLevel,
+        methodology: methodology.key,
         newVersion,
-      );
-      console.log(`  Updated ${methodology.configPath}`);
-
-      appendToChangelog(methodology.key, newVersion, applicationBump);
-      console.log(`  Updated CHANGELOG.md`);
-
-      // Tags are NOT created here — they must be created AFTER git commit
-      // in CI so the tag points at the commit containing the version bump.
-      console.log(
-        `  Pending tag: methodology-application/${methodology.key}@${newVersion}`,
-      );
-    } else {
-      console.log(`  Would update ${methodology.configPath}`);
-      console.log(`  Would update CHANGELOG.md`);
-      console.log(
-        `  Would create tag: methodology-application/${methodology.key}@${newVersion}`,
-      );
-    }
-
-    results.push(applicationBump);
+        previousVersion: methodology.currentVersion,
+        removedRules: removed,
+        ruleBumps: matchingRuleBumps,
+      },
+      methodology,
+    });
   }
 
-  if (results.length === 0) {
-    console.log('\nNo application bumps to apply.');
-    return;
+  return { results };
+}
+
+function persistMethodologyBumps(
+  results: MethodologyBumpResult[],
+): void {
+  for (const { methodology, applicationBump } of results) {
+    updateConfigVersion(
+      methodology.configPath,
+      methodology.currentVersion,
+      applicationBump.newVersion,
+    );
+    console.log(`  Updated ${methodology.configPath}`);
+
+    appendToChangelog(
+      methodology.key,
+      applicationBump.newVersion,
+      applicationBump,
+    );
+    console.log(`  Updated CHANGELOG.md`);
+
+    commitVersionBump(methodology, applicationBump.newVersion);
+    console.log(
+      `  Committed version bump for ${methodology.key}@${applicationBump.newVersion}`,
+    );
+
+    createGitTag(methodology.key, applicationBump.newVersion);
+    console.log(
+      `  Created tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
+    );
   }
 
   const distDir = path.join(ROOT, 'dist');
@@ -406,19 +430,73 @@ function main(): void {
     fs.mkdirSync(distDir, { recursive: true });
   }
 
+  const applicationBumps = results.map((r) => r.applicationBump);
   const outputPath = path.join(distDir, 'application-bumps.json');
+  fs.writeFileSync(
+    outputPath,
+    JSON.stringify(applicationBumps, null, 2),
+    'utf8',
+  );
+  console.log(
+    `\nWrote ${String(applicationBumps.length)} bump(s) to ${outputPath}`,
+  );
+}
 
-  if (!DRY_RUN) {
-    fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
-    console.log(
-      `\nWrote ${String(results.length)} bump(s) to ${outputPath}`,
-    );
-  } else {
-    console.log(
-      `\nWould write ${String(results.length)} bump(s) to ${outputPath}`,
-    );
-    console.log(JSON.stringify(results, null, 2));
+function removeStaleOutputFile(): void {
+  const outputPath = path.join(ROOT, 'dist', 'application-bumps.json');
+
+  if (fs.existsSync(outputPath)) {
+    fs.unlinkSync(outputPath);
+    console.log(`Removed stale ${outputPath}`);
   }
+}
+
+function main(): void {
+  console.log(
+    DRY_RUN
+      ? '=== DRY RUN (no files will be changed) ==='
+      : '=== Bumping application versions ===',
+  );
+
+  const ruleBumps = loadRuleBumps();
+  console.log(`Loaded ${String(ruleBumps.length)} rule bump(s)`);
+
+  const { results } = analyzeMethodologyBumps(ruleBumps);
+
+  if (results.length === 0) {
+    console.log('\nNo application bumps to apply.');
+    removeStaleOutputFile();
+
+    return;
+  }
+
+  if (DRY_RUN) {
+    for (const { methodology, applicationBump } of results) {
+      console.log(
+        `\n  ${methodology.key}: ${applicationBump.previousVersion} -> ${applicationBump.newVersion} (${applicationBump.bumpLevel})`,
+      );
+      console.log(`  Would update ${methodology.configPath}`);
+      console.log(`  Would update CHANGELOG.md`);
+      console.log(
+        `  Would create tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
+      );
+    }
+
+    console.log(
+      `\nWould write ${String(results.length)} bump(s) to dist/application-bumps.json`,
+    );
+    console.log(
+      JSON.stringify(
+        results.map((r) => r.applicationBump),
+        null,
+        2,
+      ),
+    );
+
+    return;
+  }
+
+  persistMethodologyBumps(results);
 }
 
 main();
