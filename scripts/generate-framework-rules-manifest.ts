@@ -9,9 +9,11 @@
  */
 
 import type { BaseFrameworkRule } from '@carrot-fndn/shared/rule/types';
+import { FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/framework-rule.types';
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { z } from 'zod';
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST_FRAMEWORK = path.join(ROOT, 'dist', 'framework-rules');
@@ -35,6 +37,14 @@ if (METHODOLOGY_DIRS.length === 0) {
   process.exit(1);
 }
 
+const BaseFrameworkRuleSchema = z.object({
+  description: z.string().min(1),
+  methodologyReference: z.string().min(1).optional(),
+  name: z.string().min(1),
+  slug: z.string().regex(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/),
+  type: z.enum(FRAMEWORK_RULE_TYPES),
+});
+
 function loadFrameworkRules(methodology: string): BaseFrameworkRule[] {
   const filePath = path.join(
     LIBS_METHODOLOGIES,
@@ -47,6 +57,23 @@ function loadFrameworkRules(methodology: string): BaseFrameworkRule[] {
   const { frameworkRules } = require(filePath) as {
     frameworkRules: BaseFrameworkRule[];
   };
+
+  // Validate each rule against the schema
+  for (const rule of frameworkRules) {
+    BaseFrameworkRuleSchema.parse(rule);
+  }
+
+  // Check for duplicate slugs
+  const slugs = new Set<string>();
+  for (const rule of frameworkRules) {
+    if (slugs.has(rule.slug)) {
+      throw new Error(
+        `FATAL: Duplicate framework rule slug "${rule.slug}" in ${methodology}`,
+      );
+    }
+    slugs.add(rule.slug);
+  }
+
   return frameworkRules;
 }
 
@@ -72,7 +99,7 @@ function main(): void {
         number: index + 1,
         description: rule.description,
         type: rule.type,
-        ...(rule.methodologyReference && {
+        ...(rule.methodologyReference !== undefined && {
           methodologyReference: rule.methodologyReference,
         }),
       })),
