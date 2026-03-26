@@ -9,6 +9,7 @@
  */
 
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
+import { FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/framework-rule.types';
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
@@ -73,8 +74,10 @@ const BaseRuleDefinitionSchema = z.object({
 
 const FrameworkRuleSchema = z.object({
   description: z.string(),
+  methodologyReference: z.string().min(1).optional(),
   name: z.string(),
   slug: z.string(),
+  type: z.enum(FRAMEWORK_RULE_TYPES),
 });
 
 type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;

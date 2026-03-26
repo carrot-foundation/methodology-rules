@@ -8,8 +8,12 @@
  * Output: dist/framework-rules/bold-carbon.json, dist/framework-rules/bold-recycling.json
  */
 
+import type { BaseFrameworkRule } from '@carrot-fndn/shared/rule/types';
+import { FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/framework-rule.types';
+
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { z } from 'zod';
 
 const ROOT = path.resolve(__dirname, '..');
 const DIST_FRAMEWORK = path.join(ROOT, 'dist', 'framework-rules');
@@ -33,9 +37,15 @@ if (METHODOLOGY_DIRS.length === 0) {
   process.exit(1);
 }
 
-function loadFrameworkRules(
-  methodology: string,
-): Array<{ name: string; description: string; slug: string }> {
+const BaseFrameworkRuleSchema = z.object({
+  description: z.string().min(1),
+  methodologyReference: z.string().min(1).optional(),
+  name: z.string().min(1),
+  slug: z.string().regex(/^[a-z][a-z0-9]*(-[a-z0-9]+)*$/),
+  type: z.enum(FRAMEWORK_RULE_TYPES),
+});
+
+function loadFrameworkRules(methodology: string): BaseFrameworkRule[] {
   const filePath = path.join(
     LIBS_METHODOLOGIES,
     methodology,
@@ -45,8 +55,25 @@ function loadFrameworkRules(
   );
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { frameworkRules } = require(filePath) as {
-    frameworkRules: Array<{ name: string; description: string; slug: string }>;
+    frameworkRules: BaseFrameworkRule[];
   };
+
+  // Validate each rule against the schema
+  for (const rule of frameworkRules) {
+    BaseFrameworkRuleSchema.parse(rule);
+  }
+
+  // Check for duplicate slugs
+  const slugs = new Set<string>();
+  for (const rule of frameworkRules) {
+    if (slugs.has(rule.slug)) {
+      throw new Error(
+        `FATAL: Duplicate framework rule slug "${rule.slug}" in ${methodology}`,
+      );
+    }
+    slugs.add(rule.slug);
+  }
+
   return frameworkRules;
 }
 
@@ -71,6 +98,10 @@ function main(): void {
         name: rule.name,
         number: index + 1,
         description: rule.description,
+        type: rule.type,
+        ...(rule.methodologyReference !== undefined && {
+          methodologyReference: rule.methodologyReference,
+        }),
       })),
     };
 
