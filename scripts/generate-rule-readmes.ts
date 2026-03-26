@@ -72,7 +72,7 @@ const BaseRuleDefinitionSchema = z.object({
   slug: z.string(),
 });
 
-const FrameworkRuleSchema = z.object({
+const MethodologyFrameworkRuleSchema = z.object({
   description: z.string(),
   methodologyReference: z.string().min(1).optional(),
   name: z.string(),
@@ -80,7 +80,7 @@ const FrameworkRuleSchema = z.object({
   type: z.enum(METHODOLOGY_FRAMEWORK_RULE_TYPES),
 });
 
-type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;
+type MethodologyFrameworkRule = z.infer<typeof MethodologyFrameworkRuleSchema>;
 
 class ValidationError extends Error {
   override readonly name = 'ValidationError';
@@ -91,7 +91,7 @@ interface ReadmeInput {
   contributors: string[];
   description: string;
   events: string[];
-  methodologyFrameworkRules: FrameworkRule[];
+  methodologyFrameworkRules: MethodologyFrameworkRule[];
   implRelPath: string;
   methodology: string;
   name: string;
@@ -234,7 +234,7 @@ function extractMethodologyFrameworkRuleSlugs(appRuleDefPath: string): string[] 
 
 async function loadMethodologyFrameworkRules(
   methodology: string,
-): Promise<Map<string, FrameworkRule>> {
+): Promise<Map<string, MethodologyFrameworkRule>> {
   const filePath = path.join(
     ROOT,
     'libs',
@@ -263,7 +263,7 @@ async function loadMethodologyFrameworkRules(
     (mod.default as Record<string, unknown> | undefined)?.methodologyFrameworkRules ??
     mod.default;
 
-  const result = z.array(FrameworkRuleSchema).safeParse(raw);
+  const result = z.array(MethodologyFrameworkRuleSchema).safeParse(raw);
 
   if (!result.success) {
     throw new ValidationError(
@@ -273,7 +273,7 @@ async function loadMethodologyFrameworkRules(
     );
   }
 
-  const map = new Map<string, FrameworkRule>();
+  const map = new Map<string, MethodologyFrameworkRule>();
   for (const rule of result.data) {
     map.set(rule.slug, rule);
   }
@@ -557,11 +557,11 @@ function discoverRules(): Array<{
 
 function resolveMethodologyFrameworkRules(
   frSlugs: string[],
-  methodologyFrameworkRules: Map<string, FrameworkRule> | undefined,
+  methodologyFrameworkRules: Map<string, MethodologyFrameworkRule> | undefined,
   methodology: string,
   appRuleDefPath: string,
-): FrameworkRule[] {
-  const resolved: FrameworkRule[] = [];
+): MethodologyFrameworkRule[] {
+  const resolved: MethodologyFrameworkRule[] = [];
 
   for (const frSlug of frSlugs) {
     const fr = methodologyFrameworkRules?.get(frSlug);
@@ -582,7 +582,7 @@ async function main(): Promise<void> {
   const rules = discoverRules();
 
   const methodologies = [...new Set(rules.map((r) => r.methodology))];
-  const methodologyFrameworkRulesMap = new Map<string, Map<string, FrameworkRule>>();
+  const methodologyFrameworkRulesMap = new Map<string, Map<string, MethodologyFrameworkRule>>();
 
   for (const methodology of methodologies) {
     methodologyFrameworkRulesMap.set(methodology, await loadMethodologyFrameworkRules(methodology));
@@ -617,7 +617,7 @@ async function main(): Promise<void> {
     const contributors = getContributors(libSrcPath);
 
     const appRuleDefPath = path.join(appPath, 'src', 'rule-definition.ts');
-    const resolvedFrameworkRules = resolveMethodologyFrameworkRules(
+    const resolvedMethodologyFrameworkRules = resolveMethodologyFrameworkRules(
       extractMethodologyFrameworkRuleSlugs(appRuleDefPath),
       methodologyFrameworkRulesMap.get(methodology),
       methodology,
@@ -630,7 +630,7 @@ async function main(): Promise<void> {
       contributors,
       description: ruleDef.description,
       events: ruleDef.events,
-      methodologyFrameworkRules: resolvedFrameworkRules,
+      methodologyFrameworkRules: resolvedMethodologyFrameworkRules,
       implRelPath,
       methodology,
       name: ruleDef.name,
