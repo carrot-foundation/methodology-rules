@@ -1,2 +1,2 @@
-export * from './framework-rules';
+export * from './methodology-framework-rules';
 export * from './rules.config';
