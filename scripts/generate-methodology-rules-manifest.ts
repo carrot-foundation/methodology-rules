@@ -997,10 +997,11 @@ function findEnclosingObjectBounds(
 interface ReadmeData {
   description: string;
   name: string;
+  verifications: string[];
 }
 
 function extractReadmeData(readmePath: string): ReadmeData {
-  const result: ReadmeData = { description: '', name: '' };
+  const result: ReadmeData = { description: '', name: '', verifications: [] };
 
   const content = readFileIfExists(readmePath);
   if (!content) return result;
@@ -1017,7 +1018,475 @@ function extractReadmeData(readmePath: string): ReadmeData {
     result.description = descMatch[1].trim();
   }
 
+  // Extract verifications
+  const verifMatch = content.match(
+    /##\s+(?:✅\s+)?Verification(?:\s+Criteria)?\s*\n([\s\S]*?)(?:\n##|\n---|\n?$)/,
+  );
+  if (verifMatch?.[1]) {
+    const bullets = verifMatch[1].match(/^[-*]\s+(.+)$/gm);
+    if (bullets) {
+      result.verifications = bullets.map((b) =>
+        b.replace(/^[-*]\s+/, '').trim(),
+      );
+    }
+  }
+
   return result;
+}
+
+// ---------------------------------------------------------------------------
+// Examples extraction (runtime require from test-cases)
+// ---------------------------------------------------------------------------
+
+interface ManifestExample {
+  exampleDocuments: Record<string, unknown>;
+  resultComment: string;
+  resultStatus: string;
+  scenario: string;
+}
+
+interface ManifestFieldsOverride {
+  additionalAttributes?: string[];
+  addressFields?: string[];
+  excludeAttributes?: string[];
+  includeCurrentValue?: boolean;
+  includeValue?: boolean;
+}
+
+interface RuleTestCaseShape {
+  manifestExample?: boolean;
+  manifestFields?: ManifestFieldsOverride;
+  resultComment: unknown;
+  resultStatus: unknown;
+  scenario: string;
+}
+
+function extractManifestExamples(
+  srcPath: string,
+  srcFiles: string[],
+  ruleEvents?: string[],
+): ManifestExample[] {
+  const testCasesFile = srcFiles.find((f) => f.endsWith('.test-cases.ts'));
+  if (!testCasesFile) return [];
+
+  const testCasesPath = path.join(srcPath, testCasesFile);
+
+  let mod: Record<string, unknown>;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    mod = require(testCasesPath) as Record<string, unknown>;
+  } catch (error) {
+    console.warn(`  Warning: could not require ${testCasesPath}: ${error}`);
+    return [];
+  }
+
+  const allTestCases: RuleTestCaseShape[] = [];
+  for (const value of Object.values(mod)) {
+    if (Array.isArray(value)) {
+      allTestCases.push(...(value as RuleTestCaseShape[]));
+    }
+  }
+
+  const manifestCases = allTestCases.filter(
+    (tc) => tc.manifestExample === true,
+  );
+
+  return manifestCases.map((tc) => ({
+    exampleDocuments: normalizeTestCasePayload(
+      tc as unknown as Record<string, unknown>,
+      tc.manifestFields,
+      ruleEvents,
+    ),
+    resultComment: String(tc.resultComment ?? ''),
+    resultStatus: String(tc.resultStatus ?? ''),
+    scenario: tc.scenario,
+  }));
+}
+
+// ---------------------------------------------------------------------------
+// Document normalizer (for examples)
+// ---------------------------------------------------------------------------
+
+const EXPLICIT_ATTRIBUTES = Symbol.for('manifest:explicitAttributes');
+
+const TEST_CASE_META_KEYS = new Set([
+  'scenario',
+  'resultComment',
+  'resultStatus',
+  'manifestExample',
+  'manifestFields',
+]);
+
+function normalizeTestCasePayload(
+  testCase: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(testCase)) {
+    if (TEST_CASE_META_KEYS.has(key)) continue;
+    result[key] = normalizeValue(value, fieldsOverride, ruleEvents);
+  }
+
+  return result;
+}
+
+const EVENT_MARKER_KEYS = new Set([
+  'metadata',
+  'value',
+  'isPublic',
+  'externalCreatedAt',
+  'participant',
+  'relatedDocument',
+  'author',
+]);
+
+function isDocumentEventLike(obj: Record<string, unknown>): boolean {
+  if (!('name' in obj) || typeof obj['name'] !== 'string') return false;
+  return Object.keys(obj).some((k) => EVENT_MARKER_KEYS.has(k));
+}
+
+function normalizeValue(
+  value: unknown,
+  fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
+): unknown {
+  if (value === null || value === undefined) return value;
+  if (typeof value !== 'object') return value;
+
+  if (value instanceof Map) {
+    return Object.fromEntries(
+      [...value.entries()].map(([k, v]) => [
+        k,
+        normalizeValue(v, fieldsOverride, ruleEvents),
+      ]),
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((v) => normalizeValue(v, fieldsOverride, ruleEvents));
+  }
+
+  const obj = value as Record<string, unknown>;
+
+  if (isDocumentEventLike(obj)) {
+    return normalizeDocumentEvent(obj, fieldsOverride);
+  }
+
+  if ('category' in obj && 'externalEvents' in obj) {
+    return normalizeDocument(obj, fieldsOverride, ruleEvents);
+  }
+
+  if (isParticipantLike(obj)) {
+    return normalizeParticipant(obj);
+  }
+
+  return Object.fromEntries(
+    Object.entries(obj).map(([k, v]) => [
+      k,
+      normalizeValue(v, fieldsOverride, ruleEvents),
+    ]),
+  );
+}
+
+const PARTICIPANT_MARKER_KEYS = new Set([
+  'businessName',
+  'taxId',
+  'piiSnapshotId',
+  'taxIdType',
+]);
+
+function isParticipantLike(obj: Record<string, unknown>): boolean {
+  if (typeof obj['type'] !== 'string' || typeof obj['id'] !== 'string') {
+    return false;
+  }
+
+  return Object.keys(obj).some((k) => PARTICIPANT_MARKER_KEYS.has(k));
+}
+
+function normalizeParticipant(
+  obj: Record<string, unknown>,
+): Record<string, unknown> {
+  return { type: obj['type'] };
+}
+
+function normalizeAddress(
+  address: Record<string, unknown>,
+  fields: string[],
+): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const key of fields) {
+    if (address[key] !== undefined) {
+      result[key] = address[key];
+    }
+  }
+
+  return result;
+}
+
+function isValidAttributeName(name: string): boolean {
+  if (name.includes(' ') && name.length < 80) return true;
+  if (name.length <= 30 && /^[A-Z]/.test(name)) return true;
+
+  return false;
+}
+
+// --- Value sanitizers ---
+
+const LATIN_SUFFIXES = ['us', 'um', 'ae', 'is', 'io', 'ia', 'or', 'it', 'am', 'em', 'as', 'os', 'ibus'];
+const COMMON_ENGLISH_WORDS = new Set([
+  'the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can',
+  'was', 'her', 'one', 'our', 'out', 'has', 'had', 'from', 'with',
+  'this', 'that', 'have', 'been', 'will', 'they', 'each', 'which',
+  'more', 'than', 'were', 'what', 'when', 'your', 'into', 'some',
+  'document', 'event', 'value', 'type', 'scale', 'weight', 'waste',
+  'vehicle', 'driver', 'date', 'number', 'description', 'address',
+]);
+
+function isFakerGibberish(value: string): boolean {
+  if (typeof value !== 'string' || value.length < 10) return false;
+
+  const words = value.replace(/[.,;:!?]/g, '').split(/\s+/).filter(Boolean);
+  if (words.length < 2) return false;
+
+  const lowerWords = words.map((w) => w.toLowerCase());
+
+  const knownEnglishCount = lowerWords.filter((w) => COMMON_ENGLISH_WORDS.has(w)).length;
+  if (knownEnglishCount > 0) return false;
+
+  const latinLikeCount = lowerWords.filter((w) =>
+    w.length >= 4 && LATIN_SUFFIXES.some((suffix) => w.endsWith(suffix)),
+  ).length;
+
+  return latinLikeCount / words.length >= 0.4;
+}
+
+function isAbsurdNumber(value: unknown): boolean {
+  return typeof value === 'number' && Math.abs(value) > 1_000_000;
+}
+
+function roundIfOverlyPrecise(value: unknown): unknown {
+  if (typeof value !== 'number' || Number.isInteger(value)) return value;
+
+  const str = String(value);
+  const decimalPart = str.split('.')[1];
+  if (decimalPart && decimalPart.length > 4) {
+    return Math.round(value * 100) / 100;
+  }
+
+  return value;
+}
+
+function sanitizeAttributeValue(value: unknown): unknown {
+  if (typeof value === 'string' && isFakerGibberish(value)) {
+    return undefined;
+  }
+
+  if (isAbsurdNumber(value)) {
+    return undefined;
+  }
+
+  return roundIfOverlyPrecise(value);
+}
+
+function buildAllowedAttributeSet(
+  event: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Set<string> | undefined {
+  const explicitAttrs = (event as Record<symbol, unknown>)[
+    EXPLICIT_ATTRIBUTES
+  ] as string[] | undefined;
+
+  if (
+    !explicitAttrs &&
+    !fieldsOverride?.additionalAttributes &&
+    !fieldsOverride?.excludeAttributes
+  ) {
+    return undefined;
+  }
+
+  const allowedSet = new Set(explicitAttrs ?? []);
+
+  for (const attr of fieldsOverride?.additionalAttributes ?? []) {
+    allowedSet.add(attr);
+  }
+
+  for (const attr of fieldsOverride?.excludeAttributes ?? []) {
+    allowedSet.delete(attr);
+  }
+
+  return allowedSet;
+}
+
+const RELATED_DOCUMENT_KEYS = new Set(['category', 'subtype', 'type']);
+
+function normalizeRelatedDocument(
+  relDoc: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  const result: Record<string, unknown> = {};
+
+  for (const key of RELATED_DOCUMENT_KEYS) {
+    if (relDoc[key] !== undefined) {
+      result[key] = relDoc[key];
+    }
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function normalizeDocumentEvent(
+  event: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { name: event['name'] };
+
+  if (event['label'] !== undefined) {
+    result['label'] = event['label'];
+  }
+
+  if (event['relatedDocument'] !== undefined) {
+    const slimmed = normalizeRelatedDocument(
+      event['relatedDocument'] as Record<string, unknown>,
+    );
+    if (slimmed) {
+      result['relatedDocument'] = slimmed;
+    }
+  }
+
+  if (event['participant'] !== undefined) {
+    const participantNorm = normalizeParticipant(
+      event['participant'] as Record<string, unknown>,
+    );
+    if (Object.keys(participantNorm).length > 0) {
+      result['participant'] = participantNorm;
+    }
+  }
+
+  if (fieldsOverride?.includeValue === true && event['value'] !== undefined) {
+    result['value'] = event['value'];
+  }
+
+  if (event['address'] !== undefined) {
+    const addressFields = fieldsOverride?.addressFields;
+    const addressNorm =
+      addressFields && addressFields.length > 0
+        ? normalizeAddress(
+            event['address'] as Record<string, unknown>,
+            addressFields,
+          )
+        : {};
+    if (Object.keys(addressNorm).length > 0) {
+      result['address'] = addressNorm;
+    }
+  }
+
+  const allowedSet = buildAllowedAttributeSet(event, fieldsOverride);
+
+  const metadata = event['metadata'] as Record<string, unknown> | undefined;
+  const attributes = metadata?.['attributes'] as
+    | Array<Record<string, unknown>>
+    | undefined;
+
+  if (attributes?.length) {
+    const filtered = allowedSet
+      ? attributes.filter((attr) => allowedSet.has(String(attr['name'])))
+      : attributes.filter((attr) => isValidAttributeName(String(attr['name'])));
+
+    const sanitized = filtered
+      .map((attr) => {
+        const sanitizedValue = sanitizeAttributeValue(attr['value']);
+        if (sanitizedValue === undefined) return undefined;
+
+        const normalized: Record<string, unknown> = {
+          name: attr['name'],
+          value: sanitizedValue,
+        };
+        if (attr['format']) normalized['format'] = attr['format'];
+        return normalized;
+      })
+      .filter((attr): attr is Record<string, unknown> => attr !== undefined);
+
+    if (sanitized.length) {
+      result['metadata'] = { attributes: sanitized };
+    }
+  }
+
+  return result;
+}
+
+function normalizeDocument(
+  doc: Record<string, unknown>,
+  fieldsOverride?: ManifestFieldsOverride,
+  ruleEvents?: string[],
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { category: doc['category'] };
+
+  if (doc['type']) result['type'] = doc['type'];
+  if (doc['subtype']) result['subtype'] = doc['subtype'];
+  if (doc['measurementUnit']) result['measurementUnit'] = doc['measurementUnit'];
+
+  if (
+    fieldsOverride?.includeCurrentValue === true &&
+    doc['currentValue'] !== undefined
+  ) {
+    result['currentValue'] = doc['currentValue'];
+  }
+
+  const events = doc['externalEvents'] as unknown[] | undefined;
+  const ruleHasNoEvents = ruleEvents?.length === 0;
+
+  if (events?.length && !ruleHasNoEvents) {
+    let normalizedEvents = events.map((e) =>
+      normalizeValue(e, fieldsOverride),
+    );
+
+    if (ruleEvents && ruleEvents.length > 0) {
+      normalizedEvents = filterEventsForRule(
+        normalizedEvents as Array<Record<string, unknown>>,
+        ruleEvents,
+      );
+    }
+
+    if (normalizedEvents.length > 0) {
+      result['externalEvents'] = normalizedEvents;
+    }
+  }
+
+  return result;
+}
+
+function filterEventsForRule(
+  events: Array<Record<string, unknown>>,
+  ruleEvents: string[],
+): Array<Record<string, unknown>> {
+  const ruleEventNames = new Set<string>();
+  const ruleActorLabels = new Set<string>();
+
+  for (const ev of ruleEvents) {
+    if (ev.includes(':')) {
+      const [eventName, label] = ev.split(':');
+      if (eventName) ruleEventNames.add(eventName);
+      if (label) ruleActorLabels.add(label);
+    } else {
+      ruleEventNames.add(ev);
+    }
+  }
+
+  return events.filter((event) => {
+    const name = String(event['name'] ?? '');
+    const label = event['label'] as string | undefined;
+
+    if (name === 'ACTOR') {
+      if (ruleActorLabels.size > 0) {
+        return label !== undefined && ruleActorLabels.has(label);
+      }
+      return ruleEventNames.has('ACTOR');
+    }
+
+    return ruleEventNames.has(name);
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -1028,12 +1497,14 @@ interface ApplicationManifestRule {
   description: string;
   errors: string[];
   events: string[];
+  examples: ManifestExample[];
   implementationPath: string;
   implementsMethodologyFrameworkRules: string[];
   name: string;
   readmePath: string;
   slug: string;
   successComments: string[];
+  verifications: string[];
   version: string;
 }
 
@@ -1085,9 +1556,11 @@ function buildApplicationRule(
   const errorMessages = extractErrorMessages(libSrcPath, srcFiles);
   const resultComments = extractResultComments(libSrcPath, srcFiles);
 
-  // Enrich events
+  // Enrich events early so we can pass them to example extraction for filtering
   const actorLabels = extractActorLabelsFromProcessor(processorFullPath);
   const events = enrichActorEvents(ruleDef?.events ?? [], actorLabels);
+
+  const examples = extractManifestExamples(libSrcPath, srcFiles, events);
 
   // Resolve methodologyFrameworkRules: prefer app-level, fall back to shared lib
   const appRuleMethodologyFrameworkRules =
@@ -1132,16 +1605,24 @@ function buildApplicationRule(
     }
   }
 
+  // Determine verifications
+  const verifications =
+    readme.verifications.length > 0
+      ? readme.verifications
+      : ['Validation criteria are implemented in the processor.'];
+
   return {
     description,
     errors: normalizeMessages(allErrors),
     events,
+    examples,
     implementationPath: relImplementationPath,
     implementsMethodologyFrameworkRules: methodologyFrameworkRules,
     name,
     readmePath: relReadmePath,
     slug,
     successComments: normalizeMessages(resultComments.passed),
+    verifications,
     version: ruleDef?.version ?? '0.0.0',
   };
 }
@@ -1247,6 +1728,11 @@ function generate(): void {
             if (rule.errors.length === 0) {
               warnings.push(
                 `${methodology}/${scope}/${slug}: no errors extracted`,
+              );
+            }
+            if (rule.examples.length === 0) {
+              warnings.push(
+                `${methodology}/${scope}/${slug}: no examples`,
               );
             }
           } catch (error) {
