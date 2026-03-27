@@ -14,6 +14,7 @@ const LIBS_METHODOLOGIES = path.join(ROOT, 'libs', 'methodologies');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 interface DiscoveredRule {
+  compositeKey: string;
   filePath: string;
   methodology: string;
   ruleDir: string;
@@ -22,10 +23,17 @@ interface DiscoveredRule {
   version: string;
 }
 
-function getLatestMvaTag(): string | undefined {
+function getLatestMvaTagForMethodology(
+  methodology: string,
+): string | undefined {
   const output = execFileSync(
     'git',
-    ['tag', '--list', 'methodology-application/*', '--sort=-creatordate'],
+    [
+      'tag',
+      '--list',
+      `methodology-application/${methodology}@*`,
+      '--sort=-creatordate',
+    ],
     { cwd: ROOT, encoding: 'utf8' },
   ).trim();
 
@@ -55,10 +63,10 @@ function getCommitsSince(ref?: string): string[] {
   }
 }
 
-function collectCommitsPerSlug(
+function collectCommitsPerScope(
   commitMessages: string[],
 ): Map<string, string[]> {
-  const commitsPerSlug = new Map<string, string[]>();
+  const commitsPerScope = new Map<string, string[]>();
 
   for (const message of commitMessages) {
     const header = message.split('\n')[0];
@@ -66,12 +74,12 @@ function collectCommitsPerSlug(
     if (!match?.[2]) continue;
 
     const scope = match[2];
-    const existing = commitsPerSlug.get(scope) ?? [];
+    const existing = commitsPerScope.get(scope) ?? [];
     existing.push(message);
-    commitsPerSlug.set(scope, existing);
+    commitsPerScope.set(scope, existing);
   }
 
-  return commitsPerSlug;
+  return commitsPerScope;
 }
 
 function discoverRuleDefinitions(): DiscoveredRule[] {
@@ -144,6 +152,7 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
         compositeKeyLocations.set(compositeKey, filePath);
 
         rules.push({
+          compositeKey,
           filePath,
           methodology,
           ruleDir: path.join(scopeDir, ruleDir),
@@ -221,58 +230,51 @@ function main(): void {
     DRY_RUN ? '=== DRY RUN (no files will be changed) ===' : '=== Bumping rule versions ===',
   );
 
-  const tag = getLatestMvaTag();
-  console.log(tag ? `Latest MvA tag: ${tag}` : 'No MvA tags found, scanning all commits');
-
-  const commitMessages = getCommitsSince(tag);
-  console.log(`Found ${String(commitMessages.length)} commits to analyze`);
-
-  if (commitMessages.length === 0) {
-    console.log('No commits to process. Exiting.');
-
-    if (!DRY_RUN) {
-      const distDir = path.join(ROOT, 'dist');
-      if (!fs.existsSync(distDir)) {
-        fs.mkdirSync(distDir, { recursive: true });
-      }
-
-      const outputPath = path.join(distDir, 'rule-bumps.json');
-      fs.writeFileSync(outputPath, JSON.stringify([], null, 2), 'utf8');
-      console.log(`Wrote empty rule-bumps.json to ${outputPath}`);
-    }
-
-    return;
-  }
-
-  const ruleBumpsMap = parseCommitsForRules(commitMessages);
-  console.log(`Detected bumps for ${String(ruleBumpsMap.size)} rule(s)`);
-
-  const commitsPerSlug = collectCommitsPerSlug(commitMessages);
   const discoveredRules = discoverRuleDefinitions();
   console.log(`Discovered ${String(discoveredRules.length)} rule definitions`);
 
-  const rulesBySlug = new Map<string, DiscoveredRule[]>();
+  // Group discovered rules by methodology
+  const rulesByMethodology = new Map<string, DiscoveredRule[]>();
   for (const rule of discoveredRules) {
-    const existing = rulesBySlug.get(rule.slug) ?? [];
+    const existing = rulesByMethodology.get(rule.methodology) ?? [];
     existing.push(rule);
-    rulesBySlug.set(rule.slug, existing);
+    rulesByMethodology.set(rule.methodology, existing);
   }
 
   const results: RuleBump[] = [];
 
-  for (const [slug, bumpLevel] of ruleBumpsMap) {
-    const rules = rulesBySlug.get(slug);
-    if (!rules?.length) {
-      console.log(`  SKIP ${slug}: no matching rule-definition.ts found`);
-      continue;
+  for (const [methodology, methodologyRules] of rulesByMethodology) {
+    const tag = getLatestMvaTagForMethodology(methodology);
+    console.log(
+      tag
+        ? `\n${methodology}: latest tag ${tag}`
+        : `\n${methodology}: no tags found, scanning all commits`,
+    );
+
+    const commitMessages = getCommitsSince(tag);
+    console.log(`  Found ${String(commitMessages.length)} commits to analyze`);
+
+    if (commitMessages.length === 0) continue;
+
+    const ruleBumpsMap = parseCommitsForRules(commitMessages);
+    console.log(`  Detected bumps for ${String(ruleBumpsMap.size)} scope(s)`);
+
+    const commitsPerScope = collectCommitsPerScope(commitMessages);
+
+    // Index rules by composite key for O(1) lookup
+    const rulesByKey = new Map<string, DiscoveredRule>();
+    for (const rule of methodologyRules) {
+      rulesByKey.set(rule.compositeKey, rule);
     }
 
-    const ruleCommits = commitsPerSlug.get(slug) ?? [];
+    for (const [scope, bumpLevel] of ruleBumpsMap) {
+      const rule = rulesByKey.get(scope);
+      if (!rule) continue;
 
-    for (const rule of rules) {
       const newVersion = bumpVersion(rule.version, bumpLevel);
+      const ruleCommits = commitsPerScope.get(scope) ?? [];
 
-      console.log(`  ${rule.methodology}/${rule.scope}/${slug}: ${rule.version} -> ${newVersion} (${bumpLevel})`);
+      console.log(`  ${rule.compositeKey}: ${rule.version} -> ${newVersion} (${bumpLevel})`);
 
       if (!DRY_RUN) {
         updateRuleDefinitionVersion(rule.filePath, rule.version, newVersion);
@@ -286,7 +288,7 @@ function main(): void {
         newVersion,
         previousVersion: rule.version,
         scope: rule.scope,
-        slug,
+        slug: rule.slug,
       });
     }
   }
@@ -299,7 +301,7 @@ function main(): void {
   const outputPath = path.join(distDir, 'rule-bumps.json');
 
   if (results.length === 0) {
-    console.log('No rule bumps to apply.');
+    console.log('\nNo rule bumps to apply.');
 
     if (!DRY_RUN) {
       fs.writeFileSync(outputPath, JSON.stringify([], null, 2), 'utf8');
@@ -308,6 +310,7 @@ function main(): void {
 
     return;
   }
+
   if (!DRY_RUN) {
     fs.writeFileSync(outputPath, JSON.stringify(results, null, 2), 'utf8');
     console.log(`\nWrote ${String(results.length)} bump(s) to ${outputPath}`);
