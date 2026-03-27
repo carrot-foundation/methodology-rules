@@ -15,6 +15,20 @@ import * as path from 'node:path';
 import { dirExists, fileExists } from './shared/fs-utils';
 
 const ROOT = path.resolve(__dirname, '..');
+
+const SCOPE_TO_LIB: Record<string, string> = {
+  'gas-id': 'mass-id-certificate',
+  'mass-certificate': 'mass-id-certificate',
+  'recycled-id': 'mass-id-certificate',
+};
+
+const SLUG_TO_LIB: Record<string, string> = {
+  'no-conflicting-gas-id-or-credit': 'no-conflicting-certificate-or-credit',
+  'no-conflicting-recycled-id-or-credit':
+    'no-conflicting-certificate-or-credit',
+  'recycling-manifest-data': 'document-manifest-data',
+  'transport-manifest-data': 'document-manifest-data',
+};
 const LIBS_METHODOLOGIES = path.join(ROOT, 'libs', 'methodologies');
 const LIB_RULE_PROCESSORS = path.join(
   LIBS_METHODOLOGIES,
@@ -167,9 +181,12 @@ function resolveProcessor(
     byScopedDirSlug: Map<string, RuleProcessorInfo>;
   },
 ): RuleProcessorInfo | undefined {
+  const libScope = SCOPE_TO_LIB[configScope] ?? configScope;
+  const libSlug = SLUG_TO_LIB[configSlug] ?? configSlug;
+
   return (
-    index.byScopedDirSlug.get(`${configScope}/${configSlug}`) ??
-    index.byDirSlug.get(configSlug)
+    index.byScopedDirSlug.get(`${libScope}/${libSlug}`) ??
+    index.byDirSlug.get(libSlug)
   );
 }
 

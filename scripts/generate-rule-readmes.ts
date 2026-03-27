@@ -397,7 +397,6 @@ Methodology: **${methodologyDisplay}**
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=${codecovFlag})](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=${codecovFlag})
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
-
 [![Version: ${version}](https://img.shields.io/badge/Version-${version}-blue)](${changelogRelPath})
 
 **[Changelog](${changelogRelPath})**
@@ -415,10 +414,6 @@ ${frameworkRulesSection}${eventsSection}
 ## 👥 Contributors
 
 ${contributorSection}
-
-## 🔑 License
-
-[License](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 `;
 }
 

@@ -20,7 +20,7 @@
 | #   | Name                                                                                                                                                    | Version |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
 | 1   | [Uniqueness Check](../../bold/rule-processors/mass-id/waste-mass-is-unique)                                                                             | 1.0.0   |
-| 2   | No Conflicting Recycled Id Or Credit                                                                                                                    | -       |
+| 2   | [Certificate Uniqueness Check](../../bold/rule-processors/mass-id/no-conflicting-certificate-or-credit)                                                 | 1.0.0   |
 | 3   | [Project Period](../../bold/rule-processors/mass-id/project-period-limit)                                                                               | 1.0.0   |
 | 4   | [Participant Accreditations & Verifications Requirements](../../bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements) | 1.0.0   |
 | 5   | [MassID Qualifications](../../bold/rule-processors/mass-id/mass-id-qualifications)                                                                      | 1.0.0   |
@@ -30,14 +30,14 @@
 | 9   | [Hauler Identification](../../bold/rule-processors/mass-id/hauler-identification)                                                                       | 1.0.0   |
 | 10  | [Vehicle Identification](../../bold/rule-processors/mass-id/vehicle-identification)                                                                     | 1.0.0   |
 | 11  | [Driver Identification](../../bold/rule-processors/mass-id/driver-identification)                                                                       | 1.0.0   |
-| 12  | Transport Manifest Data                                                                                                                                 | -       |
+| 12  | [Document Manifest Data](../../bold/rule-processors/mass-id/document-manifest-data)                                                                     | 1.0.0   |
 | 13  | [Processor Identification](../../bold/rule-processors/mass-id/processor-identification)                                                                 | 1.0.0   |
 | 14  | [Recycler Identification](../../bold/rule-processors/mass-id/recycler-identification)                                                                   | 1.0.0   |
 | 15  | [Weighing](../../bold/rule-processors/mass-id/weighing)                                                                                                 | 1.0.0   |
 | 16  | [Drop-off At Recycling Facility](../../bold/rule-processors/mass-id/drop-off-at-recycler)                                                               | 1.0.0   |
 | 17  | [Mass Sorting](../../bold/rule-processors/mass-id/mass-id-sorting)                                                                                      | 1.0.0   |
 | 18  | [Composting Cycle Timeframe](../../bold/rule-processors/mass-id/composting-cycle-timeframe)                                                             | 1.0.0   |
-| 19  | Recycling Manifest Data                                                                                                                                 | -       |
+| 19  | [Document Manifest Data](../../bold/rule-processors/mass-id/document-manifest-data)                                                                     | 1.0.0   |
 
 ### recycled-id
 
