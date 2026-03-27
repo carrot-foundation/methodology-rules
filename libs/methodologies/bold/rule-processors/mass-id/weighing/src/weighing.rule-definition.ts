@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.TRANSPORT_MANIFEST, DocumentEventName.WEIGHING],
   name: 'Weighing',
   slug: 'weighing',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

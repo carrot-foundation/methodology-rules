@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.RECYCLED],
   name: 'Project Period',
   slug: 'project-period-limit',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

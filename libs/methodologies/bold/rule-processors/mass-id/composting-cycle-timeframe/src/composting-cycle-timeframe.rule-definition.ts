@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.DROP_OFF, DocumentEventName.RECYCLED],
   name: 'Composting Cycle Timeframe',
   slug: 'composting-cycle-timeframe',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

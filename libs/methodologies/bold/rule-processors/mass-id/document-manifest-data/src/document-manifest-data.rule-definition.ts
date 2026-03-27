@@ -15,4 +15,5 @@ export const ruleDefinition = {
   ],
   name: 'Document Manifest Data',
   slug: 'document-manifest-data',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates waste origin identification consistency, ensuring that identified origins have exactly one Waste Generator ACTOR event and unidentified origins have none.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                               | Description                                                                                                                                                                                                                      |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -1,9 +1,9 @@
-import type { BaseFrameworkRule } from '@carrot-fndn/shared/rule/types';
+import type { BaseMethodologyFrameworkRule } from '@carrot-fndn/shared/rule/types';
 
-export const frameworkRules = [
+export const methodologyFrameworkRules = [
   {
     description:
-      "Validates that the 'Recycled' event occurred within the timeframe allowed by the methodology. The event must have occurred no later than January 1st of the previous year.",
+      "Validates that the 'Recycled' event occurred within the timeframe allowed by the methodology. The event must have occurred on or after January 1st of the previous year.",
     methodologyReference: '10.2 Allowable Project Period',
     name: 'Audit Eligibility Check',
     slug: 'audit-eligibility-check',
@@ -390,6 +390,7 @@ export const frameworkRules = [
     slug: 'recycled-to-input-conversion',
     type: 'audit',
   },
-] as const satisfies readonly BaseFrameworkRule[];
+] as const satisfies readonly BaseMethodologyFrameworkRule[];
 
-export type FrameworkRuleSlug = (typeof frameworkRules)[number]['slug'];
+export type MethodologyFrameworkRuleSlug =
+  (typeof methodologyFrameworkRules)[number]['slug'];

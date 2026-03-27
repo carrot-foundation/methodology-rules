@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.SORTING],
   name: 'Mass Sorting',
   slug: 'mass-id-sorting',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that exactly one Recycler ACTOR event exists in the MassID document, ensuring proper recycler identification for waste tracking and credit generation.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule           | Description                                                                                                                                                                              |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

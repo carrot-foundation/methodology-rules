@@ -6,4 +6,5 @@ export const ruleDefinition = {
   events: [],
   name: 'Rewards Distribution',
   slug: 'rewards-distribution',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.ACTOR],
   name: 'Participant Accreditations & Verifications Requirements',
   slug: 'participant-accreditations-and-verifications-requirements',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

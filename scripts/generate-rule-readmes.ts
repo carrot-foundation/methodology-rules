@@ -9,7 +9,7 @@
  */
 
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
-import { FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/framework-rule.types';
+import { METHODOLOGY_FRAMEWORK_RULE_TYPES } from '../libs/shared/rule/types/src/methodology-framework-rule.types';
 
 import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
@@ -72,15 +72,15 @@ const BaseRuleDefinitionSchema = z.object({
   slug: z.string(),
 });
 
-const FrameworkRuleSchema = z.object({
+const MethodologyFrameworkRuleSchema = z.object({
   description: z.string(),
   methodologyReference: z.string().min(1).optional(),
   name: z.string(),
   slug: z.string(),
-  type: z.enum(FRAMEWORK_RULE_TYPES),
+  type: z.enum(METHODOLOGY_FRAMEWORK_RULE_TYPES),
 });
 
-type FrameworkRule = z.infer<typeof FrameworkRuleSchema>;
+type MethodologyFrameworkRule = z.infer<typeof MethodologyFrameworkRuleSchema>;
 
 class ValidationError extends Error {
   override readonly name = 'ValidationError';
@@ -91,7 +91,7 @@ interface ReadmeInput {
   contributors: string[];
   description: string;
   events: string[];
-  frameworkRules: FrameworkRule[];
+  methodologyFrameworkRules: MethodologyFrameworkRule[];
   implRelPath: string;
   methodology: string;
   name: string;
@@ -200,13 +200,13 @@ async function extractRuleDefinition(
 }
 
 /**
- * Extracts frameworkRules slugs from the app-level rule-definition.ts via regex.
+ * Extracts methodologyFrameworkRules slugs from the app-level rule-definition.ts via regex.
  * Dynamic import is not used here because the app-level file imports
  * baseRuleDefinition from the lib barrel (e.g., .../weighing/src/index.ts),
  * which also re-exports the lambda handler. That handler calls
  * wrapRuleIntoLambdaHandler at module scope, which reads process.env.
  */
-function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
+function extractMethodologyFrameworkRuleSlugs(appRuleDefPath: string): string[] {
   if (!fileExists(appRuleDefPath)) return [];
 
   let content: string;
@@ -217,7 +217,7 @@ function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
       cause: error,
     });
   }
-  const match = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
+  const match = content.match(/methodologyFrameworkRules:\s*\[([\s\S]*?)\]/);
   if (!match?.[1]) return [];
 
   const results: string[] = [];
@@ -232,9 +232,9 @@ function extractFrameworkRuleSlugs(appRuleDefPath: string): string[] {
   return results;
 }
 
-async function loadFrameworkRules(
+async function loadMethodologyFrameworkRules(
   methodology: string,
-): Promise<Map<string, FrameworkRule>> {
+): Promise<Map<string, MethodologyFrameworkRule>> {
   const filePath = path.join(
     ROOT,
     'libs',
@@ -242,38 +242,38 @@ async function loadFrameworkRules(
     methodology,
     'rules',
     'src',
-    'framework-rules.ts',
+    'methodology-framework-rules.ts',
   );
 
   if (!fileExists(filePath)) {
-    console.log(`  No framework rules file for ${methodology}: ${filePath}`);
+    console.log(`  No methodology framework rules file for ${methodology}: ${filePath}`);
     return new Map();
   }
   let mod: Record<string, unknown>;
   try {
     mod = await import(pathToFileURL(filePath).href);
   } catch (error) {
-    throw new Error(`Failed to load framework rules from ${filePath}`, {
+    throw new Error(`Failed to load methodology framework rules from ${filePath}`, {
       cause: error,
     });
   }
 
   const raw: unknown =
-    mod.frameworkRules ??
-    (mod.default as Record<string, unknown> | undefined)?.frameworkRules ??
+    mod.methodologyFrameworkRules ??
+    (mod.default as Record<string, unknown> | undefined)?.methodologyFrameworkRules ??
     mod.default;
 
-  const result = z.array(FrameworkRuleSchema).safeParse(raw);
+  const result = z.array(MethodologyFrameworkRuleSchema).safeParse(raw);
 
   if (!result.success) {
     throw new ValidationError(
-      `Invalid framework rules in ${filePath}: expected an array of {slug, name, description}. ` +
+      `Invalid methodology framework rules in ${filePath}: expected an array of {slug, name, description}. ` +
         `Available exports: ${Object.keys(mod).join(', ')}`,
       { cause: result.error },
     );
   }
 
-  const map = new Map<string, FrameworkRule>();
+  const map = new Map<string, MethodologyFrameworkRule>();
   for (const rule of result.data) {
     map.set(rule.slug, rule);
   }
@@ -366,7 +366,7 @@ function generateReadme(input: ReadmeInput): string {
     contributors,
     description,
     events,
-    frameworkRules,
+    methodologyFrameworkRules,
     implRelPath,
     methodology,
     name,
@@ -376,11 +376,11 @@ function generateReadme(input: ReadmeInput): string {
   const contributorSection = formatContributorSection(contributors);
 
   let frameworkRulesSection = '';
-  if (frameworkRules.length > 0) {
-    const rows = frameworkRules
+  if (methodologyFrameworkRules.length > 0) {
+    const rows = methodologyFrameworkRules
       .map((r) => `| ${r.name} | ${r.description} |`)
       .join('\n');
-    frameworkRulesSection = `\n## 📋 Framework Rules
+    frameworkRulesSection = `\n## 📋 Methodology Framework Rules
 
 | Rule | Description |
 |------|-------------|
@@ -555,13 +555,13 @@ function discoverRules(): Array<{
   return rules;
 }
 
-function resolveFrameworkRules(
+function resolveMethodologyFrameworkRules(
   frSlugs: string[],
-  methodologyFrameworkRules: Map<string, FrameworkRule> | undefined,
+  methodologyFrameworkRules: Map<string, MethodologyFrameworkRule> | undefined,
   methodology: string,
   appRuleDefPath: string,
-): FrameworkRule[] {
-  const resolved: FrameworkRule[] = [];
+): MethodologyFrameworkRule[] {
+  const resolved: MethodologyFrameworkRule[] = [];
 
   for (const frSlug of frSlugs) {
     const fr = methodologyFrameworkRules?.get(frSlug);
@@ -569,7 +569,7 @@ function resolveFrameworkRules(
       resolved.push(fr);
     } else {
       console.warn(
-        `Warning: framework rule slug "${frSlug}" not found in ${methodology} ` +
+        `Warning: methodology framework rule slug "${frSlug}" not found in ${methodology} ` +
           `(referenced by ${appRuleDefPath})`,
       );
     }
@@ -582,10 +582,10 @@ async function main(): Promise<void> {
   const rules = discoverRules();
 
   const methodologies = [...new Set(rules.map((r) => r.methodology))];
-  const frameworkRulesMap = new Map<string, Map<string, FrameworkRule>>();
+  const methodologyFrameworkRulesMap = new Map<string, Map<string, MethodologyFrameworkRule>>();
 
   for (const methodology of methodologies) {
-    frameworkRulesMap.set(methodology, await loadFrameworkRules(methodology));
+    methodologyFrameworkRulesMap.set(methodology, await loadMethodologyFrameworkRules(methodology));
   }
 
   const readmePaths: string[] = [];
@@ -617,9 +617,9 @@ async function main(): Promise<void> {
     const contributors = getContributors(libSrcPath);
 
     const appRuleDefPath = path.join(appPath, 'src', 'rule-definition.ts');
-    const resolvedFrameworkRules = resolveFrameworkRules(
-      extractFrameworkRuleSlugs(appRuleDefPath),
-      frameworkRulesMap.get(methodology),
+    const resolvedMethodologyFrameworkRules = resolveMethodologyFrameworkRules(
+      extractMethodologyFrameworkRuleSlugs(appRuleDefPath),
+      methodologyFrameworkRulesMap.get(methodology),
       methodology,
       appRuleDefPath,
     );
@@ -630,7 +630,7 @@ async function main(): Promise<void> {
       contributors,
       description: ruleDef.description,
       events: ruleDef.events,
-      frameworkRules: resolvedFrameworkRules,
+      methodologyFrameworkRules: resolvedMethodologyFrameworkRules,
       implRelPath,
       methodology,
       name: ruleDef.name,

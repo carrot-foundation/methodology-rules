@@ -141,6 +141,9 @@ importers:
       '@types/node':
         specifier: 25.5.0
         version: 25.5.0
+      '@types/semver':
+        specifier: 7.7.1
+        version: 7.7.1
       '@types/uuid':
         specifier: 11.0.0
         version: 11.0.0
@@ -252,6 +255,9 @@ importers:
       prettier:
         specifier: 3.8.1
         version: 3.8.1
+      semver:
+        specifier: 7.7.4
+        version: 7.7.4
       ts-loader:
         specifier: 9.5.4
         version: 9.5.4(typescript@5.9.3)(webpack@5.105.4(@swc/core@1.15.21)(esbuild@0.27.4))
@@ -3641,6 +3647,9 @@ packages:
 
   '@types/retry@0.12.2':
     resolution: {integrity: sha512-XISRgDJ2Tc5q4TRqvgJtzsRkFYNJzZrhTdtMoGVBttwzzQJkPnS3WWTFc7kuDRoPtPakl+T+OfdEUjYJj7Jbow==}
+
+  '@types/semver@7.7.1':
+    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/send@0.17.6':
     resolution: {integrity: sha512-Uqt8rPBE8SY0RK8JB1EzVOIZ32uqy8HwdxCnoCOsYrvnswqmFZ/k+9Ikidlk/ImhsdvBsloHbAlewb2IEBV/Og==}
@@ -13726,6 +13735,8 @@ snapshots:
   '@types/range-parser@1.2.7': {}
 
   '@types/retry@0.12.2': {}
+
+  '@types/semver@7.7.1': {}
 
   '@types/send@0.17.6':
     dependencies:

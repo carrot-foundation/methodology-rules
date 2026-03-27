@@ -3,10 +3,11 @@ export interface BaseRuleDefinition {
   events: string[];
   name: string;
   slug: string;
+  version: string;
 }
 
 export interface RuleDefinition<
-  TFrameworkRuleSlug extends string = string,
+  TMethodologyFrameworkRuleSlug extends string = string,
 > extends BaseRuleDefinition {
-  frameworkRules: TFrameworkRuleSlug[];
+  methodologyFrameworkRules: TMethodologyFrameworkRuleSlug[];
 }

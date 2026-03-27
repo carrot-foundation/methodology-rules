@@ -6,4 +6,5 @@ export const ruleDefinition = {
   events: [],
   name: 'Certificate Uniqueness Check',
   slug: 'no-conflicting-certificate-or-credit',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

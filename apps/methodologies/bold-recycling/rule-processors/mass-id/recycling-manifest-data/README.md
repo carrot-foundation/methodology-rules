@@ -14,7 +14,7 @@ Methodology: **BOLD Recycling**
 
 Validates transport and recycling manifest events in MassID documents, ensuring they contain required attributes, proper document attachments, and valid exemption justifications. Cross-validates manifest data against extracted document content when available.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                                       | Description                                                                                                                                                                                                                                                                        |
 | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -6,4 +6,5 @@ export const ruleDefinition = {
   events: [],
   name: 'MassID Qualifications',
   slug: 'mass-id-qualifications',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

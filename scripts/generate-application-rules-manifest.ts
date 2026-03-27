@@ -147,9 +147,9 @@ function getSourceCommit(): string {
   }
 }
 
-// --- Framework rule slugs loader ---
+// --- Methodology framework rule slugs loader ---
 
-function loadFrameworkRuleSlugs(methodology: string): Set<string> {
+function loadMethodologyFrameworkRuleSlugs(methodology: string): Set<string> {
   const fwPath = path.join(
     ROOT,
     'libs',
@@ -157,7 +157,7 @@ function loadFrameworkRuleSlugs(methodology: string): Set<string> {
     methodology,
     'rules',
     'src',
-    'framework-rules.ts',
+    'methodology-framework-rules.ts',
   );
 
   if (!fileExists(fwPath)) {
@@ -176,9 +176,9 @@ function loadFrameworkRuleSlugs(methodology: string): Set<string> {
   return slugs;
 }
 
-// --- App-level frameworkRules extraction ---
+// --- App-level methodologyFrameworkRules extraction ---
 
-function extractAppFrameworkRules(
+function extractAppMethodologyFrameworkRules(
   appRulePath: string,
 ): string[] | undefined {
   const ruleDefPath = path.join(appRulePath, 'src', 'rule-definition.ts');
@@ -186,7 +186,7 @@ function extractAppFrameworkRules(
   if (!fileExists(ruleDefPath)) return undefined;
 
   const content = fs.readFileSync(ruleDefPath, 'utf8');
-  const fwMatch = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
+  const fwMatch = content.match(/methodologyFrameworkRules:\s*\[([\s\S]*?)\]/);
 
   if (!fwMatch?.[1]) return [];
 
@@ -320,7 +320,7 @@ function enrichActorEvents(
 interface RuleDefinitionData {
   description: string;
   events: string[];
-  frameworkRules: string[];
+  methodologyFrameworkRules: string[];
   name: string;
   slug: string;
 }
@@ -364,20 +364,20 @@ function extractRuleDefinition(
     }
   }
 
-  // Extract frameworkRules array
-  const fwMatch = content.match(/frameworkRules:\s*\[([\s\S]*?)\]/);
-  const frameworkRules: string[] = [];
+  // Extract methodologyFrameworkRules array
+  const fwMatch = content.match(/methodologyFrameworkRules:\s*\[([\s\S]*?)\]/);
+  const methodologyFrameworkRules: string[] = [];
   if (fwMatch?.[1]) {
     const strMatches = fwMatch[1].matchAll(/['"`]([^'"`]+)['"`]/g);
     for (const m of strMatches) {
-      if (m[1]) frameworkRules.push(m[1]);
+      if (m[1]) methodologyFrameworkRules.push(m[1]);
     }
   }
 
   return {
     description: descMatch?.[1]?.trim() ?? '',
     events,
-    frameworkRules,
+    methodologyFrameworkRules,
     name: nameMatch?.[1] ?? libSlug,
     slug: slugMatch?.[1] ?? libSlug,
   };
@@ -1379,7 +1379,7 @@ interface ManifestRule {
   events: string[];
   examples: ManifestExample[];
   implementationPath: string;
-  implementsFrameworkRules: string[];
+  implementsMethodologyFrameworkRules: string[];
   methodology: string;
   name: string;
   readmePath: string;
@@ -1393,7 +1393,7 @@ function buildRule(
   methodology: string,
   scope: string,
   slug: string,
-  validFrameworkSlugs: Set<string>,
+  validMethodologyFrameworkSlugs: Set<string>,
 ): ManifestRule {
   const libSrcPath = getLibSrcPath(scope, slug);
 
@@ -1446,18 +1446,18 @@ function buildRule(
 
   const examples = extractManifestExamples(libSrcPath, srcFiles, events);
 
-  // Resolve frameworkRules: prefer app-level, fall back to shared lib
-  const appRuleFrameworkRules = extractAppFrameworkRules(appRulePath);
-  const frameworkRules = appRuleFrameworkRules ?? ruleDef?.frameworkRules ?? [];
+  // Resolve methodologyFrameworkRules: prefer app-level, fall back to shared lib
+  const appRuleMethodologyFrameworkRules = extractAppMethodologyFrameworkRules(appRulePath);
+  const methodologyFrameworkRules = appRuleMethodologyFrameworkRules ?? ruleDef?.methodologyFrameworkRules ?? [];
 
-  // Validate framework rule slugs against the methodology's framework-rules.ts
-  const invalidSlugs = frameworkRules.filter(
-    (s) => !validFrameworkSlugs.has(s),
+  // Validate methodology framework rule slugs against the methodology's methodology-framework-rules.ts
+  const invalidSlugs = methodologyFrameworkRules.filter(
+    (s) => !validMethodologyFrameworkSlugs.has(s),
   );
   if (invalidSlugs.length > 0) {
     throw new Error(
-      `Invalid framework rule slug(s) [${invalidSlugs.join(', ')}] in ${methodology}/${scope}/${slug}. ` +
-        `Valid slugs: ${[...validFrameworkSlugs].join(', ')}`,
+      `Invalid methodology framework rule slug(s) [${invalidSlugs.join(', ')}] in ${methodology}/${scope}/${slug}. ` +
+        `Valid slugs: ${[...validMethodologyFrameworkSlugs].join(', ')}`,
     );
   }
 
@@ -1497,7 +1497,7 @@ function buildRule(
     events,
     examples,
     implementationPath: relImplementationPath,
-    implementsFrameworkRules: frameworkRules,
+    implementsMethodologyFrameworkRules: methodologyFrameworkRules,
     methodology,
     name,
     readmePath: relReadmePath,
@@ -1552,9 +1552,9 @@ function processRule(
   methodology: string,
   scope: string,
   slug: string,
-  validFrameworkSlugs: Set<string>,
+  validMethodologyFrameworkSlugs: Set<string>,
 ): ProcessRuleResult {
-  const rule = buildRule(methodology, scope, slug, validFrameworkSlugs);
+  const rule = buildRule(methodology, scope, slug, validMethodologyFrameworkSlugs);
   const warnings: string[] = [];
 
   if (rule.examples.length === 0) {
@@ -1584,7 +1584,7 @@ function processScope(
   methodology: string,
   scope: string,
   slugs: readonly string[],
-  validFrameworkSlugs: Set<string>,
+  validMethodologyFrameworkSlugs: Set<string>,
 ): ProcessScopeResult {
   const result: ProcessScopeResult = {
     rules: [],
@@ -1599,7 +1599,7 @@ function processScope(
       methodology,
       scope,
       slug,
-      validFrameworkSlugs,
+      validMethodologyFrameworkSlugs,
     );
 
     result.rules.push(rule);
@@ -1627,10 +1627,10 @@ function generate(): void {
 
   for (const [methodology, scopes] of Object.entries(loadMethodologies())) {
     manifest.methodologies[methodology] = {};
-    const validFrameworkSlugs = loadFrameworkRuleSlugs(methodology);
+    const validMethodologyFrameworkSlugs = loadMethodologyFrameworkRuleSlugs(methodology);
 
     for (const [scope, slugs] of Object.entries(scopes)) {
-      const scopeResult = processScope(methodology, scope, slugs, validFrameworkSlugs);
+      const scopeResult = processScope(methodology, scope, slugs, validMethodologyFrameworkSlugs);
 
       manifest.methodologies[methodology][scope] = scopeResult.rules;
       totalRules += scopeResult.totalRules;

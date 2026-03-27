@@ -14,7 +14,7 @@ Methodology: **BOLD Carbon**
 
 Validates that all participants in the MassID document have valid accreditation documents with active dates and no duplicate accreditations of the same type.
 
-## 📋 Framework Rules
+## 📋 Methodology Framework Rules
 
 | Rule                             | Description                                                                                                                                                                              |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

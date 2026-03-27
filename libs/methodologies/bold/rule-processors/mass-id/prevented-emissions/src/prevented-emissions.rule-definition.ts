@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.PICK_UP],
   name: 'Prevented Emissions',
   slug: 'prevented-emissions',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;

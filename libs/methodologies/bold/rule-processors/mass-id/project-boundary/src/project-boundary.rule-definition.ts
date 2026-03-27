@@ -8,4 +8,5 @@ export const ruleDefinition = {
   events: [DocumentEventName.DROP_OFF, DocumentEventName.PICK_UP],
   name: 'Project Boundary',
   slug: 'project-boundary',
+  version: '1.0.0',
 } as const satisfies BaseRuleDefinition;
