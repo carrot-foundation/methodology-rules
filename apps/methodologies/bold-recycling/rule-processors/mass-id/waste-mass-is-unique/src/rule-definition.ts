@@ -5,8 +5,5 @@ import { ruleDefinition as baseRuleDefinition } from '@carrot-fndn/shared/method
 
 export const ruleDefinition = {
   ...baseRuleDefinition,
-  methodologyFrameworkRules: [
-    'duplicate-check',
-    'route-check',
-  ],
+  methodologyFrameworkRules: ['duplicate-check', 'route-check'],
 } as const satisfies RuleDefinition<MethodologyFrameworkRuleSlug>;

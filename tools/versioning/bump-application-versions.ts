@@ -90,8 +90,15 @@ function getLatestTagForMethodology(
     ).trim();
 
     return tag || undefined;
-  } catch {
-    return undefined;
+  } catch (error: unknown) {
+    if (
+      error instanceof Error &&
+      /No names found|no matching tags|cannot describe/i.test(error.message)
+    ) {
+      return undefined;
+    }
+
+    throw error;
   }
 }
 
