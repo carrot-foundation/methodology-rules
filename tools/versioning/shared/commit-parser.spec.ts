@@ -109,6 +109,32 @@ describe('parseCommitsForRules', () => {
     expect(parseCommitsForRules([''])).toEqual(new Map());
   });
 
+  it('should parse a composite key scope (methodology/scope/slug)', () => {
+    const commits = [
+      'feat(bold/credit-order/rewards-distribution): add calculation',
+    ];
+    const result = parseCommitsForRules(commits);
+
+    expect(result).toEqual(
+      new Map([['bold/credit-order/rewards-distribution', 'minor']]),
+    );
+  });
+
+  it('should track composite key scopes independently', () => {
+    const commits = [
+      'fix(bold/credit-order/rewards-distribution): fix rounding',
+      'feat(bold/mass-id-certificate/rewards-distribution): add validation',
+    ];
+    const result = parseCommitsForRules(commits);
+
+    expect(result).toEqual(
+      new Map([
+        ['bold/credit-order/rewards-distribution', 'patch'],
+        ['bold/mass-id-certificate/rewards-distribution', 'minor'],
+      ]),
+    );
+  });
+
   it('should handle multiple rules in one batch', () => {
     const commits = [
       'fix(audit-eligibility-check): fix date parsing',
