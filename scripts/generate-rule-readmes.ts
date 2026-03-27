@@ -17,6 +17,8 @@ import * as path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
 
+import { dirExists, fileExists } from './shared/fs-utils';
+
 const ROOT = path.resolve(__dirname, '..');
 const LIB_RULE_PROCESSORS = path.join(
   ROOT,
@@ -70,6 +72,7 @@ const BaseRuleDefinitionSchema = z.object({
   events: z.array(z.string()),
   name: z.string().nonempty(),
   slug: z.string(),
+  version: z.string().nonempty(),
 });
 
 const MethodologyFrameworkRuleSchema = z.object({
@@ -87,6 +90,7 @@ class ValidationError extends Error {
 }
 
 interface ReadmeInput {
+  changelogRelPath: string;
   codecovFlag: string;
   contributors: string[];
   description: string;
@@ -95,25 +99,10 @@ interface ReadmeInput {
   implRelPath: string;
   methodology: string;
   name: string;
+  version: string;
 }
 
-function dirExists(dirPath: string): boolean {
-  try {
-    return fs.statSync(dirPath).isDirectory();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
 
-function fileExists(filePath: string): boolean {
-  try {
-    return fs.statSync(filePath).isFile();
-  } catch (error: unknown) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
-    throw error;
-  }
-}
 
 function resolveLibCoordinates(
   scope: string,
@@ -362,6 +351,7 @@ function formatContributorSection(usernames: string[]): string {
 
 function generateReadme(input: ReadmeInput): string {
   const {
+    changelogRelPath,
     codecovFlag,
     contributors,
     description,
@@ -370,6 +360,7 @@ function generateReadme(input: ReadmeInput): string {
     implRelPath,
     methodology,
     name,
+    version,
   } = input;
   const methodologyDisplay =
     METHODOLOGY_DISPLAY_NAMES[methodology] ?? methodology;
@@ -406,6 +397,9 @@ Methodology: **${methodologyDisplay}**
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/carrot-foundation/methodology-rules/check-and-deploy.yaml)](https://github.com/carrot-foundation/methodology-rules/actions)
 [![Coverage](https://img.shields.io/codecov/c/github/carrot-foundation/methodology-rules/main?flag=${codecovFlag})](https://codecov.io/gh/carrot-foundation/methodology-rules?flags[0]=${codecovFlag})
 [![License: LGPL-3.0](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
+[![Version: ${version}](https://img.shields.io/badge/Version-${version}-blue)](${changelogRelPath})
+
+**[Changelog](${changelogRelPath})**
 
 </div>
 
@@ -420,10 +414,6 @@ ${frameworkRulesSection}${eventsSection}
 ## 👥 Contributors
 
 ${contributorSection}
-
-## 🔑 License
-
-[License](https://github.com/carrot-foundation/methodology-rules/blob/main/LICENSE)
 `;
 }
 
@@ -624,8 +614,15 @@ async function main(): Promise<void> {
       appRuleDefPath,
     );
 
+    const libDir = path.dirname(libSrcPath);
+    const changelogRelPath = path
+      .relative(appPath, path.join(libDir, 'CHANGELOG.md'))
+      .split(path.sep)
+      .join('/');
+
     const readmePath = path.join(appPath, 'README.md');
     const readme = generateReadme({
+      changelogRelPath,
       codecovFlag: getCodecovFlag(scope, slug),
       contributors,
       description: ruleDef.description,
@@ -634,6 +631,7 @@ async function main(): Promise<void> {
       implRelPath,
       methodology,
       name: ruleDef.name,
+      version: ruleDef.version,
     });
 
     try {

@@ -70,6 +70,45 @@ describe('parseCommitsForRules', () => {
     expect(result).toEqual(new Map([['document-manifest-data', 'patch']]));
   });
 
+  it('should treat BREAKING CHANGE in body as feat (body detection not supported)', () => {
+    // Only the '!' header notation triggers a major bump.
+    // Body-level "BREAKING CHANGE:" is ignored because commits are parsed
+    // from subject lines only (git log --format=%s).
+    const commits = [
+      'feat(document-value): rework API\n\nBREAKING CHANGE: output format changed',
+    ];
+    const result = parseCommitsForRules(commits);
+
+    expect(result).toEqual(new Map([['document-value', 'minor']]));
+  });
+
+  it('should keep major even when a subsequent commit is patch', () => {
+    const commits = [
+      'feat(weighing)!: redesign output schema',
+      'fix(weighing): typo in field name',
+    ];
+    const result = parseCommitsForRules(commits);
+
+    expect(result).toEqual(new Map([['weighing', 'major']]));
+  });
+
+  it('should handle revert as patch', () => {
+    const commits = ['revert(audit-eligibility-check): undo last change'];
+    const result = parseCommitsForRules(commits);
+
+    expect(result).toEqual(
+      new Map([['audit-eligibility-check', 'patch']]),
+    );
+  });
+
+  it('should return empty map for empty array', () => {
+    expect(parseCommitsForRules([])).toEqual(new Map());
+  });
+
+  it('should skip empty string messages', () => {
+    expect(parseCommitsForRules([''])).toEqual(new Map());
+  });
+
   it('should handle multiple rules in one batch', () => {
     const commits = [
       'fix(audit-eligibility-check): fix date parsing',

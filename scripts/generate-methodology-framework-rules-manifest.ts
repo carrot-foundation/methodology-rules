@@ -1,6 +1,10 @@
 #!/usr/bin/env tsx
 
 /**
+ * @deprecated Use generate-methodology-rules-manifest.ts instead.
+ * This script is kept temporarily for backwards compatibility with carrot-docs
+ * and will be removed in a follow-up PR.
+ *
  * Generates per-methodology framework-rules manifests — the cross-repo contract
  * between methodology-rules and carrot-docs.
  *

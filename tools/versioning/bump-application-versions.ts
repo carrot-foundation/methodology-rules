@@ -4,8 +4,12 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { z } from 'zod';
+
 import { diffMethodologyFrameworkRules } from './shared/methodology-framework-rules-diff';
+import { escapeRegex } from './shared/string-utils';
 import type { ApplicationBump, BumpLevel, RuleBump } from './shared/types';
+import { RuleBumpSchema } from './shared/types';
 import { bumpVersion, highestBump } from './shared/version-utils';
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -76,30 +80,20 @@ function discoverMethodologies(): DiscoveredMethodology[] {
 function getLatestTagForMethodology(
   methodology: string,
 ): string | undefined {
-  try {
-    const tag = execFileSync(
-      'git',
-      [
-        'describe',
-        '--tags',
-        '--match',
-        `methodology-application/${methodology}@*`,
-        '--abbrev=0',
-      ],
-      { cwd: ROOT, encoding: 'utf8' },
-    ).trim();
+  const output = execFileSync(
+    'git',
+    [
+      'tag',
+      '--list',
+      `methodology-application/${methodology}@*`,
+      '--sort=-creatordate',
+    ],
+    { cwd: ROOT, encoding: 'utf8' },
+  ).trim();
 
-    return tag || undefined;
-  } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      /No names found|no matching tags|cannot describe/i.test(error.message)
-    ) {
-      return undefined;
-    }
+  const firstTag = output.split('\n')[0];
 
-    throw error;
-  }
+  return firstTag || undefined;
 }
 
 function getFrameworkRuleSlugsAtRef(
@@ -147,7 +141,7 @@ function getFrameworkRuleSlugsAtRef(
     content = fs.readFileSync(filePath, 'utf8');
   }
 
-  const slugRegex = /slug:\s*'([^']+)'/g;
+  const slugRegex = /slug:\s*['"`]([^'"`]+)['"`]/g;
   const slugs: string[] = [];
   let match: RegExpExecArray | null;
 
@@ -167,9 +161,9 @@ function updateConfigVersion(
 ): void {
   const content = fs.readFileSync(configPath, 'utf8');
 
-  // Match `version: '...'` but NOT `methodologyFrameworkVersion: '...'`
+  // Match `version: '...'` (or `"` / backtick) but NOT `methodologyFrameworkVersion: '...'`
   const regex = new RegExp(
-    `((?<!\\w)version:\\s*')${oldVersion.replaceAll('.', '\\.')}(')`
+    `((?<!\\w)version:\\s*(['"\`]))${escapeRegex(oldVersion)}(\\2)`
   );
 
   const updated = content.replace(regex, `$1${newVersion}$2`);
@@ -271,14 +265,6 @@ function commitVersionBump(
   );
 }
 
-function createGitTag(methodology: string, version: string): void {
-  execFileSync(
-    'git',
-    ['tag', `methodology-application/${methodology}@${version}`],
-    { cwd: ROOT, encoding: 'utf8' },
-  );
-}
-
 function loadRuleBumps(): RuleBump[] {
   const ruleBumpsPath = path.join(ROOT, 'dist', 'rule-bumps.json');
 
@@ -290,8 +276,16 @@ function loadRuleBumps(): RuleBump[] {
   }
 
   const content = fs.readFileSync(ruleBumpsPath, 'utf8');
+  const parsed: unknown = JSON.parse(content);
+  const result = z.array(RuleBumpSchema).safeParse(parsed);
 
-  return JSON.parse(content) as RuleBump[];
+  if (!result.success) {
+    throw new Error('Invalid rule-bumps.json format', {
+      cause: result.error,
+    });
+  }
+
+  return result.data;
 }
 
 function analyzeMethodologyBumps(ruleBumps: RuleBump[]): AnalysisResult {
@@ -418,11 +412,6 @@ function persistMethodologyBumps(
     console.log(
       `  Committed version bump for ${methodology.key}@${applicationBump.newVersion}`,
     );
-
-    createGitTag(methodology.key, applicationBump.newVersion);
-    console.log(
-      `  Created tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
-    );
   }
 
   const distDir = path.join(ROOT, 'dist');
@@ -480,9 +469,6 @@ function main(): void {
       );
       console.log(`  Would update ${methodology.configPath}`);
       console.log(`  Would update CHANGELOG.md`);
-      console.log(
-        `  Would create tag: methodology-application/${methodology.key}@${applicationBump.newVersion}`,
-      );
     }
 
     console.log(

@@ -4,7 +4,8 @@ import { execFileSync } from 'node:child_process';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
-import { parseCommitsForRules } from './shared/commit-parser';
+import { HEADER_PATTERN, parseCommitsForRules } from './shared/commit-parser';
+import { escapeRegex } from './shared/string-utils';
 import type { RuleBump } from './shared/types';
 import { bumpVersion } from './shared/version-utils';
 
@@ -26,24 +27,15 @@ interface DiscoveredRule {
 }
 
 function getLatestMvaTag(): string | undefined {
-  try {
-    const tag = execFileSync(
-      'git',
-      ['describe', '--tags', '--match', 'methodology-application/*', '--abbrev=0'],
-      { cwd: ROOT, encoding: 'utf8' },
-    ).trim();
+  const output = execFileSync(
+    'git',
+    ['tag', '--list', 'methodology-application/*', '--sort=-creatordate'],
+    { cwd: ROOT, encoding: 'utf8' },
+  ).trim();
 
-    return tag || undefined;
-  } catch (error: unknown) {
-    if (
-      error instanceof Error &&
-      /No names found|cannot describe/i.test(error.message)
-    ) {
-      return undefined;
-    }
+  const firstTag = output.split('\n')[0];
 
-    throw error;
-  }
+  return firstTag || undefined;
 }
 
 function getCommitsSince(ref?: string): string[] {
@@ -51,27 +43,33 @@ function getCommitsSince(ref?: string): string[] {
     ? ['log', `${ref}..HEAD`, '--format=%s']
     : ['log', '--format=%s'];
 
-  const output = execFileSync('git', args, {
-    cwd: ROOT,
-    encoding: 'utf8',
-  }).trim();
+  try {
+    const output = execFileSync('git', args, {
+      cwd: ROOT,
+      encoding: 'utf8',
+    }).trim();
 
-  if (!output) return [];
+    if (!output) return [];
 
-  return output.split('\n');
+    return output.split('\n');
+  } catch (error: unknown) {
+    throw new Error(
+      `Failed to retrieve commits${ref ? ` since ${ref}` : ''}: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 }
 
 function collectCommitsPerSlug(
   commitMessages: string[],
 ): Map<string, string[]> {
   const commitsPerSlug = new Map<string, string[]>();
-  const scopeRegex = /^\w+\(([^)]+)\)!?:/;
 
   for (const message of commitMessages) {
-    const match = scopeRegex.exec(message);
-    if (!match?.[1]) continue;
+    const header = message.split('\n')[0];
+    const match = HEADER_PATTERN.exec(header);
+    if (!match?.[2]) continue;
 
-    const scope = match[1];
+    const scope = match[2];
     const existing = commitsPerSlug.get(scope) ?? [];
     existing.push(message);
     commitsPerSlug.set(scope, existing);
@@ -82,8 +80,8 @@ function collectCommitsPerSlug(
 
 function discoverRuleDefinitions(): DiscoveredRule[] {
   const rules: DiscoveredRule[] = [];
-  const slugRegex = /slug:\s*'([^']+)'/;
-  const versionRegex = /version:\s*'([^']+)'/;
+  const slugRegex = /slug:\s*['"`]([^'"`]+)['"`]/;
+  const versionRegex = /version:\s*['"`]([^'"`]+)['"`]/;
   const slugLocations = new Map<string, string>();
 
   const scopes = fs
@@ -113,7 +111,9 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
       const versionMatch = versionRegex.exec(content);
 
       if (!slugMatch?.[1] || !versionMatch?.[1]) {
-        console.warn(`  SKIP ${filePath}: missing slug or version`);
+        console.warn(
+          `  SKIP ${filePath}: slug=${slugMatch?.[1] ?? 'NOT FOUND'}, version=${versionMatch?.[1] ?? 'NOT FOUND'}`,
+        );
         continue;
       }
 
@@ -147,10 +147,10 @@ function updateRuleDefinitionVersion(
   newVersion: string,
 ): void {
   const content = fs.readFileSync(filePath, 'utf8');
-  const updated = content.replace(
-    `version: '${oldVersion}'`,
-    `version: '${newVersion}'`,
+  const regex = new RegExp(
+    `(version:\\s*(['"\`]))${escapeRegex(oldVersion)}\\2`,
   );
+  const updated = content.replace(regex, `$1${newVersion}$2`);
 
   if (updated === content) {
     throw new Error(

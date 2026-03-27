@@ -1,6 +1,10 @@
 #!/usr/bin/env ts-node
 
 /**
+ * @deprecated Use generate-methodology-rules-manifest.ts instead.
+ * This script is kept temporarily for backwards compatibility with carrot-docs
+ * and will be removed in a follow-up PR.
+ *
  * Generates application-rules-manifest.json — the cross-repo contract
  * between methodology-rules and carrot-docs.
  *

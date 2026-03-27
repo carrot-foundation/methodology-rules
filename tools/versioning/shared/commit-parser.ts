@@ -7,7 +7,7 @@ const BUMP_PRECEDENCE: Record<BumpLevel, number> = {
   patch: 1,
 };
 
-const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
+export const HEADER_PATTERN = /^(\w*)(?:\(([\w$.* -]*)\))?(!?): (.*)$/;
 
 interface ParsedCommit {
   isBreaking: boolean;
@@ -17,7 +17,8 @@ interface ParsedCommit {
 }
 
 function parseCommitMessage(message: string): ParsedCommit | undefined {
-  const match = HEADER_PATTERN.exec(message);
+  const header = message.split('\n')[0];
+  const match = HEADER_PATTERN.exec(header);
   if (!match) return undefined;
 
   const [, type, scope, bang, subject] = match;
