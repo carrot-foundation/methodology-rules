@@ -212,6 +212,18 @@ function main(): void {
 
   if (commitMessages.length === 0) {
     console.log('No commits to process. Exiting.');
+
+    if (!DRY_RUN) {
+      const distDir = path.join(ROOT, 'dist');
+      if (!fs.existsSync(distDir)) {
+        fs.mkdirSync(distDir, { recursive: true });
+      }
+
+      const outputPath = path.join(distDir, 'rule-bumps.json');
+      fs.writeFileSync(outputPath, JSON.stringify([], null, 2), 'utf8');
+      console.log(`Wrote empty rule-bumps.json to ${outputPath}`);
+    }
+
     return;
   }
 
