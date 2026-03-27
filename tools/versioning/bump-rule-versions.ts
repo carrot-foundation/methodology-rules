@@ -10,18 +10,14 @@ import type { RuleBump } from './shared/types';
 import { bumpVersion } from './shared/version-utils';
 
 const ROOT = path.resolve(__dirname, '../..');
-const LIB_RULE_PROCESSORS = path.join(
-  ROOT,
-  'libs',
-  'methodologies',
-  'bold',
-  'rule-processors',
-);
+const LIBS_METHODOLOGIES = path.join(ROOT, 'libs', 'methodologies');
 const DRY_RUN = process.argv.includes('--dry-run');
 
 interface DiscoveredRule {
   filePath: string;
+  methodology: string;
   ruleDir: string;
+  scope: string;
   slug: string;
   version: string;
 }
@@ -82,59 +78,80 @@ function discoverRuleDefinitions(): DiscoveredRule[] {
   const rules: DiscoveredRule[] = [];
   const slugRegex = /slug:\s*['"`]([^'"`]+)['"`]/;
   const versionRegex = /version:\s*['"`]([^'"`]+)['"`]/;
-  const slugLocations = new Map<string, string>();
+  const compositeKeyLocations = new Map<string, string>();
 
-  const scopes = fs
-    .readdirSync(LIB_RULE_PROCESSORS, { withFileTypes: true })
+  const methodologyDirs = fs
+    .readdirSync(LIBS_METHODOLOGIES, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
 
-  for (const scope of scopes) {
-    const scopeDir = path.join(LIB_RULE_PROCESSORS, scope);
-    const ruleDirs = fs
-      .readdirSync(scopeDir, { withFileTypes: true })
+  for (const methodology of methodologyDirs) {
+    const ruleProcessorsDir = path.join(
+      LIBS_METHODOLOGIES,
+      methodology,
+      'rule-processors',
+    );
+
+    if (!fs.existsSync(ruleProcessorsDir)) {
+      console.log(`  ${methodology}/: no rule-processors/ directory, skipping`);
+      continue;
+    }
+
+    const scopes = fs
+      .readdirSync(ruleProcessorsDir, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name);
 
-    for (const ruleDir of ruleDirs) {
-      const srcDir = path.join(scopeDir, ruleDir, 'src');
-      if (!fs.existsSync(srcDir)) continue;
+    for (const scope of scopes) {
+      const scopeDir = path.join(ruleProcessorsDir, scope);
+      const ruleDirs = fs
+        .readdirSync(scopeDir, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory())
+        .map((entry) => entry.name);
 
-      const files = fs.readdirSync(srcDir);
-      const defFile = files.find((f) => f.endsWith('.rule-definition.ts'));
-      if (!defFile) continue;
+      for (const ruleDir of ruleDirs) {
+        const srcDir = path.join(scopeDir, ruleDir, 'src');
+        if (!fs.existsSync(srcDir)) continue;
 
-      const filePath = path.join(srcDir, defFile);
-      const content = fs.readFileSync(filePath, 'utf8');
+        const files = fs.readdirSync(srcDir);
+        const defFile = files.find((f) => f.endsWith('.rule-definition.ts'));
+        if (!defFile) continue;
 
-      const slugMatch = slugRegex.exec(content);
-      const versionMatch = versionRegex.exec(content);
+        const filePath = path.join(srcDir, defFile);
+        const content = fs.readFileSync(filePath, 'utf8');
 
-      if (!slugMatch?.[1] || !versionMatch?.[1]) {
-        console.warn(
-          `  SKIP ${filePath}: slug=${slugMatch?.[1] ?? 'NOT FOUND'}, version=${versionMatch?.[1] ?? 'NOT FOUND'}`,
-        );
-        continue;
+        const slugMatch = slugRegex.exec(content);
+        const versionMatch = versionRegex.exec(content);
+
+        if (!slugMatch?.[1] || !versionMatch?.[1]) {
+          console.warn(
+            `  SKIP ${filePath}: slug=${slugMatch?.[1] ?? 'NOT FOUND'}, version=${versionMatch?.[1] ?? 'NOT FOUND'}`,
+          );
+          continue;
+        }
+
+        const slug = slugMatch[1];
+        const compositeKey = `${methodology}/${scope}/${slug}`;
+        const previousLocation = compositeKeyLocations.get(compositeKey);
+
+        if (previousLocation) {
+          throw new Error(
+            `Duplicate rule "${compositeKey}" found in ${filePath} and ${previousLocation}. ` +
+              'Slugs must be unique within the same methodology and processor scope.',
+          );
+        }
+
+        compositeKeyLocations.set(compositeKey, filePath);
+
+        rules.push({
+          filePath,
+          methodology,
+          ruleDir: path.join(scopeDir, ruleDir),
+          scope,
+          slug,
+          version: versionMatch[1],
+        });
       }
-
-      const slug = slugMatch[1];
-      const previousLocation = slugLocations.get(slug);
-
-      if (previousLocation) {
-        throw new Error(
-          `Duplicate slug "${slug}" found in ${filePath} and ${previousLocation}. ` +
-            'Slugs must be unique across all processor scopes.',
-        );
-      }
-
-      slugLocations.set(slug, filePath);
-
-      rules.push({
-        filePath,
-        ruleDir: path.join(scopeDir, ruleDir),
-        slug,
-        version: versionMatch[1],
-      });
     }
   }
 
@@ -254,9 +271,8 @@ function main(): void {
 
     for (const rule of rules) {
       const newVersion = bumpVersion(rule.version, bumpLevel);
-      const scope = path.basename(path.dirname(rule.ruleDir));
 
-      console.log(`  ${scope}/${slug}: ${rule.version} -> ${newVersion} (${bumpLevel})`);
+      console.log(`  ${rule.methodology}/${rule.scope}/${slug}: ${rule.version} -> ${newVersion} (${bumpLevel})`);
 
       if (!DRY_RUN) {
         updateRuleDefinitionVersion(rule.filePath, rule.version, newVersion);
@@ -266,8 +282,10 @@ function main(): void {
       results.push({
         bumpLevel,
         commits: ruleCommits,
+        methodology: rule.methodology,
         newVersion,
         previousVersion: rule.version,
+        scope: rule.scope,
         slug,
       });
     }

@@ -336,8 +336,9 @@ function analyzeMethodologyBumps(ruleBumps: RuleBump[]): AnalysisResult {
 
     // Collect rule bumps that belong to this methodology
     const currentSlugSet = new Set(currentSlugs);
-    const matchingRuleBumps = ruleBumps.filter((rb) =>
-      currentSlugSet.has(rb.slug),
+    const matchingRuleBumps = ruleBumps.filter(
+      (rb) =>
+        rb.methodology === methodology.key && currentSlugSet.has(rb.slug),
     );
 
     if (matchingRuleBumps.length > 0) {

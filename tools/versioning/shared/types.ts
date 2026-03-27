@@ -5,8 +5,10 @@ export type BumpLevel = 'major' | 'minor' | 'patch';
 export const RuleBumpSchema = z.object({
   bumpLevel: z.enum(['major', 'minor', 'patch']),
   commits: z.array(z.string()),
+  methodology: z.string(),
   newVersion: z.string(),
   previousVersion: z.string(),
+  scope: z.string(),
   slug: z.string(),
 });
 
