@@ -205,6 +205,7 @@ function generateReadme(
     byScopedDirSlug: Map<string, RuleProcessorInfo>;
   },
   readmeDir: string,
+  methodologyKey: string,
 ): string {
   const scopeSections: string[] = [];
 
@@ -213,7 +214,17 @@ function generateReadme(
       const processor = resolveProcessor(scope, slug, processorIndex);
 
       if (processor) {
-        const relativePath = path.relative(readmeDir, processor.directoryPath);
+        const generatedReadme = path.join(
+          ROOT,
+          'apps',
+          'methodologies',
+          methodologyKey,
+          'rule-processors',
+          scope,
+          slug,
+          'README.md',
+        );
+        const relativePath = path.relative(readmeDir, generatedReadme);
         const nameLink = `[${processor.name}](${relativePath})`;
 
         return `| ${String(index + 1)} | ${nameLink} | ${processor.version} |`;
@@ -351,6 +362,7 @@ function main(): void {
       rulesConfig,
       processorIndex,
       readmeDir,
+      methodology.key,
     );
 
     try {
