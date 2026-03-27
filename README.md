@@ -30,7 +30,7 @@ Rule processors are the core units of the MvA. Each one evaluates [MassID](https
 
 ## Project Structure
 
-```
+```text
 methodology-rules/
 ├── apps/methodologies/          # Methodology applications (Lambda deployments)
 │   ├── bold-carbon/             #   BOLD Carbon CH₄
