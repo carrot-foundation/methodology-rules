@@ -26,7 +26,7 @@ Every methodology in the Carrot Network has three layers:
 | **MvF** (Methodology Verification Framework) | Specification translating the methodology into concrete verification rules | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies/concepts/mvf) |
 | **MvA** (Methodology Verification Application) | Open-source rule processors implementing the MvF | **This repository** · [docs](https://docs.carrot.eco/docs/methodologies/concepts/mva) |
 
-Rule processors are the core units of the MvA. Each one evaluates [MassID](https://docs.carrot.eco/docs/concepts/mass-ids) documents — digital records tracking material type, weight, and chain of custody — and returns `PASSED` or `FAILED` with a traceable explanation.
+Rule processors are the core units of the MvA. Each one evaluates [MassID](https://docs.carrot.eco/docs/concepts/mass-ids) documents — digital records tracking material type, weight, and chain of custody — and returns `PASSED`, `FAILED`, or `REVIEW_REQUIRED` with a traceable explanation.
 
 ## Project Structure
 
@@ -100,7 +100,7 @@ Every rule processor follows a standardized pattern:
 
 1. **`loadDocument()`** — Fetches the documents needed for evaluation
 2. **`getRuleSubject()`** — Extracts the specific data elements to evaluate
-3. **`evaluateResult()`** — Applies verification logic, returns `PASSED` or `FAILED`
+3. **`evaluateResult()`** — Applies verification logic, returns `PASSED`, `FAILED`, or `REVIEW_REQUIRED`
 
 Complex processors may override `process()` with custom document loading and evaluation logic.
 
