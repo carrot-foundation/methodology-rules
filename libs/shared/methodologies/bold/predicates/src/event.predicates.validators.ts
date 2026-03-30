@@ -1,22 +1,22 @@
 import { z } from 'zod';
 
-const DocumentEventSchema = z.object({
-  address: z.object({}),
-  author: z.object({}),
+const DocumentEventSchema = z.looseObject({
+  address: z.looseObject({}),
+  author: z.looseObject({}),
   externalCreatedAt: z.string(),
   id: z.string(),
   isPublic: z.boolean(),
   metadata: z
-    .object({
+    .looseObject({
       attributes: z.array(
-        z.object({
+        z.looseObject({
           name: z.string(),
         }),
       ),
     })
     .optional(),
   name: z.string(),
-  participant: z.object({
+  participant: z.looseObject({
     id: z.string(),
     type: z.string(),
   }),

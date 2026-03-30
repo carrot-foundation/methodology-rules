@@ -1,10 +1,10 @@
 import { z } from 'zod';
 
-const DocumentEventWithMetadataSchema = z.object({
-  metadata: z.object({
+const DocumentEventWithMetadataSchema = z.looseObject({
+  metadata: z.looseObject({
     attributes: z
       .array(
-        z.object({
+        z.looseObject({
           isPublic: z.boolean(),
           name: z.string(),
           value: z.unknown().optional(),
@@ -14,10 +14,10 @@ const DocumentEventWithMetadataSchema = z.object({
   }),
 });
 
-const DocumentEventWithAttachmentsSchema = z.object({
+const DocumentEventWithAttachmentsSchema = z.looseObject({
   attachments: z
     .array(
-      z.object({
+      z.looseObject({
         attachmentId: z.string(),
         contentLength: z.number(),
         isPublic: z.boolean(),

@@ -35,12 +35,14 @@ import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
-const ACTORS_REQUIRING_DATES = new Set([
+const ACTORS_REQUIRING_DATES: ReadonlySet<DocumentEventLabel> = new Set([
   DocumentEventLabel.PROCESSOR,
   DocumentEventLabel.RECYCLER,
 ]);
 
-const ACTORS_WITH_OPTIONAL_DATES = new Set([DocumentEventLabel.INTEGRATOR]);
+const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<DocumentEventLabel> = new Set([
+  DocumentEventLabel.INTEGRATOR,
+]);
 
 interface RuleSubject {
   accreditationDocuments: Map<string, Document[]>;

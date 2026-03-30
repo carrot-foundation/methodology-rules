@@ -11,7 +11,7 @@ import {
 } from './document-enum.types';
 import { DocumentParticipantSchema } from './document-participant.types';
 
-// --- ApproveException (unchanged names — not Methodology-prefixed) ---
+// --- ApprovedException (unchanged names — not Methodology-prefixed) ---
 
 export const ApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
@@ -123,7 +123,7 @@ export type DocumentEventRelation = z.infer<typeof DocumentEventRelationSchema>;
 
 // --- DocumentEventSchema (renamed from MethodologyDocumentEventSchema) ---
 
-export const DocumentEventSchema = z.object({
+export const DocumentEventSchema = z.looseObject({
   address: DocumentAddressSchema,
   attachments: z.array(DocumentEventAttachmentSchema).optional(),
   author: DocumentAuthorSchema,

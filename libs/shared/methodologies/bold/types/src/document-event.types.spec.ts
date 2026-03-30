@@ -51,7 +51,7 @@ describe('DocumentEventSchema', () => {
     );
   });
 
-  it('should strip unknown properties (strict object)', () => {
+  it('should preserve extra properties (looseObject passthrough)', () => {
     const stub = createStubFromSchema(DocumentEventSchema);
     const result = DocumentEventSchema.safeParse({
       ...stub,
@@ -59,6 +59,6 @@ describe('DocumentEventSchema', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).not.toHaveProperty('customField');
+    expect(result.success && result.data).toHaveProperty('customField');
   });
 });

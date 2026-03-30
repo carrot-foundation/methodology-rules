@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { NonEmptyStringSchema } from '../string.types';
 
-export const DocumentParticipantSchema = z.object({
+export const DocumentParticipantSchema = z.looseObject({
   businessName: NonEmptyStringSchema.optional(),
   countryCode: NonEmptyStringSchema,
   id: NonEmptyStringSchema,

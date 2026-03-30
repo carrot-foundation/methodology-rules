@@ -3,10 +3,8 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  ApprovedException,
-  ApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
+import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
+import type { ApprovedException } from '@carrot-fndn/shared/types';
 
 export interface GpsLatitudeApprovedException extends ApprovedException {
   'Attribute Location': {
@@ -16,7 +14,7 @@ export interface GpsLatitudeApprovedException extends ApprovedException {
     Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
   };
   'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LATITUDE;
-  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Exception Type': (typeof ApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
 
@@ -28,6 +26,6 @@ export interface GpsLongitudeApprovedException extends ApprovedException {
     Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
   };
   'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE;
-  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Exception Type': (typeof ApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }

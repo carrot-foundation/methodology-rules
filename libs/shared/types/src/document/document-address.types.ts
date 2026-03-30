@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { LatitudeSchema, LongitudeSchema } from '../number.types';
 import { NonEmptyStringSchema } from '../string.types';
 
-export const DocumentAddressSchema = z.object({
+export const DocumentAddressSchema = z.looseObject({
   city: NonEmptyStringSchema,
   countryCode: NonEmptyStringSchema,
   countryState: NonEmptyStringSchema,
