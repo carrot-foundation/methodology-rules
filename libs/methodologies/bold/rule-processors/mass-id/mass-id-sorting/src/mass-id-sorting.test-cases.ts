@@ -220,7 +220,7 @@ const {
     },
   })
   .createMassIDAuditDocuments()
-  .createInboundDocument()
+  .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
@@ -381,7 +381,7 @@ const invalidSortingValue = new BoldStubsBuilder()
     },
   })
   .createMassIDAuditDocuments()
-  .createInboundDocument()
+  .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 

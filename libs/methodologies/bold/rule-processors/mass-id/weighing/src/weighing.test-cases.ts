@@ -917,7 +917,7 @@ const {
 } = new BoldStubsBuilder()
   .createMassIDDocuments()
   .createMassIDAuditDocuments()
-  .createInboundDocument()
+  .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 

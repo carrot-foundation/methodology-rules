@@ -1013,7 +1013,7 @@ const {
     },
   })
   .createMassIDAuditDocuments()
-  .createInboundDocument()
+  .createMethodologyDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
