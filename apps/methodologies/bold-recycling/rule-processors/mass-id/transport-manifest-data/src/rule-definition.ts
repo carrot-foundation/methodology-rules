@@ -8,13 +8,7 @@ export const ruleDefinition = {
   description:
     'Validates transport manifest events in MassID documents, ensuring they contain required attributes, proper attachments, and valid exemption justifications.',
   methodologyFrameworkRules: [
-    'has-recycling-manifest',
     'has-transport-manifest',
-    'recycling-manifest-address',
-    'recycling-manifest-attachment',
-    'recycling-manifest-exemption-justification',
-    'recycling-manifest-fields',
-    'recycling-manifest-value',
     'transport-manifest-attachment',
     'transport-manifest-exemption-justification',
     'transport-manifest-fields',
