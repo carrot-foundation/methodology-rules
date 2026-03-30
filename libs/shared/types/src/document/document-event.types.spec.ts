@@ -1,5 +1,6 @@
 import {
   DocumentAuthorSchema,
+  DocumentEventSchema,
   DocumentParticipantSchema,
   isApprovedExceptionAttributeValue,
 } from './index';
@@ -35,6 +36,73 @@ describe('DocumentParticipantSchema', () => {
     });
 
     expect(result.success).toBe(true);
+  });
+
+  it('should strip unknown fields (z.object default behavior)', () => {
+    const result = DocumentParticipantSchema.safeParse({
+      ...validParticipant,
+      extraField: 'should-be-stripped',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty('extraField');
+  });
+});
+
+describe('DocumentEventSchema', () => {
+  const validEvent = {
+    address: {
+      city: 'Test City',
+      countryCode: 'BR',
+      countryState: 'SP',
+      id: 'addr-1',
+      latitude: -23.5,
+      longitude: -46.6,
+      neighborhood: 'Test Neighborhood',
+      number: '123',
+      participantId: 'participant-1',
+      piiSnapshotId: 'pii-1',
+      street: 'Test Street',
+      zipCode: '01000-000',
+    },
+    author: {
+      clientId: 'client-1',
+      dataSetName: 'TEST',
+      participantId: 'participant-1',
+    },
+    externalCreatedAt: '2026-01-01T00:00:00+00:00',
+    id: 'event-1',
+    isPublic: true,
+    name: 'Weighing',
+    participant: {
+      countryCode: 'BR',
+      id: 'participant-1',
+      name: 'Test Participant',
+      piiSnapshotId: 'pii-1',
+      taxId: '12345678901',
+      taxIdType: 'CPF',
+      type: 'ACTOR',
+    },
+  };
+
+  it('should accept a valid document event', () => {
+    expect(DocumentEventSchema.safeParse(validEvent).success).toBe(true);
+  });
+
+  it('should reject empty id', () => {
+    expect(
+      DocumentEventSchema.safeParse({ ...validEvent, id: '' }).success,
+    ).toBe(false);
+  });
+
+  it('should strip unknown fields (z.object default behavior)', () => {
+    const result = DocumentEventSchema.safeParse({
+      ...validEvent,
+      extraField: 'should-be-stripped',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.data).not.toHaveProperty('extraField');
   });
 });
 

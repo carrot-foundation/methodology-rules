@@ -9,7 +9,7 @@ import { DataSetNameSchema, DocumentStatusSchema } from './document-enum.types';
 import { DocumentEventSchema } from './document-event.types';
 import { DocumentParticipantSchema } from './document-participant.types';
 
-export const InboundDocumentSchema = z.looseObject({
+export const InboundDocumentSchema = z.object({
   attachments: z.array(DocumentAttachmentSchema).optional(),
   category: z.string(),
   createdAt: DateTimeSchema,

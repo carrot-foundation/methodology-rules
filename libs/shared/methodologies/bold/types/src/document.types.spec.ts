@@ -44,14 +44,14 @@ describe('BoldDocumentSchema', () => {
     ).toBe(false);
   });
 
-  it('should preserve extra properties (looseObject passthrough)', () => {
+  it('should strip unknown fields (z.object default behavior)', () => {
     const stub = createStubFromSchema(BoldDocumentSchema);
     const result = BoldDocumentSchema.safeParse({
       ...stub,
-      unknownProp: 'preserved',
+      unknownProp: 'should-be-stripped',
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toHaveProperty('unknownProp');
+    expect(result.success && result.data).not.toHaveProperty('unknownProp');
   });
 });

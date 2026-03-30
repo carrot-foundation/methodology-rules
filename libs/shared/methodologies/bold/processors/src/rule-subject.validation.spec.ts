@@ -51,4 +51,49 @@ describe('validateRuleSubjectOrThrow', () => {
 
     expect(loggerErrorSpy).toHaveBeenCalled();
   });
+
+  it('should use first issue message when it is a custom message', () => {
+    const schemaWithCustomMessage = z.object({
+      items: z.array(z.string()).superRefine((items, context) => {
+        if (items.length === 0) {
+          context.addIssue('Custom: no items found.');
+        }
+      }),
+    });
+
+    expect(() =>
+      validateRuleSubjectOrThrow({
+        errors,
+        input: { items: [] },
+        schema: schemaWithCustomMessage,
+        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      }),
+    ).toThrow('Custom: no items found.');
+  });
+
+  it('should fall back to validationMessage when first issue is generic', () => {
+    expect(() =>
+      validateRuleSubjectOrThrow({
+        errors,
+        input: {},
+        schema,
+        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      }),
+    ).toThrow('The rule subject is invalid.');
+  });
+
+  it('should fall back to validationMessage when issue message is undefined', () => {
+    const alwaysFailSchema = z.object({}).superRefine((_data, context) => {
+      context.addIssue({ code: 'custom' } as never);
+    });
+
+    expect(() =>
+      validateRuleSubjectOrThrow({
+        errors,
+        input: {},
+        schema: alwaysFailSchema,
+        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      }),
+    ).toThrow('The rule subject is invalid.');
+  });
 });

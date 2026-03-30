@@ -7,6 +7,9 @@ import {
   DocumentEventAttributeFormatSchema,
   DocumentEventAttributeType,
   DocumentEventAttributeTypeSchema,
+  DocumentEventLabelSchema,
+  DocumentEventName,
+  DocumentEventNameSchema,
   DocumentStatus,
   DocumentStatusSchema,
   DocumentType,
@@ -142,6 +145,39 @@ describe('MassIDLikeDocumentTypeSchema', () => {
     expect(
       MassIDLikeDocumentTypeSchema.safeParse(DocumentType.CREDIT_ORDER).success,
     ).toBe(false);
+  });
+});
+
+describe('DocumentEventNameSchema', () => {
+  it('should parse known event name values', () => {
+    expect(DocumentEventNameSchema.parse(DocumentEventName.WEIGHING)).toBe(
+      'Weighing',
+    );
+    expect(DocumentEventNameSchema.parse(DocumentEventName.ACTOR)).toBe(
+      'ACTOR',
+    );
+  });
+
+  it('should provide dot-notation access', () => {
+    expect(DocumentEventName.SORTING).toBe('Sorting');
+  });
+
+  it('should reject invalid values', () => {
+    expect(DocumentEventNameSchema.safeParse('Unknown Event').success).toBe(
+      false,
+    );
+  });
+});
+
+describe('DocumentEventLabelSchema', () => {
+  it('should accept actor type values as labels', () => {
+    expect(DocumentEventLabelSchema.parse(ActorType.RECYCLER)).toBe('Recycler');
+  });
+
+  it('should reject invalid values', () => {
+    expect(DocumentEventLabelSchema.safeParse('Unknown Label').success).toBe(
+      false,
+    );
   });
 });
 

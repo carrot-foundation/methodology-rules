@@ -51,8 +51,10 @@ import {
   getOthersIfOrganicContextFromMassIdDocument,
   OthersIfOrganicAuditDetails,
 } from './prevented-emissions.others-organic.helpers';
-import { PreventedEmissionsRuleSubjectSchema } from './prevented-emissions.rule-subject';
-import { type RuleSubject } from './prevented-emissions.types';
+import {
+  type PreventedEmissionsRuleSubject,
+  PreventedEmissionsRuleSubjectSchema,
+} from './prevented-emissions.rule-subject';
 
 const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
 
@@ -79,7 +81,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       });
 
       const { resultComment, resultContent, resultStatus } =
-        this.evaluateResult(validatedSubject as RuleSubject);
+        this.evaluateResult(validatedSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
@@ -90,7 +92,11 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       });
     } catch (error: unknown) {
       logger.error(
-        { documentId: ruleInput.documentId, error, ruleName: ruleInput.ruleName },
+        {
+          documentId: ruleInput.documentId,
+          error,
+          ruleName: ruleInput.ruleName,
+        },
         'Prevented-emissions processor failed',
       );
 
@@ -100,7 +106,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
   }
 
-  protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
+  protected evaluateResult(
+    ruleSubject: PreventedEmissionsRuleSubject,
+  ): EvaluateResultOutput {
     const {
       baseline,
       exceedingEmissionCoefficient,
@@ -190,7 +198,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIDDocument,
     recyclerAccreditationDocument,
-  }: Documents): RuleSubject {
+  }: Documents): PreventedEmissionsRuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:

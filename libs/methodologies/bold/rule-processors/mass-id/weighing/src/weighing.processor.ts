@@ -81,10 +81,14 @@ export class WeighingProcessor extends RuleDataProcessor {
         resultComment: evaluationResult.resultComment,
       });
     } catch (error) {
-      logger.error({
-        error,
-        message: `Error in weighing processor for document ${ruleInput.documentId}`,
-      });
+      logger.error(
+        {
+          documentId: ruleInput.documentId,
+          error,
+          ruleName: ruleInput.ruleName,
+        },
+        'Weighing processor failed',
+      );
 
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),

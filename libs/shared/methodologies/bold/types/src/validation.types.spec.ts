@@ -1,20 +1,21 @@
 import {
-  DocumentEventWithAttachmentsSchema,
-  DocumentEventWithMetadataSchema,
+  BoldDocumentEventWithAttachmentsSchema,
+  BoldDocumentEventWithMetadataSchema,
 } from './validation.types';
 
-describe('DocumentEventWithAttachmentsSchema', () => {
+describe('BoldDocumentEventWithAttachmentsSchema', () => {
   it('should reject empty attachments array', () => {
     expect(
-      DocumentEventWithAttachmentsSchema.safeParse({ attachments: [] }).success,
+      BoldDocumentEventWithAttachmentsSchema.safeParse({ attachments: [] })
+        .success,
     ).toBe(false);
   });
 });
 
-describe('DocumentEventWithMetadataSchema', () => {
+describe('BoldDocumentEventWithMetadataSchema', () => {
   it('should reject empty attributes array', () => {
     expect(
-      DocumentEventWithMetadataSchema.safeParse({
+      BoldDocumentEventWithMetadataSchema.safeParse({
         metadata: { attributes: [] },
       }).success,
     ).toBe(false);

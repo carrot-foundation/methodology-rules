@@ -30,7 +30,7 @@ export const loadDocument = async (
       return undefined;
     }
 
-    return validation.data as BoldDocument;
+    return validation.data;
   } catch (error) {
     logger.warn({ error }, `[loadDocument] Failed to load document: ${key}`);
 

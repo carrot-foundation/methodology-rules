@@ -3,18 +3,18 @@ import { z } from 'zod';
 
 import { BoldDocumentEventAttributeSchema } from './document-event.types';
 
-export const DocumentEventWithAttachmentsSchema = z.object({
+export const BoldDocumentEventWithAttachmentsSchema = z.object({
   attachments: z.array(DocumentEventAttachmentSchema).nonempty(),
 });
-export type DocumentEventWithAttachments = z.infer<
-  typeof DocumentEventWithAttachmentsSchema
+export type BoldDocumentEventWithAttachments = z.infer<
+  typeof BoldDocumentEventWithAttachmentsSchema
 >;
 
-export const DocumentEventWithMetadataSchema = z.object({
+export const BoldDocumentEventWithMetadataSchema = z.object({
   metadata: z.object({
     attributes: z.array(BoldDocumentEventAttributeSchema).nonempty(),
   }),
 });
-export type DocumentEventWithMetadata = z.infer<
-  typeof DocumentEventWithMetadataSchema
+export type BoldDocumentEventWithMetadata = z.infer<
+  typeof BoldDocumentEventWithMetadataSchema
 >;

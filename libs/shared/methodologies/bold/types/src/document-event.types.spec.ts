@@ -53,17 +53,14 @@ describe('BoldDocumentEventSchema', () => {
     ).toBe(false);
   });
 
-  it('should preserve extra properties (looseObject passthrough)', () => {
+  it('should strip unknown fields (z.object default behavior)', () => {
     const stub = createStubFromSchema(BoldDocumentEventSchema);
     const result = BoldDocumentEventSchema.safeParse({
       ...stub,
-      customField: 'custom-value',
+      customField: 'should-be-stripped',
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toHaveProperty(
-      'customField',
-      'custom-value',
-    );
+    expect(result.success && result.data).not.toHaveProperty('customField');
   });
 });

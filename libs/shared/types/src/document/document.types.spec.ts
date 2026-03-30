@@ -1,8 +1,4 @@
-import {
-  DocumentSchema,
-  InboundDocumentSchema,
-  LoadedDocumentEnvelopeSchema,
-} from './index';
+import { InboundDocumentSchema, LoadedDocumentEnvelopeSchema } from './index';
 
 const validAddress = {
   city: 'Test City',
@@ -69,25 +65,28 @@ describe('LoadedDocumentEnvelopeSchema', () => {
 });
 
 describe('InboundDocumentSchema', () => {
-  it('should preserve unknown fields at the boundary layer', () => {
+  it('should accept a valid inbound document', () => {
+    const result = InboundDocumentSchema.safeParse(validInboundDocument);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('should strip unknown fields (z.object default behavior)', () => {
     const result = InboundDocumentSchema.safeParse({
       ...validInboundDocument,
-      transportOnlyField: 'should-survive',
+      transportOnlyField: 'should-be-stripped',
     });
 
     expect(result.success).toBe(true);
-    expect(result.data).toHaveProperty('transportOnlyField');
+    expect(result.data).not.toHaveProperty('transportOnlyField');
   });
-});
 
-describe('DocumentSchema', () => {
-  it('should strip unknown fields that are not part of the normalized model', () => {
-    const result = DocumentSchema.safeParse({
-      ...validInboundDocument,
-      unknownField: 'should-be-stripped',
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.data).not.toHaveProperty('unknownField');
+  it('should reject missing required fields', () => {
+    expect(
+      InboundDocumentSchema.safeParse({
+        ...validInboundDocument,
+        id: undefined,
+      }).success,
+    ).toBe(false);
   });
 });

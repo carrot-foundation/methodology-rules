@@ -276,7 +276,7 @@ export const weighingTestCases: WeighingTestCase[] = [
     massIDDocumentEvents: {
       [WEIGHING]: undefined,
     },
-    resultComment: processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+    resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
     resultStatus: 'FAILED',
     scenario: `The MassID document does not have "${WEIGHING}" events`,
   },
@@ -286,7 +286,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [`${WEIGHING}-2`]: stubBoldMassIDWeighingEvent(),
       [`${WEIGHING}-3`]: stubBoldMassIDWeighingEvent(),
     },
-    resultComment: processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+    resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
     resultStatus: 'FAILED',
     scenario: `The MassID document has more than two "${WEIGHING}" events`,
   },

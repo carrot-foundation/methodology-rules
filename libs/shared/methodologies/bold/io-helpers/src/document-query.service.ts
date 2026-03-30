@@ -53,7 +53,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
           );
         }
 
-        return validation.data as unknown as BoldDocument;
+        return validation.data;
       },
     };
 

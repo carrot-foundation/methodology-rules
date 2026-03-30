@@ -91,7 +91,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([parentDocument]);
+      expect(result).toMatchObject([parentDocument]);
     });
 
     it('should return array with parentDocument and its parentDocument', async () => {
@@ -155,7 +155,10 @@ describe('DocumenQueryService', () => {
 
       // Check that it was called with the right documents, regardless of order
       expect(mockLoad).toHaveBeenCalled();
-      expect(result).toEqual([parentDocument, parentDocumentOfParentDocument]);
+      expect(result).toMatchObject([
+        parentDocument,
+        parentDocumentOfParentDocument,
+      ]);
 
       // Verify each document was loaded by checking if their IDs appear in any of the keys
       const callArguments = mockLoad.mock.calls.map((call) => call[0].key);
@@ -216,7 +219,10 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(3);
-      expect(result).toEqual([parentDocument, relatedDocument]);
+      expect(result.map((d) => d.id)).toEqual([
+        parentDocument.id,
+        relatedDocument.id,
+      ]);
     });
 
     it('should return array with parentDocument and relatedDocuments and its parentDocuments and relatedDocuments', async () => {
@@ -335,7 +341,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(7);
-      expect(result).toEqual([
+      expect(result).toMatchObject([
         parentDocument,
         relatedDocumentOfParentDocument,
         parentDocumentOfRelatedDocumentOfParentDocument,
@@ -385,7 +391,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([relatedDocument]);
+      expect(result).toMatchObject([relatedDocument]);
     });
 
     it('should return relatedDocuments with bidirectional false in array', async () => {
@@ -420,7 +426,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([relatedDocument]);
+      expect(result).toMatchObject([relatedDocument]);
     });
 
     it('should return empty array when relatedDocuments criteria is array empty', async () => {
@@ -529,7 +535,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(3);
-      expect(result).toEqual([relatedDocument]);
+      expect(result.map((d) => d.id)).toEqual([relatedDocument.id]);
     });
   });
 

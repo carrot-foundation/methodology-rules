@@ -8,11 +8,7 @@ const DocumentEventSchema = z.looseObject({
   isPublic: z.boolean(),
   metadata: z
     .looseObject({
-      attributes: z.array(
-        z.looseObject({
-          name: z.string(),
-        }),
-      ),
+      attributes: z.array(z.looseObject({ name: z.string() })),
     })
     .optional(),
   name: z.string(),

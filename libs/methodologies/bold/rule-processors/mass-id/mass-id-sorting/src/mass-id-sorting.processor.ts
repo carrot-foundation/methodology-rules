@@ -6,6 +6,7 @@ import {
   getOrUndefined,
   isNil,
   isNonEmptyString,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
@@ -82,6 +83,15 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
+      logger.error(
+        {
+          documentId: ruleInput.documentId,
+          error,
+          ruleName: ruleInput.ruleName,
+        },
+        'Mass-id-sorting processor failed',
+      );
+
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });

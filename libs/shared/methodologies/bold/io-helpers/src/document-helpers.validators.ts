@@ -1,6 +1,6 @@
-import { InboundDocumentSchema } from '@carrot-fndn/shared/types';
+import { BoldDocumentSchema } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const validateDocument = (
   input: unknown,
-): ReturnType<typeof InboundDocumentSchema.safeParse> =>
-  InboundDocumentSchema.safeParse(input);
+): ReturnType<typeof BoldDocumentSchema.safeParse> =>
+  BoldDocumentSchema.safeParse(input);

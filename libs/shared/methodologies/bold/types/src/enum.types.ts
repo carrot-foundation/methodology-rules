@@ -86,7 +86,7 @@ export enum DocumentEventContainerType {
   WASTE_BOX = 'Waste Box',
 }
 
-// Values sourced from BaseDocumentEventName (shared const object)
+// Values linked to BaseDocumentEventName — compile-time assertion below catches drift
 export enum DocumentEventName {
   ACCREDITATION_CONTEXT = 'Accreditation Context',
   ACCREDITATION_RESULT = 'Accreditation Result',
@@ -164,7 +164,7 @@ export enum MassIDOrganicSubtype {
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
-// Values sourced from ActorType (shared const object)
+// Values linked to ActorType and MassIDOrganicSubtype — compile-time assertion below catches drift
 export enum DocumentSubtype {
   DOMESTIC_SLUDGE = MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
@@ -196,7 +196,7 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
-// Values sourced from ActorType (shared const object)
+// Values linked to ActorType — compile-time assertion below catches drift
 export enum MassIDDocumentActorType {
   HAULER = 'Hauler',
   INTEGRATOR = 'Integrator',
@@ -215,7 +215,7 @@ export enum MethodologyBaseline {
   OPEN_AIR_DUMP = 'Open-air dump',
 }
 
-// Values sourced from ActorType (shared const object)
+// Values linked to ActorType — compile-time assertion below catches drift
 export enum MethodologyDocumentActorType {
   COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
   METHODOLOGY_AUTHOR = 'Methodology Author',
