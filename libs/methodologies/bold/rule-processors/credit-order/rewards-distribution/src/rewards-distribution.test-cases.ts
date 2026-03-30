@@ -26,13 +26,13 @@ import {
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
+import { ActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 type ActorResult = {
-  actorType: MethodologyActorType | RewardsDistributionActorType;
+  actorType: ActorType | RewardsDistributionActorType;
   amount: string;
   percentage: string;
 };
@@ -421,7 +421,7 @@ const expectedResults = {
       percentage: '1',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: ActorType.REMAINDER,
       amount: '0',
       percentage: '0',
     },
@@ -484,7 +484,7 @@ const expectedResults = {
       percentage: '20.000003',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: ActorType.REMAINDER,
       amount: '0.000001',
       percentage: '0.000003',
     },
@@ -537,7 +537,7 @@ const expectedResults = {
       percentage: '1',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: ActorType.REMAINDER,
       amount: '0',
       percentage: '0',
     },

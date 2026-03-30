@@ -11,12 +11,12 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
 
 const { ACTOR } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 
 type Subject = {
   recyclerActorEvents?: DocumentEvent[] | undefined;

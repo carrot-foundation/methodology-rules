@@ -13,8 +13,8 @@ import {
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   DataSetName,
-  MethodologyParticipantType,
   type NonEmptyString,
+  ParticipantType,
 } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.validators';
@@ -36,7 +36,7 @@ export const isRecycledEvent = (event: DocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.RECYCLED);
 
 export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
-  event.participant.type === MethodologyParticipantType.ACTOR.toString();
+  event.participant.type === ParticipantType.ACTOR.toString();
 
 export const eventHasNonEmptyStringAttribute = (
   event: DocumentEvent,

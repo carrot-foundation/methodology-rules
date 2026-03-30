@@ -9,13 +9,13 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventLabel,
+  DocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 
 export type EventsData = {
   dropOffEvent: DocumentEvent;

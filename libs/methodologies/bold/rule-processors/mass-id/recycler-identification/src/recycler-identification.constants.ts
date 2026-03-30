@@ -1,8 +1,8 @@
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { ACTOR } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 
 export const RESULT_COMMENTS = {
   failed: {

@@ -23,8 +23,8 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   ApprovedException,
-  MethodologyApprovedExceptionType,
-  MethodologyDocumentEventAttributeFormat,
+  ApprovedExceptionType,
+  DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -52,7 +52,7 @@ const {
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
 const { RECYCLER } = MassIDDocumentActorType;
-const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
+const { KILOGRAM } = DocumentEventAttributeFormat;
 
 const scaleType = stubEnumValue(DocumentEventScaleType);
 const twoStepScaleType = DocumentEventScaleType.WEIGHBRIDGE;
@@ -93,7 +93,7 @@ const stubBaseAccreditationDocuments = ({
         Event: WEIGHING,
       },
       'Attribute Name': CONTAINER_CAPACITY,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'The container capacity is not required for this event',
     });
   }
@@ -107,7 +107,7 @@ const stubBaseAccreditationDocuments = ({
         Event: WEIGHING,
       },
       'Attribute Name': CONTAINER_QUANTITY,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'The container quantity is not required for this event',
     });
   }
@@ -121,7 +121,7 @@ const stubBaseAccreditationDocuments = ({
         Event: WEIGHING,
       },
       'Attribute Name': TARE,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason:
         'Legacy manual weighing system only captured net weight for TRUCK containers',
     };
@@ -917,7 +917,7 @@ const {
 } = new BoldStubsBuilder()
   .createMassIDDocuments()
   .createMassIDAuditDocuments()
-  .createMethodologyDocument()
+  .createInboundDocument()
   .createParticipantAccreditationDocuments()
   .build();
 

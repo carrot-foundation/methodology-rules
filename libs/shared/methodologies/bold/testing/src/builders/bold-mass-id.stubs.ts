@@ -17,8 +17,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
+  DocumentEventAttributeFormat,
   type LicensePlate,
-  MethodologyDocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { format } from 'date-fns';
@@ -77,7 +77,7 @@ const {
   WASTE_ORIGIN,
   WEIGHING_CAPTURE_METHOD,
 } = DocumentEventAttributeName;
-const { DATE, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
+const { DATE, KILOGRAM } = DocumentEventAttributeFormat;
 
 const defaultPickUpAttributes: MetadataAttributeParameter[] = [
   [WASTE_ORIGIN, faker.datatype.boolean()],

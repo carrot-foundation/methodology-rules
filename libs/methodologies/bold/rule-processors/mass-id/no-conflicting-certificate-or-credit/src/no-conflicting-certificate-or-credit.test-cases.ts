@@ -14,7 +14,7 @@ import {
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
+import { DocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
@@ -28,7 +28,7 @@ const processorError = new NoConflictingCertificateOrCreditProcessorErrors();
 
 const openDocumentField = {
   partialDocument: {
-    status: MethodologyDocumentStatus.OPEN,
+    status: DocumentStatus.OPEN,
   },
 };
 
@@ -195,7 +195,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         massIDWithAuditStubs.massIDAuditDocument,
         {
           ...massIDWithAuditStubs.massIDCertificateDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
@@ -209,11 +209,11 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         massIDWithAuditStubs.massIDAuditDocument,
         {
           ...massIDWithAuditStubs.massIDCertificateDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
         {
           ...massIDWithCreditsStubs.creditOrderDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,

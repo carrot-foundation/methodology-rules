@@ -9,7 +9,7 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 import { OPTIONAL_HAULER_VEHICLE_TYPES } from './hauler-identification.processor';
@@ -19,7 +19,7 @@ interface HaulerIdentificationTestCase extends RuleTestCase {
 }
 
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = MethodologyDocumentEventLabel;
+const { HAULER } = DocumentEventLabel;
 const { VEHICLE_TYPE } = DocumentEventAttributeName;
 const { TRUCK } = DocumentEventVehicleType;
 

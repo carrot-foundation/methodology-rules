@@ -7,15 +7,15 @@ import {
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
+  DocumentEventAttributeFormat,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
 const { RECYCLING_MANIFEST } = DocumentEventName;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { DATE } = DocumentEventAttributeFormat;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 const { MTR } = ReportType;
 
 export const RESULT_COMMENTS = {

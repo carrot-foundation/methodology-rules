@@ -15,9 +15,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
+  type DocumentAddress,
+  type DocumentParticipant,
   type Geolocation,
-  type MethodologyAddress,
-  type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -58,19 +58,19 @@ const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
-  massIDActorParticipants?: Map<string, MethodologyParticipant>;
+  massIDActorParticipants?: Map<string, DocumentParticipant>;
   massIDAuditDocumentIds?: string[];
   massIDCertificateDocumentIds?: string[];
   massIDDocumentIds?: string[];
-  methodologyActorParticipants?: Map<string, MethodologyParticipant>;
+  methodologyActorParticipants?: Map<string, DocumentParticipant>;
   methodologyName?: BoldMethodologyName;
 }
 
 export interface BoldStubsBuilderResult {
   boldMethodologyName: BoldMethodologyName;
   creditOrderDocument: Document;
-  massIDActorParticipants: Map<string, MethodologyParticipant>;
-  massIDActorParticipantsAddresses: Map<string, MethodologyAddress>;
+  massIDActorParticipants: Map<string, DocumentParticipant>;
+  massIDActorParticipantsAddresses: Map<string, DocumentAddress>;
   massIDAuditDocument: Document;
   massIDAuditDocuments: Document[];
   massIDAuditIds: string[];
@@ -79,7 +79,7 @@ export interface BoldStubsBuilderResult {
   massIDDocument: Document;
   massIDDocumentIds: string[];
   massIDDocuments: Document[];
-  methodologyActorParticipants: Map<string, MethodologyParticipant>;
+  methodologyActorParticipants: Map<string, DocumentParticipant>;
   methodologyDocument: Document | undefined;
   participantsAccreditationDocuments: Map<string, Document>;
 }
@@ -124,11 +124,11 @@ export class BoldStubsBuilder {
 
   private creditOrderRelation?: DocumentRelation;
 
-  private readonly massIDActorParticipants: Map<string, MethodologyParticipant>;
+  private readonly massIDActorParticipants: Map<string, DocumentParticipant>;
 
   private readonly massIDActorParticipantsAddresses: Map<
     string,
-    MethodologyAddress
+    DocumentAddress
   >;
 
   private massIDAuditDocumentIds: string[];
@@ -145,7 +145,7 @@ export class BoldStubsBuilder {
 
   private readonly methodologyActorParticipants: Map<
     string,
-    MethodologyParticipant
+    DocumentParticipant
   >;
 
   private methodologyDocument?: Document;
@@ -771,7 +771,7 @@ export class BoldStubsBuilder {
     };
   }
 
-  private initializeActorAddresses(): Map<string, MethodologyAddress> {
+  private initializeActorAddresses(): Map<string, DocumentAddress> {
     return new Map(
       MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => {
         const coords = this.actorsCoordinates.get(subtype)!.base;
@@ -802,8 +802,8 @@ export class BoldStubsBuilder {
   }
 
   private initializeMassIDActorParticipants(
-    providedParticipants?: Map<string, MethodologyParticipant>,
-  ): Map<string, MethodologyParticipant> {
+    providedParticipants?: Map<string, DocumentParticipant>,
+  ): Map<string, DocumentParticipant> {
     if (providedParticipants) {
       return providedParticipants;
     }
@@ -817,8 +817,8 @@ export class BoldStubsBuilder {
   }
 
   private initializeMethodologyActorParticipants(
-    providedParticipants?: Map<string, MethodologyParticipant>,
-  ): Map<string, MethodologyParticipant> {
+    providedParticipants?: Map<string, DocumentParticipant>,
+  ): Map<string, DocumentParticipant> {
     if (providedParticipants) {
       return providedParticipants;
     }

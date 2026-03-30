@@ -27,7 +27,7 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import { type DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   RESULT_COMMENTS,
@@ -59,10 +59,7 @@ interface SortingData {
   deductedWeight: number;
   documentCurrentValue: number;
   grossWeight: number;
-  sortingDescription:
-    | MethodologyDocumentEventAttributeValue
-    | string
-    | undefined;
+  sortingDescription: DocumentEventAttributeValue | string | undefined;
   sortingFactor: number;
   sortingValueCalculationDifference: number;
   valueAfterSorting: number;

@@ -3,7 +3,7 @@ import {
   MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeValue,
+  DocumentEventAttributeValue,
   NonEmptyString,
   NonNegativeFloat,
   PercentageString,
@@ -20,9 +20,7 @@ export type OthersIfOrganicRuleSubjectIds = {
 
 export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
   baseline: MethodologyBaseline | undefined;
-  exceedingEmissionCoefficient:
-    | MethodologyDocumentEventAttributeValue
-    | undefined;
+  exceedingEmissionCoefficient: DocumentEventAttributeValue | undefined;
   gasType: NonEmptyString;
   massIDDocumentValue: NonNegativeFloat;
   wasteSubtype: MassIDOrganicSubtype;

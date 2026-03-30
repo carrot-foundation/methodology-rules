@@ -7,7 +7,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
+import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { addDays, subDays } from 'date-fns';
 
 import {
@@ -38,8 +38,7 @@ describe('Approved Exception Helpers', () => {
             Event: DocumentEventName.WEIGHING,
           },
           'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception reason',
         },
       ];
@@ -118,8 +117,7 @@ describe('Approved Exception Helpers', () => {
             Event: DocumentEventName.WEIGHING,
           },
           'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception',
         },
       ];
@@ -152,8 +150,7 @@ describe('Approved Exception Helpers', () => {
             Event: DocumentEventName.WEIGHING,
           },
           'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception',
         },
       ];
@@ -190,7 +187,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
       };
 
@@ -206,7 +203,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 5).toISOString(),
       };
@@ -223,7 +220,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 5).toISOString(),
       };
@@ -240,7 +237,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': 'invalid-date',
       };
@@ -262,7 +259,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': fixedDate.toISOString(),
       };
@@ -281,7 +278,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 1).toISOString(),
       };
@@ -298,7 +295,7 @@ describe('Approved Exception Helpers', () => {
           Event: DocumentEventName.WEIGHING,
         },
         'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 1).toISOString(),
       };

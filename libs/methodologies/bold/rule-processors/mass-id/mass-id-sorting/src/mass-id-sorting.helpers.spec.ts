@@ -4,7 +4,7 @@ import {
   type DocumentEventAttribute,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 import {
   findSortingEvents,
@@ -34,7 +34,7 @@ describe('mass-id-sorting helpers', () => {
 
     it('should return null when both value and format are valid', () => {
       const attribute: DocumentEventAttribute = {
-        format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
+        format: DocumentEventAttributeFormat.KILOGRAM,
         isPublic: true,
         name: 'test',
         value: 10,
@@ -66,12 +66,12 @@ describe('mass-id-sorting helpers', () => {
       const sortingEvent = stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
-            format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
+            format: DocumentEventAttributeFormat.KILOGRAM,
             name: DocumentEventAttributeName.GROSS_WEIGHT,
             value: 10,
           },
           {
-            format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
+            format: DocumentEventAttributeFormat.KILOGRAM,
             name: DocumentEventAttributeName.DEDUCTED_WEIGHT,
             value: 15,
           },
@@ -90,12 +90,12 @@ describe('mass-id-sorting helpers', () => {
       const sortingEvent = stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
-            format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
+            format: DocumentEventAttributeFormat.KILOGRAM,
             name: DocumentEventAttributeName.GROSS_WEIGHT,
             value: 10,
           },
           {
-            format: MethodologyDocumentEventAttributeFormat.KILOGRAM,
+            format: DocumentEventAttributeFormat.KILOGRAM,
             name: DocumentEventAttributeName.DEDUCTED_WEIGHT,
             value: 10,
           },

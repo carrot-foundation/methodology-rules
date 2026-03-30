@@ -21,8 +21,8 @@ import {
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type AnyObject,
-  type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventLabel,
+  type DocumentEventAttributeValue,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
@@ -36,11 +36,11 @@ const {
   LOCAL_WASTE_CLASSIFICATION_ID,
 } = DocumentEventAttributeName;
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 
 type Subject = {
-  description: MethodologyDocumentEventAttributeValue | string | undefined;
-  id: MethodologyDocumentEventAttributeValue | string | undefined;
+  description: DocumentEventAttributeValue | string | undefined;
+  id: DocumentEventAttributeValue | string | undefined;
   recyclerCountryCode: string;
   subtype: string;
 };

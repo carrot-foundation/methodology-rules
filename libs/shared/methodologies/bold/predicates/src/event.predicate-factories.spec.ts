@@ -7,7 +7,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -85,15 +85,14 @@ describe('Predicate Factories', () => {
 
   describe('eventLabelIsAnyOf', () => {
     it('should return true if the event has any of the specified labels', () => {
-      const { HAULER, RECYCLER } = MethodologyDocumentEventLabel;
+      const { HAULER, RECYCLER } = DocumentEventLabel;
       const event = stubDocumentEvent({ label: HAULER });
 
       expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified labels', () => {
-      const { HAULER, RECYCLER, WASTE_GENERATOR } =
-        MethodologyDocumentEventLabel;
+      const { HAULER, RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
       const event = stubDocumentEvent({ label: WASTE_GENERATOR });
 
       expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(false);

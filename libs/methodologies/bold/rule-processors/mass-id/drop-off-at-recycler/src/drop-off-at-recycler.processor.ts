@@ -15,22 +15,19 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventLabel,
+  type DocumentEventAttributeValue,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
 const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
 
 interface RuleSubject {
   lastDropOffEvent: DocumentEvent | undefined;
-  receivingOperatorIdentifier:
-    | MethodologyDocumentEventAttributeValue
-    | string
-    | undefined;
+  receivingOperatorIdentifier: DocumentEventAttributeValue | string | undefined;
   recyclerEvent: DocumentEvent | undefined;
 }
 

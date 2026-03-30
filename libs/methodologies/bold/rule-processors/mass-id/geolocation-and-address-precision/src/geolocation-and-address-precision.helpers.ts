@@ -17,8 +17,8 @@ import {
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  type DocumentAddress,
   type Geolocation,
-  type MethodologyAddress,
 } from '@carrot-fndn/shared/types';
 import { LatitudeSchema, LongitudeSchema } from '@carrot-fndn/shared/types';
 
@@ -67,7 +67,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
   participantId: string,
   actorType: MassIDDocumentActorType,
   accreditationDocuments: Document[],
-): MethodologyAddress | undefined => {
+): DocumentAddress | undefined => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
       isActorEvent(event) &&

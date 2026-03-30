@@ -4,7 +4,7 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyApprovedExceptionType,
+  ApprovedExceptionType,
   NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
@@ -25,9 +25,7 @@ const GpsLatitudeApprovedExceptionSchema = z.object({
     ]),
   }),
   'Attribute Name': z.literal(DocumentEventAttributeName.CAPTURED_GPS_LATITUDE),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -45,9 +43,7 @@ const GpsLongitudeApprovedExceptionSchema = z.object({
   'Attribute Name': z.literal(
     DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
   ),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });

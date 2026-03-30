@@ -1,4 +1,4 @@
-import type { MethodologyDocument } from '@carrot-fndn/shared/types';
+import type { InboundDocument } from '@carrot-fndn/shared/types';
 
 import { formatAsJson } from '@carrot-fndn/shared/cli';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -30,7 +30,7 @@ const logDocumentDetails = async (
 
   try {
     const entity = await provideDocumentLoaderService.load({ key });
-    const document = entity.document as MethodologyDocument;
+    const document = entity.document as InboundDocument;
 
     const events = document.externalEvents ?? [];
 

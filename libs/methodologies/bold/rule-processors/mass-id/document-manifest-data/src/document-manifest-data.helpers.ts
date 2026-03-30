@@ -8,9 +8,9 @@ import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttribute,
-  type MethodologyDocumentEventAttributeValue,
+  type DocumentEventAttachment,
+  type DocumentEventAttribute,
+  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 export type {
@@ -20,19 +20,19 @@ export type {
 } from '@carrot-fndn/shared/document-extractor';
 
 export interface DocumentManifestEventSubject {
-  attachment: MethodologyDocumentEventAttachment | undefined;
+  attachment: DocumentEventAttachment | undefined;
   documentNumber: EventAttributeValueType;
   documentType: EventAttributeValueType;
   eventAddressId: string | undefined;
   eventValue: number | undefined;
   exemptionJustification: EventAttributeValueType;
   hasWrongLabelAttachment: boolean;
-  issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
+  issueDateAttribute: DocumentEventAttribute | undefined;
   recyclerCountryCode: string | undefined;
 }
 
 export type EventAttributeValueType =
-  | MethodologyDocumentEventAttributeValue
+  | DocumentEventAttributeValue
   | string
   | undefined;
 

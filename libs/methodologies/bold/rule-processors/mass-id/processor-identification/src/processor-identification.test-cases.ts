@@ -2,11 +2,11 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 
-const { PROCESSOR } = MethodologyDocumentEventLabel;
+const { PROCESSOR } = DocumentEventLabel;
 const { ACTOR } = DocumentEventName;
 
 interface ProcessorIdentificationTestCase extends RuleTestCase {

@@ -16,12 +16,12 @@ import {
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = MethodologyDocumentEventLabel;
+const { HAULER } = DocumentEventLabel;
 const { VEHICLE_TYPE } = DocumentEventAttributeName;
 
 type Subject = {

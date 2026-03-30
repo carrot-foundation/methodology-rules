@@ -15,7 +15,7 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { getYear } from 'date-fns';
 
 const { SORTING } = DocumentEventName;
@@ -244,7 +244,7 @@ export const validateWeightAttribute = (
     };
   }
 
-  if (attribute.format !== MethodologyDocumentEventAttributeFormat.KILOGRAM) {
+  if (attribute.format !== DocumentEventAttributeFormat.KILOGRAM) {
     return {
       code:
         weightType === 'gross'

@@ -9,14 +9,14 @@ import {
   DocumentEventAttributeValue,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { WASTE_ORIGIN } = DocumentEventAttributeName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { WASTE_GENERATOR } = DocumentEventLabel;
 
 interface WasteOriginIdentificationTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;

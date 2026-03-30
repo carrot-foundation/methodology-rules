@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   ApprovedException,
-  MethodologyApprovedExceptionType,
+  ApprovedExceptionType,
 } from '@carrot-fndn/shared/types';
 
 export interface ContainerCapacityApprovedException extends ApprovedException {
@@ -16,7 +16,7 @@ export interface ContainerCapacityApprovedException extends ApprovedException {
     Event: DocumentEventName.WEIGHING;
   };
   'Attribute Name': DocumentEventAttributeName.CONTAINER_CAPACITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE;
   Reason: string;
 }
 
@@ -28,7 +28,7 @@ export interface ContainerQuantityApprovedException extends ApprovedException {
     Event: DocumentEventName.WEIGHING;
   };
   'Attribute Name': DocumentEventAttributeName.CONTAINER_QUANTITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE;
   Reason: string;
 }
 
@@ -40,6 +40,6 @@ export interface TareApprovedException extends ApprovedException {
     Event: DocumentEventName.WEIGHING;
   };
   'Attribute Name': DocumentEventAttributeName.TARE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE;
   Reason: string;
 }

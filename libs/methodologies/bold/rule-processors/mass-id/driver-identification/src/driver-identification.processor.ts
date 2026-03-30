@@ -1,5 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   getOrDefault,
@@ -27,11 +27,11 @@ const { PICK_UP } = DocumentEventName;
 const { SLUDGE_PIPES } = DocumentEventVehicleType;
 
 interface RuleSubject {
-  driverIdentifier: MethodologyDocumentEventAttributeValue | undefined;
+  driverIdentifier: DocumentEventAttributeValue | undefined;
   driverIdentifierExemptionJustification:
-    | MethodologyDocumentEventAttributeValue
+    | DocumentEventAttributeValue
     | undefined;
-  vehicleType: MethodologyDocumentEventAttributeValue | undefined;
+  vehicleType: DocumentEventAttributeValue | undefined;
 }
 
 export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {

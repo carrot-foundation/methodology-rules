@@ -13,7 +13,7 @@ import {
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addDays, getYear, subDays } from 'date-fns';
 
@@ -48,7 +48,7 @@ const {
   SCALE_TYPE,
   SORTING_FACTOR,
 } = DocumentEventAttributeName;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
+const { DATE } = DocumentEventAttributeFormat;
 
 const defaultAccreditationResultEventMetadataAttributes: MetadataAttributeParameter[] =
   [

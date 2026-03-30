@@ -12,8 +12,8 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
+  DocumentEventAttributeFormat,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
@@ -31,8 +31,8 @@ const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { CUBIC_METER, DATE } = MethodologyDocumentEventAttributeFormat;
+const { RECYCLER } = DocumentEventLabel;
+const { CUBIC_METER, DATE } = DocumentEventAttributeFormat;
 
 const attributeErrorMessages: Record<string, string> = {
   [DOCUMENT_NUMBER]: RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER,

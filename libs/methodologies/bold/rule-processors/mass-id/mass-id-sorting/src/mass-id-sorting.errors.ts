@@ -5,16 +5,16 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
+  DocumentEventAttributeFormat,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 const { MASS_ID } = DocumentCategory;
 const { SORTING } = DocumentEventName;
 const { DEDUCTED_WEIGHT, GROSS_WEIGHT, SORTING_FACTOR } =
   DocumentEventAttributeName;
-const { KILOGRAM } = MethodologyDocumentEventAttributeFormat;
+const { KILOGRAM } = DocumentEventAttributeFormat;
 
 export class MassIDSortingProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {

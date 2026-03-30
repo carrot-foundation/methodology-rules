@@ -30,7 +30,7 @@ import {
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
 import {
-  MethodologyAdditionalVerification,
+  AdditionalVerification,
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -257,7 +257,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }: {
     expectedNetWeight: number | undefined;
     massIDDocumentId: NonEmptyString;
-    scaleTicketConfig: MethodologyAdditionalVerification | undefined;
+    scaleTicketConfig: AdditionalVerification | undefined;
     weighingEvent: DocumentEvent;
   }): Promise<{
     errorResult?: EvaluateResultOutput;

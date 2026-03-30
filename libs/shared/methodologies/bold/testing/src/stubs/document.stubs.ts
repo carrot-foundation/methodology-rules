@@ -8,10 +8,7 @@ import {
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import {
-  DataSetName,
-  MethodologyDocumentStatus,
-} from '@carrot-fndn/shared/types';
+import { DataSetName, DocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { computeDestinationPoint } from 'geolib';
 
@@ -36,7 +33,7 @@ export const stubDocument = (
     id: faker.string.uuid(),
     isPubliclySearchable: faker.datatype.boolean(),
     measurementUnit: faker.helpers.arrayElement(['kg', 't', 'unit']),
-    status: stubEnumValue(MethodologyDocumentStatus),
+    status: stubEnumValue(DocumentStatus),
     updatedAt: faker.date.recent().toISOString(),
     ...partialDocument,
     externalEvents: [

@@ -1,14 +1,14 @@
 import {
-  MethodologyDocumentEventAttributeSchema,
-  MethodologyDocumentEventMetadataSchema,
-  MethodologyDocumentEventSchema,
-  MethodologyDocumentRelationSchema,
+  DocumentEventAttributeSchema as BaseDocumentEventAttributeSchema,
+  DocumentEventMetadataSchema as BaseDocumentEventMetadataSchema,
+  DocumentEventRelationSchema as BaseDocumentEventRelationSchema,
+  DocumentEventSchema as BaseDocumentEventSchema,
   NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
 export const DocumentEventAttributeSchema =
-  MethodologyDocumentEventAttributeSchema.extend({
+  BaseDocumentEventAttributeSchema.extend({
     name: NonEmptyStringSchema,
   });
 export type DocumentEventAttribute = z.infer<
@@ -16,12 +16,12 @@ export type DocumentEventAttribute = z.infer<
 >;
 
 export const DocumentEventMetadataSchema =
-  MethodologyDocumentEventMetadataSchema.extend({
+  BaseDocumentEventMetadataSchema.extend({
     attributes: z.array(DocumentEventAttributeSchema).optional(),
   });
 export type DocumentEventMetadata = z.infer<typeof DocumentEventMetadataSchema>;
 
-export const DocumentRelationSchema = MethodologyDocumentRelationSchema.extend({
+export const DocumentRelationSchema = BaseDocumentEventRelationSchema.extend({
   bidirectional: z.boolean().optional(),
   category: NonEmptyStringSchema.optional(),
   subtype: NonEmptyStringSchema.optional(),
@@ -29,7 +29,7 @@ export const DocumentRelationSchema = MethodologyDocumentRelationSchema.extend({
 });
 export type DocumentRelation = z.infer<typeof DocumentRelationSchema>;
 
-export const DocumentEventSchema = MethodologyDocumentEventSchema.extend({
+export const DocumentEventSchema = BaseDocumentEventSchema.extend({
   metadata: DocumentEventMetadataSchema.optional(),
   name: NonEmptyStringSchema,
   relatedDocument: DocumentRelationSchema.optional(),

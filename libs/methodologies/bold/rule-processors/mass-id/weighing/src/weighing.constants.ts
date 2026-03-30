@@ -5,7 +5,7 @@ import {
   DocumentEventScaleType,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 const { TRANSPORT_MANIFEST, WEIGHING } = DocumentEventName;
 const {
@@ -24,9 +24,7 @@ const { TRUCK } = DocumentEventVehicleType;
 
 export const NET_WEIGHT_CALCULATION_TOLERANCE = 0.1;
 
-const supportedFormats = Object.values(
-  MethodologyDocumentEventAttributeFormat,
-).join(', ');
+const supportedFormats = Object.values(DocumentEventAttributeFormat).join(', ');
 
 export const PASSED_RESULT_COMMENTS = {
   PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION: (originalPassMessage: string) =>

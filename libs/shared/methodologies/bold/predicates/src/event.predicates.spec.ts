@@ -13,8 +13,8 @@ import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodolo
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   DataSetName,
-  MethodologyDocumentEventLabel,
-  MethodologyParticipantType,
+  DocumentEventLabel,
+  ParticipantType,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -36,7 +36,7 @@ describe('Event Predicates', () => {
     it('should return true if the event is an actor participant type', () => {
       const event = stubDocumentEvent();
 
-      event.participant.type = MethodologyParticipantType.ACTOR;
+      event.participant.type = ParticipantType.ACTOR;
 
       expect(eventHasActorParticipant(event)).toBe(true);
     });
@@ -51,7 +51,7 @@ describe('Event Predicates', () => {
   });
 
   describe('eventHasLabel', () => {
-    const { RECYCLER } = MethodologyDocumentEventLabel;
+    const { RECYCLER } = DocumentEventLabel;
 
     it('should return true if the event has the label', () => {
       const event = stubDocumentEvent({ label: RECYCLER });

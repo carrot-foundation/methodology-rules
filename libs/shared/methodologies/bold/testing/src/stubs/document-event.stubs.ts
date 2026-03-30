@@ -9,8 +9,8 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type AnyObject,
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttributeValue,
+  type DocumentEventAttachment,
+  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -56,8 +56,8 @@ export const stubDocumentEvent = (
 });
 
 export const stubDocumentEventAttachment = (
-  partialInput: Partial<MethodologyDocumentEventAttachment> = {},
-): MethodologyDocumentEventAttachment => ({
+  partialInput: Partial<DocumentEventAttachment> = {},
+): DocumentEventAttachment => ({
   attachmentId: faker.string.uuid(),
   contentLength: faker.number.int({ max: 10_000, min: 0 }),
   isPublic: faker.datatype.boolean(),
@@ -96,10 +96,7 @@ export const stubActorEventWithLabel = (
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<DocumentEvent>,
   attributes?: Array<
-    | [
-        DocumentEventAttributeName | string,
-        MethodologyDocumentEventAttributeValue,
-      ]
+    | [DocumentEventAttributeName | string, DocumentEventAttributeValue]
     | Omit<DocumentEventAttribute, 'isPublic'>
   >,
 ) =>

@@ -1,8 +1,8 @@
 import type {
+  DocumentEventAttachment,
+  DocumentEventAttribute,
+  DocumentEventAttributeValue,
   Maybe,
-  MethodologyDocumentEventAttachment,
-  MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
@@ -19,7 +19,7 @@ import {
 export const getEventAttributeValue = (
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
-): MethodologyDocumentEventAttributeValue | undefined => {
+): DocumentEventAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
@@ -27,9 +27,7 @@ export const getEventAttributeValue = (
       (attribute) => attribute.name === attributeName,
     );
 
-    return foundAttribute?.value as
-      | MethodologyDocumentEventAttributeValue
-      | undefined;
+    return foundAttribute?.value as DocumentEventAttributeValue | undefined;
   }
 
   return undefined;
@@ -38,13 +36,13 @@ export const getEventAttributeValue = (
 export const getEventAttributeByName = (
   event: Maybe<DocumentEvent>,
   attributeName: DocumentEventAttributeName | string,
-): MethodologyDocumentEventAttribute | undefined => {
+): DocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
     return validation.data.metadata.attributes.find(
       (attribute) => attribute.name === attributeName,
-    ) as MethodologyDocumentEventAttribute | undefined;
+    ) as DocumentEventAttribute | undefined;
   }
 
   return undefined;
@@ -70,7 +68,7 @@ export const getEventAttributeValueOrThrow = <T>(
 export const getDocumentEventAttachmentByLabel = (
   event: DocumentEvent,
   label: string,
-): MethodologyDocumentEventAttachment | undefined => {
+): DocumentEventAttachment | undefined => {
   const validation = validateDocumentEventWithAttachments(event);
 
   if (validation.success) {
@@ -84,7 +82,7 @@ export const getDocumentEventAttachmentByLabel = (
 
 export const getEventMethodologySlug = (
   event: Maybe<DocumentEvent>,
-): MethodologyDocumentEventAttributeValue | undefined =>
+): DocumentEventAttributeValue | undefined =>
   getNonEmptyString(
     getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
   );

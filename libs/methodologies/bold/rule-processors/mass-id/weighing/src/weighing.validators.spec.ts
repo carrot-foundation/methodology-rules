@@ -4,20 +4,20 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyAdditionalVerificationAttributeValue,
-  MethodologyApprovedExceptionType,
+  type AdditionalVerificationAttributeValue,
+  ApprovedExceptionType,
 } from '@carrot-fndn/shared/types';
 
 import {
+  isAdditionalVerification,
   isAdditionalVerificationAttributeValue,
-  isMethodologyAdditionalVerification,
 } from './weighing.validators';
 
 describe('weighing.validators', () => {
-  describe('isMethodologyAdditionalVerification', () => {
+  describe('isAdditionalVerification', () => {
     it('should return true for a valid additional verification object', () => {
       expect(
-        isMethodologyAdditionalVerification({
+        isAdditionalVerification({
           'Layout IDs': ['layout-1'],
           'Verification Type': 'MANUAL_REVIEW',
         }),
@@ -26,7 +26,7 @@ describe('weighing.validators', () => {
 
     it('should return false when verification type is missing', () => {
       expect(
-        isMethodologyAdditionalVerification({
+        isAdditionalVerification({
           'Layout IDs': ['layout-1'],
         }),
       ).toBe(false);
@@ -35,7 +35,7 @@ describe('weighing.validators', () => {
 
   describe('isAdditionalVerificationAttributeValue', () => {
     it('should return true for a valid list of additional verifications', () => {
-      const value: MethodologyAdditionalVerificationAttributeValue = [
+      const value: AdditionalVerificationAttributeValue = [
         {
           'Layout IDs': ['layout-1'],
           'Verification Type': 'MANUAL_REVIEW',
@@ -63,7 +63,7 @@ describe('weighing.validators', () => {
         Event: DocumentEventName.WEIGHING,
       },
       'Attribute Name': DocumentEventAttributeName.TARE,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'validated',
     };
 

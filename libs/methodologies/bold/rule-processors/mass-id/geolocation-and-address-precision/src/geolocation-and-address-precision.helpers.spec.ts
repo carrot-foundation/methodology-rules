@@ -15,7 +15,7 @@ import {
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { MethodologyApprovedExceptionType } from '@carrot-fndn/shared/types';
+import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -35,7 +35,7 @@ const createGpsException = (
     | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
     | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
   reason: string,
-  exceptionType: string = MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  exceptionType: string = ApprovedExceptionType.MANDATORY_ATTRIBUTE,
 ) => ({
   'Attribute Location': {
     Asset: {
@@ -511,8 +511,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
             Event: DocumentEventName.DROP_OFF.toString(),
           },
           'Attribute Name': DocumentEventAttributeName.TARE.toString(),
-          'Exception Type':
-            MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Tare exception (not GPS)',
         },
       ];

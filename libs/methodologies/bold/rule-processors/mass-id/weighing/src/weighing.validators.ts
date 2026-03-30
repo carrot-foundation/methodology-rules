@@ -1,6 +1,6 @@
 import type {
-  MethodologyAdditionalVerification,
-  MethodologyAdditionalVerificationAttributeValue,
+  AdditionalVerification,
+  AdditionalVerificationAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 import {
@@ -9,7 +9,7 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyApprovedExceptionType,
+  ApprovedExceptionType,
   NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
@@ -28,9 +28,7 @@ const TareApprovedExceptionSchema = z.object({
     Event: z.literal(DocumentEventName.WEIGHING),
   }),
   'Attribute Name': z.literal(DocumentEventAttributeName.TARE),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -43,9 +41,7 @@ const ContainerCapacityApprovedExceptionSchema = z.object({
     Event: z.literal(DocumentEventName.WEIGHING),
   }),
   'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_CAPACITY),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -58,20 +54,18 @@ const ContainerQuantityApprovedExceptionSchema = z.object({
     Event: z.literal(DocumentEventName.WEIGHING),
   }),
   'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_QUANTITY),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
 
-const MethodologyAdditionalVerificationSchema = z.object({
+const AdditionalVerificationSchema = z.object({
   'Layout IDs': z.array(NonEmptyStringSchema).optional(),
   'Verification Type': z.string(),
 });
 
-const MethodologyAdditionalVerificationAttributeValueSchema = z.array(
-  MethodologyAdditionalVerificationSchema,
+const AdditionalVerificationAttributeValueSchema = z.array(
+  AdditionalVerificationSchema,
 );
 
 export const isTareApprovedException = (
@@ -91,11 +85,10 @@ export const isContainerQuantityApprovedException = (
 
 export const isAdditionalVerificationAttributeValue = (
   input: unknown,
-): input is MethodologyAdditionalVerificationAttributeValue =>
-  MethodologyAdditionalVerificationAttributeValueSchema.safeParse(input)
-    .success;
+): input is AdditionalVerificationAttributeValue =>
+  AdditionalVerificationAttributeValueSchema.safeParse(input).success;
 
-export const isMethodologyAdditionalVerification = (
+export const isAdditionalVerification = (
   input: unknown,
-): input is MethodologyAdditionalVerification =>
-  MethodologyAdditionalVerificationSchema.safeParse(input).success;
+): input is AdditionalVerification =>
+  AdditionalVerificationSchema.safeParse(input).success;

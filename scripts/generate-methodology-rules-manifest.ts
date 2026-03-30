@@ -335,8 +335,8 @@ const BoldTypes = require(
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SharedTypes = require('@carrot-fndn/shared/types') as {
-  MethodologyDocumentEventAttributeFormat: StringEnum;
-  MethodologyDocumentEventLabel: StringEnum;
+  DocumentEventAttributeFormat: StringEnum;
+  DocumentEventLabel: StringEnum;
 };
 
 const ENUM_KEY_TO_VALUE: Record<string, string> = {
@@ -344,16 +344,16 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
   ...enumKeyToValueMap(BoldTypes.DocumentType),
   ...enumKeyToValueMap(BoldTypes.DocumentEventName),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeName),
-  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventLabel),
-  ...enumKeyToValueMap(SharedTypes.MethodologyDocumentEventAttributeFormat),
+  ...enumKeyToValueMap(SharedTypes.DocumentEventLabel),
+  ...enumKeyToValueMap(SharedTypes.DocumentEventAttributeFormat),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
   ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
   ...enumKeyToValueMap(BoldTypes.MeasurementUnit),
 };
 
 const DocumentEventName = BoldTypes.DocumentEventName;
-const MethodologyDocumentEventLabel =
-  SharedTypes.MethodologyDocumentEventLabel;
+const DocumentEventLabel =
+  SharedTypes.DocumentEventLabel;
 
 // ---------------------------------------------------------------------------
 // Actor label extraction from processor files
@@ -370,7 +370,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     for (const token of inner.split(',')) {
       const trimmed = token.trim();
       const qualifiedMatch = trimmed.match(
-        /MethodologyDocumentEventLabel\.([A-Z_]+)/,
+        /DocumentEventLabel\.([A-Z_]+)/,
       );
       if (qualifiedMatch?.[1]) {
         labels.add(qualifiedMatch[1]);
@@ -381,7 +381,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
   }
 
   const hasLabelRe =
-    /eventHasLabel\(\w+,\s*(?:MethodologyDocumentEventLabel\.)?([A-Z_]+)\)/g;
+    /eventHasLabel\(\w+,\s*(?:DocumentEventLabel\.)?([A-Z_]+)\)/g;
   while ((match = hasLabelRe.exec(content)) !== null) {
     if (match[1]) {
       labels.add(match[1]);
@@ -390,7 +390,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
 
   return [...labels]
     .sort()
-    .map((key) => MethodologyDocumentEventLabel[key] ?? key);
+    .map((key) => DocumentEventLabel[key] ?? key);
 }
 
 function enrichActorEvents(

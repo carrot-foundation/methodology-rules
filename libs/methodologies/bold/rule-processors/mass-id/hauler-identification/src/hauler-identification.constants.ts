@@ -2,10 +2,10 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = MethodologyDocumentEventLabel;
+const { HAULER } = DocumentEventLabel;
 const { VEHICLE_TYPE } = DocumentEventAttributeName;
 
 export const RESULT_COMMENTS = {

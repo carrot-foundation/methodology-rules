@@ -24,8 +24,8 @@ import {
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
 import {
-  MethodologyDocumentEventLabel,
-  MethodologyDocumentStatus,
+  DocumentEventLabel,
+  DocumentStatus,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -38,7 +38,7 @@ import {
 } from './waste-mass-is-unique.helpers';
 
 const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 interface RuleSubject {
@@ -120,8 +120,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     const cancelledCount = duplicateDocuments.filter(
       (duplicateDocument) =>
-        duplicateDocument.status ===
-        MethodologyDocumentStatus.CANCELLED.toString(),
+        duplicateDocument.status === DocumentStatus.CANCELLED.toString(),
     ).length;
 
     return {
@@ -170,7 +169,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   private getEventOrThrow(
     document: Document,
     criteria: {
-      label?: MethodologyDocumentEventLabel[];
+      label?: DocumentEventLabel[];
       name: DocumentEventName[];
     },
     errorMessage: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],

@@ -9,22 +9,19 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventLabel,
-  MethodologyDocumentStatus,
-} from '@carrot-fndn/shared/types';
+import { DocumentEventLabel, DocumentStatus } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
 
-const { CANCELLED, OPEN } = MethodologyDocumentStatus;
+const { CANCELLED, OPEN } = DocumentStatus;
 const { DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 interface WasteMassIsUniqueTestCase extends RuleTestCase {
-  newDuplicateDocuments: Array<{ status: MethodologyDocumentStatus }>;
-  oldDuplicateDocuments: Array<{ status: MethodologyDocumentStatus }>;
+  newDuplicateDocuments: Array<{ status: DocumentStatus }>;
+  oldDuplicateDocuments: Array<{ status: DocumentStatus }>;
 }
 
 export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [

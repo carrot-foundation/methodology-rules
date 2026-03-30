@@ -6,7 +6,7 @@ import {
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
+import { ActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -61,7 +61,7 @@ describe('RewardsDistributionProcessor', () => {
         }));
 
         actorsResult.push({
-          actorType: MethodologyActorType.REMAINDER,
+          actorType: ActorType.REMAINDER,
           amount: remainder.amount,
           percentage: remainder.percentage,
         });

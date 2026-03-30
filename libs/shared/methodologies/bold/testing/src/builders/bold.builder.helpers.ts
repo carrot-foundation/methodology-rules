@@ -2,7 +2,7 @@ import type {
   DocumentEvent,
   DocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   DocumentEventAttributeName,
@@ -63,12 +63,12 @@ export type MetadataAttributeResponse =
 
 export type MetadataAttributeTupleParameter = [
   DocumentEventAttributeName,
-  MethodologyDocumentEventAttributeValue | undefined,
+  DocumentEventAttributeValue | undefined,
 ];
 
 export type MetadataAttributeTupleResponse = [
   DocumentEventAttributeName,
-  MethodologyDocumentEventAttributeValue,
+  DocumentEventAttributeValue,
 ];
 
 /**

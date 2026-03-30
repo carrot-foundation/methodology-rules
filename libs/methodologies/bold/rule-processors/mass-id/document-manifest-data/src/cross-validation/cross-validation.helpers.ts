@@ -1,6 +1,6 @@
 import type { WasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
-import type { MethodologyAddress } from '@carrot-fndn/shared/types';
+import type { DocumentAddress } from '@carrot-fndn/shared/types';
 
 import { type ReviewReason } from '@carrot-fndn/shared/document-extractor';
 import { isNameMatch } from '@carrot-fndn/shared/helpers';
@@ -72,7 +72,7 @@ export const getWasteClassification = (
 export const normalizeTaxId = (taxId: string): string =>
   taxId.replaceAll(/[\s./-]/g, '').toLowerCase();
 
-export const buildAddressString = (address: MethodologyAddress): string =>
+export const buildAddressString = (address: DocumentAddress): string =>
   [address.street, address.number, address.city, address.countryState]
     .filter(Boolean)
     .join(', ');

@@ -22,8 +22,8 @@ import {
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyApprovedExceptionType,
-  type MethodologyParticipant,
+  ApprovedExceptionType,
+  type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { expect } from 'vitest';
@@ -41,7 +41,7 @@ interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
 
 interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  actorParticipants: Map<string, MethodologyParticipant>;
+  actorParticipants: Map<string, DocumentParticipant>;
   massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
 }
 
@@ -73,10 +73,10 @@ const actorsCoordinates = new Map(
 
 const recyclerParticipant = actorParticipants.get(
   RECYCLER,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 const wasteGeneratorParticipant = actorParticipants.get(
   WASTE_GENERATOR,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 
 const recyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.base,
@@ -121,10 +121,10 @@ const manifestActorParticipants = new Map(
 );
 const manifestRecyclerParticipant = manifestActorParticipants.get(
   RECYCLER,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 const manifestWasteGeneratorParticipant = manifestActorParticipants.get(
   WASTE_GENERATOR,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 
 const manifestRecyclerAddress = stubAddress({
   latitude: -23.5505,
@@ -237,7 +237,7 @@ const createGpsException = (
     Event: eventName.toString(),
   },
   'Attribute Name': attributeName.toString(),
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
   Reason: reason,
   ...(validUntil && { 'Valid Until': validUntil }),
 });
@@ -277,7 +277,7 @@ const createGpsExceptions = (
 
 const createAccreditationDocumentWithAddress = (
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
+  participant: DocumentParticipant,
 ): StubBoldDocumentParameters => ({
   externalEventsMap: {
     [FACILITY_ADDRESS]: stubDocumentEvent({
@@ -295,7 +295,7 @@ const createAccreditationDocumentWithAddress = (
 
 const createAccreditationDocumentWithGpsExceptions = (
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
+  participant: DocumentParticipant,
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
   includeLatitude = true,
   includeLongitude = true,
@@ -331,7 +331,7 @@ const createAccreditationDocumentWithGpsExceptions = (
 const createMassIDEvent = (
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
+  participant: DocumentParticipant,
   gpsLatitude?: number,
   gpsLongitude?: number,
 ) => {
@@ -1013,7 +1013,7 @@ const {
     },
   })
   .createMassIDAuditDocuments()
-  .createMethodologyDocument()
+  .createInboundDocument()
   .createParticipantAccreditationDocuments()
   .build();
 

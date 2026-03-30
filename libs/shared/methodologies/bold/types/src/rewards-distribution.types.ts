@@ -1,21 +1,21 @@
 import {
   BigNumberStringSchema,
-  MethodologyActorType,
-  MethodologyParticipantSchema,
+  DocumentParticipantSchema,
   NonEmptyStringSchema,
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
+// Values sourced from ActorType (shared const object)
 export enum RewardsDistributionActorType {
-  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
-  HAULER = MethodologyActorType.HAULER,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
-  NETWORK = MethodologyActorType.NETWORK,
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
+  COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
+  HAULER = 'Hauler',
+  INTEGRATOR = 'Integrator',
+  METHODOLOGY_AUTHOR = 'Methodology Author',
+  METHODOLOGY_DEVELOPER = 'Methodology Developer',
+  NETWORK = 'Network',
+  PROCESSOR = 'Processor',
+  RECYCLER = 'Recycler',
+  WASTE_GENERATOR = 'Waste Generator',
 }
 
 export enum RewardsDistributionWasteType {
@@ -29,7 +29,7 @@ export const RewardActorAddressSchema = z.object({
 });
 export type RewardActorAddress = z.infer<typeof RewardActorAddressSchema>;
 
-export const RewardActorParticipantSchema = MethodologyParticipantSchema.pick({
+export const RewardActorParticipantSchema = DocumentParticipantSchema.pick({
   id: true,
   name: true,
 });

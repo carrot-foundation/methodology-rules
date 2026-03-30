@@ -1,8 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type {
-  Geolocation,
-  MethodologyAddress,
-} from '@carrot-fndn/shared/types';
+import type { DocumentAddress, Geolocation } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
@@ -64,9 +61,9 @@ export interface RuleSubject {
 }
 
 interface ParticipantAddressData {
-  accreditedAddress: MethodologyAddress | undefined;
+  accreditedAddress: DocumentAddress | undefined;
   actorType: MassIDDocumentActorType;
-  eventAddress: MethodologyAddress;
+  eventAddress: DocumentAddress;
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
@@ -154,7 +151,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return { resultComment, resultStatus: 'PASSED' };
   }
 
-  private buildAddressComparisonString(address: MethodologyAddress): string {
+  private buildAddressComparisonString(address: DocumentAddress): string {
     return [address.street, address.number, address.city]
       .filter(Boolean)
       .join(', ');
@@ -204,14 +201,14 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private calculateAddressDistance(
-    eventAddress: MethodologyAddress,
-    accreditedAddress: MethodologyAddress,
+    eventAddress: DocumentAddress,
+    accreditedAddress: DocumentAddress,
   ): number {
     return calculateDistance(eventAddress, accreditedAddress);
   }
 
   private calculateGpsDistance(
-    accreditedAddress: MethodologyAddress,
+    accreditedAddress: DocumentAddress,
     gpsGeolocation: Geolocation,
   ): number {
     return calculateDistance(accreditedAddress, gpsGeolocation);
@@ -381,7 +378,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     gpsGeolocation,
     recyclerAccreditationDocument,
   }: {
-    accreditedAddress: MethodologyAddress;
+    accreditedAddress: DocumentAddress;
     actorType: MassIDDocumentActorType;
     addressDistance: number;
     eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;

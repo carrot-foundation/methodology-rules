@@ -21,9 +21,9 @@ import {
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
-  type MethodologyParticipant,
+  DocumentEventAttributeFormat,
+  DocumentEventLabel,
+  type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
@@ -36,7 +36,7 @@ import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const processorErrors = new MassIDSortingProcessorErrors();
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 const {
   ACCREDITATION_CONTEXT,
   DROP_OFF,
@@ -45,7 +45,7 @@ const {
 } = DocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
   DocumentEventAttributeName;
-const { CUBIC_METER, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
+const { CUBIC_METER, KILOGRAM } = DocumentEventAttributeFormat;
 
 // Helper functions to reduce duplication
 const createAccreditationDocuments = (sortingFactor: number) =>
@@ -220,13 +220,13 @@ const {
     },
   })
   .createMassIDAuditDocuments()
-  .createMethodologyDocument()
+  .createInboundDocument()
   .createParticipantAccreditationDocuments()
   .build();
 
 interface MassIDSortingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  actorParticipants: Map<string, MethodologyParticipant>;
+  actorParticipants: Map<string, DocumentParticipant>;
   massIDEvents: BoldExternalEventsObject;
   partialDocument: PartialDeep<Document>;
 }
@@ -381,7 +381,7 @@ const invalidSortingValue = new BoldStubsBuilder()
     },
   })
   .createMassIDAuditDocuments()
-  .createMethodologyDocument()
+  .createInboundDocument()
   .createParticipantAccreditationDocuments()
   .build();
 

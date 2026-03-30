@@ -11,12 +11,12 @@ import {
   type DocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 
 const { ACTOR } = DocumentEventName;
-const { PROCESSOR } = MethodologyDocumentEventLabel;
+const { PROCESSOR } = DocumentEventLabel;
 
 type Subject = {
   processorActorEvents?: DocumentEvent[] | undefined;

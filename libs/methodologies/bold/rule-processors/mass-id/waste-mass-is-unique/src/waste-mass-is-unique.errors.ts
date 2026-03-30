@@ -3,11 +3,11 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 
 export class WasteMassIsUniqueProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {

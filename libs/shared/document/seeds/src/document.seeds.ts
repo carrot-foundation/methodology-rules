@@ -7,7 +7,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
 import {
-  type MethodologyDocument,
+  type InboundDocument,
   type NonEmptyString,
   NonEmptyStringSchema,
   type Uri,
@@ -16,11 +16,11 @@ import { faker } from '@faker-js/faker';
 
 import type { ApiDocumentCreateDto } from './document.seeds.types';
 
-const stubMethodologyDocument = (): MethodologyDocument => ({
+const stubMethodologyDocument = (): InboundDocument => ({
   category: faker.string.sample(),
   createdAt: new Date().toISOString(),
   currentValue: faker.number.int(),
-  dataSetName: 'TEST' as MethodologyDocument['dataSetName'],
+  dataSetName: 'TEST' as InboundDocument['dataSetName'],
   externalCreatedAt: new Date().toISOString(),
   id: faker.string.uuid(),
   isPubliclySearchable: faker.datatype.boolean(),
@@ -53,7 +53,7 @@ const stubMethodologyDocument = (): MethodologyDocument => ({
 });
 
 const mapDocumentParts = (
-  document: Partial<MethodologyDocument>,
+  document: Partial<InboundDocument>,
 ): ApiDocumentCreateDto['parts'] =>
   document.externalEvents?.map((event) => ({
     part: event,
@@ -66,12 +66,12 @@ export const seedDocument = async ({
   partialDocument = {},
 }: {
   logger?: Logger;
-  partialDocument?: Partial<MethodologyDocument>;
+  partialDocument?: Partial<InboundDocument>;
 } = {}): Promise<NonEmptyString> => {
   const documentId = faker.string.uuid();
   const endpoint: Uri = `${getAuditUrl()}/documents`;
 
-  const document: MethodologyDocument = {
+  const document: InboundDocument = {
     ...stubMethodologyDocument(),
     ...partialDocument,
     createdAt: new Date().toISOString(),

@@ -25,10 +25,10 @@ import {
   DocumentEventWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyAdditionalVerificationAttributeValue,
-  type MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeFormat,
-  type MethodologyDocumentEventAttributeValue,
+  type AdditionalVerificationAttributeValue,
+  type DocumentEventAttribute,
+  DocumentEventAttributeFormat,
+  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 import {
@@ -67,39 +67,36 @@ const {
 export type ValidationResult = { errors: string[] };
 
 export interface WeighingValues {
-  accreditationScaleType: MethodologyDocumentEventAttributeValue | undefined;
-  containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
+  accreditationScaleType: DocumentEventAttributeValue | undefined;
+  containerCapacityAttribute: DocumentEventAttribute | undefined;
   containerCapacityException: ContainerCapacityApprovedException | undefined;
-  containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
+  containerQuantity: DocumentEventAttributeValue | undefined;
   containerQuantityException: ContainerQuantityApprovedException | undefined;
   containerType: string | undefined;
-  description: MethodologyDocumentEventAttributeValue | undefined;
+  description: DocumentEventAttributeValue | undefined;
   eventValue: number | undefined;
-  grossWeight: MethodologyDocumentEventAttribute | undefined;
-  scaleType: MethodologyDocumentEventAttributeValue | undefined;
-  tare: MethodologyDocumentEventAttribute | undefined;
+  grossWeight: DocumentEventAttribute | undefined;
+  scaleType: DocumentEventAttributeValue | undefined;
+  tare: DocumentEventAttribute | undefined;
   tareException: TareApprovedException | undefined;
-  vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
+  vehicleLicensePlateAttribute: DocumentEventAttribute | undefined;
   weighingCaptureMethod: string | undefined;
 }
 
-const hasValidAttributeFormat = (
-  attribute?: MethodologyDocumentEventAttribute,
-): boolean =>
-  (
-    Object.values(MethodologyDocumentEventAttributeFormat) as unknown[]
-  ).includes(attribute?.format);
+const hasValidAttributeFormat = (attribute?: DocumentEventAttribute): boolean =>
+  (Object.values(DocumentEventAttributeFormat) as unknown[]).includes(
+    attribute?.format,
+  );
 
 const hasPositiveFloatAttributeValue = (
-  attribute?: MethodologyDocumentEventAttribute,
+  attribute?: DocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
 const isTruckContainer = (values: WeighingValues): boolean =>
   values.containerType === DocumentEventContainerType.TRUCK.toString();
 
-const isAttributeOmitted = (
-  attribute?: MethodologyDocumentEventAttribute,
-): boolean => isNil(attribute?.value) || attribute.value === '';
+const isAttributeOmitted = (attribute?: DocumentEventAttribute): boolean =>
+  isNil(attribute?.value) || attribute.value === '';
 
 const shouldSkipValidationWithTareException = (
   values: WeighingValues,
@@ -114,7 +111,7 @@ const shouldSkipNetWeightCalculationWithTareException = (
 
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
   recyclerAccreditationDocument: Document,
-): MethodologyAdditionalVerificationAttributeValue | undefined => {
+): AdditionalVerificationAttributeValue | undefined => {
   const accreditationResultEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([ACCREDITATION_RESULT]),
@@ -224,7 +221,7 @@ export const isExceptionValid = (
 
 export const getAccreditationScaleType = (
   recyclerAccreditationDocument: Document,
-): MethodologyDocumentEventAttributeValue | undefined => {
+): DocumentEventAttributeValue | undefined => {
   const monitoringSystemsAndEquipmentEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),

@@ -14,10 +14,7 @@ import {
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
-import {
-  type AnyObject,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { type AnyObject, DocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
@@ -28,7 +25,7 @@ const {
 } = DocumentEventAttributeName;
 
 const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = DocumentEventLabel;
 
 const randomId = faker.lorem.word();
 const randomDescription = faker.lorem.sentence();

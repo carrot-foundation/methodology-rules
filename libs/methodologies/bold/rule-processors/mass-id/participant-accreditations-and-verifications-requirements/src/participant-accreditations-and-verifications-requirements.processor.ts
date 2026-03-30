@@ -30,19 +30,17 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
 const ACTORS_REQUIRING_DATES = new Set([
-  MethodologyDocumentEventLabel.PROCESSOR,
-  MethodologyDocumentEventLabel.RECYCLER,
+  DocumentEventLabel.PROCESSOR,
+  DocumentEventLabel.RECYCLER,
 ]);
 
-const ACTORS_WITH_OPTIONAL_DATES = new Set([
-  MethodologyDocumentEventLabel.INTEGRATOR,
-]);
+const ACTORS_WITH_OPTIONAL_DATES = new Set([DocumentEventLabel.INTEGRATOR]);
 
 interface RuleSubject {
   accreditationDocuments: Map<string, Document[]>;
@@ -116,20 +114,20 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private getActorParticipants(
     massIDDocument: Document,
-  ): Map<string, MethodologyDocumentEventLabel> {
+  ): Map<string, DocumentEventLabel> {
     // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
     return new Map(
       massIDDocument
         .externalEvents!.filter(
           eventLabelIsAnyOf([
-            MethodologyDocumentEventLabel.INTEGRATOR,
-            MethodologyDocumentEventLabel.PROCESSOR,
-            MethodologyDocumentEventLabel.RECYCLER,
+            DocumentEventLabel.INTEGRATOR,
+            DocumentEventLabel.PROCESSOR,
+            DocumentEventLabel.RECYCLER,
           ]),
         )
         .map((event) => [
           event.participant.id,
-          event.label as MethodologyDocumentEventLabel,
+          event.label as DocumentEventLabel,
         ]),
     );
   }
@@ -179,7 +177,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private validateActor(
     participantId: string,
-    actorType: MethodologyDocumentEventLabel,
+    actorType: DocumentEventLabel,
     participantDocuments: Document[],
     missingParticipants: string[],
     participantsWithMultipleValid: Array<{
@@ -208,7 +206,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private validateAllActors(
-    actorParticipants: Map<string, MethodologyDocumentEventLabel>,
+    actorParticipants: Map<string, DocumentEventLabel>,
     accreditationDocuments: Map<string, Document[]>,
   ): Error | undefined {
     const missingParticipants: string[] = [];
@@ -285,9 +283,9 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIDDocument.externalEvents
         .filter(
           eventLabelIsAnyOf([
-            MethodologyDocumentEventLabel.INTEGRATOR,
-            MethodologyDocumentEventLabel.PROCESSOR,
-            MethodologyDocumentEventLabel.RECYCLER,
+            DocumentEventLabel.INTEGRATOR,
+            DocumentEventLabel.PROCESSOR,
+            DocumentEventLabel.RECYCLER,
           ]),
         )
         .map((event) => [event.participant.id, event.label as string]),

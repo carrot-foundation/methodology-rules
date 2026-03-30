@@ -25,10 +25,10 @@ import {
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
+  type DocumentEventAttachment,
+  type DocumentEventAttribute,
+  DocumentEventAttributeFormat,
+  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
@@ -51,8 +51,8 @@ const {
 } = DocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
+const { DATE } = DocumentEventAttributeFormat;
 
 export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
@@ -378,7 +378,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   }
 
   private validateExemptionAndAttachment(
-    attachment: MethodologyDocumentEventAttachment | undefined,
+    attachment: DocumentEventAttachment | undefined,
     exemptionJustification: EventAttributeValueType,
     hasWrongLabelAttachment: boolean,
   ): ValidationResult {
@@ -423,7 +423,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   }
 
   private validateIssueDate(
-    issueDateAttribute: MethodologyDocumentEventAttribute | undefined,
+    issueDateAttribute: DocumentEventAttribute | undefined,
   ): ValidationResult {
     const failMessages: string[] = [];
 

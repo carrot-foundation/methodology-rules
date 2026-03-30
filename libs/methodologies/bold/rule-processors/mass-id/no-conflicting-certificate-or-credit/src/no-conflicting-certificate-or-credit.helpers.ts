@@ -6,9 +6,9 @@ import type {
 import { getOrDefault } from '@carrot-fndn/shared/helpers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
+import { DocumentStatus } from '@carrot-fndn/shared/types';
 
-const { CANCELLED } = MethodologyDocumentStatus;
+const { CANCELLED } = DocumentStatus;
 
 export const hasMethodologySlugAttribute = (
   document: Document,

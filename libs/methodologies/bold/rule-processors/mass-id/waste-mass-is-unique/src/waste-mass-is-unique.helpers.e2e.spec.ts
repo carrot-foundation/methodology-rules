@@ -13,9 +13,9 @@ import {
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  DocumentEventLabel,
+  type InboundDocument,
   type LicensePlate,
-  type MethodologyDocument,
-  MethodologyDocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -25,14 +25,14 @@ import {
 } from './waste-mass-is-unique.helpers';
 
 const { ACTOR } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 const { DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 
 describe('Waste Mass Is Unique Helpers E2E', () => {
   let auditApiService: AuditApiService;
   let v2DocumentId: NonEmptyString;
-  let v2DocumentStub: MethodologyDocument;
+  let v2DocumentStub: InboundDocument;
 
   const vehicleLicensePlate = 'ABC1D23' as LicensePlate;
   const eventsData: EventsData = {

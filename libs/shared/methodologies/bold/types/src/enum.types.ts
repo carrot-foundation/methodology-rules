@@ -1,8 +1,3 @@
-import {
-  MethodologyActorType,
-  MethodologyDocumentEventName,
-} from '@carrot-fndn/shared/types';
-
 export enum BoldMethodologyName {
   CARBON = 'BOLD Carbon',
   RECYCLING = 'BOLD Recycling',
@@ -91,33 +86,34 @@ export enum DocumentEventContainerType {
   WASTE_BOX = 'Waste Box',
 }
 
+// Values sourced from BaseDocumentEventName (shared const object)
 export enum DocumentEventName {
-  ACCREDITATION_CONTEXT = MethodologyDocumentEventName.ACCREDITATION_CONTEXT,
-  ACCREDITATION_RESULT = MethodologyDocumentEventName.ACCREDITATION_RESULT,
-  ACTOR = MethodologyDocumentEventName.ACTOR,
-  CLOSE = MethodologyDocumentEventName.CLOSE,
-  DROP_OFF = MethodologyDocumentEventName.DROP_OFF,
-  EMISSION_AND_COMPOSTING_METRICS = MethodologyDocumentEventName.EMISSION_AND_COMPOSTING_METRICS,
+  ACCREDITATION_CONTEXT = 'Accreditation Context',
+  ACCREDITATION_RESULT = 'Accreditation Result',
+  ACTOR = 'ACTOR',
+  CLOSE = 'CLOSE',
+  DROP_OFF = 'Drop-off',
+  EMISSION_AND_COMPOSTING_METRICS = 'Emissions & Composting Metrics',
   END = 'END',
-  FACILITY_ADDRESS = MethodologyDocumentEventName.FACILITY_ADDRESS,
-  LEGAL_AND_ADMINISTRATIVE_COMPLIANCE = MethodologyDocumentEventName.LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
-  LINK = MethodologyDocumentEventName.LINK,
-  MONITORING_SYSTEMS_AND_EQUIPMENT = MethodologyDocumentEventName.MONITORING_SYSTEMS_AND_EQUIPMENT,
+  FACILITY_ADDRESS = 'Facility Address',
+  LEGAL_AND_ADMINISTRATIVE_COMPLIANCE = 'Legal & Administrative Compliance',
+  LINK = 'LINK',
+  MONITORING_SYSTEMS_AND_EQUIPMENT = 'Monitoring Systems & Equipment',
   MOVE = 'MOVE',
-  NOTICE = MethodologyDocumentEventName.NOTICE,
-  ONBOARDING_DECLARATION = MethodologyDocumentEventName.ONBOARDING_DECLARATION,
-  OUTPUT = MethodologyDocumentEventName.OUTPUT,
-  PICK_UP = MethodologyDocumentEventName.PICK_UP,
-  RECYCLED = MethodologyDocumentEventName.RECYCLED,
-  RECYCLING_BASELINES = MethodologyDocumentEventName.RECYCLING_BASELINES,
-  RECYCLING_MANIFEST = MethodologyDocumentEventName.RECYCLING_MANIFEST,
-  RELATED = MethodologyDocumentEventName.RELATED,
-  RULE_EXECUTION = MethodologyDocumentEventName.RULE_EXECUTION,
-  RULES_METADATA = MethodologyDocumentEventName.RULES_METADATA,
-  SORTING = MethodologyDocumentEventName.SORTING,
-  TRANSPORT_MANIFEST = MethodologyDocumentEventName.TRANSPORT_MANIFEST,
-  WASTE_GENERATOR = MethodologyDocumentEventName.WASTE_GENERATOR,
-  WEIGHING = MethodologyDocumentEventName.WEIGHING,
+  NOTICE = 'NOTICE',
+  ONBOARDING_DECLARATION = 'Onboarding Declaration',
+  OUTPUT = 'OUTPUT',
+  PICK_UP = 'Pick-up',
+  RECYCLED = 'Recycled',
+  RECYCLING_BASELINES = 'Recycling Baselines',
+  RECYCLING_MANIFEST = 'Recycling Manifest',
+  RELATED = 'RELATED',
+  RULE_EXECUTION = 'RULE EXECUTION',
+  RULES_METADATA = 'RULES METADATA',
+  SORTING = 'Sorting',
+  TRANSPORT_MANIFEST = 'Transport Manifest',
+  WASTE_GENERATOR = 'Waste Generator',
+  WEIGHING = 'Weighing',
 }
 
 export enum DocumentEventRuleSlug {
@@ -168,24 +164,25 @@ export enum MassIDOrganicSubtype {
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
+// Values sourced from ActorType (shared const object)
 export enum DocumentSubtype {
   DOMESTIC_SLUDGE = MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
   FOOD_FOOD_WASTE_AND_BEVERAGES = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
   GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.GARDEN_YARD_AND_PARK_WASTE,
   GROUP = 'Group',
-  HAULER = MethodologyActorType.HAULER,
+  HAULER = 'Hauler',
   INDUSTRIAL_SLUDGE = MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
+  INTEGRATOR = 'Integrator',
   OTHERS_IF_ORGANIC = MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
   PROCESS = 'Process',
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
+  PROCESSOR = 'Processor',
+  RECYCLER = 'Recycler',
   SOURCE = 'Source',
   TCC = 'TCC',
   TOBACCO = MassIDOrganicSubtype.TOBACCO,
   TRC = 'TRC',
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
+  WASTE_GENERATOR = 'Waste Generator',
   WOOD_AND_WOOD_PRODUCTS = MassIDOrganicSubtype.WOOD_AND_WOOD_PRODUCTS,
 }
 
@@ -199,12 +196,13 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
+// Values sourced from ActorType (shared const object)
 export enum MassIDDocumentActorType {
-  HAULER = MethodologyActorType.HAULER,
-  INTEGRATOR = MethodologyActorType.INTEGRATOR,
-  PROCESSOR = MethodologyActorType.PROCESSOR,
-  RECYCLER = MethodologyActorType.RECYCLER,
-  WASTE_GENERATOR = MethodologyActorType.WASTE_GENERATOR,
+  HAULER = 'Hauler',
+  INTEGRATOR = 'Integrator',
+  PROCESSOR = 'Processor',
+  RECYCLER = 'Recycler',
+  WASTE_GENERATOR = 'Waste Generator',
 }
 
 export enum MeasurementUnit {
@@ -217,11 +215,12 @@ export enum MethodologyBaseline {
   OPEN_AIR_DUMP = 'Open-air dump',
 }
 
+// Values sourced from ActorType (shared const object)
 export enum MethodologyDocumentActorType {
-  COMMUNITY_IMPACT_POOL = MethodologyActorType.COMMUNITY_IMPACT_POOL,
-  METHODOLOGY_AUTHOR = MethodologyActorType.METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER = MethodologyActorType.METHODOLOGY_DEVELOPER,
-  NETWORK = MethodologyActorType.NETWORK,
+  COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
+  METHODOLOGY_AUTHOR = 'Methodology Author',
+  METHODOLOGY_DEVELOPER = 'Methodology Developer',
+  NETWORK = 'Network',
 }
 
 export enum ReportType {
