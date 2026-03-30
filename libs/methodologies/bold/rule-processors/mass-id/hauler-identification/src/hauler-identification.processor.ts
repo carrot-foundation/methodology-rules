@@ -10,8 +10,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
@@ -25,8 +25,8 @@ const { HAULER } = DocumentEventLabel;
 const { VEHICLE_TYPE } = DocumentEventAttributeName;
 
 type Subject = {
-  haulerEvent: DocumentEvent | undefined;
-  pickUpEvent: DocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
+  pickUpEvent: BoldDocumentEvent | undefined;
 };
 
 export const OPTIONAL_HAULER_VEHICLE_TYPES = [
@@ -78,7 +78,7 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
     return {
       haulerEvent: getOrUndefined(
         document.externalEvents?.find(

@@ -8,7 +8,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
   DocumentEventAccreditationStatus,
   DocumentEventAttributeName,
@@ -297,8 +297,8 @@ const massIDWithWasteGeneratorButNoAccreditation =
   );
 
 interface ParticipantAccreditationsTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const participantAccreditationsAndVerificationsRequirementsTestCases: ParticipantAccreditationsTestCase[] =

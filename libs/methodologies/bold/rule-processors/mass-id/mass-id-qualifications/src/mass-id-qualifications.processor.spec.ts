@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -48,7 +48,7 @@ describe('MassIDQualificationsProcessor', () => {
       resultComment,
       resultStatus,
     }: {
-      massIDDocument: Document;
+      massIDDocument: BoldDocument;
       resultComment: string;
       resultStatus: RuleOutputStatus;
     }) => {

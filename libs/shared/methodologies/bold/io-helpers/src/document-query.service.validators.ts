@@ -1,15 +1,15 @@
-import type { DocumentRelation } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { z } from 'zod';
 
 export { validateDocument } from './document-helpers.validators';
 
-const DocumentRelationSchema = z.looseObject({
+const BoldDocumentRelationSchema = z.looseObject({
   documentId: z.string(),
 });
 
-export const isDocumentRelation = (input: unknown): input is DocumentRelation =>
-  DocumentRelationSchema.safeParse(input).success;
+export const isDocumentRelation = (input: unknown): input is BoldDocumentRelation =>
+  BoldDocumentRelationSchema.safeParse(input).success;
 
 export const isObject = (input: unknown): input is object =>
   typeof input === 'object' && input !== null;

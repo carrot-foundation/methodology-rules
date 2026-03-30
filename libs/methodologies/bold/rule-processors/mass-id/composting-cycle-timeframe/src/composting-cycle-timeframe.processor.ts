@@ -4,8 +4,8 @@ import { isNil } from '@carrot-fndn/shared/helpers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
@@ -21,8 +21,8 @@ import {
 const { DROP_OFF, RECYCLED } = DocumentEventName;
 
 type Subject = {
-  dropOffEvent?: DocumentEvent | undefined;
-  recycledEvent?: DocumentEvent | undefined;
+  dropOffEvent?: BoldDocumentEvent | undefined;
+  recycledEvent?: BoldDocumentEvent | undefined;
 };
 
 export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -74,7 +74,7 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
     const dropOffEvent = document.externalEvents?.find(
       eventNameIsAnyOf([DROP_OFF]),
     );

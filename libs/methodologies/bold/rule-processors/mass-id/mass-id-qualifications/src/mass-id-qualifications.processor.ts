@@ -3,7 +3,7 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
   DocumentType,
   MassIDOrganicSubtype,
@@ -19,12 +19,12 @@ const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;
 const { ORGANIC } = DocumentType;
 
-export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
+export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<BoldDocument> {
   protected readonly processorErrors =
     new MassIDQualificationsProcessorErrors();
 
   protected override evaluateResult(
-    document: Document,
+    document: BoldDocument,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
     const errorMessages: string[] = [];
 
@@ -79,7 +79,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
     };
   }
 
-  protected override getRuleSubject(document: Document): Document | undefined {
+  protected override getRuleSubject(document: BoldDocument): BoldDocument | undefined {
     return document;
   }
 
@@ -92,7 +92,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
   }
 
   private validateRequiredFields(
-    document: Document,
+    document: BoldDocument,
   ): EvaluateResultOutput | undefined {
     if (isNil(document.type)) {
       return {

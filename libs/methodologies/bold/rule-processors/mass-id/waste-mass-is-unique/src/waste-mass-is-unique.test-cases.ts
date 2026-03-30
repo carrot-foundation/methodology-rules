@@ -5,7 +5,7 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -74,8 +74,8 @@ const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
   .build();
 
 interface WasteMassIsUniqueErrorTestCase extends RuleTestCase {
-  massIDAuditDocument: Document;
-  massIDDocument: Document | undefined;
+  massIDAuditDocument: BoldDocument;
+  massIDDocument: BoldDocument | undefined;
 }
 
 export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =

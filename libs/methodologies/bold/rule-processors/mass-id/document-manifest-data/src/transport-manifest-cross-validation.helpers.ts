@@ -12,7 +12,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
@@ -34,13 +34,13 @@ import {
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
 export interface MtrCrossValidationEventData extends DocumentManifestEventSubject {
-  dropOffEvent: DocumentEvent | undefined;
-  haulerEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
   manifestType: 'mtr';
-  pickUpEvent: DocumentEvent | undefined;
-  recyclerEvent: DocumentEvent | undefined;
-  wasteGeneratorEvent: DocumentEvent | undefined;
-  weighingEvents: DocumentEvent[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 }
 
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;

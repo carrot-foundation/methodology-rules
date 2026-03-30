@@ -18,15 +18,15 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
   DocumentEventAttributeName,
   DocumentEventName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type DocumentEventAttachment,
-  type DocumentEventAttribute,
   DocumentEventAttributeFormat,
   DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
@@ -65,15 +65,15 @@ const VALID_MANIFEST_TYPES: ReadonlySet<string> = new Set<string>([
 
 type RuleSubject = {
   attachmentInfos: AttachmentInfo[];
-  document: Document;
+  document: BoldDocument;
   documentManifestEvents: DocumentManifestEventSubject[];
-  dropOffEvent: DocumentEvent | undefined;
-  haulerEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
   mtrEventDocumentNumbers: string[];
-  pickUpEvent: DocumentEvent | undefined;
-  recyclerEvent: DocumentEvent | undefined;
-  wasteGeneratorEvent: DocumentEvent | undefined;
-  weighingEvents: DocumentEvent[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 };
 
 const DOCUMENT_TYPE_MAPPING = {
@@ -123,7 +123,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       (subject) =>
         this.validateDocumentManifestEvents(
           subject,
-          ruleSubject.recyclerEvent as DocumentEvent,
+          ruleSubject.recyclerEvent as BoldDocumentEvent,
           ruleSubject.document.currentValue,
         ),
     );
@@ -198,7 +198,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const transportManifestEvents = document.externalEvents?.filter(
       eventNameIsAnyOf([this.documentManifestType]),
     );
@@ -313,7 +313,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
   private validateDocumentManifestEvents(
     subject: DocumentManifestEventSubject,
-    recyclerEvent: DocumentEvent,
+    recyclerEvent: BoldDocumentEvent,
     documentCurrentValue: number,
   ): ValidationResult {
     const {
@@ -423,7 +423,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   }
 
   private validateIssueDate(
-    issueDateAttribute: DocumentEventAttribute | undefined,
+    issueDateAttribute: BoldDocumentEventAttribute | undefined,
   ): ValidationResult {
     const failMessages: string[] = [];
 

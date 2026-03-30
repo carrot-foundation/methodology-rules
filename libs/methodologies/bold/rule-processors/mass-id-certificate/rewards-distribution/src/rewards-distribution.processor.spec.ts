@@ -3,7 +3,7 @@ import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldMethodologyName,
-  type Document,
+  type BoldDocument,
   type RewardDistributionResultContent,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -53,7 +53,7 @@ describe('RewardsDistributionProcessor', () => {
           massIDAuditDocument,
           massIDDocument,
           massIDCertificateDocument,
-          methodologyDocument as Document,
+          methodologyDocument as BoldDocument,
           ...(wasteGeneratorVerificationDocument
             ? [wasteGeneratorVerificationDocument]
             : []),

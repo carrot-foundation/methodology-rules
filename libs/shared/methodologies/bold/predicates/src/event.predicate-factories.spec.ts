@@ -3,7 +3,7 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -25,7 +25,7 @@ describe('Predicate Factories', () => {
     it('should return true if all arguments return true', () => {
       const event = stubDocumentEvent();
 
-      const condition = and<DocumentEvent>(
+      const condition = and<BoldDocumentEvent>(
         (input) => input.id === event.id,
         (input) => input.address.id === event.address.id,
         (input) => input.participant.id === event.participant.id,
@@ -37,7 +37,7 @@ describe('Predicate Factories', () => {
     it('should return false if an argument return false', () => {
       const event = stubDocumentEvent();
 
-      const condition = and<DocumentEvent>(
+      const condition = and<BoldDocumentEvent>(
         (input) => input.id === faker.string.uuid(),
         (input) => input.address.id === event.address.id,
         (input) => input.participant.id === event.participant.id,
@@ -51,7 +51,7 @@ describe('Predicate Factories', () => {
     it('should return false if argument return true', () => {
       const event = stubDocumentEvent();
 
-      const condition = not<DocumentEvent>((input) => input.id === event.id);
+      const condition = not<BoldDocumentEvent>((input) => input.id === event.id);
 
       expect(condition(event)).toBe(false);
     });
@@ -59,7 +59,7 @@ describe('Predicate Factories', () => {
     it('should return true if argument return false', () => {
       const event = stubDocumentEvent();
 
-      const condition = not<DocumentEvent>(
+      const condition = not<BoldDocumentEvent>(
         (input) => input.id === faker.string.uuid(),
       );
 

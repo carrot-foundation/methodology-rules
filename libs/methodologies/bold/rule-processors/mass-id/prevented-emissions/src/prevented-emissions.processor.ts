@@ -21,7 +21,7 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentSubtype,
   MassIDOrganicSubtype,
@@ -54,8 +54,8 @@ import { type RuleSubject } from './prevented-emissions.types';
 const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
 
 interface Documents {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 export class PreventedEmissionsProcessor extends RuleDataProcessor {
@@ -224,10 +224,10 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<Documents> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -258,8 +258,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIDDocument: massIDDocument as Document,
-      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
+      massIDDocument: massIDDocument as BoldDocument,
+      recyclerAccreditationDocument: recyclerAccreditationDocument as BoldDocument,
     };
   }
 }

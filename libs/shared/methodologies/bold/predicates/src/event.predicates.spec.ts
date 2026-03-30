@@ -4,7 +4,7 @@ import {
   stubDocumentEventWithMetadata,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
@@ -221,7 +221,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is undefined', () => {
       const result = eventHasMetadataAttribute({
-        event: {} as DocumentEvent,
+        event: {} as BoldDocumentEvent,
         metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
       });
 
@@ -343,7 +343,7 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if events has empty', () => {
-      const events = [] as unknown as DocumentEvent[];
+      const events = [] as unknown as BoldDocumentEvent[];
 
       const result = eventsHasSameMetadataAttributeValue(
         events,

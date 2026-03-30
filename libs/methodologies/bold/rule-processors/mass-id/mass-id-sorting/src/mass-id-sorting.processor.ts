@@ -17,7 +17,7 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -50,8 +50,8 @@ import {
 const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = DocumentEventAttributeName;
 
 interface DocumentPair {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 interface SortingData {
@@ -173,10 +173,10 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);

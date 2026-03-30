@@ -10,8 +10,8 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
@@ -33,10 +33,10 @@ import {
 } from './geolocation-and-address-precision.validators';
 
 export const hasVerificationDocument = (
-  massIDAuditDocument: Document,
+  massIDAuditDocument: BoldDocument,
   participantId: string,
   actorType: MassIDDocumentActorType,
-  accreditationDocuments: Document[],
+  accreditationDocuments: BoldDocument[],
 ): boolean => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
@@ -63,10 +63,10 @@ export const hasVerificationDocument = (
 };
 
 export const getAccreditedAddressByParticipantIdAndActorType = (
-  massIDAuditDocument: Document,
+  massIDAuditDocument: BoldDocument,
   participantId: string,
   actorType: MassIDDocumentActorType,
-  accreditationDocuments: Document[],
+  accreditationDocuments: BoldDocument[],
 ): DocumentAddress | undefined => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
@@ -122,7 +122,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 };
 
 export const getEventGpsGeolocation = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
 ): Geolocation | undefined => {
   const gpsLatitude = getEventAttributeValue(
     event,
@@ -147,7 +147,7 @@ export const getEventGpsGeolocation = (
 };
 
 export const getGpsExceptionsFromRecyclerAccreditation = (
-  recyclerAccreditationDocument: Document | undefined,
+  recyclerAccreditationDocument: BoldDocument | undefined,
   eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
 ): {
   latitudeException: GpsLatitudeApprovedException | undefined;

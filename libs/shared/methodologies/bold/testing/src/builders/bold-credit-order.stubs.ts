@@ -1,8 +1,8 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -34,7 +34,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
 export const stubBoldCreditOrderCreditsEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -56,7 +56,7 @@ const boldCreditOrderExternalEventsMap = new Map([
 export const stubBoldCreditOrderDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldCreditOrderExternalEventsMap
     : mergeEventsMaps(boldCreditOrderExternalEventsMap, externalEventsMap);

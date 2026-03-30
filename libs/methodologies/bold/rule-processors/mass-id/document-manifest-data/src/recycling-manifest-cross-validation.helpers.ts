@@ -8,7 +8,7 @@ import {
   getTimezoneFromAddress,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
-import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
@@ -35,13 +35,13 @@ import {
 import { getLayoutValidationConfig } from './document-manifest-data.helpers';
 
 export interface CdfCrossValidationEventData extends DocumentManifestEventSubject {
-  dropOffEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
   manifestType: 'cdf';
   mtrDocumentNumbers: string[];
-  pickUpEvent: DocumentEvent | undefined;
-  recyclerEvent: DocumentEvent | undefined;
-  wasteGeneratorEvent: DocumentEvent | undefined;
-  weighingEvents: DocumentEvent[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 }
 
 export const isCdfEventData = (

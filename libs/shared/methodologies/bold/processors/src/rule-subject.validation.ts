@@ -1,0 +1,25 @@
+import { logger } from '@carrot-fndn/shared/helpers';
+import { z } from 'zod';
+
+import { BaseProcessorErrors } from './base-processor.errors';
+
+export function validateRuleSubjectOrThrow<TSchema extends z.ZodTypeAny>({
+  errors,
+  input,
+  schema,
+  validationMessage,
+}: {
+  errors: BaseProcessorErrors;
+  input: unknown;
+  schema: TSchema;
+  validationMessage: string;
+}): z.infer<TSchema> {
+  const result = schema.safeParse(input);
+
+  if (!result.success) {
+    logger.warn({ issues: result.error.issues }, 'Invalid rule subject');
+    throw errors.getKnownError(validationMessage);
+  }
+
+  return result.data;
+}

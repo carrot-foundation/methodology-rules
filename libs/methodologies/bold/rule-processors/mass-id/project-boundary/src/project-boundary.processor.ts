@@ -4,8 +4,8 @@ import { calculateDistance, isNil } from '@carrot-fndn/shared/helpers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { convertDistance } from 'geolib';
@@ -15,8 +15,8 @@ import { RESULT_COMMENTS } from './project-boundary.constants';
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 
 interface RuleSubject {
-  dropOffEvent: DocumentEvent | undefined;
-  pickUpEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
+  pickUpEvent: BoldDocumentEvent | undefined;
 }
 
 export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -62,7 +62,7 @@ export class ProjectBoundaryProcessor extends ParentDocumentRuleProcessor<RuleSu
     }
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const pickUpEvent = document.externalEvents?.find(
       eventNameIsAnyOf([PICK_UP]),
     );

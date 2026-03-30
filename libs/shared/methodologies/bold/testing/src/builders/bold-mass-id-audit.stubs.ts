@@ -1,6 +1,6 @@
 import type {
-  Document,
-  DocumentEvent,
+  BoldDocument,
+  BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
@@ -23,7 +23,7 @@ const { PASSED } = RuleOutputStatus;
 
 const resultEventName = `Result: MassID ${PASSED}`;
 
-const boldMassIDAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
+const boldMassIDAuditExternalEventsMap: Map<string, BoldDocumentEvent> = new Map([
   [
     resultEventName,
     stubDocumentEventWithMetadataAttributes(
@@ -38,7 +38,7 @@ const boldMassIDAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
 export const stubBoldMassIDAuditDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldMassIDAuditExternalEventsMap
     : mergeEventsMaps(boldMassIDAuditExternalEventsMap, externalEventsMap);

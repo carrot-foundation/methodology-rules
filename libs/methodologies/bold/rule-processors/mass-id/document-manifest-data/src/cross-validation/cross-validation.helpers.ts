@@ -1,5 +1,5 @@
 import type { WasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { DocumentAddress } from '@carrot-fndn/shared/types';
 
 import { type ReviewReason } from '@carrot-fndn/shared/document-extractor';
@@ -53,7 +53,7 @@ const {
 } = DocumentEventAttributeName;
 
 export const getWasteClassification = (
-  pickUpEvent: DocumentEvent | undefined,
+  pickUpEvent: BoldDocumentEvent | undefined,
 ): { code: string | undefined; description: string | undefined } => ({
   code: pickUpEvent
     ? getEventAttributeValue(

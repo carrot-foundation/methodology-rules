@@ -21,7 +21,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
+  type BoldDocument,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -45,8 +45,8 @@ const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<DocumentEventLabel> = new Set([
 ]);
 
 interface RuleSubject {
-  accreditationDocuments: Map<string, Document[]>;
-  massIDDocument: Document;
+  accreditationDocuments: Map<string, BoldDocument[]>;
+  massIDDocument: BoldDocument;
 }
 
 export class ParticipantAccreditationsAndVerificationsRequirementsProcessor extends RuleDataProcessor {
@@ -115,7 +115,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private getActorParticipants(
-    massIDDocument: Document,
+    massIDDocument: BoldDocument,
   ): Map<string, DocumentEventLabel> {
     // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
     return new Map(
@@ -135,10 +135,10 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private async getRuleSubject(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<RuleSubject> {
-    const accreditationDocuments: Map<string, Document[]> = new Map();
-    let massIDDocument: Document | undefined;
+    const accreditationDocuments: Map<string, BoldDocument[]> = new Map();
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -180,13 +180,13 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   private validateActor(
     participantId: string,
     actorType: DocumentEventLabel,
-    participantDocuments: Document[],
+    participantDocuments: BoldDocument[],
     missingParticipants: string[],
     participantsWithMultipleValid: Array<{
       actorType: string;
       participantId: string;
     }>,
-    isValidAccreditation: (document: Document) => boolean,
+    isValidAccreditation: (document: BoldDocument) => boolean,
   ): void {
     const documentsForActorType = participantDocuments.filter((document) => {
       const documentRelation = mapDocumentRelation(document);
@@ -209,7 +209,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private validateAllActors(
     actorParticipants: Map<string, DocumentEventLabel>,
-    accreditationDocuments: Map<string, Document[]>,
+    accreditationDocuments: Map<string, BoldDocument[]>,
   ): Error | undefined {
     const missingParticipants: string[] = [];
     const participantsWithMultipleValid: Array<{

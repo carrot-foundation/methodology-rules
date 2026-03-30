@@ -15,7 +15,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -35,8 +35,8 @@ import {
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 
 interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document | undefined;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument | undefined;
 }
 
 interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {

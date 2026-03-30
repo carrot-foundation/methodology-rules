@@ -23,7 +23,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventName,
   DocumentSubtype,
   MassIDDocumentActorType,
@@ -54,10 +54,10 @@ import {
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 
 export interface RuleSubject {
-  accreditationDocuments: Document[];
-  massIDAuditDocument: Document;
+  accreditationDocuments: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
   participantsAddressData: Map<MassIDDocumentActorType, ParticipantAddressData>;
-  recyclerAccreditationDocument: Document | undefined;
+  recyclerAccreditationDocument: BoldDocument | undefined;
 }
 
 interface ParticipantAddressData {
@@ -158,10 +158,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private buildParticipantsAddressData(
-    events: NonNullable<Document['externalEvents']>,
-    massIDDocument: Document,
-    massIDAuditDocument: Document,
-    accreditationDocuments: Document[],
+    events: NonNullable<BoldDocument['externalEvents']>,
+    massIDDocument: BoldDocument,
+    massIDAuditDocument: BoldDocument,
+    accreditationDocuments: BoldDocument[],
   ) {
     const participantsAddressData = new Map<
       MassIDDocumentActorType,
@@ -215,10 +215,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ) {
-    const accreditationDocuments: Document[] = [];
-    let massIDDocument: Document | undefined;
+    const accreditationDocuments: BoldDocument[] = [];
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -245,9 +245,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private evaluateAddressData(
     actorType: MassIDDocumentActorType,
     addressData: ParticipantAddressData,
-    recyclerAccreditationDocument: Document | undefined,
-    massIDAuditDocument: Document,
-    accreditationDocuments: Document[],
+    recyclerAccreditationDocument: BoldDocument | undefined,
+    massIDAuditDocument: BoldDocument,
+    accreditationDocuments: BoldDocument[],
   ): EvaluateResultOutput[] {
     const {
       accreditedAddress,
@@ -383,7 +383,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     addressDistance: number;
     eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
     gpsGeolocation: Geolocation | undefined;
-    recyclerAccreditationDocument: Document | undefined;
+    recyclerAccreditationDocument: BoldDocument | undefined;
   }): EvaluateResultOutput[] {
     if (
       !isNil(gpsGeolocation) &&
@@ -475,7 +475,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return this.aggregateResults(actorResults);
   }
 
-  private extractRequiredEvents(massIDDocument: Document) {
+  private extractRequiredEvents(massIDDocument: BoldDocument) {
     const events = massIDDocument.externalEvents?.filter(
       eventNameIsAnyOf([DROP_OFF, PICK_UP]),
     );
@@ -492,8 +492,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private async getRuleSubject(
-    massIDAuditDocument: Document,
-    documentQuery: DocumentQuery<Document> | undefined,
+    massIDAuditDocument: BoldDocument,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<RuleSubject> {
     const documents = await this.collectDocuments(documentQuery);
     const massIDDocument = this.validateMassIDDocument(
@@ -526,8 +526,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private validateMassIDDocument(
-    massIDDocument: Document | undefined,
-  ): Document {
+    massIDDocument: BoldDocument | undefined,
+  ): BoldDocument {
     if (isNil(massIDDocument)) {
       throw this.processorErrors.getKnownError(
         this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,

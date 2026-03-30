@@ -10,7 +10,7 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
@@ -83,7 +83,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const pickUpEvent = document.externalEvents?.find((event) =>
       eventHasName(event, PICK_UP),
     );

@@ -1,16 +1,16 @@
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentRelation,
+  type BoldDocumentRelation,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface DocumentMatch {
-  category?: Document['category'] | undefined;
-  subtype?: Document['subtype'];
-  type?: Document['type'];
+  category?: BoldDocument['category'] | undefined;
+  subtype?: BoldDocument['subtype'];
+  type?: BoldDocument['type'];
 }
 
 export class DocumentMatcher {
@@ -20,7 +20,7 @@ export class DocumentMatcher {
     this.match = match;
   }
 
-  matches(document: Omit<DocumentRelation, 'id'>): boolean {
+  matches(document: Omit<BoldDocumentRelation, 'id'>): boolean {
     const matchKeys = Object.keys(this.match) as Array<keyof DocumentMatch>;
 
     const objectToMatch = pick(document, ...matchKeys);

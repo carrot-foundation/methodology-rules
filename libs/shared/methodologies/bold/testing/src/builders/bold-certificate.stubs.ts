@@ -1,8 +1,8 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentType,
   type RewardDistributionResultContent,
@@ -55,7 +55,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
 export const stubBoldCertificateRewardsDistributionMetadataEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -80,7 +80,7 @@ const boldCertificateExternalEventsMap = new Map([
 export const stubBoldCertificateDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldCertificateExternalEventsMap
     : mergeEventsMaps(boldCertificateExternalEventsMap, externalEventsMap);

@@ -3,7 +3,7 @@ import type {
   ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
 import type { WasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
   WasteQuantityComparison,
@@ -151,7 +151,7 @@ export const compareWasteType = (
 };
 
 const getWeighingValueKg = (
-  weighingEvents: Pick<DocumentEvent, 'value'>[],
+  weighingEvents: Pick<BoldDocumentEvent, 'value'>[],
 ): number | undefined =>
   weighingEvents.find((e) => e.value !== undefined && e.value > 0)?.value;
 
@@ -209,7 +209,7 @@ export const compareWasteQuantity = (
   entries: undefined | WasteTypeEntryData[],
   eventCode: string | undefined,
   eventDescription: string | undefined,
-  weighingEvents: Pick<DocumentEvent, 'value'>[],
+  weighingEvents: Pick<BoldDocumentEvent, 'value'>[],
   options: {
     confidence?: ExtractionConfidence | null;
     notExtractedReason?: ReviewReason;

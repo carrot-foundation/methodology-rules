@@ -1,8 +1,8 @@
 import type { PartialDeep } from 'type-fest';
 
 import {
-  type DocumentEvent,
-  type DocumentEventAttribute,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -19,7 +19,7 @@ import { stubAuthor, stubParticipant } from './participant.stubs';
 
 /**
  * Well-known Symbol used to attach the list of explicitly-provided metadata
- * attribute names to a DocumentEvent stub.  The normalizer in
+ * attribute names to a BoldDocumentEvent stub.  The normalizer in
  * generate-application-rules-manifest.ts reads this to filter out default
  * (noise) attributes from manifest examples.
  */
@@ -34,8 +34,8 @@ const isPropertyOverridenWithUndefined = <T extends AnyObject>(
 ) => Object.hasOwn(item, key) && item[key] === undefined;
 
 export const stubDocumentEvent = (
-  partialEvent: PartialDeep<DocumentEvent> = {},
-): DocumentEvent => ({
+  partialEvent: PartialDeep<BoldDocumentEvent> = {},
+): BoldDocumentEvent => ({
   externalCreatedAt: faker.date.recent().toISOString(),
   id: faker.string.uuid(),
   isPublic: faker.datatype.boolean(),
@@ -66,8 +66,8 @@ export const stubDocumentEventAttachment = (
 });
 
 export const stubDocumentEventWithMetadata = (
-  attributes: DocumentEventAttribute[],
-): DocumentEvent =>
+  attributes: BoldDocumentEventAttribute[],
+): BoldDocumentEvent =>
   stubDocumentEvent({
     metadata: {
       attributes,
@@ -75,8 +75,8 @@ export const stubDocumentEventWithMetadata = (
   });
 
 export const stubDocumentEventAttribute = (
-  partialInput: Partial<DocumentEventAttribute> = {},
-): DocumentEventAttribute => ({
+  partialInput: Partial<BoldDocumentEventAttribute> = {},
+): BoldDocumentEventAttribute => ({
   isPublic: faker.datatype.boolean(),
   name: stubEnumValue(DocumentEventAttributeName),
   value: faker.lorem.word(),
@@ -84,9 +84,9 @@ export const stubDocumentEventAttribute = (
 });
 
 export const stubActorEventWithLabel = (
-  eventLavel: DocumentEvent['label'],
-  partialEvent?: PartialDeep<DocumentEvent>,
-): DocumentEvent =>
+  eventLavel: BoldDocumentEvent['label'],
+  partialEvent?: PartialDeep<BoldDocumentEvent>,
+): BoldDocumentEvent =>
   stubDocumentEvent({
     ...partialEvent,
     label: eventLavel,
@@ -94,10 +94,10 @@ export const stubActorEventWithLabel = (
   });
 
 export const stubDocumentEventWithMetadataAttributes = (
-  partialEvent?: PartialDeep<DocumentEvent>,
+  partialEvent?: PartialDeep<BoldDocumentEvent>,
   attributes?: Array<
     | [DocumentEventAttributeName | string, DocumentEventAttributeValue]
-    | Omit<DocumentEventAttribute, 'isPublic'>
+    | Omit<BoldDocumentEventAttribute, 'isPublic'>
   >,
 ) =>
   stubDocumentEvent({

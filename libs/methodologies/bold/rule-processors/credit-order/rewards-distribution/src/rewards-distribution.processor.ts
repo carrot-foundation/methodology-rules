@@ -16,7 +16,7 @@ import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type CertificateRewardDistributionOutput,
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -47,7 +47,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
   async generateCertificateDocumentsQuery(
     ruleInput: RuleInput,
-  ): Promise<DocumentQuery<Document> | undefined> {
+  ): Promise<DocumentQuery<BoldDocument> | undefined> {
     const documentQueryService = new DocumentQueryService(
       provideDocumentLoaderService,
     );
@@ -97,7 +97,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   getRewardsDistributionRuleValue(
-    massIDCertificateDocument: Document,
+    massIDCertificateDocument: BoldDocument,
   ): CertificateRewardDistributionOutput {
     const rewardsDistributionRuleEvent =
       massIDCertificateDocument.externalEvents?.find((event) =>

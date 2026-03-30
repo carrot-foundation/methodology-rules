@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
@@ -29,7 +29,7 @@ describe('ParentDocumentRuleProcessor', () => {
 
     protected override async loadDocument(
       ruleInput: RuleInput,
-    ): Promise<Document | undefined> {
+    ): Promise<BoldDocument | undefined> {
       return super.loadDocument(ruleInput);
     }
   }

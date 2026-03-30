@@ -14,8 +14,8 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttachmentLabel,
   DocumentEventWeighingCaptureMethod,
   DocumentSubtype,
@@ -54,14 +54,14 @@ import {
 } from './weighing.helpers';
 
 interface DocumentPair {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 interface RuleSubject {
   massIDDocumentId: NonEmptyString;
-  recyclerAccreditationDocument: Document;
-  weighingEvents: DocumentEvent[];
+  recyclerAccreditationDocument: BoldDocument;
+  weighingEvents: BoldDocumentEvent[];
 }
 
 export class WeighingProcessor extends RuleDataProcessor {
@@ -167,7 +167,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       }
     }
 
-    const weighingEvent = weighingEvents[0] as DocumentEvent;
+    const weighingEvent = weighingEvents[0] as BoldDocumentEvent;
     const weighingValues = getValuesRelatedToWeighing(
       weighingEvent,
       recyclerAccreditationDocument,
@@ -258,7 +258,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     expectedNetWeight: number | undefined;
     massIDDocumentId: NonEmptyString;
     scaleTicketConfig: AdditionalVerification | undefined;
-    weighingEvent: DocumentEvent;
+    weighingEvent: BoldDocumentEvent;
   }): Promise<{
     errorResult?: EvaluateResultOutput;
     validated: boolean;
@@ -292,7 +292,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   private buildScaleTicketTextExtractorInput(
-    weighingEvent: DocumentEvent,
+    weighingEvent: BoldDocumentEvent,
     massIDDocumentId: NonEmptyString,
   ): TextExtractionInput | undefined {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
@@ -329,10 +329,10 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document>,
+    documentQuery: DocumentQuery<BoldDocument>,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -361,8 +361,8 @@ export class WeighingProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIDDocument: massIDDocument as Document,
-      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
+      massIDDocument: massIDDocument as BoldDocument,
+      recyclerAccreditationDocument: recyclerAccreditationDocument as BoldDocument,
     };
   }
 
@@ -373,7 +373,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   private validateWeighingEvents(
-    weighingEvents: DocumentEvent[] | undefined,
+    weighingEvents: BoldDocumentEvent[] | undefined,
   ): EvaluateResultOutput | undefined {
     if (isNil(weighingEvents) || weighingEvents.length === 0) {
       return {

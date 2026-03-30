@@ -1,7 +1,7 @@
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAccreditationStatus,
   DocumentEventAttributeName,
   DocumentEventName,
@@ -14,14 +14,14 @@ export const getParticipantAccreditationDocumentByParticipantId = ({
   accreditationDocuments,
   participantId,
 }: {
-  accreditationDocuments: Document[];
+  accreditationDocuments: BoldDocument[];
   participantId: NonEmptyString;
-}): Document | undefined =>
+}): BoldDocument | undefined =>
   accreditationDocuments.find(
     (document) => document.primaryParticipant.id === participantId,
   );
 
-export const isAccreditationValid = (document: Document): boolean => {
+export const isAccreditationValid = (document: BoldDocument): boolean => {
   const event = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),
   );
@@ -72,7 +72,7 @@ export const isAccreditationValid = (document: Document): boolean => {
 };
 
 export const isAccreditationValidWithOptionalDates = (
-  document: Document,
+  document: BoldDocument,
 ): boolean => {
   const event = document.externalEvents?.find(
     eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),

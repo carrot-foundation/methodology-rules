@@ -4,8 +4,8 @@ import { isNil } from '@carrot-fndn/shared/helpers';
 import { isRecycledEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { UTCDate } from '@date-fns/utc';
 import { isAfter, isEqual } from 'date-fns';
@@ -13,7 +13,7 @@ import { isAfter, isEqual } from 'date-fns';
 import { RESULT_COMMENTS } from './project-period-limit.constants';
 
 interface RuleSubject {
-  recycledEvent: DocumentEvent | undefined;
+  recycledEvent: BoldDocumentEvent | undefined;
 }
 
 export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -46,7 +46,7 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
     return new UTCDate(new Date().getUTCFullYear() - 1, 0, 1);
   }
 
-  protected getRuleSubject(document: Document): RuleSubject {
+  protected getRuleSubject(document: BoldDocument): RuleSubject {
     const recycledEvent = document.externalEvents?.find(isRecycledEvent);
 
     if (isNil(recycledEvent)) {

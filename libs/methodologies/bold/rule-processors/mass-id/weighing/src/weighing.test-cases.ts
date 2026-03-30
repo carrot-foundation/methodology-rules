@@ -10,9 +10,9 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
@@ -178,7 +178,7 @@ const createWeighingEvent = (
   overrideAttributes: MetadataAttributeParameter[] = [],
   eventValueOverride: number = eventValue,
   participant?: ReturnType<typeof stubParticipant>,
-): DocumentEvent =>
+): BoldDocumentEvent =>
   stubBoldMassIDWeighingEvent({
     metadataAttributes: overrideAttributes,
     partialDocumentEvent: {
@@ -265,7 +265,7 @@ const createTwoStepWeighingEvents = (
 
 interface WeighingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  massIDDocumentEvents: Record<string, DocumentEvent | undefined>;
+  massIDDocumentEvents: Record<string, BoldDocumentEvent | undefined>;
   scaleTicketVerificationError?: string;
 }
 
@@ -922,8 +922,8 @@ const {
   .build();
 
 interface WeighingErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const weighingErrorTestCases: WeighingErrorTestCase[] = [

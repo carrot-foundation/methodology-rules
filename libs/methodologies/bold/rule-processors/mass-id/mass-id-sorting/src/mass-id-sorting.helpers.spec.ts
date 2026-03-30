@@ -1,7 +1,7 @@
 import { stubBoldMassIDSortingEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEvent,
-  type DocumentEventAttribute,
+  BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
@@ -17,7 +17,7 @@ import {
 describe('mass-id-sorting helpers', () => {
   describe('validateWeightAttribute', () => {
     it('should return format error when value is valid but format is invalid', () => {
-      const attribute: DocumentEventAttribute = {
+      const attribute: BoldDocumentEventAttribute = {
         format: 'GRAM' as any,
         isPublic: true,
         name: 'test',
@@ -33,7 +33,7 @@ describe('mass-id-sorting helpers', () => {
     });
 
     it('should return null when both value and format are valid', () => {
-      const attribute: DocumentEventAttribute = {
+      const attribute: BoldDocumentEventAttribute = {
         format: DocumentEventAttributeFormat.KILOGRAM,
         isPublic: true,
         name: 'test',
@@ -50,7 +50,7 @@ describe('mass-id-sorting helpers', () => {
     it('should return error when priorEventWithValue is undefined', () => {
       const sortingEvent = {
         value: 10,
-      } as unknown as DocumentEvent;
+      } as unknown as BoldDocumentEvent;
 
       const result = getValidatedEventValues(undefined, sortingEvent);
 
@@ -114,16 +114,16 @@ describe('mass-id-sorting helpers', () => {
   describe('findSortingEvents', () => {
     it('should pick the last prior event with value as priorEventWithValue', () => {
       const events = [
-        { name: 'ANY', value: undefined } as unknown as DocumentEvent,
-        { name: 'ANY', value: 5 } as unknown as DocumentEvent,
-        { name: 'ANY' } as unknown as DocumentEvent,
-        { name: 'ANY', value: 7 } as unknown as DocumentEvent,
-        { name: 'ANY' } as unknown as DocumentEvent,
-        { name: 'ANY' } as unknown as DocumentEvent,
+        { name: 'ANY', value: undefined } as unknown as BoldDocumentEvent,
+        { name: 'ANY', value: 5 } as unknown as BoldDocumentEvent,
+        { name: 'ANY' } as unknown as BoldDocumentEvent,
+        { name: 'ANY', value: 7 } as unknown as BoldDocumentEvent,
+        { name: 'ANY' } as unknown as BoldDocumentEvent,
+        { name: 'ANY' } as unknown as BoldDocumentEvent,
         stubBoldMassIDSortingEvent({ partialDocumentEvent: { value: 9 } }),
       ];
 
-      const result = findSortingEvents(events as unknown as DocumentEvent[]);
+      const result = findSortingEvents(events as unknown as BoldDocumentEvent[]);
 
       if ('isError' in result) {
         throw new Error('Expected SortingEvents, got ValidationError');

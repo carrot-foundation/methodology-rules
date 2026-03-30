@@ -11,7 +11,7 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
@@ -73,7 +73,7 @@ export const mapActorReward = ({
 }: {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
-  massIDDocument: Document;
+  massIDDocument: BoldDocument;
   massIDPercentage: BigNumber;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;
@@ -93,7 +93,7 @@ export const getActorsByType = ({
 }: {
   actors: RewardsDistributionActor[];
   actorType: RewardsDistributionActorType;
-  methodologyDocument: Document;
+  methodologyDocument: BoldDocument;
 }): RewardsDistributionActor[] => {
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
     const actorEvent = methodologyDocument.externalEvents?.find(
@@ -189,7 +189,7 @@ export const calculatePercentageForUnidentifiedWasteOrigin = (
   return basePercentage;
 };
 
-export const isWasteOriginIdentified = (document: Document): boolean => {
+export const isWasteOriginIdentified = (document: BoldDocument): boolean => {
   const hasUnidentifiedOriginAttribute = getOrDefault(
     document.externalEvents,
     [],
@@ -217,7 +217,7 @@ export const getWasteGeneratorAdditionalPercentage = (
 };
 
 export const shouldApplyLargeBusinessDiscount = (
-  wasteGeneratorVerificationDocument: Document | undefined,
+  wasteGeneratorVerificationDocument: BoldDocument | undefined,
 ): boolean => {
   if (isNil(wasteGeneratorVerificationDocument)) {
     return true;
@@ -270,17 +270,17 @@ export const calculateCommunityImpactPoolShare = (
 };
 
 export const getNgoActorMassIDPercentage = (
-  massIDDocument: Document,
+  massIDDocument: BoldDocument,
   actorMassIDPercentage: BigNumber,
   actors: RewardsDistributionActor[],
   rewardDistributions: RewardsDistributionActorTypePercentage,
   getWasteGeneratorFullPercentage: (
-    targetDocument: Document,
+    targetDocument: BoldDocument,
     targetActorMassIDPercentage: BigNumber,
     targetActors: RewardsDistributionActor[],
     targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
-  wasteGeneratorVerificationDocument: Document | undefined,
+  wasteGeneratorVerificationDocument: BoldDocument | undefined,
 ): BigNumber => {
   const fullPercentage = getWasteGeneratorFullPercentage(
     massIDDocument,

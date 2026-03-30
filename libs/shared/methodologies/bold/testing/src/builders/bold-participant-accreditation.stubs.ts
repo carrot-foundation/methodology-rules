@@ -1,6 +1,6 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAccreditationStatus,
   DocumentEventScaleType,
   MassIDOrganicSubtype,
@@ -173,7 +173,7 @@ const boldAccreditationExternalEventsMap = new Map([
 export const stubBoldAccreditationDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldAccreditationExternalEventsMap
     : mergeEventsMaps(boldAccreditationExternalEventsMap, externalEventsMap);

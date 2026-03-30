@@ -1,5 +1,5 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { AnyObject, DocumentParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -18,8 +18,8 @@ interface ProcessRuleTestParameters {
   massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
   ruleDataProcessor: RuleDataProcessor;
   spyOnDocumentQueryServiceLoad: (
-    rootDocument: Document,
-    documents: Document[],
+    rootDocument: BoldDocument,
+    documents: BoldDocument[],
   ) => void;
 }
 

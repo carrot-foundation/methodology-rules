@@ -9,8 +9,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventAttributeValue,
   DocumentEventName,
@@ -22,8 +22,8 @@ const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
 const { UNIDENTIFIED } = DocumentEventAttributeValue;
 
 type Subject = {
-  pickUpEvent?: DocumentEvent | undefined;
-  wasteGeneratorEvents?: DocumentEvent[] | undefined;
+  pickUpEvent?: BoldDocumentEvent | undefined;
+  wasteGeneratorEvents?: BoldDocumentEvent[] | undefined;
 };
 
 export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -82,7 +82,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
       eventNameIsAnyOf([PICK_UP]),
     );

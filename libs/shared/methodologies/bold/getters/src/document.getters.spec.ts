@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   stubDocument,
@@ -412,7 +412,7 @@ describe('Document getters', () => {
       const document = {
         ...stubDocument(undefined, false),
         externalEvents: 'not an array',
-      } as unknown as Document;
+      } as unknown as BoldDocument;
 
       const participantActorType = getParticipantActorType({
         document,

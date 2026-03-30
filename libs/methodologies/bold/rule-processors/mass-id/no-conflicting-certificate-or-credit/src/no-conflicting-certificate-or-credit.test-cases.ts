@@ -8,7 +8,7 @@ import {
 import {
   BoldMethodologyName,
   BoldMethodologySlug,
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,
@@ -55,12 +55,12 @@ const massIDWithCreditsStubs = new BoldStubsBuilder({
   .createCreditOrderDocument(openDocumentField)
   .build();
 
-const duplicatedMassIDAuditDocument: Document = {
+const duplicatedMassIDAuditDocument: BoldDocument = {
   ...simpleMassIDStubs.massIDAuditDocument,
   id: faker.string.uuid(),
 };
 
-const massIDWithTwoAuditDocuments: Document = {
+const massIDWithTwoAuditDocuments: BoldDocument = {
   ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
@@ -72,7 +72,7 @@ const massIDWithTwoAuditDocuments: Document = {
 };
 
 const boldCarbonEventName = `${CARBON} Methodology`;
-const massIDAuditForOtherMethodology: Document = {
+const massIDAuditForOtherMethodology: BoldDocument = {
   ...duplicatedMassIDAuditDocument,
   externalEvents: [
     ...(duplicatedMassIDAuditDocument.externalEvents?.filter(
@@ -86,7 +86,7 @@ const massIDAuditForOtherMethodology: Document = {
     ),
   ],
 };
-const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
+const massIDWithAuditDocumentsForDifferentMethodologies: BoldDocument = {
   ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
@@ -98,8 +98,8 @@ const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
 };
 
 interface NoConflictingCertificateOrCreditTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificateOrCreditTestCase[] =

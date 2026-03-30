@@ -3,8 +3,8 @@ import {
   AuditApiService,
 } from '@carrot-fndn/shared/methodologies/audit-api';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -18,11 +18,11 @@ const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
 const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
 
 export type EventsData = {
-  dropOffEvent: DocumentEvent;
-  pickUpEvent: DocumentEvent;
-  recyclerEvent: DocumentEvent;
+  dropOffEvent: BoldDocumentEvent;
+  pickUpEvent: BoldDocumentEvent;
+  recyclerEvent: BoldDocumentEvent;
   vehicleLicensePlate: NonEmptyString;
-  wasteGeneratorEvent: DocumentEvent;
+  wasteGeneratorEvent: BoldDocumentEvent;
 };
 
 export const createLicensePlateRegex = (
@@ -51,7 +51,7 @@ export const createAuditApiService = (): AuditApiService =>
   new AuditApiService();
 
 export const mapMassIDV2Query = (
-  document: Document,
+  document: BoldDocument,
   requiredData: EventsData,
 ) => {
   const {
@@ -119,7 +119,7 @@ export const mapMassIDV2Query = (
   };
 };
 
-export const mapMassIDV1Query = (document: Document, events: EventsData) => {
+export const mapMassIDV1Query = (document: BoldDocument, events: EventsData) => {
   const {
     dropOffEvent,
     pickUpEvent,
@@ -207,7 +207,7 @@ export const fetchSimilarMassIDDocuments = async ({
   eventsData,
 }: {
   auditApiService: AuditApiService;
-  document: Document;
+  document: BoldDocument;
   eventsData: EventsData;
 }): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
   const v2FormatQuery = mapMassIDV2Query(document, eventsData);

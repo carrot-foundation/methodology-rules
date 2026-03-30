@@ -13,8 +13,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -109,7 +109,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  protected async getRuleSubject(document: Document): Promise<RuleSubject> {
+  protected async getRuleSubject(document: BoldDocument): Promise<RuleSubject> {
     const eventsData = this.collectRequiredEventsData(document);
 
     const duplicateDocuments = await fetchSimilarMassIDDocuments({
@@ -130,7 +130,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  private collectRequiredEventsData(document: Document): EventsData {
+  private collectRequiredEventsData(document: BoldDocument): EventsData {
     const dropOffEvent = this.getEventOrThrow(
       document,
       { name: [DROP_OFF] },
@@ -167,13 +167,13 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   }
 
   private getEventOrThrow(
-    document: Document,
+    document: BoldDocument,
     criteria: {
       label?: DocumentEventLabel[];
       name: DocumentEventName[];
     },
     errorMessage: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],
-  ): DocumentEvent {
+  ): BoldDocumentEvent {
     const { label, name } = criteria;
 
     const nameFilter = eventNameIsAnyOf(name);
@@ -192,7 +192,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     return event;
   }
 
-  private getVehicleLicensePlate(pickUpEvent: DocumentEvent): NonEmptyString {
+  private getVehicleLicensePlate(pickUpEvent: BoldDocumentEvent): NonEmptyString {
     const vehicleLicensePlate = getEventAttributeValue(
       pickUpEvent,
       VEHICLE_LICENSE_PLATE,

@@ -7,8 +7,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -19,7 +19,7 @@ const { ACTOR } = DocumentEventName;
 const { RECYCLER } = DocumentEventLabel;
 
 type Subject = {
-  recyclerActorEvents?: DocumentEvent[] | undefined;
+  recyclerActorEvents?: BoldDocumentEvent[] | undefined;
 };
 
 export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -46,7 +46,7 @@ export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
     const recyclerActorEvents = document.externalEvents?.filter(
       (event) => eventHasLabel(event, RECYCLER) && eventHasName(event, ACTOR),
     );

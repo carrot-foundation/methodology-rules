@@ -1,8 +1,8 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttachmentLabel,
   DocumentEventAttributeName,
   DocumentEventContainerType,
@@ -102,7 +102,7 @@ const defaultPickUpAttributes: MetadataAttributeParameter[] = [
 export const stubBoldMassIDPickUpEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -134,7 +134,7 @@ export const stubBoldMassIDTransportManifestEvent = ({
   withExemptionJustification,
 }: StubBoldDocumentEventParameters & {
   withExemptionJustification?: boolean | undefined;
-} = {}): DocumentEvent => {
+} = {}): BoldDocumentEvent => {
   const defaultAttributes =
     withExemptionJustification === true
       ? defaultTransportManifestWithExemptionAttributes
@@ -200,7 +200,7 @@ const defaultWeighingAttributes: MetadataAttributeParameter[] = [
 export const stubBoldMassIDWeighingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -224,7 +224,7 @@ const defaultDropOffAttributes: MetadataAttributeParameter[] = [
 export const stubBoldMassIDDropOffEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -256,7 +256,7 @@ export const stubBoldMassIDRecyclingManifestEvent = ({
   withExemptionJustification,
 }: StubBoldDocumentEventParameters & {
   withExemptionJustification?: boolean | undefined;
-} = {}): DocumentEvent => {
+} = {}): BoldDocumentEvent => {
   const defaultAttributes =
     withExemptionJustification === true
       ? defaultRecyclingManifestWithExemptionAttributes
@@ -286,7 +286,7 @@ export const stubBoldMassIDRecyclingManifestEvent = ({
 export const stubBoldMassIDRecycledEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -307,7 +307,7 @@ const defaultSortingAttributes: MetadataAttributeParameter[] = [
 export const stubBoldMassIDSortingEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -322,10 +322,10 @@ export const stubBoldMassIDSortingEvent = ({
 
 export type BoldMassIDExternalEventsMap = Map<
   DocumentEventName | string,
-  DocumentEvent
+  BoldDocumentEvent
 >;
 export type BoldMassIDExternalEventsObject = Partial<
-  Record<DocumentEventName, DocumentEvent>
+  Record<DocumentEventName, BoldDocumentEvent>
 >;
 
 export const boldMassIDExternalEventsMap: BoldMassIDExternalEventsMap = new Map(
@@ -356,7 +356,7 @@ export const boldMassIDExternalEventsMap: BoldMassIDExternalEventsMap = new Map(
 export const stubBoldMassIDDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldMassIDExternalEventsMap
     : mergeEventsMaps(boldMassIDExternalEventsMap, externalEventsMap);

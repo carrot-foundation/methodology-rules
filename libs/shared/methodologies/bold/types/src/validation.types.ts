@@ -1,7 +1,7 @@
 import { DocumentEventAttachmentSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-import { DocumentEventAttributeSchema } from './document-event.types';
+import { BoldDocumentEventAttributeSchema } from './document-event.types';
 
 export const DocumentEventWithAttachmentsSchema = z.object({
   attachments: z.array(DocumentEventAttachmentSchema).nonempty(),
@@ -12,7 +12,7 @@ export type DocumentEventWithAttachments = z.infer<
 
 export const DocumentEventWithMetadataSchema = z.object({
   metadata: z.object({
-    attributes: z.array(DocumentEventAttributeSchema).nonempty(),
+    attributes: z.array(BoldDocumentEventAttributeSchema).nonempty(),
   }),
 });
 export type DocumentEventWithMetadata = z.infer<

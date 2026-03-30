@@ -5,7 +5,7 @@ import {
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
@@ -28,7 +28,7 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
   it.each(compostingCycleTimeframeTestCases)(
     'should validate time interval between events - $scenario',
     async ({ dropOffEventDate, recycledEventDate, resultStatus }) => {
-      const externalEvents = new Map<DocumentEventName, DocumentEvent>();
+      const externalEvents = new Map<DocumentEventName, BoldDocumentEvent>();
 
       if (dropOffEventDate) {
         externalEvents.set(

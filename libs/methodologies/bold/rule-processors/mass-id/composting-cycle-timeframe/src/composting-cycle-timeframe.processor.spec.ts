@@ -5,7 +5,7 @@ import {
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
@@ -79,7 +79,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
             stubBoldMassIDDropOffEvent({
               partialDocumentEvent: {
                 externalCreatedAt:
-                  dropOffEventDate as DocumentEvent['externalCreatedAt'],
+                  dropOffEventDate as BoldDocumentEvent['externalCreatedAt'],
               },
             }),
           ],
@@ -88,7 +88,7 @@ describe('CompostingCycleTimeframeProcessor', () => {
             stubBoldMassIDRecycledEvent({
               partialDocumentEvent: {
                 externalCreatedAt:
-                  recycledEventDate as DocumentEvent['externalCreatedAt'],
+                  recycledEventDate as BoldDocumentEvent['externalCreatedAt'],
               },
             }),
           ],

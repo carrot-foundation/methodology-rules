@@ -12,8 +12,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentEventVehicleType,
@@ -33,7 +33,7 @@ export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
 ]);
 
 interface RuleSubject {
-  pickUpEvent?: DocumentEvent | undefined;
+  pickUpEvent?: BoldDocumentEvent | undefined;
 }
 
 export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -127,7 +127,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     );
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     return {
       pickUpEvent: document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
     };

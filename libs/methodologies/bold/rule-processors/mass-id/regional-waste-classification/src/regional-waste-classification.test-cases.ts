@@ -8,7 +8,7 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDOrganicSubtype,
@@ -46,7 +46,7 @@ const americanRecyclerEvent = stubDocumentEvent({
 
 interface RegionalWasteClassificationTestCase extends RuleTestCase {
   events: BoldExternalEventsObject;
-  partialDocument: PartialDeep<Document>;
+  partialDocument: PartialDeep<BoldDocument>;
   resultContent: AnyObject | undefined;
 }
 

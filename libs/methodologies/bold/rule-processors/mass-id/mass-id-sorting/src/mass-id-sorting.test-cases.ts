@@ -14,8 +14,8 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
@@ -116,20 +116,20 @@ const createMassIDEvents = (
 });
 
 const modifyDocumentEvents = (
-  baseDocument: Document,
+  baseDocument: BoldDocument,
   eventModifiers: Record<string, unknown>,
-): Document => ({
+): BoldDocument => ({
   ...baseDocument,
   externalEvents: baseDocument.externalEvents?.map((event) => {
     const eventName = String(event.name);
 
-    return (eventModifiers[eventName] ?? event) as DocumentEvent;
+    return (eventModifiers[eventName] ?? event) as BoldDocumentEvent;
   }),
 });
 
 const createErrorTestCase = (
   scenario: string,
-  documents: Document[],
+  documents: BoldDocument[],
   resultComment: string,
 ) => ({
   documents,
@@ -228,7 +228,7 @@ interface MassIDSortingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   actorParticipants: Map<string, DocumentParticipant>;
   massIDEvents: BoldExternalEventsObject;
-  partialDocument: PartialDeep<Document>;
+  partialDocument: PartialDeep<BoldDocument>;
 }
 
 export const massIDSortingTestCases: MassIDSortingTestCase[] = [
@@ -386,8 +386,8 @@ const invalidSortingValue = new BoldStubsBuilder()
   .build();
 
 interface MassIDSortingErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
@@ -454,7 +454,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
           ?.externalEvents?.filter(
             (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
           ),
-      } as Document,
+      } as BoldDocument,
     ],
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
   ),

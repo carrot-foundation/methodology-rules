@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -47,7 +47,7 @@ describe('RewardsDistributionProcessor E2E', () => {
           massIDDocument,
           massIDAuditDocument,
           massIDCertificateDocument,
-          methodologyDocument as Document,
+          methodologyDocument as BoldDocument,
         ].map((document) => ({
           document,
           documentKey: toDocumentKey({

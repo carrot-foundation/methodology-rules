@@ -1,7 +1,7 @@
 import type BigNumber from 'bignumber.js';
 
 import {
-  type Document,
+  type BoldDocument,
   RewardActorAddress,
   type RewardActorParticipant,
   type RewardsDistributionActorType,
@@ -11,15 +11,15 @@ import {
 export interface ActorMassIDPercentageInputDto {
   actors: RewardsDistributionActor[];
   actorType: RewardsDistributionActorType;
-  massIDDocument: Document;
+  massIDDocument: BoldDocument;
   rewardDistribution: BigNumber;
-  wasteGeneratorVerificationDocument: Document | undefined;
+  wasteGeneratorVerificationDocument: BoldDocument | undefined;
 }
 
 export interface ActorReward {
   actorType: RewardsDistributionActorType;
   address: RewardActorAddress;
-  massIDDocument: Document;
+  massIDDocument: BoldDocument;
   massIDPercentage: BigNumber;
   participant: RewardActorParticipant;
   preserveSensitiveData: boolean | undefined;

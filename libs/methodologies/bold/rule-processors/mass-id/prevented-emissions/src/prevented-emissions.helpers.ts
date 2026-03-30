@@ -1,7 +1,7 @@
 import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   MassIDOrganicSubtype,
   MethodologyBaseline,
@@ -53,7 +53,7 @@ export const calculatePreventedEmissions = (
 };
 
 export const getBaselineByWasteSubtype = (
-  emissionAndCompostingMetricsEvent: DocumentEvent | undefined,
+  emissionAndCompostingMetricsEvent: BoldDocumentEvent | undefined,
   wasteSubtype: MassIDOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
 ): MethodologyBaseline | undefined => {
@@ -82,7 +82,7 @@ export const throwIfMissing = <T>(
 };
 
 export const getGasTypeFromEvent = (
-  lastEmissionAndCompostingMetricsEvent: DocumentEvent | undefined,
+  lastEmissionAndCompostingMetricsEvent: BoldDocumentEvent | undefined,
 ): NonEmptyString => {
   const gasType = getEventAttributeValue(
     lastEmissionAndCompostingMetricsEvent,

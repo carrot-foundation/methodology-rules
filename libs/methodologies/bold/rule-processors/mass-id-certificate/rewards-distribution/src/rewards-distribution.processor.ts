@@ -12,7 +12,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
+  type BoldDocument,
   DocumentSubtype,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
@@ -56,14 +56,14 @@ BigNumber.config({ DECIMAL_PLACES: 10, ROUNDING_MODE: BigNumber.ROUND_DOWN });
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
 
-  async getRuleDocuments(documentQuery: DocumentQuery<Document>): Promise<{
-    massIDDocument: Document | undefined;
-    methodologyDocument: Document | undefined;
-    wasteGeneratorVerificationDocument: Document | undefined;
+  async getRuleDocuments(documentQuery: DocumentQuery<BoldDocument>): Promise<{
+    massIDDocument: BoldDocument | undefined;
+    methodologyDocument: BoldDocument | undefined;
+    wasteGeneratorVerificationDocument: BoldDocument | undefined;
   }> {
-    let massIDDocument: Document | undefined;
-    let methodologyDocument: Document | undefined;
-    let wasteGeneratorVerificationDocument: Document | undefined;
+    let massIDDocument: BoldDocument | undefined;
+    let methodologyDocument: BoldDocument | undefined;
+    let wasteGeneratorVerificationDocument: BoldDocument | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
@@ -140,7 +140,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     }
   }
 
-  private extractMassIDSubtype(document: Document): MassIDOrganicSubtype {
+  private extractMassIDSubtype(document: BoldDocument): MassIDOrganicSubtype {
     if (
       !(Object.values(MassIDOrganicSubtype) as unknown[]).includes(
         document.subtype,
@@ -220,9 +220,9 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     methodologyDocument,
     wasteGeneratorVerificationDocument,
   }: {
-    massIDDocument: Document;
-    methodologyDocument: Document;
-    wasteGeneratorVerificationDocument: Document | undefined;
+    massIDDocument: BoldDocument;
+    methodologyDocument: BoldDocument;
+    wasteGeneratorVerificationDocument: BoldDocument | undefined;
   }): ActorReward[] {
     const result: ActorReward[] = [];
     const actors = this.getRewardsDistributionActors(massIDDocument);
@@ -266,7 +266,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private getRewardsDistributionActors(
-    document: Document,
+    document: BoldDocument,
   ): RewardsDistributionActor[] {
     const actors: RewardsDistributionActor[] = [];
 
@@ -326,7 +326,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private getRewardsDistributionActorTypePercentages(
-    document: Document,
+    document: BoldDocument,
   ): RewardsDistributionActorTypePercentage {
     const documentSubtype = this.extractMassIDSubtype(document);
     const wasteType = REWARDS_DISTRIBUTION_BY_WASTE_TYPE[documentSubtype];
@@ -335,7 +335,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private getWasteGeneratorActorMassIDFullPercentage(
-    document: Document,
+    document: BoldDocument,
     actorMassIDPercentage: BigNumber,
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
@@ -350,11 +350,11 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   private getWasteGeneratorActorMassIDPercentage(
-    document: Document,
+    document: BoldDocument,
     actorMassIDPercentage: BigNumber,
     actors: RewardsDistributionActor[],
     rewardDistributions: RewardsDistributionActorTypePercentage,
-    wasteGeneratorVerificationDocument: Document | undefined,
+    wasteGeneratorVerificationDocument: BoldDocument | undefined,
   ): BigNumber {
     const fullPercentage = this.getWasteGeneratorActorMassIDFullPercentage(
       document,

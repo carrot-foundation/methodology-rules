@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDOrganicSubtype,
@@ -72,7 +72,7 @@ export const resolveCanonicalLocalWasteClassificationId = (
 };
 
 export const getOthersIfOrganicContextFromMassIdDocument = (
-  massIDDocument: Document,
+  massIDDocument: BoldDocument,
 ): OthersIfOrganicContext => {
   if (massIDDocument.subtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
     return {};

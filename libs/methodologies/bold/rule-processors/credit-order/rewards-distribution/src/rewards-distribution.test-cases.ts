@@ -15,7 +15,7 @@ import {
 import {
   BoldMethodologyName,
   type CertificateRewardDistributionOutput,
-  type Document,
+  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentSubtype,
@@ -37,8 +37,8 @@ type ActorResult = {
   percentage: string;
 };
 
-type CertificateDocument = Document;
-type CreditOrderDocument = Document;
+type CertificateDocument = BoldDocument;
+type CreditOrderDocument = BoldDocument;
 
 type ErrorTestCase = RuleTestCase & {
   creditOrderDocument: CreditOrderDocument | undefined;

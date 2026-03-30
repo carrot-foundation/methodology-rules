@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface ConnectionKeys<Criteria> {
   criteria: Criteria;
@@ -34,10 +34,10 @@ export interface QueryContext {
 }
 
 export interface RelatedDocumentCriteria extends DocumentCriteria {
-  category?: Document['category'] | undefined;
+  category?: BoldDocument['category'] | undefined;
   omit?: boolean | undefined;
-  subtype?: Document['subtype'];
-  type?: Document['type'];
+  subtype?: BoldDocument['subtype'];
+  type?: BoldDocument['type'];
 }
 
 export interface Visitor<DocumentType> {

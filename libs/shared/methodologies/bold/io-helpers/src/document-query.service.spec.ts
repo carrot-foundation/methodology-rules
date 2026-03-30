@@ -9,7 +9,7 @@ import {
   stubDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
   DocumentSubtype,
   DocumentType,
@@ -75,9 +75,9 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          parentDocumentEntity as DocumentEntity<Document>,
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -118,18 +118,18 @@ describe('DocumenQueryService', () => {
           const id = match ? match[1] : null;
 
           if (id === document.id) {
-            return Promise.resolve(documentEntity as DocumentEntity<Document>);
+            return Promise.resolve(documentEntity as DocumentEntity<BoldDocument>);
           }
 
           if (id === parentDocument.id) {
             return Promise.resolve(
-              parentDocumentEntity as DocumentEntity<Document>,
+              parentDocumentEntity as DocumentEntity<BoldDocument>,
             );
           }
 
           if (id === parentDocumentOfParentDocument.id) {
             return Promise.resolve(
-              parentDocumentOfParentDocumentEntity as DocumentEntity<Document>,
+              parentDocumentOfParentDocumentEntity as DocumentEntity<BoldDocument>,
             );
           }
 
@@ -290,36 +290,36 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(document as DocumentEntity<Document>)
+        .mockResolvedValueOnce(document as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: parentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: parentDocumentOfRelatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfRelatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfRelatedDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -430,7 +430,7 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
-        documentEntity as DocumentEntity<Document>,
+        documentEntity as DocumentEntity<BoldDocument>,
       );
 
       const loaderDocuments = await loadDocuments.load({
@@ -460,7 +460,7 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
-        documentEntity as DocumentEntity<Document>,
+        documentEntity as DocumentEntity<BoldDocument>,
       );
 
       const loaderDocuments = await loadDocuments.load({
@@ -508,10 +508,10 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
-        .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
+        .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          relatedDocumentEntity as DocumentEntity<Document>,
+          relatedDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -539,9 +539,9 @@ describe('DocumenQueryService', () => {
       const documentEntity = stubDocumentEntity({ document });
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          parentDocumentEntity as DocumentEntity<Document>,
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({

@@ -1,7 +1,7 @@
 import type {
-  Document,
-  DocumentEvent,
-  DocumentRelation,
+  BoldDocument,
+  BoldDocumentEvent,
+  BoldDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { type DocumentLoader } from '@carrot-fndn/shared/document/loader';
@@ -30,12 +30,12 @@ import {
 } from './document-query.service.validators';
 
 export class DocumentQueryService extends BaseDocumentQueryService<
-  Document,
+  BoldDocument,
   DocumentQueryCriteria,
   QueryContext
 > {
   constructor(private readonly documentLoaderService: DocumentLoader) {
-    const documentFetcher: DocumentFetcher<Document> = {
+    const documentFetcher: DocumentFetcher<BoldDocument> = {
       fetch: async ({ s3Key: documentKey }) => {
         const document = await this.documentLoaderService.load({
           key: documentKey,
@@ -53,7 +53,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
           );
         }
 
-        return validation.data as unknown as Document;
+        return validation.data as unknown as BoldDocument;
       },
     };
 
@@ -62,7 +62,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
 
   protected getConnectionKeys(
     criteria: DocumentQueryCriteria,
-    document: Document,
+    document: BoldDocument,
     context: QueryContext,
   ): Array<ConnectionKeys<DocumentQueryCriteria>> {
     const { externalEvents, parentDocumentId } = document;
@@ -142,7 +142,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     criteria,
     documentKey,
   }: {
-    callback: (document: Visitor<Document>) => T;
+    callback: (document: Visitor<BoldDocument>) => T;
     context: QueryContext;
     criteria: DocumentQueryCriteria;
     documentKey: DocumentKey;
@@ -169,7 +169,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
 
   private getEventRelationship({
     relatedDocument,
-  }: DocumentEvent): DocumentRelation | undefined {
+  }: BoldDocumentEvent): BoldDocumentRelation | undefined {
     if (isDocumentRelation(relatedDocument)) {
       return relatedDocument;
     }

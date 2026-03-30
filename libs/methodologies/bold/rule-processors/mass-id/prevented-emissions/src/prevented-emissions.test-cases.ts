@@ -8,7 +8,7 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  Document,
+  BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
@@ -397,9 +397,9 @@ const mapParticipantAccreditationDocuments = ({
   recyclerRemoveEventName,
 }: {
   excludeActorTypes?: string[];
-  recyclerExternalEvents?: Document['externalEvents'];
+  recyclerExternalEvents?: BoldDocument['externalEvents'];
   recyclerRemoveEventName?: string;
-}): Document[] =>
+}): BoldDocument[] =>
   [...participantsAccreditationDocuments.values()]
     .filter(
       (document) =>
@@ -427,13 +427,13 @@ const mapParticipantAccreditationDocuments = ({
 
 const makeRecyclerEmissionAndCompostingMetricsEvents = (
   metadataAttributes: MetadataAttributeParameter[],
-): Document['externalEvents'] => [
+): BoldDocument['externalEvents'] => [
   stubBoldEmissionAndCompostingMetricsEvent({ metadataAttributes }),
 ];
 
 interface PreventedEmissionsErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[] =

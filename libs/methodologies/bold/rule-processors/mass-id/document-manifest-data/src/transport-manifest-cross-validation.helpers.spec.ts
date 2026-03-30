@@ -3,7 +3,7 @@ import type {
   ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
@@ -60,15 +60,15 @@ const createExtractionResult = (
     reviewRequired: false,
   }) as unknown as ExtractionOutput<BaseExtractedData>;
 
-const makeWeighingEvent = (value: number): DocumentEvent =>
-  ({ value }) as unknown as DocumentEvent;
+const makeWeighingEvent = (value: number): BoldDocumentEvent =>
+  ({ value }) as unknown as BoldDocumentEvent;
 
 const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
 
 const makePickUpEventWithClassification = (
   code?: string,
   description?: string,
-): DocumentEvent =>
+): BoldDocumentEvent =>
   ({
     address: STUB_BR_ADDRESS,
     metadata: {
@@ -93,7 +93,7 @@ const makePickUpEventWithClassification = (
             ]),
       ],
     },
-  }) as unknown as DocumentEvent;
+  }) as unknown as BoldDocumentEvent;
 
 describe('transport-manifest-cross-validation.helpers', () => {
   describe('validateMtrExtractedData', () => {
@@ -149,7 +149,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -191,7 +191,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -222,7 +222,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -270,7 +270,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
           participant: {
             name: 'Original Recycler Corp',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -313,7 +313,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
           participant: {
             name: 'Original Generator Corp',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -356,7 +356,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
           participant: {
             name: 'Original Hauler Corp',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -400,7 +400,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Hauler Co',
             taxId: '22.222.222/0001-22',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -442,7 +442,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Receiver Co',
             taxId: '11.111.111/0001-11',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -484,7 +484,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Receiver Co',
             taxId: '11.111.111/0001-11',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -518,7 +518,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Receiver Co',
             taxId: '11.111.111/0001-11',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -551,7 +551,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
           participant: {
             name: 'Original Recycler Corp',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -585,7 +585,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
           participant: {
             name: 'Recycler Corp',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -608,7 +608,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         pickUpEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-10',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -631,7 +631,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         pickUpEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-03',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -654,7 +654,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         dropOffEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-10',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -685,7 +685,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -715,7 +715,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -746,7 +746,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -784,7 +784,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -820,7 +820,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
               },
             ],
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -842,7 +842,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         pickUpEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-06-15',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -865,7 +865,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         pickUpEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-15',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1574,7 +1574,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             'Lodos de tratamento',
           ),
           weighingEvents: [
-            { value: 0 } as unknown as DocumentEvent,
+            { value: 0 } as unknown as BoldDocumentEvent,
             makeWeighingEvent(1000),
             makeWeighingEvent(2000),
           ],
@@ -1718,7 +1718,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Receiver Co',
             taxId: '33.333.333/0001-33',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1757,7 +1757,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Generator Co',
             taxId: '11.111.111/0001-11',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1796,7 +1796,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Hauler Co',
             taxId: '22.222.222/0001-22',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1837,7 +1837,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Receiver Co',
             taxId: '33.333.333/0001-33',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1879,7 +1879,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
             name: 'Recycler Corp',
             taxId: '33.333.333/0001-33',
           },
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);
@@ -1908,7 +1908,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
         pickUpEvent: {
           address: STUB_BR_ADDRESS,
           externalCreatedAt: '2024-01-15',
-        } as unknown as DocumentEvent,
+        } as unknown as BoldDocumentEvent,
       };
 
       const result = validateMtrExtractedData(extractionResult, eventData);

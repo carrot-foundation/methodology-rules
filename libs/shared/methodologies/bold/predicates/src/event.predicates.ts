@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentEvent,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
@@ -20,26 +20,26 @@ import {
 import { validateDocumentEvent } from './event.predicates.validators';
 
 export const eventHasName = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   eventName: DocumentEventName,
 ): boolean => event.name === eventName.toString();
 
 export const eventHasLabel = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   eventLabel: NonEmptyString,
 ): boolean => event.label === eventLabel;
 
-export const isActorEvent = (event: DocumentEvent): boolean =>
+export const isActorEvent = (event: BoldDocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.ACTOR);
 
-export const isRecycledEvent = (event: DocumentEvent): boolean =>
+export const isRecycledEvent = (event: BoldDocumentEvent): boolean =>
   eventHasName(event, DocumentEventName.RECYCLED);
 
-export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
+export const eventHasActorParticipant = (event: BoldDocumentEvent): boolean =>
   event.participant.type === ParticipantType.ACTOR.toString();
 
 export const eventHasNonEmptyStringAttribute = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   attributeName: DocumentEventAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
@@ -56,10 +56,10 @@ export const hasWeightFormat = (
 };
 
 export const eventsHasSameMetadataAttributeValue = (
-  events: DocumentEvent[],
+  events: BoldDocumentEvent[],
   metadataName: DocumentEventAttributeName,
 ): boolean => {
-  if (isNonEmptyArray<DocumentEvent>(events)) {
+  if (isNonEmptyArray<BoldDocumentEvent>(events)) {
     return events.every(
       (event) =>
         getEventAttributeValue(event, metadataName) ===
@@ -71,7 +71,7 @@ export const eventsHasSameMetadataAttributeValue = (
 };
 
 export const eventHasMetadataAttribute = (options: {
-  event: DocumentEvent;
+  event: BoldDocumentEvent;
   eventNames?: DocumentEventName[];
   metadataName: DocumentEventAttributeName | string;
   metadataValues?: unknown;
@@ -105,7 +105,7 @@ export const eventHasMetadataAttribute = (options: {
 };
 
 export const eventHasCarrotParticipant = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   dataSetName: DataSetName,
 ): boolean => {
   const development =

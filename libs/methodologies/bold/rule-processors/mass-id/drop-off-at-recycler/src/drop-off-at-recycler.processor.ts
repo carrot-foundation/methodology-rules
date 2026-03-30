@@ -9,8 +9,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,9 +26,9 @@ const { RECYCLER } = DocumentEventLabel;
 const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
 
 interface RuleSubject {
-  lastDropOffEvent: DocumentEvent | undefined;
+  lastDropOffEvent: BoldDocumentEvent | undefined;
   receivingOperatorIdentifier: DocumentEventAttributeValue | string | undefined;
-  recyclerEvent: DocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
 }
 
 export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -65,7 +65,7 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const recyclerEvent = document.externalEvents?.find(
       and(eventLabelIsAnyOf([RECYCLER]), eventNameIsAnyOf([ACTOR])),
     );

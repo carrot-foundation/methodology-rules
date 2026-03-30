@@ -1,9 +1,9 @@
 import type { PartialDeep } from 'type-fest';
 
 import {
-  type Document,
+  type BoldDocument,
   DocumentCategory,
-  type DocumentRelation,
+  type BoldDocumentRelation,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -17,9 +17,9 @@ import { stubDocumentEvent } from './document-event.stubs';
 import { stubParticipant } from './participant.stubs';
 
 export const stubDocument = (
-  partialDocument?: PartialDeep<Document>,
+  partialDocument?: PartialDeep<BoldDocument>,
   stubExternalEvents = true,
-): Document => {
+): BoldDocument => {
   const externalEvents =
     partialDocument?.externalEvents?.map((event) => stubDocumentEvent(event)) ??
     [];
@@ -50,8 +50,8 @@ export const stubDocument = (
 };
 
 export const stubDocumentRelation = (
-  partial?: Partial<DocumentRelation>,
-): DocumentRelation => ({
+  partial?: Partial<BoldDocumentRelation>,
+): BoldDocumentRelation => ({
   bidirectional: faker.datatype.boolean(),
   category: stubEnumValue(DocumentCategory),
   documentId: faker.string.uuid(),
@@ -61,8 +61,8 @@ export const stubDocumentRelation = (
 });
 
 export const stubMassIDDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
     category: DocumentCategory.MASS_ID,
     type: DocumentType.ORGANIC,
@@ -106,8 +106,8 @@ export const generateNearbyCoordinates = (options?: {
 };
 
 export const stubParticipantAccreditationGroupDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,
@@ -116,8 +116,8 @@ export const stubParticipantAccreditationGroupDocument = (
   });
 
 export const stubParticipantAccreditationDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
     ...partialDocument,
     category: DocumentCategory.METHODOLOGY,

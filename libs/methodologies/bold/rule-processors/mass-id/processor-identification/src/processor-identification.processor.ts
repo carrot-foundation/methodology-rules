@@ -7,8 +7,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
+  type BoldDocument,
+  type BoldDocumentEvent,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventLabel } from '@carrot-fndn/shared/types';
@@ -19,7 +19,7 @@ const { ACTOR } = DocumentEventName;
 const { PROCESSOR } = DocumentEventLabel;
 
 type Subject = {
-  processorActorEvents?: DocumentEvent[] | undefined;
+  processorActorEvents?: BoldDocumentEvent[] | undefined;
 };
 
 export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -46,7 +46,7 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
     const processorActorEvents = document.externalEvents?.filter(
       (event) => eventHasLabel(event, PROCESSOR) && eventHasName(event, ACTOR),
     );
