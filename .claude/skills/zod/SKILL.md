@@ -30,3 +30,21 @@ description: 'Create and modify Zod schemas for runtime validation with proper t
 6. **Schema composition**: Use `.extend()`, `.merge()`, `.pick()`, `.omit()`, and `.partial()` to compose schemas from existing ones rather than duplicating field definitions.
 
 7. **Optional fields**: Use `z.optional()` or `.optional()` for truly optional fields. Remember that `exactOptionalPropertyTypes` is enabled in tsconfig, so optional fields must be explicitly marked.
+
+8. **Const-object + `z.enum()` pattern**: For value sets, define a const object mapping human-readable keys to values, then derive a `z.enum()` using the `Object.values` tuple cast. Use `.extract()` or `.literal()` to narrow for deeper schema layers.
+
+   ```typescript
+   const DOCUMENT_CATEGORY = {
+     Methodology: 'methodology',
+     Audit: 'audit',
+     Certificate: 'certificate',
+   } as const;
+
+   const DocumentCategorySchema = z.enum(
+     Object.values(DOCUMENT_CATEGORY) as [string, ...string[]],
+   );
+
+   // Narrower schema for a specific layer
+   const AuditOnlySchema = DocumentCategorySchema.extract(['audit']);
+   const MethodologyLiteralSchema = z.literal(DOCUMENT_CATEGORY.Methodology);
+   ```

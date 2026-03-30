@@ -7,6 +7,7 @@
  * It creates the following files in the rule's directory:
  * - index.ts - Exports the rule's lambda handler
  * - [rule-name].lambda.ts - Lambda handler wrapper
+ * - [rule-name].rule-subject.ts - Rule subject Zod schema and inferred type
  * - [rule-name].processor.ts - Main rule processor implementation
  * - [rule-name].errors.ts - Error message definitions
  * - [rule-name].processor.spec.ts - Unit tests
@@ -98,14 +99,31 @@ const instance = new ${pascalCase}Processor();
 export const ${camelCase}Lambda = wrapRuleIntoLambdaHandler(instance);\n`,
   },
   {
+    name: `${fileName}.rule-subject.ts`,
+    content: `import { BoldDocumentSchema } from '@carrot-fndn/shared/methodologies/bold/types';
+import { z } from 'zod';
+
+export const ${pascalCase}RuleSubjectSchema = z.object({
+  document: BoldDocumentSchema,
+});
+
+export type ${pascalCase}RuleSubject = z.infer<typeof ${pascalCase}RuleSubjectSchema>;
+`,
+  },
+  {
     name: `${fileName}.processor.ts`,
     content: `import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
+import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { ${pascalCase}ProcessorErrors } from './${fileName}.errors';
+import {
+  type ${pascalCase}RuleSubject,
+  ${pascalCase}RuleSubjectSchema,
+} from './${fileName}.rule-subject';
 
 export const RESULT_COMMENTS = {
   PASSED: '${description}',
@@ -119,27 +137,25 @@ export class ${pascalCase}Processor extends ParentDocumentRuleProcessor<Document
     return RESULT_COMMENTS;
   }
 
-  private validateRequiredFields(
+  protected override evaluateResult(
     document: Document,
-  ): EvaluateResultOutput | undefined {
+  ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
+    const rawSubject: ${pascalCase}RuleSubject = { document };
+
+    validateRuleSubjectOrThrow({
+      errors: this.processorErrors,
+      input: rawSubject,
+      schema: ${pascalCase}RuleSubjectSchema,
+      validationMessage:
+        this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+    });
+
     if (isNil(document.type)) {
       return {
         resultComment:
           this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
         resultStatus: 'FAILED',
       };
-    }
-
-    return undefined;
-  }
-
-  protected override evaluateResult(
-    document: Document,
-  ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
-    const validationResult = this.validateRequiredFields(document);
-
-    if (validationResult) {
-      return validationResult;
     }
 
     return {
@@ -161,6 +177,7 @@ export class ${pascalCase}ProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     DOCUMENT_TYPE_NOT_FOUND: 'Document type not found.',
     FAILED_BY_ERROR: 'Unable to validate the ${ruleName}.',
+    INVALID_RULE_SUBJECT: 'The ${ruleName} rule subject is invalid.',
   } as const;
 }\n`,
   },

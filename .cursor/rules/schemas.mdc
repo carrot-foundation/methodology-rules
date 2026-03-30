@@ -69,3 +69,37 @@ const stubVehicle = createStubFromSchema(VehicleSchema);
 ```
 
 This ensures test data always conforms to the current schema shape and evolves automatically when the schema changes.
+
+### Schema layering
+
+Document schemas are organized in five layers with progressive strictness:
+
+| Layer | Naming convention | Zod strategy | Purpose |
+|-------|------------------|--------------|---------|
+| Envelope | `LoadedDocumentEnvelopeSchema` | `z.object` | Wrapper for loaded documents |
+| Inbound | `Inbound*Schema` | `looseObject` (allows unknown fields) | Boundary contract for external data |
+| Normalized | `*Schema` | `z.object` (strips unknown fields) | Strict internal representation |
+| Domain | `Bold*Schema`, `MassID*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
+| Rule | `*RuleSubjectSchema` | `z.object` with exact fields needed | Exact contract per rule processor |
+
+Key conventions:
+
+- **Progressive unknown-field pruning**: Inbound schemas use `looseObject` to tolerate extra fields; normalized and deeper layers use strict `z.object` which strips unknown properties.
+- **Rule subject schemas are mandatory**: Every rule processor must define a `*RuleSubjectSchema` that describes the exact data it needs.
+- **`validateRuleSubjectOrThrow`**: Standard entry point for rule subject validation. Use this instead of calling `.parse()` directly.
+- **Const-object + `z.enum()` for value sets**: Define allowed values as a const object, then derive a `z.enum()` from its values. Use `.extract()` to narrow to a subset and `.literal()` for single-value constraints in deeper layers.
+
+```ts
+const MATERIAL_TYPE = {
+  Organic: 'organic',
+  Recyclable: 'recyclable',
+  Hazardous: 'hazardous',
+} as const;
+
+const MaterialTypeSchema = z.enum(
+  Object.values(MATERIAL_TYPE) as [string, ...string[]],
+);
+
+// Narrower layer
+const OrganicOnlySchema = MaterialTypeSchema.extract(['organic']);
+```

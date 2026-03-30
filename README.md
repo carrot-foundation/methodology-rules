@@ -104,6 +104,23 @@ Every rule processor follows a standardized pattern:
 
 Complex processors may override `process()` with custom document loading and evaluation logic.
 
+### Schema Layering
+
+Every rule processor follows a standardized validation flow:
+1. Load raw documents
+2. Build a rule subject
+3. Validate the rule subject schema (`validateRuleSubjectOrThrow`)
+4. Evaluate business logic
+
+Document schemas are organized in 5 layers:
+- **Envelope** (`LoadedDocumentEnvelopeSchema`) — wrapper for loaded documents
+- **Inbound** (`InboundDocumentSchema`) — boundary contract, looseObject
+- **Normalized** (`DocumentSchema`) — strict z.object, strips unknown fields
+- **Domain** (`BoldDocumentSchema`, `MassID*Schema`) — methodology-specific
+- **Rule** (`*RuleSubjectSchema`) — exact contract per rule
+
+Enums use const-object + `z.enum()` pattern with `.extract()` / `.literal()` for narrower layers.
+
 Design principles:
 
 - **Fidelity** — Mirrors the MvF specification exactly
