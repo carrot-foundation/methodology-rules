@@ -17,7 +17,10 @@ export function validateRuleSubjectOrThrow<TSchema extends z.ZodTypeAny>({
   const result = schema.safeParse(input);
 
   if (!result.success) {
-    logger.warn({ issues: result.error.issues }, 'Invalid rule subject');
+    logger.error(
+      { issues: result.error.issues, validationMessage },
+      'Invalid rule subject',
+    );
     throw errors.getKnownError(validationMessage);
   }
 

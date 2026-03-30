@@ -79,7 +79,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       });
 
       const { resultComment, resultContent, resultStatus } =
-        this.evaluateResult(validatedSubject);
+        this.evaluateResult(validatedSubject as RuleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),

@@ -73,30 +73,12 @@ export type DocumentEventAttributeType = z.infer<
 export const DocumentEventAttributeType = DocumentEventAttributeTypeSchema.enum;
 
 // --- DocumentEventLabel (renamed from MethodologyDocumentEventLabel) ---
+// Event labels use the same values as ActorType — they represent which actor role the event belongs to.
 
-export const DocumentEventLabel = {
-  AUDITOR: ActorType.AUDITOR,
-  COMMUNITY_IMPACT_POOL: ActorType.COMMUNITY_IMPACT_POOL,
-  HAULER: ActorType.HAULER,
-  INTEGRATOR: ActorType.INTEGRATOR,
-  METHODOLOGY_AUTHOR: ActorType.METHODOLOGY_AUTHOR,
-  METHODOLOGY_DEVELOPER: ActorType.METHODOLOGY_DEVELOPER,
-  NETWORK: ActorType.NETWORK,
-  PROCESSOR: ActorType.PROCESSOR,
-  RECYCLER: ActorType.RECYCLER,
-  REMAINDER: ActorType.REMAINDER,
-  SOURCE: ActorType.SOURCE,
-  WASTE_GENERATOR: ActorType.WASTE_GENERATOR,
-} as const;
-
-const documentEventLabelValues = Object.values(DocumentEventLabel) as [
-  (typeof DocumentEventLabel)[keyof typeof DocumentEventLabel],
-  ...(typeof DocumentEventLabel)[keyof typeof DocumentEventLabel][],
-];
-
-export const DocumentEventLabelSchema = z.enum(documentEventLabelValues);
-// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
-export type DocumentEventLabel = z.infer<typeof DocumentEventLabelSchema>;
+export const DocumentEventLabel = ActorType;
+export const DocumentEventLabelSchema = ActorTypeSchema;
+// eslint-disable-next-line no-redeclare, sonarjs/redundant-type-aliases -- intentional: preserves named export used by consumers
+export type DocumentEventLabel = ActorType;
 
 // --- DocumentEventName (renamed from MethodologyDocumentEventName) ---
 

@@ -32,20 +32,16 @@ describe('WeighingRuleSubjectSchema', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should reject a subject with more than 2 weighing events via superRefine', () => {
+  it('should reject a subject with more than 2 weighing events', () => {
     const subject = buildValidSubject(3);
 
     const result = WeighingRuleSubjectSchema.safeParse(subject);
 
     expect(result.success).toBe(false);
     expect(
-      result.error?.issues.some(
-        (issue) =>
-          issue.path.includes('weighingEvents') && issue.code === 'custom',
+      result.error?.issues.some((issue) =>
+        issue.path.includes('weighingEvents'),
       ),
-    ).toBe(true);
-    expect(
-      result.error?.issues.some((issue) => issue.message.includes('at most 2')),
     ).toBe(true);
   });
 

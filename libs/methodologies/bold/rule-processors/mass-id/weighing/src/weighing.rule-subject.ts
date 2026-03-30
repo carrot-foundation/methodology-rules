@@ -7,20 +7,13 @@ import { z } from 'zod';
 
 const MAX_WEIGHING_EVENTS = 2;
 
-export const WeighingRuleSubjectSchema = z
-  .object({
-    massIDDocumentId: NonEmptyStringSchema,
-    recyclerAccreditationDocument: BoldDocumentSchema,
-    weighingEvents: z.array(BoldDocumentEventSchema).min(1),
-  })
-  .superRefine((data, context) => {
-    if (data.weighingEvents.length > MAX_WEIGHING_EVENTS) {
-      context.addIssue({
-        code: 'custom',
-        message: `Expected at most ${MAX_WEIGHING_EVENTS} weighing events (single-step or two-step), but received ${data.weighingEvents.length}.`,
-        path: ['weighingEvents'],
-      });
-    }
-  });
+export const WeighingRuleSubjectSchema = z.object({
+  massIDDocumentId: NonEmptyStringSchema,
+  recyclerAccreditationDocument: BoldDocumentSchema,
+  weighingEvents: z
+    .array(BoldDocumentEventSchema)
+    .min(1)
+    .max(MAX_WEIGHING_EVENTS),
+});
 
 export type WeighingRuleSubject = z.infer<typeof WeighingRuleSubjectSchema>;

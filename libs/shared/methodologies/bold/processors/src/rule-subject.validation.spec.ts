@@ -38,7 +38,7 @@ describe('validateRuleSubjectOrThrow', () => {
   });
 
   it('should log validation issues on failure', () => {
-    const loggerWarnSpy = vi.spyOn(logger, 'warn');
+    const loggerWarnSpy = vi.spyOn(logger, 'error');
 
     expect(() =>
       validateRuleSubjectOrThrow({
