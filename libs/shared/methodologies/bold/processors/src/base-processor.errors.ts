@@ -11,8 +11,8 @@ export abstract class BaseProcessorErrors {
 
   protected readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
 
-  getKnownError(message: string): Error {
-    return new Error(this.KNOWN_ERROR_PREFIX + message);
+  getKnownError(message: string, options?: ErrorOptions): Error {
+    return new Error(this.KNOWN_ERROR_PREFIX + message, options);
   }
 
   getResultCommentFromError(error: unknown): string {

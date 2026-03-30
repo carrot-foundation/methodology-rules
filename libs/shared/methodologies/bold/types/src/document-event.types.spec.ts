@@ -61,6 +61,9 @@ describe('BoldDocumentEventSchema', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toHaveProperty('customField');
+    expect(result.success && result.data).toHaveProperty(
+      'customField',
+      'custom-value',
+    );
   });
 });

@@ -85,12 +85,12 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
         resultContent: {
           ...resultContent,
-          ruleSubject,
+          ruleSubject: validatedSubject,
         },
       });
     } catch (error: unknown) {
       logger.error(
-        { error, ruleInput },
+        { documentId: ruleInput.documentId, error, ruleName: ruleInput.ruleName },
         'Prevented-emissions processor failed',
       );
 

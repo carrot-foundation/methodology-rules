@@ -102,7 +102,7 @@ Document schemas are organized in five layers with progressive strictness:
 
 Key conventions:
 
-- **Progressive unknown-field pruning**: Inbound schemas use `looseObject` to tolerate extra fields; normalized and deeper layers use strict `z.object` which strips unknown properties.
+- **Progressive unknown-field pruning**: Inbound schemas use `looseObject` to tolerate extra fields; normalized and deeper layers use `z.object()` (default mode) which silently strips unknown properties on parse. Note: `.strict()` is a separate mode that rejects unknown properties with a ZodError.
 - **Rule subject schemas are mandatory**: Every rule processor must define a `*RuleSubjectSchema` that describes the exact data it needs.
 - **`validateRuleSubjectOrThrow`**: Standard entry point for rule subject validation. Use this instead of calling `.parse()` directly.
 - **Const-object + `z.enum()` for value sets**: Define allowed values as a const object, then derive a `z.enum()` from its values. Use `.extract()` to narrow to a subset and `.literal()` for single-value constraints in deeper layers.

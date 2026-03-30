@@ -32,7 +32,7 @@ const isMassIDAuditPassed = (document: BoldDocument): boolean =>
   );
 
 const isDocumentCancelled = (document: BoldDocument): boolean =>
-  document.status === CANCELLED.toString();
+  document.status === CANCELLED;
 
 export const hasNonCancelledDocuments = (documents: BoldDocument[]): boolean =>
   documents.some((document) => !isDocumentCancelled(document));

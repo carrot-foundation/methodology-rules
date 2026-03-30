@@ -84,12 +84,12 @@ export const stubDocumentEventAttribute = (
 });
 
 export const stubActorEventWithLabel = (
-  eventLavel: BoldDocumentEvent['label'],
+  eventLabel: BoldDocumentEvent['label'],
   partialEvent?: PartialDeep<BoldDocumentEvent>,
 ): BoldDocumentEvent =>
   stubDocumentEvent({
     ...partialEvent,
-    label: eventLavel,
+    label: eventLabel,
     name: DocumentEventName.ACTOR,
   });
 

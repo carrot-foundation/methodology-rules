@@ -39,8 +39,8 @@ const { ACTOR, PICK_UP } = DocumentEventName;
 const { RECYCLER } = DocumentEventLabel;
 
 type Subject = {
-  description: DocumentEventAttributeValue | string | undefined;
-  id: DocumentEventAttributeValue | string | undefined;
+  description: DocumentEventAttributeValue | undefined;
+  id: DocumentEventAttributeValue | undefined;
   recyclerCountryCode: string;
   subtype: string;
 };

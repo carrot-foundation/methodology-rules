@@ -174,6 +174,10 @@ describe('Approved Exception Helpers', () => {
   });
 
   describe('isApprovedExceptionValid', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it('should return false when exception is undefined', () => {
       expect(isApprovedExceptionValid(undefined)).toBe(false);
     });

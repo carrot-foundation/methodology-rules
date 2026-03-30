@@ -219,7 +219,7 @@ describe('Event Predicates', () => {
       expect(result).toBe(true);
     });
 
-    it('should return false if the event is undefined', () => {
+    it('should return false if the event is an empty object', () => {
       const result = eventHasMetadataAttribute({
         event: {} as BoldDocumentEvent,
         metadataName: DocumentEventAttributeName.WASTE_ORIGIN,

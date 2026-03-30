@@ -115,7 +115,7 @@ Every rule processor follows a standardized validation flow:
 Document schemas are organized in 5 layers:
 - **Envelope** (`LoadedDocumentEnvelopeSchema`) — wrapper for loaded documents
 - **Inbound** (`InboundDocumentSchema`) — boundary contract, looseObject
-- **Normalized** (`DocumentSchema`) — strict z.object, strips unknown fields
+- **Normalized** (`DocumentSchema`) — `z.object()` (default), strips unknown fields on parse
 - **Domain** (`BoldDocumentSchema`, `MassID*Schema`) — methodology-specific
 - **Rule** (`*RuleSubjectSchema`) — exact contract per rule
 

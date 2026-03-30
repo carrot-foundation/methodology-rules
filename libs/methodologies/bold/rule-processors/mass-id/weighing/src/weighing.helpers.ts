@@ -533,6 +533,14 @@ export const validateWeighingValues = (
 export const validateTwoStepWeighingEvents = (
   events: BoldDocumentEvent[],
 ): ValidationResult => {
+  if (events.length !== 2) {
+    return {
+      errors: [
+        `Expected exactly 2 weighing events for two-step validation, but received ${String(events.length)}.`,
+      ],
+    };
+  }
+
   const errors: string[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];
