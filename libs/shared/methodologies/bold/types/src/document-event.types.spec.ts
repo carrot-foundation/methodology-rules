@@ -19,29 +19,16 @@ describe('BoldDocumentEventAttributeSchema', () => {
 });
 
 describe('BoldDocumentRelationSchema', () => {
-  it('should reject empty category when present', () => {
-    const stub = createStubFromSchema(BoldDocumentRelationSchema);
+  it.each(['category', 'subtype', 'type'] as const)(
+    'should reject empty %s when present',
+    (field) => {
+      const stub = createStubFromSchema(BoldDocumentRelationSchema);
 
-    expect(
-      BoldDocumentRelationSchema.safeParse({ ...stub, category: '' }).success,
-    ).toBe(false);
-  });
-
-  it('should reject empty subtype when present', () => {
-    const stub = createStubFromSchema(BoldDocumentRelationSchema);
-
-    expect(
-      BoldDocumentRelationSchema.safeParse({ ...stub, subtype: '' }).success,
-    ).toBe(false);
-  });
-
-  it('should reject empty type when present', () => {
-    const stub = createStubFromSchema(BoldDocumentRelationSchema);
-
-    expect(
-      BoldDocumentRelationSchema.safeParse({ ...stub, type: '' }).success,
-    ).toBe(false);
-  });
+      expect(
+        BoldDocumentRelationSchema.safeParse({ ...stub, [field]: '' }).success,
+      ).toBe(false);
+    },
+  );
 });
 
 describe('BoldDocumentEventSchema', () => {
@@ -61,6 +48,11 @@ describe('BoldDocumentEventSchema', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).not.toHaveProperty('customField');
+
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data).not.toHaveProperty('customField');
   });
 });

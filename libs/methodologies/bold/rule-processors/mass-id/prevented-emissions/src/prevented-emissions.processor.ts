@@ -94,8 +94,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       logger.error(
         {
           documentId: ruleInput.documentId,
-          error,
-          ruleName: ruleInput.ruleName,
+          err: error,
+          operation: 'prevented-emissions:process',
+          ruleId: ruleInput.ruleName,
         },
         'Prevented-emissions processor failed',
       );

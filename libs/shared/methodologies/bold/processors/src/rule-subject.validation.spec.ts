@@ -26,15 +26,23 @@ describe('validateRuleSubjectOrThrow', () => {
     expect(result).toEqual({ type: 'Organic' });
   });
 
-  it('should throw a known processor error when validation fails', () => {
-    expect(() =>
+  it('should throw a known processor error with ZodError cause when validation fails', () => {
+    let thrownError: Error | undefined;
+
+    try {
       validateRuleSubjectOrThrow({
         errors,
         input: { type: 'Unknown' },
         schema,
         validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
-      }),
-    ).toThrow('The rule subject is invalid.');
+      });
+    } catch (error) {
+      thrownError = error as Error;
+    }
+
+    expect(thrownError).toBeDefined();
+    expect(thrownError!.message).toContain('The rule subject is invalid.');
+    expect(thrownError!.cause).toBeInstanceOf(z.ZodError);
   });
 
   it('should log validation issues on failure', () => {

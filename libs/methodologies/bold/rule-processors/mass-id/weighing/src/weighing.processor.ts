@@ -84,8 +84,9 @@ export class WeighingProcessor extends RuleDataProcessor {
       logger.error(
         {
           documentId: ruleInput.documentId,
-          error,
-          ruleName: ruleInput.ruleName,
+          err: error,
+          operation: 'weighing:process',
+          ruleId: ruleInput.ruleName,
         },
         'Weighing processor failed',
       );
@@ -168,7 +169,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       }
     }
 
-    const weighingEvent = weighingEvents[0] as BoldDocumentEvent;
+    const weighingEvent = weighingEvents[0]!;
     const weighingValues = getValuesRelatedToWeighing(
       weighingEvent,
       recyclerAccreditationDocument,

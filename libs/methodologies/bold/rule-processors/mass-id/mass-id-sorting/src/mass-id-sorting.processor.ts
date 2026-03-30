@@ -86,8 +86,9 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
       logger.error(
         {
           documentId: ruleInput.documentId,
-          error,
-          ruleName: ruleInput.ruleName,
+          err: error,
+          operation: 'mass-id-sorting',
+          ruleId: ruleInput.ruleName,
         },
         'Mass-id-sorting processor failed',
       );
