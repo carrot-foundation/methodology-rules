@@ -1,6 +1,6 @@
 import type {
-  BoldMethodologySlug,
   BoldDocument,
+  BoldMethodologySlug,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { getOrDefault } from '@carrot-fndn/shared/helpers';

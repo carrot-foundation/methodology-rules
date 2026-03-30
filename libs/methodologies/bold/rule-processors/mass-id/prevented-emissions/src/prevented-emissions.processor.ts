@@ -20,6 +20,7 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type BoldDocument,
   DocumentEventAttributeName,
@@ -49,6 +50,7 @@ import {
   getOthersIfOrganicContextFromMassIdDocument,
   OthersIfOrganicAuditDetails,
 } from './prevented-emissions.others-organic.helpers';
+import { PreventedEmissionsRuleSubjectSchema } from './prevented-emissions.rule-subject';
 import { type RuleSubject } from './prevented-emissions.types';
 
 const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
@@ -66,6 +68,14 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       const documentsQuery = await this.generateDocumentQuery(ruleInput);
       const documents = await this.collectDocuments(documentsQuery);
       const ruleSubject = this.getRuleSubject(documents);
+
+      validateRuleSubjectOrThrow({
+        errors: this.processorErrors,
+        input: ruleSubject,
+        schema: PreventedEmissionsRuleSubjectSchema,
+        validationMessage:
+          this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      });
 
       const { resultComment, resultContent, resultStatus } =
         this.evaluateResult(ruleSubject);
@@ -259,7 +269,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     return {
       massIDDocument: massIDDocument as BoldDocument,
-      recyclerAccreditationDocument: recyclerAccreditationDocument as BoldDocument,
+      recyclerAccreditationDocument:
+        recyclerAccreditationDocument as BoldDocument,
     };
   }
 }

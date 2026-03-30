@@ -1,8 +1,8 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
   type BoldDocument,
-  DocumentCategory,
   type BoldDocumentEvent,
+  DocumentCategory,
   DocumentEventAttributeName,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';

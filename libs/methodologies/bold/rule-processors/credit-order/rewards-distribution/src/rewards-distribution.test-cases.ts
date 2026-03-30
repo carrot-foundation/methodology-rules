@@ -13,9 +13,9 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type BoldDocument,
   BoldMethodologyName,
   type CertificateRewardDistributionOutput,
-  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentSubtype,

@@ -131,7 +131,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
       eventNameIsAnyOf([PICK_UP]),
     );

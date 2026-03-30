@@ -192,7 +192,9 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     return event;
   }
 
-  private getVehicleLicensePlate(pickUpEvent: BoldDocumentEvent): NonEmptyString {
+  private getVehicleLicensePlate(
+    pickUpEvent: BoldDocumentEvent,
+  ): NonEmptyString {
     const vehicleLicensePlate = getEventAttributeValue(
       pickUpEvent,
       VEHICLE_LICENSE_PLATE,

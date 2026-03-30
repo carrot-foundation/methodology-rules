@@ -119,7 +119,10 @@ export const mapMassIDV2Query = (
   };
 };
 
-export const mapMassIDV1Query = (document: BoldDocument, events: EventsData) => {
+export const mapMassIDV1Query = (
+  document: BoldDocument,
+  events: EventsData,
+) => {
   const {
     dropOffEvent,
     pickUpEvent,

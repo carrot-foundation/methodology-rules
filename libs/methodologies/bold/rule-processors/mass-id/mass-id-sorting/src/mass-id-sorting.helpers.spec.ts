@@ -123,7 +123,9 @@ describe('mass-id-sorting helpers', () => {
         stubBoldMassIDSortingEvent({ partialDocumentEvent: { value: 9 } }),
       ];
 
-      const result = findSortingEvents(events as unknown as BoldDocumentEvent[]);
+      const result = findSortingEvents(
+        events as unknown as BoldDocumentEvent[],
+      );
 
       if ('isError' in result) {
         throw new Error('Expected SortingEvents, got ValidationError');

@@ -2,8 +2,8 @@ import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  BoldMethodologyName,
   type BoldDocument,
+  BoldMethodologyName,
   type RewardDistributionResultContent,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';

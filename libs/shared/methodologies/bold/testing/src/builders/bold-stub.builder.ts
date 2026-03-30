@@ -1,13 +1,13 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  type BoldDocument,
+  type BoldDocumentEvent,
+  type BoldDocumentRelation,
   BoldMethodologyName,
   BoldMethodologySlug,
-  type BoldDocument,
   DocumentCategory,
-  type BoldDocumentEvent,
   DocumentEventAttributeName,
   DocumentEventName,
-  type BoldDocumentRelation,
   DocumentSubtype,
   DocumentType,
   MassIDDocumentActorType,
@@ -156,10 +156,13 @@ export class BoldStubsBuilder {
 
   private participantAccreditationGroupRelation?: BoldDocumentRelation;
 
-  private participantsAccreditationDocuments: Map<string, BoldDocument> = new Map();
-
-  private participantsAccreditationRelations: Map<string, BoldDocumentRelation> =
+  private participantsAccreditationDocuments: Map<string, BoldDocument> =
     new Map();
+
+  private participantsAccreditationRelations: Map<
+    string,
+    BoldDocumentRelation
+  > = new Map();
 
   constructor(options: BoldStubsBuilderOptions = {}) {
     this.count = options.count ?? 1;

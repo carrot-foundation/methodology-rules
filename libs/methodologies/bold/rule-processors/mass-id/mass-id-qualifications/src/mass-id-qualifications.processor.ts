@@ -79,7 +79,9 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): BoldDocument | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): BoldDocument | undefined {
     return document;
   }
 

@@ -6,9 +6,9 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  type BoldDocument,
   BoldMethodologyName,
   BoldMethodologySlug,
-  type BoldDocument,
   DocumentEventAttributeName,
   DocumentEventName,
   DocumentType,

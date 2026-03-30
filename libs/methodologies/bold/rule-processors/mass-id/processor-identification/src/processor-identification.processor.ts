@@ -46,7 +46,9 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const processorActorEvents = document.externalEvents?.filter(
       (event) => eventHasLabel(event, PROCESSOR) && eventHasName(event, ACTOR),
     );

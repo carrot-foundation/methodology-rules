@@ -46,7 +46,9 @@ export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const recyclerActorEvents = document.externalEvents?.filter(
       (event) => eventHasLabel(event, RECYCLER) && eventHasName(event, ACTOR),
     );

@@ -78,7 +78,9 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     return {
       haulerEvent: getOrUndefined(
         document.externalEvents?.find(

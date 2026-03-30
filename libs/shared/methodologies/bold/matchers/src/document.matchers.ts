@@ -1,8 +1,8 @@
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
   type BoldDocument,
-  DocumentCategory,
   type BoldDocumentRelation,
+  DocumentCategory,
   DocumentSubtype,
   DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';

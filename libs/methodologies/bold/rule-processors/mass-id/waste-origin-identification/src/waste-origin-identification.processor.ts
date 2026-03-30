@@ -82,7 +82,9 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
       eventNameIsAnyOf([PICK_UP]),
     );

@@ -23,17 +23,18 @@ const { PASSED } = RuleOutputStatus;
 
 const resultEventName = `Result: MassID ${PASSED}`;
 
-const boldMassIDAuditExternalEventsMap: Map<string, BoldDocumentEvent> = new Map([
-  [
-    resultEventName,
-    stubDocumentEventWithMetadataAttributes(
-      {
-        name: resultEventName,
-      },
-      [[EVALUATION_RESULT, PASSED]],
-    ),
-  ],
-]);
+const boldMassIDAuditExternalEventsMap: Map<string, BoldDocumentEvent> =
+  new Map([
+    [
+      resultEventName,
+      stubDocumentEventWithMetadataAttributes(
+        {
+          name: resultEventName,
+        },
+        [[EVALUATION_RESULT, PASSED]],
+      ),
+    ],
+  ]);
 
 export const stubBoldMassIDAuditDocument = ({
   externalEventsMap,

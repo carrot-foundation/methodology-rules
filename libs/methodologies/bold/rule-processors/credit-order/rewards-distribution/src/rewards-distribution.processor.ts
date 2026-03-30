@@ -15,8 +15,8 @@ import {
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type CertificateRewardDistributionOutput,
   type BoldDocument,
+  type CertificateRewardDistributionOutput,
   DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';

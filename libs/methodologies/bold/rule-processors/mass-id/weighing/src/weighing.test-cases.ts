@@ -11,8 +11,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocument,
-  DocumentCategory,
   type BoldDocumentEvent,
+  DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventContainerType,
   DocumentEventName,
@@ -269,12 +269,14 @@ interface WeighingTestCase extends RuleTestCase {
   scaleTicketVerificationError?: string;
 }
 
+const processorErrors = new WeighingProcessorErrors();
+
 export const weighingTestCases: WeighingTestCase[] = [
   {
     massIDDocumentEvents: {
       [WEIGHING]: undefined,
     },
-    resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
+    resultComment: processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
     resultStatus: 'FAILED',
     scenario: `The MassID document does not have "${WEIGHING}" events`,
   },
@@ -284,7 +286,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       [`${WEIGHING}-2`]: stubBoldMassIDWeighingEvent(),
       [`${WEIGHING}-3`]: stubBoldMassIDWeighingEvent(),
     },
-    resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
+    resultComment: processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
     resultStatus: 'FAILED',
     scenario: `The MassID document has more than two "${WEIGHING}" events`,
   },
@@ -907,8 +909,6 @@ export const weighingTestCases: WeighingTestCase[] = [
     scenario: `The "${WEIGHING}" event is valid for TRUCK container without tare exception and both Tare and Gross Weight provided`,
   },
 ];
-
-const processorErrors = new WeighingProcessorErrors();
 
 const {
   massIDAuditDocument,

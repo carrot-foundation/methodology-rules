@@ -74,7 +74,9 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const dropOffEvent = document.externalEvents?.find(
       eventNameIsAnyOf([DROP_OFF]),
     );

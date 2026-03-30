@@ -118,7 +118,9 @@ describe('DocumenQueryService', () => {
           const id = match ? match[1] : null;
 
           if (id === document.id) {
-            return Promise.resolve(documentEntity as DocumentEntity<BoldDocument>);
+            return Promise.resolve(
+              documentEntity as DocumentEntity<BoldDocument>,
+            );
           }
 
           if (id === parentDocument.id) {
@@ -509,7 +511,9 @@ describe('DocumenQueryService', () => {
 
       vi.spyOn(provideDocumentLoaderService, 'load')
         .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
-        .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<BoldDocument>)
+        .mockResolvedValueOnce(
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
+        )
         .mockResolvedValueOnce(
           relatedDocumentEntity as DocumentEntity<BoldDocument>,
         );

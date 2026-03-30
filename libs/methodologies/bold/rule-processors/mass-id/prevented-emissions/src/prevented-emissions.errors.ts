@@ -9,6 +9,7 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
       'The "Local Waste Classification ID" does not match the local waste classification code accepted by the methodology.',
     INVALID_MASS_ID_DOCUMENT_SUBTYPE:
       'The "MassID" document has an invalid subtype.',
+    INVALID_RULE_SUBJECT: 'The prevented-emissions rule subject is invalid.',
     MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE: (
       normalizedLocalWasteClassificationId: string,
     ) =>

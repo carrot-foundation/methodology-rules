@@ -83,7 +83,9 @@ export interface WeighingValues {
   weighingCaptureMethod: string | undefined;
 }
 
-const hasValidAttributeFormat = (attribute?: BoldDocumentEventAttribute): boolean =>
+const hasValidAttributeFormat = (
+  attribute?: BoldDocumentEventAttribute,
+): boolean =>
   (Object.values(DocumentEventAttributeFormat) as unknown[]).includes(
     attribute?.format,
   );
@@ -272,7 +274,9 @@ export const getValuesRelatedToWeighing = (
   )?.toString(),
 });
 
-export const getWeighingEvents = (document: BoldDocument): BoldDocumentEvent[] =>
+export const getWeighingEvents = (
+  document: BoldDocument,
+): BoldDocumentEvent[] =>
   getOrDefault(
     document.externalEvents?.filter(
       (event) => String(event.name) === String(WEIGHING),

@@ -51,7 +51,9 @@ describe('Predicate Factories', () => {
     it('should return false if argument return true', () => {
       const event = stubDocumentEvent();
 
-      const condition = not<BoldDocumentEvent>((input) => input.id === event.id);
+      const condition = not<BoldDocumentEvent>(
+        (input) => input.id === event.id,
+      );
 
       expect(condition(event)).toBe(false);
     });

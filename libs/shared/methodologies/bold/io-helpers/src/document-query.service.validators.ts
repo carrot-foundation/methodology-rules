@@ -8,7 +8,9 @@ const BoldDocumentRelationSchema = z.looseObject({
   documentId: z.string(),
 });
 
-export const isDocumentRelation = (input: unknown): input is BoldDocumentRelation =>
+export const isDocumentRelation = (
+  input: unknown,
+): input is BoldDocumentRelation =>
   BoldDocumentRelationSchema.safeParse(input).success;
 
 export const isObject = (input: unknown): input is object =>

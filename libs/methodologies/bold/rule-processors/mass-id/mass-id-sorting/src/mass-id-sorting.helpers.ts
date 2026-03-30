@@ -98,7 +98,9 @@ export const findSortingEvents = (
     };
   }
 
-  const sortingEvent = externalEvents.at(sortingEventIndex) as BoldDocumentEvent;
+  const sortingEvent = externalEvents.at(
+    sortingEventIndex,
+  ) as BoldDocumentEvent;
 
   const priorEventWithValue = externalEvents
     .slice(0, sortingEventIndex)

@@ -13,8 +13,8 @@ import {
   MASS_ID_AUDIT,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  BoldMethodologySlug,
   type BoldDocument,
+  BoldMethodologySlug,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
