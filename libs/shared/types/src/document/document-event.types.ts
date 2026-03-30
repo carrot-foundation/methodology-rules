@@ -123,7 +123,7 @@ export type DocumentEventRelation = z.infer<typeof DocumentEventRelationSchema>;
 
 // --- DocumentEventSchema (renamed from MethodologyDocumentEventSchema) ---
 
-export const DocumentEventSchema = z.looseObject({
+export const DocumentEventSchema = z.object({
   address: DocumentAddressSchema,
   attachments: z.array(DocumentEventAttachmentSchema).optional(),
   author: DocumentAuthorSchema,

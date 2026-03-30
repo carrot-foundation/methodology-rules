@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 export { validateDocument } from './document-helpers.validators';
 
-const DocumentRelationSchema = z.looseObject({
+const DocumentRelationSchema = z.object({
   documentId: z.string(),
 });
 

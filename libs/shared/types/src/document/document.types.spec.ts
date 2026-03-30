@@ -69,7 +69,7 @@ describe('LoadedDocumentEnvelopeSchema', () => {
 });
 
 describe('InboundDocumentSchema', () => {
-  it('should preserve unknown fields via looseObject', () => {
+  it('should preserve unknown fields at the boundary layer', () => {
     const result = InboundDocumentSchema.safeParse({
       ...validInboundDocument,
       transportOnlyField: 'should-survive',
@@ -84,10 +84,10 @@ describe('DocumentSchema', () => {
   it('should strip unknown fields that are not part of the normalized model', () => {
     const result = DocumentSchema.safeParse({
       ...validInboundDocument,
-      transportOnlyField: 'should-be-stripped',
+      unknownField: 'should-be-stripped',
     });
 
     expect(result.success).toBe(true);
-    expect(result.data).not.toHaveProperty('transportOnlyField');
+    expect(result.data).not.toHaveProperty('unknownField');
   });
 });

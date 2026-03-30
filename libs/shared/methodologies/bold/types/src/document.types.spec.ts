@@ -41,7 +41,7 @@ describe('DocumentSchema', () => {
     ).toBe(false);
   });
 
-  it('should preserve extra properties (looseObject passthrough)', () => {
+  it('should strip unknown properties (strict object)', () => {
     const stub = createStubFromSchema(DocumentSchema);
     const result = DocumentSchema.safeParse({
       ...stub,
@@ -49,9 +49,6 @@ describe('DocumentSchema', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toHaveProperty(
-      'unknownProp',
-      'preserved',
-    );
+    expect(result.success && result.data).not.toHaveProperty('unknownProp');
   });
 });
