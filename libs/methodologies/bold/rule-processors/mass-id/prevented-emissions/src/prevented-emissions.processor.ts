@@ -7,6 +7,7 @@ import {
   isNil,
   isNonEmptyString,
   isNonNegative,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
@@ -69,7 +70,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       const documents = await this.collectDocuments(documentsQuery);
       const ruleSubject = this.getRuleSubject(documents);
 
-      validateRuleSubjectOrThrow({
+      const validatedSubject = validateRuleSubjectOrThrow({
         errors: this.processorErrors,
         input: ruleSubject,
         schema: PreventedEmissionsRuleSubjectSchema,
@@ -78,7 +79,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       });
 
       const { resultComment, resultContent, resultStatus } =
-        this.evaluateResult(ruleSubject);
+        this.evaluateResult(validatedSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
@@ -88,6 +89,11 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         },
       });
     } catch (error: unknown) {
+      logger.error(
+        { error, ruleInput },
+        'Prevented-emissions processor failed',
+      );
+
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });

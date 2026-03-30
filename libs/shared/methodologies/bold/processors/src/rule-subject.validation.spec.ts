@@ -34,22 +34,20 @@ describe('validateRuleSubjectOrThrow', () => {
         schema,
         validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
       }),
-    ).toThrow();
+    ).toThrow('The rule subject is invalid.');
   });
 
   it('should log validation issues on failure', () => {
     const loggerWarnSpy = vi.spyOn(logger, 'warn');
 
-    try {
+    expect(() =>
       validateRuleSubjectOrThrow({
         errors,
         input: { type: 'Invalid' },
         schema,
         validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
-      });
-    } catch {
-      // expected
-    }
+      }),
+    ).toThrow();
 
     expect(loggerWarnSpy).toHaveBeenCalled();
   });
