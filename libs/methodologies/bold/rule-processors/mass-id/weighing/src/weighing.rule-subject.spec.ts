@@ -41,7 +41,7 @@ describe('WeighingRuleSubjectSchema', () => {
     expect(
       result.error?.issues.some(
         (issue) =>
-          issue.path.includes('weighingEvents') && issue.code === 'too_big',
+          issue.path.includes('weighingEvents') && issue.code === 'custom',
       ),
     ).toBe(true);
     expect(

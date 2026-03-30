@@ -16,12 +16,9 @@ export const WeighingRuleSubjectSchema = z
   .superRefine((data, context) => {
     if (data.weighingEvents.length > MAX_WEIGHING_EVENTS) {
       context.addIssue({
-        code: 'too_big',
-        inclusive: true,
-        maximum: MAX_WEIGHING_EVENTS,
+        code: 'custom',
         message: `Expected at most ${MAX_WEIGHING_EVENTS} weighing events (single-step or two-step), but received ${data.weighingEvents.length}.`,
         path: ['weighingEvents'],
-        type: 'array',
       });
     }
   });
