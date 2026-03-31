@@ -72,10 +72,10 @@ export const getBaselineByWasteSubtype = (
 };
 
 export const throwIfMissing = <T>(
-  value: T | undefined,
+  value: null | T | undefined,
   errorMessage: string,
   processorErrors: PreventedEmissionsProcessorErrors,
-): void => {
+): asserts value is NonNullable<T> => {
   if (isNil(value)) {
     throw processorErrors.getKnownError(errorMessage);
   }

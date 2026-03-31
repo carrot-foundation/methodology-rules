@@ -283,9 +283,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIDDocument: massIDDocument as BoldDocument,
-      recyclerAccreditationDocument:
-        recyclerAccreditationDocument as BoldDocument,
+      massIDDocument,
+      recyclerAccreditationDocument,
     };
   }
 }

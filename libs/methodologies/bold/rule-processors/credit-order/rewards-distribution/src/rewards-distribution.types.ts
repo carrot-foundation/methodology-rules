@@ -3,8 +3,9 @@ import type {
   RewardActorAddress,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type BigNumber from 'bignumber.js';
+
+import { ActorType, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 export type ActorsByType = Map<string, RewardsDistributionActor>;
 
@@ -36,7 +37,7 @@ export interface RewardsDistribution {
 }
 
 export interface RewardsDistributionActor {
-  actorType: 'Remainder' | RewardsDistributionActorType;
+  actorType: (typeof ActorType)['REMAINDER'] | RewardsDistributionActorType;
   address: RewardActorAddress;
   amount: NonEmptyString;
   participant: Participant;
