@@ -331,12 +331,12 @@ const BoldTypes = require(
   DocumentEventLabel: StringEnum;
   DocumentEventVehicleType: StringEnum;
   DocumentType: StringEnum;
-  MeasurementUnit: StringEnum;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SharedTypes = require('@carrot-fndn/shared/types') as {
   DocumentEventAttributeFormat: StringEnum;
+  MeasurementUnit: StringEnum;
 };
 
 const ENUM_KEY_TO_VALUE: Record<string, string> = {
@@ -348,7 +348,7 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
   ...enumKeyToValueMap(SharedTypes.DocumentEventAttributeFormat),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
   ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
-  ...enumKeyToValueMap(BoldTypes.MeasurementUnit),
+  ...enumKeyToValueMap(SharedTypes.MeasurementUnit),
 };
 
 const DocumentEventName = BoldTypes.DocumentEventName;

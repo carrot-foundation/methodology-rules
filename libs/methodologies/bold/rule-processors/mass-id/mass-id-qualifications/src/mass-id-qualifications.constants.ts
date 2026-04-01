@@ -1,8 +1,8 @@
 import {
   DocumentCategory,
   DocumentType,
-  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 const { MASS_ID } = DocumentCategory;
 const { KG } = MeasurementUnit;

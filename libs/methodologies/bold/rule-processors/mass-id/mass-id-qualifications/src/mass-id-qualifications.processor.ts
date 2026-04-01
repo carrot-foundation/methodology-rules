@@ -7,8 +7,8 @@ import {
   DocumentCategory,
   DocumentType,
   MassIDOrganicSubtype,
-  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';

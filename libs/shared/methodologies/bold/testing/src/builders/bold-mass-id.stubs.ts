@@ -12,13 +12,13 @@ import {
   DocumentEventWeighingCaptureMethod,
   DocumentType,
   MassIDOrganicSubtype,
-  MeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   DocumentEventAttributeFormat,
   type LicensePlate,
+  MeasurementUnit,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { format } from 'date-fns';

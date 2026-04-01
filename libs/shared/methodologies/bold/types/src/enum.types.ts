@@ -202,10 +202,6 @@ export enum MassIDDocumentActorType {
   WASTE_GENERATOR = 'Waste Generator',
 }
 
-export enum MeasurementUnit {
-  KG = 'kg',
-}
-
 export enum MethodologyBaseline {
   LANDFILLS_WITH_FLARING_OF_METHANE_GAS = 'Landfills with flaring of methane gas (and/or capture of biogas)',
   LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS = 'Landfills without flaring of methane gas',

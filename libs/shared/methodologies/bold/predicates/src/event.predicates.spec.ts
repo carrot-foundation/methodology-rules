@@ -8,12 +8,11 @@ import {
   DocumentEventAttributeName,
   DocumentEventLabel,
   DocumentEventName,
-  MeasurementUnit,
   ParticipantType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
-import { DataSetName } from '@carrot-fndn/shared/types';
+import { DataSetName, MeasurementUnit } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
