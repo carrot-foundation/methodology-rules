@@ -5,9 +5,9 @@ import {
 import {
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {

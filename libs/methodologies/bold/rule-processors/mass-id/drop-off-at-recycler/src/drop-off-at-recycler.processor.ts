@@ -12,12 +12,10 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type DocumentEventAttributeValue,
-  DocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { type DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 

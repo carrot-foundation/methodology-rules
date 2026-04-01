@@ -1,5 +1,7 @@
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
+import {
+  DocumentEventLabel,
+  DocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 const { ACTOR } = DocumentEventName;
 const { PROCESSOR } = DocumentEventLabel;

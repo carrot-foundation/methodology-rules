@@ -9,12 +9,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  DocumentEventAttributeFormat,
-  DocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';

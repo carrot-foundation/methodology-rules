@@ -22,6 +22,7 @@ import {
 import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type BoldDocument,
+  DocumentEventLabel,
   DocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -30,7 +31,6 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';

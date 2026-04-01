@@ -9,13 +9,13 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  ApprovedExceptionType,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
-import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {

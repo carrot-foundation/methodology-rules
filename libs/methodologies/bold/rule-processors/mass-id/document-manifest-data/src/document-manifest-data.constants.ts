@@ -2,14 +2,12 @@ import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
 
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   MeasurementUnit,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  DocumentEventAttributeFormat,
-  DocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
   DocumentEventAttributeName;

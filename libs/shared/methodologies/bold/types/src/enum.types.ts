@@ -86,7 +86,6 @@ export enum DocumentEventContainerType {
   WASTE_BOX = 'Waste Box',
 }
 
-// Values linked to BaseDocumentEventName — compile-time assertion below catches drift
 export enum DocumentEventName {
   ACCREDITATION_CONTEXT = 'Accreditation Context',
   ACCREDITATION_RESULT = 'Accreditation Result',
@@ -164,7 +163,6 @@ export enum MassIDOrganicSubtype {
   WOOD_AND_WOOD_PRODUCTS = 'Wood and Wood Products',
 }
 
-// Values linked to ActorType and MassIDOrganicSubtype — compile-time assertion below catches drift
 export enum DocumentSubtype {
   DOMESTIC_SLUDGE = MassIDOrganicSubtype.DOMESTIC_SLUDGE,
   EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE = MassIDOrganicSubtype.EFB_SIMILAR_TO_GARDEN_YARD_AND_PARK_WASTE,
@@ -196,7 +194,6 @@ export enum DocumentType {
   RECYCLED_ID = 'RecycledID',
 }
 
-// Values linked to ActorType — compile-time assertion below catches drift
 export enum MassIDDocumentActorType {
   HAULER = 'Hauler',
   INTEGRATOR = 'Integrator',
@@ -215,7 +212,6 @@ export enum MethodologyBaseline {
   OPEN_AIR_DUMP = 'Open-air dump',
 }
 
-// Values linked to ActorType — compile-time assertion below catches drift
 export enum MethodologyDocumentActorType {
   COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
   METHODOLOGY_AUTHOR = 'Methodology Author',
@@ -227,3 +223,47 @@ export enum ReportType {
   CDF = 'CDF',
   MTR = 'MTR',
 }
+
+export const ActorType = {
+  AUDITOR: 'Auditor',
+  COMMUNITY_IMPACT_POOL: 'Community Impact Pool',
+  HAULER: 'Hauler',
+  INTEGRATOR: 'Integrator',
+  METHODOLOGY_AUTHOR: 'Methodology Author',
+  METHODOLOGY_DEVELOPER: 'Methodology Developer',
+  NETWORK: 'Network',
+  PROCESSOR: 'Processor',
+  RECYCLER: 'Recycler',
+  REMAINDER: 'Remainder',
+  SOURCE: 'Source',
+  WASTE_GENERATOR: 'Waste Generator',
+} as const;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type ActorType = (typeof ActorType)[keyof typeof ActorType];
+
+export const DocumentEventLabel = ActorType;
+// eslint-disable-next-line no-redeclare, sonarjs/redundant-type-aliases -- intentional: preserves named export used by consumers
+export type DocumentEventLabel = ActorType;
+
+export const ApprovedExceptionType = {
+  MANDATORY_ATTRIBUTE: 'Exemption for Mandatory Attribute',
+} as const;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type ApprovedExceptionType =
+  (typeof ApprovedExceptionType)[keyof typeof ApprovedExceptionType];
+
+export const ParticipantType = {
+  ACTOR: 'ACTOR',
+} as const;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type ParticipantType =
+  (typeof ParticipantType)[keyof typeof ParticipantType];
+
+export const MassIDLikeDocumentType = {
+  GAS_ID: DocumentType.GAS_ID,
+  ORGANIC: DocumentType.ORGANIC,
+  RECYCLED_ID: DocumentType.RECYCLED_ID,
+} as const;
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type MassIDLikeDocumentType =
+  (typeof MassIDLikeDocumentType)[keyof typeof MassIDLikeDocumentType];

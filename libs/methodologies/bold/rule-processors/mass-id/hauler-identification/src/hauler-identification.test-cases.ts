@@ -6,10 +6,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 import { OPTIONAL_HAULER_VEHICLE_TYPES } from './hauler-identification.processor';

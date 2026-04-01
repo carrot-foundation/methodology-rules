@@ -7,9 +7,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 

@@ -15,16 +15,14 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  ApprovedExceptionType,
   type BoldDocument,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  ApprovedExceptionType,
-  type DocumentParticipant,
-} from '@carrot-fndn/shared/types';
+import { type DocumentParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { expect } from 'vitest';
 

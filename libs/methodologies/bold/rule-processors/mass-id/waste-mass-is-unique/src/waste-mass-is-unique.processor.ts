@@ -16,6 +16,7 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -23,11 +24,7 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import {
-  DocumentEventLabel,
-  DocumentStatus,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { DocumentStatus, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';

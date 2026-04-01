@@ -1,11 +1,12 @@
-import type {
-  CertificateRewardDistributionOutput,
-  RewardActorAddress,
-  RewardsDistributionActorType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
 import type BigNumber from 'bignumber.js';
 
-import { ActorType, type NonEmptyString } from '@carrot-fndn/shared/types';
+import {
+  ActorType,
+  type CertificateRewardDistributionOutput,
+  type RewardActorAddress,
+  type RewardsDistributionActorType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 export type ActorsByType = Map<string, RewardsDistributionActor>;
 

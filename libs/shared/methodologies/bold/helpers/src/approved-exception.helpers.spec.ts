@@ -3,11 +3,11 @@ import {
   stubParticipantAccreditationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  ApprovedExceptionType,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
 import { addDays, subDays } from 'date-fns';
 
 import {

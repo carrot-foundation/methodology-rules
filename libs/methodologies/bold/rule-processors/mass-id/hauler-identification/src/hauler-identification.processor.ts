@@ -13,10 +13,10 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   DocumentEventVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 

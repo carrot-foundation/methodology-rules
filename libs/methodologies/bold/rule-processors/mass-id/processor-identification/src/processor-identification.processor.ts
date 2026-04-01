@@ -9,9 +9,9 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 

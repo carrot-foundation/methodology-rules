@@ -10,11 +10,12 @@ import {
 import {
   type BoldDocument,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { type AnyObject, DocumentEventLabel } from '@carrot-fndn/shared/types';
+import { type AnyObject } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';

@@ -1,9 +1,9 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { DROP_OFF, PICK_UP } = DocumentEventName;
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;

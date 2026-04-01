@@ -1,6 +1,8 @@
-import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  ActorType,
+  RewardsDistributionActorType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
-import { ActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 

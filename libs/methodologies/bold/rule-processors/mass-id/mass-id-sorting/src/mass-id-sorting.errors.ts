@@ -2,12 +2,10 @@ import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/proc
 import {
   DocumentCategory,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  DocumentEventAttributeFormat,
-  DocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 const { RECYCLER } = DocumentEventLabel;
 const { MASS_ID } = DocumentCategory;

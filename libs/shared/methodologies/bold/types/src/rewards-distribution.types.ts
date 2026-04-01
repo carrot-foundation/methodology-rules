@@ -5,7 +5,6 @@ import {
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-// Values sourced from ActorType (shared const object)
 export enum RewardsDistributionActorType {
   COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
   HAULER = 'Hauler',

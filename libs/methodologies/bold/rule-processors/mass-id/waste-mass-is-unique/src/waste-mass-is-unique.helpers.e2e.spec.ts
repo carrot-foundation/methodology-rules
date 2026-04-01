@@ -10,10 +10,10 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  DocumentEventLabel,
   type InboundDocument,
   type LicensePlate,
   type NonEmptyString,

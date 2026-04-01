@@ -6,12 +6,10 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  DocumentEventLabel,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
 const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;

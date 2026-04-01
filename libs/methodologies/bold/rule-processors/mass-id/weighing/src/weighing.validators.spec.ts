@@ -1,12 +1,10 @@
 import {
+  ApprovedExceptionType,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type AdditionalVerificationAttributeValue,
-  ApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
+import { type AdditionalVerificationAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   isAdditionalVerification,

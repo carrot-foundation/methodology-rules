@@ -13,6 +13,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  ActorType,
   type BoldDocument,
   BoldMethodologyName,
   type CertificateRewardDistributionOutput,
@@ -26,7 +27,6 @@ import {
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { ActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { ERROR_MESSAGES } from './rewards-distribution.errors';

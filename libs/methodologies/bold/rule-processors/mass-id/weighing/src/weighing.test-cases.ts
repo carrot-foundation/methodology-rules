@@ -10,6 +10,7 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  ApprovedExceptionType,
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentCategory,
@@ -23,7 +24,6 @@ import {
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   ApprovedException,
-  ApprovedExceptionType,
   DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';

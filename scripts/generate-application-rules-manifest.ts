@@ -226,6 +226,7 @@ const BoldTypes = require(
   DocumentEventAttributeName: StringEnum;
   DocumentEventAttributeValue: StringEnum;
   DocumentEventName: StringEnum;
+  DocumentEventLabel: StringEnum;
   DocumentEventVehicleType: StringEnum;
   DocumentType: StringEnum;
   MeasurementUnit: StringEnum;
@@ -234,7 +235,6 @@ const BoldTypes = require(
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const SharedTypes = require('@carrot-fndn/shared/types') as {
   DocumentEventAttributeFormat: StringEnum;
-  DocumentEventLabel: StringEnum;
 };
 
 const ENUM_KEY_TO_VALUE: Record<string, string> = {
@@ -242,7 +242,7 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
   ...enumKeyToValueMap(BoldTypes.DocumentType),
   ...enumKeyToValueMap(BoldTypes.DocumentEventName),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeName),
-  ...enumKeyToValueMap(SharedTypes.DocumentEventLabel),
+  ...enumKeyToValueMap(BoldTypes.DocumentEventLabel),
   ...enumKeyToValueMap(SharedTypes.DocumentEventAttributeFormat),
   ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
   ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
@@ -250,7 +250,7 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
 };
 
 const DocumentEventName = BoldTypes.DocumentEventName;
-const DocumentEventLabel = SharedTypes.DocumentEventLabel;
+const DocumentEventLabel = BoldTypes.DocumentEventLabel;
 
 // --- Actor label extraction from processor files ---
 

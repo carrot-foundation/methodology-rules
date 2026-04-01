@@ -22,13 +22,13 @@ import {
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type DocumentEventAttachment,
   DocumentEventAttributeFormat,
-  DocumentEventLabel,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';

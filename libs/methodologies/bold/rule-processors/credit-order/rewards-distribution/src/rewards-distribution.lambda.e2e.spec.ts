@@ -1,5 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { ActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -7,7 +8,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { ActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 

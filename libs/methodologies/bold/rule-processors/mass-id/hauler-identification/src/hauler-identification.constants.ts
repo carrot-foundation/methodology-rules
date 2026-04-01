@@ -1,8 +1,8 @@
 import {
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventLabel } from '@carrot-fndn/shared/types';
 
 const { ACTOR, PICK_UP } = DocumentEventName;
 const { HAULER } = DocumentEventLabel;

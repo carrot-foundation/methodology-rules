@@ -17,12 +17,12 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   DocumentEventAttributeName,
+  DocumentEventLabel,
   DocumentEventName,
   MassIDDocumentActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentEventAttributeFormat,
-  DocumentEventLabel,
   type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';

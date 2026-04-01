@@ -1,11 +1,11 @@
 import type { ApprovedException } from '@carrot-fndn/shared/types';
 
 import {
+  ApprovedExceptionType,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { ApprovedExceptionType } from '@carrot-fndn/shared/types';
 
 export interface GpsLatitudeApprovedException extends ApprovedException {
   'Attribute Location': {

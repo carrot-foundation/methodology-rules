@@ -9,13 +9,10 @@ import {
   DocumentEventAttributeName,
   DocumentEventName,
   MeasurementUnit,
+  ParticipantType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
-import {
-  DataSetName,
-  type NonEmptyString,
-  ParticipantType,
-} from '@carrot-fndn/shared/types';
+import { DataSetName, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.validators';
 

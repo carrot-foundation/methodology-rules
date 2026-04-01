@@ -4,14 +4,12 @@ import type {
 } from '@carrot-fndn/shared/types';
 
 import {
+  ApprovedExceptionType,
   DocumentCategory,
   DocumentEventAttributeName,
   DocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  ApprovedExceptionType,
-  NonEmptyStringSchema,
-} from '@carrot-fndn/shared/types';
+import { NonEmptyStringSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
 import type {

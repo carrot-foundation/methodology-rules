@@ -4,8 +4,9 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
+import { ParticipantType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import { DataSetName, ParticipantType } from '@carrot-fndn/shared/types';
+import { DataSetName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 export const stubParticipant = (
