@@ -1,12 +1,12 @@
 import {
-  DocumentCategory,
-  DocumentType,
+  BoldDocumentCategory,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 const { KG } = MeasurementUnit;
-const { ORGANIC } = DocumentType;
+const { ORGANIC } = BoldDocumentType;
 
 export const RESULT_COMMENTS = {
   failed: {

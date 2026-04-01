@@ -4,8 +4,8 @@ import { logger } from '@carrot-fndn/shared/helpers';
 
 import type {
   BaseExtractedData,
+  BoldDocumentType,
   DocumentParser,
-  DocumentType,
   LayoutConfig,
 } from './document-extractor.types';
 
@@ -15,7 +15,7 @@ type ParserConstructor<T extends BaseExtractedData = BaseExtractedData> =
   new () => DocumentParser<T>;
 
 interface RegisteredParser {
-  documentType: DocumentType;
+  documentType: BoldDocumentType;
   layoutId: string;
   parserClass: ParserConstructor;
 }
@@ -23,7 +23,7 @@ interface RegisteredParser {
 const registeredParsers: RegisteredParser[] = [];
 
 export const registerParser = <T extends BaseExtractedData>(
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
   layoutId: string,
   parserClass: ParserConstructor<T>,
 ): void => {
@@ -54,7 +54,7 @@ export const getParser = <T extends BaseExtractedData>(
 };
 
 export const getParsersByDocumentType = (
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
 ): DocumentParser<BaseExtractedData>[] =>
   registeredParsers
     .filter((p) => p.documentType === documentType)
@@ -70,7 +70,7 @@ export interface ParserMatchResult<T extends BaseExtractedData> {
 
 export const selectBestParser = <T extends BaseExtractedData>(
   extractionResult: TextExtractionResult,
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
   layoutIds: string[],
 ): ParserMatchResult<T> | undefined => {
   let bestMatch: ParserMatchResult<T> | undefined;
@@ -135,7 +135,7 @@ export const selectBestParserGlobal = <T extends BaseExtractedData>(
 };
 
 export const getRegisteredLayouts = (): Array<{
-  documentType: DocumentType;
+  documentType: BoldDocumentType;
   layoutId: string;
 }> =>
   registeredParsers.map(({ documentType, layoutId }) => ({

@@ -9,12 +9,12 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
+  BoldAttributeValue,
   type BoldDocument,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  DocumentSubtype,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
@@ -23,12 +23,11 @@ import {
 import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.constants';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
-const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = DocumentEventAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } =
-  DocumentEventAttributeValue;
-const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = DocumentSubtype;
+const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
+const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = BoldDocumentEventName;
+const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = BoldAttributeName;
+const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } = BoldAttributeValue;
+const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = BoldDocumentSubtype;
 const {
   COMMUNITY_IMPACT_POOL,
   HAULER,
@@ -42,7 +41,7 @@ const {
 } = RewardsDistributionActorType;
 
 const createWasteGeneratorVerificationDocument = (
-  businessSize: DocumentEventAttributeValue,
+  businessSize: BoldAttributeValue,
 ): BoldDocument =>
   ({
     ...new BoldStubsBuilder()
@@ -358,7 +357,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...methodologyDocument,
           externalEvents: methodologyDocument?.externalEvents?.map((event) =>
-            event.name === String(DocumentEventName.ACTOR)
+            event.name === String(BoldDocumentEventName.ACTOR)
               ? { ...event, address: undefined }
               : event,
           ),

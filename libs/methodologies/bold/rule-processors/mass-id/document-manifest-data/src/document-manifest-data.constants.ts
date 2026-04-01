@@ -1,10 +1,10 @@
 import type { ReviewReason } from '@carrot-fndn/shared/document-extractor';
 
 import {
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
-  ReportType,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentEventAttributeFormat,
@@ -12,11 +12,11 @@ import {
 } from '@carrot-fndn/shared/types';
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { RECYCLING_MANIFEST } = DocumentEventName;
+  BoldAttributeName;
+const { RECYCLING_MANIFEST } = BoldDocumentEventName;
 const { DATE } = DocumentEventAttributeFormat;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
-const { MTR } = ReportType;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { MTR } = BoldReportType;
 
 export const RESULT_COMMENTS = {
   ADDRESS_MISMATCH: `The "${RECYCLING_MANIFEST}" event address does not match the "${RECYCLER}" ACTOR event address.`,

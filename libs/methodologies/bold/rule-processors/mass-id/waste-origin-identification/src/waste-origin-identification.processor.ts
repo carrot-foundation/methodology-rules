@@ -9,17 +9,17 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
+  BoldAttributeValue,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
-const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
+const { ACTOR, PICK_UP, WASTE_GENERATOR } = BoldDocumentEventName;
+const { UNIDENTIFIED } = BoldAttributeValue;
 
 type Subject = {
   pickUpEvent?: BoldDocumentEvent | undefined;
@@ -50,7 +50,7 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
     const wasteOrigin = getEventAttributeValue(
       pickUpEvent,
-      DocumentEventAttributeName.WASTE_ORIGIN,
+      BoldAttributeName.WASTE_ORIGIN,
     );
     const hasWasteGenerator = !isNil(wasteGeneratorEvents?.[0]);
     const isUnidentified = wasteOrigin === UNIDENTIFIED;

@@ -1,11 +1,11 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  DocumentCategory,
-  DocumentType,
+  BoldDocumentCategory,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { CREDIT_ORDER, MASS_ID_AUDIT } = DocumentType;
-const { MASS_ID } = DocumentCategory;
+const { CREDIT_ORDER, MASS_ID_AUDIT } = BoldDocumentType;
+const { MASS_ID } = BoldDocumentCategory;
 
 const ERROR_MESSAGES = {
   FAILED_BY_ERROR:

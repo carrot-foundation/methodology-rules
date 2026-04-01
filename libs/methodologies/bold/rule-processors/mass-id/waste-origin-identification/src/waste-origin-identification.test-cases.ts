@@ -5,18 +5,18 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldAttributeValue,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_GENERATOR } = DocumentEventLabel;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { WASTE_ORIGIN } = BoldAttributeName;
+const { UNIDENTIFIED } = BoldAttributeValue;
+const { WASTE_GENERATOR } = BoldDocumentEventLabel;
 
 interface WasteOriginIdentificationTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;

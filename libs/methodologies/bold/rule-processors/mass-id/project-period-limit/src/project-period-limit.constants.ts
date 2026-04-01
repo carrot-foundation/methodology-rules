@@ -1,6 +1,6 @@
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { RECYCLED } = DocumentEventName;
+const { RECYCLED } = BoldDocumentEventName;
 
 export const RESULT_COMMENTS = {
   failed: {

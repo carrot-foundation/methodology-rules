@@ -1,13 +1,13 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
 
 export class WasteMassIsUniqueProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {

@@ -8,10 +8,10 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -23,10 +23,10 @@ import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = DocumentEventLabel;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
 
 const randomId = faker.lorem.word();
 const randomDescription = faker.lorem.sentence();

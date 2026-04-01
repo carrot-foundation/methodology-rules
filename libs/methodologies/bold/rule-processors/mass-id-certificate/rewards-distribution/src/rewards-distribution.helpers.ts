@@ -11,10 +11,10 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAttributeName,
+  BoldAttributeValue,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
+  BoldDocumentEventName,
   type MassIDReward,
   RewardActorAddress,
   type RewardActorParticipant,
@@ -34,8 +34,8 @@ import {
   REQUIRED_ACTOR_TYPES,
 } from './rewards-distribution.constants';
 
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
+const { UNIDENTIFIED } = BoldAttributeValue;
+const { WASTE_ORIGIN } = BoldAttributeName;
 const WASTE_GENERATOR = 'Waste Generator';
 
 export const isHaulerActorDefined = (
@@ -98,7 +98,7 @@ export const getActorsByType = ({
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
     const actorEvent = methodologyDocument.externalEvents?.find(
       and(
-        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventNameIsAnyOf([BoldDocumentEventName.ACTOR]),
         eventLabelIsAnyOf([actorType]),
       ),
     );
@@ -226,7 +226,7 @@ export const shouldApplyLargeBusinessDiscount = (
   const onboardingDeclarationEvent =
     wasteGeneratorVerificationDocument.externalEvents?.find(
       (event) =>
-        event.name === String(DocumentEventName.ONBOARDING_DECLARATION),
+        event.name === String(BoldDocumentEventName.ONBOARDING_DECLARATION),
     );
 
   if (isNil(onboardingDeclarationEvent)) {
@@ -235,16 +235,14 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const businessSize = getEventAttributeValue(
     onboardingDeclarationEvent,
-    DocumentEventAttributeName.BUSINESS_SIZE_DECLARATION,
+    BoldAttributeName.BUSINESS_SIZE_DECLARATION,
   );
 
   if (isNil(businessSize)) {
     return true;
   }
 
-  return (
-    String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
-  );
+  return String(businessSize) === String(BoldAttributeValue.LARGE_BUSINESS);
 };
 
 export const applyLargeBusinessDiscount = (

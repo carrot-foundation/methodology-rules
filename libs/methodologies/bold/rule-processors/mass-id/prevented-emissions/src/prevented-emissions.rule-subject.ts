@@ -1,6 +1,6 @@
 import {
+  BoldBaseline,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentEventAttributeValueSchema,
@@ -10,7 +10,7 @@ import {
 import { z } from 'zod';
 
 export const PreventedEmissionsRuleSubjectSchema = z.object({
-  baseline: z.enum(MethodologyBaseline).optional(),
+  baseline: z.enum(BoldBaseline).optional(),
   exceedingEmissionCoefficient: DocumentEventAttributeValueSchema.optional(),
   gasType: NonEmptyStringSchema,
   localWasteClassificationId: NonEmptyStringSchema.optional(),

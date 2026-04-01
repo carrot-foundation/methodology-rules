@@ -10,11 +10,11 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type DocumentAddress,
@@ -35,7 +35,7 @@ import {
 export const hasVerificationDocument = (
   massIDAuditDocument: BoldDocument,
   participantId: string,
-  actorType: MassIDDocumentActorType,
+  actorType: MassIDActorType,
   accreditationDocuments: BoldDocument[],
 ): boolean => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
@@ -65,7 +65,7 @@ export const hasVerificationDocument = (
 export const getAccreditedAddressByParticipantIdAndActorType = (
   massIDAuditDocument: BoldDocument,
   participantId: string,
-  actorType: MassIDDocumentActorType,
+  actorType: MassIDActorType,
   accreditationDocuments: BoldDocument[],
 ): DocumentAddress | undefined => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
@@ -107,7 +107,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   const facilityAddressEvent =
     participantAccreditationDocument.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
+      eventNameIsAnyOf([BoldDocumentEventName.FACILITY_ADDRESS]),
     );
 
   if (!facilityAddressEvent) {
@@ -126,11 +126,11 @@ export const getEventGpsGeolocation = (
 ): Geolocation | undefined => {
   const gpsLatitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LATITUDE,
+    BoldAttributeName.CAPTURED_GPS_LATITUDE,
   );
   const gpsLongitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    BoldAttributeName.CAPTURED_GPS_LONGITUDE,
   );
 
   if (
@@ -148,7 +148,9 @@ export const getEventGpsGeolocation = (
 
 export const getGpsExceptionsFromRecyclerAccreditation = (
   recyclerAccreditationDocument: BoldDocument | undefined,
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
 ): {
   latitudeException: GpsLatitudeApprovedException | undefined;
   longitudeException: GpsLongitudeApprovedException | undefined;
@@ -157,7 +159,7 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     return { latitudeException: undefined, longitudeException: undefined };
   }
 
-  const { ACCREDITATION_RESULT } = DocumentEventName;
+  const { ACCREDITATION_RESULT } = BoldDocumentEventName;
   const approvedExceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
     ACCREDITATION_RESULT,
@@ -171,14 +173,14 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LATITUDE.toString(),
+        BoldAttributeName.CAPTURED_GPS_LATITUDE.toString(),
   );
 
   const longitudeException = approvedExceptions.find(
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
+        BoldAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
   );
 
   return {

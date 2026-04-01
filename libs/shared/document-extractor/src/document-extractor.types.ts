@@ -4,30 +4,30 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { ReviewReason } from './cross-validation.types';
 
 export interface BaseExtractedData {
-  documentType: DocumentType;
+  documentType: BoldDocumentType;
   extractionConfidence: ExtractionConfidence;
   lowConfidenceFields: string[];
   rawText: NonEmptyString;
 }
 
+export type BoldDocumentType =
+  | 'recyclingManifest'
+  | 'scaleTicket'
+  | 'transportManifest';
+
 export interface DocumentExtractorConfig {
-  documentType?: DocumentType | undefined;
+  documentType?: BoldDocumentType | undefined;
   layouts?: NonEmptyString[] | undefined;
   textExtractionResult?: TextExtractionResult | undefined;
 }
 
 export interface DocumentParser<T extends BaseExtractedData> {
-  readonly documentType: DocumentType;
+  readonly documentType: BoldDocumentType;
   getMatchScore(extractionResult: TextExtractionResult): number;
   readonly layoutId: NonEmptyString;
   parse(extractionResult: TextExtractionResult): ExtractionOutput<T>;
   readonly textractMode?: 'analyze' | 'detect';
 }
-
-export type DocumentType =
-  | 'recyclingManifest'
-  | 'scaleTicket'
-  | 'transportManifest';
 
 export interface ExtractedField<T> {
   confidence: ExtractionConfidence;
@@ -46,6 +46,6 @@ export interface ExtractionOutput<T extends BaseExtractedData> {
 }
 
 export interface LayoutConfig {
-  documentType: DocumentType;
+  documentType: BoldDocumentType;
   layoutId: NonEmptyString;
 }

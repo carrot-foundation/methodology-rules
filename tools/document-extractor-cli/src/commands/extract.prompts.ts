@@ -1,4 +1,4 @@
-import type { DocumentType } from '@carrot-fndn/shared/document-extractor';
+import type { BoldDocumentType } from '@carrot-fndn/shared/document-extractor';
 
 import { input, select } from '@inquirer/prompts';
 
@@ -6,7 +6,7 @@ import { EXTRACT_OPTIONS } from './extract.constants';
 
 const DOCUMENT_TYPE_CHOICES: Array<{
   name: string;
-  value: DocumentType;
+  value: BoldDocumentType;
 }> = [
   { name: 'Scale Ticket', value: 'scaleTicket' },
   { name: 'Transport Manifest (MTR)', value: 'transportManifest' },
@@ -25,7 +25,7 @@ export const promptForFilePath = (): Promise<string> =>
     },
   });
 
-export const promptForDocumentType = (): Promise<DocumentType> =>
+export const promptForDocumentType = (): Promise<BoldDocumentType> =>
   select({
     choices: DOCUMENT_TYPE_CHOICES,
     message: `Select document type (use ${EXTRACT_OPTIONS.documentType}):`,

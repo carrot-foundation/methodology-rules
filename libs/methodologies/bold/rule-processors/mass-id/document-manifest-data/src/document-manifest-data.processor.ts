@@ -18,13 +18,13 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
-  ReportType,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type DocumentEventAttachment,
@@ -48,10 +48,10 @@ const {
   RECYCLING_MANIFEST,
   TRANSPORT_MANIFEST,
   WEIGHING,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
+  BoldAttributeName;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
 const { DATE } = DocumentEventAttributeFormat;
 
 export type DocumentManifestType =
@@ -77,8 +77,8 @@ type RuleSubject = {
 };
 
 const DOCUMENT_TYPE_MAPPING = {
-  [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
-  [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
+  [RECYCLING_MANIFEST]: BoldReportType.CDF.toString(),
+  [TRANSPORT_MANIFEST]: BoldReportType.MTR.toString(),
 } as const;
 
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {

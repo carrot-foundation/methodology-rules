@@ -6,9 +6,9 @@ import {
   stubMassIDDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldAttributeName,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { getYear } from 'date-fns';
@@ -26,8 +26,8 @@ const {
   EMISSION_AND_COMPOSTING_METRICS,
   PICK_UP,
   RULES_METADATA,
-} = DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+} = BoldDocumentEventName;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 
 const testEmissionAndCompostingMetricsEvent = (
   documentYear: number,
@@ -38,7 +38,7 @@ const testEmissionAndCompostingMetricsEvent = (
       attributes: [
         {
           isPublic: true,
-          name: DocumentEventAttributeName.REFERENCE_YEAR,
+          name: BoldAttributeName.REFERENCE_YEAR,
           value: referenceYear,
         },
       ],
@@ -92,7 +92,7 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: BoldAttributeName.REFERENCE_YEAR,
               value: '',
             },
           ],
@@ -121,7 +121,7 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: BoldAttributeName.REFERENCE_YEAR,
               value: 0,
             },
           ],
@@ -150,7 +150,7 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: BoldAttributeName.REFERENCE_YEAR,
               value: -1,
             },
           ],
@@ -190,7 +190,7 @@ describe('Document getters', () => {
           attributes: [
             {
               isPublic: true,
-              name: DocumentEventAttributeName.REFERENCE_YEAR,
+              name: BoldAttributeName.REFERENCE_YEAR,
               value: 2023,
             },
           ],

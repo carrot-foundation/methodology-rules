@@ -14,12 +14,12 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   DocumentEventAttributeFormat,
@@ -36,15 +36,15 @@ import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const processorErrors = new MassIDSortingProcessorErrors();
 
-const { RECYCLER } = DocumentEventLabel;
+const { RECYCLER } = BoldDocumentEventLabel;
 const {
   ACCREDITATION_CONTEXT,
   DROP_OFF,
   EMISSION_AND_COMPOSTING_METRICS,
   SORTING,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 const { CUBIC_METER, KILOGRAM } = DocumentEventAttributeFormat;
 
 // Helper functions to reduce duplication
@@ -56,17 +56,13 @@ const createAccreditationDocuments = (sortingFactor: number) =>
         externalEventsMap: {
           [ACCREDITATION_CONTEXT]: stubDocumentEvent({
             name: ACCREDITATION_CONTEXT,
-            participant: actorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
-            )!,
+            participant: actorParticipants.get(MassIDActorType.RECYCLER)!,
           }),
           [EMISSION_AND_COMPOSTING_METRICS]:
             stubBoldEmissionAndCompostingMetricsEvent({
               metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
               partialDocumentEvent: {
-                participant: actorParticipants.get(
-                  MassIDDocumentActorType.RECYCLER,
-                )!,
+                participant: actorParticipants.get(MassIDActorType.RECYCLER)!,
               },
             }),
         },
@@ -105,9 +101,7 @@ const createMassIDEvents = (
       ...createWeightAttributes(grossWeight, deductedWeight),
       ...(includeDescription
         ? []
-        : [
-            [DESCRIPTION, undefined] as [DocumentEventAttributeName, undefined],
-          ]),
+        : [[DESCRIPTION, undefined] as [BoldAttributeName, undefined]]),
     ],
     ...(sortingValue !== undefined && {
       partialDocumentEvent: { value: sortingValue },

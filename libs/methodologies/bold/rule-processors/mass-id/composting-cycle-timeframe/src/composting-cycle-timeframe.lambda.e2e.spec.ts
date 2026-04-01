@@ -6,7 +6,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocumentEvent,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
@@ -20,7 +20,7 @@ import { faker } from '@faker-js/faker';
 import { compostingCycleTimeframeLambda } from './composting-cycle-timeframe.lambda';
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
+const { DROP_OFF, RECYCLED } = BoldDocumentEventName;
 
 describe('CompostingCycleTimeframeProcessor E2E', () => {
   const documentKeyPrefix = faker.string.uuid();
@@ -28,7 +28,10 @@ describe('CompostingCycleTimeframeProcessor E2E', () => {
   it.each(compostingCycleTimeframeTestCases)(
     'should validate time interval between events - $scenario',
     async ({ dropOffEventDate, recycledEventDate, resultStatus }) => {
-      const externalEvents = new Map<DocumentEventName, BoldDocumentEvent>();
+      const externalEvents = new Map<
+        BoldDocumentEventName,
+        BoldDocumentEvent
+      >();
 
       if (dropOffEventDate) {
         externalEvents.set(

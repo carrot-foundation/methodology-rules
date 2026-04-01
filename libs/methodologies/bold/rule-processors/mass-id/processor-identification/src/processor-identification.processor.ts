@@ -9,14 +9,14 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 
-const { ACTOR } = DocumentEventName;
-const { PROCESSOR } = DocumentEventLabel;
+const { ACTOR } = BoldDocumentEventName;
+const { PROCESSOR } = BoldDocumentEventLabel;
 
 type Subject = {
   processorActorEvents?: BoldDocumentEvent[] | undefined;

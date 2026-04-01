@@ -9,11 +9,11 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  ApprovedExceptionType,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -25,21 +25,23 @@ import {
   hasVerificationDocument,
 } from './geolocation-and-address-precision.helpers';
 
-const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = DocumentEventName;
+const { ACCREDITATION_RESULT, FACILITY_ADDRESS } = BoldDocumentEventName;
 const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 const createGpsException = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   attributeName:
-    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
-    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    | typeof BoldAttributeName.CAPTURED_GPS_LATITUDE
+    | typeof BoldAttributeName.CAPTURED_GPS_LONGITUDE,
   reason: string,
-  exceptionType: string = ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  exceptionType: string = BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
 ) => ({
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID,
+      Category: BoldDocumentCategory.MASS_ID,
     },
     Event: eventName.toString(),
   },
@@ -49,7 +51,9 @@ const createGpsException = (
 });
 
 const createGpsExceptions = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   includeLatitude = true,
   includeLongitude = true,
   exceptionType?: string,
@@ -98,7 +102,7 @@ const createDocumentWithExceptions = (
   });
 
 const createMassIDAuditDocumentWithActor = (
-  actorType: MassIDDocumentActorType,
+  actorType: MassIDActorType,
   participantId: string,
   relatedDocumentId?: string,
   options?: {
@@ -131,7 +135,7 @@ const createMassIDAuditDocumentWithActor = (
               'ACTOR',
               stubDocumentEvent({
                 label: actorType,
-                name: DocumentEventName.ACTOR,
+                name: BoldDocumentEventName.ACTOR,
                 participant: stubParticipant({ id: participantId }),
                 relatedDocument,
               }),
@@ -146,7 +150,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('getAccreditedAddressByParticipantIdAndActorType', () => {
     it('should return the accredited address by participant id and actor type', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.RECYCLER;
+      const actorType = MassIDActorType.RECYCLER;
       const addressId = faker.string.uuid();
 
       const accreditationDocument = stubBoldAccreditationDocument({
@@ -182,7 +186,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.HAULER;
+      const actorType = MassIDActorType.HAULER;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -203,7 +207,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.PROCESSOR;
+      const actorType = MassIDActorType.PROCESSOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -226,7 +230,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
+      const actorType = MassIDActorType.WASTE_GENERATOR;
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
@@ -248,7 +252,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return undefined when facility address event is not found in accreditation document', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.INTEGRATOR;
+      const actorType = MassIDActorType.INTEGRATOR;
 
       const accreditationDocument = stubBoldAccreditationDocument({
         externalEventsMap: new Map(),
@@ -318,7 +322,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
   describe('hasVerificationDocument', () => {
     it('should return true when verification document exists', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.WASTE_GENERATOR;
+      const actorType = MassIDActorType.WASTE_GENERATOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -340,7 +344,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when actor event is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.RECYCLER;
+      const actorType = MassIDActorType.RECYCLER;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -360,7 +364,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document id is missing in actor event', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.PROCESSOR;
+      const actorType = MassIDActorType.PROCESSOR;
 
       const accreditationDocument = stubBoldAccreditationDocument();
 
@@ -383,7 +387,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
     it('should return false when accreditation document is not found', () => {
       const participantId = faker.string.uuid();
-      const actorType = MassIDDocumentActorType.HAULER;
+      const actorType = MassIDActorType.HAULER;
 
       const unrelatedAccreditationDocument = stubBoldAccreditationDocument();
 
@@ -408,7 +412,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return undefined exceptions when recyclerAccreditationDocument is undefined', () => {
       const result = getGpsExceptionsFromRecyclerAccreditation(
         undefined,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -422,7 +426,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -443,7 +447,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -451,12 +455,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for DROP_OFF', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.DROP_OFF);
+      const exceptions = createGpsExceptions(BoldDocumentEventName.DROP_OFF);
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeDefined();
@@ -470,12 +474,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return valid GPS exceptions when document has valid latitude and longitude exceptions for PICK_UP', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const exceptions = createGpsExceptions(BoldDocumentEventName.PICK_UP);
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.PICK_UP,
+        BoldDocumentEventName.PICK_UP,
       );
 
       expect(result.latitudeException).toBeDefined();
@@ -489,12 +493,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     });
 
     it('should return undefined for exceptions that do not match the event name', () => {
-      const exceptions = createGpsExceptions(DocumentEventName.PICK_UP);
+      const exceptions = createGpsExceptions(BoldDocumentEventName.PICK_UP);
       const document = createDocumentWithExceptions(exceptions);
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -506,12 +510,12 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: BoldDocumentCategory.MASS_ID,
             },
-            Event: DocumentEventName.DROP_OFF.toString(),
+            Event: BoldDocumentEventName.DROP_OFF.toString(),
           },
-          'Attribute Name': DocumentEventAttributeName.TARE.toString(),
-          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': BoldAttributeName.TARE.toString(),
+          'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Tare exception (not GPS)',
         },
       ];
@@ -519,7 +523,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();
@@ -529,13 +533,13 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
     it('should return undefined for latitude when exception does not pass type guard', () => {
       const exceptions = [
         createGpsException(
-          DocumentEventName.DROP_OFF,
+          BoldDocumentEventName.DROP_OFF,
           CAPTURED_GPS_LATITUDE,
           'Invalid exception type',
           'INVALID_TYPE',
         ),
         createGpsException(
-          DocumentEventName.DROP_OFF,
+          BoldDocumentEventName.DROP_OFF,
           CAPTURED_GPS_LONGITUDE,
           'GPS longitude exception for DROP_OFF',
         ),
@@ -544,7 +548,7 @@ describe('GeolocationAndAddressPrecisionHelpers', () => {
 
       const result = getGpsExceptionsFromRecyclerAccreditation(
         document,
-        DocumentEventName.DROP_OFF,
+        BoldDocumentEventName.DROP_OFF,
       );
 
       expect(result.latitudeException).toBeUndefined();

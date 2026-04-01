@@ -13,7 +13,7 @@ import {
 import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type BoldDocument,
-  DocumentSubtype,
+  BoldDocumentSubtype,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -78,7 +78,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.WASTE_GENERATOR
+        documentRelation.subtype === BoldDocumentSubtype.WASTE_GENERATOR
       ) {
         wasteGeneratorVerificationDocument = document;
       }

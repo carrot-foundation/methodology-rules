@@ -6,7 +6,7 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { differenceInDays, differenceInHours, parseISO } from 'date-fns';
 
@@ -18,7 +18,7 @@ import {
   TOLERANCE_IN_HOURS,
 } from './composting-cycle-timeframe.constants';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
+const { DROP_OFF, RECYCLED } = BoldDocumentEventName;
 
 type Subject = {
   dropOffEvent?: BoldDocumentEvent | undefined;

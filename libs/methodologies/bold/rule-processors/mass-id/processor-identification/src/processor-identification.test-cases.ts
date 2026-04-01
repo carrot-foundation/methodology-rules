@@ -2,14 +2,14 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
 
-const { PROCESSOR } = DocumentEventLabel;
-const { ACTOR } = DocumentEventName;
+const { PROCESSOR } = BoldDocumentEventLabel;
+const { ACTOR } = BoldDocumentEventName;
 
 interface ProcessorIdentificationTestCase extends RuleTestCase {
   events: Map<string, ReturnType<typeof stubActorEventWithLabel> | undefined>;

@@ -1,6 +1,6 @@
-import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 
 export const RESULT_COMMENTS = {
   failed: {

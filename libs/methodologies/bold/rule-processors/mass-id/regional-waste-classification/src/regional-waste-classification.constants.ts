@@ -1,9 +1,9 @@
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 
 export const RESULT_COMMENTS = {
   failed: {

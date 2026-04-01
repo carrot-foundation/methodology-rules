@@ -2,17 +2,17 @@ import type {
   BoldDocumentEvent,
   BoldDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import type { DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
 
 export type MergeEventsMapsParameter =
-  | Map<DocumentEventName | string, BoldDocumentEvent | undefined>
+  | Map<BoldDocumentEventName, BoldDocumentEvent | undefined>
   | Record<string, BoldDocumentEvent | undefined>
   | undefined;
 
@@ -24,7 +24,7 @@ export type MergeEventsMapsParameter =
  * @param overridenEventsMap - Optional Map or object containing events that should override the defaults
  * @returns A new Map with the merged events
  */
-export const mergeEventsMaps = <T extends DocumentEventName | string>(
+export const mergeEventsMaps = <T extends BoldDocumentEventName>(
   defaultEventsMap: Map<T, BoldDocumentEvent>,
   overridenEventsMap:
     | Map<T, BoldDocumentEvent | undefined>
@@ -62,13 +62,13 @@ export type MetadataAttributeResponse =
   | Omit<BoldDocumentEventAttribute, 'isPublic'>;
 
 export type MetadataAttributeTupleParameter = [
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue | undefined,
+  BoldAttributeName,
+  BoldAttributeValue | undefined,
 ];
 
 export type MetadataAttributeTupleResponse = [
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
+  BoldAttributeName,
+  BoldAttributeValue,
 ];
 
 /**

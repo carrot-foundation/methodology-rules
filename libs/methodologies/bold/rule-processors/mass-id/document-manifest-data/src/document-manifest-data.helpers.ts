@@ -1,16 +1,16 @@
 import {
   type AttachmentInfo,
+  type BoldDocumentType,
   type DocumentExtractorConfig,
-  type DocumentType,
   getDefaultLayouts,
 } from '@carrot-fndn/shared/document-extractor';
 import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
+  type BoldAttributeValue,
   type DocumentEventAttachment,
   type DocumentEventAttribute,
-  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 export type {
@@ -31,10 +31,7 @@ export interface DocumentManifestEventSubject {
   recyclerCountryCode: string | undefined;
 }
 
-export type EventAttributeValueType =
-  | DocumentEventAttributeValue
-  | string
-  | undefined;
+export type EventAttributeValueType = BoldAttributeValue | string | undefined;
 
 export interface ValidationResult {
   failMessages: string[];
@@ -43,7 +40,7 @@ export interface ValidationResult {
   reviewRequired?: boolean;
 }
 
-export const DOCUMENT_TYPE_MAPPING: Record<string, DocumentType> = {
+export const DOCUMENT_TYPE_MAPPING: Record<string, BoldDocumentType> = {
   CDF: 'recyclingManifest',
   MTR: 'transportManifest',
 };

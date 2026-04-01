@@ -1,10 +1,10 @@
 import {
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { ACTOR } = DocumentEventName;
-const { RECYCLER } = DocumentEventLabel;
+const { ACTOR } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
 
 export const RESULT_COMMENTS = {
   failed: {

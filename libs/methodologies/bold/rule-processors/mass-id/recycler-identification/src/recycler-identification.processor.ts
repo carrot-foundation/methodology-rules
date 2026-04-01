@@ -9,14 +9,14 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
 
-const { ACTOR } = DocumentEventName;
-const { RECYCLER } = DocumentEventLabel;
+const { ACTOR } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
 
 type Subject = {
   recyclerActorEvents?: BoldDocumentEvent[] | undefined;

@@ -9,23 +9,23 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
-const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECYCLER } = DocumentEventLabel;
-const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
+const { ACTOR, DROP_OFF } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { RECEIVING_OPERATOR_IDENTIFIER } = BoldAttributeName;
 
 interface RuleSubject {
   lastDropOffEvent: BoldDocumentEvent | undefined;
-  receivingOperatorIdentifier: DocumentEventAttributeValue | string | undefined;
+  receivingOperatorIdentifier: BoldAttributeValue | string | undefined;
   recyclerEvent: BoldDocumentEvent | undefined;
 }
 

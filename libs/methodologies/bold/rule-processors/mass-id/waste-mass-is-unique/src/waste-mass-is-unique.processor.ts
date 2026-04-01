@@ -13,11 +13,11 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -34,9 +34,9 @@ import {
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
-const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { ACTOR, DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 interface RuleSubject {
   cancelledCount: number;
@@ -166,8 +166,8 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   private getEventOrThrow(
     document: BoldDocument,
     criteria: {
-      label?: DocumentEventLabel[];
-      name: DocumentEventName[];
+      label?: BoldDocumentEventLabel[];
+      name: BoldDocumentEventName[];
     },
     errorMessage: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],
   ): BoldDocumentEvent {

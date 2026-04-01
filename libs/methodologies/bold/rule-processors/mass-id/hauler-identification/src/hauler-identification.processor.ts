@@ -10,19 +10,19 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = DocumentEventLabel;
-const { VEHICLE_TYPE } = DocumentEventAttributeName;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { HAULER } = BoldDocumentEventLabel;
+const { VEHICLE_TYPE } = BoldAttributeName;
 
 type Subject = {
   haulerEvent: BoldDocumentEvent | undefined;
@@ -30,8 +30,8 @@ type Subject = {
 };
 
 export const OPTIONAL_HAULER_VEHICLE_TYPES = [
-  DocumentEventVehicleType.SLUDGE_PIPES,
-  DocumentEventVehicleType.CART,
+  BoldVehicleType.SLUDGE_PIPES,
+  BoldVehicleType.CART,
 ] as const;
 
 export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {

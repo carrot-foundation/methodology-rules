@@ -10,9 +10,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocument,
-  DocumentCategory,
-  DocumentSubtype,
-  DocumentType,
+  BoldDocumentCategory,
+  BoldDocumentSubtype,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -175,7 +175,7 @@ describe('DocumenQueryService', () => {
     });
 
     it('should return array with parentDocument and its relatedDocuments', async () => {
-      const category = stubEnumValue(DocumentCategory);
+      const category = stubEnumValue(BoldDocumentCategory);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },
@@ -226,9 +226,9 @@ describe('DocumenQueryService', () => {
     });
 
     it('should return array with parentDocument and relatedDocuments and its parentDocuments and relatedDocuments', async () => {
-      const category = stubEnumValue(DocumentCategory);
-      const subtype = stubEnumValue(DocumentSubtype);
-      const type = stubEnumValue(DocumentType);
+      const category = stubEnumValue(BoldDocumentCategory);
+      const subtype = stubEnumValue(BoldDocumentSubtype);
+      const type = stubEnumValue(BoldDocumentType);
       const relatedDocumentOfRelatedDocumentOfParentDocument = stubDocument();
       const parentDocumentOfRelatedDocumentOfParentDocument = stubDocument();
       const relatedDocumentOfParentDocument = stubDocument({
@@ -462,7 +462,7 @@ describe('DocumenQueryService', () => {
       const criteria: DocumentQueryCriteria = {
         relatedDocuments: [
           {
-            category: stubEnumValue(DocumentCategory),
+            category: stubEnumValue(BoldDocumentCategory),
           },
         ],
       };
@@ -486,7 +486,7 @@ describe('DocumenQueryService', () => {
     });
 
     it('should only return related documents when the parent document is omitted', async () => {
-      const category = stubEnumValue(DocumentCategory);
+      const category = stubEnumValue(BoldDocumentCategory);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },

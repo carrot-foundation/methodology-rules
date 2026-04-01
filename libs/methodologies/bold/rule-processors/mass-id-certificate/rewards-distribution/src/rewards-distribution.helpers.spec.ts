@@ -3,18 +3,18 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  DocumentSubtype,
+  BoldAttributeName,
+  BoldAttributeValue,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { shouldApplyLargeBusinessDiscount } from './rewards-distribution.helpers';
 
-const { ONBOARDING_DECLARATION } = DocumentEventName;
-const { BUSINESS_SIZE_DECLARATION } = DocumentEventAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS } = DocumentEventAttributeValue;
-const { WASTE_GENERATOR } = DocumentSubtype;
+const { ONBOARDING_DECLARATION } = BoldDocumentEventName;
+const { BUSINESS_SIZE_DECLARATION } = BoldAttributeName;
+const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldAttributeValue;
+const { WASTE_GENERATOR } = BoldDocumentSubtype;
 
 describe('shouldApplyLargeBusinessDiscount', () => {
   it('should return true when document is undefined (defaults to Large Business)', () => {

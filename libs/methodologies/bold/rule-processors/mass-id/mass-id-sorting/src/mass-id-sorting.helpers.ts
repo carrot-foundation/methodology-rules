@@ -9,18 +9,18 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { getYear } from 'date-fns';
 
-const { SORTING } = DocumentEventName;
+const { SORTING } = BoldDocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 export enum ValidationErrorCode {
   EVENT_BEFORE_SORTING_UNDEFINED = 'EVENT_BEFORE_SORTING_UNDEFINED',

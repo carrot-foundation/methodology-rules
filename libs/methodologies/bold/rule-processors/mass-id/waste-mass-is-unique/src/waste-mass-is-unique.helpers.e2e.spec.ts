@@ -9,9 +9,9 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type InboundDocument,
@@ -24,10 +24,10 @@ import {
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
-const { ACTOR } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
-const { DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { ACTOR } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { DROP_OFF, MOVE, PICK_UP } = BoldDocumentEventName;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 describe('Waste Mass Is Unique Helpers E2E', () => {
   let auditApiService: AuditApiService;

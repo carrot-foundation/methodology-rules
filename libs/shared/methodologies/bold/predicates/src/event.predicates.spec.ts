@@ -4,11 +4,11 @@ import {
   stubDocumentEventWithMetadata,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
-  ParticipantType,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldParticipantType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
@@ -33,7 +33,7 @@ describe('Event Predicates', () => {
     it('should return true if the event is an actor participant type', () => {
       const event = stubDocumentEvent();
 
-      event.participant.type = ParticipantType.ACTOR;
+      event.participant.type = BoldParticipantType.ACTOR;
 
       expect(eventHasActorParticipant(event)).toBe(true);
     });
@@ -48,7 +48,7 @@ describe('Event Predicates', () => {
   });
 
   describe('eventHasLabel', () => {
-    const { RECYCLER } = DocumentEventLabel;
+    const { RECYCLER } = BoldDocumentEventLabel;
 
     it('should return true if the event has the label', () => {
       const event = stubDocumentEvent({ label: RECYCLER });
@@ -65,13 +65,13 @@ describe('Event Predicates', () => {
 
   describe('isRecycledEvent', () => {
     it('should return true if the event is a recycled event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.RECYCLED });
+      const event = stubDocumentEvent({ name: BoldDocumentEventName.RECYCLED });
 
       expect(isRecycledEvent(event)).toBe(true);
     });
 
     it('should return false if the event is not a recycled event', () => {
-      const event = stubDocumentEvent({ name: DocumentEventName.ACTOR });
+      const event = stubDocumentEvent({ name: BoldDocumentEventName.ACTOR });
 
       expect(isRecycledEvent(event)).toBe(false);
     });
@@ -79,7 +79,7 @@ describe('Event Predicates', () => {
 
   describe('eventHasName', () => {
     it('should return true if the event has the event name', () => {
-      const name = stubEnumValue(DocumentEventName);
+      const name = stubEnumValue(BoldDocumentEventName);
       const event = stubDocumentEvent({ name });
 
       const result = eventHasName(event, name);
@@ -89,10 +89,10 @@ describe('Event Predicates', () => {
 
     it('should return false if the event does not have the event name', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.CLOSE,
+        name: BoldDocumentEventName.CLOSE,
       });
 
-      const result = eventHasName(event, DocumentEventName.ACTOR);
+      const result = eventHasName(event, BoldDocumentEventName.ACTOR);
 
       expect(result).toBe(false);
     });
@@ -101,7 +101,7 @@ describe('Event Predicates', () => {
   describe('isActorEvent', () => {
     it('should return true if the event is an actor event', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.ACTOR,
+        name: BoldDocumentEventName.ACTOR,
       });
 
       const result = isActorEvent(event);
@@ -111,7 +111,7 @@ describe('Event Predicates', () => {
 
     it('should return false if the event is not an actor event', () => {
       const event = stubDocumentEvent({
-        name: DocumentEventName.CLOSE,
+        name: BoldDocumentEventName.CLOSE,
       });
 
       const result = isActorEvent(event);
@@ -122,7 +122,7 @@ describe('Event Predicates', () => {
 
   describe('eventHasNonEmptyStringAttribute', () => {
     it('should return true if the attribute is a non-empty string', () => {
-      const name = stubEnumValue(DocumentEventAttributeName);
+      const name = stubEnumValue(BoldAttributeName);
       const attribute = stubDocumentEventAttribute({
         name,
         value: faker.string.sample(),
@@ -137,7 +137,7 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the attribute is an empty string', () => {
-      const name = stubEnumValue(DocumentEventAttributeName);
+      const name = stubEnumValue(BoldAttributeName);
       const attribute = stubDocumentEventAttribute({ name, value: '' });
       const event = stubDocumentEvent({
         metadata: { attributes: [attribute] },
@@ -149,7 +149,7 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the attribute is not a string', () => {
-      const name = stubEnumValue(DocumentEventAttributeName);
+      const name = stubEnumValue(BoldAttributeName);
       const attribute = stubDocumentEventAttribute({
         name,
         value: faker.number.int(),
@@ -164,7 +164,7 @@ describe('Event Predicates', () => {
     });
 
     it('should return false if the event metadata is undefined', () => {
-      const name = stubEnumValue(DocumentEventAttributeName);
+      const name = stubEnumValue(BoldAttributeName);
       const event = stubDocumentEvent({
         metadata: undefined,
       });
@@ -203,14 +203,14 @@ describe('Event Predicates', () => {
     it('should return true if the event has the metadata attribute name', () => {
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.WASTE_ORIGIN,
+          name: BoldAttributeName.WASTE_ORIGIN,
           value: faker.string.sample(),
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: BoldAttributeName.WASTE_ORIGIN,
       });
 
       expect(result).toBe(true);
@@ -219,7 +219,7 @@ describe('Event Predicates', () => {
     it('should return false if the event is an empty object', () => {
       const result = eventHasMetadataAttribute({
         event: {} as BoldDocumentEvent,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: BoldAttributeName.WASTE_ORIGIN,
       });
 
       expect(result).toBe(false);
@@ -230,8 +230,8 @@ describe('Event Predicates', () => {
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [DocumentEventName.ACTOR],
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        eventNames: [BoldDocumentEventName.ACTOR],
+        metadataName: BoldAttributeName.WASTE_ORIGIN,
       });
 
       expect(result).toBe(false);
@@ -240,14 +240,14 @@ describe('Event Predicates', () => {
     it('should return false if the event metadata name is not equal to the metadata value', () => {
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.WASTE_ORIGIN,
+          name: BoldAttributeName.WASTE_ORIGIN,
           value: faker.string.sample(),
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.WASTE_ORIGIN,
+        metadataName: BoldAttributeName.WASTE_ORIGIN,
         metadataValues: faker.string.sample(),
       });
 
@@ -259,18 +259,18 @@ describe('Event Predicates', () => {
       const description2 = faker.string.sample();
       const event = stubDocumentEventWithMetadata([
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.DESCRIPTION,
+          name: BoldAttributeName.DESCRIPTION,
           value: description1,
         }),
         stubDocumentEventAttribute({
-          name: DocumentEventAttributeName.DESCRIPTION,
+          name: BoldAttributeName.DESCRIPTION,
           value: description2,
         }),
       ]);
 
       const result = eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.DESCRIPTION,
+        metadataName: BoldAttributeName.DESCRIPTION,
         metadataValues: [description1, description2],
       });
 
@@ -282,17 +282,20 @@ describe('Event Predicates', () => {
       const event = stubDocumentEvent({
         ...stubDocumentEventWithMetadata([
           stubDocumentEventAttribute({
-            name: DocumentEventAttributeName.DESCRIPTION,
+            name: BoldAttributeName.DESCRIPTION,
             value: description,
           }),
         ]),
-        name: DocumentEventName.DROP_OFF,
+        name: BoldDocumentEventName.DROP_OFF,
       });
 
       const result = eventHasMetadataAttribute({
         event,
-        eventNames: [DocumentEventName.DROP_OFF, DocumentEventName.MOVE],
-        metadataName: DocumentEventAttributeName.DESCRIPTION,
+        eventNames: [
+          BoldDocumentEventName.DROP_OFF,
+          BoldDocumentEventName.MOVE,
+        ],
+        metadataName: BoldAttributeName.DESCRIPTION,
         metadataValues: [description],
       });
 
@@ -305,7 +308,7 @@ describe('Event Predicates', () => {
       const events = stubArray(() =>
         stubDocumentEventWithMetadata([
           stubDocumentEventAttribute({
-            name: DocumentEventAttributeName.WASTE_ORIGIN,
+            name: BoldAttributeName.WASTE_ORIGIN,
             value: 1234,
           }),
         ]),
@@ -313,7 +316,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        BoldAttributeName.WASTE_ORIGIN,
       );
 
       expect(result).toBe(true);
@@ -324,7 +327,7 @@ describe('Event Predicates', () => {
         () =>
           stubDocumentEventWithMetadata([
             stubDocumentEventAttribute({
-              name: DocumentEventAttributeName.WASTE_ORIGIN,
+              name: BoldAttributeName.WASTE_ORIGIN,
               value: faker.number.float(),
             }),
           ]),
@@ -333,7 +336,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        BoldAttributeName.WASTE_ORIGIN,
       );
 
       expect(result).toBe(false);
@@ -344,7 +347,7 @@ describe('Event Predicates', () => {
 
       const result = eventsHasSameMetadataAttributeValue(
         events,
-        DocumentEventAttributeName.WASTE_ORIGIN,
+        BoldAttributeName.WASTE_ORIGIN,
       );
 
       expect(result).toBe(false);

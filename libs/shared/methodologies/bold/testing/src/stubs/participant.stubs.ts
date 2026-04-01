@@ -4,7 +4,7 @@ import type {
 } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
-import { ParticipantType } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldParticipantType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { DataSetName } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
@@ -18,7 +18,7 @@ export const stubParticipant = (
   piiSnapshotId: faker.string.uuid(),
   taxId: faker.string.numeric(14),
   taxIdType: faker.helpers.arrayElement(['CPF', 'CNPJ']),
-  type: stubEnumValue(ParticipantType),
+  type: stubEnumValue(BoldParticipantType),
   ...partialParticipant,
 });
 

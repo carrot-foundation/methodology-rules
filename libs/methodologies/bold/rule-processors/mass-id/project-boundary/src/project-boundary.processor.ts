@@ -6,13 +6,13 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { convertDistance } from 'geolib';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
 
 interface RuleSubject {
   dropOffEvent: BoldDocumentEvent | undefined;

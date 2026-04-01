@@ -1,18 +1,18 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttachmentLabel,
+  BoldAttributeName,
+  BoldContainerType,
   type BoldDocument,
+  BoldDocumentCategory,
   type BoldDocumentEvent,
-  DocumentCategory,
-  DocumentEventAttachmentLabel,
-  DocumentEventAttributeName,
-  DocumentEventContainerType,
-  DocumentEventName,
-  DocumentEventScaleType,
-  DocumentEventVehicleType,
-  DocumentEventWeighingCaptureMethod,
-  DocumentType,
+  BoldDocumentEventName,
+  BoldDocumentType,
+  BoldReportType,
+  BoldScaleType,
+  BoldVehicleType,
+  BoldWeighingCaptureMethod,
   MassIDOrganicSubtype,
-  ReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
@@ -39,7 +39,7 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 const {
   DROP_OFF,
   PICK_UP,
@@ -48,7 +48,7 @@ const {
   SORTING,
   TRANSPORT_MANIFEST,
   WEIGHING,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const {
   CAPTURED_GPS_LATITUDE,
   CAPTURED_GPS_LONGITUDE,
@@ -76,7 +76,7 @@ const {
   VEHICLE_TYPE,
   WASTE_ORIGIN,
   WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 const { DATE, KILOGRAM } = DocumentEventAttributeFormat;
 
 const defaultPickUpAttributes: MetadataAttributeParameter[] = [
@@ -94,7 +94,7 @@ const defaultPickUpAttributes: MetadataAttributeParameter[] = [
     sensitive: true,
     value: 'FKE1A23' as LicensePlate,
   },
-  [VEHICLE_TYPE, stubEnumValue(DocumentEventVehicleType)],
+  [VEHICLE_TYPE, stubEnumValue(BoldVehicleType)],
 ];
 
 export const stubBoldMassIDPickUpEvent = ({
@@ -118,7 +118,7 @@ const defaultTransportManifestWithExemptionAttributes: MetadataAttributeParamete
 
 const defaultTransportManifestAttributes: MetadataAttributeParameter[] = [
   [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.MTR],
+  [DOCUMENT_TYPE, BoldReportType.MTR],
   {
     format: DATE,
     name: ISSUE_DATE,
@@ -146,7 +146,7 @@ export const stubBoldMassIDTransportManifestEvent = ({
             ? []
             : [
                 stubDocumentEventAttachment({
-                  label: DocumentEventAttachmentLabel.TRANSPORT_MANIFEST,
+                  label: BoldAttachmentLabel.TRANSPORT_MANIFEST,
                 }),
               ],
         ...partialDocumentEvent,
@@ -161,14 +161,14 @@ export const stubBoldMassIDTransportManifestEvent = ({
 
 const defaultWeighingAttributes: MetadataAttributeParameter[] = [
   [DESCRIPTION, faker.lorem.sentence()],
-  [WEIGHING_CAPTURE_METHOD, stubEnumValue(DocumentEventWeighingCaptureMethod)],
-  [SCALE_TYPE, stubEnumValue(DocumentEventScaleType)],
+  [WEIGHING_CAPTURE_METHOD, stubEnumValue(BoldWeighingCaptureMethod)],
+  [SCALE_TYPE, stubEnumValue(BoldScaleType)],
   [SCALE_ACCREDITATION, { documentId: faker.string.uuid() }],
   [
     CONTAINER_TYPE,
     faker.helpers.arrayElement(
-      Object.values(DocumentEventContainerType).filter(
-        (type) => type !== DocumentEventContainerType.TRUCK,
+      Object.values(BoldContainerType).filter(
+        (type) => type !== BoldContainerType.TRUCK,
       ),
     ),
   ],
@@ -240,7 +240,7 @@ const defaultRecyclingManifestWithExemptionAttributes: MetadataAttributeParamete
 
 const defaultRecyclingManifestAttributes: MetadataAttributeParameter[] = [
   [DOCUMENT_NUMBER, faker.string.uuid()],
-  [DOCUMENT_TYPE, ReportType.CDF],
+  [DOCUMENT_TYPE, BoldReportType.CDF],
   {
     format: DATE,
     name: ISSUE_DATE,
@@ -268,7 +268,7 @@ export const stubBoldMassIDRecyclingManifestEvent = ({
             ? []
             : [
                 stubDocumentEventAttachment({
-                  label: DocumentEventAttachmentLabel.RECYCLING_MANIFEST,
+                  label: BoldAttachmentLabel.RECYCLING_MANIFEST,
                 }),
               ],
         ...partialDocumentEvent,
@@ -319,11 +319,11 @@ export const stubBoldMassIDSortingEvent = ({
   );
 
 export type BoldMassIDExternalEventsMap = Map<
-  DocumentEventName | string,
+  BoldDocumentEventName,
   BoldDocumentEvent
 >;
 export type BoldMassIDExternalEventsObject = Partial<
-  Record<DocumentEventName, BoldDocumentEvent>
+  Record<BoldDocumentEventName, BoldDocumentEvent>
 >;
 
 export const boldMassIDExternalEventsMap: BoldMassIDExternalEventsMap = new Map(
@@ -373,7 +373,7 @@ export const stubBoldMassIDDocument = ({
           ...(partialDocument?.externalEvents ?? []),
         ],
         measurementUnit: MeasurementUnit.KG,
-        type: DocumentType.ORGANIC,
+        type: BoldDocumentType.ORGANIC,
       },
       false,
     ),

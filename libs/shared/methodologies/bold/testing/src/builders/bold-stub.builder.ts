@@ -1,17 +1,17 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttributeName,
   type BoldDocument,
+  BoldDocumentCategory,
   type BoldDocumentEvent,
+  BoldDocumentEventName,
   type BoldDocumentRelation,
+  BoldDocumentSubtype,
+  BoldDocumentType,
+  BoldMethodologyActorType,
   BoldMethodologyName,
   BoldMethodologySlug,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentSubtype,
-  DocumentType,
-  MassIDDocumentActorType,
-  MethodologyDocumentActorType,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
@@ -42,8 +42,9 @@ import {
 import { stubBoldMethodologyDefinitionDocument } from './bold-methodology-definition.stubs';
 import { stubBoldAccreditationDocument } from './bold-participant-accreditation.stubs';
 
-const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
+const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } =
+  BoldDocumentEventName;
+const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
 const {
   CREDIT_ORDER,
   DEFINITION,
@@ -52,9 +53,9 @@ const {
   ORGANIC,
   PARTICIPANT_ACCREDITATION,
   RECYCLED_ID,
-} = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
+} = BoldDocumentType;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = BoldDocumentSubtype;
+const { METHODOLOGY_SLUG } = BoldAttributeName;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
@@ -85,24 +86,24 @@ export interface BoldStubsBuilderResult {
 }
 
 export const MASS_ID_ACTOR_PARTICIPANTS = [
-  MassIDDocumentActorType.HAULER,
-  MassIDDocumentActorType.INTEGRATOR,
-  MassIDDocumentActorType.PROCESSOR,
-  MassIDDocumentActorType.RECYCLER,
-  MassIDDocumentActorType.WASTE_GENERATOR,
+  MassIDActorType.HAULER,
+  MassIDActorType.INTEGRATOR,
+  MassIDActorType.PROCESSOR,
+  MassIDActorType.RECYCLER,
+  MassIDActorType.WASTE_GENERATOR,
 ] as const;
 
 export const METHODOLOGY_ACTOR_PARTICIPANTS = [
-  MethodologyDocumentActorType.COMMUNITY_IMPACT_POOL,
-  MethodologyDocumentActorType.NETWORK,
-  MethodologyDocumentActorType.METHODOLOGY_AUTHOR,
-  MethodologyDocumentActorType.METHODOLOGY_DEVELOPER,
+  BoldMethodologyActorType.COMMUNITY_IMPACT_POOL,
+  BoldMethodologyActorType.NETWORK,
+  BoldMethodologyActorType.METHODOLOGY_AUTHOR,
+  BoldMethodologyActorType.METHODOLOGY_DEVELOPER,
 ] as const;
 
 const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
   [BoldMethodologyName.CARBON]: GAS_ID,
   [BoldMethodologyName.RECYCLING]: RECYCLED_ID,
-} as const satisfies Record<BoldMethodologyName, DocumentType>;
+} as const satisfies Record<BoldMethodologyName, BoldDocumentType>;
 
 export class BoldStubsBuilder {
   private _creditOrderDocument?: BoldDocument;
@@ -503,10 +504,10 @@ export class BoldStubsBuilder {
 
       const defaultEventsMap = new Map([
         [
-          DocumentEventName.ACCREDITATION_CONTEXT,
+          BoldDocumentEventName.ACCREDITATION_CONTEXT,
           stubDocumentEvent({
             address: primaryAddress,
-            name: DocumentEventName.ACCREDITATION_CONTEXT,
+            name: BoldDocumentEventName.ACCREDITATION_CONTEXT,
             participant: primaryParticipant,
           }),
         ],
@@ -674,10 +675,10 @@ export class BoldStubsBuilder {
         stubBoldMassIDDropOffEvent({
           partialDocumentEvent: {
             address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.RECYCLER,
+              MassIDActorType.RECYCLER,
             )!,
             participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
+              MassIDActorType.RECYCLER,
             )!,
           },
         }),
@@ -694,10 +695,10 @@ export class BoldStubsBuilder {
         stubBoldMassIDPickUpEvent({
           partialDocumentEvent: {
             address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
+              MassIDActorType.WASTE_GENERATOR,
             )!,
             participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
+              MassIDActorType.WASTE_GENERATOR,
             )!,
           },
         }),

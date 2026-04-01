@@ -1,14 +1,14 @@
 import type {
+  BoldAttributeValue,
   DocumentEventAttachment,
-  DocumentEventAttributeValue,
   Maybe,
 } from '@carrot-fndn/shared/types';
 
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttributeName,
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
-  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
@@ -18,8 +18,8 @@ import {
 
 export const getEventAttributeValue = (
   event: Maybe<BoldDocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
-): DocumentEventAttributeValue | undefined => {
+  attributeName: BoldAttributeName,
+): BoldAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
@@ -27,7 +27,7 @@ export const getEventAttributeValue = (
       (attribute) => attribute.name === attributeName,
     );
 
-    return foundAttribute?.value as DocumentEventAttributeValue | undefined;
+    return foundAttribute?.value as BoldAttributeValue | undefined;
   }
 
   return undefined;
@@ -35,7 +35,7 @@ export const getEventAttributeValue = (
 
 export const getEventAttributeByName = (
   event: Maybe<BoldDocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  attributeName: BoldAttributeName,
 ): BoldDocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
@@ -50,7 +50,7 @@ export const getEventAttributeByName = (
 
 export const getEventAttributeValueOrThrow = <T>(
   event: Maybe<BoldDocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  attributeName: BoldAttributeName,
   validateValue: (
     input: unknown,
   ) => { data: T; success: true } | { success: false },
@@ -82,7 +82,7 @@ export const getDocumentEventAttachmentByLabel = (
 
 export const getEventMethodologySlug = (
   event: Maybe<BoldDocumentEvent>,
-): DocumentEventAttributeValue | undefined =>
+): BoldAttributeValue | undefined =>
   getNonEmptyString(
-    getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
+    getEventAttributeValue(event, BoldAttributeName.METHODOLOGY_SLUG),
   );

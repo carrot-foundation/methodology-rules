@@ -1,8 +1,8 @@
 import { stubBoldMassIDSortingEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   BoldDocumentEvent,
   type BoldDocumentEventAttribute,
-  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
@@ -67,12 +67,12 @@ describe('mass-id-sorting helpers', () => {
         metadataAttributes: [
           {
             format: DocumentEventAttributeFormat.KILOGRAM,
-            name: DocumentEventAttributeName.GROSS_WEIGHT,
+            name: BoldAttributeName.GROSS_WEIGHT,
             value: 10,
           },
           {
             format: DocumentEventAttributeFormat.KILOGRAM,
-            name: DocumentEventAttributeName.DEDUCTED_WEIGHT,
+            name: BoldAttributeName.DEDUCTED_WEIGHT,
             value: 15,
           },
         ],
@@ -91,12 +91,12 @@ describe('mass-id-sorting helpers', () => {
         metadataAttributes: [
           {
             format: DocumentEventAttributeFormat.KILOGRAM,
-            name: DocumentEventAttributeName.GROSS_WEIGHT,
+            name: BoldAttributeName.GROSS_WEIGHT,
             value: 10,
           },
           {
             format: DocumentEventAttributeFormat.KILOGRAM,
-            name: DocumentEventAttributeName.DEDUCTED_WEIGHT,
+            name: BoldAttributeName.DEDUCTED_WEIGHT,
             value: 10,
           },
         ],

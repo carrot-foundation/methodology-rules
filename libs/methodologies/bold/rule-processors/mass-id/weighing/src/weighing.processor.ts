@@ -15,11 +15,11 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttachmentLabel,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttachmentLabel,
-  DocumentEventWeighingCaptureMethod,
-  DocumentSubtype,
+  BoldDocumentSubtype,
+  BoldWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   getAttachmentS3Key,
@@ -108,7 +108,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }): string {
     const isTransportManifest =
       weighingValues.weighingCaptureMethod ===
-      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
+      BoldWeighingCaptureMethod.TRANSPORT_MANIFEST;
 
     let passMessage = '';
 
@@ -300,7 +300,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
         String(attachment.label) ===
-        String(DocumentEventAttachmentLabel.WEIGHING_TICKET),
+        String(BoldAttachmentLabel.WEIGHING_TICKET),
     );
 
     if (!scaleTicketAttachment) {
@@ -341,7 +341,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
       ) {
         recyclerAccreditationDocument = document;
       }

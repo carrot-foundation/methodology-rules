@@ -1,8 +1,8 @@
 import type { NonEmptyString } from '@carrot-fndn/shared/types';
 
-import type { DocumentType } from './document-extractor.types';
+import type { BoldDocumentType } from './document-extractor.types';
 
-export const DEFAULT_LAYOUTS: Record<DocumentType, NonEmptyString[]> = {
+export const DEFAULT_LAYOUTS: Record<BoldDocumentType, NonEmptyString[]> = {
   recyclingManifest: [
     'cdf-sinfat',
     'cdf-custom-1',
@@ -17,5 +17,5 @@ export const DEFAULT_LAYOUTS: Record<DocumentType, NonEmptyString[]> = {
 };
 
 export const getDefaultLayouts = (
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
 ): NonEmptyString[] => DEFAULT_LAYOUTS[documentType];

@@ -1,5 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   getOrDefault,
@@ -10,10 +10,10 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
@@ -22,16 +22,14 @@ const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
   VEHICLE_TYPE,
-} = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { SLUDGE_PIPES } = DocumentEventVehicleType;
+} = BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
+const { SLUDGE_PIPES } = BoldVehicleType;
 
 interface RuleSubject {
-  driverIdentifier: DocumentEventAttributeValue | undefined;
-  driverIdentifierExemptionJustification:
-    | DocumentEventAttributeValue
-    | undefined;
-  vehicleType: DocumentEventAttributeValue | undefined;
+  driverIdentifier: BoldAttributeValue | undefined;
+  driverIdentifierExemptionJustification: BoldAttributeValue | undefined;
+  vehicleType: BoldAttributeValue | undefined;
 }
 
 export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {

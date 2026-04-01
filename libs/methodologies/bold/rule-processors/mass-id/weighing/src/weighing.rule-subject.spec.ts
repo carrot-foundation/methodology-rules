@@ -2,7 +2,7 @@ import {
   stubDocument,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
 import { WeighingRuleSubjectSchema } from './weighing.rule-subject';
@@ -11,7 +11,7 @@ const buildValidSubject = (weighingEventCount: number) => ({
   massIDDocumentId: faker.string.uuid(),
   recyclerAccreditationDocument: stubDocument(),
   weighingEvents: Array.from({ length: weighingEventCount }, () =>
-    stubDocumentEvent({ name: DocumentEventName.WEIGHING }),
+    stubDocumentEvent({ name: BoldDocumentEventName.WEIGHING }),
   ),
 });
 

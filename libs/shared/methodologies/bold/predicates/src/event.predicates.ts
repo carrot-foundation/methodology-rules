@@ -5,10 +5,10 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  BoldAttributeName,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  ParticipantType,
+  BoldDocumentEventName,
+  BoldParticipantType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
@@ -21,7 +21,7 @@ import { validateDocumentEvent } from './event.predicates.validators';
 
 export const eventHasName = (
   event: BoldDocumentEvent,
-  eventName: DocumentEventName,
+  eventName: BoldDocumentEventName,
 ): boolean => event.name === eventName.toString();
 
 export const eventHasLabel = (
@@ -30,17 +30,17 @@ export const eventHasLabel = (
 ): boolean => event.label === eventLabel;
 
 export const isActorEvent = (event: BoldDocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.ACTOR);
+  eventHasName(event, BoldDocumentEventName.ACTOR);
 
 export const isRecycledEvent = (event: BoldDocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.RECYCLED);
+  eventHasName(event, BoldDocumentEventName.RECYCLED);
 
 export const eventHasActorParticipant = (event: BoldDocumentEvent): boolean =>
-  event.participant.type === ParticipantType.ACTOR.toString();
+  event.participant.type === BoldParticipantType.ACTOR.toString();
 
 export const eventHasNonEmptyStringAttribute = (
   event: BoldDocumentEvent,
-  attributeName: DocumentEventAttributeName,
+  attributeName: BoldAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
 export const hasWeightFormat = (
@@ -57,7 +57,7 @@ export const hasWeightFormat = (
 
 export const eventsHasSameMetadataAttributeValue = (
   events: BoldDocumentEvent[],
-  metadataName: DocumentEventAttributeName,
+  metadataName: BoldAttributeName,
 ): boolean => {
   if (isNonEmptyArray<BoldDocumentEvent>(events)) {
     return events.every(
@@ -72,8 +72,8 @@ export const eventsHasSameMetadataAttributeValue = (
 
 export const eventHasMetadataAttribute = (options: {
   event: BoldDocumentEvent;
-  eventNames?: DocumentEventName[];
-  metadataName: DocumentEventAttributeName | string;
+  eventNames?: BoldDocumentEventName[];
+  metadataName: BoldAttributeName;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;

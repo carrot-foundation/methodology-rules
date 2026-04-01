@@ -5,7 +5,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocument,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
@@ -53,7 +53,7 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
         (participant) =>
           stubDocumentEvent({
             label: participant.type,
-            name: DocumentEventName.ACTOR,
+            name: BoldDocumentEventName.ACTOR,
             participant,
             relatedDocument: {
               documentId: participantsAccreditationDocuments.get(

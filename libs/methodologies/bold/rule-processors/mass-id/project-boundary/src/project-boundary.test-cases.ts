@@ -8,13 +8,13 @@ import {
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 import { convertDistance } from 'geolib';
 
 import { RESULT_COMMENTS } from './project-boundary.constants';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
 
 const distance = faker.number.float({ max: 5000, min: 100 });
 

@@ -1,10 +1,10 @@
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAccreditationStatus,
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAccreditationStatus,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { DateTimeSchema } from '@carrot-fndn/shared/types';
@@ -23,7 +23,7 @@ export const getParticipantAccreditationDocumentByParticipantId = ({
 
 export const isAccreditationValid = (document: BoldDocument): boolean => {
   const event = document.externalEvents?.find(
-    eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),
+    eventNameIsAnyOf([BoldDocumentEventName.ACCREDITATION_RESULT]),
   );
 
   if (!event) {
@@ -32,15 +32,15 @@ export const isAccreditationValid = (document: BoldDocument): boolean => {
 
   const effectiveDate = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.EFFECTIVE_DATE,
+    BoldAttributeName.EFFECTIVE_DATE,
   );
   const expirationDate = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.EXPIRATION_DATE,
+    BoldAttributeName.EXPIRATION_DATE,
   );
   const status = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.ACCREDITATION_STATUS,
+    BoldAttributeName.ACCREDITATION_STATUS,
   );
 
   const expirationDateExists = expirationDate !== undefined;
@@ -49,10 +49,8 @@ export const isAccreditationValid = (document: BoldDocument): boolean => {
     !DateTimeSchema.safeParse(effectiveDate).success ||
     (expirationDateExists &&
       !DateTimeSchema.safeParse(expirationDate).success) ||
-    !(Object.values(DocumentEventAccreditationStatus) as unknown[]).includes(
-      status,
-    ) ||
-    status !== DocumentEventAccreditationStatus.APPROVED
+    !(Object.values(BoldAccreditationStatus) as unknown[]).includes(status) ||
+    status !== BoldAccreditationStatus.APPROVED
   ) {
     return false;
   }
@@ -75,7 +73,7 @@ export const isAccreditationValidWithOptionalDates = (
   document: BoldDocument,
 ): boolean => {
   const event = document.externalEvents?.find(
-    eventNameIsAnyOf([DocumentEventName.ACCREDITATION_RESULT]),
+    eventNameIsAnyOf([BoldDocumentEventName.ACCREDITATION_RESULT]),
   );
 
   // If no ACCREDITATION_RESULT event exists, the accreditation is valid

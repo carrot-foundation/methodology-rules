@@ -9,22 +9,26 @@ export interface DocumentCriteria {
   relatedDocuments?: RelatedDocumentCriteria[] | undefined;
 }
 
-export interface DocumentFetcher<DocumentType> {
-  fetch: (documentKey: DocumentKey) => Promise<DocumentType>;
+export interface DocumentFetcher<BoldDocumentType> {
+  fetch: (documentKey: DocumentKey) => Promise<BoldDocumentType>;
 }
 
-export interface DocumentIterator<DocumentType> {
-  each: (callback: (document: Visitor<DocumentType>) => void) => Promise<void>;
-  map: <T>(callback: (document: Visitor<DocumentType>) => T) => Promise<T[]>;
+export interface DocumentIterator<BoldDocumentType> {
+  each: (
+    callback: (document: Visitor<BoldDocumentType>) => void,
+  ) => Promise<void>;
+  map: <T>(
+    callback: (document: Visitor<BoldDocumentType>) => T,
+  ) => Promise<T[]>;
 }
 
 export interface DocumentKey {
   s3Key: string;
 }
 
-export interface DocumentQuery<DocumentType> {
-  iterator: () => DocumentIterator<DocumentType>;
-  rootDocument: DocumentType;
+export interface DocumentQuery<BoldDocumentType> {
+  iterator: () => DocumentIterator<BoldDocumentType>;
+  rootDocument: BoldDocumentType;
 }
 
 export type DocumentQueryCriteria = DocumentCriteria;
@@ -40,6 +44,6 @@ export interface RelatedDocumentCriteria extends DocumentCriteria {
   type?: BoldDocument['type'];
 }
 
-export interface Visitor<DocumentType> {
-  document: DocumentType;
+export interface Visitor<BoldDocumentType> {
+  document: BoldDocumentType;
 }

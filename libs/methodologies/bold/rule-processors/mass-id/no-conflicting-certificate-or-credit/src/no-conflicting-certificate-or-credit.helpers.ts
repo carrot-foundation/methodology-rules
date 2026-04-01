@@ -5,7 +5,7 @@ import type {
 
 import { getOrDefault } from '@carrot-fndn/shared/helpers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentStatus } from '@carrot-fndn/shared/types';
 
 const { CANCELLED } = DocumentStatus;
@@ -17,7 +17,7 @@ export const hasMethodologySlugAttribute = (
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
-      metadataName: DocumentEventAttributeName.METHODOLOGY_SLUG,
+      metadataName: BoldAttributeName.METHODOLOGY_SLUG,
       metadataValues: methodologySlug,
     }),
   );
@@ -26,7 +26,7 @@ const isMassIDAuditPassed = (document: BoldDocument): boolean =>
   getOrDefault(document.externalEvents, []).some((event) =>
     eventHasMetadataAttribute({
       event,
-      metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
+      metadataName: BoldAttributeName.EVALUATION_RESULT,
       metadataValues: 'PASSED',
     }),
   );
@@ -43,7 +43,7 @@ export const isMassIDAuditInProgress = (document: BoldDocument): boolean =>
     (event) =>
       !eventHasMetadataAttribute({
         event,
-        metadataName: DocumentEventAttributeName.EVALUATION_RESULT,
+        metadataName: BoldAttributeName.EVALUATION_RESULT,
       }),
   );
 

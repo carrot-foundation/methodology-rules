@@ -15,9 +15,9 @@ import {
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type CertificateRewardDistributionOutput,
-  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -36,7 +36,7 @@ import { RewardsDistributionProcessorErrors } from './rewards-distribution.error
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 import { isCertificateRewardDistributionOutput } from './rewards-distribution.validators';
 
-const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = BoldAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -103,7 +103,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       massIDCertificateDocument.externalEvents?.find((event) =>
         eventHasMetadataAttribute({
           event,
-          metadataName: DocumentEventAttributeName.SLUG,
+          metadataName: BoldAttributeName.SLUG,
           metadataValues: 'rewards-distribution',
         }),
       );

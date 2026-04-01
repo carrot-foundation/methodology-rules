@@ -1,6 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { ActorType } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -65,7 +65,7 @@ describe('RewardsDistributionProcessor E2E', () => {
         }));
 
         actorsResult.push({
-          actorType: ActorType.REMAINDER,
+          actorType: BoldActorType.REMAINDER,
           amount: remainder.amount,
           percentage: remainder.percentage,
         });

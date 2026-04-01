@@ -8,9 +8,9 @@ import {
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
@@ -25,11 +25,11 @@ interface DocumentManifestDataTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
 
-const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
+const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = BoldDocumentEventName;
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { RECYCLER } = DocumentEventLabel;
+  BoldAttributeName;
+const { RECYCLER } = BoldDocumentEventLabel;
 const { CUBIC_METER, DATE } = DocumentEventAttributeFormat;
 
 const attributeErrorMessages: Record<string, string> = {

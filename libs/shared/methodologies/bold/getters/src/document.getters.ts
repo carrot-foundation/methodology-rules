@@ -1,18 +1,18 @@
 import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from './event.getters';
 
 const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
-  DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+  BoldDocumentEventName;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 
 interface LastYearEmissionAndCompostingMetricsEventParameters {
   documentWithEmissionAndCompostingMetricsEvent: BoldDocument;
@@ -32,7 +32,7 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
       if (event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS)) {
         const referenceYear = getEventAttributeValue(
           event,
-          DocumentEventAttributeName.REFERENCE_YEAR,
+          BoldAttributeName.REFERENCE_YEAR,
         );
 
         return referenceYear?.toString() === lastDocumentYearYear.toString();
@@ -62,7 +62,7 @@ export const getParticipantActorType = ({
 }: {
   document: BoldDocument;
   event: BoldDocumentEvent;
-}): MassIDDocumentActorType | undefined => {
+}): MassIDActorType | undefined => {
   const events = document.externalEvents;
 
   if (!isNonEmptyArray(events)) {

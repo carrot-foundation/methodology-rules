@@ -5,10 +5,10 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentStatus } from '@carrot-fndn/shared/types';
 
@@ -16,9 +16,9 @@ import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
 
 const { CANCELLED, OPEN } = DocumentStatus;
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = DocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 interface WasteMassIsUniqueTestCase extends RuleTestCase {
   newDuplicateDocuments: Array<{ status: DocumentStatus }>;

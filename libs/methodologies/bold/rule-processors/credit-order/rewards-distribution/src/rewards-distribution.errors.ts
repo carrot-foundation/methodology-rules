@@ -1,11 +1,11 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  DocumentEventAttributeName,
-  DocumentType,
+  BoldAttributeName,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { CREDIT_ORDER } = DocumentType;
-const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
+const { CREDIT_ORDER } = BoldDocumentType;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = BoldAttributeName;
 
 export const ERROR_MESSAGES = {
   CERTIFICATE_DOCUMENT_NOT_FOUND: (certificateType: unknown) =>

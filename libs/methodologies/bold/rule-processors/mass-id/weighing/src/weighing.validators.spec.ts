@@ -1,8 +1,8 @@
 import {
-  ApprovedExceptionType,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type AdditionalVerificationAttributeValue } from '@carrot-fndn/shared/types';
 
@@ -57,16 +57,14 @@ describe('weighing.validators', () => {
   it('keeps approved exception literals compatible with weighing enums', () => {
     const tareException = {
       'Attribute Location': {
-        Asset: { Category: DocumentCategory.MASS_ID },
-        Event: DocumentEventName.WEIGHING,
+        Asset: { Category: BoldDocumentCategory.MASS_ID },
+        Event: BoldDocumentEventName.WEIGHING,
       },
-      'Attribute Name': DocumentEventAttributeName.TARE,
-      'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': BoldAttributeName.TARE,
+      'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'validated',
     };
 
-    expect(tareException['Attribute Name']).toBe(
-      DocumentEventAttributeName.TARE,
-    );
+    expect(tareException['Attribute Name']).toBe(BoldAttributeName.TARE);
   });
 });

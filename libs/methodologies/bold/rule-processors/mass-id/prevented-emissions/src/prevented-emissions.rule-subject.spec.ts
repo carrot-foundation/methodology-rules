@@ -1,6 +1,6 @@
 import {
+  BoldBaseline,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { PreventedEmissionsRuleSubjectSchema } from './prevented-emissions.rule-subject';
@@ -8,7 +8,7 @@ import { PreventedEmissionsRuleSubjectSchema } from './prevented-emissions.rule-
 describe('PreventedEmissionsRuleSubjectSchema', () => {
   it('should accept a valid organic rule subject', () => {
     const input = {
-      baseline: MethodologyBaseline.OPEN_AIR_DUMP,
+      baseline: BoldBaseline.OPEN_AIR_DUMP,
       exceedingEmissionCoefficient: 0.5,
       gasType: 'CO2e',
       massIDDocumentValue: 100,
@@ -22,7 +22,7 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
   it('should reject a non-organic document subtype', () => {
     const input = {
-      baseline: MethodologyBaseline.OPEN_AIR_DUMP,
+      baseline: BoldBaseline.OPEN_AIR_DUMP,
       exceedingEmissionCoefficient: 0.5,
       gasType: 'CO2e',
       massIDDocumentValue: 100,
@@ -36,7 +36,7 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
   it('should accept a valid "Others (if organic)" subject with classification IDs', () => {
     const input = {
-      baseline: MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+      baseline: BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
       exceedingEmissionCoefficient: 0.3,
       gasType: 'CO2e',
       localWasteClassificationId: 'BR-8.7D-001',
@@ -65,7 +65,7 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
   it('should reject an empty gasType', () => {
     const input = {
-      baseline: MethodologyBaseline.OPEN_AIR_DUMP,
+      baseline: BoldBaseline.OPEN_AIR_DUMP,
       exceedingEmissionCoefficient: 0.5,
       gasType: '',
       massIDDocumentValue: 100,
@@ -79,7 +79,7 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
   it('should reject a negative massIDDocumentValue', () => {
     const input = {
-      baseline: MethodologyBaseline.OPEN_AIR_DUMP,
+      baseline: BoldBaseline.OPEN_AIR_DUMP,
       exceedingEmissionCoefficient: 0.5,
       gasType: 'CO2e',
       massIDDocumentValue: -10,

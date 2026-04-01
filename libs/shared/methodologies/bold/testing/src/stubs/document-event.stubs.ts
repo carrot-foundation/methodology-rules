@@ -1,16 +1,16 @@
 import type { PartialDeep } from 'type-fest';
 
 import {
+  BoldAttributeName,
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type AnyObject,
+  type BoldAttributeValue,
   type DocumentEventAttachment,
-  type DocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -39,7 +39,7 @@ export const stubDocumentEvent = (
   externalCreatedAt: faker.date.recent().toISOString(),
   id: faker.string.uuid(),
   isPublic: faker.datatype.boolean(),
-  name: stubEnumValue(DocumentEventName),
+  name: stubEnumValue(BoldDocumentEventName),
   ...partialEvent,
   address: stubAddress(partialEvent.address),
   author: stubAuthor(partialEvent.author),
@@ -78,7 +78,7 @@ export const stubDocumentEventAttribute = (
   partialInput: Partial<BoldDocumentEventAttribute> = {},
 ): BoldDocumentEventAttribute => ({
   isPublic: faker.datatype.boolean(),
-  name: stubEnumValue(DocumentEventAttributeName),
+  name: stubEnumValue(BoldAttributeName),
   value: faker.lorem.word(),
   ...partialInput,
 });
@@ -90,13 +90,13 @@ export const stubActorEventWithLabel = (
   stubDocumentEvent({
     ...partialEvent,
     label: eventLabel,
-    name: DocumentEventName.ACTOR,
+    name: BoldDocumentEventName.ACTOR,
   });
 
 export const stubDocumentEventWithMetadataAttributes = (
   partialEvent?: PartialDeep<BoldDocumentEvent>,
   attributes?: Array<
-    | [DocumentEventAttributeName | string, DocumentEventAttributeValue]
+    | [BoldAttributeName, BoldAttributeValue]
     | Omit<BoldDocumentEventAttribute, 'isPublic'>
   >,
 ) =>

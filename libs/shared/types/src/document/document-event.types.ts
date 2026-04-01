@@ -61,7 +61,7 @@ export const DocumentEventAttributeValueSchema = z.union([
   z.array(z.unknown()),
   z.record(z.string(), z.unknown()),
 ]);
-export type DocumentEventAttributeValue = z.infer<
+export type BoldAttributeValue = z.infer<
   typeof DocumentEventAttributeValueSchema
 >;
 

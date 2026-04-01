@@ -6,12 +6,12 @@ import {
   stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import * as helpers from './waste-mass-is-unique.helpers';
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 
 const mockCheckDuplicateDocuments = vi.fn();
 const mockAuditApiService = {

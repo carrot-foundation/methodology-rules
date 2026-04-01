@@ -24,9 +24,9 @@ import {
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type BoldDocument,
-  DocumentEventName,
-  DocumentSubtype,
-  MassIDDocumentActorType,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -51,20 +51,22 @@ import {
   shouldSkipGpsValidation,
 } from './geolocation-and-address-precision.helpers';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
 
 export interface RuleSubject {
   accreditationDocuments: BoldDocument[];
   massIDAuditDocument: BoldDocument;
-  participantsAddressData: Map<MassIDDocumentActorType, ParticipantAddressData>;
+  participantsAddressData: Map<MassIDActorType, ParticipantAddressData>;
   recyclerAccreditationDocument: BoldDocument | undefined;
 }
 
 interface ParticipantAddressData {
   accreditedAddress: DocumentAddress | undefined;
-  actorType: MassIDDocumentActorType;
+  actorType: MassIDActorType;
   eventAddress: DocumentAddress;
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP;
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
 }
@@ -124,7 +126,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private aggregateResults(
-    actorResults: Map<MassIDDocumentActorType, EvaluateResultOutput[]>,
+    actorResults: Map<MassIDActorType, EvaluateResultOutput[]>,
   ): EvaluateResultOutput {
     const allResults = [...actorResults.values()].flat();
 
@@ -164,7 +166,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     accreditationDocuments: BoldDocument[],
   ) {
     const participantsAddressData = new Map<
-      MassIDDocumentActorType,
+      MassIDActorType,
       ParticipantAddressData
     >();
 
@@ -190,8 +192,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         actorType,
         eventAddress: event.address,
         eventName: event.name as
-          | DocumentEventName.DROP_OFF
-          | DocumentEventName.PICK_UP,
+          | typeof BoldDocumentEventName.DROP_OFF
+          | typeof BoldDocumentEventName.PICK_UP,
         gpsGeolocation: getEventGpsGeolocation(event),
         participantId: event.participant.id,
       });
@@ -243,7 +245,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   }
 
   private evaluateAddressData(
-    actorType: MassIDDocumentActorType,
+    actorType: MassIDActorType,
     addressData: ParticipantAddressData,
     recyclerAccreditationDocument: BoldDocument | undefined,
     massIDAuditDocument: BoldDocument,
@@ -257,7 +259,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       participantId,
     } = addressData;
 
-    if (actorType === MassIDDocumentActorType.WASTE_GENERATOR) {
+    if (actorType === MassIDActorType.WASTE_GENERATOR) {
       const verificationDocumentExists: boolean = Boolean(
         hasVerificationDocument(
           massIDAuditDocument,
@@ -379,16 +381,15 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     recyclerAccreditationDocument,
   }: {
     accreditedAddress: DocumentAddress;
-    actorType: MassIDDocumentActorType;
+    actorType: MassIDActorType;
     addressDistance: number;
-    eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    eventName:
+      | typeof BoldDocumentEventName.DROP_OFF
+      | typeof BoldDocumentEventName.PICK_UP;
     gpsGeolocation: Geolocation | undefined;
     recyclerAccreditationDocument: BoldDocument | undefined;
   }): EvaluateResultOutput[] {
-    if (
-      !isNil(gpsGeolocation) &&
-      actorType === MassIDDocumentActorType.RECYCLER
-    ) {
+    if (!isNil(gpsGeolocation) && actorType === MassIDActorType.RECYCLER) {
       const { latitudeException, longitudeException } =
         getGpsExceptionsFromRecyclerAccreditation(
           recyclerAccreditationDocument,
@@ -455,10 +456,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     participantsAddressData,
     recyclerAccreditationDocument,
   }: RuleSubject): EvaluateResultOutput {
-    const actorResults = new Map<
-      MassIDDocumentActorType,
-      EvaluateResultOutput[]
-    >();
+    const actorResults = new Map<MassIDActorType, EvaluateResultOutput[]>();
 
     for (const [actorType, addressData] of participantsAddressData) {
       const results = this.evaluateAddressData(
@@ -507,7 +505,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
         return (
           PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
-          relation.subtype === DocumentSubtype.RECYCLER
+          relation.subtype === BoldDocumentSubtype.RECYCLER
         );
       },
     );

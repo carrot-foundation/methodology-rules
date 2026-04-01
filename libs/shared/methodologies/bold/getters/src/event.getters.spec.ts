@@ -6,8 +6,8 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { validateNonEmptyString } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { faker } from '@faker-js/faker';
@@ -20,8 +20,8 @@ import {
   getEventMethodologySlug,
 } from './event.getters';
 
-const { ACTOR } = DocumentEventName;
-const { DESCRIPTION, METHODOLOGY_SLUG } = DocumentEventAttributeName;
+const { ACTOR } = BoldDocumentEventName;
+const { DESCRIPTION, METHODOLOGY_SLUG } = BoldAttributeName;
 
 describe('Event getters', () => {
   describe('getEventAttributeValue', () => {

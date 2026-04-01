@@ -12,8 +12,8 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  BoldAttributeName,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
@@ -43,7 +43,7 @@ export interface MtrCrossValidationEventData extends DocumentManifestEventSubjec
   weighingEvents: BoldDocumentEvent[];
 }
 
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 export const validateMtrExtractedData = (
   extractionResult: ExtractionOutput<BaseExtractedData>,

@@ -324,13 +324,13 @@ function enumKeyToValueMap(enumObj: StringEnum): Record<string, string> {
 const BoldTypes = require(
   '@carrot-fndn/shared/methodologies/bold/types',
 ) as {
-  DocumentCategory: StringEnum;
-  DocumentEventAttributeName: StringEnum;
-  DocumentEventAttributeValue: StringEnum;
-  DocumentEventName: StringEnum;
-  DocumentEventLabel: StringEnum;
-  DocumentEventVehicleType: StringEnum;
-  DocumentType: StringEnum;
+  BoldDocumentCategory: StringEnum;
+  BoldAttributeName: StringEnum;
+  BoldAttributeValue: StringEnum;
+  BoldDocumentEventName: StringEnum;
+  BoldDocumentEventLabel: StringEnum;
+  BoldVehicleType: StringEnum;
+  BoldDocumentType: StringEnum;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
@@ -340,19 +340,19 @@ const SharedTypes = require('@carrot-fndn/shared/types') as {
 };
 
 const ENUM_KEY_TO_VALUE: Record<string, string> = {
-  ...enumKeyToValueMap(BoldTypes.DocumentCategory),
-  ...enumKeyToValueMap(BoldTypes.DocumentType),
-  ...enumKeyToValueMap(BoldTypes.DocumentEventName),
-  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeName),
-  ...enumKeyToValueMap(BoldTypes.DocumentEventLabel),
+  ...enumKeyToValueMap(BoldTypes.BoldDocumentCategory),
+  ...enumKeyToValueMap(BoldTypes.BoldDocumentType),
+  ...enumKeyToValueMap(BoldTypes.BoldDocumentEventName),
+  ...enumKeyToValueMap(BoldTypes.BoldAttributeName),
+  ...enumKeyToValueMap(BoldTypes.BoldDocumentEventLabel),
   ...enumKeyToValueMap(SharedTypes.DocumentEventAttributeFormat),
-  ...enumKeyToValueMap(BoldTypes.DocumentEventAttributeValue),
-  ...enumKeyToValueMap(BoldTypes.DocumentEventVehicleType),
+  ...enumKeyToValueMap(BoldTypes.BoldAttributeValue),
+  ...enumKeyToValueMap(BoldTypes.BoldVehicleType),
   ...enumKeyToValueMap(SharedTypes.MeasurementUnit),
 };
 
-const DocumentEventName = BoldTypes.DocumentEventName;
-const DocumentEventLabel = BoldTypes.DocumentEventLabel;
+const BoldDocumentEventName = BoldTypes.BoldDocumentEventName;
+const BoldDocumentEventLabel = BoldTypes.BoldDocumentEventLabel;
 
 // ---------------------------------------------------------------------------
 // Actor label extraction from processor files
@@ -369,7 +369,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
     for (const token of inner.split(',')) {
       const trimmed = token.trim();
       const qualifiedMatch = trimmed.match(
-        /DocumentEventLabel\.([A-Z_]+)/,
+        /BoldDocumentEventLabel\.([A-Z_]+)/,
       );
       if (qualifiedMatch?.[1]) {
         labels.add(qualifiedMatch[1]);
@@ -380,7 +380,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
   }
 
   const hasLabelRe =
-    /eventHasLabel\(\w+,\s*(?:DocumentEventLabel\.)?([A-Z_]+)\)/g;
+    /eventHasLabel\(\w+,\s*(?:BoldDocumentEventLabel\.)?([A-Z_]+)\)/g;
   while ((match = hasLabelRe.exec(content)) !== null) {
     if (match[1]) {
       labels.add(match[1]);
@@ -389,7 +389,7 @@ function extractActorLabelsFromProcessor(processorPath: string): string[] {
 
   return [...labels]
     .sort()
-    .map((key) => DocumentEventLabel[key] ?? key);
+    .map((key) => BoldDocumentEventLabel[key] ?? key);
 }
 
 function enrichActorEvents(
@@ -398,7 +398,7 @@ function enrichActorEvents(
 ): string[] {
   if (actorLabels.length === 0) return events;
 
-  const actorValue = DocumentEventName['ACTOR'] ?? 'ACTOR';
+  const actorValue = BoldDocumentEventName['ACTOR'] ?? 'ACTOR';
 
   return events.flatMap((event) =>
     event === actorValue
@@ -459,13 +459,13 @@ function extractRuleDefinition(
     const eventsContent = eventsMatch[1];
     const eventEntries =
       eventsContent.match(
-        /DocumentEventName\.(\w+)|['"`]([^'"`]+)['"`]/g,
+        /BoldDocumentEventName\.(\w+)|['"`]([^'"`]+)['"`]/g,
       ) ?? [];
     for (const entry of eventEntries) {
-      const enumMatch = entry.match(/DocumentEventName\.(\w+)/);
+      const enumMatch = entry.match(/BoldDocumentEventName\.(\w+)/);
       if (enumMatch?.[1]) {
         const enumKey = enumMatch[1];
-        events.push(DocumentEventName[enumKey] ?? enumKey);
+        events.push(BoldDocumentEventName[enumKey] ?? enumKey);
       } else {
         const strMatch = entry.match(/['"`]([^'"`]+)['"`]/);
         if (strMatch?.[1]) events.push(strMatch[1]);
@@ -899,8 +899,8 @@ function isPlaceholderOnly(s: string): boolean {
 
 const DOCUMENT_TYPE_DISPLAY_NAMES = [
   ...new Set([
-    ...Object.values(BoldTypes.DocumentCategory),
-    ...Object.values(BoldTypes.DocumentType),
+    ...Object.values(BoldTypes.BoldDocumentCategory),
+    ...Object.values(BoldTypes.BoldDocumentType),
   ]),
 ].sort((a, b) => b.length - a.length);
 

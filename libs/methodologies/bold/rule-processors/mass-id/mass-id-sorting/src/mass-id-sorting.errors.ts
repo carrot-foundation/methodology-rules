@@ -1,17 +1,16 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventLabel,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
-const { RECYCLER } = DocumentEventLabel;
-const { MASS_ID } = DocumentCategory;
-const { SORTING } = DocumentEventName;
-const { DEDUCTED_WEIGHT, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { MASS_ID } = BoldDocumentCategory;
+const { SORTING } = BoldDocumentEventName;
+const { DEDUCTED_WEIGHT, GROSS_WEIGHT, SORTING_FACTOR } = BoldAttributeName;
 const { KILOGRAM } = DocumentEventAttributeFormat;
 
 export class MassIDSortingProcessorErrors extends BaseProcessorErrors {

@@ -1,6 +1,6 @@
 import {
+  BoldBaseline,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonEmptyString, PercentageString } from '@carrot-fndn/shared/types';
 
@@ -14,5 +14,5 @@ export type OthersIfOrganicRuleSubjectIds = {
 };
 
 export type WasteGeneratorBaselineValues = Partial<
-  Record<MassIDOrganicSubtype, MethodologyBaseline>
+  Record<MassIDOrganicSubtype, BoldBaseline>
 >;

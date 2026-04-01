@@ -2,8 +2,8 @@ import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
@@ -17,8 +17,8 @@ const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
   VEHICLE_TYPE,
-} = DocumentEventAttributeName;
-const { BICYCLE, BOAT, SLUDGE_PIPES, TRUCK } = DocumentEventVehicleType;
+} = BoldAttributeName;
+const { BICYCLE, BOAT, SLUDGE_PIPES, TRUCK } = BoldVehicleType;
 
 const someJustification =
   'The driver is exempt from identification requirements.';

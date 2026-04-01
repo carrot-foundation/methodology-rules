@@ -6,12 +6,12 @@ import {
   MASS_ID_AUDIT,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
+  BoldDocumentCategory,
   BoldMethodologyName,
   BoldMethodologySlug,
-  DocumentCategory,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 
 export const buildDocumentsCriteria = (
   massIDCertificateMatcher: DocumentMatcher,

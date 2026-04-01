@@ -23,9 +23,9 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentSubtype,
+  BoldDocumentSubtype,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -56,7 +56,7 @@ import {
   PreventedEmissionsRuleSubjectSchema,
 } from './prevented-emissions.rule-subject';
 
-const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
+const { EXCEEDING_EMISSION_COEFFICIENT } = BoldAttributeName;
 
 interface Documents {
   massIDDocument: BoldDocument;
@@ -259,7 +259,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER.toString()
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER.toString()
       ) {
         recyclerAccreditationDocument = document;
       }

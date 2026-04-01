@@ -1,10 +1,10 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttributeName,
   type BoldDocument,
+  BoldDocumentCategory,
   type BoldDocumentEvent,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentType,
+  BoldDocumentType,
   type RewardDistributionResultContent,
   RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -26,7 +26,7 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { RULE_RESULT_DETAILS, SLUG } = DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, SLUG } = BoldAttributeName;
 
 export const REWARDS_DISTRIBUTION_RULE_SLUG = 'rewards-distribution';
 
@@ -89,11 +89,11 @@ export const stubBoldCertificateDocument = ({
     ...stubDocument(
       {
         type: faker.helpers.arrayElement([
-          DocumentType.GAS_ID,
-          DocumentType.RECYCLED_ID,
+          BoldDocumentType.GAS_ID,
+          BoldDocumentType.RECYCLED_ID,
         ]),
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: BoldDocumentCategory.METHODOLOGY,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),

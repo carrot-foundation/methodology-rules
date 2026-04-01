@@ -18,9 +18,9 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  DocumentSubtype,
+  BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -28,7 +28,7 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { type DocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   RESULT_COMMENTS,
@@ -48,7 +48,7 @@ import {
   ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
-const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = DocumentEventAttributeName;
+const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = BoldAttributeName;
 
 interface DocumentPair {
   massIDDocument: BoldDocument;
@@ -60,7 +60,7 @@ interface SortingData {
   deductedWeight: number;
   documentCurrentValue: number;
   grossWeight: number;
-  sortingDescription: DocumentEventAttributeValue | string | undefined;
+  sortingDescription: BoldAttributeValue | string | undefined;
   sortingFactor: number;
   sortingValueCalculationDifference: number;
   valueAfterSorting: number;
@@ -194,7 +194,7 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
       ) {
         recyclerAccreditationDocument = document;
       }

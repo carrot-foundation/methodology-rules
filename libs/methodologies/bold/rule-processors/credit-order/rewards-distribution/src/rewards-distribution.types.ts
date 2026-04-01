@@ -1,7 +1,7 @@
 import type BigNumber from 'bignumber.js';
 
 import {
-  ActorType,
+  BoldActorType,
   type CertificateRewardDistributionOutput,
   type RewardActorAddress,
   type RewardsDistributionActorType,
@@ -38,7 +38,7 @@ export interface RewardsDistribution {
 }
 
 export interface RewardsDistributionActor {
-  actorType: (typeof ActorType)['REMAINDER'] | RewardsDistributionActorType;
+  actorType: (typeof BoldActorType)['REMAINDER'] | RewardsDistributionActorType;
   address: RewardActorAddress;
   amount: NonEmptyString;
   participant: Participant;

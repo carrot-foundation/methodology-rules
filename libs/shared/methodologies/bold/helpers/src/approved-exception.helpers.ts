@@ -1,9 +1,9 @@
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
+  BoldAttributeName,
   type BoldDocument,
-  DocumentEventAttributeName,
-  type DocumentEventName,
+  type BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type ApprovedException,
@@ -11,11 +11,11 @@ import {
 } from '@carrot-fndn/shared/types';
 import { isAfter, isValid, parseISO } from 'date-fns';
 
-const { APPROVED_EXCEPTIONS } = DocumentEventAttributeName;
+const { APPROVED_EXCEPTIONS } = BoldAttributeName;
 
 export const getApprovedExceptions = (
   accreditationDocument: BoldDocument,
-  eventName: DocumentEventName,
+  eventName: BoldDocumentEventName,
 ): ApprovedException[] | undefined => {
   const event = accreditationDocument.externalEvents?.find(
     eventNameIsAnyOf([eventName]),

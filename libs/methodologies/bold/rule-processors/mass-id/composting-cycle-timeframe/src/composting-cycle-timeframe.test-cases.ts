@@ -1,6 +1,6 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 interface CompostingCycleTimeframeTestCase extends Omit<
   RuleTestCase,
@@ -35,7 +35,7 @@ const RECYCLED_DATE_JITTER_MIN = '2024-02-27T00:00:00.000Z';
 const DROP_OFF_DATE_JITTER_MAX = '2023-08-31T00:00:00.000Z';
 const RECYCLED_DATE_JITTER_MAX = '2024-02-27T00:00:08.000Z';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
+const { DROP_OFF, RECYCLED } = BoldDocumentEventName;
 
 export const compostingCycleTimeframeTestCases: CompostingCycleTimeframeTestCase[] =
   [

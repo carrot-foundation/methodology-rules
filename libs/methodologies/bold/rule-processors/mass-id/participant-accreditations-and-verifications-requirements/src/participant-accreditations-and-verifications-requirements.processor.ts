@@ -22,8 +22,8 @@ import {
 import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   type BoldDocument,
-  DocumentEventLabel,
-  DocumentSubtype,
+  BoldDocumentEventLabel,
+  BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -35,14 +35,14 @@ import {
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
-const ACTORS_REQUIRING_DATES: ReadonlySet<DocumentEventLabel> = new Set([
-  DocumentEventLabel.PROCESSOR,
-  DocumentEventLabel.RECYCLER,
+const ACTORS_REQUIRING_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set([
+  BoldDocumentEventLabel.PROCESSOR,
+  BoldDocumentEventLabel.RECYCLER,
 ]);
 
-const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<DocumentEventLabel> = new Set([
-  DocumentEventLabel.INTEGRATOR,
-]);
+const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set(
+  [BoldDocumentEventLabel.INTEGRATOR],
+);
 
 interface RuleSubject {
   accreditationDocuments: Map<string, BoldDocument[]>;
@@ -116,20 +116,20 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private getActorParticipants(
     massIDDocument: BoldDocument,
-  ): Map<string, DocumentEventLabel> {
+  ): Map<string, BoldDocumentEventLabel> {
     // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
     return new Map(
       massIDDocument
         .externalEvents!.filter(
           eventLabelIsAnyOf([
-            DocumentEventLabel.INTEGRATOR,
-            DocumentEventLabel.PROCESSOR,
-            DocumentEventLabel.RECYCLER,
+            BoldDocumentEventLabel.INTEGRATOR,
+            BoldDocumentEventLabel.PROCESSOR,
+            BoldDocumentEventLabel.RECYCLER,
           ]),
         )
         .map((event) => [
           event.participant.id,
-          event.label as DocumentEventLabel,
+          event.label as BoldDocumentEventLabel,
         ]),
     );
   }
@@ -179,7 +179,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
   private validateActor(
     participantId: string,
-    actorType: DocumentEventLabel,
+    actorType: BoldDocumentEventLabel,
     participantDocuments: BoldDocument[],
     missingParticipants: string[],
     participantsWithMultipleValid: Array<{
@@ -192,7 +192,8 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       const documentRelation = mapDocumentRelation(document);
 
       return (
-        documentRelation.subtype === (actorType as unknown as DocumentSubtype)
+        documentRelation.subtype ===
+        (actorType as unknown as BoldDocumentSubtype)
       );
     });
 
@@ -208,7 +209,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private validateAllActors(
-    actorParticipants: Map<string, DocumentEventLabel>,
+    actorParticipants: Map<string, BoldDocumentEventLabel>,
     accreditationDocuments: Map<string, BoldDocument[]>,
   ): Error | undefined {
     const missingParticipants: string[] = [];
@@ -285,9 +286,9 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       massIDDocument.externalEvents
         .filter(
           eventLabelIsAnyOf([
-            DocumentEventLabel.INTEGRATOR,
-            DocumentEventLabel.PROCESSOR,
-            DocumentEventLabel.RECYCLER,
+            BoldDocumentEventLabel.INTEGRATOR,
+            BoldDocumentEventLabel.PROCESSOR,
+            BoldDocumentEventLabel.RECYCLER,
           ]),
         )
         .map((event) => [event.participant.id, event.label as string]),

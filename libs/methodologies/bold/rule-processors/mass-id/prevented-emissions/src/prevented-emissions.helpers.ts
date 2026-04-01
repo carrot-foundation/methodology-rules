@@ -1,10 +1,10 @@
 import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  BoldAttributeName,
+  BoldBaseline,
   type BoldDocumentEvent,
-  DocumentEventAttributeName,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
@@ -18,11 +18,11 @@ import {
 } from './prevented-emissions.others-organic.helpers';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
-const { BASELINES } = DocumentEventAttributeName;
+const { BASELINES } = BoldAttributeName;
 
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
-  baseline: MethodologyBaseline,
+  baseline: BoldBaseline,
   processorErrors: PreventedEmissionsProcessorErrors,
   othersIfOrganicContext?: OthersIfOrganicContext,
 ): number => {
@@ -56,7 +56,7 @@ export const getBaselineByWasteSubtype = (
   emissionAndCompostingMetricsEvent: BoldDocumentEvent | undefined,
   wasteSubtype: MassIDOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
-): MethodologyBaseline | undefined => {
+): BoldBaseline | undefined => {
   const baselines = getEventAttributeValue(
     emissionAndCompostingMetricsEvent,
     BASELINES,
@@ -90,7 +90,7 @@ export const getGasTypeFromEvent = (
 ): NonEmptyString => {
   const gasType = getEventAttributeValue(
     lastEmissionAndCompostingMetricsEvent,
-    DocumentEventAttributeName.GREENHOUSE_GAS_TYPE,
+    BoldAttributeName.GREENHOUSE_GAS_TYPE,
   );
 
   if (!isNonEmptyString(gasType)) {

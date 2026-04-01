@@ -4,8 +4,8 @@ import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   type BoldDocument,
-  DocumentCategory,
-  DocumentType,
+  BoldDocumentCategory,
+  BoldDocumentType,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { MeasurementUnit } from '@carrot-fndn/shared/types';
@@ -15,9 +15,9 @@ import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.er
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 const { KG } = MeasurementUnit;
-const { ORGANIC } = DocumentType;
+const { ORGANIC } = BoldDocumentType;
 
 export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<BoldDocument> {
   protected readonly processorErrors =

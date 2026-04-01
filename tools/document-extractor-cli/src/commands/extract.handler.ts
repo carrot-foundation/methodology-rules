@@ -10,8 +10,8 @@ import {
 } from '@carrot-fndn/shared/cli';
 import {
   type BaseExtractedData,
+  type BoldDocumentType,
   createDocumentExtractor,
-  type DocumentType,
   type ExtractionOutput,
   getDefaultLayouts,
   getRegisteredLayouts,
@@ -39,7 +39,7 @@ interface ExtractOptions {
   cache?: boolean | undefined;
   concurrency: number;
   debug?: boolean | undefined;
-  documentType?: DocumentType | undefined;
+  documentType?: BoldDocumentType | undefined;
   json?: boolean | undefined;
   layout?: string | undefined;
   outputFailures?: string | undefined;
@@ -56,9 +56,9 @@ interface FileSuccess {
 }
 
 const resolveDocumentType = async (
-  option: DocumentType | undefined,
+  option: BoldDocumentType | undefined,
   isInteractive: boolean,
-): Promise<DocumentType | undefined> => {
+): Promise<BoldDocumentType | undefined> => {
   if (option) {
     return option;
   }
@@ -72,7 +72,7 @@ const resolveDocumentType = async (
 
 const resolveLayouts = (
   option: string | undefined,
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
 ): string[] => {
   if (option) {
     return [option];

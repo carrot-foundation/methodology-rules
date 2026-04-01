@@ -5,7 +5,7 @@ import type { DocumentAddress } from '@carrot-fndn/shared/types';
 import { type ReviewReason } from '@carrot-fndn/shared/document-extractor';
 import { isNameMatch } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { ValidationResult } from '../document-manifest-data.helpers';
 import type { AttachmentCrossValidation } from '../document-manifest-data.result-content.types';
@@ -50,7 +50,7 @@ export const collectResults = (
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 
 export const getWasteClassification = (
   pickUpEvent: BoldDocumentEvent | undefined,

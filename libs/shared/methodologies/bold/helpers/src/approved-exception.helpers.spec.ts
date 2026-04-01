@@ -3,10 +3,10 @@ import {
   stubParticipantAccreditationDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  ApprovedExceptionType,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { addDays, subDays } from 'date-fns';
 
@@ -15,8 +15,8 @@ import {
   isApprovedExceptionValid,
 } from './approved-exception.helpers';
 
-const { ACCREDITATION_RESULT } = DocumentEventName;
-const { APPROVED_EXCEPTIONS } = DocumentEventAttributeName;
+const { ACCREDITATION_RESULT } = BoldDocumentEventName;
+const { APPROVED_EXCEPTIONS } = BoldAttributeName;
 
 describe('Approved Exception Helpers', () => {
   describe('getApprovedExceptions', () => {
@@ -33,12 +33,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: BoldDocumentCategory.MASS_ID,
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: BoldDocumentEventName.WEIGHING,
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': BoldAttributeName.TARE,
+          'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception reason',
         },
       ];
@@ -112,12 +112,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: BoldDocumentCategory.MASS_ID,
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: BoldDocumentEventName.WEIGHING,
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': BoldAttributeName.TARE,
+          'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception',
         },
       ];
@@ -129,7 +129,7 @@ describe('Approved Exception Helpers', () => {
             [[APPROVED_EXCEPTIONS, exceptions]],
           ),
           stubDocumentEventWithMetadataAttributes(
-            { name: DocumentEventName.FACILITY_ADDRESS },
+            { name: BoldDocumentEventName.FACILITY_ADDRESS },
             [],
           ),
         ],
@@ -145,12 +145,12 @@ describe('Approved Exception Helpers', () => {
         {
           'Attribute Location': {
             Asset: {
-              Category: DocumentCategory.MASS_ID,
+              Category: BoldDocumentCategory.MASS_ID,
             },
-            Event: DocumentEventName.WEIGHING,
+            Event: BoldDocumentEventName.WEIGHING,
           },
-          'Attribute Name': DocumentEventAttributeName.TARE,
-          'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+          'Attribute Name': BoldAttributeName.TARE,
+          'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
           Reason: 'Test exception',
         },
       ];
@@ -166,7 +166,7 @@ describe('Approved Exception Helpers', () => {
 
       const result = getApprovedExceptions(
         document,
-        DocumentEventName.FACILITY_ADDRESS,
+        BoldDocumentEventName.FACILITY_ADDRESS,
       );
 
       expect(result).toBeUndefined();
@@ -186,12 +186,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
       };
 
@@ -202,12 +202,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 5).toISOString(),
       };
@@ -219,12 +219,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 5).toISOString(),
       };
@@ -236,12 +236,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': 'invalid-date',
       };
@@ -258,12 +258,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': fixedDate.toISOString(),
       };
@@ -277,12 +277,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': addDays(new Date(), 1).toISOString(),
       };
@@ -294,12 +294,12 @@ describe('Approved Exception Helpers', () => {
       const exception = {
         'Attribute Location': {
           Asset: {
-            Category: DocumentCategory.MASS_ID,
+            Category: BoldDocumentCategory.MASS_ID,
           },
-          Event: DocumentEventName.WEIGHING,
+          Event: BoldDocumentEventName.WEIGHING,
         },
-        'Attribute Name': DocumentEventAttributeName.TARE,
-        'Exception Type': ApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
         Reason: 'Test exception',
         'Valid Until': subDays(new Date(), 1).toISOString(),
       };

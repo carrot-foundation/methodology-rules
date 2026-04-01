@@ -4,10 +4,10 @@ import type {
 } from '@carrot-fndn/shared/types';
 
 import {
-  ApprovedExceptionType,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonEmptyStringSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
@@ -21,12 +21,12 @@ import type {
 const TareApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(BoldDocumentEventName.WEIGHING),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.TARE),
-  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
+  'Attribute Name': z.literal(BoldAttributeName.TARE),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -34,12 +34,12 @@ const TareApprovedExceptionSchema = z.object({
 const ContainerCapacityApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(BoldDocumentEventName.WEIGHING),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_CAPACITY),
-  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
+  'Attribute Name': z.literal(BoldAttributeName.CONTAINER_CAPACITY),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -47,12 +47,12 @@ const ContainerCapacityApprovedExceptionSchema = z.object({
 const ContainerQuantityApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
     }),
-    Event: z.literal(DocumentEventName.WEIGHING),
+    Event: z.literal(BoldDocumentEventName.WEIGHING),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CONTAINER_QUANTITY),
-  'Exception Type': z.literal(ApprovedExceptionType.MANDATORY_ATTRIBUTE),
+  'Attribute Name': z.literal(BoldAttributeName.CONTAINER_QUANTITY),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });

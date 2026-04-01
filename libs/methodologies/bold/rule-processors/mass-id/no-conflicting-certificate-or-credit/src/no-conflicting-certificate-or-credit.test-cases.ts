@@ -6,12 +6,12 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
   type BoldDocument,
+  BoldDocumentEventName,
+  BoldDocumentType,
   BoldMethodologyName,
   BoldMethodologySlug,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { DocumentStatus } from '@carrot-fndn/shared/types';
@@ -20,9 +20,9 @@ import { faker } from '@faker-js/faker';
 import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
-const { RELATED } = DocumentEventName;
+const { RELATED } = BoldDocumentEventName;
 const { CARBON, RECYCLING } = BoldMethodologyName;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
+const { METHODOLOGY_SLUG } = BoldAttributeName;
 
 const processorError = new NoConflictingCertificateOrCreditProcessorErrors();
 
@@ -169,7 +169,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
-          DocumentType.RECYCLED_ID,
+          BoldDocumentType.RECYCLED_ID,
         ),
       resultStatus: 'FAILED',
       scenario:

@@ -8,13 +8,13 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAccreditationStatus,
+  BoldAttributeName,
   type BoldDocument,
-  DocumentCategory,
-  DocumentEventAccreditationStatus,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
-  MassIDDocumentActorType,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  BoldDocumentType,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { addDays, subDays } from 'date-fns';
@@ -23,10 +23,11 @@ import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
 const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
-  MassIDDocumentActorType;
-const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } = DocumentEventName;
+  MassIDActorType;
+const { ACCREDITATION_CONTEXT, ACCREDITATION_RESULT, LINK } =
+  BoldDocumentEventName;
 const { ACCREDITATION_STATUS, EFFECTIVE_DATE, EXPIRATION_DATE } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 const processorError =
   new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors();
@@ -36,7 +37,7 @@ const createValidAccreditationResultEvent = () =>
     metadataAttributes: [
       [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
       [EXPIRATION_DATE, addDays(new Date(), 10).toISOString()],
-      [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+      [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
     ],
   });
 
@@ -45,14 +46,14 @@ const createExpiredAccreditationResultEvent = () =>
     metadataAttributes: [
       [EFFECTIVE_DATE, subDays(new Date(), 10).toISOString()],
       [EXPIRATION_DATE, subDays(new Date(), 2).toISOString()],
-      [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+      [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
     ],
   });
 
 const createMassIDWithActorAccreditation = (
-  actorType: MassIDDocumentActorType,
+  actorType: MassIDActorType,
   externalEventsMap: Map<
-    DocumentEventName,
+    BoldDocumentEventName,
     ReturnType<typeof stubBoldAccreditationResultEvent>
   >,
 ) =>
@@ -67,16 +68,16 @@ const createMassIDWithActorAccreditation = (
 
 const createMassIDWithMultipleActorAccreditations = (
   actorAccreditations: Map<
-    MassIDDocumentActorType,
+    MassIDActorType,
     {
       externalEventsMap: Map<
-        DocumentEventName,
+        BoldDocumentEventName,
         ReturnType<typeof stubBoldAccreditationResultEvent>
       >;
     }
   >,
   massIDActorParticipants?: Map<
-    MassIDDocumentActorType,
+    MassIDActorType,
     ReturnType<typeof stubParticipant>
   >,
 ) => {
@@ -112,7 +113,7 @@ const createMassIDAuditWithLinkEvent = (
 });
 
 const createMultipleValidAccreditationsTestData = (
-  actorType: MassIDDocumentActorType,
+  actorType: MassIDActorType,
 ) => {
   const massIDWithMultipleValid = new BoldStubsBuilder()
     .createMassIDDocuments()
@@ -137,19 +138,19 @@ const createMultipleValidAccreditationsTestData = (
 
   const secondAccreditation = stubDocument(
     {
-      category: DocumentCategory.METHODOLOGY,
+      category: BoldDocumentCategory.METHODOLOGY,
       externalEvents: [
         stubBoldAccreditationResultEvent({
           metadataAttributes: [
             [EFFECTIVE_DATE, subDays(new Date(), 5).toISOString()],
             [EXPIRATION_DATE, addDays(new Date(), 5).toISOString()],
-            [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+            [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
           ],
         }),
       ],
       primaryParticipant: originalAccreditation.primaryParticipant,
       subtype: actorType,
-      type: DocumentType.PARTICIPANT_ACCREDITATION,
+      type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
     },
     false, // stubExternalEvents = false to avoid random events
   );
