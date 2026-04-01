@@ -71,7 +71,11 @@ export const getBaselineByWasteSubtype = (
   return baselines[wasteSubtype];
 };
 
-export const throwIfMissing = <T>(
+export const throwIfMissing: <T>(
+  value: null | T | undefined,
+  errorMessage: string,
+  processorErrors: PreventedEmissionsProcessorErrors,
+) => asserts value is NonNullable<T> = <T>(
   value: null | T | undefined,
   errorMessage: string,
   processorErrors: PreventedEmissionsProcessorErrors,
