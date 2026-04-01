@@ -15,10 +15,10 @@ import {
   BoldAttributeValue,
   type BoldDocument,
   BoldDocumentEventName,
-  type MassIDReward,
-  RewardActorAddress,
-  type RewardActorParticipant,
+  type RewardsDistributionActorAddress,
+  type RewardsDistributionActorParticipant,
   RewardsDistributionActorType,
+  type RewardsDistributionMassIDReward,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
@@ -46,7 +46,9 @@ export const isHaulerActorDefined = (
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
-export const mapMassIDRewards = (participants: ActorReward[]): MassIDReward[] =>
+export const mapMassIDRewards = (
+  participants: ActorReward[],
+): RewardsDistributionMassIDReward[] =>
   participants.map(
     ({
       actorType,
@@ -72,10 +74,10 @@ export const mapActorReward = ({
   preserveSensitiveData,
 }: {
   actorType: RewardsDistributionActorType;
-  address: RewardActorAddress;
+  address: RewardsDistributionActorAddress;
   massIDDocument: BoldDocument;
   massIDPercentage: BigNumber;
-  participant: RewardActorParticipant;
+  participant: RewardsDistributionActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }): ActorReward => ({
   actorType,

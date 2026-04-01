@@ -2,8 +2,8 @@ import type BigNumber from 'bignumber.js';
 
 import {
   type BoldDocument,
-  RewardActorAddress,
-  type RewardActorParticipant,
+  type RewardsDistributionActorAddress,
+  type RewardsDistributionActorParticipant,
   type RewardsDistributionActorType,
   RewardsDistributionWasteType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -18,10 +18,10 @@ export interface ActorMassIDPercentageInputDto {
 
 export interface ActorReward {
   actorType: RewardsDistributionActorType;
-  address: RewardActorAddress;
+  address: RewardsDistributionActorAddress;
   massIDDocument: BoldDocument;
   massIDPercentage: BigNumber;
-  participant: RewardActorParticipant;
+  participant: RewardsDistributionActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }
 
@@ -31,8 +31,8 @@ export type RewardsDistribution = Record<
 >;
 
 export interface RewardsDistributionActor {
-  address: RewardActorAddress;
-  participant: RewardActorParticipant;
+  address: RewardsDistributionActorAddress;
+  participant: RewardsDistributionActorParticipant;
   preserveSensitiveData: boolean | undefined;
   type: RewardsDistributionActorType;
 }

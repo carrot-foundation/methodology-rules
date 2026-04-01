@@ -119,7 +119,7 @@ const calculateCertificateTotalValue = (certificateValues: BigNumber[]) =>
   sumBigNumbers(certificateValues);
 
 export const getAggregateParticipantKey = (
-  actorType: RewardsDistributionActorType | string | undefined,
+  actorType: RewardsDistributionActorType | undefined,
   participantId: string | undefined,
 ): string => {
   if (!actorType || !participantId) {

@@ -21,10 +21,10 @@ import {
   BoldDocumentType,
   BoldMethodologyActorType,
   BoldMethodologyName,
-  type CertificateRewardDistributionOutput,
   MassIDActorType,
-  type MassIDReward,
   RewardsDistributionActorType,
+  type RewardsDistributionMassIDReward,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { faker } from '@faker-js/faker';
@@ -32,7 +32,7 @@ import { faker } from '@faker-js/faker';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 type ActorResult = {
-  actorType: BoldActorType | RewardsDistributionActorType;
+  actorType: RewardsDistributionActorType;
   amount: string;
   percentage: string;
 };
@@ -124,7 +124,7 @@ const { massIDActorParticipants, methodologyActorParticipants } =
 
 const createStandardRewardsDistribution = (
   documentId: string,
-): CertificateRewardDistributionOutput => ({
+): RewardsDistributionResultContent => ({
   massIDDocumentId: documentId,
   massIDRewards: [
     ...massIDActorParticipants.entries(),
@@ -139,7 +139,7 @@ const createStandardRewardsDistribution = (
       id: participant.id,
       name: participant.name,
     },
-  })) as unknown as NonEmptyArray<MassIDReward>,
+  })) as unknown as NonEmptyArray<RewardsDistributionMassIDReward>,
 });
 
 const createMethodologyActorReward = (
@@ -196,7 +196,7 @@ const createMassIDActorReward = (
 
 const createMultiHaulerRewardsDistribution = (
   documentId: string,
-): CertificateRewardDistributionOutput => {
+): RewardsDistributionResultContent => {
   const haulerParticipants = [
     {
       id:
@@ -261,7 +261,7 @@ const createMultiHaulerRewardsDistribution = (
       NETWORK,
       MULTI_HAULER_REWARDS_DISTRIBUTION[NETWORK],
     ),
-  ] as unknown as NonEmptyArray<MassIDReward>;
+  ] as unknown as NonEmptyArray<RewardsDistributionMassIDReward>;
 
   return {
     massIDDocumentId: documentId,
@@ -271,7 +271,7 @@ const createMultiHaulerRewardsDistribution = (
 
 const buildCertificateDocuments = (options: {
   massIDDocumentId: string;
-  rewardsDistribution: CertificateRewardDistributionOutput;
+  rewardsDistribution: RewardsDistributionResultContent;
   value: number;
 }) => {
   const { massIDDocumentId, rewardsDistribution, value } = options;

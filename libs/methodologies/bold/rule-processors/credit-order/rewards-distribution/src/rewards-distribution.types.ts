@@ -1,10 +1,9 @@
 import type BigNumber from 'bignumber.js';
 
 import {
-  BoldActorType,
-  type CertificateRewardDistributionOutput,
-  type RewardActorAddress,
+  type RewardsDistributionActorAddress,
   type RewardsDistributionActorType,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
@@ -27,7 +26,7 @@ export interface Remainder<T = BigNumber> {
 
 export interface ResultContentsWithMassIDCertificateValue {
   massIDCertificateValue: BigNumber;
-  resultContent: CertificateRewardDistributionOutput;
+  resultContent: RewardsDistributionResultContent;
 }
 
 export interface RewardsDistribution {
@@ -38,8 +37,8 @@ export interface RewardsDistribution {
 }
 
 export interface RewardsDistributionActor {
-  actorType: (typeof BoldActorType)['REMAINDER'] | RewardsDistributionActorType;
-  address: RewardActorAddress;
+  actorType: RewardsDistributionActorType;
+  address: RewardsDistributionActorAddress;
   amount: NonEmptyString;
   participant: Participant;
   percentage: NonEmptyString;

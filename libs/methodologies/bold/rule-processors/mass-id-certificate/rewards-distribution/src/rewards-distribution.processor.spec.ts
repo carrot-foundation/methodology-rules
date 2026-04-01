@@ -4,8 +4,7 @@ import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing
 import {
   type BoldDocument,
   BoldMethodologyName,
-  type RewardDistributionResultContent,
-  RewardsDistributionActorType,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import BigNumber from 'bignumber.js';
@@ -68,7 +67,7 @@ describe('RewardsDistributionProcessor', () => {
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
         const { massIDRewards } =
-          ruleOutput.resultContent as RewardDistributionResultContent;
+          ruleOutput.resultContent as RewardsDistributionResultContent;
 
         const totalPercentage = sumBigNumbers(
           massIDRewards.map(
@@ -82,9 +81,7 @@ describe('RewardsDistributionProcessor', () => {
 
         for (const actorType of Object.keys(expectedRewards)) {
           const reward = massIDRewards.find(
-            (massIDReward) =>
-              massIDReward.actorType ===
-              (actorType as RewardsDistributionActorType),
+            (massIDReward) => massIDReward.actorType === actorType,
           );
 
           expect(reward).toBeDefined();

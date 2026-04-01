@@ -5,8 +5,8 @@ import {
   BoldDocumentCategory,
   type BoldDocumentEvent,
   BoldDocumentType,
-  type RewardDistributionResultContent,
   RewardsDistributionActorType,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -47,7 +47,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
           preserveSensitiveData: faker.datatype.boolean(),
         },
       ],
-    } satisfies RewardDistributionResultContent,
+    } satisfies RewardsDistributionResultContent,
   ],
   [SLUG, REWARDS_DISTRIBUTION_RULE_SLUG],
 ];

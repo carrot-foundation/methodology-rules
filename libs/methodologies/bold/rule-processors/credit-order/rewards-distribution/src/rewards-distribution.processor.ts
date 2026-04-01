@@ -17,7 +17,7 @@ import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bol
 import {
   BoldAttributeName,
   type BoldDocument,
-  type CertificateRewardDistributionOutput,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -98,7 +98,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
   getRewardsDistributionRuleValue(
     massIDCertificateDocument: BoldDocument,
-  ): CertificateRewardDistributionOutput {
+  ): RewardsDistributionResultContent {
     const rewardsDistributionRuleEvent =
       massIDCertificateDocument.externalEvents?.find((event) =>
         eventHasMetadataAttribute({

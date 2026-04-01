@@ -166,7 +166,9 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
   [
     ...Object.entries(REWARDS_DISTRIBUTION_BY_WASTE_TYPE).map(
       ([wasteType, expectedRewards]) => ({
-        expectedRewards: EXPECTED_REWARDS[expectedRewards],
+        expectedRewards: EXPECTED_REWARDS[
+          expectedRewards as keyof typeof EXPECTED_REWARDS
+        ] as Record<string, string>,
         massIDDocumentEvents: {},
         massIDPartialDocument: {
           subtype: wasteType,

@@ -5,61 +5,78 @@ import {
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-export enum RewardsDistributionActorType {
-  COMMUNITY_IMPACT_POOL = 'Community Impact Pool',
-  HAULER = 'Hauler',
-  INTEGRATOR = 'Integrator',
-  METHODOLOGY_AUTHOR = 'Methodology Author',
-  METHODOLOGY_DEVELOPER = 'Methodology Developer',
-  NETWORK = 'Network',
-  PROCESSOR = 'Processor',
-  RECYCLER = 'Recycler',
-  WASTE_GENERATOR = 'Waste Generator',
-}
-
-export enum RewardsDistributionWasteType {
-  MIXED_ORGANIC_WASTE = 'Mixed Organic Waste',
-  SLUDGE_FROM_WASTE_TREATMENT = 'Sludge from Waste Treatment',
-  TOBACCO_INDUSTRY_RESIDUES = 'Tobacco Industry Residues',
-}
-
-export const RewardActorAddressSchema = z.object({
-  id: NonEmptyStringSchema,
-});
-export type RewardActorAddress = z.infer<typeof RewardActorAddressSchema>;
-
-export const RewardActorParticipantSchema = DocumentParticipantSchema.pick({
-  id: true,
-  name: true,
-});
-export type RewardActorParticipant = z.infer<
-  typeof RewardActorParticipantSchema
+export const RewardsDistributionActorType = {
+  COMMUNITY_IMPACT_POOL: 'Community Impact Pool',
+  HAULER: 'Hauler',
+  INTEGRATOR: 'Integrator',
+  METHODOLOGY_AUTHOR: 'Methodology Author',
+  METHODOLOGY_DEVELOPER: 'Methodology Developer',
+  NETWORK: 'Network',
+  PROCESSOR: 'Processor',
+  RECYCLER: 'Recycler',
+  WASTE_GENERATOR: 'Waste Generator',
+} as const;
+export const RewardsDistributionActorTypeSchema = z.enum(
+  Object.values(RewardsDistributionActorType) as [string, ...string[]],
+);
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type RewardsDistributionActorType = z.infer<
+  typeof RewardsDistributionActorTypeSchema
 >;
 
-export const CertificateRewardSchema = z.object({
-  actorType: z.enum(RewardsDistributionActorType),
-  participant: RewardActorParticipantSchema,
+export const RewardsDistributionWasteType = {
+  MIXED_ORGANIC_WASTE: 'Mixed Organic Waste',
+  SLUDGE_FROM_WASTE_TREATMENT: 'Sludge from Waste Treatment',
+  TOBACCO_INDUSTRY_RESIDUES: 'Tobacco Industry Residues',
+} as const;
+export const RewardsDistributionWasteTypeSchema = z.enum(
+  Object.values(RewardsDistributionWasteType) as [string, ...string[]],
+);
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type RewardsDistributionWasteType = z.infer<
+  typeof RewardsDistributionWasteTypeSchema
+>;
+
+export const RewardsDistributionActorAddressSchema = z.object({
+  id: NonEmptyStringSchema,
+});
+export type RewardsDistributionActorAddress = z.infer<
+  typeof RewardsDistributionActorAddressSchema
+>;
+
+export const RewardsDistributionActorParticipantSchema =
+  DocumentParticipantSchema.pick({
+    id: true,
+    name: true,
+  });
+export type RewardsDistributionActorParticipant = z.infer<
+  typeof RewardsDistributionActorParticipantSchema
+>;
+
+export const RewardsDistributionCertificateRewardSchema = z.object({
+  actorType: RewardsDistributionActorTypeSchema,
+  participant: RewardsDistributionActorParticipantSchema,
   percentage: BigNumberStringSchema,
 });
-export type CertificateReward = z.infer<typeof CertificateRewardSchema>;
+export type RewardsDistributionCertificateReward = z.infer<
+  typeof RewardsDistributionCertificateRewardSchema
+>;
 
-// eslint-disable-next-line sonarjs/redundant-type-aliases -- preserves named export used by consumers
-export type CertificateRewardDistributionOutput =
-  RewardDistributionResultContent;
-
-export const MassIDRewardSchema = z.object({
-  actorType: z.enum(RewardsDistributionActorType),
-  address: RewardActorAddressSchema,
+export const RewardsDistributionMassIDRewardSchema = z.object({
+  actorType: RewardsDistributionActorTypeSchema,
+  address: RewardsDistributionActorAddressSchema,
   massIDPercentage: BigNumberStringSchema,
-  participant: RewardActorParticipantSchema,
+  participant: RewardsDistributionActorParticipantSchema,
   preserveSensitiveData: z.boolean().optional(),
 });
-export type MassIDReward = z.infer<typeof MassIDRewardSchema>;
+export type RewardsDistributionMassIDReward = z.infer<
+  typeof RewardsDistributionMassIDRewardSchema
+>;
 
-export const RewardDistributionResultContentSchema = z.object({
+export const RewardsDistributionResultContentSchema = z.object({
   massIDDocumentId: NonEmptyStringSchema,
-  massIDRewards: z.array(MassIDRewardSchema).nonempty(),
+  massIDRewards: z.array(RewardsDistributionMassIDRewardSchema).nonempty(),
 });
-export type RewardDistributionResultContent = z.infer<
-  typeof RewardDistributionResultContentSchema
+export type RewardsDistributionResultContent = z.infer<
+  typeof RewardsDistributionResultContentSchema
 >;
