@@ -97,7 +97,7 @@ Document schemas are organized in five layers with progressive strictness:
 | Envelope | `LoadedDocumentEnvelopeSchema` | `z.object` | Wrapper for loaded documents |
 | Inbound | `Inbound*Schema` | `z.object` (strips unknown fields) | Boundary contract for external data |
 | Normalized | `*Schema` | `z.object` (strips unknown fields) | Strict internal representation |
-| Domain | `Bold*Schema`, `MassID*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
+| Domain | `Bold*Schema`, `MassID*Schema`, `RewardsDistribution*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
 | Rule | `*RuleSubjectSchema` | `z.object` with exact fields needed | Exact contract per rule processor |
 
 Key conventions:
@@ -106,19 +106,26 @@ Key conventions:
 - **`z.looseObject` for predicate/getter validators only**: Narrow structural checks in predicate or getter helpers (e.g. "does this event have a `metadata.attributes` array?") may use `z.looseObject` to avoid rejecting objects that carry extra fields they don't inspect. These are not layer schemas.
 - **Rule subject schemas are mandatory**: Every rule processor must define a `*RuleSubjectSchema` that describes the exact data it needs.
 - **`validateRuleSubjectOrThrow`**: Standard entry point for rule subject validation. Use this instead of calling `.parse()` directly.
-- **Const-object + `z.enum()` for value sets**: Define allowed values as a const object, then derive a `z.enum()` from its values. Use `.extract()` to narrow to a subset and `.literal()` for single-value constraints in deeper layers.
+- **Const-object + `z.enum()` for value sets**: Define allowed values as a const object, then derive a `z.enum()` from its values. Use `.extract()` to narrow to a subset and `.literal()` for single-value constraints in deeper layers. Domain-scoped enums use declaration merging (const + type + schema) to provide both dot-notation access and a Zod schema:
 
 ```ts
-const MATERIAL_TYPE = {
-  Organic: 'organic',
-  Recyclable: 'recyclable',
-  Hazardous: 'hazardous',
+// Domain enum with declaration merging (schema-first)
+export const BoldVehicleType = {
+  BICYCLE: 'Bicycle',
+  TRUCK: 'Truck',
 } as const;
-
-const MaterialTypeSchema = z.enum(
-  Object.values(MATERIAL_TYPE) as [string, ...string[]],
+export const BoldVehicleTypeSchema = z.enum(
+  Object.values(BoldVehicleType) as [string, ...string[]],
 );
+// eslint-disable-next-line no-redeclare
+export type BoldVehicleType = z.infer<typeof BoldVehicleTypeSchema>;
+
+// Usage: dot-notation in value position, type in type position
+const vehicle = BoldVehicleType.TRUCK;
+const isValid: BoldVehicleType = 'Bicycle';
 
 // Narrower layer
-const OrganicOnlySchema = MaterialTypeSchema.extract(['organic']);
+const TruckOnlySchema = BoldVehicleTypeSchema.extract(['Truck']);
 ```
+
+Do not use TypeScript `enum` — always use the const-object + `z.enum()` pattern above.
