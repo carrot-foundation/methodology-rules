@@ -4,9 +4,7 @@ import type {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
-import {
-  BoldAttributeName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
 

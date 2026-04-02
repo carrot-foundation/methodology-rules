@@ -66,7 +66,11 @@ describe('Event getters', () => {
       const event = stubDocumentEventWithMetadata([]);
 
       expect(() =>
-        getEventAttributeValueOrThrow(event, DESCRIPTION, validateNonEmptyString),
+        getEventAttributeValueOrThrow(
+          event,
+          DESCRIPTION,
+          validateNonEmptyString,
+        ),
       ).toThrow('Required metadata Description attribute is missing');
     });
   });
