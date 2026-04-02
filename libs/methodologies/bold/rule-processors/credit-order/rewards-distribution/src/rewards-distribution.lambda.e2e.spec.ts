@@ -58,17 +58,18 @@ describe('RewardsDistributionProcessor E2E', () => {
         const { actors, remainder } =
           response.resultContent as RewardsDistribution;
 
-        const actorsResult = actors.map((actor) => ({
-          actorType: actor.actorType,
-          amount: actor.amount,
-          percentage: actor.percentage,
-        }));
-
-        actorsResult.push({
-          actorType: BoldActorType.REMAINDER,
-          amount: remainder.amount,
-          percentage: remainder.percentage,
-        });
+        const actorsResult = [
+          ...actors.map((actor) => ({
+            actorType: actor.actorType,
+            amount: actor.amount,
+            percentage: actor.percentage,
+          })),
+          {
+            actorType: BoldActorType.REMAINDER,
+            amount: remainder.amount,
+            percentage: remainder.percentage,
+          },
+        ];
 
         for (const [index, actual] of actorsResult.entries()) {
           const expected = expectedActorsResult[index];

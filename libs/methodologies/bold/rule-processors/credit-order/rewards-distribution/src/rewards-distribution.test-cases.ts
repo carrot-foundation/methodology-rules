@@ -32,7 +32,7 @@ import { faker } from '@faker-js/faker';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 type ActorResult = {
-  actorType: RewardsDistributionActorType;
+  actorType: string;
   amount: string;
   percentage: string;
 };

@@ -54,17 +54,18 @@ describe('RewardsDistributionProcessor', () => {
           remainder,
         } = ruleOutput.resultContent as RewardsDistribution;
 
-        const actorsResult = actors.map((actor) => ({
-          actorType: actor.actorType,
-          amount: actor.amount,
-          percentage: actor.percentage,
-        }));
-
-        actorsResult.push({
-          actorType: BoldActorType.REMAINDER,
-          amount: remainder.amount,
-          percentage: remainder.percentage,
-        });
+        const actorsResult = [
+          ...actors.map((actor) => ({
+            actorType: actor.actorType,
+            amount: actor.amount,
+            percentage: actor.percentage,
+          })),
+          {
+            actorType: BoldActorType.REMAINDER,
+            amount: remainder.amount,
+            percentage: remainder.percentage,
+          },
+        ];
 
         const totalPercentage = sumBigNumbers(
           actorsResult.map((actor) => BigNumber(actor.percentage)),

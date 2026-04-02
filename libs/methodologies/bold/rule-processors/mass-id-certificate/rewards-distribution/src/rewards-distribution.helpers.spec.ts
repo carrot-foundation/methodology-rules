@@ -145,7 +145,8 @@ describe('calculateNetworkPercentageForUnidentifiedWasteOrigin', () => {
   };
 
   it('should default processor and recycler percentages to zero when missing from rewardDistributions', () => {
-    const result = calculateNetworkPercentageForUnidentifiedWasteOrigin(baseDto);
+    const result =
+      calculateNetworkPercentageForUnidentifiedWasteOrigin(baseDto);
 
     // 0.2 (base) + 0.3 (wasteGenerator) + 0 (additional) + 0*0.25 (processor) + 0*0.25 (recycler)
     expect(result).toEqual(new BigNumber(0.5));
