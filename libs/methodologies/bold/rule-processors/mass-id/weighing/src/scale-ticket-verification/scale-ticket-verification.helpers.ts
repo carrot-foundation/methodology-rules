@@ -1,6 +1,6 @@
 import type { ScaleTicketExtractedData } from '@carrot-fndn/shared/document-extractor-scale-ticket';
 import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
-import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
+import type { AdditionalVerification } from '@carrot-fndn/shared/types';
 
 import {
   createDocumentExtractor,
@@ -24,7 +24,7 @@ const documentExtractor: DocumentExtractorService =
   createDocumentExtractor(textExtractor);
 
 export const isScaleTicketVerificationConfig = (
-  config: MethodologyAdditionalVerification,
+  config: AdditionalVerification,
 ): boolean => config['Verification Type'] === 'Scale Ticket';
 
 export const verifyScaleTicketNetWeight = async ({
@@ -32,7 +32,7 @@ export const verifyScaleTicketNetWeight = async ({
   expectedNetWeight,
   textExtractorInput,
 }: {
-  config: MethodologyAdditionalVerification;
+  config: AdditionalVerification;
   expectedNetWeight: number;
   textExtractorInput: TextExtractionInput | undefined;
 }): Promise<ScaleTicketVerificationResult> => {
@@ -97,7 +97,7 @@ export const buildScaleTicketVerificationContext = ({
   config,
   expectedNetWeight,
 }: {
-  config: MethodologyAdditionalVerification | undefined;
+  config: AdditionalVerification | undefined;
   expectedNetWeight: number | undefined;
 }): ScaleTicketVerificationContext => ({
   config,

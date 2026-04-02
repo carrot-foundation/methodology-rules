@@ -6,29 +6,29 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventName,
+  BoldDocumentType,
   BoldMethodologyName,
   BoldMethodologySlug,
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { MethodologyDocumentStatus } from '@carrot-fndn/shared/types';
+import { DocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
-const { RELATED } = DocumentEventName;
+const { RELATED } = BoldDocumentEventName;
 const { CARBON, RECYCLING } = BoldMethodologyName;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
+const { METHODOLOGY_SLUG } = BoldAttributeName;
 
 const processorError = new NoConflictingCertificateOrCreditProcessorErrors();
 
 const openDocumentField = {
   partialDocument: {
-    status: MethodologyDocumentStatus.OPEN,
+    status: DocumentStatus.OPEN,
   },
 };
 
@@ -55,12 +55,12 @@ const massIDWithCreditsStubs = new BoldStubsBuilder({
   .createCreditOrderDocument(openDocumentField)
   .build();
 
-const duplicatedMassIDAuditDocument: Document = {
+const duplicatedMassIDAuditDocument: BoldDocument = {
   ...simpleMassIDStubs.massIDAuditDocument,
   id: faker.string.uuid(),
 };
 
-const massIDWithTwoAuditDocuments: Document = {
+const massIDWithTwoAuditDocuments: BoldDocument = {
   ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
@@ -72,7 +72,7 @@ const massIDWithTwoAuditDocuments: Document = {
 };
 
 const boldCarbonEventName = `${CARBON} Methodology`;
-const massIDAuditForOtherMethodology: Document = {
+const massIDAuditForOtherMethodology: BoldDocument = {
   ...duplicatedMassIDAuditDocument,
   externalEvents: [
     ...(duplicatedMassIDAuditDocument.externalEvents?.filter(
@@ -86,7 +86,7 @@ const massIDAuditForOtherMethodology: Document = {
     ),
   ],
 };
-const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
+const massIDWithAuditDocumentsForDifferentMethodologies: BoldDocument = {
   ...simpleMassIDStubs.massIDDocument,
   externalEvents: [
     ...(simpleMassIDStubs.massIDDocument.externalEvents ?? []),
@@ -98,8 +98,8 @@ const massIDWithAuditDocumentsForDifferentMethodologies: Document = {
 };
 
 interface NoConflictingCertificateOrCreditTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificateOrCreditTestCase[] =
@@ -169,7 +169,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
       resultComment:
         processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
-          DocumentType.RECYCLED_ID,
+          BoldDocumentType.RECYCLED_ID,
         ),
       resultStatus: 'FAILED',
       scenario:
@@ -195,7 +195,7 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         massIDWithAuditStubs.massIDAuditDocument,
         {
           ...massIDWithAuditStubs.massIDCertificateDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,
@@ -209,11 +209,11 @@ export const noConflictingCertificateOrCreditTestCases: NoConflictingCertificate
         massIDWithAuditStubs.massIDAuditDocument,
         {
           ...massIDWithAuditStubs.massIDCertificateDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
         {
           ...massIDWithCreditsStubs.creditOrderDocument,
-          status: MethodologyDocumentStatus.CANCELLED,
+          status: DocumentStatus.CANCELLED,
         },
       ],
       massIDAuditDocument: massIDWithAuditStubs.massIDAuditDocument,

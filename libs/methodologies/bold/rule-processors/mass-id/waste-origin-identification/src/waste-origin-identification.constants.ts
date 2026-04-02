@@ -1,10 +1,10 @@
 import {
-  DocumentEventAttributeValue,
-  DocumentEventName,
+  BoldDocumentEventName,
+  BoldUnidentifiedAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { ACTOR, PICK_UP, WASTE_GENERATOR } = DocumentEventName;
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
+const { ACTOR, PICK_UP, WASTE_GENERATOR } = BoldDocumentEventName;
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
 
 export const RESULT_COMMENTS = {
   failed: {

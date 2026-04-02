@@ -15,9 +15,9 @@ import {
 import { DocumentMatcher } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { eventHasMetadataAttribute } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type CertificateRewardDistributionOutput,
-  type Document,
-  DocumentEventAttributeName,
+  BoldAttributeName,
+  type BoldDocument,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
@@ -36,7 +36,7 @@ import { RewardsDistributionProcessorErrors } from './rewards-distribution.error
 import { calculateRewardsDistribution } from './rewards-distribution.helpers';
 import { isCertificateRewardDistributionOutput } from './rewards-distribution.validators';
 
-const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = BoldAttributeName;
 
 export class RewardsDistributionProcessor extends RuleDataProcessor {
   readonly errorProcessor = new RewardsDistributionProcessorErrors();
@@ -47,7 +47,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
 
   async generateCertificateDocumentsQuery(
     ruleInput: RuleInput,
-  ): Promise<DocumentQuery<Document> | undefined> {
+  ): Promise<DocumentQuery<BoldDocument> | undefined> {
     const documentQueryService = new DocumentQueryService(
       provideDocumentLoaderService,
     );
@@ -97,13 +97,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
   }
 
   getRewardsDistributionRuleValue(
-    massIDCertificateDocument: Document,
-  ): CertificateRewardDistributionOutput {
+    massIDCertificateDocument: BoldDocument,
+  ): RewardsDistributionResultContent {
     const rewardsDistributionRuleEvent =
       massIDCertificateDocument.externalEvents?.find((event) =>
         eventHasMetadataAttribute({
           event,
-          metadataName: DocumentEventAttributeName.SLUG,
+          metadataName: BoldAttributeName.SLUG,
           metadataValues: 'rewards-distribution',
         }),
       );

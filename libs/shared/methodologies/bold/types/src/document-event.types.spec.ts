@@ -1,67 +1,58 @@
 import { createStubFromSchema } from '@carrot-fndn/shared/testing';
 
 import {
-  DocumentEventAttributeSchema,
-  DocumentEventSchema,
-  DocumentRelationSchema,
+  BoldDocumentEventAttributeSchema,
+  BoldDocumentEventSchema,
+  BoldDocumentRelationSchema,
 } from './document-event.types';
 
-describe('DocumentEventAttributeSchema', () => {
+describe('BoldDocumentEventAttributeSchema', () => {
   it('should reject empty name', () => {
-    const stub = createStubFromSchema(DocumentEventAttributeSchema, {
+    const stub = createStubFromSchema(BoldDocumentEventAttributeSchema, {
       name: '',
     });
 
-    expect(DocumentEventAttributeSchema.safeParse(stub).success).toBe(false);
-  });
-});
-
-describe('DocumentRelationSchema', () => {
-  it('should reject empty category when present', () => {
-    const stub = createStubFromSchema(DocumentRelationSchema);
-
-    expect(
-      DocumentRelationSchema.safeParse({ ...stub, category: '' }).success,
-    ).toBe(false);
-  });
-
-  it('should reject empty subtype when present', () => {
-    const stub = createStubFromSchema(DocumentRelationSchema);
-
-    expect(
-      DocumentRelationSchema.safeParse({ ...stub, subtype: '' }).success,
-    ).toBe(false);
-  });
-
-  it('should reject empty type when present', () => {
-    const stub = createStubFromSchema(DocumentRelationSchema);
-
-    expect(
-      DocumentRelationSchema.safeParse({ ...stub, type: '' }).success,
-    ).toBe(false);
-  });
-});
-
-describe('DocumentEventSchema', () => {
-  it('should reject empty name', () => {
-    const stub = createStubFromSchema(DocumentEventSchema);
-
-    expect(DocumentEventSchema.safeParse({ ...stub, name: '' }).success).toBe(
+    expect(BoldDocumentEventAttributeSchema.safeParse(stub).success).toBe(
       false,
     );
   });
+});
 
-  it('should preserve extra properties (looseObject passthrough)', () => {
-    const stub = createStubFromSchema(DocumentEventSchema);
-    const result = DocumentEventSchema.safeParse({
+describe('BoldDocumentRelationSchema', () => {
+  it.each(['category', 'subtype', 'type'] as const)(
+    'should reject empty %s when present',
+    (field) => {
+      const stub = createStubFromSchema(BoldDocumentRelationSchema);
+
+      expect(
+        BoldDocumentRelationSchema.safeParse({ ...stub, [field]: '' }).success,
+      ).toBe(false);
+    },
+  );
+});
+
+describe('BoldDocumentEventSchema', () => {
+  it('should reject empty name', () => {
+    const stub = createStubFromSchema(BoldDocumentEventSchema);
+
+    expect(
+      BoldDocumentEventSchema.safeParse({ ...stub, name: '' }).success,
+    ).toBe(false);
+  });
+
+  it('should strip unknown fields (z.object default behavior)', () => {
+    const stub = createStubFromSchema(BoldDocumentEventSchema);
+    const result = BoldDocumentEventSchema.safeParse({
       ...stub,
-      customField: 'custom-value',
+      customField: 'should-be-stripped',
     });
 
     expect(result.success).toBe(true);
-    expect(result.success && result.data).toHaveProperty(
-      'customField',
-      'custom-value',
-    );
+
+    if (!result.success) {
+      return;
+    }
+
+    expect(result.data).not.toHaveProperty('customField');
   });
 });

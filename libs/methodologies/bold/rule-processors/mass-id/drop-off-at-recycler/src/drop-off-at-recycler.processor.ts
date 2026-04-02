@@ -9,29 +9,24 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
-const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
+const { ACTOR, DROP_OFF } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { RECEIVING_OPERATOR_IDENTIFIER } = BoldAttributeName;
 
 interface RuleSubject {
-  lastDropOffEvent: DocumentEvent | undefined;
-  receivingOperatorIdentifier:
-    | MethodologyDocumentEventAttributeValue
-    | string
-    | undefined;
-  recyclerEvent: DocumentEvent | undefined;
+  lastDropOffEvent: BoldDocumentEvent | undefined;
+  receivingOperatorIdentifier: BoldAttributeValue | string | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
 }
 
 export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -68,7 +63,7 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const recyclerEvent = document.externalEvents?.find(
       and(eventLabelIsAnyOf([RECYCLER]), eventNameIsAnyOf([ACTOR])),
     );

@@ -7,6 +7,7 @@ import {
   isNil,
   isNonEmptyString,
   isNonNegative,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import {
   getEventAttributeValue,
@@ -20,10 +21,11 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentSubtype,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentSubtype,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -49,13 +51,16 @@ import {
   getOthersIfOrganicContextFromMassIdDocument,
   OthersIfOrganicAuditDetails,
 } from './prevented-emissions.others-organic.helpers';
-import { type RuleSubject } from './prevented-emissions.types';
+import {
+  type PreventedEmissionsRuleSubject,
+  PreventedEmissionsRuleSubjectSchema,
+} from './prevented-emissions.rule-subject';
 
-const { EXCEEDING_EMISSION_COEFFICIENT } = DocumentEventAttributeName;
+const { EXCEEDING_EMISSION_COEFFICIENT } = BoldAttributeName;
 
 interface Documents {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 export class PreventedEmissionsProcessor extends RuleDataProcessor {
@@ -67,24 +72,44 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       const documents = await this.collectDocuments(documentsQuery);
       const ruleSubject = this.getRuleSubject(documents);
 
+      const validatedSubject = validateRuleSubjectOrThrow({
+        errors: this.processorErrors,
+        input: ruleSubject,
+        schema: PreventedEmissionsRuleSubjectSchema,
+        validationMessage:
+          this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      });
+
       const { resultComment, resultContent, resultStatus } =
-        this.evaluateResult(ruleSubject);
+        this.evaluateResult(validatedSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
         resultContent: {
           ...resultContent,
-          ruleSubject,
+          ruleSubject: validatedSubject,
         },
       });
     } catch (error: unknown) {
+      logger.error(
+        {
+          documentId: ruleInput.documentId,
+          err: error,
+          operation: 'prevented-emissions:process',
+          ruleId: ruleInput.ruleName,
+        },
+        'Prevented-emissions processor failed',
+      );
+
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
     }
   }
 
-  protected evaluateResult(ruleSubject: RuleSubject): EvaluateResultOutput {
+  protected evaluateResult(
+    ruleSubject: PreventedEmissionsRuleSubject,
+  ): EvaluateResultOutput {
     const {
       baseline,
       exceedingEmissionCoefficient,
@@ -174,7 +199,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIDDocument,
     recyclerAccreditationDocument,
-  }: Documents): RuleSubject {
+  }: Documents): PreventedEmissionsRuleSubject {
     const lastEmissionAndCompostingMetricsEvent =
       getLastYearEmissionAndCompostingMetricsEvent({
         documentWithEmissionAndCompostingMetricsEvent:
@@ -224,17 +249,17 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<Documents> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER.toString()
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER.toString()
       ) {
         recyclerAccreditationDocument = document;
       }
@@ -258,8 +283,8 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIDDocument: massIDDocument as Document,
-      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
+      massIDDocument,
+      recyclerAccreditationDocument,
     };
   }
 }

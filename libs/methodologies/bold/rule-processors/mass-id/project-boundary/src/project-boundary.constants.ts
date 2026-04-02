@@ -1,6 +1,6 @@
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
 
 export const RESULT_COMMENTS = {
   failed: {

@@ -3,7 +3,7 @@ import type { NonEmptyString } from '@carrot-fndn/shared/types';
 import type { ReviewReason } from './cross-validation.types';
 import type {
   BaseExtractedData,
-  DocumentType,
+  BoldDocumentType,
   ExtractedField,
   ExtractionConfidence,
   ExtractionOutput,
@@ -215,7 +215,7 @@ export const MATCH_THRESHOLDS = {
 export interface FinalizeExtractionInput<T extends BaseExtractedData> {
   allFields: readonly string[];
   confidenceFields: Array<ExtractedField<unknown> | undefined>;
-  documentType: DocumentType;
+  documentType: BoldDocumentType;
   matchScore: number;
   partialData: Partial<T>;
   rawText: NonEmptyString;

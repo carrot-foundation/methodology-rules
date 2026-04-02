@@ -1,13 +1,15 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import { stubActorEventWithLabel } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
+import {
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { ACTOR } = DocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { ACTOR } = BoldDocumentEventName;
 
 interface RecyclerIdentificationTestCase extends RuleTestCase {
   events: Map<string, ReturnType<typeof stubActorEventWithLabel> | undefined>;

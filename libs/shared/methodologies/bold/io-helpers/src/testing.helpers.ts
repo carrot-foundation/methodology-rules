@@ -1,11 +1,11 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { DocumentQueryService } from './document-query.service';
 import * as documentHelpers from './document.helpers';
 
 export const spyOnDocumentQueryServiceLoad = (
-  rootDocument: Document,
-  documents: Document[],
+  rootDocument: BoldDocument,
+  documents: BoldDocument[],
 ) => {
   vi.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
     iterator: () => ({

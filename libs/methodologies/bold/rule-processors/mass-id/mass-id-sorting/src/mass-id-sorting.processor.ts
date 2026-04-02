@@ -6,6 +6,7 @@ import {
   getOrUndefined,
   isNil,
   isNonEmptyString,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
@@ -17,9 +18,9 @@ import {
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentSubtype,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -27,7 +28,7 @@ import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { type MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   RESULT_COMMENTS,
@@ -47,11 +48,11 @@ import {
   ValidationErrorCode,
 } from './mass-id-sorting.helpers';
 
-const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = DocumentEventAttributeName;
+const { DEDUCTED_WEIGHT, GROSS_WEIGHT } = BoldAttributeName;
 
 interface DocumentPair {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 interface SortingData {
@@ -59,10 +60,7 @@ interface SortingData {
   deductedWeight: number;
   documentCurrentValue: number;
   grossWeight: number;
-  sortingDescription:
-    | MethodologyDocumentEventAttributeValue
-    | string
-    | undefined;
+  sortingDescription: BoldAttributeValue | string | undefined;
   sortingFactor: number;
   sortingValueCalculationDifference: number;
   valueAfterSorting: number;
@@ -85,6 +83,16 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         resultComment: getOrUndefined(resultComment),
       });
     } catch (error: unknown) {
+      logger.error(
+        {
+          documentId: ruleInput.documentId,
+          err: error,
+          operation: 'mass-id-sorting',
+          ruleId: ruleInput.ruleName,
+        },
+        'Mass-id-sorting processor failed',
+      );
+
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
       });
@@ -176,17 +184,17 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
       ) {
         recyclerAccreditationDocument = document;
       }

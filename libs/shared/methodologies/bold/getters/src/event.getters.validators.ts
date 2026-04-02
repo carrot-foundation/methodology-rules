@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const DocumentEventWithMetadataSchema = z.looseObject({
-  metadata: z.object({
+  metadata: z.looseObject({
     attributes: z
       .array(
         z.looseObject({

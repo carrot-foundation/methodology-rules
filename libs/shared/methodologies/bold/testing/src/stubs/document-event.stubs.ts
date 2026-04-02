@@ -1,16 +1,16 @@
 import type { PartialDeep } from 'type-fest';
 
 import {
-  type DocumentEvent,
-  type DocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
   type AnyObject,
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttributeValue,
+  type BoldAttributeValue,
+  type DocumentEventAttachment,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -19,7 +19,7 @@ import { stubAuthor, stubParticipant } from './participant.stubs';
 
 /**
  * Well-known Symbol used to attach the list of explicitly-provided metadata
- * attribute names to a DocumentEvent stub.  The normalizer in
+ * attribute names to a BoldDocumentEvent stub.  The normalizer in
  * generate-application-rules-manifest.ts reads this to filter out default
  * (noise) attributes from manifest examples.
  */
@@ -34,12 +34,12 @@ const isPropertyOverridenWithUndefined = <T extends AnyObject>(
 ) => Object.hasOwn(item, key) && item[key] === undefined;
 
 export const stubDocumentEvent = (
-  partialEvent: PartialDeep<DocumentEvent> = {},
-): DocumentEvent => ({
+  partialEvent: PartialDeep<BoldDocumentEvent> = {},
+): BoldDocumentEvent => ({
   externalCreatedAt: faker.date.recent().toISOString(),
   id: faker.string.uuid(),
   isPublic: faker.datatype.boolean(),
-  name: stubEnumValue(DocumentEventName),
+  name: stubEnumValue(BoldDocumentEventName),
   ...partialEvent,
   address: stubAddress(partialEvent.address),
   author: stubAuthor(partialEvent.author),
@@ -56,8 +56,8 @@ export const stubDocumentEvent = (
 });
 
 export const stubDocumentEventAttachment = (
-  partialInput: Partial<MethodologyDocumentEventAttachment> = {},
-): MethodologyDocumentEventAttachment => ({
+  partialInput: Partial<DocumentEventAttachment> = {},
+): DocumentEventAttachment => ({
   attachmentId: faker.string.uuid(),
   contentLength: faker.number.int({ max: 10_000, min: 0 }),
   isPublic: faker.datatype.boolean(),
@@ -66,8 +66,8 @@ export const stubDocumentEventAttachment = (
 });
 
 export const stubDocumentEventWithMetadata = (
-  attributes: DocumentEventAttribute[],
-): DocumentEvent =>
+  attributes: BoldDocumentEventAttribute[],
+): BoldDocumentEvent =>
   stubDocumentEvent({
     metadata: {
       attributes,
@@ -75,32 +75,29 @@ export const stubDocumentEventWithMetadata = (
   });
 
 export const stubDocumentEventAttribute = (
-  partialInput: Partial<DocumentEventAttribute> = {},
-): DocumentEventAttribute => ({
+  partialInput: Partial<BoldDocumentEventAttribute> = {},
+): BoldDocumentEventAttribute => ({
   isPublic: faker.datatype.boolean(),
-  name: stubEnumValue(DocumentEventAttributeName),
+  name: stubEnumValue(BoldAttributeName),
   value: faker.lorem.word(),
   ...partialInput,
 });
 
 export const stubActorEventWithLabel = (
-  eventLavel: DocumentEvent['label'],
-  partialEvent?: PartialDeep<DocumentEvent>,
-): DocumentEvent =>
+  eventLabel: BoldDocumentEvent['label'],
+  partialEvent?: PartialDeep<BoldDocumentEvent>,
+): BoldDocumentEvent =>
   stubDocumentEvent({
     ...partialEvent,
-    label: eventLavel,
-    name: DocumentEventName.ACTOR,
+    label: eventLabel,
+    name: BoldDocumentEventName.ACTOR,
   });
 
 export const stubDocumentEventWithMetadataAttributes = (
-  partialEvent?: PartialDeep<DocumentEvent>,
+  partialEvent?: PartialDeep<BoldDocumentEvent>,
   attributes?: Array<
-    | [
-        DocumentEventAttributeName | string,
-        MethodologyDocumentEventAttributeValue,
-      ]
-    | Omit<DocumentEventAttribute, 'isPublic'>
+    | [BoldAttributeName, BoldAttributeValue]
+    | Omit<BoldDocumentEventAttribute, 'isPublic'>
   >,
 ) =>
   stubDocumentEvent({

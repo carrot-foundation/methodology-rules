@@ -1,21 +1,21 @@
 import { isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { NonZeroPositiveInt } from '@carrot-fndn/shared/types';
 
 import { getEventAttributeValue } from './event.getters';
 
 const { DROP_OFF, EMISSION_AND_COMPOSTING_METRICS, PICK_UP, RULES_METADATA } =
-  DocumentEventName;
-const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+  BoldDocumentEventName;
+const { PROCESSOR, RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 
 interface LastYearEmissionAndCompostingMetricsEventParameters {
-  documentWithEmissionAndCompostingMetricsEvent: Document;
+  documentWithEmissionAndCompostingMetricsEvent: BoldDocument;
   documentYear: NonZeroPositiveInt;
 }
 
@@ -23,7 +23,7 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
   documentWithEmissionAndCompostingMetricsEvent,
   documentYear,
 }: LastYearEmissionAndCompostingMetricsEventParameters):
-  | DocumentEvent
+  | BoldDocumentEvent
   | undefined => {
   const lastDocumentYearYear = documentYear - 1;
 
@@ -32,7 +32,7 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
       if (event.name.toString().includes(EMISSION_AND_COMPOSTING_METRICS)) {
         const referenceYear = getEventAttributeValue(
           event,
-          DocumentEventAttributeName.REFERENCE_YEAR,
+          BoldAttributeName.REFERENCE_YEAR,
         );
 
         return referenceYear?.toString() === lastDocumentYearYear.toString();
@@ -44,14 +44,14 @@ export const getLastYearEmissionAndCompostingMetricsEvent = ({
 };
 
 export const getDocumentEventById = (
-  document: Document,
+  document: BoldDocument,
   eventId: string,
-): DocumentEvent | undefined =>
+): BoldDocumentEvent | undefined =>
   document.externalEvents?.find((event) => event.id === eventId);
 
 export const getRulesMetadataEvent = (
-  document: Document | undefined,
-): DocumentEvent | undefined =>
+  document: BoldDocument | undefined,
+): BoldDocumentEvent | undefined =>
   document?.externalEvents?.find(
     (event) => event.name === RULES_METADATA.toString(),
   );
@@ -60,9 +60,9 @@ export const getParticipantActorType = ({
   document,
   event,
 }: {
-  document: Document;
-  event: DocumentEvent;
-}): MassIDDocumentActorType | undefined => {
+  document: BoldDocument;
+  event: BoldDocumentEvent;
+}): MassIDActorType | undefined => {
   const events = document.externalEvents;
 
   if (!isNonEmptyArray(events)) {
@@ -76,8 +76,8 @@ export const getParticipantActorType = ({
     return undefined;
   }
 
-  const sourcePickUp = pickUpEvents[0] as DocumentEvent;
-  const finalDropOff = dropOffEvents.at(-1) as DocumentEvent;
+  const sourcePickUp = pickUpEvents[0] as BoldDocumentEvent;
+  const finalDropOff = dropOffEvents.at(-1) as BoldDocumentEvent;
 
   if (sourcePickUp.id === event.id) {
     return WASTE_GENERATOR;

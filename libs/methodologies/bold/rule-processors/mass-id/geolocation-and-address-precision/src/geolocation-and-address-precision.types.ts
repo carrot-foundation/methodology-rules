@@ -1,33 +1,36 @@
+import type { ApprovedException } from '@carrot-fndn/shared/types';
+
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  ApprovedException,
-  MethodologyApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
 
 export interface GpsLatitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    Event:
+      | typeof BoldDocumentEventName.DROP_OFF
+      | typeof BoldDocumentEventName.PICK_UP;
   };
-  'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LATITUDE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof BoldAttributeName.CAPTURED_GPS_LATITUDE;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
 
 export interface GpsLongitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP;
+    Event:
+      | typeof BoldDocumentEventName.DROP_OFF
+      | typeof BoldDocumentEventName.PICK_UP;
   };
-  'Attribute Name': DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof BoldAttributeName.CAPTURED_GPS_LONGITUDE;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }

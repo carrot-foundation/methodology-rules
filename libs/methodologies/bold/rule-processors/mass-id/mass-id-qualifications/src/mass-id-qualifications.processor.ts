@@ -3,28 +3,28 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import { isNil } from '@carrot-fndn/shared/helpers';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  DocumentCategory,
-  DocumentType,
+  type BoldDocument,
+  BoldDocumentCategory,
+  BoldDocumentType,
   MassIDOrganicSubtype,
-  MeasurementUnit,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
 import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
 
-const { MASS_ID } = DocumentCategory;
+const { MASS_ID } = BoldDocumentCategory;
 const { KG } = MeasurementUnit;
-const { ORGANIC } = DocumentType;
+const { ORGANIC } = BoldDocumentType;
 
-export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<Document> {
+export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<BoldDocument> {
   protected readonly processorErrors =
     new MassIDQualificationsProcessorErrors();
 
   protected override evaluateResult(
-    document: Document,
+    document: BoldDocument,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
     const errorMessages: string[] = [];
 
@@ -79,7 +79,9 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
     };
   }
 
-  protected override getRuleSubject(document: Document): Document | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): BoldDocument | undefined {
     return document;
   }
 
@@ -92,7 +94,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<D
   }
 
   private validateRequiredFields(
-    document: Document,
+    document: BoldDocument,
   ): EvaluateResultOutput | undefined {
     if (isNil(document.type)) {
       return {

@@ -12,28 +12,28 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  DocumentEventAttributeName;
-const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = DocumentEventVehicleType;
-const { PICK_UP } = DocumentEventName;
+  BoldAttributeName;
+const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = BoldVehicleType;
+const { PICK_UP } = BoldDocumentEventName;
 
-export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
+export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set<string>([
   BICYCLE,
   CART,
   SLUDGE_PIPES,
 ]);
 
 interface RuleSubject {
-  pickUpEvent?: DocumentEvent | undefined;
+  pickUpEvent?: BoldDocumentEvent | undefined;
 }
 
 export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -57,9 +57,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     }
 
     if (
-      !(Object.values(DocumentEventVehicleType) as unknown[]).includes(
-        vehicleTypeValue,
-      )
+      !(Object.values(BoldVehicleType) as unknown[]).includes(vehicleTypeValue)
     ) {
       return this.createResult(
         false,
@@ -88,9 +86,8 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
           );
     }
 
-    const needsLicensePlate = !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(
-      vehicleTypeValue as DocumentEventVehicleType,
-    );
+    const needsLicensePlate =
+      !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
 
     if (!needsLicensePlate) {
       return this.createResult(
@@ -127,7 +124,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     );
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     return {
       pickUpEvent: document.externalEvents?.find(eventNameIsAnyOf([PICK_UP])),
     };

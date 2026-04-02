@@ -19,6 +19,9 @@ anti_patterns:
   - Naming interfaces with an `I` prefix (e.g. `IDocument`); use plain PascalCase instead
   - Suffixing types or interfaces with `Type` (e.g. `DocumentType` when `Document` suffices)
   - Mixing naming styles within the same scope (e.g. `total_weight` alongside `totalMass`)
+  - Declaring types, schemas, or enums in a domain-scoped library without the domain prefix (e.g. `DocumentCategory` instead of `BoldDocumentCategory` in `bold/types/`)
+  - Using `DocumentEvent` as a qualifier when the concept exists independently of document events (e.g. `DocumentEventVehicleType` instead of `BoldVehicleType`)
+  - Placing generic types (e.g. `MeasurementUnit`) in a domain-scoped library instead of `libs/shared/types/`
 ---
 
 # Naming Conventions Rule
@@ -73,6 +76,24 @@ const s = calc(mb);
 ```
 
 Avoid generic names like `data`, `info`, or `result` unless qualified with domain context (e.g. `documentData`, `validationResult`).
+
+### Domain-scoped type prefixes
+
+Types, schemas, enums, and constants declared in a domain-scoped library must carry the domain prefix. The import path already provides namespace context, but the prefix makes the domain explicit at usage sites across the codebase.
+
+| Library path | Prefix | Example |
+|---|---|---|
+| `libs/shared/methodologies/bold/*` | `Bold` | `BoldDocumentCategory`, `BoldVehicleType` |
+| (MassID-specific within Bold) | `MassID` | `MassIDActorType`, `MassIDOrganicSubtype` |
+| (RewardsDistribution-specific within Bold) | `RewardsDistribution` | `RewardsDistributionActorType` |
+| (CreditOrder-specific within Bold) | `CreditOrder` | `CreditOrderStatus` |
+
+Rules:
+
+- **Drop `DocumentEvent`** when the concept exists independently of document events. Vehicle types, scale types, container types, and attribute names are domain concepts, not event-specific. Keep `DocumentEvent` only when the concept IS about events (e.g. `BoldDocumentEventName`, `BoldDocumentEventLabel`).
+- **Drop `Document`** from actor type names. Actors belong to a domain, not to documents: `MassIDActorType`, not `MassIDDocumentActorType`.
+- **`Methodology` is a qualifier, not a domain**. Use it as a qualifier within Bold: `BoldMethodologyActorType` (actors in Methodology-category documents), not `MethodologyDocumentActorType`.
+- **Generic types belong in `libs/shared/types/`**, not in domain libraries. If a type is not specific to any methodology, move it up.
 
 ### Booleans
 

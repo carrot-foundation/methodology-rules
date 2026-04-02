@@ -1,12 +1,12 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { addDays, addHours, subDays, subSeconds } from 'date-fns';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
 import { ProjectPeriodLimitProcessor } from './project-period-limit.processor';
 
-const { RECYCLED } = DocumentEventName;
+const { RECYCLED } = BoldDocumentEventName;
 
 const createBRTDateString = (date: Date): string => {
   const utcDate = new Date(date);

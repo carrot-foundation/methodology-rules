@@ -1,9 +1,9 @@
 import type { UnknownArray } from 'type-fest';
 
 import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type NonEmptyString,
@@ -34,19 +34,17 @@ export const not =
     !predicateCallback(input);
 
 export const eventNameIsAnyOf =
-  (eventNames: DocumentEventName[]): PredicateCallback<DocumentEvent> =>
+  (eventNames: BoldDocumentEventName[]): PredicateCallback<BoldDocumentEvent> =>
   (event) =>
     eventNames.some((name) => eventHasName(event, name));
 
 export const eventLabelIsAnyOf =
-  (eventLabels: NonEmptyString[]): PredicateCallback<DocumentEvent> =>
+  (eventLabels: NonEmptyString[]): PredicateCallback<BoldDocumentEvent> =>
   (event) =>
     eventLabels.some((label) => eventHasLabel(event, label));
 
 export const metadataAttributeNameIsAnyOf =
-  (
-    metadataNames: DocumentEventAttributeName[],
-  ): PredicateCallback<DocumentEvent> =>
+  (metadataNames: BoldAttributeName[]): PredicateCallback<BoldDocumentEvent> =>
   (event) =>
     metadataNames.some((metadataName) =>
       eventHasMetadataAttribute({ event, metadataName }),
@@ -54,15 +52,13 @@ export const metadataAttributeNameIsAnyOf =
 
 export const metadataAttributeValueIsAnyOf =
   (
-    metadataName: DocumentEventAttributeName,
+    metadataName: BoldAttributeName,
     metadataValues: UnknownArray,
-  ): PredicateCallback<DocumentEvent> =>
+  ): PredicateCallback<BoldDocumentEvent> =>
   (event) =>
     eventHasMetadataAttribute({ event, metadataName, metadataValues });
 
 export const metadataAttributeValueIsNotEmpty =
-  (
-    metadataName: DocumentEventAttributeName,
-  ): PredicateCallback<DocumentEvent> =>
+  (metadataName: BoldAttributeName): PredicateCallback<BoldDocumentEvent> =>
   (event) =>
     eventHasNonEmptyStringAttribute(event, metadataName);

@@ -15,16 +15,14 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyApprovedExceptionType,
-  type MethodologyParticipant,
-} from '@carrot-fndn/shared/types';
+import { type DocumentParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { expect } from 'vitest';
 
@@ -35,17 +33,17 @@ import {
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 
 interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document | undefined;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument | undefined;
 }
 
 interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  actorParticipants: Map<string, MethodologyParticipant>;
+  actorParticipants: Map<string, DocumentParticipant>;
   massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
 }
 
-const { RECYCLER, WASTE_GENERATOR } = MassIDDocumentActorType;
+const { RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 const {
   ACCREDITATION_CONTEXT,
   ACCREDITATION_RESULT,
@@ -54,9 +52,9 @@ const {
   FACILITY_ADDRESS,
   LEGAL_AND_ADMINISTRATIVE_COMPLIANCE,
   PICK_UP,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const { APPROVED_EXCEPTIONS, CAPTURED_GPS_LATITUDE, CAPTURED_GPS_LONGITUDE } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 const actorParticipants = new Map(
   MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => [
@@ -73,10 +71,10 @@ const actorsCoordinates = new Map(
 
 const recyclerParticipant = actorParticipants.get(
   RECYCLER,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 const wasteGeneratorParticipant = actorParticipants.get(
   WASTE_GENERATOR,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 
 const recyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.base,
@@ -121,10 +119,10 @@ const manifestActorParticipants = new Map(
 );
 const manifestRecyclerParticipant = manifestActorParticipants.get(
   RECYCLER,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 const manifestWasteGeneratorParticipant = manifestActorParticipants.get(
   WASTE_GENERATOR,
-) as MethodologyParticipant;
+) as DocumentParticipant;
 
 const manifestRecyclerAddress = stubAddress({
   latitude: -23.5505,
@@ -223,27 +221,31 @@ const similarWasteGeneratorAddress = stubAddress({
 });
 
 const createGpsException = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   attributeName:
-    | DocumentEventAttributeName.CAPTURED_GPS_LATITUDE
-    | DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    | typeof BoldAttributeName.CAPTURED_GPS_LATITUDE
+    | typeof BoldAttributeName.CAPTURED_GPS_LONGITUDE,
   reason: string,
   validUntil?: string,
 ) => ({
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID,
+      Category: BoldDocumentCategory.MASS_ID,
     },
     Event: eventName.toString(),
   },
   'Attribute Name': attributeName.toString(),
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+  'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
   Reason: reason,
   ...(validUntil && { 'Valid Until': validUntil }),
 });
 
 const createGpsExceptions = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   includeLatitude = true,
   includeLongitude = true,
   validUntil?: string,
@@ -277,7 +279,7 @@ const createGpsExceptions = (
 
 const createAccreditationDocumentWithAddress = (
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
+  participant: DocumentParticipant,
 ): StubBoldDocumentParameters => ({
   externalEventsMap: {
     [FACILITY_ADDRESS]: stubDocumentEvent({
@@ -295,8 +297,10 @@ const createAccreditationDocumentWithAddress = (
 
 const createAccreditationDocumentWithGpsExceptions = (
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  participant: DocumentParticipant,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   includeLatitude = true,
   includeLongitude = true,
   validUntil?: string,
@@ -329,9 +333,11 @@ const createAccreditationDocumentWithGpsExceptions = (
 });
 
 const createMassIDEvent = (
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
   address: ReturnType<typeof stubAddress>,
-  participant: MethodologyParticipant,
+  participant: DocumentParticipant,
   gpsLatitude?: number,
   gpsLongitude?: number,
 ) => {

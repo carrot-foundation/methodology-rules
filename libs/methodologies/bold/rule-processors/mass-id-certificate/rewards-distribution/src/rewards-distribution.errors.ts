@@ -1,7 +1,7 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
-import { DocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentCategory } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
+const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
 
 export const ERROR_MESSAGES = {
   EXTERNAL_EVENTS_NOT_FOUND: (documentId: string) =>

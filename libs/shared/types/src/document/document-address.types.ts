@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { LatitudeSchema, LongitudeSchema } from '../number.types';
 import { NonEmptyStringSchema } from '../string.types';
 
-export const MethodologyAddressSchema = z.looseObject({
+export const DocumentAddressSchema = z.object({
   city: NonEmptyStringSchema,
   countryCode: NonEmptyStringSchema,
   countryState: NonEmptyStringSchema,
@@ -17,4 +17,4 @@ export const MethodologyAddressSchema = z.looseObject({
   street: NonEmptyStringSchema,
   zipCode: NonEmptyStringSchema,
 });
-export type MethodologyAddress = z.infer<typeof MethodologyAddressSchema>;
+export type DocumentAddress = z.infer<typeof DocumentAddressSchema>;

@@ -8,12 +8,12 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldAttributeName,
+  BoldBaseline,
+  BoldDocument,
+  BoldDocumentEventName,
+  MassIDActorType,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type AnyObject } from '@carrot-fndn/shared/types';
 import { addYears } from 'date-fns';
@@ -38,12 +38,12 @@ const {
   EXCEEDING_EMISSION_COEFFICIENT,
   GREENHOUSE_GAS_TYPE,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-const { RECYCLER } = MassIDDocumentActorType;
-const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP } = DocumentEventName;
+} = BoldAttributeName;
+const { RECYCLER } = MassIDActorType;
+const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP } = BoldDocumentEventName;
 
 const subtype = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
-const baseline = MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
+const baseline = BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
 const exceedingEmissionCoefficient = 0.02;
 const massIDDocumentValue = 100;
 const baselineValue =
@@ -56,17 +56,13 @@ const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 const othersIfOrganicLocalWasteClassificationCode = '02 01 06';
 const othersIfOrganicCarbonFraction = '0.15';
 
-const computeOthersIfOrganicFactor = (
-  baseline_: MethodologyBaseline,
-): number => {
-  if (
-    baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
-  ) {
+const computeOthersIfOrganicFactor = (baseline_: BoldBaseline): number => {
+  if (baseline_ === BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS) {
     // Coefficients aligned with internal calculator, rounded to 6 decimals.
     return Number.parseFloat('0.905557');
   }
 
-  if (baseline_ === MethodologyBaseline.OPEN_AIR_DUMP) {
+  if (baseline_ === BoldBaseline.OPEN_AIR_DUMP) {
     return Number.parseFloat('0.698505');
   }
 
@@ -74,18 +70,16 @@ const computeOthersIfOrganicFactor = (
 };
 
 const getOthersIfOrganicFormulaCoeffs = (
-  baseline_: MethodologyBaseline,
+  baseline_: BoldBaseline,
 ): { intercept: number; slope: number } => {
-  if (
-    baseline_ === MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS
-  ) {
+  if (baseline_ === BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS) {
     return {
       intercept: Number.parseFloat('-0.1297003'),
       slope: Number.parseFloat('6.901715'),
     };
   }
 
-  if (baseline_ === MethodologyBaseline.OPEN_AIR_DUMP) {
+  if (baseline_ === BoldBaseline.OPEN_AIR_DUMP) {
     return {
       intercept: Number.parseFloat('-0.1297013'),
       slope: Number.parseFloat('5.521373'),
@@ -252,9 +246,9 @@ export const preventedEmissionsTestCases = [
     subtype,
   },
   ...[
-    MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
-    MethodologyBaseline.OPEN_AIR_DUMP,
-    MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+    BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+    BoldBaseline.OPEN_AIR_DUMP,
+    BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
   ].map((othersBaseline) => {
     const othersFactor = computeOthersIfOrganicFactor(othersBaseline);
     const expectedOthersPreventedEmissions =
@@ -397,9 +391,9 @@ const mapParticipantAccreditationDocuments = ({
   recyclerRemoveEventName,
 }: {
   excludeActorTypes?: string[];
-  recyclerExternalEvents?: Document['externalEvents'];
+  recyclerExternalEvents?: BoldDocument['externalEvents'];
   recyclerRemoveEventName?: string;
-}): Document[] =>
+}): BoldDocument[] =>
   [...participantsAccreditationDocuments.values()]
     .filter(
       (document) =>
@@ -427,13 +421,13 @@ const mapParticipantAccreditationDocuments = ({
 
 const makeRecyclerEmissionAndCompostingMetricsEvents = (
   metadataAttributes: MetadataAttributeParameter[],
-): Document['externalEvents'] => [
+): BoldDocument['externalEvents'] => [
   stubBoldEmissionAndCompostingMetricsEvent({ metadataAttributes }),
 ];
 
 interface PreventedEmissionsErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[] =

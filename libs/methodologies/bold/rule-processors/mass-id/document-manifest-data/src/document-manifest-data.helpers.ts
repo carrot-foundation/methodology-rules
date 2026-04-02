@@ -1,16 +1,16 @@
 import {
   type AttachmentInfo,
+  type BoldDocumentType,
   type DocumentExtractorConfig,
-  type DocumentType,
   getDefaultLayouts,
 } from '@carrot-fndn/shared/document-extractor';
 import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
 import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttribute,
-  type MethodologyDocumentEventAttributeValue,
+  type BoldAttributeValue,
+  type DocumentEventAttachment,
+  type DocumentEventAttribute,
 } from '@carrot-fndn/shared/types';
 
 export type {
@@ -20,21 +20,18 @@ export type {
 } from '@carrot-fndn/shared/document-extractor';
 
 export interface DocumentManifestEventSubject {
-  attachment: MethodologyDocumentEventAttachment | undefined;
+  attachment: DocumentEventAttachment | undefined;
   documentNumber: EventAttributeValueType;
   documentType: EventAttributeValueType;
   eventAddressId: string | undefined;
   eventValue: number | undefined;
   exemptionJustification: EventAttributeValueType;
   hasWrongLabelAttachment: boolean;
-  issueDateAttribute: MethodologyDocumentEventAttribute | undefined;
+  issueDateAttribute: DocumentEventAttribute | undefined;
   recyclerCountryCode: string | undefined;
 }
 
-export type EventAttributeValueType =
-  | MethodologyDocumentEventAttributeValue
-  | string
-  | undefined;
+export type EventAttributeValueType = BoldAttributeValue | string | undefined;
 
 export interface ValidationResult {
   failMessages: string[];
@@ -43,7 +40,7 @@ export interface ValidationResult {
   reviewRequired?: boolean;
 }
 
-export const DOCUMENT_TYPE_MAPPING: Record<string, DocumentType> = {
+export const DOCUMENT_TYPE_MAPPING: Record<string, BoldDocumentType> = {
   CDF: 'recyclingManifest',
   MTR: 'transportManifest',
 };

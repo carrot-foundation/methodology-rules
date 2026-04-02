@@ -5,11 +5,11 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldBaseline,
+  type BoldDocument,
+  BoldDocumentEventName,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
@@ -27,8 +27,8 @@ import {
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { type OthersIfOrganicRuleSubjectIds } from './prevented-emissions.types';
 
-const { LOCAL_WASTE_CLASSIFICATION_ID } = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
+const { LOCAL_WASTE_CLASSIFICATION_ID } = BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
 
 export interface OthersIfOrganicAuditDetails {
   canonicalLocalWasteClassificationCode: NonEmptyString;
@@ -72,7 +72,7 @@ export const resolveCanonicalLocalWasteClassificationId = (
 };
 
 export const getOthersIfOrganicContextFromMassIdDocument = (
-  massIDDocument: Document,
+  massIDDocument: BoldDocument,
 ): OthersIfOrganicContext => {
   if (massIDDocument.subtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
     return {};
@@ -115,7 +115,7 @@ export const buildOthersIfOrganicContext = (
 };
 
 export const calculateOthersIfOrganicFactor = (
-  baseline: MethodologyBaseline,
+  baseline: BoldBaseline,
   carbonFraction: PercentageString,
 ): NonNegativeFloat => {
   const { intercept, slope } = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
@@ -196,7 +196,7 @@ export const getCarbonFractionForOthersIfOrganic = (
 
 export const getOthersIfOrganicAuditDetails = (
   normalizedLocalWasteClassificationId: NonEmptyString,
-  baseline: MethodologyBaseline,
+  baseline: BoldBaseline,
 ): OthersIfOrganicAuditDetails => {
   if (
     !Object.prototype.hasOwnProperty.call(

@@ -9,13 +9,13 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  type InboundDocument,
   type LicensePlate,
-  type MethodologyDocument,
-  MethodologyDocumentEventLabel,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -24,15 +24,15 @@ import {
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
-const { ACTOR } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { ACTOR } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { DROP_OFF, MOVE, PICK_UP } = BoldDocumentEventName;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 describe('Waste Mass Is Unique Helpers E2E', () => {
   let auditApiService: AuditApiService;
   let v2DocumentId: NonEmptyString;
-  let v2DocumentStub: MethodologyDocument;
+  let v2DocumentStub: InboundDocument;
 
   const vehicleLicensePlate = 'ABC1D23' as LicensePlate;
   const eventsData: EventsData = {

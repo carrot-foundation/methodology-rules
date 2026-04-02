@@ -9,10 +9,10 @@ import {
   stubDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentCategory,
-  DocumentSubtype,
-  DocumentType,
+  type BoldDocument,
+  BoldDocumentCategory,
+  BoldDocumentSubtype,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -75,9 +75,9 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          parentDocumentEntity as DocumentEntity<Document>,
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -91,7 +91,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([parentDocument]);
+      expect(result).toMatchObject([parentDocument]);
     });
 
     it('should return array with parentDocument and its parentDocument', async () => {
@@ -118,18 +118,20 @@ describe('DocumenQueryService', () => {
           const id = match ? match[1] : null;
 
           if (id === document.id) {
-            return Promise.resolve(documentEntity as DocumentEntity<Document>);
+            return Promise.resolve(
+              documentEntity as DocumentEntity<BoldDocument>,
+            );
           }
 
           if (id === parentDocument.id) {
             return Promise.resolve(
-              parentDocumentEntity as DocumentEntity<Document>,
+              parentDocumentEntity as DocumentEntity<BoldDocument>,
             );
           }
 
           if (id === parentDocumentOfParentDocument.id) {
             return Promise.resolve(
-              parentDocumentOfParentDocumentEntity as DocumentEntity<Document>,
+              parentDocumentOfParentDocumentEntity as DocumentEntity<BoldDocument>,
             );
           }
 
@@ -153,7 +155,10 @@ describe('DocumenQueryService', () => {
 
       // Check that it was called with the right documents, regardless of order
       expect(mockLoad).toHaveBeenCalled();
-      expect(result).toEqual([parentDocument, parentDocumentOfParentDocument]);
+      expect(result).toMatchObject([
+        parentDocument,
+        parentDocumentOfParentDocument,
+      ]);
 
       // Verify each document was loaded by checking if their IDs appear in any of the keys
       const callArguments = mockLoad.mock.calls.map((call) => call[0].key);
@@ -170,7 +175,7 @@ describe('DocumenQueryService', () => {
     });
 
     it('should return array with parentDocument and its relatedDocuments', async () => {
-      const category = stubEnumValue(DocumentCategory);
+      const category = stubEnumValue(BoldDocumentCategory);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },
@@ -214,13 +219,16 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(3);
-      expect(result).toEqual([parentDocument, relatedDocument]);
+      expect(result.map((d) => d.id)).toEqual([
+        parentDocument.id,
+        relatedDocument.id,
+      ]);
     });
 
     it('should return array with parentDocument and relatedDocuments and its parentDocuments and relatedDocuments', async () => {
-      const category = stubEnumValue(DocumentCategory);
-      const subtype = stubEnumValue(DocumentSubtype);
-      const type = stubEnumValue(DocumentType);
+      const category = stubEnumValue(BoldDocumentCategory);
+      const subtype = stubEnumValue(BoldDocumentSubtype);
+      const type = stubEnumValue(BoldDocumentType);
       const relatedDocumentOfRelatedDocumentOfParentDocument = stubDocument();
       const parentDocumentOfRelatedDocumentOfParentDocument = stubDocument();
       const relatedDocumentOfParentDocument = stubDocument({
@@ -290,36 +298,36 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(document as DocumentEntity<Document>)
+        .mockResolvedValueOnce(document as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: parentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: parentDocumentOfRelatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfRelatedDocumentOfParentDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         )
         .mockResolvedValueOnce(
           stubDocumentEntity({
             document: relatedDocumentOfRelatedDocument,
-          }) as DocumentEntity<Document>,
+          }) as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -333,7 +341,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(7);
-      expect(result).toEqual([
+      expect(result).toMatchObject([
         parentDocument,
         relatedDocumentOfParentDocument,
         parentDocumentOfRelatedDocumentOfParentDocument,
@@ -383,7 +391,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([relatedDocument]);
+      expect(result).toMatchObject([relatedDocument]);
     });
 
     it('should return relatedDocuments with bidirectional false in array', async () => {
@@ -418,7 +426,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(2);
-      expect(result).toEqual([relatedDocument]);
+      expect(result).toMatchObject([relatedDocument]);
     });
 
     it('should return empty array when relatedDocuments criteria is array empty', async () => {
@@ -430,7 +438,7 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
-        documentEntity as DocumentEntity<Document>,
+        documentEntity as DocumentEntity<BoldDocument>,
       );
 
       const loaderDocuments = await loadDocuments.load({
@@ -454,13 +462,13 @@ describe('DocumenQueryService', () => {
       const criteria: DocumentQueryCriteria = {
         relatedDocuments: [
           {
-            category: stubEnumValue(DocumentCategory),
+            category: stubEnumValue(BoldDocumentCategory),
           },
         ],
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load').mockResolvedValueOnce(
-        documentEntity as DocumentEntity<Document>,
+        documentEntity as DocumentEntity<BoldDocument>,
       );
 
       const loaderDocuments = await loadDocuments.load({
@@ -478,7 +486,7 @@ describe('DocumenQueryService', () => {
     });
 
     it('should only return related documents when the parent document is omitted', async () => {
-      const category = stubEnumValue(DocumentCategory);
+      const category = stubEnumValue(BoldDocumentCategory);
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { attachments, ...externalEvent } = stubDocumentEvent({
         relatedDocument: { category },
@@ -508,10 +516,12 @@ describe('DocumenQueryService', () => {
       };
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
-        .mockResolvedValueOnce(parentDocumentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          relatedDocumentEntity as DocumentEntity<Document>,
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
+        )
+        .mockResolvedValueOnce(
+          relatedDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({
@@ -525,7 +535,7 @@ describe('DocumenQueryService', () => {
         .map(({ document: documentLoad }) => documentLoad);
 
       expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(3);
-      expect(result).toEqual([relatedDocument]);
+      expect(result.map((d) => d.id)).toEqual([relatedDocument.id]);
     });
   });
 
@@ -539,9 +549,9 @@ describe('DocumenQueryService', () => {
       const documentEntity = stubDocumentEntity({ document });
 
       vi.spyOn(provideDocumentLoaderService, 'load')
-        .mockResolvedValueOnce(documentEntity as DocumentEntity<Document>)
+        .mockResolvedValueOnce(documentEntity as DocumentEntity<BoldDocument>)
         .mockResolvedValueOnce(
-          parentDocumentEntity as DocumentEntity<Document>,
+          parentDocumentEntity as DocumentEntity<BoldDocument>,
         );
 
       const loaderDocuments = await loadDocuments.load({

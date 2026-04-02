@@ -1,22 +1,52 @@
+import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+import { DocumentEventAttachmentSchema } from '@carrot-fndn/shared/types';
+
+import { BoldDocumentEventAttributeSchema } from './document-event.types';
 import {
-  DocumentEventWithAttachmentsSchema,
-  DocumentEventWithMetadataSchema,
+  BoldDocumentEventWithAttachmentsSchema,
+  BoldDocumentEventWithMetadataSchema,
 } from './validation.types';
 
-describe('DocumentEventWithAttachmentsSchema', () => {
-  it('should reject empty attachments array', () => {
+describe('BoldDocumentEventWithAttachmentsSchema', () => {
+  it.each([
+    {
+      expected: true,
+      input: {
+        attachments: [createStubFromSchema(DocumentEventAttachmentSchema)],
+      },
+      scenario: 'non-empty attachments',
+    },
+    {
+      expected: false,
+      input: { attachments: [] },
+      scenario: 'empty attachments',
+    },
+  ])('should return $expected for $scenario', ({ expected, input }) => {
     expect(
-      DocumentEventWithAttachmentsSchema.safeParse({ attachments: [] }).success,
-    ).toBe(false);
+      BoldDocumentEventWithAttachmentsSchema.safeParse(input).success,
+    ).toBe(expected);
   });
 });
 
-describe('DocumentEventWithMetadataSchema', () => {
-  it('should reject empty attributes array', () => {
-    expect(
-      DocumentEventWithMetadataSchema.safeParse({
-        metadata: { attributes: [] },
-      }).success,
-    ).toBe(false);
+describe('BoldDocumentEventWithMetadataSchema', () => {
+  it.each([
+    {
+      expected: true,
+      input: {
+        metadata: {
+          attributes: [createStubFromSchema(BoldDocumentEventAttributeSchema)],
+        },
+      },
+      scenario: 'non-empty attributes',
+    },
+    {
+      expected: false,
+      input: { metadata: { attributes: [] } },
+      scenario: 'empty attributes',
+    },
+  ])('should return $expected for $scenario', ({ expected, input }) => {
+    expect(BoldDocumentEventWithMetadataSchema.safeParse(input).success).toBe(
+      expected,
+    );
   });
 });

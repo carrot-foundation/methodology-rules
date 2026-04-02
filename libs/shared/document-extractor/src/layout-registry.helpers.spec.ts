@@ -7,8 +7,8 @@ import {
 
 import type {
   BaseExtractedData,
+  BoldDocumentType,
   DocumentParser,
-  DocumentType,
   ExtractionOutput,
 } from './document-extractor.types';
 
@@ -24,7 +24,7 @@ import {
 } from './layout-registry.helpers';
 
 const buildMockExtractionOutput = (
-  documentType: DocumentType,
+  documentType: BoldDocumentType,
   rawText: NonEmptyString,
 ): ExtractionOutput<BaseExtractedData> => ({
   data: {

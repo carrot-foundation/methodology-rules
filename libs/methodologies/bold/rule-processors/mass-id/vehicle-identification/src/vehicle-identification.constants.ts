@@ -1,11 +1,11 @@
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
+  BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
 
 export const RESULT_COMMENTS = {
   failed: {

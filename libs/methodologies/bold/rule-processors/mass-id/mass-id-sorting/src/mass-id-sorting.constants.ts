@@ -1,7 +1,7 @@
-import { DocumentEventAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 export const SORTING_TOLERANCE = 0.1;
 

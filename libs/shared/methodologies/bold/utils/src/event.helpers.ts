@@ -1,9 +1,9 @@
 import { calculateDistance } from '@carrot-fndn/shared/helpers';
-import { type DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const calculateDistanceBetweenTwoEvents = (
-  eventA: DocumentEvent,
-  eventB: DocumentEvent,
+  eventA: BoldDocumentEvent,
+  eventB: BoldDocumentEvent,
 ): number =>
   calculateDistance(
     {

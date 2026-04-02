@@ -1,25 +1,25 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
-import { AnyObject, MethodologyParticipant } from '@carrot-fndn/shared/types';
+import { AnyObject, DocumentParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { BoldStubsBuilder, type StubBoldDocumentParameters } from '../builders';
 
 interface CreateBoldStubsParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  massIDActorParticipants?: Map<string, MethodologyParticipant> | undefined;
+  massIDActorParticipants?: Map<string, DocumentParticipant> | undefined;
   massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
 }
 
 interface ProcessRuleTestParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  massIDActorParticipants?: Map<string, MethodologyParticipant> | undefined;
+  massIDActorParticipants?: Map<string, DocumentParticipant> | undefined;
   massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
   ruleDataProcessor: RuleDataProcessor;
   spyOnDocumentQueryServiceLoad: (
-    rootDocument: Document,
-    documents: Document[],
+    rootDocument: BoldDocument,
+    documents: BoldDocument[],
   ) => void;
 }
 

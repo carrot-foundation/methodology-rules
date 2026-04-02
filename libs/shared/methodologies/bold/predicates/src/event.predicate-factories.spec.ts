@@ -3,11 +3,11 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -25,7 +25,7 @@ describe('Predicate Factories', () => {
     it('should return true if all arguments return true', () => {
       const event = stubDocumentEvent();
 
-      const condition = and<DocumentEvent>(
+      const condition = and<BoldDocumentEvent>(
         (input) => input.id === event.id,
         (input) => input.address.id === event.address.id,
         (input) => input.participant.id === event.participant.id,
@@ -37,7 +37,7 @@ describe('Predicate Factories', () => {
     it('should return false if an argument return false', () => {
       const event = stubDocumentEvent();
 
-      const condition = and<DocumentEvent>(
+      const condition = and<BoldDocumentEvent>(
         (input) => input.id === faker.string.uuid(),
         (input) => input.address.id === event.address.id,
         (input) => input.participant.id === event.participant.id,
@@ -51,7 +51,9 @@ describe('Predicate Factories', () => {
     it('should return false if argument return true', () => {
       const event = stubDocumentEvent();
 
-      const condition = not<DocumentEvent>((input) => input.id === event.id);
+      const condition = not<BoldDocumentEvent>(
+        (input) => input.id === event.id,
+      );
 
       expect(condition(event)).toBe(false);
     });
@@ -59,7 +61,7 @@ describe('Predicate Factories', () => {
     it('should return true if argument return false', () => {
       const event = stubDocumentEvent();
 
-      const condition = not<DocumentEvent>(
+      const condition = not<BoldDocumentEvent>(
         (input) => input.id === faker.string.uuid(),
       );
 
@@ -69,14 +71,14 @@ describe('Predicate Factories', () => {
 
   describe('eventNameIsAnyOf', () => {
     it('should return true if the event has any of the specified names', () => {
-      const { ACTOR, MOVE } = DocumentEventName;
+      const { ACTOR, MOVE } = BoldDocumentEventName;
       const event = stubDocumentEvent({ name: MOVE });
 
       expect(eventNameIsAnyOf([MOVE, ACTOR])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified names', () => {
-      const { ACTOR, DROP_OFF, MOVE } = DocumentEventName;
+      const { ACTOR, DROP_OFF, MOVE } = BoldDocumentEventName;
       const event = stubDocumentEvent({ name: ACTOR });
 
       expect(eventNameIsAnyOf([MOVE, DROP_OFF])(event)).toBe(false);
@@ -85,15 +87,14 @@ describe('Predicate Factories', () => {
 
   describe('eventLabelIsAnyOf', () => {
     it('should return true if the event has any of the specified labels', () => {
-      const { HAULER, RECYCLER } = MethodologyDocumentEventLabel;
+      const { HAULER, RECYCLER } = BoldDocumentEventLabel;
       const event = stubDocumentEvent({ label: HAULER });
 
       expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(true);
     });
 
     it('should return false if the event has none of the specified labels', () => {
-      const { HAULER, RECYCLER, WASTE_GENERATOR } =
-        MethodologyDocumentEventLabel;
+      const { HAULER, RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
       const event = stubDocumentEvent({ label: WASTE_GENERATOR });
 
       expect(eventLabelIsAnyOf([HAULER, RECYCLER])(event)).toBe(false);
@@ -102,7 +103,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeNameIsAnyOf', () => {
     it('should return true if the event has any of the specified metadata attribute names', () => {
-      const { DESCRIPTION, DOCUMENT_NUMBER } = DocumentEventAttributeName;
+      const { DESCRIPTION, DOCUMENT_NUMBER } = BoldAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -114,7 +115,7 @@ describe('Predicate Factories', () => {
 
     it('should return false if the event has none of the specified metadata attribute names', () => {
       const { CONTAINER_TYPE, DESCRIPTION, DOCUMENT_NUMBER } =
-        DocumentEventAttributeName;
+        BoldAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -127,7 +128,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeValueIsAnyOf', () => {
     it('should return true if the metadata attribute has any of the specified values', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
+      const { DESCRIPTION } = BoldAttributeName;
       const description = faker.string.sample();
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, description],
@@ -142,7 +143,7 @@ describe('Predicate Factories', () => {
     });
 
     it('should return false if the metadata attribute has none of the specified values', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
+      const { DESCRIPTION } = BoldAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -158,7 +159,7 @@ describe('Predicate Factories', () => {
 
   describe('metadataAttributeValueIsNotEmpty', () => {
     it('should return true if the metadata attribute value is not empty', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
+      const { DESCRIPTION } = BoldAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, faker.string.sample()],
       ]);
@@ -167,7 +168,7 @@ describe('Predicate Factories', () => {
     });
 
     it('should return false if the metadata attribute value is empty', () => {
-      const { DESCRIPTION } = DocumentEventAttributeName;
+      const { DESCRIPTION } = BoldAttributeName;
       const event = stubDocumentEventWithMetadataAttributes(undefined, [
         [DESCRIPTION, undefined as any], // necessary cast to reuse stub
       ]);

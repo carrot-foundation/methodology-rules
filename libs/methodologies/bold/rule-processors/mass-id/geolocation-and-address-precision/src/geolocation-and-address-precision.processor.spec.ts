@@ -7,7 +7,7 @@ import {
   expectRuleOutput,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleInput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
@@ -50,7 +50,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
         (participant) =>
           stubDocumentEvent({
             label: participant.type,
-            name: DocumentEventName.ACTOR,
+            name: BoldDocumentEventName.ACTOR,
             participant,
             relatedDocument: {
               documentId: participantsAccreditationDocuments.get(

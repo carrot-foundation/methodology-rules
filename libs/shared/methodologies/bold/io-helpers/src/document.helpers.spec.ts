@@ -4,7 +4,7 @@ import {
 } from '@carrot-fndn/shared/document/loader';
 import { stubDocumentEntity } from '@carrot-fndn/shared/document/loader/stubs';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { type Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
 import { loadDocument } from './document.helpers';
@@ -35,7 +35,7 @@ describe('Document Helpers', () => {
       const key = faker.string.uuid();
 
       vi.spyOn(loaderService, 'load').mockResolvedValueOnce(
-        stubDocumentEntity() as DocumentEntity<Document>,
+        stubDocumentEntity() as DocumentEntity<BoldDocument>,
       );
 
       const result = await loadDocument(loaderService, key);

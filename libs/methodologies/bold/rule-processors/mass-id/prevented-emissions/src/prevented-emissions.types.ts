@@ -1,13 +1,8 @@
 import {
+  BoldBaseline,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventAttributeValue,
-  NonEmptyString,
-  NonNegativeFloat,
-  PercentageString,
-} from '@carrot-fndn/shared/types';
+import { NonEmptyString, PercentageString } from '@carrot-fndn/shared/types';
 
 export interface OthersIfOrganicCarbonEntry {
   carbonFraction: PercentageString;
@@ -18,16 +13,6 @@ export type OthersIfOrganicRuleSubjectIds = {
   normalizedLocalWasteClassificationId?: NonEmptyString | undefined;
 };
 
-export interface RuleSubject extends OthersIfOrganicRuleSubjectIds {
-  baseline: MethodologyBaseline | undefined;
-  exceedingEmissionCoefficient:
-    | MethodologyDocumentEventAttributeValue
-    | undefined;
-  gasType: NonEmptyString;
-  massIDDocumentValue: NonNegativeFloat;
-  wasteSubtype: MassIDOrganicSubtype;
-}
-
 export type WasteGeneratorBaselineValues = Partial<
-  Record<MassIDOrganicSubtype, MethodologyBaseline>
+  Record<MassIDOrganicSubtype, BoldBaseline>
 >;

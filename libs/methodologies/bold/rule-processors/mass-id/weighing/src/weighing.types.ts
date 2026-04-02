@@ -1,45 +1,44 @@
+import type { ApprovedException } from '@carrot-fndn/shared/types';
+
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  ApprovedException,
-  MethodologyApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
 
 export interface ContainerCapacityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': DocumentEventAttributeName.CONTAINER_CAPACITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof BoldAttributeName.CONTAINER_CAPACITY;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
 
 export interface ContainerQuantityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': DocumentEventAttributeName.CONTAINER_QUANTITY;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof BoldAttributeName.CONTAINER_QUANTITY;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
 
 export interface TareApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: DocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: DocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': DocumentEventAttributeName.TARE;
-  'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE;
+  'Attribute Name': typeof BoldAttributeName.TARE;
+  'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }

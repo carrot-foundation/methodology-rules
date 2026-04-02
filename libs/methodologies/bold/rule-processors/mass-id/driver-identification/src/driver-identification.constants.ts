@@ -1,16 +1,16 @@
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
   VEHICLE_TYPE,
-} = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { SLUDGE_PIPES } = DocumentEventVehicleType;
+} = BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
+const { SLUDGE_PIPES } = BoldVehicleType;
 
 export const RESULT_COMMENTS = {
   failed: {

@@ -5,26 +5,24 @@ import {
   stubBoldMassIDPickUpEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventLabel,
-  MethodologyDocumentStatus,
-} from '@carrot-fndn/shared/types';
+import { DocumentStatus } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
 
-const { CANCELLED, OPEN } = MethodologyDocumentStatus;
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { CANCELLED, OPEN } = DocumentStatus;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 interface WasteMassIsUniqueTestCase extends RuleTestCase {
-  newDuplicateDocuments: Array<{ status: MethodologyDocumentStatus }>;
-  oldDuplicateDocuments: Array<{ status: MethodologyDocumentStatus }>;
+  newDuplicateDocuments: Array<{ status: DocumentStatus }>;
+  oldDuplicateDocuments: Array<{ status: DocumentStatus }>;
 }
 
 export const wasteMassIsUniqueTestCases: WasteMassIsUniqueTestCase[] = [
@@ -77,8 +75,8 @@ const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
   .build();
 
 interface WasteMassIsUniqueErrorTestCase extends RuleTestCase {
-  massIDAuditDocument: Document;
-  massIDDocument: Document | undefined;
+  massIDAuditDocument: BoldDocument;
+  massIDDocument: BoldDocument | undefined;
 }
 
 export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =

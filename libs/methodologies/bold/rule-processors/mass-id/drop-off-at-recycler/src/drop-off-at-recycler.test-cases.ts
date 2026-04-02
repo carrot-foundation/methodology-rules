@@ -6,10 +6,10 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
@@ -17,9 +17,9 @@ interface DropOffAtRecyclerTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { ACTOR, DROP_OFF } = DocumentEventName;
-const { RECEIVING_OPERATOR_IDENTIFIER } = DocumentEventAttributeName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { ACTOR, DROP_OFF } = BoldDocumentEventName;
+const { RECEIVING_OPERATOR_IDENTIFIER } = BoldAttributeName;
 
 const sameRecyclerAndDropOffAddress = stubAddress();
 

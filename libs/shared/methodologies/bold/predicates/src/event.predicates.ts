@@ -5,42 +5,42 @@ import {
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MeasurementUnit,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
+  BoldParticipantType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { CARROT_PARTICIPANT_BY_ENVIRONMENT } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   DataSetName,
-  MethodologyParticipantType,
+  MeasurementUnit,
   type NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
 import { validateDocumentEvent } from './event.predicates.validators';
 
 export const eventHasName = (
-  event: DocumentEvent,
-  eventName: DocumentEventName,
+  event: BoldDocumentEvent,
+  eventName: BoldDocumentEventName,
 ): boolean => event.name === eventName.toString();
 
 export const eventHasLabel = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   eventLabel: NonEmptyString,
 ): boolean => event.label === eventLabel;
 
-export const isActorEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.ACTOR);
+export const isActorEvent = (event: BoldDocumentEvent): boolean =>
+  eventHasName(event, BoldDocumentEventName.ACTOR);
 
-export const isRecycledEvent = (event: DocumentEvent): boolean =>
-  eventHasName(event, DocumentEventName.RECYCLED);
+export const isRecycledEvent = (event: BoldDocumentEvent): boolean =>
+  eventHasName(event, BoldDocumentEventName.RECYCLED);
 
-export const eventHasActorParticipant = (event: DocumentEvent): boolean =>
-  event.participant.type === MethodologyParticipantType.ACTOR.toString();
+export const eventHasActorParticipant = (event: BoldDocumentEvent): boolean =>
+  event.participant.type === BoldParticipantType.ACTOR.toString();
 
 export const eventHasNonEmptyStringAttribute = (
-  event: DocumentEvent,
-  attributeName: DocumentEventAttributeName,
+  event: BoldDocumentEvent,
+  attributeName: BoldAttributeName,
 ): boolean => isNonEmptyString(getEventAttributeValue(event, attributeName));
 
 export const hasWeightFormat = (
@@ -56,10 +56,10 @@ export const hasWeightFormat = (
 };
 
 export const eventsHasSameMetadataAttributeValue = (
-  events: DocumentEvent[],
-  metadataName: DocumentEventAttributeName,
+  events: BoldDocumentEvent[],
+  metadataName: BoldAttributeName,
 ): boolean => {
-  if (isNonEmptyArray<DocumentEvent>(events)) {
+  if (isNonEmptyArray<BoldDocumentEvent>(events)) {
     return events.every(
       (event) =>
         getEventAttributeValue(event, metadataName) ===
@@ -71,9 +71,9 @@ export const eventsHasSameMetadataAttributeValue = (
 };
 
 export const eventHasMetadataAttribute = (options: {
-  event: DocumentEvent;
-  eventNames?: DocumentEventName[];
-  metadataName: DocumentEventAttributeName | string;
+  event: BoldDocumentEvent;
+  eventNames?: BoldDocumentEventName[];
+  metadataName: BoldAttributeName;
   metadataValues?: unknown;
 }): boolean => {
   const { event, eventNames, metadataName, metadataValues } = options;
@@ -105,7 +105,7 @@ export const eventHasMetadataAttribute = (options: {
 };
 
 export const eventHasCarrotParticipant = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   dataSetName: DataSetName,
 ): boolean => {
   const development =

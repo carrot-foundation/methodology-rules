@@ -1,4 +1,4 @@
-import type { DocumentRelation } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { faker } from '@faker-js/faker';
@@ -17,7 +17,7 @@ describe('Document Mappers', () => {
 
       const result = mapDocumentRelation(document);
 
-      const expected: DocumentRelation = {
+      const expected: BoldDocumentRelation = {
         category: document.category,
         documentId: document.id,
         subtype: document.subtype,

@@ -14,15 +14,15 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type AnyObject,
-  type MethodologyDocumentEventAttributeValue,
-  MethodologyDocumentEventLabel,
+  type BoldAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
@@ -34,13 +34,13 @@ const DESCRIPTION_SIMILARITY_THRESHOLD = 0.9;
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+} = BoldAttributeName;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
 
 type Subject = {
-  description: MethodologyDocumentEventAttributeValue | string | undefined;
-  id: MethodologyDocumentEventAttributeValue | string | undefined;
+  description: BoldAttributeValue | undefined;
+  id: BoldAttributeValue | undefined;
   recyclerCountryCode: string;
   subtype: string;
 };
@@ -131,7 +131,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     const pickUpEvent = document.externalEvents?.find(
       eventNameIsAnyOf([PICK_UP]),
     );

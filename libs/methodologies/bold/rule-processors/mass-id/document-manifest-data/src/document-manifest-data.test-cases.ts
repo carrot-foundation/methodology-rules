@@ -8,13 +8,11 @@ import {
   stubDocumentEventAttachment,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
@@ -27,12 +25,12 @@ interface DocumentManifestDataTestCase extends RuleTestCase {
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
 
-const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = DocumentEventName;
+const { ACTOR, RECYCLING_MANIFEST, TRANSPORT_MANIFEST } = BoldDocumentEventName;
 
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
-const { CUBIC_METER, DATE } = MethodologyDocumentEventAttributeFormat;
+  BoldAttributeName;
+const { RECYCLER } = BoldDocumentEventLabel;
+const { CUBIC_METER, DATE } = DocumentEventAttributeFormat;
 
 const attributeErrorMessages: Record<string, string> = {
   [DOCUMENT_NUMBER]: RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER,

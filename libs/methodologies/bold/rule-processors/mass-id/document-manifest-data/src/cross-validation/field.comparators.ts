@@ -4,7 +4,7 @@ import type {
   ExtractedField,
   ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
-import type { MethodologyAddress } from '@carrot-fndn/shared/types';
+import type { DocumentAddress } from '@carrot-fndn/shared/types';
 
 import {
   dateDifferenceInDays,
@@ -195,7 +195,7 @@ export const compareDateField = (
 const buildEntityNotExtractedReasons = (
   eventNames: readonly string[] | undefined,
   eventTaxId: string | undefined,
-  eventAddress: MethodologyAddress | undefined,
+  eventAddress: DocumentAddress | undefined,
   reasons: EntityComparisonReasons,
 ): FieldValidationResult[] => {
   const validation: FieldValidationResult[] = [];
@@ -232,7 +232,7 @@ const buildExtractedAddress = (
 
 const buildAddressDebug = (
   entityWithAddress: ExtractedEntityWithAddressInfo,
-  eventAddress: MethodologyAddress | undefined,
+  eventAddress: DocumentAddress | undefined,
 ): NonNullable<EntityComparison['address']> => {
   const extractedAddress = buildExtractedAddress(entityWithAddress);
 
@@ -256,7 +256,7 @@ const buildAddressDebug = (
 
 const validateEntityAddress = (
   entityWithAddress: ExtractedEntityWithAddressInfo,
-  eventAddress: MethodologyAddress,
+  eventAddress: DocumentAddress,
   addressReasons: NonNullable<EntityComparisonReasons['address']>,
 ): FieldValidationResult | undefined => {
   if (entityWithAddress.address.confidence !== 'high') {
@@ -318,7 +318,7 @@ export const compareEntity = (
   eventNames: readonly string[] | undefined,
   eventTaxId: string | undefined,
   reasons: EntityComparisonReasons,
-  eventAddress?: MethodologyAddress,
+  eventAddress?: DocumentAddress,
 ): ComparisonOutput<EntityComparison | null> => {
   if (!entity) {
     return {

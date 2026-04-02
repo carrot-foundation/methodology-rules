@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { Maybe } from '@carrot-fndn/shared/types';
 
 import { type DocumentLoader } from '@carrot-fndn/shared/document/loader';
@@ -9,7 +9,7 @@ import { validateDocument } from './document-helpers.validators';
 export const loadDocument = async (
   loaderService: DocumentLoader,
   key: Maybe<string>,
-): Promise<Document | undefined> => {
+): Promise<BoldDocument | undefined> => {
   if (!isNonEmptyString(key)) {
     logger.info(`[loadDocument] Invalid key provided: ${key}`);
 
@@ -30,7 +30,7 @@ export const loadDocument = async (
       return undefined;
     }
 
-    return validation.data as Document;
+    return validation.data;
   } catch (error) {
     logger.warn({ error }, `[loadDocument] Failed to load document: ${key}`);
 

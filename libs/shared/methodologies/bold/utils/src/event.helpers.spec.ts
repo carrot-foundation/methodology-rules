@@ -1,4 +1,4 @@
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { stubDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { stubArray } from '@carrot-fndn/shared/testing';
@@ -9,8 +9,8 @@ describe('Event Helpers', () => {
   describe('calculateDistanceBetweenTwoEvents', () => {
     it('should return the geometric distance between the address of two events', () => {
       const events = stubArray(() => stubDocumentEvent(), 2) as [
-        DocumentEvent,
-        DocumentEvent,
+        BoldDocumentEvent,
+        BoldDocumentEvent,
       ];
 
       const result = calculateDistanceBetweenTwoEvents(...events);

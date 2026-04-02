@@ -5,8 +5,8 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { BoldActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -54,17 +54,18 @@ describe('RewardsDistributionProcessor', () => {
           remainder,
         } = ruleOutput.resultContent as RewardsDistribution;
 
-        const actorsResult = actors.map((actor) => ({
-          actorType: actor.actorType,
-          amount: actor.amount,
-          percentage: actor.percentage,
-        }));
-
-        actorsResult.push({
-          actorType: MethodologyActorType.REMAINDER,
-          amount: remainder.amount,
-          percentage: remainder.percentage,
-        });
+        const actorsResult = [
+          ...actors.map((actor) => ({
+            actorType: actor.actorType,
+            amount: actor.amount,
+            percentage: actor.percentage,
+          })),
+          {
+            actorType: BoldActorType.REMAINDER,
+            amount: remainder.amount,
+            percentage: remainder.percentage,
+          },
+        ];
 
         const totalPercentage = sumBigNumbers(
           actorsResult.map((actor) => BigNumber(actor.percentage)),

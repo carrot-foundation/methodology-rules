@@ -1,4 +1,4 @@
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
   AttachmentInfo,
@@ -29,7 +29,7 @@ const noRelatedEvents: {
   pickUpEvent: undefined;
   recyclerEvent: undefined;
   wasteGeneratorEvent: undefined;
-  weighingEvents: DocumentEvent[];
+  weighingEvents: BoldDocumentEvent[];
 } = {
   dropOffEvent: undefined,
   haulerEvent: undefined,
@@ -290,16 +290,16 @@ describe('crossValidateWithTextract', () => {
       address: STUB_BR_ADDRESS,
       externalCreatedAt: '2024-01-01',
       metadata: { attributes: [] },
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     const dropOffEvent = {
       address: STUB_BR_ADDRESS,
       externalCreatedAt: '2024-01-01',
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     const recyclerEvent = {
       participant: { name: 'Recycler Corp' },
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     mockExtract.mockResolvedValue({
       data: {
@@ -350,7 +350,7 @@ describe('crossValidateWithTextract', () => {
     const pickUpEvent = {
       externalCreatedAt: '2024-01-01',
       metadata: { attributes: [] },
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     mockExtract.mockResolvedValue({
       data: {

@@ -1,4 +1,4 @@
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   createDocumentExtractor,
@@ -49,13 +49,13 @@ export const crossValidateWithTextract = async ({
 }: {
   attachmentInfos: AttachmentInfo[];
   documentManifestEvents: DocumentManifestEventSubject[];
-  dropOffEvent: DocumentEvent | undefined;
-  haulerEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
   mtrEventDocumentNumbers?: string[];
-  pickUpEvent: DocumentEvent | undefined;
-  recyclerEvent: DocumentEvent | undefined;
-  wasteGeneratorEvent: DocumentEvent | undefined;
-  weighingEvents: DocumentEvent[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 }): Promise<CrossValidationResult> => {
   const inputs: CrossValidationInput<DocumentManifestEventSubject>[] = [];
 

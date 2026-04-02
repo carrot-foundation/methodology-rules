@@ -1,11 +1,11 @@
 import {
-  type DocumentType,
+  type BoldDocumentType,
   getRegisteredLayouts,
 } from '@carrot-fndn/shared/document-extractor';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { Command } from '@commander-js/extra-typings';
 
-const VALID_DOCUMENT_TYPES: DocumentType[] = [
+const VALID_DOCUMENT_TYPES: BoldDocumentType[] = [
   'scaleTicket',
   'transportManifest',
   'recyclingManifest',
@@ -18,7 +18,7 @@ export const listLayoutsCommand = new Command('list-layouts')
     const layouts = getRegisteredLayouts();
 
     if (documentType) {
-      if (!VALID_DOCUMENT_TYPES.includes(documentType as DocumentType)) {
+      if (!VALID_DOCUMENT_TYPES.includes(documentType as BoldDocumentType)) {
         logger.error(
           `Unknown document type: ${documentType}\nValid types: ${VALID_DOCUMENT_TYPES.join(', ')}`,
         );

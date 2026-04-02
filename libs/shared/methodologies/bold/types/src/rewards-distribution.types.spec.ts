@@ -1,19 +1,23 @@
 import { createStubFromSchema } from '@carrot-fndn/shared/testing';
 
 import {
-  CertificateRewardSchema,
-  MassIDRewardSchema,
-  RewardActorAddressSchema,
-  RewardActorParticipantSchema,
-  RewardDistributionResultContentSchema,
+  RewardsDistributionActorAddressSchema,
+  RewardsDistributionActorParticipantSchema,
   RewardsDistributionActorType,
+  RewardsDistributionCertificateRewardSchema,
+  RewardsDistributionMassIDRewardSchema,
+  RewardsDistributionResultContentSchema,
 } from './rewards-distribution.types';
 
-const validParticipant = createStubFromSchema(RewardActorParticipantSchema);
+const validParticipant = createStubFromSchema(
+  RewardsDistributionActorParticipantSchema,
+);
 
-const validAddress = createStubFromSchema(RewardActorAddressSchema);
+const validAddress = createStubFromSchema(
+  RewardsDistributionActorAddressSchema,
+);
 
-describe('CertificateRewardSchema', () => {
+describe('RewardsDistributionCertificateRewardSchema', () => {
   const validCertificateReward = {
     actorType: RewardsDistributionActorType.HAULER,
     participant: validParticipant,
@@ -22,7 +26,7 @@ describe('CertificateRewardSchema', () => {
 
   it('should accept all valid actor types', () => {
     for (const actorType of Object.values(RewardsDistributionActorType)) {
-      const result = CertificateRewardSchema.safeParse({
+      const result = RewardsDistributionCertificateRewardSchema.safeParse({
         ...validCertificateReward,
         actorType,
       });
@@ -33,7 +37,7 @@ describe('CertificateRewardSchema', () => {
 
   it('should reject invalid actor type', () => {
     expect(
-      CertificateRewardSchema.safeParse({
+      RewardsDistributionCertificateRewardSchema.safeParse({
         ...validCertificateReward,
         actorType: 'INVALID_TYPE',
       }).success,
@@ -42,7 +46,7 @@ describe('CertificateRewardSchema', () => {
 
   it('should reject invalid BigNumber percentage', () => {
     expect(
-      CertificateRewardSchema.safeParse({
+      RewardsDistributionCertificateRewardSchema.safeParse({
         ...validCertificateReward,
         percentage: 'not-a-number',
       }).success,
@@ -50,7 +54,7 @@ describe('CertificateRewardSchema', () => {
   });
 });
 
-describe('MassIDRewardSchema', () => {
+describe('RewardsDistributionMassIDRewardSchema', () => {
   const validMassIDReward = {
     actorType: RewardsDistributionActorType.RECYCLER,
     address: validAddress,
@@ -60,7 +64,7 @@ describe('MassIDRewardSchema', () => {
 
   it('should accept scientific notation for BigNumber', () => {
     expect(
-      MassIDRewardSchema.safeParse({
+      RewardsDistributionMassIDRewardSchema.safeParse({
         ...validMassIDReward,
         massIDPercentage: '1e5',
       }).success,
@@ -69,7 +73,7 @@ describe('MassIDRewardSchema', () => {
 
   it('should reject NaN for BigNumber', () => {
     expect(
-      MassIDRewardSchema.safeParse({
+      RewardsDistributionMassIDRewardSchema.safeParse({
         ...validMassIDReward,
         massIDPercentage: 'NaN',
       }).success,
@@ -77,11 +81,14 @@ describe('MassIDRewardSchema', () => {
   });
 
   it('should accept without optional preserveSensitiveData', () => {
-    expect(MassIDRewardSchema.safeParse(validMassIDReward).success).toBe(true);
+    expect(
+      RewardsDistributionMassIDRewardSchema.safeParse(validMassIDReward)
+        .success,
+    ).toBe(true);
   });
 });
 
-describe('RewardDistributionResultContentSchema', () => {
+describe('RewardsDistributionResultContentSchema', () => {
   const validResultContent = {
     massIDDocumentId: 'doc-123',
     massIDRewards: [
@@ -96,7 +103,7 @@ describe('RewardDistributionResultContentSchema', () => {
 
   it('should reject empty massIDRewards array', () => {
     expect(
-      RewardDistributionResultContentSchema.safeParse({
+      RewardsDistributionResultContentSchema.safeParse({
         ...validResultContent,
         massIDRewards: [],
       }).success,
@@ -105,7 +112,7 @@ describe('RewardDistributionResultContentSchema', () => {
 
   it('should reject empty massIDDocumentId', () => {
     expect(
-      RewardDistributionResultContentSchema.safeParse({
+      RewardsDistributionResultContentSchema.safeParse({
         ...validResultContent,
         massIDDocumentId: '',
       }).success,

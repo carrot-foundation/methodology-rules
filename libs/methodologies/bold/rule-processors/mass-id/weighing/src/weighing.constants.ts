@@ -1,13 +1,13 @@
 import {
-  DocumentEventAttributeName,
-  DocumentEventContainerType,
-  DocumentEventName,
-  DocumentEventScaleType,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  BoldContainerType,
+  BoldDocumentEventName,
+  BoldScaleType,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
-const { TRANSPORT_MANIFEST, WEIGHING } = DocumentEventName;
+const { TRANSPORT_MANIFEST, WEIGHING } = BoldDocumentEventName;
 const {
   CONTAINER_CAPACITY,
   CONTAINER_QUANTITY,
@@ -19,14 +19,12 @@ const {
   TARE,
   VEHICLE_LICENSE_PLATE,
   WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
-const { TRUCK } = DocumentEventVehicleType;
+} = BoldAttributeName;
+const { TRUCK } = BoldVehicleType;
 
 export const NET_WEIGHT_CALCULATION_TOLERANCE = 0.1;
 
-const supportedFormats = Object.values(
-  MethodologyDocumentEventAttributeFormat,
-).join(', ');
+const supportedFormats = Object.values(DocumentEventAttributeFormat).join(', ');
 
 export const PASSED_RESULT_COMMENTS = {
   PASSED_WITH_CONTAINER_QUANTITY_EXCEPTION: (originalPassMessage: string) =>
@@ -75,18 +73,18 @@ export const INVALID_RESULT_COMMENTS = {
   SCALE_TICKET_UNSUPPORTED_LAYOUT: (layout: unknown) =>
     `The scale ticket layout "${String(
       layout,
-    )}" specified in "${DocumentEventAttributeName.REQUIRED_ADDITIONAL_VERIFICATIONS}" is not supported.`,
+    )}" specified in "${BoldAttributeName.REQUIRED_ADDITIONAL_VERIFICATIONS}" is not supported.`,
   SCALE_TYPE: (scaleType: unknown) =>
     `The "${SCALE_TYPE}" "${String(scaleType)}" is not supported by the methodology.`,
   SCALE_TYPE_MISMATCH: (scaleType: unknown, accreditationScaleType: unknown) =>
     `The provided "${SCALE_TYPE}" "${String(scaleType)}" does not match the accreditation scale type "${String(accreditationScaleType)}".`,
   TARE_FORMAT: `The "${TARE}" format must be one of the supported formats.`,
   TWO_STEP_CONTAINER_TYPE: (containerType: unknown) =>
-    `The "${CONTAINER_TYPE}" for two-step weighing must be ${DocumentEventContainerType.TRUCK}, but "${String(containerType)}" was provided.`,
+    `The "${CONTAINER_TYPE}" for two-step weighing must be ${BoldContainerType.TRUCK}, but "${String(containerType)}" was provided.`,
   TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS:
     'The first weighing participant does not match the second weighing participant.',
   TWO_STEP_WEIGHING_EVENT_SCALE_TYPE: (scaleType: unknown) =>
-    `The "${SCALE_TYPE}" for two-step weighing must be "${DocumentEventScaleType.WEIGHBRIDGE}", but "${String(scaleType)}" was provided.`,
+    `The "${SCALE_TYPE}" for two-step weighing must be "${BoldScaleType.WEIGHBRIDGE}", but "${String(scaleType)}" was provided.`,
   TWO_STEP_WEIGHING_EVENT_VALUES: ({
     attributeName,
     firstValue,

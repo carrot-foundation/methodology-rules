@@ -1,6 +1,6 @@
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { DROP_OFF, RECYCLED } = DocumentEventName;
+const { DROP_OFF, RECYCLED } = BoldDocumentEventName;
 
 export const COMPOSTING_CYCLE_MAX_DAYS = 180;
 export const COMPOSTING_CYCLE_MIN_DAYS = 60;

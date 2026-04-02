@@ -8,16 +8,14 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { WASTE_CLASSIFICATION_CODES } from '@carrot-fndn/shared/methodologies/bold/utils';
-import {
-  type AnyObject,
-  MethodologyDocumentEventLabel,
-} from '@carrot-fndn/shared/types';
+import { type AnyObject } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
@@ -25,10 +23,10 @@ import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
   LOCAL_WASTE_CLASSIFICATION_ID,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER } = BoldDocumentEventLabel;
 
 const randomId = faker.lorem.word();
 const randomDescription = faker.lorem.sentence();
@@ -49,7 +47,7 @@ const americanRecyclerEvent = stubDocumentEvent({
 
 interface RegionalWasteClassificationTestCase extends RuleTestCase {
   events: BoldExternalEventsObject;
-  partialDocument: PartialDeep<Document>;
+  partialDocument: PartialDeep<BoldDocument>;
   resultContent: AnyObject | undefined;
 }
 

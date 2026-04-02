@@ -1,10 +1,10 @@
 import { isNil, isNonEmptyString } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
+  BoldAttributeName,
+  BoldBaseline,
+  type BoldDocumentEvent,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
@@ -18,11 +18,11 @@ import {
 } from './prevented-emissions.others-organic.helpers';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
-const { BASELINES } = DocumentEventAttributeName;
+const { BASELINES } = BoldAttributeName;
 
 export const getPreventedEmissionsFactor = (
   wasteSubtype: MassIDOrganicSubtype,
-  baseline: MethodologyBaseline,
+  baseline: BoldBaseline,
   processorErrors: PreventedEmissionsProcessorErrors,
   othersIfOrganicContext?: OthersIfOrganicContext,
 ): number => {
@@ -53,10 +53,10 @@ export const calculatePreventedEmissions = (
 };
 
 export const getBaselineByWasteSubtype = (
-  emissionAndCompostingMetricsEvent: DocumentEvent | undefined,
+  emissionAndCompostingMetricsEvent: BoldDocumentEvent | undefined,
   wasteSubtype: MassIDOrganicSubtype,
   processorErrors: PreventedEmissionsProcessorErrors,
-): MethodologyBaseline | undefined => {
+): BoldBaseline | undefined => {
   const baselines = getEventAttributeValue(
     emissionAndCompostingMetricsEvent,
     BASELINES,
@@ -71,22 +71,26 @@ export const getBaselineByWasteSubtype = (
   return baselines[wasteSubtype];
 };
 
-export const throwIfMissing = <T>(
-  value: T | undefined,
+export const throwIfMissing: <T>(
+  value: null | T | undefined,
   errorMessage: string,
   processorErrors: PreventedEmissionsProcessorErrors,
-): void => {
+) => asserts value is NonNullable<T> = <T>(
+  value: null | T | undefined,
+  errorMessage: string,
+  processorErrors: PreventedEmissionsProcessorErrors,
+): asserts value is NonNullable<T> => {
   if (isNil(value)) {
     throw processorErrors.getKnownError(errorMessage);
   }
 };
 
 export const getGasTypeFromEvent = (
-  lastEmissionAndCompostingMetricsEvent: DocumentEvent | undefined,
+  lastEmissionAndCompostingMetricsEvent: BoldDocumentEvent | undefined,
 ): NonEmptyString => {
   const gasType = getEventAttributeValue(
     lastEmissionAndCompostingMetricsEvent,
-    DocumentEventAttributeName.GREENHOUSE_GAS_TYPE,
+    BoldAttributeName.GREENHOUSE_GAS_TYPE,
   );
 
   if (!isNonEmptyString(gasType)) {

@@ -1,11 +1,11 @@
-import type { MethodologyAddress } from '@carrot-fndn/shared/types';
+import type { DocumentAddress } from '@carrot-fndn/shared/types';
 import type { PartialDeep } from 'type-fest';
 
 import { faker } from '@faker-js/faker';
 
 export const stubAddress = (
-  partialAddress: PartialDeep<MethodologyAddress> = {},
-): MethodologyAddress => ({
+  partialAddress: PartialDeep<DocumentAddress> = {},
+): DocumentAddress => ({
   city: faker.location.city(),
   countryCode: faker.location.countryCode(),
   countryState: faker.location.state(),

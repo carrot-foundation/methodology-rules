@@ -9,18 +9,18 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
-  type DocumentEvent,
-  type DocumentEventAttribute,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { getYear } from 'date-fns';
 
-const { SORTING } = DocumentEventName;
+const { SORTING } = BoldDocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 export enum ValidationErrorCode {
   EVENT_BEFORE_SORTING_UNDEFINED = 'EVENT_BEFORE_SORTING_UNDEFINED',
@@ -49,8 +49,8 @@ export interface SortingCalculations {
 }
 
 export interface SortingEvents {
-  priorEventWithValue: DocumentEvent | undefined;
-  sortingEvent: DocumentEvent;
+  priorEventWithValue: BoldDocumentEvent | undefined;
+  sortingEvent: BoldDocumentEvent;
 }
 
 export interface ValidationError {
@@ -85,7 +85,7 @@ export const calculateSortingValues = (
 };
 
 export const findSortingEvents = (
-  externalEvents: DocumentEvent[],
+  externalEvents: BoldDocumentEvent[],
 ): SortingEvents | ValidationError => {
   const sortingEventIndex = externalEvents.findIndex(
     eventNameIsAnyOf([SORTING]),
@@ -98,7 +98,9 @@ export const findSortingEvents = (
     };
   }
 
-  const sortingEvent = externalEvents.at(sortingEventIndex) as DocumentEvent;
+  const sortingEvent = externalEvents.at(
+    sortingEventIndex,
+  ) as BoldDocumentEvent;
 
   const priorEventWithValue = externalEvents
     .slice(0, sortingEventIndex)
@@ -108,12 +110,12 @@ export const findSortingEvents = (
   return { priorEventWithValue, sortingEvent };
 };
 
-export const getSortingDescription = (sortingEvent: DocumentEvent) =>
+export const getSortingDescription = (sortingEvent: BoldDocumentEvent) =>
   getEventAttributeValue(sortingEvent, DESCRIPTION);
 
 export const getSortingFactor = (
-  recyclerAccreditationDocument: Document,
-  massIDDocument: Document,
+  recyclerAccreditationDocument: BoldDocument,
+  massIDDocument: BoldDocument,
 ): number | ValidationError => {
   const emissionAndCompostingMetricsEvent =
     getLastYearEmissionAndCompostingMetricsEvent({
@@ -138,8 +140,8 @@ export const getSortingFactor = (
 };
 
 export const getValidatedEventValues = (
-  priorEventWithValue: DocumentEvent | undefined,
-  sortingEvent: DocumentEvent,
+  priorEventWithValue: BoldDocumentEvent | undefined,
+  sortingEvent: BoldDocumentEvent,
 ): EventValues | ValidationError => {
   if (!priorEventWithValue) {
     return {
@@ -172,8 +174,8 @@ export const getValidatedEventValues = (
 };
 
 export const getValidatedExternalEvents = (
-  massIDDocument: Document,
-): DocumentEvent[] | ValidationError => {
+  massIDDocument: BoldDocument,
+): BoldDocumentEvent[] | ValidationError => {
   if (!isNonEmptyArray(massIDDocument.externalEvents)) {
     return {
       code: ValidationErrorCode.MISSING_EXTERNAL_EVENTS,
@@ -185,7 +187,7 @@ export const getValidatedExternalEvents = (
 };
 
 export const getValidatedWeightAttributes = (
-  sortingEvent: DocumentEvent,
+  sortingEvent: BoldDocumentEvent,
 ): ValidationError | WeightAttributes => {
   const grossWeightAttribute = getEventAttributeByName(
     sortingEvent,
@@ -231,7 +233,7 @@ export const getValidatedWeightAttributes = (
 };
 
 export const validateWeightAttribute = (
-  attribute: DocumentEventAttribute | undefined,
+  attribute: BoldDocumentEventAttribute | undefined,
   weightType: 'deducted' | 'gross',
 ): null | ValidationError => {
   if (!isNonZeroPositive(attribute?.value)) {
@@ -244,7 +246,7 @@ export const validateWeightAttribute = (
     };
   }
 
-  if (attribute.format !== MethodologyDocumentEventAttributeFormat.KILOGRAM) {
+  if (attribute.format !== DocumentEventAttributeFormat.KILOGRAM) {
     return {
       code:
         weightType === 'gross'

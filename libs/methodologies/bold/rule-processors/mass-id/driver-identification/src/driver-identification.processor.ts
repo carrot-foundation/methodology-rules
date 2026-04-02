@@ -1,5 +1,5 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   getOrDefault,
@@ -10,10 +10,10 @@ import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/g
 import { eventHasName } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
@@ -22,16 +22,14 @@ const {
   DRIVER_IDENTIFIER,
   DRIVER_IDENTIFIER_EXEMPTION_JUSTIFICATION,
   VEHICLE_TYPE,
-} = DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { SLUDGE_PIPES } = DocumentEventVehicleType;
+} = BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
+const { SLUDGE_PIPES } = BoldVehicleType;
 
 interface RuleSubject {
-  driverIdentifier: MethodologyDocumentEventAttributeValue | undefined;
-  driverIdentifierExemptionJustification:
-    | MethodologyDocumentEventAttributeValue
-    | undefined;
-  vehicleType: MethodologyDocumentEventAttributeValue | undefined;
+  driverIdentifier: BoldAttributeValue | undefined;
+  driverIdentifierExemptionJustification: BoldAttributeValue | undefined;
+  vehicleType: BoldAttributeValue | undefined;
 }
 
 export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -83,7 +81,7 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const pickUpEvent = document.externalEvents?.find((event) =>
       eventHasName(event, PICK_UP),
     );

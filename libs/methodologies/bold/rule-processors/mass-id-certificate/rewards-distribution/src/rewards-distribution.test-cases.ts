@@ -9,12 +9,13 @@ import {
   stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  DocumentSubtype,
+  BoldAttributeName,
+  BoldBusinessSizeDeclarationValue,
+  type BoldDocument,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
+  BoldUnidentifiedAttributeValue,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
@@ -23,12 +24,12 @@ import {
 import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.constants';
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
-const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = DocumentEventName;
-const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = DocumentEventAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } =
-  DocumentEventAttributeValue;
-const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = DocumentSubtype;
+const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
+const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = BoldDocumentEventName;
+const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = BoldAttributeName;
+const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldBusinessSizeDeclarationValue;
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
+const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = BoldDocumentSubtype;
 const {
   COMMUNITY_IMPACT_POOL,
   HAULER,
@@ -42,8 +43,8 @@ const {
 } = RewardsDistributionActorType;
 
 const createWasteGeneratorVerificationDocument = (
-  businessSize: DocumentEventAttributeValue,
-): Document =>
+  businessSize: BoldBusinessSizeDeclarationValue,
+): BoldDocument =>
   ({
     ...new BoldStubsBuilder()
       .createMassIDDocuments()
@@ -69,7 +70,7 @@ const createWasteGeneratorVerificationDocument = (
       )
       .build()
       .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
-  }) as Document;
+  }) as BoldDocument;
 
 const DEFAULT_REWARDS = {
   [COMMUNITY_IMPACT_POOL]: '0',
@@ -158,16 +159,18 @@ interface RewardsDistributionTestCase extends Omit<
 > {
   expectedRewards: Record<string, string>;
   massIDDocumentEvents?: BoldExternalEventsObject | undefined;
-  massIDPartialDocument: PartialDeep<Document>;
+  massIDPartialDocument: PartialDeep<BoldDocument>;
   resultComment?: string;
-  wasteGeneratorVerificationDocument?: Document | undefined;
+  wasteGeneratorVerificationDocument?: BoldDocument | undefined;
 }
 
 export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[] =
   [
     ...Object.entries(REWARDS_DISTRIBUTION_BY_WASTE_TYPE).map(
       ([wasteType, expectedRewards]) => ({
-        expectedRewards: EXPECTED_REWARDS[expectedRewards],
+        expectedRewards: EXPECTED_REWARDS[
+          expectedRewards as keyof typeof EXPECTED_REWARDS
+        ] as Record<string, string>,
         massIDDocumentEvents: {},
         massIDPartialDocument: {
           subtype: wasteType,
@@ -274,8 +277,8 @@ const { massIDAuditDocument, massIDDocument, methodologyDocument } =
     .build();
 
 interface RewardsDistributionErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCase[] =
@@ -302,7 +305,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
             ({ label }) => label !== RewardsDistributionActorType.INTEGRATOR,
           ),
         },
-        methodologyDocument as Document,
+        methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIDDocument.id, [
@@ -316,7 +319,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...methodologyDocument,
           externalEvents: [],
-        } as Document,
+        } as BoldDocument,
         massIDDocument,
       ],
       massIDAuditDocument,
@@ -329,8 +332,8 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...massIDDocument,
           externalEvents: [],
-        } as Document,
-        methodologyDocument as Document,
+        } as BoldDocument,
+        methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(
@@ -344,8 +347,8 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...massIDDocument,
           subtype: 'unknown',
-        } as Document,
-        methodologyDocument as Document,
+        } as BoldDocument,
+        methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
@@ -358,11 +361,11 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         {
           ...methodologyDocument,
           externalEvents: methodologyDocument?.externalEvents?.map((event) =>
-            event.name === String(DocumentEventName.ACTOR)
+            event.name === String(BoldDocumentEventName.ACTOR)
               ? { ...event, address: undefined }
               : event,
           ),
-        } as Document,
+        } as BoldDocument,
       ],
       massIDAuditDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,

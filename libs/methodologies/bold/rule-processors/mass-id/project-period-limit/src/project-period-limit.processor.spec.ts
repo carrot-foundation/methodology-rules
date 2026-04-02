@@ -3,7 +3,7 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
@@ -18,7 +18,7 @@ class TestProjectPeriodLimitProcessor extends ProjectPeriodLimitProcessor {
   }
 }
 
-const { RECYCLED } = DocumentEventName;
+const { RECYCLED } = BoldDocumentEventName;
 
 describe('ProjectPeriodLimitProcessor', () => {
   const ruleDataProcessor = new TestProjectPeriodLimitProcessor();

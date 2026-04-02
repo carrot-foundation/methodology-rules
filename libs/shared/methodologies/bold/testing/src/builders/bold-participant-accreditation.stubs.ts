@@ -1,19 +1,19 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
-  DocumentEventAccreditationStatus,
-  DocumentEventScaleType,
+  BoldAccreditationStatus,
+  BoldBaseline,
+  type BoldDocument,
+  BoldScaleType,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import { MethodologyDocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addDays, getYear, subDays } from 'date-fns';
 
@@ -37,7 +37,7 @@ const {
   EMISSION_AND_COMPOSTING_METRICS,
   MONITORING_SYSTEMS_AND_EQUIPMENT,
   RECYCLING_BASELINES,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const {
   ACCREDITATION_STATUS,
   BASELINES,
@@ -47,8 +47,8 @@ const {
   REFERENCE_YEAR,
   SCALE_TYPE,
   SORTING_FACTOR,
-} = DocumentEventAttributeName;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
+} = BoldAttributeName;
+const { DATE } = DocumentEventAttributeFormat;
 
 const defaultAccreditationResultEventMetadataAttributes: MetadataAttributeParameter[] =
   [
@@ -62,7 +62,7 @@ const defaultAccreditationResultEventMetadataAttributes: MetadataAttributeParame
       name: EXPIRATION_DATE,
       value: addDays(new Date(), 2).toISOString(),
     },
-    [ACCREDITATION_STATUS, DocumentEventAccreditationStatus.APPROVED],
+    [ACCREDITATION_STATUS, BoldAccreditationStatus.APPROVED],
   ];
 
 export const stubBoldAccreditationResultEvent = ({
@@ -117,8 +117,7 @@ const defaultRecyclingBaselinesEventMetadataAttributes: MetadataAttributeParamet
     [
       BASELINES,
       {
-        [stubEnumValue(MassIDOrganicSubtype)]:
-          stubEnumValue(MethodologyBaseline),
+        [stubEnumValue(MassIDOrganicSubtype)]: stubEnumValue(BoldBaseline),
       },
     ],
   ];
@@ -142,7 +141,7 @@ export const stubBoldRecyclingBaselinesEvent = ({
   );
 
 const defaultMonitoringSystemsAndEquipmentEventMetadataAttributes: MetadataAttributeParameter[] =
-  [[SCALE_TYPE, stubEnumValue(DocumentEventScaleType)]];
+  [[SCALE_TYPE, stubEnumValue(BoldScaleType)]];
 
 export const stubBoldMonitoringSystemsAndEquipmentEvent = ({
   metadataAttributes,
@@ -173,7 +172,7 @@ const boldAccreditationExternalEventsMap = new Map([
 export const stubBoldAccreditationDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldAccreditationExternalEventsMap
     : mergeEventsMaps(boldAccreditationExternalEventsMap, externalEventsMap);
@@ -182,12 +181,12 @@ export const stubBoldAccreditationDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: BoldDocumentCategory.METHODOLOGY,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.PARTICIPANT_ACCREDITATION,
+        type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
       },
       false,
     ),

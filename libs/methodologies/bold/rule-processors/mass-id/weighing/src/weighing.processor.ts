@@ -13,12 +13,13 @@ import {
   MASS_ID,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttachmentLabel,
-  DocumentEventWeighingCaptureMethod,
-  DocumentSubtype,
+  BoldAttachmentLabel,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentSubtype,
+  BoldWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   getAttachmentS3Key,
@@ -30,7 +31,7 @@ import {
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
 import {
-  MethodologyAdditionalVerification,
+  AdditionalVerification,
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -38,10 +39,7 @@ import {
   isScaleTicketVerificationConfig,
   verifyScaleTicketNetWeight,
 } from './scale-ticket-verification/scale-ticket-verification.helpers';
-import {
-  NOT_FOUND_RESULT_COMMENTS,
-  PASSED_RESULT_COMMENTS,
-} from './weighing.constants';
+import { PASSED_RESULT_COMMENTS } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
 import {
   getRequiredAdditionalVerificationsFromAccreditationDocument,
@@ -52,16 +50,14 @@ import {
   validateWeighingValues,
   type WeighingValues,
 } from './weighing.helpers';
+import {
+  type WeighingRuleSubject,
+  WeighingRuleSubjectSchema,
+} from './weighing.rule-subject';
 
 interface DocumentPair {
-  massIDDocument: Document;
-  recyclerAccreditationDocument: Document;
-}
-
-interface RuleSubject {
-  massIDDocumentId: NonEmptyString;
-  recyclerAccreditationDocument: Document;
-  weighingEvents: DocumentEvent[];
+  massIDDocument: BoldDocument;
+  recyclerAccreditationDocument: BoldDocument;
 }
 
 export class WeighingProcessor extends RuleDataProcessor {
@@ -71,17 +67,29 @@ export class WeighingProcessor extends RuleDataProcessor {
     try {
       const documentQuery = await this.generateDocumentQuery(ruleInput);
       const documentPair = await this.collectDocuments(documentQuery);
-      const ruleSubject = this.getRuleSubject(documentPair);
+      const rawSubject = this.getRuleSubject(documentPair);
+      const ruleSubject = validateRuleSubjectOrThrow({
+        errors: this.processorErrors,
+        input: rawSubject,
+        schema: WeighingRuleSubjectSchema,
+        validationMessage:
+          this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      });
       const evaluationResult = await this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
       });
     } catch (error) {
-      logger.error({
-        error,
-        message: `Error in weighing processor for document ${ruleInput.documentId}`,
-      });
+      logger.error(
+        {
+          documentId: ruleInput.documentId,
+          err: error,
+          operation: 'weighing:process',
+          ruleId: ruleInput.ruleName,
+        },
+        'Weighing processor failed',
+      );
 
       return mapToRuleOutput(ruleInput, 'FAILED', {
         resultComment: this.processorErrors.getResultCommentFromError(error),
@@ -100,7 +108,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }): string {
     const isTransportManifest =
       weighingValues.weighingCaptureMethod ===
-      DocumentEventWeighingCaptureMethod.TRANSPORT_MANIFEST;
+      BoldWeighingCaptureMethod.TRANSPORT_MANIFEST;
 
     let passMessage = '';
 
@@ -146,13 +154,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     massIDDocumentId,
     recyclerAccreditationDocument,
     weighingEvents,
-  }: RuleSubject): Promise<EvaluateResultOutput> {
-    const initialValidation = this.validateWeighingEvents(weighingEvents);
-
-    if (initialValidation) {
-      return initialValidation;
-    }
-
+  }: WeighingRuleSubject): Promise<EvaluateResultOutput> {
     const isTwoStepWeighingEvent = weighingEvents.length === 2;
 
     if (isTwoStepWeighingEvent) {
@@ -167,7 +169,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       }
     }
 
-    const weighingEvent = weighingEvents[0] as DocumentEvent;
+    const weighingEvent = weighingEvents[0]!;
     const weighingValues = getValuesRelatedToWeighing(
       weighingEvent,
       recyclerAccreditationDocument,
@@ -239,7 +241,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   protected getRuleSubject({
     massIDDocument,
     recyclerAccreditationDocument,
-  }: DocumentPair): RuleSubject {
+  }: DocumentPair): WeighingRuleSubject {
     const weighingEvents = getWeighingEvents(massIDDocument);
 
     return {
@@ -257,8 +259,8 @@ export class WeighingProcessor extends RuleDataProcessor {
   }: {
     expectedNetWeight: number | undefined;
     massIDDocumentId: NonEmptyString;
-    scaleTicketConfig: MethodologyAdditionalVerification | undefined;
-    weighingEvent: DocumentEvent;
+    scaleTicketConfig: AdditionalVerification | undefined;
+    weighingEvent: BoldDocumentEvent;
   }): Promise<{
     errorResult?: EvaluateResultOutput;
     validated: boolean;
@@ -292,13 +294,13 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   private buildScaleTicketTextExtractorInput(
-    weighingEvent: DocumentEvent,
+    weighingEvent: BoldDocumentEvent,
     massIDDocumentId: NonEmptyString,
   ): TextExtractionInput | undefined {
     const scaleTicketAttachment = weighingEvent.attachments?.find(
       (attachment) =>
         String(attachment.label) ===
-        String(DocumentEventAttachmentLabel.WEIGHING_TICKET),
+        String(BoldAttachmentLabel.WEIGHING_TICKET),
     );
 
     if (!scaleTicketAttachment) {
@@ -329,17 +331,17 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   private async collectDocuments(
-    documentQuery: DocumentQuery<Document>,
+    documentQuery: DocumentQuery<BoldDocument>,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: Document | undefined;
-    let massIDDocument: Document | undefined;
+    let recyclerAccreditationDocument: BoldDocument | undefined;
+    let massIDDocument: BoldDocument | undefined;
 
     await documentQuery.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);
 
       if (
         PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === DocumentSubtype.RECYCLER
+        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
       ) {
         recyclerAccreditationDocument = document;
       }
@@ -361,8 +363,9 @@ export class WeighingProcessor extends RuleDataProcessor {
     );
 
     return {
-      massIDDocument: massIDDocument as Document,
-      recyclerAccreditationDocument: recyclerAccreditationDocument as Document,
+      massIDDocument: massIDDocument as BoldDocument,
+      recyclerAccreditationDocument:
+        recyclerAccreditationDocument as BoldDocument,
     };
   }
 
@@ -370,25 +373,5 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (condition) {
       throw this.processorErrors.getKnownError(errorMessage);
     }
-  }
-
-  private validateWeighingEvents(
-    weighingEvents: DocumentEvent[] | undefined,
-  ): EvaluateResultOutput | undefined {
-    if (isNil(weighingEvents) || weighingEvents.length === 0) {
-      return {
-        resultComment: NOT_FOUND_RESULT_COMMENTS.NO_WEIGHING_EVENTS,
-        resultStatus: 'FAILED',
-      };
-    }
-
-    if (weighingEvents.length > 2) {
-      return {
-        resultComment: NOT_FOUND_RESULT_COMMENTS.MORE_THAN_TWO_WEIGHING_EVENTS,
-        resultStatus: 'FAILED',
-      };
-    }
-
-    return undefined;
   }
 }

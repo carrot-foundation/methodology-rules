@@ -1,7 +1,7 @@
 import type {
   AnyObject,
   DateTime,
-  MethodologyDocument,
+  InboundDocument,
   NonEmptyString,
 } from '@carrot-fndn/shared/types';
 
@@ -23,7 +23,7 @@ export interface AuditApiDocumentPartSnapshotEntity<
 
 export interface AuditApiDocumentPrimitiveEntity {
   createdAt: DateTime;
-  document: MethodologyDocument;
+  document: InboundDocument;
   documentId: string;
   snapshotId: string;
   versionDate: DateTime;

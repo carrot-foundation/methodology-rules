@@ -1,12 +1,12 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
-  DocumentCategory,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentType,
-  type RewardDistributionResultContent,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentCategory,
+  type BoldDocumentEvent,
+  BoldDocumentType,
   RewardsDistributionActorType,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
@@ -26,7 +26,7 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { RULE_RESULT_DETAILS, SLUG } = DocumentEventAttributeName;
+const { RULE_RESULT_DETAILS, SLUG } = BoldAttributeName;
 
 export const REWARDS_DISTRIBUTION_RULE_SLUG = 'rewards-distribution';
 
@@ -47,7 +47,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
           preserveSensitiveData: faker.datatype.boolean(),
         },
       ],
-    } satisfies RewardDistributionResultContent,
+    } satisfies RewardsDistributionResultContent,
   ],
   [SLUG, REWARDS_DISTRIBUTION_RULE_SLUG],
 ];
@@ -55,7 +55,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
 export const stubBoldCertificateRewardsDistributionMetadataEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -80,7 +80,7 @@ const boldCertificateExternalEventsMap = new Map([
 export const stubBoldCertificateDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldCertificateExternalEventsMap
     : mergeEventsMaps(boldCertificateExternalEventsMap, externalEventsMap);
@@ -89,11 +89,11 @@ export const stubBoldCertificateDocument = ({
     ...stubDocument(
       {
         type: faker.helpers.arrayElement([
-          DocumentType.GAS_ID,
-          DocumentType.RECYCLED_ID,
+          BoldDocumentType.GAS_ID,
+          BoldDocumentType.RECYCLED_ID,
         ]),
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: BoldDocumentCategory.METHODOLOGY,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),

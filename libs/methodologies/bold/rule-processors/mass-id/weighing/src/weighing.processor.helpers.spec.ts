@@ -1,6 +1,6 @@
 import {
-  type DocumentEvent,
-  DocumentEventAttachmentLabel,
+  BoldAttachmentLabel,
+  type BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { WeighingProcessor } from './weighing.processor';
@@ -24,10 +24,10 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
+          label: BoldAttachmentLabel.WEIGHING_TICKET,
         },
       ],
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     mockGetDocumentAttachmentBucketName.mockReturnValue('bucket-name');
 
@@ -51,10 +51,10 @@ describe('WeighingProcessor helpers', () => {
           attachmentId: 'attachment-1',
           contentLength: 0,
           isPublic: false,
-          label: DocumentEventAttachmentLabel.WEIGHING_TICKET,
+          label: BoldAttachmentLabel.WEIGHING_TICKET,
         },
       ],
-    } as unknown as DocumentEvent;
+    } as unknown as BoldDocumentEvent;
 
     mockGetDocumentAttachmentBucketName.mockReturnValue(undefined);
 

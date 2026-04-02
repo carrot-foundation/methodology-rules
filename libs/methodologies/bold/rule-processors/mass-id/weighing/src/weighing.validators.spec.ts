@@ -1,23 +1,21 @@
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  type MethodologyAdditionalVerificationAttributeValue,
-  MethodologyApprovedExceptionType,
-} from '@carrot-fndn/shared/types';
+import { type AdditionalVerificationAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
+  isAdditionalVerification,
   isAdditionalVerificationAttributeValue,
-  isMethodologyAdditionalVerification,
 } from './weighing.validators';
 
 describe('weighing.validators', () => {
-  describe('isMethodologyAdditionalVerification', () => {
+  describe('isAdditionalVerification', () => {
     it('should return true for a valid additional verification object', () => {
       expect(
-        isMethodologyAdditionalVerification({
+        isAdditionalVerification({
           'Layout IDs': ['layout-1'],
           'Verification Type': 'MANUAL_REVIEW',
         }),
@@ -26,7 +24,7 @@ describe('weighing.validators', () => {
 
     it('should return false when verification type is missing', () => {
       expect(
-        isMethodologyAdditionalVerification({
+        isAdditionalVerification({
           'Layout IDs': ['layout-1'],
         }),
       ).toBe(false);
@@ -35,7 +33,7 @@ describe('weighing.validators', () => {
 
   describe('isAdditionalVerificationAttributeValue', () => {
     it('should return true for a valid list of additional verifications', () => {
-      const value: MethodologyAdditionalVerificationAttributeValue = [
+      const value: AdditionalVerificationAttributeValue = [
         {
           'Layout IDs': ['layout-1'],
           'Verification Type': 'MANUAL_REVIEW',
@@ -59,16 +57,14 @@ describe('weighing.validators', () => {
   it('keeps approved exception literals compatible with weighing enums', () => {
     const tareException = {
       'Attribute Location': {
-        Asset: { Category: DocumentCategory.MASS_ID },
-        Event: DocumentEventName.WEIGHING,
+        Asset: { Category: BoldDocumentCategory.MASS_ID },
+        Event: BoldDocumentEventName.WEIGHING,
       },
-      'Attribute Name': DocumentEventAttributeName.TARE,
-      'Exception Type': MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      'Attribute Name': BoldAttributeName.TARE,
+      'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
       Reason: 'validated',
     };
 
-    expect(tareException['Attribute Name']).toBe(
-      DocumentEventAttributeName.TARE,
-    );
+    expect(tareException['Attribute Name']).toBe(BoldAttributeName.TARE);
   });
 });

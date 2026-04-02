@@ -1,23 +1,23 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentCategory,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
+  type BoldDocumentRelation,
+  BoldDocumentSubtype,
+  BoldDocumentType,
+  BoldMethodologyActorType,
   BoldMethodologyName,
   BoldMethodologySlug,
-  type Document,
-  DocumentCategory,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  type DocumentRelation,
-  DocumentSubtype,
-  DocumentType,
-  MassIDDocumentActorType,
-  MethodologyDocumentActorType,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
 import {
+  type DocumentAddress,
+  type DocumentParticipant,
   type Geolocation,
-  type MethodologyAddress,
-  type MethodologyParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
@@ -42,8 +42,9 @@ import {
 import { stubBoldMethodologyDefinitionDocument } from './bold-methodology-definition.stubs';
 import { stubBoldAccreditationDocument } from './bold-participant-accreditation.stubs';
 
-const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } = DocumentEventName;
-const { MASS_ID, METHODOLOGY } = DocumentCategory;
+const { ACTOR, DROP_OFF, LINK, OUTPUT, PICK_UP, RELATED } =
+  BoldDocumentEventName;
+const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
 const {
   CREDIT_ORDER,
   DEFINITION,
@@ -52,66 +53,66 @@ const {
   ORGANIC,
   PARTICIPANT_ACCREDITATION,
   RECYCLED_ID,
-} = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = DocumentSubtype;
-const { METHODOLOGY_SLUG } = DocumentEventAttributeName;
+} = BoldDocumentType;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES, GROUP, PROCESS } = BoldDocumentSubtype;
+const { METHODOLOGY_SLUG } = BoldAttributeName;
 
 export interface BoldStubsBuilderOptions {
   count?: number;
-  massIDActorParticipants?: Map<string, MethodologyParticipant>;
+  massIDActorParticipants?: Map<string, DocumentParticipant>;
   massIDAuditDocumentIds?: string[];
   massIDCertificateDocumentIds?: string[];
   massIDDocumentIds?: string[];
-  methodologyActorParticipants?: Map<string, MethodologyParticipant>;
+  methodologyActorParticipants?: Map<string, DocumentParticipant>;
   methodologyName?: BoldMethodologyName;
 }
 
 export interface BoldStubsBuilderResult {
   boldMethodologyName: BoldMethodologyName;
-  creditOrderDocument: Document;
-  massIDActorParticipants: Map<string, MethodologyParticipant>;
-  massIDActorParticipantsAddresses: Map<string, MethodologyAddress>;
-  massIDAuditDocument: Document;
-  massIDAuditDocuments: Document[];
+  creditOrderDocument: BoldDocument;
+  massIDActorParticipants: Map<string, DocumentParticipant>;
+  massIDActorParticipantsAddresses: Map<string, DocumentAddress>;
+  massIDAuditDocument: BoldDocument;
+  massIDAuditDocuments: BoldDocument[];
   massIDAuditIds: string[];
-  massIDCertificateDocument: Document;
-  massIDCertificateDocuments: Document[];
-  massIDDocument: Document;
+  massIDCertificateDocument: BoldDocument;
+  massIDCertificateDocuments: BoldDocument[];
+  massIDDocument: BoldDocument;
   massIDDocumentIds: string[];
-  massIDDocuments: Document[];
-  methodologyActorParticipants: Map<string, MethodologyParticipant>;
-  methodologyDocument: Document | undefined;
-  participantsAccreditationDocuments: Map<string, Document>;
+  massIDDocuments: BoldDocument[];
+  methodologyActorParticipants: Map<string, DocumentParticipant>;
+  methodologyDocument: BoldDocument | undefined;
+  participantsAccreditationDocuments: Map<string, BoldDocument>;
 }
 
 export const MASS_ID_ACTOR_PARTICIPANTS = [
-  MassIDDocumentActorType.HAULER,
-  MassIDDocumentActorType.INTEGRATOR,
-  MassIDDocumentActorType.PROCESSOR,
-  MassIDDocumentActorType.RECYCLER,
-  MassIDDocumentActorType.WASTE_GENERATOR,
+  MassIDActorType.HAULER,
+  MassIDActorType.INTEGRATOR,
+  MassIDActorType.PROCESSOR,
+  MassIDActorType.RECYCLER,
+  MassIDActorType.WASTE_GENERATOR,
 ] as const;
 
 export const METHODOLOGY_ACTOR_PARTICIPANTS = [
-  MethodologyDocumentActorType.COMMUNITY_IMPACT_POOL,
-  MethodologyDocumentActorType.NETWORK,
-  MethodologyDocumentActorType.METHODOLOGY_AUTHOR,
-  MethodologyDocumentActorType.METHODOLOGY_DEVELOPER,
+  BoldMethodologyActorType.COMMUNITY_IMPACT_POOL,
+  BoldMethodologyActorType.NETWORK,
+  BoldMethodologyActorType.METHODOLOGY_AUTHOR,
+  BoldMethodologyActorType.METHODOLOGY_DEVELOPER,
 ] as const;
 
 const MASS_ID_CERTIFICATE_BY_METHODOLOGY_NAME = {
   [BoldMethodologyName.CARBON]: GAS_ID,
   [BoldMethodologyName.RECYCLING]: RECYCLED_ID,
-} as const satisfies Record<BoldMethodologyName, DocumentType>;
+} as const satisfies Record<BoldMethodologyName, BoldDocumentType>;
 
 export class BoldStubsBuilder {
-  private _creditOrderDocument?: Document;
+  private _creditOrderDocument?: BoldDocument;
 
-  private _massIDAuditDocuments: Document[] = [];
+  private _massIDAuditDocuments: BoldDocument[] = [];
 
-  private _massIDCertificateDocuments: Document[] = [];
+  private _massIDCertificateDocuments: BoldDocument[] = [];
 
-  private _massIDDocuments: Document[] = [];
+  private _massIDDocuments: BoldDocument[] = [];
 
   private readonly actorsCoordinates: Map<
     string,
@@ -122,44 +123,47 @@ export class BoldStubsBuilder {
 
   private count: number;
 
-  private creditOrderRelation?: DocumentRelation;
+  private creditOrderRelation?: BoldDocumentRelation;
 
-  private readonly massIDActorParticipants: Map<string, MethodologyParticipant>;
+  private readonly massIDActorParticipants: Map<string, DocumentParticipant>;
 
   private readonly massIDActorParticipantsAddresses: Map<
     string,
-    MethodologyAddress
+    DocumentAddress
   >;
 
   private massIDAuditDocumentIds: string[];
 
-  private massIDAuditRelations: DocumentRelation[] = [];
+  private massIDAuditRelations: BoldDocumentRelation[] = [];
 
   private massIDCertificateDocumentIds: string[];
 
-  private massIDCertificateDocumentRelations: DocumentRelation[] = [];
+  private massIDCertificateDocumentRelations: BoldDocumentRelation[] = [];
 
   private massIDDocumentIds: string[];
 
-  private massIDRelations: DocumentRelation[] = [];
+  private massIDRelations: BoldDocumentRelation[] = [];
 
   private readonly methodologyActorParticipants: Map<
     string,
-    MethodologyParticipant
+    DocumentParticipant
   >;
 
-  private methodologyDocument?: Document;
+  private methodologyDocument?: BoldDocument;
 
-  private methodologyRelation?: DocumentRelation;
+  private methodologyRelation?: BoldDocumentRelation;
 
-  private participantAccreditationGroupDocument?: Document;
+  private participantAccreditationGroupDocument?: BoldDocument;
 
-  private participantAccreditationGroupRelation?: DocumentRelation;
+  private participantAccreditationGroupRelation?: BoldDocumentRelation;
 
-  private participantsAccreditationDocuments: Map<string, Document> = new Map();
-
-  private participantsAccreditationRelations: Map<string, DocumentRelation> =
+  private participantsAccreditationDocuments: Map<string, BoldDocument> =
     new Map();
+
+  private participantsAccreditationRelations: Map<
+    string,
+    BoldDocumentRelation
+  > = new Map();
 
   constructor(options: BoldStubsBuilderOptions = {}) {
     this.count = options.count ?? 1;
@@ -500,10 +504,10 @@ export class BoldStubsBuilder {
 
       const defaultEventsMap = new Map([
         [
-          DocumentEventName.ACCREDITATION_CONTEXT,
+          BoldDocumentEventName.ACCREDITATION_CONTEXT,
           stubDocumentEvent({
             address: primaryAddress,
-            name: DocumentEventName.ACCREDITATION_CONTEXT,
+            name: BoldDocumentEventName.ACCREDITATION_CONTEXT,
             participant: primaryParticipant,
           }),
         ],
@@ -575,8 +579,8 @@ export class BoldStubsBuilder {
   }
 
   private addCreditRelationToMassIDCertificateDocument(
-    massIDCertificateDocument: Document,
-  ): Document {
+    massIDCertificateDocument: BoldDocument,
+  ): BoldDocument {
     return {
       ...massIDCertificateDocument,
       externalEvents: [
@@ -590,9 +594,9 @@ export class BoldStubsBuilder {
   }
 
   private addExternalEventToDocument(
-    document: Document,
-    event: DocumentEvent,
-  ): Document {
+    document: BoldDocument,
+    event: BoldDocumentEvent,
+  ): BoldDocument {
     return {
       ...document,
       externalEvents: [...(document.externalEvents ?? []), event],
@@ -623,7 +627,7 @@ export class BoldStubsBuilder {
     );
   }
 
-  private createCreditOrderDocumentRelation(): DocumentRelation {
+  private createCreditOrderDocumentRelation(): BoldDocumentRelation {
     return {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
@@ -633,7 +637,7 @@ export class BoldStubsBuilder {
 
   private createDefaultMassIDCertificateDocumentEventsMap(
     index: number,
-  ): Map<string, DocumentEvent> {
+  ): Map<string, BoldDocumentEvent> {
     const methodologyEventName = `${this.boldMethodologyName} Methodology`;
 
     return new Map([
@@ -663,18 +667,18 @@ export class BoldStubsBuilder {
 
   private createDefaultMassIDEventsMap(
     index: number,
-    actorEvents: Record<string, DocumentEvent>,
-  ): Map<string, DocumentEvent> {
+    actorEvents: Record<string, BoldDocumentEvent>,
+  ): Map<string, BoldDocumentEvent> {
     return new Map([
       [
         DROP_OFF,
         stubBoldMassIDDropOffEvent({
           partialDocumentEvent: {
             address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.RECYCLER,
+              MassIDActorType.RECYCLER,
             )!,
             participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
+              MassIDActorType.RECYCLER,
             )!,
           },
         }),
@@ -691,10 +695,10 @@ export class BoldStubsBuilder {
         stubBoldMassIDPickUpEvent({
           partialDocumentEvent: {
             address: this.massIDActorParticipantsAddresses.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
+              MassIDActorType.WASTE_GENERATOR,
             )!,
             participant: this.massIDActorParticipants.get(
-              MassIDDocumentActorType.WASTE_GENERATOR,
+              MassIDActorType.WASTE_GENERATOR,
             )!,
           },
         }),
@@ -703,7 +707,7 @@ export class BoldStubsBuilder {
     ]);
   }
 
-  private createMassIDActorEvents(): Record<string, DocumentEvent> {
+  private createMassIDActorEvents(): Record<string, BoldDocumentEvent> {
     return Object.fromEntries(
       Array.from(this.massIDActorParticipants, ([actorType, participant]) => [
         `${ACTOR}-${actorType}`,
@@ -717,7 +721,7 @@ export class BoldStubsBuilder {
     );
   }
 
-  private createMassIDAuditRelations(): DocumentRelation[] {
+  private createMassIDAuditRelations(): BoldDocumentRelation[] {
     return this.massIDAuditDocumentIds.map((documentId) => ({
       category: METHODOLOGY,
       documentId,
@@ -726,7 +730,7 @@ export class BoldStubsBuilder {
     }));
   }
 
-  private createMassIDCertificateDocumentRelations(): DocumentRelation[] {
+  private createMassIDCertificateDocumentRelations(): BoldDocumentRelation[] {
     return this.massIDCertificateDocumentIds.map((documentId) => ({
       category: METHODOLOGY,
       documentId,
@@ -734,7 +738,7 @@ export class BoldStubsBuilder {
     }));
   }
 
-  private createMassIDRelations(): DocumentRelation[] {
+  private createMassIDRelations(): BoldDocumentRelation[] {
     return this.massIDDocumentIds.map((documentId) => ({
       bidirectional: false,
       category: MASS_ID,
@@ -744,7 +748,7 @@ export class BoldStubsBuilder {
     }));
   }
 
-  private createMethodologyActorEvents(): Record<string, DocumentEvent> {
+  private createMethodologyActorEvents(): Record<string, BoldDocumentEvent> {
     return Object.fromEntries(
       Array.from(
         this.methodologyActorParticipants,
@@ -762,7 +766,7 @@ export class BoldStubsBuilder {
 
   private createParticipantAccreditationRelation(
     subtype: string,
-  ): DocumentRelation {
+  ): BoldDocumentRelation {
     return {
       category: METHODOLOGY,
       documentId: faker.string.uuid(),
@@ -771,7 +775,7 @@ export class BoldStubsBuilder {
     };
   }
 
-  private initializeActorAddresses(): Map<string, MethodologyAddress> {
+  private initializeActorAddresses(): Map<string, DocumentAddress> {
     return new Map(
       MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => {
         const coords = this.actorsCoordinates.get(subtype)!.base;
@@ -802,8 +806,8 @@ export class BoldStubsBuilder {
   }
 
   private initializeMassIDActorParticipants(
-    providedParticipants?: Map<string, MethodologyParticipant>,
-  ): Map<string, MethodologyParticipant> {
+    providedParticipants?: Map<string, DocumentParticipant>,
+  ): Map<string, DocumentParticipant> {
     if (providedParticipants) {
       return providedParticipants;
     }
@@ -817,8 +821,8 @@ export class BoldStubsBuilder {
   }
 
   private initializeMethodologyActorParticipants(
-    providedParticipants?: Map<string, MethodologyParticipant>,
-  ): Map<string, MethodologyParticipant> {
+    providedParticipants?: Map<string, DocumentParticipant>,
+  ): Map<string, DocumentParticipant> {
     if (providedParticipants) {
       return providedParticipants;
     }
@@ -833,9 +837,9 @@ export class BoldStubsBuilder {
   }
 
   private mergeEventsMaps(
-    defaultEventsMap: Map<string, DocumentEvent>,
+    defaultEventsMap: Map<string, BoldDocumentEvent>,
     externalEventsMap: StubBoldDocumentParameters['externalEventsMap'],
-  ): Map<string, DocumentEvent | undefined> {
+  ): Map<string, BoldDocumentEvent | undefined> {
     return new Map([
       ...defaultEventsMap,
       ...(externalEventsMap instanceof Map

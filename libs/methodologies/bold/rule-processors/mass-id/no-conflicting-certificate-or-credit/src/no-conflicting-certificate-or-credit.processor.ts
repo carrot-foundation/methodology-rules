@@ -13,8 +13,8 @@ import {
   MASS_ID_AUDIT,
 } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
+  type BoldDocument,
   BoldMethodologySlug,
-  type Document,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
@@ -36,9 +36,9 @@ import {
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 
 interface RuleSubject {
-  creditDocuments: Document[];
-  massIDCertificateDocuments: Document[];
-  relatedMassIDAuditDocuments: Document[];
+  creditDocuments: BoldDocument[];
+  massIDCertificateDocuments: BoldDocument[];
+  relatedMassIDAuditDocuments: BoldDocument[];
 }
 
 export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor {
@@ -131,12 +131,12 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
   }
 
   private async getRuleSubject(
-    documentQuery: DocumentQuery<Document> | undefined,
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
     ruleInput: RuleInput,
   ): Promise<RuleSubject> {
-    const creditDocuments: Document[] = [];
-    const massIDCertificateDocuments: Document[] = [];
-    const relatedMassIDAuditDocuments: Document[] = [];
+    const creditDocuments: BoldDocument[] = [];
+    const massIDCertificateDocuments: BoldDocument[] = [];
+    const relatedMassIDAuditDocuments: BoldDocument[] = [];
 
     await documentQuery?.iterator().each(({ document }) => {
       const documentRelation = mapDocumentRelation(document);

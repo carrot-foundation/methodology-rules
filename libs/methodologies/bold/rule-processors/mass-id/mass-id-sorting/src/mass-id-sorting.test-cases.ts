@@ -14,16 +14,16 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
-  type MethodologyParticipant,
+  DocumentEventAttributeFormat,
+  type DocumentParticipant,
 } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { addYears } from 'date-fns';
@@ -36,16 +36,16 @@ import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
 
 const processorErrors = new MassIDSortingProcessorErrors();
 
-const { RECYCLER } = MethodologyDocumentEventLabel;
+const { RECYCLER } = BoldDocumentEventLabel;
 const {
   ACCREDITATION_CONTEXT,
   DROP_OFF,
   EMISSION_AND_COMPOSTING_METRICS,
   SORTING,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const { DEDUCTED_WEIGHT, DESCRIPTION, GROSS_WEIGHT, SORTING_FACTOR } =
-  DocumentEventAttributeName;
-const { CUBIC_METER, KILOGRAM } = MethodologyDocumentEventAttributeFormat;
+  BoldAttributeName;
+const { CUBIC_METER, KILOGRAM } = DocumentEventAttributeFormat;
 
 // Helper functions to reduce duplication
 const createAccreditationDocuments = (sortingFactor: number) =>
@@ -56,17 +56,13 @@ const createAccreditationDocuments = (sortingFactor: number) =>
         externalEventsMap: {
           [ACCREDITATION_CONTEXT]: stubDocumentEvent({
             name: ACCREDITATION_CONTEXT,
-            participant: actorParticipants.get(
-              MassIDDocumentActorType.RECYCLER,
-            )!,
+            participant: actorParticipants.get(MassIDActorType.RECYCLER)!,
           }),
           [EMISSION_AND_COMPOSTING_METRICS]:
             stubBoldEmissionAndCompostingMetricsEvent({
               metadataAttributes: [[SORTING_FACTOR, sortingFactor]],
               partialDocumentEvent: {
-                participant: actorParticipants.get(
-                  MassIDDocumentActorType.RECYCLER,
-                )!,
+                participant: actorParticipants.get(MassIDActorType.RECYCLER)!,
               },
             }),
         },
@@ -105,9 +101,7 @@ const createMassIDEvents = (
       ...createWeightAttributes(grossWeight, deductedWeight),
       ...(includeDescription
         ? []
-        : [
-            [DESCRIPTION, undefined] as [DocumentEventAttributeName, undefined],
-          ]),
+        : [[DESCRIPTION, undefined] as [BoldAttributeName, undefined]]),
     ],
     ...(sortingValue !== undefined && {
       partialDocumentEvent: { value: sortingValue },
@@ -116,20 +110,20 @@ const createMassIDEvents = (
 });
 
 const modifyDocumentEvents = (
-  baseDocument: Document,
+  baseDocument: BoldDocument,
   eventModifiers: Record<string, unknown>,
-): Document => ({
+): BoldDocument => ({
   ...baseDocument,
   externalEvents: baseDocument.externalEvents?.map((event) => {
     const eventName = String(event.name);
 
-    return (eventModifiers[eventName] ?? event) as DocumentEvent;
+    return (eventModifiers[eventName] ?? event) as BoldDocumentEvent;
   }),
 });
 
 const createErrorTestCase = (
   scenario: string,
-  documents: Document[],
+  documents: BoldDocument[],
   resultComment: string,
 ) => ({
   documents,
@@ -226,9 +220,9 @@ const {
 
 interface MassIDSortingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
-  actorParticipants: Map<string, MethodologyParticipant>;
+  actorParticipants: Map<string, DocumentParticipant>;
   massIDEvents: BoldExternalEventsObject;
-  partialDocument: PartialDeep<Document>;
+  partialDocument: PartialDeep<BoldDocument>;
 }
 
 export const massIDSortingTestCases: MassIDSortingTestCase[] = [
@@ -386,8 +380,8 @@ const invalidSortingValue = new BoldStubsBuilder()
   .build();
 
 interface MassIDSortingErrorTestCase extends RuleTestCase {
-  documents: Document[];
-  massIDAuditDocument: Document;
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
 }
 
 export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
@@ -454,7 +448,7 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
           ?.externalEvents?.filter(
             (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
           ),
-      } as Document,
+      } as BoldDocument,
     ],
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
   ),

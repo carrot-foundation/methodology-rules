@@ -28,7 +28,10 @@ const {
 
 export const LARGE_REVENUE_BUSINESS_DISCOUNT = 0.5;
 
-export const REQUIRED_ACTOR_TYPES = {
+export const REQUIRED_ACTOR_TYPES: {
+  MASS_ID: readonly RewardsDistributionActorType[];
+  METHODOLOGY: readonly RewardsDistributionActorType[];
+} = {
   MASS_ID: [RECYCLER, PROCESSOR, INTEGRATOR],
   METHODOLOGY: [
     COMMUNITY_IMPACT_POOL,

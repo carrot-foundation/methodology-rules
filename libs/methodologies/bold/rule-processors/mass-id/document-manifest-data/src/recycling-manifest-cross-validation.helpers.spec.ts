@@ -3,7 +3,7 @@ import type {
   ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
-import type { DocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
 
@@ -61,14 +61,14 @@ const createExtractionResult = (
     reviewRequired: false,
   }) as unknown as ExtractionOutput<BaseExtractedData>;
 
-const makeWeighingEvent = (value: number): DocumentEvent =>
-  ({ value }) as unknown as DocumentEvent;
+const makeWeighingEvent = (value: number): BoldDocumentEvent =>
+  ({ value }) as unknown as BoldDocumentEvent;
 
 const makeEventWithClassification = (
   code?: string,
   description?: string,
   externalCreatedAt?: string,
-): DocumentEvent =>
+): BoldDocumentEvent =>
   ({
     address: STUB_BR_ADDRESS,
     externalCreatedAt,
@@ -94,7 +94,7 @@ const makeEventWithClassification = (
             ]),
       ],
     },
-  }) as unknown as DocumentEvent;
+  }) as unknown as BoldDocumentEvent;
 
 describe('recycling-manifest-cross-validation.helpers', () => {
   describe('validateCdfExtractedData', () => {
@@ -192,7 +192,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           ...baseEventData,
           recyclerEvent: {
             participant: { name: 'Recycler Corp', taxId: '33.333.333/0001-33' },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -214,7 +214,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           ...baseEventData,
           recyclerEvent: {
             participant: { name: 'Recycler Corp', taxId: '33.333.333/0001-33' },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -250,7 +250,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
               name: 'Generator Co',
               taxId: '11.111.111/0001-11',
             },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -282,7 +282,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
               name: 'Generator Co',
               taxId: '11.111.111/0001-11',
             },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -315,7 +315,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
               name: 'Generator Co',
               taxId: '11.111.111/0001-11',
             },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -346,7 +346,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           dropOffEvent: {
             address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-01-15',
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -369,7 +369,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           dropOffEvent: {
             address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -392,7 +392,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           dropOffEvent: {
             address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -1093,11 +1093,11 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           dropOffEvent: {
             address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-03-15',
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
           mtrDocumentNumbers: ['MTR-001'],
           recyclerEvent: {
             participant: { name: 'Recycler Corp', taxId: '33.333.333/0001-33' },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -1122,7 +1122,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
               name: 'Recycler Corp',
               taxId: '33.333.333/0001-33',
             },
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);
@@ -1175,7 +1175,7 @@ describe('recycling-manifest-cross-validation.helpers', () => {
           dropOffEvent: {
             address: STUB_BR_ADDRESS,
             externalCreatedAt: '2024-01-15',
-          } as unknown as DocumentEvent,
+          } as unknown as BoldDocumentEvent,
         };
 
         const result = validateCdfExtractedData(extractionResult, eventData);

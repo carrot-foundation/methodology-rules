@@ -1,13 +1,13 @@
 import type {
-  Document,
-  DocumentEvent,
+  BoldDocument,
+  BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 
@@ -18,27 +18,28 @@ import {
 import { mergeEventsMaps } from './bold.builder.helpers';
 import { type StubBoldDocumentParameters } from './bold.stubs.types';
 
-const { EVALUATION_RESULT } = DocumentEventAttributeName;
+const { EVALUATION_RESULT } = BoldAttributeName;
 const { PASSED } = RuleOutputStatus;
 
 const resultEventName = `Result: MassID ${PASSED}`;
 
-const boldMassIDAuditExternalEventsMap: Map<string, DocumentEvent> = new Map([
-  [
-    resultEventName,
-    stubDocumentEventWithMetadataAttributes(
-      {
-        name: resultEventName,
-      },
-      [[EVALUATION_RESULT, PASSED]],
-    ),
-  ],
-]);
+const boldMassIDAuditExternalEventsMap: Map<string, BoldDocumentEvent> =
+  new Map([
+    [
+      resultEventName,
+      stubDocumentEventWithMetadataAttributes(
+        {
+          name: resultEventName,
+        },
+        [[EVALUATION_RESULT, PASSED]],
+      ),
+    ],
+  ]);
 
 export const stubBoldMassIDAuditDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldMassIDAuditExternalEventsMap
     : mergeEventsMaps(boldMassIDAuditExternalEventsMap, externalEventsMap);
@@ -47,12 +48,12 @@ export const stubBoldMassIDAuditDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: BoldDocumentCategory.METHODOLOGY,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.MASS_ID_AUDIT,
+        type: BoldDocumentType.MASS_ID_AUDIT,
       },
       false,
     ),

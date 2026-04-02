@@ -18,17 +18,17 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  ReportType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyDocumentEventAttachment,
-  type MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeFormat,
-  MethodologyDocumentEventLabel,
+  type DocumentEventAttachment,
+  DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
@@ -48,11 +48,11 @@ const {
   RECYCLING_MANIFEST,
   TRANSPORT_MANIFEST,
   WEIGHING,
-} = DocumentEventName;
+} = BoldDocumentEventName;
 const { DOCUMENT_NUMBER, DOCUMENT_TYPE, EXEMPTION_JUSTIFICATION, ISSUE_DATE } =
-  DocumentEventAttributeName;
-const { HAULER, RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { DATE } = MethodologyDocumentEventAttributeFormat;
+  BoldAttributeName;
+const { HAULER, RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { DATE } = DocumentEventAttributeFormat;
 
 export type DocumentManifestType =
   | typeof RECYCLING_MANIFEST
@@ -65,20 +65,20 @@ const VALID_MANIFEST_TYPES: ReadonlySet<string> = new Set<string>([
 
 type RuleSubject = {
   attachmentInfos: AttachmentInfo[];
-  document: Document;
+  document: BoldDocument;
   documentManifestEvents: DocumentManifestEventSubject[];
-  dropOffEvent: DocumentEvent | undefined;
-  haulerEvent: DocumentEvent | undefined;
+  dropOffEvent: BoldDocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
   mtrEventDocumentNumbers: string[];
-  pickUpEvent: DocumentEvent | undefined;
-  recyclerEvent: DocumentEvent | undefined;
-  wasteGeneratorEvent: DocumentEvent | undefined;
-  weighingEvents: DocumentEvent[];
+  pickUpEvent: BoldDocumentEvent | undefined;
+  recyclerEvent: BoldDocumentEvent | undefined;
+  wasteGeneratorEvent: BoldDocumentEvent | undefined;
+  weighingEvents: BoldDocumentEvent[];
 };
 
 const DOCUMENT_TYPE_MAPPING = {
-  [RECYCLING_MANIFEST]: ReportType.CDF.toString(),
-  [TRANSPORT_MANIFEST]: ReportType.MTR.toString(),
+  [RECYCLING_MANIFEST]: BoldReportType.CDF.toString(),
+  [TRANSPORT_MANIFEST]: BoldReportType.MTR.toString(),
 } as const;
 
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
@@ -123,7 +123,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       (subject) =>
         this.validateDocumentManifestEvents(
           subject,
-          ruleSubject.recyclerEvent as DocumentEvent,
+          ruleSubject.recyclerEvent as BoldDocumentEvent,
           ruleSubject.document.currentValue,
         ),
     );
@@ -198,7 +198,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     };
   }
 
-  protected override getRuleSubject(document: Document): RuleSubject {
+  protected override getRuleSubject(document: BoldDocument): RuleSubject {
     const transportManifestEvents = document.externalEvents?.filter(
       eventNameIsAnyOf([this.documentManifestType]),
     );
@@ -313,7 +313,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
   private validateDocumentManifestEvents(
     subject: DocumentManifestEventSubject,
-    recyclerEvent: DocumentEvent,
+    recyclerEvent: BoldDocumentEvent,
     documentCurrentValue: number,
   ): ValidationResult {
     const {
@@ -378,7 +378,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   }
 
   private validateExemptionAndAttachment(
-    attachment: MethodologyDocumentEventAttachment | undefined,
+    attachment: DocumentEventAttachment | undefined,
     exemptionJustification: EventAttributeValueType,
     hasWrongLabelAttachment: boolean,
   ): ValidationResult {
@@ -423,7 +423,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   }
 
   private validateIssueDate(
-    issueDateAttribute: MethodologyDocumentEventAttribute | undefined,
+    issueDateAttribute: BoldDocumentEventAttribute | undefined,
   ): ValidationResult {
     const failMessages: string[] = [];
 

@@ -10,15 +10,15 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  MassIDDocumentActorType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventName,
+  MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  type DocumentAddress,
   type Geolocation,
-  type MethodologyAddress,
 } from '@carrot-fndn/shared/types';
 import { LatitudeSchema, LongitudeSchema } from '@carrot-fndn/shared/types';
 
@@ -33,10 +33,10 @@ import {
 } from './geolocation-and-address-precision.validators';
 
 export const hasVerificationDocument = (
-  massIDAuditDocument: Document,
+  massIDAuditDocument: BoldDocument,
   participantId: string,
-  actorType: MassIDDocumentActorType,
-  accreditationDocuments: Document[],
+  actorType: MassIDActorType,
+  accreditationDocuments: BoldDocument[],
 ): boolean => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
@@ -63,11 +63,11 @@ export const hasVerificationDocument = (
 };
 
 export const getAccreditedAddressByParticipantIdAndActorType = (
-  massIDAuditDocument: Document,
+  massIDAuditDocument: BoldDocument,
   participantId: string,
-  actorType: MassIDDocumentActorType,
-  accreditationDocuments: Document[],
-): MethodologyAddress | undefined => {
+  actorType: MassIDActorType,
+  accreditationDocuments: BoldDocument[],
+): DocumentAddress | undefined => {
   const actorEvent = massIDAuditDocument.externalEvents?.find(
     (event) =>
       isActorEvent(event) &&
@@ -107,7 +107,7 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 
   const facilityAddressEvent =
     participantAccreditationDocument.externalEvents?.find(
-      eventNameIsAnyOf([DocumentEventName.FACILITY_ADDRESS]),
+      eventNameIsAnyOf([BoldDocumentEventName.FACILITY_ADDRESS]),
     );
 
   if (!facilityAddressEvent) {
@@ -122,15 +122,15 @@ export const getAccreditedAddressByParticipantIdAndActorType = (
 };
 
 export const getEventGpsGeolocation = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
 ): Geolocation | undefined => {
   const gpsLatitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LATITUDE,
+    BoldAttributeName.CAPTURED_GPS_LATITUDE,
   );
   const gpsLongitude = getEventAttributeValue(
     event,
-    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
+    BoldAttributeName.CAPTURED_GPS_LONGITUDE,
   );
 
   if (
@@ -147,8 +147,10 @@ export const getEventGpsGeolocation = (
 };
 
 export const getGpsExceptionsFromRecyclerAccreditation = (
-  recyclerAccreditationDocument: Document | undefined,
-  eventName: DocumentEventName.DROP_OFF | DocumentEventName.PICK_UP,
+  recyclerAccreditationDocument: BoldDocument | undefined,
+  eventName:
+    | typeof BoldDocumentEventName.DROP_OFF
+    | typeof BoldDocumentEventName.PICK_UP,
 ): {
   latitudeException: GpsLatitudeApprovedException | undefined;
   longitudeException: GpsLongitudeApprovedException | undefined;
@@ -157,7 +159,7 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     return { latitudeException: undefined, longitudeException: undefined };
   }
 
-  const { ACCREDITATION_RESULT } = DocumentEventName;
+  const { ACCREDITATION_RESULT } = BoldDocumentEventName;
   const approvedExceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
     ACCREDITATION_RESULT,
@@ -171,14 +173,14 @@ export const getGpsExceptionsFromRecyclerAccreditation = (
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LATITUDE.toString(),
+        BoldAttributeName.CAPTURED_GPS_LATITUDE.toString(),
   );
 
   const longitudeException = approvedExceptions.find(
     (exception) =>
       exception['Attribute Location'].Event === eventName.toString() &&
       exception['Attribute Name'] ===
-        DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
+        BoldAttributeName.CAPTURED_GPS_LONGITUDE.toString(),
   );
 
   return {

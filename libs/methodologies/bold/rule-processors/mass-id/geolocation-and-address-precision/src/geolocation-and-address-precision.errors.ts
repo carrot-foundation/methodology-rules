@@ -1,13 +1,13 @@
 import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  DocumentCategory,
-  DocumentEventName,
-  DocumentType,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-const { DROP_OFF, PICK_UP } = DocumentEventName;
-const { MASS_ID } = DocumentCategory;
-const { MASS_ID_AUDIT, PARTICIPANT_ACCREDITATION } = DocumentType;
+const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { MASS_ID } = BoldDocumentCategory;
+const { MASS_ID_AUDIT, PARTICIPANT_ACCREDITATION } = BoldDocumentType;
 
 export class GeolocationAndAddressPrecisionProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {

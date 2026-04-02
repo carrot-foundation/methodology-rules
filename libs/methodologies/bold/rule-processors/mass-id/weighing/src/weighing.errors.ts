@@ -3,6 +3,7 @@ import { BaseProcessorErrors } from '@carrot-fndn/shared/methodologies/bold/proc
 export class WeighingProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     FAILED_BY_ERROR: 'Unable to validate the weighing process.',
+    INVALID_RULE_SUBJECT: 'The weighing rule subject is invalid.',
     MASS_ID_DOCUMENT_NOT_FOUND: 'The MassID document was not found.',
     MISSING_RECYCLER_ACCREDITATION_DOCUMENT:
       'The Recycler accreditation document was not found.',

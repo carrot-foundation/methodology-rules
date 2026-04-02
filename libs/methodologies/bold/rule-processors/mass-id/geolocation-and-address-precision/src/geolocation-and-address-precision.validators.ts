@@ -1,12 +1,10 @@
 import {
-  DocumentCategory,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyApprovedExceptionType,
-  NonEmptyStringSchema,
-} from '@carrot-fndn/shared/types';
+import { NonEmptyStringSchema } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
 import type {
@@ -17,17 +15,15 @@ import type {
 const GpsLatitudeApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
     }),
     Event: z.union([
-      z.literal(DocumentEventName.DROP_OFF),
-      z.literal(DocumentEventName.PICK_UP),
+      z.literal(BoldDocumentEventName.DROP_OFF),
+      z.literal(BoldDocumentEventName.PICK_UP),
     ]),
   }),
-  'Attribute Name': z.literal(DocumentEventAttributeName.CAPTURED_GPS_LATITUDE),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Attribute Name': z.literal(BoldAttributeName.CAPTURED_GPS_LATITUDE),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });
@@ -35,19 +31,15 @@ const GpsLatitudeApprovedExceptionSchema = z.object({
 const GpsLongitudeApprovedExceptionSchema = z.object({
   'Attribute Location': z.object({
     Asset: z.object({
-      Category: z.literal(DocumentCategory.MASS_ID),
+      Category: z.literal(BoldDocumentCategory.MASS_ID),
     }),
     Event: z.union([
-      z.literal(DocumentEventName.DROP_OFF),
-      z.literal(DocumentEventName.PICK_UP),
+      z.literal(BoldDocumentEventName.DROP_OFF),
+      z.literal(BoldDocumentEventName.PICK_UP),
     ]),
   }),
-  'Attribute Name': z.literal(
-    DocumentEventAttributeName.CAPTURED_GPS_LONGITUDE,
-  ),
-  'Exception Type': z.literal(
-    MethodologyApprovedExceptionType.MANDATORY_ATTRIBUTE,
-  ),
+  'Attribute Name': z.literal(BoldAttributeName.CAPTURED_GPS_LONGITUDE),
+  'Exception Type': z.literal(BoldApprovedExceptionType.MANDATORY_ATTRIBUTE),
   Reason: NonEmptyStringSchema,
   'Valid Until': z.string().optional(),
 });

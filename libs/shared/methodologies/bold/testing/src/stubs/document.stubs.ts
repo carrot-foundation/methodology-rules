@@ -1,17 +1,14 @@
 import type { PartialDeep } from 'type-fest';
 
 import {
-  type Document,
-  DocumentCategory,
-  type DocumentRelation,
-  DocumentSubtype,
-  DocumentType,
+  type BoldDocument,
+  BoldDocumentCategory,
+  type BoldDocumentRelation,
+  BoldDocumentSubtype,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubEnumValue } from '@carrot-fndn/shared/testing';
-import {
-  DataSetName,
-  MethodologyDocumentStatus,
-} from '@carrot-fndn/shared/types';
+import { DataSetName, DocumentStatus } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { computeDestinationPoint } from 'geolib';
 
@@ -20,15 +17,15 @@ import { stubDocumentEvent } from './document-event.stubs';
 import { stubParticipant } from './participant.stubs';
 
 export const stubDocument = (
-  partialDocument?: PartialDeep<Document>,
+  partialDocument?: PartialDeep<BoldDocument>,
   stubExternalEvents = true,
-): Document => {
+): BoldDocument => {
   const externalEvents =
     partialDocument?.externalEvents?.map((event) => stubDocumentEvent(event)) ??
     [];
 
   return {
-    category: stubEnumValue(DocumentCategory),
+    category: stubEnumValue(BoldDocumentCategory),
     createdAt: faker.date.recent().toISOString(),
     currentValue: faker.number.float({ max: 10_000, min: 0 }),
     dataSetName: stubEnumValue(DataSetName),
@@ -36,7 +33,7 @@ export const stubDocument = (
     id: faker.string.uuid(),
     isPubliclySearchable: faker.datatype.boolean(),
     measurementUnit: faker.helpers.arrayElement(['kg', 't', 'unit']),
-    status: stubEnumValue(MethodologyDocumentStatus),
+    status: stubEnumValue(DocumentStatus),
     updatedAt: faker.date.recent().toISOString(),
     ...partialDocument,
     externalEvents: [
@@ -53,22 +50,22 @@ export const stubDocument = (
 };
 
 export const stubDocumentRelation = (
-  partial?: Partial<DocumentRelation>,
-): DocumentRelation => ({
+  partial?: Partial<BoldDocumentRelation>,
+): BoldDocumentRelation => ({
   bidirectional: faker.datatype.boolean(),
-  category: stubEnumValue(DocumentCategory),
+  category: stubEnumValue(BoldDocumentCategory),
   documentId: faker.string.uuid(),
-  subtype: stubEnumValue(DocumentSubtype),
-  type: stubEnumValue(DocumentType),
+  subtype: stubEnumValue(BoldDocumentSubtype),
+  type: stubEnumValue(BoldDocumentType),
   ...partial,
 });
 
 export const stubMassIDDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
-    category: DocumentCategory.MASS_ID,
-    type: DocumentType.ORGANIC,
+    category: BoldDocumentCategory.MASS_ID,
+    type: BoldDocumentType.ORGANIC,
     ...partialDocument,
   });
 
@@ -109,20 +106,20 @@ export const generateNearbyCoordinates = (options?: {
 };
 
 export const stubParticipantAccreditationGroupDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
     ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    subtype: DocumentSubtype.GROUP,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
+    category: BoldDocumentCategory.METHODOLOGY,
+    subtype: BoldDocumentSubtype.GROUP,
+    type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
   });
 
 export const stubParticipantAccreditationDocument = (
-  partialDocument?: PartialDeep<Document>,
-): Document =>
+  partialDocument?: PartialDeep<BoldDocument>,
+): BoldDocument =>
   stubDocument({
     ...partialDocument,
-    category: DocumentCategory.METHODOLOGY,
-    type: DocumentType.PARTICIPANT_ACCREDITATION,
+    category: BoldDocumentCategory.METHODOLOGY,
+    type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
   });

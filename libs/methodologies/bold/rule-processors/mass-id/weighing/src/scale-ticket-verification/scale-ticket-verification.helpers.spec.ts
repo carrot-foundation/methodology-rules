@@ -1,4 +1,4 @@
-import type { MethodologyAdditionalVerification } from '@carrot-fndn/shared/types';
+import type { AdditionalVerification } from '@carrot-fndn/shared/types';
 
 import { ScaleTicketLayout1Parser } from '@carrot-fndn/shared/document-extractor-scale-ticket';
 import { textExtractor } from '@carrot-fndn/shared/text-extractor';
@@ -53,7 +53,7 @@ describe('scale-ticket-verification', () => {
     const result = await verifyScaleTicketNetWeight({
       config: {
         'Verification Type': 'otherType',
-      } as MethodologyAdditionalVerification,
+      } as AdditionalVerification,
       expectedNetWeight: 100,
       textExtractorInput: undefined,
     });
@@ -66,7 +66,7 @@ describe('scale-ticket-verification', () => {
       config: {
         'Layout IDs': ['layout-1'],
         'Verification Type': 'otherType',
-      } as MethodologyAdditionalVerification,
+      } as AdditionalVerification,
       expectedNetWeight: 100,
       textExtractorInput: { filePath: 'dummy-path' },
     });
@@ -75,7 +75,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should return no errors when expected net weight is zero and matches the ticket net weight', async () => {
-    const baseConfig: MethodologyAdditionalVerification = {
+    const baseConfig: AdditionalVerification = {
       'Layout IDs': ['layout-1'],
       'Verification Type': 'Scale Ticket',
     };
@@ -183,7 +183,7 @@ describe('scale-ticket-verification', () => {
   });
 
   it('should build a scale ticket verification context', () => {
-    const config: MethodologyAdditionalVerification = {
+    const config: AdditionalVerification = {
       'Layout IDs': ['layout-1'],
       'Verification Type': 'Scale Ticket',
     };

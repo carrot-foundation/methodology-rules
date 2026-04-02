@@ -44,20 +44,23 @@ references:
    ├── {rule-name}.processor.spec.ts
    ├── {rule-name}.lambda.e2e.spec.ts
    ├── {rule-name}.test-cases.ts
+   ├── {rule-name}.rule-subject.ts
    ├── index.ts
    ├── project.json
    └── vitest.config.ts
    ```
 
-2. **Implement the processor**: In `{rule-name}.processor.ts`, implement the `evaluateResult()` method. The processor extends `ParentDocumentRuleProcessor<RuleSubject>`.
+2. **Define the rule subject schema**: In `{rule-name}.rule-subject.ts`, define a `*RuleSubjectSchema` using `z.object()` with the exact fields the rule needs. Export both the schema and the inferred type. Use `validateRuleSubjectOrThrow` as the standard validation entry point in the processor.
 
-3. **Write test cases**: In `{rule-name}.test-cases.ts`, define shared test data using `@faker-js/faker` and `zocker`. Never use real data (no real company names, tax IDs, addresses, etc.).
+3. **Implement the processor**: In `{rule-name}.processor.ts`, implement the `evaluateResult()` method. The processor extends `ParentDocumentRuleProcessor<RuleSubject>`.
 
-4. **Write unit tests**: In `{rule-name}.processor.spec.ts`, test the core evaluation logic using the shared test cases.
+4. **Write test cases**: In `{rule-name}.test-cases.ts`, define shared test data using `@faker-js/faker` and `zocker`. Never use real data (no real company names, tax IDs, addresses, etc.).
 
-5. **Write e2e tests**: In `{rule-name}.lambda.e2e.spec.ts`, test the Lambda handler end-to-end.
+5. **Write unit tests**: In `{rule-name}.processor.spec.ts`, test the core evaluation logic using the shared test cases.
 
-6. **Apply to a methodology** (if needed):
+6. **Write e2e tests**: In `{rule-name}.lambda.e2e.spec.ts`, test the Lambda handler end-to-end.
+
+7. **Apply to a methodology** (if needed):
 
    ```bash
    pnpm apply-methodology-rule <methodology> <rule> <scope>
@@ -65,4 +68,4 @@ references:
 
    Example: `pnpm apply-methodology-rule carbon-organic vehicle-validation mass-id`
 
-7. **Verify**: Run `pnpm lint:affected && pnpm ts:affected && pnpm test:affected` to confirm everything passes.
+8. **Verify**: Run `pnpm lint:affected && pnpm ts:affected && pnpm test:affected` to confirm everything passes.

@@ -1,5 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { RECYCLED_ID } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import { BoldActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
@@ -7,7 +8,6 @@ import {
   stubRuleInput,
   stubRuleResponse,
 } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -58,17 +58,18 @@ describe('RewardsDistributionProcessor E2E', () => {
         const { actors, remainder } =
           response.resultContent as RewardsDistribution;
 
-        const actorsResult = actors.map((actor) => ({
-          actorType: actor.actorType,
-          amount: actor.amount,
-          percentage: actor.percentage,
-        }));
-
-        actorsResult.push({
-          actorType: MethodologyActorType.REMAINDER,
-          amount: remainder.amount,
-          percentage: remainder.percentage,
-        });
+        const actorsResult = [
+          ...actors.map((actor) => ({
+            actorType: actor.actorType,
+            amount: actor.amount,
+            percentage: actor.percentage,
+          })),
+          {
+            actorType: BoldActorType.REMAINDER,
+            amount: remainder.amount,
+            percentage: remainder.percentage,
+          },
+        ];
 
         for (const [index, actual] of actorsResult.entries()) {
           const expected = expectedActorsResult[index];

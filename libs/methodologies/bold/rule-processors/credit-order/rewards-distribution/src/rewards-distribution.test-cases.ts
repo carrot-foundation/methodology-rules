@@ -13,32 +13,32 @@ import {
   stubParticipant,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldActorType,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
+  BoldDocumentType,
+  BoldMethodologyActorType,
   BoldMethodologyName,
-  type CertificateRewardDistributionOutput,
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentSubtype,
-  DocumentType,
-  MassIDDocumentActorType,
-  type MassIDReward,
-  MethodologyDocumentActorType,
+  MassIDActorType,
   RewardsDistributionActorType,
+  type RewardsDistributionMassIDReward,
+  type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 type ActorResult = {
-  actorType: MethodologyActorType | RewardsDistributionActorType;
+  actorType: string;
   amount: string;
   percentage: string;
 };
 
-type CertificateDocument = Document;
-type CreditOrderDocument = Document;
+type CertificateDocument = BoldDocument;
+type CreditOrderDocument = BoldDocument;
 
 type ErrorTestCase = RuleTestCase & {
   creditOrderDocument: CreditOrderDocument | undefined;
@@ -54,10 +54,10 @@ type TestCase = Omit<RuleTestCase, 'resultComment'> & {
   unitPrice: number;
 };
 
-const { CREDIT_ORDER, RECYCLED_ID } = DocumentType;
-const { FOOD_FOOD_WASTE_AND_BEVERAGES } = DocumentSubtype;
-const { RELATED } = DocumentEventName;
-const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = DocumentEventAttributeName;
+const { CREDIT_ORDER, RECYCLED_ID } = BoldDocumentType;
+const { FOOD_FOOD_WASTE_AND_BEVERAGES } = BoldDocumentSubtype;
+const { RELATED } = BoldDocumentEventName;
+const { CREDIT_UNIT_PRICE, RULE_RESULT_DETAILS } = BoldAttributeName;
 const {
   COMMUNITY_IMPACT_POOL,
   HAULER,
@@ -124,7 +124,7 @@ const { massIDActorParticipants, methodologyActorParticipants } =
 
 const createStandardRewardsDistribution = (
   documentId: string,
-): CertificateRewardDistributionOutput => ({
+): RewardsDistributionResultContent => ({
   massIDDocumentId: documentId,
   massIDRewards: [
     ...massIDActorParticipants.entries(),
@@ -139,7 +139,7 @@ const createStandardRewardsDistribution = (
       id: participant.id,
       name: participant.name,
     },
-  })) as unknown as NonEmptyArray<MassIDReward>,
+  })) as unknown as NonEmptyArray<RewardsDistributionMassIDReward>,
 });
 
 const createMethodologyActorReward = (
@@ -148,12 +148,12 @@ const createMethodologyActorReward = (
 ) => {
   const id =
     methodologyActorParticipants.get(
-      actorType as unknown as MethodologyDocumentActorType,
+      actorType as unknown as BoldMethodologyActorType,
     )?.id || faker.string.uuid();
 
   const name =
     methodologyActorParticipants.get(
-      actorType as unknown as MethodologyDocumentActorType,
+      actorType as unknown as BoldMethodologyActorType,
     )?.name || `${actorType} Participant`;
 
   return {
@@ -174,11 +174,11 @@ const createMassIDActorReward = (
   percentage: string,
 ) => {
   const id =
-    massIDActorParticipants.get(actorType as unknown as MassIDDocumentActorType)
-      ?.id || faker.string.uuid();
+    massIDActorParticipants.get(actorType as unknown as MassIDActorType)?.id ||
+    faker.string.uuid();
 
   const name =
-    massIDActorParticipants.get(actorType as unknown as MassIDDocumentActorType)
+    massIDActorParticipants.get(actorType as unknown as MassIDActorType)
       ?.name || `${actorType} Participant`;
 
   return {
@@ -196,13 +196,12 @@ const createMassIDActorReward = (
 
 const createMultiHaulerRewardsDistribution = (
   documentId: string,
-): CertificateRewardDistributionOutput => {
+): RewardsDistributionResultContent => {
   const haulerParticipants = [
     {
       id:
-        massIDActorParticipants.get(
-          HAULER as unknown as MassIDDocumentActorType,
-        )?.id ?? '',
+        massIDActorParticipants.get(HAULER as unknown as MassIDActorType)?.id ??
+        '',
       name: 'Tera',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION[HAULER][0],
     },
@@ -262,7 +261,7 @@ const createMultiHaulerRewardsDistribution = (
       NETWORK,
       MULTI_HAULER_REWARDS_DISTRIBUTION[NETWORK],
     ),
-  ] as unknown as NonEmptyArray<MassIDReward>;
+  ] as unknown as NonEmptyArray<RewardsDistributionMassIDReward>;
 
   return {
     massIDDocumentId: documentId,
@@ -272,7 +271,7 @@ const createMultiHaulerRewardsDistribution = (
 
 const buildCertificateDocuments = (options: {
   massIDDocumentId: string;
-  rewardsDistribution: CertificateRewardDistributionOutput;
+  rewardsDistribution: RewardsDistributionResultContent;
   value: number;
 }) => {
   const { massIDDocumentId, rewardsDistribution, value } = options;
@@ -421,7 +420,7 @@ const expectedResults = {
       percentage: '1',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: BoldActorType.REMAINDER,
       amount: '0',
       percentage: '0',
     },
@@ -484,7 +483,7 @@ const expectedResults = {
       percentage: '20.000003',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: BoldActorType.REMAINDER,
       amount: '0.000001',
       percentage: '0.000003',
     },
@@ -537,7 +536,7 @@ const expectedResults = {
       percentage: '1',
     },
     {
-      actorType: MethodologyActorType.REMAINDER,
+      actorType: BoldActorType.REMAINDER,
       amount: '0',
       percentage: '0',
     },

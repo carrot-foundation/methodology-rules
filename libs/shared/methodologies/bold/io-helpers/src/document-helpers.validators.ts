@@ -1,6 +1,6 @@
-import { MethodologyDocumentSchema } from '@carrot-fndn/shared/types';
+import { BoldDocumentSchema } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const validateDocument = (
   input: unknown,
-): ReturnType<typeof MethodologyDocumentSchema.safeParse> =>
-  MethodologyDocumentSchema.safeParse(input);
+): ReturnType<typeof BoldDocumentSchema.safeParse> =>
+  BoldDocumentSchema.safeParse(input);

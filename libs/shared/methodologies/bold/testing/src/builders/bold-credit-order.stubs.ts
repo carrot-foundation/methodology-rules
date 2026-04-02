@@ -1,10 +1,10 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
-  DocumentCategory,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentType,
+  BoldAttributeName,
+  type BoldDocument,
+  BoldDocumentCategory,
+  type BoldDocumentEvent,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
@@ -23,7 +23,7 @@ import {
   type StubBoldDocumentParameters,
 } from './bold.stubs.types';
 
-const { CREDIT_UNIT_PRICE } = DocumentEventAttributeName;
+const { CREDIT_UNIT_PRICE } = BoldAttributeName;
 
 export const CREDITS_EVENT_NAME = 'Credits';
 
@@ -34,7 +34,7 @@ const defaultRulesMetadataAttributes: MetadataAttributeParameter[] = [
 export const stubBoldCreditOrderCreditsEvent = ({
   metadataAttributes,
   partialDocumentEvent,
-}: StubBoldDocumentEventParameters = {}): DocumentEvent =>
+}: StubBoldDocumentEventParameters = {}): BoldDocumentEvent =>
   attachExplicitAttributes(
     stubDocumentEventWithMetadataAttributes(
       {
@@ -56,7 +56,7 @@ const boldCreditOrderExternalEventsMap = new Map([
 export const stubBoldCreditOrderDocument = ({
   externalEventsMap,
   partialDocument,
-}: StubBoldDocumentParameters = {}): Document => {
+}: StubBoldDocumentParameters = {}): BoldDocument => {
   const mergedEventsMap = isNil(externalEventsMap)
     ? boldCreditOrderExternalEventsMap
     : mergeEventsMaps(boldCreditOrderExternalEventsMap, externalEventsMap);
@@ -65,12 +65,12 @@ export const stubBoldCreditOrderDocument = ({
     ...stubDocument(
       {
         ...partialDocument,
-        category: DocumentCategory.METHODOLOGY,
+        category: BoldDocumentCategory.METHODOLOGY,
         externalEvents: [
           ...mergedEventsMap.values(),
           ...(partialDocument?.externalEvents ?? []),
         ],
-        type: DocumentType.CREDIT_ORDER,
+        type: BoldDocumentType.CREDIT_ORDER,
       },
       false,
     ),

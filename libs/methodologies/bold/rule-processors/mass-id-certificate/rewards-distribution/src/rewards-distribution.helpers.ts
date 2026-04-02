@@ -11,14 +11,16 @@ import {
   isActorEvent,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
-  DocumentEventAttributeName,
-  DocumentEventAttributeValue,
-  DocumentEventName,
-  type MassIDReward,
-  RewardActorAddress,
-  type RewardActorParticipant,
+  BoldAttributeName,
+  BoldBusinessSizeDeclarationValue,
+  type BoldDocument,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldUnidentifiedAttributeValue,
+  type RewardsDistributionActorAddress,
+  type RewardsDistributionActorParticipant,
   RewardsDistributionActorType,
+  type RewardsDistributionMassIDReward,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import BigNumber from 'bignumber.js';
 
@@ -34,9 +36,9 @@ import {
   REQUIRED_ACTOR_TYPES,
 } from './rewards-distribution.constants';
 
-const { UNIDENTIFIED } = DocumentEventAttributeValue;
-const { WASTE_ORIGIN } = DocumentEventAttributeName;
-const WASTE_GENERATOR = 'Waste Generator';
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
+const { WASTE_ORIGIN } = BoldAttributeName;
+const { WASTE_GENERATOR: WASTE_GENERATOR_LABEL } = BoldDocumentEventLabel;
 
 export const isHaulerActorDefined = (
   participants: RewardsDistributionActor[],
@@ -46,7 +48,9 @@ export const isHaulerActorDefined = (
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
-export const mapMassIDRewards = (participants: ActorReward[]): MassIDReward[] =>
+export const mapMassIDRewards = (
+  participants: ActorReward[],
+): RewardsDistributionMassIDReward[] =>
   participants.map(
     ({
       actorType,
@@ -72,10 +76,10 @@ export const mapActorReward = ({
   preserveSensitiveData,
 }: {
   actorType: RewardsDistributionActorType;
-  address: RewardActorAddress;
-  massIDDocument: Document;
+  address: RewardsDistributionActorAddress;
+  massIDDocument: BoldDocument;
   massIDPercentage: BigNumber;
-  participant: RewardActorParticipant;
+  participant: RewardsDistributionActorParticipant;
   preserveSensitiveData: boolean | undefined;
 }): ActorReward => ({
   actorType,
@@ -93,12 +97,12 @@ export const getActorsByType = ({
 }: {
   actors: RewardsDistributionActor[];
   actorType: RewardsDistributionActorType;
-  methodologyDocument: Document;
+  methodologyDocument: BoldDocument;
 }): RewardsDistributionActor[] => {
   if (REQUIRED_ACTOR_TYPES.METHODOLOGY.includes(actorType)) {
     const actorEvent = methodologyDocument.externalEvents?.find(
       and(
-        eventNameIsAnyOf([DocumentEventName.ACTOR]),
+        eventNameIsAnyOf([BoldDocumentEventName.ACTOR]),
         eventLabelIsAnyOf([actorType]),
       ),
     );
@@ -137,11 +141,13 @@ export const getActorsByType = ({
 export const isLogisticsOrServiceProvider = (
   actorType: RewardsDistributionActorType,
 ): boolean =>
-  [
-    RewardsDistributionActorType.HAULER,
-    RewardsDistributionActorType.PROCESSOR,
-    RewardsDistributionActorType.RECYCLER,
-  ].includes(actorType);
+  (
+    [
+      RewardsDistributionActorType.HAULER,
+      RewardsDistributionActorType.PROCESSOR,
+      RewardsDistributionActorType.RECYCLER,
+    ] as RewardsDistributionActorType[]
+  ).includes(actorType);
 
 export const applySupplyChainDigitizationDiscount = (
   basePercentage: BigNumber,
@@ -158,15 +164,26 @@ export const calculateNetworkPercentageForUnidentifiedWasteOrigin = (
     wasteGeneratorPercentage,
   } = dto;
 
+  const processorPercentage =
+    rewardDistributions[RewardsDistributionActorType.PROCESSOR] ??
+    new BigNumber(0);
+  const recyclerPercentage =
+    rewardDistributions[RewardsDistributionActorType.RECYCLER] ??
+    new BigNumber(0);
+
   let networkPercentage = basePercentage
     .plus(wasteGeneratorPercentage)
     .plus(additionalPercentage)
-    .plus(new BigNumber(rewardDistributions.Processor).multipliedBy(0.25))
-    .plus(new BigNumber(rewardDistributions.Recycler).multipliedBy(0.25));
+    .plus(processorPercentage.multipliedBy(0.25))
+    .plus(recyclerPercentage.multipliedBy(0.25));
 
   if (isHaulerActorDefined(actors)) {
+    const haulerPercentage =
+      rewardDistributions[RewardsDistributionActorType.HAULER] ??
+      new BigNumber(0);
+
     networkPercentage = networkPercentage.plus(
-      new BigNumber(rewardDistributions.Hauler).multipliedBy(0.25),
+      haulerPercentage.multipliedBy(0.25),
     );
   }
 
@@ -189,7 +206,7 @@ export const calculatePercentageForUnidentifiedWasteOrigin = (
   return basePercentage;
 };
 
-export const isWasteOriginIdentified = (document: Document): boolean => {
+export const isWasteOriginIdentified = (document: BoldDocument): boolean => {
   const hasUnidentifiedOriginAttribute = getOrDefault(
     document.externalEvents,
     [],
@@ -199,7 +216,7 @@ export const isWasteOriginIdentified = (document: Document): boolean => {
 
   const hasWasteGeneratorEvent = getOrDefault(document.externalEvents, []).some(
     (event) =>
-      isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
+      isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR_LABEL])(event),
   );
 
   return !hasUnidentifiedOriginAttribute || hasWasteGeneratorEvent;
@@ -210,14 +227,17 @@ export const getWasteGeneratorAdditionalPercentage = (
   rewardDistributions: RewardsDistributionActorTypePercentage,
 ): BigNumber => {
   if (!isHaulerActorDefined(actors)) {
-    return new BigNumber(rewardDistributions.Hauler);
+    return (
+      rewardDistributions[RewardsDistributionActorType.HAULER] ??
+      new BigNumber(0)
+    );
   }
 
   return new BigNumber(0);
 };
 
 export const shouldApplyLargeBusinessDiscount = (
-  wasteGeneratorVerificationDocument: Document | undefined,
+  wasteGeneratorVerificationDocument: BoldDocument | undefined,
 ): boolean => {
   if (isNil(wasteGeneratorVerificationDocument)) {
     return true;
@@ -226,7 +246,7 @@ export const shouldApplyLargeBusinessDiscount = (
   const onboardingDeclarationEvent =
     wasteGeneratorVerificationDocument.externalEvents?.find(
       (event) =>
-        event.name === String(DocumentEventName.ONBOARDING_DECLARATION),
+        event.name === String(BoldDocumentEventName.ONBOARDING_DECLARATION),
     );
 
   if (isNil(onboardingDeclarationEvent)) {
@@ -235,16 +255,14 @@ export const shouldApplyLargeBusinessDiscount = (
 
   const businessSize = getEventAttributeValue(
     onboardingDeclarationEvent,
-    DocumentEventAttributeName.BUSINESS_SIZE_DECLARATION,
+    BoldAttributeName.BUSINESS_SIZE_DECLARATION,
   );
 
   if (isNil(businessSize)) {
     return true;
   }
 
-  return (
-    String(businessSize) === String(DocumentEventAttributeValue.LARGE_BUSINESS)
-  );
+  return businessSize === BoldBusinessSizeDeclarationValue.LARGE_BUSINESS;
 };
 
 export const applyLargeBusinessDiscount = (
@@ -270,17 +288,17 @@ export const calculateCommunityImpactPoolShare = (
 };
 
 export const getNgoActorMassIDPercentage = (
-  massIDDocument: Document,
+  massIDDocument: BoldDocument,
   actorMassIDPercentage: BigNumber,
   actors: RewardsDistributionActor[],
   rewardDistributions: RewardsDistributionActorTypePercentage,
   getWasteGeneratorFullPercentage: (
-    targetDocument: Document,
+    targetDocument: BoldDocument,
     targetActorMassIDPercentage: BigNumber,
     targetActors: RewardsDistributionActor[],
     targetRewardDistributions: RewardsDistributionActorTypePercentage,
   ) => BigNumber,
-  wasteGeneratorVerificationDocument: Document | undefined,
+  wasteGeneratorVerificationDocument: BoldDocument | undefined,
 ): BigNumber => {
   const fullPercentage = getWasteGeneratorFullPercentage(
     massIDDocument,

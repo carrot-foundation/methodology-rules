@@ -10,28 +10,28 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { MethodologyDocumentEventLabel } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
 
-const { ACTOR, PICK_UP } = DocumentEventName;
-const { HAULER } = MethodologyDocumentEventLabel;
-const { VEHICLE_TYPE } = DocumentEventAttributeName;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { HAULER } = BoldDocumentEventLabel;
+const { VEHICLE_TYPE } = BoldAttributeName;
 
 type Subject = {
-  haulerEvent: DocumentEvent | undefined;
-  pickUpEvent: DocumentEvent | undefined;
+  haulerEvent: BoldDocumentEvent | undefined;
+  pickUpEvent: BoldDocumentEvent | undefined;
 };
 
 export const OPTIONAL_HAULER_VEHICLE_TYPES = [
-  DocumentEventVehicleType.SLUDGE_PIPES,
-  DocumentEventVehicleType.CART,
+  BoldVehicleType.SLUDGE_PIPES,
+  BoldVehicleType.CART,
 ] as const;
 
 export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<Subject> {
@@ -78,7 +78,9 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     };
   }
 
-  protected override getRuleSubject(document: Document): Subject | undefined {
+  protected override getRuleSubject(
+    document: BoldDocument,
+  ): Subject | undefined {
     return {
       haulerEvent: getOrUndefined(
         document.externalEvents?.find(

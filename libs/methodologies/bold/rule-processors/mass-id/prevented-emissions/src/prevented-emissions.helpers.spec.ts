@@ -1,8 +1,8 @@
 import { stubBoldEmissionAndCompostingMetricsEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
+  BoldAttributeName,
+  BoldBaseline,
   MassIDOrganicSubtype,
-  MethodologyBaseline,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
@@ -17,7 +17,7 @@ import {
 } from './prevented-emissions.helpers';
 
 const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
-  DocumentEventAttributeName;
+  BoldAttributeName;
 
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
@@ -26,35 +26,35 @@ describe('PreventedEmissionsHelpers', () => {
     it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
+        BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
         processorErrors,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
-        ][MethodologyBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
+        ][BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
       );
     });
 
     it('should return the correct prevented emissions factor for domestic sludge and open air dump', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        BoldBaseline.OPEN_AIR_DUMP,
         processorErrors,
       );
 
       expect(result).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
-        ][MethodologyBaseline.OPEN_AIR_DUMP],
+        ][BoldBaseline.OPEN_AIR_DUMP],
       );
     });
 
     it('should calculate factor for Others (if organic) when valid context is provided', () => {
       const result = getPreventedEmissionsFactor(
         MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-        MethodologyBaseline.OPEN_AIR_DUMP,
+        BoldBaseline.OPEN_AIR_DUMP,
         processorErrors,
         { normalizedLocalWasteClassificationId: '02 01 06' },
       );
@@ -129,9 +129,9 @@ describe('PreventedEmissionsHelpers', () => {
             BASELINES,
             {
               [MassIDOrganicSubtype.DOMESTIC_SLUDGE]:
-                MethodologyBaseline.OPEN_AIR_DUMP,
+                BoldBaseline.OPEN_AIR_DUMP,
               [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+                BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
             },
           ],
         ],
@@ -143,9 +143,7 @@ describe('PreventedEmissionsHelpers', () => {
         processorErrors,
       );
 
-      expect(result).toBe(
-        MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
-      );
+      expect(result).toBe(BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS);
     });
 
     it('should return undefined when baseline for waste subtype is not available', () => {
@@ -155,7 +153,7 @@ describe('PreventedEmissionsHelpers', () => {
             BASELINES,
             {
               [MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES]:
-                MethodologyBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+                BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
             },
           ],
         ],

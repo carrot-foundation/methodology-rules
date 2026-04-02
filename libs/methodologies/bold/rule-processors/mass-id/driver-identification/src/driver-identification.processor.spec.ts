@@ -1,13 +1,13 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
-import { DocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { DriverIdentificationProcessor } from './driver-identification.processor';
 import { driverIdentificationTestCases } from './driver-identification.test-cases';
 
-const { PICK_UP } = DocumentEventName;
+const { PICK_UP } = BoldDocumentEventName;
 
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 

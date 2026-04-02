@@ -3,18 +3,18 @@ import type { LicensePlate } from '@carrot-fndn/shared/types';
 
 import { stubBoldMassIDPickUpEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-  DocumentEventVehicleType,
+  BoldAttributeName,
+  BoldDocumentEventName,
+  BoldVehicleType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
 import { VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES } from './vehicle-identification.processor';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
-  DocumentEventAttributeName;
-const { PICK_UP } = DocumentEventName;
-const { OTHERS, TRUCK } = DocumentEventVehicleType;
+  BoldAttributeName;
+const { PICK_UP } = BoldDocumentEventName;
+const { OTHERS, TRUCK } = BoldVehicleType;
 
 interface VehicleIdentificationTestCase extends RuleTestCase {
   events: Map<string, ReturnType<typeof stubBoldMassIDPickUpEvent> | undefined>;

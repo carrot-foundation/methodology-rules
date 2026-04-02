@@ -4,8 +4,8 @@ import {
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
-  type Document,
-  DocumentEventName,
+  type BoldDocument,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
@@ -53,7 +53,7 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
         (participant) =>
           stubDocumentEvent({
             label: participant.type,
-            name: DocumentEventName.ACTOR,
+            name: BoldDocumentEventName.ACTOR,
             participant,
             relatedDocument: {
               documentId: participantsAccreditationDocuments.get(
@@ -103,7 +103,7 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
       'should return $resultStatus when $scenario',
       async ({ documents, massIDAuditDocument, resultStatus }) => {
         const documentEntries = (
-          [...documents, massIDAuditDocument].filter(Boolean) as Document[]
+          [...documents, massIDAuditDocument].filter(Boolean) as BoldDocument[]
         ).map((document) => ({
           document,
           documentKey: toDocumentKey({

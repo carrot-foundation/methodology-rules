@@ -13,21 +13,18 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import {
-  MethodologyDocumentEventLabel,
-  MethodologyDocumentStatus,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { DocumentStatus, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
@@ -37,9 +34,9 @@ import {
   fetchSimilarMassIDDocuments,
 } from './waste-mass-is-unique.helpers';
 
-const { ACTOR, DROP_OFF, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
+const { ACTOR, DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 
 interface RuleSubject {
   cancelledCount: number;
@@ -109,7 +106,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  protected async getRuleSubject(document: Document): Promise<RuleSubject> {
+  protected async getRuleSubject(document: BoldDocument): Promise<RuleSubject> {
     const eventsData = this.collectRequiredEventsData(document);
 
     const duplicateDocuments = await fetchSimilarMassIDDocuments({
@@ -120,8 +117,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     const cancelledCount = duplicateDocuments.filter(
       (duplicateDocument) =>
-        duplicateDocument.status ===
-        MethodologyDocumentStatus.CANCELLED.toString(),
+        duplicateDocument.status === DocumentStatus.CANCELLED.toString(),
     ).length;
 
     return {
@@ -131,7 +127,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     };
   }
 
-  private collectRequiredEventsData(document: Document): EventsData {
+  private collectRequiredEventsData(document: BoldDocument): EventsData {
     const dropOffEvent = this.getEventOrThrow(
       document,
       { name: [DROP_OFF] },
@@ -168,13 +164,13 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   }
 
   private getEventOrThrow(
-    document: Document,
+    document: BoldDocument,
     criteria: {
-      label?: MethodologyDocumentEventLabel[];
-      name: DocumentEventName[];
+      label?: BoldDocumentEventLabel[];
+      name: BoldDocumentEventName[];
     },
     errorMessage: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],
-  ): DocumentEvent {
+  ): BoldDocumentEvent {
     const { label, name } = criteria;
 
     const nameFilter = eventNameIsAnyOf(name);
@@ -193,7 +189,9 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
     return event;
   }
 
-  private getVehicleLicensePlate(pickUpEvent: DocumentEvent): NonEmptyString {
+  private getVehicleLicensePlate(
+    pickUpEvent: BoldDocumentEvent,
+  ): NonEmptyString {
     const vehicleLicensePlate = getEventAttributeValue(
       pickUpEvent,
       VEHICLE_LICENSE_PLATE,

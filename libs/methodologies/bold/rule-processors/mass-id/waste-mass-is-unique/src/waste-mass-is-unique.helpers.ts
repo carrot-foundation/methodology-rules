@@ -3,26 +3,24 @@ import {
   AuditApiService,
 } from '@carrot-fndn/shared/methodologies/audit-api';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventName,
+  BoldAttributeName,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  MethodologyDocumentEventLabel,
-  type NonEmptyString,
-} from '@carrot-fndn/shared/types';
+import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
-const { VEHICLE_LICENSE_PLATE } = DocumentEventAttributeName;
-const { ACTOR, DROP_OFF, MOVE, PICK_UP } = DocumentEventName;
-const { RECYCLER, WASTE_GENERATOR } = MethodologyDocumentEventLabel;
+const { VEHICLE_LICENSE_PLATE } = BoldAttributeName;
+const { ACTOR, DROP_OFF, MOVE, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = BoldDocumentEventLabel;
 
 export type EventsData = {
-  dropOffEvent: DocumentEvent;
-  pickUpEvent: DocumentEvent;
-  recyclerEvent: DocumentEvent;
+  dropOffEvent: BoldDocumentEvent;
+  pickUpEvent: BoldDocumentEvent;
+  recyclerEvent: BoldDocumentEvent;
   vehicleLicensePlate: NonEmptyString;
-  wasteGeneratorEvent: DocumentEvent;
+  wasteGeneratorEvent: BoldDocumentEvent;
 };
 
 export const createLicensePlateRegex = (
@@ -51,7 +49,7 @@ export const createAuditApiService = (): AuditApiService =>
   new AuditApiService();
 
 export const mapMassIDV2Query = (
-  document: Document,
+  document: BoldDocument,
   requiredData: EventsData,
 ) => {
   const {
@@ -119,7 +117,10 @@ export const mapMassIDV2Query = (
   };
 };
 
-export const mapMassIDV1Query = (document: Document, events: EventsData) => {
+export const mapMassIDV1Query = (
+  document: BoldDocument,
+  events: EventsData,
+) => {
   const {
     dropOffEvent,
     pickUpEvent,
@@ -207,7 +208,7 @@ export const fetchSimilarMassIDDocuments = async ({
   eventsData,
 }: {
   auditApiService: AuditApiService;
-  document: Document;
+  document: BoldDocument;
   eventsData: EventsData;
 }): Promise<ApiDocumentCheckDuplicatesResponse[]> => {
   const v2FormatQuery = mapMassIDV2Query(document, eventsData);

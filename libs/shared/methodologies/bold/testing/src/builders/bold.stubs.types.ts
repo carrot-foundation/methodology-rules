@@ -1,20 +1,20 @@
 import type {
-  Document,
-  DocumentEvent,
+  BoldDocument,
+  BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { PartialDeep } from 'type-fest';
 
 import type { MetadataAttributeParameter } from './bold.builder.helpers';
 
-export type BoldExternalEventsMap = Map<string, DocumentEvent | undefined>;
+export type BoldExternalEventsMap = Map<string, BoldDocumentEvent | undefined>;
 
 export type BoldExternalEventsObject = Partial<
-  Record<string, DocumentEvent | undefined>
+  Record<string, BoldDocumentEvent | undefined>
 >;
 
 export interface StubBoldDocumentEventParameters {
   metadataAttributes?: MetadataAttributeParameter[] | undefined;
-  partialDocumentEvent?: PartialDeep<DocumentEvent> | undefined;
+  partialDocumentEvent?: PartialDeep<BoldDocumentEvent> | undefined;
 }
 
 export interface StubBoldDocumentParameters {
@@ -22,5 +22,5 @@ export interface StubBoldDocumentParameters {
     | BoldExternalEventsMap
     | BoldExternalEventsObject
     | undefined;
-  partialDocument?: PartialDeep<Document> | undefined;
+  partialDocument?: PartialDeep<BoldDocument> | undefined;
 }

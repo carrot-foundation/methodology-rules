@@ -1,14 +1,14 @@
 import type {
+  BoldAttributeValue,
+  DocumentEventAttachment,
   Maybe,
-  MethodologyDocumentEventAttachment,
-  MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeValue,
 } from '@carrot-fndn/shared/types';
 
 import { getNonEmptyString } from '@carrot-fndn/shared/helpers';
 import {
-  type DocumentEvent,
-  DocumentEventAttributeName,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
@@ -17,9 +17,9 @@ import {
 } from './event.getters.validators';
 
 export const getEventAttributeValue = (
-  event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
-): MethodologyDocumentEventAttributeValue | undefined => {
+  event: Maybe<BoldDocumentEvent>,
+  attributeName: BoldAttributeName,
+): BoldAttributeValue | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
@@ -27,32 +27,30 @@ export const getEventAttributeValue = (
       (attribute) => attribute.name === attributeName,
     );
 
-    return foundAttribute?.value as
-      | MethodologyDocumentEventAttributeValue
-      | undefined;
+    return foundAttribute?.value as BoldAttributeValue | undefined;
   }
 
   return undefined;
 };
 
 export const getEventAttributeByName = (
-  event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
-): MethodologyDocumentEventAttribute | undefined => {
+  event: Maybe<BoldDocumentEvent>,
+  attributeName: BoldAttributeName,
+): BoldDocumentEventAttribute | undefined => {
   const validation = validateDocumentEventWithMetadata(event);
 
   if (validation.success) {
     return validation.data.metadata.attributes.find(
       (attribute) => attribute.name === attributeName,
-    ) as MethodologyDocumentEventAttribute | undefined;
+    ) as BoldDocumentEventAttribute | undefined;
   }
 
   return undefined;
 };
 
 export const getEventAttributeValueOrThrow = <T>(
-  event: Maybe<DocumentEvent>,
-  attributeName: DocumentEventAttributeName | string,
+  event: Maybe<BoldDocumentEvent>,
+  attributeName: BoldAttributeName,
   validateValue: (
     input: unknown,
   ) => { data: T; success: true } | { success: false },
@@ -68,9 +66,9 @@ export const getEventAttributeValueOrThrow = <T>(
 };
 
 export const getDocumentEventAttachmentByLabel = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   label: string,
-): MethodologyDocumentEventAttachment | undefined => {
+): DocumentEventAttachment | undefined => {
   const validation = validateDocumentEventWithAttachments(event);
 
   if (validation.success) {
@@ -83,8 +81,8 @@ export const getDocumentEventAttachmentByLabel = (
 };
 
 export const getEventMethodologySlug = (
-  event: Maybe<DocumentEvent>,
-): MethodologyDocumentEventAttributeValue | undefined =>
+  event: Maybe<BoldDocumentEvent>,
+): BoldAttributeValue | undefined =>
   getNonEmptyString(
-    getEventAttributeValue(event, DocumentEventAttributeName.METHODOLOGY_SLUG),
+    getEventAttributeValue(event, BoldAttributeName.METHODOLOGY_SLUG),
   );

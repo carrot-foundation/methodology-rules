@@ -16,19 +16,19 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
-  type Document,
-  type DocumentEvent,
-  DocumentEventAttributeName,
-  DocumentEventContainerType,
-  DocumentEventName,
-  DocumentEventScaleType,
-  DocumentEventWeighingCaptureMethod,
+  BoldAttributeName,
+  BoldContainerType,
+  type BoldDocument,
+  type BoldDocumentEvent,
+  type BoldDocumentEventAttribute,
+  BoldDocumentEventName,
+  BoldScaleType,
+  BoldWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
-  type MethodologyAdditionalVerificationAttributeValue,
-  type MethodologyDocumentEventAttribute,
-  MethodologyDocumentEventAttributeFormat,
-  type MethodologyDocumentEventAttributeValue,
+  type AdditionalVerificationAttributeValue,
+  type BoldAttributeValue,
+  DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 
 import {
@@ -50,7 +50,7 @@ import {
 } from './weighing.validators';
 
 const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
-  DocumentEventName;
+  BoldDocumentEventName;
 const {
   CONTAINER_CAPACITY,
   CONTAINER_QUANTITY,
@@ -62,44 +62,43 @@ const {
   TARE,
   VEHICLE_LICENSE_PLATE,
   WEIGHING_CAPTURE_METHOD,
-} = DocumentEventAttributeName;
+} = BoldAttributeName;
 
 export type ValidationResult = { errors: string[] };
 
 export interface WeighingValues {
-  accreditationScaleType: MethodologyDocumentEventAttributeValue | undefined;
-  containerCapacityAttribute: MethodologyDocumentEventAttribute | undefined;
+  accreditationScaleType: BoldAttributeValue | undefined;
+  containerCapacityAttribute: BoldDocumentEventAttribute | undefined;
   containerCapacityException: ContainerCapacityApprovedException | undefined;
-  containerQuantity: MethodologyDocumentEventAttributeValue | undefined;
+  containerQuantity: BoldAttributeValue | undefined;
   containerQuantityException: ContainerQuantityApprovedException | undefined;
   containerType: string | undefined;
-  description: MethodologyDocumentEventAttributeValue | undefined;
+  description: BoldAttributeValue | undefined;
   eventValue: number | undefined;
-  grossWeight: MethodologyDocumentEventAttribute | undefined;
-  scaleType: MethodologyDocumentEventAttributeValue | undefined;
-  tare: MethodologyDocumentEventAttribute | undefined;
+  grossWeight: BoldDocumentEventAttribute | undefined;
+  scaleType: BoldAttributeValue | undefined;
+  tare: BoldDocumentEventAttribute | undefined;
   tareException: TareApprovedException | undefined;
-  vehicleLicensePlateAttribute: MethodologyDocumentEventAttribute | undefined;
+  vehicleLicensePlateAttribute: BoldDocumentEventAttribute | undefined;
   weighingCaptureMethod: string | undefined;
 }
 
 const hasValidAttributeFormat = (
-  attribute?: MethodologyDocumentEventAttribute,
+  attribute?: BoldDocumentEventAttribute,
 ): boolean =>
-  (
-    Object.values(MethodologyDocumentEventAttributeFormat) as unknown[]
-  ).includes(attribute?.format);
+  (Object.values(DocumentEventAttributeFormat) as unknown[]).includes(
+    attribute?.format,
+  );
 
 const hasPositiveFloatAttributeValue = (
-  attribute?: MethodologyDocumentEventAttribute,
+  attribute?: BoldDocumentEventAttribute,
 ): boolean => isNonZeroPositive(attribute?.value);
 
 const isTruckContainer = (values: WeighingValues): boolean =>
-  values.containerType === DocumentEventContainerType.TRUCK.toString();
+  values.containerType === BoldContainerType.TRUCK.toString();
 
-const isAttributeOmitted = (
-  attribute?: MethodologyDocumentEventAttribute,
-): boolean => isNil(attribute?.value) || attribute.value === '';
+const isAttributeOmitted = (attribute?: BoldDocumentEventAttribute): boolean =>
+  isNil(attribute?.value) || attribute.value === '';
 
 const shouldSkipValidationWithTareException = (
   values: WeighingValues,
@@ -113,8 +112,8 @@ const shouldSkipNetWeightCalculationWithTareException = (
   (isAttributeOmitted(values.grossWeight) || isAttributeOmitted(values.tare));
 
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
-  recyclerAccreditationDocument: Document,
-): MethodologyAdditionalVerificationAttributeValue | undefined => {
+  recyclerAccreditationDocument: BoldDocument,
+): AdditionalVerificationAttributeValue | undefined => {
   const accreditationResultEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([ACCREDITATION_RESULT]),
@@ -137,7 +136,7 @@ export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
 };
 
 export const getTareExceptionFromAccreditationDocument = (
-  recyclerAccreditationDocument: Document,
+  recyclerAccreditationDocument: BoldDocument,
 ): TareApprovedException | undefined => {
   const exceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
@@ -158,7 +157,7 @@ export const getTareExceptionFromAccreditationDocument = (
 };
 
 export const getContainerCapacityExceptionFromAccreditationDocument = (
-  recyclerAccreditationDocument: Document,
+  recyclerAccreditationDocument: BoldDocument,
 ): ContainerCapacityApprovedException | undefined => {
   const exceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
@@ -181,7 +180,7 @@ export const getContainerCapacityExceptionFromAccreditationDocument = (
 };
 
 export const getContainerQuantityExceptionFromAccreditationDocument = (
-  recyclerAccreditationDocument: Document,
+  recyclerAccreditationDocument: BoldDocument,
 ): ContainerQuantityApprovedException | undefined => {
   const exceptions = getApprovedExceptions(
     recyclerAccreditationDocument,
@@ -223,8 +222,8 @@ export const isExceptionValid = (
 };
 
 export const getAccreditationScaleType = (
-  recyclerAccreditationDocument: Document,
-): MethodologyDocumentEventAttributeValue | undefined => {
+  recyclerAccreditationDocument: BoldDocument,
+): BoldAttributeValue | undefined => {
   const monitoringSystemsAndEquipmentEvent =
     recyclerAccreditationDocument.externalEvents?.find(
       eventNameIsAnyOf([MONITORING_SYSTEMS_AND_EQUIPMENT]),
@@ -234,8 +233,8 @@ export const getAccreditationScaleType = (
 };
 
 export const getValuesRelatedToWeighing = (
-  weighingEvent: DocumentEvent,
-  recyclerAccreditationDocument: Document,
+  weighingEvent: BoldDocumentEvent,
+  recyclerAccreditationDocument: BoldDocument,
 ): WeighingValues => ({
   accreditationScaleType: getAccreditationScaleType(
     recyclerAccreditationDocument,
@@ -275,7 +274,9 @@ export const getValuesRelatedToWeighing = (
   )?.toString(),
 });
 
-export const getWeighingEvents = (document: Document): DocumentEvent[] =>
+export const getWeighingEvents = (
+  document: BoldDocument,
+): BoldDocumentEvent[] =>
   getOrDefault(
     document.externalEvents?.filter(
       (event) => String(event.name) === String(WEIGHING),
@@ -333,7 +334,7 @@ const validators: Record<string, Validator> = {
 
     if (
       isTwoStep === true &&
-      values.containerType !== DocumentEventContainerType.TRUCK.toString()
+      values.containerType !== BoldContainerType.TRUCK.toString()
     ) {
       return {
         errors: [
@@ -442,17 +443,12 @@ const validators: Record<string, Validator> = {
     }
 
     if (
-      !(Object.values(DocumentEventScaleType) as unknown[]).includes(
-        values.scaleType,
-      )
+      !(Object.values(BoldScaleType) as unknown[]).includes(values.scaleType)
     ) {
       errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
     }
 
-    if (
-      isTwoStep === true &&
-      values.scaleType !== DocumentEventScaleType.WEIGHBRIDGE
-    ) {
+    if (isTwoStep === true && values.scaleType !== BoldScaleType.WEIGHBRIDGE) {
       errors.push(
         INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
           values.scaleType,
@@ -499,7 +495,7 @@ const validators: Record<string, Validator> = {
 
   weighingCaptureMethod: (values) => {
     if (
-      (Object.values(DocumentEventWeighingCaptureMethod) as unknown[]).includes(
+      (Object.values(BoldWeighingCaptureMethod) as unknown[]).includes(
         values.weighingCaptureMethod,
       )
     ) {
@@ -530,8 +526,16 @@ export const validateWeighingValues = (
 };
 
 export const validateTwoStepWeighingEvents = (
-  events: DocumentEvent[],
+  events: BoldDocumentEvent[],
 ): ValidationResult => {
+  if (events.length !== 2) {
+    return {
+      errors: [
+        `Expected exactly 2 weighing events for two-step validation, but received ${String(events.length)}.`,
+      ],
+    };
+  }
+
   const errors: string[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];

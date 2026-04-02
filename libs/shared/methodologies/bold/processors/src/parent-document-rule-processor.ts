@@ -1,4 +1,4 @@
-import type { Document } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { RuleInput } from '@carrot-fndn/shared/rule/types';
 
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
@@ -7,10 +7,10 @@ import { RuleStandardDataProcessor } from '@carrot-fndn/shared/rule/standard-dat
 
 export abstract class ParentDocumentRuleProcessor<
   Subject,
-> extends RuleStandardDataProcessor<Document, Subject> {
+> extends RuleStandardDataProcessor<BoldDocument, Subject> {
   protected override async loadDocument(
     ruleInput: RuleInput,
-  ): Promise<Document | undefined> {
+  ): Promise<BoldDocument | undefined> {
     return loadDocument(
       this.context.documentLoaderService,
       toDocumentKey({

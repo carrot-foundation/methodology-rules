@@ -1,4 +1,4 @@
-import type { CertificateRewardDistributionOutput } from '@carrot-fndn/shared/methodologies/bold/types';
+import type { RewardsDistributionResultContent } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { z } from 'zod';
 
@@ -20,5 +20,5 @@ const CertificateRewardDistributionOutputSchema = z.object({
 
 export const isCertificateRewardDistributionOutput = (
   value: unknown,
-): value is CertificateRewardDistributionOutput =>
+): value is RewardsDistributionResultContent =>
   CertificateRewardDistributionOutputSchema.safeParse(value).success;

@@ -1,19 +1,16 @@
 import type {
-  DocumentEvent,
-  DocumentEventAttribute,
+  BoldDocumentEvent,
+  BoldDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import type { MethodologyDocumentEventAttributeValue } from '@carrot-fndn/shared/types';
+import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
-import {
-  DocumentEventAttributeName,
-  DocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
 
 export type MergeEventsMapsParameter =
-  | Map<DocumentEventName | string, DocumentEvent | undefined>
-  | Record<string, DocumentEvent | undefined>
+  | Map<string, BoldDocumentEvent | undefined>
+  | Record<string, BoldDocumentEvent | undefined>
   | undefined;
 
 /**
@@ -24,12 +21,12 @@ export type MergeEventsMapsParameter =
  * @param overridenEventsMap - Optional Map or object containing events that should override the defaults
  * @returns A new Map with the merged events
  */
-export const mergeEventsMaps = <T extends DocumentEventName | string>(
-  defaultEventsMap: Map<T, DocumentEvent>,
+export const mergeEventsMaps = <T extends string>(
+  defaultEventsMap: Map<T, BoldDocumentEvent>,
   overridenEventsMap:
-    | Map<T, DocumentEvent | undefined>
-    | Record<string, DocumentEvent | undefined>,
-): Map<T, DocumentEvent> => {
+    | Map<T, BoldDocumentEvent | undefined>
+    | Record<string, BoldDocumentEvent | undefined>,
+): Map<T, BoldDocumentEvent> => {
   const mergedEventsMap = new Map(defaultEventsMap);
 
   if (overridenEventsMap instanceof Map) {
@@ -55,31 +52,31 @@ export const mergeEventsMaps = <T extends DocumentEventName | string>(
 
 export type MetadataAttributeParameter =
   | MetadataAttributeTupleParameter
-  | Omit<DocumentEventAttribute, 'isPublic'>;
+  | Omit<BoldDocumentEventAttribute, 'isPublic'>;
 
 export type MetadataAttributeResponse =
   | MetadataAttributeTupleResponse
-  | Omit<DocumentEventAttribute, 'isPublic'>;
+  | Omit<BoldDocumentEventAttribute, 'isPublic'>;
 
 export type MetadataAttributeTupleParameter = [
-  DocumentEventAttributeName,
-  MethodologyDocumentEventAttributeValue | undefined,
+  BoldAttributeName,
+  BoldAttributeValue | undefined,
 ];
 
 export type MetadataAttributeTupleResponse = [
-  DocumentEventAttributeName,
-  MethodologyDocumentEventAttributeValue,
+  BoldAttributeName,
+  BoldAttributeValue,
 ];
 
 /**
  * Attaches the list of explicitly-provided metadata attribute names to a
- * DocumentEvent.  Used by the manifest generator to filter out default
+ * BoldDocumentEvent.  Used by the manifest generator to filter out default
  * (noise) attributes from examples.
  */
 export const attachExplicitAttributes = (
-  event: DocumentEvent,
+  event: BoldDocumentEvent,
   metadataAttributes?: MetadataAttributeParameter[],
-): DocumentEvent => {
+): BoldDocumentEvent => {
   if (metadataAttributes !== undefined && metadataAttributes.length > 0) {
     Object.defineProperty(event, EXPLICIT_ATTRIBUTES, {
       configurable: true,

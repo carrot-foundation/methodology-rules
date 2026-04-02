@@ -1,16 +1,16 @@
 import { pick } from '@carrot-fndn/shared/helpers';
 import {
-  type Document,
-  DocumentCategory,
-  type DocumentRelation,
-  DocumentSubtype,
-  DocumentType,
+  type BoldDocument,
+  BoldDocumentCategory,
+  type BoldDocumentRelation,
+  BoldDocumentSubtype,
+  BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface DocumentMatch {
-  category?: Document['category'] | undefined;
-  subtype?: Document['subtype'];
-  type?: Document['type'];
+  category?: BoldDocument['category'] | undefined;
+  subtype?: BoldDocument['subtype'];
+  type?: BoldDocument['type'];
 }
 
 export class DocumentMatcher {
@@ -20,7 +20,7 @@ export class DocumentMatcher {
     this.match = match;
   }
 
-  matches(document: Omit<DocumentRelation, 'id'>): boolean {
+  matches(document: Omit<BoldDocumentRelation, 'id'>): boolean {
     const matchKeys = Object.keys(this.match) as Array<keyof DocumentMatch>;
 
     const objectToMatch = pick(document, ...matchKeys);
@@ -31,41 +31,41 @@ export class DocumentMatcher {
 }
 
 export const MASS_ID = new DocumentMatcher({
-  category: DocumentCategory.MASS_ID,
+  category: BoldDocumentCategory.MASS_ID,
 });
 
 export const MASS_ID_AUDIT = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.MASS_ID_AUDIT,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.MASS_ID_AUDIT,
 });
 
 export const RECYCLED_ID = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.RECYCLED_ID,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.RECYCLED_ID,
 });
 
 export const GAS_ID = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.GAS_ID,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.GAS_ID,
 });
 
 export const METHODOLOGY_DEFINITION = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.DEFINITION,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.DEFINITION,
 });
 
 export const PARTICIPANT_ACCREDITATION_GROUP = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  subtype: DocumentSubtype.GROUP,
-  type: DocumentType.PARTICIPANT_ACCREDITATION,
+  category: BoldDocumentCategory.METHODOLOGY,
+  subtype: BoldDocumentSubtype.GROUP,
+  type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
 });
 
 export const PARTICIPANT_ACCREDITATION_PARTIAL_MATCH = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.PARTICIPANT_ACCREDITATION,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
 });
 
 export const CREDIT_ORDER_MATCH = new DocumentMatcher({
-  category: DocumentCategory.METHODOLOGY,
-  type: DocumentType.CREDIT_ORDER,
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: BoldDocumentType.CREDIT_ORDER,
 });

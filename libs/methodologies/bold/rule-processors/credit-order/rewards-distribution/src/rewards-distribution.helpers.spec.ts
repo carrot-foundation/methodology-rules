@@ -1,6 +1,8 @@
-import { RewardsDistributionActorType } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  BoldActorType,
+  RewardsDistributionActorType,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubArray, stubEnumValue } from '@carrot-fndn/shared/testing';
-import { MethodologyActorType } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import BigNumber from 'bignumber.js';
 
@@ -245,7 +247,7 @@ describe('Rewards Distribution Helpers', () => {
         percentage: new BigNumber('0.027105'),
       };
 
-      actors.set(MethodologyActorType.NETWORK, {
+      actors.set(BoldActorType.NETWORK, {
         actorType: RewardsDistributionActorType.NETWORK,
         address: { id: faker.string.uuid() },
         amount: '8.023876',
@@ -259,7 +261,7 @@ describe('Rewards Distribution Helpers', () => {
         remainder,
       });
 
-      expect(actors.get(MethodologyActorType.NETWORK)).toMatchObject({
+      expect(actors.get(BoldActorType.NETWORK)).toMatchObject({
         amount: formatDecimalPlaces(
           new BigNumber('8.023876').plus('3.543984'),
         ).toString(),
