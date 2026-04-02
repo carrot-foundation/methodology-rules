@@ -170,8 +170,9 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     let actorMassIDPercentage = rewardDistribution;
     const rewardDistributions =
       this.getRewardsDistributionActorTypePercentages(massIDDocument);
+
     const wasteGeneratorRewardDistribution =
-      rewardDistributions['Waste Generator'];
+      rewardDistributions['Waste Generator']!;
 
     if (actorType === RewardsDistributionActorType.WASTE_GENERATOR) {
       actorMassIDPercentage = this.getWasteGeneratorActorMassIDPercentage(
@@ -230,7 +231,7 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       this.getRewardsDistributionActorTypePercentages(massIDDocument);
 
     for (const actorType of Object.values(RewardsDistributionActorType)) {
-      const rewardDistribution = distributions[actorType];
+      const rewardDistribution = distributions[actorType]!;
       const actorsByType = getActorsByType({
         actors,
         actorType,
@@ -308,13 +309,13 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
       checkIfHasRequiredActorTypes({
         actors,
         documentId: document.id,
-        requiredActorTypes: REQUIRED_ACTOR_TYPES.MASS_ID,
+        requiredActorTypes: [...REQUIRED_ACTOR_TYPES.MASS_ID],
       });
     } catch {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MISSING_REQUIRED_ACTORS(
           document.id,
-          REQUIRED_ACTOR_TYPES.MASS_ID.filter(
+          [...REQUIRED_ACTOR_TYPES.MASS_ID].filter(
             (requiredActorType) =>
               !actors.some((actor) => actor.type === requiredActorType),
           ),
@@ -329,9 +330,10 @@ export class RewardsDistributionProcessor extends RuleDataProcessor {
     document: BoldDocument,
   ): RewardsDistributionActorTypePercentage {
     const documentSubtype = this.extractMassIDSubtype(document);
+
     const wasteType = REWARDS_DISTRIBUTION_BY_WASTE_TYPE[documentSubtype];
 
-    return REWARDS_DISTRIBUTION[wasteType];
+    return REWARDS_DISTRIBUTION[wasteType]!;
   }
 
   private getWasteGeneratorActorMassIDFullPercentage(

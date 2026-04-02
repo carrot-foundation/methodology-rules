@@ -10,11 +10,11 @@ import {
 export interface ContainerCapacityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: BoldDocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: BoldDocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': BoldAttributeName.CONTAINER_CAPACITY;
+  'Attribute Name': typeof BoldAttributeName.CONTAINER_CAPACITY;
   'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
@@ -22,11 +22,11 @@ export interface ContainerCapacityApprovedException extends ApprovedException {
 export interface ContainerQuantityApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: BoldDocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: BoldDocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': BoldAttributeName.CONTAINER_QUANTITY;
+  'Attribute Name': typeof BoldAttributeName.CONTAINER_QUANTITY;
   'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }
@@ -34,11 +34,11 @@ export interface ContainerQuantityApprovedException extends ApprovedException {
 export interface TareApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: BoldDocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
-    Event: BoldDocumentEventName.WEIGHING;
+    Event: typeof BoldDocumentEventName.WEIGHING;
   };
-  'Attribute Name': BoldAttributeName.TARE;
+  'Attribute Name': typeof BoldAttributeName.TARE;
   'Exception Type': (typeof BoldApprovedExceptionType)['MANDATORY_ATTRIBUTE'];
   Reason: string;
 }

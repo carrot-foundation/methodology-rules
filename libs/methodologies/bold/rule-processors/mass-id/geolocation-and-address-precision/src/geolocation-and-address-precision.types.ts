@@ -10,7 +10,7 @@ import {
 export interface GpsLatitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: BoldDocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
     Event:
       | typeof BoldDocumentEventName.DROP_OFF
@@ -24,7 +24,7 @@ export interface GpsLatitudeApprovedException extends ApprovedException {
 export interface GpsLongitudeApprovedException extends ApprovedException {
   'Attribute Location': {
     Asset: {
-      Category: BoldDocumentCategory.MASS_ID;
+      Category: typeof BoldDocumentCategory.MASS_ID;
     };
     Event:
       | typeof BoldDocumentEventName.DROP_OFF

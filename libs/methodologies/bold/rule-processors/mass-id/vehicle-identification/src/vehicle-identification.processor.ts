@@ -26,7 +26,7 @@ const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
 const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = BoldVehicleType;
 const { PICK_UP } = BoldDocumentEventName;
 
-export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set([
+export const VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES = new Set<string>([
   BICYCLE,
   CART,
   SLUDGE_PIPES,

@@ -141,11 +141,13 @@ export const getActorsByType = ({
 export const isLogisticsOrServiceProvider = (
   actorType: RewardsDistributionActorType,
 ): boolean =>
-  [
-    RewardsDistributionActorType.HAULER,
-    RewardsDistributionActorType.PROCESSOR,
-    RewardsDistributionActorType.RECYCLER,
-  ].includes(actorType);
+  (
+    [
+      RewardsDistributionActorType.HAULER,
+      RewardsDistributionActorType.PROCESSOR,
+      RewardsDistributionActorType.RECYCLER,
+    ] as RewardsDistributionActorType[]
+  ).includes(actorType);
 
 export const applySupplyChainDigitizationDiscount = (
   basePercentage: BigNumber,
@@ -179,6 +181,7 @@ export const calculateNetworkPercentageForUnidentifiedWasteOrigin = (
     const haulerPercentage =
       rewardDistributions[RewardsDistributionActorType.HAULER] ??
       new BigNumber(0);
+
     networkPercentage = networkPercentage.plus(
       haulerPercentage.multipliedBy(0.25),
     );
@@ -225,7 +228,8 @@ export const getWasteGeneratorAdditionalPercentage = (
 ): BigNumber => {
   if (!isHaulerActorDefined(actors)) {
     return (
-      rewardDistributions[RewardsDistributionActorType.HAULER] ?? new BigNumber(0)
+      rewardDistributions[RewardsDistributionActorType.HAULER] ??
+      new BigNumber(0)
     );
   }
 
