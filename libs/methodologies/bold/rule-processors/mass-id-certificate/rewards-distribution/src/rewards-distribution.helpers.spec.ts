@@ -7,9 +7,20 @@ import {
   BoldBusinessSizeDeclarationValue,
   BoldDocumentEventName,
   BoldDocumentSubtype,
+  RewardsDistributionActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import BigNumber from 'bignumber.js';
 
-import { shouldApplyLargeBusinessDiscount } from './rewards-distribution.helpers';
+import type {
+  RewardsDistributionActor,
+  RewardsDistributionActorTypePercentage,
+} from './rewards-distribution.types';
+
+import {
+  calculateNetworkPercentageForUnidentifiedWasteOrigin,
+  getWasteGeneratorAdditionalPercentage,
+  shouldApplyLargeBusinessDiscount,
+} from './rewards-distribution.helpers';
 
 const { ONBOARDING_DECLARATION } = BoldDocumentEventName;
 const { BUSINESS_SIZE_DECLARATION } = BoldAttributeName;
@@ -120,5 +131,51 @@ describe('shouldApplyLargeBusinessDiscount', () => {
       .participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
 
     expect(shouldApplyLargeBusinessDiscount(document)).toBe(true);
+  });
+});
+
+describe('calculateNetworkPercentageForUnidentifiedWasteOrigin', () => {
+  const baseDto = {
+    actors: [] as RewardsDistributionActor[],
+    actorType: RewardsDistributionActorType.NETWORK,
+    additionalPercentage: new BigNumber(0),
+    basePercentage: new BigNumber(0.2),
+    rewardDistributions: {} as RewardsDistributionActorTypePercentage,
+    wasteGeneratorPercentage: new BigNumber(0.3),
+  };
+
+  it('should default processor and recycler percentages to zero when missing from rewardDistributions', () => {
+    const result = calculateNetworkPercentageForUnidentifiedWasteOrigin(baseDto);
+
+    // 0.2 (base) + 0.3 (wasteGenerator) + 0 (additional) + 0*0.25 (processor) + 0*0.25 (recycler)
+    expect(result).toEqual(new BigNumber(0.5));
+  });
+
+  it('should default hauler percentage to zero when hauler actor is defined but missing from rewardDistributions', () => {
+    const haulerActor: RewardsDistributionActor = {
+      address: { id: 'address-1' },
+      participant: { id: 'participant-1', name: 'Hauler Co' },
+      preserveSensitiveData: false,
+      type: RewardsDistributionActorType.HAULER,
+    };
+
+    const result = calculateNetworkPercentageForUnidentifiedWasteOrigin({
+      ...baseDto,
+      actors: [haulerActor],
+    });
+
+    // 0.2 + 0.3 + 0 + 0*0.25 + 0*0.25 + 0*0.25 (hauler default)
+    expect(result).toEqual(new BigNumber(0.5));
+  });
+});
+
+describe('getWasteGeneratorAdditionalPercentage', () => {
+  it('should default hauler percentage to zero when hauler is not defined and missing from rewardDistributions', () => {
+    const result = getWasteGeneratorAdditionalPercentage(
+      [],
+      {} as RewardsDistributionActorTypePercentage,
+    );
+
+    expect(result).toEqual(new BigNumber(0));
   });
 });
