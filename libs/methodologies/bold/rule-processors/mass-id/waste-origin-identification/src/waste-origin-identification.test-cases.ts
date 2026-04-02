@@ -6,16 +6,16 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
-  BoldAttributeValue,
   BoldDocumentEventLabel,
   BoldDocumentEventName,
+  BoldUnidentifiedAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
 
 const { ACTOR, PICK_UP } = BoldDocumentEventName;
 const { WASTE_ORIGIN } = BoldAttributeName;
-const { UNIDENTIFIED } = BoldAttributeValue;
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
 const { WASTE_GENERATOR } = BoldDocumentEventLabel;
 
 interface WasteOriginIdentificationTestCase extends RuleTestCase {

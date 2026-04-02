@@ -29,7 +29,10 @@ describe('Event getters', () => {
       const attribute = stubDocumentEventAttribute();
       const event = stubDocumentEventWithMetadata([attribute]);
 
-      const result = getEventAttributeValue(event, attribute.name);
+      const result = getEventAttributeValue(
+        event,
+        attribute.name as BoldAttributeName,
+      );
 
       expect(result).toBe(attribute.value);
     });
@@ -37,7 +40,7 @@ describe('Event getters', () => {
     it('should return undefined if the event does not have attributes', () => {
       const event = stubDocumentEventWithMetadata([]);
 
-      const result = getEventAttributeValue(event, faker.string.sample());
+      const result = getEventAttributeValue(event, DESCRIPTION);
 
       expect(result).toBe(undefined);
     });
@@ -52,7 +55,7 @@ describe('Event getters', () => {
 
       const result = getEventAttributeValueOrThrow(
         event,
-        attribute.name,
+        attribute.name as BoldAttributeName,
         validateNonEmptyString,
       );
 
@@ -63,8 +66,8 @@ describe('Event getters', () => {
       const event = stubDocumentEventWithMetadata([]);
 
       expect(() =>
-        getEventAttributeValueOrThrow(event, 'missing', validateNonEmptyString),
-      ).toThrow('Required metadata missing attribute is missing');
+        getEventAttributeValueOrThrow(event, DESCRIPTION, validateNonEmptyString),
+      ).toThrow('Required metadata Description attribute is missing');
     });
   });
 
@@ -152,7 +155,7 @@ describe('Event getters', () => {
         [DESCRIPTION, faker.string.sample()],
       ]);
 
-      const result = getEventAttributeByName(event, 'missing');
+      const result = getEventAttributeByName(event, METHODOLOGY_SLUG);
 
       expect(result).toBeUndefined();
     });

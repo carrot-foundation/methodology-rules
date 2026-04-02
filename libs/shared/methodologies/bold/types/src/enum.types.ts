@@ -112,14 +112,28 @@ export const BoldAttributeNameSchema = z.enum(valuesOf(BoldAttributeName));
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
 export type BoldAttributeName = z.infer<typeof BoldAttributeNameSchema>;
 
-export const BoldAttributeValue = {
+export const BoldBusinessSizeDeclarationValue = {
   LARGE_BUSINESS: 'Large Business',
   SMALL_BUSINESS: 'Small Business',
+} as const;
+export const BoldBusinessSizeDeclarationValueSchema = z.enum(
+  valuesOf(BoldBusinessSizeDeclarationValue),
+);
+// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
+export type BoldBusinessSizeDeclarationValue = z.infer<
+  typeof BoldBusinessSizeDeclarationValueSchema
+>;
+
+export const BoldUnidentifiedAttributeValue = {
   UNIDENTIFIED: 'Unidentified',
 } as const;
-export const BoldAttributeValueSchema = z.enum(valuesOf(BoldAttributeValue));
+export const BoldUnidentifiedAttributeValueSchema = z.enum(
+  valuesOf(BoldUnidentifiedAttributeValue),
+);
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
-export type BoldAttributeValue = z.infer<typeof BoldAttributeValueSchema>;
+export type BoldUnidentifiedAttributeValue = z.infer<
+  typeof BoldUnidentifiedAttributeValueSchema
+>;
 
 export const BoldContainerType = {
   BAG: 'Bag',

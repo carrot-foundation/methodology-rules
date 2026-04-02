@@ -12,9 +12,11 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
 import {
   BoldAttributeName,
-  BoldAttributeValue,
+  BoldBusinessSizeDeclarationValue,
   type BoldDocument,
+  BoldDocumentEventLabel,
   BoldDocumentEventName,
+  BoldUnidentifiedAttributeValue,
   type RewardsDistributionActorAddress,
   type RewardsDistributionActorParticipant,
   RewardsDistributionActorType,
@@ -34,9 +36,9 @@ import {
   REQUIRED_ACTOR_TYPES,
 } from './rewards-distribution.constants';
 
-const { UNIDENTIFIED } = BoldAttributeValue;
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
 const { WASTE_ORIGIN } = BoldAttributeName;
-const WASTE_GENERATOR = 'Waste Generator';
+const { WASTE_GENERATOR: WASTE_GENERATOR_LABEL } = BoldDocumentEventLabel;
 
 export const isHaulerActorDefined = (
   participants: RewardsDistributionActor[],
@@ -160,15 +162,25 @@ export const calculateNetworkPercentageForUnidentifiedWasteOrigin = (
     wasteGeneratorPercentage,
   } = dto;
 
+  const processorPercentage =
+    rewardDistributions[RewardsDistributionActorType.PROCESSOR] ??
+    new BigNumber(0);
+  const recyclerPercentage =
+    rewardDistributions[RewardsDistributionActorType.RECYCLER] ??
+    new BigNumber(0);
+
   let networkPercentage = basePercentage
     .plus(wasteGeneratorPercentage)
     .plus(additionalPercentage)
-    .plus(new BigNumber(rewardDistributions.Processor).multipliedBy(0.25))
-    .plus(new BigNumber(rewardDistributions.Recycler).multipliedBy(0.25));
+    .plus(processorPercentage.multipliedBy(0.25))
+    .plus(recyclerPercentage.multipliedBy(0.25));
 
   if (isHaulerActorDefined(actors)) {
+    const haulerPercentage =
+      rewardDistributions[RewardsDistributionActorType.HAULER] ??
+      new BigNumber(0);
     networkPercentage = networkPercentage.plus(
-      new BigNumber(rewardDistributions.Hauler).multipliedBy(0.25),
+      haulerPercentage.multipliedBy(0.25),
     );
   }
 
@@ -201,7 +213,7 @@ export const isWasteOriginIdentified = (document: BoldDocument): boolean => {
 
   const hasWasteGeneratorEvent = getOrDefault(document.externalEvents, []).some(
     (event) =>
-      isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR])(event),
+      isActorEvent(event) && eventLabelIsAnyOf([WASTE_GENERATOR_LABEL])(event),
   );
 
   return !hasUnidentifiedOriginAttribute || hasWasteGeneratorEvent;
@@ -212,7 +224,9 @@ export const getWasteGeneratorAdditionalPercentage = (
   rewardDistributions: RewardsDistributionActorTypePercentage,
 ): BigNumber => {
   if (!isHaulerActorDefined(actors)) {
-    return new BigNumber(rewardDistributions.Hauler);
+    return (
+      rewardDistributions[RewardsDistributionActorType.HAULER] ?? new BigNumber(0)
+    );
   }
 
   return new BigNumber(0);
@@ -244,7 +258,7 @@ export const shouldApplyLargeBusinessDiscount = (
     return true;
   }
 
-  return String(businessSize) === String(BoldAttributeValue.LARGE_BUSINESS);
+  return businessSize === BoldBusinessSizeDeclarationValue.LARGE_BUSINESS;
 };
 
 export const applyLargeBusinessDiscount = (

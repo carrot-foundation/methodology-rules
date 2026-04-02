@@ -10,11 +10,12 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
-  BoldAttributeValue,
+  BoldBusinessSizeDeclarationValue,
   type BoldDocument,
   BoldDocumentCategory,
   BoldDocumentEventName,
   BoldDocumentSubtype,
+  BoldUnidentifiedAttributeValue,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
   RewardsDistributionWasteType,
@@ -26,7 +27,8 @@ import { ERROR_MESSAGES } from './rewards-distribution.errors';
 const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
 const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = BoldDocumentEventName;
 const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = BoldAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS, UNIDENTIFIED } = BoldAttributeValue;
+const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldBusinessSizeDeclarationValue;
+const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
 const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = BoldDocumentSubtype;
 const {
   COMMUNITY_IMPACT_POOL,
@@ -41,7 +43,7 @@ const {
 } = RewardsDistributionActorType;
 
 const createWasteGeneratorVerificationDocument = (
-  businessSize: BoldAttributeValue,
+  businessSize: BoldBusinessSizeDeclarationValue,
 ): BoldDocument =>
   ({
     ...new BoldStubsBuilder()

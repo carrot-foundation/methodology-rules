@@ -4,7 +4,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
-  BoldAttributeValue,
+  BoldBusinessSizeDeclarationValue,
   BoldDocumentEventName,
   BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -13,7 +13,7 @@ import { shouldApplyLargeBusinessDiscount } from './rewards-distribution.helpers
 
 const { ONBOARDING_DECLARATION } = BoldDocumentEventName;
 const { BUSINESS_SIZE_DECLARATION } = BoldAttributeName;
-const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldAttributeValue;
+const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldBusinessSizeDeclarationValue;
 const { WASTE_GENERATOR } = BoldDocumentSubtype;
 
 describe('shouldApplyLargeBusinessDiscount', () => {

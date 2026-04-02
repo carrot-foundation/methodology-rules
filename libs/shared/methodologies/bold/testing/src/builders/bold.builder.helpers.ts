@@ -6,13 +6,12 @@ import type { BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import {
   BoldAttributeName,
-  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { EXPLICIT_ATTRIBUTES } from '../stubs/document-event.stubs';
 
 export type MergeEventsMapsParameter =
-  | Map<BoldDocumentEventName, BoldDocumentEvent | undefined>
+  | Map<string, BoldDocumentEvent | undefined>
   | Record<string, BoldDocumentEvent | undefined>
   | undefined;
 
@@ -24,7 +23,7 @@ export type MergeEventsMapsParameter =
  * @param overridenEventsMap - Optional Map or object containing events that should override the defaults
  * @returns A new Map with the merged events
  */
-export const mergeEventsMaps = <T extends BoldDocumentEventName>(
+export const mergeEventsMaps = <T extends string>(
   defaultEventsMap: Map<T, BoldDocumentEvent>,
   overridenEventsMap:
     | Map<T, BoldDocumentEvent | undefined>

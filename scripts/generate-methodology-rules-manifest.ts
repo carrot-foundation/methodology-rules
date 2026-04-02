@@ -326,7 +326,8 @@ const BoldTypes = require(
 ) as {
   BoldDocumentCategory: StringEnum;
   BoldAttributeName: StringEnum;
-  BoldAttributeValue: StringEnum;
+  BoldBusinessSizeDeclarationValue: StringEnum;
+  BoldUnidentifiedAttributeValue: StringEnum;
   BoldDocumentEventName: StringEnum;
   BoldDocumentEventLabel: StringEnum;
   BoldVehicleType: StringEnum;
@@ -346,7 +347,8 @@ const ENUM_KEY_TO_VALUE: Record<string, string> = {
   ...enumKeyToValueMap(BoldTypes.BoldAttributeName),
   ...enumKeyToValueMap(BoldTypes.BoldDocumentEventLabel),
   ...enumKeyToValueMap(SharedTypes.DocumentEventAttributeFormat),
-  ...enumKeyToValueMap(BoldTypes.BoldAttributeValue),
+  ...enumKeyToValueMap(BoldTypes.BoldBusinessSizeDeclarationValue),
+  ...enumKeyToValueMap(BoldTypes.BoldUnidentifiedAttributeValue),
   ...enumKeyToValueMap(BoldTypes.BoldVehicleType),
   ...enumKeyToValueMap(SharedTypes.MeasurementUnit),
 };
