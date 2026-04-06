@@ -447,6 +447,21 @@ export const weighingTestCases: WeighingTestCase[] = [
     scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
   },
   {
+    accreditationDocuments: stubBaseAccreditationDocuments({
+      scaleTypeValue: BoldScaleType.WEIGHBRIDGE,
+    }),
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(
+        mergeAttributes(validWeighingAttributes, [
+          [SCALE_TYPE, BoldScaleType.WEIGHBRIDGE_SHORT],
+        ]),
+      ),
+    },
+    resultComment: PASSED_RESULT_COMMENTS.SINGLE_STEP,
+    resultStatus: 'PASSED',
+    scenario: `The "${SCALE_TYPE}" "${BoldScaleType.WEIGHBRIDGE_SHORT}" matches accreditation "${BoldScaleType.WEIGHBRIDGE}" as equivalent`,
+  },
+  {
     accreditationDocuments: stubBaseAccreditationDocuments(),
     massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(
