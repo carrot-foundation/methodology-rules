@@ -200,6 +200,7 @@ export const BoldScaleType = {
   PORTABLE_AXLE_WEIGHER: 'Portable Axle Weigher',
   PRECISION_OR_BENCH_SCALE: 'Precision / Bench Scale',
   WEIGHBRIDGE: 'Weighbridge (Truck Scale)',
+  WEIGHBRIDGE_SHORT: 'Weighbridge',
 } as const;
 export const BoldScaleTypeSchema = z.enum(valuesOf(BoldScaleType));
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation

@@ -287,7 +287,7 @@ export const methodologyFrameworkRules = [
   },
   {
     description:
-      "In the 'WEIGHING' event, the 'Scale Type' metadata must be declared and identified as one of the approved types: Weighbridge (Truck Scale), Floor Scale, Pallet Scale, Forklift Scale, Conveyor Belt Scale, Hanging/Crane Scale, Bin Scale, Portable Axle Weigher, Onboard Truck Scale, Precision/Bench Scale, or Two-bin Lateral Scale.",
+      "In the 'WEIGHING' event, the 'Scale Type' metadata must be declared and identified as one of the approved types: Weighbridge, Floor Scale, Pallet Scale, Forklift Scale, Conveyor Belt Scale, Hanging/Crane Scale, Bin Scale, Portable Axle Weigher, Onboard Truck Scale, Precision/Bench Scale, or Two-bin Lateral Scale.",
     name: 'Scale Type',
     slug: 'scale-type',
     type: 'audit',

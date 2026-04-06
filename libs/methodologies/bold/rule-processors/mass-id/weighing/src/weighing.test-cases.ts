@@ -647,7 +647,7 @@ export const weighingTestCases: WeighingTestCase[] = [
       BoldScaleType.CONVEYOR_BELT_SCALE,
     ),
     resultStatus: 'FAILED',
-    scenario: `The two step "${WEIGHING}" event scale type is not "${BoldScaleType.WEIGHBRIDGE}"`,
+    scenario: `The two step "${WEIGHING}" event scale type is not "${BoldScaleType.WEIGHBRIDGE_SHORT}"`,
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({

@@ -84,7 +84,7 @@ export const INVALID_RESULT_COMMENTS = {
   TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS:
     'The first weighing participant does not match the second weighing participant.',
   TWO_STEP_WEIGHING_EVENT_SCALE_TYPE: (scaleType: unknown) =>
-    `The "${SCALE_TYPE}" for two-step weighing must be "${BoldScaleType.WEIGHBRIDGE}", but "${String(scaleType)}" was provided.`,
+    `The "${SCALE_TYPE}" for two-step weighing must be "${BoldScaleType.WEIGHBRIDGE_SHORT}", but "${String(scaleType)}" was provided.`,
   TWO_STEP_WEIGHING_EVENT_VALUES: ({
     attributeName,
     firstValue,
