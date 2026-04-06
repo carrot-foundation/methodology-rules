@@ -13,6 +13,13 @@ export interface TableColumnConfig<TColumn extends string = string> {
 export interface TableExtractionConfig<TColumn extends string = string> {
   anchorColumn: TColumn;
   columns: [TableColumnConfig<TColumn>, ...Array<TableColumnConfig<TColumn>>];
+  /**
+   * Optional predicate to determine if an anchor value starts a new row.
+   * When omitted, any non-empty anchor value starts a new row.
+   * When provided, rows whose anchor value does not satisfy the predicate
+   * are merged into the previous row (all columns carried over).
+   */
+  isNewRow?: (anchorValue: string) => boolean;
   maxRowGap?: number;
   xTolerance?: number;
   yRange?: { max: number; min: number };
@@ -143,13 +150,18 @@ const mergeRowsByAnchor = (
   partialRows: readonly PartialRowWithTop[],
   anchorColumn: string,
   maxRowGap?: number,
+  isNewRowPredicate?: (anchorValue: string) => boolean,
 ): TableRow[] => {
   const merged: TableRow[] = [];
   let lastAnchorTop: number | undefined;
 
   for (const { row, top } of partialRows) {
     const anchorValue = row[anchorColumn];
-    const isNewRow = anchorValue !== undefined && anchorValue.trim().length > 0;
+    const hasAnchor =
+      anchorValue !== undefined && anchorValue.trim().length > 0;
+    const isNewRow = hasAnchor
+      ? (isNewRowPredicate?.(anchorValue) ?? true)
+      : false;
     const exceedsMaxGap =
       maxRowGap !== undefined &&
       lastAnchorTop !== undefined &&
@@ -254,6 +266,7 @@ export const extractTableFromBlocks = <TColumn extends string>(
     partialRows,
     config.anchorColumn,
     config.maxRowGap,
+    config.isNewRow,
   ) as Array<TableRow<TColumn>>;
 
   return { rows };
