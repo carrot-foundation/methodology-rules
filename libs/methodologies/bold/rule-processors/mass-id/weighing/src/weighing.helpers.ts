@@ -448,7 +448,11 @@ const validators: Record<string, Validator> = {
       errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
     }
 
-    if (isTwoStep === true && values.scaleType !== BoldScaleType.WEIGHBRIDGE) {
+    if (
+      isTwoStep === true &&
+      values.scaleType !== BoldScaleType.WEIGHBRIDGE &&
+      values.scaleType !== BoldScaleType.WEIGHBRIDGE_SHORT
+    ) {
       errors.push(
         INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
           values.scaleType,
