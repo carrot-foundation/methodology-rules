@@ -30,6 +30,12 @@ export const RESULT_COMMENTS = {
   passed: {
     OPTIONAL_VALIDATION_SKIPPED: (actorType: string): string =>
       `Optional validation skipped for ${actorType} (verification document not found).`,
+    PASSED_WITH_ADDRESS_SIMILARITY: (
+      actorType: string,
+      addressDistance: number,
+      similarityPercent: number,
+    ): string =>
+      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m, but the address data matches with ${similarityPercent}% similarity.`,
     PASSED_WITH_GPS: (
       actorType: string,
       addressDistance: number,
