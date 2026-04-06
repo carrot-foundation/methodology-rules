@@ -433,7 +433,15 @@ const validators: Record<string, Validator> = {
       return { errors: [NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT] };
     }
 
-    if (String(values.scaleType) !== String(values.accreditationScaleType)) {
+    const normalizeScaleType = (value: unknown): string =>
+      String(value) === BoldScaleType.WEIGHBRIDGE
+        ? BoldScaleType.WEIGHBRIDGE_SHORT
+        : String(value);
+
+    if (
+      normalizeScaleType(values.scaleType) !==
+      normalizeScaleType(values.accreditationScaleType)
+    ) {
       errors.push(
         INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
           values.scaleType,
