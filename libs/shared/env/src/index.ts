@@ -7,6 +7,7 @@ export {
   getDocumentAttachmentBucketName,
   getDocumentBucketName,
   getEnableCloudwatchMetrics,
+  getEnableReviewRequired,
   getEnvironment,
   getNodeEnv,
   getOptionalEnv,

@@ -3,6 +3,7 @@ import type { DocumentAddress, Geolocation } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
 import {
   calculateDistance,
   getOrUndefined,
@@ -347,15 +348,28 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     const similarityPercent = Math.floor(score * 100);
 
     if (isMatch && score >= ADDRESS_SIMILARITY_THRESHOLD) {
+      if (getEnableReviewRequired()) {
+        return [
+          {
+            resultComment:
+              RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
+                actorType,
+                addressDistance,
+                similarityPercent,
+              ),
+            resultStatus: 'REVIEW_REQUIRED',
+          },
+        ];
+      }
+
       return [
         {
-          resultComment:
-            RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
-              actorType,
-              addressDistance,
-              similarityPercent,
-            ),
-          resultStatus: 'REVIEW_REQUIRED',
+          resultComment: RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY(
+            actorType,
+            addressDistance,
+            similarityPercent,
+          ),
+          resultStatus: 'PASSED',
         },
       ];
     }

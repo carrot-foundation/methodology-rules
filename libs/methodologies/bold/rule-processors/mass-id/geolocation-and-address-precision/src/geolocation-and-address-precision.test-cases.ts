@@ -836,9 +836,9 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining('similarity'),
-      resultStatus: 'REVIEW_REQUIRED',
+      resultStatus: 'PASSED',
       scenario:
-        'Recycler address is 2-30km away but textual address matches by similarity (REVIEW_REQUIRED)',
+        'Recycler address is 2-30km away but textual address matches by similarity (PASSED when ENABLE_REVIEW_REQUIRED is disabled)',
     },
     {
       accreditationDocuments: new Map([
@@ -1004,6 +1004,61 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       scenario: 'Recycler address is beyond 30km (FAILED)',
     },
   ];
+
+export const reviewRequiredTestCase: GeolocationAndAddressPrecisionTestCase = {
+  accreditationDocuments: new Map([
+    [
+      RECYCLER,
+      createAccreditationDocumentWithAddress(
+        similarRecyclerAccreditedAddress,
+        similarRecyclerParticipant,
+      ),
+    ],
+    [
+      WASTE_GENERATOR,
+      createAccreditationDocumentWithAddress(
+        similarWasteGeneratorAddress,
+        similarWasteGeneratorParticipant,
+      ),
+    ],
+  ]),
+  actorParticipants: new Map([
+    ...actorParticipants,
+    [RECYCLER, similarRecyclerParticipant],
+    [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+  ]),
+  massIDDocumentParameters: {
+    externalEventsMap: {
+      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+        address: similarRecyclerEventAddress,
+        label: RECYCLER,
+        name: ACTOR,
+        participant: similarRecyclerParticipant,
+      }),
+      [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+        address: similarWasteGeneratorAddress,
+        label: WASTE_GENERATOR,
+        name: ACTOR,
+        participant: similarWasteGeneratorParticipant,
+      }),
+      [DROP_OFF]: createMassIDEvent(
+        DROP_OFF,
+        similarRecyclerEventAddress,
+        similarRecyclerParticipant,
+      ),
+      [PICK_UP]: createMassIDEvent(
+        PICK_UP,
+        similarWasteGeneratorAddress,
+        similarWasteGeneratorParticipant,
+      ),
+    },
+  },
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  resultComment: expect.stringContaining('requires review'),
+  resultStatus: 'REVIEW_REQUIRED',
+  scenario:
+    'Recycler address is 2-30km away but textual address matches by similarity (REVIEW_REQUIRED when ENABLE_REVIEW_REQUIRED is enabled)',
+};
 
 const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 

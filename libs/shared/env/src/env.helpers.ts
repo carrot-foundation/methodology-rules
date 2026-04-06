@@ -52,5 +52,7 @@ export const getDocumentAttachmentBucketName = (): string | undefined =>
   getOptionalEnv('DOCUMENT_ATTACHMENT_BUCKET_NAME');
 export const getEnableCloudwatchMetrics = (): boolean =>
   getBooleanEnv('ENABLE_CLOUDWATCH_METRICS');
+export const getEnableReviewRequired = (): boolean =>
+  getBooleanEnv('ENABLE_REVIEW_REQUIRED');
 export const getSentryDsn = (): string | undefined =>
   getOptionalEnv('SENTRY_DSN');
