@@ -487,6 +487,83 @@ describe('CdfSinfatParser', () => {
       expect(entry?.quantity).toBe(420);
     });
 
+    it('should carry over data columns from continuation rows when data is Y-aligned with the continuation line', () => {
+      const rawText = [
+        'Certificado de Destinacao Final CDF nº 9900002/2025',
+        'VERDE ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
+        'Identificacao dos Residuos',
+        'Residuo Classe Quantidade Unidade Tecnologia',
+        '1. 020106 - Fezes, urina e estrume de animais (incluindo palha suja),',
+        'efluentes recolhidos separadamente e tratados noutro local Classe II A 420,00000 Tonelada Compostagem',
+        'Observacoes',
+        'Declaracao.',
+        'MTRs incluidos',
+        '9900000001, 9900000002',
+      ].join('\n');
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(rawText, [
+          ...sinfatWasteHeaderBlocks,
+          {
+            boundingBox: { height: 0.01, left: 0.05, top: 0.31, width: 0.4 },
+            text: '1. 020106 - Fezes, urina e estrume de animais (incluindo palha suja),',
+          },
+          {
+            boundingBox: { height: 0.01, left: 0.05, top: 0.33, width: 0.4 },
+            text: 'efluentes recolhidos separadamente e tratados noutro local',
+          },
+          {
+            boundingBox: { height: 0.008, left: 0.46, top: 0.325, width: 0.08 },
+            text: 'Classe II A',
+          },
+          {
+            boundingBox: {
+              height: 0.009,
+              left: 0.578,
+              top: 0.325,
+              width: 0.04,
+            },
+            text: '420,00000',
+          },
+          {
+            boundingBox: {
+              height: 0.008,
+              left: 0.652,
+              top: 0.325,
+              width: 0.06,
+            },
+            text: 'Tonelada',
+          },
+          {
+            boundingBox: {
+              height: 0.009,
+              left: 0.749,
+              top: 0.325,
+              width: 0.09,
+            },
+            text: 'Compostagem',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.05, top: 0.38, width: 0.1 },
+            text: 'Observacoes',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteEntries?.parsed).toHaveLength(1);
+
+      const entry = result.data.wasteEntries?.parsed[0];
+
+      expect(entry?.code).toBe('020106');
+      expect(entry?.description).toBe(
+        'Fezes, urina e estrume de animais (incluindo palha suja), efluentes recolhidos separadamente e tratados noutro local',
+      );
+      expect(entry?.classification).toBe('Classe II A');
+      expect(entry?.quantity).toBe(420);
+      expect(entry?.unit).toBe('Tonelada');
+      expect(entry?.technology).toBe('Compostagem');
+    });
+
     it('should exclude MTR numbers below the Observacoes table boundary', () => {
       const rawText = [
         'Certificado de Destinacao Final CDF nº 100/2025',

@@ -269,6 +269,12 @@ const mergeWasteContinuationRows = (
       previous[anchorColumn] = anchorText
         ? `${previousAnchor} ${anchorText}`
         : previousAnchor;
+
+      for (const [key, value] of Object.entries(row)) {
+        if (key !== anchorColumn && value !== undefined && !previous[key]) {
+          previous[key] = value;
+        }
+      }
     }
   }
 
