@@ -9,6 +9,7 @@ import {
   getDocumentAttachmentBucketName,
   getDocumentBucketName,
   getEnableCloudwatchMetrics,
+  getEnableReviewRequired,
   getEnvironment,
   getNodeEnv as getNodeEnvironment,
   getOptionalEnv as getOptionalEnvironment,
@@ -283,6 +284,18 @@ describe('specific env helpers', () => {
       delete process.env['ENABLE_CLOUDWATCH_METRICS'];
 
       expect(getEnableCloudwatchMetrics()).toBe(false);
+    });
+
+    it('getEnableReviewRequired should return true when set to "true"', () => {
+      process.env['ENABLE_REVIEW_REQUIRED'] = 'true';
+
+      expect(getEnableReviewRequired()).toBe(true);
+    });
+
+    it('getEnableReviewRequired should return false when not set', () => {
+      delete process.env['ENABLE_REVIEW_REQUIRED'];
+
+      expect(getEnableReviewRequired()).toBe(false);
     });
   });
 });
