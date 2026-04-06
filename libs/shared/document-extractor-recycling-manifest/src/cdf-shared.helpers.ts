@@ -262,18 +262,11 @@ const mergeWasteContinuationRows = (
       merged.push({ ...row });
     } else {
       const previous = merged.at(-1)!;
-      // v8 ignore next -- anchor-based extraction guarantees non-empty text
-      const previousAnchor = previous[anchorColumn]?.trim() ?? '';
-
-      // v8 ignore next -- anchor-based extraction guarantees non-empty anchor text
-      previous[anchorColumn] = anchorText
-        ? `${previousAnchor} ${anchorText}`
-        : previousAnchor;
 
       for (const [key, value] of Object.entries(row)) {
-        if (key !== anchorColumn && value !== undefined && !previous[key]) {
-          previous[key] = value;
-        }
+        const existing = previous[key];
+
+        previous[key] = existing ? `${existing} ${value}` : value;
       }
     }
   }
