@@ -183,6 +183,7 @@ const parseCdfWasteRow = (
 
   const codeMatch = config.codePattern.exec(wasteText);
 
+  // v8 ignore next -- isNewRow predicate in table extraction guarantees code-matching anchor text
   if (!codeMatch?.[1]) {
     return undefined;
   }
@@ -241,39 +242,6 @@ const findTableEndY = (
   return undefined;
 };
 
-/**
- * Merges continuation rows (where the anchor column text does not match the
- * waste code pattern) into the preceding row.  This handles multi-line waste
- * descriptions that Textract splits across separate LINE blocks.
- */
-const mergeWasteContinuationRows = (
-  rows: Array<Record<string, string | undefined>>,
-  anchorColumn: string,
-  codePattern: RegExp,
-): Array<Record<string, string | undefined>> => {
-  const merged: Array<Record<string, string | undefined>> = [];
-
-  for (const row of rows) {
-    // v8 ignore next -- anchor-based extraction guarantees non-empty anchor text
-    const anchorText = row[anchorColumn]?.trim() ?? '';
-    const isCodeRow = codePattern.test(anchorText);
-
-    if (isCodeRow || merged.length === 0) {
-      merged.push({ ...row });
-    } else {
-      const previous = merged.at(-1)!;
-
-      for (const [key, value] of Object.entries(row)) {
-        const existing = previous[key];
-
-        previous[key] = existing ? `${existing} ${value}` : value;
-      }
-    }
-  }
-
-  return merged;
-};
-
 export const extractCdfWasteEntries = (
   extractionResult: TextExtractionResult,
   config: CdfWasteTableConfig,
@@ -296,6 +264,7 @@ export const extractCdfWasteEntries = (
       TableColumnConfig,
       ...Array<TableColumnConfig>,
     ],
+    isNewRow: (anchorValue) => config.codePattern.test(anchorValue.trim()),
     maxRowGap: 0.03,
     xTolerance: 0.2,
     yRange: {
@@ -304,13 +273,7 @@ export const extractCdfWasteEntries = (
     },
   });
 
-  const mergedRows = mergeWasteContinuationRows(
-    rows,
-    config.anchorColumn,
-    config.codePattern,
-  );
-
-  const entries = mergedRows
+  const entries = rows
     .map((row) => parseCdfWasteRow(row, config))
     .filter((r): r is WasteEntry => r !== undefined);
 
