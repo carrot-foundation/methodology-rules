@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__aws-api__call_aws"
+    ]
+  }
+}

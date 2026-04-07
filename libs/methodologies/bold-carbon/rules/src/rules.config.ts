@@ -21,7 +21,6 @@ export const rulesConfig = {
     'mass-id-sorting',
     'composting-cycle-timeframe',
     'recycling-manifest-data',
-    'project-boundary',
     'prevented-emissions',
   ],
 } as const;

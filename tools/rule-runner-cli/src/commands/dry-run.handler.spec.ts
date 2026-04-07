@@ -69,9 +69,9 @@ const mockPreparedResponse = {
     {
       executionOrder: 2,
       ruleId: 'rule-2',
-      ruleName: 'Project Boundary',
+      ruleName: 'Weighing',
       ruleScope: 'MassID',
-      ruleSlug: 'project-boundary',
+      ruleSlug: 'weighing',
     },
   ],
 };
@@ -138,7 +138,7 @@ describe('handleDryRun', () => {
       undefined,
     );
     expect(mockLoadProcessor).toHaveBeenCalledWith(
-      'libs/methodologies/bold/rule-processors/mass-id/project-boundary',
+      'libs/methodologies/bold/rule-processors/mass-id/weighing',
       undefined,
     );
   });
