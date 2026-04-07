@@ -64,9 +64,6 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/processor-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/index.ts"
       ],
-      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/project-boundary": [
-        "libs/methodologies/bold/rule-processors/mass-id/project-boundary/src/index.ts"
-      ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/project-period-limit": [
         "libs/methodologies/bold/rule-processors/mass-id/project-period-limit/src/index.ts"
       ],

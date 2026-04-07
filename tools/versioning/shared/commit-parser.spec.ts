@@ -20,10 +20,10 @@ describe('parseCommitsForRules', () => {
   });
 
   it('should parse a breaking change into a major bump', () => {
-    const commits = ['feat(project-boundary)!: change output format'];
+    const commits = ['feat(weighing)!: change output format'];
     const result = parseCommitsForRules(commits);
 
-    expect(result).toEqual(new Map([['project-boundary', 'major']]));
+    expect(result).toEqual(new Map([['weighing', 'major']]));
   });
 
   it('should take the highest bump when multiple commits affect the same rule', () => {
@@ -138,7 +138,7 @@ describe('parseCommitsForRules', () => {
   it('should handle multiple rules in one batch', () => {
     const commits = [
       'fix(audit-eligibility-check): fix date parsing',
-      'feat(project-boundary): add radius check',
+      'feat(drop-off-at-recycler): add radius check',
       'fix(weighing): handle edge case',
     ];
     const result = parseCommitsForRules(commits);
@@ -146,7 +146,7 @@ describe('parseCommitsForRules', () => {
     expect(result).toEqual(
       new Map([
         ['audit-eligibility-check', 'patch'],
-        ['project-boundary', 'minor'],
+        ['drop-off-at-recycler', 'minor'],
         ['weighing', 'patch'],
       ]),
     );

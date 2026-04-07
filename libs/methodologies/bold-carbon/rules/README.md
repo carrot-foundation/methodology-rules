@@ -44,8 +44,7 @@
 | 17  | [Mass Sorting](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/mass-id-sorting/README.md)                                                                                      | 1.0.0   |
 | 18  | [Composting Cycle Timeframe](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/composting-cycle-timeframe/README.md)                                                             | 1.0.0   |
 | 19  | [Document Manifest Data](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/recycling-manifest-data/README.md)                                                                    | 1.0.0   |
-| 20  | [Project Boundary](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/project-boundary/README.md)                                                                                 | 1.0.0   |
-| 21  | [Prevented Emissions](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/prevented-emissions/README.md)                                                                           | 1.0.0   |
+| 20  | [Prevented Emissions](../../../../apps/methodologies/bold-carbon/rule-processors/mass-id/prevented-emissions/README.md)                                                                           | 1.0.0   |
 
 ## License
 

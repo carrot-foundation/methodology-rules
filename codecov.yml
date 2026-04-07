@@ -97,11 +97,6 @@ flags:
       - libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/
     carryforward: true
 
-  mass-id--project-boundary:
-    paths:
-      - libs/methodologies/bold/rule-processors/mass-id/project-boundary/src/
-    carryforward: true
-
   mass-id--project-period-limit:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/project-period-limit/src/

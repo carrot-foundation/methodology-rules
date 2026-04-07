@@ -38,7 +38,7 @@ export const runCommand = new Command('run')
   .addArgument(
     new Argument(
       '<processor-path>',
-      'Path to the rule processor directory (e.g., libs/methodologies/bold/rule-processors/mass-id/project-boundary)',
+      'Path to the rule processor directory (e.g., libs/methodologies/bold/rule-processors/mass-id/weighing)',
     ),
   )
   .addOption(
