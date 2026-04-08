@@ -443,6 +443,7 @@ const buildSimilarParticipantsTestCase = ({
     ],
   ]),
   actorParticipants: new Map([
+    ...actorParticipants,
     [RECYCLER, similarRecyclerParticipant],
     [WASTE_GENERATOR, similarWasteGeneratorParticipant],
   ]),
@@ -1414,6 +1415,7 @@ export const geolocationAndAddressPrecisionReviewRequiredTestCases: GeolocationA
         ],
       ]),
       actorParticipants: new Map([
+        ...actorParticipants,
         [RECYCLER, similarRecyclerParticipant],
         [WASTE_GENERATOR, similarWasteGeneratorParticipant],
       ]),
