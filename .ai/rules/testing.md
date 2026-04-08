@@ -7,6 +7,9 @@ scope:
   - "*.test-cases.ts"
 requirements:
   - Use Vitest as the test runner; test environment is configured via `.env-files/.env.test`
+  - Avoid `expect()` inside conditionals or loops (vitest/no-conditional-expect); throw to short-circuit instead
+  - When an `it.each` delegates assertions to a helper, suppress vitest/expect-expect with an eslint-disable on the it.each line
+  - `expect.stringContaining` and `expect.stringMatching` return `any`; precede the call with `// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment` (and re-add it if `lint --fix` strips it)
   - Generate test data with `@faker-js/faker` for primitives and `zocker` for schema-driven object generation
   - Use shared test helpers from `@carrot-fndn/shared/testing` including `stubRuleInput()`, `stubDocument()`, and `createStubFromSchema()`
   - Use `it.each` for table-driven tests when verifying the same logic across multiple input/output combinations
