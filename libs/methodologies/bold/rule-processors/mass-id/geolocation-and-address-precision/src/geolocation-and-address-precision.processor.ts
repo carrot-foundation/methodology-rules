@@ -7,12 +7,10 @@ import type {
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
-import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
 import {
   calculateDistance,
   getOrUndefined,
   hasAddressCoordinates,
-  isAddressMatch,
   isNil,
   isNonEmptyArray,
   toDocumentKey,
@@ -41,7 +39,6 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 
 import {
-  ADDRESS_SIMILARITY_THRESHOLD,
   DISTANCE_THRESHOLD_PASS,
   DISTANCE_THRESHOLD_SIMILARITY,
   GPS_MAX_ALLOWED_DISTANCE,
@@ -49,7 +46,7 @@ import {
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
-  buildAddressComparisonString,
+  evaluateAddressSimilarityResult,
   findRecyclerAccreditation,
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
@@ -78,11 +75,6 @@ interface ParticipantAddressData {
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
 }
-
-type SimilarityOutcome =
-  | { kind: 'fail'; similarityPercent: number }
-  | { kind: 'pass'; similarityPercent: number }
-  | { kind: 'review_required'; similarityPercent: number };
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private readonly processorErrors =
@@ -366,71 +358,28 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       ];
     }
 
-    const outcome = this.evaluateAddressSimilarity(
-      eventAddress,
-      accreditedAddress,
-    );
-
-    switch (outcome.kind) {
-      case 'fail': {
-        return [
-          {
-            resultComment: RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY(
-              actorType,
-              addressDistance,
-              outcome.similarityPercent,
-            ),
-            resultStatus: 'FAILED',
-          },
-        ];
-      }
-      case 'pass': {
-        return [
-          {
-            resultComment:
-              RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY(
-                actorType,
-                addressDistance,
-                outcome.similarityPercent,
-              ),
-            resultStatus: 'PASSED',
-          },
-        ];
-      }
-      case 'review_required': {
-        return [
-          {
-            resultComment:
-              RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
-                actorType,
-                addressDistance,
-                outcome.similarityPercent,
-              ),
-            resultStatus: 'REVIEW_REQUIRED',
-          },
-        ];
-      }
-    }
-  }
-
-  private evaluateAddressSimilarity(
-    eventAddress: DocumentAddress,
-    accreditedAddress: DocumentAddress,
-  ): SimilarityOutcome {
-    const { isMatch, score } = isAddressMatch(
-      buildAddressComparisonString(eventAddress),
-      buildAddressComparisonString(accreditedAddress),
-      ADDRESS_SIMILARITY_THRESHOLD,
-    );
-    const similarityPercent = Math.floor(score * 100);
-
-    if (!isMatch || score < ADDRESS_SIMILARITY_THRESHOLD) {
-      return { kind: 'fail', similarityPercent };
-    }
-
-    return getEnableReviewRequired()
-      ? { kind: 'review_required', similarityPercent }
-      : { kind: 'pass', similarityPercent };
+    return [
+      evaluateAddressSimilarityResult(eventAddress, accreditedAddress, {
+        failed: (similarityPercent) =>
+          RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY(
+            actorType,
+            addressDistance,
+            similarityPercent,
+          ),
+        passed: (similarityPercent) =>
+          RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY(
+            actorType,
+            addressDistance,
+            similarityPercent,
+          ),
+        reviewRequired: (similarityPercent) =>
+          RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
+            actorType,
+            addressDistance,
+            similarityPercent,
+          ),
+      }),
+    ];
   }
 
   private evaluateGpsData({
@@ -561,43 +510,23 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       };
     }
 
-    const outcome = this.evaluateAddressSimilarity(
-      eventAddress,
-      accreditedAddress,
-    );
-
-    switch (outcome.kind) {
-      case 'fail': {
-        return {
-          resultComment:
-            RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-              actorType,
-              outcome.similarityPercent,
-            ),
-          resultStatus: 'FAILED',
-        };
-      }
-      case 'pass': {
-        return {
-          resultComment:
-            RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-              actorType,
-              outcome.similarityPercent,
-            ),
-          resultStatus: 'PASSED',
-        };
-      }
-      case 'review_required': {
-        return {
-          resultComment:
-            RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-              actorType,
-              outcome.similarityPercent,
-            ),
-          resultStatus: 'REVIEW_REQUIRED',
-        };
-      }
-    }
+    return evaluateAddressSimilarityResult(eventAddress, accreditedAddress, {
+      failed: (similarityPercent) =>
+        RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+          actorType,
+          similarityPercent,
+        ),
+      passed: (similarityPercent) =>
+        RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+          actorType,
+          similarityPercent,
+        ),
+      reviewRequired: (similarityPercent) =>
+        RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+          actorType,
+          similarityPercent,
+        ),
+    });
   }
 
   private evaluateWithoutEventCoordinates({
