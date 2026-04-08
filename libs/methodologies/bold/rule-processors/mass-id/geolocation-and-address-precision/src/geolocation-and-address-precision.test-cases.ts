@@ -398,6 +398,70 @@ const createMassIDEvent = (
   });
 };
 
+const buildSimilarParticipantsTestCase = ({
+  recyclerAccreditationAddress,
+  recyclerEventAddress,
+  resultComment,
+  resultStatus,
+  scenario,
+}: {
+  recyclerAccreditationAddress: ReturnType<typeof stubAddress>;
+  recyclerEventAddress: ReturnType<typeof stubAddress>;
+  resultComment: GeolocationAndAddressPrecisionTestCase['resultComment'];
+  resultStatus: GeolocationAndAddressPrecisionTestCase['resultStatus'];
+  scenario: string;
+}): GeolocationAndAddressPrecisionTestCase => ({
+  accreditationDocuments: new Map([
+    [
+      RECYCLER,
+      createAccreditationDocumentWithAddress(
+        recyclerAccreditationAddress,
+        similarRecyclerParticipant,
+      ),
+    ],
+    [
+      WASTE_GENERATOR,
+      createAccreditationDocumentWithAddress(
+        similarWasteGeneratorAddress,
+        similarWasteGeneratorParticipant,
+      ),
+    ],
+  ]),
+  actorParticipants: new Map([
+    [RECYCLER, similarRecyclerParticipant],
+    [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+  ]),
+  massIDDocumentParameters: {
+    externalEventsMap: {
+      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+        address: recyclerEventAddress,
+        label: RECYCLER,
+        name: ACTOR,
+        participant: similarRecyclerParticipant,
+      }),
+      [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+        address: similarWasteGeneratorAddress,
+        label: WASTE_GENERATOR,
+        name: ACTOR,
+        participant: similarWasteGeneratorParticipant,
+      }),
+      [DROP_OFF]: createMassIDEvent(
+        DROP_OFF,
+        recyclerEventAddress,
+        similarRecyclerParticipant,
+      ),
+      [PICK_UP]: createMassIDEvent(
+        PICK_UP,
+        similarWasteGeneratorAddress,
+        similarWasteGeneratorParticipant,
+      ),
+    },
+  },
+  resultComment,
+  resultStatus,
+  scenario,
+});
+
 const validAccreditationDocuments = new Map([
   [
     RECYCLER,
@@ -1089,110 +1153,22 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       scenario: 'the accredited recycler address is missing latitude/longitude',
     },
     // Case 2 — Event address missing coords, similarity match → PASSED
-    {
-      accreditationDocuments: new Map([
-        [
-          RECYCLER,
-          createAccreditationDocumentWithAddress(
-            similarRecyclerAccreditedAddress,
-            similarRecyclerParticipant,
-          ),
-        ],
-        [
-          WASTE_GENERATOR,
-          createAccreditationDocumentWithAddress(
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        ],
-      ]),
-      actorParticipants: new Map([
-        [RECYCLER, similarRecyclerParticipant],
-        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
-      ]),
-      massIDDocumentParameters: {
-        externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-            address: similarRecyclerEventAddressWithoutCoordinates,
-            label: RECYCLER,
-            name: ACTOR,
-            participant: similarRecyclerParticipant,
-          }),
-          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-            address: similarWasteGeneratorAddress,
-            label: WASTE_GENERATOR,
-            name: ACTOR,
-            participant: similarWasteGeneratorParticipant,
-          }),
-          [DROP_OFF]: createMassIDEvent(
-            DROP_OFF,
-            similarRecyclerEventAddressWithoutCoordinates,
-            similarRecyclerParticipant,
-          ),
-          [PICK_UP]: createMassIDEvent(
-            PICK_UP,
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        },
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    buildSimilarParticipantsTestCase({
+      recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
+      recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
       resultComment: expect.stringContaining(
         'event address coordinates were not provided',
       ),
       resultStatus: 'PASSED',
       scenario:
         'the recycler event address is missing coordinates but matches the accredited address textually',
-    },
+    }),
     // Case 3 — Event address missing coords, country/state mismatch → FAILED
-    {
-      accreditationDocuments: new Map([
-        [
-          RECYCLER,
-          createAccreditationDocumentWithAddress(
-            similarRecyclerAccreditedAddress,
-            similarRecyclerParticipant,
-          ),
-        ],
-        [
-          WASTE_GENERATOR,
-          createAccreditationDocumentWithAddress(
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        ],
-      ]),
-      actorParticipants: new Map([
-        [RECYCLER, similarRecyclerParticipant],
-        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
-      ]),
-      massIDDocumentParameters: {
-        externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-            address: mismatchedStateAddressWithoutCoordinates,
-            label: RECYCLER,
-            name: ACTOR,
-            participant: similarRecyclerParticipant,
-          }),
-          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-            address: similarWasteGeneratorAddress,
-            label: WASTE_GENERATOR,
-            name: ACTOR,
-            participant: similarWasteGeneratorParticipant,
-          }),
-          [DROP_OFF]: createMassIDEvent(
-            DROP_OFF,
-            mismatchedStateAddressWithoutCoordinates,
-            similarRecyclerParticipant,
-          ),
-          [PICK_UP]: createMassIDEvent(
-            PICK_UP,
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        },
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    buildSimilarParticipantsTestCase({
+      recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
+      recyclerEventAddress: mismatchedStateAddressWithoutCoordinates,
       resultComment: expect.stringContaining(
         RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES(
           RECYCLER,
@@ -1201,63 +1177,19 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultStatus: 'FAILED',
       scenario:
         'the recycler event address is missing coordinates and country/state mismatches accredited',
-    },
+    }),
     // Case 4 — Event address missing coords, similarity fail → FAILED
-    {
-      accreditationDocuments: new Map([
-        [
-          RECYCLER,
-          createAccreditationDocumentWithAddress(
-            dissimilarRecyclerAccreditedAddress,
-            similarRecyclerParticipant,
-          ),
-        ],
-        [
-          WASTE_GENERATOR,
-          createAccreditationDocumentWithAddress(
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        ],
-      ]),
-      actorParticipants: new Map([
-        [RECYCLER, similarRecyclerParticipant],
-        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
-      ]),
-      massIDDocumentParameters: {
-        externalEventsMap: {
-          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-            address: similarRecyclerEventAddressWithoutCoordinates,
-            label: RECYCLER,
-            name: ACTOR,
-            participant: similarRecyclerParticipant,
-          }),
-          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-            address: similarWasteGeneratorAddress,
-            label: WASTE_GENERATOR,
-            name: ACTOR,
-            participant: similarWasteGeneratorParticipant,
-          }),
-          [DROP_OFF]: createMassIDEvent(
-            DROP_OFF,
-            similarRecyclerEventAddressWithoutCoordinates,
-            similarRecyclerParticipant,
-          ),
-          [PICK_UP]: createMassIDEvent(
-            PICK_UP,
-            similarWasteGeneratorAddress,
-            similarWasteGeneratorParticipant,
-          ),
-        },
-      },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    buildSimilarParticipantsTestCase({
+      recyclerAccreditationAddress: dissimilarRecyclerAccreditedAddress,
+      recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
       resultComment: expect.stringContaining(
         'event address coordinates were not provided',
       ),
       resultStatus: 'FAILED',
       scenario:
         'the recycler event address is missing coordinates and has low similarity to the accredited address',
-    },
+    }),
     // Case 5 — Event addresses missing coords + GPS within limit → PASSED
     {
       accreditationDocuments: manifestValidAccreditationDocuments,
