@@ -564,14 +564,14 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       };
     }
 
-    const { score } = isAddressMatch(
+    const { isMatch, score } = isAddressMatch(
       this.buildAddressComparisonString(eventAddress),
       this.buildAddressComparisonString(accreditedAddress),
       ADDRESS_SIMILARITY_THRESHOLD,
     );
     const similarityPercent = Math.floor(score * 100);
 
-    if (score < ADDRESS_SIMILARITY_THRESHOLD) {
+    if (!isMatch || score < ADDRESS_SIMILARITY_THRESHOLD) {
       return {
         resultComment:
           RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(

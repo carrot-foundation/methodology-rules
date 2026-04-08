@@ -242,6 +242,21 @@ const similarRecyclerEventAddressWithoutCoordinates = stubAddress({
   street: 'Rua das Flores',
 });
 
+// Same street/city/state as the accredited recycler address but a
+// different street number. Used to verify that isAddressMatch's numeric
+// token gate is honored on the no-event-coordinates path: the Dice
+// score is high enough to clear the threshold but the street numbers
+// must not match, so the rule must FAIL.
+const recyclerEventAddressWithoutCoordinatesDifferentNumber = stubAddress({
+  city: 'Vila Verde',
+  countryCode: 'XX',
+  countryState: 'Norte',
+  latitude: undefined,
+  longitude: undefined,
+  number: '999',
+  street: 'R. das Flores',
+});
+
 const mismatchedStateAddressWithoutCoordinates = stubAddress({
   ...mismatchedStateAddress,
   latitude: undefined,
@@ -1189,6 +1204,23 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       resultStatus: 'FAILED',
       scenario:
         'the recycler event address is missing coordinates and has low similarity to the accredited address',
+    }),
+    // Case 4b — Event address missing coords, same street/city but
+    // different street number → FAILED. Regression guard: the Dice score
+    // alone clears the threshold, but isAddressMatch's numeric token gate
+    // returns isMatch=false, so the rule must FAIL. Without honoring
+    // isMatch on this path, the address would silently PASS.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    buildSimilarParticipantsTestCase({
+      recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
+      recyclerEventAddress:
+        recyclerEventAddressWithoutCoordinatesDifferentNumber,
+      resultComment: expect.stringContaining(
+        'event address coordinates were not provided',
+      ),
+      resultStatus: 'FAILED',
+      scenario:
+        'the recycler event address is missing coordinates and the street number does not match the accredited address',
     }),
     // Case 5 — Event addresses missing coords + GPS within limit → PASSED
     {
