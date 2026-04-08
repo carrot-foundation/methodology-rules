@@ -546,6 +546,63 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return this.aggregateResults(actorResults);
   }
 
+  private evaluateTextualAddressWithoutCoordinates(
+    actorType: MassIDActorType,
+    eventAddress: DocumentAddress,
+    accreditedAddress: DocumentAddressWithCoordinates,
+  ): EvaluateResultOutput {
+    if (
+      eventAddress.countryCode !== accreditedAddress.countryCode ||
+      eventAddress.countryState !== accreditedAddress.countryState
+    ) {
+      return {
+        resultComment:
+          RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES(
+            actorType,
+          ),
+        resultStatus: 'FAILED',
+      };
+    }
+
+    const { score } = isAddressMatch(
+      this.buildAddressComparisonString(eventAddress),
+      this.buildAddressComparisonString(accreditedAddress),
+      ADDRESS_SIMILARITY_THRESHOLD,
+    );
+    const similarityPercent = Math.floor(score * 100);
+
+    if (score < ADDRESS_SIMILARITY_THRESHOLD) {
+      return {
+        resultComment:
+          RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+            actorType,
+            similarityPercent,
+          ),
+        resultStatus: 'FAILED',
+      };
+    }
+
+    if (getEnableReviewRequired()) {
+      return {
+        resultComment:
+          RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+            actorType,
+            similarityPercent,
+          ),
+        resultStatus: 'REVIEW_REQUIRED',
+      };
+    }
+
+    return {
+      resultComment:
+        RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+          actorType,
+          similarityPercent,
+        ),
+      resultStatus: 'PASSED',
+    };
+  }
+
   private evaluateWithoutEventCoordinates({
     accreditedAddress,
     actorType,
@@ -563,75 +620,22 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     gpsGeolocation: Geolocation | undefined;
     recyclerAccreditationDocument: BoldDocument | undefined;
   }): EvaluateResultOutput[] {
-    const results: EvaluateResultOutput[] = [];
-
-    if (
-      eventAddress.countryCode !== accreditedAddress.countryCode ||
-      eventAddress.countryState !== accreditedAddress.countryState
-    ) {
-      results.push({
-        resultComment:
-          RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES(
-            actorType,
-          ),
-        resultStatus: 'FAILED',
-      });
-    } else {
-      const eventAddressString =
-        this.buildAddressComparisonString(eventAddress);
-      const accreditedAddressString =
-        this.buildAddressComparisonString(accreditedAddress);
-      const { score } = isAddressMatch(
-        eventAddressString,
-        accreditedAddressString,
-        ADDRESS_SIMILARITY_THRESHOLD,
-      );
-      const similarityPercent = Math.floor(score * 100);
-
-      if (score >= ADDRESS_SIMILARITY_THRESHOLD) {
-        if (getEnableReviewRequired()) {
-          results.push({
-            resultComment:
-              RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-                actorType,
-                similarityPercent,
-              ),
-            resultStatus: 'REVIEW_REQUIRED',
-          });
-        } else {
-          results.push({
-            resultComment:
-              RESULT_COMMENTS.passed.PASSED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-                actorType,
-                similarityPercent,
-              ),
-            resultStatus: 'PASSED',
-          });
-        }
-      } else {
-        results.push({
-          resultComment:
-            RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-              actorType,
-              similarityPercent,
-            ),
-          resultStatus: 'FAILED',
-        });
-      }
-    }
-
-    results.push(
-      ...this.evaluateGpsData({
-        accreditedAddress,
-        actorType,
-        addressDistance: undefined,
-        eventName,
-        gpsGeolocation,
-        recyclerAccreditationDocument,
-      }),
+    const textualResult = this.evaluateTextualAddressWithoutCoordinates(
+      actorType,
+      eventAddress,
+      accreditedAddress,
     );
 
-    return results;
+    const gpsResults = this.evaluateGpsData({
+      accreditedAddress,
+      actorType,
+      addressDistance: undefined,
+      eventName,
+      gpsGeolocation,
+      recyclerAccreditationDocument,
+    });
+
+    return [textualResult, ...gpsResults];
   }
 
   private extractRequiredEvents(massIDDocument: BoldDocument) {

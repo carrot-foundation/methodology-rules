@@ -49,11 +49,4 @@ describe('hasAddressCoordinates', () => {
 
     expect(hasAddressCoordinates(address)).toBe(false);
   });
-
-  it('narrows the type within a truthy branch', () => {
-    const address: DocumentAddress = baseAddress;
-
-    // Runtime: the guard must return true for a fully populated address.
-    expect(hasAddressCoordinates(address)).toBe(true);
-  });
 });

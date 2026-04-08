@@ -221,13 +221,13 @@ const similarWasteGeneratorAddress = stubAddress({
 });
 
 const recyclerAddressWithoutCoordinates = stubAddress({
-  ...actorsCoordinates.get(RECYCLER)!.base,
+  ...recyclerAddress,
   latitude: undefined,
   longitude: undefined,
 });
 
 const wasteGeneratorAddressWithoutCoordinates = stubAddress({
-  ...actorsCoordinates.get(WASTE_GENERATOR)!.base,
+  ...wasteGeneratorAddress,
   latitude: undefined,
   longitude: undefined,
 });
@@ -240,6 +240,24 @@ const similarRecyclerEventAddressWithoutCoordinates = stubAddress({
   longitude: undefined,
   number: '100',
   street: 'Rua das Flores',
+});
+
+const mismatchedStateAddressWithoutCoordinates = stubAddress({
+  ...mismatchedStateAddress,
+  latitude: undefined,
+  longitude: undefined,
+});
+
+const manifestRecyclerAddressWithoutCoordinates = stubAddress({
+  ...manifestRecyclerAddress,
+  latitude: undefined,
+  longitude: undefined,
+});
+
+const manifestWasteGeneratorAddressWithoutCoordinates = stubAddress({
+  ...manifestWasteGeneratorAddress,
+  latitude: undefined,
+  longitude: undefined,
 });
 
 const createGpsException = (
@@ -1151,11 +1169,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       massIDDocumentParameters: {
         externalEventsMap: {
           [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-            address: stubAddress({
-              ...mismatchedStateAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            address: mismatchedStateAddressWithoutCoordinates,
             label: RECYCLER,
             name: ACTOR,
             participant: similarRecyclerParticipant,
@@ -1168,11 +1182,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           }),
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            stubAddress({
-              ...mismatchedStateAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            mismatchedStateAddressWithoutCoordinates,
             similarRecyclerParticipant,
           ),
           [PICK_UP]: createMassIDEvent(
@@ -1258,22 +1268,14 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           [`${ACTOR}-${WASTE_GENERATOR}`]: manifestWasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            stubAddress({
-              ...manifestRecyclerAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            manifestRecyclerAddressWithoutCoordinates,
             manifestRecyclerParticipant,
             manifestNearbyRecyclerAddress.latitude,
             manifestNearbyRecyclerAddress.longitude,
           ),
           [PICK_UP]: createMassIDEvent(
             PICK_UP,
-            stubAddress({
-              ...manifestWasteGeneratorAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            manifestWasteGeneratorAddressWithoutCoordinates,
             manifestWasteGeneratorParticipant,
             manifestNearbyWasteGeneratorAddress.latitude,
             manifestNearbyWasteGeneratorAddress.longitude,
@@ -1314,11 +1316,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            stubAddress({
-              ...recyclerAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            recyclerAddressWithoutCoordinates,
             recyclerParticipant,
             invalidRecyclerAddress.latitude,
             invalidRecyclerAddress.longitude,
@@ -1348,11 +1346,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           [`${ACTOR}-${WASTE_GENERATOR}`]: wasteGeneratorActorEvent,
           [DROP_OFF]: createMassIDEvent(
             DROP_OFF,
-            stubAddress({
-              ...recyclerAddress,
-              latitude: undefined,
-              longitude: undefined,
-            }),
+            recyclerAddressWithoutCoordinates,
             recyclerParticipant,
             invalidRecyclerAddress.latitude,
             invalidRecyclerAddress.longitude,
