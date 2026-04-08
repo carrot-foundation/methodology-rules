@@ -8,13 +8,22 @@ export const DocumentAddressSchema = z.object({
   countryCode: NonEmptyStringSchema,
   countryState: NonEmptyStringSchema,
   id: NonEmptyStringSchema,
-  latitude: LatitudeSchema,
-  longitude: LongitudeSchema,
+  latitude: LatitudeSchema.optional(),
+  longitude: LongitudeSchema.optional(),
   neighborhood: NonEmptyStringSchema,
   number: NonEmptyStringSchema,
   participantId: NonEmptyStringSchema,
   piiSnapshotId: NonEmptyStringSchema,
   street: NonEmptyStringSchema,
-  zipCode: NonEmptyStringSchema,
+  zipCode: NonEmptyStringSchema.optional(),
 });
 export type DocumentAddress = z.infer<typeof DocumentAddressSchema>;
+
+export const DocumentAddressWithCoordinatesSchema =
+  DocumentAddressSchema.extend({
+    latitude: LatitudeSchema,
+    longitude: LongitudeSchema,
+  });
+export type DocumentAddressWithCoordinates = z.infer<
+  typeof DocumentAddressWithCoordinatesSchema
+>;

@@ -1,9 +1,13 @@
-import { isNil, logger } from '@carrot-fndn/shared/helpers';
+import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+
+import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
+import { isAddressMatch, isNil, logger } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
   getApprovedExceptions,
   isApprovedExceptionValid,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { PARTICIPANT_ACCREDITATION_PARTIAL_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   eventHasLabel,
   eventNameIsAnyOf,
@@ -14,8 +18,10 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   BoldDocumentEventName,
+  BoldDocumentSubtype,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type DocumentAddress,
   type Geolocation,
@@ -27,10 +33,78 @@ import type {
   GpsLongitudeApprovedException,
 } from './geolocation-and-address-precision.types';
 
+import { ADDRESS_SIMILARITY_THRESHOLD } from './geolocation-and-address-precision.constants';
 import {
   isGpsLatitudeApprovedException,
   isGpsLongitudeApprovedException,
 } from './geolocation-and-address-precision.validators';
+
+export interface SimilarityCommentTemplates {
+  failed: (similarityPercent: number) => string;
+  passed: (similarityPercent: number) => string;
+  reviewRequired: (similarityPercent: number) => string;
+}
+
+export const evaluateAddressSimilarityResult = (
+  eventAddress: DocumentAddress,
+  accreditedAddress: DocumentAddress,
+  templates: SimilarityCommentTemplates,
+): EvaluateResultOutput => {
+  const { isMatch, score } = isAddressMatch(
+    buildAddressComparisonString(eventAddress),
+    buildAddressComparisonString(accreditedAddress),
+    ADDRESS_SIMILARITY_THRESHOLD,
+  );
+  const similarityPercent = Math.floor(score * 100);
+
+  if (!isMatch || score < ADDRESS_SIMILARITY_THRESHOLD) {
+    return {
+      resultComment: templates.failed(similarityPercent),
+      resultStatus: 'FAILED',
+    };
+  }
+
+  if (getEnableReviewRequired()) {
+    return {
+      resultComment: templates.reviewRequired(similarityPercent),
+      resultStatus: 'REVIEW_REQUIRED',
+    };
+  }
+
+  return {
+    resultComment: templates.passed(similarityPercent),
+    resultStatus: 'PASSED',
+  };
+};
+
+export const buildAddressComparisonString = (
+  address: DocumentAddress,
+): string =>
+  [address.street, address.number, address.city].filter(Boolean).join(', ');
+
+export const findRecyclerAccreditation = (
+  accreditationDocuments: BoldDocument[],
+): BoldDocument | undefined =>
+  accreditationDocuments.find((document) => {
+    const relation = mapDocumentRelation(document);
+
+    return (
+      PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
+      relation.subtype === BoldDocumentSubtype.RECYCLER
+    );
+  });
+
+export const pickGpsComment = (
+  addressDistance: number | undefined,
+  noCoord: () => string,
+  withCoord: (distance: number) => string,
+): string => {
+  if (isNil(addressDistance)) {
+    return noCoord();
+  }
+
+  return withCoord(addressDistance);
+};
 
 export const hasVerificationDocument = (
   massIDAuditDocument: BoldDocument,
