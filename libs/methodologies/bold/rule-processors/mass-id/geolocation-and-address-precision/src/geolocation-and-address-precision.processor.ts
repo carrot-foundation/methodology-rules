@@ -445,13 +445,16 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment: this.pickGpsComment(
               addressDistance,
-              RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
-                actorType,
-              ),
-              RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(
-                actorType,
-                addressDistance!,
-              ),
+              /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
+              () =>
+                RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
+                  actorType,
+                ),
+              (distance) =>
+                RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(
+                  actorType,
+                  distance,
+                ),
             ),
             resultStatus: 'PASSED',
           },
@@ -470,14 +473,17 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment: this.pickGpsComment(
               addressDistance,
-              RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
-                actorType,
-                gpsDistance,
-              ),
-              RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(
-                actorType,
-                gpsDistance,
-              ),
+              /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
+              () =>
+                RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
+                  actorType,
+                  gpsDistance,
+                ),
+              () =>
+                RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(
+                  actorType,
+                  gpsDistance,
+                ),
             ),
             resultStatus: 'FAILED',
           },
@@ -488,15 +494,18 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         {
           resultComment: this.pickGpsComment(
             addressDistance,
-            RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
-              actorType,
-              gpsDistance,
-            ),
-            RESULT_COMMENTS.passed.PASSED_WITH_GPS(
-              actorType,
-              addressDistance!,
-              gpsDistance,
-            ),
+            /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
+            () =>
+              RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
+                actorType,
+                gpsDistance,
+              ),
+            (distance) =>
+              RESULT_COMMENTS.passed.PASSED_WITH_GPS(
+                actorType,
+                distance,
+                gpsDistance,
+              ),
           ),
           resultStatus: 'PASSED',
         },
@@ -507,13 +516,13 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       {
         resultComment: this.pickGpsComment(
           addressDistance,
-          RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
-            actorType,
-          ),
-          RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(
-            actorType,
-            addressDistance!,
-          ),
+          /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
+          () =>
+            RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
+              actorType,
+            ),
+          (distance) =>
+            RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(actorType, distance),
         ),
         resultStatus: 'PASSED',
       },
@@ -683,13 +692,17 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     };
   }
 
-  /* v8 ignore next -- no-event-coords branch dead until Task 6 */
   private pickGpsComment(
     addressDistance: number | undefined,
-    noCoordComment: string,
-    withCoordComment: string,
+    noCoord: () => string,
+    withCoord: (distance: number) => string,
   ): string {
-    return isNil(addressDistance) ? noCoordComment : withCoordComment;
+    /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
+    if (isNil(addressDistance)) {
+      return noCoord();
+    }
+
+    return withCoord(addressDistance);
   }
 
   private validateMassIDDocument(
