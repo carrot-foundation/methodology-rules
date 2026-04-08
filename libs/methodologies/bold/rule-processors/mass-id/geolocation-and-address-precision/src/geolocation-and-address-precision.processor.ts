@@ -66,11 +66,6 @@ export interface RuleSubject {
   recyclerAccreditationDocument: BoldDocument | undefined;
 }
 
-type SimilarityOutcome =
-  | { kind: 'fail'; similarityPercent: number }
-  | { kind: 'pass'; similarityPercent: number }
-  | { kind: 'review_required'; similarityPercent: number };
-
 interface ParticipantAddressData {
   accreditedAddress: DocumentAddress | undefined;
   actorType: MassIDActorType;
@@ -81,6 +76,11 @@ interface ParticipantAddressData {
   gpsGeolocation: Geolocation | undefined;
   participantId: string;
 }
+
+type SimilarityOutcome =
+  | { kind: 'fail'; similarityPercent: number }
+  | { kind: 'pass'; similarityPercent: number }
+  | { kind: 'review_required'; similarityPercent: number };
 
 export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   private readonly processorErrors =
@@ -164,12 +164,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return { resultComment, resultStatus: 'PASSED' };
   }
 
-  private buildAddressComparisonString(address: DocumentAddress): string {
-    return [address.street, address.number, address.city]
-      .filter(Boolean)
-      .join(', ');
-  }
-
   private buildParticipantsAddressData(
     events: NonNullable<BoldDocument['externalEvents']>,
     massIDDocument: BoldDocument,
@@ -248,12 +242,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     massIDAuditDocument: BoldDocument,
     accreditationDocuments: BoldDocument[],
   ): EvaluateResultOutput[] {
-    const {
-      accreditedAddress,
-      eventAddress,
-      eventName,
-      gpsGeolocation,
-    } = addressData;
+    const { accreditedAddress, eventAddress, eventName, gpsGeolocation } =
+      addressData;
 
     if (
       this.shouldSkipWasteGeneratorValidation(
@@ -392,19 +382,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           },
         ];
       }
-      case 'review_required': {
-        return [
-          {
-            resultComment:
-              RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
-                actorType,
-                addressDistance,
-                outcome.similarityPercent,
-              ),
-            resultStatus: 'REVIEW_REQUIRED',
-          },
-        ];
-      }
       case 'pass': {
         return [
           {
@@ -418,28 +395,20 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           },
         ];
       }
+      case 'review_required': {
+        return [
+          {
+            resultComment:
+              RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
+                actorType,
+                addressDistance,
+                outcome.similarityPercent,
+              ),
+            resultStatus: 'REVIEW_REQUIRED',
+          },
+        ];
+      }
     }
-  }
-
-  private shouldSkipWasteGeneratorValidation(
-    addressData: ParticipantAddressData,
-    massIDAuditDocument: BoldDocument,
-    accreditationDocuments: BoldDocument[],
-  ): boolean {
-    if (addressData.actorType !== MassIDActorType.WASTE_GENERATOR) {
-      return false;
-    }
-
-    const verificationDocumentExists = Boolean(
-      hasVerificationDocument(
-        massIDAuditDocument,
-        addressData.participantId,
-        addressData.actorType,
-        accreditationDocuments,
-      ),
-    );
-
-    return !verificationDocumentExists || isNil(addressData.accreditedAddress);
   }
 
   private evaluateAddressSimilarity(
@@ -447,8 +416,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     accreditedAddress: DocumentAddress,
   ): SimilarityOutcome {
     const { isMatch, score } = isAddressMatch(
-      this.buildAddressComparisonString(eventAddress),
-      this.buildAddressComparisonString(accreditedAddress),
+      buildAddressComparisonString(eventAddress),
+      buildAddressComparisonString(accreditedAddress),
       ADDRESS_SIMILARITY_THRESHOLD,
     );
     const similarityPercent = Math.floor(score * 100);
@@ -515,7 +484,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               actorType,
               gpsDistance,
             ),
-          () => RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(actorType, gpsDistance),
+          () =>
+            RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(actorType, gpsDistance),
         );
       }
 
@@ -528,7 +498,11 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             gpsDistance,
           ),
         (distance) =>
-          RESULT_COMMENTS.passed.PASSED_WITH_GPS(actorType, distance, gpsDistance),
+          RESULT_COMMENTS.passed.PASSED_WITH_GPS(
+            actorType,
+            distance,
+            gpsDistance,
+          ),
       );
     }
 
@@ -536,23 +510,12 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       addressDistance,
       'PASSED',
       () =>
-        RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(actorType),
-      (distance) => RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(actorType, distance),
+        RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
+          actorType,
+        ),
+      (distance) =>
+        RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(actorType, distance),
     );
-  }
-
-  private gpsResult(
-    addressDistance: number | undefined,
-    resultStatus: EvaluateResultOutput['resultStatus'],
-    noCoord: () => string,
-    withCoord: (distance: number) => string,
-  ): EvaluateResultOutput[] {
-    return [
-      {
-        resultComment: this.pickGpsComment(addressDistance, noCoord, withCoord),
-        resultStatus,
-      },
-    ];
   }
 
   private evaluateResult({
@@ -612,16 +575,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           resultStatus: 'FAILED',
         };
       }
-      case 'review_required': {
-        return {
-          resultComment:
-            RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
-              actorType,
-              outcome.similarityPercent,
-            ),
-          resultStatus: 'REVIEW_REQUIRED',
-        };
-      }
       case 'pass': {
         return {
           resultComment:
@@ -630,6 +583,16 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
               outcome.similarityPercent,
             ),
           resultStatus: 'PASSED',
+        };
+      }
+      case 'review_required': {
+        return {
+          resultComment:
+            RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+              actorType,
+              outcome.similarityPercent,
+            ),
+          resultStatus: 'REVIEW_REQUIRED',
         };
       }
     }
@@ -696,15 +659,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     );
     const pickUpAndDropOffEvents = this.extractRequiredEvents(massIDDocument);
 
-    const recyclerAccreditationDocument = documents.accreditationDocuments.find(
-      (document) => {
-        const relation = mapDocumentRelation(document);
-
-        return (
-          PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
-          relation.subtype === BoldDocumentSubtype.RECYCLER
-        );
-      },
+    const recyclerAccreditationDocument = findRecyclerAccreditation(
+      documents.accreditationDocuments,
     );
 
     return {
@@ -720,16 +676,39 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     };
   }
 
-  private pickGpsComment(
+  private gpsResult(
     addressDistance: number | undefined,
+    resultStatus: EvaluateResultOutput['resultStatus'],
     noCoord: () => string,
     withCoord: (distance: number) => string,
-  ): string {
-    if (isNil(addressDistance)) {
-      return noCoord();
+  ): EvaluateResultOutput[] {
+    return [
+      {
+        resultComment: pickGpsComment(addressDistance, noCoord, withCoord),
+        resultStatus,
+      },
+    ];
+  }
+
+  private shouldSkipWasteGeneratorValidation(
+    addressData: ParticipantAddressData,
+    massIDAuditDocument: BoldDocument,
+    accreditationDocuments: BoldDocument[],
+  ): boolean {
+    if (addressData.actorType !== MassIDActorType.WASTE_GENERATOR) {
+      return false;
     }
 
-    return withCoord(addressDistance);
+    const verificationDocumentExists = Boolean(
+      hasVerificationDocument(
+        massIDAuditDocument,
+        addressData.participantId,
+        addressData.actorType,
+        accreditationDocuments,
+      ),
+    );
+
+    return !verificationDocumentExists || isNil(addressData.accreditedAddress);
   }
 
   private validateMassIDDocument(
@@ -743,4 +722,35 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     return massIDDocument;
   }
+}
+
+function buildAddressComparisonString(address: DocumentAddress): string {
+  return [address.street, address.number, address.city]
+    .filter(Boolean)
+    .join(', ');
+}
+
+function findRecyclerAccreditation(
+  accreditationDocuments: BoldDocument[],
+): BoldDocument | undefined {
+  return accreditationDocuments.find((document) => {
+    const relation = mapDocumentRelation(document);
+
+    return (
+      PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
+      relation.subtype === BoldDocumentSubtype.RECYCLER
+    );
+  });
+}
+
+function pickGpsComment(
+  addressDistance: number | undefined,
+  noCoord: () => string,
+  withCoord: (distance: number) => string,
+): string {
+  if (isNil(addressDistance)) {
+    return noCoord();
+  }
+
+  return withCoord(addressDistance);
 }
