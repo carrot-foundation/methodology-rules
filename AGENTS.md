@@ -16,7 +16,7 @@ Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capab
 
 ## Current capability counts
 
-- Rules: 14
+- Rules: 15
 - Skills: 13
 - Agents/Roles: 3
 
@@ -38,6 +38,7 @@ Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capab
 
 ## Rule mappings
 
+- `rule-canonical-config` - Keep generated rule manifests, READMEs, and codecov flags in sync with rules.config.ts edits
 - `rule-code-comments` - Keep comments meaningful by explaining intent rather than restating code
 - `rule-code-preservation` - Protect existing code, tests, and features from unintended removal or modification
 - `rule-code-style` - Maintain readable, consistent, and well-structured TypeScript code across the monorepo

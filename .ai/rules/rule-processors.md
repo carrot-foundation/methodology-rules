@@ -11,6 +11,8 @@ requirements:
   - Apply rules to methodologies using `pnpm apply-methodology-rule <methodology> <rule> <scope>`
   - Import shared utilities only from `@carrot-fndn/shared/*` path aliases
   - Define test data in `{rule-name}.test-cases.ts` and share it between unit and e2e tests
+  - Place stateless helper functions in `{rule-name}.helpers.ts` (not as private methods on the processor class) using arrow-`const` syntax (`export const myHelper = (...) => ...`)
+  - Place result-comment templates and threshold constants in `{rule-name}.constants.ts`
 anti_patterns:
   - Creating rule processor files manually instead of using the scaffolding script
   - Putting business logic in the Lambda handler instead of the processor class
@@ -37,10 +39,14 @@ Every rule processor must contain the following files:
 ├── {rule-name}.processor.spec.ts  # Unit tests
 ├── {rule-name}.lambda.e2e.spec.ts # E2E tests
 ├── {rule-name}.test-cases.ts      # Shared test data
+├── {rule-name}.helpers.ts         # Stateless helpers (optional)
+├── {rule-name}.constants.ts       # Result-comment templates and thresholds (optional)
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
 └── vitest.config.ts               # Vitest config
 ```
+
+Stateless functions belong in `{rule-name}.helpers.ts` rather than as private methods on the processor class. Use arrow-`const` syntax (`export const myHelper = (...) => ...`), matching the existing helper-file convention. Result-comment templates and threshold constants live in `{rule-name}.constants.ts` and can compose small phrase-builder helpers to keep variants in sync.
 
 ### Scaffolding
 

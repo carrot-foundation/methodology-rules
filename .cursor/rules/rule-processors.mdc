@@ -18,10 +18,14 @@ Every rule processor must contain the following files:
 ├── {rule-name}.processor.spec.ts  # Unit tests
 ├── {rule-name}.lambda.e2e.spec.ts # E2E tests
 ├── {rule-name}.test-cases.ts      # Shared test data
+├── {rule-name}.helpers.ts         # Stateless helpers (optional)
+├── {rule-name}.constants.ts       # Result-comment templates and thresholds (optional)
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
 └── vitest.config.ts               # Vitest config
 ```
+
+Stateless functions belong in `{rule-name}.helpers.ts` rather than as private methods on the processor class. Use arrow-`const` syntax (`export const myHelper = (...) => ...`), matching the existing helper-file convention. Result-comment templates and threshold constants live in `{rule-name}.constants.ts` and can compose small phrase-builder helpers to keep variants in sync.
 
 ### Scaffolding
 

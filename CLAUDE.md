@@ -29,6 +29,6 @@ Claude adapter for Methodology Rules AI instructions. This file is generated fro
 
 ## Capability counts
 
-- Rules: 14
+- Rules: 15
 - Skills: 13
 - Agents/Roles: 3
