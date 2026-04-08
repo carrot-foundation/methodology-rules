@@ -22,49 +22,46 @@ const without = (key: keyof typeof baseAddress): Partial<typeof baseAddress> =>
   Object.fromEntries(Object.entries(baseAddress).filter(([k]) => k !== key));
 
 describe('DocumentAddressSchema', () => {
-  it('accepts a fully populated address', () => {
-    const result = DocumentAddressSchema.safeParse(baseAddress);
+  it.each([
+    {
+      expected: true,
+      scenario: 'a fully populated address',
+      value: baseAddress,
+    },
+    {
+      expected: true,
+      scenario: 'an address without latitude',
+      value: without('latitude'),
+    },
+    {
+      expected: true,
+      scenario: 'an address without longitude',
+      value: without('longitude'),
+    },
+    {
+      expected: true,
+      scenario: 'an address without zipCode',
+      value: without('zipCode'),
+    },
+    {
+      expected: false,
+      scenario: 'an address without city (still required)',
+      value: without('city'),
+    },
+    {
+      expected: false,
+      scenario: 'an address without countryCode (still required)',
+      value: without('countryCode'),
+    },
+    {
+      expected: false,
+      scenario: 'an out-of-range latitude when provided',
+      value: { ...baseAddress, latitude: 200 },
+    },
+  ])('returns success=$expected for $scenario', ({ expected, value }) => {
+    const result = DocumentAddressSchema.safeParse(value);
 
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts an address without latitude', () => {
-    const result = DocumentAddressSchema.safeParse(without('latitude'));
-
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts an address without longitude', () => {
-    const result = DocumentAddressSchema.safeParse(without('longitude'));
-
-    expect(result.success).toBe(true);
-  });
-
-  it('accepts an address without zipCode', () => {
-    const result = DocumentAddressSchema.safeParse(without('zipCode'));
-
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects an address without city (still required)', () => {
-    const result = DocumentAddressSchema.safeParse(without('city'));
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects an address without countryCode (still required)', () => {
-    const result = DocumentAddressSchema.safeParse(without('countryCode'));
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects an out-of-range latitude when provided', () => {
-    const result = DocumentAddressSchema.safeParse({
-      ...baseAddress,
-      latitude: 200,
-    });
-
-    expect(result.success).toBe(false);
+    expect(result.success).toBe(expected);
   });
 });
 
