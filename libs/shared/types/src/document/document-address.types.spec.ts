@@ -45,12 +45,12 @@ describe('DocumentAddressSchema', () => {
     },
     {
       expected: false,
-      scenario: 'an address without city (still required)',
+      scenario: 'an address without city',
       value: without('city'),
     },
     {
       expected: false,
-      scenario: 'an address without countryCode (still required)',
+      scenario: 'an address without countryCode',
       value: without('countryCode'),
     },
     {
@@ -70,7 +70,7 @@ describe('DocumentAddressWithCoordinatesSchema', () => {
     { expected: true, scenario: 'a fully populated address', value: baseAddress },
     {
       expected: true,
-      scenario: 'an address without zipCode (still optional)',
+      scenario: 'an address without zipCode',
       value: without('zipCode'),
     },
     {

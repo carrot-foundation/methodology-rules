@@ -1,4 +1,7 @@
-import type { DocumentAddress } from '@carrot-fndn/shared/types';
+import type {
+  DocumentAddress,
+  DocumentAddressWithCoordinates,
+} from '@carrot-fndn/shared/types';
 
 import { hasAddressCoordinates } from './address.helpers';
 
@@ -48,5 +51,21 @@ describe('hasAddressCoordinates', () => {
     };
 
     expect(hasAddressCoordinates(address)).toBe(false);
+  });
+
+  it('narrows DocumentAddress to DocumentAddressWithCoordinates in a truthy branch', () => {
+    const address: DocumentAddress = baseAddress;
+
+    if (!hasAddressCoordinates(address)) {
+      throw new Error('Expected coordinates to be present');
+    }
+
+    // Compile-time assertion: this assignment only type-checks if
+    // hasAddressCoordinates is declared with `address is DocumentAddressWithCoordinates`.
+    // A regression to plain `boolean` would break the build here.
+    const narrowedAddress: DocumentAddressWithCoordinates = address;
+
+    expect(narrowedAddress.latitude).toBe(baseAddress.latitude);
+    expect(narrowedAddress.longitude).toBe(baseAddress.longitude);
   });
 });
