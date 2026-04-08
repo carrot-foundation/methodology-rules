@@ -14,10 +14,9 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { GeolocationAndAddressPrecisionProcessor } from './geolocation-and-address-precision.processor';
 import {
   geolocationAndAddressPrecisionErrorTestCases,
+  geolocationAndAddressPrecisionReviewRequiredTestCases,
   type GeolocationAndAddressPrecisionTestCase,
   geolocationAndAddressPrecisionTestCases,
-  reviewRequiredNoCoordinatesTestCase,
-  reviewRequiredTestCase,
 } from './geolocation-and-address-precision.test-cases';
 
 describe('GeolocationAndAddressPrecisionProcessor', () => {
@@ -109,19 +108,10 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
     // runTestCase contains the assertions; vitest's expect-expect rule
     // does not follow the indirection.
     // eslint-disable-next-line vitest/expect-expect
-    it.each([
-      {
-        scenario: 'address similarity matches',
-        testCase: reviewRequiredTestCase,
-      },
-      {
-        scenario:
-          'event address coordinates are missing and similarity matches',
-        testCase: reviewRequiredNoCoordinatesTestCase,
-      },
-    ])('should return REVIEW_REQUIRED when $scenario', async ({ testCase }) => {
-      await runTestCase(testCase);
-    });
+    it.each(geolocationAndAddressPrecisionReviewRequiredTestCases)(
+      'should return $resultStatus when $scenario',
+      runTestCase,
+    );
   });
 
   describe('GeolocationAndAddressPrecisionProcessorErrors', () => {

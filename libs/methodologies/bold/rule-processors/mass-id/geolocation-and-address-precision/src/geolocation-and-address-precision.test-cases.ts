@@ -1338,115 +1338,116 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
     },
   ];
 
-export const reviewRequiredTestCase: GeolocationAndAddressPrecisionTestCase = {
-  accreditationDocuments: new Map([
-    [
-      RECYCLER,
-      createAccreditationDocumentWithAddress(
-        similarRecyclerAccreditedAddress,
-        similarRecyclerParticipant,
-      ),
-    ],
-    [
-      WASTE_GENERATOR,
-      createAccreditationDocumentWithAddress(
-        similarWasteGeneratorAddress,
-        similarWasteGeneratorParticipant,
-      ),
-    ],
-  ]),
-  actorParticipants: new Map([
-    ...actorParticipants,
-    [RECYCLER, similarRecyclerParticipant],
-    [WASTE_GENERATOR, similarWasteGeneratorParticipant],
-  ]),
-  massIDDocumentParameters: {
-    externalEventsMap: {
-      [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-        address: similarRecyclerEventAddress,
-        label: RECYCLER,
-        name: ACTOR,
-        participant: similarRecyclerParticipant,
-      }),
-      [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-        address: similarWasteGeneratorAddress,
-        label: WASTE_GENERATOR,
-        name: ACTOR,
-        participant: similarWasteGeneratorParticipant,
-      }),
-      [DROP_OFF]: createMassIDEvent(
-        DROP_OFF,
-        similarRecyclerEventAddress,
-        similarRecyclerParticipant,
-      ),
-      [PICK_UP]: createMassIDEvent(
-        PICK_UP,
-        similarWasteGeneratorAddress,
-        similarWasteGeneratorParticipant,
-      ),
-    },
-  },
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  resultComment: expect.stringContaining('requires review'),
-  resultStatus: 'REVIEW_REQUIRED',
-  scenario:
-    'Recycler address is 2-30km away but textual address matches by similarity (REVIEW_REQUIRED when ENABLE_REVIEW_REQUIRED is enabled)',
-};
-
-export const reviewRequiredNoCoordinatesTestCase: GeolocationAndAddressPrecisionTestCase =
-  {
-    accreditationDocuments: new Map([
-      [
-        RECYCLER,
-        createAccreditationDocumentWithAddress(
-          similarRecyclerAccreditedAddress,
-          similarRecyclerParticipant,
-        ),
-      ],
-      [
-        WASTE_GENERATOR,
-        createAccreditationDocumentWithAddress(
-          similarWasteGeneratorAddress,
-          similarWasteGeneratorParticipant,
-        ),
-      ],
-    ]),
-    actorParticipants: new Map([
-      [RECYCLER, similarRecyclerParticipant],
-      [WASTE_GENERATOR, similarWasteGeneratorParticipant],
-    ]),
-    massIDDocumentParameters: {
-      externalEventsMap: {
-        [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
-          address: similarRecyclerEventAddressWithoutCoordinates,
-          label: RECYCLER,
-          name: ACTOR,
-          participant: similarRecyclerParticipant,
-        }),
-        [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
-          address: similarWasteGeneratorAddress,
-          label: WASTE_GENERATOR,
-          name: ACTOR,
-          participant: similarWasteGeneratorParticipant,
-        }),
-        [DROP_OFF]: createMassIDEvent(
-          DROP_OFF,
-          similarRecyclerEventAddressWithoutCoordinates,
-          similarRecyclerParticipant,
-        ),
-        [PICK_UP]: createMassIDEvent(
-          PICK_UP,
-          similarWasteGeneratorAddress,
-          similarWasteGeneratorParticipant,
-        ),
+export const geolocationAndAddressPrecisionReviewRequiredTestCases: GeolocationAndAddressPrecisionTestCase[] =
+  [
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            similarRecyclerAccreditedAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        ...actorParticipants,
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddress,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddress,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
       },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining('requires review'),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'the recycler address is 2-30km away but matches the accredited address textually',
     },
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    resultComment: expect.stringContaining('requires review'),
-    resultStatus: 'REVIEW_REQUIRED',
-    scenario:
-      'recycler event address is missing coordinates and matches textually (REVIEW_REQUIRED when ENABLE_REVIEW_REQUIRED is enabled)',
-  };
+    {
+      accreditationDocuments: new Map([
+        [
+          RECYCLER,
+          createAccreditationDocumentWithAddress(
+            similarRecyclerAccreditedAddress,
+            similarRecyclerParticipant,
+          ),
+        ],
+        [
+          WASTE_GENERATOR,
+          createAccreditationDocumentWithAddress(
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        ],
+      ]),
+      actorParticipants: new Map([
+        [RECYCLER, similarRecyclerParticipant],
+        [WASTE_GENERATOR, similarWasteGeneratorParticipant],
+      ]),
+      massIDDocumentParameters: {
+        externalEventsMap: {
+          [`${ACTOR}-${RECYCLER}`]: stubDocumentEvent({
+            address: similarRecyclerEventAddressWithoutCoordinates,
+            label: RECYCLER,
+            name: ACTOR,
+            participant: similarRecyclerParticipant,
+          }),
+          [`${ACTOR}-${WASTE_GENERATOR}`]: stubDocumentEvent({
+            address: similarWasteGeneratorAddress,
+            label: WASTE_GENERATOR,
+            name: ACTOR,
+            participant: similarWasteGeneratorParticipant,
+          }),
+          [DROP_OFF]: createMassIDEvent(
+            DROP_OFF,
+            similarRecyclerEventAddressWithoutCoordinates,
+            similarRecyclerParticipant,
+          ),
+          [PICK_UP]: createMassIDEvent(
+            PICK_UP,
+            similarWasteGeneratorAddress,
+            similarWasteGeneratorParticipant,
+          ),
+        },
+      },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      resultComment: expect.stringContaining('requires review'),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'the recycler event address is missing coordinates and matches the accredited address textually',
+    },
+  ];
 
 const errorMessage = new GeolocationAndAddressPrecisionProcessorErrors();
 
