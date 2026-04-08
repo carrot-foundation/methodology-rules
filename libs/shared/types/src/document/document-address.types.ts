@@ -18,3 +18,8 @@ export const DocumentAddressSchema = z.object({
   zipCode: NonEmptyStringSchema,
 });
 export type DocumentAddress = z.infer<typeof DocumentAddressSchema>;
+
+export type DocumentAddressWithCoordinates = DocumentAddress & {
+  latitude: number;
+  longitude: number;
+};
