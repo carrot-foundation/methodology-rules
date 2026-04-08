@@ -1176,8 +1176,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
       recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+      resultComment: expect.stringMatching(
+        /Compliant Recycler address: event address coordinates were not provided; the address data matches the accredited facility with \d+% similarity\./,
       ),
       resultStatus: 'PASSED',
       scenario:
@@ -1204,8 +1204,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       recyclerAccreditationAddress: dissimilarRecyclerAccreditedAddress,
       recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+      resultComment: expect.stringMatching(
+        /Non-compliant Recycler address: event address coordinates were not provided; the address data similarity is only \d+% \(below threshold\)\./,
       ),
       resultStatus: 'FAILED',
       scenario:
@@ -1213,17 +1213,18 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
     }),
     // Case 4b — Event address missing coords, same street/city but
     // different street number → FAILED. Regression guard: the Dice score
-    // alone clears the threshold, but isAddressMatch's numeric token gate
-    // returns isMatch=false, so the rule must FAIL. Without honoring
-    // isMatch on this path, the address would silently PASS.
+    // alone clears the threshold (similarity ≥ 75%), but isAddressMatch's
+    // numeric token gate returns isMatch=false, so the rule must FAIL.
+    // The regex below pins the similarity to 75-100% to prove the gate
+    // fired — a generic dissimilar-address failure would land below 75%.
 
     buildSimilarParticipantsTestCase({
       recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
       recyclerEventAddress:
         recyclerEventAddressWithoutCoordinatesDifferentNumber,
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+      resultComment: expect.stringMatching(
+        /Non-compliant Recycler address: event address coordinates were not provided; the address data similarity is only (?:7[5-9]|[89]\d|100)% \(below threshold\)\./,
       ),
       resultStatus: 'FAILED',
       scenario:
@@ -1254,8 +1255,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+      resultComment: expect.stringMatching(
+        /Compliant Recycler address: event address coordinates were not provided; the captured GPS coordinates are within \d+ m of the accredited facility\./,
       ),
       resultStatus: 'PASSED',
       scenario:
@@ -1299,9 +1300,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           ),
         },
       },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+        'event address coordinates were not provided. GPS validation skipped due to approved exception.',
       ),
       resultStatus: 'PASSED',
       scenario:
@@ -1332,8 +1332,8 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining(
-        'event address coordinates were not provided',
+      resultComment: expect.stringMatching(
+        /Non-compliant Recycler address: event address coordinates were not provided; the captured GPS coordinates are \d+ m from the accredited facility, exceeding the \d+ m limit\./,
       ),
       resultStatus: 'FAILED',
       scenario:
