@@ -1300,6 +1300,7 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
           ),
         },
       },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
         'event address coordinates were not provided. GPS validation skipped due to approved exception.',
       ),
