@@ -296,7 +296,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       ];
     }
 
-    /* v8 ignore start -- dead until schema makes coordinates optional (Task 6) */
     if (!hasAddressCoordinates(accreditedAddress)) {
       return [
         {
@@ -319,7 +318,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         recyclerAccreditationDocument,
       });
     }
-    /* v8 ignore stop */
 
     const addressDistance = this.calculateAddressDistance(
       eventAddress,
@@ -445,7 +443,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment: this.pickGpsComment(
               addressDistance,
-              /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
               () =>
                 RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
                   actorType,
@@ -473,7 +470,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           {
             resultComment: this.pickGpsComment(
               addressDistance,
-              /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
               () =>
                 RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
                   actorType,
@@ -494,7 +490,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         {
           resultComment: this.pickGpsComment(
             addressDistance,
-            /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
             () =>
               RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
                 actorType,
@@ -516,7 +511,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       {
         resultComment: this.pickGpsComment(
           addressDistance,
-          /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
           () =>
             RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
               actorType,
@@ -552,7 +546,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return this.aggregateResults(actorResults);
   }
 
-  /* v8 ignore start -- dead until schema makes coordinates optional (Task 6) */
   private evaluateWithoutEventCoordinates({
     accreditedAddress,
     actorType,
@@ -640,7 +633,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     return results;
   }
-  /* v8 ignore stop */
 
   private extractRequiredEvents(massIDDocument: BoldDocument) {
     const events = massIDDocument.externalEvents?.filter(
@@ -697,7 +689,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     noCoord: () => string,
     withCoord: (distance: number) => string,
   ): string {
-    /* v8 ignore next 2 -- dead until schema makes coordinates optional (Task 6) */
     if (isNil(addressDistance)) {
       return noCoord();
     }

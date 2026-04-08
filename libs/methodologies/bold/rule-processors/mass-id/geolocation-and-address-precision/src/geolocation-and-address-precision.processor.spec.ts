@@ -15,6 +15,7 @@ import { GeolocationAndAddressPrecisionProcessor } from './geolocation-and-addre
 import {
   geolocationAndAddressPrecisionErrorTestCases,
   geolocationAndAddressPrecisionTestCases,
+  reviewRequiredNoCoordinatesTestCase,
   reviewRequiredTestCase,
 } from './geolocation-and-address-precision.test-cases';
 
@@ -107,6 +108,70 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
         resultComment,
         resultStatus,
       } = reviewRequiredTestCase;
+
+      const {
+        massIDAuditDocument,
+        massIDDocument,
+        participantsAccreditationDocuments,
+      } = new BoldStubsBuilder({
+        massIDActorParticipants: actorParticipants,
+      })
+        .createMassIDDocuments(massIDDocumentParameters)
+        .createMassIDAuditDocuments()
+        .createMethodologyDocument()
+        .createParticipantAccreditationDocuments(accreditationDocuments)
+        .build();
+
+      const auditActorEvents = [...actorParticipants.values()].map(
+        (participant) =>
+          stubDocumentEvent({
+            label: participant.type,
+            name: BoldDocumentEventName.ACTOR,
+            participant,
+            relatedDocument: {
+              documentId: participantsAccreditationDocuments.get(
+                participant.type,
+              )!.id,
+            },
+          }),
+      );
+
+      massIDAuditDocument.externalEvents = [
+        ...(massIDAuditDocument.externalEvents ?? []),
+        ...auditActorEvents,
+      ];
+
+      const allDocuments = [
+        massIDDocument,
+        massIDAuditDocument,
+        ...participantsAccreditationDocuments.values(),
+      ];
+
+      spyOnLoadDocument(massIDAuditDocument);
+      spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
+
+      const ruleInput = stubRuleInput({
+        documentId: massIDAuditDocument.id,
+      });
+
+      const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+      expectRuleOutput({
+        resultComment,
+        resultStatus,
+        ruleInput,
+        ruleOutput,
+      });
+    });
+
+    it('should return REVIEW_REQUIRED when event address coordinates are missing and similarity matches', async () => {
+      const {
+        accreditationDocuments,
+        actorParticipants,
+        massIDDocumentParameters,
+        resultComment,
+        resultStatus,
+      } = reviewRequiredNoCoordinatesTestCase;
 
       const {
         massIDAuditDocument,
