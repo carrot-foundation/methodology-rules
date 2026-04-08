@@ -1079,7 +1079,9 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         },
       },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      resultComment: expect.stringContaining('country or state do not match'),
+      resultComment: expect.stringContaining(
+        'country or state does not match the accredited facility',
+      ),
       resultStatus: 'FAILED',
       scenario:
         'Recycler address is 2-30km away but state does not match (FAILED)',

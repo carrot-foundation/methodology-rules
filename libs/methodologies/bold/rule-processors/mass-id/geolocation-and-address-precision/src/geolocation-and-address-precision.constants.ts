@@ -3,6 +3,45 @@ export const DISTANCE_THRESHOLD_PASS = 2000;
 export const DISTANCE_THRESHOLD_SIMILARITY = 30_000;
 export const GPS_MAX_ALLOWED_DISTANCE = 2000;
 
+// --- Phrase builders -------------------------------------------------------
+//
+// These small helpers are the single source of truth for the recurring text
+// fragments used by the RESULT_COMMENTS templates below. Edit a phrase here
+// once and every variant that mentions it picks up the change consistently.
+// They are intentionally not exported.
+
+const compliantAddress = (actorType: string): string =>
+  `Compliant ${actorType} address`;
+
+const nonCompliantAddress = (actorType: string): string =>
+  `Non-compliant ${actorType} address`;
+
+const eventToAccreditedDistance = (addressDistance: number): string =>
+  `the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m`;
+
+const NO_EVENT_COORDINATES = 'event address coordinates were not provided';
+
+const gpsWithinAccredited = (gpsDistance: number): string =>
+  `the captured GPS coordinates are within ${gpsDistance} m of the accredited facility`;
+
+const gpsExceedingAccreditedLimit = (gpsDistance: number): string =>
+  `the captured GPS coordinates are ${gpsDistance} m from the accredited facility, exceeding the ${GPS_MAX_ALLOWED_DISTANCE} m limit`;
+
+const similarityBelowThreshold = (similarityPercent: number): string =>
+  `the address data similarity is only ${similarityPercent}% (below threshold)`;
+
+const similarityMatchesAccredited = (similarityPercent: number): string =>
+  `the address data matches the accredited facility with ${similarityPercent}% similarity`;
+
+const COUNTRY_OR_STATE_MISMATCH =
+  'the event address country or state does not match the accredited facility';
+
+const GPS_EXCEPTION_NOTE = 'GPS validation skipped due to approved exception';
+
+const REVIEW_REQUIRED_NOTE = '(note: requires review)';
+
+// --- Result comments -------------------------------------------------------
+
 export const RESULT_COMMENTS = {
   failed: {
     FAILED_ADDRESS_SIMILARITY: (
@@ -10,34 +49,34 @@ export const RESULT_COMMENTS = {
       addressDistance: number,
       similarityPercent: number,
     ): string =>
-      `Non-compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m and the address data similarity is only ${similarityPercent}% (below threshold).`,
+      `${nonCompliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)} and ${similarityBelowThreshold(similarityPercent)}.`,
     FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES: (
       actorType: string,
       similarityPercent: number,
     ): string =>
-      `Non-compliant ${actorType} address: event address coordinates were not provided; the address data similarity is only ${similarityPercent}% (below threshold).`,
+      `${nonCompliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${similarityBelowThreshold(similarityPercent)}.`,
     INVALID_ACTOR_TYPE: 'Could not extract the event actor type.',
     INVALID_ADDRESS_DISTANCE: (
       actorType: string,
       addressDistance: number,
     ): string =>
-      `Non-compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m, exceeding the ${DISTANCE_THRESHOLD_SIMILARITY} m limit.`,
+      `${nonCompliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)}, exceeding the ${DISTANCE_THRESHOLD_SIMILARITY} m limit.`,
     INVALID_GPS_DISTANCE: (actorType: string, gpsDistance: number): string =>
-      `Non-compliant ${actorType} address: the captured GPS coordinates are ${gpsDistance} m from the accredited facility, exceeding the ${GPS_MAX_ALLOWED_DISTANCE} m limit.`,
+      `${nonCompliantAddress(actorType)}: ${gpsExceedingAccreditedLimit(gpsDistance)}.`,
     INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES: (
       actorType: string,
       gpsDistance: number,
     ): string =>
-      `Non-compliant ${actorType} address: event address coordinates were not provided; the captured GPS coordinates are ${gpsDistance} m from the accredited facility, exceeding the ${GPS_MAX_ALLOWED_DISTANCE} m limit.`,
+      `${nonCompliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${gpsExceedingAccreditedLimit(gpsDistance)}.`,
     MISMATCHED_COUNTRY_OR_STATE: (
       actorType: string,
       addressDistance: number,
     ): string =>
-      `Non-compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m and the country or state do not match.`,
+      `${nonCompliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)} and ${COUNTRY_OR_STATE_MISMATCH}.`,
     MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES: (
       actorType: string,
     ): string =>
-      `Non-compliant ${actorType} address: event address coordinates were not provided; the event address country or state does not match the accredited facility.`,
+      `${nonCompliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${COUNTRY_OR_STATE_MISMATCH}.`,
     MISSING_ACCREDITATION_ADDRESS: (actorType: string): string =>
       `No accredited address was found for the ${actorType} actor.`,
     MISSING_ACCREDITED_ADDRESS_COORDINATES: (actorType: string): string =>
@@ -51,36 +90,36 @@ export const RESULT_COMMENTS = {
       addressDistance: number,
       similarityPercent: number,
     ): string =>
-      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m, but the address data matches with ${similarityPercent}% similarity.`,
+      `${compliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)}, but ${similarityMatchesAccredited(similarityPercent)}.`,
     PASSED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES: (
       actorType: string,
       similarityPercent: number,
     ): string =>
-      `Compliant ${actorType} address: event address coordinates were not provided; the address data matches the accredited facility with ${similarityPercent}% similarity.`,
+      `${compliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${similarityMatchesAccredited(similarityPercent)}.`,
     PASSED_WITH_GPS: (
       actorType: string,
       addressDistance: number,
       gpsDistance: number,
     ): string =>
-      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m, and the captured GPS coordinates are within ${gpsDistance} m of the accredited facility.`,
+      `${compliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)}, and ${gpsWithinAccredited(gpsDistance)}.`,
     PASSED_WITH_GPS_EXCEPTION: (
       actorType: string,
       addressDistance: number,
     ): string =>
-      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m. GPS validation skipped due to approved exception.`,
+      `${compliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)}. ${GPS_EXCEPTION_NOTE}.`,
     PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES: (
       actorType: string,
     ): string =>
-      `Compliant ${actorType} address: event address coordinates were not provided. GPS validation skipped due to approved exception.`,
+      `${compliantAddress(actorType)}: ${NO_EVENT_COORDINATES}. ${GPS_EXCEPTION_NOTE}.`,
     PASSED_WITH_GPS_NO_EVENT_COORDINATES: (
       actorType: string,
       gpsDistance: number,
     ): string =>
-      `Compliant ${actorType} address: event address coordinates were not provided; the captured GPS coordinates are within ${gpsDistance} m of the accredited facility.`,
+      `${compliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${gpsWithinAccredited(gpsDistance)}.`,
     PASSED_WITHOUT_GPS: (actorType: string, addressDistance: number): string =>
-      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m (note: no GPS data was provided).`,
+      `${compliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)} (note: no GPS data was provided).`,
     PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES: (actorType: string): string =>
-      `Compliant ${actorType} address: event address coordinates were not provided and no GPS data was supplied; validation relied on textual address comparison only.`,
+      `${compliantAddress(actorType)}: ${NO_EVENT_COORDINATES} and no GPS data was supplied; validation relied on textual address comparison only.`,
   },
   reviewRequired: {
     REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY: (
@@ -88,11 +127,11 @@ export const RESULT_COMMENTS = {
       addressDistance: number,
       similarityPercent: number,
     ): string =>
-      `Compliant ${actorType} address: the geodesic distance between the event address coordinates and the accredited facility coordinates is ${addressDistance} m, but the address data matches with ${similarityPercent}% similarity (note: requires review).`,
+      `${compliantAddress(actorType)}: ${eventToAccreditedDistance(addressDistance)}, but ${similarityMatchesAccredited(similarityPercent)} ${REVIEW_REQUIRED_NOTE}.`,
     REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES: (
       actorType: string,
       similarityPercent: number,
     ): string =>
-      `Compliant ${actorType} address: event address coordinates were not provided; the address data matches the accredited facility with ${similarityPercent}% similarity (note: requires review).`,
+      `${compliantAddress(actorType)}: ${NO_EVENT_COORDINATES}; ${similarityMatchesAccredited(similarityPercent)} ${REVIEW_REQUIRED_NOTE}.`,
   },
 } as const;
