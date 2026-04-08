@@ -25,9 +25,6 @@ describe('hasAddressCoordinates', () => {
   it('returns false when latitude is undefined', () => {
     const address: DocumentAddress = {
       ...baseAddress,
-      // @ts-expect-error — schema currently requires latitude; this directive
-      // will become unused (and therefore an error) once the optional-coordinates
-      // schema change lands, at which point it must be removed.
       latitude: undefined,
     };
 
@@ -37,9 +34,6 @@ describe('hasAddressCoordinates', () => {
   it('returns false when longitude is undefined', () => {
     const address: DocumentAddress = {
       ...baseAddress,
-      // @ts-expect-error — schema currently requires longitude; this directive
-      // will become unused (and therefore an error) once the optional-coordinates
-      // schema change lands, at which point it must be removed.
       longitude: undefined,
     };
 
@@ -49,9 +43,7 @@ describe('hasAddressCoordinates', () => {
   it('returns false when both coordinates are undefined', () => {
     const address: DocumentAddress = {
       ...baseAddress,
-      // @ts-expect-error — see note above; remove with schema change.
       latitude: undefined,
-      // @ts-expect-error — see note above; remove with schema change.
       longitude: undefined,
     };
 
