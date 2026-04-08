@@ -67,7 +67,11 @@ describe('DocumentAddressSchema', () => {
 
 describe('DocumentAddressWithCoordinatesSchema', () => {
   it.each([
-    { expected: true, scenario: 'a fully populated address', value: baseAddress },
+    {
+      expected: true,
+      scenario: 'a fully populated address',
+      value: baseAddress,
+    },
     {
       expected: true,
       scenario: 'an address without zipCode',
