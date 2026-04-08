@@ -74,22 +74,24 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
     resultStatus: 'FAILED',
     scenario: `The MassID document does not have a ${documentManifestType} event`,
   },
-  ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map((attribute) => ({
-    documentManifestType,
-    events: {
-      [documentManifestType]: documentManifestTypeStub[documentManifestType]({
-        metadataAttributes: [[attribute, undefined]],
-        partialDocumentEvent: {
-          address: sameAddress,
-        },
-      }),
-      ...defaultEvents,
-    },
-    manifestExample: true,
-    resultComment: attributeErrorMessages[attribute]!,
-    resultStatus: 'FAILED',
-    scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
-  })),
+  ...[ISSUE_DATE, DOCUMENT_NUMBER, DOCUMENT_TYPE].map(
+    (attribute): DocumentManifestDataTestCase => ({
+      documentManifestType,
+      events: {
+        [documentManifestType]: documentManifestTypeStub[documentManifestType]({
+          metadataAttributes: [[attribute, undefined]],
+          partialDocumentEvent: {
+            address: sameAddress,
+          },
+        }),
+        ...defaultEvents,
+      },
+      manifestExample: true,
+      resultComment: attributeErrorMessages[attribute]!,
+      resultStatus: 'FAILED',
+      scenario: `The MassID document has a ${documentManifestType} event without a ${attribute}`,
+    }),
+  ),
   {
     documentManifestType,
     events: {

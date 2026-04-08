@@ -89,22 +89,24 @@ export const vehicleIdentificationTestCases: VehicleIdentificationTestCase[] = [
     resultStatus: 'FAILED',
     scenario: `The "${PICK_UP}" event is not present`,
   },
-  ...[...VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES].map((vehicleType) => ({
-    events: new Map([
-      [
-        PICK_UP,
-        stubBoldMassIDPickUpEvent({
-          metadataAttributes: [[VEHICLE_TYPE, vehicleType]],
-        }),
-      ],
-    ]),
-    resultComment:
-      RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
-        vehicleType,
-      ),
-    resultStatus: 'PASSED',
-    scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
-  })),
+  ...[...VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES].map(
+    (vehicleType): VehicleIdentificationTestCase => ({
+      events: new Map([
+        [
+          PICK_UP,
+          stubBoldMassIDPickUpEvent({
+            metadataAttributes: [[VEHICLE_TYPE, vehicleType]],
+          }),
+        ],
+      ]),
+      resultComment:
+        RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
+          vehicleType,
+        ),
+      resultStatus: 'PASSED',
+      scenario: `The "${VEHICLE_TYPE}" attribute is declared as ${vehicleType} and no license plate is needed`,
+    }),
+  ),
   {
     events: new Map([
       [

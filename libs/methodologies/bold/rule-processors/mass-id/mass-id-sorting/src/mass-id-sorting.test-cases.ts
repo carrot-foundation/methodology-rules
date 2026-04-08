@@ -125,7 +125,7 @@ const createErrorTestCase = (
   scenario: string,
   documents: BoldDocument[],
   resultComment: string,
-) => ({
+): MassIDSortingErrorTestCase => ({
   documents,
   massIDAuditDocument,
   resultComment,
@@ -136,8 +136,8 @@ const createErrorTestCase = (
 const createWeightAttributesWithFormat = (
   grossWeight: number,
   deductedWeight: number,
-  grossFormat = KILOGRAM,
-  deductedFormat = KILOGRAM,
+  grossFormat: DocumentEventAttributeFormat = KILOGRAM,
+  deductedFormat: DocumentEventAttributeFormat = KILOGRAM,
 ) => [
   {
     format: grossFormat,

@@ -8,7 +8,6 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
   preventedEmissionsErrorTestCases,
-  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -20,7 +19,7 @@ describe('PreventedEmissionsProcessor', () => {
   });
 
   describe('PreventedEmissionsProcessor', () => {
-    it.each<PreventedEmissionsTestCase>(preventedEmissionsTestCases)(
+    it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
       async ({
         accreditationDocuments,

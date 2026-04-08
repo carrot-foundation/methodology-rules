@@ -140,28 +140,33 @@ describe('Waste Mass Is Unique Helpers E2E', () => {
               ...eventsData.pickUpEvent,
               name: 'OPEN',
             },
-            [['vehicle-license-plate', vehicleLicensePlate]],
+            [
+              [
+                'vehicle-license-plate' as BoldAttributeName,
+                vehicleLicensePlate,
+              ],
+            ],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.dropOffEvent,
               name: MOVE,
             },
-            [['move-type', 'Drop-off']],
+            [['move-type' as BoldAttributeName, 'Drop-off']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.recyclerEvent,
               name: ACTOR,
             },
-            [['actor-type', 'RECYCLER']],
+            [['actor-type' as BoldAttributeName, 'RECYCLER']],
           ),
           stubDocumentEventWithMetadataAttributes(
             {
               ...eventsData.wasteGeneratorEvent,
               name: ACTOR,
             },
-            [['actor-type', 'SOURCE']],
+            [['actor-type' as BoldAttributeName, 'SOURCE']],
           ),
         ],
         subtype: v2DocumentStub.subtype,
