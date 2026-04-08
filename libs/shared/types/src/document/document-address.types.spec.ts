@@ -69,33 +69,26 @@ describe('DocumentAddressSchema', () => {
 });
 
 describe('DocumentAddressWithCoordinatesSchema', () => {
-  it('accepts a fully populated address with coordinates', () => {
-    const result = DocumentAddressWithCoordinatesSchema.safeParse(baseAddress);
+  it.each([
+    { expected: true, scenario: 'a fully populated address', value: baseAddress },
+    {
+      expected: true,
+      scenario: 'an address without zipCode (still optional)',
+      value: without('zipCode'),
+    },
+    {
+      expected: false,
+      scenario: 'an address without latitude',
+      value: without('latitude'),
+    },
+    {
+      expected: false,
+      scenario: 'an address without longitude',
+      value: without('longitude'),
+    },
+  ])('returns success=$expected for $scenario', ({ expected, value }) => {
+    const result = DocumentAddressWithCoordinatesSchema.safeParse(value);
 
-    expect(result.success).toBe(true);
-  });
-
-  it('rejects an address without latitude', () => {
-    const result = DocumentAddressWithCoordinatesSchema.safeParse(
-      without('latitude'),
-    );
-
-    expect(result.success).toBe(false);
-  });
-
-  it('rejects an address without longitude', () => {
-    const result = DocumentAddressWithCoordinatesSchema.safeParse(
-      without('longitude'),
-    );
-
-    expect(result.success).toBe(false);
-  });
-
-  it('still allows the address to omit zipCode', () => {
-    const result = DocumentAddressWithCoordinatesSchema.safeParse(
-      without('zipCode'),
-    );
-
-    expect(result.success).toBe(true);
+    expect(result.success).toBe(expected);
   });
 });
