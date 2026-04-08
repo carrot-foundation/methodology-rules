@@ -445,23 +445,19 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         );
 
       if (shouldSkipGpsValidation(latitudeException, longitudeException)) {
-        return [
-          {
-            resultComment: this.pickGpsComment(
-              addressDistance,
-              () =>
-                RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
-                  actorType,
-                ),
-              (distance) =>
-                RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(
-                  actorType,
-                  distance,
-                ),
+        return this.gpsResult(
+          addressDistance,
+          'PASSED',
+          () =>
+            RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
+              actorType,
             ),
-            resultStatus: 'PASSED',
-          },
-        ];
+          (distance) =>
+            RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION(
+              actorType,
+              distance,
+            ),
+        );
       }
     }
 
@@ -469,59 +465,50 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       const gpsDistance = calculateDistance(accreditedAddress, gpsGeolocation);
 
       if (gpsDistance > GPS_MAX_ALLOWED_DISTANCE) {
-        return [
-          {
-            resultComment: this.pickGpsComment(
-              addressDistance,
-              () =>
-                RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
-                  actorType,
-                  gpsDistance,
-                ),
-              () =>
-                RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(
-                  actorType,
-                  gpsDistance,
-                ),
+        return this.gpsResult(
+          addressDistance,
+          'FAILED',
+          () =>
+            RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
+              actorType,
+              gpsDistance,
             ),
-            resultStatus: 'FAILED',
-          },
-        ];
+          () => RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(actorType, gpsDistance),
+        );
       }
 
-      return [
-        {
-          resultComment: this.pickGpsComment(
-            addressDistance,
-            () =>
-              RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
-                actorType,
-                gpsDistance,
-              ),
-            (distance) =>
-              RESULT_COMMENTS.passed.PASSED_WITH_GPS(
-                actorType,
-                distance,
-                gpsDistance,
-              ),
+      return this.gpsResult(
+        addressDistance,
+        'PASSED',
+        () =>
+          RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
+            actorType,
+            gpsDistance,
           ),
-          resultStatus: 'PASSED',
-        },
-      ];
+        (distance) =>
+          RESULT_COMMENTS.passed.PASSED_WITH_GPS(actorType, distance, gpsDistance),
+      );
     }
 
+    return this.gpsResult(
+      addressDistance,
+      'PASSED',
+      () =>
+        RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(actorType),
+      (distance) => RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(actorType, distance),
+    );
+  }
+
+  private gpsResult(
+    addressDistance: number | undefined,
+    resultStatus: EvaluateResultOutput['resultStatus'],
+    noCoord: () => string,
+    withCoord: (distance: number) => string,
+  ): EvaluateResultOutput[] {
     return [
       {
-        resultComment: this.pickGpsComment(
-          addressDistance,
-          () =>
-            RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
-              actorType,
-            ),
-          (distance) =>
-            RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS(actorType, distance),
-        ),
-        resultStatus: 'PASSED',
+        resultComment: this.pickGpsComment(addressDistance, noCoord, withCoord),
+        resultStatus,
       },
     ];
   }
