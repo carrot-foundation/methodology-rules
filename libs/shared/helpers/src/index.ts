@@ -1,3 +1,4 @@
+export * from './address.helpers';
 export * from './array.helpers';
 export * from './assert.validators';
 export * from './calculate-distance-between-coordinates';
