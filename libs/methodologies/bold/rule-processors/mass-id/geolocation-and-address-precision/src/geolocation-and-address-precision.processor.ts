@@ -208,20 +208,6 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return participantsAddressData;
   }
 
-  private calculateAddressDistance(
-    eventAddress: DocumentAddressWithCoordinates,
-    accreditedAddress: DocumentAddressWithCoordinates,
-  ): number {
-    return calculateDistance(eventAddress, accreditedAddress);
-  }
-
-  private calculateGpsDistance(
-    accreditedAddress: DocumentAddressWithCoordinates,
-    gpsGeolocation: Geolocation,
-  ): number {
-    return calculateDistance(accreditedAddress, gpsGeolocation);
-  }
-
   private async collectDocuments(
     documentQuery: DocumentQuery<BoldDocument> | undefined,
   ) {
@@ -319,10 +305,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       });
     }
 
-    const addressDistance = this.calculateAddressDistance(
-      eventAddress,
-      accreditedAddress,
-    );
+    const addressDistance = calculateDistance(eventAddress, accreditedAddress);
 
     // Tier 1: ≤2km — pass, continue to GPS check
     if (addressDistance <= DISTANCE_THRESHOLD_PASS) {
@@ -460,10 +443,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     }
 
     if (!isNil(gpsGeolocation)) {
-      const gpsDistance = this.calculateGpsDistance(
-        accreditedAddress,
-        gpsGeolocation,
-      );
+      const gpsDistance = calculateDistance(accreditedAddress, gpsGeolocation);
 
       if (gpsDistance > GPS_MAX_ALLOWED_DISTANCE) {
         return [
