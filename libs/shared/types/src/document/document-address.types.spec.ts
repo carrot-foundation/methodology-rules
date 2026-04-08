@@ -1,4 +1,7 @@
-import { DocumentAddressSchema } from './document-address.types';
+import {
+  DocumentAddressSchema,
+  DocumentAddressWithCoordinatesSchema,
+} from './document-address.types';
 
 const baseAddress = {
   city: 'São Paulo',
@@ -62,5 +65,37 @@ describe('DocumentAddressSchema', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+});
+
+describe('DocumentAddressWithCoordinatesSchema', () => {
+  it('accepts a fully populated address with coordinates', () => {
+    const result = DocumentAddressWithCoordinatesSchema.safeParse(baseAddress);
+
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects an address without latitude', () => {
+    const result = DocumentAddressWithCoordinatesSchema.safeParse(
+      without('latitude'),
+    );
+
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects an address without longitude', () => {
+    const result = DocumentAddressWithCoordinatesSchema.safeParse(
+      without('longitude'),
+    );
+
+    expect(result.success).toBe(false);
+  });
+
+  it('still allows the address to omit zipCode', () => {
+    const result = DocumentAddressWithCoordinatesSchema.safeParse(
+      without('zipCode'),
+    );
+
+    expect(result.success).toBe(true);
   });
 });

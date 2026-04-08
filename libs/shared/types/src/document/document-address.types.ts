@@ -19,7 +19,11 @@ export const DocumentAddressSchema = z.object({
 });
 export type DocumentAddress = z.infer<typeof DocumentAddressSchema>;
 
-export type DocumentAddressWithCoordinates = DocumentAddress & {
-  latitude: number;
-  longitude: number;
-};
+export const DocumentAddressWithCoordinatesSchema =
+  DocumentAddressSchema.extend({
+    latitude: LatitudeSchema,
+    longitude: LongitudeSchema,
+  });
+export type DocumentAddressWithCoordinates = z.infer<
+  typeof DocumentAddressWithCoordinatesSchema
+>;
