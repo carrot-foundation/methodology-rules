@@ -3,13 +3,6 @@ export const DISTANCE_THRESHOLD_PASS = 2000;
 export const DISTANCE_THRESHOLD_SIMILARITY = 30_000;
 export const GPS_MAX_ALLOWED_DISTANCE = 2000;
 
-// --- Phrase builders -------------------------------------------------------
-//
-// These small helpers are the single source of truth for the recurring text
-// fragments used by the RESULT_COMMENTS templates below. Edit a phrase here
-// once and every variant that mentions it picks up the change consistently.
-// They are intentionally not exported.
-
 const compliantAddress = (actorType: string): string =>
   `Compliant ${actorType} address`;
 
@@ -39,8 +32,6 @@ const COUNTRY_OR_STATE_MISMATCH =
 const GPS_EXCEPTION_NOTE = 'GPS validation skipped due to approved exception';
 
 const REVIEW_REQUIRED_NOTE = '(note: requires review)';
-
-// --- Result comments -------------------------------------------------------
 
 export const RESULT_COMMENTS = {
   failed: {
