@@ -4,6 +4,7 @@ import {
   getApprovedExceptions,
   isApprovedExceptionValid,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
+import { PARTICIPANT_ACCREDITATION_PARTIAL_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   eventHasLabel,
   eventNameIsAnyOf,
@@ -14,8 +15,10 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   BoldDocumentEventName,
+  BoldDocumentSubtype,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type DocumentAddress,
   type Geolocation,
@@ -31,6 +34,35 @@ import {
   isGpsLatitudeApprovedException,
   isGpsLongitudeApprovedException,
 } from './geolocation-and-address-precision.validators';
+
+export const buildAddressComparisonString = (
+  address: DocumentAddress,
+): string =>
+  [address.street, address.number, address.city].filter(Boolean).join(', ');
+
+export const findRecyclerAccreditation = (
+  accreditationDocuments: BoldDocument[],
+): BoldDocument | undefined =>
+  accreditationDocuments.find((document) => {
+    const relation = mapDocumentRelation(document);
+
+    return (
+      PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
+      relation.subtype === BoldDocumentSubtype.RECYCLER
+    );
+  });
+
+export const pickGpsComment = (
+  addressDistance: number | undefined,
+  noCoord: () => string,
+  withCoord: (distance: number) => string,
+): string => {
+  if (isNil(addressDistance)) {
+    return noCoord();
+  }
+
+  return withCoord(addressDistance);
+};
 
 export const hasVerificationDocument = (
   massIDAuditDocument: BoldDocument,

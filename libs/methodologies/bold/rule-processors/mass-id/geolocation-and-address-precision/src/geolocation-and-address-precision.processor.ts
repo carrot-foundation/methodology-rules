@@ -31,7 +31,6 @@ import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predica
 import {
   type BoldDocument,
   BoldDocumentEventName,
-  BoldDocumentSubtype,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
@@ -50,10 +49,13 @@ import {
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 import {
+  buildAddressComparisonString,
+  findRecyclerAccreditation,
   getAccreditedAddressByParticipantIdAndActorType,
   getEventGpsGeolocation,
   getGpsExceptionsFromRecyclerAccreditation,
   hasVerificationDocument,
+  pickGpsComment,
   shouldSkipGpsValidation,
 } from './geolocation-and-address-precision.helpers';
 
@@ -722,35 +724,4 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     return massIDDocument;
   }
-}
-
-function buildAddressComparisonString(address: DocumentAddress): string {
-  return [address.street, address.number, address.city]
-    .filter(Boolean)
-    .join(', ');
-}
-
-function findRecyclerAccreditation(
-  accreditationDocuments: BoldDocument[],
-): BoldDocument | undefined {
-  return accreditationDocuments.find((document) => {
-    const relation = mapDocumentRelation(document);
-
-    return (
-      PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
-      relation.subtype === BoldDocumentSubtype.RECYCLER
-    );
-  });
-}
-
-function pickGpsComment(
-  addressDistance: number | undefined,
-  noCoord: () => string,
-  withCoord: (distance: number) => string,
-): string {
-  if (isNil(addressDistance)) {
-    return noCoord();
-  }
-
-  return withCoord(addressDistance);
 }
