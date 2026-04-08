@@ -12,7 +12,6 @@ import { faker } from '@faker-js/faker';
 import { preventedEmissionsLambda } from './prevented-emissions.lambda';
 import {
   preventedEmissionsErrorTestCases,
-  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -23,7 +22,7 @@ describe('PreventedEmissionsProcessor E2E', () => {
 
   const documentKeyPrefix = faker.string.uuid();
 
-  it.each<PreventedEmissionsTestCase>(preventedEmissionsTestCases)(
+  it.each(preventedEmissionsTestCases)(
     'should return $resultStatus when $scenario',
     async ({
       accreditationDocuments,

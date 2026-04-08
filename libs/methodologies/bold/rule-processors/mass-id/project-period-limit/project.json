@@ -13,6 +13,6 @@
   "targets": {
     "lint": {},
     "test": {},
-    "type-check": {}
+    "ts": {}
   }
 }

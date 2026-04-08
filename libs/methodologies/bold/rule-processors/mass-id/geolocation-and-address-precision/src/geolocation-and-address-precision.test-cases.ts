@@ -22,7 +22,10 @@ import {
   BoldDocumentEventName,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type DocumentParticipant } from '@carrot-fndn/shared/types';
+import {
+  type DocumentAddress,
+  type DocumentParticipant,
+} from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
 import { expect } from 'vitest';
 
@@ -69,6 +72,12 @@ const actorsCoordinates = new Map(
   ]),
 );
 
+const distanceBetweenAddresses = (a: DocumentAddress, b: DocumentAddress) =>
+  calculateDistance(
+    { latitude: a.latitude!, longitude: a.longitude! },
+    { latitude: b.latitude!, longitude: b.longitude! },
+  );
+
 const recyclerParticipant = actorParticipants.get(
   RECYCLER,
 ) as DocumentParticipant;
@@ -94,15 +103,15 @@ const nearbyRecyclerAddress = stubAddress({
   ...actorsCoordinates.get(RECYCLER)!.nearby,
 });
 
-const invalidRecyclerAddressDistance = calculateDistance(
+const invalidRecyclerAddressDistance = distanceBetweenAddresses(
   recyclerAddress,
   invalidRecyclerAddress,
 );
-const invalidWasteGeneratorAddressDistance = calculateDistance(
+const invalidWasteGeneratorAddressDistance = distanceBetweenAddresses(
   wasteGeneratorAddress,
   invalidWasteGeneratorAddress,
 );
-const nearbyRecyclerAddressDistance = calculateDistance(
+const nearbyRecyclerAddressDistance = distanceBetweenAddresses(
   recyclerAddress,
   nearbyRecyclerAddress,
 );
@@ -149,19 +158,19 @@ const manifestInvalidWasteGeneratorAddress = stubAddress({
   longitude: -118.2437,
 });
 
-const manifestNearbyRecyclerAddressDistance = calculateDistance(
+const manifestNearbyRecyclerAddressDistance = distanceBetweenAddresses(
   manifestRecyclerAddress,
   manifestNearbyRecyclerAddress,
 );
-const manifestNearbyWasteGeneratorAddressDistance = calculateDistance(
+const manifestNearbyWasteGeneratorAddressDistance = distanceBetweenAddresses(
   manifestWasteGeneratorAddress,
   manifestNearbyWasteGeneratorAddress,
 );
-const manifestInvalidRecyclerAddressDistance = calculateDistance(
+const manifestInvalidRecyclerAddressDistance = distanceBetweenAddresses(
   manifestRecyclerAddress,
   manifestInvalidRecyclerAddress,
 );
-const manifestInvalidWasteGeneratorAddressDistance = calculateDistance(
+const manifestInvalidWasteGeneratorAddressDistance = distanceBetweenAddresses(
   manifestWasteGeneratorAddress,
   manifestInvalidWasteGeneratorAddress,
 );

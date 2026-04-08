@@ -137,7 +137,7 @@ const {
   .createParticipantAccreditationDocuments()
   .build();
 
-export const preventedEmissionsTestCases = [
+export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
   {
     accreditationDocuments: makeAccreditationDocuments([
       [EXCEEDING_EMISSION_COEFFICIENT, undefined],
@@ -249,7 +249,7 @@ export const preventedEmissionsTestCases = [
     BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
     BoldBaseline.OPEN_AIR_DUMP,
     BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
-  ].map((othersBaseline) => {
+  ].map((othersBaseline): PreventedEmissionsTestCase => {
     const othersFactor = computeOthersIfOrganicFactor(othersBaseline);
     const expectedOthersPreventedEmissions =
       massIDDocumentValue * othersFactor -

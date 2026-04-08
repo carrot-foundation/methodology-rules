@@ -117,9 +117,9 @@ describe('waste-mass-is-unique.helpers', () => {
 
       expect(calls.length).toBeGreaterThanOrEqual(2);
 
-      expect(calls[0][0].match.category).toBe(MASS_ID);
+      expect(calls[0]![0].match.category).toBe(MASS_ID);
 
-      expect(calls[1][0].match.category).toBe('Mass');
+      expect(calls[1]![0].match.category).toBe('Mass');
     });
   });
 
