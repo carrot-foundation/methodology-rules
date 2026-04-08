@@ -14,6 +14,7 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { GeolocationAndAddressPrecisionProcessor } from './geolocation-and-address-precision.processor';
 import {
   geolocationAndAddressPrecisionErrorTestCases,
+  type GeolocationAndAddressPrecisionTestCase,
   geolocationAndAddressPrecisionTestCases,
   reviewRequiredNoCoordinatesTestCase,
   reviewRequiredTestCase,
@@ -22,73 +23,78 @@ import {
 describe('GeolocationAndAddressPrecisionProcessor', () => {
   const ruleDataProcessor = new GeolocationAndAddressPrecisionProcessor();
 
+  const runTestCase = async ({
+    accreditationDocuments,
+    actorParticipants,
+    massIDDocumentParameters,
+    resultComment,
+    resultStatus,
+  }: GeolocationAndAddressPrecisionTestCase): Promise<void> => {
+    const {
+      massIDAuditDocument,
+      massIDDocument,
+      participantsAccreditationDocuments,
+    } = new BoldStubsBuilder({
+      massIDActorParticipants: actorParticipants,
+    })
+      .createMassIDDocuments(massIDDocumentParameters)
+      .createMassIDAuditDocuments()
+      .createMethodologyDocument()
+      .createParticipantAccreditationDocuments(accreditationDocuments)
+      .build();
+
+    const auditActorEvents = [...actorParticipants.values()].map(
+      (participant) =>
+        stubDocumentEvent({
+          label: participant.type,
+          name: BoldDocumentEventName.ACTOR,
+          participant,
+          relatedDocument: {
+            documentId: participantsAccreditationDocuments.get(
+              participant.type,
+            )!.id,
+          },
+        }),
+    );
+
+    massIDAuditDocument.externalEvents = [
+      ...(massIDAuditDocument.externalEvents ?? []),
+      ...auditActorEvents,
+    ];
+
+    const allDocuments = [
+      massIDDocument,
+      massIDAuditDocument,
+      ...participantsAccreditationDocuments.values(),
+    ];
+
+    spyOnLoadDocument(massIDAuditDocument);
+    spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
+
+    const ruleInput = stubRuleInput({
+      documentId: massIDAuditDocument.id,
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+
+    expectRuleOutput({
+      resultComment,
+      resultStatus,
+      ruleInput,
+      ruleOutput,
+    });
+  };
+
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
+  // runTestCase contains the assertions; vitest's expect-expect rule
+  // does not follow the indirection.
+  // eslint-disable-next-line vitest/expect-expect
   it.each(geolocationAndAddressPrecisionTestCases)(
     'should return $resultStatus when $scenario',
-    async ({
-      accreditationDocuments,
-      actorParticipants,
-      massIDDocumentParameters,
-      resultComment,
-      resultStatus,
-    }) => {
-      const {
-        massIDAuditDocument,
-        massIDDocument,
-        participantsAccreditationDocuments,
-      } = new BoldStubsBuilder({
-        massIDActorParticipants: actorParticipants,
-      })
-        .createMassIDDocuments(massIDDocumentParameters)
-        .createMassIDAuditDocuments()
-        .createMethodologyDocument()
-        .createParticipantAccreditationDocuments(accreditationDocuments)
-        .build();
-
-      const auditActorEvents = [...actorParticipants.values()].map(
-        (participant) =>
-          stubDocumentEvent({
-            label: participant.type,
-            name: BoldDocumentEventName.ACTOR,
-            participant,
-            relatedDocument: {
-              documentId: participantsAccreditationDocuments.get(
-                participant.type,
-              )!.id,
-            },
-          }),
-      );
-
-      massIDAuditDocument.externalEvents = [
-        ...(massIDAuditDocument.externalEvents ?? []),
-        ...auditActorEvents,
-      ];
-
-      const allDocuments = [
-        massIDDocument,
-        massIDAuditDocument,
-        ...participantsAccreditationDocuments.values(),
-      ];
-
-      spyOnLoadDocument(massIDAuditDocument);
-      spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
-
-      const ruleInput = stubRuleInput({
-        documentId: massIDAuditDocument.id,
-      });
-
-      const ruleOutput = await ruleDataProcessor.process(ruleInput);
-
-      expectRuleOutput({
-        resultComment,
-        resultStatus,
-        ruleInput,
-        ruleOutput,
-      });
-    },
+    runTestCase,
   );
 
   describe('when ENABLE_REVIEW_REQUIRED is enabled', () => {
@@ -100,132 +106,21 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       vi.unstubAllEnvs();
     });
 
-    it('should return REVIEW_REQUIRED when address similarity matches', async () => {
-      const {
-        accreditationDocuments,
-        actorParticipants,
-        massIDDocumentParameters,
-        resultComment,
-        resultStatus,
-      } = reviewRequiredTestCase;
-
-      const {
-        massIDAuditDocument,
-        massIDDocument,
-        participantsAccreditationDocuments,
-      } = new BoldStubsBuilder({
-        massIDActorParticipants: actorParticipants,
-      })
-        .createMassIDDocuments(massIDDocumentParameters)
-        .createMassIDAuditDocuments()
-        .createMethodologyDocument()
-        .createParticipantAccreditationDocuments(accreditationDocuments)
-        .build();
-
-      const auditActorEvents = [...actorParticipants.values()].map(
-        (participant) =>
-          stubDocumentEvent({
-            label: participant.type,
-            name: BoldDocumentEventName.ACTOR,
-            participant,
-            relatedDocument: {
-              documentId: participantsAccreditationDocuments.get(
-                participant.type,
-              )!.id,
-            },
-          }),
-      );
-
-      massIDAuditDocument.externalEvents = [
-        ...(massIDAuditDocument.externalEvents ?? []),
-        ...auditActorEvents,
-      ];
-
-      const allDocuments = [
-        massIDDocument,
-        massIDAuditDocument,
-        ...participantsAccreditationDocuments.values(),
-      ];
-
-      spyOnLoadDocument(massIDAuditDocument);
-      spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
-
-      const ruleInput = stubRuleInput({
-        documentId: massIDAuditDocument.id,
-      });
-
-      const ruleOutput = await ruleDataProcessor.process(ruleInput);
-
-      expectRuleOutput({
-        resultComment,
-        resultStatus,
-        ruleInput,
-        ruleOutput,
-      });
-    });
-
-    it('should return REVIEW_REQUIRED when event address coordinates are missing and similarity matches', async () => {
-      const {
-        accreditationDocuments,
-        actorParticipants,
-        massIDDocumentParameters,
-        resultComment,
-        resultStatus,
-      } = reviewRequiredNoCoordinatesTestCase;
-
-      const {
-        massIDAuditDocument,
-        massIDDocument,
-        participantsAccreditationDocuments,
-      } = new BoldStubsBuilder({
-        massIDActorParticipants: actorParticipants,
-      })
-        .createMassIDDocuments(massIDDocumentParameters)
-        .createMassIDAuditDocuments()
-        .createMethodologyDocument()
-        .createParticipantAccreditationDocuments(accreditationDocuments)
-        .build();
-
-      const auditActorEvents = [...actorParticipants.values()].map(
-        (participant) =>
-          stubDocumentEvent({
-            label: participant.type,
-            name: BoldDocumentEventName.ACTOR,
-            participant,
-            relatedDocument: {
-              documentId: participantsAccreditationDocuments.get(
-                participant.type,
-              )!.id,
-            },
-          }),
-      );
-
-      massIDAuditDocument.externalEvents = [
-        ...(massIDAuditDocument.externalEvents ?? []),
-        ...auditActorEvents,
-      ];
-
-      const allDocuments = [
-        massIDDocument,
-        massIDAuditDocument,
-        ...participantsAccreditationDocuments.values(),
-      ];
-
-      spyOnLoadDocument(massIDAuditDocument);
-      spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
-
-      const ruleInput = stubRuleInput({
-        documentId: massIDAuditDocument.id,
-      });
-
-      const ruleOutput = await ruleDataProcessor.process(ruleInput);
-
-      expectRuleOutput({
-        resultComment,
-        resultStatus,
-        ruleInput,
-        ruleOutput,
-      });
+    // runTestCase contains the assertions; vitest's expect-expect rule
+    // does not follow the indirection.
+    // eslint-disable-next-line vitest/expect-expect
+    it.each([
+      {
+        scenario: 'address similarity matches',
+        testCase: reviewRequiredTestCase,
+      },
+      {
+        scenario:
+          'event address coordinates are missing and similarity matches',
+        testCase: reviewRequiredNoCoordinatesTestCase,
+      },
+    ])('should return REVIEW_REQUIRED when $scenario', async ({ testCase }) => {
+      await runTestCase(testCase);
     });
   });
 

@@ -32,15 +32,15 @@ import {
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
 
-interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
-  documents: BoldDocument[];
-  massIDAuditDocument: BoldDocument | undefined;
-}
-
-interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
+export interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   actorParticipants: Map<string, DocumentParticipant>;
   massIDDocumentParameters?: StubBoldDocumentParameters | undefined;
+}
+
+interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument | undefined;
 }
 
 const { RECYCLER, WASTE_GENERATOR } = MassIDActorType;
@@ -1168,10 +1168,11 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
       scenario: 'the accredited recycler address is missing latitude/longitude',
     },
     // Case 2 — Event address missing coords, similarity match → PASSED
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     buildSimilarParticipantsTestCase({
       recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
       recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
         'event address coordinates were not provided',
       ),
@@ -1180,10 +1181,11 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         'the recycler event address is missing coordinates but matches the accredited address textually',
     }),
     // Case 3 — Event address missing coords, country/state mismatch → FAILED
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     buildSimilarParticipantsTestCase({
       recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
       recyclerEventAddress: mismatchedStateAddressWithoutCoordinates,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
         RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES(
           RECYCLER,
@@ -1194,10 +1196,11 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
         'the recycler event address is missing coordinates and country/state mismatches accredited',
     }),
     // Case 4 — Event address missing coords, similarity fail → FAILED
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     buildSimilarParticipantsTestCase({
       recyclerAccreditationAddress: dissimilarRecyclerAccreditedAddress,
       recyclerEventAddress: similarRecyclerEventAddressWithoutCoordinates,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
         'event address coordinates were not provided',
       ),
@@ -1210,11 +1213,12 @@ export const geolocationAndAddressPrecisionTestCases: GeolocationAndAddressPreci
     // alone clears the threshold, but isAddressMatch's numeric token gate
     // returns isMatch=false, so the rule must FAIL. Without honoring
     // isMatch on this path, the address would silently PASS.
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
     buildSimilarParticipantsTestCase({
       recyclerAccreditationAddress: similarRecyclerAccreditedAddress,
       recyclerEventAddress:
         recyclerEventAddressWithoutCoordinatesDifferentNumber,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       resultComment: expect.stringContaining(
         'event address coordinates were not provided',
       ),
