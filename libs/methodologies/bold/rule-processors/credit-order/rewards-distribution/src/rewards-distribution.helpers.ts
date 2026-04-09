@@ -14,10 +14,17 @@ import type {
   RuleSubject,
 } from './rewards-distribution.types';
 
-// Canonical actor order — mirrors smaug/libs/shared/palantir/helpers/src/helpers.ts
+// Canonical actor order — mirrors smaug's palantir/helpers/src/helpers.ts
 // ACTOR_TYPE_SORT_ORDER. Keep in sync with that file when it changes.
-// Using a Record<Enum, number> gives compile-time guarantees that every actor
-// type has a sort order, eliminating the need for a runtime fallback.
+//
+// NOTE: RewardsDistributionActorType is inferred from a Zod enum whose values
+// are cast to [string, ...string[]], so at the type level it is `string` and
+// this Record is not compile-time exhaustive. The runtime guarantees that every
+// actor type has an entry come from: (a) upstream Zod validation on document
+// events, which narrows the set of actual values to the 9 enum members; and
+// (b) the `assigns a sort order to every RewardsDistributionActorType` test,
+// which iterates Object.values(RewardsDistributionActorType) and verifies
+// every one is sortable by this table.
 
 const ACTOR_TYPE_SORT_ORDER: Record<RewardsDistributionActorType, number> = {
   [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL]: 5,

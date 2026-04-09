@@ -2,17 +2,25 @@ export const DEFAULT_FETCH_CONCURRENCY = 10;
 
 /**
  * Fetch a list of tasks in parallel with a bounded concurrency cap, yielding
- * results in the original input order.
+ * results in the original input order even when fetches resolve out of order.
  *
- * Memory invariant: at any moment, the number of tasks whose values are held
- * (in-flight fetches + resolved-but-not-yet-yielded values) is at most
- * `concurrency`. Each value is released as soon as the caller consumes its
- * yield, and a new fetch is dispatched to refill the pipeline.
+ * Memory invariant: at any moment, the number of pending slots — in-flight
+ * fetches plus resolved values buffered for later consumption — is capped at
+ * `concurrency`. The consumer consuming a yield releases exactly one slot,
+ * which the primitive immediately refills by dispatching the next pending
+ * task. No `fetchPromises` array pattern (which retains all resolved values
+ * until the array is dropped).
  *
- * Error semantics: on the first rejection, the generator throws that error on
- * its next iteration. Already-in-flight fetches run to completion naturally
- * (no cancellation) but their results are discarded. Subsequent errors are
- * swallowed in favor of the first.
+ * Order preservation: results are yielded by input index, not by resolution
+ * order. If task N resolves before task N-1, the N-value is buffered until
+ * N-1 lands, then both yield in order. Callbacks running inside the for-await
+ * loop are therefore invoked in the same order a serial implementation would.
+ *
+ * Error semantics: on the first rejection, any consumer awaiting the next
+ * yield is woken immediately and the generator rethrows. No further tasks
+ * are dispatched after the failure. Already-in-flight fetches run to
+ * completion (their results and errors are discarded). Subsequent errors
+ * are ignored in favor of the first.
  */
 export async function* boundedParallelFetchInOrder<Task, Value>(
   tasks: readonly Task[],

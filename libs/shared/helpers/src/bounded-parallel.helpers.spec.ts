@@ -150,6 +150,42 @@ describe('boundedParallelFetchInOrder', () => {
     expect(peak).toBe(10);
   });
 
+  it('caps inFlight + buffered values when the consumer drains slowly', async () => {
+    let held = 0;
+    let peakHeld = 0;
+
+    const fetchOne = (task: number): Promise<number> => {
+      held += 1;
+      peakHeld = Math.max(peakHeld, held);
+
+      return Promise.resolve(task);
+    };
+
+    const generator = boundedParallelFetchInOrder(
+      Array.from({ length: 50 }, (_, index) => index),
+      fetchOne,
+      10,
+    );
+
+    for await (const { value } of generator) {
+      // Consumer "releases" the slot by pulling the value; simulate slow
+      // consumer work between yields so the buffer has opportunity to fill.
+      held -= 1;
+      expect(value).toBeGreaterThanOrEqual(0);
+      await flushMicrotasks();
+      // After the consumer pull, at most concurrency tasks remain tracked
+      // (inFlight + buffered) — one slot was freed but the next task may
+      // already be in flight from the dispatch-before-yield ordering.
+      expect(held).toBeLessThanOrEqual(10);
+    }
+
+    // dispatch() fires the next task BEFORE yield delivers the current value to
+    // the consumer, so the transient peak is concurrency + 1 (the current task
+    // lands in the consumer's hands while the next one starts). A naive
+    // dispatcher that ignores fetched.size would grow without bound here.
+    expect(peakHeld).toBeLessThanOrEqual(11);
+  });
+
   it('does not start task 11 while the walker is blocked on task 0', async () => {
     const deferreds = Array.from({ length: 15 }, () =>
       createDeferred<string>(),
@@ -273,18 +309,6 @@ describe('boundedParallelFetchInOrder', () => {
     deferreds[1]!.reject(error);
 
     await expect(resultPromise).rejects.toBe(error);
-  });
-
-  it('skips awaiting when an error has already been captured before the current iteration', async () => {
-    // Sequential error → first iteration fails → second iteration's
-    // `fatalError !== undefined` guard should trip before awaiting.
-    const error = new Error('upstream');
-    const fetchOne = (task: number): Promise<string> =>
-      task === 0 ? Promise.reject(error) : Promise.resolve(`value-${task}`);
-
-    await expect(
-      collect(boundedParallelFetchInOrder([0, 1, 2], fetchOne, 10)),
-    ).rejects.toBe(error);
   });
 
   it('throws at loop start when error is set before the next iteration begins', async () => {

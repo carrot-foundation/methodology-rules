@@ -735,5 +735,65 @@ describe('DocumenQueryService', () => {
         loaderDocuments.iterator().map(({ document }) => document.id),
       ).rejects.toThrow('S3 exploded');
     });
+
+    it('caps concurrent loader calls at DEFAULT_FETCH_CONCURRENCY for a single related-documents criterion', async () => {
+      const { category, subtype, type } = stubDocumentRelation();
+      const rootDocument = stubDocument();
+
+      const childCount = 25;
+      const children = Array.from({ length: childCount }, () => stubDocument());
+
+      rootDocument.externalEvents = children.map((child) =>
+        stubDocumentEvent({
+          relatedDocument: { category, documentId: child.id, subtype, type },
+        }),
+      );
+
+      let activeCalls = 0;
+      let peakActiveCalls = 0;
+      const childById = new Map(children.map((child) => [child.id, child]));
+
+      vi.spyOn(provideDocumentLoaderService, 'load').mockImplementation(
+        async ({ key }) => {
+          if (key.includes(rootDocument.id)) {
+            return stubDocumentEntity({
+              document: rootDocument,
+            }) as DocumentEntity<BoldDocument>;
+          }
+          const matchingChild = [...childById.entries()].find(([childId]) =>
+            key.includes(childId),
+          );
+
+          if (matchingChild === undefined) {
+            throw new Error(`Unexpected loader key: ${key}`);
+          }
+          activeCalls += 1;
+          peakActiveCalls = Math.max(peakActiveCalls, activeCalls);
+          // Yield to the event loop so other fetches can overlap.
+          await Promise.resolve();
+          await Promise.resolve();
+          activeCalls -= 1;
+
+          return stubDocumentEntity({
+            document: matchingChild[1],
+          }) as DocumentEntity<BoldDocument>;
+        },
+      );
+
+      const loaderDocuments = await loadDocuments.load({
+        context: stubQueryContext(),
+        criteria: { relatedDocuments: [{ category, subtype, type }] },
+        documentId: rootDocument.id,
+      });
+
+      const result = await loaderDocuments
+        .iterator()
+        .map(({ document }) => document.id);
+
+      expect(result).toHaveLength(childCount);
+      expect(peakActiveCalls).toBeLessThanOrEqual(10);
+      // And prove parallelism actually happens (not all serial)
+      expect(peakActiveCalls).toBeGreaterThan(1);
+    });
   });
 });

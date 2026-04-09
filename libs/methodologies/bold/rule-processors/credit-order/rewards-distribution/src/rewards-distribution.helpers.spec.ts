@@ -615,15 +615,21 @@ describe('Rewards Distribution Helpers', () => {
       const actors = allTypes.map((actorType) =>
         makeRewardsDistributionActor(actorType),
       );
+
       const sorted = sortRewardsDistributionActors(actors);
 
       expect(sorted).toHaveLength(allTypes.length);
-      expect(sorted[0]!.actorType).toBe(
+      expect(sorted.map((actor) => actor.actorType)).toEqual([
         RewardsDistributionActorType.WASTE_GENERATOR,
-      );
-      expect(sorted.at(-1)!.actorType).toBe(
+        RewardsDistributionActorType.HAULER,
+        RewardsDistributionActorType.PROCESSOR,
+        RewardsDistributionActorType.RECYCLER,
+        RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        RewardsDistributionActorType.INTEGRATOR,
+        RewardsDistributionActorType.METHODOLOGY_AUTHOR,
+        RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
         RewardsDistributionActorType.NETWORK,
-      );
+      ]);
     });
   });
 });
