@@ -1,3 +1,5 @@
+import { isNonZeroPositiveInt } from './is.validators';
+
 export const DEFAULT_FETCH_CONCURRENCY = 10;
 
 /**
@@ -27,9 +29,11 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
   fetchOne: (task: Task, index: number) => Promise<Value>,
   concurrency: number,
 ): AsyncGenerator<Readonly<{ index: number; task: Task; value: Value }>> {
-  if (!Number.isInteger(concurrency) || concurrency < 1) {
+  const receivedConcurrency: number = concurrency;
+
+  if (!isNonZeroPositiveInt(concurrency)) {
     throw new RangeError(
-      `boundedParallelFetchInOrder: concurrency must be a positive integer, received ${concurrency}`,
+      `boundedParallelFetchInOrder: concurrency must be a positive integer, received ${receivedConcurrency}`,
     );
   }
 

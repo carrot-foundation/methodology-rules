@@ -17,14 +17,10 @@ import type {
 // Canonical actor order for rendering rewards distributions in downstream
 // consumers. Keep this Record in sync with the downstream canonical order.
 //
-// NOTE: RewardsDistributionActorType is inferred from a Zod enum whose values
-// are cast to [string, ...string[]], so at the type level it is `string` and
-// this Record is not compile-time exhaustive. The runtime guarantees that every
-// actor type has an entry come from: (a) upstream Zod validation on document
-// events, which narrows the set of actual values to the 9 enum members; and
-// (b) the `assigns a sort order to every RewardsDistributionActorType` test,
-// which iterates Object.values(RewardsDistributionActorType) and verifies
-// every one is sortable by this table.
+// RewardsDistributionActorType is a Zod-enum-inferred string, so this Record
+// is not compile-time exhaustive. Runtime exhaustiveness is guaranteed by
+// upstream Zod validation on document events and the completeness test in
+// rewards-distribution.helpers.spec.ts.
 
 const ACTOR_TYPE_SORT_ORDER: Record<RewardsDistributionActorType, number> = {
   [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL]: 5,
@@ -39,7 +35,7 @@ const ACTOR_TYPE_SORT_ORDER: Record<RewardsDistributionActorType, number> = {
 };
 
 export const sortRewardsDistributionActors = (
-  actors: readonly RewardsDistributionActor[],
+  actors: Iterable<RewardsDistributionActor>,
 ): RewardsDistributionActor[] =>
   [...actors].sort((a, b) => {
     // Non-null assertions: upstream Zod validation + the completeness test
@@ -266,7 +262,7 @@ export const calculateRewardsDistribution = (
   });
 
   return {
-    actors: sortRewardsDistributionActors([...actors.values()]),
+    actors: sortRewardsDistributionActors(actors.values()),
     creditUnitPrice: creditUnitPrice.toString(),
     massIDCertificateTotalValue: massIDCertificateTotalValue.toString(),
     remainder: {
