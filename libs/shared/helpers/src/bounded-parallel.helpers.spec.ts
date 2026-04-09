@@ -377,4 +377,34 @@ describe('boundedParallelFetchInOrder', () => {
     expect(result.map((r) => r.value)).toEqual([1, 2, 3]);
     expect(fetchOne).toHaveBeenCalledTimes(3);
   });
+
+  it('accepts undefined as a valid Task and undefined as a valid Value', async () => {
+    // Regression test: the primitive must not use value-based `=== undefined`
+    // guards for its bounds/presence checks, because that would reject valid
+    // undefined tasks or undefined fetch results when Task/Value include
+    // undefined in their type.
+    const tasks: Array<number | undefined> = [undefined, 1, undefined, 2];
+
+    const fetchOne = (task: number | undefined): Promise<string | undefined> =>
+      task === undefined
+        ? Promise.resolve(undefined)
+        : Promise.resolve(`v${task}`);
+
+    const result = await collect(
+      boundedParallelFetchInOrder<number | undefined, string | undefined>(
+        tasks,
+        fetchOne,
+        10,
+      ),
+    );
+
+    expect(result).toHaveLength(4);
+    expect(result.map((r) => r.task)).toEqual([undefined, 1, undefined, 2]);
+    expect(result.map((r) => r.value)).toEqual([
+      undefined,
+      'v1',
+      undefined,
+      'v2',
+    ]);
+  });
 });

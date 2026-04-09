@@ -14,8 +14,8 @@ import type {
   RuleSubject,
 } from './rewards-distribution.types';
 
-// Canonical actor order — mirrors smaug's palantir/helpers/src/helpers.ts
-// ACTOR_TYPE_SORT_ORDER. Keep in sync with that file when it changes.
+// Canonical actor order for rendering rewards distributions in downstream
+// consumers. Keep this Record in sync with the downstream canonical order.
 //
 // NOTE: RewardsDistributionActorType is inferred from a Zod enum whose values
 // are cast to [string, ...string[]], so at the type level it is `string` and

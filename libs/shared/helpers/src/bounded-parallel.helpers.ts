@@ -61,16 +61,11 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
 
   const fetchAndSettle = async (taskIndex: number): Promise<void> => {
     try {
-      const task = tasks[taskIndex];
-
-      /* v8 ignore start -- invariant: taskIndex always < tasks.length when dispatched */
-      if (task === undefined) {
-        throw new Error(
-          `boundedParallelFetchInOrder invariant violation: tasks[${taskIndex}] is undefined`,
-        );
-      }
-      /* v8 ignore stop */
-
+      // The dispatch loop only fires when taskIndex < tasks.length, so the
+      // index is always in bounds. The `as Task` cast preserves Task's full
+      // type (including `undefined` if Task is `T | undefined`), which a
+      // value-based `=== undefined` check would incorrectly reject.
+      const task = tasks[taskIndex] as Task;
       const value = await fetchOne(task, taskIndex);
 
       inFlightCount -= 1;
@@ -79,9 +74,8 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
     } catch (error: unknown) {
       inFlightCount -= 1;
 
-      if (fatalError === undefined) {
-        fatalError = { error };
-      }
+      // Preserve the first error on concurrent rejections.
+      fatalError ??= { error };
 
       notifyAllWaiters();
     }
@@ -124,15 +118,12 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
       throw errorAfterAwait.error;
     }
 
-    const value = fetched.get(index);
-
-    /* v8 ignore start -- invariant: fetched always has `index` after notifier fires */
-    if (value === undefined) {
-      throw new Error(
-        `boundedParallelFetchInOrder invariant violation: fetched[${index}] is undefined after await`,
-      );
-    }
-    /* v8 ignore stop */
+    // Walker either skipped the await because `fetched.has(index)` was
+    // already true, or awoke from the notifier which is fired immediately
+    // after the `.then` populates `fetched`. Either way, the slot exists.
+    // The `as Value` cast preserves Value's full type (including `undefined`
+    // if Value is `T | undefined`), which a value-based check would reject.
+    const value = fetched.get(index) as Value;
 
     fetched.delete(index);
     dispatch();
