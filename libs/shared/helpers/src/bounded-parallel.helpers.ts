@@ -26,7 +26,13 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
   tasks: readonly Task[],
   fetchOne: (task: Task, index: number) => Promise<Value>,
   concurrency: number,
-): AsyncGenerator<{ index: number; task: Task; value: Value }> {
+): AsyncGenerator<Readonly<{ index: number; task: Task; value: Value }>> {
+  if (!Number.isInteger(concurrency) || concurrency < 1) {
+    throw new RangeError(
+      `boundedParallelFetchInOrder: concurrency must be a positive integer, received ${concurrency}`,
+    );
+  }
+
   const fetched = new Map<number, Value>();
   const notifiers = new Map<number, () => void>();
   let nextDispatch = 0;
@@ -55,7 +61,17 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
 
   const fetchAndSettle = async (taskIndex: number): Promise<void> => {
     try {
-      const value = await fetchOne(tasks[taskIndex]!, taskIndex);
+      const task = tasks[taskIndex];
+
+      /* v8 ignore start -- invariant: taskIndex always < tasks.length when dispatched */
+      if (task === undefined) {
+        throw new Error(
+          `boundedParallelFetchInOrder invariant violation: tasks[${taskIndex}] is undefined`,
+        );
+      }
+      /* v8 ignore stop */
+
+      const value = await fetchOne(task, taskIndex);
 
       inFlightCount -= 1;
       fetched.set(taskIndex, value);
@@ -108,7 +124,15 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
       throw errorAfterAwait.error;
     }
 
-    const value = fetched.get(index) as Value;
+    const value = fetched.get(index);
+
+    /* v8 ignore start -- invariant: fetched always has `index` after notifier fires */
+    if (value === undefined) {
+      throw new Error(
+        `boundedParallelFetchInOrder invariant violation: fetched[${index}] is undefined after await`,
+      );
+    }
+    /* v8 ignore stop */
 
     fetched.delete(index);
     dispatch();

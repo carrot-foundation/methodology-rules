@@ -596,6 +596,23 @@ describe('Rewards Distribution Helpers', () => {
       ]);
     });
 
+    it('preserves original order when actor type and participant id are identical (stable sort)', () => {
+      const actorA = makeRewardsDistributionActor(
+        RewardsDistributionActorType.HAULER,
+        'same-id',
+      );
+      const actorB = makeRewardsDistributionActor(
+        RewardsDistributionActorType.HAULER,
+        'same-id',
+      );
+
+      const input = [actorA, actorB];
+      const sorted = sortRewardsDistributionActors(input);
+
+      expect(sorted[0]).toBe(actorA);
+      expect(sorted[1]).toBe(actorB);
+    });
+
     it('does not mutate the input array', () => {
       const input = [
         makeRewardsDistributionActor(RewardsDistributionActorType.NETWORK),

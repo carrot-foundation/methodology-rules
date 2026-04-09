@@ -41,8 +41,7 @@ export abstract class BaseDocumentQueryService<
 
     return {
       iterator: () => ({
-        // eslint-disable-next-line no-shadow
-        each: async (callback: (document: Visitor<Document>) => void) => {
+        each: async (callback: (visitor: Visitor<Document>) => void) => {
           await this.loadQueryCriteria({
             callback,
             context,
@@ -50,8 +49,7 @@ export abstract class BaseDocumentQueryService<
             document,
           });
         },
-        // eslint-disable-next-line no-shadow
-        map: async <T>(callback: (document: Visitor<Document>) => T) =>
+        map: async <T>(callback: (visitor: Visitor<Document>) => T) =>
           this.loadQueryCriteria<T>({
             callback,
             context,
@@ -85,8 +83,7 @@ export abstract class BaseDocumentQueryService<
     criteria,
     document,
   }: {
-    // eslint-disable-next-line no-shadow
-    callback: (document: Visitor<Document>) => T;
+    callback: (visitor: Visitor<Document>) => T;
     context: QueryContext;
     criteria: Criteria;
     document: Document;
@@ -95,7 +92,7 @@ export abstract class BaseDocumentQueryService<
 
     const results: T[] = [];
 
-    for (const { criteria: criterion, documentKeys } of connections) {
+    for (const { criteria: connectionCriteria, documentKeys } of connections) {
       // Parallel within each connection, sequential across connections — preserves depth-first traversal order.
       for await (const {
         value: fetchedDocument,
@@ -108,7 +105,7 @@ export abstract class BaseDocumentQueryService<
           ...(await this.processFetchedDocument<T>({
             callback,
             context,
-            criteria: criterion,
+            criteria: connectionCriteria,
             document: fetchedDocument,
           })),
         );
@@ -119,7 +116,7 @@ export abstract class BaseDocumentQueryService<
   }
 
   protected abstract processFetchedDocument<T = void>(parameters: {
-    callback: (document: Visitor<Document>) => T;
+    callback: (visitor: Visitor<Document>) => T;
     context: QueryContext;
     criteria: Criteria;
     document: Document;

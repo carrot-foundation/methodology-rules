@@ -14,7 +14,7 @@ import {
   BoldDocumentSubtype,
   BoldDocumentType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { stubEnumValue } from '@carrot-fndn/shared/testing';
+import { createDeferred, stubEnumValue } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import type { DocumentQueryCriteria } from './document-query.service.types';
@@ -585,23 +585,6 @@ describe('DocumenQueryService', () => {
   });
 
   describe('parallel fetch semantics', () => {
-    interface Deferred<T> {
-      promise: Promise<T>;
-      reject: (error: unknown) => void;
-      resolve: (value: T) => void;
-    }
-
-    const createDeferred = <T>(): Deferred<T> => {
-      let resolve!: (value: T) => void;
-      let reject!: (error: unknown) => void;
-      const promise = new Promise<T>((_resolve, _reject) => {
-        resolve = _resolve;
-        reject = _reject;
-      });
-
-      return { promise, reject, resolve };
-    };
-
     it('yields related documents in input order even when loader resolutions arrive out of order', async () => {
       const { category, subtype, type } = stubDocumentRelation();
       const rootDocument = stubDocument();
@@ -678,6 +661,15 @@ describe('DocumenQueryService', () => {
 
         return document.id;
       });
+
+      // Give the primitive a chance to dispatch all three fetches.
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      // Prove the fetches were kicked off in parallel: all three loader
+      // calls (root + 3 children) should have been initiated already.
+      expect(provideDocumentLoaderService.load).toHaveBeenCalledTimes(4);
 
       // Resolve in reverse order to exercise out-of-order semantics
       child2Deferred.resolve(

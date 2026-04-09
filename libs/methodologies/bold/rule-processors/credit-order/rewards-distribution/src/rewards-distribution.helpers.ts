@@ -42,9 +42,8 @@ export const sortRewardsDistributionActors = (
   actors: readonly RewardsDistributionActor[],
 ): RewardsDistributionActor[] =>
   [...actors].sort((a, b) => {
-    // Non-null assertions are safe: Record<RewardsDistributionActorType, number>
-    // guarantees every enum value has an entry.
-
+    // Non-null assertions: upstream Zod validation + the completeness test
+    // guarantee every actorType has an entry at runtime.
     const orderA = ACTOR_TYPE_SORT_ORDER[a.actorType]!;
 
     const orderB = ACTOR_TYPE_SORT_ORDER[b.actorType]!;

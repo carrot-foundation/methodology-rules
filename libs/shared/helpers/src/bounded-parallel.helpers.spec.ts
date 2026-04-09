@@ -1,24 +1,9 @@
+import { createDeferred } from '@carrot-fndn/shared/testing';
+
 import {
   boundedParallelFetchInOrder,
   DEFAULT_FETCH_CONCURRENCY,
 } from './bounded-parallel.helpers';
-
-interface Deferred<T> {
-  promise: Promise<T>;
-  reject: (error: unknown) => void;
-  resolve: (value: T) => void;
-}
-
-const createDeferred = <T>(): Deferred<T> => {
-  let resolve!: (value: T) => void;
-  let reject!: (error: unknown) => void;
-  const promise = new Promise<T>((_resolve, _reject) => {
-    resolve = _resolve;
-    reject = _reject;
-  });
-
-  return { promise, reject, resolve };
-};
 
 const flushMicrotasks = async (): Promise<void> => {
   // Several awaits to allow chained .then handlers to run.
@@ -49,6 +34,21 @@ describe('boundedParallelFetchInOrder', () => {
   it('exports a default concurrency constant of 10', () => {
     expect(DEFAULT_FETCH_CONCURRENCY).toBe(10);
   });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
+    'throws a RangeError when concurrency is %s',
+    async (invalidConcurrency) => {
+      await expect(
+        collect(
+          boundedParallelFetchInOrder(
+            [1, 2, 3],
+            (t) => Promise.resolve(t),
+            invalidConcurrency,
+          ),
+        ),
+      ).rejects.toBeInstanceOf(RangeError);
+    },
+  );
 
   it('yields nothing for an empty task list', async () => {
     const fetchOne = vi.fn();
@@ -194,14 +194,22 @@ describe('boundedParallelFetchInOrder', () => {
       (_task: number, index: number) => deferreds[index]!.promise,
     );
 
-    // Fire and forget — we're asserting call counts while it's still pending.
-    void collect(
-      boundedParallelFetchInOrder(
-        Array.from({ length: 15 }, (_, index) => index),
-        fetchOne,
-        10,
-      ),
-    );
+    // Track the background collect so we can await it at the end; any error
+    // is intentionally swallowed here — the test only cares about call counts.
+    let backgroundError: unknown;
+    const backgroundPromise = (async () => {
+      try {
+        await collect(
+          boundedParallelFetchInOrder(
+            Array.from({ length: 15 }, (_, index) => index),
+            fetchOne,
+            10,
+          ),
+        );
+      } catch (error: unknown) {
+        backgroundError = error;
+      }
+    })();
 
     await flushMicrotasks();
     expect(fetchOne).toHaveBeenCalledTimes(10);
@@ -227,6 +235,8 @@ describe('boundedParallelFetchInOrder', () => {
       deferreds[index]!.resolve(`value-${index}`);
     }
     await flushMicrotasks();
+    await backgroundPromise;
+    expect(backgroundError).toBeUndefined();
   });
 
   it('fires notifier.get(i) when a waiter is present', async () => {
@@ -339,5 +349,32 @@ describe('boundedParallelFetchInOrder', () => {
 
     // Walker now checks fatalError at loop start (first guard) and throws
     await expect(gen.next()).rejects.toBe(error);
+  });
+
+  it('handles concurrency === 1 (serial degenerate case)', async () => {
+    const order: number[] = [];
+    const fetchOne = (task: number): Promise<number> => {
+      order.push(task);
+
+      return Promise.resolve(task);
+    };
+
+    const result = await collect(
+      boundedParallelFetchInOrder([10, 20, 30], fetchOne, 1),
+    );
+
+    expect(result.map((r) => r.value)).toEqual([10, 20, 30]);
+    expect(order).toEqual([10, 20, 30]);
+  });
+
+  it('handles concurrency > tasks.length without dispatching extra fetches', async () => {
+    const fetchOne = vi.fn((task: number) => Promise.resolve(task));
+
+    const result = await collect(
+      boundedParallelFetchInOrder([1, 2, 3], fetchOne, 10),
+    );
+
+    expect(result.map((r) => r.value)).toEqual([1, 2, 3]);
+    expect(fetchOne).toHaveBeenCalledTimes(3);
   });
 });

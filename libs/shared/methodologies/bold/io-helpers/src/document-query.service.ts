@@ -148,8 +148,7 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     criteria,
     document,
   }: {
-    // eslint-disable-next-line no-shadow
-    callback: (document: Visitor<BoldDocument>) => T;
+    callback: (visitor: Visitor<BoldDocument>) => T;
     context: QueryContext;
     criteria: DocumentQueryCriteria;
     document: BoldDocument;
