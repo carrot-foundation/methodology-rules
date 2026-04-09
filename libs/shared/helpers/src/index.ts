@@ -1,6 +1,7 @@
 export * from './address.helpers';
 export * from './array.helpers';
 export * from './assert.validators';
+export * from './bounded-parallel.helpers';
 export * from './calculate-distance-between-coordinates';
 export * from './common.helpers';
 export * from './document.helpers';
