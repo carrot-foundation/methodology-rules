@@ -60,6 +60,12 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     super(documentFetcher, documentFetcher);
   }
 
+  protected async fetchDocument(
+    documentKey: DocumentKey,
+  ): Promise<BoldDocument> {
+    return this.documentFetcher.fetch(documentKey);
+  }
+
   protected getConnectionKeys(
     criteria: DocumentQueryCriteria,
     document: BoldDocument,
@@ -136,27 +142,26 @@ export class DocumentQueryService extends BaseDocumentQueryService<
     };
   }
 
-  protected async loadDocument<T = void>({
+  protected async processFetchedDocument<T = void>({
     callback,
     context,
     criteria,
-    documentKey,
+    document,
   }: {
+    // eslint-disable-next-line no-shadow
     callback: (document: Visitor<BoldDocument>) => T;
     context: QueryContext;
     criteria: DocumentQueryCriteria;
-    documentKey: DocumentKey;
+    document: BoldDocument;
   }): Promise<T[]> {
-    const result = [];
-
-    const document = await this.documentFetcher.fetch(documentKey);
+    const result: T[] = [];
 
     if (!isRelatedDocumentCriteria(criteria)) {
       result.push(callback({ document }));
     }
 
     result.push(
-      ...(await this.loadQueryCriteria({
+      ...(await this.loadQueryCriteria<T>({
         callback,
         context,
         criteria,

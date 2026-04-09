@@ -1,5 +1,10 @@
 import type { AnyObject } from '@carrot-fndn/shared/types';
 
+import {
+  boundedParallelFetchInOrder,
+  DEFAULT_FETCH_CONCURRENCY,
+} from '@carrot-fndn/shared/helpers';
+
 import type {
   ConnectionKeys,
   DocumentFetcher,
@@ -58,6 +63,8 @@ export abstract class BaseDocumentQueryService<
     };
   }
 
+  protected abstract fetchDocument(documentKey: DocumentKey): Promise<Document>;
+
   protected abstract getConnectionKeys(
     criteria: Criteria,
     document: Document,
@@ -72,18 +79,6 @@ export abstract class BaseDocumentQueryService<
     documentId: string;
   }): DocumentKey;
 
-  protected abstract loadDocument<T = void>({
-    callback,
-    context,
-    criteria,
-    documentKey,
-  }: {
-    callback: (document: Visitor<Document>) => T;
-    context: QueryContext;
-    criteria: Criteria;
-    documentKey: DocumentKey;
-  }): Promise<T[]>;
-
   protected async loadQueryCriteria<T = void>({
     callback,
     context,
@@ -96,23 +91,36 @@ export abstract class BaseDocumentQueryService<
     criteria: Criteria;
     document: Document;
   }): Promise<T[]> {
-    const result: T[] = [];
-
     const connections = this.getConnectionKeys(criteria, document, context);
 
-    for (const { criteria: connectionCriteria, documentKeys } of connections) {
-      for (const documentKey of documentKeys) {
-        result.push(
-          ...(await this.loadDocument({
+    const results: T[] = [];
+
+    for (const { criteria: criterion, documentKeys } of connections) {
+      for await (const {
+        value: fetchedDocument,
+      } of boundedParallelFetchInOrder(
+        documentKeys,
+        async (documentKey: DocumentKey) => this.fetchDocument(documentKey),
+        DEFAULT_FETCH_CONCURRENCY,
+      )) {
+        results.push(
+          ...(await this.processFetchedDocument<T>({
             callback,
             context,
-            criteria: connectionCriteria,
-            documentKey,
+            criteria: criterion,
+            document: fetchedDocument,
           })),
         );
       }
     }
 
-    return result;
+    return results;
   }
+
+  protected abstract processFetchedDocument<T = void>(parameters: {
+    callback: (document: Visitor<Document>) => T;
+    context: QueryContext;
+    criteria: Criteria;
+    document: Document;
+  }): Promise<T[]>;
 }
