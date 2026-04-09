@@ -10,8 +10,40 @@ import type {
   Remainder,
   ResultContentsWithMassIDCertificateValue,
   RewardsDistribution,
+  RewardsDistributionActor,
   RuleSubject,
 } from './rewards-distribution.types';
+
+// Canonical actor order — mirrors smaug/libs/shared/palantir/helpers/src/helpers.ts
+// ACTOR_TYPE_SORT_ORDER. Keep in sync with that file when it changes.
+const ACTOR_TYPE_SORT_ORDER: ReadonlyMap<RewardsDistributionActorType, number> =
+  new Map([
+    [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL, 5],
+    [RewardsDistributionActorType.HAULER, 2],
+    [RewardsDistributionActorType.INTEGRATOR, 6],
+    [RewardsDistributionActorType.METHODOLOGY_AUTHOR, 7],
+    [RewardsDistributionActorType.METHODOLOGY_DEVELOPER, 8],
+    [RewardsDistributionActorType.NETWORK, 9],
+    [RewardsDistributionActorType.PROCESSOR, 3],
+    [RewardsDistributionActorType.RECYCLER, 4],
+    [RewardsDistributionActorType.WASTE_GENERATOR, 1],
+  ]);
+
+export const sortRewardsDistributionActors = (
+  actors: readonly RewardsDistributionActor[],
+): RewardsDistributionActor[] =>
+  [...actors].sort((a, b) => {
+    const orderA =
+      ACTOR_TYPE_SORT_ORDER.get(a.actorType) ?? Number.MAX_SAFE_INTEGER;
+    const orderB =
+      ACTOR_TYPE_SORT_ORDER.get(b.actorType) ?? Number.MAX_SAFE_INTEGER;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    return a.participant.id.localeCompare(b.participant.id);
+  });
 
 export const formatPercentage = (percentage: BigNumber): BigNumber =>
   percentage.dividedBy(100);
@@ -223,7 +255,7 @@ export const calculateRewardsDistribution = (
   });
 
   return {
-    actors: [...actors.values()],
+    actors: sortRewardsDistributionActors([...actors.values()]),
     creditUnitPrice: creditUnitPrice.toString(),
     massIDCertificateTotalValue: massIDCertificateTotalValue.toString(),
     remainder: {
