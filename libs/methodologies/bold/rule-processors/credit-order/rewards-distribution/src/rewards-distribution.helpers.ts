@@ -16,32 +16,37 @@ import type {
 
 // Canonical actor order — mirrors smaug/libs/shared/palantir/helpers/src/helpers.ts
 // ACTOR_TYPE_SORT_ORDER. Keep in sync with that file when it changes.
-const ACTOR_TYPE_SORT_ORDER: ReadonlyMap<RewardsDistributionActorType, number> =
-  new Map([
-    [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL, 5],
-    [RewardsDistributionActorType.HAULER, 2],
-    [RewardsDistributionActorType.INTEGRATOR, 6],
-    [RewardsDistributionActorType.METHODOLOGY_AUTHOR, 7],
-    [RewardsDistributionActorType.METHODOLOGY_DEVELOPER, 8],
-    [RewardsDistributionActorType.NETWORK, 9],
-    [RewardsDistributionActorType.PROCESSOR, 3],
-    [RewardsDistributionActorType.RECYCLER, 4],
-    [RewardsDistributionActorType.WASTE_GENERATOR, 1],
-  ]);
+// Using a Record<Enum, number> gives compile-time guarantees that every actor
+// type has a sort order, eliminating the need for a runtime fallback.
+
+const ACTOR_TYPE_SORT_ORDER: Record<RewardsDistributionActorType, number> = {
+  [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL]: 5,
+  [RewardsDistributionActorType.HAULER]: 2,
+  [RewardsDistributionActorType.INTEGRATOR]: 6,
+  [RewardsDistributionActorType.METHODOLOGY_AUTHOR]: 7,
+  [RewardsDistributionActorType.METHODOLOGY_DEVELOPER]: 8,
+  [RewardsDistributionActorType.NETWORK]: 9,
+  [RewardsDistributionActorType.PROCESSOR]: 3,
+  [RewardsDistributionActorType.RECYCLER]: 4,
+  [RewardsDistributionActorType.WASTE_GENERATOR]: 1,
+};
 
 export const sortRewardsDistributionActors = (
   actors: readonly RewardsDistributionActor[],
 ): RewardsDistributionActor[] =>
   [...actors].sort((a, b) => {
-    const orderA =
-      ACTOR_TYPE_SORT_ORDER.get(a.actorType) ?? Number.MAX_SAFE_INTEGER;
-    const orderB =
-      ACTOR_TYPE_SORT_ORDER.get(b.actorType) ?? Number.MAX_SAFE_INTEGER;
+    // Non-null assertions are safe: Record<RewardsDistributionActorType, number>
+    // guarantees every enum value has an entry.
+
+    const orderA = ACTOR_TYPE_SORT_ORDER[a.actorType]!;
+
+    const orderB = ACTOR_TYPE_SORT_ORDER[b.actorType]!;
 
     if (orderA !== orderB) {
       return orderA - orderB;
     }
 
+    // Tiebreak within a type: lexicographic by participant id.
     return a.participant.id.localeCompare(b.participant.id);
   });
 

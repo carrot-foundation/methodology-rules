@@ -625,24 +625,5 @@ describe('Rewards Distribution Helpers', () => {
         RewardsDistributionActorType.NETWORK,
       );
     });
-
-    it('places actors with unknown type at the end, sorted by participant id', () => {
-      const unknownType = 'Unknown Actor' as RewardsDistributionActorType;
-      const input = [
-        makeRewardsDistributionActor(unknownType, 'z-participant'),
-        makeRewardsDistributionActor(
-          RewardsDistributionActorType.WASTE_GENERATOR,
-        ),
-        makeRewardsDistributionActor(unknownType, 'a-participant'),
-      ];
-
-      const sorted = sortRewardsDistributionActors(input);
-
-      expect(sorted[0]!.actorType).toBe(
-        RewardsDistributionActorType.WASTE_GENERATOR,
-      );
-      expect(sorted[1]!.participant.id).toBe('a-participant');
-      expect(sorted[2]!.participant.id).toBe('z-participant');
-    });
   });
 });
