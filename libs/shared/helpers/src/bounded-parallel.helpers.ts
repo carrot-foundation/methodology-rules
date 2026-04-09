@@ -45,7 +45,7 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
     notifiers.clear();
   };
 
-  const runFetch = async (taskIndex: number): Promise<void> => {
+  const fetchAndSettle = async (taskIndex: number): Promise<void> => {
     try {
       const value = await fetchOne(tasks[taskIndex]!, taskIndex);
 
@@ -74,13 +74,14 @@ export async function* boundedParallelFetchInOrder<Task, Value>(
       nextDispatch += 1;
       inFlightCount += 1;
 
-      void runFetch(taskIndex);
+      void fetchAndSettle(taskIndex);
     }
   };
 
   dispatch();
 
   for (const [index, task] of tasks.entries()) {
+    // Error captured before this iteration — throw without waiting.
     if (fatalError !== undefined) {
       throw fatalError.error;
     }

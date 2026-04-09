@@ -42,7 +42,7 @@ const collect = async <Task, Value>(
 const fetchStringByTask = (task: string): Promise<string> =>
   Promise.resolve(`value-${task}`);
 
-const fetchNumberByValue = (task: number): Promise<string> =>
+const fetchStringByNumber = (task: number): Promise<string> =>
   Promise.resolve(`value-${task}`);
 
 describe('boundedParallelFetchInOrder', () => {
@@ -83,7 +83,7 @@ describe('boundedParallelFetchInOrder', () => {
 
   it('yields tasks in input order when task count exceeds concurrency', async () => {
     const tasks = Array.from({ length: 25 }, (_, index) => index);
-    const fetchOne = vi.fn(fetchNumberByValue);
+    const fetchOne = vi.fn(fetchStringByNumber);
 
     const result = await collect(
       boundedParallelFetchInOrder(tasks, fetchOne, 10),
@@ -216,7 +216,7 @@ describe('boundedParallelFetchInOrder', () => {
     // Resolutions that land before the walker gets to them exercise the
     // "no waiter registered" branch in the fetch handler.
     const result = await collect(
-      boundedParallelFetchInOrder([0, 1, 2], fetchNumberByValue, 10),
+      boundedParallelFetchInOrder([0, 1, 2], fetchStringByNumber, 10),
     );
 
     expect(result.map((r) => r.value)).toEqual([
