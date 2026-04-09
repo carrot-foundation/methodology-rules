@@ -96,11 +96,12 @@ export abstract class BaseDocumentQueryService<
     const results: T[] = [];
 
     for (const { criteria: criterion, documentKeys } of connections) {
+      // Parallel within each connection, sequential across connections — preserves depth-first traversal order.
       for await (const {
         value: fetchedDocument,
       } of boundedParallelFetchInOrder(
         documentKeys,
-        async (documentKey: DocumentKey) => this.fetchDocument(documentKey),
+        (documentKey: DocumentKey) => this.fetchDocument(documentKey),
         DEFAULT_FETCH_CONCURRENCY,
       )) {
         results.push(
