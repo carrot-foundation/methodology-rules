@@ -583,4 +583,157 @@ describe('DocumenQueryService', () => {
       expect(eventRelationship).toBeUndefined();
     });
   });
+
+  describe('parallel fetch semantics', () => {
+    interface Deferred<T> {
+      promise: Promise<T>;
+      reject: (error: unknown) => void;
+      resolve: (value: T) => void;
+    }
+
+    const createDeferred = <T>(): Deferred<T> => {
+      let resolve!: (value: T) => void;
+      let reject!: (error: unknown) => void;
+      const promise = new Promise<T>((_resolve, _reject) => {
+        resolve = _resolve;
+        reject = _reject;
+      });
+
+      return { promise, reject, resolve };
+    };
+
+    it('yields related documents in input order even when loader resolutions arrive out of order', async () => {
+      const { category, subtype, type } = stubDocumentRelation();
+      const rootDocument = stubDocument();
+      const child0 = stubDocument();
+      const child1 = stubDocument();
+      const child2 = stubDocument();
+
+      rootDocument.externalEvents = [
+        stubDocumentEvent({
+          relatedDocument: {
+            category,
+            documentId: child0.id,
+            subtype,
+            type,
+          },
+        }),
+        stubDocumentEvent({
+          relatedDocument: {
+            category,
+            documentId: child1.id,
+            subtype,
+            type,
+          },
+        }),
+        stubDocumentEvent({
+          relatedDocument: {
+            category,
+            documentId: child2.id,
+            subtype,
+            type,
+          },
+        }),
+      ];
+
+      const child0Deferred = createDeferred<DocumentEntity<BoldDocument>>();
+      const child1Deferred = createDeferred<DocumentEntity<BoldDocument>>();
+      const child2Deferred = createDeferred<DocumentEntity<BoldDocument>>();
+
+      vi.spyOn(provideDocumentLoaderService, 'load').mockImplementation(
+        ({ key }) => {
+          if (key.includes(rootDocument.id)) {
+            return Promise.resolve(
+              stubDocumentEntity({
+                document: rootDocument,
+              }) as DocumentEntity<BoldDocument>,
+            );
+          }
+
+          if (key.includes(child0.id)) {
+            return child0Deferred.promise;
+          }
+
+          if (key.includes(child1.id)) {
+            return child1Deferred.promise;
+          }
+
+          if (key.includes(child2.id)) {
+            return child2Deferred.promise;
+          }
+
+          return Promise.reject(new Error(`Unexpected loader key: ${key}`));
+        },
+      );
+
+      const loaderDocuments = await loadDocuments.load({
+        context: stubQueryContext(),
+        criteria: { relatedDocuments: [{ category, subtype, type }] },
+        documentId: rootDocument.id,
+      });
+
+      const visited: string[] = [];
+      const mapPromise = loaderDocuments.iterator().map(({ document }) => {
+        visited.push(document.id);
+
+        return document.id;
+      });
+
+      // Resolve in reverse order to exercise out-of-order semantics
+      child2Deferred.resolve(
+        stubDocumentEntity({
+          document: child2,
+        }) as DocumentEntity<BoldDocument>,
+      );
+      child1Deferred.resolve(
+        stubDocumentEntity({
+          document: child1,
+        }) as DocumentEntity<BoldDocument>,
+      );
+      child0Deferred.resolve(
+        stubDocumentEntity({
+          document: child0,
+        }) as DocumentEntity<BoldDocument>,
+      );
+
+      const result = await mapPromise;
+
+      // Callback invocation order preserves input order
+      expect(visited).toEqual([child0.id, child1.id, child2.id]);
+      // Result array preserves input order
+      expect(result).toEqual([child0.id, child1.id, child2.id]);
+    });
+
+    it('propagates a loader rejection through .map()', async () => {
+      const { category, subtype, type } = stubDocumentRelation();
+      const rootDocument = stubDocument();
+      const child = stubDocument();
+
+      rootDocument.externalEvents = [
+        stubDocumentEvent({
+          relatedDocument: { category, documentId: child.id, subtype, type },
+        }),
+      ];
+
+      const error = new Error('S3 exploded');
+
+      vi.spyOn(provideDocumentLoaderService, 'load')
+        .mockResolvedValueOnce(
+          stubDocumentEntity({
+            document: rootDocument,
+          }) as DocumentEntity<BoldDocument>,
+        )
+        .mockRejectedValueOnce(error);
+
+      const loaderDocuments = await loadDocuments.load({
+        context: stubQueryContext(),
+        criteria: { relatedDocuments: [{ category, subtype, type }] },
+        documentId: rootDocument.id,
+      });
+
+      await expect(
+        loaderDocuments.iterator().map(({ document }) => document.id),
+      ).rejects.toThrow('S3 exploded');
+    });
+  });
 });
