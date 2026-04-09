@@ -1,5 +1,10 @@
 import type { AnyObject } from '@carrot-fndn/shared/types';
 
+import {
+  boundedParallelFetchInOrder,
+  DEFAULT_FETCH_CONCURRENCY,
+} from '@carrot-fndn/shared/helpers';
+
 import type {
   ConnectionKeys,
   DocumentFetcher,
@@ -36,8 +41,7 @@ export abstract class BaseDocumentQueryService<
 
     return {
       iterator: () => ({
-        // eslint-disable-next-line no-shadow
-        each: async (callback: (document: Visitor<Document>) => void) => {
+        each: async (callback: (visitor: Visitor<Document>) => void) => {
           await this.loadQueryCriteria({
             callback,
             context,
@@ -45,8 +49,7 @@ export abstract class BaseDocumentQueryService<
             document,
           });
         },
-        // eslint-disable-next-line no-shadow
-        map: async <T>(callback: (document: Visitor<Document>) => T) =>
+        map: async <T>(callback: (visitor: Visitor<Document>) => T) =>
           this.loadQueryCriteria<T>({
             callback,
             context,
@@ -57,6 +60,8 @@ export abstract class BaseDocumentQueryService<
       rootDocument: document,
     };
   }
+
+  protected abstract fetchDocument(documentKey: DocumentKey): Promise<Document>;
 
   protected abstract getConnectionKeys(
     criteria: Criteria,
@@ -72,47 +77,48 @@ export abstract class BaseDocumentQueryService<
     documentId: string;
   }): DocumentKey;
 
-  protected abstract loadDocument<T = void>({
-    callback,
-    context,
-    criteria,
-    documentKey,
-  }: {
-    callback: (document: Visitor<Document>) => T;
-    context: QueryContext;
-    criteria: Criteria;
-    documentKey: DocumentKey;
-  }): Promise<T[]>;
-
   protected async loadQueryCriteria<T = void>({
     callback,
     context,
     criteria,
     document,
   }: {
-    // eslint-disable-next-line no-shadow
-    callback: (document: Visitor<Document>) => T;
+    callback: (visitor: Visitor<Document>) => T;
     context: QueryContext;
     criteria: Criteria;
     document: Document;
   }): Promise<T[]> {
-    const result: T[] = [];
-
     const connections = this.getConnectionKeys(criteria, document, context);
 
+    const results: T[] = [];
+
     for (const { criteria: connectionCriteria, documentKeys } of connections) {
-      for (const documentKey of documentKeys) {
-        result.push(
-          ...(await this.loadDocument({
+      // Parallel within each connection, sequential across connections — preserves depth-first traversal order.
+      for await (const {
+        value: fetchedDocument,
+      } of boundedParallelFetchInOrder(
+        documentKeys,
+        (documentKey: DocumentKey) => this.fetchDocument(documentKey),
+        DEFAULT_FETCH_CONCURRENCY,
+      )) {
+        results.push(
+          ...(await this.processFetchedDocument<T>({
             callback,
             context,
             criteria: connectionCriteria,
-            documentKey,
+            document: fetchedDocument,
           })),
         );
       }
     }
 
-    return result;
+    return results;
   }
+
+  protected abstract processFetchedDocument<T = void>(parameters: {
+    callback: (visitor: Visitor<Document>) => T;
+    context: QueryContext;
+    criteria: Criteria;
+    document: Document;
+  }): Promise<T[]>;
 }

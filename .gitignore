@@ -52,6 +52,7 @@ temp-rules-metadata.json
 
 # Plans
 docs/plans/
+docs/superpowers/
 
 # Claude
 .claude/projects

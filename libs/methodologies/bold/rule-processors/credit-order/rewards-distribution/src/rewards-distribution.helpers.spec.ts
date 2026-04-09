@@ -23,7 +23,20 @@ import {
   formatDecimalPlaces,
   formatPercentage,
   getAggregateParticipantKey,
+  sortRewardsDistributionActors,
 } from './rewards-distribution.helpers';
+
+const makeRewardsDistributionActor = (
+  actorType: RewardsDistributionActorType,
+  participantId = 'participant-1',
+): RewardsDistributionActor => ({
+  actorType,
+  address: { id: 'address-1' },
+  amount: '10',
+  participant: { id: participantId, name: 'Test Participant' },
+  percentage: '10',
+  preserveSensitiveData: undefined,
+});
 
 describe('Rewards Distribution Helpers', () => {
   const creditUnitPrice = new BigNumber(5.23);
@@ -518,6 +531,122 @@ describe('Rewards Distribution Helpers', () => {
 
       expect(actors.get(participantType1)?.actorType).toEqual(actorType1);
       expect(actors.get(participantType2)?.actorType).toEqual(actorType2);
+    });
+  });
+
+  describe('sortRewardsDistributionActors', () => {
+    it('sorts actors into the canonical order regardless of input order', () => {
+      const input = [
+        makeRewardsDistributionActor(RewardsDistributionActorType.NETWORK),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        ),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.WASTE_GENERATOR,
+        ),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
+        ),
+        makeRewardsDistributionActor(RewardsDistributionActorType.HAULER),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.METHODOLOGY_AUTHOR,
+        ),
+        makeRewardsDistributionActor(RewardsDistributionActorType.PROCESSOR),
+        makeRewardsDistributionActor(RewardsDistributionActorType.INTEGRATOR),
+        makeRewardsDistributionActor(RewardsDistributionActorType.RECYCLER),
+      ];
+
+      const sorted = sortRewardsDistributionActors(input);
+
+      expect(sorted.map((actor) => actor.actorType)).toEqual([
+        RewardsDistributionActorType.WASTE_GENERATOR,
+        RewardsDistributionActorType.HAULER,
+        RewardsDistributionActorType.PROCESSOR,
+        RewardsDistributionActorType.RECYCLER,
+        RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        RewardsDistributionActorType.INTEGRATOR,
+        RewardsDistributionActorType.METHODOLOGY_AUTHOR,
+        RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
+        RewardsDistributionActorType.NETWORK,
+      ]);
+    });
+
+    it('breaks ties between actors of the same type by participant id', () => {
+      const input = [
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.WASTE_GENERATOR,
+          'zebra',
+        ),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.WASTE_GENERATOR,
+          'apple',
+        ),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.WASTE_GENERATOR,
+          'mango',
+        ),
+      ];
+
+      const sorted = sortRewardsDistributionActors(input);
+
+      expect(sorted.map((actor) => actor.participant.id)).toEqual([
+        'apple',
+        'mango',
+        'zebra',
+      ]);
+    });
+
+    it('preserves original order when actor type and participant id are identical (stable sort)', () => {
+      const actorA = makeRewardsDistributionActor(
+        RewardsDistributionActorType.HAULER,
+        'same-id',
+      );
+      const actorB = makeRewardsDistributionActor(
+        RewardsDistributionActorType.HAULER,
+        'same-id',
+      );
+
+      const input = [actorA, actorB];
+      const sorted = sortRewardsDistributionActors(input);
+
+      expect(sorted[0]).toBe(actorA);
+      expect(sorted[1]).toBe(actorB);
+    });
+
+    it('does not mutate the input array', () => {
+      const input = [
+        makeRewardsDistributionActor(RewardsDistributionActorType.NETWORK),
+        makeRewardsDistributionActor(
+          RewardsDistributionActorType.WASTE_GENERATOR,
+        ),
+      ];
+      const originalOrder = input.map((actor) => actor.actorType);
+
+      sortRewardsDistributionActors(input);
+
+      expect(input.map((actor) => actor.actorType)).toEqual(originalOrder);
+    });
+
+    it('assigns a sort order to every RewardsDistributionActorType', () => {
+      const allTypes = Object.values(RewardsDistributionActorType);
+      const actors = allTypes.map((actorType) =>
+        makeRewardsDistributionActor(actorType),
+      );
+
+      const sorted = sortRewardsDistributionActors(actors);
+
+      expect(sorted).toHaveLength(allTypes.length);
+      expect(sorted.map((actor) => actor.actorType)).toEqual([
+        RewardsDistributionActorType.WASTE_GENERATOR,
+        RewardsDistributionActorType.HAULER,
+        RewardsDistributionActorType.PROCESSOR,
+        RewardsDistributionActorType.RECYCLER,
+        RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        RewardsDistributionActorType.INTEGRATOR,
+        RewardsDistributionActorType.METHODOLOGY_AUTHOR,
+        RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
+        RewardsDistributionActorType.NETWORK,
+      ]);
     });
   });
 });

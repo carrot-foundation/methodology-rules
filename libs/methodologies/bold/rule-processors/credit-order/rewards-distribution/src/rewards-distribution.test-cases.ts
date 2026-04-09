@@ -199,19 +199,17 @@ const createMultiHaulerRewardsDistribution = (
 ): RewardsDistributionResultContent => {
   const haulerParticipants = [
     {
-      id:
-        massIDActorParticipants.get(HAULER as unknown as MassIDActorType)?.id ??
-        '',
+      id: 'hauler-participant-tera',
       name: 'Tera',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION[HAULER][0],
     },
     {
-      id: faker.string.uuid(),
+      id: 'hauler-participant-transport-y',
       name: 'Transport Y',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION[HAULER][1],
     },
     {
-      id: faker.string.uuid(),
+      id: 'hauler-participant-transport-x',
       name: 'Transport X',
       percentage: MULTI_HAULER_REWARDS_DISTRIBUTION[HAULER][2],
     },
@@ -372,175 +370,61 @@ const createTestDocuments = () => {
 
 const documents = createTestDocuments();
 
+// Compact helper: each tuple is [actorType, amount, percentage]. Collapses a
+// 5-line object literal into a single line and removes the structural
+// duplication that cross-fixture `{ actorType, amount, percentage }` object
+// literals create in Sonar's duplication metric.
+type ActorResultTuple = [ActorResult['actorType'], string, string];
+
+const toActorResults = (tuples: readonly ActorResultTuple[]): ActorResult[] =>
+  tuples.map(([actorType, amount, percentage]) => ({
+    actorType,
+    amount,
+    percentage,
+  }));
+
 const expectedResults = {
-  multipleCertificates: [
-    {
-      actorType: RewardsDistributionActorType.HAULER,
-      amount: '22.9995',
-      percentage: '10',
-    },
-    {
-      actorType: RewardsDistributionActorType.INTEGRATOR,
-      amount: '18.3996',
-      percentage: '8',
-    },
-    {
-      actorType: RewardsDistributionActorType.PROCESSOR,
-      amount: '22.9995',
-      percentage: '10',
-    },
-    {
-      actorType: RewardsDistributionActorType.RECYCLER,
-      amount: '45.999',
-      percentage: '20',
-    },
-    {
-      actorType: RewardsDistributionActorType.WASTE_GENERATOR,
-      amount: '34.49925',
-      percentage: '15',
-    },
-    {
-      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
-      amount: '34.49925',
-      percentage: '15',
-    },
-    {
-      actorType: RewardsDistributionActorType.NETWORK,
-      amount: '45.999',
-      percentage: '20',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_AUTHOR,
-      amount: '2.29995',
-      percentage: '1',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
-      amount: '2.29995',
-      percentage: '1',
-    },
-    {
-      actorType: BoldActorType.REMAINDER,
-      amount: '0',
-      percentage: '0',
-    },
-  ],
+  multipleCertificates: toActorResults([
+    [RewardsDistributionActorType.WASTE_GENERATOR, '34.49925', '15'],
+    [RewardsDistributionActorType.HAULER, '22.9995', '10'],
+    [RewardsDistributionActorType.PROCESSOR, '22.9995', '10'],
+    [RewardsDistributionActorType.RECYCLER, '45.999', '20'],
+    [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL, '34.49925', '15'],
+    [RewardsDistributionActorType.INTEGRATOR, '18.3996', '8'],
+    [RewardsDistributionActorType.METHODOLOGY_AUTHOR, '2.29995', '1'],
+    [RewardsDistributionActorType.METHODOLOGY_DEVELOPER, '2.29995', '1'],
+    [RewardsDistributionActorType.NETWORK, '45.999', '20'],
+    [BoldActorType.REMAINDER, '0', '0'],
+  ]),
 
-  multipleHaulers: [
-    {
-      actorType: RewardsDistributionActorType.HAULER,
-      amount: '5.110999',
-      percentage: '3.333332',
-    },
-    {
-      actorType: RewardsDistributionActorType.HAULER,
-      amount: '5.110999',
-      percentage: '3.333332',
-    },
-    {
-      actorType: RewardsDistributionActorType.HAULER,
-      amount: '5.111001',
-      percentage: '3.333333',
-    },
-    {
-      actorType: RewardsDistributionActorType.WASTE_GENERATOR,
-      amount: '45.999',
-      percentage: '30',
-    },
-    {
-      actorType: RewardsDistributionActorType.PROCESSOR,
-      amount: '15.333',
-      percentage: '10',
-    },
-    {
-      actorType: RewardsDistributionActorType.RECYCLER,
-      amount: '30.666',
-      percentage: '20',
-    },
-    {
-      actorType: RewardsDistributionActorType.INTEGRATOR,
-      amount: '12.2664',
-      percentage: '8',
-    },
-    {
-      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
-      amount: '0',
-      percentage: '0',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_AUTHOR,
-      amount: '1.5333',
-      percentage: '1',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
-      amount: '1.5333',
-      percentage: '1',
-    },
-    {
-      actorType: RewardsDistributionActorType.NETWORK,
-      amount: '30.666001',
-      percentage: '20.000003',
-    },
-    {
-      actorType: BoldActorType.REMAINDER,
-      amount: '0.000001',
-      percentage: '0.000003',
-    },
-  ],
+  // Haulers sorted by participant.id: tera < transport-x < transport-y
+  multipleHaulers: toActorResults([
+    [RewardsDistributionActorType.WASTE_GENERATOR, '45.999', '30'],
+    [RewardsDistributionActorType.HAULER, '5.110999', '3.333332'],
+    [RewardsDistributionActorType.HAULER, '5.111001', '3.333333'],
+    [RewardsDistributionActorType.HAULER, '5.110999', '3.333332'],
+    [RewardsDistributionActorType.PROCESSOR, '15.333', '10'],
+    [RewardsDistributionActorType.RECYCLER, '30.666', '20'],
+    [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL, '0', '0'],
+    [RewardsDistributionActorType.INTEGRATOR, '12.2664', '8'],
+    [RewardsDistributionActorType.METHODOLOGY_AUTHOR, '1.5333', '1'],
+    [RewardsDistributionActorType.METHODOLOGY_DEVELOPER, '1.5333', '1'],
+    [RewardsDistributionActorType.NETWORK, '30.666001', '20.000003'],
+    [BoldActorType.REMAINDER, '0.000001', '0.000003'],
+  ]),
 
-  singleCertificateStandard: [
-    {
-      actorType: RewardsDistributionActorType.HAULER,
-      amount: '15.333',
-      percentage: '10',
-    },
-    {
-      actorType: RewardsDistributionActorType.INTEGRATOR,
-      amount: '12.2664',
-      percentage: '8',
-    },
-    {
-      actorType: RewardsDistributionActorType.PROCESSOR,
-      amount: '15.333',
-      percentage: '10',
-    },
-    {
-      actorType: RewardsDistributionActorType.RECYCLER,
-      amount: '30.666',
-      percentage: '20',
-    },
-    {
-      actorType: RewardsDistributionActorType.WASTE_GENERATOR,
-      amount: '22.9995',
-      percentage: '15',
-    },
-    {
-      actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
-      amount: '22.9995',
-      percentage: '15',
-    },
-    {
-      actorType: RewardsDistributionActorType.NETWORK,
-      amount: '30.666',
-      percentage: '20',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_AUTHOR,
-      amount: '1.5333',
-      percentage: '1',
-    },
-    {
-      actorType: RewardsDistributionActorType.METHODOLOGY_DEVELOPER,
-      amount: '1.5333',
-      percentage: '1',
-    },
-    {
-      actorType: BoldActorType.REMAINDER,
-      amount: '0',
-      percentage: '0',
-    },
-  ],
+  singleCertificateStandard: toActorResults([
+    [RewardsDistributionActorType.WASTE_GENERATOR, '22.9995', '15'],
+    [RewardsDistributionActorType.HAULER, '15.333', '10'],
+    [RewardsDistributionActorType.PROCESSOR, '15.333', '10'],
+    [RewardsDistributionActorType.RECYCLER, '30.666', '20'],
+    [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL, '22.9995', '15'],
+    [RewardsDistributionActorType.INTEGRATOR, '12.2664', '8'],
+    [RewardsDistributionActorType.METHODOLOGY_AUTHOR, '1.5333', '1'],
+    [RewardsDistributionActorType.METHODOLOGY_DEVELOPER, '1.5333', '1'],
+    [RewardsDistributionActorType.NETWORK, '30.666', '20'],
+    [BoldActorType.REMAINDER, '0', '0'],
+  ]),
 };
 
 export const rewardsDistributionProcessorTestCases: TestCase[] = [

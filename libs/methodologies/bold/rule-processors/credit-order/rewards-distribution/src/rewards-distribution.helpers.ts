@@ -10,8 +10,51 @@ import type {
   Remainder,
   ResultContentsWithMassIDCertificateValue,
   RewardsDistribution,
+  RewardsDistributionActor,
   RuleSubject,
 } from './rewards-distribution.types';
+
+// Canonical actor order for rendering rewards distributions in downstream
+// consumers. Keep this Record in sync with the downstream canonical order.
+//
+// NOTE: RewardsDistributionActorType is inferred from a Zod enum whose values
+// are cast to [string, ...string[]], so at the type level it is `string` and
+// this Record is not compile-time exhaustive. The runtime guarantees that every
+// actor type has an entry come from: (a) upstream Zod validation on document
+// events, which narrows the set of actual values to the 9 enum members; and
+// (b) the `assigns a sort order to every RewardsDistributionActorType` test,
+// which iterates Object.values(RewardsDistributionActorType) and verifies
+// every one is sortable by this table.
+
+const ACTOR_TYPE_SORT_ORDER: Record<RewardsDistributionActorType, number> = {
+  [RewardsDistributionActorType.COMMUNITY_IMPACT_POOL]: 5,
+  [RewardsDistributionActorType.HAULER]: 2,
+  [RewardsDistributionActorType.INTEGRATOR]: 6,
+  [RewardsDistributionActorType.METHODOLOGY_AUTHOR]: 7,
+  [RewardsDistributionActorType.METHODOLOGY_DEVELOPER]: 8,
+  [RewardsDistributionActorType.NETWORK]: 9,
+  [RewardsDistributionActorType.PROCESSOR]: 3,
+  [RewardsDistributionActorType.RECYCLER]: 4,
+  [RewardsDistributionActorType.WASTE_GENERATOR]: 1,
+};
+
+export const sortRewardsDistributionActors = (
+  actors: readonly RewardsDistributionActor[],
+): RewardsDistributionActor[] =>
+  [...actors].sort((a, b) => {
+    // Non-null assertions: upstream Zod validation + the completeness test
+    // guarantee every actorType has an entry at runtime.
+    const orderA = ACTOR_TYPE_SORT_ORDER[a.actorType]!;
+
+    const orderB = ACTOR_TYPE_SORT_ORDER[b.actorType]!;
+
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+
+    // Tiebreak within a type: lexicographic by participant id.
+    return a.participant.id.localeCompare(b.participant.id);
+  });
 
 export const formatPercentage = (percentage: BigNumber): BigNumber =>
   percentage.dividedBy(100);
@@ -223,7 +266,7 @@ export const calculateRewardsDistribution = (
   });
 
   return {
-    actors: [...actors.values()],
+    actors: sortRewardsDistributionActors([...actors.values()]),
     creditUnitPrice: creditUnitPrice.toString(),
     massIDCertificateTotalValue: massIDCertificateTotalValue.toString(),
     remainder: {
