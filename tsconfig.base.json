@@ -4,9 +4,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "baseUrl": ".",
-    "lib": ["es2023"],
+    "lib": ["es2024"],
     "module": "esnext",
-    "target": "es2022",
+    "target": "es2024",
     "moduleResolution": "node",
     "typeRoots": ["node_modules/@types", "./types"],
     "strict": true,
