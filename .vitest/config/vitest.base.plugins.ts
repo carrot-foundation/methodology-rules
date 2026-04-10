@@ -16,7 +16,7 @@ export const getVitestBasePlugins = (): PluginOption[] => {
   return [
     swc.vite({
       jsc: {
-        target: 'es2022',
+        target: 'es2024',
         parser: {
           syntax: 'typescript',
           tsx: false,
