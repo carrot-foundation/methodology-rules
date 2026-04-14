@@ -8,6 +8,7 @@
         "cacheableOperations": [
           "build-lambda",
           "test",
+          "test-e2e",
           "lint",
           "ts",
           "package-lambda"
@@ -94,6 +95,15 @@
         "resourceName": "{projectName}",
         "zipPath": "{workspaceRoot}/dist/.zip/{projectName}.zip"
       }
+    },
+    "test-e2e": {
+      "executor": "nx:run-commands",
+      "inputs": ["test-e2e", "^production"],
+      "outputs": ["{workspaceRoot}/coverage/{projectName}/junit.xml"],
+      "options": {
+        "command": "vitest run --config vitest.e2e.config.ts",
+        "cwd": "{projectRoot}"
+      }
     }
   },
   "pluginsConfig": {
@@ -150,6 +160,17 @@
       "{workspaceRoot}/.vitest/**/*.ts",
       "{workspaceRoot}/vitest.workspace.ts",
       "{projectRoot}/vitest.config.ts",
+      "{projectRoot}/tsconfig.spec.json"
+    ],
+    "test-e2e": [
+      "node",
+      "src",
+      "{workspaceRoot}/tsconfig.base.json",
+      "{workspaceRoot}/.env-files/.env.test",
+      "{workspaceRoot}/.tsconfig/tsconfig.spec.json",
+      "{workspaceRoot}/.vitest/**/*.ts",
+      "{workspaceRoot}/vitest.workspace.ts",
+      "{projectRoot}/vitest.e2e.config.ts",
       "{projectRoot}/tsconfig.spec.json"
     ]
   },
