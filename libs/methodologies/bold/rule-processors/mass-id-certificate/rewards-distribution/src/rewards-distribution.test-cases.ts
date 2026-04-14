@@ -6,7 +6,6 @@ import {
   BoldStubsBuilder,
   stubBoldMassIDPickUpEvent,
   stubDocumentEvent,
-  stubDocumentEventWithMetadataAttributes,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -14,7 +13,6 @@ import {
   type BoldDocument,
   BoldDocumentCategory,
   BoldDocumentEventName,
-  BoldDocumentSubtype,
   BoldUnidentifiedAttributeValue,
   MassIDOrganicSubtype,
   RewardsDistributionActorType,
@@ -25,11 +23,10 @@ import { REWARDS_DISTRIBUTION_BY_WASTE_TYPE } from './rewards-distribution.const
 import { ERROR_MESSAGES } from './rewards-distribution.errors';
 
 const { MASS_ID, METHODOLOGY } = BoldDocumentCategory;
-const { ACTOR, ONBOARDING_DECLARATION, PICK_UP } = BoldDocumentEventName;
-const { BUSINESS_SIZE_DECLARATION, WASTE_ORIGIN } = BoldAttributeName;
+const { ACTOR, PICK_UP } = BoldDocumentEventName;
+const { WASTE_ORIGIN } = BoldAttributeName;
 const { LARGE_BUSINESS, SMALL_BUSINESS } = BoldBusinessSizeDeclarationValue;
 const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
-const { WASTE_GENERATOR: WASTE_GENERATOR_SUBTYPE } = BoldDocumentSubtype;
 const {
   COMMUNITY_IMPACT_POOL,
   HAULER,
@@ -41,36 +38,6 @@ const {
   RECYCLER,
   WASTE_GENERATOR,
 } = RewardsDistributionActorType;
-
-const createWasteGeneratorVerificationDocument = (
-  businessSize: BoldBusinessSizeDeclarationValue,
-): BoldDocument =>
-  ({
-    ...new BoldStubsBuilder()
-      .createMassIDDocuments()
-      .createMassIDAuditDocuments()
-      .createMethodologyDocument()
-      .createParticipantAccreditationDocuments(
-        new Map([
-          [
-            WASTE_GENERATOR_SUBTYPE,
-            {
-              externalEventsMap: {
-                [ONBOARDING_DECLARATION]:
-                  stubDocumentEventWithMetadataAttributes(
-                    {
-                      name: ONBOARDING_DECLARATION,
-                    },
-                    [[BUSINESS_SIZE_DECLARATION, businessSize]],
-                  ),
-              },
-            },
-          ],
-        ]),
-      )
-      .build()
-      .participantsAccreditationDocuments.get(WASTE_GENERATOR_SUBTYPE)!,
-  }) as BoldDocument;
 
 const DEFAULT_REWARDS = {
   [COMMUNITY_IMPACT_POOL]: '0',
@@ -157,11 +124,11 @@ interface RewardsDistributionTestCase extends Omit<
   RuleTestCase,
   'resultComment'
 > {
+  accreditationBusinessSize?: BoldBusinessSizeDeclarationValue | undefined;
   expectedRewards: Record<string, string>;
   massIDDocumentEvents?: BoldExternalEventsObject | undefined;
   massIDPartialDocument: PartialDeep<BoldDocument>;
   resultComment?: string;
-  wasteGeneratorVerificationDocument?: BoldDocument | undefined;
 }
 
 export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[] =
@@ -227,6 +194,7 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       scenario: `Large Business discount is applied when Waste Generator Verification Document is missing (defaults to Large Business)`,
     },
     {
+      accreditationBusinessSize: LARGE_BUSINESS,
       expectedRewards: EXPECTED_REWARDS['Mixed Organic Waste'],
       massIDDocumentEvents: {},
       massIDPartialDocument: {
@@ -234,10 +202,9 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       },
       resultStatus: 'PASSED' as const,
       scenario: `Large Business discount is applied when Waste Generator Verification Document indicates Large Business`,
-      wasteGeneratorVerificationDocument:
-        createWasteGeneratorVerificationDocument(LARGE_BUSINESS),
     },
     {
+      accreditationBusinessSize: SMALL_BUSINESS,
       expectedRewards:
         EXPECTED_REWARDS.SMALL_BUSINESS[
           RewardsDistributionWasteType.MIXED_ORGANIC_WASTE
@@ -248,8 +215,19 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
       },
       resultStatus: 'PASSED' as const,
       scenario: `no discount is applied when Waste Generator Verification Document indicates Small Business`,
-      wasteGeneratorVerificationDocument:
-        createWasteGeneratorVerificationDocument(SMALL_BUSINESS),
+    },
+    {
+      accreditationBusinessSize: SMALL_BUSINESS,
+      expectedRewards:
+        EXPECTED_REWARDS.SMALL_BUSINESS[
+          RewardsDistributionWasteType.MIXED_ORGANIC_WASTE
+        ],
+      massIDDocumentEvents: {},
+      massIDPartialDocument: {
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultStatus: 'PASSED' as const,
+      scenario: `regression: a small-business waste generator on a Food/Food Waste and Beverages MassID receives the full generator share and the Community Impact Pool does not receive any redirected share`,
     },
     {
       expectedRewards:
@@ -269,16 +247,22 @@ export const rewardsDistributionProcessorTestCases: RewardsDistributionTestCase[
     },
   ];
 
-const { massIDAuditDocument, massIDDocument, methodologyDocument } =
-  new BoldStubsBuilder()
-    .createMassIDDocuments()
-    .createMassIDAuditDocuments()
-    .createMethodologyDocument()
-    .build();
+const {
+  massIDAuditDocument,
+  massIDCertificateDocument,
+  massIDDocument,
+  methodologyDocument,
+} = new BoldStubsBuilder()
+  .createMassIDDocuments()
+  .createMassIDAuditDocuments()
+  .createMethodologyDocument()
+  .createMassIDCertificateDocuments()
+  .build();
 
 interface RewardsDistributionErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
   massIDAuditDocument: BoldDocument;
+  massIDCertificateDocument: BoldDocument;
 }
 
 export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCase[] =
@@ -286,6 +270,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
     {
       documents: [],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: 'FAILED' as const,
       scenario: `${MASS_ID} document is not found`,
@@ -293,6 +278,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
     {
       documents: [massIDDocument],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
       resultStatus: 'FAILED' as const,
       scenario: `${METHODOLOGY} document is not found`,
@@ -308,6 +294,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.MISSING_REQUIRED_ACTORS(massIDDocument.id, [
         RewardsDistributionActorType.INTEGRATOR,
       ]),
@@ -323,6 +310,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         massIDDocument,
       ],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
       resultStatus: 'FAILED' as const,
       scenario: `the ${METHODOLOGY} document does not have the required actors`,
@@ -336,6 +324,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.EXTERNAL_EVENTS_NOT_FOUND(
         massIDDocument.id,
       ),
@@ -351,6 +340,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         methodologyDocument as BoldDocument,
       ],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.UNEXPECTED_DOCUMENT_SUBTYPE('unknown'),
       resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document has an unexpected subtype`,
@@ -368,6 +358,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         } as BoldDocument,
       ],
       massIDAuditDocument,
+      massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
       resultStatus: 'FAILED' as const,
       scenario: `the ${METHODOLOGY} document does not have the required address in actors`,

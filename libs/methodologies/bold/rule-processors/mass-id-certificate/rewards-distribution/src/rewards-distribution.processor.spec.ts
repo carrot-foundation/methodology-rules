@@ -1,8 +1,14 @@
 import { sumBigNumbers } from '@carrot-fndn/shared/helpers';
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldStubsBuilder,
+  stubDocumentEventWithMetadataAttributes,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldAttributeName,
   type BoldDocument,
+  BoldDocumentEventName,
+  BoldDocumentSubtype,
   BoldMethodologyName,
   type RewardsDistributionResultContent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -15,6 +21,10 @@ import {
   rewardsDistributionProcessorTestCases,
 } from './rewards-distribution.test-cases';
 
+const { ONBOARDING_DECLARATION } = BoldDocumentEventName;
+const { BUSINESS_SIZE_DECLARATION } = BoldAttributeName;
+const { WASTE_GENERATOR } = BoldDocumentSubtype;
+
 describe('RewardsDistributionProcessor', () => {
   const ruleDataProcessor = new RewardsDistributionProcessor();
 
@@ -26,17 +36,12 @@ describe('RewardsDistributionProcessor', () => {
     it.each(rewardsDistributionProcessorTestCases)(
       'should return $resultStatus when $scenario',
       async ({
+        accreditationBusinessSize,
         expectedRewards,
         massIDDocumentEvents,
         massIDPartialDocument,
-        wasteGeneratorVerificationDocument,
       }) => {
-        const {
-          massIDAuditDocument,
-          massIDCertificateDocument,
-          massIDDocument,
-          methodologyDocument,
-        } = new BoldStubsBuilder({
+        const builder = new BoldStubsBuilder({
           methodologyName: BoldMethodologyName.RECYCLING,
         })
           .createMassIDDocuments({
@@ -44,18 +49,47 @@ describe('RewardsDistributionProcessor', () => {
             partialDocument: massIDPartialDocument,
           })
           .createMassIDAuditDocuments()
-          .createMassIDCertificateDocuments()
           .createMethodologyDocument()
-          .build();
+          .createMassIDCertificateDocuments();
+
+        if (accreditationBusinessSize !== undefined) {
+          builder.createParticipantAccreditationDocuments(
+            new Map([
+              [
+                WASTE_GENERATOR,
+                {
+                  externalEventsMap: {
+                    [ONBOARDING_DECLARATION]:
+                      stubDocumentEventWithMetadataAttributes(
+                        { name: ONBOARDING_DECLARATION },
+                        [
+                          [
+                            BUSINESS_SIZE_DECLARATION,
+                            accreditationBusinessSize,
+                          ],
+                        ],
+                      ),
+                  },
+                },
+              ],
+            ]),
+          );
+        }
+
+        const {
+          massIDAuditDocument,
+          massIDCertificateDocument,
+          massIDDocument,
+          methodologyDocument,
+          participantsAccreditationDocuments,
+        } = builder.build();
 
         const allDocuments = [
           massIDAuditDocument,
           massIDDocument,
           massIDCertificateDocument,
           methodologyDocument as BoldDocument,
-          ...(wasteGeneratorVerificationDocument
-            ? [wasteGeneratorVerificationDocument]
-            : []),
+          ...participantsAccreditationDocuments.values(),
         ];
 
         spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
