@@ -100,6 +100,10 @@ export const REWARDS_DISTRIBUTION_BY_WASTE_TYPE: Record<
 };
 
 export const REWARDS_DISTRIBUTION_CRITERIA: DocumentCriteria = {
+  parentDocument: {
+    omit: true,
+    relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
+  },
   relatedDocuments: [
     METHODOLOGY_DEFINITION.match,
     MASS_ID.match,
