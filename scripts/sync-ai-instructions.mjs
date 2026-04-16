@@ -26,6 +26,7 @@ const PATHS = {
   codexSkills: path.join(ROOT, '.agents', 'skills'),
   rootAgents: path.join(ROOT, 'AGENTS.md'),
   rootClaude: path.join(ROOT, 'CLAUDE.md'),
+  projectContext: path.join(ROOT, '.ai', 'PROJECT_CONTEXT.md'),
 
   parityMatrix: path.join(ROOT, '.ai', 'PARITY_MATRIX.md'),
 };
@@ -555,6 +556,11 @@ async function writeCanonicalBaseDocs() {
   );
 
   await writeIfMissing(
+    path.join(PATHS.canonicalRoot, 'PROJECT_CONTEXT.md'),
+    `# Project Context\n\nProject-specific knowledge for AI assistants.\n\n## Project Overview\n\nDescribe the project name, purpose, and audience here.\n\n## Scope\n\nDefine what is in and out of scope for AI assistance.\n\n## How to use\n\nThis file is appended to generated adapters (e.g., CLAUDE.md) to provide project-specific context.\nEdit this file directly; regenerate adapters with \`pnpm ai:sync\`.\n`,
+  );
+
+  await writeIfMissing(
     path.join(PATHS.canonicalSchemas, 'rule.schema.yaml'),
     `type: object\nrequired:\n  - id\n  - intent\n  - scope\n  - requirements\n  - anti_patterns\nproperties:\n  id:\n    type: string\n  intent:\n    type: string\n  scope:\n    type: array\n    items:\n      type: string\n  requirements:\n    type: array\n    items:\n      type: string\n  anti_patterns:\n    type: array\n    items:\n      type: string\n`,
   );
@@ -774,6 +780,7 @@ async function generateRootAdapters(canonicalRules, canonicalSkills, canonicalAg
     '- `.ai/DEFINITIONS.md`',
     '- `.ai/STANDARDS.md`',
     '- `.ai/PARITY_MATRIX.md`',
+    '- `.ai/PROJECT_CONTEXT.md`',
   ].join('\n');
 
   const skillsList = canonicalSkills
@@ -864,8 +871,20 @@ ${sharedLinks}
 - Agents/Roles: ${canonicalAgents.length}
 `;
 
-  await writeFile(PATHS.rootAgents, agentsContent);
-  await writeFile(PATHS.rootClaude, claudeContent);
+  const projectContextContent = (await pathExists(PATHS.projectContext))
+    ? (await fs.readFile(PATHS.projectContext, 'utf8')).trim()
+    : null;
+
+  const claudeFinal = projectContextContent
+    ? `${claudeContent.trimEnd()}\n\n${projectContextContent}\n`
+    : claudeContent;
+
+  const agentsFinal = projectContextContent
+    ? `${agentsContent.trimEnd()}\n\n${projectContextContent}\n`
+    : agentsContent;
+
+  await writeFile(PATHS.rootAgents, agentsFinal);
+  await writeFile(PATHS.rootClaude, claudeFinal);
 }
 
 async function removeStaleAdapters(canonicalRules, canonicalSkills, canonicalAgents) {
