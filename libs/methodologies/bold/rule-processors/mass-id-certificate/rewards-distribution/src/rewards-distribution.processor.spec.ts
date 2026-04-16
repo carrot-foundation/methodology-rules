@@ -113,6 +113,8 @@ describe('RewardsDistributionProcessor', () => {
           massIDDocumentId: massIDDocument.id,
         });
 
+        expect(massIDRewards).toHaveLength(Object.keys(expectedRewards).length);
+
         for (const actorType of Object.keys(expectedRewards)) {
           const reward = massIDRewards.find(
             (massIDReward) => massIDReward.actorType === actorType,
