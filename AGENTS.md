@@ -75,7 +75,7 @@ Methodology Rules AI instructions for Codex, Claude, and Cursor with equal capab
 
 # Methodology Rules Project Context
 
-Project-specific knowledge for AI assistants working on Methodology Rules. This content is appended to the generated CLAUDE.md adapter.
+Project-specific knowledge for AI assistants working on Methodology Rules. This content is appended to generated root adapters (`CLAUDE.md` and `AGENTS.md`).
 
 ## Project Overview
 
@@ -101,7 +101,7 @@ Methodology Rules is an Nx monorepo containing AWS Lambda rule processors for Ca
 
 ### Directory Structure
 
-```
+```text
 libs/
   methodologies/
     bold/                              # BOLD Mass ID methodology
@@ -162,7 +162,7 @@ libs/
 
 Each rule processor follows this file structure:
 
-```
+```text
 libs/methodologies/{methodology}/rule-processors/{document-type}/{processor-name}/
   src/
     {name}.lambda.ts           # Lambda entry point (wrapRuleIntoLambdaHandler)
@@ -188,7 +188,7 @@ libs/methodologies/{methodology}/rule-processors/{document-type}/{processor-name
 
 ### Processing Pipeline
 
-```
+```text
 RuleInput (S3 event reference)
   → Lambda handler (wrapRuleIntoLambdaHandler)
     → Processor (extends RuleDataProcessor)
