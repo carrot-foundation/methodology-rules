@@ -44,6 +44,11 @@ describe('DocumentAddressSchema', () => {
       value: without('zipCode'),
     },
     {
+      expected: true,
+      scenario: 'an address without neighborhood',
+      value: without('neighborhood'),
+    },
+    {
       expected: false,
       scenario: 'an address without city',
       value: without('city'),

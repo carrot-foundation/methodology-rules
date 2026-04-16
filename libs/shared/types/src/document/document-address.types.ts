@@ -10,7 +10,7 @@ export const DocumentAddressSchema = z.object({
   id: NonEmptyStringSchema,
   latitude: LatitudeSchema.optional(),
   longitude: LongitudeSchema.optional(),
-  neighborhood: NonEmptyStringSchema,
+  neighborhood: NonEmptyStringSchema.optional(),
   number: NonEmptyStringSchema,
   participantId: NonEmptyStringSchema,
   piiSnapshotId: NonEmptyStringSchema,
