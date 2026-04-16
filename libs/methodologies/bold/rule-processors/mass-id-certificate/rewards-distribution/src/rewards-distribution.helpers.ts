@@ -2,6 +2,7 @@ import {
   getOrDefault,
   isNil,
   isNonEmptyArray,
+  logger,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
@@ -48,24 +49,42 @@ export const isHaulerActorDefined = (
 export const formatPercentage = (percentage: BigNumber): string =>
   percentage.multipliedBy(100).toString();
 
+const formatMassIDReward = ({
+  actorType,
+  address,
+  massIDPercentage,
+  participant,
+  preserveSensitiveData,
+}: ActorReward): RewardsDistributionMassIDReward => ({
+  actorType,
+  address,
+  massIDPercentage: formatPercentage(massIDPercentage),
+  participant,
+  preserveSensitiveData,
+});
+
 export const mapMassIDRewards = (
   participants: ActorReward[],
 ): RewardsDistributionMassIDReward[] =>
-  participants.map(
-    ({
-      actorType,
-      address,
-      massIDPercentage,
-      participant,
-      preserveSensitiveData,
-    }) => ({
-      actorType,
-      address,
-      massIDPercentage: formatPercentage(massIDPercentage),
-      participant,
-      preserveSensitiveData,
-    }),
-  );
+  participants.flatMap((reward) => {
+    if (reward.massIDPercentage.isZero()) {
+      if (
+        reward.actorType === RewardsDistributionActorType.COMMUNITY_IMPACT_POOL
+      ) {
+        return [];
+      }
+      logger.warn(
+        {
+          actorType: reward.actorType,
+          massIDDocumentId: reward.massIDDocument.id,
+          participantId: reward.participant.id,
+        },
+        'Rewards distribution actor received zero percentage',
+      );
+    }
+
+    return [formatMassIDReward(reward)];
+  });
 
 export const mapActorReward = ({
   actorType,

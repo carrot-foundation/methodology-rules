@@ -40,7 +40,6 @@ const {
 } = RewardsDistributionActorType;
 
 const DEFAULT_REWARDS = {
-  [COMMUNITY_IMPACT_POOL]: '0',
   [INTEGRATOR]: '8',
   [METHODOLOGY_AUTHOR]: '1',
   [METHODOLOGY_DEVELOPER]: '1',
@@ -82,7 +81,6 @@ const EXPECTED_REWARDS = {
       [RECYCLER]: '20',
       [WASTE_GENERATOR]: '30',
       ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
     },
     [RewardsDistributionWasteType.SLUDGE_FROM_WASTE_TREATMENT]: {
       [HAULER]: '5',
@@ -91,7 +89,6 @@ const EXPECTED_REWARDS = {
       [RECYCLER]: '30',
       [WASTE_GENERATOR]: '25',
       ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
     },
     [RewardsDistributionWasteType.TOBACCO_INDUSTRY_RESIDUES]: {
       [HAULER]: '5',
@@ -100,7 +97,6 @@ const EXPECTED_REWARDS = {
       [RECYCLER]: '30',
       [WASTE_GENERATOR]: '25',
       ...DEFAULT_REWARDS,
-      [COMMUNITY_IMPACT_POOL]: '0',
     },
   },
   WITHOUT_WASTE_GENERATOR: {
