@@ -556,6 +556,11 @@ async function writeCanonicalBaseDocs() {
   );
 
   await writeIfMissing(
+    path.join(PATHS.canonicalRoot, 'PROJECT_CONTEXT.md'),
+    `# Project Context\n\nProject-specific knowledge for AI assistants.\n\n## Project Overview\n\nDescribe the project name, purpose, and audience here.\n\n## Scope\n\nDefine what is in and out of scope for AI assistance.\n\n## How to use\n\nThis file is appended to generated adapters (e.g., CLAUDE.md) to provide project-specific context.\nEdit this file directly; regenerate adapters with \`pnpm ai:sync\`.\n`,
+  );
+
+  await writeIfMissing(
     path.join(PATHS.canonicalSchemas, 'rule.schema.yaml'),
     `type: object\nrequired:\n  - id\n  - intent\n  - scope\n  - requirements\n  - anti_patterns\nproperties:\n  id:\n    type: string\n  intent:\n    type: string\n  scope:\n    type: array\n    items:\n      type: string\n  requirements:\n    type: array\n    items:\n      type: string\n  anti_patterns:\n    type: array\n    items:\n      type: string\n`,
   );
