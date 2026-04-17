@@ -1,3 +1,4 @@
+import { logger } from '@carrot-fndn/shared/helpers';
 import {
   BoldStubsBuilder,
   stubDocumentEventWithMetadataAttributes,
@@ -5,6 +6,7 @@ import {
 import {
   BoldAttributeName,
   BoldBusinessSizeDeclarationValue,
+  type BoldDocument,
   BoldDocumentEventName,
   BoldDocumentSubtype,
   RewardsDistributionActorType,
@@ -12,6 +14,7 @@ import {
 import BigNumber from 'bignumber.js';
 
 import type {
+  ActorReward,
   RewardsDistributionActor,
   RewardsDistributionActorTypePercentage,
 } from './rewards-distribution.types';
@@ -19,6 +22,7 @@ import type {
 import {
   calculateNetworkPercentageForUnidentifiedWasteOrigin,
   getWasteGeneratorAdditionalPercentage,
+  mapMassIDRewards,
   shouldApplyLargeBusinessDiscount,
 } from './rewards-distribution.helpers';
 
@@ -178,5 +182,125 @@ describe('getWasteGeneratorAdditionalPercentage', () => {
     );
 
     expect(result).toEqual(new BigNumber(0));
+  });
+});
+
+describe('mapMassIDRewards', () => {
+  let massIDDocument: BoldDocument;
+  let warnSpy: vi.MockInstance<typeof logger.warn>;
+
+  beforeAll(() => {
+    massIDDocument = new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .createMassIDAuditDocuments()
+      .createMethodologyDocument()
+      .build().massIDDocument;
+  });
+
+  beforeEach(() => {
+    vi.restoreAllMocks();
+    warnSpy = vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+  });
+
+  const buildActorReward = (
+    overrides: Partial<ActorReward> = {},
+  ): ActorReward => ({
+    actorType: RewardsDistributionActorType.RECYCLER,
+    address: { id: 'address-recycler' },
+    massIDDocument,
+    massIDPercentage: new BigNumber('0.2'),
+    participant: { id: 'participant-recycler', name: 'Recycler Co' },
+    preserveSensitiveData: false,
+    ...overrides,
+  });
+
+  it('returns an empty array for an empty input and does not warn', () => {
+    expect(mapMassIDRewards([])).toEqual([]);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('emits non-zero entries with formatted percentage and unchanged fields', () => {
+    const result = mapMassIDRewards([
+      buildActorReward({ massIDPercentage: new BigNumber('0.3') }),
+    ]);
+
+    expect(result).toEqual([
+      {
+        actorType: RewardsDistributionActorType.RECYCLER,
+        address: { id: 'address-recycler' },
+        massIDPercentage: '30',
+        participant: { id: 'participant-recycler', name: 'Recycler Co' },
+        preserveSensitiveData: false,
+      },
+    ]);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('emits a Community Impact Pool entry when its percentage is non-zero', () => {
+    const result = mapMassIDRewards([
+      buildActorReward({
+        actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        address: { id: 'address-cip' },
+        massIDPercentage: new BigNumber('0.15'),
+        participant: { id: 'participant-cip', name: 'Community Impact Pool' },
+      }),
+    ]);
+
+    expect(result).toEqual([
+      {
+        actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        address: { id: 'address-cip' },
+        massIDPercentage: '15',
+        participant: { id: 'participant-cip', name: 'Community Impact Pool' },
+        preserveSensitiveData: false,
+      },
+    ]);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('drops a zero-percentage Community Impact Pool entry and does not log a warning', () => {
+    const result = mapMassIDRewards([
+      buildActorReward({
+        actorType: RewardsDistributionActorType.COMMUNITY_IMPACT_POOL,
+        address: { id: 'address-cip' },
+        massIDPercentage: new BigNumber(0),
+        participant: { id: 'participant-cip', name: 'Community Impact Pool' },
+      }),
+      buildActorReward({ massIDPercentage: new BigNumber('0.2') }),
+    ]);
+
+    expect(result).toHaveLength(1);
+    expect(result[0]?.actorType).toBe(RewardsDistributionActorType.RECYCLER);
+    expect(warnSpy).not.toHaveBeenCalled();
+  });
+
+  it('emits a zero-percentage non-CIP entry and logs a warning with diagnostic context', () => {
+    const result = mapMassIDRewards([
+      buildActorReward({
+        actorType: RewardsDistributionActorType.NETWORK,
+        address: { id: 'address-network' },
+        massIDPercentage: new BigNumber(0),
+        participant: { id: 'participant-network', name: 'Network' },
+      }),
+    ]);
+
+    expect(result).toEqual([
+      {
+        actorType: RewardsDistributionActorType.NETWORK,
+        address: { id: 'address-network' },
+        massIDPercentage: '0',
+        participant: { id: 'participant-network', name: 'Network' },
+        preserveSensitiveData: false,
+      },
+    ]);
+    expect(warnSpy).toHaveBeenCalledTimes(1);
+    expect(warnSpy).toHaveBeenCalledWith(
+      {
+        actorType: RewardsDistributionActorType.NETWORK,
+        massIDDocumentId: massIDDocument.id,
+        participantId: 'participant-network',
+      },
+      'Rewards distribution actor received zero percentage',
+    );
   });
 });
