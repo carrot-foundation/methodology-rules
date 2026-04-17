@@ -13,6 +13,7 @@
   "targets": {
     "lint": {},
     "test": {},
+    "test-e2e": {},
     "ts": {}
   }
 }
