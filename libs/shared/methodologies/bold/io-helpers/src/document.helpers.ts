@@ -23,7 +23,12 @@ export const loadDocument = async (
 
     if (!validation.success) {
       logger.error(
-        { documentKey: key, err: validation.error, operation: 'loadDocument' },
+        {
+          documentKey: key,
+          err: validation.error,
+          operation: 'loadDocument',
+          validationIssues: validation.error.issues,
+        },
         '[loadDocument] Invalid document',
       );
 

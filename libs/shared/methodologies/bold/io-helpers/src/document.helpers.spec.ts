@@ -67,5 +67,52 @@ describe('Document Helpers', () => {
 
       expect(result).toBe(undefined);
     });
+
+    it('should accept null address fields and normalize them to undefined', async () => {
+      const key = faker.string.uuid();
+      const baseDocument = stubDocument();
+      const documentWithNulls = {
+        ...baseDocument,
+        externalEvents: baseDocument.externalEvents?.map((event) => ({
+          ...event,
+          address: {
+            ...event.address,
+            latitude: null,
+            longitude: null,
+            neighborhood: null,
+            zipCode: null,
+          },
+        })),
+        primaryAddress: {
+          ...baseDocument.primaryAddress,
+          latitude: null,
+          longitude: null,
+          neighborhood: null,
+          zipCode: null,
+        },
+      } as unknown as BoldDocument;
+
+      vi.spyOn(loaderService, 'load').mockResolvedValueOnce(
+        stubDocumentEntity({ document: documentWithNulls }),
+      );
+
+      const result = await loadDocument(loaderService, key);
+
+      expect(result).toBeDefined();
+      expect(result?.primaryAddress).toMatchObject({
+        latitude: undefined,
+        longitude: undefined,
+        neighborhood: undefined,
+        zipCode: undefined,
+      });
+      for (const event of result?.externalEvents ?? []) {
+        expect(event.address).toMatchObject({
+          latitude: undefined,
+          longitude: undefined,
+          neighborhood: undefined,
+          zipCode: undefined,
+        });
+      }
+    });
   });
 });
