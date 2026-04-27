@@ -68,10 +68,10 @@ describe('Document Helpers', () => {
       expect(result).toBe(undefined);
     });
 
-    it('should return the document when address fields are null', async () => {
+    it('should accept null address fields and normalize them to undefined', async () => {
       const key = faker.string.uuid();
       const baseDocument = stubDocument();
-      const document = {
+      const documentWithNulls = {
         ...baseDocument,
         externalEvents: baseDocument.externalEvents?.map((event) => ({
           ...event,
@@ -93,12 +93,26 @@ describe('Document Helpers', () => {
       } as unknown as BoldDocument;
 
       vi.spyOn(loaderService, 'load').mockResolvedValueOnce(
-        stubDocumentEntity({ document }),
+        stubDocumentEntity({ document: documentWithNulls }),
       );
 
       const result = await loadDocument(loaderService, key);
 
-      expect(result).toEqual(document);
+      expect(result).toBeDefined();
+      expect(result?.primaryAddress).toMatchObject({
+        latitude: undefined,
+        longitude: undefined,
+        neighborhood: undefined,
+        zipCode: undefined,
+      });
+      for (const event of result?.externalEvents ?? []) {
+        expect(event.address).toMatchObject({
+          latitude: undefined,
+          longitude: undefined,
+          neighborhood: undefined,
+          zipCode: undefined,
+        });
+      }
     });
   });
 });
