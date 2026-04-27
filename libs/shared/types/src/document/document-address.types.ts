@@ -8,14 +8,14 @@ export const DocumentAddressSchema = z.object({
   countryCode: NonEmptyStringSchema,
   countryState: NonEmptyStringSchema,
   id: NonEmptyStringSchema,
-  latitude: LatitudeSchema.optional(),
-  longitude: LongitudeSchema.optional(),
-  neighborhood: NonEmptyStringSchema.optional(),
+  latitude: LatitudeSchema.nullish(),
+  longitude: LongitudeSchema.nullish(),
+  neighborhood: NonEmptyStringSchema.nullish(),
   number: NonEmptyStringSchema,
   participantId: NonEmptyStringSchema,
   piiSnapshotId: NonEmptyStringSchema,
   street: NonEmptyStringSchema,
-  zipCode: NonEmptyStringSchema.optional(),
+  zipCode: NonEmptyStringSchema.nullish(),
 });
 export type DocumentAddress = z.infer<typeof DocumentAddressSchema>;
 

@@ -67,5 +67,38 @@ describe('Document Helpers', () => {
 
       expect(result).toBe(undefined);
     });
+
+    it('should return the document when address fields are null', async () => {
+      const key = faker.string.uuid();
+      const baseDocument = stubDocument();
+      const document = {
+        ...baseDocument,
+        externalEvents: baseDocument.externalEvents?.map((event) => ({
+          ...event,
+          address: {
+            ...event.address,
+            latitude: null,
+            longitude: null,
+            neighborhood: null,
+            zipCode: null,
+          },
+        })),
+        primaryAddress: {
+          ...baseDocument.primaryAddress,
+          latitude: null,
+          longitude: null,
+          neighborhood: null,
+          zipCode: null,
+        },
+      } as unknown as BoldDocument;
+
+      vi.spyOn(loaderService, 'load').mockResolvedValueOnce(
+        stubDocumentEntity({ document }),
+      );
+
+      const result = await loadDocument(loaderService, key);
+
+      expect(result).toEqual(document);
+    });
   });
 });
