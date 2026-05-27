@@ -762,6 +762,44 @@ describe('transport-manifest-cross-validation.helpers', () => {
       );
     });
 
+    it('should pass validation with observation when extractor reads I as slash', () => {
+      const extractionResult = createExtractionResult({
+        vehiclePlate: {
+          confidence: 'high',
+          parsed: 'ABC1/23',
+          rawMatch: 'ABC1/23',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        pickUpEvent: {
+          address: STUB_BR_ADDRESS,
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: 'Vehicle License Plate',
+                value: 'ABC1I23',
+              },
+            ],
+          },
+        } as unknown as BoldDocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
+
+      const crossValidation = result.crossValidation as MtrCrossValidation;
+
+      expect(crossValidation.vehiclePlate.isMatch).toBe(true);
+      expect(crossValidation.vehiclePlate.observation).toBe(
+        'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.',
+      );
+    });
+
     it('should not add observation when plates match exactly after normalization', () => {
       const extractionResult = createExtractionResult({
         vehiclePlate: {

@@ -459,6 +459,11 @@ describe('string-comparison.helpers', () => {
       expect(isOcrPlausiblePlateMatch('ABG1D23', 'AB61D23')).toBe(true);
     });
 
+    it('should return true for I/slash OCR confusion (extractor reads I as /)', () => {
+      expect(isOcrPlausiblePlateMatch('ABC1I23', 'ABC1/23')).toBe(true);
+      expect(isOcrPlausiblePlateMatch('ABC1/23', 'ABC1I23')).toBe(true);
+    });
+
     it('should return true for exact match after normalization', () => {
       expect(isOcrPlausiblePlateMatch('ABC-1D23', 'abc 1d23')).toBe(true);
     });
