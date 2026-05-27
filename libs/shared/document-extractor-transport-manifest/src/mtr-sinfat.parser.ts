@@ -80,10 +80,13 @@ const SINFAT_HEADER_DEFS: [
 
 const SINFAT_ANCHOR_COLUMN: SinfatWasteColumn = 'description';
 
-const SINFAT_WASTE_CODE_PATTERN = /^\d+\.\s+(\d{6})\s+(.+)/;
+const SINFAT_WASTE_CODE_PATTERN = /\b(\d{6})\b[\s.,\-–]*([\s\S]+)/;
 
 // eslint-disable-next-line sonarjs/slow-regex
 const SINFAT_WASTE_ITEM_PATTERN = /\d+\.\s+(\d{6})\s+(.+)/g;
+
+// eslint-disable-next-line sonarjs/slow-regex
+const TRAILING_ITEM_MARKER_PATTERN = /\s*\b\d+\.\s*$/;
 
 const parseSinfatWasteRow = (
   rawDescription: string,
@@ -93,7 +96,9 @@ const parseSinfatWasteRow = (
 
   const entry: WasteTypeEntryData = {
     code: codeMatch[1] as string,
-    description: (codeMatch[2] as string).trim(),
+    description: (codeMatch[2] as string)
+      .replace(TRAILING_ITEM_MARKER_PATTERN, '')
+      .trim(),
   };
 
   if (row['classification']) {

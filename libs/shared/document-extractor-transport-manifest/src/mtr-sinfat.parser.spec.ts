@@ -644,6 +644,121 @@ Tecnologia: Compostagem`;
         { code: '020299', description: 'Outros resíduos' },
       ]);
     });
+
+    it('should capture waste row when item marker is emitted as a separate block within the description column', () => {
+      const headerY = 0.7;
+      const dataY = 0.72;
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validSinfatText, [
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: headerY,
+              width: 0.18,
+            },
+            text: 'Item. Código IBAMA e Denominação',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: headerY, width: 0.07 },
+            text: 'Estado Físico',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.49,
+              top: headerY,
+              width: 0.03,
+            },
+            text: 'Classe',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.54,
+              top: headerY,
+              width: 0.09,
+            },
+            text: 'Acondicionamento',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.65,
+              top: headerY,
+              width: 0.02,
+            },
+            text: 'Qtde',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.72,
+              top: headerY,
+              width: 0.04,
+            },
+            text: 'Unidade',
+          },
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.84,
+              top: headerY,
+              width: 0.05,
+            },
+            text: 'Tecnologia',
+          },
+          // CONAMA-code+description block emitted first (slightly lower top).
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.057,
+              top: dataY - 0.001,
+              width: 0.22,
+            },
+            text: '999900 Fictional waste description',
+          },
+          // Item-marker block emitted later in y order but within the same cluster
+          // and inside the description column's x range.
+          {
+            boundingBox: {
+              height: 0.02,
+              left: 0.04,
+              top: dataY + 0.0005,
+              width: 0.01,
+            },
+            text: '1.',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.4, top: dataY, width: 0.07 },
+            text: 'Semi-solido',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.49, top: dataY, width: 0.03 },
+            text: 'IIA',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.65, top: dataY, width: 0.05 },
+            text: '8.400,00000',
+          },
+          {
+            boundingBox: { height: 0.02, left: 0.72, top: dataY, width: 0.04 },
+            text: 'Quilograma',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          classification: 'IIA',
+          code: '999900',
+          description: 'Fictional waste description',
+          quantity: 8400,
+          unit: 'Quilograma',
+        },
+      ]);
+    });
   });
 
   describe('getMatchScore', () => {
