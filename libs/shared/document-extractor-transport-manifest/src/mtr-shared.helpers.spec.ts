@@ -408,6 +408,62 @@ describe('MTR shared helpers', () => {
         vehiclePlate: 'NOP9Q12',
       });
     });
+
+    it('should reconstruct a plate whose first character was OCR-grouped onto the driver-name line', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA A',
+        'BC1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'ABC1D23',
+      });
+    });
+
+    it('should not reconstruct when stripping the trailing letter would leave too short a driver name', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'A A',
+        'BC1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'A A',
+        vehiclePlate: 'BC1D23',
+      });
+    });
+
+    it('should not reconstruct when the driver-name line does not end with a single letter token', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA',
+        'BC1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'BC1D23',
+      });
+    });
+
+    it('should not reconstruct when the candidate is already a valid plate', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA A',
+        'XYZ1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA A',
+        vehiclePlate: 'XYZ1D23',
+      });
+    });
   });
 
   describe('extractMtrEntityWithAddress', () => {
