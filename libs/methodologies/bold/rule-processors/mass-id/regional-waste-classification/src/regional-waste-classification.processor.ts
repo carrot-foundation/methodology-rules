@@ -29,7 +29,7 @@ import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
 import { getCdmCodeFromSubtype } from './regional-waste-classification.helpers';
 
-const DESCRIPTION_SIMILARITY_THRESHOLD = 0.9;
+const DESCRIPTION_SIMILARITY_THRESHOLD = 0.85;
 
 const {
   LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,

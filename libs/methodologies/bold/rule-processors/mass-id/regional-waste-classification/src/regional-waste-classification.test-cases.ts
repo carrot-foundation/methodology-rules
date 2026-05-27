@@ -239,6 +239,33 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
     },
     {
       events: {
+        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 25'],
+            [
+              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              'Óleos e gorduras vegetais alimentares',
+            ],
+          ],
+        }),
+      },
+      partialDocument: {
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
+      resultContent: {
+        description: 'Óleos e gorduras vegetais alimentares',
+        id: '20 01 25',
+        recyclerCountryCode: 'BR',
+        subtype: MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+      },
+      resultStatus: 'PASSED',
+      scenario:
+        'The local waste classification description is a SINIR-MTR variant of the CONAMA entry (Dice 0.857 >= 0.85 threshold)',
+    },
+    {
+      events: {
         [`${ACTOR}-${RECYCLER}`]: americanRecyclerEvent,
         [PICK_UP]: stubBoldMassIDPickUpEvent({
           metadataAttributes: [
