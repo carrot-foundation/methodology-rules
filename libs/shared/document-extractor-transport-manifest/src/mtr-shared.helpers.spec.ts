@@ -409,35 +409,7 @@ describe('MTR shared helpers', () => {
       });
     });
 
-    it('should reconstruct a plate whose first character was OCR-grouped onto the driver-name line', () => {
-      const section = [
-        'Nome do Motorista',
-        'Placa do Veiculo',
-        'PEDRO ALMEIDA A',
-        'BC1D23',
-      ].join('\n');
-
-      expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'PEDRO ALMEIDA',
-        vehiclePlate: 'ABC1D23',
-      });
-    });
-
-    it('should not reconstruct when stripping the trailing letter would leave too short a driver name', () => {
-      const section = [
-        'Nome do Motorista',
-        'Placa do Veiculo',
-        'A A',
-        'BC1D23',
-      ].join('\n');
-
-      expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'A A',
-        vehiclePlate: 'BC1D23',
-      });
-    });
-
-    it('should not reconstruct when the driver-name line does not end with a single letter token', () => {
+    it('should drop a 6-character near-plate candidate so downstream marks the plate as low-confidence', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
@@ -447,20 +419,19 @@ describe('MTR shared helpers', () => {
 
       expect(extractDriverAndVehicle(section)).toEqual({
         driverName: 'PEDRO ALMEIDA',
-        vehiclePlate: 'BC1D23',
       });
     });
 
-    it('should not reconstruct when the candidate is already a valid plate', () => {
+    it('should still accept a full-length plate that follows the driver-name line', () => {
       const section = [
         'Nome do Motorista',
         'Placa do Veiculo',
-        'PEDRO ALMEIDA A',
+        'PEDRO ALMEIDA',
         'XYZ1D23',
       ].join('\n');
 
       expect(extractDriverAndVehicle(section)).toEqual({
-        driverName: 'PEDRO ALMEIDA A',
+        driverName: 'PEDRO ALMEIDA',
         vehiclePlate: 'XYZ1D23',
       });
     });

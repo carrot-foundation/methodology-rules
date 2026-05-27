@@ -120,8 +120,7 @@ export const extractMtrEntityWithAddress = (
 const DRIVER_LABELS = ['nome do motorista', 'motorista'] as const;
 const PLATE_LABEL = 'placa do veiculo';
 const VEHICLE_PLATE_FORMAT = /^[A-Z]{3}[-\s]?\d[A-Z0-9]\d{2}$/i;
-const TRUNCATED_PLATE_FORMAT = /^[A-Z]{2}[-\s]?\d[A-Z0-9]\d{2}$/i;
-const NAME_TRAILING_LETTER = /\s([A-Z])$/i;
+const TRUNCATED_PLATE_FORMAT = /^[A-Z]{2}\d[A-Z0-9]\d{2}$/i;
 const BOILERPLATE_PATTERN =
   /nome\s+e\s+assinatura|cargo|responsavel|assinatura/i;
 
@@ -171,29 +170,6 @@ const isValueLine = (line: string): boolean =>
   !line.toLowerCase().startsWith(PLATE_LABEL) &&
   !BOILERPLATE_PATTERN.test(line);
 
-const reconstructSplitPlate = (
-  nameLine: string,
-  plateCandidate: string,
-): undefined | { driverName: string; vehiclePlate: string } => {
-  if (!TRUNCATED_PLATE_FORMAT.test(plateCandidate)) {
-    return undefined;
-  }
-
-  const tail = NAME_TRAILING_LETTER.exec(nameLine);
-
-  if (!tail) {
-    return undefined;
-  }
-
-  const driverName = nameLine.slice(0, tail.index).trim();
-
-  if (driverName.length < MIN_DRIVER_NAME_LENGTH) {
-    return undefined;
-  }
-
-  return { driverName, vehiclePlate: `${tail[1]}${plateCandidate}` };
-};
-
 const extractFromBothLabels = (
   valueLines: string[],
   result: DriverAndVehicle,
@@ -204,17 +180,11 @@ const extractFromBothLabels = (
     const remaining = valueLines.find((line) => line !== nameLine);
 
     if (remaining) {
-      const reconstructed = reconstructSplitPlate(nameLine, remaining);
-
-      if (reconstructed) {
-        result.driverName = reconstructed.driverName;
-        result.vehiclePlate = reconstructed.vehiclePlate;
-
-        return;
-      }
-
       result.driverName = nameLine;
-      result.vehiclePlate = remaining;
+
+      if (!TRUNCATED_PLATE_FORMAT.test(remaining)) {
+        result.vehiclePlate = remaining;
+      }
     } else if (nameLine.includes(' ') || nameLine.length > 7) {
       result.driverName = nameLine;
     }
