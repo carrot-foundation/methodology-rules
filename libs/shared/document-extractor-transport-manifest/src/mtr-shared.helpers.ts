@@ -120,6 +120,7 @@ export const extractMtrEntityWithAddress = (
 const DRIVER_LABELS = ['nome do motorista', 'motorista'] as const;
 const PLATE_LABEL = 'placa do veiculo';
 const VEHICLE_PLATE_FORMAT = /^[A-Z]{3}[-\s]?\d[A-Z0-9]\d{2}$/i;
+const TRUNCATED_PLATE_FORMAT = /^[A-Z]{2}\d[A-Z0-9]\d{2}$/i;
 const BOILERPLATE_PATTERN =
   /nome\s+e\s+assinatura|cargo|responsavel|assinatura/i;
 
@@ -180,7 +181,10 @@ const extractFromBothLabels = (
 
     if (remaining) {
       result.driverName = nameLine;
-      result.vehiclePlate = remaining;
+
+      if (!TRUNCATED_PLATE_FORMAT.test(remaining)) {
+        result.vehiclePlate = remaining;
+      }
     } else if (nameLine.includes(' ') || nameLine.length > 7) {
       result.driverName = nameLine;
     }

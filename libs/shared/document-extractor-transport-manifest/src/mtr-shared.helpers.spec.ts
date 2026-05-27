@@ -408,6 +408,33 @@ describe('MTR shared helpers', () => {
         vehiclePlate: 'NOP9Q12',
       });
     });
+
+    it('should drop a 6-character near-plate candidate so downstream marks the plate as low-confidence', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA',
+        'BC1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+      });
+    });
+
+    it('should still accept a full-length plate that follows the driver-name line', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA',
+        'XYZ1D23',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'XYZ1D23',
+      });
+    });
   });
 
   describe('extractMtrEntityWithAddress', () => {
