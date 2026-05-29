@@ -86,6 +86,33 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
         [PICK_UP]: stubBoldMassIDPickUpEvent({
           metadataAttributes: [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '19 08 12'],
+            [
+              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              WASTE_CLASSIFICATION_CODES.BR['19 08 12'].description,
+            ],
+          ],
+        }),
+      },
+      partialDocument: {
+        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      },
+      resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
+      resultContent: {
+        description: WASTE_CLASSIFICATION_CODES.BR['19 08 12'].description,
+        id: '19 08 12',
+        recyclerCountryCode: 'BR',
+        subtype: MassIDOrganicSubtype.INDUSTRIAL_SLUDGE,
+      },
+      resultStatus: 'PASSED',
+      scenario:
+        'The Industrial Sludge subtype matches the 19 08 12 classification code (CDM 8.7B)',
+    },
+    {
+      events: {
+        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [
             [LOCAL_WASTE_CLASSIFICATION_ID, '020101'],
             [
               LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,

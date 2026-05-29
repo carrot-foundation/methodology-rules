@@ -722,7 +722,7 @@ export const WASTE_CLASSIFICATION_CODES = {
         'Misturas de gorduras e óleos, da separação óleo/água, contendo apenas óleos e gorduras alimentares',
     },
     '19 08 12': {
-      CDM_CODE: '8.7D',
+      CDM_CODE: '8.7B',
       description:
         'Lodos do tratamento biológico de efluentes industriais não abrangidas em 19 08 11',
     },
