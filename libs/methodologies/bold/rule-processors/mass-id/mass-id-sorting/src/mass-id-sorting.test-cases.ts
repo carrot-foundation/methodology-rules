@@ -94,7 +94,10 @@ const createMassIDEvents = (
   includeDescription = true,
 ) => ({
   [DROP_OFF]: stubBoldMassIDDropOffEvent({
-    partialDocumentEvent: { value: valueBeforeSorting },
+    partialDocumentEvent: {
+      externalCreatedAt: DROP_OFF_EXTERNAL_CREATED_AT,
+      value: valueBeforeSorting,
+    },
   }),
   [SORTING]: stubBoldMassIDSortingEvent({
     metadataAttributes: [
@@ -103,9 +106,10 @@ const createMassIDEvents = (
         ? []
         : [[DESCRIPTION, undefined] as [BoldAttributeName, undefined]]),
     ],
-    ...(sortingValue !== undefined && {
-      partialDocumentEvent: { value: sortingValue },
-    }),
+    partialDocumentEvent: {
+      externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+      ...(sortingValue !== undefined && { value: sortingValue }),
+    },
   }),
 });
 
@@ -159,6 +163,9 @@ const MANIFEST_DEDUCTED_WEIGHT =
   MANIFEST_GROSS_WEIGHT * MANIFEST_SORTING_FACTOR;
 const MANIFEST_SORTING_VALUE = MANIFEST_GROSS_WEIGHT - MANIFEST_DEDUCTED_WEIGHT;
 
+const DROP_OFF_EXTERNAL_CREATED_AT = '2099-01-01T00:00:00.000Z';
+const SORTING_EXTERNAL_CREATED_AT = '2099-01-01T01:00:00.000Z';
+
 const sortingFactor = faker.number.float({ max: 1, min: 0 });
 const valueBeforeSorting = faker.number.float({ min: 1 });
 const grossWeight = valueBeforeSorting;
@@ -188,6 +195,7 @@ const {
     externalEventsMap: {
       [DROP_OFF]: stubBoldMassIDDropOffEvent({
         partialDocumentEvent: {
+          externalCreatedAt: DROP_OFF_EXTERNAL_CREATED_AT,
           value: 0,
         },
       }),
@@ -207,6 +215,9 @@ const {
             }),
           },
         ],
+        partialDocumentEvent: {
+          externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+        },
       }),
     },
     partialDocument: {
@@ -239,6 +250,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     partialDocument: {
       ...massIDDocument,
       currentValue: calculatedSortingValue,
+      externalEvents: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
     resultStatus: 'FAILED',
@@ -260,6 +272,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     partialDocument: {
       ...massIDDocument,
       currentValue: MANIFEST_SORTING_VALUE,
+      externalEvents: undefined,
     },
     resultComment: RESULT_COMMENTS.passed.SORTING_VALUE_WITHIN_TOLERANCE(0),
     resultStatus: 'PASSED',
@@ -279,6 +292,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     partialDocument: {
       ...massIDDocument,
       currentValue: calculatedSortingValue + 1,
+      externalEvents: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.DOCUMENT_VALUE_MISMATCH(
       calculatedSortingValue + 1,
@@ -298,7 +312,11 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
       deductedWeight,
       wrongSortingValue,
     ),
-    partialDocument: { ...massIDDocument, currentValue: wrongSortingValue },
+    partialDocument: {
+      ...massIDDocument,
+      currentValue: wrongSortingValue,
+      externalEvents: undefined,
+    },
     resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
       Math.abs(calculatedSortingValue - wrongSortingValue),
     ),
@@ -318,6 +336,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     partialDocument: {
       ...massIDDocument,
       currentValue: calculatedSortingValue,
+      externalEvents: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.DEDUCTED_WEIGHT_MISMATCH(
       mismatchedDeductedWeight,
@@ -339,6 +358,7 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
     partialDocument: {
       ...massIDDocument,
       currentValue: calculatedSortingValue,
+      externalEvents: undefined,
     },
     resultComment: RESULT_COMMENTS.failed.GROSS_WEIGHT_MISMATCH(
       grossWeight + 0.2,
@@ -352,6 +372,11 @@ export const massIDSortingTestCases: MassIDSortingTestCase[] = [
 const invalidSortingValue = new BoldStubsBuilder()
   .createMassIDDocuments({
     externalEventsMap: {
+      [DROP_OFF]: stubBoldMassIDDropOffEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: DROP_OFF_EXTERNAL_CREATED_AT,
+        },
+      }),
       [SORTING]: stubBoldMassIDSortingEvent({
         metadataAttributes: [
           {
@@ -366,6 +391,7 @@ const invalidSortingValue = new BoldStubsBuilder()
           },
         ],
         partialDocumentEvent: {
+          externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
           value: 0,
         },
       }),
@@ -474,7 +500,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
             CUBIC_METER,
             KILOGRAM,
           ),
-          partialDocumentEvent: { value: calculatedSortingValue },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: calculatedSortingValue,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -498,7 +527,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
             KILOGRAM,
             CUBIC_METER,
           ),
-          partialDocumentEvent: { value: calculatedSortingValue },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: calculatedSortingValue,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -517,7 +549,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
         },
         [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(0, deductedWeight),
-          partialDocumentEvent: { value: calculatedSortingValue },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: calculatedSortingValue,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -536,7 +571,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
         },
         [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(valueBeforeSorting, 0),
-          partialDocumentEvent: { value: calculatedSortingValue },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: calculatedSortingValue,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -560,7 +598,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
             CUBIC_METER,
             KILOGRAM,
           ),
-          partialDocumentEvent: { value: 7 },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: 7,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -584,7 +625,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
             KILOGRAM,
             CUBIC_METER,
           ),
-          partialDocumentEvent: { value: 7 },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: 7,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),
@@ -603,7 +647,10 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
         },
         [String(SORTING)]: stubBoldMassIDSortingEvent({
           metadataAttributes: createWeightAttributes(5, 10),
-          partialDocumentEvent: { value: calculatedSortingValue },
+          partialDocumentEvent: {
+            externalCreatedAt: SORTING_EXTERNAL_CREATED_AT,
+            value: calculatedSortingValue,
+          },
         }),
       }),
       ...participantsAccreditationDocuments.values(),

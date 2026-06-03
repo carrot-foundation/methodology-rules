@@ -1,4 +1,8 @@
-import { stubBoldMassIDSortingEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  stubBoldMassIDSortingEvent,
+  stubBoldMassIDTransportManifestEvent,
+  stubBoldMassIDWeighingEvent,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
   BoldDocumentEvent,
@@ -114,13 +118,39 @@ describe('mass-id-sorting helpers', () => {
   describe('findSortingEvents', () => {
     it('should pick the last prior event with value as priorEventWithValue', () => {
       const events = [
-        { name: 'ANY', value: undefined } as unknown as BoldDocumentEvent,
-        { name: 'ANY', value: 5 } as unknown as BoldDocumentEvent,
-        { name: 'ANY' } as unknown as BoldDocumentEvent,
-        { name: 'ANY', value: 7 } as unknown as BoldDocumentEvent,
-        { name: 'ANY' } as unknown as BoldDocumentEvent,
-        { name: 'ANY' } as unknown as BoldDocumentEvent,
-        stubBoldMassIDSortingEvent({ partialDocumentEvent: { value: 9 } }),
+        {
+          externalCreatedAt: '2026-01-01T03:00:00.000Z',
+          name: 'ANY',
+          value: undefined,
+        } as unknown as BoldDocumentEvent,
+        {
+          externalCreatedAt: '2026-01-01T03:00:01.000Z',
+          name: 'ANY',
+          value: 5,
+        } as unknown as BoldDocumentEvent,
+        {
+          externalCreatedAt: '2026-01-01T03:00:02.000Z',
+          name: 'ANY',
+        } as unknown as BoldDocumentEvent,
+        {
+          externalCreatedAt: '2026-01-01T03:00:03.000Z',
+          name: 'ANY',
+          value: 7,
+        } as unknown as BoldDocumentEvent,
+        {
+          externalCreatedAt: '2026-01-01T03:00:04.000Z',
+          name: 'ANY',
+        } as unknown as BoldDocumentEvent,
+        {
+          externalCreatedAt: '2026-01-01T03:00:05.000Z',
+          name: 'ANY',
+        } as unknown as BoldDocumentEvent,
+        stubBoldMassIDSortingEvent({
+          partialDocumentEvent: {
+            externalCreatedAt: '2026-01-01T03:00:06.000Z',
+            value: 9,
+          },
+        }),
       ];
 
       const result = findSortingEvents(
@@ -132,6 +162,68 @@ describe('mass-id-sorting helpers', () => {
       }
 
       expect(result.priorEventWithValue?.value).toBe(7);
+    });
+
+    it('should select the prior value event by timestamp even when Sorting precedes it in array order', () => {
+      const sortingEvent = stubBoldMassIDSortingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: '2026-01-01T03:00:09.000Z',
+          value: 112.404,
+        },
+      });
+      const transportManifestEvent = stubBoldMassIDTransportManifestEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: '2026-01-01T03:00:01.000Z',
+          value: 114,
+        },
+      });
+      const weighingEvent = stubBoldMassIDWeighingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: '2026-01-01T03:00:03.000Z',
+          value: 120,
+        },
+      });
+      const actorEvent = {
+        externalCreatedAt: '2026-01-01T03:00:00.000Z',
+        name: 'ACTOR',
+        value: undefined,
+      } as unknown as BoldDocumentEvent;
+
+      const result = findSortingEvents([
+        actorEvent,
+        sortingEvent,
+        transportManifestEvent,
+        weighingEvent,
+      ]);
+
+      if ('isError' in result) {
+        throw new Error('Expected SortingEvents, got ValidationError');
+      }
+
+      expect(result.priorEventWithValue?.value).toBe(120);
+    });
+
+    it('should leave priorEventWithValue undefined when no value event precedes Sorting in time', () => {
+      const sortingEvent = stubBoldMassIDSortingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: '2026-01-01T03:00:01.000Z',
+          value: 100,
+        },
+      });
+      const laterWeighingEvent = stubBoldMassIDWeighingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: '2026-01-01T03:00:05.000Z',
+          value: 120,
+        },
+      });
+
+      const result = findSortingEvents([laterWeighingEvent, sortingEvent]);
+
+      if ('isError' in result) {
+        throw new Error('Expected SortingEvents, got ValidationError');
+      }
+
+      expect(result.priorEventWithValue).toBeUndefined();
     });
   });
 });

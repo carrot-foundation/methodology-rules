@@ -102,10 +102,21 @@ export const findSortingEvents = (
     sortingEventIndex,
   ) as BoldDocumentEvent;
 
+  const sortingCreatedAt = new Date(sortingEvent.externalCreatedAt).getTime();
+
   const priorEventWithValue = externalEvents
-    .slice(0, sortingEventIndex)
-    .reverse()
-    .find((event) => event.value !== undefined);
+    .filter(
+      (event) =>
+        event !== sortingEvent &&
+        event.value !== undefined &&
+        new Date(event.externalCreatedAt).getTime() < sortingCreatedAt,
+    )
+    .sort(
+      (a, b) =>
+        new Date(a.externalCreatedAt).getTime() -
+        new Date(b.externalCreatedAt).getTime(),
+    )
+    .at(-1);
 
   return { priorEventWithValue, sortingEvent };
 };
