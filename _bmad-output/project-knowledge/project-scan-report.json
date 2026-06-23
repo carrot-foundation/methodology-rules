@@ -1,0 +1,44 @@
+{
+  "workflow_version": "1.2.0",
+  "timestamps": {
+    "started": "2026-06-23T18:30:00Z",
+    "last_updated": "2026-06-23T18:55:00Z",
+    "completed": "2026-06-23T18:55:00Z"
+  },
+  "mode": "initial_scan",
+  "scan_level": "deep",
+  "project_root": "{project-root}",
+  "project_knowledge": "{project-root}/_bmad-output/project-knowledge",
+  "current_step": "completed",
+  "completed_steps": [
+    { "step": "step_1", "status": "completed", "summary": "Classified as monorepo (Nx) with 1 cohesive backend part; ~100 Nx projects, 23 rule-processor projects" },
+    { "step": "step_2", "status": "completed", "summary": "Existing docs: root CLAUDE.md/AGENTS.md, .ai/ canonical rules, generated per-rule READMEs" },
+    { "step": "step_3", "status": "completed", "summary": "Tech stack: TypeScript 5.9.3 on Node 24.14.1, AWS Lambda, Nx 22.6.1, Vitest 4.1.0, Zod 4.3.6" },
+    { "step": "step_4", "status": "completed", "summary": "Documented rule-processor contract (RuleInput/RuleOutput) and data models (document/methodology types)" },
+    { "step": "step_5", "status": "completed", "summary": "Annotated source tree written" },
+    { "step": "step_6", "status": "completed", "summary": "Development + deployment guides written" },
+    { "step": "step_8", "status": "completed", "summary": "Architecture document written (single backend part)" },
+    { "step": "step_9", "status": "completed", "summary": "Supporting docs written (overview, api-contracts, data-models, dev/deploy guides)" },
+    { "step": "step_10", "status": "completed", "summary": "Master index.md generated" },
+    { "step": "step_12", "status": "completed", "summary": "Workflow complete" }
+  ],
+  "project_types": [
+    { "part_id": "methodology-rules", "project_type_id": "backend", "display_name": "AWS Lambda rule processors (Nx monorepo)" }
+  ],
+  "findings": {
+    "project_classification": "Nx monorepo, single cohesive TypeScript backend; AWS Lambda rule processors for the BOLD methodology framework",
+    "technology_stack": "TypeScript 5.9.3 / Node 24.14.1 / AWS Lambda / Nx 22.6.1 / Vitest 4.1.0 / Zod 4.3.6"
+  },
+  "outputs_generated": [
+    "project-scan-report.json",
+    "project-overview.md",
+    "architecture.md",
+    "source-tree-analysis.md",
+    "api-contracts.md",
+    "data-models.md",
+    "development-guide.md",
+    "deployment-guide.md",
+    "index.md"
+  ],
+  "resume_instructions": "Workflow complete. Re-run document-project and choose 're-scan' or 'deep-dive' to update."
+}
