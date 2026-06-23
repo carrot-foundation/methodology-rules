@@ -1,0 +1,31 @@
+# Team / enterprise overrides for _bmad/config.toml.
+# Committed to the repo — applies to every developer on the project.
+# Tables deep-merge over base config; keyed entries merge by key.
+# Example: override an agent descriptor, or add a new agent.
+#
+# [agents.bmad-agent-pm]
+# description = "Prefers short, bulleted PRDs over narrative drafts."
+
+# ─────────────────────────────────────────────────────────────────
+# Path overrides — keep the entire BMAD footprint inside the
+# _bmad-output/ tree. Installer defaults pointed at {project-root}/docs
+# and {project-root}/skills (top-level dirs that would be committed by
+# accident). Under _bmad-output/, the knowledge docs (project_knowledge)
+# are tracked for the team, while the builder (skills/) and test-architect
+# (test-artifacts/) outputs are gitignored as ephemeral — see .gitignore.
+# methodology-rules' real knowledge lives in .ai/ (synced via
+# `pnpm ai:sync`) and is still read during the repo scan.
+# ─────────────────────────────────────────────────────────────────
+
+[modules.bmm]
+project_knowledge = "{project-root}/_bmad-output/project-knowledge"
+
+[modules.bmb]
+bmad_builder_output_folder = "{project-root}/_bmad-output/skills"
+bmad_builder_reports = "{project-root}/_bmad-output/skills/reports"
+
+[modules.tea]
+test_artifacts = "{project-root}/_bmad-output/test-artifacts"
+test_design_output = "_bmad-output/test-artifacts/test-design"
+test_review_output = "_bmad-output/test-artifacts/test-reviews"
+trace_output = "_bmad-output/test-artifacts/traceability"
