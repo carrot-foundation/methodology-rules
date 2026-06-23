@@ -8,12 +8,13 @@
 
 # ─────────────────────────────────────────────────────────────────
 # Path overrides — keep the entire BMAD footprint inside the
-# gitignored _bmad-output/ tree (.gitignore ignores _bmad-output/).
-# Installer defaults pointed at {project-root}/docs and
-# {project-root}/skills, which are NOT gitignored and would be
-# committed by accident. methodology-rules' real knowledge lives in
-# .ai/ (synced via `pnpm ai:sync`) and is still read during the repo
-# scan, so project_knowledge here is only BMAD's own output store.
+# _bmad-output/ tree. Installer defaults pointed at {project-root}/docs
+# and {project-root}/skills (top-level dirs that would be committed by
+# accident). Under _bmad-output/, the knowledge docs (project_knowledge)
+# are tracked for the team, while the builder (skills/) and test-architect
+# (test-artifacts/) outputs are gitignored as ephemeral — see .gitignore.
+# methodology-rules' real knowledge lives in .ai/ (synced via
+# `pnpm ai:sync`) and is still read during the repo scan.
 # ─────────────────────────────────────────────────────────────────
 
 [modules.bmm]

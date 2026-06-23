@@ -51,4 +51,4 @@ pnpm test:affected # Vitest
 
 When planning a new feature with the BMAD PRD workflow, point it at this file (`_bmad-output/project-knowledge/index.md`) as project-knowledge input.
 
-> **Maintenance:** this doc set is gitignored (lives under `_bmad-output/`). The canonical engineering rules remain in `.ai/`. Re-run `document-project` and choose *re-scan* or *deep-dive* to refresh after major structural changes.
+> **Maintenance:** this doc set is committed (tracked under `_bmad-output/`, matching sibling repos); installer-generated `_bmad/*` and ephemeral `_bmad-output/{skills,test-artifacts}/` stay gitignored. The canonical engineering rules remain in `.ai/`. Re-run `document-project` and choose *re-scan* or *deep-dive* to refresh after major structural changes.

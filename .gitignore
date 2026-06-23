@@ -74,3 +74,7 @@ _bmad/custom/*.user.yaml
 # BMAD installer-generated skill copies in source-of-truth dir (mirror to .claude/skills/* covered by wildcard below)
 .agents/skills/bmad-*/
 .claude/skills/bmad-*/
+# BMAD ephemeral generated outputs — the knowledge docs under _bmad-output/ are tracked,
+# but builder (skills/) and test-architect (test-artifacts/) outputs are regenerated per machine
+_bmad-output/skills/
+_bmad-output/test-artifacts/
