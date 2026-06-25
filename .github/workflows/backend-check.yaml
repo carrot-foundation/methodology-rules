@@ -137,13 +137,37 @@ jobs:
         id: download-cli
         if: ${{ !cancelled() && steps.coverage-exists.outputs.has_coverage == 'true' }}
         run: |
-          # Pinned for reproducibility; bump manually after verifying CLI compatibility
+          # Pinned for reproducibility; bump CODECOV_CLI_VERSION and CODECOV_CLI_SHA256
+          # together after verifying CLI compatibility.
           # Releases: https://github.com/codecov/codecov-cli/releases
-          CODECOV_CLI_VERSION="v10.4.0"
-          curl -fsSL --retry 3 --retry-connrefused "https://cli.codecov.io/${CODECOV_CLI_VERSION}/linux/codecov" -o ./codecov
-          curl -fsSL --retry 3 --retry-connrefused "https://cli.codecov.io/${CODECOV_CLI_VERSION}/linux/codecov.SHA256SUM" -o ./codecov.SHA256SUM
-          if ! grep ' codecov$' ./codecov.SHA256SUM | sha256sum --check -; then
-            echo "::error::Codecov CLI checksum verification failed for ${CODECOV_CLI_VERSION}. The download may be corrupted or tampered with. Try bumping CODECOV_CLI_VERSION."
+          CODECOV_CLI_VERSION="v11.2.8"
+          # Repo-owned expected SHA-256 of the linux codecov binary. This is the source
+          # of trust: the binary and its codecov.SHA256SUM are served from the same
+          # origin, so a same-origin checksum alone cannot prove the binary was not
+          # tampered with at the origin/CDN. Pinning the hash here catches such a swap.
+          CODECOV_CLI_SHA256="8930c4bb30254a42f3d8c340706b1be340885e20c0df5160a24efa2e030e662b"
+          CODECOV_CLI_BASE_URL="https://cli.codecov.io/${CODECOV_CLI_VERSION}/linux"
+
+          # cli.codecov.io redirects to a CDN that can occasionally serve a corrupt or
+          # partial body with HTTP 200; curl --retry only retries connection-level
+          # failures, so re-download and re-verify a few times to self-heal a transient
+          # bad transfer instead of failing the build.
+          download_and_verify_codecov_cli() {
+            curl -fsSL --retry 3 --retry-connrefused "${CODECOV_CLI_BASE_URL}/codecov" -o ./codecov || return 1
+            echo "${CODECOV_CLI_SHA256}  codecov" | sha256sum --check -
+          }
+
+          verified=false
+          for attempt in 1 2 3; do
+            if download_and_verify_codecov_cli; then
+              verified=true
+              break
+            fi
+            echo "::warning::Codecov CLI download/verification failed for ${CODECOV_CLI_VERSION} (attempt ${attempt}/3); retrying."
+            sleep 2
+          done
+          if [ "${verified}" != "true" ]; then
+            echo "::error::Codecov CLI checksum verification failed for ${CODECOV_CLI_VERSION} after 3 attempts. Expected SHA-256 ${CODECOV_CLI_SHA256}. The download may be corrupted or tampered with, or the pinned hash is stale after a version bump."
             exit 1
           fi
           chmod +x ./codecov
