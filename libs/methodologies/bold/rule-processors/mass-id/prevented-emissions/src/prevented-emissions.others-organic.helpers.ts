@@ -154,11 +154,19 @@ const toUtcStartOfDay = (isoDate: NonEmptyString): Date => {
 export const isCarbonCharacterizationValid = (
   analysisDate: NonEmptyString,
   pickUpDate: NonEmptyString,
-): boolean =>
-  !isAfter(
-    toUtcStartOfDay(pickUpDate),
-    addYears(toUtcStartOfDay(analysisDate), 2),
-  );
+): boolean => {
+  const pickUp = toUtcStartOfDay(pickUpDate);
+  const analysis = toUtcStartOfDay(analysisDate);
+
+  // Fail safe: an unparseable date must not slip through as "valid" —
+  // `isAfter` returns false for invalid dates, so the negated check below
+  // would otherwise treat a malformed pick-up date as within the window.
+  if (!isValid(pickUp) || !isValid(analysis)) {
+    return false;
+  }
+
+  return !isAfter(pickUp, addYears(analysis, 2));
+};
 
 export const getGeneratorCarbonCharacterization = (
   wasteGeneratorAccreditationDocument: BoldDocument | undefined,

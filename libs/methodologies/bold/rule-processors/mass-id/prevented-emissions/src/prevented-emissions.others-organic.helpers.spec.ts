@@ -318,6 +318,18 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
         isCarbonCharacterizationValid('2024-05-01', '2026-05-01T00:00:00.000Z'),
       ).toBe(true);
     });
+
+    it.each([
+      ['unparseable pickup date', '2026-05-01', 'not-a-date'],
+      ['unparseable analysis date', 'not-a-date', '2026-06-01'],
+    ])(
+      'fails safe and rejects an %s',
+      (_scenario, analysisDate, pickUpDate) => {
+        expect(isCarbonCharacterizationValid(analysisDate, pickUpDate)).toBe(
+          false,
+        );
+      },
+    );
   });
 
   describe('getGeneratorCarbonCharacterization', () => {
