@@ -26,5 +26,14 @@ describe('stubBoldOrganicWasteCarbonCharacterizationEvent', () => {
     expect(event.name).toBe(
       BoldDocumentEventName.ORGANIC_WASTE_CARBON_CHARACTERIZATION,
     );
+
+    const attributeValue = (name: BoldAttributeName) =>
+      event.metadata?.attributes?.find((attribute) => attribute.name === name)
+        ?.value;
+
+    expect(attributeValue(LOCAL_WASTE_CLASSIFICATION_ID)).toBe('20 01 99');
+    expect(attributeValue(CARBON_FRACTION)).toBe('0.12');
+    expect(attributeValue(CARBON_ANALYSIS_DATE)).toBe('2026-05-01');
+    expect(attributeValue(MOISTURE_FRACTION)).toBe('0.65');
   });
 });
