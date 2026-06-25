@@ -10,10 +10,6 @@ export class PreventedEmissionsProcessorErrors extends BaseProcessorErrors {
     INVALID_MASS_ID_DOCUMENT_SUBTYPE:
       'The "MassID" document has an invalid subtype.',
     INVALID_RULE_SUBJECT: 'The prevented-emissions rule subject is invalid.',
-    MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE: (
-      normalizedLocalWasteClassificationId: string,
-    ) =>
-      `The carbon fraction for the "Others (if organic)" local waste classification code "${normalizedLocalWasteClassificationId}" is not configured.`,
     MISSING_GREENHOUSE_GAS_TYPE:
       'Greenhouse Gas Type (GHG) metadata attribute is missing or invalid',
     MISSING_MASS_ID_DOCUMENT: 'The "MassID" document was not found.',

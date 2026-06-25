@@ -90,4 +90,44 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('should accept and preserve all optional generator characterization fields', () => {
+    const parsed = PreventedEmissionsRuleSubjectSchema.parse({
+      gasType: 'Methane (CH4)',
+      generatorCarbonAnalysisDate: '2026-05-01',
+      generatorCarbonFraction: '0.12',
+      generatorCarbonMoisture: '0.65',
+      massIDDocumentValue: 100,
+      pickUpDate: '2026-06-01',
+      wasteSubtype: 'Others (if organic)',
+    });
+
+    expect(parsed.generatorCarbonAnalysisDate).toBe('2026-05-01');
+    expect(parsed.generatorCarbonFraction).toBe('0.12');
+    expect(parsed.generatorCarbonMoisture).toBe('0.65');
+    expect(parsed.pickUpDate).toBe('2026-06-01');
+  });
+
+  it.each([
+    ['generatorCarbonFraction', { generatorCarbonFraction: 'abc' }],
+    ['generatorCarbonFraction out of range', { generatorCarbonFraction: '15' }],
+    ['generatorCarbonMoisture', { generatorCarbonMoisture: 'abc' }],
+    [
+      'generatorCarbonAnalysisDate',
+      { generatorCarbonAnalysisDate: 'not-a-date' },
+    ],
+  ])('should reject an invalid %s', (_scenario, override) => {
+    const result = PreventedEmissionsRuleSubjectSchema.safeParse({
+      gasType: 'Methane (CH4)',
+      generatorCarbonAnalysisDate: '2026-05-01',
+      generatorCarbonFraction: '0.12',
+      generatorCarbonMoisture: '0.65',
+      massIDDocumentValue: 100,
+      pickUpDate: '2026-06-01',
+      wasteSubtype: 'Others (if organic)',
+      ...override,
+    });
+
+    expect(result.success).toBe(false);
+  });
 });

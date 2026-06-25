@@ -25,6 +25,8 @@ export const RESULT_COMMENTS = {
       wasteSubtype: MassIDOrganicSubtype,
     ) =>
       `The "${BASELINES}" was not found in the "Recycler Accreditation" document for the waste subtype "${wasteSubtype}" or it is invalid.`,
+    OTHERS_IF_ORGANIC_NO_CARBON_FRACTION: (code: string) =>
+      `No carbon fraction available for the "Others (if organic)" local waste classification code "${code}": the author has not defined one and the waste generator has no valid registered fraction.`,
   },
   passed: {
     EMISSIONS_CALCULATED: (
@@ -35,7 +37,16 @@ export const RESULT_COMMENTS = {
     ) =>
       `The prevented emissions were calculated as ${formatNumber(preventedEmissions)} kg CO₂e using the formula (${currentValue} x ${preventedEmissionsByWasteSubtypeAndBaselinePerTon}) - (${currentValue} x ${exceedingEmissionCoefficient}) = ${formatNumber(preventedEmissions)} [formula: (current_value x prevented_emissions_by_waste_subtype_and_baseline_per_ton) - (current_value x exceeding_emission_coefficient) = prevented_emissions].`,
   },
-  reviewRequired: {},
+  reviewRequired: {
+    OTHERS_IF_ORGANIC_AWAITING_LAUDO: (code: string) =>
+      `No carbon fraction available for the "Others (if organic)" local waste classification code "${code}" — the author has not defined one and the waste generator has no valid registered fraction. Awaiting laudo.`,
+    OTHERS_IF_ORGANIC_EXPIRED_FRACTION: (
+      code: string,
+      analysisDate: string,
+      pickUpDate: string,
+    ) =>
+      `The waste generator's registered carbon fraction for code "${code}" expired: analysed ${analysisDate}, MassID picked up ${pickUpDate} (valid 2 years). Awaiting a new laudo.`,
+  },
 } as const;
 
 export const CDM_CODE_OTHERS_IF_ORGANIC = '8.7D';
@@ -124,11 +135,10 @@ export type OthersIfOrganicCarbonFractionsByCode = Record<
  */
 export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCarbonFractionsByCode =
   {
-    /**
-     * Local waste classification (Ibama, Brazil): 02 01 06
-     * Carbon fraction: 15% -> 0.15
-     */
-    '02 01 06': {
-      carbonFraction: '0.15',
-    },
+    // Author-defined carbon fractions (Prof. Caio), confirmed for production.
+    '02 01 06': { carbonFraction: '0.15' },
+    '16 03 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '17 05 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '19 02 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
+    '19 08 14': { carbonFraction: '0.09' }, // similar to Industrial Sludge
   };

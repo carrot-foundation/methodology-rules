@@ -5,14 +5,17 @@ import {
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import {
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
+  type StaticFactorSubtype,
+} from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   calculatePreventedEmissions,
   formatNumber,
   getBaselineByWasteSubtype,
   getGasTypeFromEvent,
-  getPreventedEmissionsFactor,
+  getStaticPreventedEmissionsFactor,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
@@ -22,44 +25,45 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
 
-  describe('getPreventedEmissionsFactor', () => {
-    it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
-        processorErrors,
-      );
-
-      expect(result).toBe(
+  describe('getStaticPreventedEmissionsFactor', () => {
+    it('returns the static table value for a non-OTHERS subtype', () => {
+      expect(
+        getStaticPreventedEmissionsFactor(
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+          processorErrors,
+        ),
+      ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
-        ][BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
+        ][BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS],
       );
     });
 
-    it('should return the correct prevented emissions factor for domestic sludge and open air dump', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-        BoldBaseline.OPEN_AIR_DUMP,
-        processorErrors,
-      );
-
-      expect(result).toBe(
+    it('returns the static table value for domestic sludge and open air dump', () => {
+      expect(
+        getStaticPreventedEmissionsFactor(
+          MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+          BoldBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+        ),
+      ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][BoldBaseline.OPEN_AIR_DUMP],
       );
     });
 
-    it('should calculate factor for Others (if organic) when valid context is provided', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-        BoldBaseline.OPEN_AIR_DUMP,
-        processorErrors,
-        { normalizedLocalWasteClassificationId: '02 01 06' },
-      );
-
-      expect(result).toBe(0.698_505);
+    it('throws a known error when the subtype has no static factor entry', () => {
+      expect(() =>
+        getStaticPreventedEmissionsFactor(
+          // OTHERS_IF_ORGANIC has no static-table entry; the cast mirrors the
+          // processor's narrowed call so the missing-entry guard is exercised.
+          MassIDOrganicSubtype.OTHERS_IF_ORGANIC as unknown as StaticFactorSubtype,
+          BoldBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+        ),
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE);
     });
   });
 

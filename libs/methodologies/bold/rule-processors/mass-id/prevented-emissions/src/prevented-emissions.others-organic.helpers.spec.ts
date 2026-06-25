@@ -1,28 +1,70 @@
 import {
+  type MetadataAttributeParameter,
   stubBoldMassIDPickUpEvent,
+  stubBoldOrganicWasteCarbonCharacterizationEvent,
   stubDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
   BoldBaseline,
+  type BoldDocument,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import {
-  OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
-  OthersIfOrganicCarbonFractionsByCode,
-} from './prevented-emissions.constants';
+import { OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
+  buildOthersIfOrganicAuditDetails,
   buildOthersIfOrganicContext,
   calculateOthersIfOrganicFactor,
-  getCarbonFractionForOthersIfOrganic,
-  getOthersIfOrganicAuditDetails,
+  getGeneratorCarbonCharacterization,
   getOthersIfOrganicContextFromMassIdDocument,
+  isCarbonCharacterizationValid,
   resolveCanonicalLocalWasteClassificationId,
+  resolveOthersIfOrganicCarbonFraction,
 } from './prevented-emissions.others-organic.helpers';
 
-const { LOCAL_WASTE_CLASSIFICATION_ID } = BoldAttributeName;
+const {
+  CARBON_ANALYSIS_DATE,
+  CARBON_FRACTION,
+  LOCAL_WASTE_CLASSIFICATION_ID,
+  MOISTURE_FRACTION,
+} = BoldAttributeName;
+
+const buildWasteGeneratorAccreditationDocument = (
+  metadataAttributes: MetadataAttributeParameter[],
+): BoldDocument =>
+  stubDocument({
+    externalEvents: [
+      stubBoldOrganicWasteCarbonCharacterizationEvent({
+        metadataAttributes,
+      }),
+    ],
+  });
+
+const buildWasteGeneratorAccreditationDocumentWithEvents = (
+  metadataAttributesList: MetadataAttributeParameter[][],
+): BoldDocument =>
+  stubDocument({
+    externalEvents: metadataAttributesList.map((metadataAttributes) =>
+      stubBoldOrganicWasteCarbonCharacterizationEvent({
+        metadataAttributes,
+      }),
+    ),
+  });
+
+describe('OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE (author-defined)', () => {
+  it.each([
+    ['16 03 06', '0.05'],
+    ['19 08 14', '0.09'],
+    ['19 02 06', '0.05'],
+    ['17 05 06', '0.05'],
+  ])('has the author-defined carbon fraction for %s', (code, fraction) => {
+    expect(
+      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[code]?.carbonFraction,
+    ).toBe(fraction);
+  });
+});
 
 describe('PreventedEmissionsOthersOrganicHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
@@ -246,133 +288,387 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
     });
   });
 
-  describe('getCarbonFractionForOthersIfOrganic', () => {
-    it('should throw INVALID_CLASSIFICATION_ID when context is undefined', () => {
-      expect(() =>
-        getCarbonFractionForOthersIfOrganic(undefined, processorErrors),
-      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
+  describe('isCarbonCharacterizationValid', () => {
+    it('accepts a pickup within 2 years of analysis', () => {
+      expect(isCarbonCharacterizationValid('2026-05-01', '2026-06-01')).toBe(
+        true,
+      );
     });
 
-    it('should throw INVALID_CLASSIFICATION_ID when normalizedLocalWasteClassificationId is missing', () => {
-      expect(() =>
-        getCarbonFractionForOthersIfOrganic({}, processorErrors),
-      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
+    it('accepts a pickup exactly 2 years after analysis', () => {
+      expect(isCarbonCharacterizationValid('2024-05-01', '2026-05-01')).toBe(
+        true,
+      );
     });
 
-    it('should throw INVALID_CLASSIFICATION_ID when normalizedLocalWasteClassificationId is empty string', () => {
+    it('rejects a pickup more than 2 years after analysis', () => {
+      expect(isCarbonCharacterizationValid('2023-05-01', '2026-05-02')).toBe(
+        false,
+      );
+    });
+
+    it('treats the exact +2y boundary deterministically when inputs differ in time basis', () => {
+      // analysisDate is date-only; pickUpDate is a UTC instant on the exact
+      // +2y boundary. Both must collapse to the same date basis so the result
+      // is independent of the host timezone.
+      expect(
+        isCarbonCharacterizationValid('2024-05-01', '2026-05-01T23:59:59.999Z'),
+      ).toBe(true);
+      expect(
+        isCarbonCharacterizationValid('2024-05-01', '2026-05-01T00:00:00.000Z'),
+      ).toBe(true);
+    });
+  });
+
+  describe('getGeneratorCarbonCharacterization', () => {
+    it('returns undefined when the accreditation document is undefined', () => {
+      expect(
+        getGeneratorCarbonCharacterization(undefined, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the normalized classification id is missing', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+      ]);
+
+      expect(
+        getGeneratorCarbonCharacterization(document, undefined),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the document has no external events', () => {
+      const document: BoldDocument = {
+        ...stubDocument(),
+        externalEvents: undefined,
+      };
+
+      expect(
+        getGeneratorCarbonCharacterization(document, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when no characterization event matches the code', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '02 02 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+      ]);
+
+      expect(
+        getGeneratorCarbonCharacterization(document, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the characterization event has no classification id', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+      ]);
+
+      expect(
+        getGeneratorCarbonCharacterization(document, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it('returns undefined when the carbon fraction is missing', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+      ]);
+
+      expect(
+        getGeneratorCarbonCharacterization(document, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it('returns the characterization when fraction, date and moisture match the code', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+        [MOISTURE_FRACTION, '0.65'],
+      ]);
+
+      expect(getGeneratorCarbonCharacterization(document, '20 01 99')).toEqual({
+        analysisDate: '2026-05-01',
+        carbonFraction: '0.12',
+        moistureFraction: '0.65',
+      });
+    });
+
+    it('returns undefined when the moisture fraction is missing', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+      ]);
+
+      expect(
+        getGeneratorCarbonCharacterization(document, '20 01 99'),
+      ).toBeUndefined();
+    });
+
+    it.each([['abc'], ['15']])(
+      'returns undefined when the moisture fraction "%s" is not a valid percentage',
+      (moistureFraction) => {
+        const document = buildWasteGeneratorAccreditationDocument([
+          [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+          [CARBON_FRACTION, '0.12'],
+          [CARBON_ANALYSIS_DATE, '2026-05-01'],
+          [MOISTURE_FRACTION, moistureFraction],
+        ]);
+
+        expect(
+          getGeneratorCarbonCharacterization(document, '20 01 99'),
+        ).toBeUndefined();
+      },
+    );
+
+    it.each([['2026-13-99'], ['pending']])(
+      'returns undefined when the analysis date "%s" is not a parseable date',
+      (analysisDate) => {
+        const document = buildWasteGeneratorAccreditationDocument([
+          [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+          [CARBON_FRACTION, '0.12'],
+          [CARBON_ANALYSIS_DATE, analysisDate],
+          [MOISTURE_FRACTION, '0.65'],
+        ]);
+
+        expect(
+          getGeneratorCarbonCharacterization(document, '20 01 99'),
+        ).toBeUndefined();
+      },
+    );
+
+    it.each([['abc'], ['15']])(
+      'returns undefined when the carbon fraction "%s" is not a valid percentage',
+      (carbonFraction) => {
+        const document = buildWasteGeneratorAccreditationDocument([
+          [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+          [CARBON_FRACTION, carbonFraction],
+          [CARBON_ANALYSIS_DATE, '2026-05-01'],
+          [MOISTURE_FRACTION, '0.65'],
+        ]);
+
+        expect(
+          getGeneratorCarbonCharacterization(document, '20 01 99'),
+        ).toBeUndefined();
+      },
+    );
+
+    it('returns the characterization when the carbon fraction is a valid percentage', () => {
+      const document = buildWasteGeneratorAccreditationDocument([
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2026-05-01'],
+        [MOISTURE_FRACTION, '0.65'],
+      ]);
+
+      expect(getGeneratorCarbonCharacterization(document, '20 01 99')).toEqual({
+        analysisDate: '2026-05-01',
+        carbonFraction: '0.12',
+        moistureFraction: '0.65',
+      });
+    });
+
+    it.each([
+      [
+        'older event first',
+        [
+          [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+            [CARBON_FRACTION, '0.10'],
+            [CARBON_ANALYSIS_DATE, '2024-01-01'],
+            [MOISTURE_FRACTION, '0.50'],
+          ],
+          [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+            [CARBON_FRACTION, '0.20'],
+            [CARBON_ANALYSIS_DATE, '2026-01-01'],
+            [MOISTURE_FRACTION, '0.65'],
+          ],
+        ] as MetadataAttributeParameter[][],
+      ],
+      [
+        'newer event first',
+        [
+          [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+            [CARBON_FRACTION, '0.20'],
+            [CARBON_ANALYSIS_DATE, '2026-01-01'],
+            [MOISTURE_FRACTION, '0.65'],
+          ],
+          [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+            [CARBON_FRACTION, '0.10'],
+            [CARBON_ANALYSIS_DATE, '2024-01-01'],
+            [MOISTURE_FRACTION, '0.50'],
+          ],
+        ] as MetadataAttributeParameter[][],
+      ],
+    ])(
+      'selects the newest valid characterization regardless of array order (%s)',
+      (_scenario, metadataAttributesList) => {
+        const document = buildWasteGeneratorAccreditationDocumentWithEvents(
+          metadataAttributesList,
+        );
+
+        expect(
+          getGeneratorCarbonCharacterization(document, '20 01 99'),
+        ).toEqual({
+          analysisDate: '2026-01-01',
+          carbonFraction: '0.20',
+          moistureFraction: '0.65',
+        });
+      },
+    );
+  });
+
+  describe('resolveOthersIfOrganicCarbonFraction', () => {
+    const authorContext = { normalizedLocalWasteClassificationId: '02 01 06' };
+    const context = { normalizedLocalWasteClassificationId: '20 01 99' };
+
+    it('Tier 1: resolves an author-defined code', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        authorContext,
+        undefined,
+        '2026-06-01',
+        processorErrors,
+      );
+
+      expect(result).toEqual({
+        carbonFraction: '0.15',
+        resolved: true,
+        source: 'author',
+      });
+    });
+
+    it('Tier 1 wins over an available generator characterization', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        authorContext,
+        {
+          analysisDate: '2026-05-01',
+          carbonFraction: '0.12',
+          moistureFraction: '0.65',
+        },
+        '2026-06-01',
+        processorErrors,
+      );
+
+      expect(result).toEqual({
+        carbonFraction: '0.15',
+        resolved: true,
+        source: 'author',
+      });
+    });
+
+    it('Tier 2: resolves a valid generator characterization', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        context,
+        {
+          analysisDate: '2026-05-01',
+          carbonFraction: '0.12',
+          moistureFraction: '0.65',
+        },
+        '2026-06-01',
+        processorErrors,
+      );
+
+      expect(result).toEqual({
+        analysisDate: '2026-05-01',
+        carbonFraction: '0.12',
+        moistureFraction: '0.65',
+        resolved: true,
+        source: 'generator',
+      });
+    });
+
+    it('Tier 2 expired → unresolved (expired)', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        context,
+        {
+          analysisDate: '2023-05-01',
+          carbonFraction: '0.12',
+          moistureFraction: '0.65',
+        },
+        '2026-05-02',
+        processorErrors,
+      );
+
+      expect(result).toEqual({ reason: 'expired', resolved: false });
+    });
+
+    it('Tier 2 with an unparseable pickup date → unresolved (missing), not expired', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        context,
+        {
+          analysisDate: '2026-05-01',
+          carbonFraction: '0.12',
+          moistureFraction: '0.65',
+        },
+        'not-a-date',
+        processorErrors,
+      );
+
+      expect(result).toEqual({ reason: 'missing', resolved: false });
+    });
+
+    it('Tier 3: no author and no generator value → unresolved (missing)', () => {
+      const result = resolveOthersIfOrganicCarbonFraction(
+        context,
+        undefined,
+        '2026-06-01',
+        processorErrors,
+      );
+
+      expect(result).toEqual({ reason: 'missing', resolved: false });
+    });
+
+    it('throws INVALID_CLASSIFICATION_ID when context is undefined', () => {
       expect(() =>
-        getCarbonFractionForOthersIfOrganic(
-          { normalizedLocalWasteClassificationId: '' },
+        resolveOthersIfOrganicCarbonFraction(
+          undefined,
+          undefined,
+          '2026-06-01',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
     });
 
-    it('should throw INVALID_CLASSIFICATION_ID when classification id is not in WASTE_CLASSIFICATION_CODES', () => {
+    it('throws INVALID_CLASSIFICATION_ID for an unknown classification id', () => {
       expect(() =>
-        getCarbonFractionForOthersIfOrganic(
+        resolveOthersIfOrganicCarbonFraction(
           { normalizedLocalWasteClassificationId: '99 99 99' },
+          undefined,
+          '2026-06-01',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID);
     });
 
-    it('should throw SUBTYPE_CDM_CODE_MISMATCH when classification code is not 8.7D', () => {
+    it('throws SUBTYPE_CDM_CODE_MISMATCH when classification code is not 8.7D', () => {
       expect(() =>
-        getCarbonFractionForOthersIfOrganic(
+        resolveOthersIfOrganicCarbonFraction(
           { normalizedLocalWasteClassificationId: '02 01 01' },
+          undefined,
+          '2026-06-01',
           processorErrors,
         ),
       ).toThrow(processorErrors.ERROR_MESSAGE.SUBTYPE_CDM_CODE_MISMATCH);
     });
-
-    it('should throw MISSING_CARBON_FRACTION when carbon fraction is not configured', () => {
-      expect(() =>
-        getCarbonFractionForOthersIfOrganic(
-          { normalizedLocalWasteClassificationId: '02 02 99' },
-          processorErrors,
-        ),
-      ).toThrow(
-        processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-          '02 02 99',
-        ),
-      );
-    });
-
-    it('should throw MISSING_CARBON_FRACTION when carbon entry exists but is undefined (defensive branch)', () => {
-      const canonicalLocalWasteClassificationCode = '02 01 06';
-      const carbonMap: OthersIfOrganicCarbonFractionsByCode =
-        OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE;
-      const original = carbonMap[canonicalLocalWasteClassificationCode];
-
-      try {
-        // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalLocalWasteClassificationCode] = undefined;
-
-        expect(() =>
-          getCarbonFractionForOthersIfOrganic(
-            {
-              normalizedLocalWasteClassificationId:
-                canonicalLocalWasteClassificationCode,
-            },
-            processorErrors,
-          ),
-        ).toThrow(
-          processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-            canonicalLocalWasteClassificationCode,
-          ),
-        );
-      } finally {
-        // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalLocalWasteClassificationCode] = original;
-      }
-    });
-
-    it('should return carbon fraction when valid classification id is provided', () => {
-      const result = getCarbonFractionForOthersIfOrganic(
-        { normalizedLocalWasteClassificationId: '02 01 06' },
-        processorErrors,
-      );
-
-      expect(result).toBe('0.15');
-    });
   });
 
-  describe('getOthersIfOrganicAuditDetails', () => {
-    it('should throw when local waste classification code is not configured', () => {
-      expect(() => {
-        getOthersIfOrganicAuditDetails('00 00 00', BoldBaseline.OPEN_AIR_DUMP);
-      }).toThrow(
-        'getOthersIfOrganicAuditDetails: no carbon entry for "00 00 00"',
-      );
-    });
-
-    it('should throw when local waste classification code exists but entry is undefined (defensive branch)', () => {
-      const canonicalLocalWasteClassificationCode = '02 01 06';
-      const carbonMap = OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE;
-      const original = carbonMap[canonicalLocalWasteClassificationCode];
-
-      try {
-        // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalLocalWasteClassificationCode] = undefined;
-
-        expect(() => {
-          getOthersIfOrganicAuditDetails(
-            canonicalLocalWasteClassificationCode,
-            BoldBaseline.OPEN_AIR_DUMP,
-          );
-        }).toThrow(
-          `getOthersIfOrganicAuditDetails: no carbon entry for "${canonicalLocalWasteClassificationCode}"`,
-        );
-      } finally {
-        // @ts-expect-error - we want to test the defensive branch
-        carbonMap[canonicalLocalWasteClassificationCode] = original;
-      }
-    });
-
+  describe('buildOthersIfOrganicAuditDetails', () => {
     it('should return audit details for OPEN_AIR_DUMP baseline', () => {
       expect(
-        getOthersIfOrganicAuditDetails('02 01 06', BoldBaseline.OPEN_AIR_DUMP),
+        buildOthersIfOrganicAuditDetails(
+          '02 01 06',
+          '0.15',
+          BoldBaseline.OPEN_AIR_DUMP,
+        ),
       ).toEqual({
         canonicalLocalWasteClassificationCode: '02 01 06',
         carbonFraction: '0.15',
@@ -386,8 +682,9 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should return audit details for LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS baseline', () => {
       expect(
-        getOthersIfOrganicAuditDetails(
+        buildOthersIfOrganicAuditDetails(
           '02 01 06',
+          '0.15',
           BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
         ),
       ).toEqual({
@@ -403,8 +700,9 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
 
     it('should return audit details for LANDFILLS_WITH_FLARING_OF_METHANE_GAS baseline', () => {
       expect(
-        getOthersIfOrganicAuditDetails(
+        buildOthersIfOrganicAuditDetails(
           '02 01 06',
+          '0.15',
           BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
         ),
       ).toEqual({
@@ -419,8 +717,9 @@ describe('PreventedEmissionsOthersOrganicHelpers', () => {
     });
 
     it('should use BigNumber for formula coefficients', () => {
-      const result = getOthersIfOrganicAuditDetails(
+      const result = buildOthersIfOrganicAuditDetails(
         '02 01 06',
+        '0.15',
         BoldBaseline.OPEN_AIR_DUMP,
       );
 
