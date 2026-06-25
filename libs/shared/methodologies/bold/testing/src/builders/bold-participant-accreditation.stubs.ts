@@ -36,6 +36,7 @@ const {
   ACCREDITATION_RESULT,
   EMISSION_AND_COMPOSTING_METRICS,
   MONITORING_SYSTEMS_AND_EQUIPMENT,
+  ORGANIC_WASTE_CARBON_CHARACTERIZATION,
   RECYCLING_BASELINES,
 } = BoldDocumentEventName;
 const {
@@ -108,6 +109,21 @@ export const stubBoldEmissionAndCompostingMetricsEvent = ({
         defaultEmissionAndCompostingMetricsEventMetadataAttributes,
         metadataAttributes,
       ),
+    ),
+    metadataAttributes,
+  );
+
+export const stubBoldOrganicWasteCarbonCharacterizationEvent = ({
+  metadataAttributes,
+  partialDocumentEvent,
+}: StubBoldDocumentEventParameters = {}) =>
+  attachExplicitAttributes(
+    stubDocumentEventWithMetadataAttributes(
+      {
+        ...partialDocumentEvent,
+        name: ORGANIC_WASTE_CARBON_CHARACTERIZATION,
+      },
+      mergeMetadataAttributes([], metadataAttributes),
     ),
     metadataAttributes,
   );

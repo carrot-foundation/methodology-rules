@@ -12,7 +12,7 @@ import {
   formatNumber,
   getBaselineByWasteSubtype,
   getGasTypeFromEvent,
-  getPreventedEmissionsFactor,
+  getStaticPreventedEmissionsFactor,
   throwIfMissing,
 } from './prevented-emissions.helpers';
 
@@ -22,44 +22,31 @@ const { BASELINES, EXCEEDING_EMISSION_COEFFICIENT, GREENHOUSE_GAS_TYPE } =
 describe('PreventedEmissionsHelpers', () => {
   const processorErrors = new PreventedEmissionsProcessorErrors();
 
-  describe('getPreventedEmissionsFactor', () => {
-    it('should return the correct prevented emissions factor for food waste and landfills without flaring', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
-        BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS,
-        processorErrors,
-      );
-
-      expect(result).toBe(
+  describe('getStaticPreventedEmissionsFactor', () => {
+    it('returns the static table value for a non-OTHERS subtype', () => {
+      expect(
+        getStaticPreventedEmissionsFactor(
+          MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
+          BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+        ),
+      ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES
-        ][BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS],
+        ][BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS],
       );
     });
 
-    it('should return the correct prevented emissions factor for domestic sludge and open air dump', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-        BoldBaseline.OPEN_AIR_DUMP,
-        processorErrors,
-      );
-
-      expect(result).toBe(
+    it('returns the static table value for domestic sludge and open air dump', () => {
+      expect(
+        getStaticPreventedEmissionsFactor(
+          MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+          BoldBaseline.OPEN_AIR_DUMP,
+        ),
+      ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][BoldBaseline.OPEN_AIR_DUMP],
       );
-    });
-
-    it('should calculate factor for Others (if organic) when valid context is provided', () => {
-      const result = getPreventedEmissionsFactor(
-        MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-        BoldBaseline.OPEN_AIR_DUMP,
-        processorErrors,
-        { normalizedLocalWasteClassificationId: '02 01 06' },
-      );
-
-      expect(result).toBe(0.698_505);
     });
   });
 

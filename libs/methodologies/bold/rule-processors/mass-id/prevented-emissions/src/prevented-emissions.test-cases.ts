@@ -6,6 +6,7 @@ import {
   type StubBoldDocumentParameters,
   stubBoldEmissionAndCompostingMetricsEvent,
   stubBoldMassIDPickUpEvent,
+  stubBoldOrganicWasteCarbonCharacterizationEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -23,6 +24,10 @@ import {
   RESULT_COMMENTS,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import {
+  buildOthersIfOrganicAuditDetails,
+  calculateOthersIfOrganicFactor,
+} from './prevented-emissions.others-organic.helpers';
 
 export interface PreventedEmissionsTestCase extends RuleTestCase {
   accreditationDocuments: Map<string, StubBoldDocumentParameters>;
@@ -35,12 +40,19 @@ export interface PreventedEmissionsTestCase extends RuleTestCase {
 
 const {
   BASELINES,
+  CARBON_ANALYSIS_DATE,
+  CARBON_FRACTION,
   EXCEEDING_EMISSION_COEFFICIENT,
   GREENHOUSE_GAS_TYPE,
   LOCAL_WASTE_CLASSIFICATION_ID,
+  MOISTURE_FRACTION,
 } = BoldAttributeName;
-const { RECYCLER } = MassIDActorType;
-const { EMISSION_AND_COMPOSTING_METRICS, PICK_UP } = BoldDocumentEventName;
+const { RECYCLER, WASTE_GENERATOR } = MassIDActorType;
+const {
+  EMISSION_AND_COMPOSTING_METRICS,
+  ORGANIC_WASTE_CARBON_CHARACTERIZATION,
+  PICK_UP,
+} = BoldDocumentEventName;
 
 const subtype = MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES;
 const baseline = BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS;
@@ -55,6 +67,7 @@ const exceedingEmissionCoefficientExceedingBaseline = baselineValue + 1;
 
 const othersIfOrganicLocalWasteClassificationCode = '02 01 06';
 const othersIfOrganicCarbonFraction = '0.15';
+const othersIfOrganicPickUpDate = '2026-06-01T00:00:00.000Z';
 
 const computeOthersIfOrganicFactor = (baseline_: BoldBaseline): number => {
   if (baseline_ === BoldBaseline.LANDFILLS_WITHOUT_FLARING_OF_METHANE_GAS) {
@@ -105,16 +118,35 @@ const makeRecyclerAccreditationParameters = (
 
 const makeAccreditationDocuments = (
   recyclerMetadataAttributes: MetadataAttributeParameter[],
-): Map<string, StubBoldDocumentParameters> =>
-  new Map([
+  wasteGeneratorCarbonCharacterizationAttributes?: MetadataAttributeParameter[],
+): Map<string, StubBoldDocumentParameters> => {
+  const accreditationDocuments = new Map<string, StubBoldDocumentParameters>([
     [RECYCLER, makeRecyclerAccreditationParameters(recyclerMetadataAttributes)],
   ]);
 
+  if (wasteGeneratorCarbonCharacterizationAttributes) {
+    accreditationDocuments.set(WASTE_GENERATOR, {
+      externalEventsMap: {
+        [ORGANIC_WASTE_CARBON_CHARACTERIZATION]:
+          stubBoldOrganicWasteCarbonCharacterizationEvent({
+            metadataAttributes: wasteGeneratorCarbonCharacterizationAttributes,
+          }),
+      },
+    });
+  }
+
+  return accreditationDocuments;
+};
+
 const makeMassIdPickUpParametersWithLocalWasteClassificationCode = (
   localWasteClassificationCode: string | undefined,
+  pickUpExternalCreatedAt?: string,
 ): StubBoldDocumentParameters => ({
   externalEventsMap: {
     [PICK_UP]: stubBoldMassIDPickUpEvent({
+      ...(pickUpExternalCreatedAt && {
+        partialDocumentEvent: { externalCreatedAt: pickUpExternalCreatedAt },
+      }),
       metadataAttributes: [
         [LOCAL_WASTE_CLASSIFICATION_ID, localWasteClassificationCode],
       ],
@@ -270,6 +302,7 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
       massIDDocumentsParams:
         makeMassIdPickUpParametersWithLocalWasteClassificationCode(
           othersIfOrganicLocalWasteClassificationCode,
+          othersIfOrganicPickUpDate,
         ),
       massIDDocumentValue,
       resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
@@ -286,6 +319,7 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
           carbonFraction: othersIfOrganicCarbonFraction,
           computedFactor: othersFactor,
           formulaCoeffs,
+          source: 'author',
         },
         preventedCo2e: expectedOthersPreventedEmissions,
         ruleSubject: {
@@ -297,6 +331,7 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
           massIDDocumentValue,
           normalizedLocalWasteClassificationId:
             othersIfOrganicLocalWasteClassificationCode,
+          pickUpDate: othersIfOrganicPickUpDate,
           wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
         },
       },
@@ -382,6 +417,161 @@ export const preventedEmissionsTestCases: PreventedEmissionsTestCase[] = [
     resultStatus: 'FAILED',
     scenario: 'The exceeding emission coefficient is negative',
     subtype,
+  },
+  // Tier 2 — valid generator carbon characterization.
+  (() => {
+    const generatorBaseline = BoldBaseline.OPEN_AIR_DUMP;
+    const generatorCarbonFraction = '0.12';
+    const generatorMoistureFraction = '0.65';
+    const generatorAnalysisDate = '2026-05-01';
+    const generatorWasteCode = '20 01 99';
+    const generatorFactor = calculateOthersIfOrganicFactor(
+      generatorBaseline,
+      generatorCarbonFraction,
+    );
+    const generatorPreventedEmissions =
+      massIDDocumentValue * generatorFactor -
+      massIDDocumentValue * exceedingEmissionCoefficient;
+
+    return {
+      accreditationDocuments: makeAccreditationDocuments(
+        [
+          [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+          [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+          [
+            BASELINES,
+            { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: generatorBaseline },
+          ],
+        ],
+        [
+          [LOCAL_WASTE_CLASSIFICATION_ID, generatorWasteCode],
+          [CARBON_FRACTION, generatorCarbonFraction],
+          [CARBON_ANALYSIS_DATE, generatorAnalysisDate],
+          [MOISTURE_FRACTION, generatorMoistureFraction],
+        ],
+      ),
+      externalCreatedAt: massIDDocument.externalCreatedAt,
+      massIDDocumentsParams:
+        makeMassIdPickUpParametersWithLocalWasteClassificationCode(
+          generatorWasteCode,
+          othersIfOrganicPickUpDate,
+        ),
+      massIDDocumentValue,
+      resultComment: RESULT_COMMENTS.passed.EMISSIONS_CALCULATED(
+        generatorPreventedEmissions,
+        generatorFactor,
+        exceedingEmissionCoefficient,
+        massIDDocumentValue,
+      ),
+      resultContent: {
+        gasType: 'Methane (CH4)',
+        othersIfOrganicAudit: {
+          ...buildOthersIfOrganicAuditDetails(
+            generatorWasteCode,
+            generatorCarbonFraction,
+            generatorBaseline,
+          ),
+          analysisDate: generatorAnalysisDate,
+          moistureFraction: generatorMoistureFraction,
+          source: 'generator',
+        },
+        preventedCo2e: generatorPreventedEmissions,
+        ruleSubject: {
+          baseline: generatorBaseline,
+          exceedingEmissionCoefficient,
+          gasType: 'Methane (CH4)',
+          generatorCarbonAnalysisDate: generatorAnalysisDate,
+          generatorCarbonFraction,
+          generatorCarbonMoisture: generatorMoistureFraction,
+          localWasteClassificationId: generatorWasteCode,
+          massIDDocumentValue,
+          normalizedLocalWasteClassificationId: generatorWasteCode,
+          pickUpDate: othersIfOrganicPickUpDate,
+          wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+        },
+      },
+      resultStatus: 'PASSED',
+      scenario:
+        'Others (if organic) resolves via a valid generator carbon characterization',
+      subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+    } satisfies PreventedEmissionsTestCase;
+  })(),
+  // Tier 3 — no author and no generator fraction → FAILED when the review flag is off.
+  {
+    accreditationDocuments: makeAccreditationDocuments([
+      [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+      [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+      [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
+    ]),
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentsParams:
+      makeMassIdPickUpParametersWithLocalWasteClassificationCode(
+        '20 01 99',
+        othersIfOrganicPickUpDate,
+      ),
+    massIDDocumentValue,
+    resultComment:
+      RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION('20 01 99'),
+    resultContent: {
+      ruleSubject: {
+        baseline,
+        exceedingEmissionCoefficient,
+        gasType: 'Methane (CH4)',
+        localWasteClassificationId: '20 01 99',
+        massIDDocumentValue,
+        normalizedLocalWasteClassificationId: '20 01 99',
+        pickUpDate: othersIfOrganicPickUpDate,
+        wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+      },
+    },
+    resultStatus: 'FAILED',
+    scenario:
+      'Others (if organic) with no author/generator fraction fails when the review flag is off',
+    subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+  },
+  // Tier 2 expired — generator fraction older than 2 years → FAILED when the review flag is off.
+  {
+    accreditationDocuments: makeAccreditationDocuments(
+      [
+        [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
+        [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
+        [BASELINES, { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline }],
+      ],
+      [
+        [LOCAL_WASTE_CLASSIFICATION_ID, '20 01 99'],
+        [CARBON_FRACTION, '0.12'],
+        [CARBON_ANALYSIS_DATE, '2023-05-01'],
+        [MOISTURE_FRACTION, '0.65'],
+      ],
+    ),
+    externalCreatedAt: massIDDocument.externalCreatedAt,
+    massIDDocumentsParams:
+      makeMassIdPickUpParametersWithLocalWasteClassificationCode(
+        '20 01 99',
+        '2026-05-02T00:00:00.000Z',
+      ),
+    massIDDocumentValue,
+    resultComment:
+      RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION('20 01 99'),
+    resultContent: {
+      ruleSubject: {
+        baseline,
+        exceedingEmissionCoefficient,
+        gasType: 'Methane (CH4)',
+        generatorCarbonAnalysisDate: '2023-05-01',
+        generatorCarbonFraction: '0.12',
+        generatorCarbonMoisture: '0.65',
+        localWasteClassificationId: '20 01 99',
+        massIDDocumentValue,
+        normalizedLocalWasteClassificationId: '20 01 99',
+        pickUpDate: '2026-05-02T00:00:00.000Z',
+        wasteSubtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+      },
+    },
+    resultStatus: 'FAILED',
+    scenario:
+      'Others (if organic) with an expired generator fraction fails when the review flag is off',
+    subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
   },
 ];
 
@@ -565,40 +755,5 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
       resultStatus: 'FAILED',
       scenario:
         'Others (if organic) has an unknown Local Waste Classification ID (not an accepted local waste classification code (Ibama, Brazil))',
-    },
-    {
-      documents: [
-        {
-          ...massIDDocument,
-          externalEvents: [
-            ...(massIDDocument.externalEvents?.filter(
-              (event) => event.name !== PICK_UP.toString(),
-            ) ?? []),
-            stubBoldMassIDPickUpEvent({
-              metadataAttributes: [[LOCAL_WASTE_CLASSIFICATION_ID, '02 02 99']],
-            }),
-          ],
-          subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
-        },
-        ...mapParticipantAccreditationDocuments({
-          recyclerExternalEvents:
-            makeRecyclerEmissionAndCompostingMetricsEvents([
-              [EXCEEDING_EMISSION_COEFFICIENT, exceedingEmissionCoefficient],
-              [GREENHOUSE_GAS_TYPE, 'Methane (CH4)'],
-              [
-                BASELINES,
-                { [MassIDOrganicSubtype.OTHERS_IF_ORGANIC]: baseline },
-              ],
-            ]),
-        }),
-      ],
-      massIDAuditDocument,
-      resultComment:
-        processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-          '02 02 99',
-        ),
-      resultStatus: 'FAILED',
-      scenario:
-        'Others (if organic) has a valid 8.7D local waste classification code (Ibama, Brazil) but carbon fraction is not configured',
     },
   ];

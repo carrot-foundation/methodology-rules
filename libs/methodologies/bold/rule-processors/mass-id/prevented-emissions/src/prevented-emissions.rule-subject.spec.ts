@@ -90,4 +90,18 @@ describe('PreventedEmissionsRuleSubjectSchema', () => {
 
     expect(result.success).toBe(false);
   });
+
+  it('should accept optional generator characterization fields', () => {
+    const parsed = PreventedEmissionsRuleSubjectSchema.parse({
+      gasType: 'Methane (CH4)',
+      generatorCarbonAnalysisDate: '2026-05-01',
+      generatorCarbonFraction: '0.12',
+      massIDDocumentValue: 100,
+      pickUpDate: '2026-06-01',
+      wasteSubtype: 'Others (if organic)',
+    });
+
+    expect(parsed.generatorCarbonFraction).toBe('0.12');
+    expect(parsed.pickUpDate).toBe('2026-06-01');
+  });
 });

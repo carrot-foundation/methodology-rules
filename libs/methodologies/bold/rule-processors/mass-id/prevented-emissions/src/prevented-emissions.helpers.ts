@@ -8,37 +8,22 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
-import type { OthersIfOrganicContext } from './prevented-emissions.others-organic.helpers';
-
-import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
-import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
-  calculateOthersIfOrganicFactor,
-  getCarbonFractionForOthersIfOrganic,
-} from './prevented-emissions.others-organic.helpers';
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
+  type StaticFactorSubtype,
+} from './prevented-emissions.constants';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
 const { BASELINES } = BoldAttributeName;
 
-export const getPreventedEmissionsFactor = (
-  wasteSubtype: MassIDOrganicSubtype,
+export const getStaticPreventedEmissionsFactor = (
+  wasteSubtype: StaticFactorSubtype,
   baseline: BoldBaseline,
-  processorErrors: PreventedEmissionsProcessorErrors,
-  othersIfOrganicContext?: OthersIfOrganicContext,
-): number => {
-  if (wasteSubtype !== MassIDOrganicSubtype.OTHERS_IF_ORGANIC) {
-    return PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
-      wasteSubtype
-    ][baseline];
-  }
-
-  const carbonFraction = getCarbonFractionForOthersIfOrganic(
-    othersIfOrganicContext,
-    processorErrors,
-  );
-
-  return calculateOthersIfOrganicFactor(baseline, carbonFraction);
-};
+): number =>
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[wasteSubtype][
+    baseline
+  ];
 
 export const calculatePreventedEmissions = (
   exceedingEmissionCoefficient: number,

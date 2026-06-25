@@ -16,8 +16,16 @@ import {
   type NonEmptyString,
   NonNegativeFloat,
   PercentageString,
+  PercentageStringSchema,
 } from '@carrot-fndn/shared/types';
 import BigNumber from 'bignumber.js';
+import { addYears, isAfter, isValid, parseISO } from 'date-fns';
+
+import type {
+  GeneratorCarbonCharacterization,
+  OthersIfOrganicCarbonResolution,
+  OthersIfOrganicRuleSubjectIds,
+} from './prevented-emissions.types';
 
 import {
   CDM_CODE_OTHERS_IF_ORGANIC,
@@ -25,10 +33,15 @@ import {
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
-import { type OthersIfOrganicRuleSubjectIds } from './prevented-emissions.types';
 
-const { LOCAL_WASTE_CLASSIFICATION_ID } = BoldAttributeName;
-const { PICK_UP } = BoldDocumentEventName;
+const {
+  CARBON_ANALYSIS_DATE,
+  CARBON_FRACTION,
+  LOCAL_WASTE_CLASSIFICATION_ID,
+  MOISTURE_FRACTION,
+} = BoldAttributeName;
+const { ORGANIC_WASTE_CARBON_CHARACTERIZATION, PICK_UP } =
+  BoldDocumentEventName;
 
 export interface OthersIfOrganicAuditDetails {
   canonicalLocalWasteClassificationCode: NonEmptyString;
@@ -128,10 +141,108 @@ export const calculateOthersIfOrganicFactor = (
   return BigNumber.max(computed, 0).toNumber();
 };
 
-export const getCarbonFractionForOthersIfOrganic = (
+const toUtcStartOfDay = (isoDate: NonEmptyString): Date => {
+  const parsed = parseISO(isoDate);
+
+  return new Date(
+    Date.UTC(
+      parsed.getUTCFullYear(),
+      parsed.getUTCMonth(),
+      parsed.getUTCDate(),
+    ),
+  );
+};
+
+export const isCarbonCharacterizationValid = (
+  analysisDate: NonEmptyString,
+  pickUpDate: NonEmptyString,
+): boolean =>
+  !isAfter(
+    toUtcStartOfDay(pickUpDate),
+    addYears(toUtcStartOfDay(analysisDate), 2),
+  );
+
+export const getGeneratorCarbonCharacterization = (
+  wasteGeneratorAccreditationDocument: BoldDocument | undefined,
+  normalizedLocalWasteClassificationId: NonEmptyString | undefined,
+): GeneratorCarbonCharacterization | undefined => {
+  if (
+    isNil(wasteGeneratorAccreditationDocument) ||
+    !isNonEmptyString(normalizedLocalWasteClassificationId)
+  ) {
+    return undefined;
+  }
+
+  const candidates = (
+    wasteGeneratorAccreditationDocument.externalEvents ?? []
+  ).filter(
+    (candidate) =>
+      candidate.name === ORGANIC_WASTE_CARBON_CHARACTERIZATION.toString() &&
+      normalizeString(
+        String(
+          getEventAttributeValue(candidate, LOCAL_WASTE_CLASSIFICATION_ID) ??
+            '',
+        ),
+      ) === normalizeString(normalizedLocalWasteClassificationId),
+  );
+
+  let newest: GeneratorCarbonCharacterization | undefined;
+
+  for (const candidate of candidates) {
+    const carbonFractionRaw = getEventAttributeValue(
+      candidate,
+      CARBON_FRACTION,
+    );
+    const analysisDate = getEventAttributeValue(
+      candidate,
+      CARBON_ANALYSIS_DATE,
+    );
+    const moistureFractionRaw = getEventAttributeValue(
+      candidate,
+      MOISTURE_FRACTION,
+    );
+
+    if (
+      !isNonEmptyString(carbonFractionRaw) ||
+      !isNonEmptyString(analysisDate) ||
+      !isNonEmptyString(moistureFractionRaw)
+    ) {
+      continue;
+    }
+
+    if (!isValid(parseISO(analysisDate))) {
+      continue;
+    }
+
+    const carbonFraction = PercentageStringSchema.safeParse(carbonFractionRaw);
+    const moistureFraction =
+      PercentageStringSchema.safeParse(moistureFractionRaw);
+
+    if (!carbonFraction.success || !moistureFraction.success) {
+      continue;
+    }
+
+    if (
+      isNil(newest) ||
+      isAfter(parseISO(analysisDate), parseISO(newest.analysisDate))
+    ) {
+      newest = {
+        analysisDate,
+        carbonFraction: carbonFraction.data,
+        moistureFraction: moistureFraction.data,
+      };
+    }
+  }
+
+  return newest;
+};
+
+export const resolveOthersIfOrganicCarbonFraction = (
   othersIfOrganicContext: OthersIfOrganicContext | undefined,
+  generatorCharacterization: GeneratorCarbonCharacterization | undefined,
+  pickUpDate: NonEmptyString | undefined,
   processorErrors: PreventedEmissionsProcessorErrors,
-): PercentageString => {
+): OthersIfOrganicCarbonResolution => {
   const { normalizedLocalWasteClassificationId } = othersIfOrganicContext ?? {};
 
   if (!isNonEmptyString(normalizedLocalWasteClassificationId)) {
@@ -165,61 +276,46 @@ export const getCarbonFractionForOthersIfOrganic = (
     );
   }
 
-  if (
-    !Object.prototype.hasOwnProperty.call(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
-      normalizedLocalWasteClassificationId,
-    )
-  ) {
-    throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-        normalizedLocalWasteClassificationId,
-      ),
-    );
-  }
-
-  const carbonEntry =
+  const authorEntry =
     OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
       normalizedLocalWasteClassificationId
     ];
 
-  if (!carbonEntry) {
-    throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.MISSING_CARBON_FRACTION_FOR_LOCAL_WASTE_CLASSIFICATION_CODE(
-        normalizedLocalWasteClassificationId,
-      ),
-    );
+  if (authorEntry) {
+    return {
+      carbonFraction: authorEntry.carbonFraction,
+      resolved: true,
+      source: 'author',
+    };
   }
 
-  return carbonEntry.carbonFraction;
+  if (generatorCharacterization && isNonEmptyString(pickUpDate)) {
+    if (
+      isCarbonCharacterizationValid(
+        generatorCharacterization.analysisDate,
+        pickUpDate,
+      )
+    ) {
+      return {
+        analysisDate: generatorCharacterization.analysisDate,
+        carbonFraction: generatorCharacterization.carbonFraction,
+        moistureFraction: generatorCharacterization.moistureFraction,
+        resolved: true,
+        source: 'generator',
+      };
+    }
+
+    return { reason: 'expired', resolved: false };
+  }
+
+  return { reason: 'missing', resolved: false };
 };
 
-export const getOthersIfOrganicAuditDetails = (
+export const buildOthersIfOrganicAuditDetails = (
   normalizedLocalWasteClassificationId: NonEmptyString,
+  carbonFraction: PercentageString,
   baseline: BoldBaseline,
 ): OthersIfOrganicAuditDetails => {
-  if (
-    !Object.prototype.hasOwnProperty.call(
-      OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
-      normalizedLocalWasteClassificationId,
-    )
-  ) {
-    throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
-    );
-  }
-
-  const entry =
-    OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE[
-      normalizedLocalWasteClassificationId
-    ];
-
-  if (!entry) {
-    throw new Error(
-      `getOthersIfOrganicAuditDetails: no carbon entry for "${normalizedLocalWasteClassificationId}"`,
-    );
-  }
-
   const formulaCoeffsRaw = OTHERS_IF_ORGANIC_BASELINE_FORMULA[baseline];
   const formulaCoeffs = {
     intercept: new BigNumber(formulaCoeffsRaw.intercept).toNumber(),
@@ -227,12 +323,12 @@ export const getOthersIfOrganicAuditDetails = (
   };
   const computedFactor = calculateOthersIfOrganicFactor(
     baseline,
-    entry.carbonFraction,
+    carbonFraction,
   );
 
   return {
     canonicalLocalWasteClassificationCode: normalizedLocalWasteClassificationId,
-    carbonFraction: entry.carbonFraction,
+    carbonFraction,
     computedFactor,
     formulaCoeffs,
   };
