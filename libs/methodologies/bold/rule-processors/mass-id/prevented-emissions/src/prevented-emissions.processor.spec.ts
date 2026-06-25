@@ -223,7 +223,7 @@ describe('PreventedEmissionsProcessor', () => {
       ).toMatchObject({ source: 'author' });
     });
 
-    it('uses the MassID created date as the pick-up date when no pick-up event exists', async () => {
+    it('degrades to a controlled FAILED when the MassID has no pick-up event', async () => {
       const {
         massIDAuditDocument,
         massIDDocument,
@@ -258,8 +258,11 @@ describe('PreventedEmissionsProcessor', () => {
         stubRuleInput({ documentId: massIDAuditDocument.id }),
       );
 
-      // Without a Local Waste Classification ID the resolver rejects the
-      // classification, but the pick-up-date fallback path is still exercised.
+      // With no pick-up event the local waste classification is absent, so the
+      // resolver rejects the classification and the rule produces a controlled
+      // FAILED rather than crashing. (The pick-up-date fallback itself is only
+      // reachable when a pick-up event exists without a timestamp, which the
+      // stub builder never produces, so it is not asserted here.)
       expect(ruleOutput.resultStatus).toBe('FAILED');
     });
 

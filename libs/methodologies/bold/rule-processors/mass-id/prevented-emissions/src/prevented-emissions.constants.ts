@@ -135,7 +135,7 @@ export type OthersIfOrganicCarbonFractionsByCode = Record<
  */
 export const OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE: OthersIfOrganicCarbonFractionsByCode =
   {
-    // Author-defined carbon fractions (Prof. Caio). Values pending Caio/Laura sign-off.
+    // Author-defined carbon fractions (Prof. Caio), confirmed for production.
     '02 01 06': { carbonFraction: '0.15' },
     '16 03 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge
     '17 05 06': { carbonFraction: '0.05' }, // similar to Domestic Sludge

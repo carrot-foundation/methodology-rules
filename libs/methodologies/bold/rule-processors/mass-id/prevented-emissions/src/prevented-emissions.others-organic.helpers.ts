@@ -18,6 +18,7 @@ import {
   PercentageString,
   PercentageStringSchema,
 } from '@carrot-fndn/shared/types';
+import { UTCDate } from '@date-fns/utc';
 import BigNumber from 'bignumber.js';
 import { addYears, isAfter, isValid, parseISO } from 'date-fns';
 
@@ -142,15 +143,12 @@ export const calculateOthersIfOrganicFactor = (
 };
 
 const toUtcStartOfDay = (isoDate: NonEmptyString): Date => {
-  const parsed = parseISO(isoDate);
+  // `UTCDate` reads a date-only string as UTC midnight (unlike date-fns
+  // `parseISO`, which uses local midnight), so the day cannot shift on
+  // non-UTC hosts.
+  const parsed = new UTCDate(isoDate);
 
-  return new Date(
-    Date.UTC(
-      parsed.getUTCFullYear(),
-      parsed.getUTCMonth(),
-      parsed.getUTCDate(),
-    ),
-  );
+  return new UTCDate(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 };
 
 export const isCarbonCharacterizationValid = (

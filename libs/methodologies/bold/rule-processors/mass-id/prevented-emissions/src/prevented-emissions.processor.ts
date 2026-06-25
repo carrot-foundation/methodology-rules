@@ -155,10 +155,12 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     }
 
     // The OTHERS_IF_ORGANIC early-return above precedes this line, so every
-    // remaining subtype is a StaticFactorSubtype, making the cast sound.
+    // remaining subtype is a StaticFactorSubtype; the helper still guards the
+    // lookup and throws a known error rather than returning NaN if it misses.
     const staticFactor = getStaticPreventedEmissionsFactor(
       wasteSubtype as StaticFactorSubtype,
       baseline,
+      this.processorErrors,
     );
     const preventedEmissions = calculatePreventedEmissions(
       exceedingEmissionCoefficient,

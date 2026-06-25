@@ -5,7 +5,10 @@ import {
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON } from './prevented-emissions.constants';
+import {
+  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON,
+  type StaticFactorSubtype,
+} from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import {
   calculatePreventedEmissions,
@@ -28,6 +31,7 @@ describe('PreventedEmissionsHelpers', () => {
         getStaticPreventedEmissionsFactor(
           MassIDOrganicSubtype.FOOD_FOOD_WASTE_AND_BEVERAGES,
           BoldBaseline.LANDFILLS_WITH_FLARING_OF_METHANE_GAS,
+          processorErrors,
         ),
       ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
@@ -41,12 +45,25 @@ describe('PreventedEmissionsHelpers', () => {
         getStaticPreventedEmissionsFactor(
           MassIDOrganicSubtype.DOMESTIC_SLUDGE,
           BoldBaseline.OPEN_AIR_DUMP,
+          processorErrors,
         ),
       ).toBe(
         PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[
           MassIDOrganicSubtype.DOMESTIC_SLUDGE
         ][BoldBaseline.OPEN_AIR_DUMP],
       );
+    });
+
+    it('throws a known error when the subtype has no static factor entry', () => {
+      expect(() =>
+        getStaticPreventedEmissionsFactor(
+          // OTHERS_IF_ORGANIC has no static-table entry; the cast mirrors the
+          // processor's narrowed call so the missing-entry guard is exercised.
+          MassIDOrganicSubtype.OTHERS_IF_ORGANIC as unknown as StaticFactorSubtype,
+          BoldBaseline.OPEN_AIR_DUMP,
+          processorErrors,
+        ),
+      ).toThrow(processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE);
     });
   });
 

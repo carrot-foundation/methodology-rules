@@ -20,10 +20,25 @@ const { BASELINES } = BoldAttributeName;
 export const getStaticPreventedEmissionsFactor = (
   wasteSubtype: StaticFactorSubtype,
   baseline: BoldBaseline,
-): number =>
-  PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[wasteSubtype][
-    baseline
-  ];
+  processorErrors: PreventedEmissionsProcessorErrors,
+): number => {
+  // The processor narrows `wasteSubtype` with a cast, so the static table's
+  // declared type hides that this lookup can miss at runtime; treat the bucket
+  // as possibly-undefined so the guard below is real.
+  const factorsByBaseline =
+    PREVENTED_EMISSIONS_BY_WASTE_SUBTYPE_AND_BASELINE_PER_TON[wasteSubtype] as
+      | Record<BoldBaseline, number>
+      | undefined;
+  const factor = factorsByBaseline?.[baseline];
+
+  if (isNil(factor)) {
+    throw processorErrors.getKnownError(
+      processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
+    );
+  }
+
+  return factor;
+};
 
 export const calculatePreventedEmissions = (
   exceedingEmissionCoefficient: number,
