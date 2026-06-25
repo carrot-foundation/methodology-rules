@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload overall coverage to Codecov
         if: ${{ !cancelled() && steps.coverage-exists.outputs.has_coverage == 'true' }}
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           directory: ./coverage
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -252,7 +252,7 @@ jobs:
         # step outcome so the follow-up warning step can detect upload failures.
         if: ${{ !cancelled() && steps.run-tests.outcome != 'skipped' && steps.codecov-check.outputs.available == 'true' }}
         continue-on-error: true
-        uses: codecov/codecov-action@1af58845a975a7985b0beb0cbe6fbbb71a41dbad # v5.5.3
+        uses: codecov/codecov-action@0fb7174895f61a3b6b78fc075e0cd60383518dac # v5.5.5
         with:
           directory: ./coverage
           token: ${{ secrets.CODECOV_TOKEN }}
