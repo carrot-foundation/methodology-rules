@@ -151,22 +151,18 @@ const toUtcStartOfDay = (isoDate: NonEmptyString): Date => {
   return new UTCDate(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
 };
 
+// Pure "within the 2-year window?" predicate. Callers MUST pass parseable
+// dates: `getGeneratorCarbonCharacterization` validates `analysisDate` and the
+// resolver validates `pickUpDate` (a malformed date is bucketed as `missing`,
+// not silently treated as in-window).
 export const isCarbonCharacterizationValid = (
   analysisDate: NonEmptyString,
   pickUpDate: NonEmptyString,
-): boolean => {
-  const pickUp = toUtcStartOfDay(pickUpDate);
-  const analysis = toUtcStartOfDay(analysisDate);
-
-  // Fail safe: an unparseable date must not slip through as "valid" —
-  // `isAfter` returns false for invalid dates, so the negated check below
-  // would otherwise treat a malformed pick-up date as within the window.
-  if (!isValid(pickUp) || !isValid(analysis)) {
-    return false;
-  }
-
-  return !isAfter(pickUp, addYears(analysis, 2));
-};
+): boolean =>
+  !isAfter(
+    toUtcStartOfDay(pickUpDate),
+    addYears(toUtcStartOfDay(analysisDate), 2),
+  );
 
 export const getGeneratorCarbonCharacterization = (
   wasteGeneratorAccreditationDocument: BoldDocument | undefined,
@@ -296,6 +292,13 @@ export const resolveOthersIfOrganicCarbonFraction = (
   }
 
   if (generatorCharacterization && isNonEmptyString(pickUpDate)) {
+    // An unparseable pick-up date can't establish a validity window, so the
+    // laudo is unusable (`missing`) rather than `expired`. `analysisDate` is
+    // already validated in `getGeneratorCarbonCharacterization`.
+    if (!isValid(parseISO(pickUpDate))) {
+      return { reason: 'missing', resolved: false };
+    }
+
     if (
       isCarbonCharacterizationValid(
         generatorCharacterization.analysisDate,
