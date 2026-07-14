@@ -4,5 +4,5 @@
     "types": ["vitest-globals", "node", "methodology-rules-vitest-matchers"]
   },
   "include": ["**/*.ts"],
-  "exclude": ["vitest.config.ts"]
+  "exclude": ["vitest.config.ts", "vitest.e2e.config.ts"]
 }
