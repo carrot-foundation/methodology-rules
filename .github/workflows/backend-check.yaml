@@ -278,6 +278,7 @@ jobs:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0 # required for Nx affected
+          persist-credentials: false # job runs pnpm install; don't leave GITHUB_TOKEN in .git/config
       - uses: ./.github/actions/prepare-to-run-nx
         with:
           environment: development
