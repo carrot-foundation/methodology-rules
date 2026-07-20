@@ -114,5 +114,38 @@ describe('Document Helpers', () => {
         });
       }
     });
+
+    it('should accept a null participant businessName and normalize it to undefined', async () => {
+      const key = faker.string.uuid();
+      const baseDocument = stubDocument();
+      const documentWithNulls = {
+        ...baseDocument,
+        externalEvents: baseDocument.externalEvents?.map((event) => ({
+          ...event,
+          participant: {
+            ...event.participant,
+            businessName: null,
+          },
+        })),
+        primaryParticipant: {
+          ...baseDocument.primaryParticipant,
+          businessName: null,
+        },
+      } as unknown as BoldDocument;
+
+      vi.spyOn(loaderService, 'load').mockResolvedValueOnce(
+        stubDocumentEntity({ document: documentWithNulls }),
+      );
+
+      const result = await loadDocument(loaderService, key);
+
+      expect(result).toBeDefined();
+      expect(result?.primaryParticipant).toMatchObject({
+        businessName: undefined,
+      });
+      for (const event of result?.externalEvents ?? []) {
+        expect(event.participant).toMatchObject({ businessName: undefined });
+      }
+    });
   });
 });

@@ -3,7 +3,9 @@ import { z } from 'zod';
 import { NonEmptyStringSchema } from '../string.types';
 
 export const DocumentParticipantSchema = z.object({
-  businessName: NonEmptyStringSchema.optional(),
+  businessName: NonEmptyStringSchema.nullish().transform(
+    (value) => value ?? undefined,
+  ),
   countryCode: NonEmptyStringSchema,
   id: NonEmptyStringSchema,
   name: NonEmptyStringSchema,
