@@ -5,6 +5,7 @@ import {
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
+  BoldActorType,
   BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
@@ -17,13 +18,17 @@ import type { PrivacyFlagsResultContent } from './privacy-flags.result-content.t
 import { PRIVACY_REASON_CODES } from './privacy-flags.constants';
 import { PrivacyFlagsProcessor } from './privacy-flags.processor';
 import {
+  actorEventKey,
   conformantEvent,
   conformantExternalEventsMap,
 } from './privacy-flags.test-cases';
 
 const { DESCRIPTION, VEHICLE_LICENSE_PLATE } = BoldAttributeName;
-const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { ACTOR, DROP_OFF, PICK_UP } = BoldDocumentEventName;
+const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
+  BoldActorType;
 
+const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
 const SKIPPED_EVENT_NAME = 'MassID Audit (BOLD Recycling)';
 const UNKNOWN_EVENT_NAME = 'Unlisted Event';
 const UNKNOWN_ATTRIBUTE_NAME = 'Unlisted Attribute';
@@ -268,5 +273,133 @@ describe('PrivacyFlagsProcessor', () => {
         field: 'sensitive',
       }),
     );
+  });
+
+  describe('ACTOR events', () => {
+    it.each([{ label: PROCESSOR }, { label: RECYCLER }])(
+      'should add a review reason when the $label actor declares preserveSensitiveData as true',
+      async ({ label }) => {
+        const massIDDocument = buildMassID({
+          [actorEventKey(label)]: stubDocumentEvent({
+            isPublic: true,
+            label,
+            name: ACTOR,
+            preserveSensitiveData: true,
+          }),
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toContainEqual(
+          expect.objectContaining({
+            actual: true,
+            code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+            eventLabel: label,
+            eventName: ACTOR,
+            expected: false,
+            field: 'preserveSensitiveData',
+          }),
+        );
+      },
+    );
+
+    it.each([
+      { label: HAULER, preserveSensitiveData: true },
+      { label: HAULER, preserveSensitiveData: false },
+      { label: HAULER, preserveSensitiveData: undefined },
+      { label: WASTE_GENERATOR, preserveSensitiveData: true },
+      { label: WASTE_GENERATOR, preserveSensitiveData: false },
+      { label: WASTE_GENERATOR, preserveSensitiveData: undefined },
+    ])(
+      'should not add a preserveSensitiveData review reason for the $label actor when preserveSensitiveData is $preserveSensitiveData',
+      async ({ label, preserveSensitiveData }) => {
+        const massIDDocument = buildMassID({
+          [actorEventKey(label)]: stubDocumentEvent({
+            isPublic: true,
+            label,
+            name: ACTOR,
+            preserveSensitiveData,
+          }),
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('PASSED');
+        expect(resultContent.reviewReasons).not.toContainEqual(
+          expect.objectContaining({
+            eventLabel: label,
+            field: 'preserveSensitiveData',
+          }),
+        );
+      },
+    );
+
+    it('should add a review reason when the Processor actor declares isPublic as false', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(PROCESSOR)]: stubDocumentEvent({
+          isPublic: false,
+          label: PROCESSOR,
+          name: ACTOR,
+          preserveSensitiveData: false,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toContainEqual(
+        expect.objectContaining({
+          actual: false,
+          code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
+          eventLabel: PROCESSOR,
+          eventName: ACTOR,
+          expected: true,
+          field: 'isPublic',
+        }),
+      );
+    });
+
+    it('should skip the Integrator and METHODOLOGY PLATFORM actors even with hostile privacy flags', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(INTEGRATOR)]: stubDocumentEvent({
+          isPublic: false,
+          label: INTEGRATOR,
+          name: ACTOR,
+          preserveSensitiveData: true,
+        }),
+        [actorEventKey(METHODOLOGY_PLATFORM_LABEL)]: stubDocumentEvent({
+          isPublic: false,
+          label: METHODOLOGY_PLATFORM_LABEL,
+          name: ACTOR,
+          preserveSensitiveData: true,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+      expect(resultContent.notValidated).not.toContainEqual(
+        expect.objectContaining({ eventName: ACTOR }),
+      );
+    });
+
+    it('should skip an ACTOR event with no label even when isPublic is false', async () => {
+      const massIDDocument = buildMassID({
+        'ACTOR-unlabeled': stubDocumentEvent({
+          isPublic: false,
+          name: ACTOR,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+      expect(resultContent.notValidated).not.toContainEqual(
+        expect.objectContaining({ eventName: ACTOR }),
+      );
+    });
   });
 });

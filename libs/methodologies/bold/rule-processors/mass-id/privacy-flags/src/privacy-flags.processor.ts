@@ -4,6 +4,7 @@ import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/b
 import {
   type BoldDocument,
   type BoldDocumentEvent,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
@@ -15,10 +16,14 @@ import type {
 import {
   EVENT_PRIVACY_SPEC,
   type EventPrivacySpec,
+  OPEN_ACTOR_LABELS,
   PRIVACY_REASON_CODES,
   RESULT_COMMENTS,
+  SKIPPED_ACTOR_LABELS,
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
+
+const { ACTOR } = BoldDocumentEventName;
 
 interface RuleSubject {
   events: BoldDocumentEvent[];
@@ -34,6 +39,14 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
 
     for (const event of events) {
       if (SKIPPED_EVENT_NAMES.has(event.name)) {
+        continue;
+      }
+
+      if (event.name === ACTOR) {
+        if (this.validateActorEvent(event, reviewReasons)) {
+          validatedEvents += 1;
+        }
+
         continue;
       }
 
@@ -72,6 +85,47 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
 
   protected override getRuleSubject(document: BoldDocument): RuleSubject {
     return { events: document.externalEvents ?? [] };
+  }
+
+  private validateActorEvent(
+    event: BoldDocumentEvent,
+    reviewReasons: PrivacyReviewReason[],
+  ): boolean {
+    const { label } = event;
+
+    if (label === undefined || SKIPPED_ACTOR_LABELS.has(label)) {
+      return false;
+    }
+
+    if (!event.isPublic) {
+      reviewReasons.push({
+        actual: event.isPublic,
+        code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
+        description: RESULT_COMMENTS.reviewRequired.ACTOR_IS_PUBLIC(
+          label,
+          true,
+        ),
+        eventLabel: label,
+        eventName: event.name,
+        expected: true,
+        field: 'isPublic',
+      });
+    }
+
+    if (OPEN_ACTOR_LABELS.has(label) && event.preserveSensitiveData === true) {
+      reviewReasons.push({
+        actual: event.preserveSensitiveData,
+        code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+        description:
+          RESULT_COMMENTS.reviewRequired.ACTOR_PRESERVE_SENSITIVE_DATA(label),
+        eventLabel: label,
+        eventName: event.name,
+        expected: false,
+        field: 'preserveSensitiveData',
+      });
+    }
+
+    return true;
   }
 
   private validateEvent(
