@@ -203,6 +203,40 @@ describe('mass-id-sorting helpers', () => {
       expect(result.priorEventWithValue?.value).toBe(120);
     });
 
+    it('should select the prior value event when every event shares the same externalCreatedAt', () => {
+      const sameCreatedAt = '2026-01-01T00:00:00.000Z';
+      const actorEvent = {
+        externalCreatedAt: sameCreatedAt,
+        name: 'ACTOR',
+        value: undefined,
+      } as unknown as BoldDocumentEvent;
+      const weighingEvent = stubBoldMassIDWeighingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: sameCreatedAt,
+          value: 1400,
+        },
+      });
+      const sortingEvent = stubBoldMassIDSortingEvent({
+        partialDocumentEvent: {
+          externalCreatedAt: sameCreatedAt,
+          value: 1386,
+        },
+      });
+
+      const result = findSortingEvents([
+        actorEvent,
+        weighingEvent,
+        sortingEvent,
+      ]);
+
+      if ('isError' in result) {
+        throw new Error('Expected SortingEvents, got ValidationError');
+      }
+
+      expect(result.priorEventWithValue).toBe(weighingEvent);
+      expect(result.priorEventWithValue?.value).toBe(1400);
+    });
+
     it('should leave priorEventWithValue undefined when no value event precedes Sorting in time', () => {
       const sortingEvent = stubBoldMassIDSortingEvent({
         partialDocumentEvent: {

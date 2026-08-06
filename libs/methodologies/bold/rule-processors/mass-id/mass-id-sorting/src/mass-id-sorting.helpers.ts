@@ -109,7 +109,7 @@ export const findSortingEvents = (
       (event) =>
         event !== sortingEvent &&
         event.value !== undefined &&
-        new Date(event.externalCreatedAt).getTime() < sortingCreatedAt,
+        new Date(event.externalCreatedAt).getTime() <= sortingCreatedAt,
     )
     .sort(
       (a, b) =>
