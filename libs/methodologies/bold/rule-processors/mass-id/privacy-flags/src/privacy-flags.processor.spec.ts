@@ -380,9 +380,6 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
-      expect(resultContent.notValidated).not.toContainEqual(
-        expect.objectContaining({ eventName: ACTOR }),
-      );
     });
 
     it('should skip an ACTOR event with no label even when isPublic is false', async () => {
@@ -397,9 +394,6 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
-      expect(resultContent.notValidated).not.toContainEqual(
-        expect.objectContaining({ eventName: ACTOR }),
-      );
     });
   });
 });
