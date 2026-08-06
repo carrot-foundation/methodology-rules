@@ -36,9 +36,7 @@ const {
   WEIGHING,
 } = BoldDocumentEventName;
 
-const { INTEGRATOR, PROCESSOR, RECYCLER } = BoldActorType;
-
-const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
+const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface AttributePrivacySpec {
   isPublic: boolean;
@@ -123,9 +121,11 @@ export const OPEN_ACTOR_LABELS: ReadonlySet<string> = new Set([
   RECYCLER,
 ]);
 
-export const SKIPPED_ACTOR_LABELS: ReadonlySet<string> = new Set([
-  INTEGRATOR,
-  METHODOLOGY_PLATFORM_LABEL,
+export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set([
+  HAULER,
+  PROCESSOR,
+  RECYCLER,
+  WASTE_GENERATOR,
 ]);
 
 export const SKIPPED_EVENT_NAMES: ReadonlySet<string> = new Set([

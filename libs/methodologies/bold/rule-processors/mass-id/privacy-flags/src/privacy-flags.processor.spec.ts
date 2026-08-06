@@ -25,7 +25,7 @@ import {
 
 const { DESCRIPTION, VEHICLE_LICENSE_PLATE } = BoldAttributeName;
 const { ACTOR, DROP_OFF, PICK_UP } = BoldDocumentEventName;
-const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
+const { AUDITOR, HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
   BoldActorType;
 
 const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
@@ -51,6 +51,7 @@ describe('PrivacyFlagsProcessor', () => {
   const evaluate = async (
     massIDDocument: BoldDocument,
   ): Promise<{
+    resultComment: string | undefined;
     resultContent: PrivacyFlagsResultContent;
     resultStatus: string;
   }> => {
@@ -59,13 +60,43 @@ describe('PrivacyFlagsProcessor', () => {
     const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
 
     return {
+      resultComment: ruleOutput.resultComment,
       resultContent: ruleOutput.resultContent as PrivacyFlagsResultContent,
       resultStatus: ruleOutput.resultStatus,
     };
   };
 
   it('should return PASSED with no review reasons for a conformant document', async () => {
-    const { resultContent, resultStatus } = await evaluate(buildMassID());
+    const { resultComment, resultContent, resultStatus } =
+      await evaluate(buildMassID());
+
+    expect(resultStatus).toBe('PASSED');
+    expect(resultContent.reviewReasons).toEqual([]);
+    expect(resultComment).toBe(
+      'All privacy flags match the methodology specification across 11 validated event(s).',
+    );
+  });
+
+  it('should treat an attribute with the sensitive property omitted as sensitive: false', async () => {
+    const pickUpEvent = conformantEvent(PICK_UP);
+    const massIDDocument = buildMassID({
+      [PICK_UP]: {
+        ...pickUpEvent,
+        metadata: {
+          attributes: (pickUpEvent.metadata?.attributes ?? []).map(
+            (attribute) =>
+              attribute.name === DESCRIPTION
+                ? stubDocumentEventAttribute({
+                    isPublic: true,
+                    name: DESCRIPTION,
+                  })
+                : attribute,
+          ),
+        },
+      },
+    });
+
+    const { resultContent, resultStatus } = await evaluate(massIDDocument);
 
     expect(resultStatus).toBe('PASSED');
     expect(resultContent.reviewReasons).toEqual([]);
@@ -360,7 +391,7 @@ describe('PrivacyFlagsProcessor', () => {
       );
     });
 
-    it('should skip the Integrator and METHODOLOGY PLATFORM actors even with hostile privacy flags', async () => {
+    it('should skip the Integrator and METHODOLOGY PLATFORM labels even with hostile privacy flags, because they are outside the assertable actor allow-list', async () => {
       const massIDDocument = buildMassID({
         [actorEventKey(INTEGRATOR)]: stubDocumentEvent({
           isPublic: false,
@@ -380,6 +411,24 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    it('should skip a BoldActorType label outside the assertable actor allow-list, such as Auditor, even with hostile privacy flags', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(AUDITOR)]: stubDocumentEvent({
+          isPublic: false,
+          label: AUDITOR,
+          name: ACTOR,
+          preserveSensitiveData: true,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).not.toContainEqual(
+        expect.objectContaining({ eventLabel: AUDITOR }),
+      );
     });
 
     it('should skip an ACTOR event with no label even when isPublic is false', async () => {

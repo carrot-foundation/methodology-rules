@@ -4,34 +4,30 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  BoldActorType,
-  BoldDocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { EVENT_PRIVACY_SPEC } from './privacy-flags.constants';
+import {
+  ASSERTABLE_ACTOR_LABELS,
+  EVENT_PRIVACY_SPEC,
+} from './privacy-flags.constants';
 
 const { ACTOR } = BoldDocumentEventName;
-const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export const SPECIFIED_EVENT_NAMES = [...EVENT_PRIVACY_SPEC.keys()];
-
-export const ASSERTABLE_ACTOR_LABELS = [
-  HAULER,
-  PROCESSOR,
-  RECYCLER,
-  WASTE_GENERATOR,
-];
 
 export const actorEventKey = (label: string): string => `${ACTOR}-${label}`;
 
 export const conformantEvent = (eventName: string): BoldDocumentEvent => {
   const eventSpec = EVENT_PRIVACY_SPEC.get(eventName);
 
+  if (eventSpec === undefined) {
+    throw new Error(`No privacy spec found for event "${eventName}"`);
+  }
+
   return stubDocumentEvent({
     isPublic: true,
     metadata: {
-      attributes: [...(eventSpec?.attributes ?? [])].map(
+      attributes: [...eventSpec.attributes].map(
         ([attributeName, attributeSpec]) =>
           stubDocumentEventAttribute({
             isPublic: attributeSpec.isPublic,
@@ -63,7 +59,7 @@ export const conformantExternalEventsMap = (): Record<
     ]),
   ),
   ...Object.fromEntries(
-    ASSERTABLE_ACTOR_LABELS.map((label) => [
+    [...ASSERTABLE_ACTOR_LABELS].map((label) => [
       actorEventKey(label),
       conformantActorEvent(label),
     ]),

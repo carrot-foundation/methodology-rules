@@ -14,12 +14,12 @@ import type {
 } from './privacy-flags.result-content.types';
 
 import {
+  ASSERTABLE_ACTOR_LABELS,
   EVENT_PRIVACY_SPEC,
   type EventPrivacySpec,
   OPEN_ACTOR_LABELS,
   PRIVACY_REASON_CODES,
   RESULT_COMMENTS,
-  SKIPPED_ACTOR_LABELS,
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
 
@@ -93,7 +93,7 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
   ): boolean {
     const { label } = event;
 
-    if (label === undefined || SKIPPED_ACTOR_LABELS.has(label)) {
+    if (label === undefined || !ASSERTABLE_ACTOR_LABELS.has(label)) {
       return false;
     }
 
