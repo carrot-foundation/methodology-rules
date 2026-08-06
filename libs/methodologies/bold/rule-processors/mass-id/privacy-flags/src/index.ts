@@ -1,1 +1,2 @@
-export * from './privacy-flags.processor';
+export * from './privacy-flags.lambda';
+export * from './privacy-flags.rule-definition';
