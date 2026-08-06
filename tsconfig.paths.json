@@ -40,6 +40,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/driver-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/driver-identification/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags": [
+        "libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler": [
         "libs/methodologies/bold/rule-processors/mass-id/drop-off-at-recycler/src/index.ts"
       ],

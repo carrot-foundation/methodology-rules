@@ -1,0 +1,19 @@
+{
+  "name": "methodologies-bold-rule-processors-mass-id-privacy-flags",
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "tags": [
+    "app:any",
+    "methodology:bold",
+    "scope:mass-id",
+    "stack:any",
+    "type:library"
+  ],
+  "sourceRoot": "libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "test-e2e": {},
+    "ts": {}
+  }
+}

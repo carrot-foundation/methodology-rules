@@ -92,6 +92,11 @@ flags:
       - libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/
     carryforward: true
 
+  mass-id--privacy-flags:
+    paths:
+      - libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/
+    carryforward: true
+
   mass-id--processor-identification:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/processor-identification/src/
