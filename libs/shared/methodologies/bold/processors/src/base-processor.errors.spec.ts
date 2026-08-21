@@ -3,7 +3,6 @@ import * as Sentry from '@sentry/aws-serverless';
 
 import { BaseProcessorErrors } from './base-processor.errors';
 
-// Mock implementation for testing
 class TestProcessorErrors extends BaseProcessorErrors {
   override readonly ERROR_MESSAGE = {
     FAILED_BY_ERROR: 'Unable to process request',
@@ -47,23 +46,44 @@ describe('BaseProcessorErrors', () => {
       expect(result).toBe('test message');
     });
 
-    it('should return default message for unknown errors', () => {
+    it('should capture and rethrow an unknown Error with the same identity', () => {
       const error = new Error('unknown error');
-      const result = processor.getResultCommentFromError(error);
+      let thrownError: unknown;
 
-      expect(result).toBe('Unable to process request');
-      expect(logger.error).toHaveBeenCalled();
+      try {
+        processor.getResultCommentFromError(error);
+      } catch (caughtError: unknown) {
+        thrownError = caughtError;
+      }
+
+      expect(thrownError).toBe(error);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        error,
+        'Unexpected error on "processKnownError" method',
+      );
       expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
 
-    it('should handle non-error objects', () => {
-      const result = processor.getResultCommentFromError({
+    it('should capture and rethrow a non-Error value with the same identity', () => {
+      const error = {
         message: 'not an error',
-      });
+      };
+      let thrownError: unknown;
 
-      expect(result).toBe('Unable to process request');
-      expect(logger.error).toHaveBeenCalled();
-      expect(Sentry.captureException).toHaveBeenCalled();
+      try {
+        processor.getResultCommentFromError(error);
+      } catch (caughtError: unknown) {
+        thrownError = caughtError;
+      }
+
+      expect(thrownError).toBe(error);
+
+      expect(logger.error).toHaveBeenCalledWith(
+        error,
+        'Unexpected error on "processKnownError" method',
+      );
+      expect(Sentry.captureException).toHaveBeenCalledWith(error);
     });
   });
 
