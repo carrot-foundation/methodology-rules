@@ -79,7 +79,12 @@ describe('MassIDSortingProcessor E2E', () => {
   describe('MassIDSortingProcessorErrors', () => {
     it.each(massIDSortingErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIDAuditDocument, resultStatus }) => {
+      async ({
+        documents,
+        lambdaShouldReject,
+        massIDAuditDocument,
+        resultStatus,
+      }) => {
         prepareEnvironmentTestE2E(
           [...documents, massIDAuditDocument].map((document) => ({
             document,
@@ -90,16 +95,28 @@ describe('MassIDSortingProcessor E2E', () => {
           })),
         );
 
-        const response = (await massIDSortingLambda(
+        const responsePromise = massIDSortingLambda(
           stubRuleInput({
             documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),
           () => stubRuleResponse(),
-        )) as RuleOutput;
+        );
 
-        expect(response.resultStatus).toBe(resultStatus);
+        const [outcome] = await Promise.allSettled([responsePromise]);
+        const rejectionOutcome = {
+          reason: expect.any(Error),
+          status: 'rejected',
+        };
+        const resolvedOutcome = {
+          status: 'fulfilled',
+          value: expect.objectContaining({ resultStatus }),
+        };
+
+        expect(outcome).toMatchObject(
+          lambdaShouldReject ? rejectionOutcome : resolvedOutcome,
+        );
       },
     );
   });

@@ -42,6 +42,7 @@ type CreditOrderDocument = BoldDocument;
 
 type ErrorTestCase = RuleTestCase & {
   creditOrderDocument: CreditOrderDocument | undefined;
+  lambdaShouldReject?: boolean;
   massIDCertificateDocuments: CertificateDocument[];
 };
 
@@ -499,7 +500,13 @@ const errorTestData = createErrorTestCases();
 
 export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   {
-    creditOrderDocument: errorTestData.errorStubs.creditOrderDocument,
+    creditOrderDocument: {
+      ...errorTestData.errorStubs.creditOrderDocument,
+      externalEvents:
+        errorTestData.errorStubs.creditOrderDocument.externalEvents?.filter(
+          (event) => event.relatedDocument?.type !== RECYCLED_ID,
+        ),
+    },
     massIDCertificateDocuments: [],
     resultComment: ERROR_MESSAGES.CERTIFICATE_DOCUMENT_NOT_FOUND(RECYCLED_ID),
     resultStatus: 'FAILED',
@@ -507,6 +514,7 @@ export const rewardsDistributionProcessorErrors: ErrorTestCase[] = [
   },
   {
     creditOrderDocument: undefined,
+    lambdaShouldReject: true,
     massIDCertificateDocuments: [
       ...errorTestData.errorStubs.massIDCertificateDocuments,
     ],

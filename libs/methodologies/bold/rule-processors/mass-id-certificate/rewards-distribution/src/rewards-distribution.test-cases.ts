@@ -257,6 +257,7 @@ const {
 
 interface RewardsDistributionErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
   massIDCertificateDocument: BoldDocument;
 }
@@ -271,6 +272,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
   [
     {
       documents: [],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -279,6 +281,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
     },
     {
       documents: [massIDDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,

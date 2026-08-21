@@ -43,6 +43,7 @@ export interface GeolocationAndAddressPrecisionTestCase extends RuleTestCase {
 
 interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument | undefined;
 }
 
@@ -1488,6 +1489,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
         massIDAuditDocument,
         ...participantsAccreditationDocuments.values(),
       ],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       resultComment: errorMessage.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
       resultStatus: 'FAILED',
@@ -1510,6 +1512,7 @@ export const geolocationAndAddressPrecisionErrorTestCases: GeolocationAndAddress
     },
     {
       documents: [massIDDocument, massIDAuditDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       resultComment:
         errorMessage.ERROR_MESSAGE

@@ -407,15 +407,19 @@ const invalidSortingValue = new BoldStubsBuilder()
 
 interface MassIDSortingErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
 }
 
 export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
-  createErrorTestCase(
-    'The MassID document does not exist',
-    [...participantsAccreditationDocuments.values()],
-    processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-  ),
+  {
+    ...createErrorTestCase(
+      'The MassID document does not exist',
+      [...participantsAccreditationDocuments.values()],
+      processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+    ),
+    lambdaShouldReject: true,
+  },
   createErrorTestCase(
     'The MassID document does not contain external events',
     [
@@ -424,11 +428,14 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     ],
     processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
   ),
-  createErrorTestCase(
-    `The ${RECYCLER} accreditation does not exist`,
-    [massIDDocument],
-    processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-  ),
+  {
+    ...createErrorTestCase(
+      `The ${RECYCLER} accreditation does not exist`,
+      [massIDDocument],
+      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+    ),
+    lambdaShouldReject: true,
+  },
   createErrorTestCase(
     `The MassID document does not contain a ${SORTING} event`,
     [
@@ -442,15 +449,18 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
     ],
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
   ),
-  createErrorTestCase(
-    'The value after sorting is not valid',
-    [
-      invalidSortingValue.massIDDocument,
-      invalidSortingValue.massIDAuditDocument,
-      ...invalidSortingValue.participantsAccreditationDocuments.values(),
-    ],
-    processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
-  ),
+  {
+    ...createErrorTestCase(
+      'The value after sorting is not valid',
+      [
+        invalidSortingValue.massIDDocument,
+        invalidSortingValue.massIDAuditDocument,
+        ...invalidSortingValue.participantsAccreditationDocuments.values(),
+      ],
+      processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(0),
+    ),
+    massIDAuditDocument: invalidSortingValue.massIDAuditDocument,
+  },
   createErrorTestCase(
     `The ${RECYCLER} accreditation does not contain a ${SORTING_FACTOR} attribute`,
     [
@@ -475,6 +485,9 @@ export const massIDSortingErrorTestCases: MassIDSortingErrorTestCase[] = [
             (event) => !event.name.includes(EMISSION_AND_COMPOSTING_METRICS),
           ),
       } as BoldDocument,
+      ...[...participantsAccreditationDocuments.entries()]
+        .filter(([participantType]) => participantType !== RECYCLER)
+        .map(([, document]) => document),
     ],
     processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
   ),

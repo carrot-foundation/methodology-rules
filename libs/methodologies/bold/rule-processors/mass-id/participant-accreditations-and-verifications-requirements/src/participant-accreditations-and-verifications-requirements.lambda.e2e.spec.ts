@@ -1,5 +1,4 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
-import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
   stubContext,
@@ -20,7 +19,12 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', (
 
   it.each(participantAccreditationsAndVerificationsRequirementsTestCases)(
     'should return $resultStatus when $scenario',
-    async ({ documents, massIDAuditDocument, resultStatus }) => {
+    async ({
+      documents,
+      lambdaShouldReject,
+      massIDAuditDocument,
+      resultStatus,
+    }) => {
       prepareEnvironmentTestE2E(
         [...documents, massIDAuditDocument].map((document) => ({
           document,
@@ -31,17 +35,29 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor E2E', (
         })),
       );
 
-      const response =
-        (await participantAccreditationsAndVerificationsRequirementsLambda(
+      const responsePromise =
+        participantAccreditationsAndVerificationsRequirementsLambda(
           stubRuleInput({
             documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),
           () => stubRuleResponse(),
-        )) as RuleOutput;
+        );
 
-      expect(response.resultStatus).toBe(resultStatus);
+      const [outcome] = await Promise.allSettled([responsePromise]);
+      const rejectionOutcome = {
+        reason: expect.any(Error),
+        status: 'rejected',
+      };
+      const resolvedOutcome = {
+        status: 'fulfilled',
+        value: expect.objectContaining({ resultStatus }),
+      };
+
+      expect(outcome).toMatchObject(
+        lambdaShouldReject ? rejectionOutcome : resolvedOutcome,
+      );
     },
   );
 });

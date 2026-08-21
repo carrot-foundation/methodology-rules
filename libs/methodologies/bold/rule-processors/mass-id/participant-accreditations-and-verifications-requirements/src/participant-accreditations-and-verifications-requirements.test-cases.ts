@@ -299,6 +299,7 @@ const massIDWithWasteGeneratorButNoAccreditation =
 
 interface ParticipantAccreditationsTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
 }
 
@@ -318,6 +319,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
     },
     {
       documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument:
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment:
@@ -339,6 +341,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
     },
     {
       documents: [massIDAuditWithAccreditationsAndVerifications.massIDDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument:
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment:
@@ -353,6 +356,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
           ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
         ].filter((document) => document.subtype !== INTEGRATOR),
       ],
+      lambdaShouldReject: true,
       massIDAuditDocument:
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment:
@@ -366,6 +370,7 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       documents: [
         ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
       ],
+      lambdaShouldReject: true,
       massIDAuditDocument:
         massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
       resultComment: processorError.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
