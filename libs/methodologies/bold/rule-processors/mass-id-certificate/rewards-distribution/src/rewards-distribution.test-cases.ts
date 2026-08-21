@@ -257,14 +257,22 @@ const {
 
 interface RewardsDistributionErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
   massIDCertificateDocument: BoldDocument;
+}
+
+interface RewardsDistributionUnexpectedErrorTestCase {
+  documents: BoldDocument[];
+  massIDAuditDocument: BoldDocument;
+  scenario: string;
 }
 
 export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCase[] =
   [
     {
       documents: [],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -273,6 +281,7 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
     },
     {
       documents: [massIDDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       massIDCertificateDocument,
       resultComment: ERROR_MESSAGES.METHODOLOGY_DOCUMENT_NOT_FOUND,
@@ -296,20 +305,6 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       ]),
       resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document does not have the required actors`,
-    },
-    {
-      documents: [
-        {
-          ...methodologyDocument,
-          externalEvents: [],
-        } as BoldDocument,
-        massIDDocument,
-      ],
-      massIDAuditDocument,
-      massIDCertificateDocument,
-      resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
-      resultStatus: 'FAILED' as const,
-      scenario: `the ${METHODOLOGY} document does not have the required actors`,
     },
     {
       documents: [
@@ -341,6 +336,21 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
       resultStatus: 'FAILED' as const,
       scenario: `the ${MASS_ID} document has an unexpected subtype`,
     },
+  ];
+
+export const rewardsDistributionProcessorUnexpectedErrors: RewardsDistributionUnexpectedErrorTestCase[] =
+  [
+    {
+      documents: [
+        {
+          ...methodologyDocument,
+          externalEvents: [],
+        } as BoldDocument,
+        massIDDocument,
+      ],
+      massIDAuditDocument,
+      scenario: `the ${METHODOLOGY} document does not have the required actors`,
+    },
     {
       documents: [
         massIDDocument,
@@ -354,9 +364,6 @@ export const rewardsDistributionProcessorErrors: RewardsDistributionErrorTestCas
         } as BoldDocument,
       ],
       massIDAuditDocument,
-      massIDCertificateDocument,
-      resultComment: ERROR_MESSAGES.FAILED_BY_ERROR,
-      resultStatus: 'FAILED' as const,
       scenario: `the ${METHODOLOGY} document does not have the required address in actors`,
     },
   ];

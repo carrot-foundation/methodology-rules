@@ -938,12 +938,14 @@ const {
 
 interface WeighingErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
 }
 
 export const weighingErrorTestCases: WeighingErrorTestCase[] = [
   {
     documents: [...participantsAccreditationDocuments.values()],
+    lambdaShouldReject: true,
     massIDAuditDocument,
     resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
     resultStatus: 'FAILED',
@@ -951,6 +953,7 @@ export const weighingErrorTestCases: WeighingErrorTestCase[] = [
   },
   {
     documents: [massIDDocument],
+    lambdaShouldReject: true,
     massIDAuditDocument,
     resultComment:
       processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,

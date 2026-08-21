@@ -93,7 +93,12 @@ describe('WeighingProcessor E2E', () => {
   describe('WeighingProcessorErrors', () => {
     it.each(weighingErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIDAuditDocument, resultStatus }) => {
+      async ({
+        documents,
+        lambdaShouldReject,
+        massIDAuditDocument,
+        resultStatus,
+      }) => {
         prepareEnvironmentTestE2E(
           [...documents, massIDAuditDocument].map((document) => ({
             document,
@@ -104,16 +109,28 @@ describe('WeighingProcessor E2E', () => {
           })),
         );
 
-        const response = (await weighingLambda(
+        const responsePromise = weighingLambda(
           stubRuleInput({
             documentId: massIDAuditDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),
           () => stubRuleResponse(),
-        )) as RuleOutput;
+        );
 
-        expect(response.resultStatus).toBe(resultStatus);
+        const [outcome] = await Promise.allSettled([responsePromise]);
+        const rejectionOutcome = {
+          reason: expect.any(Error),
+          status: 'rejected',
+        };
+        const resolvedOutcome = {
+          status: 'fulfilled',
+          value: expect.objectContaining({ resultStatus }),
+        };
+
+        expect(outcome).toMatchObject(
+          lambdaShouldReject ? rejectionOutcome : resolvedOutcome,
+        );
       },
     );
   });

@@ -134,6 +134,7 @@ describe('RewardsDistributionProcessor E2E', () => {
       'should return $resultStatus when $scenario',
       async ({
         documents,
+        lambdaShouldReject,
         massIDAuditDocument,
         massIDCertificateDocument,
         resultStatus,
@@ -150,16 +151,28 @@ describe('RewardsDistributionProcessor E2E', () => {
           ),
         );
 
-        const response = (await rewardsDistributionLambda(
+        const responsePromise = rewardsDistributionLambda(
           stubRuleInput({
             documentId: massIDCertificateDocument.id,
             documentKeyPrefix,
           }),
           stubContext(),
           () => stubRuleResponse(),
-        )) as RuleOutput;
+        );
 
-        expect(response.resultStatus).toBe(resultStatus);
+        const [outcome] = await Promise.allSettled([responsePromise]);
+        const rejectionOutcome = {
+          reason: expect.any(Error),
+          status: 'rejected',
+        };
+        const resolvedOutcome = {
+          status: 'fulfilled',
+          value: expect.objectContaining({ resultStatus }),
+        };
+
+        expect(outcome).toMatchObject(
+          lambdaShouldReject ? rejectionOutcome : resolvedOutcome,
+        );
       },
     );
   });

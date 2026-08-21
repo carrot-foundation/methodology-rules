@@ -101,7 +101,12 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
   describe('GeolocationAndAddressPrecisionProcessorErrors', () => {
     it.each(geolocationAndAddressPrecisionErrorTestCases)(
       'should return $resultStatus when $scenario',
-      async ({ documents, massIDAuditDocument, resultStatus }) => {
+      async ({
+        documents,
+        lambdaShouldReject,
+        massIDAuditDocument,
+        resultStatus,
+      }) => {
         const documentEntries = (
           [...documents, massIDAuditDocument].filter(Boolean) as BoldDocument[]
         ).map((document) => ({
@@ -116,16 +121,28 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
           prepareEnvironmentTestE2E(documentEntries);
         }
 
-        const response = (await geolocationAndAddressPrecisionLambda(
+        const responsePromise = geolocationAndAddressPrecisionLambda(
           stubRuleInput({
             documentId: massIDAuditDocument?.id ?? faker.string.uuid(),
             documentKeyPrefix,
           }),
           stubContext(),
           () => stubRuleResponse(),
-        )) as RuleOutput;
+        );
 
-        expect(response.resultStatus).toBe(resultStatus);
+        const [outcome] = await Promise.allSettled([responsePromise]);
+        const rejectionOutcome = {
+          reason: expect.any(Error),
+          status: 'rejected',
+        };
+        const resolvedOutcome = {
+          status: 'fulfilled',
+          value: expect.objectContaining({ resultStatus }),
+        };
+
+        expect(outcome).toMatchObject(
+          lambdaShouldReject ? rejectionOutcome : resolvedOutcome,
+        );
       },
     );
   });

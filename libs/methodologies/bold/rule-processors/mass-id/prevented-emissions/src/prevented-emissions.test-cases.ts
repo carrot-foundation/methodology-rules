@@ -617,6 +617,7 @@ const makeRecyclerEmissionAndCompostingMetricsEvents = (
 
 interface PreventedEmissionsErrorTestCase extends RuleTestCase {
   documents: BoldDocument[];
+  lambdaShouldReject?: boolean;
   massIDAuditDocument: BoldDocument;
 }
 
@@ -662,6 +663,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
     },
     {
       documents: [...participantsAccreditationDocuments.values()],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       resultComment: processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
       resultStatus: 'FAILED',
@@ -669,6 +671,7 @@ export const preventedEmissionsErrorTestCases: PreventedEmissionsErrorTestCase[]
     },
     {
       documents: [massIDDocument],
+      lambdaShouldReject: true,
       massIDAuditDocument,
       resultComment:
         processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,

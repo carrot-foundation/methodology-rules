@@ -16,7 +16,13 @@ export abstract class BaseProcessorErrors {
   }
 
   getResultCommentFromError(error: unknown): string {
-    return this.processKnownError(error) || this.ERROR_MESSAGE.FAILED_BY_ERROR;
+    const resultComment = this.processKnownError(error);
+
+    if (resultComment === undefined) {
+      throw error;
+    }
+
+    return resultComment;
   }
 
   private getKnownErrorMessage(error: Error): string {

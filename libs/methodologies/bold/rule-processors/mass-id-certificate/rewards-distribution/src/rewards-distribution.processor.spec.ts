@@ -19,6 +19,7 @@ import { RewardsDistributionProcessor } from './rewards-distribution.processor';
 import {
   rewardsDistributionProcessorErrors,
   rewardsDistributionProcessorTestCases,
+  rewardsDistributionProcessorUnexpectedErrors,
 } from './rewards-distribution.test-cases';
 
 const { ONBOARDING_DECLARATION } = BoldDocumentEventName;
@@ -155,6 +156,23 @@ describe('RewardsDistributionProcessor', () => {
           resultComment,
           resultStatus,
         });
+      },
+    );
+  });
+
+  describe('rewardsDistributionProcessorUnexpectedErrors', () => {
+    it.each(rewardsDistributionProcessorUnexpectedErrors)(
+      'should reject when $scenario',
+      async ({ documents, massIDAuditDocument }) => {
+        const allDocuments = [massIDAuditDocument, ...documents];
+
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, allDocuments);
+
+        const ruleInput = stubRuleInput({
+          documentId: massIDAuditDocument.id,
+        });
+
+        await expect(ruleDataProcessor.process(ruleInput)).rejects.toThrow();
       },
     );
   });
