@@ -3,6 +3,8 @@ import { fromEnv } from '@aws-sdk/credential-providers';
 import { isObject } from '@carrot-fndn/shared/helpers';
 import { SignatureV4 } from '@smithy/signature-v4';
 
+import type { AwsCredentialIdentityProvider } from './aws-credentials.provider';
+
 export interface SignRequestInput {
   body?: unknown;
   method: string;
@@ -13,9 +15,10 @@ export interface SignRequestInput {
 export const signRequest = async (
   { body, method, query, url }: SignRequestInput,
   awsRegion: string,
+  credentials: AwsCredentialIdentityProvider = fromEnv(),
 ) => {
   const signer = new SignatureV4({
-    credentials: fromEnv(),
+    credentials,
     region: awsRegion,
     service: 'execute-api',
     sha256: Sha256,

@@ -1,7 +1,6 @@
 import type { UnknownObject } from '@carrot-fndn/shared/types';
 
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
-import { STSClient } from '@aws-sdk/client-sts';
 import { faker } from '@faker-js/faker';
 import { sdkStreamMixin } from '@smithy/util-stream';
 import { mockClient } from 'aws-sdk-client-mock';
@@ -15,7 +14,8 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
     AWS_ACCESS_KEY_ID: faker.string.uuid(),
     AWS_REGION: faker.string.uuid(),
     AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-    SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: faker.string.uuid(),
+    SMAUG_API_GATEWAY_ASSUME_ROLE_ARN:
+      'arn:aws:iam::123456789012:role/carrot-test-smaug-api-gateway',
   };
 
   // Mock report to Smaug
@@ -26,16 +26,6 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
     $metadata: {},
     message: 'Not found document for Parent Document Key',
   });
-
-  STSClient.prototype.send = () =>
-    ({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        Expiration: new Date(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    }) as never;
 
   mockClient(S3Client)
     .on(GetObjectCommand)

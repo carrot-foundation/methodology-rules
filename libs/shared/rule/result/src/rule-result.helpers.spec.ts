@@ -1,4 +1,3 @@
-import { STSClient } from '@aws-sdk/client-sts';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
@@ -18,16 +17,26 @@ import {
 const mockArtifactChecksum = vi.fn(() => faker.string.uuid());
 const mockSourceCodeUrl = vi.fn(() => faker.internet.url());
 const mockSourceCodeVersion = vi.fn(() => faker.string.uuid());
-const mockSmaugArn = vi.fn(() => faker.string.uuid());
 const mockAwsRegion = vi.fn(() => faker.string.uuid());
+const validSmaugRoleArn = 'arn:aws:iam::123456789012:role/smaug-api-gateway';
+const provideStubSmaugCredentials = () =>
+  Promise.resolve({
+    accessKeyId: 'smaug-access-key',
+    secretAccessKey: 'smaug-secret-key',
+    sessionToken: 'smaug-session-token',
+  });
 
 vi.mock('@carrot-fndn/shared/env', () => ({
   getArtifactChecksum: () => mockArtifactChecksum(),
   getAwsRegion: () => mockAwsRegion(),
   getOptionalEnv: vi.fn(),
-  getSmaugApiGatewayAssumeRoleArn: () => mockSmaugArn(),
   getSourceCodeUrl: () => mockSourceCodeUrl(),
   getSourceCodeVersion: () => mockSourceCodeVersion(),
+}));
+
+vi.mock('@carrot-fndn/shared/aws-http', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@carrot-fndn/shared/aws-http')>()),
+  provideSmaugApiCredentials: vi.fn(() => provideStubSmaugCredentials),
 }));
 
 describe('mapToRuleOutput', () => {
@@ -68,7 +77,6 @@ describe('mapToRuleOutput', () => {
     });
   });
 });
-
 describe('mapRuleOutputToPostProcessInput', () => {
   let artifactChecksum: string;
   let sourceCodeUrl: string;
@@ -114,7 +122,6 @@ describe('reportRuleResults', () => {
 
   beforeEach(() => {
     const awsRegion = faker.string.uuid();
-    const smaugArn = faker.string.uuid();
 
     artifactChecksum = faker.string.uuid();
     sourceCodeUrl = faker.internet.url();
@@ -123,7 +130,6 @@ describe('reportRuleResults', () => {
     mockArtifactChecksum.mockReturnValue(artifactChecksum);
     mockSourceCodeUrl.mockReturnValue(sourceCodeUrl);
     mockSourceCodeVersion.mockReturnValue(sourceCodeVersion);
-    mockSmaugArn.mockReturnValue(smaugArn);
     mockAwsRegion.mockReturnValue(awsRegion);
 
     process.env = {
@@ -131,7 +137,7 @@ describe('reportRuleResults', () => {
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
       AWS_REGION: awsRegion,
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: smaugArn,
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: validSmaugRoleArn,
     };
   });
 
@@ -145,14 +151,6 @@ describe('reportRuleResults', () => {
       responseUrl: faker.internet.url(),
       resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
-
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
 
     const { headers, ...request } = await signRequest({
       body: mapRuleOutputToPostProcessInput(ruleOutput),
@@ -201,14 +199,6 @@ describe('reportRuleResults', () => {
       resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
 
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
-
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
       new Response(null, { status: 400 }),
     );
@@ -226,14 +216,6 @@ describe('reportRuleResults', () => {
     };
 
     const errorResponse = new Response();
-
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
 
     vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(errorResponse);
     vi.spyOn(logger, 'error').mockImplementationOnce(() => {});
@@ -254,9 +236,7 @@ describe('signRequest', () => {
 
   beforeEach(() => {
     const awsRegion = faker.string.uuid();
-    const smaugArn = faker.string.uuid();
 
-    mockSmaugArn.mockReturnValue(smaugArn);
     mockAwsRegion.mockReturnValue(awsRegion);
 
     process.env = {
@@ -264,7 +244,7 @@ describe('signRequest', () => {
       AWS_ACCESS_KEY_ID: faker.string.uuid(),
       AWS_REGION: awsRegion,
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: smaugArn,
+      SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: validSmaugRoleArn,
     };
   });
 
@@ -280,14 +260,6 @@ describe('signRequest', () => {
       url: new URL(faker.internet.url()),
     };
 
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
-
     const result = await signRequest(input);
 
     expect(result).toEqual(
@@ -297,6 +269,7 @@ describe('signRequest', () => {
           authorization: expect.any(String),
           'Content-Type': 'application/json',
           Host: input.url.host,
+          'x-amz-security-token': 'smaug-session-token',
         }),
         hostname: input.url.hostname,
         method: input.method,
@@ -308,60 +281,5 @@ describe('signRequest', () => {
         username: undefined,
       }),
     );
-  });
-
-  it('should throw error when Credentials for the assumed role are not found', async () => {
-    const input = {
-      body: { [faker.string.sample()]: faker.string.sample() },
-      method: faker.internet.httpMethod(),
-      query: { [faker.string.sample()]: faker.string.sample() },
-      url: new URL(faker.internet.url()),
-    };
-
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: undefined,
-    } as never);
-
-    await expect(signRequest(input)).rejects.toThrow();
-  });
-
-  it.each([
-    {
-      Credentials: {
-        AccessKeyId: undefined,
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-      field: 'AccessKeyId',
-    },
-    {
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: undefined,
-        SessionToken: faker.string.uuid(),
-      },
-      field: 'SecretAccessKey',
-    },
-    {
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: undefined,
-      },
-      field: 'SessionToken',
-    },
-  ])('should throw error when $field is undefined', async ({ Credentials }) => {
-    const input = {
-      body: { [faker.string.sample()]: faker.string.sample() },
-      method: faker.internet.httpMethod(),
-      query: { [faker.string.sample()]: faker.string.sample() },
-      url: new URL(faker.internet.url()),
-    };
-
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials,
-    } as never);
-
-    await expect(signRequest(input)).rejects.toThrow();
   });
 });
