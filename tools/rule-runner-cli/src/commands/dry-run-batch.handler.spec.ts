@@ -449,6 +449,53 @@ describe('handleDryRunBatch', () => {
     );
   });
 
+  it('should exclude processor reason codes from local batch logs', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const localSelection = {
+      dataSetName: 'TEST' as const,
+      mode: 'local' as const,
+      processorPath: 'some/path',
+    };
+    const localResult = makeDocumentResult('doc-1', [
+      {
+        resultContent: {
+          failReasons: [{ code: 'EXTRACTED_PARTICIPANT_NAME' }],
+          reviewReasons: [{ code: 'EXTRACTED_DOCUMENT_NUMBER' }],
+        },
+        status: 'failed',
+      },
+      {
+        resultContent: {
+          reviewReasons: [{ code: 'EXTRACTED_REVIEW_VALUE' }],
+        },
+        status: 'review_required',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', localResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: localResult }],
+      });
+    });
+
+    const infoSpy = vi.spyOn(logger, 'info');
+
+    await handleDryRunBatch(localSelection, baseOptions);
+
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_PARTICIPANT_NAME',
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_DOCUMENT_NUMBER',
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_REVIEW_VALUE',
+    );
+  });
+
   it('should not write result files when all rules pass', async () => {
     mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
 

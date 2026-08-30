@@ -47,9 +47,12 @@ const readDocumentIds = async (filePath: string): Promise<string[]> => {
   return parsed as string[];
 };
 
-const toRuleResultEntry = (ruleResult: DryRunRuleResult): RuleResultEntry => ({
+const toRuleResultEntry = (
+  ruleResult: DryRunRuleResult,
+  mode: DryRunSelection['mode'],
+): RuleResultEntry => ({
   resultComment: ruleResult.resultComment,
-  resultContent: ruleResult.resultContent,
+  ...(mode === 'registered' && { resultContent: ruleResult.resultContent }),
   resultStatus: ruleResult.status,
 });
 
@@ -159,11 +162,13 @@ export const handleDryRunBatch = async (
   });
 
   const reviewRequiredBreakdown = buildReasonCodeBreakdown(
-    reviewRequiredResults.map((r) => toRuleResultEntry(r.ruleResult)),
+    reviewRequiredResults.map((r) =>
+      toRuleResultEntry(r.ruleResult, selection.mode),
+    ),
     'reviewReasons',
   );
   const failedEntries = ruleFailures.map((r) =>
-    toRuleResultEntry(r.ruleResult),
+    toRuleResultEntry(r.ruleResult, selection.mode),
   );
   const failedBreakdown = buildReasonCodeBreakdown(
     failedEntries,
