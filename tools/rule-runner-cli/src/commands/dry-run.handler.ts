@@ -7,15 +7,20 @@ import { formatAsJson } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 import path from 'node:path';
 
-import type { DryRunOptions } from './dry-run.command';
+import type { DryRunOptions, DryRunSelection } from './dry-run.command';
 
 import { formatAsHuman } from '../formatters/human.formatter';
 import { parseConfig } from '../utils/config-parser';
-import { loadProcessor } from '../utils/processor-loader';
+import {
+  loadLocalRuleModule,
+  loadProcessor,
+  type LocalRuleModule,
+} from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 import {
   type DryRunPrepareResponse,
   prepareDryRun,
+  prepareLocalRule,
 } from '../utils/smaug-client';
 
 export interface DryRunDocumentResult {
@@ -192,20 +197,76 @@ export const processDryRunDocument = async (
   return { documentId, ruleResults };
 };
 
+export const processLocalDryRunDocument = async (
+  documentId: string,
+  context: {
+    localRuleModule: LocalRuleModule;
+    options: DryRunOptions;
+    selection: Extract<DryRunSelection, { mode: 'local' }>;
+    smaugUrl: string;
+  },
+): Promise<DryRunDocumentResult> => {
+  const { localRuleModule, selection } = context;
+  const input = localRuleModule.ruleDefinition.input;
+  const prepared = await prepareLocalRule(context.smaugUrl, {
+    dataSetName: selection.dataSetName,
+    documentId,
+    ...(input === undefined ? {} : { input }),
+    ruleSlug: localRuleModule.ruleDefinition.slug,
+    rulesScope: localRuleModule.rulesScope,
+  });
+  const processor = new localRuleModule.Processor();
+  const ruleInput = buildRuleInput({ prepared });
+  const startTime = Date.now();
+  const output = await processor.process(ruleInput);
+  const elapsedMs = Date.now() - startTime;
+
+  if (context.options.json) {
+    logger.info(formatAsJson(output));
+  } else {
+    logger.info(
+      formatAsHuman(output, { debug: context.options.debug, elapsedMs }),
+    );
+  }
+
+  return {
+    documentId,
+    ruleResults: [
+      {
+        resultComment: output.resultComment,
+        resultContent: output.resultContent,
+        ruleSlug: localRuleModule.ruleDefinition.slug,
+        status: mapOutputStatus(output.resultStatus),
+      },
+    ],
+  };
+};
+
 export const handleDryRun = async (
-  processorPath: string | undefined,
+  selection: DryRunSelection,
   options: DryRunOptions & { documentId: string },
 ): Promise<DryRunDocumentResult> => {
   const { smaugUrl } = resolveDryRunEnvironment(options);
   const config = parseConfig(options.config);
 
+  if (selection.mode === 'local') {
+    const localRuleModule = await loadLocalRuleModule(selection.processorPath);
+
+    return processLocalDryRunDocument(options.documentId, {
+      localRuleModule,
+      options,
+      selection,
+      smaugUrl,
+    });
+  }
+
   return processDryRunDocument(options.documentId, {
     config,
-    methodologySlug: options.methodologySlug,
+    methodologySlug: selection.methodologySlug,
     options,
-    processorPath,
-    ruleSlug: options.ruleSlug,
-    rulesScope: options.rulesScope,
+    processorPath: undefined,
+    ruleSlug: selection.ruleSlug,
+    rulesScope: selection.rulesScope,
     smaugUrl,
   });
 };

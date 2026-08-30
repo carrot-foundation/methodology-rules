@@ -9,7 +9,7 @@ import { logger } from '@carrot-fndn/shared/helpers';
 import { readFile } from 'node:fs/promises';
 
 import type { RuleResultEntry } from '../utils/batch-summary';
-import type { DryRunOptions } from './dry-run.command';
+import type { DryRunOptions, DryRunSelection } from './dry-run.command';
 import type { DryRunDocumentResult, DryRunRuleResult } from './dry-run.handler';
 
 import {
@@ -18,8 +18,10 @@ import {
   writeJsonLog,
 } from '../utils/batch-summary';
 import { parseConfig } from '../utils/config-parser';
+import { loadLocalRuleModule } from '../utils/processor-loader';
 import {
   processDryRunDocument,
+  processLocalDryRunDocument,
   resolveDryRunEnvironment,
 } from './dry-run.handler';
 
@@ -51,7 +53,7 @@ const toRuleResultEntry = (ruleResult: DryRunRuleResult): RuleResultEntry => ({
 });
 
 export const handleDryRunBatch = async (
-  processorPath: string | undefined,
+  selection: DryRunSelection,
   options: DryRunOptions,
 ): Promise<void> => {
   if (!options.inputFile) {
@@ -67,15 +69,10 @@ export const handleDryRunBatch = async (
   );
   logger.info(`Concurrency: ${String(options.concurrency)}`);
 
-  const context = {
-    config,
-    methodologySlug: options.methodologySlug,
-    options,
-    processorPath,
-    ruleSlug: options.ruleSlug,
-    rulesScope: options.rulesScope,
-    smaugUrl,
-  };
+  const localRuleModule =
+    selection.mode === 'local'
+      ? await loadLocalRuleModule(selection.processorPath)
+      : undefined;
 
   let passedCount = 0;
   let reviewRequiredCount = 0;
@@ -134,8 +131,30 @@ export const handleDryRunBatch = async (
         }
       }
     },
-    processItem: async (documentId): Promise<DryRunDocumentResult> =>
-      processDryRunDocument(documentId, context),
+    processItem: async (documentId): Promise<DryRunDocumentResult> => {
+      if (selection.mode === 'local') {
+        if (!localRuleModule) {
+          throw new Error('Local rule module was not loaded.');
+        }
+
+        return processLocalDryRunDocument(documentId, {
+          localRuleModule,
+          options,
+          selection,
+          smaugUrl,
+        });
+      }
+
+      return processDryRunDocument(documentId, {
+        config,
+        methodologySlug: selection.methodologySlug,
+        options,
+        processorPath: undefined,
+        ruleSlug: selection.ruleSlug,
+        rulesScope: selection.rulesScope,
+        smaugUrl,
+      });
+    },
   });
 
   const reviewRequiredBreakdown = buildReasonCodeBreakdown(

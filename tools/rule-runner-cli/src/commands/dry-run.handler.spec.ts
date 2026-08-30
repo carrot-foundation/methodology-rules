@@ -4,9 +4,9 @@ import { logger } from '@carrot-fndn/shared/helpers';
 
 import type { DryRunOptions } from './dry-run.command';
 
-import { loadProcessor } from '../utils/processor-loader';
+import { loadLocalRuleModule, loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
-import { prepareDryRun } from '../utils/smaug-client';
+import { prepareDryRun, prepareLocalRule } from '../utils/smaug-client';
 import {
   handleDryRun,
   resolveDryRunEnvironment,
@@ -15,9 +15,11 @@ import {
 
 vi.mock('../utils/smaug-client', () => ({
   prepareDryRun: vi.fn(),
+  prepareLocalRule: vi.fn(),
 }));
 
 vi.mock('../utils/processor-loader', () => ({
+  loadLocalRuleModule: vi.fn(),
   loadProcessor: vi.fn(),
 }));
 
@@ -34,6 +36,12 @@ vi.mock('../utils/rule-input.builder', () => ({
 
 const mockPrepareDryRun = prepareDryRun as vi.MockedFunction<
   typeof prepareDryRun
+>;
+const mockPrepareLocalRule = prepareLocalRule as vi.MockedFunction<
+  typeof prepareLocalRule
+>;
+const mockLoadLocalRuleModule = loadLocalRuleModule as vi.MockedFunction<
+  typeof loadLocalRuleModule
 >;
 const mockLoadProcessor = loadProcessor as vi.MockedFunction<
   typeof loadProcessor
@@ -52,6 +60,13 @@ const baseOptions: DryRunOptions & { documentId: string } = {
   methodologySlug: 'bold-carbon-organic',
   rulesScope: 'MassID',
   smaugUrl: 'https://smaug.carrot.eco',
+};
+
+const registeredSelection = {
+  allRules: true,
+  methodologySlug: 'bold-carbon-organic',
+  mode: 'registered' as const,
+  rulesScope: 'MassID',
 };
 
 const mockPreparedResponse = {
@@ -94,15 +109,17 @@ describe('handleDryRun', () => {
     delete process.env['DEBUG'];
 
     mockPrepareDryRun.mockResolvedValue(mockPreparedResponse);
+    mockPrepareLocalRule.mockResolvedValue({
+      auditDocumentId: 'synthetic-audit-123',
+      auditedDocumentId: 'mass-id-456',
+      executionId: 'dry-run/local-exec-1',
+    });
     mockProcess.mockResolvedValue(mockRuleOutput);
     mockLoadProcessor.mockResolvedValue({ process: mockProcess } as never);
   });
 
   it('should call Smaug prepare API with correct parameters', async () => {
-    await handleDryRun(
-      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data',
-      baseOptions,
-    );
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith('https://smaug.carrot.eco', {
       documentId: 'mass-id-456',
@@ -112,26 +129,14 @@ describe('handleDryRun', () => {
   });
 
   it('should run processor for each returned rule', async () => {
-    await handleDryRun(
-      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data',
-      baseOptions,
-    );
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(mockLoadProcessor).toHaveBeenCalledTimes(2);
     expect(mockProcess).toHaveBeenCalledTimes(2);
   });
 
-  it('should use provided processorPath when given', async () => {
-    const processorPath =
-      'libs/methodologies/bold/rule-processors/mass-id/custom-rule';
-
-    await handleDryRun(processorPath, baseOptions);
-
-    expect(mockLoadProcessor).toHaveBeenCalledWith(processorPath, undefined);
-  });
-
-  it('should resolve processor path from rule metadata when no processorPath given', async () => {
-    await handleDryRun(undefined, { ...baseOptions, allRules: true });
+  it('should resolve processor paths from registered rule metadata', async () => {
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(mockLoadProcessor).toHaveBeenCalledWith(
       'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data',
@@ -148,7 +153,7 @@ describe('handleDryRun', () => {
       .mockRejectedValueOnce(new Error('First rule failed'))
       .mockResolvedValueOnce(mockRuleOutput);
 
-    const result = await handleDryRun('some/path', baseOptions);
+    const result = await handleDryRun(registeredSelection, baseOptions);
 
     expect(mockProcess).toHaveBeenCalledTimes(2);
     expect(result.ruleResults).toHaveLength(2);
@@ -162,7 +167,7 @@ describe('handleDryRun', () => {
       resultStatus: 'REVIEW_REQUIRED',
     });
 
-    const result = await handleDryRun('some/path', baseOptions);
+    const result = await handleDryRun(registeredSelection, baseOptions);
 
     expect(result.ruleResults[0]?.status).toBe('review_required');
   });
@@ -173,7 +178,7 @@ describe('handleDryRun', () => {
       resultStatus: 'FAILED',
     });
 
-    const result = await handleDryRun('some/path', baseOptions);
+    const result = await handleDryRun(registeredSelection, baseOptions);
 
     expect(result.ruleResults[0]?.status).toBe('failed');
   });
@@ -181,7 +186,7 @@ describe('handleDryRun', () => {
   it('should throw when AUDIT_URL is not set and no --smaug-url provided', async () => {
     const options = { ...baseOptions, smaugUrl: undefined };
 
-    await expect(handleDryRun('some/path', options)).rejects.toThrow(
+    await expect(handleDryRun(registeredSelection, options)).rejects.toThrow(
       'Smaug URL not set. Use --smaug-url or set AUDIT_URL env var.',
     );
   });
@@ -189,7 +194,7 @@ describe('handleDryRun', () => {
   it('should fall back to AUDIT_URL env var when --smaug-url not provided', async () => {
     process.env['AUDIT_URL'] = 'https://smaug-from-env.carrot.eco';
 
-    await handleDryRun('some/path', {
+    await handleDryRun(registeredSelection, {
       ...baseOptions,
       smaugUrl: undefined,
     });
@@ -201,16 +206,16 @@ describe('handleDryRun', () => {
   });
 
   it('should enable textract cache by default', async () => {
-    await handleDryRun('some/path', { ...baseOptions, cache: true });
+    await handleDryRun(registeredSelection, { ...baseOptions, cache: true });
 
     expect(process.env['TEXTRACT_CACHE_DIR']).toBeDefined();
   });
 
   it('should pass ruleSlug to prepare API when provided', async () => {
-    await handleDryRun('some/path', {
-      ...baseOptions,
-      ruleSlug: 'document-manifest-data',
-    });
+    await handleDryRun(
+      { ...registeredSelection, ruleSlug: 'document-manifest-data' },
+      baseOptions,
+    );
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith(
       'https://smaug.carrot.eco',
@@ -223,7 +228,7 @@ describe('handleDryRun', () => {
   it('should output as JSON when --json option is set', async () => {
     const infoSpy = vi.spyOn(logger, 'info');
 
-    await handleDryRun('some/path', { ...baseOptions, json: true });
+    await handleDryRun(registeredSelection, { ...baseOptions, json: true });
 
     expect(infoSpy).toHaveBeenCalledWith(
       expect.stringContaining('"resultStatus"'),
@@ -231,7 +236,7 @@ describe('handleDryRun', () => {
   });
 
   it('should build rule input with correct IDs from prepared response', async () => {
-    await handleDryRun('some/path', baseOptions);
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(mockBuildRuleInput).toHaveBeenCalledWith({
       documentId: 'audit-123',
@@ -249,7 +254,7 @@ describe('handleDryRun', () => {
 
     const errorSpy = vi.spyOn(logger, 'error');
 
-    await handleDryRun('some/path', { ...baseOptions, debug: true });
+    await handleDryRun(registeredSelection, { ...baseOptions, debug: true });
 
     expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining('Debug failure'),
@@ -264,7 +269,7 @@ describe('handleDryRun', () => {
 
     const errorSpy = vi.spyOn(logger, 'error');
 
-    await handleDryRun('some/path', baseOptions);
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(errorSpy).toHaveBeenCalledWith(
       expect.stringContaining('string-error'),
@@ -278,7 +283,7 @@ describe('handleDryRun', () => {
 
     const errorSpy = vi.spyOn(logger, 'error');
 
-    await handleDryRun('some/path', baseOptions);
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(errorSpy).toHaveBeenCalledTimes(1);
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Failure'));
@@ -289,7 +294,7 @@ describe('handleDryRun', () => {
 
     const infoSpy = vi.spyOn(logger, 'info');
 
-    await handleDryRun('some/path', baseOptions);
+    await handleDryRun(registeredSelection, baseOptions);
 
     expect(infoSpy).toHaveBeenCalledWith('DOCUMENT_BUCKET_NAME=test-bucket');
 
@@ -306,9 +311,128 @@ describe('handleDryRun', () => {
 
     const errorSpy = vi.spyOn(logger, 'error');
 
-    await handleDryRun('some/path', { ...baseOptions, debug: true });
+    await handleDryRun(registeredSelection, { ...baseOptions, debug: true });
 
     expect(errorSpy).toHaveBeenCalledWith('');
+  });
+
+  it('should prepare and execute an explicit local processor exactly once', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return {
+        process: mockProcess,
+      };
+    });
+    const ruleInput = {
+      parentDocument: {
+        relatedDocuments: [{ category: 'WASTE' }],
+      },
+    };
+
+    mockLoadLocalRuleModule.mockResolvedValue({
+      Processor,
+      ruleDefinition: {
+        description: 'Local rule',
+        events: [],
+        input: ruleInput,
+        name: 'Local rule',
+        slug: 'local-rule',
+        version: '1.0.0',
+      },
+      rulesScope: 'MassID',
+    } as never);
+
+    await handleDryRun(
+      {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      baseOptions,
+    );
+
+    expect(mockPrepareLocalRule).toHaveBeenCalledWith(
+      'https://smaug.carrot.eco',
+      {
+        dataSetName: 'TEST',
+        documentId: 'mass-id-456',
+        input: ruleInput,
+        ruleSlug: 'local-rule',
+        rulesScope: 'MassID',
+      },
+    );
+    expect(mockBuildRuleInput).toHaveBeenCalledWith({
+      prepared: {
+        auditDocumentId: 'synthetic-audit-123',
+        auditedDocumentId: 'mass-id-456',
+        executionId: 'dry-run/local-exec-1',
+      },
+    });
+    expect(Processor).toHaveBeenCalledTimes(1);
+    expect(mockProcess).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reject an explicit local processor exception', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return {
+        process: vi.fn().mockRejectedValue(new Error('local failure')),
+      };
+    });
+
+    mockLoadLocalRuleModule.mockResolvedValue({
+      Processor,
+      ruleDefinition: {
+        description: 'Root-only rule',
+        events: [],
+        name: 'Root-only rule',
+        slug: 'root-only-rule',
+        version: '1.0.0',
+      },
+      rulesScope: 'MassID',
+    } as never);
+
+    await expect(
+      handleDryRun(
+        {
+          dataSetName: 'TEST',
+          mode: 'local',
+          processorPath: 'some/path',
+        },
+        baseOptions,
+      ),
+    ).rejects.toThrow('local failure');
+  });
+
+  it('should output a local processor result as JSON when requested', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return { process: mockProcess };
+    });
+
+    mockLoadLocalRuleModule.mockResolvedValue({
+      Processor,
+      ruleDefinition: {
+        description: 'Root-only rule',
+        events: [],
+        name: 'Root-only rule',
+        slug: 'root-only-rule',
+        version: '1.0.0',
+      },
+      rulesScope: 'MassID',
+    } as never);
+
+    const infoSpy = vi.spyOn(logger, 'info');
+
+    await handleDryRun(
+      {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      { ...baseOptions, json: true },
+    );
+
+    expect(infoSpy).toHaveBeenCalledWith(
+      expect.stringContaining('"resultStatus"'),
+    );
   });
 });
 

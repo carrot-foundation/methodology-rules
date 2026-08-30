@@ -30,4 +30,20 @@ describe('buildRuleInput', () => {
 
     expect(result1.requestId).not.toBe(result2.requestId);
   });
+
+  it('should build local input directly from the preparation response identifiers', () => {
+    const result = buildRuleInput({
+      prepared: {
+        auditDocumentId: 'synthetic-audit-123',
+        auditedDocumentId: 'document-456',
+        executionId: 'dry-run/local-execution-789',
+      },
+    });
+
+    expect(result).toMatchObject({
+      documentId: 'synthetic-audit-123',
+      documentKeyPrefix: 'dry-run/local-execution-789/documents',
+      parentDocumentId: 'document-456',
+    });
+  });
 });

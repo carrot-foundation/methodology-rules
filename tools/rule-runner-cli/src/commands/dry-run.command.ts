@@ -1,4 +1,5 @@
 import { handleCommandError } from '@carrot-fndn/shared/cli';
+import { type DataSetName, DataSetNameSchema } from '@carrot-fndn/shared/types';
 import {
   Argument,
   Command,
@@ -14,16 +15,31 @@ export interface DryRunOptions {
   cache: boolean;
   concurrency: number;
   config?: string | undefined;
+  dataSetName?: DataSetName | undefined;
   debug: boolean;
   documentId?: string | undefined;
   envFile?: string | undefined;
   inputFile?: string | undefined;
   json: boolean;
-  methodologySlug: string;
+  methodologySlug?: string | undefined;
   ruleSlug?: string | undefined;
   rulesScope: string;
   smaugUrl?: string | undefined;
 }
+
+export type DryRunSelection =
+  | {
+      allRules: boolean;
+      methodologySlug: string;
+      mode: 'registered';
+      ruleSlug?: string | undefined;
+      rulesScope: string;
+    }
+  | {
+      dataSetName: DataSetName;
+      mode: 'local';
+      processorPath: string;
+    };
 
 const parseConcurrency = (value: string): number => {
   const parsed = Number.parseInt(value, 10);
@@ -33,6 +49,79 @@ const parseConcurrency = (value: string): number => {
   }
 
   return parsed;
+};
+
+export const parseDataSetName = (value: string): DataSetName => {
+  const result = DataSetNameSchema.safeParse(value);
+
+  if (!result.success) {
+    throw new InvalidArgumentError(
+      '--data-set-name must be one of PROD, PROD_SIMULATION, TEST.',
+    );
+  }
+
+  return result.data;
+};
+
+const LOCAL_ONLY_FORBIDDEN_OPTION_KEYS = [
+  'methodologySlug',
+  'rulesScope',
+  'ruleSlug',
+  'allRules',
+] as const;
+
+type OptionValueSourceReader = Pick<Command, 'getOptionValueSource'>;
+
+const formatOptionFlag = (optionKey: string): string =>
+  `--${optionKey.replaceAll(
+    /[A-Z]/g,
+    (character) => `-${character.toLowerCase()}`,
+  )}`;
+
+export const createDryRunSelection = (
+  processorPath: string | undefined,
+  options: DryRunOptions,
+  command: OptionValueSourceReader,
+): DryRunSelection => {
+  if (processorPath) {
+    for (const optionKey of LOCAL_ONLY_FORBIDDEN_OPTION_KEYS) {
+      if (command.getOptionValueSource(optionKey) === 'cli') {
+        throw new Error(
+          `${formatOptionFlag(optionKey)} cannot be used with an explicit processor path`,
+        );
+      }
+    }
+
+    if (!options.dataSetName) {
+      throw new Error(
+        'Explicit local mode requires --data-set-name (PROD, PROD_SIMULATION, or TEST).',
+      );
+    }
+
+    return {
+      dataSetName: options.dataSetName,
+      mode: 'local',
+      processorPath,
+    };
+  }
+
+  if (!options.allRules) {
+    throw new Error(
+      'Either provide a <processor-path> or use --all-rules to run all rules',
+    );
+  }
+
+  if (!options.methodologySlug) {
+    throw new Error('Registered mode requires --methodology-slug (-m).');
+  }
+
+  return {
+    allRules: options.allRules,
+    methodologySlug: options.methodologySlug,
+    mode: 'registered',
+    ruleSlug: options.ruleSlug,
+    rulesScope: options.rulesScope,
+  };
 };
 
 export const dryRunCommand = new Command('dry-run')
@@ -49,13 +138,19 @@ export const dryRunCommand = new Command('dry-run')
     new Option(
       '-m, --methodology-slug <slug>',
       'Methodology slug (e.g., bold-carbon-organic)',
-    ).makeOptionMandatory(),
+    ),
   )
   .addOption(
     new Option(
       '-d, --document-id <id>',
       'MassID document ID (Palantir document ID)',
     ),
+  )
+  .addOption(
+    new Option(
+      '--data-set-name <name>',
+      'Document dataset for explicit local mode (PROD, PROD_SIMULATION, TEST)',
+    ).argParser(parseDataSetName),
   )
   .addOption(
     new Option(
@@ -96,28 +191,34 @@ export const dryRunCommand = new Command('dry-run')
   .option('--debug', 'Show detailed output', false)
   .option('--json', 'Output as JSON', false)
   .option('--no-cache', 'Disable textract cache')
-  .action(async (processorPath: string | undefined, options: DryRunOptions) => {
-    try {
-      if (!processorPath && !options.allRules) {
-        throw new Error(
-          'Either provide a <processor-path> or use --all-rules to run all rules',
+  .action(
+    async (
+      processorPath: string | undefined,
+      options: DryRunOptions,
+      command,
+    ) => {
+      try {
+        const selection = createDryRunSelection(
+          processorPath,
+          options,
+          command,
         );
-      }
 
-      if (options.inputFile) {
-        await handleDryRunBatch(processorPath, options);
-      } else {
-        const { documentId } = options;
+        if (options.inputFile) {
+          await handleDryRunBatch(selection, options);
+        } else {
+          const { documentId } = options;
 
-        if (!documentId) {
-          throw new Error(
-            'Single-document mode requires --document-id (-d). Use --input-file for batch processing.',
-          );
+          if (!documentId) {
+            throw new Error(
+              'Single-document mode requires --document-id (-d). Use --input-file for batch processing.',
+            );
+          }
+
+          await handleDryRun(selection, { ...options, documentId });
         }
-
-        await handleDryRun(processorPath, { ...options, documentId });
+      } catch (error: unknown) {
+        handleCommandError(error, { verbose: options.debug });
       }
-    } catch (error: unknown) {
-      handleCommandError(error, { verbose: options.debug });
-    }
-  });
+    },
+  );
