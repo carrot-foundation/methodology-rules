@@ -68,6 +68,7 @@ const LOCAL_ONLY_FORBIDDEN_OPTION_KEYS = [
   'rulesScope',
   'ruleSlug',
   'allRules',
+  'config',
 ] as const;
 
 type OptionValueSourceReader = Pick<Command, 'getOptionValueSource'>;

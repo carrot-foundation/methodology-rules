@@ -48,18 +48,21 @@ describe('createDryRunSelection', () => {
     });
   });
 
-  it.each(['methodologySlug', 'rulesScope', 'ruleSlug', 'allRules'] as const)(
-    'should reject explicitly supplied %s in local mode',
-    (flag) => {
-      expect(() =>
-        createDryRunSelection(
-          'libs/methodologies/bold/rule-processors/mass-id/local-rule',
-          { ...baseOptions, dataSetName: 'TEST' },
-          commandWithSources({ [flag]: 'cli' }),
-        ),
-      ).toThrow('cannot be used with an explicit processor path');
-    },
-  );
+  it.each([
+    'methodologySlug',
+    'rulesScope',
+    'ruleSlug',
+    'allRules',
+    'config',
+  ] as const)('should reject explicitly supplied %s in local mode', (flag) => {
+    expect(() =>
+      createDryRunSelection(
+        'libs/methodologies/bold/rule-processors/mass-id/local-rule',
+        { ...baseOptions, dataSetName: 'TEST' },
+        commandWithSources({ [flag]: 'cli' }),
+      ),
+    ).toThrow('cannot be used with an explicit processor path');
+  });
 
   it.each(['PROD', 'PROD_SIMULATION', 'TEST'] as const)(
     'should retain canonical %s data-set names in local mode',

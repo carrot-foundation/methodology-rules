@@ -1,9 +1,14 @@
 import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import type { DataSetName } from '@carrot-fndn/shared/types';
 
 import { provideSmaugApiCredentials } from '@carrot-fndn/shared/aws-http';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
+import {
+  type DataSetName,
+  DocumentIdSchema,
+  NonEmptyStringSchema,
+} from '@carrot-fndn/shared/types';
+import { z } from 'zod';
 
 export interface DryRunPrepareResponse {
   auditDocumentId: string;
@@ -25,6 +30,12 @@ export interface LocalRuleDryRunPrepareResponse {
   auditedDocumentId: string;
   executionId: string;
 }
+
+const LocalRuleDryRunPrepareResponseSchema = z.strictObject({
+  auditDocumentId: DocumentIdSchema,
+  auditedDocumentId: DocumentIdSchema,
+  executionId: NonEmptyStringSchema,
+});
 
 interface DryRunPrepareRequest {
   documentId: string;
@@ -88,5 +99,11 @@ export const prepareLocalRule = async (
     );
   }
 
-  return response.data as LocalRuleDryRunPrepareResponse;
+  const result = LocalRuleDryRunPrepareResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    throw new Error('Smaug local rule preparation response is invalid');
+  }
+
+  return result.data;
 };

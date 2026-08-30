@@ -216,4 +216,28 @@ export class TestRuleProcessor extends RuleDataProcessor {
       'Invalid rule definition',
     );
   });
+
+  it.each([
+    'input: [],',
+    "input: { unknown: 'value' },",
+    "input: { parentDocument: { omit: 'true' } },",
+    'input: { parentDocument: { relatedDocuments: [{ category: 42 }] } },',
+  ])('should reject invalid document query criteria (%s)', async (input) => {
+    const processorDirectory = await createFixture({
+      ruleDefinitionSource: `
+export const ruleDefinition = {
+  description: 'A test rule definition.',
+  events: [],
+  ${input}
+  name: 'Test rule',
+  slug: 'test-rule',
+  version: '1.0.0',
+};
+`,
+    });
+
+    await expect(loadLocalRuleModule(processorDirectory)).rejects.toThrow(
+      'Invalid rule definition',
+    );
+  });
 });

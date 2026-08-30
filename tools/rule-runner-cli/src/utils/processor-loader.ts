@@ -1,8 +1,11 @@
-import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { logger } from '@carrot-fndn/shared/helpers';
+import {
+  type DocumentQueryCriteria,
+  DocumentQueryCriteriaSchema,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -65,7 +68,8 @@ const isRuleDefinition = (
   return (
     hasStringProperty(value, 'description') &&
     hasStringArrayProperty(value, 'events') &&
-    (input === undefined || isObject(input)) &&
+    (input === undefined ||
+      DocumentQueryCriteriaSchema.safeParse(input).success) &&
     hasStringProperty(value, 'name') &&
     hasStringProperty(value, 'slug') &&
     hasStringProperty(value, 'version')

@@ -9,6 +9,8 @@ export type AwsCredentialIdentityProvider = ReturnType<typeof fromEnv>;
 const smaugApiRoleArnPattern =
   /^arn:aws:iam::\d{12}:role\/[A-Za-z0-9+=,.@_/-]+$/;
 
+const providersByRoleArn = new Map<string, AwsCredentialIdentityProvider>();
+
 const requireValidSmaugApiRoleArn = (): string => {
   const roleArn = getSmaugApiGatewayAssumeRoleArn();
 
@@ -21,12 +23,24 @@ const requireValidSmaugApiRoleArn = (): string => {
   return roleArn;
 };
 
-export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider =>
-  fromTemporaryCredentials({
+export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider => {
+  const roleArn = requireValidSmaugApiRoleArn();
+  const cachedProvider = providersByRoleArn.get(roleArn);
+
+  if (cachedProvider) {
+    return cachedProvider;
+  }
+
+  const provider = fromTemporaryCredentials({
     clientConfig: {},
     masterCredentials: fromEnv(),
     params: {
-      RoleArn: requireValidSmaugApiRoleArn(),
+      RoleArn: roleArn,
       RoleSessionName: 'methodology-rules-smaug-api',
     },
   });
+
+  providersByRoleArn.set(roleArn, provider);
+
+  return provider;
+};

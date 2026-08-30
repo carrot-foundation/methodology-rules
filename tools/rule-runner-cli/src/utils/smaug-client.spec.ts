@@ -90,6 +90,25 @@ describe('prepareDryRun', () => {
     );
   });
 
+  it('should reject malformed 2xx local preparation identifiers without response data', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue({
+      data: {
+        auditDocumentId: '',
+        auditedDocumentId: 42,
+        executionId: 'token=secret',
+      },
+      status: 200,
+    } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation response is invalid',
+    );
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.not.toThrow(
+      'token=secret',
+    );
+  });
+
   it('should call Smaug dry-run prepare endpoint', async () => {
     mockHttpRequest.mockResolvedValue({ data: mockResponse } as never);
 

@@ -9,6 +9,7 @@ import { buildRuleInput } from '../utils/rule-input.builder';
 import { prepareDryRun, prepareLocalRule } from '../utils/smaug-client';
 import {
   handleDryRun,
+  processLocalDryRunDocument,
   resolveDryRunEnvironment,
   resolveProcessorPath,
 } from './dry-run.handler';
@@ -400,6 +401,110 @@ describe('handleDryRun', () => {
         baseOptions,
       ),
     ).rejects.toThrow('local failure');
+  });
+
+  it('should omit input when preparing a root-only local processor', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return { process: mockProcess };
+    });
+
+    mockLoadLocalRuleModule.mockResolvedValue({
+      Processor,
+      ruleDefinition: {
+        description: 'Root-only rule',
+        events: [],
+        name: 'Root-only rule',
+        slug: 'root-only-rule',
+        version: '1.0.0',
+      },
+      rulesScope: 'MassID',
+    } as never);
+
+    await handleDryRun(
+      {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      baseOptions,
+    );
+
+    expect(mockPrepareLocalRule).toHaveBeenCalledWith(
+      'https://smaug.carrot.eco',
+      {
+        dataSetName: 'TEST',
+        documentId: 'mass-id-456',
+        ruleSlug: 'root-only-rule',
+        rulesScope: 'MassID',
+      },
+    );
+  });
+
+  it('should construct a fresh local processor for each batch document call', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return { process: mockProcess };
+    });
+    const context = {
+      localRuleModule: {
+        Processor,
+        ruleDefinition: {
+          description: 'Root-only rule',
+          events: [],
+          name: 'Root-only rule',
+          slug: 'root-only-rule',
+          version: '1.0.0',
+        },
+        rulesScope: 'MassID' as const,
+      },
+      options: baseOptions,
+      selection: {
+        dataSetName: 'TEST' as const,
+        mode: 'local' as const,
+        processorPath: 'some/path',
+      },
+      smaugUrl: 'https://smaug.carrot.eco',
+    };
+
+    await processLocalDryRunDocument('document-1', context);
+    await processLocalDryRunDocument('document-2', context);
+
+    expect(Processor).toHaveBeenCalledTimes(2);
+    expect(Processor.mock.results[0]?.value).not.toBe(
+      Processor.mock.results[1]?.value,
+    );
+  });
+
+  it('should not build input or construct a processor when local preparation rejects', async () => {
+    const Processor = vi.fn();
+
+    mockPrepareLocalRule.mockRejectedValue(
+      new Error('Smaug local rule preparation response is invalid'),
+    );
+    mockLoadLocalRuleModule.mockResolvedValue({
+      Processor,
+      ruleDefinition: {
+        description: 'Root-only rule',
+        events: [],
+        name: 'Root-only rule',
+        slug: 'root-only-rule',
+        version: '1.0.0',
+      },
+      rulesScope: 'MassID',
+    } as never);
+
+    await expect(
+      handleDryRun(
+        {
+          dataSetName: 'TEST',
+          mode: 'local',
+          processorPath: 'some/path',
+        },
+        baseOptions,
+      ),
+    ).rejects.toThrow('Smaug local rule preparation response is invalid');
+
+    expect(mockBuildRuleInput).not.toHaveBeenCalled();
+    expect(Processor).not.toHaveBeenCalled();
   });
 
   it('should output a local processor result as JSON when requested', async () => {
