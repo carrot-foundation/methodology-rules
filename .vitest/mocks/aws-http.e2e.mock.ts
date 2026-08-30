@@ -1,3 +1,5 @@
+import type { AwsCredentialIdentityProvider } from '../../libs/shared/aws-http/src/index';
+
 export * from '../../libs/shared/aws-http/src/index';
 
 const provideStubSmaugCredentials = () =>
@@ -7,4 +9,5 @@ const provideStubSmaugCredentials = () =>
     sessionToken: 'smaug-session-token',
   });
 
-export const provideSmaugApiCredentials = () => provideStubSmaugCredentials;
+export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider =>
+  provideStubSmaugCredentials;

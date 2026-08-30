@@ -25,17 +25,15 @@ export interface LocalRuleDryRunPrepareRequest {
   rulesScope: 'MassID';
 }
 
-export interface LocalRuleDryRunPrepareResponse {
-  auditDocumentId: string;
-  auditedDocumentId: string;
-  executionId: string;
-}
-
 const LocalRuleDryRunPrepareResponseSchema = z.strictObject({
   auditDocumentId: DocumentIdSchema,
   auditedDocumentId: DocumentIdSchema,
   executionId: NonEmptyStringSchema,
 });
+
+export type LocalRuleDryRunPrepareResponse = z.infer<
+  typeof LocalRuleDryRunPrepareResponseSchema
+>;
 
 interface DryRunPrepareRequest {
   documentId: string;
