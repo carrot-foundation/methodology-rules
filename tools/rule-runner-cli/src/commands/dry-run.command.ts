@@ -79,19 +79,31 @@ const formatOptionFlag = (optionKey: string): string =>
     (character) => `-${character.toLowerCase()}`,
   )}`;
 
+const assertNoExplicitOptions = (
+  command: OptionValueSourceReader,
+  optionKeys: readonly string[],
+  modeDescription: string,
+): void => {
+  for (const optionKey of optionKeys) {
+    if (command.getOptionValueSource(optionKey) === 'cli') {
+      throw new Error(
+        `${formatOptionFlag(optionKey)} cannot be used ${modeDescription}`,
+      );
+    }
+  }
+};
+
 export const createDryRunSelection = (
   processorPath: string | undefined,
   options: DryRunOptions,
   command: OptionValueSourceReader,
 ): DryRunSelection => {
   if (processorPath) {
-    for (const optionKey of LOCAL_ONLY_FORBIDDEN_OPTION_KEYS) {
-      if (command.getOptionValueSource(optionKey) === 'cli') {
-        throw new Error(
-          `${formatOptionFlag(optionKey)} cannot be used with an explicit processor path`,
-        );
-      }
-    }
+    assertNoExplicitOptions(
+      command,
+      LOCAL_ONLY_FORBIDDEN_OPTION_KEYS,
+      'with an explicit processor path',
+    );
 
     if (!options.dataSetName) {
       throw new Error(
@@ -105,6 +117,8 @@ export const createDryRunSelection = (
       processorPath,
     };
   }
+
+  assertNoExplicitOptions(command, ['dataSetName'], 'in registered mode');
 
   if (!options.allRules) {
     throw new Error(

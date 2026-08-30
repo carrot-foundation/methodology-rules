@@ -77,6 +77,16 @@ describe('createDryRunSelection', () => {
     },
   );
 
+  it('should reject an explicitly supplied data-set name in registered mode', () => {
+    expect(() =>
+      createDryRunSelection(
+        undefined,
+        { ...baseOptions, allRules: true, dataSetName: 'TEST' },
+        commandWithSources({ dataSetName: 'cli' }),
+      ),
+    ).toThrow('--data-set-name cannot be used in registered mode');
+  });
+
   it('should reject a non-canonical data-set name in local mode', () => {
     expect(() => parseDataSetName('INVALID')).toThrow('--data-set-name');
   });
