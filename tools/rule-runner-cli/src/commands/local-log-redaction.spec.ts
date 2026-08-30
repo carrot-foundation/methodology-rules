@@ -133,6 +133,35 @@ describe('local processor structured log redaction', () => {
     expect(events).toEqual(['processor-finished', 'stdout']);
   });
 
+  it('should redact and sanitize a local processor constructor failure', async () => {
+    const sensitiveMarker = 'Fictional participant: Example Recycler';
+
+    class Processor {
+      constructor() {
+        logger.error(sensitiveMarker);
+
+        throw new Error(sensitiveMarker);
+      }
+
+      process(): Promise<RuleOutput> {
+        return Promise.resolve(ruleOutput);
+      }
+    }
+
+    const outputSpy = vi
+      .spyOn(getPinoOutputStream(), 'write')
+      .mockImplementation(() => true);
+
+    await expect(
+      processLocalDryRunDocument('document-123', createContext(Processor)),
+    ).rejects.toThrow('LOCAL_RULE_EXECUTION_FAILED');
+
+    expect(JSON.stringify(outputSpy.mock.calls)).not.toContain(sensitiveMarker);
+    expect(JSON.stringify(outputSpy.mock.calls)).toContain(
+      'LOCAL_PROCESSOR_LOG_REDACTED',
+    );
+  });
+
   it('should preserve later logs after a redacted local processor failure', async () => {
     const sensitiveMarker = 'Fictional participant: Example Recycler';
     const laterMarker = 'safe log after local failure';

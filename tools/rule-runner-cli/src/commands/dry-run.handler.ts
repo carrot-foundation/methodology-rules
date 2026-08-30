@@ -222,15 +222,16 @@ export const processLocalDryRunDocument = async (
     ruleSlug: localRuleModule.ruleDefinition.slug,
     rulesScope: localRuleModule.rulesScope,
   });
-  const processor = new localRuleModule.Processor();
   const ruleInput = buildRuleInput({ prepared });
   const startTime = Date.now();
   let output: RuleOutput;
 
   try {
-    output = await executeWithStructuredLogsRedacted(() =>
-      processor.process(ruleInput),
-    );
+    output = await executeWithStructuredLogsRedacted(() => {
+      const processor = new localRuleModule.Processor();
+
+      return processor.process(ruleInput);
+    });
   } catch {
     throw createLocalRuleExecutionError();
   }
