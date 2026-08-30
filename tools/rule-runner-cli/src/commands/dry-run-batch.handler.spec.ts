@@ -6,6 +6,7 @@ import type { DryRunOptions } from './dry-run.command';
 import type { DryRunDocumentResult } from './dry-run.handler';
 
 import { writeJsonLog } from '../utils/batch-summary';
+import { createLocalRuleExecutionError } from '../utils/local-result-output';
 import { loadLocalRuleModule } from '../utils/processor-loader';
 import { handleDryRunBatch } from './dry-run-batch.handler';
 import {
@@ -95,12 +96,14 @@ const registeredSelection = {
 const makeDocumentResult = (
   documentId: string,
   rules: Array<{
+    resultComment?: string;
     resultContent?: Record<string, unknown>;
     status: DryRunDocumentResult['ruleResults'][number]['status'];
   }>,
 ): DryRunDocumentResult => ({
   documentId,
   ruleResults: rules.map((rule, index) => ({
+    resultComment: rule.resultComment,
     resultContent: rule.resultContent,
     ruleSlug: `rule-${String(index + 1)}`,
     status: rule.status,
@@ -379,6 +382,73 @@ describe('handleDryRunBatch', () => {
     );
   });
 
+  it('should exclude participant data from local result files', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const localSelection = {
+      dataSetName: 'TEST' as const,
+      mode: 'local' as const,
+      processorPath: 'some/path',
+    };
+    const failedResult = makeDocumentResult('doc-1', [
+      {
+        resultComment: 'Fictional participant: Example Recycler',
+        resultContent: { participantName: 'Example Recycler' },
+        status: 'failed',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', failedResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: failedResult }],
+      });
+    });
+
+    await handleDryRunBatch(localSelection, baseOptions);
+
+    expect(mockWriteJsonLog).toHaveBeenCalledWith(
+      [
+        {
+          documentId: 'doc-1',
+          resultStatus: 'failed',
+          ruleSlug: 'rule-1',
+        },
+      ],
+      'rule-failures',
+    );
+    expect(JSON.stringify(mockWriteJsonLog.mock.calls)).not.toContain(
+      'Example Recycler',
+    );
+  });
+
+  it('should preserve participant-bearing result files for registered mode', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const failedResult = makeDocumentResult('doc-1', [
+      {
+        resultComment: 'Fictional participant: Example Recycler',
+        resultContent: { participantName: 'Example Recycler' },
+        status: 'failed',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', failedResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: failedResult }],
+      });
+    });
+
+    await handleDryRunBatch(registeredSelection, baseOptions);
+
+    expect(JSON.stringify(mockWriteJsonLog.mock.calls)).toContain(
+      'Example Recycler',
+    );
+  });
+
   it('should not write result files when all rules pass', async () => {
     mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
 
@@ -508,7 +578,9 @@ describe('handleDryRunBatch', () => {
       .mockResolvedValueOnce(
         makeDocumentResult('doc-1', [{ status: 'passed' }]),
       )
-      .mockRejectedValueOnce(new Error('local processor failed'));
+      .mockRejectedValueOnce(createLocalRuleExecutionError());
+    let recordedFailures: Array<{ error: string; item: unknown }> = [];
+
     mockProcessBatch.mockImplementation(async (options) => {
       const successes = [];
       const failures = [];
@@ -528,8 +600,12 @@ describe('handleDryRunBatch', () => {
         }
       }
 
+      recordedFailures = failures;
+
       return { failures, successes };
     });
+
+    const errorSpy = vi.spyOn(logger, 'error');
 
     await handleDryRunBatch(
       {
@@ -542,6 +618,12 @@ describe('handleDryRunBatch', () => {
 
     expect(mockLoadLocalRuleModule).toHaveBeenCalledTimes(1);
     expect(mockProcessLocalDryRunDocument).toHaveBeenCalledTimes(2);
+    expect(recordedFailures).toEqual([
+      { error: 'LOCAL_RULE_EXECUTION_FAILED', item: 'doc-2' },
+    ]);
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error [doc-2]: LOCAL_RULE_EXECUTION_FAILED',
+    );
     expect(process.exitCode).toBe(1);
   });
 });

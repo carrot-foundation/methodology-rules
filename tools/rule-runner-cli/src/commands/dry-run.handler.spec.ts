@@ -1,5 +1,6 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
+import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 
 import type { DryRunOptions } from './dry-run.command';
@@ -373,9 +374,10 @@ describe('handleDryRun', () => {
   });
 
   it('should reject an explicit local processor exception', async () => {
+    const sensitiveMarker = 'Fictional participant: Example Recycler';
     const Processor = vi.fn().mockImplementation(function Processor() {
       return {
-        process: vi.fn().mockRejectedValue(new Error('local failure')),
+        process: vi.fn().mockRejectedValue(new Error(sensitiveMarker)),
       };
     });
 
@@ -391,16 +393,31 @@ describe('handleDryRun', () => {
       rulesScope: 'MassID',
     } as never);
 
-    await expect(
-      handleDryRun(
+    let commandError: unknown;
+
+    try {
+      await handleDryRun(
         {
           dataSetName: 'TEST',
           mode: 'local',
           processorPath: 'some/path',
         },
         baseOptions,
-      ),
-    ).rejects.toThrow('local failure');
+      );
+    } catch (error: unknown) {
+      commandError = error;
+    }
+
+    expect(commandError).toEqual(new Error('LOCAL_RULE_EXECUTION_FAILED'));
+
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    handleCommandError(commandError, { verbose: true });
+
+    expect(JSON.stringify(errorSpy.mock.calls)).toContain(
+      'LOCAL_RULE_EXECUTION_FAILED',
+    );
+    expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(sensitiveMarker);
   });
 
   it('should omit input when preparing a root-only local processor', async () => {
@@ -524,7 +541,14 @@ describe('handleDryRun', () => {
       rulesScope: 'MassID',
     } as never);
 
+    mockProcess.mockResolvedValue({
+      ...mockRuleOutput,
+      resultComment: 'Fictional participant: Example Recycler',
+    });
     const infoSpy = vi.spyOn(logger, 'info');
+    const stdoutSpy = vi
+      .spyOn(process.stdout, 'write')
+      .mockImplementation(() => true);
 
     await handleDryRun(
       {
@@ -535,8 +559,14 @@ describe('handleDryRun', () => {
       { ...baseOptions, json: true },
     );
 
-    expect(infoSpy).toHaveBeenCalledWith(
+    expect(stdoutSpy).toHaveBeenCalledWith(
       expect.stringContaining('"resultStatus"'),
+    );
+    expect(stdoutSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Example Recycler'),
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'Example Recycler',
     );
   });
 });

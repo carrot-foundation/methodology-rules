@@ -12,6 +12,10 @@ import type { DryRunOptions, DryRunSelection } from './dry-run.command';
 import { formatAsHuman } from '../formatters/human.formatter';
 import { parseConfig } from '../utils/config-parser';
 import {
+  createLocalRuleExecutionError,
+  writeLocalRuleOutput,
+} from '../utils/local-result-output';
+import {
   loadLocalRuleModule,
   loadProcessor,
   type LocalRuleModule,
@@ -218,16 +222,21 @@ export const processLocalDryRunDocument = async (
   const processor = new localRuleModule.Processor();
   const ruleInput = buildRuleInput({ prepared });
   const startTime = Date.now();
-  const output = await processor.process(ruleInput);
+  let output: RuleOutput;
+
+  try {
+    output = await processor.process(ruleInput);
+  } catch {
+    throw createLocalRuleExecutionError();
+  }
+
   const elapsedMs = Date.now() - startTime;
 
-  if (context.options.json) {
-    logger.info(formatAsJson(output));
-  } else {
-    logger.info(
-      formatAsHuman(output, { debug: context.options.debug, elapsedMs }),
-    );
-  }
+  writeLocalRuleOutput(output, {
+    debug: context.options.debug,
+    elapsedMs,
+    json: context.options.json,
+  });
 
   return {
     documentId,

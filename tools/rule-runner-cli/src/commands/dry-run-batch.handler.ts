@@ -18,6 +18,7 @@ import {
   writeJsonLog,
 } from '../utils/batch-summary';
 import { parseConfig } from '../utils/config-parser';
+import { toDryRunRuleResultLog } from '../utils/local-result-output';
 import { loadLocalRuleModule } from '../utils/processor-loader';
 import {
   processDryRunDocument,
@@ -204,25 +205,25 @@ export const handleDryRunBatch = async (
   logger.info(`\n${lines.join('\n')}`);
 
   if (ruleFailures.length > 0) {
-    const data = ruleFailures.map((f) => ({
-      documentId: f.documentId,
-      resultComment: f.ruleResult.resultComment,
-      resultContent: f.ruleResult.resultContent,
-      resultStatus: f.ruleResult.status,
-      ruleSlug: f.ruleResult.ruleSlug,
-    }));
+    const data = ruleFailures.map((failure) =>
+      toDryRunRuleResultLog(
+        failure.documentId,
+        failure.ruleResult,
+        selection.mode,
+      ),
+    );
 
     await writeJsonLog(data, 'rule-failures');
   }
 
   if (reviewRequiredResults.length > 0) {
-    const data = reviewRequiredResults.map((f) => ({
-      documentId: f.documentId,
-      resultComment: f.ruleResult.resultComment,
-      resultContent: f.ruleResult.resultContent,
-      resultStatus: f.ruleResult.status,
-      ruleSlug: f.ruleResult.ruleSlug,
-    }));
+    const data = reviewRequiredResults.map((result) =>
+      toDryRunRuleResultLog(
+        result.documentId,
+        result.ruleResult,
+        selection.mode,
+      ),
+    );
 
     await writeJsonLog(data, 'review-required');
   }
