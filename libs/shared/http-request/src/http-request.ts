@@ -1,4 +1,7 @@
-import { signRequest } from '@carrot-fndn/shared/aws-http';
+import {
+  type AwsCredentialIdentityProvider,
+  signRequest,
+} from '@carrot-fndn/shared/aws-http';
 import { getAwsRegion } from '@carrot-fndn/shared/env';
 import {
   isNonEmptyString,
@@ -7,8 +10,15 @@ import {
 import axios, { type AxiosRequestConfig, isAxiosError } from 'axios';
 import { type Logger } from 'pino';
 
+export interface HttpRequestOptions {
+  credentials?: AwsCredentialIdentityProvider | undefined;
+  ignoreTimeoutError?: boolean;
+  logger?: Logger;
+}
+
 export const prepareHttpRequestConfig = async (
   config: AxiosRequestConfig,
+  { credentials }: Pick<HttpRequestOptions, 'credentials'> = {},
 ): Promise<AxiosRequestConfig> => {
   const url = new URL([config.baseURL, config.url].join(''));
   const signedRequest = config.baseURL?.includes('localhost') !== true;
@@ -30,6 +40,7 @@ export const prepareHttpRequestConfig = async (
       url,
     },
     getAwsRegion(),
+    credentials,
   );
 
   return {
@@ -43,18 +54,17 @@ export const prepareHttpRequestConfig = async (
 
 export const handleRequestError = (
   error: unknown,
-  config: AxiosRequestConfig,
   options: { ignoreTimeoutError: boolean; logger: Logger },
 ) => {
   const { ignoreTimeoutError, logger } = options;
-  const url = new URL([config.baseURL, config.url].join(''));
 
   if (!isAxiosError(error)) {
-    throw new Error('Request failed', { cause: error });
+    throw new Error('Request failed');
   }
 
-  const status = error.response?.status as number;
-  const message = `API call ${url.toString()} responded with ${status}`;
+  const status = error.response?.status;
+  const errorCode = error.code ?? 'UNKNOWN';
+  const message = `Request failed with status ${String(status)} (${errorCode})`;
 
   if (status === 504) {
     if (!ignoreTimeoutError) {
@@ -68,31 +78,29 @@ export const handleRequestError = (
     logger.error(message);
   }
 
-  logger.debug(error, message);
+  logger.debug({ errorCode, status }, message);
 
-  if (status >= 400 && status < 500) {
+  if (status !== undefined && status >= 400 && status < 500) {
     return error.response;
   }
 
-  throw new Error('Request failed', { cause: error });
+  throw new Error(message);
 };
 
 export const httpRequest = async (
   config: AxiosRequestConfig,
   {
+    credentials,
     ignoreTimeoutError = false,
     logger = pinoLogger,
-  }: {
-    ignoreTimeoutError?: boolean;
-    logger?: Logger;
-  } = {},
+  }: HttpRequestOptions = {},
 ) => {
-  const requestConfig = await prepareHttpRequestConfig(config);
+  const requestConfig = await prepareHttpRequestConfig(config, { credentials });
 
   try {
     return await axios(requestConfig);
   } catch (error) {
-    return handleRequestError(error, requestConfig, {
+    return handleRequestError(error, {
       ignoreTimeoutError,
       logger,
     });

@@ -1,12 +1,17 @@
+import { provideSmaugApiCredentials } from '@carrot-fndn/shared/aws-http';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
 
-import { prepareDryRun } from './smaug-client';
+import { prepareDryRun, prepareLocalRule } from './smaug-client';
 
 vi.mock('@carrot-fndn/shared/http-request', () => ({
   httpRequest: vi.fn(),
 }));
+vi.mock('@carrot-fndn/shared/aws-http', () => ({
+  provideSmaugApiCredentials: vi.fn(),
+}));
 
 const mockHttpRequest = httpRequest as vi.MockedFunction<typeof httpRequest>;
+const mockProvideSmaugApiCredentials = vi.mocked(provideSmaugApiCredentials);
 
 describe('prepareDryRun', () => {
   const smaugUrl = 'https://smaug.carrot.eco';
@@ -25,9 +30,64 @@ describe('prepareDryRun', () => {
       },
     ],
   };
+  const localRequest = {
+    dataSetName: 'TEST' as const,
+    documentId: 'mass-id-456',
+    input: {
+      relatedDocuments: [{ category: 'WASTE' }],
+    },
+    ruleSlug: 'document-manifest-data',
+    rulesScope: 'MassID' as const,
+  };
+  const localResponse = {
+    auditDocumentId: 'audit-123',
+    auditedDocumentId: 'mass-id-456',
+    executionId: 'dry-run/uuid-789',
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it('should prepare a local rule with Smaug assumed credentials', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
+    mockHttpRequest.mockResolvedValue({ data: localResponse } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).resolves.toEqual(
+      localResponse,
+    );
+
+    expect(mockHttpRequest).toHaveBeenCalledWith(
+      {
+        data: localRequest,
+        method: 'POST',
+        url: `${smaugUrl}/methodologies/dry-run/prepare-local-rule`,
+      },
+      { credentials },
+    );
+  });
+
+  it('should reject a missing local preparation response', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue(null as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation failed (HTTP N/A)',
+    );
+  });
+
+  it('should reject a 4xx local preparation response without its body', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue({
+      data: { authorization: 'signed-header' },
+      status: 400,
+    } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation failed (HTTP 400)',
+    );
   });
 
   it('should call Smaug dry-run prepare endpoint', async () => {
