@@ -8,6 +8,7 @@ import { isNil, logger } from '@carrot-fndn/shared/helpers';
 import {
   type DocumentQuery,
   DocumentQueryService,
+  RELATED_DOCUMENT_CRITERIA,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
@@ -230,10 +231,7 @@ export class WeighingProcessor extends RuleDataProcessor {
       context: {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
-      criteria: {
-        parentDocument: {},
-        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
-      },
+      criteria: RELATED_DOCUMENT_CRITERIA,
       documentId: ruleInput.documentId,
     });
   }

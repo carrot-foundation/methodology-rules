@@ -1,4 +1,8 @@
-import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  DocumentQueryService,
+  RELATED_DOCUMENT_CRITERIA,
+  spyOnDocumentQueryServiceLoad,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   createRuleTestFixture,
   expectRuleOutput,
@@ -46,6 +50,10 @@ describe('MassIDSortingProcessor', () => {
           ruleInput,
           ruleOutput,
         });
+
+        expect(DocumentQueryService.prototype.load).toHaveBeenCalledWith(
+          expect.objectContaining({ criteria: RELATED_DOCUMENT_CRITERIA }),
+        );
       },
     );
   });

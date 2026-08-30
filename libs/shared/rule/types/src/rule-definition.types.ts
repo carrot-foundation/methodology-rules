@@ -1,6 +1,7 @@
-export interface BaseRuleDefinition {
+export interface BaseRuleDefinition<TInput = never> {
   description: string;
   events: string[];
+  input?: TInput;
   name: string;
   slug: string;
   version: string;
@@ -8,6 +9,7 @@ export interface BaseRuleDefinition {
 
 export interface RuleDefinition<
   TMethodologyFrameworkRuleSlug extends string = string,
-> extends BaseRuleDefinition {
+  TInput = never,
+> extends BaseRuleDefinition<TInput> {
   methodologyFrameworkRules: TMethodologyFrameworkRuleSlug[];
 }

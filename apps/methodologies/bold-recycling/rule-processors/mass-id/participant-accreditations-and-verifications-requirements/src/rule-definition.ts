@@ -1,4 +1,5 @@
 import type { MethodologyFrameworkRuleSlug } from '@carrot-fndn/methodologies/bold-recycling/rules';
+import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { RuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { ruleDefinition as baseRuleDefinition } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements';
@@ -6,4 +7,7 @@ import { ruleDefinition as baseRuleDefinition } from '@carrot-fndn/shared/method
 export const ruleDefinition = {
   ...baseRuleDefinition,
   methodologyFrameworkRules: ['check-participants-accreditation'],
-} as const satisfies RuleDefinition<MethodologyFrameworkRuleSlug>;
+} as const satisfies RuleDefinition<
+  MethodologyFrameworkRuleSlug,
+  DocumentQueryCriteria
+>;
