@@ -4,7 +4,10 @@ import type {
 } from '@carrot-fndn/shared/rule/types';
 
 import { formatAsJson } from '@carrot-fndn/shared/cli';
-import { logger } from '@carrot-fndn/shared/helpers';
+import {
+  executeWithStructuredLogsRedacted,
+  logger,
+} from '@carrot-fndn/shared/helpers';
 import path from 'node:path';
 
 import type { DryRunOptions, DryRunSelection } from './dry-run.command';
@@ -225,7 +228,9 @@ export const processLocalDryRunDocument = async (
   let output: RuleOutput;
 
   try {
-    output = await processor.process(ruleInput);
+    output = await executeWithStructuredLogsRedacted(() =>
+      processor.process(ruleInput),
+    );
   } catch {
     throw createLocalRuleExecutionError();
   }
