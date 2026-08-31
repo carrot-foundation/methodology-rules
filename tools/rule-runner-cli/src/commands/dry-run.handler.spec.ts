@@ -1,9 +1,11 @@
-import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
+import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { Command } from '@commander-js/extra-typings';
 
+import type { LocalRuleModule } from '../utils/processor-loader';
 import type { DryRunOptions } from './dry-run.command';
 
 import { STUB_ENV_SMAUG_URL, STUB_SMAUG_URL } from '../test.constants';
@@ -619,6 +621,43 @@ describe('handleDryRun', () => {
     expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
       'Example Recycler',
     );
+  });
+
+  it('should suppress local processor output when requested', async () => {
+    class Processor extends RuleDataProcessor {
+      override process(data: RuleInput): Promise<RuleOutput> {
+        return mockProcess(data);
+      }
+    }
+
+    const stdoutSpy = vi
+      .spyOn(process.stdout, 'write')
+      .mockImplementation(() => true);
+
+    await processLocalDryRunDocument('document-1', {
+      localRuleModule: {
+        Processor,
+        ruleDefinition: {
+          description: 'Root-only rule',
+          events: [],
+          input: {},
+          name: 'Root-only rule',
+          slug: 'root-only-rule',
+          version: '1.0.0',
+        },
+        rulesScope: 'MassID',
+      } satisfies LocalRuleModule,
+      options: { ...baseOptions, json: true },
+      selection: {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      shouldWriteOutput: false,
+      smaugUrl: STUB_SMAUG_URL,
+    });
+
+    expect(stdoutSpy).not.toHaveBeenCalled();
   });
 });
 

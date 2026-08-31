@@ -145,6 +145,7 @@ export const handleDryRunBatch = async (
           localRuleModule,
           options,
           selection,
+          shouldWriteOutput: false,
           smaugUrl,
         });
       }
