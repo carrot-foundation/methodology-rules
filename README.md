@@ -98,6 +98,8 @@ pnpm apply-methodology-rule          # Apply a rule to a methodology
 
 Use one processor-path mode per dry run.
 
+Supply `AUDIT_URL` and `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` through shell variables or an operator-managed `--env-file`. The tracked test configuration is deliberately non-routable.
+
 ```bash
 # Local mode: runs the processor from the supplied path against an explicit dataset.
 pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-flags --data-set-name TEST --document-id <massid-document-id>

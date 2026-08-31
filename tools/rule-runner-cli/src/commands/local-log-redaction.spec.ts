@@ -6,6 +6,7 @@ import { symbols } from 'pino';
 
 import type { DryRunOptions } from './dry-run.command';
 
+import { STUB_SMAUG_URL } from '../test.constants';
 import { loadLocalRuleModule, loadProcessor } from '../utils/processor-loader';
 import { prepareLocalRule } from '../utils/smaug-client';
 import {
@@ -53,7 +54,7 @@ const options: DryRunOptions = {
   json: false,
   methodologySlug: 'bold-carbon-organic',
   rulesScope: 'MassID',
-  smaugUrl: 'https://smaug.carrot.eco',
+  smaugUrl: STUB_SMAUG_URL,
 };
 
 const ruleOutput: RuleOutput = {
@@ -84,7 +85,7 @@ const createContext = (
     mode: 'local' as const,
     processorPath: 'some/path',
   },
-  smaugUrl: 'https://smaug.carrot.eco',
+  smaugUrl: STUB_SMAUG_URL,
 });
 
 const getPinoOutputStream = (): { write: (value: string) => boolean } =>

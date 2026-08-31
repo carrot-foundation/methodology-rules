@@ -4,62 +4,20 @@ Status: Approved
 
 ## Purpose
 
-`run-rule dry-run` executes one local MassID rule processor before that rule is registered in a Smaug methodology. Smaug prepares a temporary execution graph from its document snapshots, and Methodology Rules executes the selected processor against that graph.
+`run-rule dry-run` executes one explicit local MassID processor before that rule is registered in a methodology. Smaug prepares the processor input, and Methodology Rules executes the selected processor locally.
 
-Palantir is a content-agnostic document and event platform. It exposes no methodology-specific route, projection, schema, or authorization behavior for this flow. Methodology selection, rule input interpretation, synthetic audit construction, and execution staging belong to Smaug and Methodology Rules.
+## Public Runtime Boundary
 
-## Goals
+- The CLI calls Smaug only.
+- The CLI does not call Palantir, read a database, or stage documents manually.
+- Smaug owns snapshot selection, bounded graph preparation, temporary staging, and cleanup.
+- Methodology Rules owns rule definitions, declarative query criteria, processor selection, local execution, and result presentation.
+- Local execution does not post its rule result.
+- Registered processor-path and `--all-rules` dry runs retain their existing behavior.
 
-- Execute one explicit local MassID processor without a Smaug methodology-rule record.
-- Use Smaug's latest available document snapshot as the sole source of execution documents.
-- Pin one snapshot cutoff for the target and every traversed document.
-- Stage every parent and related document required by the processor's declarative query criteria.
-- Keep registered processor-path and `--all-rules` dry runs compatible.
-- Use the deployed Smaug API invocation role and SigV4 authentication.
-- Keep credentials and source documents out of API and CLI logs.
-- Expire staged objects through the methodology-executions bucket lifecycle.
+## Preparation Contract
 
-## Non-goals
-
-- Adding or changing a Palantir API.
-- Falling back to Palantir when a Smaug snapshot is absent or invalid.
-- Registering, deploying, or enabling the local rule.
-- Posting a local rule result to Smaug.
-- Running local processor code inside Smaug.
-- Reading Palantir or Smaug MongoDB from the CLI.
-- Accepting executable preprocessing logic from the caller.
-- Supporting rule scopes other than MassID in this release.
-- Supporting processors whose construction requires application-specific arguments.
-
-## Ownership Boundary
-
-Palantir owns documents, events, document authorization, and delivery of document snapshots to Smaug.
-
-Smaug owns its persisted snapshots, methodology and rule configuration, interpretation of rule input criteria, snapshot selection, synthetic audit construction, execution staging, cleanup, and the signed preparation endpoint.
-
-Methodology Rules owns rule definitions, declarative document-query criteria, explicit local processor selection, construction of the existing `RuleInput` envelope, local processor execution, and result presentation.
-
-Rule processors receive `RuleInput`, then load staged documents through the existing document loader. They do not call Palantir or Smaug's document API.
-
-## Decision
-
-Smaug exposes a separate local-rule preparation endpoint:
-
-```text
-POST /methodologies/dry-run/prepare-local-rule
-```
-
-The endpoint accepts the selected rule's declarative input criteria. It reads the target and related documents exclusively through Smaug's `DocumentApiService`, prepares one isolated S3 execution prefix, and returns the identifiers required by the local processor.
-
-The registered preparation endpoint owns methodology-bound and `--all-rules` execution. Its external contract does not change.
-
-### Rejected alternatives
-
-- A methodology-specific Palantir endpoint violates Palantir's content-agnostic boundary and combines ordinary document-read permission with raw-PII export behavior.
-- A generic Palantir full-document endpoint adds a network and authorization surface that this flow does not need.
-- A Palantir fallback makes equivalent dry-run requests depend on different sources and snapshot times.
-
-## Request and Response
+Explicit local mode sends a strict request to `POST /methodologies/dry-run/prepare-local-rule`:
 
 ```typescript
 interface LocalRuleDryRunPrepareRequest {
@@ -77,149 +35,61 @@ interface LocalRuleDryRunPrepareResponse {
 }
 ```
 
-`dataSetName` is a consistency assertion, not a Palantir routing instruction. After validating each composed document, Smaug rejects the target or any traversed source snapshot whose `document.dataSetName` differs from the request. `ruleSlug` identifies logs and preparation context; it does not resolve a Smaug rule record. The response contains identifiers only.
+The response contains identifiers only. Smaug validates the dataset and declarative criteria, pins one snapshot boundary for the prepared graph, bounds criteria before recursive parsing, and owns failure cleanup. Cleanup targets only the exact staged object versions created by that request; the required cloud permissions remain operator-managed infrastructure configuration.
 
-`input` uses the declarative BOLD document-query shape:
+## Declarative Rule Input
 
-```typescript
-interface DocumentQueryCriteria {
-  parentDocument?: RelatedDocumentCriteria;
-  relatedDocuments?: RelatedDocumentCriteria[];
-}
+`BaseRuleDefinition<TInput = never>` has an optional `input` property typed as `TInput`. Eligible BOLD definitions declare their complete static `DocumentQueryCriteria`; a root-only rule declares the shared empty `BOLD_ROOT_DOCUMENT_CRITERIA`.
 
-interface RelatedDocumentCriteria extends DocumentQueryCriteria {
-  category?: string;
-  omit?: boolean;
-  subtype?: string;
-  type?: string;
-}
-```
+The five processors that load the participant-accreditation graph share `PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA` without changing its shape:
 
-Smaug rejects unsupported fields, malformed values, more than six relationship edges from the top-level `input` to any nested criterion, more than 20 entries in one `relatedDocuments` array, more than 250 total criteria nodes, or more than 250 unique staged document identifiers including the target and synthetic audit. The top-level `input` is the first criteria node; every nested `parentDocument` or `relatedDocuments` entry adds one. Duplicate graph references count once toward the staged-document limit. The criteria-node check runs on the unknown input before the recursive schema parses it, so a syntactically valid but combinatorial request cannot consume unbounded synchronous validation work. A 25-second cooperative service deadline prevents new reads or staging writes after expiry. Shared constants define these limits for validation, traversal, and tests; the finite-depth schema is constructed explicitly because a self-recursive Zod schema does not impose a depth limit.
+- geolocation-and-address-precision
+- mass-id-sorting
+- participant-accreditations-and-verifications-requirements
+- prevented-emissions
+- weighing
 
-`omit` affects the processor's iterator result. Smaug still collects and stages an omitted document and its requested descendants.
+The first four definitions declare that shared input. Weighing remains ineligible because its complete input includes an unstaged attachment path. A processor with required constructor arguments, missing static input, or an additional live read outside the prepared graph is ineligible.
 
-## Canonical Rule Definition Input
-
-`BaseRuleDefinition<TInput = never>` has an optional `input` property typed as `TInput`. BOLD rule definitions that query related documents use `BaseRuleDefinition<DocumentQueryCriteria>`.
-
-Rules that use the common BOLD participant-accreditation graph import one shared criteria constant for `DocumentQueryService.load({ criteria })`. Eligible rules also use it in `ruleDefinition.input` for preparation. A processor whose complete input includes an unstaged source omits `ruleDefinition.input` and remains ineligible even when part of its document graph is shared. A rule with a distinct complete graph owns one criteria constant and shares it between preparation and execution. An eligible root-only rule declares the shared empty `BOLD_ROOT_DOCUMENT_CRITERIA` as its input. Requiring an explicit static input declaration distinguishes a processor whose complete graph is known from one that performs additional live reads.
-
-Explicit local mode accepts MassID processors that are constructible without application-specific arguments and whose rule definition declares complete static query criteria, including an explicit empty object for a root-only graph. The loader uses the runtime constructor arity to reject processors with required positional arguments; constructors whose parameters all have defaults remain eligible only when the definition also declares static input. The privacy-flags processor is the supported root-only case. The no-conflicting-certificate-or-credit processor remains unsupported because it requires application-specific constructor arguments; waste-mass-is-unique remains unsupported because it performs duplicate-document API queries outside the pinned staged graph; weighing remains unsupported because scale-ticket verification reads the attachment bucket and may cache extracted participant content outside Smaug's staged snapshot. A separate factory or complete Smaug-staging design is required before these processors can run unbound.
-
-## Snapshot Consistency
-
-Smaug calls `DocumentApiService.findOneLatestSnapshot({ documentId })` once for the target. That snapshot supplies the composed document, snapshot identifier, deduplication identifier, creation date, version date, and cutoff for every related-document lookup. The stored dataset is `snapshot.document.dataSetName` after document-schema validation; it is not snapshot-envelope metadata.
-
-Smaug validates the stored document against `PalantirFullDocumentSchema` at its internal document-to-methodology boundary. The schema name describes the ingested shape; it creates no Palantir runtime dependency.
-
-Methodology Rules validates the staged payload against its own BOLD inbound schema when the local processor loads it. Smaug's storage validation does not claim that every stored Palantir document is processor-compatible. A document that satisfies Smaug's snapshot schema but not the processor's BOLD contract fails locally without posting a result; coordinated contract coverage proves the supported BOLD fixture across the staging and loader boundaries.
-
-Every related-document fetch uses `DocumentApiService.findOneLatestSnapshot({ documentId, versionDate: cutoff })`, validates the composed document and its dataset, and preserves the selected source snapshot's identifiers and dates in the staged workflow envelope. The request-local fetcher returns the pinned target and synthetic audit without refetching them. A document update arriving after target selection cannot enter the execution graph.
-
-An unvalidated document is eligible when its snapshot exists in Smaug. `DocumentApiService.findOneLatestSnapshot` does not depend on methodology registration or validation state, so snapshot existence and schema validity determine availability.
-
-## Smaug Preparation Flow
-
-1. Validate the request, dataset, document identifier, rule slug, scope, and query bounds.
-2. Read the target's latest Smaug snapshot and establish its version date as the cutoff.
-3. Validate the target and verify `target.document.dataSetName` matches the request.
-4. Create an in-memory synthetic audit by cloning the complete target, replacing its document identifier, setting its parent to the target, retaining only ACTOR events, and applying the dry-run audit subtype and type. Its workflow envelope receives new document, snapshot, and deduplication identifiers plus one request-time creation/version timestamp; source snapshot envelopes remain unchanged.
-5. Validate the synthetic audit against the same document schema.
-6. Build a request-local `DocumentQueryService` whose fetcher returns the pinned audit and target and reads every other document from Smaug at or before the cutoff.
-7. Traverse the requested graph, validate every source snapshot and dataset, fail on missing required connections, deduplicate by document identifier, and enforce the staged-document limit including the synthetic audit.
-8. Preserve source snapshot metadata and validate every execution-workflow document before the first S3 write. Only the synthetic audit receives generated workflow metadata.
-9. Stage all documents under `<executionId>/documents/`, tagged `dry-run=true`.
-10. Each successful write returns its S3 version identifier. If the deadline expires or a write fails, await any in-flight write, permanently delete every exact version written by this request, and return an error. When cleanup succeeds, rethrow the preparation failure. When cleanup also fails, return an `AggregateError` whose `cause` is the preparation failure and whose errors are the cleanup failures. The API task role has a dedicated statement granting `s3:DeleteObject` and `s3:DeleteObjectVersion` on the methodology-executions bucket object ARN; S3 does not support an existing-object-tag condition on these deletion actions.
-11. Return the preparation identifiers only after all writes succeed.
-
-Request body parsing and strict criteria validation run before the service deadline and are bounded by the HTTP body limit plus the criteria depth, fan-out, and total-node caps. A single cooperative 25-second service deadline then covers snapshot reads, traversal, document/workflow validation, and staging. Every awaited operation is followed by a deadline check, and no new write begins after expiry. An in-flight S3 request is allowed to settle so cleanup can remove the exact version it created; the endpoint never returns success after the deadline. Preparation creates a fresh execution on every call because local processor code and criteria can change independently of snapshots. The bucket lifecycle expires successful dry-run objects after seven days and noncurrent versions after one day.
-
-## CLI Flow
+## CLI Selection
 
 ```text
-rtk pnpm run-rule dry-run <processor-path> \
+pnpm run-rule dry-run <processor-path> \
   --document-id <document-id> \
   --data-set-name TEST
 ```
 
-The CLI loads the processor and colocated rule definition, rejects unsupported construction contracts, sends the document ID, expected dataset, MassID scope, rule slug, and optional criteria to Smaug, constructs one existing `RuleInput`, executes the processor exactly once, and prints the result locally.
+A processor path plus `--data-set-name` selects explicit local mode. A processor path plus `--methodology-slug` selects registered mode. `--all-rules` remains registered mode.
 
-`--data-set-name` selects explicit local mode when a processor path is present. Without it, the existing processor-path plus `--methodology-slug` command remains registered mode. `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config` are invalid in explicit local mode; `--data-set-name` is invalid in registered mode. Batch mode loads the local module once and creates one processor instance per document. Registered modes use the registered endpoint and its returned rules array.
+Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config`. Registered mode rejects `--data-set-name`. Batch mode loads the local module once and creates one processor instance per document.
 
-## Authentication
+## Authentication and Credential Lifetime
 
-`aws-vault exec smaug-prod` supplies the base SSO credentials. The CLI assumes the deployed API Gateway invocation role and signs the Smaug request with SigV4.
+The operator supplies credentials and the Smaug invocation-role ARN through runtime configuration. The tracked invocation-role test value uses fictional account metadata.
 
-The shared AWS HTTP credential provider serves rule-result reporting and dry-run preparation. `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` identifies the deployed role. The provider memoizes unexpired assumed credentials, coalesces concurrent refreshes, and refreshes before expiry instead of invoking STS for every signed request. The CLI loads `--env-file` through a side-effect-free bootstrap before importing modules that read environment variables, while explicit shell variables retain precedence. A missing or unreadable requested environment file fails closed without dotenv diagnostic output.
-
-The endpoint uses the IAM-protected API Gateway proxy. It introduces no Palantir credential, permission, SDK call, or network dependency.
+The shared credential provider validates the configured ARN lazily, caches assumed credentials by role ARN, coalesces concurrent refreshes, reuses unexpired credentials, refreshes before expiration, and retries after a rejected refresh. Localhost fixtures bypass signing without requiring AWS configuration.
 
 ## Safety and Privacy
 
-- The endpoint accepts declarative criteria only.
-- Query depth, fan-out, document count, and preparation time have explicit limits.
-- Missing, malformed, or dataset-mismatched target or related snapshots fail closed without a Palantir fallback.
-- Logs contain document identifiers, expected dataset, rule slug, counts, timings, and error codes only.
-- Logs exclude source documents, participant data, credentials, authorization headers, signed headers, and full HTTP request objects.
-- Raw participant data stays inside Smaug's snapshot and execution boundaries.
+- Requests accept declarative criteria only.
+- Missing, malformed, or dataset-mismatched preparation input fails closed.
+- This change adds no source documents, participant data, credentials, signed headers, full HTTP request objects, real account identifiers, private credential profiles, or production topology to committed fixtures and documentation.
 - The CLI persists no fetched document locally.
-- The endpoint returns no source document content.
-- S3 objects use the existing `dry-run=true` lifecycle boundary.
-
-## Error Contract
-
-Preparation fails without a success response when the request is invalid, the target snapshot is unavailable, the stored dataset differs, a document fails schema validation, a required relationship is unavailable at the cutoff, a graph limit or deadline is exceeded, or staging or cleanup fails.
-
-The CLI never executes the processor after preparation failure. Explicit local single-document mode exits nonzero on preparation failure, a processor exception, or a normal `FAILED` rule output. Batch mode records each document failure and exits nonzero after the batch. Registered mode retains its result-conversion behavior.
+- Preparation failures prevent processor execution.
+- Explicit local single-document preparation failures, processor exceptions, and normal `FAILED` outputs exit nonzero.
+- Batch mode records document failures and exits nonzero.
+- Registered mode keeps its existing result-conversion behavior.
 
 ## Verification
 
-### Methodology Rules
+The Methodology Rules implementation is verified by:
 
-- Load an explicit processor and its rule definition.
-- Reject application-specific constructor arguments.
-- Forward nested criteria and forward an explicit empty input for eligible root-only rules.
-- Reject zero-argument processors whose definitions do not declare a complete static input graph.
-- Execute the selected processor exactly once.
-- Reject mixed registered and explicit-local flags.
-- Preserve registered, `--all-rules`, single-document, and batch behavior.
-- Redact authorization and AWS signing headers from HTTP failures.
-- Reuse the shared assume-role credential provider.
-- Reuse one unexpired assumed credential across sequential and concurrent signatures, then refresh before expiration.
-- Preserve the registered processor-path command as well as registered `--all-rules` mode.
-- Load a requested environment file before transitive environment consumers and fail closed when it cannot be loaded.
+- loader tests for scope, constructor, static-input, and colocated-definition boundaries;
+- strict request/response and error-redaction tests;
+- sequential, concurrent, refresh, and retry credential-provider probes;
+- local, registered processor-path, registered `--all-rules`, single-document, and batch tests;
+- shared-criteria tests and owning tests for all five processors;
+- a localhost live test that proves route selection and absence of AWS, Palantir, database, S3, and audit-result calls;
+- exact-head local review, CI, thread convergence, and merge-tree checks.
 
-### Smaug
-
-- Prepare from an unvalidated snapshot already stored in Smaug.
-- Reject a missing target or dataset mismatch before staging.
-- Use the target version date for every related-document lookup.
-- Prove a later snapshot cannot enter the pinned graph.
-- Return the pinned target instead of refetching it during traversal.
-- Clone the complete target before applying synthetic-audit overrides.
-- Traverse root-only, parent, related, omitted, and nested criteria.
-- Fail on missing required connections and graph limits without writing.
-- Validate and deduplicate the complete graph before staging.
-- Delete successful writes after a later write fails, and preserve both the preparation and cleanup failures when deletion fails.
-- Prove the local dry-run service and fetcher have no direct Palantir SDK call or import; unrelated methodology-module Palantir integrations remain unchanged.
-- Preserve registered dry-run behavior.
-- Verify the IAM-protected proxy and invocation-role policy.
-
-### End-to-end evidence
-
-The implementation is complete only after tests demonstrate a successful unvalidated-snapshot preparation through the real local Nest/Fastify route, missing-snapshot failure without a Palantir call, cutoff exclusion of a later related snapshot, required-relationship failure at the cutoff, cleanup after partial staging, and a successful registered dry run.
-
-After deployment, an operator runs a root-only unbound processor against a real TEST MassID snapshot, a processor that traverses a related snapshot, a registered dry run, a known-invalid case, an accepted SigV4 request using the deployed invocation role, and a rejected control request using the base SSO role.
-
-Production identifiers and participant data stay outside committed tests, fixtures, logs, and documentation.
-
-## Delivery Boundaries
-
-The runtime feature requires coordinated changes in Smaug and Methodology Rules only. Palantir requires no feature or deployment change. An independent Palantir documentation and architecture-check pull request enforces the content-agnostic boundary but does not participate in the runtime flow.
-
-The coordinated delivery includes `docs/superpowers/rcas/2026-08-30-unbound-rule-dry-run-architecture.md`: Smaug and Methodology Rules carry the runtime feature, while the independent Palantir pull request carries only the platform-boundary guardrail. The ship controller owns the final evidence pass after those three pull requests exist; every corrective action maps to a descriptive pull request, implementation or documentation path, and verification result.
-
-Smaug deploys before the Methodology Rules release. The production TEST-dataset run is operator-gated. Pull-request merge and deployment remain operator-controlled.
-
-No change registers the rule under test in a methodology or posts its local result to Smaug.
+Any deployed-environment verification is a separately authorized operator step. It remains read-only unless the operator separately authorizes a mutation. Pull-request merge and deployment remain human-controlled.

@@ -6,6 +6,7 @@ import { readFile } from 'node:fs/promises';
 import type { DryRunOptions } from './dry-run.command';
 import type { DryRunDocumentResult } from './dry-run.handler';
 
+import { STUB_SMAUG_URL } from '../test.constants';
 import { writeJsonLog } from '../utils/batch-summary';
 import { createLocalRuleExecutionError } from '../utils/local-result-output';
 import { handleDryRunBatch } from './dry-run-batch.handler';
@@ -39,7 +40,7 @@ vi.mock('./dry-run.handler', async (importOriginal) => {
     processDryRunDocument: vi.fn(),
     processLocalDryRunDocument: vi.fn(),
     resolveDryRunEnvironment: vi.fn().mockReturnValue({
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     }),
   };
 });
@@ -88,7 +89,7 @@ const baseOptions: DryRunOptions = {
   json: false,
   methodologySlug: 'bold-carbon-organic',
   rulesScope: 'MassID',
-  smaugUrl: 'https://smaug.carrot.eco',
+  smaugUrl: STUB_SMAUG_URL,
 };
 
 const registeredSelection = {
@@ -120,7 +121,7 @@ describe('handleDryRunBatch', () => {
     vi.clearAllMocks();
     process.exitCode = undefined;
     mockResolveDryRunEnvironment.mockReturnValue({
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     });
     mockProcessBatch.mockResolvedValue({ failures: [], successes: [] });
     mockLoadRedactedLocalRuleModule.mockResolvedValue({} as never);
@@ -232,7 +233,7 @@ describe('handleDryRunBatch', () => {
       expect.objectContaining({
         methodologySlug: 'bold-carbon-organic',
         processorPath: undefined,
-        smaugUrl: 'https://smaug.carrot.eco',
+        smaugUrl: STUB_SMAUG_URL,
       }),
     );
   });

@@ -1,6 +1,7 @@
 import { provideSmaugApiCredentials } from '@carrot-fndn/shared/aws-http';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
 
+import { STUB_SMAUG_URL } from '../test.constants';
 import { prepareDryRun, prepareLocalRule } from './smaug-client';
 
 vi.mock('@carrot-fndn/shared/http-request', () => ({
@@ -14,7 +15,7 @@ const mockHttpRequest = httpRequest as vi.MockedFunction<typeof httpRequest>;
 const mockProvideSmaugApiCredentials = vi.mocked(provideSmaugApiCredentials);
 
 describe('prepareDryRun', () => {
-  const smaugUrl = 'https://smaug.carrot.eco';
+  const smaugUrl = STUB_SMAUG_URL;
 
   const mockResponse = {
     auditDocumentId: 'audit-123',

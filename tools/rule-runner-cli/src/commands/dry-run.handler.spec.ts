@@ -6,6 +6,7 @@ import { Command } from '@commander-js/extra-typings';
 
 import type { DryRunOptions } from './dry-run.command';
 
+import { STUB_ENV_SMAUG_URL, STUB_SMAUG_URL } from '../test.constants';
 import { loadLocalRuleModule, loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 import { prepareDryRun, prepareLocalRule } from '../utils/smaug-client';
@@ -83,7 +84,7 @@ const baseOptions: DryRunOptions & { documentId: string } = {
   json: false,
   methodologySlug: 'bold-carbon-organic',
   rulesScope: 'MassID',
-  smaugUrl: 'https://smaug.carrot.eco',
+  smaugUrl: STUB_SMAUG_URL,
 };
 
 const registeredSelection = {
@@ -145,7 +146,7 @@ describe('handleDryRun', () => {
   it('should call Smaug prepare API with correct parameters', async () => {
     await handleDryRun(registeredSelection, baseOptions);
 
-    expect(mockPrepareDryRun).toHaveBeenCalledWith('https://smaug.carrot.eco', {
+    expect(mockPrepareDryRun).toHaveBeenCalledWith(STUB_SMAUG_URL, {
       documentId: 'mass-id-456',
       methodologySlug: 'bold-carbon-organic',
       rulesScope: 'MassID',
@@ -189,7 +190,7 @@ describe('handleDryRun', () => {
     );
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith(
-      'https://smaug.carrot.eco',
+      STUB_SMAUG_URL,
       expect.objectContaining({
         methodologySlug: 'bold-carbon-organic',
         ruleSlug: 'document-manifest-data',
@@ -243,7 +244,7 @@ describe('handleDryRun', () => {
   });
 
   it('should fall back to AUDIT_URL env var when --smaug-url not provided', async () => {
-    process.env['AUDIT_URL'] = 'https://smaug-from-env.carrot.eco';
+    process.env['AUDIT_URL'] = STUB_ENV_SMAUG_URL;
 
     await handleDryRun(registeredSelection, {
       ...baseOptions,
@@ -251,7 +252,7 @@ describe('handleDryRun', () => {
     });
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith(
-      'https://smaug-from-env.carrot.eco',
+      STUB_ENV_SMAUG_URL,
       expect.anything(),
     );
   });
@@ -269,7 +270,7 @@ describe('handleDryRun', () => {
     );
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith(
-      'https://smaug.carrot.eco',
+      STUB_SMAUG_URL,
       expect.objectContaining({
         ruleSlug: 'document-manifest-data',
       }),
@@ -401,16 +402,13 @@ describe('handleDryRun', () => {
       baseOptions,
     );
 
-    expect(mockPrepareLocalRule).toHaveBeenCalledWith(
-      'https://smaug.carrot.eco',
-      {
-        dataSetName: 'TEST',
-        documentId: 'mass-id-456',
-        input: ruleInput,
-        ruleSlug: 'local-rule',
-        rulesScope: 'MassID',
-      },
-    );
+    expect(mockPrepareLocalRule).toHaveBeenCalledWith(STUB_SMAUG_URL, {
+      dataSetName: 'TEST',
+      documentId: 'mass-id-456',
+      input: ruleInput,
+      ruleSlug: 'local-rule',
+      rulesScope: 'MassID',
+    });
     expect(mockPrepareDryRun).not.toHaveBeenCalled();
     expect(mockBuildRuleInput).toHaveBeenCalledWith({
       prepared: {
@@ -498,16 +496,13 @@ describe('handleDryRun', () => {
       baseOptions,
     );
 
-    expect(mockPrepareLocalRule).toHaveBeenCalledWith(
-      'https://smaug.carrot.eco',
-      {
-        dataSetName: 'TEST',
-        documentId: 'mass-id-456',
-        input: {},
-        ruleSlug: 'root-only-rule',
-        rulesScope: 'MassID',
-      },
-    );
+    expect(mockPrepareLocalRule).toHaveBeenCalledWith(STUB_SMAUG_URL, {
+      dataSetName: 'TEST',
+      documentId: 'mass-id-456',
+      input: {},
+      ruleSlug: 'root-only-rule',
+      rulesScope: 'MassID',
+    });
   });
 
   it('should construct a fresh local processor for each batch document call', async () => {
@@ -533,7 +528,7 @@ describe('handleDryRun', () => {
         mode: 'local' as const,
         processorPath: 'some/path',
       },
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     };
 
     await processLocalDryRunDocument('document-1', context);
@@ -638,14 +633,14 @@ describe('resolveDryRunEnv', () => {
     const result = resolveDryRunEnvironment({
       cache: false,
       debug: false,
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     });
 
-    expect(result).toStrictEqual({ smaugUrl: 'https://smaug.carrot.eco' });
+    expect(result).toStrictEqual({ smaugUrl: STUB_SMAUG_URL });
   });
 
   it('should fall back to AUDIT_URL env var', () => {
-    process.env['AUDIT_URL'] = 'https://env-smaug.carrot.eco';
+    process.env['AUDIT_URL'] = STUB_ENV_SMAUG_URL;
 
     const result = resolveDryRunEnvironment({
       cache: false,
@@ -653,7 +648,7 @@ describe('resolveDryRunEnv', () => {
       smaugUrl: undefined,
     });
 
-    expect(result).toStrictEqual({ smaugUrl: 'https://env-smaug.carrot.eco' });
+    expect(result).toStrictEqual({ smaugUrl: STUB_ENV_SMAUG_URL });
   });
 
   it('should throw when no smaug URL is available', () => {
@@ -670,7 +665,7 @@ describe('resolveDryRunEnv', () => {
     resolveDryRunEnvironment({
       cache: true,
       debug: false,
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     });
 
     expect(process.env['TEXTRACT_CACHE_DIR']).toBeDefined();
@@ -680,7 +675,7 @@ describe('resolveDryRunEnv', () => {
     resolveDryRunEnvironment({
       cache: false,
       debug: true,
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     });
 
     expect(process.env['DEBUG']).toBe('true');

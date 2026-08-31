@@ -226,6 +226,9 @@ describe('dryRunCommand', () => {
     );
 
     expect(readme).toContain(
+      'Supply `AUDIT_URL` and `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` through shell variables or an operator-managed `--env-file`.',
+    );
+    expect(readme).toContain(
       'pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-flags --data-set-name TEST',
     );
     expect(readme).toContain(
