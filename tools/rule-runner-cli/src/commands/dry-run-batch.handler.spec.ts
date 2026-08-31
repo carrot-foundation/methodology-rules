@@ -277,6 +277,35 @@ describe('handleDryRunBatch', () => {
     expect(mockProcessLocalDryRunDocument).not.toHaveBeenCalled();
   });
 
+  it('should suppress per-document processor output in local batch mode', async () => {
+    const localSelection = {
+      dataSetName: 'TEST' as const,
+      mode: 'local' as const,
+      processorPath: 'some/path',
+    };
+
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    mockProcessLocalDryRunDocument.mockResolvedValue(
+      makeDocumentResult('doc-1', [{ status: 'passed' }]),
+    );
+    mockProcessBatch.mockImplementation(async (options) => ({
+      failures: [],
+      successes: [
+        {
+          item: 'doc-1',
+          result: await options.processItem('doc-1'),
+        },
+      ],
+    }));
+
+    await handleDryRunBatch(localSelection, baseOptions);
+
+    expect(mockProcessLocalDryRunDocument).toHaveBeenCalledWith(
+      'doc-1',
+      expect.objectContaining({ writeOutput: false }),
+    );
+  });
+
   it('should aggregate rule statuses across documents in summary', async () => {
     mockReadFile.mockResolvedValue(JSON.stringify(['doc-1', 'doc-2', 'doc-3']));
 

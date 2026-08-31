@@ -620,6 +620,40 @@ describe('handleDryRun', () => {
       'Example Recycler',
     );
   });
+
+  it('should suppress local processor output when requested', async () => {
+    const Processor = vi.fn().mockImplementation(function Processor() {
+      return { process: mockProcess };
+    });
+    const stdoutSpy = vi
+      .spyOn(process.stdout, 'write')
+      .mockImplementation(() => true);
+
+    await processLocalDryRunDocument('document-1', {
+      localRuleModule: {
+        Processor,
+        ruleDefinition: {
+          description: 'Root-only rule',
+          events: [],
+          input: {},
+          name: 'Root-only rule',
+          slug: 'root-only-rule',
+          version: '1.0.0',
+        },
+        rulesScope: 'MassID',
+      } as never,
+      options: { ...baseOptions, json: true },
+      selection: {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      smaugUrl: STUB_SMAUG_URL,
+      writeOutput: false,
+    });
+
+    expect(stdoutSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe('resolveDryRunEnv', () => {
