@@ -10,7 +10,7 @@ No Palantir deployment or production mutation occurred. The cost was avoidable i
 
 ## Root Cause
 
-The primary cause was a failed architecture-premise check. Work began from the assumption that an unvalidated MassID required a new Palantir read path. We did not first exercise Smaug's existing registered dry-run path or inspect how `DocumentApiService.findOneLatestSnapshot` composes base snapshots with document-part snapshots.
+The primary cause was a failed architecture-premise check. Work began from the assumption that an unvalidated MassID required a new Palantir read path. We did not first exercise Smaug's existing registered dry-run path or inspect how `DocumentApiService.findOneLatestSnapshot` delegates to `ApiDocumentSnapshotService`, which composes the selected base snapshot with document-part snapshots at or before its version.
 
 The generic shape of Palantir's document API was treated as evidence that Palantir should supply methodology execution input. That inference confused the platform that transports documents with the consumer that interprets them. Parallel implementation then amplified the unverified premise instead of independently validating it.
 
@@ -28,11 +28,12 @@ These documentation gaps contributed to the failure. They did not cause the deci
 ## Evidence
 
 - Smaug already exposes a registered dry-run controller and service under its methodology module.
-- That service reads documents through `DocumentApiService`, not through a new Palantir endpoint.
-- `DocumentApiService.findOneLatestSnapshot` delegates to `ApiDocumentSnapshotService`.
-- `ApiDocumentSnapshotService` composes document-part snapshots at or before the selected snapshot version.
-- Methodology Rules pull request #417 (unbound rule dry runs) already calls a signed Smaug preparation endpoint and contains no Palantir runtime dependency; its remaining work is correction and complete verification.
-- Palantir pull request #3602 (methodology execution input) is closed and unmerged.
+- That service calls `DocumentApiService.findOne`; the API service delegates through `findOneLatestSnapshot` to `ApiDocumentSnapshotService`.
+- `ApiDocumentSnapshotService` composes document-part snapshots whose version is at or before the selected base snapshot version.
+- [Methodology Rules pull request #417 (unbound rule dry runs)](https://github.com/carrot-foundation/methodology-rules/pull/417) calls only Smaug preparation routes at runtime and has no Palantir SDK, network, or database dependency. The reviewed local implementation head is `1e990a52` (fix rule-runner invocation); the remote PR head requires the final reviewed push.
+- [Palantir pull request #3602 (methodology execution input)](https://github.com/carrot-foundation/palantir/pull/3602) is closed and unmerged at `00bd122c` (expose methodology execution input).
+- [Palantir pull request #3603 (platform ownership guardrails)](https://github.com/carrot-foundation/palantir/pull/3603) is open. Its boundary detector passes the current guardrail branch and fails the closed endpoint branch at `document.controller.ts:114` with the matched `methodology` route concept.
+- Smaug Phase 1 exists locally as `0cea5d5a` (prove composed snapshot cutoff reads), `b1f3a49e` (validate local dry-run requests), and `6123b857` (fetch pinned dry-run snapshots). No Smaug pull request exists yet, and the local preparation endpoint, staging, cleanup, and IAM work remain pending.
 
 ## Corrective Actions
 
@@ -50,10 +51,20 @@ These documentation gaps contributed to the failure. They did not cause the deci
 - Methodology Rules documents that processors consume Smaug-staged documents and that its CLI does not call Palantir or either service database.
 - Cross-repository scope expansion requires renewed approval after the premise check identifies the concept owner.
 
+## Corrective Action Proof
+
+| Action | Proof | Status |
+| --- | --- | --- |
+| Close the misplaced Palantir execution-input feature | Palantir pull request #3602 (methodology execution input) is closed and unmerged. The guard at `tools/scripts/src/check-platform-boundaries/check-platform-boundaries.mjs` still rejects its `apps/document/external/api/service/src/app/modules/document/controllers/document.controller.ts:114` route. | Complete |
+| Prevent execution-specific Palantir API ownership | Palantir pull request #3603 (platform ownership guardrails) adds the guard and its mutation tests under `tools/scripts/src/check-platform-boundaries/`. The Nx target passes current code and fails the closed endpoint branch. | Awaiting human merge |
+| Prepare and execute an explicit Methodology Rules processor through Smaug only | Methodology Rules pull request #417 (unbound rule dry runs), reviewed local head `1e990a52` (fix rule-runner invocation). Runtime boundaries are in `tools/rule-runner-cli/src/utils/smaug-client.ts`, `processor-loader.ts`, and `commands/dry-run.command.ts`; RED mutations proved static-input, endpoint-selection, credential-cache, and README detectors before green project gates and the three-mode localhost run. | Local implementation complete; PR convergence pending |
+| Prepare composed, pinned snapshots in Smaug | Local Phase 1 commits `0cea5d5a` (prove composed cutoff), `b1f3a49e` (validate request), and `6123b857` (fetch pinned snapshots) cover `libs/shared/nest/document/api/src/__tests__/document.api.service.e2e.spec.ts`, `libs/apps/api/service/methodology/module/src/dry-run/methodology.dry-run.schema.ts`, and `libs/apps/api/service/methodology/module/src/dry-run/methodology.local-dry-run.fetcher.ts` with focused tests. | `PENDING_SMAUG_PR`: endpoint, exact-version staging cleanup, `DeleteObjectVersion` IAM, full review, and PR remain |
+| Prove deployed production TEST behavior | `docs/superpowers/plans/2026-08-28-unbound-rule-dry-run-methodology-rules.md` records the operator matrix: a confirmed-absent generated document ID, root-only and related-snapshot processors, registered flow, known-invalid result, and rejected base-role control. | `PENDING_OPERATOR`: each real-document call and production mutation requires separate authorization |
+
 ## Completion Criteria
 
 - Palantir pull request #3602 (methodology execution input) remains closed and unmerged.
-- Smaug and Methodology Rules changes pass focused, full-project, architecture, privacy, and exact-head CI gates.
+- Smaug and Methodology Rules changes pass focused, full-project, architecture, privacy, and exact-head CI gates after their respective PRs exist.
 - The Palantir detector passes on current code and fails on the closed endpoint branch.
 - Local live tests prove composed snapshot preparation and both registered and explicit-local CLI behavior.
 - Post-deployment production TEST-dataset acceptance remains a separately authorized operator action.
