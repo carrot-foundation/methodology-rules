@@ -143,9 +143,12 @@ describe('reportRuleResults', () => {
 
   afterEach(() => {
     process.env = originalEnvironment;
+    vi.useRealTimers();
   });
 
   it('should send a request to the given responseUrl', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime('2026-08-30T12:00:00.000Z');
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),

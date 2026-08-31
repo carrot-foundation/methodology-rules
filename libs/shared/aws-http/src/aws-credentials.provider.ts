@@ -10,6 +10,7 @@ const smaugApiRoleArnPattern =
   /^arn:aws:iam::\d{12}:role\/[A-Za-z0-9+=,.@_/-]+$/;
 
 const providersByRoleArn = new Map<string, AwsCredentialIdentityProvider>();
+const refreshWindowMilliseconds = 5 * 60_000;
 
 const requireValidSmaugApiRoleArn = (): string => {
   const roleArn = getSmaugApiGatewayAssumeRoleArn();
@@ -23,24 +24,58 @@ const requireValidSmaugApiRoleArn = (): string => {
   return roleArn;
 };
 
-export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider => {
-  const roleArn = requireValidSmaugApiRoleArn();
-  const cachedProvider = providersByRoleArn.get(roleArn);
+const memoizeCredentials = (
+  source: AwsCredentialIdentityProvider,
+): AwsCredentialIdentityProvider => {
+  let cached: Awaited<ReturnType<AwsCredentialIdentityProvider>> | undefined;
+  let inFlight: ReturnType<AwsCredentialIdentityProvider> | undefined;
 
-  if (cachedProvider) {
-    return cachedProvider;
-  }
+  return async () => {
+    const refreshAfter = Date.now() + refreshWindowMilliseconds;
 
-  const provider = fromTemporaryCredentials({
-    clientConfig: {},
-    masterCredentials: fromEnv(),
-    params: {
-      RoleArn: roleArn,
-      RoleSessionName: 'methodology-rules-smaug-api',
-    },
-  });
+    if (
+      cached !== undefined &&
+      (cached.expiration === undefined ||
+        cached.expiration.getTime() > refreshAfter)
+    ) {
+      return cached;
+    }
 
-  providersByRoleArn.set(roleArn, provider);
+    inFlight ??= (async () => {
+      const credentials = await source();
 
-  return provider;
+      cached = credentials;
+
+      return credentials;
+    })();
+
+    try {
+      return await inFlight;
+    } finally {
+      inFlight = undefined;
+    }
+  };
 };
+
+const resolveSmaugApiCredentials: AwsCredentialIdentityProvider = async () => {
+  const roleArn = requireValidSmaugApiRoleArn();
+  const source =
+    providersByRoleArn.get(roleArn) ??
+    memoizeCredentials(
+      fromTemporaryCredentials({
+        clientConfig: {},
+        masterCredentials: fromEnv(),
+        params: {
+          RoleArn: roleArn,
+          RoleSessionName: 'methodology-rules-smaug-api',
+        },
+      }),
+    );
+
+  providersByRoleArn.set(roleArn, source);
+
+  return source();
+};
+
+export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider =>
+  resolveSmaugApiCredentials;

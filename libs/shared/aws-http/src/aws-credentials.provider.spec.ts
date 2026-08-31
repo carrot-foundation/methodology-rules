@@ -1,10 +1,10 @@
 import { fromTemporaryCredentials } from '@aws-sdk/credential-providers';
 import { faker } from '@faker-js/faker';
-import dotenv from 'dotenv';
-import { readFileSync } from 'node:fs';
-import path from 'node:path';
 
-import { provideSmaugApiCredentials } from './aws-credentials.provider';
+import {
+  type AwsCredentialIdentityProvider,
+  provideSmaugApiCredentials,
+} from './aws-credentials.provider';
 
 vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@aws-sdk/credential-providers')>()),
@@ -13,8 +13,24 @@ vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
 
 describe('provideSmaugApiCredentials', () => {
   const environment = { ...process.env };
-  const trackedRoleArn = 'arn:aws:iam::629216831935:role/aws-api-gateway-role';
   const validRoleArn = 'arn:aws:iam::123456789012:role/smaug-api-gateway';
+  const concurrentRoleArn =
+    'arn:aws:iam::123456789013:role/smaug-api-gateway-concurrent';
+  const sequentialRoleArn =
+    'arn:aws:iam::123456789014:role/smaug-api-gateway-sequential';
+  const expiringRoleArn =
+    'arn:aws:iam::123456789015:role/smaug-api-gateway-expiring';
+  const rejectedRefreshRoleArn =
+    'arn:aws:iam::123456789016:role/smaug-api-gateway-rejected-refresh';
+  const credentials = {
+    accessKeyId: 'access-key',
+    secretAccessKey: 'secret-access-key',
+  };
+  const refreshedCredentials = {
+    accessKeyId: 'refreshed-access-key',
+    secretAccessKey: 'refreshed-secret-access-key',
+  };
+  const assumeRoleProvider = vi.fn<AwsCredentialIdentityProvider>();
   const mockFromTemporaryCredentials = vi.mocked(fromTemporaryCredentials);
 
   beforeEach(() => {
@@ -25,20 +41,27 @@ describe('provideSmaugApiCredentials', () => {
       AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
       SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: validRoleArn,
     };
-    mockFromTemporaryCredentials.mockReturnValue(vi.fn());
+    assumeRoleProvider.mockResolvedValue(credentials);
+    mockFromTemporaryCredentials.mockReturnValue(assumeRoleProvider);
   });
 
   afterEach(() => {
     process.env = environment;
+    vi.useRealTimers();
     vi.clearAllMocks();
   });
 
-  it('should configure the configured API Gateway role from base credentials', () => {
-    provideSmaugApiCredentials();
+  it('should configure the API Gateway role lazily from base credentials', async () => {
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = validRoleArn;
+
+    const provider = provideSmaugApiCredentials();
+
+    expect(mockFromTemporaryCredentials).not.toHaveBeenCalled();
+
+    await provider();
 
     expect(mockFromTemporaryCredentials).toHaveBeenCalledWith(
       expect.objectContaining({
-        clientConfig: {},
         masterCredentials: expect.any(Function),
         params: {
           RoleArn: validRoleArn,
@@ -48,84 +71,76 @@ describe('provideSmaugApiCredentials', () => {
     );
   });
 
-  it('should accept the tracked default API Gateway role ARN', () => {
-    const trackedEnvironment = dotenv.parse(
-      readFileSync(
-        path.resolve(process.cwd(), '../../../.env-files/.env.test'),
-        'utf8',
-      ),
-    );
-
-    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] =
-      trackedEnvironment['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'];
-
-    expect(() => provideSmaugApiCredentials()).not.toThrow();
-    expect(mockFromTemporaryCredentials).toHaveBeenCalledWith(
-      expect.objectContaining({
-        params: expect.objectContaining({ RoleArn: trackedRoleArn }),
-      }),
-    );
-  });
-
-  it('should return and invoke the cached provider for the same role ARN', async () => {
-    const cachedRoleArn =
-      'arn:aws:iam::123456789012:role/smaug-api-gateway-cache';
-    const credentials = vi.fn().mockResolvedValue({
-      accessKeyId: 'access-key',
-      secretAccessKey: 'secret-access-key',
-    });
-
-    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = cachedRoleArn;
-    mockFromTemporaryCredentials.mockReturnValue(credentials);
-
-    const firstProvider = provideSmaugApiCredentials();
-    const secondProvider = provideSmaugApiCredentials();
-
-    expect(firstProvider).toBe(credentials);
-    expect(secondProvider).toBe(firstProvider);
-    expect(mockFromTemporaryCredentials).toHaveBeenCalledTimes(1);
-
-    await firstProvider();
-
-    expect(credentials).toHaveBeenCalledTimes(1);
-  });
-
-  it('should create a provider for a changed valid role ARN', () => {
-    const firstRoleArn =
-      'arn:aws:iam::123456789012:role/smaug-api-gateway-first';
-    const secondRoleArn =
-      'arn:aws:iam::123456789012:role/smaug-api-gateway-second';
-    const firstCredentials = vi.fn();
-    const secondCredentials = vi.fn();
-
-    mockFromTemporaryCredentials
-      .mockReturnValueOnce(firstCredentials)
-      .mockReturnValueOnce(secondCredentials);
-    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = firstRoleArn;
-
-    const firstProvider = provideSmaugApiCredentials();
-
-    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = secondRoleArn;
-    const secondProvider = provideSmaugApiCredentials();
-
-    expect(firstProvider).toBe(firstCredentials);
-    expect(secondProvider).toBe(secondCredentials);
-    expect(firstProvider).not.toBe(secondProvider);
-    expect(mockFromTemporaryCredentials).toHaveBeenCalledTimes(2);
-  });
-
   it.each([
     undefined,
     'arn:aws:iam::1234:role/aws-api-gateway-role',
     'invalid',
-  ])('should reject unusable role ARN %s before signing', (roleArn) => {
+  ])('should reject unusable role ARN %s before signing', async (roleArn) => {
     if (roleArn === undefined) {
       delete process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'];
     } else {
       process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = roleArn;
     }
 
-    expect(() => provideSmaugApiCredentials()).toThrow();
+    await expect(provideSmaugApiCredentials()()).rejects.toThrow();
     expect(mockFromTemporaryCredentials).not.toHaveBeenCalled();
+  });
+
+  it('should coalesce concurrent resolution and reuse unexpired credentials', async () => {
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = concurrentRoleArn;
+    const provider = provideSmaugApiCredentials();
+
+    const [first, second] = await Promise.all([provider(), provider()]);
+
+    expect(first).toBe(second);
+    expect(assumeRoleProvider).toHaveBeenCalledTimes(1);
+  });
+
+  it('should reuse unexpired credentials across sequential resolutions', async () => {
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = sequentialRoleArn;
+    const provider = provideSmaugApiCredentials();
+
+    await provider();
+    await provider();
+
+    expect(assumeRoleProvider).toHaveBeenCalledTimes(1);
+  });
+
+  it('should coalesce refresh within five minutes of expiration', async () => {
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = expiringRoleArn;
+    vi.useFakeTimers();
+    vi.setSystemTime('2026-08-30T12:00:00.000Z');
+    assumeRoleProvider.mockResolvedValue({
+      ...credentials,
+      expiration: new Date('2026-08-30T13:00:00.000Z'),
+    });
+    const provider = provideSmaugApiCredentials();
+
+    await provider();
+    vi.setSystemTime('2026-08-30T12:56:00.000Z');
+    await Promise.all([provider(), provider()]);
+
+    expect(assumeRoleProvider).toHaveBeenCalledTimes(2);
+  });
+
+  it('should retry after a rejected refresh', async () => {
+    process.env['SMAUG_API_GATEWAY_ASSUME_ROLE_ARN'] = rejectedRefreshRoleArn;
+    vi.useFakeTimers();
+    vi.setSystemTime('2026-08-30T12:00:00.000Z');
+    assumeRoleProvider
+      .mockResolvedValueOnce({
+        ...credentials,
+        expiration: new Date('2026-08-30T13:00:00.000Z'),
+      })
+      .mockRejectedValueOnce(new Error('STS unavailable'))
+      .mockResolvedValueOnce(refreshedCredentials);
+    const provider = provideSmaugApiCredentials();
+
+    await provider();
+    vi.setSystemTime('2026-08-30T12:56:00.000Z');
+    await expect(provider()).rejects.toThrow('STS unavailable');
+    await expect(provider()).resolves.toEqual(refreshedCredentials);
+
+    expect(assumeRoleProvider).toHaveBeenCalledTimes(3);
   });
 });
