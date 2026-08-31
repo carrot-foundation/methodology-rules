@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+
 import {
   BOLD_ROOT_DOCUMENT_CRITERIA,
   DocumentQueryCriteriaSchema,
@@ -44,10 +46,16 @@ describe('DocumentQueryCriteriaSchema', () => {
 
   it.each([
     [[]],
-    [{ unknown: 'value' }],
-    [{ parentDocument: { omit: 'true' } }],
-    [{ relatedDocuments: [{ category: 42 }] }],
-    [{ parentDocument: { relatedDocuments: [{ type: 42 }] } }],
+    [{ unknown: faker.string.sample() }],
+    [{ parentDocument: { omit: faker.string.sample() } }],
+    [{ relatedDocuments: [{ category: faker.number.int() }] }],
+    [
+      {
+        parentDocument: {
+          relatedDocuments: [{ type: faker.number.int() }],
+        },
+      },
+    ],
   ])('should reject invalid criteria %j', (criteria) => {
     expect(DocumentQueryCriteriaSchema.safeParse(criteria).success).toBe(false);
   });

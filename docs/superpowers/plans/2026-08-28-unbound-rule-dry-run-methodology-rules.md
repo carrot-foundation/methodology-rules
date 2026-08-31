@@ -84,7 +84,7 @@ export const ruleDefinition = {
 } as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
 ```
 
-Define `PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `BOLD_ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared participant-accreditation criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
+Define `PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA` once in the shared BOLD IO helper because all five processor literals are identical. Apply it to the processor loads for geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing, and to the first four rule definitions. Keep weighing's definition without `input` because its complete execution input also includes an attachment-bucket read and optional Textract cache outside Smaug's staged snapshot. Define `BOLD_ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared participant-accreditation criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
 
 - [ ] **Step 2: Run type-check and the rule tests**
 
@@ -104,7 +104,7 @@ export interface BaseRuleDefinition<TInput = never> {
 }
 ```
 
-Move the five byte-equivalent criteria literals to the shared BOLD IO helper, type the constant there, and import it in every definition and processor. Add the shared empty root constant to privacy-flags. Propagate the input generic through the application `RuleDefinition` declarations. Do not import BOLD types into `shared-rule-types`.
+Move the five byte-equivalent criteria literals to the shared BOLD IO helper, type the constant there, and import it in all five processors and the four definitions whose complete input Smaug stages. Leave weighing without a definition input until its attachment path is Smaug-staged. Add the shared empty root constant to privacy-flags. Propagate the input generic through the application `RuleDefinition` declarations. Do not import BOLD types into `shared-rule-types`.
 
 - [ ] **Step 4: Run focused tests and type-check**
 
@@ -408,13 +408,13 @@ await expect(loadLocalRuleModule(defaultedConstructorPath)).resolves.toMatchObje
 ```
 
 Also prove missing, duplicate, or malformed `*.rule-definition.ts` exports fail deterministically. Use isolated temporary fixtures for out-of-scope, required-constructor rejection, and defaulted-constructor acceptance so edge cases do not depend on unrelated production processors. Keep a real `privacy-flags` module load as the positive end-to-end loader case.
-Require every local rule definition to declare `input`, accepting the shared empty root criteria as a complete graph. Add the real `waste-mass-is-unique` module as a negative case proving that zero constructor arity without declared static input is rejected before execution.
+Require every local rule definition to declare `input`, accepting the shared empty root criteria as a complete graph. Add the real `waste-mass-is-unique` and weighing modules as negative cases proving that zero constructor arity without a complete declared static input is rejected before execution.
 
 - [ ] **Step 2: Run the complete rule-runner test target**
 
 Run: `rtk pnpm nx test rule-runner-cli`
 
-Expected: FAIL because constructor arity alone still accepts `waste-mass-is-unique` and a fixture whose definition omits `input`; the defaulted-constructor case with `input: {}` remains eligible.
+Expected: FAIL because constructor arity alone still accepts `waste-mass-is-unique`, weighing, and a fixture whose definition omits `input`; the defaulted-constructor case with `input: {}` remains eligible.
 
 - [ ] **Step 3: Add the explicit static-input guard to the existing loader**
 

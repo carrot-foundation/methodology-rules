@@ -15,13 +15,11 @@ describe('provideSmaugApiCredentials', () => {
   const environment = { ...process.env };
   const stubRoleArn = (roleName: string): string =>
     `arn:aws:iam::${faker.string.numeric(12)}:role/${roleName}`;
-  const validRoleArn = stubRoleArn('smaug-api-gateway');
-  const concurrentRoleArn = stubRoleArn('smaug-api-gateway-concurrent');
-  const sequentialRoleArn = stubRoleArn('smaug-api-gateway-sequential');
-  const expiringRoleArn = stubRoleArn('smaug-api-gateway-expiring');
-  const rejectedRefreshRoleArn = stubRoleArn(
-    'smaug-api-gateway-rejected-refresh',
-  );
+  const validRoleArn = stubRoleArn(faker.string.uuid());
+  const concurrentRoleArn = stubRoleArn(faker.string.uuid());
+  const sequentialRoleArn = stubRoleArn(faker.string.uuid());
+  const expiringRoleArn = stubRoleArn(faker.string.uuid());
+  const rejectedRefreshRoleArn = stubRoleArn(faker.string.uuid());
   const credentials = {
     accessKeyId: faker.string.uuid(),
     secretAccessKey: faker.string.uuid(),

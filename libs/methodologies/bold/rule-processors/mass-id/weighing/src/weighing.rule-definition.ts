@@ -1,9 +1,6 @@
+import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
-import {
-  type DocumentQueryCriteria,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
-} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const ruleDefinition = {
@@ -13,7 +10,6 @@ export const ruleDefinition = {
     BoldDocumentEventName.TRANSPORT_MANIFEST,
     BoldDocumentEventName.WEIGHING,
   ],
-  input: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
   name: 'Weighing',
   slug: 'weighing',
   version: '1.0.0',

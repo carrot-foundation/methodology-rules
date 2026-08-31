@@ -1,6 +1,7 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
 import { logger } from '@carrot-fndn/shared/helpers';
+import { faker } from '@faker-js/faker';
 import { symbols } from 'pino';
 
 import type { DryRunOptions } from './dry-run.command';
@@ -142,7 +143,7 @@ describe('local processor structured log redaction', () => {
   });
 
   it('should redact and sanitize local module evaluation failures', async () => {
-    const sensitiveMarker = 'Fictional participant: Example Recycler';
+    const sensitiveMarker = faker.string.uuid();
     const outputSpy = vi
       .spyOn(getPinoOutputStream(), 'write')
       .mockImplementation(() => true);

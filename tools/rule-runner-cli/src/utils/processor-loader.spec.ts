@@ -17,6 +17,10 @@ const liveQueryProcessorPath = path.join(
   repositoryRoot,
   'libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique',
 );
+const attachmentQueryProcessorPath = path.join(
+  repositoryRoot,
+  'libs/methodologies/bold/rule-processors/mass-id/weighing',
+);
 const parameterizedConstructorSentinel =
   'processorLoaderParameterizedConstructorInvoked';
 
@@ -157,6 +161,14 @@ describe('loadLocalRuleModule', () => {
   it('should reject a zero-argument processor without declared static input', async () => {
     await expect(loadLocalRuleModule(liveQueryProcessorPath)).rejects.toThrow(
       `Unsupported rule definition for ${liveQueryProcessorPath}. Local MassID processors must declare static input criteria.`,
+    );
+  });
+
+  it('should reject weighing because its attachment input is not staged', async () => {
+    await expect(
+      loadLocalRuleModule(attachmentQueryProcessorPath),
+    ).rejects.toThrow(
+      `Unsupported rule definition for ${attachmentQueryProcessorPath}. Local MassID processors must declare static input criteria.`,
     );
   });
 
