@@ -53,6 +53,42 @@ describe('signRequest', () => {
     expect(result.body).not.toBeDefined();
   });
 
+  it('should reject cleartext URLs before resolving credentials', async () => {
+    const credentials = vi.fn();
+
+    await expect(
+      signRequest(
+        { method: 'POST', url: new URL('http://smaug.example') },
+        faker.string.uuid(),
+        credentials,
+      ),
+    ).rejects.toThrow('Signed requests require HTTPS');
+
+    expect(credentials).not.toHaveBeenCalled();
+  });
+
+  it('should sanitize credential and signing failures', async () => {
+    const sensitiveMarker = faker.string.alpha(24);
+    const credentials = vi.fn().mockRejectedValue(new Error(sensitiveMarker));
+    let caughtError: Error | undefined;
+
+    try {
+      await signRequest(
+        { method: 'POST', url: new URL('https://smaug.example') },
+        faker.string.uuid(),
+        credentials,
+      );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        caughtError = error;
+      }
+    }
+
+    expect(caughtError).toEqual(new Error('Request signing failed'));
+    expect(caughtError?.cause).toBeUndefined();
+    expect(caughtError?.stack).not.toContain(sensitiveMarker);
+  });
+
   it('should return http request object with authorization header, body and query', async () => {
     const input: SignRequestInput = {
       ...stubSignRequestInput(),

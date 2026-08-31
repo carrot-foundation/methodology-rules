@@ -9,7 +9,7 @@ import { logger } from '@carrot-fndn/shared/helpers';
 import { readFile } from 'node:fs/promises';
 
 import type { RuleResultEntry } from '../utils/batch-summary';
-import type { DryRunOptions } from './dry-run.command';
+import type { DryRunOptions, DryRunSelection } from './dry-run.command';
 import type { DryRunDocumentResult, DryRunRuleResult } from './dry-run.handler';
 
 import {
@@ -18,8 +18,11 @@ import {
   writeJsonLog,
 } from '../utils/batch-summary';
 import { parseConfig } from '../utils/config-parser';
+import { toDryRunRuleResultLog } from '../utils/local-result-output';
 import {
+  loadRedactedLocalRuleModule,
   processDryRunDocument,
+  processLocalDryRunDocument,
   resolveDryRunEnvironment,
 } from './dry-run.handler';
 
@@ -44,14 +47,17 @@ const readDocumentIds = async (filePath: string): Promise<string[]> => {
   return parsed as string[];
 };
 
-const toRuleResultEntry = (ruleResult: DryRunRuleResult): RuleResultEntry => ({
+const toRuleResultEntry = (
+  ruleResult: DryRunRuleResult,
+  mode: DryRunSelection['mode'],
+): RuleResultEntry => ({
   resultComment: ruleResult.resultComment,
-  resultContent: ruleResult.resultContent,
+  ...(mode === 'registered' && { resultContent: ruleResult.resultContent }),
   resultStatus: ruleResult.status,
 });
 
 export const handleDryRunBatch = async (
-  processorPath: string | undefined,
+  selection: DryRunSelection,
   options: DryRunOptions,
 ): Promise<void> => {
   if (!options.inputFile) {
@@ -67,15 +73,10 @@ export const handleDryRunBatch = async (
   );
   logger.info(`Concurrency: ${String(options.concurrency)}`);
 
-  const context = {
-    config,
-    methodologySlug: options.methodologySlug,
-    options,
-    processorPath,
-    ruleSlug: options.ruleSlug,
-    rulesScope: options.rulesScope,
-    smaugUrl,
-  };
+  const localRuleModule =
+    selection.mode === 'local'
+      ? await loadRedactedLocalRuleModule(selection.processorPath)
+      : undefined;
 
   let passedCount = 0;
   let reviewRequiredCount = 0;
@@ -134,16 +135,41 @@ export const handleDryRunBatch = async (
         }
       }
     },
-    processItem: async (documentId): Promise<DryRunDocumentResult> =>
-      processDryRunDocument(documentId, context),
+    processItem: async (documentId): Promise<DryRunDocumentResult> => {
+      if (selection.mode === 'local') {
+        if (!localRuleModule) {
+          throw new Error('Local rule module was not loaded.');
+        }
+
+        return processLocalDryRunDocument(documentId, {
+          localRuleModule,
+          options,
+          selection,
+          smaugUrl,
+        });
+      }
+
+      return processDryRunDocument(documentId, {
+        config,
+        methodologySlug: selection.methodologySlug,
+        options,
+        processorPath: selection.processorPath,
+        ruleSlug: selection.ruleSlug,
+        rulesScope: selection.rulesScope,
+        smaugUrl,
+      });
+    },
+    retainSuccesses: false,
   });
 
   const reviewRequiredBreakdown = buildReasonCodeBreakdown(
-    reviewRequiredResults.map((r) => toRuleResultEntry(r.ruleResult)),
+    reviewRequiredResults.map((r) =>
+      toRuleResultEntry(r.ruleResult, selection.mode),
+    ),
     'reviewReasons',
   );
   const failedEntries = ruleFailures.map((r) =>
-    toRuleResultEntry(r.ruleResult),
+    toRuleResultEntry(r.ruleResult, selection.mode),
   );
   const failedBreakdown = buildReasonCodeBreakdown(
     failedEntries,
@@ -185,25 +211,25 @@ export const handleDryRunBatch = async (
   logger.info(`\n${lines.join('\n')}`);
 
   if (ruleFailures.length > 0) {
-    const data = ruleFailures.map((f) => ({
-      documentId: f.documentId,
-      resultComment: f.ruleResult.resultComment,
-      resultContent: f.ruleResult.resultContent,
-      resultStatus: f.ruleResult.status,
-      ruleSlug: f.ruleResult.ruleSlug,
-    }));
+    const data = ruleFailures.map((failure) =>
+      toDryRunRuleResultLog(
+        failure.documentId,
+        failure.ruleResult,
+        selection.mode,
+      ),
+    );
 
     await writeJsonLog(data, 'rule-failures');
   }
 
   if (reviewRequiredResults.length > 0) {
-    const data = reviewRequiredResults.map((f) => ({
-      documentId: f.documentId,
-      resultComment: f.ruleResult.resultComment,
-      resultContent: f.ruleResult.resultContent,
-      resultStatus: f.ruleResult.status,
-      ruleSlug: f.ruleResult.ruleSlug,
-    }));
+    const data = reviewRequiredResults.map((result) =>
+      toDryRunRuleResultLog(
+        result.documentId,
+        result.ruleResult,
+        selection.mode,
+      ),
+    );
 
     await writeJsonLog(data, 'review-required');
   }

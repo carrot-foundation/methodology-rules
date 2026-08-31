@@ -1,14 +1,20 @@
 import { processBatch } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { Command } from '@commander-js/extra-typings';
 import { readFile } from 'node:fs/promises';
 
 import type { DryRunOptions } from './dry-run.command';
 import type { DryRunDocumentResult } from './dry-run.handler';
 
+import { STUB_SMAUG_URL } from '../test.constants';
 import { writeJsonLog } from '../utils/batch-summary';
+import { createLocalRuleExecutionError } from '../utils/local-result-output';
 import { handleDryRunBatch } from './dry-run-batch.handler';
+import { createDryRunSelection } from './dry-run.command';
 import {
+  loadRedactedLocalRuleModule,
   processDryRunDocument,
+  processLocalDryRunDocument,
   resolveDryRunEnvironment,
 } from './dry-run.handler';
 
@@ -25,12 +31,19 @@ vi.mock('@carrot-fndn/shared/cli', async (importOriginal) => {
   };
 });
 
-vi.mock('./dry-run.handler', () => ({
-  processDryRunDocument: vi.fn(),
-  resolveDryRunEnvironment: vi.fn().mockReturnValue({
-    smaugUrl: 'https://smaug.carrot.eco',
-  }),
-}));
+vi.mock('./dry-run.handler', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+
+  return {
+    ...actual,
+    loadRedactedLocalRuleModule: vi.fn(),
+    processDryRunDocument: vi.fn(),
+    processLocalDryRunDocument: vi.fn(),
+    resolveDryRunEnvironment: vi.fn().mockReturnValue({
+      smaugUrl: STUB_SMAUG_URL,
+    }),
+  };
+});
 
 vi.mock('../utils/config-parser', () => ({
   parseConfig: vi.fn().mockReturnValue(undefined),
@@ -54,7 +67,15 @@ const mockResolveDryRunEnvironment =
 const mockProcessDryRunDocument = processDryRunDocument as vi.MockedFunction<
   typeof processDryRunDocument
 >;
+const mockProcessLocalDryRunDocument =
+  processLocalDryRunDocument as vi.MockedFunction<
+    typeof processLocalDryRunDocument
+  >;
 const mockWriteJsonLog = writeJsonLog as vi.MockedFunction<typeof writeJsonLog>;
+const mockLoadRedactedLocalRuleModule =
+  loadRedactedLocalRuleModule as vi.MockedFunction<
+    typeof loadRedactedLocalRuleModule
+  >;
 
 const INPUT_FILE_PATH = 'test-data/docs.json';
 
@@ -68,18 +89,27 @@ const baseOptions: DryRunOptions = {
   json: false,
   methodologySlug: 'bold-carbon-organic',
   rulesScope: 'MassID',
-  smaugUrl: 'https://smaug.carrot.eco',
+  smaugUrl: STUB_SMAUG_URL,
+};
+
+const registeredSelection = {
+  allRules: true,
+  methodologySlug: 'bold-carbon-organic',
+  mode: 'registered' as const,
+  rulesScope: 'MassID',
 };
 
 const makeDocumentResult = (
   documentId: string,
   rules: Array<{
+    resultComment?: string;
     resultContent?: Record<string, unknown>;
     status: DryRunDocumentResult['ruleResults'][number]['status'];
   }>,
 ): DryRunDocumentResult => ({
   documentId,
   ruleResults: rules.map((rule, index) => ({
+    resultComment: rule.resultComment,
     resultContent: rule.resultContent,
     ruleSlug: `rule-${String(index + 1)}`,
     status: rule.status,
@@ -91,15 +121,19 @@ describe('handleDryRunBatch', () => {
     vi.clearAllMocks();
     process.exitCode = undefined;
     mockResolveDryRunEnvironment.mockReturnValue({
-      smaugUrl: 'https://smaug.carrot.eco',
+      smaugUrl: STUB_SMAUG_URL,
     });
     mockProcessBatch.mockResolvedValue({ failures: [], successes: [] });
+    mockLoadRedactedLocalRuleModule.mockResolvedValue({} as never);
     mockWriteJsonLog.mockResolvedValue();
   });
 
   it('should throw when --input-file is not provided', async () => {
     await expect(
-      handleDryRunBatch(undefined, { ...baseOptions, inputFile: undefined }),
+      handleDryRunBatch(registeredSelection, {
+        ...baseOptions,
+        inputFile: undefined,
+      }),
     ).rejects.toThrow('--input-file is required for batch mode');
   });
 
@@ -118,7 +152,7 @@ describe('handleDryRunBatch', () => {
       ],
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockReadFile).toHaveBeenCalledWith(INPUT_FILE_PATH, 'utf8');
     expect(mockProcessBatch).toHaveBeenCalledWith(
@@ -141,7 +175,7 @@ describe('handleDryRunBatch', () => {
       ],
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockResolveDryRunEnvironment).toHaveBeenCalledTimes(1);
     expect(mockResolveDryRunEnvironment).toHaveBeenCalledWith(baseOptions);
@@ -159,10 +193,13 @@ describe('handleDryRunBatch', () => {
       ],
     });
 
-    await handleDryRunBatch(undefined, { ...baseOptions, concurrency: 3 });
+    await handleDryRunBatch(registeredSelection, {
+      ...baseOptions,
+      concurrency: 3,
+    });
 
     expect(mockProcessBatch).toHaveBeenCalledWith(
-      expect.objectContaining({ concurrency: 3 }),
+      expect.objectContaining({ concurrency: 3, retainSuccesses: false }),
     );
   });
 
@@ -188,17 +225,56 @@ describe('handleDryRunBatch', () => {
       return { failures: [], successes };
     });
 
-    await handleDryRunBatch('some/path', baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockProcessDryRunDocument).toHaveBeenCalledTimes(2);
     expect(mockProcessDryRunDocument).toHaveBeenCalledWith(
       'doc-1',
       expect.objectContaining({
         methodologySlug: 'bold-carbon-organic',
-        processorPath: 'some/path',
-        smaugUrl: 'https://smaug.carrot.eco',
+        processorPath: undefined,
+        smaugUrl: STUB_SMAUG_URL,
       }),
     );
+  });
+
+  it('should preserve an explicit processor path in registered batch mode', async () => {
+    const processorPath =
+      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data';
+    const command = new Command('dry-run');
+
+    command.setOptionValueWithSource(
+      'methodologySlug',
+      'bold-carbon-organic',
+      'cli',
+    );
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    mockProcessDryRunDocument.mockResolvedValue(
+      makeDocumentResult('doc-1', [{ status: 'passed' }]),
+    );
+    mockProcessBatch.mockImplementation(async (options) => ({
+      failures: [],
+      successes: [
+        {
+          item: 'doc-1',
+          result: await options.processItem('doc-1'),
+        },
+      ],
+    }));
+
+    await handleDryRunBatch(
+      createDryRunSelection(processorPath, baseOptions, command),
+      baseOptions,
+    );
+
+    expect(mockProcessDryRunDocument).toHaveBeenCalledWith(
+      'doc-1',
+      expect.objectContaining({
+        processorPath,
+        ruleSlug: 'document-manifest-data',
+      }),
+    );
+    expect(mockProcessLocalDryRunDocument).not.toHaveBeenCalled();
   });
 
   it('should aggregate rule statuses across documents in summary', async () => {
@@ -234,7 +310,7 @@ describe('handleDryRunBatch', () => {
 
     const infoSpy = vi.spyOn(logger, 'info');
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(infoSpy).toHaveBeenCalledWith(
       expect.stringContaining('Total documents: 3'),
@@ -283,7 +359,7 @@ describe('handleDryRunBatch', () => {
 
     const infoSpy = vi.spyOn(logger, 'info');
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(infoSpy).toHaveBeenCalledWith(
       expect.stringContaining('MISSING_DATA: 2'),
@@ -307,7 +383,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockWriteJsonLog).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -337,7 +413,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockWriteJsonLog).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -348,6 +424,120 @@ describe('handleDryRunBatch', () => {
         }),
       ]),
       'review-required',
+    );
+  });
+
+  it('should exclude participant data from local result files', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const localSelection = {
+      dataSetName: 'TEST' as const,
+      mode: 'local' as const,
+      processorPath: 'some/path',
+    };
+    const failedResult = makeDocumentResult('doc-1', [
+      {
+        resultComment: 'Fictional participant: Example Recycler',
+        resultContent: { participantName: 'Example Recycler' },
+        status: 'failed',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', failedResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: failedResult }],
+      });
+    });
+
+    await handleDryRunBatch(localSelection, baseOptions);
+
+    expect(mockWriteJsonLog).toHaveBeenCalledWith(
+      [
+        {
+          documentId: 'doc-1',
+          resultStatus: 'failed',
+          ruleSlug: 'rule-1',
+        },
+      ],
+      'rule-failures',
+    );
+    expect(JSON.stringify(mockWriteJsonLog.mock.calls)).not.toContain(
+      'Example Recycler',
+    );
+  });
+
+  it('should preserve participant-bearing result files for registered mode', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const failedResult = makeDocumentResult('doc-1', [
+      {
+        resultComment: 'Fictional participant: Example Recycler',
+        resultContent: { participantName: 'Example Recycler' },
+        status: 'failed',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', failedResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: failedResult }],
+      });
+    });
+
+    await handleDryRunBatch(registeredSelection, baseOptions);
+
+    expect(JSON.stringify(mockWriteJsonLog.mock.calls)).toContain(
+      'Example Recycler',
+    );
+  });
+
+  it('should exclude processor reason codes from local batch logs', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    const localSelection = {
+      dataSetName: 'TEST' as const,
+      mode: 'local' as const,
+      processorPath: 'some/path',
+    };
+    const localResult = makeDocumentResult('doc-1', [
+      {
+        resultContent: {
+          failReasons: [{ code: 'EXTRACTED_PARTICIPANT_NAME' }],
+          reviewReasons: [{ code: 'EXTRACTED_DOCUMENT_NUMBER' }],
+        },
+        status: 'failed',
+      },
+      {
+        resultContent: {
+          reviewReasons: [{ code: 'EXTRACTED_REVIEW_VALUE' }],
+        },
+        status: 'review_required',
+      },
+    ]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', localResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: localResult }],
+      });
+    });
+
+    const infoSpy = vi.spyOn(logger, 'info');
+
+    await handleDryRunBatch(localSelection, baseOptions);
+
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_PARTICIPANT_NAME',
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_DOCUMENT_NUMBER',
+    );
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      'EXTRACTED_REVIEW_VALUE',
     );
   });
 
@@ -365,7 +555,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(mockWriteJsonLog).not.toHaveBeenCalled();
   });
@@ -377,7 +567,7 @@ describe('handleDryRunBatch', () => {
       successes: [],
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(process.exitCode).toBe(1);
   });
@@ -396,7 +586,26 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
+
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should set exit code 1 when there are only rule errors', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+
+    const errorResult = makeDocumentResult('doc-1', [{ status: 'error' }]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', errorResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: errorResult }],
+      });
+    });
+
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(process.exitCode).toBe(1);
   });
@@ -418,7 +627,7 @@ describe('handleDryRunBatch', () => {
       });
     });
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(process.exitCode).toBeUndefined();
   });
@@ -426,17 +635,17 @@ describe('handleDryRunBatch', () => {
   it('should throw when input file is not a JSON array', async () => {
     mockReadFile.mockResolvedValue(JSON.stringify({ key: 'value' }));
 
-    await expect(handleDryRunBatch(undefined, baseOptions)).rejects.toThrow(
-      'Input file must contain a JSON array',
-    );
+    await expect(
+      handleDryRunBatch(registeredSelection, baseOptions),
+    ).rejects.toThrow('Input file must contain a JSON array');
   });
 
   it('should throw when input file contains non-string entries', async () => {
     mockReadFile.mockResolvedValue(JSON.stringify(['doc-1', 123]));
 
-    await expect(handleDryRunBatch(undefined, baseOptions)).rejects.toThrow(
-      'Entry at index 1 must be a string document ID',
-    );
+    await expect(
+      handleDryRunBatch(registeredSelection, baseOptions),
+    ).rejects.toThrow('Entry at index 1 must be a string document ID');
   });
 
   it('should log batch start via onBatchStart callback', async () => {
@@ -449,7 +658,7 @@ describe('handleDryRunBatch', () => {
 
     const infoSpy = vi.spyOn(logger, 'info');
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(infoSpy).toHaveBeenCalledWith(
       'Processing batch 1/1 (1 documents)...',
@@ -469,8 +678,64 @@ describe('handleDryRunBatch', () => {
 
     const errorSpy = vi.spyOn(logger, 'error');
 
-    await handleDryRunBatch(undefined, baseOptions);
+    await handleDryRunBatch(registeredSelection, baseOptions);
 
     expect(errorSpy).toHaveBeenCalledWith('Error [doc-1]: something broke');
+  });
+
+  it('should process every local document through one loaded module and record local exceptions', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1', 'doc-2']));
+    mockProcessLocalDryRunDocument
+      .mockResolvedValueOnce(
+        makeDocumentResult('doc-1', [{ status: 'passed' }]),
+      )
+      .mockRejectedValueOnce(createLocalRuleExecutionError());
+    let recordedFailures: Array<{ error: string; item: unknown }> = [];
+
+    mockProcessBatch.mockImplementation(async (options) => {
+      const successes = [];
+      const failures = [];
+
+      for (const documentId of options.items) {
+        try {
+          const result = await options.processItem(documentId);
+
+          options.onItemSuccess?.(documentId, result);
+          successes.push({ item: documentId, result });
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : String(error);
+
+          options.onItemFailure?.(documentId, message);
+          failures.push({ error: message, item: documentId });
+        }
+      }
+
+      recordedFailures = failures;
+
+      return { failures, successes };
+    });
+
+    const errorSpy = vi.spyOn(logger, 'error');
+
+    await handleDryRunBatch(
+      {
+        dataSetName: 'TEST',
+        mode: 'local',
+        processorPath: 'some/path',
+      },
+      baseOptions,
+    );
+
+    expect(mockLoadRedactedLocalRuleModule).toHaveBeenCalledTimes(1);
+    expect(mockProcessLocalDryRunDocument).toHaveBeenCalledTimes(2);
+    expect(mockProcessDryRunDocument).not.toHaveBeenCalled();
+    expect(recordedFailures).toEqual([
+      { error: 'LOCAL_RULE_EXECUTION_FAILED', item: 'doc-2' },
+    ]);
+    expect(errorSpy).toHaveBeenCalledWith(
+      'Error [doc-2]: LOCAL_RULE_EXECUTION_FAILED',
+    );
+    expect(process.exitCode).toBe(1);
   });
 });

@@ -1,4 +1,7 @@
-import { signRequest } from '@carrot-fndn/shared/aws-http';
+import {
+  type AwsCredentialIdentityProvider,
+  signRequest,
+} from '@carrot-fndn/shared/aws-http';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { faker } from '@faker-js/faker';
 import axios from 'axios';
@@ -36,6 +39,60 @@ describe('request helpers', () => {
       );
     });
 
+    it('should reject a request without a URL', async () => {
+      await expect(httpRequest({ method: 'GET' })).rejects.toThrow(
+        'Request URL is required',
+      );
+    });
+
+    it('should resolve an empty URL to its base URL', async () => {
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://smaug.example',
+        method: 'GET',
+        url: '',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ url: new URL('https://smaug.example') }),
+        'us-east-1',
+        undefined,
+      );
+    });
+
+    it('should reject a protocol-relative URL when Axios cannot send it', async () => {
+      await expect(
+        httpRequest({
+          baseURL: 'https://smaug.example',
+          method: 'GET',
+          url: '//api.example/data',
+        }),
+      ).rejects.toThrow('Invalid URL');
+
+      expect(mockedSignRequest).not.toHaveBeenCalled();
+      expect(mockedAxios).not.toHaveBeenCalled();
+    });
+
+    it('should combine an absolute URL when allowAbsoluteUrls is false', async () => {
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        allowAbsoluteUrls: false,
+        baseURL: 'https://smaug.example',
+        method: 'GET',
+        url: 'https://api.example/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: new URL('https://smaug.example/https://api.example/data'),
+        }),
+        'us-east-1',
+        undefined,
+      );
+    });
+
     it('should make a successful request', async () => {
       const mockResponse = { data: 'success' };
       const input = { baseURL: faker.internet.url(), method: 'GET' };
@@ -64,17 +121,92 @@ describe('request helpers', () => {
       );
     });
 
-    it('should not sign the request for localhost', async () => {
-      await httpRequest({
-        baseURL: 'http://localhost:3000',
-        method: 'POST',
-        url: '/data',
-      });
+    it('should sign a request once with injected credentials', async () => {
+      const credentials: AwsCredentialIdentityProvider = vi.fn();
+      const input = { baseURL: faker.internet.url(), method: 'POST' };
 
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest(input, { credentials });
+
+      expect(mockedSignRequest).toHaveBeenCalledTimes(1);
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        {
+          body: undefined,
+          method: 'POST',
+          query: undefined,
+          url: new URL(input.baseURL),
+        },
+        'us-east-1',
+        credentials,
+      );
+    });
+
+    it('should not resolve credentials or sign a localhost request', async () => {
+      const credentials: AwsCredentialIdentityProvider = vi.fn();
+
+      await httpRequest(
+        {
+          baseURL: 'http://localhost:3000',
+          method: 'POST',
+          url: '/data',
+        },
+        { credentials },
+      );
+
+      expect(credentials).not.toHaveBeenCalled();
+      expect(mockedSignRequest).not.toHaveBeenCalled();
       expect(axios).toHaveBeenCalledWith(
         expect.not.objectContaining({
           headers: expect.objectContaining({ 'X-Signed': 'true' }),
         }),
+      );
+    });
+
+    it('should sign an HTTPS localhost request', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://localhost:3000',
+        method: 'POST',
+        url: '/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledOnce();
+    });
+
+    it('should sign an external hostname containing localhost', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://localhost.attacker.example',
+        method: 'POST',
+        url: '/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledOnce();
+    });
+
+    it('should sign the normalized path for a trailing base URL slash', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://smaug.example/',
+        method: 'POST',
+        url: '/methodologies/dry-run/prepare-local-rule',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: new URL(
+            'https://smaug.example/methodologies/dry-run/prepare-local-rule',
+          ),
+        }),
+        'us-east-1',
+        undefined,
       );
     });
 
@@ -137,6 +269,72 @@ describe('request helpers', () => {
         ),
       ).rejects.toThrow('Request failed');
       expect(logger.error).toHaveBeenCalled();
+    });
+
+    it('should exclude signed headers from logger arguments and thrown messages', async () => {
+      const authorization = 'AWS4-HMAC-SHA256 Credential=access-key';
+      const upperCaseAuthorization =
+        'AWS4-HMAC-SHA256 Credential=upper-case-access-key';
+      const sessionToken = 'session-token';
+      const signingDate = '20260830T000000Z';
+      const customAmzHeader = 'custom-amz-header';
+      const mockError = {
+        code: 'ERR_BAD_RESPONSE',
+        config: {
+          data: { authorization },
+          headers: {
+            Authorization: authorization,
+            AUTHORIZATION: upperCaseAuthorization,
+            'X-AmZ-Date': signingDate,
+            'x-amz-security-token': sessionToken,
+          },
+        },
+        isAxiosError: true,
+        request: {
+          headers: {
+            'X-AMZ-Custom': customAmzHeader,
+          },
+        },
+        response: { status: 500 },
+      };
+
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+      mockedAxios.mockRejectedValue(mockError);
+      vi.spyOn(axios, 'isAxiosError').mockReturnValue(true);
+      const errorSpy = vi.spyOn(logger, 'error');
+      const debugSpy = vi.spyOn(logger, 'debug');
+
+      let caughtError: Error | undefined;
+
+      try {
+        await httpRequest(
+          { baseURL: faker.internet.url(), method: 'GET' },
+          { logger },
+        );
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          caughtError = error;
+        }
+      }
+
+      const loggerArguments = [...errorSpy.mock.calls, ...debugSpy.mock.calls];
+      const loggerOutput = JSON.stringify(loggerArguments);
+
+      expect(caughtError).toBeInstanceOf(Error);
+      expect(caughtError?.message).not.toContain(authorization);
+      expect(caughtError?.message).not.toContain(upperCaseAuthorization);
+      expect(caughtError?.message).not.toContain(sessionToken);
+      expect(caughtError?.message).not.toContain(signingDate);
+      expect(caughtError?.message).not.toContain(customAmzHeader);
+      expect(loggerOutput).not.toContain(authorization);
+      expect(loggerOutput).not.toContain(upperCaseAuthorization);
+      expect(loggerOutput).not.toContain(sessionToken);
+      expect(loggerOutput).not.toContain(signingDate);
+      expect(loggerOutput).not.toContain(customAmzHeader);
+      expect(debugSpy).toHaveBeenCalledWith(
+        { errorCode: 'ERR_BAD_RESPONSE', status: 500 },
+        'Request failed with status 500 (ERR_BAD_RESPONSE)',
+      );
     });
 
     it('should handle timeout errors and return null', async () => {

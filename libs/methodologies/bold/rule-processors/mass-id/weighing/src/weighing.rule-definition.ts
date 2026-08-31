@@ -1,3 +1,4 @@
+import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -12,4 +13,4 @@ export const ruleDefinition = {
   name: 'Weighing',
   slug: 'weighing',
   version: '1.0.0',
-} as const satisfies BaseRuleDefinition;
+} as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;

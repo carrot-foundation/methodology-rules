@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 
 import {
+  formatHttpStatus,
   getNonEmptyStringOrDefault,
   getOrDefault,
   getOrUndefined,
@@ -13,6 +14,17 @@ import {
 } from './common.helpers';
 
 describe('common helpers', () => {
+  describe('formatHttpStatus', () => {
+    it.each([
+      { expected: '200', status: 200 },
+      { expected: 'N/A', status: undefined },
+      { expected: 'N/A', status: 200.5 },
+      { expected: 'N/A', status: '200' },
+    ])('should return $expected for $status', ({ expected, status }) => {
+      expect(formatHttpStatus(status)).toBe(expected);
+    });
+  });
+
   describe('isNil', () => {
     it('should return true if the value is null', () => {
       expect(isNil(null)).toBe(true);

@@ -27,7 +27,8 @@ vi.mock('@carrot-fndn/shared/env', () => ({
   getNodeEnv: () => 'test',
   getOptionalEnv: vi.fn(),
   getSentryDsn: () => undefined,
-  getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
+  getSmaugApiGatewayAssumeRoleArn: () =>
+    'arn:aws:iam::123456789012:role/carrot-test-smaug-api-gateway',
   getSourceCodeUrl: () => 'https://test.example.com/repo',
   getSourceCodeVersion: () => 'test-version',
 }));

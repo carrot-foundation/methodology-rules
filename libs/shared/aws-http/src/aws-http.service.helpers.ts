@@ -3,6 +3,8 @@ import { fromEnv } from '@aws-sdk/credential-providers';
 import { isObject } from '@carrot-fndn/shared/helpers';
 import { SignatureV4 } from '@smithy/signature-v4';
 
+import type { AwsCredentialIdentityProvider } from './aws-credentials.provider';
+
 export interface SignRequestInput {
   body?: unknown;
   method: string;
@@ -13,9 +15,14 @@ export interface SignRequestInput {
 export const signRequest = async (
   { body, method, query, url }: SignRequestInput,
   awsRegion: string,
-) => {
+  credentials: AwsCredentialIdentityProvider = fromEnv(),
+): Promise<Awaited<ReturnType<SignatureV4['sign']>>> => {
+  if (url.protocol !== 'https:') {
+    throw new Error('Signed requests require HTTPS');
+  }
+
   const signer = new SignatureV4({
-    credentials: fromEnv(),
+    credentials,
     region: awsRegion,
     service: 'execute-api',
     sha256: Sha256,
@@ -29,13 +36,17 @@ export const signRequest = async (
     headers['Content-Type'] = 'application/json';
   }
 
-  return signer.sign({
-    headers,
-    hostname: url.hostname,
-    method,
-    path: url.pathname,
-    protocol: 'https',
-    ...(query && { query }),
-    ...(isObject(body) && { body: JSON.stringify(body) }),
-  });
+  try {
+    return await signer.sign({
+      headers,
+      hostname: url.hostname,
+      method,
+      path: url.pathname,
+      protocol: 'https',
+      ...(query && { query }),
+      ...(isObject(body) && { body: JSON.stringify(body) }),
+    });
+  } catch {
+    throw new Error('Request signing failed');
+  }
 };

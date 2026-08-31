@@ -4,18 +4,30 @@ import type {
 } from '@carrot-fndn/shared/rule/types';
 
 import { formatAsJson } from '@carrot-fndn/shared/cli';
-import { logger } from '@carrot-fndn/shared/helpers';
+import {
+  executeWithStructuredLogsRedacted,
+  logger,
+} from '@carrot-fndn/shared/helpers';
 import path from 'node:path';
 
-import type { DryRunOptions } from './dry-run.command';
+import type { DryRunOptions, DryRunSelection } from './dry-run.command';
 
 import { formatAsHuman } from '../formatters/human.formatter';
 import { parseConfig } from '../utils/config-parser';
-import { loadProcessor } from '../utils/processor-loader';
+import {
+  createLocalRuleExecutionError,
+  writeLocalRuleOutput,
+} from '../utils/local-result-output';
+import {
+  loadLocalRuleModule,
+  loadProcessor,
+  type LocalRuleModule,
+} from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 import {
   type DryRunPrepareResponse,
   prepareDryRun,
+  prepareLocalRule,
 } from '../utils/smaug-client';
 
 export interface DryRunDocumentResult {
@@ -30,6 +42,11 @@ export interface DryRunRuleResult {
   ruleSlug: string;
   status: 'error' | 'failed' | 'passed' | 'review_required';
 }
+
+export const hasDryRunRuleFailure = (
+  ruleResults: DryRunRuleResult[],
+): boolean =>
+  ruleResults.some(({ status }) => status === 'error' || status === 'failed');
 
 export const resolveProcessorPath = (rule: {
   ruleScope: string;
@@ -192,20 +209,97 @@ export const processDryRunDocument = async (
   return { documentId, ruleResults };
 };
 
+export const processLocalDryRunDocument = async (
+  documentId: string,
+  context: {
+    localRuleModule: LocalRuleModule;
+    options: DryRunOptions;
+    selection: Extract<DryRunSelection, { mode: 'local' }>;
+    smaugUrl: string;
+  },
+): Promise<DryRunDocumentResult> => {
+  const { localRuleModule, selection } = context;
+  const prepared = await prepareLocalRule(context.smaugUrl, {
+    dataSetName: selection.dataSetName,
+    documentId,
+    input: localRuleModule.ruleDefinition.input,
+    ruleSlug: localRuleModule.ruleDefinition.slug,
+    rulesScope: localRuleModule.rulesScope,
+  });
+  const ruleInput = buildRuleInput({ prepared });
+  const startTime = Date.now();
+  let output: RuleOutput;
+
+  try {
+    output = await executeWithStructuredLogsRedacted(() => {
+      const processor = new localRuleModule.Processor();
+
+      return processor.process(ruleInput);
+    });
+  } catch {
+    throw createLocalRuleExecutionError();
+  }
+
+  const elapsedMs = Date.now() - startTime;
+
+  writeLocalRuleOutput(output, {
+    debug: context.options.debug,
+    elapsedMs,
+    json: context.options.json,
+  });
+
+  return {
+    documentId,
+    ruleResults: [
+      {
+        resultComment: output.resultComment,
+        resultContent: output.resultContent,
+        ruleSlug: localRuleModule.ruleDefinition.slug,
+        status: mapOutputStatus(output.resultStatus),
+      },
+    ],
+  };
+};
+
+export const loadRedactedLocalRuleModule = async (
+  processorPath: string,
+): Promise<LocalRuleModule> => {
+  try {
+    return await executeWithStructuredLogsRedacted(() =>
+      loadLocalRuleModule(processorPath),
+    );
+  } catch {
+    throw createLocalRuleExecutionError();
+  }
+};
+
 export const handleDryRun = async (
-  processorPath: string | undefined,
+  selection: DryRunSelection,
   options: DryRunOptions & { documentId: string },
 ): Promise<DryRunDocumentResult> => {
   const { smaugUrl } = resolveDryRunEnvironment(options);
   const config = parseConfig(options.config);
 
+  if (selection.mode === 'local') {
+    const localRuleModule = await loadRedactedLocalRuleModule(
+      selection.processorPath,
+    );
+
+    return processLocalDryRunDocument(options.documentId, {
+      localRuleModule,
+      options,
+      selection,
+      smaugUrl,
+    });
+  }
+
   return processDryRunDocument(options.documentId, {
     config,
-    methodologySlug: options.methodologySlug,
+    methodologySlug: selection.methodologySlug,
     options,
-    processorPath,
-    ruleSlug: options.ruleSlug,
-    rulesScope: options.rulesScope,
+    processorPath: selection.processorPath,
+    ruleSlug: selection.ruleSlug,
+    rulesScope: selection.rulesScope,
     smaugUrl,
   });
 };

@@ -33,6 +33,7 @@ const nxPluginConfigs = {
       'error',
       {
         allow: [],
+        checkDynamicDependenciesExceptions: ['@carrot-fndn/shared/cli'],
         depConstraints: [
           {
             sourceTag: 'app:any',

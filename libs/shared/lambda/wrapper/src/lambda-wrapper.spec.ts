@@ -1,6 +1,5 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
-import { STSClient } from '@aws-sdk/client-sts';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { getSentryDsn } from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
@@ -15,6 +14,12 @@ import * as Sentry from '@sentry/serverless';
 import { wrapRuleIntoLambdaHandler } from './lambda-wrapper';
 
 const mockGetNodeEnv = vi.fn(() => 'test');
+const provideStubSmaugCredentials = () =>
+  Promise.resolve({
+    accessKeyId: 'smaug-access-key',
+    secretAccessKey: 'smaug-secret-key',
+    sessionToken: 'smaug-session-token',
+  });
 
 vi.mock('@carrot-fndn/shared/env', () => ({
   getArtifactChecksum: () => 'test-checksum',
@@ -24,9 +29,15 @@ vi.mock('@carrot-fndn/shared/env', () => ({
   getEnvironment: () => 'development',
   getNodeEnv: () => mockGetNodeEnv(),
   getSentryDsn: vi.fn(() => undefined),
-  getSmaugApiGatewayAssumeRoleArn: () => 'arn:aws:iam::123456:role/test',
+  getSmaugApiGatewayAssumeRoleArn: () =>
+    'arn:aws:iam::123456789012:role/carrot-test-smaug-api-gateway',
   getSourceCodeUrl: () => 'https://test.example.com/repo',
   getSourceCodeVersion: () => 'test-version',
+}));
+
+vi.mock('@carrot-fndn/shared/aws-http', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@carrot-fndn/shared/aws-http')>()),
+  provideSmaugApiCredentials: vi.fn(() => provideStubSmaugCredentials),
 }));
 
 process.env = {
@@ -34,7 +45,8 @@ process.env = {
   AWS_ACCESS_KEY_ID: faker.string.uuid(),
   AWS_REGION: 'us-east-1',
   AWS_SECRET_ACCESS_KEY: faker.string.uuid(),
-  SMAUG_API_GATEWAY_ASSUME_ROLE_ARN: 'arn:aws:iam::123456:role/test',
+  SMAUG_API_GATEWAY_ASSUME_ROLE_ARN:
+    'arn:aws:iam::123456789012:role/carrot-test-smaug-api-gateway',
 };
 
 describe('wrapRuleIntoLambdaHandler', () => {
@@ -44,17 +56,8 @@ describe('wrapRuleIntoLambdaHandler', () => {
 
   vi.spyOn(Sentry.AWSLambda, 'init').mockImplementation(() => {});
 
-  const mockStsAndFetch = () => {
-    vi.spyOn(STSClient.prototype, 'send').mockResolvedValue({
-      Credentials: {
-        AccessKeyId: faker.string.uuid(),
-        SecretAccessKey: faker.string.uuid(),
-        SessionToken: faker.string.uuid(),
-      },
-    } as never);
-
+  const mockFetch = () =>
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
-  };
 
   it('should work', async () => {
     const response = {
@@ -69,12 +72,21 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
-    mockStsAndFetch();
+    const fetchSpy = mockFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
     expect(result).toEqual(response);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      response.responseUrl,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-amz-security-token': 'smaug-session-token',
+        }),
+        method: 'POST',
+      }),
+    );
   });
 
   it('should convert REVIEW_REQUIRED to FAILED before reporting and returning', async () => {
@@ -90,7 +102,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
-    mockStsAndFetch();
+    mockFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});
@@ -145,7 +157,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
-    mockStsAndFetch();
+    mockFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
 
@@ -198,7 +210,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
-    mockStsAndFetch();
+    mockFetch();
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});

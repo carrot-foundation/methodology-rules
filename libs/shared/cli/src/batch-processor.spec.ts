@@ -113,6 +113,27 @@ describe('processBatch', () => {
     expect(failureItems).toEqual([{ error: 'failed-b', item: 'b' }]);
   });
 
+  it('should deliver successful results without retaining them when disabled', async () => {
+    const deliveredResults: string[] = [];
+
+    const result = await processBatch<string, string>({
+      concurrency: 2,
+      items: ['a', 'b', 'c'],
+      onItemSuccess: (_item, successfulResult) => {
+        deliveredResults.push(successfulResult);
+      },
+      processItem: (item) => Promise.resolve(`processed-${item}`),
+      retainSuccesses: false,
+    });
+
+    expect(deliveredResults).toEqual([
+      'processed-a',
+      'processed-b',
+      'processed-c',
+    ]);
+    expect(result.successes).toEqual([]);
+  });
+
   it('should throw when concurrency is zero', async () => {
     await expect(
       processBatch({

@@ -82,10 +82,12 @@ Project-specific knowledge for AI assistants working on Methodology Rules. This 
 
 Methodology Rules is an Nx monorepo containing AWS Lambda rule processors for Carrot Foundation's BOLD methodology. Each processor validates a specific aspect of waste management documents (MassIDs, certificates, credit orders) by querying S3-stored documents and reporting results to Smaug via SigV4-signed HTTP requests.
 
+Unbound rule execution retrieves and stages document snapshots only through Smaug and never calls Palantir directly.
+
 ## Technology Stack
 
 - **Monorepo**: Nx 22.6.1 workspace with pnpm 10.18.3
-- **Node**: 22.15.0 (see `.nvmrc`)
+- **Node**: 24.14.1 (see `.nvmrc`)
 - **TypeScript**: 5.9.3 with strict mode
 - **Runtime**: AWS Lambda (Node.js)
 - **Testing**: Vitest 4.1.0 with @vitest/coverage-v8
@@ -272,7 +274,7 @@ pnpm build-lambda:all                  # nx run-many --target build-lambda
 pnpm create-rule
 
 # Run a rule processor locally
-pnpm run-rule -- <args>                # nx run rule-runner-cli:run -- <args>
+pnpm run-rule <args>                   # nx run rule-runner-cli:run -- <args>
 
 # Extract document data
 pnpm extract-document -- <args>        # nx run document-extractor-cli:run -- <args>
@@ -325,26 +327,26 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 
 ## Environment Variables
 
-| Variable | Purpose |
-|---|---|
-| `DOCUMENT_BUCKET_NAME` | S3 bucket for methodology execution documents |
-| `DOCUMENT_ATTACHMENT_BUCKET_NAME` | S3 bucket for document attachments (scale tickets, manifests) |
-| `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` | IAM role ARN for STS AssumeRole to sign Smaug API requests |
-| `AUDIT_URL` | Smaug API base URL for posting audit results |
-| `AI_ATTACHMENT_VALIDATOR_API_URI` | Smaug API endpoint for AI-based attachment validation |
-| `SENTRY_DSN` | Sentry DSN for error reporting |
-| `ENVIRONMENT` | Deployment environment (development, staging, production) |
-| `SOURCE_CODE_VERSION` | Build artifact version identifier |
-| `SOURCE_CODE_URL` | GitHub repository URL |
-| `ARTIFACT_CHECKSUM` | Build artifact checksum |
-| `VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI` | Feature flag for AI attachment validation |
-| `ENABLE_CLOUDWATCH_METRICS` | Enable CloudWatch metrics publishing |
-| `CLOUDWATCH_METRICS_NAMESPACE` | CloudWatch metrics namespace |
+| Variable                                   | Purpose                                                       |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| `DOCUMENT_BUCKET_NAME`                     | S3 bucket for methodology execution documents                 |
+| `DOCUMENT_ATTACHMENT_BUCKET_NAME`          | S3 bucket for document attachments (scale tickets, manifests) |
+| `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN`        | IAM role ARN for STS AssumeRole to sign Smaug API requests    |
+| `AUDIT_URL`                                | Smaug API base URL for posting audit results                  |
+| `AI_ATTACHMENT_VALIDATOR_API_URI`          | Smaug API endpoint for AI-based attachment validation         |
+| `SENTRY_DSN`                               | Sentry DSN for error reporting                                |
+| `ENVIRONMENT`                              | Deployment environment (development, staging, production)     |
+| `SOURCE_CODE_VERSION`                      | Build artifact version identifier                             |
+| `SOURCE_CODE_URL`                          | GitHub repository URL                                         |
+| `ARTIFACT_CHECKSUM`                        | Build artifact checksum                                       |
+| `VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI` | Feature flag for AI attachment validation                     |
+| `ENABLE_CLOUDWATCH_METRICS`                | Enable CloudWatch metrics publishing                          |
+| `CLOUDWATCH_METRICS_NAMESPACE`             | CloudWatch metrics namespace                                  |
 
 ## Important Notes
 
 - **Package Manager**: pnpm ONLY (enforced by `preinstall` script)
-- **Node Version**: 22.15.0 (check `.nvmrc`)
+- **Node Version**: 24.14.1 (check `.nvmrc`)
 - **Husky Hooks**: Git hooks for pre-commit linting via lint-staged
 - **Cacheable Operations**: `build-lambda`, `test`, `lint`, `ts`, `package-lambda`
 - **Remote Cache**: S3 bucket `carrot-nx-cache` (us-east-1)

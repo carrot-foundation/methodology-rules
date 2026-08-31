@@ -1,4 +1,8 @@
+import path from 'node:path';
+
 import { getVitestBaseConfig } from './vitest.base.config';
+
+const workspaceRoot = path.resolve(import.meta.dirname, '../..');
 
 export const getVitestE2EBaseConfig = (dirname: string) => {
   const base = getVitestBaseConfig(dirname);
@@ -25,6 +29,12 @@ export const getVitestE2EBaseConfig = (dirname: string) => {
       coverage: {
         ...base.test.coverage,
         enabled: false,
+      },
+      alias: {
+        '@carrot-fndn/shared/aws-http': path.join(
+          workspaceRoot,
+          '.vitest/mocks/aws-http.e2e.mock.ts',
+        ),
       },
     },
   };

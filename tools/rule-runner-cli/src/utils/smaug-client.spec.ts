@@ -1,15 +1,21 @@
+import { provideSmaugApiCredentials } from '@carrot-fndn/shared/aws-http';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
 
-import { prepareDryRun } from './smaug-client';
+import { STUB_SMAUG_URL } from '../test.constants';
+import { prepareDryRun, prepareLocalRule } from './smaug-client';
 
 vi.mock('@carrot-fndn/shared/http-request', () => ({
   httpRequest: vi.fn(),
 }));
+vi.mock('@carrot-fndn/shared/aws-http', () => ({
+  provideSmaugApiCredentials: vi.fn(),
+}));
 
 const mockHttpRequest = httpRequest as vi.MockedFunction<typeof httpRequest>;
+const mockProvideSmaugApiCredentials = vi.mocked(provideSmaugApiCredentials);
 
 describe('prepareDryRun', () => {
-  const smaugUrl = 'https://smaug.carrot.eco';
+  const smaugUrl = STUB_SMAUG_URL;
 
   const mockResponse = {
     auditDocumentId: 'audit-123',
@@ -25,12 +31,90 @@ describe('prepareDryRun', () => {
       },
     ],
   };
+  const localRequest = {
+    dataSetName: 'TEST' as const,
+    documentId: 'mass-id-456',
+    input: {
+      relatedDocuments: [{ category: 'WASTE' }],
+    },
+    ruleSlug: 'document-manifest-data',
+    rulesScope: 'MassID' as const,
+  };
+  const localResponse = {
+    auditDocumentId: 'audit-123',
+    auditedDocumentId: 'mass-id-456',
+    executionId: 'dry-run/uuid-789',
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
+  it('should prepare a local rule with Smaug assumed credentials', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
+    mockHttpRequest.mockResolvedValue({ data: localResponse } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).resolves.toEqual(
+      localResponse,
+    );
+
+    expect(mockHttpRequest).toHaveBeenCalledWith(
+      {
+        baseURL: smaugUrl,
+        data: localRequest,
+        method: 'POST',
+        url: '/methodologies/dry-run/prepare-local-rule',
+      },
+      { credentials },
+    );
+  });
+
+  it('should reject a missing local preparation response', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue(null as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation failed (HTTP N/A)',
+    );
+  });
+
+  it('should reject a 4xx local preparation response without its body', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue({
+      data: { authorization: 'signed-header' },
+      status: 400,
+    } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation failed (HTTP 400)',
+    );
+  });
+
+  it('should reject malformed 2xx local preparation identifiers without response data', async () => {
+    mockProvideSmaugApiCredentials.mockReturnValue(vi.fn());
+    mockHttpRequest.mockResolvedValue({
+      data: {
+        auditDocumentId: '',
+        auditedDocumentId: 42,
+        executionId: 'token=secret',
+      },
+      status: 200,
+    } as never);
+
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.toThrow(
+      'Smaug local rule preparation response is invalid',
+    );
+    await expect(prepareLocalRule(smaugUrl, localRequest)).rejects.not.toThrow(
+      'token=secret',
+    );
+  });
+
   it('should call Smaug dry-run prepare endpoint', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
     mockHttpRequest.mockResolvedValue({ data: mockResponse } as never);
 
     const result = await prepareDryRun(smaugUrl, {
@@ -39,20 +123,57 @@ describe('prepareDryRun', () => {
       rulesScope: 'MassID',
     });
 
-    expect(mockHttpRequest).toHaveBeenCalledWith({
-      data: {
-        documentId: 'mass-id-456',
-        methodologySlug: 'bold-carbon-organic',
-        rulesScope: 'MassID',
+    expect(mockHttpRequest).toHaveBeenCalledWith(
+      {
+        baseURL: smaugUrl,
+        data: {
+          documentId: 'mass-id-456',
+          methodologySlug: 'bold-carbon-organic',
+          rulesScope: 'MassID',
+        },
+        method: 'POST',
+        url: '/methodologies/dry-run/prepare',
       },
-      method: 'POST',
-      url: `${smaugUrl}/methodologies/dry-run/prepare`,
-    });
+      { credentials },
+    );
 
     expect(result).toEqual(mockResponse);
   });
 
+  it('should reject a malformed registered preparation response without response data', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
+    mockHttpRequest.mockResolvedValue({
+      data: {
+        auditDocumentId: 'audit-123',
+        auditedDocumentId: 'mass-id-456',
+        executionId: 'token=secret',
+        rules: [{ executionOrder: 'first' }],
+      },
+      status: 200,
+    } as never);
+
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'MassID',
+      }),
+    ).rejects.toThrow('Smaug dry-run preparation response is invalid');
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'MassID',
+      }),
+    ).rejects.not.toThrow('token=secret');
+  });
+
   it('should pass optional ruleSlug when provided', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
     mockHttpRequest.mockResolvedValue({ data: mockResponse } as never);
 
     await prepareDryRun(smaugUrl, {
@@ -68,10 +189,11 @@ describe('prepareDryRun', () => {
           ruleSlug: 'document-manifest-data',
         }),
       }),
+      { credentials },
     );
   });
 
-  it('should throw on 4xx error response with error body', async () => {
+  it('should throw on 4xx error response without its body', async () => {
     mockHttpRequest.mockResolvedValue({
       data: { error: 'Bad Request', message: 'Invalid scope' },
       status: 400,
@@ -84,6 +206,13 @@ describe('prepareDryRun', () => {
         rulesScope: 'INVALID',
       }),
     ).rejects.toThrow('Smaug dry-run prepare failed (HTTP 400)');
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'INVALID',
+      }),
+    ).rejects.not.toThrow('Invalid scope');
   });
 
   it('should throw when response is null', async () => {

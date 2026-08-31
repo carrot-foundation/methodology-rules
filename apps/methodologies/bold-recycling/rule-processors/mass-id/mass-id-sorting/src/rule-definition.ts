@@ -1,4 +1,5 @@
 import type { MethodologyFrameworkRuleSlug } from '@carrot-fndn/methodologies/bold-recycling/rules';
+import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { RuleDefinition } from '@carrot-fndn/shared/rule/types';
 
 import { ruleDefinition as baseRuleDefinition } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/mass-id-sorting';
@@ -10,4 +11,7 @@ export const ruleDefinition = {
     'sorting-calculation',
     'sorting-value-field',
   ],
-} as const satisfies RuleDefinition<MethodologyFrameworkRuleSlug>;
+} as const satisfies RuleDefinition<
+  MethodologyFrameworkRuleSlug,
+  DocumentQueryCriteria
+>;

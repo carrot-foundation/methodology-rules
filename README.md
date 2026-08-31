@@ -20,11 +20,11 @@ flowchart LR
 
 Every methodology in the Carrot Network has three layers:
 
-| Layer | What | Where |
-|-------|------|-------|
-| **Methodology** | Scientific foundation (e.g., UNFCCC CDM) | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies) |
-| **MvF** (Methodology Verification Framework) | Specification translating the methodology into concrete verification rules | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies/concepts/mvf) |
-| **MvA** (Methodology Verification Application) | Open-source rule processors implementing the MvF | **This repository** · [docs](https://docs.carrot.eco/docs/methodologies/concepts/mva) |
+| Layer                                          | What                                                                       | Where                                                                                 |
+| ---------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Methodology**                                | Scientific foundation (e.g., UNFCCC CDM)                                   | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies)                         |
+| **MvF** (Methodology Verification Framework)   | Specification translating the methodology into concrete verification rules | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies/concepts/mvf)            |
+| **MvA** (Methodology Verification Application) | Open-source rule processors implementing the MvF                           | **This repository** · [docs](https://docs.carrot.eco/docs/methodologies/concepts/mva) |
 
 Rule processors are the core units of the MvA. Each one evaluates [MassID](https://docs.carrot.eco/docs/concepts/mass-ids) documents — digital records tracking material type, weight, and chain of custody — and returns `PASSED`, `FAILED`, or `REVIEW_REQUIRED` with a traceable explanation.
 
@@ -56,7 +56,7 @@ methodology-rules/
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) v22.15.0 (see `.nvmrc`)
+- [Node.js](https://nodejs.org/) v24.14.1 (see `.nvmrc`)
 - [pnpm](https://pnpm.io/) v10.18.3 (see `packageManager` in `package.json`)
 
 ### Installation
@@ -90,8 +90,22 @@ pnpm nx test <project-name> --testFile=<relative-path>
 
 ```bash
 pnpm create-rule                     # Scaffold a new rule processor
-pnpm run-rule -- <args>              # Run a rule locally against test data
+pnpm run-rule <args>                 # Run a rule locally against test data
 pnpm apply-methodology-rule          # Apply a rule to a methodology
+```
+
+#### Rule Runner Dry Runs
+
+Use one processor-path mode per dry run.
+
+Supply `AUDIT_URL` and `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` through shell variables or an operator-managed `--env-file`. The tracked test configuration is deliberately non-routable.
+
+```bash
+# Local mode: runs the processor from the supplied path against an explicit dataset.
+pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-flags --data-set-name TEST --document-id <massid-document-id>
+
+# Registered mode: resolves the processor against the supplied methodology.
+pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/document-manifest-data --methodology-slug bold-carbon-organic --document-id <massid-document-id>
 ```
 
 ## Rule Processor Design
@@ -107,12 +121,14 @@ Complex processors may override `process()` with custom document loading and eva
 ### Schema Layering
 
 Every rule processor follows a standardized validation flow:
+
 1. Load raw documents
 2. Build a rule subject
 3. Validate the rule subject schema (`validateRuleSubjectOrThrow`)
 4. Evaluate business logic
 
 Document schemas are organized in 5 layers:
+
 - **Envelope** (`LoadedDocumentEnvelopeSchema`) — wrapper for loaded documents
 - **Inbound** (`InboundDocumentSchema`) — boundary contract, looseObject
 - **Normalized** (`DocumentSchema`) — `z.object()` (default), strips unknown fields on parse

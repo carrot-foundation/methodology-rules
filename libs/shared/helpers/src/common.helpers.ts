@@ -39,6 +39,11 @@ export const isNonEmptyObject = (
 ): value is Record<string, unknown> =>
   isPlainObject(value) && Object.keys(value).length > 0;
 
+export const formatHttpStatus = (status?: unknown): string =>
+  typeof status === 'number' && Number.isInteger(status)
+    ? String(status)
+    : 'N/A';
+
 export const pick = <T, K extends keyof T>(
   object: T,
   ...keys: K[]

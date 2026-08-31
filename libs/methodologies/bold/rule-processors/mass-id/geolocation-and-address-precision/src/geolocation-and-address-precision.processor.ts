@@ -20,6 +20,7 @@ import {
   type DocumentQuery,
   DocumentQueryService,
   loadDocument,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
@@ -122,10 +123,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       context: {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
-      criteria: {
-        parentDocument: {},
-        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
-      },
+      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
       documentId: ruleInput.documentId,
     });
   }

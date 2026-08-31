@@ -101,6 +101,7 @@ const invalidWasteGeneratorAddress = stubAddress({
   longitude: -118.2437,
 });
 const nearbyRecyclerAddress = stubAddress({
+  ...recyclerAddress,
   ...actorsCoordinates.get(RECYCLER)!.nearby,
 });
 

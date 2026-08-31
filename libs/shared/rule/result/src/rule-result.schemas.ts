@@ -13,11 +13,3 @@ export const PostProcessInputSchema = z.object({
   taskToken: z.string(),
 });
 export type PostProcessInput = z.infer<typeof PostProcessInputSchema>;
-
-export const CredentialsSchema = z.object({
-  AccessKeyId: z.string(),
-  Expiration: z.date().optional(),
-  SecretAccessKey: z.string(),
-  SessionToken: z.string(),
-});
-export type Credentials = z.infer<typeof CredentialsSchema>;
