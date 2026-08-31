@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+
 import { buildRuleInput } from './rule-input.builder';
 
 describe('buildRuleInput', () => {
@@ -32,17 +34,18 @@ describe('buildRuleInput', () => {
   });
 
   it('should build local input directly from the preparation response identifiers', () => {
+    const executionId = faker.string.uuid();
     const result = buildRuleInput({
       prepared: {
         auditDocumentId: 'synthetic-audit-123',
         auditedDocumentId: 'document-456',
-        executionId: 'local-execution-789',
+        executionId,
       },
     });
 
     expect(result).toMatchObject({
       documentId: 'synthetic-audit-123',
-      documentKeyPrefix: 'dry-run/local-execution-789/documents',
+      documentKeyPrefix: `dry-run/${executionId}/documents`,
       parentDocumentId: 'document-456',
     });
   });
