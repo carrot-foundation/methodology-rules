@@ -166,12 +166,7 @@ export const dryRunCommand = new Command('dry-run')
       'Methodology slug (e.g., bold-carbon-organic)',
     ),
   )
-  .addOption(
-    new Option(
-      '-d, --document-id <id>',
-      'MassID document ID (Palantir document ID)',
-    ),
-  )
+  .addOption(new Option('-d, --document-id <id>', 'MassID document ID'))
   .addOption(
     new Option(
       '--data-set-name <name>',

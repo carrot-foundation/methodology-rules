@@ -2,7 +2,11 @@ import { Command } from '@commander-js/extra-typings';
 
 import type { DryRunOptions } from './dry-run.command';
 
-import { createDryRunSelection, parseDataSetName } from './dry-run.command';
+import {
+  createDryRunSelection,
+  dryRunCommand,
+  parseDataSetName,
+} from './dry-run.command';
 
 const baseOptions: DryRunOptions = {
   allRules: false,
@@ -135,5 +139,16 @@ describe('createDryRunSelection', () => {
 
   it('should reject a non-canonical data-set name in local mode', () => {
     expect(() => parseDataSetName('INVALID')).toThrow('--data-set-name');
+  });
+});
+
+describe('dryRunCommand', () => {
+  it('should describe the document ID as a MassID document ID', () => {
+    const documentIdOption = dryRunCommand.options.find(
+      (option) => option.long === '--document-id',
+    );
+
+    expect(documentIdOption).toBeDefined();
+    expect(documentIdOption?.description).toBe('MassID document ID');
   });
 });

@@ -82,6 +82,8 @@ Project-specific knowledge for AI assistants working on Methodology Rules. This 
 
 Methodology Rules is an Nx monorepo containing AWS Lambda rule processors for Carrot Foundation's BOLD methodology. Each processor validates a specific aspect of waste management documents (MassIDs, certificates, credit orders) by querying S3-stored documents and reporting results to Smaug via SigV4-signed HTTP requests.
 
+Unbound rule execution retrieves and stages document snapshots only through Smaug and never calls Palantir directly.
+
 ## Technology Stack
 
 - **Monorepo**: Nx 22.6.1 workspace with pnpm 10.18.3

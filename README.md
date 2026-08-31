@@ -94,6 +94,18 @@ pnpm run-rule -- <args>              # Run a rule locally against test data
 pnpm apply-methodology-rule          # Apply a rule to a methodology
 ```
 
+#### Rule Runner Dry Runs
+
+Use one processor-path mode per dry run.
+
+```bash
+# Local mode: runs the processor from the supplied path against an explicit dataset.
+pnpm run-rule -- dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-flags --data-set-name TEST --document-id <massid-document-id>
+
+# Registered mode: resolves the processor against the supplied methodology.
+pnpm run-rule -- dry-run libs/methodologies/bold/rule-processors/mass-id/document-manifest-data --methodology-slug bold-carbon-organic --document-id <massid-document-id>
+```
+
 ## Rule Processor Design
 
 Every rule processor follows a standardized pattern:
