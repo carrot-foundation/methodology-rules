@@ -54,24 +54,18 @@ export const prepareDryRun = async (
   smaugUrl: string,
   request: DryRunPrepareRequest,
 ): Promise<DryRunPrepareResponse> => {
-  const url = `${smaugUrl}/methodologies/dry-run/prepare`;
-
-  logger.info(`Calling Smaug dry-run prepare: ${url}`);
+  logger.info('Calling Smaug dry-run prepare');
 
   const response = await httpRequest({
+    baseURL: smaugUrl,
     data: request,
     method: 'POST',
-    url,
+    url: '/methodologies/dry-run/prepare',
   });
 
   if (!response || response.status >= 400) {
-    const errorBody =
-      response?.data !== undefined && response.data !== null
-        ? JSON.stringify(response.data, undefined, 2)
-        : 'No response body';
-
     throw new Error(
-      `Smaug dry-run prepare failed (HTTP ${String(response?.status ?? 'N/A')}): ${errorBody}`,
+      `Smaug dry-run prepare failed (HTTP ${String(response?.status ?? 'N/A')})`,
     );
   }
 
@@ -84,9 +78,10 @@ export const prepareLocalRule = async (
 ): Promise<LocalRuleDryRunPrepareResponse> => {
   const response = await httpRequest(
     {
+      baseURL: smaugUrl,
       data: request,
       method: 'POST',
-      url: `${smaugUrl}/methodologies/dry-run/prepare-local-rule`,
+      url: '/methodologies/dry-run/prepare-local-rule',
     },
     { credentials: provideSmaugApiCredentials() },
   );

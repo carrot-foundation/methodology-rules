@@ -88,13 +88,20 @@ describe('request helpers', () => {
       );
     });
 
-    it('should not sign the request for localhost', async () => {
-      await httpRequest({
-        baseURL: 'http://localhost:3000',
-        method: 'POST',
-        url: '/data',
-      });
+    it('should not resolve credentials or sign a localhost request', async () => {
+      const credentials: AwsCredentialIdentityProvider = vi.fn();
 
+      await httpRequest(
+        {
+          baseURL: 'http://localhost:3000',
+          method: 'POST',
+          url: '/data',
+        },
+        { credentials },
+      );
+
+      expect(credentials).not.toHaveBeenCalled();
+      expect(mockedSignRequest).not.toHaveBeenCalled();
       expect(axios).toHaveBeenCalledWith(
         expect.not.objectContaining({
           headers: expect.objectContaining({ 'X-Signed': 'true' }),
@@ -165,14 +172,18 @@ describe('request helpers', () => {
 
     it('should exclude signed headers from logger arguments and thrown messages', async () => {
       const authorization = 'AWS4-HMAC-SHA256 Credential=access-key';
+      const upperCaseAuthorization =
+        'AWS4-HMAC-SHA256 Credential=upper-case-access-key';
       const sessionToken = 'session-token';
       const signingDate = '20260830T000000Z';
       const customAmzHeader = 'custom-amz-header';
       const mockError = {
         code: 'ERR_BAD_RESPONSE',
         config: {
+          data: { authorization },
           headers: {
-            authorization,
+            Authorization: authorization,
+            AUTHORIZATION: upperCaseAuthorization,
             'X-AmZ-Date': signingDate,
             'x-amz-security-token': sessionToken,
           },
@@ -210,10 +221,12 @@ describe('request helpers', () => {
 
       expect(caughtError).toBeInstanceOf(Error);
       expect(caughtError?.message).not.toContain(authorization);
+      expect(caughtError?.message).not.toContain(upperCaseAuthorization);
       expect(caughtError?.message).not.toContain(sessionToken);
       expect(caughtError?.message).not.toContain(signingDate);
       expect(caughtError?.message).not.toContain(customAmzHeader);
       expect(loggerOutput).not.toContain(authorization);
+      expect(loggerOutput).not.toContain(upperCaseAuthorization);
       expect(loggerOutput).not.toContain(sessionToken);
       expect(loggerOutput).not.toContain(signingDate);
       expect(loggerOutput).not.toContain(customAmzHeader);

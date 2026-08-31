@@ -61,9 +61,10 @@ describe('prepareDryRun', () => {
 
     expect(mockHttpRequest).toHaveBeenCalledWith(
       {
+        baseURL: smaugUrl,
         data: localRequest,
         method: 'POST',
-        url: `${smaugUrl}/methodologies/dry-run/prepare-local-rule`,
+        url: '/methodologies/dry-run/prepare-local-rule',
       },
       { credentials },
     );
@@ -119,13 +120,14 @@ describe('prepareDryRun', () => {
     });
 
     expect(mockHttpRequest).toHaveBeenCalledWith({
+      baseURL: smaugUrl,
       data: {
         documentId: 'mass-id-456',
         methodologySlug: 'bold-carbon-organic',
         rulesScope: 'MassID',
       },
       method: 'POST',
-      url: `${smaugUrl}/methodologies/dry-run/prepare`,
+      url: '/methodologies/dry-run/prepare',
     });
 
     expect(result).toEqual(mockResponse);
@@ -150,7 +152,7 @@ describe('prepareDryRun', () => {
     );
   });
 
-  it('should throw on 4xx error response with error body', async () => {
+  it('should throw on 4xx error response without its body', async () => {
     mockHttpRequest.mockResolvedValue({
       data: { error: 'Bad Request', message: 'Invalid scope' },
       status: 400,
@@ -163,6 +165,13 @@ describe('prepareDryRun', () => {
         rulesScope: 'INVALID',
       }),
     ).rejects.toThrow('Smaug dry-run prepare failed (HTTP 400)');
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'INVALID',
+      }),
+    ).rejects.not.toThrow('Invalid scope');
   });
 
   it('should throw when response is null', async () => {
