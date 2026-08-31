@@ -63,6 +63,7 @@ const createContext = (
     ruleDefinition: {
       description: 'Root-only rule',
       events: [],
+      input: {},
       name: 'Root-only rule',
       slug: 'root-only-rule',
       version: '1.0.0',

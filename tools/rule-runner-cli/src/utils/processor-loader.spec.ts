@@ -21,6 +21,10 @@ const parameterizedProcessorPath = path.join(
   repositoryRoot,
   'libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit',
 );
+const liveQueryProcessorPath = path.join(
+  repositoryRoot,
+  'libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique',
+);
 const parameterizedConstructorSentinel =
   'processorLoaderParameterizedConstructorInvoked';
 
@@ -33,6 +37,7 @@ const validRuleDefinitionSource = `
 export const ruleDefinition = {
   description: 'A test rule definition.',
   events: [],
+  input: {},
   name: 'Test rule',
   slug: 'test-rule',
   version: '1.0.0',
@@ -119,6 +124,7 @@ describe('loadLocalRuleModule', () => {
       ruleDefinition: {
         description: expect.any(String),
         events: expect.any(Array),
+        input: {},
         name: expect.any(String),
         slug: 'privacy-flags',
         version: expect.any(String),
@@ -155,6 +161,12 @@ describe('loadLocalRuleModule', () => {
       loadLocalRuleModule(parameterizedProcessorPath),
     ).rejects.toThrow(
       `Unsupported processor constructor for ${parameterizedProcessorPath}. Local MassID processors must not require constructor arguments.`,
+    );
+  });
+
+  it('should reject a zero-argument processor without declared static input', async () => {
+    await expect(loadLocalRuleModule(liveQueryProcessorPath)).rejects.toThrow(
+      `Unsupported rule definition for ${liveQueryProcessorPath}. Local MassID processors must declare static input criteria.`,
     );
   });
 
@@ -261,6 +273,24 @@ export class TestRuleProcessor extends RuleDataProcessor {
 
     await expect(loadLocalRuleModule(processorDirectory)).rejects.toThrow(
       'Invalid rule definition',
+    );
+  });
+
+  it('should reject a rule definition without declared static input', async () => {
+    const processorDirectory = await createFixture({
+      ruleDefinitionSource: `
+export const ruleDefinition = {
+  description: 'A test rule definition.',
+  events: [],
+  name: 'Test rule',
+  slug: 'test-rule',
+  version: '1.0.0',
+};
+`,
+    });
+
+    await expect(loadLocalRuleModule(processorDirectory)).rejects.toThrow(
+      `Unsupported rule definition for ${processorDirectory}. Local MassID processors must declare static input criteria.`,
     );
   });
 

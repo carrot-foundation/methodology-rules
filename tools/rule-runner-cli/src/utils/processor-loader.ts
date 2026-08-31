@@ -11,7 +11,7 @@ import path from 'node:path';
 
 export interface LocalRuleModule {
   Processor: RuleProcessorConstructor;
-  ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria>;
+  ruleDefinition: LocalRuleDefinition;
   rulesScope: 'MassID';
 }
 
@@ -20,6 +20,10 @@ export type RuleProcessorConstructor = new () => RuleDataProcessor;
 type DiscoveredRuleProcessorConstructor = new (
   config?: Record<string, unknown>,
 ) => RuleDataProcessor;
+
+interface LocalRuleDefinition extends BaseRuleDefinition<DocumentQueryCriteria> {
+  input: DocumentQueryCriteria;
+}
 
 const isRuleDataProcessorClass = (
   value: unknown,
@@ -198,6 +202,10 @@ const isArgumentFreeRuleProcessorConstructor = (
   Processor: DiscoveredRuleProcessorConstructor,
 ): Processor is RuleProcessorConstructor => Processor.length === 0;
 
+const hasStaticInput = (
+  ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria>,
+): ruleDefinition is LocalRuleDefinition => ruleDefinition.input !== undefined;
+
 export const loadLocalRuleModule = async (
   processorPath: string,
 ): Promise<LocalRuleModule> => {
@@ -210,6 +218,12 @@ export const loadLocalRuleModule = async (
   if (!isArgumentFreeRuleProcessorConstructor(Processor)) {
     throw new Error(
       `Unsupported processor constructor for ${processorPath}. Local MassID processors must not require constructor arguments.`,
+    );
+  }
+
+  if (!hasStaticInput(ruleDefinition)) {
+    throw new Error(
+      `Unsupported rule definition for ${processorPath}. Local MassID processors must declare static input criteria.`,
     );
   }
 

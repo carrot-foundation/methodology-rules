@@ -386,6 +386,7 @@ describe('handleDryRun', () => {
       ruleDefinition: {
         description: 'Root-only rule',
         events: [],
+        input: {},
         name: 'Root-only rule',
         slug: 'root-only-rule',
         version: '1.0.0',
@@ -420,7 +421,7 @@ describe('handleDryRun', () => {
     expect(JSON.stringify(errorSpy.mock.calls)).not.toContain(sensitiveMarker);
   });
 
-  it('should omit input when preparing a root-only local processor', async () => {
+  it('should forward explicit empty input for a root-only local processor', async () => {
     const Processor = vi.fn().mockImplementation(function Processor() {
       return { process: mockProcess };
     });
@@ -430,6 +431,7 @@ describe('handleDryRun', () => {
       ruleDefinition: {
         description: 'Root-only rule',
         events: [],
+        input: {},
         name: 'Root-only rule',
         slug: 'root-only-rule',
         version: '1.0.0',
@@ -451,6 +453,7 @@ describe('handleDryRun', () => {
       {
         dataSetName: 'TEST',
         documentId: 'mass-id-456',
+        input: {},
         ruleSlug: 'root-only-rule',
         rulesScope: 'MassID',
       },
@@ -467,6 +470,7 @@ describe('handleDryRun', () => {
         ruleDefinition: {
           description: 'Root-only rule',
           events: [],
+          input: {},
           name: 'Root-only rule',
           slug: 'root-only-rule',
           version: '1.0.0',
@@ -502,6 +506,7 @@ describe('handleDryRun', () => {
       ruleDefinition: {
         description: 'Root-only rule',
         events: [],
+        input: {},
         name: 'Root-only rule',
         slug: 'root-only-rule',
         version: '1.0.0',
@@ -534,6 +539,7 @@ describe('handleDryRun', () => {
       ruleDefinition: {
         description: 'Root-only rule',
         events: [],
+        input: {},
         name: 'Root-only rule',
         slug: 'root-only-rule',
         version: '1.0.0',

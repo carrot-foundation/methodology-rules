@@ -214,11 +214,10 @@ export const processLocalDryRunDocument = async (
   },
 ): Promise<DryRunDocumentResult> => {
   const { localRuleModule, selection } = context;
-  const input = localRuleModule.ruleDefinition.input;
   const prepared = await prepareLocalRule(context.smaugUrl, {
     dataSetName: selection.dataSetName,
     documentId,
-    ...(input === undefined ? {} : { input }),
+    input: localRuleModule.ruleDefinition.input,
     ruleSlug: localRuleModule.ruleDefinition.slug,
     rulesScope: localRuleModule.rulesScope,
   });
