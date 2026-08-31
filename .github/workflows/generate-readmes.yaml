@@ -7,7 +7,7 @@ on:
       - '!main' # READMEs are generated on feature branches only; main receives them via PR merge
 
 permissions:
-  contents: read # Least-privilege for GITHUB_TOKEN; the PAT (ADMIN_GITHUB_TOKEN) provides its own write access for push-back
+  contents: read # Least-privilege for GITHUB_TOKEN; the app token provides its own write access for push-back
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,7 +18,7 @@ jobs:
     name: Generate Rule READMEs
     runs-on: ubuntu-latest
     # Skip bot commits to prevent infinite loops.
-    # Because ADMIN_GITHUB_TOKEN (a PAT) is used for the push-back,
+    # Because an app installation token is used for the push-back,
     # the push DOES trigger new workflow runs (unlike GITHUB_TOKEN).
     # The `if` condition below is the primary guard: it checks the
     # commit message for [skip ci] and skips the job if found.
@@ -66,10 +66,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }} # PAT to bypass branch protection for push-back
+          token: ${{ steps.app-token.outputs.token }} # bypasses branch protection for push-back
 
       - name: Download generated READMEs
         uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4.1.8
@@ -95,6 +103,6 @@ jobs:
             exit 1
           }
           git push || {
-            echo "::error::Failed to push auto-generated READMEs. Possible causes: concurrent push, branch protection rules, or ADMIN_GITHUB_TOKEN permission issue. Re-run the workflow or push manually."
+            echo "::error::Failed to push auto-generated READMEs. Possible causes: concurrent push, branch protection rules, or app token permission issue. Re-run the workflow or push manually."
             exit 1
           }

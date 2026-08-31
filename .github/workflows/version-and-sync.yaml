@@ -21,11 +21,19 @@ jobs:
       !contains(github.event.head_commit.message, '[skip ci]')
 
     steps:
+      - name: Generate app token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          permission-contents: write
+
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0
           fetch-tags: true
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - uses: ./.github/actions/install-node-dependencies
 
@@ -81,10 +89,20 @@ jobs:
           path: dist/methodology-rules-manifest.json
           retention-days: 7
 
+      - name: Generate docs dispatch token
+        id: docs-app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ vars.CI_APP_ID }}
+          private-key: ${{ secrets.CI_APP_PRIVATE_KEY }}
+          owner: carrot-foundation
+          repositories: docs
+          permission-contents: write
+
       - name: Dispatch to carrot-docs
         uses: peter-evans/repository-dispatch@ff45666b9427631e3450c54a1bcbee4d9ff4d7c0 # v3.0.0
         with:
-          token: ${{ secrets.DOCS_DISPATCH_TOKEN }}
+          token: ${{ steps.docs-app-token.outputs.token }}
           repository: carrot-foundation/docs
           event-type: rules-manifest-updated
           client-payload: >-

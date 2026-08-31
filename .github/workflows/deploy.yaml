@@ -9,8 +9,6 @@ on:
         required: true
       AWS_ACCOUNT_ID_DEVELOPMENT:
         required: true
-      ADMIN_GITHUB_TOKEN:
-        required: true
       SLACK_WEBHOOK_URL:
         required: true
       nx_key:
@@ -32,7 +30,6 @@ jobs:
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
-          token: ${{ secrets.ADMIN_GITHUB_TOKEN }} # required for git push
           fetch-depth: 0 # required for Nx affected
 
       - uses: ./.github/actions/prepare-to-run-nx
