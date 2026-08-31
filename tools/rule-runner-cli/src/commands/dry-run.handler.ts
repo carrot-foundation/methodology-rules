@@ -256,6 +256,18 @@ export const processLocalDryRunDocument = async (
   };
 };
 
+export const loadRedactedLocalRuleModule = async (
+  processorPath: string,
+): Promise<LocalRuleModule> => {
+  try {
+    return await executeWithStructuredLogsRedacted(() =>
+      loadLocalRuleModule(processorPath),
+    );
+  } catch {
+    throw createLocalRuleExecutionError();
+  }
+};
+
 export const handleDryRun = async (
   selection: DryRunSelection,
   options: DryRunOptions & { documentId: string },
@@ -264,7 +276,9 @@ export const handleDryRun = async (
   const config = parseConfig(options.config);
 
   if (selection.mode === 'local') {
-    const localRuleModule = await loadLocalRuleModule(selection.processorPath);
+    const localRuleModule = await loadRedactedLocalRuleModule(
+      selection.processorPath,
+    );
 
     return processLocalDryRunDocument(options.documentId, {
       localRuleModule,

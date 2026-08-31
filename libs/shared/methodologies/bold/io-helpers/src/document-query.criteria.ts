@@ -30,5 +30,5 @@ export const RELATED_DOCUMENT_CRITERIA = {
   relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
 } as const satisfies DocumentQueryCriteria;
 
-export const ROOT_DOCUMENT_CRITERIA =
+export const BOLD_ROOT_DOCUMENT_CRITERIA =
   {} as const satisfies DocumentQueryCriteria;

@@ -8,10 +8,10 @@ import type { DryRunDocumentResult } from './dry-run.handler';
 
 import { writeJsonLog } from '../utils/batch-summary';
 import { createLocalRuleExecutionError } from '../utils/local-result-output';
-import { loadLocalRuleModule } from '../utils/processor-loader';
 import { handleDryRunBatch } from './dry-run-batch.handler';
 import { createDryRunSelection } from './dry-run.command';
 import {
+  loadRedactedLocalRuleModule,
   processDryRunDocument,
   processLocalDryRunDocument,
   resolveDryRunEnvironment,
@@ -31,6 +31,7 @@ vi.mock('@carrot-fndn/shared/cli', async (importOriginal) => {
 });
 
 vi.mock('./dry-run.handler', () => ({
+  loadRedactedLocalRuleModule: vi.fn(),
   processDryRunDocument: vi.fn(),
   processLocalDryRunDocument: vi.fn(),
   resolveDryRunEnvironment: vi.fn().mockReturnValue({
@@ -40,10 +41,6 @@ vi.mock('./dry-run.handler', () => ({
 
 vi.mock('../utils/config-parser', () => ({
   parseConfig: vi.fn().mockReturnValue(undefined),
-}));
-
-vi.mock('../utils/processor-loader', () => ({
-  loadLocalRuleModule: vi.fn(),
 }));
 
 vi.mock('../utils/batch-summary', async (importOriginal) => {
@@ -69,9 +66,10 @@ const mockProcessLocalDryRunDocument =
     typeof processLocalDryRunDocument
   >;
 const mockWriteJsonLog = writeJsonLog as vi.MockedFunction<typeof writeJsonLog>;
-const mockLoadLocalRuleModule = loadLocalRuleModule as vi.MockedFunction<
-  typeof loadLocalRuleModule
->;
+const mockLoadRedactedLocalRuleModule =
+  loadRedactedLocalRuleModule as vi.MockedFunction<
+    typeof loadRedactedLocalRuleModule
+  >;
 
 const INPUT_FILE_PATH = 'test-data/docs.json';
 
@@ -120,7 +118,7 @@ describe('handleDryRunBatch', () => {
       smaugUrl: 'https://smaug.carrot.eco',
     });
     mockProcessBatch.mockResolvedValue({ failures: [], successes: [] });
-    mockLoadLocalRuleModule.mockResolvedValue({} as never);
+    mockLoadRedactedLocalRuleModule.mockResolvedValue({} as never);
     mockWriteJsonLog.mockResolvedValue();
   });
 
@@ -265,7 +263,10 @@ describe('handleDryRunBatch', () => {
 
     expect(mockProcessDryRunDocument).toHaveBeenCalledWith(
       'doc-1',
-      expect.objectContaining({ processorPath }),
+      expect.objectContaining({
+        processorPath,
+        ruleSlug: 'document-manifest-data',
+      }),
     );
     expect(mockProcessLocalDryRunDocument).not.toHaveBeenCalled();
   });
@@ -701,7 +702,7 @@ describe('handleDryRunBatch', () => {
       baseOptions,
     );
 
-    expect(mockLoadLocalRuleModule).toHaveBeenCalledTimes(1);
+    expect(mockLoadRedactedLocalRuleModule).toHaveBeenCalledTimes(1);
     expect(mockProcessLocalDryRunDocument).toHaveBeenCalledTimes(2);
     expect(mockProcessDryRunDocument).not.toHaveBeenCalled();
     expect(recordedFailures).toEqual([

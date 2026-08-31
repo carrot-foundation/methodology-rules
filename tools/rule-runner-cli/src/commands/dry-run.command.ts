@@ -6,6 +6,7 @@ import {
   InvalidArgumentError,
   Option,
 } from '@commander-js/extra-typings';
+import path from 'node:path';
 
 import { handleDryRunBatch } from './dry-run-batch.handler';
 import { handleDryRun } from './dry-run.handler';
@@ -145,7 +146,8 @@ export const createDryRunSelection = (
     methodologySlug: options.methodologySlug,
     mode: 'registered',
     processorPath,
-    ruleSlug: options.ruleSlug,
+    ruleSlug:
+      options.ruleSlug ?? (processorPath && path.basename(processorPath)),
     rulesScope: options.rulesScope,
   };
 };

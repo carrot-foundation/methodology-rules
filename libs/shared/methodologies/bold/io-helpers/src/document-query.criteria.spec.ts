@@ -1,7 +1,7 @@
 import {
+  BOLD_ROOT_DOCUMENT_CRITERIA,
   DocumentQueryCriteriaSchema,
   RELATED_DOCUMENT_CRITERIA,
-  ROOT_DOCUMENT_CRITERIA,
 } from './document-query.criteria';
 
 describe('DocumentQueryCriteriaSchema', () => {
@@ -12,9 +12,9 @@ describe('DocumentQueryCriteriaSchema', () => {
   });
 
   it('should accept the explicit root-only criteria', () => {
-    expect(DocumentQueryCriteriaSchema.parse(ROOT_DOCUMENT_CRITERIA)).toEqual(
-      ROOT_DOCUMENT_CRITERIA,
-    );
+    expect(
+      DocumentQueryCriteriaSchema.parse(BOLD_ROOT_DOCUMENT_CRITERIA),
+    ).toEqual(BOLD_ROOT_DOCUMENT_CRITERIA);
   });
 
   it('should accept recursive non-empty document field values outside BOLD enums', () => {
@@ -41,11 +41,11 @@ describe('DocumentQueryCriteriaSchema', () => {
   });
 
   it.each([
-    [],
-    { unknown: 'value' },
-    { parentDocument: { omit: 'true' } },
-    { relatedDocuments: [{ category: 42 }] },
-    { parentDocument: { relatedDocuments: [{ type: 42 }] } },
+    [[]],
+    [{ unknown: 'value' }],
+    [{ parentDocument: { omit: 'true' } }],
+    [{ relatedDocuments: [{ category: 42 }] }],
+    [{ parentDocument: { relatedDocuments: [{ type: 42 }] } }],
   ])('should reject invalid criteria %j', (criteria) => {
     expect(DocumentQueryCriteriaSchema.safeParse(criteria).success).toBe(false);
   });

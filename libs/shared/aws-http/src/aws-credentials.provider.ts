@@ -6,16 +6,16 @@ import { getSmaugApiGatewayAssumeRoleArn } from '@carrot-fndn/shared/env';
 
 export type AwsCredentialIdentityProvider = ReturnType<typeof fromEnv>;
 
-const smaugApiRoleArnPattern =
+const SMAUG_API_ROLE_ARN_PATTERN =
   /^arn:aws:iam::\d{12}:role\/[A-Za-z0-9+=,.@_/-]+$/;
 
-const providersByRoleArn = new Map<string, AwsCredentialIdentityProvider>();
-const refreshWindowMilliseconds = 5 * 60_000;
+const PROVIDERS_BY_ROLE_ARN = new Map<string, AwsCredentialIdentityProvider>();
+const REFRESH_WINDOW_MILLISECONDS = 5 * 60_000;
 
 const requireValidSmaugApiRoleArn = (): string => {
   const roleArn = getSmaugApiGatewayAssumeRoleArn();
 
-  if (!smaugApiRoleArnPattern.test(roleArn)) {
+  if (!SMAUG_API_ROLE_ARN_PATTERN.test(roleArn)) {
     throw new TypeError(
       'SMAUG_API_GATEWAY_ASSUME_ROLE_ARN must be a valid AWS IAM role ARN',
     );
@@ -31,7 +31,7 @@ const memoizeCredentials = (
   let inFlight: ReturnType<AwsCredentialIdentityProvider> | undefined;
 
   return async () => {
-    const refreshAfter = Date.now() + refreshWindowMilliseconds;
+    const refreshAfter = Date.now() + REFRESH_WINDOW_MILLISECONDS;
 
     if (
       cached !== undefined &&
@@ -60,7 +60,7 @@ const memoizeCredentials = (
 const resolveSmaugApiCredentials: AwsCredentialIdentityProvider = async () => {
   const roleArn = requireValidSmaugApiRoleArn();
   const source =
-    providersByRoleArn.get(roleArn) ??
+    PROVIDERS_BY_ROLE_ARN.get(roleArn) ??
     memoizeCredentials(
       fromTemporaryCredentials({
         clientConfig: {},
@@ -72,7 +72,7 @@ const resolveSmaugApiCredentials: AwsCredentialIdentityProvider = async () => {
       }),
     );
 
-  providersByRoleArn.set(roleArn, source);
+  PROVIDERS_BY_ROLE_ARN.set(roleArn, source);
 
   return source();
 };

@@ -170,7 +170,10 @@ describe('handleDryRun', () => {
 
     expect(mockPrepareDryRun).toHaveBeenCalledWith(
       'https://smaug.carrot.eco',
-      expect.objectContaining({ methodologySlug: 'bold-carbon-organic' }),
+      expect.objectContaining({
+        methodologySlug: 'bold-carbon-organic',
+        ruleSlug: 'document-manifest-data',
+      }),
     );
     expect(mockPrepareLocalRule).not.toHaveBeenCalled();
     expect(mockLoadProcessor).toHaveBeenCalledWith(processorPath, undefined);

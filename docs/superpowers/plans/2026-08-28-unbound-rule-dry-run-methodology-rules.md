@@ -15,7 +15,7 @@
 - Explicit local mode supports MassID processors only.
 - Explicit local mode rejects processors whose construction requires application-specific arguments.
 - Registered processor-path and `--all-rules` dry-runs remain behaviorally unchanged.
-- Root-only definitions declare the shared empty `ROOT_DOCUMENT_CRITERIA`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
+- Root-only definitions declare the shared empty `BOLD_ROOT_DOCUMENT_CRITERIA`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
 - Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config`; registered mode rejects `--data-set-name`.
 - Single-document processor exceptions reject and exit nonzero; batch records errors and exits nonzero.
 - `aws-vault exec smaug-prod` provides base credentials; requests use assumed-role SigV4 credentials.
@@ -63,7 +63,7 @@ The branch contains the core implementations described by Tasks 1–6. Phase 4 r
 
 **Interfaces:**
 - Consumes: `DocumentQueryCriteria` from `@carrot-fndn/shared/methodologies/bold/io-helpers`.
-- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus shared `RELATED_DOCUMENT_CRITERIA` and `ROOT_DOCUMENT_CRITERIA` constants referenced by supported definitions and processors.
+- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus shared `RELATED_DOCUMENT_CRITERIA` and `BOLD_ROOT_DOCUMENT_CRITERIA` constants referenced by supported definitions and processors.
 
 - [ ] **Step 1: Write the failing explicit root-criteria tests**
 
@@ -84,13 +84,13 @@ export const ruleDefinition = {
 } as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
 ```
 
-Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared related criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
+Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `BOLD_ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared related criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
 
 - [ ] **Step 2: Run type-check and the rule tests**
 
 Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the six listed processor projects with `rtk pnpm nx run-many`.
 
-Expected: FAIL because `ROOT_DOCUMENT_CRITERIA` does not exist and privacy-flags does not yet declare an explicit static input graph; the five existing related-criteria cases remain green.
+Expected: FAIL because `BOLD_ROOT_DOCUMENT_CRITERIA` does not exist and privacy-flags does not yet declare an explicit static input graph; the five existing related-criteria cases remain green.
 
 - [ ] **Step 3: Implement the shared root criteria without changing the generic boundary**
 
@@ -389,7 +389,7 @@ rtk git commit -m "fix(rule-runner): fail closed during environment bootstrap"
 
 **Interfaces:**
 - Consumes: an explicit MassID processor directory.
-- Produces: `loadLocalRuleModule(processorPath: string): Promise<{ Processor: RuleProcessorConstructor; ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria>; rulesScope: 'MassID' }>`.
+- Produces: `loadLocalRuleModule(processorPath: string): Promise<{ Processor: RuleProcessorConstructor; ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria> & { input: DocumentQueryCriteria }; rulesScope: 'MassID' }>`.
 
 - [ ] **Step 1: Write the failing static-input eligibility tests**
 
@@ -457,7 +457,7 @@ rtk git commit -m "fix(script): require static unbound input"
 
 **Interfaces:**
 - Consumes: Task 2 credential provider and Smaug `POST /methodologies/dry-run/prepare-local-rule`.
-- Produces: `prepareLocalRule(request: LocalRuleDryRunPrepareRequest): Promise<LocalRuleDryRunPrepareResponse>`.
+- Produces: `prepareLocalRule(smaugUrl: string, request: LocalRuleDryRunPrepareRequest): Promise<LocalRuleDryRunPrepareResponse>`.
 
 - [ ] **Step 1: Write failing request and redaction tests**
 

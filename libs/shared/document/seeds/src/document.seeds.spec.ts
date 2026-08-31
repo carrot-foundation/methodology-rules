@@ -1,6 +1,7 @@
 import { getAuditUrl } from '@carrot-fndn/shared/env';
 import { httpRequest } from '@carrot-fndn/shared/http-request';
 import { stubDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import { faker } from '@faker-js/faker';
 
 import { seedDocument } from './document.seeds';
 
@@ -21,7 +22,7 @@ describe('seedDocument', () => {
   });
 
   it('should exclude an invalid response body from its error', async () => {
-    const responseSecret = 'fictional-secret-response-body';
+    const responseSecret = faker.string.uuid();
 
     mockHttpRequest.mockResolvedValue({
       data: { authorization: responseSecret },
@@ -35,7 +36,7 @@ describe('seedDocument', () => {
   });
 
   it('should exclude a non-object response from its error', async () => {
-    const responseSecret = 'fictional-secret-response-body';
+    const responseSecret = faker.string.uuid();
 
     mockHttpRequest.mockResolvedValue(responseSecret as never);
 
@@ -46,7 +47,7 @@ describe('seedDocument', () => {
   });
 
   it('should return the created document identifier', async () => {
-    const documentId = 'created-document-id';
+    const documentId = faker.string.uuid();
     const externalEvent = stubDocumentEvent();
 
     mockHttpRequest.mockResolvedValue({

@@ -7,7 +7,11 @@ import {
   isNonEmptyString,
   logger as pinoLogger,
 } from '@carrot-fndn/shared/helpers';
-import axios, { type AxiosRequestConfig, isAxiosError } from 'axios';
+import axios, {
+  type AxiosRequestConfig,
+  type AxiosResponse,
+  isAxiosError,
+} from 'axios';
 import { type Logger } from 'pino';
 
 export interface HttpRequestOptions {
@@ -85,7 +89,7 @@ export const prepareHttpRequestConfig = async (
 export const handleRequestError = (
   error: unknown,
   options: { ignoreTimeoutError: boolean; logger: Logger },
-) => {
+): AxiosResponse | null | undefined => {
   const { ignoreTimeoutError, logger } = options;
 
   if (!isAxiosError(error)) {
@@ -124,7 +128,7 @@ export const httpRequest = async (
     ignoreTimeoutError = false,
     logger = pinoLogger,
   }: HttpRequestOptions = {},
-) => {
+): Promise<AxiosResponse | null | undefined> => {
   const requestConfig = await prepareHttpRequestConfig(config, { credentials });
 
   try {

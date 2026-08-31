@@ -13,22 +13,22 @@ vi.mock('@aws-sdk/credential-providers', async (importOriginal) => ({
 
 describe('provideSmaugApiCredentials', () => {
   const environment = { ...process.env };
-  const validRoleArn = 'arn:aws:iam::123456789012:role/smaug-api-gateway';
-  const concurrentRoleArn =
-    'arn:aws:iam::123456789013:role/smaug-api-gateway-concurrent';
-  const sequentialRoleArn =
-    'arn:aws:iam::123456789014:role/smaug-api-gateway-sequential';
-  const expiringRoleArn =
-    'arn:aws:iam::123456789015:role/smaug-api-gateway-expiring';
-  const rejectedRefreshRoleArn =
-    'arn:aws:iam::123456789016:role/smaug-api-gateway-rejected-refresh';
+  const stubRoleArn = (roleName: string): string =>
+    `arn:aws:iam::${faker.string.numeric(12)}:role/${roleName}`;
+  const validRoleArn = stubRoleArn('smaug-api-gateway');
+  const concurrentRoleArn = stubRoleArn('smaug-api-gateway-concurrent');
+  const sequentialRoleArn = stubRoleArn('smaug-api-gateway-sequential');
+  const expiringRoleArn = stubRoleArn('smaug-api-gateway-expiring');
+  const rejectedRefreshRoleArn = stubRoleArn(
+    'smaug-api-gateway-rejected-refresh',
+  );
   const credentials = {
-    accessKeyId: 'access-key',
-    secretAccessKey: 'secret-access-key',
+    accessKeyId: faker.string.uuid(),
+    secretAccessKey: faker.string.uuid(),
   };
   const refreshedCredentials = {
-    accessKeyId: 'refreshed-access-key',
-    secretAccessKey: 'refreshed-secret-access-key',
+    accessKeyId: faker.string.uuid(),
+    secretAccessKey: faker.string.uuid(),
   };
   const assumeRoleProvider = vi.fn<AwsCredentialIdentityProvider>();
   const mockFromTemporaryCredentials = vi.mocked(fromTemporaryCredentials);

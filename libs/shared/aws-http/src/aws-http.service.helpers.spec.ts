@@ -53,6 +53,20 @@ describe('signRequest', () => {
     expect(result.body).not.toBeDefined();
   });
 
+  it('should reject cleartext URLs before resolving credentials', async () => {
+    const credentials = vi.fn();
+
+    await expect(
+      signRequest(
+        { method: 'POST', url: new URL('http://smaug.example') },
+        faker.string.uuid(),
+        credentials,
+      ),
+    ).rejects.toThrow('Signed requests require HTTPS');
+
+    expect(credentials).not.toHaveBeenCalled();
+  });
+
   it('should return http request object with authorization header, body and query', async () => {
     const input: SignRequestInput = {
       ...stubSignRequestInput(),

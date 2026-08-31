@@ -18,4 +18,7 @@ export {
   getSourceCodeUrl,
   getSourceCodeVersion,
 } from './env.helpers';
-export * from './environment-loader';
+export {
+  loadEnvironment,
+  type LoadEnvironmentOptions,
+} from './environment-loader';

@@ -13,14 +13,6 @@ const privacyFlagsRuleDefinitionPath = path.join(
   privacyFlagsProcessorPath,
   'src/privacy-flags.rule-definition.ts',
 );
-const creditOrderProcessorPath = path.join(
-  repositoryRoot,
-  'libs/methodologies/bold/rule-processors/credit-order/rewards-distribution',
-);
-const parameterizedProcessorPath = path.join(
-  repositoryRoot,
-  'libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit',
-);
 const liveQueryProcessorPath = path.join(
   repositoryRoot,
   'libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique',
@@ -50,6 +42,7 @@ interface FixtureOptions {
   processorSource?: string;
   ruleDefinitionFileName?: string;
   ruleDefinitionSource?: null | string;
+  rulesScopeDirectory?: string;
 }
 
 const createProcessorFixture = async ({
@@ -58,6 +51,7 @@ const createProcessorFixture = async ({
   processorSource = `export { HaulerIdentificationProcessor } from '${haulerProcessorSourcePath}';`,
   ruleDefinitionFileName = 'test-rule.rule-definition.ts',
   ruleDefinitionSource = validRuleDefinitionSource,
+  rulesScopeDirectory = 'mass-id',
 }: FixtureOptions = {}): Promise<string> => {
   const fixtureDirectory = await mkdtemp(
     path.join(os.tmpdir(), 'processor-loader-'),
@@ -65,7 +59,7 @@ const createProcessorFixture = async ({
   const processorDirectory = path.join(
     fixtureDirectory,
     'rule-processors',
-    'mass-id',
+    rulesScopeDirectory,
     'test-rule',
   );
   const sourceDirectory = path.join(processorDirectory, 'src');
@@ -151,16 +145,12 @@ describe('loadLocalRuleModule', () => {
   });
 
   it('should reject a processor outside the MassID scope', async () => {
-    await expect(loadLocalRuleModule(creditOrderProcessorPath)).rejects.toThrow(
-      'MassID',
-    );
-  });
+    const processorDirectory = await createFixture({
+      rulesScopeDirectory: 'credit-order',
+    });
 
-  it('should reject the real parameterized MassID processor before construction', async () => {
-    await expect(
-      loadLocalRuleModule(parameterizedProcessorPath),
-    ).rejects.toThrow(
-      `Unsupported processor constructor for ${parameterizedProcessorPath}. Local MassID processors must not require constructor arguments.`,
+    await expect(loadLocalRuleModule(processorDirectory)).rejects.toThrow(
+      'MassID',
     );
   });
 

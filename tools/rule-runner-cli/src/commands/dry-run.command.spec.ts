@@ -54,9 +54,22 @@ describe('createDryRunSelection', () => {
       methodologySlug: 'bold-carbon-organic',
       mode: 'registered',
       processorPath,
-      ruleSlug: undefined,
+      ruleSlug: 'document-manifest-data',
       rulesScope: 'MassID',
     });
+  });
+
+  it('should preserve an explicit registered rule slug over the processor directory name', () => {
+    const processorPath =
+      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data';
+
+    expect(
+      createDryRunSelection(
+        processorPath,
+        { ...baseOptions, ruleSlug: 'weighing' },
+        commandWithSources({ methodologySlug: 'cli', ruleSlug: 'cli' }),
+      ),
+    ).toMatchObject({ ruleSlug: 'weighing' });
   });
 
   it('should reject an explicit methodologySlug combined with local data-set-name', () => {

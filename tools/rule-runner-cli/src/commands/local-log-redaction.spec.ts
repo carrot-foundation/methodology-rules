@@ -5,9 +5,13 @@ import { symbols } from 'pino';
 
 import type { DryRunOptions } from './dry-run.command';
 
-import { loadProcessor } from '../utils/processor-loader';
+import { loadLocalRuleModule, loadProcessor } from '../utils/processor-loader';
 import { prepareLocalRule } from '../utils/smaug-client';
-import { executeRule, processLocalDryRunDocument } from './dry-run.handler';
+import {
+  executeRule,
+  loadRedactedLocalRuleModule,
+  processLocalDryRunDocument,
+} from './dry-run.handler';
 
 vi.unmock('pino');
 
@@ -34,6 +38,9 @@ const mockPrepareLocalRule = prepareLocalRule as vi.MockedFunction<
 >;
 const mockLoadProcessor = loadProcessor as vi.MockedFunction<
   typeof loadProcessor
+>;
+const mockLoadLocalRuleModule = loadLocalRuleModule as vi.MockedFunction<
+  typeof loadLocalRuleModule
 >;
 
 const options: DryRunOptions = {
@@ -132,6 +139,28 @@ describe('local processor structured log redaction', () => {
       'LOCAL_PROCESSOR_LOG_REDACTED',
     );
     expect(events).toEqual(['processor-finished', 'stdout']);
+  });
+
+  it('should redact and sanitize local module evaluation failures', async () => {
+    const sensitiveMarker = 'Fictional participant: Example Recycler';
+    const outputSpy = vi
+      .spyOn(getPinoOutputStream(), 'write')
+      .mockImplementation(() => true);
+
+    mockLoadLocalRuleModule.mockImplementation(() => {
+      logger.error(sensitiveMarker);
+
+      return Promise.reject(new Error(sensitiveMarker));
+    });
+
+    await expect(loadRedactedLocalRuleModule('some/path')).rejects.toThrow(
+      'LOCAL_RULE_EXECUTION_FAILED',
+    );
+
+    expect(JSON.stringify(outputSpy.mock.calls)).not.toContain(sensitiveMarker);
+    expect(JSON.stringify(outputSpy.mock.calls)).toContain(
+      'LOCAL_PROCESSOR_LOG_REDACTED',
+    );
   });
 
   it('should redact and sanitize a local processor constructor failure', async () => {

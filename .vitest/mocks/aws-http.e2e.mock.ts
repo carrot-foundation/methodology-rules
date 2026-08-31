@@ -1,4 +1,4 @@
-import type { AwsCredentialIdentityProvider } from '../../libs/shared/aws-http/src/index';
+import type { AwsCredentialIdentityProvider } from '@carrot-fndn/shared/aws-http';
 
 export * from '../../libs/shared/aws-http/src/index';
 

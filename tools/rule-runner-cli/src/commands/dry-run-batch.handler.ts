@@ -19,8 +19,8 @@ import {
 } from '../utils/batch-summary';
 import { parseConfig } from '../utils/config-parser';
 import { toDryRunRuleResultLog } from '../utils/local-result-output';
-import { loadLocalRuleModule } from '../utils/processor-loader';
 import {
+  loadRedactedLocalRuleModule,
   processDryRunDocument,
   processLocalDryRunDocument,
   resolveDryRunEnvironment,
@@ -75,7 +75,7 @@ export const handleDryRunBatch = async (
 
   const localRuleModule =
     selection.mode === 'local'
-      ? await loadLocalRuleModule(selection.processorPath)
+      ? await loadRedactedLocalRuleModule(selection.processorPath)
       : undefined;
 
   let passedCount = 0;

@@ -16,7 +16,11 @@ export const signRequest = async (
   { body, method, query, url }: SignRequestInput,
   awsRegion: string,
   credentials: AwsCredentialIdentityProvider = fromEnv(),
-) => {
+): Promise<Awaited<ReturnType<SignatureV4['sign']>>> => {
+  if (url.protocol !== 'https:') {
+    throw new Error('Signed requests require HTTPS');
+  }
+
   const signer = new SignatureV4({
     credentials,
     region: awsRegion,

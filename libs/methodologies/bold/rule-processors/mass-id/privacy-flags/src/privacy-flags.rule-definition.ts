@@ -1,7 +1,7 @@
 import type { DocumentQueryCriteria } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
-import { ROOT_DOCUMENT_CRITERIA } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { BOLD_ROOT_DOCUMENT_CRITERIA } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const ruleDefinition = {
@@ -17,7 +17,7 @@ export const ruleDefinition = {
     BoldDocumentEventName.TRANSPORT_MANIFEST,
     BoldDocumentEventName.WEIGHING,
   ],
-  input: ROOT_DOCUMENT_CRITERIA,
+  input: BOLD_ROOT_DOCUMENT_CRITERIA,
   name: 'Privacy Flags',
   slug: 'privacy-flags',
   version: '1.0.0',

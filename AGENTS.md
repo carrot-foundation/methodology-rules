@@ -87,7 +87,7 @@ Unbound rule execution retrieves and stages document snapshots only through Smau
 ## Technology Stack
 
 - **Monorepo**: Nx 22.6.1 workspace with pnpm 10.18.3
-- **Node**: 22.15.0 (see `.nvmrc`)
+- **Node**: 24.14.1 (see `.nvmrc`)
 - **TypeScript**: 5.9.3 with strict mode
 - **Runtime**: AWS Lambda (Node.js)
 - **Testing**: Vitest 4.1.0 with @vitest/coverage-v8
@@ -346,7 +346,7 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 ## Important Notes
 
 - **Package Manager**: pnpm ONLY (enforced by `preinstall` script)
-- **Node Version**: 22.15.0 (check `.nvmrc`)
+- **Node Version**: 24.14.1 (check `.nvmrc`)
 - **Husky Hooks**: Git hooks for pre-commit linting via lint-staged
 - **Cacheable Operations**: `build-lambda`, `test`, `lint`, `ts`, `package-lambda`
 - **Remote Cache**: S3 bucket `carrot-nx-cache` (us-east-1)

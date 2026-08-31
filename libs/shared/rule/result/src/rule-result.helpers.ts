@@ -59,7 +59,9 @@ export const mapToRuleOutput = (
     resultStatus,
   });
 
-export const signRequest = async (input: SignRequestInput) =>
+export const signRequest = async (
+  input: SignRequestInput,
+): ReturnType<typeof signAwsHttpRequest> =>
   signAwsHttpRequest(input, getAwsRegion(), provideSmaugApiCredentials());
 
 export const reportRuleResults = async (

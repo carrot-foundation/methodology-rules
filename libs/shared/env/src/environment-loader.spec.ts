@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 import dotenv from 'dotenv';
 import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -11,6 +12,7 @@ describe('loadEnvironment', () => {
   const originalDotenvKey = process.env['DOTENV_KEY'];
   let environmentDirectory: string;
   let environmentFile: string;
+  let fileAuditUrl: string;
   let missingEnvironmentFile: string;
 
   beforeAll(async () => {
@@ -19,7 +21,8 @@ describe('loadEnvironment', () => {
     );
     environmentFile = path.join(environmentDirectory, '.env');
     missingEnvironmentFile = path.join(environmentDirectory, 'missing.env');
-    await writeFile(environmentFile, 'AUDIT_URL=https://file.example\n');
+    fileAuditUrl = faker.internet.url();
+    await writeFile(environmentFile, `AUDIT_URL=${fileAuditUrl}\n`);
   });
 
   afterEach(() => {
@@ -85,19 +88,21 @@ describe('loadEnvironment', () => {
   });
 
   it('should preserve an explicit shell value', () => {
-    process.env['AUDIT_URL'] = 'https://shell.example';
+    const shellAuditUrl = faker.internet.url();
+
+    process.env['AUDIT_URL'] = shellAuditUrl;
 
     loadEnvironment(environmentFile);
 
-    expect(process.env['AUDIT_URL']).toBe('https://shell.example');
+    expect(process.env['AUDIT_URL']).toBe(shellAuditUrl);
   });
 
   it('should override a shell value when requested', () => {
-    process.env['AUDIT_URL'] = 'https://shell.example';
+    process.env['AUDIT_URL'] = faker.internet.url();
 
     loadEnvironment(environmentFile, { override: true });
 
-    expect(process.env['AUDIT_URL']).toBe('https://file.example');
+    expect(process.env['AUDIT_URL']).toBe(fileAuditUrl);
   });
 
   it('should reject a missing requested environment file', () => {

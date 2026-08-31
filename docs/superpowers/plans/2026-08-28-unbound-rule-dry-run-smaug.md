@@ -174,7 +174,13 @@ const toWorkflowDocument = (
   snapshot: ApiDocumentSnapshotEntity,
   expectedDataSetName: DataSetName,
 ): MethodologyExecutionWorkflowDocument<PalantirFullDocument> => {
-  const document = PalantirFullDocumentSchema.parse(snapshot.document);
+  const validation = PalantirFullDocumentSchema.safeParse(snapshot.document);
+  if (!validation.success) {
+    throw new Error('Invalid stored document for local dry-run.', {
+      cause: validation.error,
+    });
+  }
+  const document = validation.data;
   if (document.dataSetName !== expectedDataSetName) throw new LocalDryRunDataSetMismatchError();
   return { ...snapshot, document, documentId: snapshot.documentId };
 };
