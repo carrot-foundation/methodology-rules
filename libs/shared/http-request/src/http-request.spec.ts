@@ -45,17 +45,33 @@ describe('request helpers', () => {
       );
     });
 
-    it('should resolve a protocol-relative URL against its base URL', async () => {
+    it('should reject a protocol-relative URL when Axios cannot send it', async () => {
+      await expect(
+        httpRequest({
+          baseURL: 'https://smaug.example',
+          method: 'GET',
+          url: '//api.example/data',
+        }),
+      ).rejects.toThrow('Invalid URL');
+
+      expect(mockedSignRequest).not.toHaveBeenCalled();
+      expect(mockedAxios).not.toHaveBeenCalled();
+    });
+
+    it('should combine an absolute URL when allowAbsoluteUrls is false', async () => {
       mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
 
       await httpRequest({
+        allowAbsoluteUrls: false,
         baseURL: 'https://smaug.example',
         method: 'GET',
-        url: '//api.example/data',
+        url: 'https://api.example/data',
       });
 
       expect(mockedSignRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ url: new URL('https://api.example/data') }),
+        expect.objectContaining({
+          url: new URL('https://smaug.example/https://api.example/data'),
+        }),
         'us-east-1',
         undefined,
       );

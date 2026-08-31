@@ -308,7 +308,7 @@ rtk git commit -m "fix(aws-http): reuse assumed credentials"
 
 **Interfaces:**
 - Consumes: `--env-file <path>` from `process.argv` and pre-existing shell variables.
-- Produces: side-effect-free `loadEnvironment(path?: string, options?: { override?: boolean }): void` from `@carrot-fndn/shared/env`, called before importing the shared CLI runtime, commands, logging, or auth configuration.
+- Produces: process-wide bootstrap `loadEnvironment(path?: string, options?: { override?: boolean }): void` from `@carrot-fndn/shared/env`, which writes `process.env` before importing the shared CLI runtime, commands, logging, or auth configuration.
 
 - [ ] **Step 1: Write failing precedence and import-order tests**
 

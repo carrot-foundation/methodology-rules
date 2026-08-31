@@ -17,27 +17,30 @@ export interface HttpRequestOptions {
 }
 
 const isAbsoluteUrl = (url: string): boolean =>
-  url.startsWith('//') || URL.canParse(url);
+  /^([a-z][a-z\d+\-.]*:)?\/\//i.test(url);
 
 const resolveRequestUrl = ({
+  allowAbsoluteUrls,
   baseURL,
   url,
-}: Pick<AxiosRequestConfig, 'baseURL' | 'url'>): URL => {
+}: Pick<AxiosRequestConfig, 'allowAbsoluteUrls' | 'baseURL' | 'url'>): URL => {
   const requestUrl = url ?? baseURL;
 
   if (!isNonEmptyString(requestUrl)) {
     throw new Error('Request URL is required');
   }
 
-  if (url?.startsWith('//') === true && baseURL !== undefined) {
-    return new URL(url, baseURL);
+  if (
+    baseURL !== undefined &&
+    url !== undefined &&
+    (!isAbsoluteUrl(url) || allowAbsoluteUrls === false)
+  ) {
+    return new URL(
+      `${baseURL.replace(/\/?\/$/, '')}/${url.replace(/^\/+/, '')}`,
+    );
   }
 
-  if (baseURL === undefined || url === undefined || isAbsoluteUrl(url)) {
-    return new URL(requestUrl);
-  }
-
-  return new URL(`${baseURL.replace(/\/?\/$/, '')}/${url.replace(/^\/+/, '')}`);
+  return new URL(requestUrl);
 };
 
 const isUnsignedLocalhostRequest = (url: URL): boolean =>

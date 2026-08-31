@@ -139,6 +139,36 @@ describe('prepareDryRun', () => {
     expect(result).toEqual(mockResponse);
   });
 
+  it('should reject a malformed registered preparation response without response data', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
+    mockHttpRequest.mockResolvedValue({
+      data: {
+        auditDocumentId: 'audit-123',
+        auditedDocumentId: 'mass-id-456',
+        executionId: 'token=secret',
+        rules: [{ executionOrder: 'first' }],
+      },
+      status: 200,
+    } as never);
+
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'MassID',
+      }),
+    ).rejects.toThrow('Smaug dry-run preparation response is invalid');
+    await expect(
+      prepareDryRun(smaugUrl, {
+        documentId: 'mass-id-456',
+        methodologySlug: 'bold-carbon-organic',
+        rulesScope: 'MassID',
+      }),
+    ).rejects.not.toThrow('token=secret');
+  });
+
   it('should pass optional ruleSlug when provided', async () => {
     const credentials = vi.fn();
 

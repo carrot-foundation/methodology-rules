@@ -10,12 +10,26 @@ import {
 } from '@carrot-fndn/shared/types';
 import { z } from 'zod';
 
-export interface DryRunPrepareResponse {
-  auditDocumentId: string;
-  auditedDocumentId: string;
-  executionId: string;
-  rules: DryRunPrepareRule[];
-}
+const DryRunPrepareIdentifierShape = {
+  auditDocumentId: DocumentIdSchema,
+  auditedDocumentId: DocumentIdSchema,
+  executionId: NonEmptyStringSchema,
+};
+
+const DryRunPrepareResponseSchema = z.object({
+  ...DryRunPrepareIdentifierShape,
+  rules: z.array(
+    z.object({
+      executionOrder: z.number(),
+      ruleId: z.string(),
+      ruleName: z.string(),
+      ruleScope: z.string(),
+      ruleSlug: z.string(),
+    }),
+  ),
+});
+
+export type DryRunPrepareResponse = z.infer<typeof DryRunPrepareResponseSchema>;
 
 export interface LocalRuleDryRunPrepareRequest {
   dataSetName: DataSetName;
@@ -26,9 +40,7 @@ export interface LocalRuleDryRunPrepareRequest {
 }
 
 const LocalRuleDryRunPrepareResponseSchema = z.strictObject({
-  auditDocumentId: DocumentIdSchema,
-  auditedDocumentId: DocumentIdSchema,
-  executionId: NonEmptyStringSchema,
+  ...DryRunPrepareIdentifierShape,
 });
 
 export type LocalRuleDryRunPrepareResponse = z.infer<
@@ -40,14 +52,6 @@ interface DryRunPrepareRequest {
   methodologySlug: string;
   ruleSlug?: string;
   rulesScope: string;
-}
-
-interface DryRunPrepareRule {
-  executionOrder: number;
-  ruleId: string;
-  ruleName: string;
-  ruleScope: string;
-  ruleSlug: string;
 }
 
 export const prepareDryRun = async (
@@ -72,7 +76,13 @@ export const prepareDryRun = async (
     );
   }
 
-  return response.data as DryRunPrepareResponse;
+  const result = DryRunPrepareResponseSchema.safeParse(response.data);
+
+  if (!result.success) {
+    throw new Error('Smaug dry-run preparation response is invalid');
+  }
+
+  return result.data;
 };
 
 export const prepareLocalRule = async (
