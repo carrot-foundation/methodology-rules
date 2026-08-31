@@ -1,6 +1,7 @@
 import {
   DocumentQueryCriteriaSchema,
   RELATED_DOCUMENT_CRITERIA,
+  ROOT_DOCUMENT_CRITERIA,
 } from './document-query.criteria';
 
 describe('DocumentQueryCriteriaSchema', () => {
@@ -8,6 +9,12 @@ describe('DocumentQueryCriteriaSchema', () => {
     expect(
       DocumentQueryCriteriaSchema.parse(RELATED_DOCUMENT_CRITERIA),
     ).toEqual(RELATED_DOCUMENT_CRITERIA);
+  });
+
+  it('should accept the explicit root-only criteria', () => {
+    expect(DocumentQueryCriteriaSchema.parse(ROOT_DOCUMENT_CRITERIA)).toEqual(
+      ROOT_DOCUMENT_CRITERIA,
+    );
   });
 
   it('should accept recursive non-empty document field values outside BOLD enums', () => {
