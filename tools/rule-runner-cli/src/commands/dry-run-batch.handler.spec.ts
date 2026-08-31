@@ -199,7 +199,7 @@ describe('handleDryRunBatch', () => {
     });
 
     expect(mockProcessBatch).toHaveBeenCalledWith(
-      expect.objectContaining({ concurrency: 3 }),
+      expect.objectContaining({ concurrency: 3, retainSuccesses: false }),
     );
   });
 

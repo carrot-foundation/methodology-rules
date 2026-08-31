@@ -9,12 +9,24 @@ interface BatchProcessorOptions<TItem, TSuccess> {
   onItemFailure?: (item: TItem, error: string) => void;
   onItemSuccess?: (item: TItem, result: TSuccess) => void;
   processItem: (item: TItem) => Promise<TSuccess>;
+  retainSuccesses?: boolean;
 }
 
 interface BatchResult<TItem, TSuccess> {
   failures: Array<{ error: string; item: TItem }>;
   successes: Array<{ item: TItem; result: TSuccess }>;
 }
+
+const retainSuccessfulResult = <TItem, TSuccess>(
+  successes: BatchResult<TItem, TSuccess>['successes'],
+  item: TItem,
+  result: TSuccess,
+  retainSuccesses: boolean,
+): void => {
+  if (retainSuccesses) {
+    successes.push({ item, result });
+  }
+};
 
 export const processBatch = async <TItem, TSuccess>(
   options: BatchProcessorOptions<TItem, TSuccess>,
@@ -26,6 +38,7 @@ export const processBatch = async <TItem, TSuccess>(
     onItemFailure,
     onItemSuccess,
     processItem,
+    retainSuccesses = true,
   } = options;
 
   if (
@@ -56,7 +69,7 @@ export const processBatch = async <TItem, TSuccess>(
       const item = batch[entryIndex]!;
 
       if (result.status === 'fulfilled') {
-        successes.push({ item, result: result.value });
+        retainSuccessfulResult(successes, item, result.value, retainSuccesses);
         onItemSuccess?.(item, result.value);
       } else {
         const error =
