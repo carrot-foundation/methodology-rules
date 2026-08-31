@@ -36,13 +36,17 @@ export const signRequest = async (
     headers['Content-Type'] = 'application/json';
   }
 
-  return signer.sign({
-    headers,
-    hostname: url.hostname,
-    method,
-    path: url.pathname,
-    protocol: 'https',
-    ...(query && { query }),
-    ...(isObject(body) && { body: JSON.stringify(body) }),
-  });
+  try {
+    return await signer.sign({
+      headers,
+      hostname: url.hostname,
+      method,
+      path: url.pathname,
+      protocol: 'https',
+      ...(query && { query }),
+      ...(isObject(body) && { body: JSON.stringify(body) }),
+    });
+  } catch {
+    throw new Error('Request signing failed');
+  }
 };
