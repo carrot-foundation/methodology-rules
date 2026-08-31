@@ -95,7 +95,7 @@ interface RelatedDocumentCriteria extends DocumentQueryCriteria {
 }
 ```
 
-Smaug rejects unsupported fields, malformed values, more than six nested criteria levels, more than 20 entries in one `relatedDocuments` array, or more than 250 staged documents including the target and synthetic audit. A 25-second cooperative deadline prevents new staging writes after expiry. Shared constants define these limits for validation, traversal, and tests.
+Smaug rejects unsupported fields, malformed values, more than six relationship edges from the top-level `input` to any nested criterion, more than 20 entries in one `relatedDocuments` array, more than 250 total criteria nodes, or more than 250 unique staged document identifiers including the target and synthetic audit. The top-level `input` is the first criteria node; every nested `parentDocument` or `relatedDocuments` entry adds one. Duplicate graph references count once toward the staged-document limit. The criteria-node check runs on the unknown input before the recursive schema parses it, so a syntactically valid but combinatorial request cannot consume unbounded synchronous validation work. A 25-second cooperative service deadline prevents new reads or staging writes after expiry. Shared constants define these limits for validation, traversal, and tests; the finite-depth schema is constructed explicitly because a self-recursive Zod schema does not impose a depth limit.
 
 `omit` affects the processor's iterator result. Smaug still collects and stages an omitted document and its requested descendants.
 
@@ -113,6 +113,8 @@ Smaug calls `DocumentApiService.findOneLatestSnapshot({ documentId })` once for 
 
 Smaug validates the stored document against `PalantirFullDocumentSchema` at its internal document-to-methodology boundary. The schema name describes the ingested shape; it creates no Palantir runtime dependency.
 
+Methodology Rules validates the staged payload against its own BOLD inbound schema when the local processor loads it. Smaug's storage validation does not claim that every stored Palantir document is processor-compatible. A document that satisfies Smaug's snapshot schema but not the processor's BOLD contract fails locally without posting a result; coordinated contract coverage proves the supported BOLD fixture across the staging and loader boundaries.
+
 Every related-document fetch uses `DocumentApiService.findOneLatestSnapshot({ documentId, versionDate: cutoff })`, validates the composed document and its dataset, and preserves the selected source snapshot's identifiers and dates in the staged workflow envelope. The request-local fetcher returns the pinned target and synthetic audit without refetching them. A document update arriving after target selection cannot enter the execution graph.
 
 An unvalidated document is eligible when its snapshot exists in Smaug. `DocumentApiService.findOneLatestSnapshot` does not depend on methodology registration or validation state, so snapshot existence and schema validity determine availability.
@@ -122,16 +124,16 @@ An unvalidated document is eligible when its snapshot exists in Smaug. `Document
 1. Validate the request, dataset, document identifier, rule slug, scope, and query bounds.
 2. Read the target's latest Smaug snapshot and establish its version date as the cutoff.
 3. Validate the target and verify `target.document.dataSetName` matches the request.
-4. Create an in-memory synthetic audit by cloning the complete target, replacing its identifier, setting its parent to the target, retaining only ACTOR events, and applying the dry-run audit subtype and type.
+4. Create an in-memory synthetic audit by cloning the complete target, replacing its document identifier, setting its parent to the target, retaining only ACTOR events, and applying the dry-run audit subtype and type. Its workflow envelope receives new document, snapshot, and deduplication identifiers plus one request-time creation/version timestamp; source snapshot envelopes remain unchanged.
 5. Validate the synthetic audit against the same document schema.
 6. Build a request-local `DocumentQueryService` whose fetcher returns the pinned audit and target and reads every other document from Smaug at or before the cutoff.
 7. Traverse the requested graph, validate every source snapshot and dataset, fail on missing required connections, deduplicate by document identifier, and enforce the staged-document limit including the synthetic audit.
-8. Preserve source snapshot metadata and validate every execution-workflow document before the first S3 write. Generate new snapshot and deduplication identifiers only for the synthetic audit.
+8. Preserve source snapshot metadata and validate every execution-workflow document before the first S3 write. Only the synthetic audit receives generated workflow metadata.
 9. Stage all documents under `<executionId>/documents/`, tagged `dry-run=true`.
-10. If the deadline expires or a write fails, await any in-flight write, delete every object written by this request, and return an error. The API task role has narrowly resource-scoped `s3:DeleteObject` permission for this cleanup; S3 does not support an existing-object-tag condition on `DeleteObject`.
+10. Each successful write returns its S3 version identifier. If the deadline expires or a write fails, await any in-flight write, permanently delete every exact version written by this request, and return an error. When cleanup succeeds, rethrow the preparation failure. When cleanup also fails, return an `AggregateError` whose `cause` is the preparation failure and whose errors are the cleanup failures. The API task role has a dedicated statement granting `s3:DeleteObject` and `s3:DeleteObjectVersion` on the methodology-executions bucket object ARN; S3 does not support an existing-object-tag condition on these deletion actions.
 11. Return the preparation identifiers only after all writes succeed.
 
-A single cooperative 25-second deadline covers snapshot reads, traversal, validation, and staging. Every awaited operation is followed by a deadline check, and no new write begins after expiry. An in-flight S3 request is allowed to settle so cleanup can remove any object it created; the endpoint never returns success after the deadline. Preparation creates a fresh execution on every call because local processor code and criteria can change independently of snapshots. The bucket lifecycle expires dry-run objects after seven days and noncurrent versions after one day.
+Request body parsing and strict criteria validation run before the service deadline and are bounded by the HTTP body limit plus the criteria depth, fan-out, and total-node caps. A single cooperative 25-second service deadline then covers snapshot reads, traversal, document/workflow validation, and staging. Every awaited operation is followed by a deadline check, and no new write begins after expiry. An in-flight S3 request is allowed to settle so cleanup can remove the exact version it created; the endpoint never returns success after the deadline. Preparation creates a fresh execution on every call because local processor code and criteria can change independently of snapshots. The bucket lifecycle expires successful dry-run objects after seven days and noncurrent versions after one day.
 
 ## CLI Flow
 
@@ -198,14 +200,14 @@ The CLI never executes the processor after preparation failure. Explicit local s
 - Traverse root-only, parent, related, omitted, and nested criteria.
 - Fail on missing required connections and graph limits without writing.
 - Validate and deduplicate the complete graph before staging.
-- Delete successful writes after a later write fails.
+- Delete successful writes after a later write fails, and preserve both the preparation and cleanup failures when deletion fails.
 - Prove the local dry-run service and fetcher have no direct Palantir SDK call or import; unrelated methodology-module Palantir integrations remain unchanged.
 - Preserve registered dry-run behavior.
 - Verify the IAM-protected proxy and invocation-role policy.
 
 ### End-to-end evidence
 
-The implementation is complete only after tests demonstrate a successful unvalidated-snapshot preparation, missing-snapshot failure without a Palantir call, cutoff exclusion of a later related snapshot, required-relationship failure at the cutoff, cleanup after partial staging, and a successful registered dry run.
+The implementation is complete only after tests demonstrate a successful unvalidated-snapshot preparation through the real local Nest/Fastify route, missing-snapshot failure without a Palantir call, cutoff exclusion of a later related snapshot, required-relationship failure at the cutoff, cleanup after partial staging, and a successful registered dry run.
 
 After deployment, an operator runs a root-only unbound processor against a real TEST MassID snapshot, a processor that traverses a related snapshot, a registered dry run, a known-invalid case, an accepted SigV4 request using the deployed invocation role, and a rejected control request using the base SSO role.
 
@@ -213,9 +215,9 @@ Production identifiers and participant data stay outside committed tests, fixtur
 
 ## Delivery Boundaries
 
-The feature requires coordinated changes in Smaug and Methodology Rules only. Palantir requires no feature or deployment change. Independent Palantir documentation and architecture checks enforce the content-agnostic boundary but do not participate in the runtime flow.
+The runtime feature requires coordinated changes in Smaug and Methodology Rules only. Palantir requires no feature or deployment change. An independent Palantir documentation and architecture-check pull request enforces the content-agnostic boundary but does not participate in the runtime flow.
 
-The coordinated delivery includes `docs/superpowers/rcas/2026-08-30-unbound-rule-dry-run-architecture.md`. The ship controller owns its final evidence pass after all three pull requests exist; every corrective action maps to a descriptive PR, implementation or documentation path, and verification result.
+The coordinated delivery includes `docs/superpowers/rcas/2026-08-30-unbound-rule-dry-run-architecture.md`: Smaug and Methodology Rules carry the runtime feature, while the independent Palantir pull request carries only the platform-boundary guardrail. The ship controller owns the final evidence pass after those three pull requests exist; every corrective action maps to a descriptive pull request, implementation or documentation path, and verification result.
 
 Smaug deploys before the Methodology Rules release. The production TEST-dataset run is operator-gated. Pull-request merge and deployment remain operator-controlled.
 
