@@ -111,6 +111,9 @@ describe('prepareDryRun', () => {
   });
 
   it('should call Smaug dry-run prepare endpoint', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
     mockHttpRequest.mockResolvedValue({ data: mockResponse } as never);
 
     const result = await prepareDryRun(smaugUrl, {
@@ -119,21 +122,27 @@ describe('prepareDryRun', () => {
       rulesScope: 'MassID',
     });
 
-    expect(mockHttpRequest).toHaveBeenCalledWith({
-      baseURL: smaugUrl,
-      data: {
-        documentId: 'mass-id-456',
-        methodologySlug: 'bold-carbon-organic',
-        rulesScope: 'MassID',
+    expect(mockHttpRequest).toHaveBeenCalledWith(
+      {
+        baseURL: smaugUrl,
+        data: {
+          documentId: 'mass-id-456',
+          methodologySlug: 'bold-carbon-organic',
+          rulesScope: 'MassID',
+        },
+        method: 'POST',
+        url: '/methodologies/dry-run/prepare',
       },
-      method: 'POST',
-      url: '/methodologies/dry-run/prepare',
-    });
+      { credentials },
+    );
 
     expect(result).toEqual(mockResponse);
   });
 
   it('should pass optional ruleSlug when provided', async () => {
+    const credentials = vi.fn();
+
+    mockProvideSmaugApiCredentials.mockReturnValue(credentials);
     mockHttpRequest.mockResolvedValue({ data: mockResponse } as never);
 
     await prepareDryRun(smaugUrl, {
@@ -149,6 +158,7 @@ describe('prepareDryRun', () => {
           ruleSlug: 'document-manifest-data',
         }),
       }),
+      { credentials },
     );
   });
 

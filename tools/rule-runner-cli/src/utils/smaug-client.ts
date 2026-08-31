@@ -56,12 +56,15 @@ export const prepareDryRun = async (
 ): Promise<DryRunPrepareResponse> => {
   logger.info('Calling Smaug dry-run prepare');
 
-  const response = await httpRequest({
-    baseURL: smaugUrl,
-    data: request,
-    method: 'POST',
-    url: '/methodologies/dry-run/prepare',
-  });
+  const response = await httpRequest(
+    {
+      baseURL: smaugUrl,
+      data: request,
+      method: 'POST',
+      url: '/methodologies/dry-run/prepare',
+    },
+    { credentials: provideSmaugApiCredentials() },
+  );
 
   if (!response || response.status >= 400) {
     throw new Error(

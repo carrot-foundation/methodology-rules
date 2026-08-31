@@ -11,7 +11,7 @@ import {
   getSourceCodeUrl,
   getSourceCodeVersion,
 } from '@carrot-fndn/shared/env';
-import { logger } from '@carrot-fndn/shared/helpers';
+import { formatHttpStatus, logger } from '@carrot-fndn/shared/helpers';
 import {
   type RuleInput,
   type RuleOutput,
@@ -80,9 +80,7 @@ export const reportRuleResults = async (
 
     if (!response.ok) {
       throw new Error(
-        `Failed to report rule results: status ${
-          response.status
-        }. Response body: ${await response.text()}`,
+        `Failed to report rule results: status ${formatHttpStatus(response.status)}`,
       );
     }
   } catch (error) {

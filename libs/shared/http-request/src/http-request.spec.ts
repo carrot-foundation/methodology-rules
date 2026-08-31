@@ -39,6 +39,28 @@ describe('request helpers', () => {
       );
     });
 
+    it('should reject a request without a URL', async () => {
+      await expect(httpRequest({ method: 'GET' })).rejects.toThrow(
+        'Request URL is required',
+      );
+    });
+
+    it('should resolve a protocol-relative URL against its base URL', async () => {
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://smaug.example',
+        method: 'GET',
+        url: '//api.example/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ url: new URL('https://api.example/data') }),
+        'us-east-1',
+        undefined,
+      );
+    });
+
     it('should make a successful request', async () => {
       const mockResponse = { data: 'success' };
       const input = { baseURL: faker.internet.url(), method: 'GET' };
@@ -106,6 +128,53 @@ describe('request helpers', () => {
         expect.not.objectContaining({
           headers: expect.objectContaining({ 'X-Signed': 'true' }),
         }),
+      );
+    });
+
+    it('should sign an HTTPS localhost request', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://localhost:3000',
+        method: 'POST',
+        url: '/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledOnce();
+    });
+
+    it('should sign an external hostname containing localhost', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://localhost.attacker.example',
+        method: 'POST',
+        url: '/data',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledOnce();
+    });
+
+    it('should sign the normalized path for a trailing base URL slash', async () => {
+      mockedAxios.mockResolvedValue({});
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://smaug.example/',
+        method: 'POST',
+        url: '/methodologies/dry-run/prepare-local-rule',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: new URL(
+            'https://smaug.example/methodologies/dry-run/prepare-local-rule',
+          ),
+        }),
+        'us-east-1',
+        undefined,
       );
     });
 

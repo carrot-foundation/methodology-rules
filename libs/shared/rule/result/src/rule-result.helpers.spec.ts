@@ -195,18 +195,47 @@ describe('reportRuleResults', () => {
     await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
   });
 
-  it('should throw error when response code is not ok', async () => {
+  it('should exclude a failed response body from errors and logs', async () => {
+    const responseSecret = 'fictional-secret-response-body';
     const ruleOutput = {
       ...stubRuleOutput(),
       responseUrl: faker.internet.url(),
       resultContent: { [faker.string.sample()]: faker.string.sample() },
     };
+    const loggerErrorSpy = vi
+      .spyOn(logger, 'error')
+      .mockImplementation(() => undefined);
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
-      new Response(null, { status: 400 }),
+      new Response(responseSecret, { status: 400 }),
     );
 
-    await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
+    let error: unknown;
+
+    try {
+      await reportRuleResults(ruleOutput);
+    } catch (caughtError: unknown) {
+      error = caughtError;
+    }
+
+    expect(error).toBeInstanceOf(Error);
+
+    const errorMessage = error instanceof Error ? error.message : '';
+
+    expect(errorMessage).toBe('Failed to report rule results: status 400');
+    expect(errorMessage).not.toContain(responseSecret);
+    expect(JSON.stringify(loggerErrorSpy.mock.calls)).not.toContain(
+      responseSecret,
+    );
+
+    const loggedError = loggerErrorSpy.mock.calls[0]?.[0];
+
+    expect(loggedError).toBeInstanceOf(Error);
+
+    const loggedErrorMessage =
+      loggedError instanceof Error ? loggedError.message : '';
+
+    expect(loggedErrorMessage).not.toContain(responseSecret);
 
     expect(fetch).toHaveBeenCalled();
   });

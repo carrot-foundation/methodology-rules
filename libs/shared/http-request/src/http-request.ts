@@ -16,18 +16,44 @@ export interface HttpRequestOptions {
   logger?: Logger;
 }
 
+const isAbsoluteUrl = (url: string): boolean =>
+  url.startsWith('//') || URL.canParse(url);
+
+const resolveRequestUrl = ({
+  baseURL,
+  url,
+}: Pick<AxiosRequestConfig, 'baseURL' | 'url'>): URL => {
+  const requestUrl = url ?? baseURL;
+
+  if (!isNonEmptyString(requestUrl)) {
+    throw new Error('Request URL is required');
+  }
+
+  if (url?.startsWith('//') === true && baseURL !== undefined) {
+    return new URL(url, baseURL);
+  }
+
+  if (baseURL === undefined || url === undefined || isAbsoluteUrl(url)) {
+    return new URL(requestUrl);
+  }
+
+  return new URL(`${baseURL.replace(/\/?\/$/, '')}/${url.replace(/^\/+/, '')}`);
+};
+
+const isUnsignedLocalhostRequest = (url: URL): boolean =>
+  url.hostname === 'localhost' && url.protocol === 'http:';
+
 export const prepareHttpRequestConfig = async (
   config: AxiosRequestConfig,
   { credentials }: Pick<HttpRequestOptions, 'credentials'> = {},
 ): Promise<AxiosRequestConfig> => {
-  const url = new URL([config.baseURL, config.url].join(''));
-  const signedRequest = config.baseURL?.includes('localhost') !== true;
+  const url = resolveRequestUrl(config);
 
   if (!isNonEmptyString(config.method)) {
     throw new Error('Request method is required');
   }
 
-  if (!signedRequest) {
+  if (isUnsignedLocalhostRequest(url)) {
     return config;
   }
 

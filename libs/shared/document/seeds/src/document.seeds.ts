@@ -2,6 +2,7 @@ import type { Logger } from 'pino';
 
 import { getAuditUrl } from '@carrot-fndn/shared/env';
 import {
+  formatHttpStatus,
   isNonEmptyObject,
   logger as pinoLogger,
 } from '@carrot-fndn/shared/helpers';
@@ -103,7 +104,7 @@ export const seedDocument = async ({
 
   if (!isNonEmptyObject(response)) {
     throw new Error(
-      `Unexpected response from ${endpoint}: ${JSON.stringify(response)}`,
+      `Unexpected response from ${endpoint}: HTTP ${formatHttpStatus()}`,
     );
   }
 
@@ -114,7 +115,7 @@ export const seedDocument = async ({
     !isNonEmptyObject(responseData['document'])
   ) {
     throw new Error(
-      `Unexpected response shape from ${endpoint}: expected { document: { id: string } }, got ${JSON.stringify(responseData)}`,
+      `Unexpected response shape from ${endpoint}: HTTP ${formatHttpStatus(response['status'])}`,
     );
   }
 
