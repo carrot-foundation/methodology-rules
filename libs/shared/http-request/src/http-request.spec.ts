@@ -45,6 +45,22 @@ describe('request helpers', () => {
       );
     });
 
+    it('should resolve an empty URL to its base URL', async () => {
+      mockedSignRequest.mockResolvedValue(mockSignedRequestResponse);
+
+      await httpRequest({
+        baseURL: 'https://smaug.example',
+        method: 'GET',
+        url: '',
+      });
+
+      expect(mockedSignRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ url: new URL('https://smaug.example') }),
+        'us-east-1',
+        undefined,
+      );
+    });
+
     it('should reject a protocol-relative URL when Axios cannot send it', async () => {
       await expect(
         httpRequest({

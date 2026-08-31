@@ -24,7 +24,7 @@ const resolveRequestUrl = ({
   baseURL,
   url,
 }: Pick<AxiosRequestConfig, 'allowAbsoluteUrls' | 'baseURL' | 'url'>): URL => {
-  const requestUrl = url ?? baseURL;
+  const requestUrl = url === '' ? baseURL : (url ?? baseURL);
 
   if (!isNonEmptyString(requestUrl)) {
     throw new Error('Request URL is required');
@@ -33,6 +33,7 @@ const resolveRequestUrl = ({
   if (
     baseURL !== undefined &&
     url !== undefined &&
+    url !== '' &&
     (!isAbsoluteUrl(url) || allowAbsoluteUrls === false)
   ) {
     return new URL(
