@@ -1,30 +1,45 @@
 import { Command } from '@commander-js/extra-typings';
 
-const { importOrder, loadEnvironment, recordCommandImport, runProgram } =
-  vi.hoisted(() => {
-    const order: string[] = [];
+const {
+  importOrder,
+  loadEnvironment,
+  recordCommandImport,
+  recordRuntimeImport,
+  runProgram,
+} = vi.hoisted(() => {
+  const order: string[] = [];
 
-    return {
-      importOrder: order,
-      loadEnvironment: vi.fn(
-        (environmentFile: string, options?: { override?: boolean }) => {
-          order.push(
-            `environment:${environmentFile}:${String(options?.override)}`,
-          );
-        },
-      ),
-      recordCommandImport: (): void => {
-        if (!order.includes('commands')) {
-          order.push('commands');
-        }
+  return {
+    importOrder: order,
+    loadEnvironment: vi.fn(
+      (environmentFile: string, options?: { override?: boolean }) => {
+        order.push(
+          `environment:${environmentFile}:${String(options?.override)}`,
+        );
       },
-      runProgram: vi.fn().mockResolvedValue(undefined),
-    };
-  });
+    ),
+    recordCommandImport: (): void => {
+      if (!order.includes('commands')) {
+        order.push('commands');
+      }
+    },
+    recordRuntimeImport: (): void => {
+      order.push('runtime');
+    },
+    runProgram: vi.fn().mockResolvedValue(undefined),
+  };
+});
+
+vi.mock('@carrot-fndn/shared/env', () => ({
+  loadEnvironment,
+}));
 
 vi.mock('@carrot-fndn/shared/cli', () => ({
-  loadEnvironment,
-  runProgram,
+  get runProgram(): typeof runProgram {
+    recordRuntimeImport();
+
+    return runProgram;
+  },
 }));
 
 vi.mock('./commands/run.command', () => ({
@@ -66,6 +81,7 @@ describe('rule runner bootstrap', () => {
     await vi.waitFor(() => {
       expect(importOrder).toEqual([
         'environment:.env-files/.env.custom:false',
+        'runtime',
         'commands',
       ]);
     });
@@ -79,6 +95,7 @@ describe('rule runner bootstrap', () => {
     await vi.waitFor(() => {
       expect(importOrder).toEqual([
         'environment:.env-files/.env.custom:false',
+        'runtime',
         'commands',
       ]);
     });
@@ -97,20 +114,20 @@ describe('rule runner bootstrap', () => {
     await vi.waitFor(() => {
       expect(importOrder).toEqual([
         'environment:.env-files/.env.custom:false',
+        'runtime',
         'commands',
       ]);
     });
   });
 
-  it('should consume a following option as an environment file', async () => {
-    process.argv.push('--env-file', '--debug');
+  it.each([['--env-file'], ['--env-file='], ['--env-file', '--debug']])(
+    'should reject a malformed bootstrap argument %j',
+    async (...arguments_) => {
+      process.argv.push(...arguments_);
 
-    await import('./main');
-
-    await vi.waitFor(() => {
-      expect(importOrder).toEqual(['environment:--debug:false', 'commands']);
-    });
-  });
+      await expect(import('./main')).rejects.toThrow('--env-file');
+    },
+  );
 
   it('should stop scanning environment files after the sentinel', async () => {
     process.argv.push(
@@ -126,6 +143,7 @@ describe('rule runner bootstrap', () => {
     await vi.waitFor(() => {
       expect(importOrder).toEqual([
         'environment:.env-files/.env.custom:false',
+        'runtime',
         'commands',
       ]);
     });

@@ -1,5 +1,4 @@
-import { loadEnvironment, runProgram } from '@carrot-fndn/shared/cli';
-import { Command } from '@commander-js/extra-typings';
+import { loadEnvironment } from '@carrot-fndn/shared/env';
 
 const readOptionValue = (
   arguments_: readonly string[],
@@ -20,7 +19,13 @@ const readOptionValue = (
     }
 
     if (argument.startsWith(optionWithEquals)) {
-      optionValue = argument.slice(optionWithEquals.length);
+      const value = argument.slice(optionWithEquals.length);
+
+      if (value.length === 0) {
+        throw new Error(`${optionName} requires a path`);
+      }
+
+      optionValue = value;
       continue;
     }
 
@@ -30,9 +35,8 @@ const readOptionValue = (
 
     const nextArgument = arguments_.at(index + 1);
 
-    if (nextArgument === undefined) {
-      optionValue = undefined;
-      continue;
+    if (nextArgument === undefined || nextArgument.startsWith('-')) {
+      throw new Error(`${optionName} requires a path`);
     }
 
     optionValue = nextArgument;
@@ -47,6 +51,8 @@ const environmentFile = readOptionValue(process.argv, '--env-file');
 loadEnvironment(environmentFile, { override: false });
 
 void (async () => {
+  const { Command } = await import('@commander-js/extra-typings');
+  const { runProgram } = await import('@carrot-fndn/shared/cli');
   const { runCommand } = await import('./commands/run.command');
   const { dryRunCommand } = await import('./commands/dry-run.command');
 
