@@ -14,7 +14,7 @@ Palantir is a content-agnostic document and event platform. It exposes no method
 - Use Smaug's latest available document snapshot as the sole source of execution documents.
 - Pin one snapshot cutoff for the target and every traversed document.
 - Stage every parent and related document required by the processor's declarative query criteria.
-- Keep registered-rule and `--all-rules` dry runs compatible.
+- Keep registered processor-path and `--all-rules` dry runs compatible.
 - Use the deployed Smaug API invocation role and SigV4 authentication.
 - Keep credentials and source documents out of API and CLI logs.
 - Expire staged objects through the methodology-executions bucket lifecycle.
@@ -103,9 +103,9 @@ Smaug rejects unsupported fields, malformed values, more than six nested criteri
 
 `BaseRuleDefinition<TInput = never>` has an optional `input` property typed as `TInput`. BOLD rule definitions that query related documents use `BaseRuleDefinition<DocumentQueryCriteria>`.
 
-A related-document rule exports one criteria constant and uses it in both `ruleDefinition.input` for preparation and `DocumentQueryService.load({ criteria })` for execution. Root-only processors omit `input`; Smaug always stages the target and synthetic audit.
+Rules that use the common BOLD related-document graph import one shared criteria constant and use it in both `ruleDefinition.input` for preparation and `DocumentQueryService.load({ criteria })` for execution. A rule with a distinct graph owns one criteria constant and shares it between those same two consumers. Root-only processors omit `input`; Smaug always stages the target and synthetic audit.
 
-Explicit local mode accepts MassID processors with zero declared constructor arguments and complete static query criteria. Parameterized processors, including the no-conflicting-certificate-or-credit processor, are rejected. A separate factory or execution-descriptor design is required before those processors can run unbound.
+Explicit local mode accepts MassID processors that are constructible without application-specific arguments and have complete static query criteria. The loader uses the runtime constructor arity to reject processors with required positional arguments; constructors whose parameters all have defaults remain eligible. Parameterized processors, including the no-conflicting-certificate-or-credit processor, are rejected. A separate factory or execution-descriptor design is required before those processors can run unbound.
 
 ## Snapshot Consistency
 
@@ -143,13 +143,13 @@ rtk pnpm run-rule dry-run <processor-path> \
 
 The CLI loads the processor and colocated rule definition, rejects unsupported construction contracts, sends the document ID, expected dataset, MassID scope, rule slug, and optional criteria to Smaug, constructs one existing `RuleInput`, executes the processor exactly once, and prints the result locally.
 
-`--methodology-slug`, `--rules-scope`, `--rule-slug`, and `--all-rules` are invalid in explicit local mode. Batch mode loads the module once and creates one processor instance per document. Registered modes use the registered endpoint and its returned rules array.
+`--data-set-name` selects explicit local mode when a processor path is present. Without it, the existing processor-path plus `--methodology-slug` command remains registered mode. `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config` are invalid in explicit local mode; `--data-set-name` is invalid in registered mode. Batch mode loads the local module once and creates one processor instance per document. Registered modes use the registered endpoint and its returned rules array.
 
 ## Authentication
 
 `aws-vault exec smaug-prod` supplies the base SSO credentials. The CLI assumes the deployed API Gateway invocation role and signs the Smaug request with SigV4.
 
-The shared AWS HTTP credential provider serves rule-result reporting and dry-run preparation. `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` identifies the deployed role. The CLI loads `--env-file` before importing modules that read environment variables, while explicit shell variables retain precedence.
+The shared AWS HTTP credential provider serves rule-result reporting and dry-run preparation. `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` identifies the deployed role. The provider memoizes unexpired assumed credentials, coalesces concurrent refreshes, and refreshes before expiry instead of invoking STS for every signed request. The CLI loads `--env-file` through a side-effect-free bootstrap before importing modules that read environment variables, while explicit shell variables retain precedence. A missing or unreadable requested environment file fails closed without dotenv diagnostic output.
 
 The endpoint uses the IAM-protected API Gateway proxy. It introduces no Palantir credential, permission, SDK call, or network dependency.
 
@@ -183,6 +183,9 @@ The CLI never executes the processor after preparation failure. Explicit local s
 - Preserve registered, `--all-rules`, single-document, and batch behavior.
 - Redact authorization and AWS signing headers from HTTP failures.
 - Reuse the shared assume-role credential provider.
+- Reuse one unexpired assumed credential across sequential and concurrent signatures, then refresh before expiration.
+- Preserve the registered processor-path command as well as registered `--all-rules` mode.
+- Load a requested environment file before transitive environment consumers and fail closed when it cannot be loaded.
 
 ### Smaug
 

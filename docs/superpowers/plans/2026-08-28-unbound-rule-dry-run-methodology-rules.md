@@ -8,21 +8,27 @@
 
 **Tech Stack:** Node.js 24.14.1, TypeScript, Commander, Zod, AWS STS and SigV4, Axios, Vitest, Nx, pnpm 10.18.3
 
-**Spec:** `/Users/rafael/workspace/methodology-rules/docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
+**Spec:** `docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
 
 ## Global Constraints
 
 - Explicit local mode supports MassID processors only.
 - Explicit local mode rejects processors whose construction requires application-specific arguments.
-- Registered and `--all-rules` dry-runs remain behaviorally unchanged.
-- Root-only definitions omit `input`; related-document definitions share one criteria constant between definition and processor.
-- Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, and `--all-rules`.
+- Registered processor-path and `--all-rules` dry-runs remain behaviorally unchanged.
+- Root-only definitions omit `input`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
+- Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config`; registered mode rejects `--data-set-name`.
 - Single-document processor exceptions reject and exit nonzero; batch records errors and exits nonzero.
 - `aws-vault exec smaug-prod` provides base credentials; requests use assumed-role SigV4 credentials.
 - Shell environment variables override `--env-file`; configuration loads before modules that read it.
+- A requested environment file that is missing or unreadable fails closed without dotenv diagnostic output.
+- Sequential and concurrent signed requests reuse unexpired assumed credentials and refresh them before expiration.
 - Never persist fetched documents or log documents, credentials, signed headers, or full Axios request objects.
 - The CLI calls only Smaug's signed preparation API; it never calls Palantir or reads either service's database.
 - Production TEST-dataset end-to-end execution is an operator-gated task.
+
+## Phase 4 Execution Baseline
+
+The branch contains the core implementations described by Tasks 1–6. Phase 4 reviews Tasks 1 and 4 against their current implementation commits and records them complete without manufacturing a new commit when the review is clean. Tasks 2, 3, 5, and 6 add the failing regressions named below, fix the verified gaps in the current implementation, and commit only those corrective deltas. Tasks 7–9 are implementation or verification-owned work.
 
 ---
 
@@ -30,27 +36,35 @@
 
 **Files:**
 - Modify: `libs/shared/rule/types/src/rule-definition.types.ts`
+- Create: `libs/shared/methodologies/bold/io-helpers/src/document-query.criteria.ts`
+- Create: `libs/shared/methodologies/bold/io-helpers/src/document-query.criteria.spec.ts`
+- Modify: `libs/shared/methodologies/bold/io-helpers/src/index.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/geolocation-and-address-precision.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/geolocation-and-address-precision.processor.ts`
-- Test: `libs/methodologies/bold/rule-processors/mass-id/geolocation-and-address-precision/src/geolocation-and-address-precision.processor.spec.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/mass-id-sorting.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/mass-id-sorting.processor.ts`
 - Test: `libs/methodologies/bold/rule-processors/mass-id/mass-id-sorting/src/mass-id-sorting.processor.spec.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/participant-accreditations-and-verifications-requirements.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/participant-accreditations-and-verifications-requirements.processor.ts`
-- Test: `libs/methodologies/bold/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/participant-accreditations-and-verifications-requirements.processor.spec.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/prevented-emissions.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/prevented-emissions.processor.ts`
-- Test: `libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/prevented-emissions.processor.spec.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/weighing/src/weighing.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/weighing/src/weighing.processor.ts`
-- Test: `libs/methodologies/bold/rule-processors/mass-id/weighing/src/weighing.processor.spec.ts`
+- Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/geolocation-and-address-precision/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/mass-id-sorting/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/prevented-emissions/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/weighing/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-recycling/rule-processors/mass-id/geolocation-and-address-precision/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-recycling/rule-processors/mass-id/mass-id-sorting/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-recycling/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/rule-definition.ts`
+- Modify: `apps/methodologies/bold-recycling/rule-processors/mass-id/weighing/src/rule-definition.ts`
 
 **Interfaces:**
 - Consumes: `DocumentQueryCriteria` from `@carrot-fndn/shared/methodologies/bold/io-helpers`.
-- Produces: `BaseRuleDefinition<TInput = never>` with `input?: TInput`, plus one exported criteria constant per supported criteria-bearing processor, referenced by both its rule definition and processor.
+- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus one shared `RELATED_DOCUMENT_CRITERIA` referenced by each supported definition and processor.
 
-- [ ] **Step 1: Write a failing compile-time usage test**
+- [ ] **Step 1: Verify the existing compile-time usage and shared-criteria tests**
 
 ```typescript
 export const RELATED_DOCUMENT_CRITERIA = {
@@ -59,20 +73,25 @@ export const RELATED_DOCUMENT_CRITERIA = {
 } as const satisfies DocumentQueryCriteria;
 
 export const ruleDefinition = {
-  ...existingDefinition,
+  description:
+    'Validates sorting events in MassID documents, ensuring that gross weight, deducted weight, sorting factor, and event values are correctly calculated and formatted.',
+  events: [BoldDocumentEventName.SORTING],
   input: RELATED_DOCUMENT_CRITERIA,
-} satisfies BaseRuleDefinition<DocumentQueryCriteria>;
+  name: 'Mass Sorting',
+  slug: 'mass-id-sorting',
+  version: '1.0.0',
+} as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
 ```
 
-Apply the pattern to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Update each processor test to assert `DocumentQueryService.load` receives its exported criteria constant by identity or exact equality. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments.
+Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared constant and schema tests that validate the recursive shape. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments.
 
-- [ ] **Step 2: Run type-check and the rule test**
+- [ ] **Step 2: Run type-check and the rule tests**
 
 Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the five listed processor projects with `rtk pnpm nx run-many`.
 
-Expected: FAIL because `BaseRuleDefinition` has no generic input and the shared constant is absent.
+Expected: PASS on the existing Task 1 implementation.
 
-- [ ] **Step 3: Add the generic without a reverse methodology dependency**
+- [ ] **Step 3: Review the generic and shared constant for reverse dependencies**
 
 ```typescript
 export interface BaseRuleDefinition<TInput = never> {
@@ -84,7 +103,7 @@ export interface BaseRuleDefinition<TInput = never> {
 }
 ```
 
-Move each supported rule's existing criteria literal to one named constant, type it in the BOLD rule, and import it in both the definition and processor. Do not import BOLD types into `shared-rule-types`.
+Move the five byte-equivalent criteria literals to the shared BOLD IO helper, type the constant there, and import it in every definition and processor. Propagate the input generic through the application `RuleDefinition` declarations. Do not import BOLD types into `shared-rule-types`.
 
 - [ ] **Step 4: Run focused tests and type-check**
 
@@ -92,12 +111,9 @@ Run `rtk pnpm nx ts shared-rule-types`, then run `test` and `ts` for all five li
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Record the existing implementation evidence**
 
-```bash
-rtk git add libs/shared/rule/types libs/methodologies/bold/rule-processors/mass-id
-rtk git commit -m "feat(rule): declare dry-run input criteria"
-```
+Record `112944b8` (typed dry-run input criteria) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger; create no commit when the review is clean.
 
 ### Task 2: Move Assume-Role Credentials Into the Shared AWS HTTP Layer
 
@@ -108,46 +124,156 @@ rtk git commit -m "feat(rule): declare dry-run input criteria"
 - Test: `libs/shared/aws-http/src/aws-credentials.provider.spec.ts`
 - Modify: `libs/shared/rule/result/src/rule-result.helpers.ts`
 - Test: `libs/shared/rule/result/src/rule-result.helpers.spec.ts`
+- Modify: `libs/shared/rule/result/src/rule-result.schemas.ts`
+- Modify: `.vitest/config/vitest.e2e.base.config.ts`
+- Create: `.vitest/mocks/aws-http.e2e.mock.ts`
+- Modify: `libs/shared/testing/src/helpers/e2e.helpers.ts`
+- Test: `libs/shared/lambda/wrapper/src/lambda-wrapper.spec.ts`
+- Test: `libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/document-manifest-data.lambda.e2e.spec.ts`
 
 **Interfaces:**
 - Consumes: `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN`, AWS SDK `fromEnv`, and `STSClient`.
-- Produces: `provideSmaugApiCredentials(): AwsCredentialIdentityProvider`, shared by audit-result reporting and dry-run HTTP signing.
+- Produces: `provideSmaugApiCredentials(): AwsCredentialIdentityProvider`, shared by audit-result reporting and dry-run HTTP signing, with one expiration-aware cache and one in-flight refresh per role ARN.
 
 - [ ] **Step 1: Write failing provider tests**
 
 ```typescript
-it('should assume the configured API Gateway role from base credentials', async () => {
+it('should configure the API Gateway role lazily from base credentials', async () => {
   process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = validRoleArn;
-  await provideSmaugApiCredentials()();
-  expect(stsMock).toHaveReceivedCommandWith(AssumeRoleCommand, { RoleArn: validRoleArn });
+  const provider = provideSmaugApiCredentials();
+  expect(fromTemporaryCredentials).not.toHaveBeenCalled();
+  await provider();
+  expect(fromTemporaryCredentials).toHaveBeenCalledWith(expect.objectContaining({
+    masterCredentials: expect.any(Function),
+    params: { RoleArn: validRoleArn, RoleSessionName: 'methodology-rules-smaug-api' },
+  }));
 });
 
 it.each([undefined, 'arn:aws:iam::1234:role/aws-api-gateway-role', 'invalid'])(
   'should reject unusable role ARN %s before signing',
-  async (roleArn) => { /* set env and expect provider rejection */ },
+  async (roleArn) => {
+    if (roleArn === undefined) {
+      delete process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN;
+    } else {
+      process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = roleArn;
+    }
+
+    await expect(provideSmaugApiCredentials()()).rejects.toThrow();
+    expect(fromTemporaryCredentials).not.toHaveBeenCalled();
+  },
 );
+
+it('should coalesce concurrent resolution and reuse unexpired credentials', async () => {
+  process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = concurrentRoleArn;
+  const provider = provideSmaugApiCredentials();
+  const [first, second] = await Promise.all([provider(), provider()]);
+  expect(first).toBe(second);
+  expect(assumeRoleProvider).toHaveBeenCalledTimes(1);
+});
+
+it('should reuse unexpired credentials across sequential resolutions', async () => {
+  process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = sequentialRoleArn;
+  const provider = provideSmaugApiCredentials();
+  await provider();
+  await provider();
+  expect(assumeRoleProvider).toHaveBeenCalledTimes(1);
+});
+
+it('should coalesce refresh within five minutes of expiration', async () => {
+  process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = expiringRoleArn;
+  vi.setSystemTime('2026-08-30T12:00:00.000Z');
+  assumeRoleProvider.mockResolvedValue({
+    ...credentials,
+    expiration: new Date('2026-08-30T13:00:00.000Z'),
+  });
+  const provider = provideSmaugApiCredentials();
+  await provider();
+  vi.setSystemTime('2026-08-30T12:56:00.000Z');
+  await Promise.all([provider(), provider()]);
+  expect(assumeRoleProvider).toHaveBeenCalledTimes(2);
+});
+
+it('should retry after a rejected refresh', async () => {
+  process.env.SMAUG_API_GATEWAY_ASSUME_ROLE_ARN = rejectedRefreshRoleArn;
+  vi.setSystemTime('2026-08-30T12:00:00.000Z');
+  assumeRoleProvider
+    .mockResolvedValueOnce({
+      ...credentials,
+      expiration: new Date('2026-08-30T13:00:00.000Z'),
+    })
+    .mockRejectedValueOnce(new Error('STS unavailable'))
+    .mockResolvedValueOnce(refreshedCredentials);
+  const provider = provideSmaugApiCredentials();
+  await provider();
+  vi.setSystemTime('2026-08-30T12:56:00.000Z');
+  await expect(provider()).rejects.toThrow('STS unavailable');
+  await expect(provider()).resolves.toEqual(refreshedCredentials);
+  expect(assumeRoleProvider).toHaveBeenCalledTimes(3);
+});
 ```
 
-- [ ] **Step 2: Run focused tests and verify no shared provider exists**
+Use distinct valid role ARNs for `concurrentRoleArn`, `sequentialRoleArn`, `expiringRoleArn`, and `rejectedRefreshRoleArn` so the module-level provider map cannot leak cached state between cases. Restore real timers and the original environment after each test.
 
-Run: `rtk pnpm nx test shared-aws-http && rtk pnpm nx test shared-rule-result`
+- [ ] **Step 2: Run focused tests and verify the current cache is insufficient**
 
-Expected: FAIL because `provideSmaugApiCredentials` is absent.
+Run: `rtk pnpm nx test shared-aws-http`, then `rtk pnpm nx test shared-rule-result`.
+
+Expected: FAIL because the current factory validates the role eagerly and repeated provider calls invoke the underlying assume-role provider again.
 
 - [ ] **Step 3: Extract the existing STS implementation**
 
 ```typescript
-export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider => {
+const resolveSmaugApiCredentials: AwsCredentialIdentityProvider = async () => {
   const roleArn = requireValidSmaugApiRoleArn();
-  return fromTemporaryCredentials({
-    clientConfig: {},
-    masterCredentials: fromEnv(),
-    params: { RoleArn: roleArn, RoleSessionName: 'methodology-rules-smaug-api' },
-  });
+  const source =
+    providersByRoleArn.get(roleArn) ??
+    memoizeCredentials(
+      fromTemporaryCredentials({
+        clientConfig: {},
+        masterCredentials: fromEnv(),
+        params: { RoleArn: roleArn, RoleSessionName: 'methodology-rules-smaug-api' },
+      }),
+    );
+
+  providersByRoleArn.set(roleArn, source);
+  return source();
+};
+
+export const provideSmaugApiCredentials = (): AwsCredentialIdentityProvider =>
+  resolveSmaugApiCredentials;
+
+const memoizeCredentials = (
+  source: AwsCredentialIdentityProvider,
+): AwsCredentialIdentityProvider => {
+  const refreshWindowMilliseconds = 5 * 60_000;
+  let cached: Awaited<ReturnType<AwsCredentialIdentityProvider>> | undefined;
+  let inFlight: ReturnType<AwsCredentialIdentityProvider> | undefined;
+
+  return async () => {
+    const refreshAfter = Date.now() + refreshWindowMilliseconds;
+
+    if (
+      cached !== undefined &&
+      (cached.expiration === undefined || cached.expiration.getTime() > refreshAfter)
+    ) {
+      return cached;
+    }
+
+    inFlight ??= source().then((credentials) => {
+      cached = credentials;
+      return credentials;
+    });
+
+    try {
+      return await inFlight;
+    } finally {
+      inFlight = undefined;
+    }
+  };
 };
 ```
 
-Move, do not duplicate, the assume-role behavior from `rule-result.helpers.ts`. Make the signer accept the provider. Reject the documented placeholder account before any request.
+Move, do not duplicate, the assume-role behavior from `rule-result.helpers.ts`. Keep role validation and `fromTemporaryCredentials` creation inside the returned provider so a localhost request can bypass signing without requiring AWS configuration. Implement `memoizeCredentials` with one cached identity, one shared in-flight promise, and a five-minute refresh window based on `expiration`; identities without an expiration remain cached. Make the signer accept the provider. Reject malformed role ARNs before a signed request.
 
 - [ ] **Step 4: Verify both consumers**
 
@@ -158,22 +284,25 @@ Expected: PASS and `rg -n 'AssumeRoleCommand|fromTemporaryCredentials' libs/shar
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git add libs/shared/aws-http libs/shared/rule/result
-rtk git commit -m "refactor(aws-http): share Smaug assumed credentials"
+rtk git add .vitest/config/vitest.e2e.base.config.ts .vitest/mocks/aws-http.e2e.mock.ts libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/document-manifest-data.lambda.e2e.spec.ts libs/shared/aws-http libs/shared/lambda/wrapper/src/lambda-wrapper.spec.ts libs/shared/rule/result libs/shared/testing/src/helpers/e2e.helpers.ts
+rtk git commit -m "fix(aws-http): reuse assumed credentials"
 ```
 
 ### Task 3: Load Explicit Environment Files Before Runtime Imports
 
 **Files:**
 - Modify: `tools/rule-runner-cli/src/main.ts`
+- Create: `libs/shared/env/src/environment-loader.ts`
+- Create: `libs/shared/env/src/environment-loader.spec.ts`
+- Modify: `libs/shared/env/src/index.ts`
 - Modify: `libs/shared/cli/src/environment-loader.ts`
-- Test: `libs/shared/cli/src/environment-loader.spec.ts`
+- Delete: `libs/shared/cli/src/environment-loader.spec.ts`
 - Test: `tools/rule-runner-cli/src/main.spec.ts`
 - Modify: `.env-files/.env.test`
 
 **Interfaces:**
 - Consumes: `--env-file <path>` from `process.argv` and pre-existing shell variables.
-- Produces: `loadEnvironment(path: string, options?: { override?: boolean }): void`, called before importing commands or auth configuration.
+- Produces: side-effect-free `loadEnvironment(path?: string, options?: { override?: boolean }): void` from `@carrot-fndn/shared/env`, called before importing the shared CLI runtime, commands, logging, or auth configuration.
 
 - [ ] **Step 1: Write failing precedence and import-order tests**
 
@@ -189,36 +318,58 @@ it('should load the requested file before importing the command module', async (
   await import('./main');
   expect(importOrder).toEqual(['environment', 'commands']);
 });
+
+it('should reject a missing requested environment file', () => {
+  expect(() => loadEnvironment('missing.env')).toThrow('missing.env');
+});
+
+it.each([['--env-file'], ['--env-file='], ['--env-file', '--debug']])(
+  'should reject malformed bootstrap arguments %j',
+  async (...arguments_) => {
+    process.argv.push(...arguments_);
+    await expect(import('./main')).rejects.toThrow('--env-file');
+  },
+);
+
+it.each([missingEnvironmentFile, environmentDirectory])(
+  'should fail quietly when %s cannot be read as an environment file',
+  (environmentFile) => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    expect(() => loadEnvironment(environmentFile)).toThrow(environmentFile);
+    expect(log).not.toHaveBeenCalled();
+  },
+);
 ```
 
-- [ ] **Step 2: Run tests and verify `--env-file` is inert**
+- [ ] **Step 2: Run tests and verify the current bootstrap gaps**
 
-Run: `rtk pnpm nx test rule-runner-cli && rtk pnpm nx test shared-cli`
+Run: `rtk pnpm nx test rule-runner-cli`, then `rtk pnpm nx test shared-env`.
 
-Expected: FAIL because startup loads only the hardcoded default and command imports occur first.
+Expected: FAIL because the current shared CLI barrel imports environment consumers first, malformed option values are accepted, dotenv diagnostics are printed, and unreadable files do not fail closed.
 
 - [ ] **Step 3: Parse only the bootstrap flag, load, then dynamically import commands**
 
 ```typescript
-const envFile = readOptionValue(process.argv, '--env-file') ?? '.env-files/.env.test';
-loadEnvironment(envFile, { override: false });
-const { runRuleCommand } = await import('./commands');
-await runRuleCommand.parseAsync(process.argv);
+const environmentFile = readOptionValue(process.argv, '--env-file');
+loadEnvironment(environmentFile, { override: false });
+const { runProgram } = await import('@carrot-fndn/shared/cli');
+const { dryRunCommand } = await import('./commands/dry-run.command');
+const { runCommand } = await import('./commands/run.command');
 ```
 
-Update `.env-files/.env.test` with the verified Carrot-owned deployed role ARN, never a third-party identifier or secret. Do not print the value.
+Make `readOptionValue` reject an empty value, a missing value, or a following option token. In `loadEnvironment`, use dotenv with `quiet: true`, preserve shell precedence, and throw when dotenv returns an error. Create `environmentDirectory` with the test fixture setup so the unreadable-path case receives a real directory rather than relying on permissions. Keep the shared CLI path as a compatibility re-export of the shared environment owner. Update `.env-files/.env.test` with the verified Carrot-owned deployed role ARN, never a third-party identifier or secret. Do not print the value.
 
 - [ ] **Step 4: Run focused tests**
 
-Run: `rtk pnpm nx run-many -t test ts lint -p shared-cli,rule-runner-cli`
+Run: `rtk pnpm nx run-many -t test ts lint -p shared-env,shared-cli,rule-runner-cli`
 
 Expected: PASS and shell precedence is covered.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git add tools/rule-runner-cli libs/shared/cli .env-files/.env.test
-rtk git commit -m "fix(rule-runner): load requested environment before auth"
+rtk git add tools/rule-runner-cli libs/shared/env libs/shared/cli .env-files/.env.test
+rtk git commit -m "fix(rule-runner): fail closed during environment bootstrap"
 ```
 
 ### Task 4: Load an Explicit Processor and Colocated Rule Definition
@@ -229,9 +380,9 @@ rtk git commit -m "fix(rule-runner): load requested environment before auth"
 
 **Interfaces:**
 - Consumes: an explicit MassID processor directory.
-- Produces: `loadLocalRuleModule(processorPath: string): Promise<{ Processor: RuleProcessorConstructor; ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria | never>; rulesScope: 'MassID' }>`.
+- Produces: `loadLocalRuleModule(processorPath: string): Promise<{ Processor: RuleProcessorConstructor; ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria>; rulesScope: 'MassID' }>`.
 
-- [ ] **Step 1: Write failing module-loader tests**
+- [ ] **Step 1: Verify the existing module-loader tests and add the defaulted-constructor case**
 
 ```typescript
 await expect(loadLocalRuleModule(rootOnlyPath)).resolves.toMatchObject({
@@ -241,17 +392,21 @@ await expect(loadLocalRuleModule(rootOnlyPath)).resolves.toMatchObject({
 });
 await expect(loadLocalRuleModule(creditOrderPath)).rejects.toThrow('MassID');
 await expect(loadLocalRuleModule(parameterizedMassIdPath)).rejects.toThrow('constructor');
+await expect(loadLocalRuleModule(defaultedConstructorPath)).resolves.toMatchObject({
+  Processor: expect.any(Function),
+  rulesScope: 'MassID',
+});
 ```
 
-Also prove missing, duplicate, or malformed `*.rule-definition.ts` exports fail deterministically. Use isolated temporary fixtures for out-of-scope and parameterized-constructor rejection so negative cases do not depend on unrelated production processors. Keep a real `privacy-flags` module load as the positive end-to-end loader case.
+Also prove missing, duplicate, or malformed `*.rule-definition.ts` exports fail deterministically. Use isolated temporary fixtures for out-of-scope, required-constructor rejection, and defaulted-constructor acceptance so edge cases do not depend on unrelated production processors. Keep a real `privacy-flags` module load as the positive end-to-end loader case.
 
-- [ ] **Step 2: Run the loader tests and verify definition loading is absent**
+- [ ] **Step 2: Run the complete rule-runner test target**
 
-Run: `rtk pnpm nx test rule-runner-cli --testNamePattern='loadLocalRuleModule'`
+Run: `rtk pnpm nx test rule-runner-cli`
 
-Expected: FAIL because the loader returns only a processor constructor.
+Expected: PASS on the existing Task 4 implementation, including the new defaulted-constructor regression.
 
-- [ ] **Step 3: Implement one module load and structural scope validation**
+- [ ] **Step 3: Review the existing module load and structural scope validation**
 
 ```typescript
 export const loadLocalRuleModule = async (processorPath: string): Promise<LocalRuleModule> => {
@@ -269,16 +424,13 @@ Resolve exact filenames with the existing path conventions and validate the rule
 
 - [ ] **Step 4: Run focused tests and type-check**
 
-Run: `rtk pnpm nx test rule-runner-cli --testNamePattern='loadLocalRuleModule' && rtk pnpm nx ts rule-runner-cli`
+Run: `rtk pnpm nx test rule-runner-cli`, then `rtk pnpm nx ts rule-runner-cli`.
 
 Expected: PASS.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Record the existing implementation evidence**
 
-```bash
-rtk git add tools/rule-runner-cli/src/utils/processor-loader.ts tools/rule-runner-cli/src/utils/processor-loader.spec.ts
-rtk git commit -m "feat(rule-runner): load local rule definitions"
-```
+Record `19620d56` (local rule-definition loading) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger; create no commit when the review is clean.
 
 ### Task 5: Add the SigV4 Local Preparation Client
 
@@ -295,36 +447,41 @@ rtk git commit -m "feat(rule-runner): load local rule definitions"
 - [ ] **Step 1: Write failing request and redaction tests**
 
 ```typescript
-await client.prepareLocalRule(request);
-expect(http.post).toHaveBeenCalledWith(
-  '/methodologies/dry-run/prepare-local-rule',
-  request,
-  expect.objectContaining({ headers: expect.objectContaining({ authorization: expect.any(String) }) }),
+await prepareLocalRule(smaugUrl, request);
+expect(httpRequest).toHaveBeenCalledWith(
+  {
+    baseURL: smaugUrl,
+    data: request,
+    method: 'POST',
+    url: '/methodologies/dry-run/prepare-local-rule',
+  },
+  { credentials: expect.any(Function) },
 );
-
-expect(redactHttpError(errorWithSignedHeaders)).not.toContain('authorization');
-expect(redactHttpError(errorWithSignedHeaders)).not.toContain('x-amz-security-token');
 ```
 
-- [ ] **Step 2: Run tests and verify the endpoint/client path is absent**
+Add `http-request` tests proving full signed error configs and every case-insensitive `authorization` or `x-amz-*` header are excluded from logs. Add a localhost `baseURL` case proving the controlled fixture does not resolve the returned credential provider or invoke the signer, even when AWS role and credential variables are absent.
 
-Run: `rtk pnpm nx test rule-runner-cli && rtk pnpm nx test shared-http-request`
+- [ ] **Step 2: Run tests and verify the localhost bypass is absent**
 
-Expected: FAIL because `prepareLocalRule` and complete signed-header redaction do not exist.
+Run: `rtk pnpm nx test rule-runner-cli`, then `rtk pnpm nx test shared-http-request`.
+
+Expected: FAIL because the current full-URL client path still resolves AWS configuration for localhost instead of reaching the controlled fixture without signing.
 
 - [ ] **Step 3: Implement the signed call and narrow error logging**
 
 ```typescript
-const signedRequest = await signRequest({
-  credentials: provideSmaugApiCredentials(),
-  method: 'POST',
-  url,
-  body: JSON.stringify(request),
-});
-return httpRequest<LocalRuleDryRunPrepareResponse>(signedRequest);
+const response = await httpRequest(
+  {
+    baseURL: smaugUrl,
+    data: request,
+    method: 'POST',
+    url: '/methodologies/dry-run/prepare-local-rule',
+  },
+  { credentials: provideSmaugApiCredentials() },
+);
 ```
 
-Redact `authorization`, `x-amz-security-token`, `x-amz-date`, and all other `x-amz-*` headers case-insensitively. Log status, error code, and safe identifiers only; never serialize the Axios request/config object.
+Use `baseURL` plus a relative path for both Smaug preparation methods so the existing localhost fixture boundary is reachable without AWS credentials. Parse the local response through a strict Zod schema. Log status and error code only; never serialize the Axios request/config object or any signed headers.
 
 - [ ] **Step 4: Run focused project gates**
 
@@ -336,7 +493,7 @@ Expected: PASS.
 
 ```bash
 rtk git add tools/rule-runner-cli/src/utils/smaug-client.ts tools/rule-runner-cli/src/utils/smaug-client.spec.ts libs/shared/http-request
-rtk git commit -m "feat(rule-runner): sign local dry-run preparation"
+rtk git commit -m "fix(http-request): support local Smaug fixtures"
 ```
 
 ### Task 6: Split Explicit Local and Registered CLI Contracts
@@ -349,10 +506,14 @@ rtk git commit -m "feat(rule-runner): sign local dry-run preparation"
 - Test: `tools/rule-runner-cli/src/commands/dry-run.handler.spec.ts`
 - Test: `tools/rule-runner-cli/src/commands/dry-run-batch.handler.spec.ts`
 - Test: `tools/rule-runner-cli/src/utils/rule-input.builder.spec.ts`
+- Test: `tools/rule-runner-cli/src/commands/dry-run.command.spec.ts`
+- Create: `tools/rule-runner-cli/src/commands/local-log-redaction.spec.ts`
+- Create: `tools/rule-runner-cli/src/utils/local-result-output.ts`
+- Modify: `libs/shared/helpers/src/logger.helpers.ts`
 
 **Interfaces:**
 - Consumes: Tasks 4-5 local module/client and existing registered preparation response.
-- Produces: explicit command `pnpm run-rule dry-run <processor-path> --document-id <id> --data-set-name TEST`; registered command behavior remains unchanged.
+- Produces: explicit command `pnpm run-rule dry-run <processor-path> --document-id <id> --data-set-name TEST`; the legacy registered processor-path plus methodology command and registered `--all-rules` command remain unchanged.
 
 - [ ] **Step 1: Write failing local-mode and regression tests**
 
@@ -369,25 +530,36 @@ it.each(['methodologySlug', 'rulesScope', 'ruleSlug', 'allRules'] as const)(
   'should reject %s in explicit local mode',
   async (flag) => expect(runWithFlag(flag)).rejects.toThrow('cannot be used with an explicit processor path'),
 );
+
+it('should preserve the registered processor-path command', () => {
+  expect(createDryRunSelection(processorPath, registeredOptions, command)).toEqual({
+    allRules: false,
+    methodologySlug: registeredOptions.methodologySlug,
+    mode: 'registered',
+    processorPath,
+    ruleSlug: registeredOptions.ruleSlug,
+    rulesScope: registeredOptions.rulesScope,
+  });
+});
 ```
 
-Add tests that nested input is forwarded unchanged; explicit processor exceptions reject; registered responses still execute their `rules` array; batch loads the module once, constructs once per document, records errors, and sets nonzero exit state. Assert endpoint exclusivity explicitly: local mode never calls `prepareDryRun`, and registered mode never calls `prepareLocalRule`.
+Include `config` in the local forbidden-option table and reject `dataSetName` in registered mode. Add tests that nested input is forwarded unchanged; explicit processor exceptions reject; registered responses still execute their `rules` array; the registered path overrides automatic processor resolution; batch loads the local module once, constructs once per document, records errors, and sets nonzero exit state. Assert endpoint exclusivity explicitly: local mode never calls `prepareDryRun`, and registered mode never calls `prepareLocalRule`.
 
 - [ ] **Step 2: Run rule-runner tests and verify the old mandatory methodology contract fails them**
 
 Run: `rtk pnpm nx test rule-runner-cli`
 
-Expected: FAIL because `--methodology-slug` is mandatory and the handler expects a `rules` array for every mode.
+Expected: FAIL because the current selection treats every supplied processor path as explicit local mode and rejects the legacy registered processor-path command.
 
 - [ ] **Step 3: Implement an explicit discriminated mode**
 
 ```typescript
 type DryRunSelection =
-  | { mode: 'local'; dataSetName: DataSetName; processorPath: string }
-  | { mode: 'registered'; allRules: boolean; methodologySlug: string; ruleSlug?: string; rulesScope: string };
+  | { dataSetName: DataSetName; mode: 'local'; processorPath: string }
+  | { allRules: boolean; methodologySlug: string; mode: 'registered'; processorPath?: string; ruleSlug?: string; rulesScope: string };
 ```
 
-Build the selection once in the command, reject mixed flags, and pass it to handlers. Local mode calls `prepareLocalRule`, builds one `RuleInput`, instantiates the processor per document, and lets exceptions reject. Registered mode keeps the existing preparation and error-to-result behavior.
+Select local mode only when a processor path and `--data-set-name` are both present. A processor path plus `--methodology-slug` selects the legacy registered path; `--all-rules` selects registered discovery. Reject ambiguous or mixed flags and pass the discriminated selection to handlers. Local mode calls `prepareLocalRule`, builds one `RuleInput`, instantiates the processor per document, and lets exceptions reject. Registered mode keeps the existing preparation, optional processor-path override, and error-to-result behavior.
 
 Make `--methodology-slug` conditionally required in registered mode. Use Commander's option-value source so the default `rulesScope: 'MassID'` does not count as an explicitly supplied forbidden flag in local mode.
 
@@ -400,8 +572,8 @@ Expected: PASS, including registered regression tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git add tools/rule-runner-cli
-rtk git commit -m "feat(rule-runner): execute unbound MassID rules"
+rtk git add libs/shared/helpers/src/logger.helpers.ts tools/rule-runner-cli
+rtk git commit -m "fix(rule-runner): preserve registered processor paths"
 ```
 
 ### Task 7: Document the Smaug-Only Runtime Boundary
@@ -413,7 +585,6 @@ rtk git commit -m "feat(rule-runner): execute unbound MassID rules"
 - Modify: `tools/rule-runner-cli/src/commands/dry-run.command.spec.ts`
 - Regenerate: `AGENTS.md`
 - Regenerate: `CLAUDE.md`
-- Regenerate: `.cursor/rules/project-context.mdc`
 
 **Interfaces:**
 - Consumes: the completed local-rule CLI flow.
@@ -421,7 +592,7 @@ rtk git commit -m "feat(rule-runner): execute unbound MassID rules"
 
 - [ ] **Step 1: Add failing documentation and help assertions**
 
-Assert the document argument help is exactly `MassID document ID`, the README contains a local processor example, and the project context states that unbound execution retrieves and stages snapshots through Smaug without calling Palantir directly.
+Assert the document argument help is exactly `MassID document ID`, the README contains separate local and registered processor-path examples, and the project context states that unbound execution retrieves and stages snapshots through Smaug without calling Palantir directly.
 
 - [ ] **Step 2: Run the focused test and observe the stale wording**
 
@@ -442,7 +613,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit**
 
 ```bash
-rtk git add README.md .ai/PROJECT_CONTEXT.md tools/rule-runner-cli AGENTS.md CLAUDE.md .cursor/rules/project-context.mdc
+rtk git add README.md .ai/PROJECT_CONTEXT.md tools/rule-runner-cli AGENTS.md CLAUDE.md
 rtk git commit -m "docs(rule-runner): define Smaug dry-run boundary"
 ```
 
@@ -457,7 +628,7 @@ rtk git commit -m "docs(rule-runner): define Smaug dry-run boundary"
 
 - [ ] **Step 1: Derive the exact changed projects without `nx affected`**
 
-Map `rtk git diff --name-only origin/main...HEAD` to owning `project.json` files. The expected branch surface is 25 projects: nine application projects, six BOLD rule-processor libraries, `rule-runner-cli`, and nine shared libraries. If the diff changes, use the newly derived set rather than this snapshot.
+Map `rtk git diff --name-only origin/main...HEAD` to the nearest owning `project.json`. After the fail-closed bootstrap correction, the expected branch surface is 26 projects: nine application projects, six BOLD rule-processor libraries, `rule-runner-cli`, and ten shared libraries. If the diff changes, use the newly derived set rather than this snapshot.
 
 - [ ] **Step 2: Run all supported targets for the six changed processor libraries**
 
@@ -478,9 +649,9 @@ Use `rtk pnpm nx run-many -t test test-e2e ts lint -p <comma-separated-projects>
 
 Run those targets for the BOLD Carbon and BOLD Recycling application projects owning geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions where present, and weighing. Derive their exact Nx names from their `project.json` files before invoking `run-many`.
 
-- [ ] **Step 4: Run every supported gate for the ten changed tool/shared projects**
+- [ ] **Step 4: Run every supported gate for the eleven changed tool/shared projects**
 
-Verify targets from each `project.json`, then run their supported combination of `test`, `ts`, and `lint` for `rule-runner-cli`, `shared-aws-http`, `shared-cli`, `shared-helpers`, `shared-http-request`, `shared-lambda-wrapper`, `shared-methodologies-bold-io-helpers`, `shared-rule-result`, `shared-rule-types`, and `shared-testing`.
+Verify targets from each `project.json`, then run their supported combination of `test`, `ts`, and `lint` for `rule-runner-cli`, `shared-aws-http`, `shared-cli`, `shared-env`, `shared-helpers`, `shared-http-request`, `shared-lambda-wrapper`, `shared-methodologies-bold-io-helpers`, `shared-rule-result`, `shared-rule-types`, and `shared-testing`.
 
 - [ ] **Step 5: Run repository-level generated, formatting, and diff checks**
 
@@ -490,9 +661,9 @@ Run `rtk pnpm nx format:check`, `rtk pnpm ai:check`, and `rtk git diff --check`.
 
 Inspect `rtk git diff origin/main...HEAD --word-diff=porcelain` for proper nouns and production-like identifiers. Replace every third-party name or real identifier in docs, tests, fixtures, skills, comments, and commit messages with fictional data or placeholders.
 
-- [ ] **Step 7: Exercise both CLI modes locally**
+- [ ] **Step 7: Exercise all CLI selections locally**
 
-Run local-rule mode through the real CLI against a controlled Smaug HTTP fixture and verify the signed preparation request, one processor execution per document, and no audit-result submission. Run registered mode through the same CLI fixture and verify the existing preparation and multi-rule behavior remain intact.
+Create a disposable argument-free MassID processor fixture under the repository's normal processor path and a localhost HTTP server that records requests and returns identifier-only preparation responses. With AWS credential variables absent, invoke the real `rtk pnpm run-rule dry-run` command for explicit local mode, the legacy registered processor-path mode, and registered `--all-rules` mode. Require successful execution, the expected local or registered preparation route and request body, one processor execution per returned rule, no audit-result route, and no STS/AWS access. Delete the disposable fixture after the run. Unit tests remain the exact-byte SigV4 proof because localhost intentionally bypasses signing.
 
 - [ ] **Step 8: Record the post-deployment acceptance gate**
 
