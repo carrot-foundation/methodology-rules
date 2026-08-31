@@ -36,7 +36,7 @@ describe('buildRuleInput', () => {
       prepared: {
         auditDocumentId: 'synthetic-audit-123',
         auditedDocumentId: 'document-456',
-        executionId: 'dry-run/local-execution-789',
+        executionId: 'local-execution-789',
       },
     });
 

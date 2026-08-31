@@ -25,7 +25,7 @@ export const buildRuleInput = (
     'prepared' in options
       ? {
           documentId: options.prepared.auditDocumentId,
-          documentKeyPrefix: `${options.prepared.executionId}/documents`,
+          documentKeyPrefix: `dry-run/${options.prepared.executionId}/documents`,
           parentDocumentId: options.prepared.auditedDocumentId,
         }
       : options;
