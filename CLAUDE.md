@@ -234,7 +234,7 @@ pnpm build-lambda:all                  # nx run-many --target build-lambda
 pnpm create-rule
 
 # Run a rule processor locally
-pnpm run-rule -- <args>                # nx run rule-runner-cli:run -- <args>
+pnpm run-rule <args>                   # nx run rule-runner-cli:run -- <args>
 
 # Extract document data
 pnpm extract-document -- <args>        # nx run document-extractor-cli:run -- <args>

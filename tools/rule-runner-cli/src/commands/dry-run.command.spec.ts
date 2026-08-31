@@ -1,4 +1,6 @@
 import { Command } from '@commander-js/extra-typings';
+import fs from 'node:fs';
+import path from 'node:path';
 
 import type { DryRunOptions } from './dry-run.command';
 
@@ -150,5 +152,20 @@ describe('dryRunCommand', () => {
 
     expect(documentIdOption).toBeDefined();
     expect(documentIdOption?.description).toBe('MassID document ID');
+  });
+
+  it('should document executable local and registered processor-path commands', () => {
+    const readme = fs.readFileSync(
+      path.resolve(process.cwd(), '../../README.md'),
+      'utf8',
+    );
+
+    expect(readme).toContain(
+      'pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-flags --data-set-name TEST',
+    );
+    expect(readme).toContain(
+      'pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/document-manifest-data --methodology-slug bold-carbon-organic',
+    );
+    expect(readme).not.toContain('pnpm run-rule -- dry-run');
   });
 });
