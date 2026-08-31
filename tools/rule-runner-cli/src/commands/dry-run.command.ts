@@ -9,7 +9,7 @@ import {
 import path from 'node:path';
 
 import { handleDryRunBatch } from './dry-run-batch.handler';
-import { handleDryRun } from './dry-run.handler';
+import { handleDryRun, hasDryRunRuleFailure } from './dry-run.handler';
 
 export interface DryRunOptions {
   allRules: boolean;
@@ -152,6 +152,41 @@ export const createDryRunSelection = (
   };
 };
 
+export const handleDryRunCommand = async (
+  processorPath: string | undefined,
+  options: DryRunOptions,
+  command: OptionValueSourceReader,
+): Promise<void> => {
+  try {
+    const selection = createDryRunSelection(processorPath, options, command);
+
+    if (options.inputFile) {
+      await handleDryRunBatch(selection, options);
+
+      return;
+    }
+
+    const { documentId } = options;
+
+    if (!documentId) {
+      throw new Error(
+        'Single-document mode requires --document-id (-d). Use --input-file for batch processing.',
+      );
+    }
+
+    const result = await handleDryRun(selection, { ...options, documentId });
+
+    if (
+      selection.mode === 'local' &&
+      hasDryRunRuleFailure(result.ruleResults)
+    ) {
+      process.exitCode = 1;
+    }
+  } catch (error: unknown) {
+    handleCommandError(error, { verbose: options.debug });
+  }
+};
+
 export const dryRunCommand = new Command('dry-run')
   .description(
     'Run rule processors against an un-audited document (prepares S3 data via Smaug)',
@@ -214,34 +249,4 @@ export const dryRunCommand = new Command('dry-run')
   .option('--debug', 'Show detailed output', false)
   .option('--json', 'Output as JSON', false)
   .option('--no-cache', 'Disable textract cache')
-  .action(
-    async (
-      processorPath: string | undefined,
-      options: DryRunOptions,
-      command,
-    ) => {
-      try {
-        const selection = createDryRunSelection(
-          processorPath,
-          options,
-          command,
-        );
-
-        if (options.inputFile) {
-          await handleDryRunBatch(selection, options);
-        } else {
-          const { documentId } = options;
-
-          if (!documentId) {
-            throw new Error(
-              'Single-document mode requires --document-id (-d). Use --input-file for batch processing.',
-            );
-          }
-
-          await handleDryRun(selection, { ...options, documentId });
-        }
-      } catch (error: unknown) {
-        handleCommandError(error, { verbose: options.debug });
-      }
-    },
-  );
+  .action(handleDryRunCommand);

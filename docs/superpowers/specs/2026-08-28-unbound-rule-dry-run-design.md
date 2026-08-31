@@ -171,7 +171,7 @@ The endpoint uses the IAM-protected API Gateway proxy. It introduces no Palantir
 
 Preparation fails without a success response when the request is invalid, the target snapshot is unavailable, the stored dataset differs, a document fails schema validation, a required relationship is unavailable at the cutoff, a graph limit or deadline is exceeded, or staging or cleanup fails.
 
-The CLI never executes the processor after preparation failure. Explicit local single-document mode exits nonzero on preparation or processor failure. Batch mode records each document failure and exits nonzero after the batch. Registered mode retains its result-conversion behavior.
+The CLI never executes the processor after preparation failure. Explicit local single-document mode exits nonzero on preparation failure, a processor exception, or a normal `FAILED` rule output. Batch mode records each document failure and exits nonzero after the batch. Registered mode retains its result-conversion behavior.
 
 ## Verification
 

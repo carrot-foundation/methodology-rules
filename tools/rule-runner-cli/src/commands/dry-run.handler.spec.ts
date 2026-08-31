@@ -12,10 +12,30 @@ import { prepareDryRun, prepareLocalRule } from '../utils/smaug-client';
 import { createDryRunSelection } from './dry-run.command';
 import {
   handleDryRun,
+  hasDryRunRuleFailure,
   processLocalDryRunDocument,
   resolveDryRunEnvironment,
   resolveProcessorPath,
 } from './dry-run.handler';
+
+describe('hasDryRunRuleFailure', () => {
+  it.each([
+    { expected: true, statuses: ['failed'] as const },
+    { expected: true, statuses: ['error'] as const },
+    { expected: false, statuses: ['passed'] as const },
+    { expected: false, statuses: ['review_required'] as const },
+    { expected: true, statuses: ['passed', 'failed'] as const },
+  ])('should return $expected for $statuses', ({ expected, statuses }) => {
+    expect(
+      hasDryRunRuleFailure(
+        statuses.map((status) => ({
+          ruleSlug: 'local-rule',
+          status,
+        })),
+      ),
+    ).toBe(expected);
+  });
+});
 
 vi.mock('../utils/smaug-client', () => ({
   prepareDryRun: vi.fn(),

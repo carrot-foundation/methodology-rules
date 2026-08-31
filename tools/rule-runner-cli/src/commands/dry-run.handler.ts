@@ -43,6 +43,11 @@ export interface DryRunRuleResult {
   status: 'error' | 'failed' | 'passed' | 'review_required';
 }
 
+export const hasDryRunRuleFailure = (
+  ruleResults: DryRunRuleResult[],
+): boolean =>
+  ruleResults.some(({ status }) => status === 'error' || status === 'failed');
+
 export const resolveProcessorPath = (rule: {
   ruleScope: string;
   ruleSlug: string;

@@ -17,7 +17,7 @@
 - Registered processor-path and `--all-rules` dry-runs remain behaviorally unchanged.
 - Root-only definitions declare the shared empty `BOLD_ROOT_DOCUMENT_CRITERIA`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
 - Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config`; registered mode rejects `--data-set-name`.
-- Single-document processor exceptions reject and exit nonzero; batch records errors and exits nonzero.
+- Explicit local single-document preparation failures, processor exceptions, and normal `FAILED` outputs exit nonzero; batch records errors and exits nonzero.
 - `aws-vault exec smaug-prod` provides base credentials; requests use assumed-role SigV4 credentials.
 - Shell environment variables override `--env-file`; configuration loads before modules that read it.
 - A requested environment file that is missing or unreadable fails closed without dotenv diagnostic output.
@@ -558,7 +558,7 @@ it('should preserve the registered processor-path command', () => {
 });
 ```
 
-Include `config` in the local forbidden-option table and reject `dataSetName` in registered mode. Add tests that nested input is forwarded unchanged; explicit processor exceptions reject; registered responses still execute their `rules` array; the registered path overrides automatic processor resolution; batch loads the local module once, constructs once per document, records errors, and sets nonzero exit state. Assert endpoint exclusivity explicitly: local mode never calls `prepareDryRun`, and registered mode never calls `prepareLocalRule`.
+Include `config` in the local forbidden-option table and reject `dataSetName` in registered mode. Add tests that nested input is forwarded unchanged; explicit processor exceptions reject; normal explicit local `FAILED` outputs set nonzero exit state; registered responses still execute their `rules` array; the registered path overrides automatic processor resolution; batch loads the local module once, constructs once per document, records errors, and sets nonzero exit state. Assert endpoint exclusivity explicitly: local mode never calls `prepareDryRun`, and registered mode never calls `prepareLocalRule`.
 
 - [ ] **Step 2: Run rule-runner tests and verify the old mandatory methodology contract fails them**
 

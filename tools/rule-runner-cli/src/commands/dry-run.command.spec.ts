@@ -7,8 +7,25 @@ import type { DryRunOptions } from './dry-run.command';
 import {
   createDryRunSelection,
   dryRunCommand,
+  handleDryRunCommand,
   parseDataSetName,
 } from './dry-run.command';
+import { handleDryRun } from './dry-run.handler';
+
+vi.mock('./dry-run-batch.handler', () => ({
+  handleDryRunBatch: vi.fn(),
+}));
+
+vi.mock('./dry-run.handler', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+
+  return {
+    ...actual,
+    handleDryRun: vi.fn(),
+  };
+});
+
+const mockHandleDryRun = handleDryRun as vi.MockedFunction<typeof handleDryRun>;
 
 const baseOptions: DryRunOptions = {
   allRules: false,
@@ -158,6 +175,41 @@ describe('createDryRunSelection', () => {
 });
 
 describe('dryRunCommand', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.exitCode = undefined;
+  });
+
+  it('should set a nonzero exit code for a failed explicit local rule', async () => {
+    mockHandleDryRun.mockResolvedValue({
+      documentId: 'document-123',
+      ruleResults: [{ ruleSlug: 'local-rule', status: 'failed' }],
+    });
+
+    await handleDryRunCommand(
+      'libs/methodologies/bold/rule-processors/mass-id/local-rule',
+      { ...baseOptions, dataSetName: 'TEST' },
+      commandWithSources({ dataSetName: 'cli' }),
+    );
+
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should preserve a zero exit code for a failed registered rule', async () => {
+    mockHandleDryRun.mockResolvedValue({
+      documentId: 'document-123',
+      ruleResults: [{ ruleSlug: 'registered-rule', status: 'failed' }],
+    });
+
+    await handleDryRunCommand(
+      'libs/methodologies/bold/rule-processors/mass-id/registered-rule',
+      baseOptions,
+      commandWithSources({ methodologySlug: 'cli' }),
+    );
+
+    expect(process.exitCode).toBeUndefined();
+  });
+
   it('should describe the document ID as a MassID document ID', () => {
     const documentIdOption = dryRunCommand.options.find(
       (option) => option.long === '--document-id',

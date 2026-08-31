@@ -30,14 +30,19 @@ vi.mock('@carrot-fndn/shared/cli', async (importOriginal) => {
   };
 });
 
-vi.mock('./dry-run.handler', () => ({
-  loadRedactedLocalRuleModule: vi.fn(),
-  processDryRunDocument: vi.fn(),
-  processLocalDryRunDocument: vi.fn(),
-  resolveDryRunEnvironment: vi.fn().mockReturnValue({
-    smaugUrl: 'https://smaug.carrot.eco',
-  }),
-}));
+vi.mock('./dry-run.handler', async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+
+  return {
+    ...actual,
+    loadRedactedLocalRuleModule: vi.fn(),
+    processDryRunDocument: vi.fn(),
+    processLocalDryRunDocument: vi.fn(),
+    resolveDryRunEnvironment: vi.fn().mockReturnValue({
+      smaugUrl: 'https://smaug.carrot.eco',
+    }),
+  };
+});
 
 vi.mock('../utils/config-parser', () => ({
   parseConfig: vi.fn().mockReturnValue(undefined),
@@ -577,6 +582,25 @@ describe('handleDryRunBatch', () => {
       return Promise.resolve({
         failures: [],
         successes: [{ item: 'doc-1', result: failedResult }],
+      });
+    });
+
+    await handleDryRunBatch(registeredSelection, baseOptions);
+
+    expect(process.exitCode).toBe(1);
+  });
+
+  it('should set exit code 1 when there are only rule errors', async () => {
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+
+    const errorResult = makeDocumentResult('doc-1', [{ status: 'error' }]);
+
+    mockProcessBatch.mockImplementation((options) => {
+      options.onItemSuccess?.('doc-1', errorResult);
+
+      return Promise.resolve({
+        failures: [],
+        successes: [{ item: 'doc-1', result: errorResult }],
       });
     });
 

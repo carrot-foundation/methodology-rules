@@ -20,6 +20,7 @@ import {
 import { parseConfig } from '../utils/config-parser';
 import { toDryRunRuleResultLog } from '../utils/local-result-output';
 import {
+  hasDryRunRuleFailure,
   loadRedactedLocalRuleModule,
   processDryRunDocument,
   processLocalDryRunDocument,
@@ -90,6 +91,7 @@ export const handleDryRunBatch = async (
     documentId: string;
     ruleResult: DryRunRuleResult;
   }> = [];
+  const ruleResults: DryRunRuleResult[] = [];
 
   const { failures } = await processBatch<string, DryRunDocumentResult>({
     concurrency: options.concurrency,
@@ -103,6 +105,8 @@ export const handleDryRunBatch = async (
       logger.error(`Error [${documentId}]: ${error}`);
     },
     onItemSuccess: (_documentId, result) => {
+      ruleResults.push(...result.ruleResults);
+
       for (const ruleResult of result.ruleResults) {
         switch (ruleResult.status) {
           case 'error': {
@@ -233,7 +237,7 @@ export const handleDryRunBatch = async (
     await writeJsonLog(data, 'review-required');
   }
 
-  if (failures.length > 0 || failedCount > 0 || ruleErrorCount > 0) {
+  if (failures.length > 0 || hasDryRunRuleFailure(ruleResults)) {
     process.exitCode = 1;
   }
 };
