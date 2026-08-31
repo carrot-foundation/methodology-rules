@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24.13.1, TypeScript 5.9.3 compiler API, node:test, Nx, pnpm 10.28.2, GitHub Actions
 
-**Spec:** `/Users/rafael/workspace/methodology-rules/docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
+**Spec:** `docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
 
 ## Global constraints
 
@@ -18,6 +18,7 @@
 - Inspect route decorators and API feature-module ownership only. Never scan DTO fields, payloads, event metadata, fixtures, or presentation configuration.
 - Use the installed TypeScript compiler API; add no dependency.
 - Correct the complete duplicated Smaug Cursor adapter set instead of patching one file.
+- Before Task 4, set `CLOSED_ENDPOINT_WORKTREE` to the absolute path of the operator-supplied, unmodified closed endpoint worktree.
 - Never merge or deploy; stop at a merge-ready PR.
 
 ---
@@ -193,7 +194,7 @@ Expected: PASS.
 
 - [ ] **Step 3: Run the same checker against the closed-PR worktree**
 
-Use the checker's explicit `--repository-root` option against `/Users/rafael/workspace/palantir-worktrees/feat-methodology-execution-input-worker`.
+Use the checker's explicit `--repository-root` option against `$CLOSED_ENDPOINT_WORKTREE`.
 
 Expected: FAIL and identify the `:id/methodology-execution-input` route. This is the required detector red proof; do not modify the closed branch to manufacture it.
 
