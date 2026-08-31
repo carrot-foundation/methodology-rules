@@ -1,5 +1,6 @@
 import { processBatch } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { Command } from '@commander-js/extra-typings';
 import { readFile } from 'node:fs/promises';
 
 import type { DryRunOptions } from './dry-run.command';
@@ -9,6 +10,7 @@ import { writeJsonLog } from '../utils/batch-summary';
 import { createLocalRuleExecutionError } from '../utils/local-result-output';
 import { loadLocalRuleModule } from '../utils/processor-loader';
 import { handleDryRunBatch } from './dry-run-batch.handler';
+import { createDryRunSelection } from './dry-run.command';
 import {
   processDryRunDocument,
   processLocalDryRunDocument,
@@ -230,6 +232,42 @@ describe('handleDryRunBatch', () => {
         smaugUrl: 'https://smaug.carrot.eco',
       }),
     );
+  });
+
+  it('should preserve an explicit processor path in registered batch mode', async () => {
+    const processorPath =
+      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data';
+    const command = new Command('dry-run');
+
+    command.setOptionValueWithSource(
+      'methodologySlug',
+      'bold-carbon-organic',
+      'cli',
+    );
+    mockReadFile.mockResolvedValue(JSON.stringify(['doc-1']));
+    mockProcessDryRunDocument.mockResolvedValue(
+      makeDocumentResult('doc-1', [{ status: 'passed' }]),
+    );
+    mockProcessBatch.mockImplementation(async (options) => ({
+      failures: [],
+      successes: [
+        {
+          item: 'doc-1',
+          result: await options.processItem('doc-1'),
+        },
+      ],
+    }));
+
+    await handleDryRunBatch(
+      createDryRunSelection(processorPath, baseOptions, command),
+      baseOptions,
+    );
+
+    expect(mockProcessDryRunDocument).toHaveBeenCalledWith(
+      'doc-1',
+      expect.objectContaining({ processorPath }),
+    );
+    expect(mockProcessLocalDryRunDocument).not.toHaveBeenCalled();
   });
 
   it('should aggregate rule statuses across documents in summary', async () => {
@@ -665,6 +703,7 @@ describe('handleDryRunBatch', () => {
 
     expect(mockLoadLocalRuleModule).toHaveBeenCalledTimes(1);
     expect(mockProcessLocalDryRunDocument).toHaveBeenCalledTimes(2);
+    expect(mockProcessDryRunDocument).not.toHaveBeenCalled();
     expect(recordedFailures).toEqual([
       { error: 'LOCAL_RULE_EXECUTION_FAILED', item: 'doc-2' },
     ]);

@@ -32,6 +32,7 @@ export type DryRunSelection =
       allRules: boolean;
       methodologySlug: string;
       mode: 'registered';
+      processorPath?: string | undefined;
       ruleSlug?: string | undefined;
       rulesScope: string;
     }
@@ -98,18 +99,12 @@ export const createDryRunSelection = (
   options: DryRunOptions,
   command: OptionValueSourceReader,
 ): DryRunSelection => {
-  if (processorPath) {
+  if (processorPath && options.dataSetName) {
     assertNoExplicitOptions(
       command,
       LOCAL_ONLY_FORBIDDEN_OPTION_KEYS,
       'with an explicit processor path',
     );
-
-    if (!options.dataSetName) {
-      throw new Error(
-        'Explicit local mode requires --data-set-name (PROD, PROD_SIMULATION, or TEST).',
-      );
-    }
 
     return {
       dataSetName: options.dataSetName,
@@ -120,7 +115,22 @@ export const createDryRunSelection = (
 
   assertNoExplicitOptions(command, ['dataSetName'], 'in registered mode');
 
-  if (!options.allRules) {
+  if (processorPath && command.getOptionValueSource('allRules') === 'cli') {
+    throw new Error(
+      '--all-rules cannot be used with an explicit processor path',
+    );
+  }
+
+  if (
+    processorPath &&
+    command.getOptionValueSource('methodologySlug') !== 'cli'
+  ) {
+    throw new Error(
+      'Explicit processor paths require --data-set-name for local mode or --methodology-slug for registered mode.',
+    );
+  }
+
+  if (!processorPath && !options.allRules) {
     throw new Error(
       'Either provide a <processor-path> or use --all-rules to run all rules',
     );
@@ -134,6 +144,7 @@ export const createDryRunSelection = (
     allRules: options.allRules,
     methodologySlug: options.methodologySlug,
     mode: 'registered',
+    processorPath,
     ruleSlug: options.ruleSlug,
     rulesScope: options.rulesScope,
   };

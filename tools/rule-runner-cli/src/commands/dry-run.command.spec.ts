@@ -33,6 +33,52 @@ const commandWithSources = (
 };
 
 describe('createDryRunSelection', () => {
+  it('should keep an explicit processor path in registered mode when methodologySlug is explicit', () => {
+    const processorPath =
+      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data';
+
+    expect(
+      createDryRunSelection(
+        processorPath,
+        baseOptions,
+        commandWithSources({ methodologySlug: 'cli' }),
+      ),
+    ).toEqual({
+      allRules: false,
+      methodologySlug: 'bold-carbon-organic',
+      mode: 'registered',
+      processorPath,
+      ruleSlug: undefined,
+      rulesScope: 'MassID',
+    });
+  });
+
+  it('should reject an explicit methodologySlug combined with local data-set-name', () => {
+    expect(() =>
+      createDryRunSelection(
+        'libs/methodologies/bold/rule-processors/mass-id/local-rule',
+        { ...baseOptions, dataSetName: 'TEST' },
+        commandWithSources({ methodologySlug: 'cli' }),
+      ),
+    ).toThrow(
+      '--methodology-slug cannot be used with an explicit processor path',
+    );
+  });
+
+  it('should reject --all-rules combined with an explicit registered processor path', () => {
+    const command = commandWithSources({ methodologySlug: 'cli' });
+
+    command.setOptionValueWithSource('allRules', true, 'cli');
+
+    expect(() =>
+      createDryRunSelection(
+        'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data',
+        { ...baseOptions, allRules: true },
+        command,
+      ),
+    ).toThrow('--all-rules cannot be used with an explicit processor path');
+  });
+
   it('should select explicit local mode without treating default rulesScope as a mixed flag', () => {
     expect(
       createDryRunSelection(

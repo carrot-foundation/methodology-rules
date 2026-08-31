@@ -2,12 +2,14 @@ import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
 import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { Command } from '@commander-js/extra-typings';
 
 import type { DryRunOptions } from './dry-run.command';
 
 import { loadLocalRuleModule, loadProcessor } from '../utils/processor-loader';
 import { buildRuleInput } from '../utils/rule-input.builder';
 import { prepareDryRun, prepareLocalRule } from '../utils/smaug-client';
+import { createDryRunSelection } from './dry-run.command';
 import {
   handleDryRun,
   processLocalDryRunDocument,
@@ -148,6 +150,30 @@ describe('handleDryRun', () => {
       'libs/methodologies/bold/rule-processors/mass-id/weighing',
       undefined,
     );
+  });
+
+  it('should use the explicit registered processor path without calling the local endpoint', async () => {
+    const processorPath =
+      'libs/methodologies/bold/rule-processors/mass-id/document-manifest-data';
+    const command = new Command('dry-run');
+
+    command.setOptionValueWithSource(
+      'methodologySlug',
+      'bold-carbon-organic',
+      'cli',
+    );
+
+    await handleDryRun(
+      createDryRunSelection(processorPath, baseOptions, command),
+      baseOptions,
+    );
+
+    expect(mockPrepareDryRun).toHaveBeenCalledWith(
+      'https://smaug.carrot.eco',
+      expect.objectContaining({ methodologySlug: 'bold-carbon-organic' }),
+    );
+    expect(mockPrepareLocalRule).not.toHaveBeenCalled();
+    expect(mockLoadProcessor).toHaveBeenCalledWith(processorPath, undefined);
   });
 
   it('should skip failed rules and continue with others', async () => {
@@ -362,6 +388,7 @@ describe('handleDryRun', () => {
         rulesScope: 'MassID',
       },
     );
+    expect(mockPrepareDryRun).not.toHaveBeenCalled();
     expect(mockBuildRuleInput).toHaveBeenCalledWith({
       prepared: {
         auditDocumentId: 'synthetic-audit-123',

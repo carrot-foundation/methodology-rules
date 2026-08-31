@@ -153,7 +153,7 @@ export const handleDryRunBatch = async (
         config,
         methodologySlug: selection.methodologySlug,
         options,
-        processorPath: undefined,
+        processorPath: selection.processorPath,
         ruleSlug: selection.ruleSlug,
         rulesScope: selection.rulesScope,
         smaugUrl,
