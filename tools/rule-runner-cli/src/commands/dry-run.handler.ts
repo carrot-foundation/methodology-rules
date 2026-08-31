@@ -215,8 +215,8 @@ export const processLocalDryRunDocument = async (
     localRuleModule: LocalRuleModule;
     options: DryRunOptions;
     selection: Extract<DryRunSelection, { mode: 'local' }>;
+    shouldWriteOutput?: boolean;
     smaugUrl: string;
-    writeOutput?: boolean;
   },
 ): Promise<DryRunDocumentResult> => {
   const { localRuleModule, selection } = context;
@@ -243,7 +243,7 @@ export const processLocalDryRunDocument = async (
 
   const elapsedMs = Date.now() - startTime;
 
-  if (context.writeOutput !== false) {
+  if (context.shouldWriteOutput !== false) {
     writeLocalRuleOutput(output, {
       debug: context.options.debug,
       elapsedMs,

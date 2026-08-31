@@ -302,7 +302,7 @@ describe('handleDryRunBatch', () => {
 
     expect(mockProcessLocalDryRunDocument).toHaveBeenCalledWith(
       'doc-1',
-      expect.objectContaining({ writeOutput: false }),
+      expect.objectContaining({ shouldWriteOutput: false }),
     );
   });
 

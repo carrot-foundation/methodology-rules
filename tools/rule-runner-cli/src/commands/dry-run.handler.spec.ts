@@ -1,9 +1,11 @@
-import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
+import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
 
+import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { handleCommandError } from '@carrot-fndn/shared/cli';
 import { logger } from '@carrot-fndn/shared/helpers';
 import { Command } from '@commander-js/extra-typings';
 
+import type { LocalRuleModule } from '../utils/processor-loader';
 import type { DryRunOptions } from './dry-run.command';
 
 import { STUB_ENV_SMAUG_URL, STUB_SMAUG_URL } from '../test.constants';
@@ -622,9 +624,12 @@ describe('handleDryRun', () => {
   });
 
   it('should suppress local processor output when requested', async () => {
-    const Processor = vi.fn().mockImplementation(function Processor() {
-      return { process: mockProcess };
-    });
+    class Processor extends RuleDataProcessor {
+      override process(data: RuleInput): Promise<RuleOutput> {
+        return mockProcess(data);
+      }
+    }
+
     const stdoutSpy = vi
       .spyOn(process.stdout, 'write')
       .mockImplementation(() => true);
@@ -641,15 +646,15 @@ describe('handleDryRun', () => {
           version: '1.0.0',
         },
         rulesScope: 'MassID',
-      } as never,
+      } satisfies LocalRuleModule,
       options: { ...baseOptions, json: true },
       selection: {
         dataSetName: 'TEST',
         mode: 'local',
         processorPath: 'some/path',
       },
+      shouldWriteOutput: false,
       smaugUrl: STUB_SMAUG_URL,
-      writeOutput: false,
     });
 
     expect(stdoutSpy).not.toHaveBeenCalled();
