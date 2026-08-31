@@ -5,9 +5,13 @@ import path from 'node:path';
 import { loadLocalRuleModule } from './processor-loader';
 
 const repositoryRoot = path.resolve(process.cwd(), '../..');
-const rootOnlyProcessorPath = path.join(
+const privacyFlagsProcessorPath = path.join(
   repositoryRoot,
-  'libs/methodologies/bold/rule-processors/mass-id/hauler-identification',
+  'libs/methodologies/bold/rule-processors/mass-id/privacy-flags',
+);
+const privacyFlagsRuleDefinitionPath = path.join(
+  privacyFlagsProcessorPath,
+  'src/privacy-flags.rule-definition.ts',
 );
 const creditOrderProcessorPath = path.join(
   repositoryRoot,
@@ -107,20 +111,37 @@ describe('loadLocalRuleModule', () => {
     return processorDirectory;
   };
 
-  it('should load a root-only MassID processor and its colocated definition', async () => {
+  it('should load the real privacy-flags MassID processor and its colocated definition', async () => {
     await expect(
-      loadLocalRuleModule(rootOnlyProcessorPath),
+      loadLocalRuleModule(privacyFlagsProcessorPath),
     ).resolves.toMatchObject({
       Processor: expect.any(Function),
       ruleDefinition: {
         description: expect.any(String),
         events: expect.any(Array),
         name: expect.any(String),
-        slug: 'hauler-identification',
+        slug: 'privacy-flags',
         version: expect.any(String),
       },
       rulesScope: 'MassID',
     });
+  });
+
+  it('should preserve the imported privacy-flags definition across repeated cached loads', async () => {
+    const { ruleDefinition: importedRuleDefinition } = await import(
+      privacyFlagsRuleDefinitionPath
+    );
+    const expectedDefinition = structuredClone(importedRuleDefinition);
+
+    Object.freeze(importedRuleDefinition.events);
+    Object.freeze(importedRuleDefinition);
+
+    const firstLoad = await loadLocalRuleModule(privacyFlagsProcessorPath);
+    const secondLoad = await loadLocalRuleModule(privacyFlagsProcessorPath);
+
+    expect(firstLoad.ruleDefinition).toEqual(expectedDefinition);
+    expect(secondLoad.ruleDefinition).toEqual(expectedDefinition);
+    expect(importedRuleDefinition).toEqual(expectedDefinition);
   });
 
   it('should reject a processor outside the MassID scope', async () => {
@@ -165,6 +186,32 @@ export class TestRuleProcessor extends RuleDataProcessor {
     expect(Reflect.get(globalThis, parameterizedConstructorSentinel)).toBe(
       false,
     );
+  });
+
+  it('should accept a processor whose only constructor argument is defaulted', async () => {
+    const processorDirectory = await createFixture({
+      processorSource: `
+import { RuleDataProcessor } from '${path.join(repositoryRoot, 'libs/shared/app/types/src/app-context.ts')}';
+import type { RuleInput, RuleOutput } from '${path.join(repositoryRoot, 'libs/shared/rule/types/src/rule.types.ts')}';
+
+export class TestRuleProcessor extends RuleDataProcessor {
+  constructor(configuration: Record<string, unknown> = {}) {
+    super();
+  }
+
+  async process(_ruleInput: RuleInput): Promise<RuleOutput> {
+    throw new Error('Not reached.');
+  }
+}
+`,
+    });
+
+    await expect(
+      loadLocalRuleModule(processorDirectory),
+    ).resolves.toMatchObject({
+      Processor: expect.any(Function),
+      rulesScope: 'MassID',
+    });
   });
 
   it('should reject a processor without a colocated rule definition', async () => {
