@@ -20,11 +20,11 @@ flowchart LR
 
 Every methodology in the Carrot Network has three layers:
 
-| Layer | What | Where |
-|-------|------|-------|
-| **Methodology** | Scientific foundation (e.g., UNFCCC CDM) | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies) |
-| **MvF** (Methodology Verification Framework) | Specification translating the methodology into concrete verification rules | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies/concepts/mvf) |
-| **MvA** (Methodology Verification Application) | Open-source rule processors implementing the MvF | **This repository** · [docs](https://docs.carrot.eco/docs/methodologies/concepts/mva) |
+| Layer                                          | What                                                                       | Where                                                                                 |
+| ---------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Methodology**                                | Scientific foundation (e.g., UNFCCC CDM)                                   | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies)                         |
+| **MvF** (Methodology Verification Framework)   | Specification translating the methodology into concrete verification rules | [docs.carrot.eco](https://docs.carrot.eco/docs/methodologies/concepts/mvf)            |
+| **MvA** (Methodology Verification Application) | Open-source rule processors implementing the MvF                           | **This repository** · [docs](https://docs.carrot.eco/docs/methodologies/concepts/mva) |
 
 Rule processors are the core units of the MvA. Each one evaluates [MassID](https://docs.carrot.eco/docs/concepts/mass-ids) documents — digital records tracking material type, weight, and chain of custody — and returns `PASSED`, `FAILED`, or `REVIEW_REQUIRED` with a traceable explanation.
 
@@ -119,12 +119,14 @@ Complex processors may override `process()` with custom document loading and eva
 ### Schema Layering
 
 Every rule processor follows a standardized validation flow:
+
 1. Load raw documents
 2. Build a rule subject
 3. Validate the rule subject schema (`validateRuleSubjectOrThrow`)
 4. Evaluate business logic
 
 Document schemas are organized in 5 layers:
+
 - **Envelope** (`LoadedDocumentEnvelopeSchema`) — wrapper for loaded documents
 - **Inbound** (`InboundDocumentSchema`) — boundary contract, looseObject
 - **Normalized** (`DocumentSchema`) — `z.object()` (default), strips unknown fields on parse

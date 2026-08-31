@@ -327,21 +327,21 @@ pnpm pkgJsonLint                       # npmPkgJsonLint .
 
 ## Environment Variables
 
-| Variable | Purpose |
-|---|---|
-| `DOCUMENT_BUCKET_NAME` | S3 bucket for methodology execution documents |
-| `DOCUMENT_ATTACHMENT_BUCKET_NAME` | S3 bucket for document attachments (scale tickets, manifests) |
-| `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` | IAM role ARN for STS AssumeRole to sign Smaug API requests |
-| `AUDIT_URL` | Smaug API base URL for posting audit results |
-| `AI_ATTACHMENT_VALIDATOR_API_URI` | Smaug API endpoint for AI-based attachment validation |
-| `SENTRY_DSN` | Sentry DSN for error reporting |
-| `ENVIRONMENT` | Deployment environment (development, staging, production) |
-| `SOURCE_CODE_VERSION` | Build artifact version identifier |
-| `SOURCE_CODE_URL` | GitHub repository URL |
-| `ARTIFACT_CHECKSUM` | Build artifact checksum |
-| `VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI` | Feature flag for AI attachment validation |
-| `ENABLE_CLOUDWATCH_METRICS` | Enable CloudWatch metrics publishing |
-| `CLOUDWATCH_METRICS_NAMESPACE` | CloudWatch metrics namespace |
+| Variable                                   | Purpose                                                       |
+| ------------------------------------------ | ------------------------------------------------------------- |
+| `DOCUMENT_BUCKET_NAME`                     | S3 bucket for methodology execution documents                 |
+| `DOCUMENT_ATTACHMENT_BUCKET_NAME`          | S3 bucket for document attachments (scale tickets, manifests) |
+| `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN`        | IAM role ARN for STS AssumeRole to sign Smaug API requests    |
+| `AUDIT_URL`                                | Smaug API base URL for posting audit results                  |
+| `AI_ATTACHMENT_VALIDATOR_API_URI`          | Smaug API endpoint for AI-based attachment validation         |
+| `SENTRY_DSN`                               | Sentry DSN for error reporting                                |
+| `ENVIRONMENT`                              | Deployment environment (development, staging, production)     |
+| `SOURCE_CODE_VERSION`                      | Build artifact version identifier                             |
+| `SOURCE_CODE_URL`                          | GitHub repository URL                                         |
+| `ARTIFACT_CHECKSUM`                        | Build artifact checksum                                       |
+| `VALIDATE_ATTACHMENTS_CONSISTENCY_WITH_AI` | Feature flag for AI attachment validation                     |
+| `ENABLE_CLOUDWATCH_METRICS`                | Enable CloudWatch metrics publishing                          |
+| `CLOUDWATCH_METRICS_NAMESPACE`             | CloudWatch metrics namespace                                  |
 
 ## Important Notes
 
