@@ -27,7 +27,7 @@ Cacheable Nx targets: `build-lambda`, `package-lambda`, `test`, `lint`, `ts`. Re
 
 ### `deploy.yaml` shape
 
-- Triggered via `workflow_call` with secrets: `AWS_ACCOUNT_ID_PRODUCTION`, `AWS_ACCOUNT_ID_DEVELOPMENT`, `ADMIN_GITHUB_TOKEN`, `SLACK_WEBHOOK_URL`, `nx_key`.
+- Triggered via `workflow_call` with secrets: `AWS_ACCOUNT_ID_PRODUCTION`, `AWS_ACCOUNT_ID_DEVELOPMENT`, `SLACK_WEBHOOK_URL`, `nx_key`.
 - `AWS_REGION: us-east-1`.
 - Matrix over `environment: [production, development]`.
 - Uses the `prepare-to-run-nx` composite action (full git history for Nx affected), then builds and uploads each affected Lambda artifact to S3.

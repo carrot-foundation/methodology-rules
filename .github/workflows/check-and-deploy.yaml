@@ -55,6 +55,5 @@ jobs:
     secrets:
       AWS_ACCOUNT_ID_PRODUCTION: ${{ secrets.AWS_ACCOUNT_ID_PRODUCTION }}
       AWS_ACCOUNT_ID_DEVELOPMENT: ${{ secrets.AWS_ACCOUNT_ID_DEVELOPMENT }}
-      ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
       nx_key: ${{ secrets.NX_KEY }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
