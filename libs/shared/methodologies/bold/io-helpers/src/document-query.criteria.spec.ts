@@ -1,14 +1,16 @@
 import {
   BOLD_ROOT_DOCUMENT_CRITERIA,
   DocumentQueryCriteriaSchema,
-  RELATED_DOCUMENT_CRITERIA,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
 } from './document-query.criteria';
 
 describe('DocumentQueryCriteriaSchema', () => {
-  it('should accept the shared related-document criteria', () => {
+  it('should accept the participant-accreditation document-query criteria', () => {
     expect(
-      DocumentQueryCriteriaSchema.parse(RELATED_DOCUMENT_CRITERIA),
-    ).toEqual(RELATED_DOCUMENT_CRITERIA);
+      DocumentQueryCriteriaSchema.parse(
+        PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+      ),
+    ).toEqual(PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA);
   });
 
   it('should accept the explicit root-only criteria', () => {

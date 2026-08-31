@@ -17,7 +17,7 @@ import {
 import {
   type DocumentQuery,
   DocumentQueryService,
-  RELATED_DOCUMENT_CRITERIA,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   MASS_ID,
@@ -193,7 +193,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       context: {
         s3KeyPrefix: ruleInput.documentKeyPrefix,
       },
-      criteria: RELATED_DOCUMENT_CRITERIA,
+      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
       documentId: ruleInput.documentId,
     });
   }

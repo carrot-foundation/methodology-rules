@@ -25,7 +25,7 @@ export const DocumentQueryCriteriaSchema: z.ZodType<DocumentQueryCriteria> =
     relatedDocuments: z.array(RelatedDocumentCriteriaSchema).optional(),
   });
 
-export const RELATED_DOCUMENT_CRITERIA = {
+export const PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA = {
   parentDocument: {},
   relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
 } as const satisfies DocumentQueryCriteria;

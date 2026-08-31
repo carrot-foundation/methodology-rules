@@ -1,6 +1,6 @@
 import {
   DocumentQueryService,
-  RELATED_DOCUMENT_CRITERIA,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
   spyOnDocumentQueryServiceLoad,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
@@ -52,7 +52,9 @@ describe('MassIDSortingProcessor', () => {
         });
 
         expect(DocumentQueryService.prototype.load).toHaveBeenCalledWith(
-          expect.objectContaining({ criteria: RELATED_DOCUMENT_CRITERIA }),
+          expect.objectContaining({
+            criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+          }),
         );
       },
     );

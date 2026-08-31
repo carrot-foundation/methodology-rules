@@ -63,12 +63,12 @@ The branch contains the core implementations described by Tasks 1–6. Phase 4 r
 
 **Interfaces:**
 - Consumes: `DocumentQueryCriteria` from `@carrot-fndn/shared/methodologies/bold/io-helpers`.
-- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus shared `RELATED_DOCUMENT_CRITERIA` and `BOLD_ROOT_DOCUMENT_CRITERIA` constants referenced by supported definitions and processors.
+- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus shared `PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA` and `BOLD_ROOT_DOCUMENT_CRITERIA` constants referenced by supported definitions and processors.
 
 - [ ] **Step 1: Write the failing explicit root-criteria tests**
 
 ```typescript
-export const RELATED_DOCUMENT_CRITERIA = {
+export const PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA = {
   parentDocument: {},
   relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
 } as const satisfies DocumentQueryCriteria;
@@ -77,18 +77,18 @@ export const ruleDefinition = {
   description:
     'Validates sorting events in MassID documents, ensuring that gross weight, deducted weight, sorting factor, and event values are correctly calculated and formatted.',
   events: [BoldDocumentEventName.SORTING],
-  input: RELATED_DOCUMENT_CRITERIA,
+  input: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
   name: 'Mass Sorting',
   slug: 'mass-id-sorting',
   version: '1.0.0',
 } as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
 ```
 
-Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `BOLD_ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared related criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
+Define `PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `BOLD_ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared participant-accreditation criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
 
 - [ ] **Step 2: Run type-check and the rule tests**
 
-Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the six listed processor projects with `rtk pnpm nx run-many`.
+Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the five participant-accreditation criteria consumers plus the privacy-flags root-only project with `rtk pnpm nx run-many`.
 
 Expected: FAIL because `BOLD_ROOT_DOCUMENT_CRITERIA` does not exist and privacy-flags does not yet declare an explicit static input graph; the five existing related-criteria cases remain green.
 
@@ -108,7 +108,7 @@ Move the five byte-equivalent criteria literals to the shared BOLD IO helper, ty
 
 - [ ] **Step 4: Run focused tests and type-check**
 
-Run `rtk pnpm nx ts shared-rule-types`, then run `test` and `ts` for all six listed processor projects with `rtk pnpm nx run-many`.
+Run `rtk pnpm nx ts shared-rule-types`, then run `test` and `ts` for the five participant-accreditation criteria consumers plus the privacy-flags root-only project with `rtk pnpm nx run-many`.
 
 Expected: PASS.
 
