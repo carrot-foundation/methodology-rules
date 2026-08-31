@@ -8,7 +8,7 @@
 
 **Tech Stack:** Node.js 24.14.1, TypeScript, NestJS, Zod, MongoDB snapshot services, AWS S3, Terraform, Vitest, Nx, pnpm 10.33.0
 
-**Spec:** `/Users/rafael/workspace/methodology-rules/docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
+**Spec:** `docs/superpowers/specs/2026-08-28-unbound-rule-dry-run-design.md`
 
 ## Global constraints
 

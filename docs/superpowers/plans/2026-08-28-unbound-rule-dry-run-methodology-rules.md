@@ -15,7 +15,7 @@
 - Explicit local mode supports MassID processors only.
 - Explicit local mode rejects processors whose construction requires application-specific arguments.
 - Registered processor-path and `--all-rules` dry-runs remain behaviorally unchanged.
-- Root-only definitions omit `input`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
+- Root-only definitions declare the shared empty `ROOT_DOCUMENT_CRITERIA`; rules with the common related-document graph import one shared criteria constant in both definition and processor.
 - Explicit local mode rejects `--methodology-slug`, `--rules-scope`, `--rule-slug`, `--all-rules`, and `--config`; registered mode rejects `--data-set-name`.
 - Single-document processor exceptions reject and exit nonzero; batch records errors and exits nonzero.
 - `aws-vault exec smaug-prod` provides base credentials; requests use assumed-role SigV4 credentials.
@@ -50,6 +50,7 @@ The branch contains the core implementations described by Tasks 1–6. Phase 4 r
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/prevented-emissions/src/prevented-emissions.processor.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/weighing/src/weighing.rule-definition.ts`
 - Modify: `libs/methodologies/bold/rule-processors/mass-id/weighing/src/weighing.processor.ts`
+- Modify: `libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/privacy-flags.rule-definition.ts`
 - Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/geolocation-and-address-precision/src/rule-definition.ts`
 - Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/mass-id-sorting/src/rule-definition.ts`
 - Modify: `apps/methodologies/bold-carbon/rule-processors/mass-id/participant-accreditations-and-verifications-requirements/src/rule-definition.ts`
@@ -62,9 +63,9 @@ The branch contains the core implementations described by Tasks 1–6. Phase 4 r
 
 **Interfaces:**
 - Consumes: `DocumentQueryCriteria` from `@carrot-fndn/shared/methodologies/bold/io-helpers`.
-- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus one shared `RELATED_DOCUMENT_CRITERIA` referenced by each supported definition and processor.
+- Produces: `BaseRuleDefinition<TInput = never>` and `RuleDefinition<TMethodologyFrameworkRuleSlug, TInput>` with `input?: TInput`, plus shared `RELATED_DOCUMENT_CRITERIA` and `ROOT_DOCUMENT_CRITERIA` constants referenced by supported definitions and processors.
 
-- [ ] **Step 1: Verify the existing compile-time usage and shared-criteria tests**
+- [ ] **Step 1: Write the failing explicit root-criteria tests**
 
 ```typescript
 export const RELATED_DOCUMENT_CRITERIA = {
@@ -83,15 +84,15 @@ export const ruleDefinition = {
 } as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
 ```
 
-Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared constant and schema tests that validate the recursive shape. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments.
+Define `RELATED_DOCUMENT_CRITERIA` once in the shared BOLD IO helper because all five prior literals are identical. Apply it to geolocation-and-address-precision, mass-id-sorting, participant-accreditations-and-verifications-requirements, prevented-emissions, and weighing. Define `ROOT_DOCUMENT_CRITERIA = {}` in the same owner and apply it to the privacy-flags rule definition so root-only eligibility is explicit rather than inferred from constructor arity. Type the nine application definitions with the same input generic. Add one processor contract assertion that `DocumentQueryService.load` receives the shared related criteria and schema tests that validate both constants. Keep no-conflicting-certificate-or-credit unsupported because its processor requires application-specific constructor arguments; keep waste-mass-is-unique unsupported because it performs live duplicate-document API queries outside the staged graph.
 
 - [ ] **Step 2: Run type-check and the rule tests**
 
-Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the five listed processor projects with `rtk pnpm nx run-many`.
+Run `rtk pnpm nx ts shared-rule-types`, then run the `test` target for the six listed processor projects with `rtk pnpm nx run-many`.
 
-Expected: PASS on the existing Task 1 implementation.
+Expected: FAIL because `ROOT_DOCUMENT_CRITERIA` does not exist and privacy-flags does not yet declare an explicit static input graph; the five existing related-criteria cases remain green.
 
-- [ ] **Step 3: Review the generic and shared constant for reverse dependencies**
+- [ ] **Step 3: Implement the shared root criteria without changing the generic boundary**
 
 ```typescript
 export interface BaseRuleDefinition<TInput = never> {
@@ -103,17 +104,22 @@ export interface BaseRuleDefinition<TInput = never> {
 }
 ```
 
-Move the five byte-equivalent criteria literals to the shared BOLD IO helper, type the constant there, and import it in every definition and processor. Propagate the input generic through the application `RuleDefinition` declarations. Do not import BOLD types into `shared-rule-types`.
+Move the five byte-equivalent criteria literals to the shared BOLD IO helper, type the constant there, and import it in every definition and processor. Add the shared empty root constant to privacy-flags. Propagate the input generic through the application `RuleDefinition` declarations. Do not import BOLD types into `shared-rule-types`.
 
 - [ ] **Step 4: Run focused tests and type-check**
 
-Run `rtk pnpm nx ts shared-rule-types`, then run `test` and `ts` for all five listed processor projects with `rtk pnpm nx run-many`.
+Run `rtk pnpm nx ts shared-rule-types`, then run `test` and `ts` for all six listed processor projects with `rtk pnpm nx run-many`.
 
 Expected: PASS.
 
-- [ ] **Step 5: Record the existing implementation evidence**
+- [ ] **Step 5: Commit the explicit root-input correction**
 
-Record `112944b8` (typed dry-run input criteria) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger; create no commit when the review is clean.
+Record `112944b8` (typed dry-run input criteria) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger, then commit the shared root criteria and privacy-flags definition correction:
+
+```bash
+rtk git add libs/shared/methodologies/bold/io-helpers/src/document-query.criteria.ts libs/shared/methodologies/bold/io-helpers/src/document-query.criteria.spec.ts libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/privacy-flags.rule-definition.ts
+rtk git commit -m "fix(rule): declare static unbound input"
+```
 
 ### Task 2: Move Assume-Role Credentials Into the Shared AWS HTTP Layer
 
@@ -377,12 +383,15 @@ rtk git commit -m "fix(rule-runner): fail closed during environment bootstrap"
 **Files:**
 - Modify: `tools/rule-runner-cli/src/utils/processor-loader.ts`
 - Test: `tools/rule-runner-cli/src/utils/processor-loader.spec.ts`
+- Modify: `tools/rule-runner-cli/src/commands/dry-run.handler.ts`
+- Test: `tools/rule-runner-cli/src/commands/dry-run.handler.spec.ts`
+- Test: `tools/rule-runner-cli/src/commands/local-log-redaction.spec.ts`
 
 **Interfaces:**
 - Consumes: an explicit MassID processor directory.
 - Produces: `loadLocalRuleModule(processorPath: string): Promise<{ Processor: RuleProcessorConstructor; ruleDefinition: BaseRuleDefinition<DocumentQueryCriteria>; rulesScope: 'MassID' }>`.
 
-- [ ] **Step 1: Verify the existing module-loader tests and add the defaulted-constructor case**
+- [ ] **Step 1: Write the failing static-input eligibility tests**
 
 ```typescript
 await expect(loadLocalRuleModule(rootOnlyPath)).resolves.toMatchObject({
@@ -399,14 +408,15 @@ await expect(loadLocalRuleModule(defaultedConstructorPath)).resolves.toMatchObje
 ```
 
 Also prove missing, duplicate, or malformed `*.rule-definition.ts` exports fail deterministically. Use isolated temporary fixtures for out-of-scope, required-constructor rejection, and defaulted-constructor acceptance so edge cases do not depend on unrelated production processors. Keep a real `privacy-flags` module load as the positive end-to-end loader case.
+Require every local rule definition to declare `input`, accepting the shared empty root criteria as a complete graph. Add the real `waste-mass-is-unique` module as a negative case proving that zero constructor arity without declared static input is rejected before execution.
 
 - [ ] **Step 2: Run the complete rule-runner test target**
 
 Run: `rtk pnpm nx test rule-runner-cli`
 
-Expected: PASS on the existing Task 4 implementation, including the new defaulted-constructor regression.
+Expected: FAIL because constructor arity alone still accepts `waste-mass-is-unique` and a fixture whose definition omits `input`; the defaulted-constructor case with `input: {}` remains eligible.
 
-- [ ] **Step 3: Review the existing module load and structural scope validation**
+- [ ] **Step 3: Add the explicit static-input guard to the existing loader**
 
 ```typescript
 export const loadLocalRuleModule = async (processorPath: string): Promise<LocalRuleModule> => {
@@ -420,7 +430,7 @@ export const loadLocalRuleModule = async (processorPath: string): Promise<LocalR
 };
 ```
 
-Resolve exact filenames with the existing path conventions and validate the rule definition shape at the filesystem boundary. Inspect the processor constructor contract and reject a constructor that requires application-specific arguments; do not call it with missing values or introduce an executable factory into the rule definition.
+Resolve exact filenames with the existing path conventions and validate the rule definition shape at the filesystem boundary. Inspect the processor constructor contract and reject a constructor that requires application-specific arguments; do not call it with missing values or introduce an executable factory into the rule definition. Separately reject a definition whose `input` is absent, because constructor arity cannot prove that a processor avoids live queries outside the staged graph.
 
 - [ ] **Step 4: Run focused tests and type-check**
 
@@ -428,9 +438,14 @@ Run: `rtk pnpm nx test rule-runner-cli`, then `rtk pnpm nx ts rule-runner-cli`.
 
 Expected: PASS.
 
-- [ ] **Step 5: Record the existing implementation evidence**
+- [ ] **Step 5: Commit the static-input eligibility guard**
 
-Record `19620d56` (local rule-definition loading) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger; create no commit when the review is clean.
+Record `19620d56` (local rule-definition loading) and `8646193b` (unbound dry-run boundary validation) in the task-review ledger, then commit the eligibility detector and guard:
+
+```bash
+rtk git add tools/rule-runner-cli/src/utils/processor-loader.ts tools/rule-runner-cli/src/utils/processor-loader.spec.ts tools/rule-runner-cli/src/commands/dry-run.handler.ts tools/rule-runner-cli/src/commands/dry-run.handler.spec.ts tools/rule-runner-cli/src/commands/local-log-redaction.spec.ts
+rtk git commit -m "fix(script): require static unbound input"
+```
 
 ### Task 5: Add the SigV4 Local Preparation Client
 
@@ -521,7 +536,7 @@ rtk git commit -m "fix(http-request): support local Smaug fixtures"
 it('should prepare and execute one explicit root-only processor', async () => {
   await handleDryRun(processorPath, localOptions);
   expect(smaug.prepareLocalRule).toHaveBeenCalledWith(expect.objectContaining({
-    dataSetName: 'TEST', input: undefined, rulesScope: 'MassID', ruleSlug,
+    dataSetName: 'TEST', input: {}, rulesScope: 'MassID', ruleSlug,
   }));
   expect(Processor).toHaveBeenCalledTimes(1);
 });
@@ -628,9 +643,9 @@ rtk git commit -m "docs(rule-runner): define Smaug dry-run boundary"
 
 - [ ] **Step 1: Derive the exact changed projects without `nx affected`**
 
-Map `rtk git diff --name-only origin/main...HEAD` to the nearest owning `project.json`. After the fail-closed bootstrap correction, the expected branch surface is 26 projects: nine application projects, six BOLD rule-processor libraries, `rule-runner-cli`, and ten shared libraries. If the diff changes, use the newly derived set rather than this snapshot.
+Map `rtk git diff --name-only origin/main...HEAD` to the nearest owning `project.json`. After the fail-closed bootstrap and explicit root-input corrections, the expected branch surface is 27 projects: nine application projects, seven BOLD rule-processor libraries, `rule-runner-cli`, and ten shared libraries. If the diff changes, use the newly derived set rather than this snapshot.
 
-- [ ] **Step 2: Run all supported targets for the six changed processor libraries**
+- [ ] **Step 2: Run all supported targets for the seven changed processor libraries**
 
 Run `test`, `test-e2e`, `ts`, and `lint` for:
 
@@ -640,6 +655,7 @@ methodologies-bold-rule-processors-mass-id-geolocation-and-address-precision
 methodologies-bold-rule-processors-mass-id-mass-id-sorting
 methodologies-bold-rule-processors-mass-id-participant-accreditations-and-verifications-requirements
 methodologies-bold-rule-processors-mass-id-prevented-emissions
+methodologies-bold-rule-processors-mass-id-privacy-flags
 methodologies-bold-rule-processors-mass-id-weighing
 ```
 
@@ -663,7 +679,7 @@ Inspect `rtk git diff origin/main...HEAD --word-diff=porcelain` for proper nouns
 
 - [ ] **Step 7: Exercise all CLI selections locally**
 
-Create a disposable argument-free MassID processor fixture under the repository's normal processor path and a localhost HTTP server that records requests and returns identifier-only preparation responses. With AWS credential variables absent, invoke the real `rtk pnpm run-rule dry-run` command for explicit local mode, the legacy registered processor-path mode, and registered `--all-rules` mode. Require successful execution, the expected local or registered preparation route and request body, one processor execution per returned rule, no audit-result route, and no STS/AWS access. Delete the disposable fixture after the run. Unit tests remain the exact-byte SigV4 proof because localhost intentionally bypasses signing.
+Create a disposable argument-free MassID processor fixture whose colocated rule definition declares `input: {}` under the repository's normal processor path and a localhost HTTP server that records requests and returns identifier-only preparation responses. With AWS credential variables absent, invoke the real `rtk pnpm run-rule dry-run` command for explicit local mode, the legacy registered processor-path mode, and registered `--all-rules` mode. Require successful execution, the expected local or registered preparation route and request body, one processor execution per returned rule, no audit-result route, and no STS/AWS access. Delete the disposable fixture after the run. Unit tests remain the exact-byte SigV4 proof because localhost intentionally bypasses signing.
 
 - [ ] **Step 8: Record the post-deployment acceptance gate**
 
