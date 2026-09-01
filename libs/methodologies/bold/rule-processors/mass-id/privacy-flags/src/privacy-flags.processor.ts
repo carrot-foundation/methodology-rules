@@ -44,7 +44,11 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
           ? event.label
           : participantRoles.get(event.participant.id);
 
-      this.validatePreserveSensitiveData(event, participantRole, reviewReasons);
+      this.validatePreserveSensitiveDataIfSpecified(
+        event,
+        participantRole,
+        reviewReasons,
+      );
 
       if (SKIPPED_EVENT_NAMES.has(event.name)) {
         continue;
@@ -206,11 +210,15 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     }
   }
 
-  private validatePreserveSensitiveData(
+  private validatePreserveSensitiveDataIfSpecified(
     event: BoldDocumentEvent,
     participantRole: string | undefined,
     reviewReasons: PrivacyReviewReason[],
   ): void {
+    if (event.preserveSensitiveData === undefined) {
+      return;
+    }
+
     if (participantRole === undefined) {
       return;
     }

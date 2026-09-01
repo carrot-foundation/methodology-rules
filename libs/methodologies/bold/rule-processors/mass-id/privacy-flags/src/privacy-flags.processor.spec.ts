@@ -180,6 +180,23 @@ describe('PrivacyFlagsProcessor', () => {
     );
   });
 
+  it('should not validate preserveSensitiveData without a matching assertable participant', async () => {
+    const massIDDocument = buildMassID({
+      [UNKNOWN_EVENT_NAME]: stubDocumentEvent({
+        isPublic: true,
+        name: UNKNOWN_EVENT_NAME,
+        preserveSensitiveData: true,
+      }),
+    });
+
+    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+    expect(resultStatus).toBe('PASSED');
+    expect(resultContent.reviewReasons).not.toContainEqual(
+      expect.objectContaining({ field: 'preserveSensitiveData' }),
+    );
+  });
+
   it('should add a review reason when an event isPublic does not match the spec', async () => {
     const massIDDocument = buildMassID({
       [PICK_UP]: { ...conformantEvent(PICK_UP), isPublic: false },
@@ -370,18 +387,10 @@ describe('PrivacyFlagsProcessor', () => {
 
     it.each([
       { expected: true, label: HAULER, preserveSensitiveData: false },
-      { expected: true, label: HAULER, preserveSensitiveData: undefined },
-      { expected: false, label: PROCESSOR, preserveSensitiveData: undefined },
-      { expected: false, label: RECYCLER, preserveSensitiveData: undefined },
       {
         expected: true,
         label: WASTE_GENERATOR,
         preserveSensitiveData: false,
-      },
-      {
-        expected: true,
-        label: WASTE_GENERATOR,
-        preserveSensitiveData: undefined,
       },
     ])(
       'should add a review reason when the $label actor declares preserveSensitiveData as $preserveSensitiveData',
@@ -403,6 +412,35 @@ describe('PrivacyFlagsProcessor', () => {
             actual: preserveSensitiveData,
             eventLabel: label,
             expected,
+            field: 'preserveSensitiveData',
+          }),
+        );
+      },
+    );
+
+    it.each([
+      { label: HAULER },
+      { label: PROCESSOR },
+      { label: RECYCLER },
+      { label: WASTE_GENERATOR },
+    ])(
+      'should accept an unspecified preserveSensitiveData value on the $label actor',
+      async ({ label }) => {
+        const massIDDocument = buildMassID({
+          [actorEventKey(label)]: stubDocumentEvent({
+            isPublic: true,
+            label,
+            name: ACTOR,
+            preserveSensitiveData: undefined,
+          }),
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('PASSED');
+        expect(resultContent.reviewReasons).not.toContainEqual(
+          expect.objectContaining({
+            eventLabel: label,
             field: 'preserveSensitiveData',
           }),
         );
@@ -440,6 +478,36 @@ describe('PrivacyFlagsProcessor', () => {
             code: 'PRIVACY_EVENT_PRESERVE_SENSITIVE_DATA_MISMATCH',
             eventName: PICK_UP,
             expected,
+            field: 'preserveSensitiveData',
+          }),
+        );
+      },
+    );
+
+    it.each([
+      { label: HAULER },
+      { label: PROCESSOR },
+      { label: RECYCLER },
+      { label: WASTE_GENERATOR },
+    ])(
+      'should accept an unspecified preserveSensitiveData value on a non-Actor event used by the $label participant',
+      async ({ label }) => {
+        const actorEvent = conformantActorEvent(label);
+        const massIDDocument = buildMassID({
+          [actorEventKey(label)]: actorEvent,
+          [PICK_UP]: {
+            ...conformantEvent(PICK_UP),
+            participant: actorEvent.participant,
+            preserveSensitiveData: undefined,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('PASSED');
+        expect(resultContent.reviewReasons).not.toContainEqual(
+          expect.objectContaining({
+            eventName: PICK_UP,
             field: 'preserveSensitiveData',
           }),
         );
