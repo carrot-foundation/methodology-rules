@@ -22,4 +22,5 @@ export interface PrivacyReviewReason extends ReviewReason {
   eventName: string;
   expected: boolean;
   field: PrivacyFlagField;
+  participantRole?: string;
 }

@@ -1,7 +1,7 @@
 import {
   ASSERTABLE_ACTOR_LABELS,
   EVENT_PRIVACY_SPEC,
-  OPEN_ACTOR_LABELS,
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC,
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
 
@@ -97,11 +97,15 @@ describe('privacy-flags constants', () => {
     });
   });
 
-  it('should treat only Processor and Recycler as open actors', () => {
-    expect([...OPEN_ACTOR_LABELS].sort(sortAlphabetically)).toEqual([
-      'Processor',
-      'Recycler',
-    ]);
+  it('should specify preserveSensitiveData by participant role', () => {
+    expect(
+      Object.fromEntries(PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC),
+    ).toEqual({
+      Hauler: true,
+      Processor: false,
+      Recycler: false,
+      'Waste Generator': true,
+    });
   });
 
   it('should assert privacy flags only for the Hauler, Processor, Recycler, and Waste Generator actors', () => {
