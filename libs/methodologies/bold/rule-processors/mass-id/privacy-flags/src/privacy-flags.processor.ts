@@ -39,14 +39,12 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     let validatedEvents = 0;
 
     for (const event of events) {
-      const participantRole = this.getPreserveSensitiveDataParticipantRole(
-        event,
-        participantRoles,
-      );
+      const participantRolesForEvent =
+        this.getPreserveSensitiveDataParticipantRoles(event, participantRoles);
 
       this.validatePreserveSensitiveDataIfSpecified(
         event,
-        participantRole,
+        participantRolesForEvent,
         reviewReasons,
       );
 
@@ -101,8 +99,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
 
   private getParticipantRoles(
     events: BoldDocumentEvent[],
-  ): ReadonlyMap<string, string> {
-    const participantRoles = new Map<string, string>();
+  ): ReadonlyMap<string, ReadonlySet<string>> {
+    const participantRoles = new Map<string, Set<string>>();
 
     for (const event of events) {
       if (
@@ -110,22 +108,28 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         event.label !== undefined &&
         ASSERTABLE_ACTOR_LABELS.has(event.label)
       ) {
-        participantRoles.set(event.participant.id, event.label);
+        const roles = participantRoles.get(event.participant.id);
+
+        if (roles === undefined) {
+          participantRoles.set(event.participant.id, new Set([event.label]));
+        } else {
+          roles.add(event.label);
+        }
       }
     }
 
     return participantRoles;
   }
 
-  private getPreserveSensitiveDataParticipantRole(
+  private getPreserveSensitiveDataParticipantRoles(
     event: BoldDocumentEvent,
-    participantRoles: ReadonlyMap<string, string>,
-  ): string | undefined {
+    participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
+  ): ReadonlySet<string> {
     if (event.name === ACTOR) {
-      return event.label;
+      return event.label === undefined ? new Set() : new Set([event.label]);
     }
 
-    return participantRoles.get(event.participant.id);
+    return participantRoles.get(event.participant.id) ?? new Set();
   }
 
   private validateActorEvent(
@@ -223,42 +227,41 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
 
   private validatePreserveSensitiveDataIfSpecified(
     event: BoldDocumentEvent,
-    participantRole: string | undefined,
+    participantRoles: ReadonlySet<string>,
     reviewReasons: PrivacyReviewReason[],
   ): void {
     if (event.preserveSensitiveData === undefined) {
       return;
     }
 
-    if (participantRole === undefined) {
-      return;
-    }
+    for (const participantRole of participantRoles) {
+      const expected =
+        PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(participantRole);
 
-    const expected =
-      PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(participantRole);
+      if (expected === undefined || event.preserveSensitiveData === expected) {
+        continue;
+      }
 
-    if (expected === undefined || event.preserveSensitiveData === expected) {
-      return;
-    }
-
-    reviewReasons.push({
-      actual: event.preserveSensitiveData,
-      code:
-        event.name === ACTOR
-          ? PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA
-          : PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
-      description: RESULT_COMMENTS.reviewRequired.EVENT_PRESERVE_SENSITIVE_DATA(
-        event.name,
-        participantRole,
+      reviewReasons.push({
+        actual: event.preserveSensitiveData,
+        code:
+          event.name === ACTOR
+            ? PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA
+            : PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
+        description:
+          RESULT_COMMENTS.reviewRequired.EVENT_PRESERVE_SENSITIVE_DATA(
+            event.name,
+            participantRole,
+            expected,
+          ),
+        ...(event.name === ACTOR && event.label !== undefined
+          ? { eventLabel: event.label }
+          : {}),
+        eventName: event.name,
         expected,
-      ),
-      ...(event.name === ACTOR && event.label !== undefined
-        ? { eventLabel: event.label }
-        : {}),
-      eventName: event.name,
-      expected,
-      field: 'preserveSensitiveData',
-      participantRole,
-    });
+        field: 'preserveSensitiveData',
+        participantRole,
+      });
+    }
   }
 }

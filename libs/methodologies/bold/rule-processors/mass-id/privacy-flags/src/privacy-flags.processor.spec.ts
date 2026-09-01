@@ -514,6 +514,64 @@ describe('PrivacyFlagsProcessor', () => {
       },
     );
 
+    it.each([
+      {
+        actorRoles: [PROCESSOR, HAULER],
+        expectedParticipantRole: PROCESSOR,
+        preserveSensitiveData: true,
+      },
+      {
+        actorRoles: [HAULER, PROCESSOR],
+        expectedParticipantRole: HAULER,
+        preserveSensitiveData: false,
+      },
+      {
+        actorRoles: [HAULER, PROCESSOR],
+        expectedParticipantRole: PROCESSOR,
+        preserveSensitiveData: true,
+      },
+      {
+        actorRoles: [PROCESSOR, HAULER],
+        expectedParticipantRole: HAULER,
+        preserveSensitiveData: false,
+      },
+    ])(
+      'should validate a linked event against every participant role when Actor order is $actorRoles',
+      async ({
+        actorRoles,
+        expectedParticipantRole,
+        preserveSensitiveData,
+      }) => {
+        const participant = conformantActorEvent(PROCESSOR).participant;
+        const massIDDocument: BoldDocument = {
+          ...buildMassID(),
+          externalEvents: [
+            ...actorRoles.map((label) => ({
+              ...conformantActorEvent(label),
+              participant,
+            })),
+            {
+              ...conformantEvent(PICK_UP),
+              participant,
+              preserveSensitiveData,
+            },
+          ],
+        };
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toContainEqual(
+          expect.objectContaining({
+            actual: preserveSensitiveData,
+            eventName: PICK_UP,
+            field: 'preserveSensitiveData',
+            participantRole: expectedParticipantRole,
+          }),
+        );
+      },
+    );
+
     it('should add a review reason when the Processor actor declares isPublic as false', async () => {
       const massIDDocument = buildMassID({
         [actorEventKey(PROCESSOR)]: stubDocumentEvent({
