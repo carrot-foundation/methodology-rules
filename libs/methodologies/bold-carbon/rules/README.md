@@ -9,8 +9,6 @@
 
 ## Rules
 
-
-
 ### mass-id
 
 | #   | Name                                                                                                                                                                                              | Version |
