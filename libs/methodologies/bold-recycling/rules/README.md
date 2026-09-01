@@ -9,12 +9,6 @@
 
 ## Rules
 
-### credit-order
-
-| #   | Name                                                                                                                              | Version |
-| --- | --------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | [Rewards Distribution](../../../../apps/methodologies/bold-recycling/rule-processors/credit-order/rewards-distribution/README.md) | 1.0.0   |
-
 ### mass-id
 
 | #   | Name                                                                                                                                                                                                 | Version |
@@ -38,12 +32,6 @@
 | 17  | [Mass Sorting](../../../../apps/methodologies/bold-recycling/rule-processors/mass-id/mass-id-sorting/README.md)                                                                                      | 1.0.0   |
 | 18  | [Composting Cycle Timeframe](../../../../apps/methodologies/bold-recycling/rule-processors/mass-id/composting-cycle-timeframe/README.md)                                                             | 1.0.0   |
 | 19  | [Document Manifest Data](../../../../apps/methodologies/bold-recycling/rule-processors/mass-id/recycling-manifest-data/README.md)                                                                    | 1.0.0   |
-
-### recycled-id
-
-| #   | Name                                                                                                                             | Version |
-| --- | -------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| 1   | [Rewards Distribution](../../../../apps/methodologies/bold-recycling/rule-processors/recycled-id/rewards-distribution/README.md) | 1.0.0   |
 
 ## License
 

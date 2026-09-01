@@ -32,11 +32,6 @@ github_checks:
   annotations: true
 
 flags:
-  credit-order--rewards-distribution:
-    paths:
-      - libs/methodologies/bold/rule-processors/credit-order/rewards-distribution/src/
-    carryforward: true
-
   mass-id--composting-cycle-timeframe:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/composting-cycle-timeframe/src/
@@ -135,9 +130,4 @@ flags:
   mass-id--weighing:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/weighing/src/
-    carryforward: true
-
-  mass-id-certificate--rewards-distribution:
-    paths:
-      - libs/methodologies/bold/rule-processors/mass-id-certificate/rewards-distribution/src/
     carryforward: true

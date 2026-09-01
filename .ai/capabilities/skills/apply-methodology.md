@@ -13,7 +13,7 @@ workflow:
 inputs:
   - Methodology name (e.g., carbon-organic, bold-recycling)
   - Rule name (e.g., geolocation-precision)
-  - Scope (mass-id, credit-order, or mass-id-certificate)
+  - Scope (`mass-id`)
 outputs:
   - Rule applied to the methodology with all wiring in place
 references:
@@ -27,7 +27,7 @@ references:
 1. **Identify the parameters**:
    - `<methodology>`: the target methodology (e.g., `carbon-organic`, `bold-recycling`)
    - `<rule>`: the rule processor name (e.g., `geolocation-precision`)
-   - `<scope>`: the processor group (`mass-id`, `credit-order`, or `mass-id-certificate`)
+   - `<scope>`: the processor group (`mass-id` is the only one that exists today)
 
 2. **Run the apply script**:
 

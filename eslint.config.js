@@ -16,13 +16,7 @@ const vitestPlugin = require('@vitest/eslint-plugin');
 const jsoncPlugin = require('eslint-plugin-jsonc');
 
 const methodologies = ['bold'];
-const ruleProcessorTypes = [
-  'mass-id',
-  'credit-order',
-  'mass-id-certificate',
-  'gas-id',
-  'recycled-id',
-];
+const ruleProcessorTypes = ['mass-id'];
 
 const nxPluginConfigs = {
   plugins: {
@@ -57,9 +51,6 @@ const nxPluginConfigs = {
             onlyDependOnLibsWithTags: [
               'processor:shared',
               `processor:${processorType}`,
-              ...(processorType === 'gas-id' || processorType === 'recycled-id'
-                ? ['processor:mass-id-certificate']
-                : []),
               'type:library',
             ],
           })),

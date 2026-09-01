@@ -6,7 +6,7 @@ description: 'Apply an existing rule processor to a specific methodology using t
 1. **Identify the parameters**:
    - `<methodology>`: the target methodology (e.g., `carbon-organic`, `bold-recycling`)
    - `<rule>`: the rule processor name (e.g., `geolocation-precision`)
-   - `<scope>`: the processor group (`mass-id`, `credit-order`, or `mass-id-certificate`)
+   - `<scope>`: the processor group (`mass-id` is the only one that exists today)
 
 2. **Run the apply script**:
 
