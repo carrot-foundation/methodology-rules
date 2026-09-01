@@ -116,17 +116,19 @@ export const EVENT_PRIVACY_SPEC: ReadonlyMap<string, EventPrivacySpec> =
     ],
   ]);
 
-export const OPEN_ACTOR_LABELS: ReadonlySet<string> = new Set([
-  PROCESSOR,
-  RECYCLER,
+export const PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC: ReadonlyMap<
+  string,
+  boolean
+> = new Map([
+  [HAULER, true],
+  [PROCESSOR, false],
+  [RECYCLER, false],
+  [WASTE_GENERATOR, true],
 ]);
 
-export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set([
-  HAULER,
-  PROCESSOR,
-  RECYCLER,
-  WASTE_GENERATOR,
-]);
+export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set(
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.keys(),
+);
 
 export const SKIPPED_EVENT_NAMES: ReadonlySet<string> = new Set([
   'GasID',
@@ -140,6 +142,8 @@ export const PRIVACY_REASON_CODES = {
   ATTRIBUTE_IS_PUBLIC: 'PRIVACY_ATTRIBUTE_IS_PUBLIC_MISMATCH',
   ATTRIBUTE_SENSITIVE: 'PRIVACY_ATTRIBUTE_SENSITIVE_MISMATCH',
   EVENT_IS_PUBLIC: 'PRIVACY_EVENT_IS_PUBLIC_MISMATCH',
+  EVENT_PRESERVE_SENSITIVE_DATA:
+    'PRIVACY_EVENT_PRESERVE_SENSITIVE_DATA_MISMATCH',
 } as const;
 
 export const RESULT_COMMENTS = {
@@ -150,8 +154,6 @@ export const RESULT_COMMENTS = {
   reviewRequired: {
     ACTOR_IS_PUBLIC: (label: string, expected: boolean) =>
       `The "${ACTOR}" event labeled "${label}" must declare "isPublic" as ${String(expected)}.`,
-    ACTOR_PRESERVE_SENSITIVE_DATA: (label: string) =>
-      `The "${ACTOR}" event labeled "${label}" must not declare "preserveSensitiveData" as true, because the methodology requires this participant to be publicly identifiable.`,
     ATTRIBUTE_IS_PUBLIC: (
       eventName: string,
       attributeName: string,
@@ -166,5 +168,11 @@ export const RESULT_COMMENTS = {
       `The "${attributeName}" attribute of the "${eventName}" event must declare "sensitive" as ${String(expected)}.`,
     EVENT_IS_PUBLIC: (eventName: string, expected: boolean) =>
       `The "${eventName}" event must declare "isPublic" as ${String(expected)}.`,
+    EVENT_PRESERVE_SENSITIVE_DATA: (
+      eventName: string,
+      participantRole: string,
+      expected: boolean,
+    ) =>
+      `The "${eventName}" event used by the "${participantRole}" participant must declare "preserveSensitiveData" as ${String(expected)}.`,
   },
 } as const;

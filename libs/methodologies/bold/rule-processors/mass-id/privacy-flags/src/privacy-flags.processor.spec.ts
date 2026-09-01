@@ -19,6 +19,7 @@ import { PRIVACY_REASON_CODES } from './privacy-flags.constants';
 import { PrivacyFlagsProcessor } from './privacy-flags.processor';
 import {
   actorEventKey,
+  conformantActorEvent,
   conformantEvent,
   conformantExternalEventsMap,
 } from './privacy-flags.test-cases';
@@ -128,6 +129,38 @@ describe('PrivacyFlagsProcessor', () => {
     expect(resultContent.reviewReasons).toEqual([]);
     expect(resultContent.notValidated).not.toContainEqual(
       expect.objectContaining({ eventName: SKIPPED_EVENT_NAME }),
+    );
+  });
+
+  it('should validate preserveSensitiveData on a skipped event used by an assertable participant', async () => {
+    const actorEvent = conformantActorEvent(HAULER);
+    const massIDDocument = buildMassID({
+      [actorEventKey(HAULER)]: actorEvent,
+      [SKIPPED_EVENT_NAME]: stubDocumentEvent({
+        isPublic: false,
+        name: SKIPPED_EVENT_NAME,
+        participant: actorEvent.participant,
+        preserveSensitiveData: false,
+      }),
+    });
+
+    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+    expect(resultStatus).toBe('REVIEW_REQUIRED');
+    expect(resultContent.reviewReasons).toContainEqual(
+      expect.objectContaining({
+        actual: false,
+        eventName: SKIPPED_EVENT_NAME,
+        expected: true,
+        field: 'preserveSensitiveData',
+        participantRole: HAULER,
+      }),
+    );
+    expect(resultContent.reviewReasons).not.toContainEqual(
+      expect.objectContaining({
+        eventName: SKIPPED_EVENT_NAME,
+        field: 'isPublic',
+      }),
     );
   });
 
@@ -325,7 +358,7 @@ describe('PrivacyFlagsProcessor', () => {
         expect(resultContent.reviewReasons).toContainEqual(
           expect.objectContaining({
             actual: true,
-            code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+            code: 'PRIVACY_ACTOR_PRESERVE_SENSITIVE_DATA',
             eventLabel: label,
             eventName: ACTOR,
             expected: false,
@@ -336,15 +369,23 @@ describe('PrivacyFlagsProcessor', () => {
     );
 
     it.each([
-      { label: HAULER, preserveSensitiveData: true },
-      { label: HAULER, preserveSensitiveData: false },
-      { label: HAULER, preserveSensitiveData: undefined },
-      { label: WASTE_GENERATOR, preserveSensitiveData: true },
-      { label: WASTE_GENERATOR, preserveSensitiveData: false },
-      { label: WASTE_GENERATOR, preserveSensitiveData: undefined },
+      { expected: true, label: HAULER, preserveSensitiveData: false },
+      { expected: true, label: HAULER, preserveSensitiveData: undefined },
+      { expected: false, label: PROCESSOR, preserveSensitiveData: undefined },
+      { expected: false, label: RECYCLER, preserveSensitiveData: undefined },
+      {
+        expected: true,
+        label: WASTE_GENERATOR,
+        preserveSensitiveData: false,
+      },
+      {
+        expected: true,
+        label: WASTE_GENERATOR,
+        preserveSensitiveData: undefined,
+      },
     ])(
-      'should not add a preserveSensitiveData review reason for the $label actor when preserveSensitiveData is $preserveSensitiveData',
-      async ({ label, preserveSensitiveData }) => {
+      'should add a review reason when the $label actor declares preserveSensitiveData as $preserveSensitiveData',
+      async ({ expected, label, preserveSensitiveData }) => {
         const massIDDocument = buildMassID({
           [actorEventKey(label)]: stubDocumentEvent({
             isPublic: true,
@@ -356,10 +397,49 @@ describe('PrivacyFlagsProcessor', () => {
 
         const { resultContent, resultStatus } = await evaluate(massIDDocument);
 
-        expect(resultStatus).toBe('PASSED');
-        expect(resultContent.reviewReasons).not.toContainEqual(
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toContainEqual(
           expect.objectContaining({
+            actual: preserveSensitiveData,
             eventLabel: label,
+            expected,
+            field: 'preserveSensitiveData',
+          }),
+        );
+      },
+    );
+
+    it.each([
+      { expected: true, label: HAULER, preserveSensitiveData: false },
+      { expected: false, label: PROCESSOR, preserveSensitiveData: true },
+      { expected: false, label: RECYCLER, preserveSensitiveData: true },
+      {
+        expected: true,
+        label: WASTE_GENERATOR,
+        preserveSensitiveData: false,
+      },
+    ])(
+      'should validate preserveSensitiveData on non-Actor events used by the $label participant',
+      async ({ expected, label, preserveSensitiveData }) => {
+        const actorEvent = conformantActorEvent(label);
+        const massIDDocument = buildMassID({
+          [actorEventKey(label)]: actorEvent,
+          [PICK_UP]: {
+            ...conformantEvent(PICK_UP),
+            participant: actorEvent.participant,
+            preserveSensitiveData,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toContainEqual(
+          expect.objectContaining({
+            actual: preserveSensitiveData,
+            code: 'PRIVACY_EVENT_PRESERVE_SENSITIVE_DATA_MISMATCH',
+            eventName: PICK_UP,
+            expected,
             field: 'preserveSensitiveData',
           }),
         );

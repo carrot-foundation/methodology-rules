@@ -17,7 +17,7 @@ import {
   ASSERTABLE_ACTOR_LABELS,
   EVENT_PRIVACY_SPEC,
   type EventPrivacySpec,
-  OPEN_ACTOR_LABELS,
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC,
   PRIVACY_REASON_CODES,
   RESULT_COMMENTS,
   SKIPPED_EVENT_NAMES,
@@ -35,9 +35,17 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
   }: RuleSubject): EvaluateResultOutput {
     const notValidated: NotValidatedEntry[] = [];
     const reviewReasons: PrivacyReviewReason[] = [];
+    const participantRoles = this.getParticipantRoles(events);
     let validatedEvents = 0;
 
     for (const event of events) {
+      const participantRole =
+        event.name === ACTOR
+          ? event.label
+          : participantRoles.get(event.participant.id);
+
+      this.validatePreserveSensitiveData(event, participantRole, reviewReasons);
+
       if (SKIPPED_EVENT_NAMES.has(event.name)) {
         continue;
       }
@@ -87,6 +95,24 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     return { events: document.externalEvents ?? [] };
   }
 
+  private getParticipantRoles(
+    events: BoldDocumentEvent[],
+  ): ReadonlyMap<string, string> {
+    const participantRoles = new Map<string, string>();
+
+    for (const event of events) {
+      if (
+        event.name === ACTOR &&
+        event.label !== undefined &&
+        ASSERTABLE_ACTOR_LABELS.has(event.label)
+      ) {
+        participantRoles.set(event.participant.id, event.label);
+      }
+    }
+
+    return participantRoles;
+  }
+
   private validateActorEvent(
     event: BoldDocumentEvent,
     reviewReasons: PrivacyReviewReason[],
@@ -109,19 +135,6 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         eventName: event.name,
         expected: true,
         field: 'isPublic',
-      });
-    }
-
-    if (OPEN_ACTOR_LABELS.has(label) && event.preserveSensitiveData === true) {
-      reviewReasons.push({
-        actual: event.preserveSensitiveData,
-        code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
-        description:
-          RESULT_COMMENTS.reviewRequired.ACTOR_PRESERVE_SENSITIVE_DATA(label),
-        eventLabel: label,
-        eventName: event.name,
-        expected: false,
-        field: 'preserveSensitiveData',
       });
     }
 
@@ -191,5 +204,42 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         });
       }
     }
+  }
+
+  private validatePreserveSensitiveData(
+    event: BoldDocumentEvent,
+    participantRole: string | undefined,
+    reviewReasons: PrivacyReviewReason[],
+  ): void {
+    if (participantRole === undefined) {
+      return;
+    }
+
+    const expected =
+      PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(participantRole);
+
+    if (expected === undefined || event.preserveSensitiveData === expected) {
+      return;
+    }
+
+    reviewReasons.push({
+      actual: event.preserveSensitiveData,
+      code:
+        event.name === ACTOR
+          ? PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA
+          : PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
+      description: RESULT_COMMENTS.reviewRequired.EVENT_PRESERVE_SENSITIVE_DATA(
+        event.name,
+        participantRole,
+        expected,
+      ),
+      ...(event.name === ACTOR && event.label !== undefined
+        ? { eventLabel: event.label }
+        : {}),
+      eventName: event.name,
+      expected,
+      field: 'preserveSensitiveData',
+      participantRole,
+    });
   }
 }
