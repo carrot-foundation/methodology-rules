@@ -561,6 +561,30 @@ describe('PrivacyFlagsProcessor', () => {
       expect(resultContent.reviewReasons).toEqual([]);
     });
 
+    it("should use an Actor event's own label when the participant also has an assertable Actor role", async () => {
+      const processorActorEvent = conformantActorEvent(PROCESSOR);
+      const massIDDocument = buildMassID({
+        [actorEventKey(INTEGRATOR)]: stubDocumentEvent({
+          isPublic: false,
+          label: INTEGRATOR,
+          name: ACTOR,
+          participant: processorActorEvent.participant,
+          preserveSensitiveData: true,
+        }),
+        [actorEventKey(PROCESSOR)]: processorActorEvent,
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).not.toContainEqual(
+        expect.objectContaining({
+          eventLabel: INTEGRATOR,
+          field: 'preserveSensitiveData',
+        }),
+      );
+    });
+
     it('should skip a BoldActorType label outside the assertable actor allow-list, such as Auditor, even with hostile privacy flags', async () => {
       const massIDDocument = buildMassID({
         [actorEventKey(AUDITOR)]: stubDocumentEvent({

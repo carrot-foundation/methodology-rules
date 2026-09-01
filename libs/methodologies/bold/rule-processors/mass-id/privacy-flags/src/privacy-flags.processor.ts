@@ -39,10 +39,10 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     let validatedEvents = 0;
 
     for (const event of events) {
-      const participantRole =
-        event.name === ACTOR
-          ? event.label
-          : participantRoles.get(event.participant.id);
+      const participantRole = this.getPreserveSensitiveDataParticipantRole(
+        event,
+        participantRoles,
+      );
 
       this.validatePreserveSensitiveDataIfSpecified(
         event,
@@ -115,6 +115,17 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     }
 
     return participantRoles;
+  }
+
+  private getPreserveSensitiveDataParticipantRole(
+    event: BoldDocumentEvent,
+    participantRoles: ReadonlyMap<string, string>,
+  ): string | undefined {
+    if (event.name === ACTOR) {
+      return event.label;
+    }
+
+    return participantRoles.get(event.participant.id);
   }
 
   private validateActorEvent(
