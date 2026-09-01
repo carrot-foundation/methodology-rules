@@ -13,7 +13,7 @@ workflow:
   - Create shared test cases
 inputs:
   - Rule name (kebab-case)
-  - Scope (mass-id, credit-order, or mass-id-certificate)
+  - Scope (`mass-id`)
   - Description of the rule
 outputs:
   - Scaffolded rule processor with processor, lambda handler, tests, and test cases
@@ -32,7 +32,7 @@ references:
    ```
 
    - `<name>`: kebab-case rule name (e.g., `vehicle-validation`)
-   - `<scope>`: processor group (`mass-id`, `credit-order`, or `mass-id-certificate`)
+   - `<scope>`: processor group (`mass-id` is the only one that exists today)
    - `<description>`: short description of what the rule validates
 
    This creates the standard file structure:

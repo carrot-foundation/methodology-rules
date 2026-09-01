@@ -38,9 +38,7 @@ methodology-rules/
 ├── libs/
 │   ├── methodologies/bold/
 │   │   └── rule-processors/     # Shared BOLD rule processors
-│   │       ├── mass-id/         #   MassID verification rules
-│   │       ├── credit-order/    #   Credit order rules
-│   │       └── mass-id-certificate/  # Certificate rules
+│   │       └── mass-id/         #   MassID verification rules
 │   └── shared/                  # Shared libraries across methodologies
 ├── tools/                       # CLI tooling
 │   ├── create-rule.js           #   Scaffold new rule processors

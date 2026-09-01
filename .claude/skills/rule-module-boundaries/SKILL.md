@@ -6,6 +6,7 @@ description: 'Rule mapping for module-boundaries'
 # Rule module-boundaries
 
 Apply this rule whenever work touches:
+
 - `libs/**/*.ts`
 
 Nx enforces strict module boundaries to keep the dependency graph clean and prevent coupling between unrelated parts of the codebase.
@@ -23,7 +24,7 @@ apps/methodologies/*  -->  libs/methodologies/bold/rule-processors/*
 
 Key constraints:
 
-- **Processors depend on shared only.** A rule processor under `libs/methodologies/bold/rule-processors/mass-id/` can import from `libs/shared/*` but never from `libs/methodologies/bold/rule-processors/credit-order/`.
+- **Processors depend on shared only.** A rule processor under `libs/methodologies/bold/rule-processors/mass-id/` can import from `libs/shared/*` but never from another processor group under `libs/methodologies/bold/rule-processors/`.
 - **Shared libraries are independent.** Shared libraries should not depend on processors or apps.
 - **No circular references.** If library A imports from library B, then B must not import from A.
 

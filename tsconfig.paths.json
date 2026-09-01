@@ -95,7 +95,7 @@
       "@carrot-fndn/shared/document/loader": [
         "libs/shared/document/loader/src/index.ts"
       ],
-       "@carrot-fndn/shared/document/loader/stubs": [
+      "@carrot-fndn/shared/document/loader/stubs": [
         "libs/shared/document/loader/src/document.stubs.ts"
       ],
       "@carrot-fndn/shared/document/seeds": [
@@ -121,12 +121,6 @@
       ],
       "@carrot-fndn/methodologies/bold/rule-processors/mass-id": [
         "libs/methodologies/bold/rule-processors/mass-id/src/index.ts"
-      ],
-      "@carrot-fndn/methodologies/bold/rule-processors/credit-order": [
-        "libs/methodologies/bold/rule-processors/credit-order/src/index.ts"
-      ],
-      "@carrot-fndn/methodologies/bold/rule-processors/mass-id-certificate": [
-        "libs/methodologies/bold/rule-processors/mass-id-certificate/src/index.ts"
       ],
       "@carrot-fndn/shared/rule/standard-data-processor": [
         "libs/shared/rule/standard-data-processor/src/index.ts"

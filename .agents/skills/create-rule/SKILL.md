@@ -10,7 +10,7 @@ description: 'Scaffold a new rule processor, implement the evaluation logic, and
    ```
 
    - `<name>`: kebab-case rule name (e.g., `vehicle-validation`)
-   - `<scope>`: processor group (`mass-id`, `credit-order`, or `mass-id-certificate`)
+   - `<scope>`: processor group (`mass-id` is the only one that exists today)
    - `<description>`: short description of what the rule validates
 
    This creates the standard file structure:
