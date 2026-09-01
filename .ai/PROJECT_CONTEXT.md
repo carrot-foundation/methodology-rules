@@ -54,10 +54,6 @@ libs/
           waste-mass-is-unique/
           waste-origin-identification/
           weighing/
-        mass-id-certificate/           # 1 processor for certificate documents
-          rewards-distribution/
-        credit-order/                  # 1 processor for credit order documents
-          rewards-distribution/
     bold-carbon/                       # BOLD Carbon Certificate methodology
       rules/                           # 1 rule set
     bold-recycling/                    # BOLD Recycling Credit Order methodology

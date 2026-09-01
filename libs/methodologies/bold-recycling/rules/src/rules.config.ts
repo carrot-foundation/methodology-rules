@@ -1,5 +1,4 @@
 export const rulesConfig = {
-  'credit-order': ['rewards-distribution'],
   'mass-id': [
     'waste-mass-is-unique',
     'no-conflicting-recycled-id-or-credit',
@@ -21,5 +20,4 @@ export const rulesConfig = {
     'composting-cycle-timeframe',
     'recycling-manifest-data',
   ],
-  'recycled-id': ['rewards-distribution'],
 } as const;

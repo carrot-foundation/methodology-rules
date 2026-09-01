@@ -1,6 +1,4 @@
 export const rulesConfig = {
-  'credit-order': ['rewards-distribution'],
-  'gas-id': ['rewards-distribution'],
   'mass-id': [
     'waste-mass-is-unique',
     'no-conflicting-gas-id-or-credit',

@@ -9,17 +9,7 @@
 
 ## Rules
 
-### credit-order
 
-| #   | Name                                                                                                                           | Version |
-| --- | ------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| 1   | [Rewards Distribution](../../../../apps/methodologies/bold-carbon/rule-processors/credit-order/rewards-distribution/README.md) | 1.0.0   |
-
-### gas-id
-
-| #   | Name                                                                                                                     | Version |
-| --- | ------------------------------------------------------------------------------------------------------------------------ | ------- |
-| 1   | [Rewards Distribution](../../../../apps/methodologies/bold-carbon/rule-processors/gas-id/rewards-distribution/README.md) | 1.0.0   |
 
 ### mass-id
 
