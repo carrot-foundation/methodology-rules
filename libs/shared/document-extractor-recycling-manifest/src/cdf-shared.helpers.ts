@@ -64,10 +64,15 @@ export const createRecyclerEntity = (
       : undefined,
   );
 
+export interface MtrDigitRange {
+  max: number;
+  min: number;
+}
+
 export const extractMtrNumbers = (
   rawText: string,
   sectionPattern: RegExp,
-  digitCount: number,
+  digitRange: MtrDigitRange,
 ): string[] => {
   const sectionMatch = sectionPattern.exec(rawText);
 
@@ -75,7 +80,10 @@ export const extractMtrNumbers = (
     return [];
   }
 
-  const digitPattern = new RegExp(`(\\d{${String(digitCount)}})`, 'g');
+  const digitPattern = new RegExp(
+    `(?<!\\d)(\\d{${String(digitRange.min)},${String(digitRange.max)}})(?!\\d)`,
+    'g',
+  );
 
   return [...sectionMatch[1].matchAll(digitPattern)].map(
     (match) => match[1] as string,
@@ -143,7 +151,7 @@ export const finalizeCdfExtraction = (
 
 export interface CdfParseConfig {
   issueDatePatterns: RegExp[];
-  mtrDigitCount: number;
+  mtrDigitRange: MtrDigitRange;
   mtrSectionPattern: RegExp;
   patterns: {
     documentNumber: RegExp;
@@ -373,7 +381,7 @@ export const parseCdfDocument = (
   const transportManifests = extractMtrNumbers(
     text,
     config.mtrSectionPattern,
-    config.mtrDigitCount,
+    config.mtrDigitRange,
   );
 
   if (transportManifests.length > 0) {

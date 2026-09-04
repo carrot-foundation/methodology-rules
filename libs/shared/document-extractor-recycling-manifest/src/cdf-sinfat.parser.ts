@@ -24,7 +24,7 @@ const SIGNATURE_PATTERNS = [
 
 const CDF_SINFAT_CONFIG: CdfParseConfig = {
   issueDatePatterns: [/Declaracao[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i],
-  mtrDigitCount: 10,
+  mtrDigitRange: { max: 10, min: 9 },
   mtrSectionPattern:
     // eslint-disable-next-line sonarjs/slow-regex
     /MTRs?\s+incluidos\s*\n([\s\S]*?)(?=\nNome\s+do\s+Responsavel|$)/i,

@@ -167,6 +167,29 @@ describe('CdfSinfatParser', () => {
       ]);
     });
 
+    it('should extract 9-digit transport manifest numbers when the section runs to the end of the document', () => {
+      const text = [
+        'Certificado de Destinação Final CDF nº 2154920/2026',
+        'ADUBOS VERDES ORGANICOS LTDA, CPF/CNPJ 44.555.666/0001-88 certifica que recebeu',
+        'Identificação do Gerador',
+        'Razão Social: Laticínios Modelo LTDA CPF/CNPJ: 55.666.777/0035-99',
+        'Declaração',
+        'Cidade Interior, 10/04/2026',
+        'MTRs incluidos',
+        '612345678, 612345679, 612345680',
+        'CDF emitido no Sistema MTR',
+        'FAZENDA EXEMPLO, nº S/N Zona Rural Cep 12345000 Cidade Interior RS',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.transportManifests?.parsed).toEqual([
+        '612345678',
+        '612345679',
+        '612345680',
+      ]);
+    });
+
     it('should set low confidence when recycler preamble is missing', () => {
       const noRecyclerText = [
         'Certificado de Destinação Final CDF nº 100/2023',
