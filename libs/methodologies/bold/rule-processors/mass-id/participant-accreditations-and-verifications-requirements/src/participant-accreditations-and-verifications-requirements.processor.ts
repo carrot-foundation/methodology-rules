@@ -112,24 +112,38 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     };
   }
 
+  /**
+   * One participant can hold several of these roles at once — a recycler is
+   * normally both PROCESSOR and RECYCLER — and each role carries its own
+   * accreditation subtype, so the roles are collected per participant rather
+   * than overwritten.
+   */
   private getActorParticipants(
     massIDDocument: BoldDocument,
-  ): Map<string, BoldDocumentEventLabel> {
+  ): Map<string, Set<BoldDocumentEventLabel>> {
+    const actorParticipants = new Map<string, Set<BoldDocumentEventLabel>>();
+
     // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
-    return new Map(
-      massIDDocument
-        .externalEvents!.filter(
-          eventLabelIsAnyOf([
-            BoldDocumentEventLabel.INTEGRATOR,
-            BoldDocumentEventLabel.PROCESSOR,
-            BoldDocumentEventLabel.RECYCLER,
-          ]),
-        )
-        .map((event) => [
+    for (const event of massIDDocument.externalEvents!.filter(
+      eventLabelIsAnyOf([
+        BoldDocumentEventLabel.INTEGRATOR,
+        BoldDocumentEventLabel.PROCESSOR,
+        BoldDocumentEventLabel.RECYCLER,
+      ]),
+    )) {
+      const actorTypes = actorParticipants.get(event.participant.id);
+
+      if (actorTypes) {
+        actorTypes.add(event.label as BoldDocumentEventLabel);
+      } else {
+        actorParticipants.set(
           event.participant.id,
-          event.label as BoldDocumentEventLabel,
-        ]),
-    );
+          new Set([event.label as BoldDocumentEventLabel]),
+        );
+      }
+    }
+
+    return actorParticipants;
   }
 
   private async getRuleSubject(
@@ -207,7 +221,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }
 
   private validateAllActors(
-    actorParticipants: Map<string, BoldDocumentEventLabel>,
+    actorParticipants: Map<string, Set<BoldDocumentEventLabel>>,
     accreditationDocuments: Map<string, BoldDocument[]>,
   ): Error | undefined {
     const missingParticipants: string[] = [];
@@ -216,31 +230,33 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       participantId: string;
     }> = [];
 
-    for (const [participantId, actorType] of actorParticipants.entries()) {
+    for (const [participantId, actorTypes] of actorParticipants.entries()) {
       // Documents are guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
       const participantDocuments = accreditationDocuments.get(participantId)!;
 
-      if (ACTORS_REQUIRING_DATES.has(actorType)) {
-        this.validateActor(
-          participantId,
-          actorType,
-          participantDocuments,
-          missingParticipants,
-          participantsWithMultipleValid,
-          isAccreditationValid,
-        );
-        /* v8 ignore start -- actorType is always in one of the two sets */
-      } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
-        this.validateActor(
-          participantId,
-          actorType,
-          participantDocuments,
-          missingParticipants,
-          participantsWithMultipleValid,
-          isAccreditationValidWithOptionalDates,
-        );
+      for (const actorType of actorTypes) {
+        if (ACTORS_REQUIRING_DATES.has(actorType)) {
+          this.validateActor(
+            participantId,
+            actorType,
+            participantDocuments,
+            missingParticipants,
+            participantsWithMultipleValid,
+            isAccreditationValid,
+          );
+          /* v8 ignore start -- actorType is always in one of the two sets */
+        } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
+          this.validateActor(
+            participantId,
+            actorType,
+            participantDocuments,
+            missingParticipants,
+            participantsWithMultipleValid,
+            isAccreditationValidWithOptionalDates,
+          );
+        }
+        /* v8 ignore stop */
       }
-      /* v8 ignore stop */
     }
 
     if (isNonEmptyArray(missingParticipants)) {
