@@ -81,7 +81,7 @@ export const extractMtrNumbers = (
   }
 
   const digitPattern = new RegExp(
-    `(?<!\\d)(\\d{${String(digitRange.min)},${String(digitRange.max)}})(?!\\d)`,
+    String.raw`(?<!\d)(\d{${String(digitRange.min)},${String(digitRange.max)}})(?!\d)`,
     'g',
   );
 
