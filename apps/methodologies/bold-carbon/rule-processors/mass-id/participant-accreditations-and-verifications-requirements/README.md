@@ -15,7 +15,7 @@ Methodology: **BOLD Carbon**
 
 ## 📄 Description
 
-Validates that all participants in the MassID document have valid accreditation documents with active dates and no duplicate accreditations of the same type.
+Validates that the Integrator, Processor and Recycler in the MassID document have accreditation documents, requiring an approved accreditation with active dates for the Processor and Recycler, and no duplicate accreditations of the same type.
 
 ## 📋 Methodology Framework Rules
 
