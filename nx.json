@@ -129,6 +129,7 @@
     "src": ["{projectRoot}/src/**/*"],
     "production": [
       "src",
+      "{projectRoot}/package.json",
       "!{projectRoot}/**/?(*.)+(spec|test|stubs).[jt]s?(x)?(.snap)",
       "!{projectRoot}/**/testing/**"
     ],
