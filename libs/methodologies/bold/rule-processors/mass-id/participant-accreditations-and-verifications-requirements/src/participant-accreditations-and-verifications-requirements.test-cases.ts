@@ -261,6 +261,50 @@ const massIDWithParticipantMultipleRoles =
     ]),
   );
 
+// The same participant is PROCESSOR and RECYCLER, and is validly accredited as
+// RECYCLER while its PROCESSOR accreditation has expired. Both roles must be
+// checked, so this must fail on the PROCESSOR one.
+const dualRoleParticipantWithOneExpiredAccreditation = stubParticipant({
+  type: PROCESSOR,
+});
+
+const massIDWithDualRoleParticipantOneExpiredAccreditation =
+  createMassIDWithMultipleActorAccreditations(
+    new Map([
+      [
+        INTEGRATOR,
+        {
+          externalEventsMap: new Map([
+            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+          ]),
+        },
+      ],
+      [
+        PROCESSOR,
+        {
+          externalEventsMap: new Map([
+            [ACCREDITATION_RESULT, createExpiredAccreditationResultEvent()],
+          ]),
+        },
+      ],
+      [
+        RECYCLER,
+        {
+          externalEventsMap: new Map([
+            [ACCREDITATION_RESULT, createValidAccreditationResultEvent()],
+          ]),
+        },
+      ],
+    ]),
+    new Map([
+      [HAULER, stubParticipant({ type: HAULER })],
+      [INTEGRATOR, stubParticipant({ type: INTEGRATOR })],
+      [PROCESSOR, dualRoleParticipantWithOneExpiredAccreditation],
+      [RECYCLER, dualRoleParticipantWithOneExpiredAccreditation],
+      [WASTE_GENERATOR, stubParticipant({ type: WASTE_GENERATOR })],
+    ]),
+  );
+
 const massIDWithWasteGeneratorButNoAccreditation =
   createMassIDWithMultipleActorAccreditations(
     new Map([
@@ -469,6 +513,21 @@ export const participantAccreditationsAndVerificationsRequirementsTestCases: Par
       resultStatus: 'PASSED',
       scenario:
         'The participant has one valid accreditation as PROCESSOR and one as RECYCLER (should pass)',
+    },
+    {
+      documents: [
+        massIDWithDualRoleParticipantOneExpiredAccreditation.massIDDocument,
+        ...massIDWithDualRoleParticipantOneExpiredAccreditation.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDWithDualRoleParticipantOneExpiredAccreditation.massIDAuditDocument,
+      resultComment:
+        processorError.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+          [PROCESSOR],
+        ),
+      resultStatus: 'FAILED',
+      scenario:
+        'The participant is both PROCESSOR and RECYCLER and its PROCESSOR accreditation is expired (should fail — both roles are validated)',
     },
     {
       documents: [

@@ -105,6 +105,7 @@ describe('Document Helpers', () => {
         neighborhood: undefined,
         zipCode: undefined,
       });
+
       for (const event of result?.externalEvents ?? []) {
         expect(event.address).toMatchObject({
           latitude: undefined,
@@ -143,6 +144,7 @@ describe('Document Helpers', () => {
       expect(result?.primaryParticipant).toMatchObject({
         businessName: undefined,
       });
+
       for (const event of result?.externalEvents ?? []) {
         expect(event.participant).toMatchObject({ businessName: undefined });
       }
