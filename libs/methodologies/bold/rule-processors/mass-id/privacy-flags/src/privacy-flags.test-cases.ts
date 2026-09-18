@@ -4,18 +4,15 @@ import {
   stubDocumentEvent,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
-import {
-  BoldActorType,
-  BoldDocumentEventName,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import {
   ASSERTABLE_ACTOR_LABELS,
   EVENT_PRIVACY_SPEC,
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC,
 } from './privacy-flags.constants';
 
 const { ACTOR } = BoldDocumentEventName;
-const { HAULER, WASTE_GENERATOR } = BoldActorType;
 
 export const SPECIFIED_EVENT_NAMES = [...EVENT_PRIVACY_SPEC.keys()];
 
@@ -49,7 +46,8 @@ export const conformantActorEvent = (label: string): BoldDocumentEvent =>
     isPublic: true,
     label,
     name: ACTOR,
-    preserveSensitiveData: label === HAULER || label === WASTE_GENERATOR,
+    preserveSensitiveData:
+      PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(label) ?? false,
   });
 
 export const conformantExternalEventsMap = (): Record<

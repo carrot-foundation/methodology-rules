@@ -1,0 +1,209 @@
+{
+  "$comment": [
+    "Conformance vectors for participant visibility resolution.",
+    "Canonical rule: participant-visibility.spec.md beside this file.",
+    "Vendored byte-identical into palantir, smaug, methodology-rules and rivendell.",
+    "Each repo runs these through ITS OWN resolver. Do not copy a reference implementation.",
+    "",
+    "Each vector describes ONE participant across ONE whole document. `occurrences` are every",
+    "place that participant id appears; `preserveSensitiveData` is omitted when the source data",
+    "omits it, which is a distinct case from false and is where implementations diverge.",
+    "",
+    "`decidedBy` names the spec step that decides, so a failure points at the rule, not just at",
+    "a boolean. It is documentation for the person reading the failure, not an assertion."
+  ],
+  "version": "1.0.0",
+  "roles": {
+    "public": ["Processor", "Recycler", "Network Integrator", "Waste Manager"],
+    "private": ["Waste Generator", "Hauler", "Bin Custodian"]
+  },
+  "vectors": [
+    {
+      "id": "explicit-true-beats-public-role-default",
+      "decidedBy": 1,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Recycler", "preserveSensitiveData": true }],
+      "expected": "private"
+    },
+    {
+      "id": "explicit-true-on-one-of-several-occurrences-propagates",
+      "decidedBy": 1,
+      "note": "Most-private-wins across the document. A last-write-wins map resolves this public and is wrong.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        { "role": "Recycler" },
+        { "role": "Recycler", "preserveSensitiveData": true }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "explicit-true-beats-explicit-false-elsewhere",
+      "decidedBy": 1,
+      "participantType": "COMPANY",
+      "occurrences": [
+        { "role": "Recycler", "preserveSensitiveData": false },
+        { "role": "Hauler", "preserveSensitiveData": true }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "explicit-true-beats-hauler-plus-recycler-exception",
+      "decidedBy": 1,
+      "note": "Step 3 applies only when no occurrence asks for privacy.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        { "role": "Hauler", "preserveSensitiveData": true },
+        { "role": "Recycler" }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "explicit-true-beats-network-integrator-default",
+      "decidedBy": 1,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Network Integrator", "preserveSensitiveData": true }],
+      "expected": "private"
+    },
+
+    {
+      "id": "waste-generator-default-private",
+      "decidedBy": 2,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Waste Generator" }],
+      "expected": "private"
+    },
+    {
+      "id": "waste-generator-explicit-false-is-still-private",
+      "decidedBy": 2,
+      "note": "The asymmetry with Hauler. Step 2 is terminal, so step 4 is never reached for a generator.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Waste Generator", "preserveSensitiveData": false }],
+      "expected": "private"
+    },
+    {
+      "id": "waste-generator-with-recycler-is-private",
+      "decidedBy": 2,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Waste Generator" }, { "role": "Recycler" }],
+      "expected": "private"
+    },
+    {
+      "id": "waste-generator-blocks-the-hauler-plus-recycler-exception",
+      "decidedBy": 2,
+      "note": "Holds Hauler and Recycler, which alone would be public, but the generator role overrides.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        { "role": "Waste Generator" },
+        { "role": "Hauler" },
+        { "role": "Recycler" }
+      ],
+      "expected": "private"
+    },
+
+    {
+      "id": "hauler-with-recycler-is-public",
+      "decidedBy": 3,
+      "note": "No flag anywhere. Role defaults alone would resolve private (Hauler); the exception overrides.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Hauler" }, { "role": "Recycler" }],
+      "expected": "public"
+    },
+    {
+      "id": "hauler-with-processor-is-public",
+      "decidedBy": 3,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Hauler" }, { "role": "Processor" }],
+      "expected": "public"
+    },
+
+    {
+      "id": "hauler-explicit-false-is-public",
+      "decidedBy": 4,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Hauler", "preserveSensitiveData": false }],
+      "expected": "public"
+    },
+    {
+      "id": "bin-custodian-explicit-false-is-public",
+      "decidedBy": 4,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Bin Custodian", "preserveSensitiveData": false }],
+      "expected": "public"
+    },
+    {
+      "id": "explicit-false-beats-the-individual-type-fallback",
+      "decidedBy": 4,
+      "participantType": "INDIVIDUAL",
+      "occurrences": [{ "role": "Bin Custodian", "preserveSensitiveData": false }],
+      "expected": "public"
+    },
+
+    {
+      "id": "recycler-with-field-absent-is-public",
+      "decidedBy": 5,
+      "note": "The absent-field case. An implementation that treats absence as withhold fails here.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Recycler" }],
+      "expected": "public"
+    },
+    {
+      "id": "processor-with-field-absent-is-public",
+      "decidedBy": 5,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Processor" }],
+      "expected": "public"
+    },
+    {
+      "id": "network-integrator-with-field-absent-is-public",
+      "decidedBy": 5,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Network Integrator" }],
+      "expected": "public"
+    },
+    {
+      "id": "waste-manager-with-field-absent-is-public",
+      "decidedBy": 5,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Waste Manager" }],
+      "expected": "public"
+    },
+    {
+      "id": "hauler-with-field-absent-is-private",
+      "decidedBy": 5,
+      "note": "The mirror of the recycler case. An implementation that treats absence as publish fails here.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Hauler" }],
+      "expected": "private"
+    },
+    {
+      "id": "bin-custodian-with-field-absent-is-private",
+      "decidedBy": 5,
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Bin Custodian" }],
+      "expected": "private"
+    },
+    {
+      "id": "disagreeing-role-defaults-resolve-private",
+      "decidedBy": 5,
+      "note": "Waste Manager is public and Hauler is private, and this pair is not the step 3 exception.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Hauler" }, { "role": "Waste Manager" }],
+      "expected": "private"
+    },
+    {
+      "id": "unknown-role-company-is-public",
+      "decidedBy": 5,
+      "note": "Type fallback, reached only when no role is one of the seven.",
+      "participantType": "COMPANY",
+      "occurrences": [{ "role": "Auditor" }],
+      "expected": "public"
+    },
+    {
+      "id": "unknown-role-individual-is-private",
+      "decidedBy": 5,
+      "participantType": "INDIVIDUAL",
+      "occurrences": [{ "role": "Auditor" }],
+      "expected": "private"
+    }
+  ]
+}

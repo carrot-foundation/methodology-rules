@@ -101,19 +101,25 @@ describe('privacy-flags constants', () => {
     expect(
       Object.fromEntries(PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC),
     ).toEqual({
+      'Bin Custodian': true,
       Hauler: true,
+      Integrator: false,
       Processor: false,
       Recycler: false,
       'Waste Generator': true,
+      'Waste Manager': false,
     });
   });
 
-  it('should assert privacy flags only for the Hauler, Processor, Recycler, and Waste Generator actors', () => {
+  it('should assert privacy flags for every participant role the visibility spec names', () => {
     expect([...ASSERTABLE_ACTOR_LABELS].sort(sortAlphabetically)).toEqual([
+      'Bin Custodian',
       'Hauler',
+      'Integrator',
       'Processor',
       'Recycler',
       'Waste Generator',
+      'Waste Manager',
     ]);
   });
 
