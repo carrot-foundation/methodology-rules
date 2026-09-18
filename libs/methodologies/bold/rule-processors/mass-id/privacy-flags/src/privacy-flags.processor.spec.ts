@@ -592,6 +592,31 @@ describe('PrivacyFlagsProcessor', () => {
       );
     });
 
+    it('should add a review reason when the Integrator actor declares isPublic as false', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(INTEGRATOR)]: stubDocumentEvent({
+          isPublic: false,
+          label: INTEGRATOR,
+          name: ACTOR,
+          preserveSensitiveData: false,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons).toContainEqual(
+        expect.objectContaining({
+          actual: false,
+          code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
+          eventLabel: INTEGRATOR,
+          eventName: ACTOR,
+          expected: true,
+          field: 'isPublic',
+        }),
+      );
+    });
+
     it('should skip the METHODOLOGY PLATFORM label even with hostile privacy flags, because it is outside the assertable actor allow-list', async () => {
       const massIDDocument = buildMassID({
         [actorEventKey(METHODOLOGY_PLATFORM_LABEL)]: stubDocumentEvent({
