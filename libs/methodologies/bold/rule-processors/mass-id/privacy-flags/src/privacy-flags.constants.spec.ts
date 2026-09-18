@@ -107,7 +107,7 @@ describe('privacy-flags constants', () => {
       Processor: false,
       Recycler: false,
       'Waste Generator': true,
-      'Waste Manager': false,
+      'Waste Manager': true,
     });
   });
 

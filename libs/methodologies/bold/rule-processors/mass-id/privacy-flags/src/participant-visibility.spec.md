@@ -24,8 +24,8 @@ in the document, then resolved in this order. The first step that matches decide
    protects nothing. This is the only exception of its kind.
 4. `preserveSensitiveData: false` on any occurrence → **public**.
 5. Role default:
-   - **public** — Processor, Recycler, Network Integrator, Waste Manager
-   - **private** — Waste Generator, Hauler, Bin Custodian
+   - **public** — Processor, Recycler, Network Integrator
+   - **private** — Waste Generator, Hauler, Bin Custodian, Waste Manager
    - Roles disagreeing at this step resolve **private** (most-private-wins).
    - No known role → participant type: `COMPANY` → public, anything else → private.
 
@@ -47,6 +47,15 @@ Seven, spelled as the published supply-chain vocabulary spells them — `Hauler`
 
 `Waste Generator`, `Waste Manager`, `Bin Custodian`, `Hauler`, `Processor`, `Recycler`,
 `Network Integrator`.
+
+**Waste Manager is private to stop generator re-identification, not because its own
+participation is sensitive.** A waste manager is contracted by one generator to choose the
+destination, so wherever it serves a single generator in a municipality, naming it names the
+generator beside it — and municipality and state are themselves public
+`[lore:canonical/adr/public-location-granularity]`. The generator masking is only as strong as
+the least-masked party standing next to it. Do not "correct" this back to public because the
+role's own contribution is a public-interest decision; that is the argument the ADR originally
+made, and it is about a different question than re-identification.
 
 **Bin Custodian is an unvalidated working assumption.** It was defined to unblock the Atlas
 data contract and has not been validated with the team. Implement it as specified, but do not

@@ -131,7 +131,8 @@ export const PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC: ReadonlyMap<
   [PROCESSOR, false],
   [RECYCLER, false],
   [WASTE_GENERATOR, true],
-  [WASTE_MANAGER, false],
+  // Private to stop generator re-identification, not because the role's own participation is sensitive.
+  [WASTE_MANAGER, true],
 ]);
 
 export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set(
