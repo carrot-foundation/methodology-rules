@@ -41,14 +41,21 @@ export const conformantEvent = (eventName: string): BoldDocumentEvent => {
   });
 };
 
-export const conformantActorEvent = (label: string): BoldDocumentEvent =>
-  stubDocumentEvent({
+export const conformantActorEvent = (label: string): BoldDocumentEvent => {
+  const preserveSensitiveData =
+    PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(label);
+
+  if (preserveSensitiveData === undefined) {
+    throw new Error(`No participant privacy spec found for label "${label}"`);
+  }
+
+  return stubDocumentEvent({
     isPublic: true,
     label,
     name: ACTOR,
-    preserveSensitiveData:
-      PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(label) ?? false,
+    preserveSensitiveData,
   });
+};
 
 export const conformantExternalEventsMap = (): Record<
   string,

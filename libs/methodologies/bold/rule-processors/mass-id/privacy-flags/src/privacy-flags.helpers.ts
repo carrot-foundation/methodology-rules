@@ -6,10 +6,17 @@ const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
 export interface ParticipantOccurrence {
   preserveSensitiveData?: boolean | undefined;
-  role: string;
+  role?: string | undefined;
 }
 
 export type ParticipantVisibility = 'private' | 'public';
+
+export const participantRolesOf = (
+  occurrences: readonly ParticipantOccurrence[],
+): ReadonlySet<string> =>
+  new Set(
+    occurrences.flatMap(({ role }) => (role === undefined ? [] : [role])),
+  );
 
 export const resolveParticipantVisibility = (
   occurrences: readonly ParticipantOccurrence[],
@@ -22,7 +29,7 @@ export const resolveParticipantVisibility = (
     return 'private';
   }
 
-  const roles = new Set(occurrences.map(({ role }) => role));
+  const roles = participantRolesOf(occurrences);
 
   if (roles.has(WASTE_GENERATOR)) {
     return 'private';

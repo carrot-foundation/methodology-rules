@@ -7,18 +7,18 @@ import type { ParticipantOccurrence } from './privacy-flags.helpers';
 
 import { resolveParticipantVisibility } from './privacy-flags.helpers';
 
+const VectorOccurrenceSchema = z.object({
+  preserveSensitiveData: z.boolean().optional(),
+  role: z.string(),
+});
+
 const VectorsFileSchema = z.object({
   vectors: z.array(
     z.object({
       decidedBy: z.number(),
       expected: z.enum(['private', 'public']),
       id: z.string(),
-      occurrences: z.array(
-        z.object({
-          preserveSensitiveData: z.boolean().optional(),
-          role: z.string(),
-        }),
-      ),
+      occurrences: z.array(VectorOccurrenceSchema),
       participantType: z.string(),
     }),
   ),
@@ -49,7 +49,7 @@ const UNEXPRESSIBLE_VECTORS: ReadonlyMap<string, string> = new Map([
 const sortAlphabetically = (a: string, b: string): number => a.localeCompare(b);
 
 const toOccurrences = (
-  occurrences: readonly ParticipantOccurrence[],
+  occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
   occurrences.map(({ preserveSensitiveData, role }) => ({
     preserveSensitiveData,

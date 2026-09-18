@@ -23,7 +23,10 @@ import {
   RESULT_COMMENTS,
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
-import { resolveParticipantVisibility } from './privacy-flags.helpers';
+import {
+  participantRolesOf,
+  resolveParticipantVisibility,
+} from './privacy-flags.helpers';
 
 const { ACTOR } = BoldDocumentEventName;
 
@@ -114,6 +117,12 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     occurrences: Map<string, ParticipantOccurrence[]>,
   ): void {
     const participantOccurrences = occurrences.get(event.participant.id) ?? [];
+
+    if (participantRoles.size === 0) {
+      participantOccurrences.push({
+        preserveSensitiveData: event.preserveSensitiveData,
+      });
+    }
 
     for (const role of participantRoles) {
       participantOccurrences.push({
@@ -309,7 +318,7 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         continue;
       }
 
-      const roles = new Set(participantOccurrences.map(({ role }) => role));
+      const roles = participantRolesOf(participantOccurrences);
 
       for (const participantRole of roles) {
         if (

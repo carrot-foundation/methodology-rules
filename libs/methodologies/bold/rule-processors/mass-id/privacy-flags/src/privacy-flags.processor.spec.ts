@@ -757,6 +757,27 @@ describe('PrivacyFlagsProcessor', () => {
       );
     });
 
+    it('should collect preserveSensitiveData from an unlabeled ACTOR event of the same participant', async () => {
+      const haulerActorEvent = conformantActorEvent(HAULER);
+      const massIDDocument = buildMassID({
+        'ACTOR-unlabeled': stubDocumentEvent({
+          isPublic: true,
+          name: ACTOR,
+          participant: haulerActorEvent.participant,
+          preserveSensitiveData: true,
+        }),
+        [actorEventKey(HAULER)]: {
+          ...haulerActorEvent,
+          preserveSensitiveData: undefined,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('PASSED');
+      expect(resultContent.reviewReasons).toEqual([]);
+    });
+
     it('should skip an ACTOR event with no label even when isPublic is false', async () => {
       const massIDDocument = buildMassID({
         'ACTOR-unlabeled': stubDocumentEvent({
