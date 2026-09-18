@@ -7,6 +7,7 @@ import {
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import type { ParticipantOccurrence } from './privacy-flags.helpers';
 import type {
   NotValidatedEntry,
   PrivacyFlagsResultContent,
@@ -22,6 +23,10 @@ import {
   RESULT_COMMENTS,
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
+import {
+  participantRolesOf,
+  resolveParticipantVisibility,
+} from './privacy-flags.helpers';
 
 const { ACTOR } = BoldDocumentEventName;
 
@@ -36,11 +41,18 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     const notValidated: NotValidatedEntry[] = [];
     const reviewReasons: PrivacyReviewReason[] = [];
     const participantRoles = this.getParticipantRoles(events);
+    const occurrences = new Map<string, ParticipantOccurrence[]>();
     let validatedEvents = 0;
 
     for (const event of events) {
       const participantRolesForEvent =
         this.getPreserveSensitiveDataParticipantRoles(event, participantRoles);
+
+      this.collectParticipantOccurrences(
+        event,
+        participantRolesForEvent,
+        occurrences,
+      );
 
       this.validatePreserveSensitiveDataIfSpecified(
         event,
@@ -71,6 +83,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
       this.validateEvent(event, eventSpec, notValidated, reviewReasons);
     }
 
+    this.validatePreserveSensitiveDataIsDeclared(occurrences, reviewReasons);
+
     const resultContent: PrivacyFlagsResultContent = {
       notValidated,
       reviewReasons,
@@ -95,6 +109,29 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
 
   protected override getRuleSubject(document: BoldDocument): RuleSubject {
     return { events: document.externalEvents ?? [] };
+  }
+
+  private collectParticipantOccurrences(
+    event: BoldDocumentEvent,
+    participantRoles: ReadonlySet<string>,
+    occurrences: Map<string, ParticipantOccurrence[]>,
+  ): void {
+    const participantOccurrences = occurrences.get(event.participant.id) ?? [];
+
+    if (participantRoles.size === 0) {
+      participantOccurrences.push({
+        preserveSensitiveData: event.preserveSensitiveData,
+      });
+    }
+
+    for (const role of participantRoles) {
+      participantOccurrences.push({
+        preserveSensitiveData: event.preserveSensitiveData,
+        role,
+      });
+    }
+
+    occurrences.set(event.participant.id, participantOccurrences);
   }
 
   private getParticipantRoles(
@@ -125,8 +162,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     event: BoldDocumentEvent,
     participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
   ): ReadonlySet<string> {
-    if (event.name === ACTOR) {
-      return event.label === undefined ? new Set() : new Set([event.label]);
+    if (event.name === ACTOR && event.label !== undefined) {
+      return new Set([event.label]);
     }
 
     return participantRoles.get(event.participant.id) ?? new Set();
@@ -262,6 +299,50 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         field: 'preserveSensitiveData',
         participantRole,
       });
+    }
+  }
+
+  private validatePreserveSensitiveDataIsDeclared(
+    occurrences: ReadonlyMap<string, ParticipantOccurrence[]>,
+    reviewReasons: PrivacyReviewReason[],
+  ): void {
+    for (const participantOccurrences of occurrences.values()) {
+      if (resolveParticipantVisibility(participantOccurrences) !== 'private') {
+        continue;
+      }
+
+      for (const participantRole of participantRolesOf(
+        participantOccurrences,
+      )) {
+        if (
+          PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(participantRole) !== true
+        ) {
+          continue;
+        }
+
+        const roleDeclared = participantOccurrences.some(
+          ({ preserveSensitiveData, role }) =>
+            role === participantRole && preserveSensitiveData !== undefined,
+        );
+
+        if (roleDeclared) {
+          continue;
+        }
+
+        reviewReasons.push({
+          actual: undefined,
+          code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+          description:
+            RESULT_COMMENTS.reviewRequired.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING(
+              participantRole,
+            ),
+          eventLabel: participantRole,
+          eventName: ACTOR,
+          expected: true,
+          field: 'preserveSensitiveData',
+          participantRole,
+        });
+      }
     }
   }
 }

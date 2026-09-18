@@ -1,3 +1,8 @@
 # Add files here to ignore them from prettier formatting
 /dist
 /coverage
+
+# Vendored byte-identical across palantir, smaug, methodology-rules and rivendell.
+# Reformatting either file desynchronizes the copies.
+**/participant-visibility.spec.md
+**/participant-visibility.vectors.json

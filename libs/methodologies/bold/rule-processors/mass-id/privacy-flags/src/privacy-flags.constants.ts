@@ -36,7 +36,12 @@ const {
   WEIGHING,
 } = BoldDocumentEventName;
 
-const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
+const { HAULER, INTEGRATOR, PROCESSOR, RECYCLER, WASTE_GENERATOR } =
+  BoldActorType;
+
+// Not in BoldActorType: the vendored participant-visibility spec defines them, BOLD has not adopted them.
+const BIN_CUSTODIAN = 'Bin Custodian';
+const WASTE_MANAGER = 'Waste Manager';
 
 export interface AttributePrivacySpec {
   isPublic: boolean;
@@ -120,10 +125,14 @@ export const PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC: ReadonlyMap<
   string,
   boolean
 > = new Map([
+  [BIN_CUSTODIAN, true],
   [HAULER, true],
+  [INTEGRATOR, false],
   [PROCESSOR, false],
   [RECYCLER, false],
   [WASTE_GENERATOR, true],
+  // Private to stop generator re-identification, not because the role's own participation is sensitive.
+  [WASTE_MANAGER, true],
 ]);
 
 export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set(
@@ -144,6 +153,8 @@ export const PRIVACY_REASON_CODES = {
   EVENT_IS_PUBLIC: 'PRIVACY_EVENT_IS_PUBLIC_MISMATCH',
   EVENT_PRESERVE_SENSITIVE_DATA:
     'PRIVACY_EVENT_PRESERVE_SENSITIVE_DATA_MISMATCH',
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING:
+    'PRIVACY_PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING',
 } as const;
 
 export const RESULT_COMMENTS = {
@@ -174,5 +185,7 @@ export const RESULT_COMMENTS = {
       expected: boolean,
     ) =>
       `The "${eventName}" event used by the "${participantRole}" participant must declare "preserveSensitiveData" as ${String(expected)}.`,
+    PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING: (participantRole: string) =>
+      `The "${participantRole}" participant resolves to private visibility, so an event must declare "preserveSensitiveData" as true.`,
   },
 } as const;
