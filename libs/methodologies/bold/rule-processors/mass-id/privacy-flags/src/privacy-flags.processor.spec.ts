@@ -757,6 +757,39 @@ describe('PrivacyFlagsProcessor', () => {
       );
     });
 
+    it.each([{ label: HAULER }, { label: WASTE_GENERATOR }])(
+      'should validate an unlabeled ACTOR event declaring preserveSensitiveData as false against the $label role it belongs to',
+      async ({ label }) => {
+        const actorEvent = conformantActorEvent(label);
+        const massIDDocument = buildMassID({
+          'ACTOR-unlabeled': stubDocumentEvent({
+            isPublic: true,
+            name: ACTOR,
+            participant: actorEvent.participant,
+            preserveSensitiveData: false,
+          }),
+          [actorEventKey(label)]: {
+            ...actorEvent,
+            preserveSensitiveData: undefined,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toContainEqual(
+          expect.objectContaining({
+            actual: false,
+            code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+            eventName: ACTOR,
+            expected: true,
+            field: 'preserveSensitiveData',
+            participantRole: label,
+          }),
+        );
+      },
+    );
+
     it('should collect preserveSensitiveData from an unlabeled ACTOR event of the same participant', async () => {
       const haulerActorEvent = conformantActorEvent(HAULER);
       const massIDDocument = buildMassID({

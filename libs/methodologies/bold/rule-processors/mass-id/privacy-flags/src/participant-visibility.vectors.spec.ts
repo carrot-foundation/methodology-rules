@@ -22,9 +22,10 @@ const VectorsFileSchema = z.object({
       participantType: z.string(),
     }),
   ),
+  version: z.string(),
 });
 
-const { vectors } = VectorsFileSchema.parse(
+const { vectors, version } = VectorsFileSchema.parse(
   JSON.parse(
     readFileSync(
       path.join(import.meta.dirname, 'participant-visibility.vectors.json'),
@@ -65,8 +66,11 @@ const unexpressible = vectors
   }));
 
 describe('participant-visibility.vectors.json', () => {
-  it('should account for every vendored vector as either expressible or explicitly unexpressible', () => {
-    expect(expressible.length + unexpressible.length).toBe(vectors.length);
+  it('should replay the vendored contract this suite was written against', () => {
+    expect({ vectorCount: vectors.length, version }).toEqual({
+      vectorCount: 23,
+      version: '1.1.0',
+    });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
       [...UNEXPRESSIBLE_VECTORS.keys()].sort(sortAlphabetically),
     );

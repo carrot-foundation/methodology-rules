@@ -162,8 +162,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     event: BoldDocumentEvent,
     participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
   ): ReadonlySet<string> {
-    if (event.name === ACTOR) {
-      return event.label === undefined ? new Set() : new Set([event.label]);
+    if (event.name === ACTOR && event.label !== undefined) {
+      return new Set([event.label]);
     }
 
     return participantRoles.get(event.participant.id) ?? new Set();
