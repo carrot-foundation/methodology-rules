@@ -28,6 +28,12 @@ in the document, then resolved in this order. The first step that matches decide
    - **private** — Waste Generator, Hauler, Bin Custodian, Waste Manager
    - Roles disagreeing at this step resolve **private** (most-private-wins).
    - No known role → participant type: `COMPANY` → public, anything else → private.
+     **Type aggregates most-private-wins too:** if any occurrence of that participant
+     carries a non-`COMPANY` type, the fallback resolves private. Event participant
+     snapshots are historical, so an actor that converted from individual to company
+     carries both types across its own events — taking the last one seen publishes on
+     the newest snapshot alone. The vectors cannot catch this: each carries a single
+     document-level `participantType`.
 
 ### Two consequences worth stating, because implementations get them wrong
 
