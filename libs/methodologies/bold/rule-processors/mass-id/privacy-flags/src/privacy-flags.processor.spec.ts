@@ -737,6 +737,63 @@ describe('PrivacyFlagsProcessor', () => {
       ]);
     });
 
+    it('should flag an undeclared Waste Generator even when its Recycler role declares preserveSensitiveData as false', async () => {
+      const wasteGeneratorActorEvent = conformantActorEvent(WASTE_GENERATOR);
+      const massIDDocument = buildMassID({
+        [actorEventKey(RECYCLER)]: {
+          ...conformantActorEvent(RECYCLER),
+          participant: wasteGeneratorActorEvent.participant,
+          preserveSensitiveData: false,
+        },
+        [actorEventKey(WASTE_GENERATOR)]: {
+          ...wasteGeneratorActorEvent,
+          preserveSensitiveData: undefined,
+        },
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(
+        resultContent.reviewReasons.filter(
+          ({ field }) => field === 'preserveSensitiveData',
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+          expected: true,
+          participantRole: WASTE_GENERATOR,
+        }),
+      ]);
+    });
+
+    it('should raise exactly one reason for a Waste Generator that declares preserveSensitiveData as false', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(WASTE_GENERATOR)]: stubDocumentEvent({
+          isPublic: true,
+          label: WASTE_GENERATOR,
+          name: ACTOR,
+          preserveSensitiveData: false,
+        }),
+      });
+
+      const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(
+        resultContent.reviewReasons.filter(
+          ({ field }) => field === 'preserveSensitiveData',
+        ),
+      ).toEqual([
+        expect.objectContaining({
+          actual: false,
+          code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+          expected: true,
+          participantRole: WASTE_GENERATOR,
+        }),
+      ]);
+    });
+
     it('should accept a Hauler that never declares preserveSensitiveData when it is also a Recycler', async () => {
       const haulerActorEvent = conformantActorEvent(HAULER);
       const massIDDocument = buildMassID({

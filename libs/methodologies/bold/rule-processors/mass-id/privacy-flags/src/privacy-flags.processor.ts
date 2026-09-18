@@ -307,23 +307,25 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     reviewReasons: PrivacyReviewReason[],
   ): void {
     for (const participantOccurrences of occurrences.values()) {
-      const isDeclared = participantOccurrences.some(
-        ({ preserveSensitiveData }) => preserveSensitiveData !== undefined,
-      );
-
-      if (
-        isDeclared ||
-        resolveParticipantVisibility(participantOccurrences) !== 'private'
-      ) {
+      if (resolveParticipantVisibility(participantOccurrences) !== 'private') {
         continue;
       }
 
-      const roles = participantRolesOf(participantOccurrences);
-
-      for (const participantRole of roles) {
+      for (const participantRole of participantRolesOf(
+        participantOccurrences,
+      )) {
         if (
           PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.get(participantRole) !== true
         ) {
+          continue;
+        }
+
+        const roleDeclared = participantOccurrences.some(
+          ({ preserveSensitiveData, role }) =>
+            role === participantRole && preserveSensitiveData !== undefined,
+        );
+
+        if (roleDeclared) {
           continue;
         }
 
