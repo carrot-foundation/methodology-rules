@@ -5,6 +5,8 @@
 # organization settings because `inheritance` is on; without it this file would replace them.
 inheritance: true
 language: en-US
+# Kept from the file this one replaces.
+early_access: false
 
 reviews:
   profile: chill
@@ -13,8 +15,8 @@ reviews:
   auto_review:
     enabled: true
     # Incremental review is off, so this is the one review a PR gets. Taking it when the PR opens,
-    # draft included, lands its findings before E2E and promotion; waiting for ready would add a
-    # second round after promotion that re-runs E2E.
+    # draft included, lands its findings while the PR is still a draft instead of in a second round
+    # after it is marked ready.
     drafts: true
     # Every run counts against the PR author's review allowance, and a run on each push used it up
     # on 69% of PRs. Review once; `@coderabbitai review` re-runs on demand.
@@ -37,11 +39,11 @@ reviews:
   review_status: true
 
   pre_merge_checks:
-    # The coverage target contradicts .ai/rules/code-comments.md; the PR loop declined every warning
-    # it raised across the org.
+    # .ai/rules/code-comments.md decides where docstrings belong, not a coverage percentage; the PR
+    # loop declined every warning this check raised across the org.
     docstrings:
       mode: 'off'
-    # Work is tracked in ClickUp, so there are no linked GitHub issues to assess.
+    # Work is tracked in ClickUp: 0 of the last 100 merged PRs here closed a GitHub issue.
     issue_assessment:
       mode: 'off'
 
@@ -49,11 +51,11 @@ reviews:
     docstrings:
       enabled: false
 
-  # Outputs of `pnpm ai:sync` (`pnpm ai:check` fails CI on drift), and the per-rule READMEs and
-  # codecov.yml that scripts/generate-rule-readmes.ts renders from rules.config.ts
-  # (.ai/rules/canonical-config.md).
-  # AGENTS.md, CLAUDE.md and .cursor/rules are generated too, but CodeRabbit reads them as coding
-  # guidelines and path filters also narrow its checkout, so they are handled by path_instructions.
+  # Rewritten by every `pnpm ai:sync` from `.ai/`, and the READMEs and codecov.yml the rule registry
+  # generates (.ai/rules/canonical-config.md). The READMEs under apps/methodologies/bold/ are
+  # hand-maintained and stay in review. AGENTS.md, CLAUDE.md and .cursor/rules are generated too,
+  # but CodeRabbit reads them as coding guidelines and path filters also narrow its checkout, so
+  # they are handled by path_instructions.
   path_filters:
     - '!.agents/skills/**'
     - '!.claude/skills/**'
@@ -61,7 +63,9 @@ reviews:
     - '!.cursor/skills/**'
     - '!.cursor/agents/**'
     - '!.ai/PARITY_MATRIX.md'
-    - '!apps/methodologies/*/rule-processors/**/README.md'
+    - '!apps/methodologies/bold-carbon/rule-processors/*/*/README.md'
+    - '!apps/methodologies/bold-recycling/rule-processors/*/*/README.md'
+    - '!libs/methodologies/*/rules/README.md'
     - '!codecov.yml'
 
   path_instructions:
@@ -73,10 +77,10 @@ reviews:
       instructions: *generated-adapter
     - path: '.cursor/rules/**'
       instructions: *generated-adapter
-    - path: '**/*.{ts,tsx,js,jsx,mjs,cjs}'
+    - path: '**/*.{ts,tsx,mts,cts,js,jsx,mjs,cjs}'
       instructions: >-
-        Judge comments and docstrings against `.ai/rules/code-comments.md`, not a coverage target.
-        Do not ask to add docstrings, or to shorten or delete a comment that states a reason, an
+        Ask for docstrings only where `.ai/rules/code-comments.md` requires them, never to meet a
+        coverage target. Do not ask to shorten or delete a comment that states a reason, an
         invariant or an external constraint.
 
 chat:
