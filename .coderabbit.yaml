@@ -60,6 +60,7 @@ reviews:
     - '!.agents/skills/**'
     - '!.claude/skills/**'
     - '!.claude/agents/**'
+    - '!.claude/settings.json'
     - '!.cursor/skills/**'
     - '!.cursor/agents/**'
     - '!.ai/PARITY_MATRIX.md'
