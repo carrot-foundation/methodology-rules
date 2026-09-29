@@ -82,14 +82,19 @@ const normalizeKilometerMarkers = (
   const distances: string[] = [];
   const invalidMarkers: string[] = [];
   const normalized = value.replaceAll(
-    /(?<![\p{L}_])km\.?\s*((?:[+.,/-]+\s*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
+    /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
     (marker: string, notation: string, offset: number): string => {
       const trimmedNotation = notation.replace(/[,.]$/, '');
       const distance = /^(\d+)(?:([.,+])(\d{1,3}))?$/.exec(trimmedNotation);
 
       const remainder = value.slice(offset + marker.length);
 
-      if (!distance || /^[\p{L}\p{N}]|^\s*[+./-]+\s*\d/u.test(remainder)) {
+      if (
+        !distance ||
+        /^[\p{L}\p{N}]|^\s*[^\p{L}\p{N}\s,)\]}][^\p{L}\p{N},)\]}]*\d/u.test(
+          remainder,
+        )
+      ) {
         invalidMarkers.push(marker);
 
         return marker;
