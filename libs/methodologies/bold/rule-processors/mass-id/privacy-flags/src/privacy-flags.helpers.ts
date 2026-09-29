@@ -1,6 +1,13 @@
-import { BoldActorType } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  BoldActorType,
+  type BoldDocumentEvent,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
-import { PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC } from './privacy-flags.constants';
+import {
+  LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+  PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC,
+  ROLE_BY_LEGACY_ACTOR_TYPE,
+} from './privacy-flags.constants';
 
 const { HAULER, PROCESSOR, RECYCLER, WASTE_GENERATOR } = BoldActorType;
 
@@ -10,6 +17,32 @@ export interface ParticipantOccurrence {
 }
 
 export type ParticipantVisibility = 'private' | 'public';
+
+export const actorEventRolesOf = ({
+  label,
+  metadata,
+}: Pick<BoldDocumentEvent, 'label' | 'metadata'>): ReadonlySet<string> => {
+  const legacyRoles = (metadata?.attributes ?? []).flatMap(
+    ({ name, value }) => {
+      const role =
+        name === LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME && typeof value === 'string'
+          ? ROLE_BY_LEGACY_ACTOR_TYPE.get(value)
+          : undefined;
+
+      return role === undefined ? [] : [role];
+    },
+  );
+
+  return new Set([...(label === undefined ? [] : [label]), ...legacyRoles]);
+};
+
+export const participantOccurrencesOf = (
+  preserveSensitiveData: boolean | undefined,
+  roles: ReadonlySet<string>,
+): ParticipantOccurrence[] =>
+  roles.size === 0
+    ? [{ preserveSensitiveData }]
+    : [...roles].map((role) => ({ preserveSensitiveData, role }));
 
 export const participantRolesOf = (
   occurrences: readonly ParticipantOccurrence[],

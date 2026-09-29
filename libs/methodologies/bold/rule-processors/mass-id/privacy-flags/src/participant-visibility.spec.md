@@ -67,6 +67,32 @@ made, and it is about a different question than re-identification.
 data contract and has not been validated with the team. Implement it as specified, but do not
 cite it as established policy and do not publish it as public documentation.
 
+## Where the role comes from
+
+A role is read only from ACTOR events: from the `label`, and on **legacy MassIDs**, which carry
+no `label`, from the metadata attribute `actor-type`, spelled in the legacy vocabulary. Read
+both, and map the attribute:
+
+| `actor-type` | Role |
+| --- | --- |
+| `SOURCE` | Waste Generator |
+| `HAULER` | Hauler |
+| `PROCESSOR` | Processor |
+| `RECYCLER` | Recycler |
+| `INTEGRATOR` | Network Integrator |
+
+Any other value names no known role. When an event carries both a `label` and an `actor-type`,
+the occurrence holds both roles.
+
+**Read the attribute whatever its own `isPublic` says.** That flag governs whether the attribute
+may be published, not whether the role it names may withhold the participant. A resolver that
+reads only `label`, or only public attributes, sees no role on a legacy generator: with
+`preserveSensitiveData: false` step 4 publishes it, and with the flag absent step 5 publishes it
+whenever it is a `COMPANY`.
+
+In the vectors, an occurrence with no `role` has no `label`, and `legacyActorType` carries the
+attribute's `value` and its own `isPublic`.
+
 ## What a conforming repo does
 
 Run every vector in `participant-visibility.vectors.json` through **your own resolver** —

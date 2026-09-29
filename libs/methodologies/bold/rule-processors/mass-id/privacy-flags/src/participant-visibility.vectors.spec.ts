@@ -5,11 +5,19 @@ import { z } from 'zod';
 
 import type { ParticipantOccurrence } from './privacy-flags.helpers';
 
-import { resolveParticipantVisibility } from './privacy-flags.helpers';
+import { LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME } from './privacy-flags.constants';
+import {
+  actorEventRolesOf,
+  participantOccurrencesOf,
+  resolveParticipantVisibility,
+} from './privacy-flags.helpers';
 
 const VectorOccurrenceSchema = z.object({
+  legacyActorType: z
+    .object({ isPublic: z.boolean(), value: z.string() })
+    .optional(),
   preserveSensitiveData: z.boolean().optional(),
-  role: z.string(),
+  role: z.string().optional(),
 });
 
 const VectorsFileSchema = z.object({
@@ -43,6 +51,7 @@ const NO_PARTICIPANT_TYPE =
   'DocumentParticipant.type carries the actor kind, never COMPANY or INDIVIDUAL, so the spec step 5 participant-type fallback is not modelled';
 
 const UNEXPRESSIBLE_VECTORS: ReadonlyMap<string, string> = new Map([
+  ['unknown-legacy-actor-type-company-is-public', NO_PARTICIPANT_TYPE],
   ['unknown-role-company-is-public', NO_PARTICIPANT_TYPE],
   ['unknown-role-individual-is-private', NO_PARTICIPANT_TYPE],
 ]);
@@ -52,10 +61,26 @@ const sortAlphabetically = (a: string, b: string): number => a.localeCompare(b);
 const toOccurrences = (
   occurrences: readonly z.infer<typeof VectorOccurrenceSchema>[],
 ): ParticipantOccurrence[] =>
-  occurrences.map(({ preserveSensitiveData, role }) => ({
-    preserveSensitiveData,
-    role: SPEC_ROLE_LABELS.get(role) ?? role,
-  }));
+  occurrences.flatMap(({ legacyActorType, preserveSensitiveData, role }) =>
+    participantOccurrencesOf(
+      preserveSensitiveData,
+      actorEventRolesOf({
+        label:
+          role === undefined ? undefined : (SPEC_ROLE_LABELS.get(role) ?? role),
+        metadata: {
+          attributes:
+            legacyActorType === undefined
+              ? []
+              : [
+                  {
+                    name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+                    ...legacyActorType,
+                  },
+                ],
+        },
+      }),
+    ),
+  );
 
 const expressible = vectors.filter(({ id }) => !UNEXPRESSIBLE_VECTORS.has(id));
 const unexpressible = vectors
@@ -68,8 +93,8 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 23,
-      version: '1.1.0',
+      vectorCount: 29,
+      version: '1.2.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
       [...UNEXPRESSIBLE_VECTORS.keys()].sort(sortAlphabetically),

@@ -10,9 +10,13 @@
     "omits it, which is a distinct case from false and is where implementations diverge.",
     "",
     "`decidedBy` names the spec step that decides, so a failure points at the rule, not just at",
-    "a boolean. It is documentation for the person reading the failure, not an assertion."
+    "a boolean. It is documentation for the person reading the failure, not an assertion.",
+    "",
+    "An occurrence with no `role` is an ACTOR event with no `label`. `legacyActorType` is that",
+    "event's legacy `actor-type` metadata attribute, value and own `isPublic` as the source data",
+    "carries them. See \"Where the role comes from\" in the spec."
   ],
-  "version": "1.1.0",
+  "version": "1.2.0",
   "roles": {
     "public": [
       "Processor",
@@ -156,6 +160,53 @@
       "expected": "private"
     },
     {
+      "id": "unlabeled-legacy-waste-generator-explicit-false-is-private",
+      "decidedBy": 2,
+      "note": "Legacy MassIDs carry the role in `actor-type`, not `label`. A resolver that reads only `label` sees no role and publishes this generator at step 4.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "legacyActorType": {
+            "value": "SOURCE",
+            "isPublic": true
+          },
+          "preserveSensitiveData": false
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "unlabeled-legacy-waste-generator-with-private-attribute-and-field-absent-is-private",
+      "decidedBy": 2,
+      "note": "The attribute's own `isPublic` governs publishing the attribute, not reading the role. Skipping private attributes falls through to the COMPANY default at step 5.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "legacyActorType": {
+            "value": "SOURCE",
+            "isPublic": false
+          }
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "label-and-legacy-actor-type-on-one-event-hold-both-roles",
+      "decidedBy": 2,
+      "note": "The label does not override `actor-type`. A resolver that reads `actor-type` only when `label` is missing publishes this generator as a Recycler.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "role": "Recycler",
+          "legacyActorType": {
+            "value": "SOURCE",
+            "isPublic": true
+          }
+        }
+      ],
+      "expected": "private"
+    },
+    {
       "id": "hauler-with-recycler-is-public",
       "decidedBy": 3,
       "note": "No flag anywhere. Role defaults alone would resolve private (Hauler); the exception overrides.",
@@ -255,6 +306,21 @@
       "expected": "public"
     },
     {
+      "id": "unlabeled-legacy-network-integrator-individual-is-public",
+      "decidedBy": 5,
+      "note": "`INTEGRATOR` names Network Integrator, whose default beats the individual type fallback. A resolver that drops the mapping resolves this private.",
+      "participantType": "INDIVIDUAL",
+      "occurrences": [
+        {
+          "legacyActorType": {
+            "value": "INTEGRATOR",
+            "isPublic": true
+          }
+        }
+      ],
+      "expected": "public"
+    },
+    {
       "id": "waste-manager-with-field-absent-is-private",
       "decidedBy": 5,
       "participantType": "COMPANY",
@@ -274,6 +340,21 @@
       "occurrences": [
         {
           "role": "Hauler"
+        }
+      ],
+      "expected": "private"
+    },
+    {
+      "id": "unlabeled-legacy-hauler-with-field-absent-is-private",
+      "decidedBy": 5,
+      "note": "A label-only resolver sees no role and publishes this COMPANY hauler at step 5.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "legacyActorType": {
+            "value": "HAULER",
+            "isPublic": true
+          }
         }
       ],
       "expected": "private"
@@ -326,6 +407,21 @@
         }
       ],
       "expected": "private"
+    },
+    {
+      "id": "unknown-legacy-actor-type-company-is-public",
+      "decidedBy": 5,
+      "note": "Only the five mapped `actor-type` values name a role; any other falls to the participant type.",
+      "participantType": "COMPANY",
+      "occurrences": [
+        {
+          "legacyActorType": {
+            "value": "AUDITOR",
+            "isPublic": true
+          }
+        }
+      ],
+      "expected": "public"
     }
   ]
 }
