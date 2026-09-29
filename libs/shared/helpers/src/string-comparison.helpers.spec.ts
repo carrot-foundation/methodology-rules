@@ -311,6 +311,108 @@ describe('string-comparison.helpers', () => {
   });
 
   describe('isAddressMatch', () => {
+    it.each([
+      ['Km 42,3', 'KM 42+300'],
+      ['Km 42.03', 'km42+030'],
+      ['Km 42,003', 'Km 42+3'],
+      ['Km 00042,300', 'Km 42+300'],
+      ['Km 42,0', 'Km 42'],
+      ['Km 42.000', 'Km 42+000'],
+      ['Km. 42,3', 'Km 42+300'],
+    ])(
+      'should match exact kilometer equivalents %s and %s',
+      (first, second) => {
+        const prefix = 'Rodovia Ficticia BR-999, ';
+        const suffix = ', Vila Inventada, SP';
+
+        expect(
+          isAddressMatch(prefix + first + suffix, prefix + second + suffix)
+            .isMatch,
+        ).toBe(true);
+        expect(
+          isAddressMatch(prefix + second + suffix, prefix + first + suffix)
+            .isMatch,
+        ).toBe(true);
+      },
+    );
+
+    it.each([
+      ['Km 42,3', 'Km 42+400'],
+      ['Km 42+3', 'Km 42+333'],
+      ['Km 42+300', 'Km 4242+300'],
+      ['Km 42+300', 'Km 300+42'],
+      ['Km 42+300', 'Km 42+300 Km 43+300'],
+      ['Km 42,3001', 'Km 42+300'],
+      ['Km 42+1000', 'Km 43'],
+      ['Km 42,3+00', 'Km 42+300'],
+      ['Km 42,3,00', 'Km 42+300'],
+      ['Km 42+300.0', 'Km 42+300'],
+      ['Km -42,3', 'Km 42+300'],
+      ['Km 42,3abc', 'Km 42+300'],
+      ['Km + 42+300', 'Km 42+300'],
+      ['Km .42+300', 'Km 42+300'],
+      ['Km 42 +300', 'Km 42+300'],
+      ['Km 42/300', 'Km 42+300'],
+      ['Km 42+300 Km 43+300', 'Km 42,3 Km 43,3'],
+    ])(
+      'should reject different or ambiguous kilometer markers %s and %s',
+      (first, second) => {
+        const prefix = 'Rodovia Ficticia BR-999, ';
+        const suffix = ', Vila Inventada, SP';
+
+        expect(
+          isAddressMatch(prefix + first + suffix, prefix + second + suffix)
+            .isMatch,
+        ).toBe(false);
+        expect(
+          isAddressMatch(prefix + second + suffix, prefix + first + suffix)
+            .isMatch,
+        ).toBe(false);
+      },
+    );
+
+    it.each([
+      ['BR-998, Km 42+300, 10', 'BR-999, Km 42,3, 10'],
+      ['BR-999, Km 42+300, 10', 'BR-999, Km 42,3, 11'],
+      ['BR-999, 42,3', 'BR-999, 42+300'],
+    ])(
+      'should preserve unrelated numeric refusals for %s and %s',
+      (first, second) => {
+        expect(
+          isAddressMatch(
+            `${first}, Vila Inventada, SP`,
+            `${second}, Vila Inventada, SP`,
+          ).isMatch,
+        ).toBe(false);
+      },
+    );
+
+    it.each([
+      ['(Km 42,3)', '(Km 42+300)'],
+      ['Km 42,3,S/N', 'Km 42+300,S/N'],
+      ['Km 42+300,S/N', 'Km 42+300,S/N'],
+      ['[Km 42,3]', '[Km 42+300]'],
+    ])(
+      'should preserve address delimiters around %s and %s',
+      (first, second) => {
+        expect(
+          isAddressMatch(
+            `Rodovia Ficticia BR-999, ${first}, Vila Inventada, SP`,
+            `Rodovia Ficticia BR-999, ${second}, Vila Inventada, SP`,
+          ).isMatch,
+        ).toBe(true);
+      },
+    );
+
+    it('should deduplicate repeated equivalent kilometer markers from OCR', () => {
+      expect(
+        isAddressMatch(
+          'Rodovia Ficticia BR-999, Km 42,3 Km 42,3, Vila Inventada, SP',
+          'Rodovia Ficticia BR-999, Km 42+300, Vila Inventada, SP',
+        ).isMatch,
+      ).toBe(true);
+    });
+
     it('should match when one side uses street abbreviation and other uses full name', () => {
       const result = isAddressMatch(
         'Al Jacaranda, 1, Cidade dos Pinheiros, SP',
