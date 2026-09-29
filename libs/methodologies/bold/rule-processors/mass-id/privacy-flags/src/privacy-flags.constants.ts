@@ -135,6 +135,16 @@ export const PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC: ReadonlyMap<
   [WASTE_MANAGER, true],
 ]);
 
+export const LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME = 'actor-type';
+
+export const ROLE_BY_LEGACY_ACTOR_TYPE: ReadonlyMap<string, string> = new Map([
+  ['HAULER', HAULER],
+  ['INTEGRATOR', INTEGRATOR],
+  ['PROCESSOR', PROCESSOR],
+  ['RECYCLER', RECYCLER],
+  ['SOURCE', WASTE_GENERATOR],
+]);
+
 export const ASSERTABLE_ACTOR_LABELS: ReadonlySet<string> = new Set(
   PARTICIPANT_PRESERVE_SENSITIVE_DATA_SPEC.keys(),
 );

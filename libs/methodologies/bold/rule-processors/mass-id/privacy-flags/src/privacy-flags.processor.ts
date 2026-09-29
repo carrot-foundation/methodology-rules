@@ -24,6 +24,8 @@ import {
   SKIPPED_EVENT_NAMES,
 } from './privacy-flags.constants';
 import {
+  actorEventRolesOf,
+  participantOccurrencesOf,
   participantRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
@@ -116,22 +118,13 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     participantRoles: ReadonlySet<string>,
     occurrences: Map<string, ParticipantOccurrence[]>,
   ): void {
-    const participantOccurrences = occurrences.get(event.participant.id) ?? [];
-
-    if (participantRoles.size === 0) {
-      participantOccurrences.push({
-        preserveSensitiveData: event.preserveSensitiveData,
-      });
-    }
-
-    for (const role of participantRoles) {
-      participantOccurrences.push({
-        preserveSensitiveData: event.preserveSensitiveData,
-        role,
-      });
-    }
-
-    occurrences.set(event.participant.id, participantOccurrences);
+    occurrences.set(event.participant.id, [
+      ...(occurrences.get(event.participant.id) ?? []),
+      ...participantOccurrencesOf(
+        event.preserveSensitiveData,
+        participantRoles,
+      ),
+    ]);
   }
 
   private getParticipantRoles(
@@ -140,18 +133,20 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     const participantRoles = new Map<string, Set<string>>();
 
     for (const event of events) {
-      if (
-        event.name === ACTOR &&
-        event.label !== undefined &&
-        ASSERTABLE_ACTOR_LABELS.has(event.label)
-      ) {
-        const roles = participantRoles.get(event.participant.id);
+      if (event.name !== ACTOR) {
+        continue;
+      }
 
-        if (roles === undefined) {
-          participantRoles.set(event.participant.id, new Set([event.label]));
-        } else {
-          roles.add(event.label);
+      const roles = participantRoles.get(event.participant.id) ?? new Set();
+
+      for (const role of actorEventRolesOf(event)) {
+        if (ASSERTABLE_ACTOR_LABELS.has(role)) {
+          roles.add(role);
         }
+      }
+
+      if (roles.size > 0) {
+        participantRoles.set(event.participant.id, roles);
       }
     }
 
@@ -162,8 +157,11 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     event: BoldDocumentEvent,
     participantRoles: ReadonlyMap<string, ReadonlySet<string>>,
   ): ReadonlySet<string> {
-    if (event.name === ACTOR && event.label !== undefined) {
-      return new Set([event.label]);
+    const actorRoles =
+      event.name === ACTOR ? actorEventRolesOf(event) : new Set<string>();
+
+    if (actorRoles.size > 0) {
+      return actorRoles;
     }
 
     return participantRoles.get(event.participant.id) ?? new Set();

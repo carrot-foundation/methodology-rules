@@ -15,7 +15,10 @@ import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import type { PrivacyFlagsResultContent } from './privacy-flags.result-content.types';
 
-import { PRIVACY_REASON_CODES } from './privacy-flags.constants';
+import {
+  LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+  PRIVACY_REASON_CODES,
+} from './privacy-flags.constants';
 import { PrivacyFlagsProcessor } from './privacy-flags.processor';
 import {
   actorEventKey,
@@ -33,6 +36,25 @@ const METHODOLOGY_PLATFORM_LABEL = 'METHODOLOGY PLATFORM';
 const SKIPPED_EVENT_NAME = 'MassID Audit (BOLD Recycling)';
 const UNKNOWN_EVENT_NAME = 'Unlisted Event';
 const UNKNOWN_ATTRIBUTE_NAME = 'Unlisted Attribute';
+
+const legacyActorEvent = (
+  actorType: number | string,
+  overrides: Partial<BoldDocumentEvent> = {},
+): BoldDocumentEvent =>
+  stubDocumentEvent({
+    isPublic: true,
+    metadata: {
+      attributes: [
+        stubDocumentEventAttribute({
+          isPublic: false,
+          name: LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
+          value: actorType,
+        }),
+      ],
+    },
+    name: ACTOR,
+    ...overrides,
+  });
 
 const buildMassID = (
   overrides: Record<string, BoldDocumentEvent> = {},
@@ -905,6 +927,123 @@ describe('PrivacyFlagsProcessor', () => {
 
       expect(resultStatus).toBe('PASSED');
       expect(resultContent.reviewReasons).toEqual([]);
+    });
+
+    describe('legacy actor-type attribute', () => {
+      it.each([
+        { actorType: 'HAULER', expectedRole: HAULER },
+        { actorType: 'SOURCE', expectedRole: WASTE_GENERATOR },
+      ])(
+        'should read the $expectedRole role from an unlabeled ACTOR event with actor-type $actorType declaring preserveSensitiveData as false',
+        async ({ actorType, expectedRole }) => {
+          const massIDDocument = buildMassID({
+            'ACTOR-legacy': legacyActorEvent(actorType, {
+              preserveSensitiveData: false,
+            }),
+          });
+
+          const { resultContent, resultStatus } =
+            await evaluate(massIDDocument);
+
+          expect(resultStatus).toBe('REVIEW_REQUIRED');
+          expect(
+            resultContent.reviewReasons.filter(
+              ({ participantRole }) => participantRole === expectedRole,
+            ),
+          ).toEqual([
+            expect.objectContaining({
+              actual: false,
+              code: PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA,
+              eventName: ACTOR,
+              expected: true,
+              field: 'preserveSensitiveData',
+            }),
+          ]);
+        },
+      );
+
+      it('should require a declaration from a legacy Waste Generator that omits preserveSensitiveData', async () => {
+        const massIDDocument = buildMassID({
+          'ACTOR-legacy': legacyActorEvent('SOURCE', {
+            preserveSensitiveData: undefined,
+          }),
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toEqual([
+          expect.objectContaining({
+            code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
+            participantRole: WASTE_GENERATOR,
+          }),
+        ]);
+      });
+
+      it('should validate non-Actor events against the role read from actor-type', async () => {
+        const actorEvent = legacyActorEvent('HAULER', {
+          preserveSensitiveData: true,
+        });
+        const massIDDocument = buildMassID({
+          'ACTOR-legacy': actorEvent,
+          [PICK_UP]: {
+            ...conformantEvent(PICK_UP),
+            participant: actorEvent.participant,
+            preserveSensitiveData: false,
+          },
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toEqual([
+          expect.objectContaining({
+            actual: false,
+            code: PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
+            eventName: PICK_UP,
+            expected: true,
+            participantRole: HAULER,
+          }),
+        ]);
+      });
+
+      it('should hold both the label role and the actor-type role of one ACTOR event', async () => {
+        const massIDDocument = buildMassID({
+          [actorEventKey(RECYCLER)]: legacyActorEvent('SOURCE', {
+            label: RECYCLER,
+            preserveSensitiveData: false,
+          }),
+        });
+
+        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+
+        expect(resultStatus).toBe('REVIEW_REQUIRED');
+        expect(resultContent.reviewReasons).toEqual([
+          expect.objectContaining({
+            actual: false,
+            eventLabel: RECYCLER,
+            expected: true,
+            participantRole: WASTE_GENERATOR,
+          }),
+        ]);
+      });
+
+      it.each([{ actorType: 'AUDITOR' }, { actorType: 1 }])(
+        'should read no role from the actor-type value $actorType outside the legacy vocabulary',
+        async ({ actorType }) => {
+          const massIDDocument = buildMassID({
+            'ACTOR-legacy': legacyActorEvent(actorType, {
+              preserveSensitiveData: undefined,
+            }),
+          });
+
+          const { resultContent, resultStatus } =
+            await evaluate(massIDDocument);
+
+          expect(resultStatus).toBe('PASSED');
+          expect(resultContent.reviewReasons).toEqual([]);
+        },
+      );
     });
   });
 });
