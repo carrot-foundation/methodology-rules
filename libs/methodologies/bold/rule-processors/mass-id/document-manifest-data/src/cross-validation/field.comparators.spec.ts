@@ -458,6 +458,45 @@ describe('cross-validation field comparators', () => {
       expect(result.validation).toEqual([]);
     });
 
+    it.each([
+      { expectedReview: false, extractedMarker: '42+300' },
+      { expectedReview: true, extractedMarker: '42+400' },
+    ])(
+      'should preserve receiver address review only for a different distance ($extractedMarker)',
+      ({ expectedReview, extractedMarker }) => {
+        const entity = stubMtrEntityWithHighAddress(
+          'Fictional Receiver',
+          '11.111.111/0001-11',
+          `Rodovia Ficticia BR-999, Km ${extractedMarker}, S/N`,
+          'Vila Inventada',
+          'SP',
+        );
+        const result = compareEntity(
+          entity,
+          ['Fictional Receiver'],
+          '22.222.222/0001-22',
+          entityReasonsWithAddress,
+          stubEventAddress({
+            city: 'Vila Inventada',
+            number: 'S/N',
+            street: 'Rodovia Ficticia BR-999, Km 42,3',
+          }),
+        );
+
+        expect(
+          result.validation.some(
+            (validation) =>
+              validation.reviewReason?.code === 'ADDRESS_MISMATCH',
+          ),
+        ).toBe(expectedReview);
+        expect(result.validation).toContainEqual(
+          expect.objectContaining({
+            failReason: expect.objectContaining({ code: 'TAXID_MISMATCH' }),
+          }),
+        );
+      },
+    );
+
     it('should include address in debug for entity with address fields', () => {
       const entity = stubEntityWithAddress(
         'Generator Co',

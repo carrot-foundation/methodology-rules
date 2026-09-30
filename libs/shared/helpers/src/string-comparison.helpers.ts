@@ -72,13 +72,68 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
   return result;
 };
 
+const normalizeKilometerMarkers = (
+  value: string,
+): {
+  distances: string[];
+  invalid: boolean;
+  value: string;
+} => {
+  const distances: string[] = [];
+  const invalidMarkers: string[] = [];
+  const normalized = value.replaceAll(
+    /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
+    (marker: string, notation: string, offset: number): string => {
+      const trimmedNotation = notation.replace(/[,.]$/, '');
+      const distance = /^(\d+)(?:([.,+])(\d{1,3}))?$/.exec(trimmedNotation);
+
+      const remainder = value.slice(offset + marker.length);
+
+      if (
+        !distance ||
+        /^[\p{L}\p{N}]|^\s*[^\p{L}\p{N}\s,)\]}][^\p{L}\p{N},)\]}]*\d/u.test(
+          remainder,
+        )
+      ) {
+        invalidMarkers.push(marker);
+
+        return marker;
+      }
+
+      const kilometers = stripLeadingZeros(distance[1]!);
+      const fraction = distance[3] ?? '';
+      const meters =
+        distance[2] === '+'
+          ? fraction.padStart(3, '0')
+          : fraction.padEnd(3, '0');
+
+      distances.push(stripLeadingZeros(kilometers + meters));
+
+      const suffix = notation.slice(trimmedNotation.length);
+
+      return meters === '000'
+        ? `km ${kilometers}${suffix}`
+        : `km ${kilometers} ${meters}${suffix}`;
+    },
+  );
+
+  return {
+    distances: deduplicateConsecutiveTokens(distances),
+    invalid: invalidMarkers.length > 0 || new Set(distances).size > 1,
+    value: normalized,
+  };
+};
+
 /**
  * Normalizes an address string for comparison.
  * Applies aggressiveNormalize, then expands Brazilian street abbreviations
  * and deduplicates consecutive identical tokens (OCR noise).
  */
 export const normalizeAddress = (value: string): string => {
-  const withDigitSpaces = value.replaceAll(/(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g, ' ');
+  const withDigitSpaces = normalizeKilometerMarkers(value).value.replaceAll(
+    /(?<=\d)[^\d\sa-zA-Z]+(?=\d)/g,
+    ' ',
+  );
   const normalized = aggressiveNormalize(withDigitSpaces);
 
   if (normalized === '') {
@@ -296,6 +351,20 @@ export const isAddressMatch = (
   const tokensA = normalizedA.split(' ');
   const tokensB = normalizedB.split(' ');
   const score = diceCoefficient(normalizedA, normalizedB);
+
+  const kilometersA = normalizeKilometerMarkers(a);
+  const kilometersB = normalizeKilometerMarkers(b);
+
+  // Kilometer distances cannot use the street-number OCR repetition tolerance.
+  if (
+    kilometersA.invalid ||
+    kilometersB.invalid ||
+    (kilometersA.distances.length > 0 &&
+      kilometersB.distances.length > 0 &&
+      kilometersA.distances.join(' ') !== kilometersB.distances.join(' '))
+  ) {
+    return { isMatch: false, score };
+  }
 
   const numsA = extractNumericTokens(tokensA);
   const numsB = extractNumericTokens(tokensB);

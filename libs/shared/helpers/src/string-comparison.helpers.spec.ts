@@ -311,6 +311,102 @@ describe('string-comparison.helpers', () => {
   });
 
   describe('isAddressMatch', () => {
+    it.each([
+      { expected: true, first: 'Km 42,3', second: 'KM 42+300' },
+      { expected: true, first: 'Km 42.03', second: 'km42+030' },
+      { expected: true, first: 'Km 42,003', second: 'Km 42+3' },
+      { expected: true, first: 'Km 00042,300', second: 'Km 42+300' },
+      { expected: true, first: 'Km 42,0', second: 'Km 42' },
+      { expected: true, first: 'Km 42.000', second: 'Km 42+000' },
+      { expected: true, first: 'Km. 42,3', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42,3', second: 'Km 42+400' },
+      { expected: false, first: 'Km 42+3', second: 'Km 42+333' },
+      { expected: false, first: 'Km 42+300', second: 'Km 4242+300' },
+      { expected: false, first: 'Km 42+300', second: 'Km 300+42' },
+      { expected: false, first: 'Km 42+300', second: 'Km 42+300 Km 43+300' },
+      { expected: false, first: 'Km 42,3001', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42+1000', second: 'Km 43' },
+      { expected: false, first: 'Km 42,3+00', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42,3,00', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42+300.0', second: 'Km 42+300' },
+      { expected: false, first: 'Km -42,3', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42,3abc', second: 'Km 42+300' },
+      { expected: false, first: 'Km + 42+300', second: 'Km 42+300' },
+      { expected: false, first: 'Km .42+300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42 +300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42/300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42:300', second: 'Km 42' },
+      { expected: false, first: 'Km 42:300', second: 'Km 42:300' },
+      { expected: false, first: 'Km 42 :300', second: 'Km 42' },
+      { expected: false, first: 'Km:42+300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42*300', second: 'Km 42' },
+      { expected: false, first: 'Km 42=300', second: 'Km 42' },
+      { expected: false, first: 'Km~42+300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42%300', second: 'Km 42' },
+      { expected: false, first: 'Km 42 : * 300', second: 'Km 42' },
+      { expected: false, first: 'Km : * 42+300', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42;300', second: 'Km 42' },
+      { expected: false, first: 'Km(42+300)', second: 'Km 42+300' },
+      { expected: false, first: 'Km 42 /300', second: 'Km 42' },
+      { expected: false, first: 'Km 42 .300', second: 'Km 42' },
+      { expected: false, first: 'Km 42 -300', second: 'Km 42' },
+      { expected: false, first: 'Km/42+300', second: 'Km 42,3' },
+      { expected: false, first: 'BR-999KM 42+3', second: 'BR-999 Km 42+33' },
+      { expected: false, first: 'BR-999KM42+3', second: 'BR-999 Km 42+33' },
+      { expected: true, first: 'BR-999KM42+300', second: 'BR-999 Km 42,3' },
+      {
+        expected: false,
+        first: 'Km 42+300 Km 43+300',
+        second: 'Km 42,3 Km 43,3',
+      },
+      { expected: true, first: '(Km 42,3)', second: '(Km 42+300)' },
+      { expected: true, first: 'Km 42,3,S/N', second: 'Km 42+300,S/N' },
+      { expected: true, first: 'Km 42+300,S/N', second: 'Km 42+300,S/N' },
+      { expected: true, first: '[Km 42,3]', second: '[Km 42+300]' },
+      { expected: true, first: 'Km 42-Bairro', second: 'Km 42-Bairro' },
+      { expected: true, first: 'Km 42/S/N', second: 'Km 42/S/N' },
+      { expected: false, first: 'Km 42-300', second: 'Km 42+300' },
+      { expected: true, first: 'Km 42, 10', second: 'Km 42.0, 10' },
+    ])(
+      'should compare $first and $second with match $expected',
+      ({ expected, first, second }) => {
+        const firstAddress = `Rodovia Ficticia BR-999, ${first}, Vila Inventada, SP`;
+        const secondAddress = `Rodovia Ficticia BR-999, ${second}, Vila Inventada, SP`;
+
+        expect(isAddressMatch(firstAddress, secondAddress).isMatch).toBe(
+          expected,
+        );
+        expect(isAddressMatch(secondAddress, firstAddress).isMatch).toBe(
+          expected,
+        );
+      },
+    );
+
+    it.each([
+      ['BR-998, Km 42+300, 10', 'BR-999, Km 42,3, 10'],
+      ['BR-999, Km 42+300, 10', 'BR-999, Km 42,3, 11'],
+      ['BR-999, 42,3', 'BR-999, 42+300'],
+    ])(
+      'should preserve unrelated numeric refusals for %s and %s',
+      (first, second) => {
+        expect(
+          isAddressMatch(
+            `${first}, Vila Inventada, SP`,
+            `${second}, Vila Inventada, SP`,
+          ).isMatch,
+        ).toBe(false);
+      },
+    );
+
+    it('should deduplicate repeated equivalent kilometer markers from OCR', () => {
+      expect(
+        isAddressMatch(
+          'Rodovia Ficticia BR-999, Km 42,3 Km 42,3, Vila Inventada, SP',
+          'Rodovia Ficticia BR-999, Km 42+300, Vila Inventada, SP',
+        ).isMatch,
+      ).toBe(true);
+    });
+
     it('should match when one side uses street abbreviation and other uses full name', () => {
       const result = isAddressMatch(
         'Al Jacaranda, 1, Cidade dos Pinheiros, SP',
