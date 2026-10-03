@@ -14,10 +14,8 @@ reviews:
 
   auto_review:
     enabled: true
-    # Incremental review is off, so this is the one review a PR gets. Taking it when the PR opens,
-    # draft included, lands its findings while the PR is still a draft instead of in a second round
-    # after it is marked ready.
-    drafts: true
+    # Defer review until ready so unfinished changes do not consume the author's allowance.
+    drafts: false
     # Every run counts against the PR author's review allowance, and a run on each push used it up
     # on 69% of PRs. Review once; `@coderabbitai review` re-runs on demand.
     auto_incremental_review: false
