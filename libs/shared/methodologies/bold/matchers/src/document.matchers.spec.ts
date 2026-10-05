@@ -12,12 +12,29 @@ import {
   MASS_ID,
   MASS_ID_AUDIT,
   METHODOLOGY_DEFINITION,
+  PARTICIPANT_ACCREDITATION_CONTAINER,
   PARTICIPANT_ACCREDITATION_GROUP,
   PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
+  PARTICIPANT_ACCREDITATION_ROOT,
   RECYCLED_ID,
 } from './document.matchers';
 
 describe('Document Matchers', () => {
+  it.each([
+    PARTICIPANT_ACCREDITATION_CONTAINER,
+    PARTICIPANT_ACCREDITATION_ROOT,
+  ])('should recognize source-backed accreditation containers', (matcher) => {
+    const relation = stubDocumentRelation(matcher.match);
+
+    expect(matcher.matches(relation)).toBe(true);
+    expect(
+      matcher.matches({ ...relation, category: BoldDocumentCategory.MASS_ID }),
+    ).toBe(false);
+    expect(
+      matcher.matches({ ...relation, type: BoldDocumentType.MASS_ID_AUDIT }),
+    ).toBe(false);
+  });
+
   describe('matches', () => {
     it('should return true if document has the same values passed in match', () => {
       const documentMatch: DocumentMatch = {

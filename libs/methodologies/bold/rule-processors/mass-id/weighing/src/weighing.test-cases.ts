@@ -147,6 +147,7 @@ const stubBaseAccreditationDocuments = ({
         externalEventsMap: {
           [ACCREDITATION_RESULT]: stubBoldAccreditationResultEvent({
             metadataAttributes: [
+              [BoldAttributeName.ACCREDITATION_STATUS, 'Approved'],
               ...(exceptions.length > 0
                 ? ([
                     [APPROVED_EXCEPTIONS, exceptions],
@@ -358,7 +359,8 @@ export const weighingTestCases: WeighingTestCase[] = [
         ]),
       ),
     },
-    resultComment: NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT,
+    resultComment:
+      processorErrors.ERROR_MESSAGE.MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
     resultStatus: 'FAILED',
     scenario: `The "${ACCREDITATION_RESULT}" event is missing`,
   },

@@ -18,6 +18,7 @@ import { faker } from '@faker-js/faker';
 
 import { geolocationAndAddressPrecisionLambda } from './geolocation-and-address-precision.lambda';
 import {
+  alignActorFacilityAddresses,
   geolocationAndAddressPrecisionErrorTestCases,
   geolocationAndAddressPrecisionTestCases,
 } from './geolocation-and-address-precision.test-cases';
@@ -48,6 +49,11 @@ describe('GeolocationAndAddressPrecisionProcessor E2E', () => {
         .createMethodologyDocument()
         .createParticipantAccreditationDocuments(accreditationDocuments)
         .build();
+
+      alignActorFacilityAddresses(
+        massIDDocument,
+        participantsAccreditationDocuments,
+      );
 
       const auditActorEvents = [...actorParticipants.values()].map(
         (participant) =>

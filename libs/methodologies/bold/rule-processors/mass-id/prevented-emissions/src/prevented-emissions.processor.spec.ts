@@ -24,6 +24,7 @@ import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
   preventedEmissionsErrorTestCases,
+  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -54,9 +55,84 @@ const makeMassIDDocumentsParameters = (
   },
 });
 
+const makeTestCaseMassIDParameters = ({
+  externalCreatedAt,
+  massIDDocumentsParams,
+  massIDDocumentValue,
+  subtype,
+}: PreventedEmissionsTestCase): StubBoldDocumentParameters => ({
+  ...massIDDocumentsParams,
+  partialDocument: {
+    ...massIDDocumentsParams?.partialDocument,
+    ...(massIDDocumentValue !== undefined && {
+      currentValue: massIDDocumentValue,
+    }),
+    externalCreatedAt,
+    subtype,
+  },
+});
+
 describe('PreventedEmissionsProcessor', () => {
   const ruleDataProcessor = new PreventedEmissionsProcessor();
 
+  it.each([
+    { omitGenerator: true, status: 'PASSED' },
+    { omitGenerator: false, status: 'FAILED' },
+  ] as const)(
+    'should distinguish absent Generator accreditation from a wrong facility ($omitGenerator)',
+    async ({ omitGenerator, status }) => {
+      const testCase = preventedEmissionsTestCases.find(
+        (candidate) => candidate.resultStatus === 'PASSED',
+      )!;
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments: testCase.accreditationDocuments,
+        configureDocuments: ({ participantsAccreditationDocuments }) => {
+          const generator =
+            participantsAccreditationDocuments.get(WASTE_GENERATOR)!;
+
+          if (omitGenerator) {
+            participantsAccreditationDocuments.delete(WASTE_GENERATOR);
+          } else {
+            generator.primaryAddress = {
+              ...generator.primaryAddress,
+              id: 'unrelated-generator-facility',
+            };
+          }
+        },
+        massIDDocumentsParams: makeTestCaseMassIDParameters(testCase),
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultStatus).toBe(status);
+    },
+  );
+
+  it.each(
+    preventedEmissionsTestCases.filter(
+      (testCase) => testCase.resultStatus === 'PASSED',
+    ),
+  )(
+    'should refuse a wrong-facility accreditation when $scenario',
+    async (testCase) => {
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments: testCase.accreditationDocuments,
+        configureDocuments: (documents) => {
+          for (const document of documents.participantsAccreditationDocuments.values()) {
+            document.primaryAddress = {
+              ...document.primaryAddress,
+              id: 'unrelated-facility',
+            };
+          }
+        },
+        massIDDocumentsParams: makeTestCaseMassIDParameters(testCase),
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultStatus).toBe('FAILED');
+    },
+  );
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -64,27 +140,16 @@ describe('PreventedEmissionsProcessor', () => {
   describe('PreventedEmissionsProcessor', () => {
     it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
-      async ({
-        accreditationDocuments,
-        externalCreatedAt,
-        massIDDocumentsParams,
-        massIDDocumentValue,
-        resultComment,
-        resultContent,
-        resultStatus,
-        subtype,
-      }) => {
+      async (testCase) => {
+        const {
+          accreditationDocuments,
+          resultComment,
+          resultContent,
+          resultStatus,
+        } = testCase;
         const { ruleInput, ruleOutput } = await createRuleTestFixture({
           accreditationDocuments,
-          massIDDocumentsParams: {
-            ...massIDDocumentsParams,
-            partialDocument: {
-              ...massIDDocumentsParams?.partialDocument,
-              currentValue: massIDDocumentValue as number,
-              externalCreatedAt,
-              subtype,
-            },
-          },
+          massIDDocumentsParams: makeTestCaseMassIDParameters(testCase),
           ruleDataProcessor,
           spyOnDocumentQueryServiceLoad,
         });

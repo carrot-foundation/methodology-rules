@@ -148,6 +148,7 @@ const createMultipleValidAccreditationsTestData = (
           ],
         }),
       ],
+      primaryAddress: originalAccreditation.primaryAddress,
       primaryParticipant: originalAccreditation.primaryParticipant,
       subtype: actorType,
       type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
@@ -349,6 +350,23 @@ interface ParticipantAccreditationsTestCase extends RuleTestCase {
 
 export const participantAccreditationsAndVerificationsRequirementsTestCases: ParticipantAccreditationsTestCase[] =
   [
+    {
+      documents: [
+        {
+          ...massIDAuditWithAccreditationsAndVerifications.massIDDocument,
+          externalEvents:
+            massIDAuditWithAccreditationsAndVerifications.massIDDocument.externalEvents?.filter(
+              (event) => event.label !== PROCESSOR,
+            ),
+        },
+        ...massIDAuditWithAccreditationsAndVerifications.participantsAccreditationDocuments.values(),
+      ],
+      massIDAuditDocument:
+        massIDAuditWithAccreditationsAndVerifications.massIDAuditDocument,
+      resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
+      resultStatus: 'PASSED',
+      scenario: 'No Processor actor participates in this MassID',
+    },
     {
       documents: [
         massIDAuditWithAccreditationsAndVerifications.massIDDocument,

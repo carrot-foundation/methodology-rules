@@ -65,6 +65,16 @@ export const PARTICIPANT_ACCREDITATION_PARTIAL_MATCH = new DocumentMatcher({
   type: BoldDocumentType.PARTICIPANT_ACCREDITATION,
 });
 
+export const PARTICIPANT_ACCREDITATION_CONTAINER = new DocumentMatcher({
+  ...PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match,
+  subtype: 'Participant',
+});
+
+export const PARTICIPANT_ACCREDITATION_ROOT = new DocumentMatcher({
+  category: BoldDocumentCategory.METHODOLOGY,
+  type: 'Participant Accreditations & Verifications',
+});
+
 export const CREDIT_ORDER_MATCH = new DocumentMatcher({
   category: BoldDocumentCategory.METHODOLOGY,
   type: BoldDocumentType.CREDIT_ORDER,

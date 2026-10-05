@@ -7,7 +7,7 @@ export const spyOnDocumentQueryServiceLoad = (
   rootDocument: BoldDocument,
   documents: BoldDocument[],
 ) => {
-  vi.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValueOnce({
+  vi.spyOn(DocumentQueryService.prototype, 'load').mockResolvedValue({
     iterator: () => ({
       each: (callback) =>
         Promise.resolve(

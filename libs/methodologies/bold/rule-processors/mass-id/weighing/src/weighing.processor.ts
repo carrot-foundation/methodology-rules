@@ -2,18 +2,14 @@ import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-dat
 import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, logger } from '@carrot-fndn/shared/helpers';
+import { selectActorAccreditation } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
+  collectAccreditationDocuments,
   type DocumentQuery,
-  DocumentQueryService,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  loadAccreditationDocumentQuery,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  MASS_ID,
-  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
-} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   BoldAttachmentLabel,
@@ -22,10 +18,7 @@ import {
   BoldDocumentSubtype,
   BoldWeighingCaptureMethod,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import {
-  getAttachmentS3Key,
-  mapDocumentRelation,
-} from '@carrot-fndn/shared/methodologies/bold/utils';
+import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -57,6 +50,7 @@ import {
 } from './weighing.rule-subject';
 
 interface DocumentPair {
+  evaluationDate: string;
   massIDDocument: BoldDocument;
   recyclerAccreditationDocument: BoldDocument;
 }
@@ -65,9 +59,17 @@ export class WeighingProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new WeighingProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    const legacyEvaluationDate = new Date().toISOString();
+
     try {
-      const documentQuery = await this.generateDocumentQuery(ruleInput);
-      const documentPair = await this.collectDocuments(documentQuery);
+      const documentQuery = await this.generateDocumentQuery(
+        ruleInput,
+        legacyEvaluationDate,
+      );
+      const documentPair = await this.collectDocuments(
+        documentQuery,
+        legacyEvaluationDate,
+      );
       const rawSubject = this.getRuleSubject(documentPair);
       const ruleSubject = validateRuleSubjectOrThrow({
         errors: this.processorErrors,
@@ -121,12 +123,20 @@ export class WeighingProcessor extends RuleDataProcessor {
       passMessage = PASSED_RESULT_COMMENTS.SINGLE_STEP;
     }
 
-    if (isExceptionValid(weighingValues.containerCapacityException)) {
+    if (
+      isExceptionValid(
+        weighingValues.containerCapacityException,
+        weighingValues.evaluationDate,
+      )
+    ) {
       passMessage = PASSED_RESULT_COMMENTS.PASSED_WITH_EXCEPTION(passMessage);
     }
 
     if (
-      isExceptionValid(weighingValues.containerQuantityException) &&
+      isExceptionValid(
+        weighingValues.containerQuantityException,
+        weighingValues.evaluationDate,
+      ) &&
       isNil(weighingValues.containerQuantity)
     ) {
       passMessage =
@@ -136,7 +146,10 @@ export class WeighingProcessor extends RuleDataProcessor {
     }
 
     if (
-      isExceptionValid(weighingValues.tareException) &&
+      isExceptionValid(
+        weighingValues.tareException,
+        weighingValues.evaluationDate,
+      ) &&
       isNil(weighingValues.tare?.value)
     ) {
       passMessage =
@@ -152,6 +165,7 @@ export class WeighingProcessor extends RuleDataProcessor {
   }
 
   protected async evaluateResult({
+    evaluationDate,
     massIDDocumentId,
     recyclerAccreditationDocument,
     weighingEvents,
@@ -174,6 +188,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     const weighingValues = getValuesRelatedToWeighing(
       weighingEvent,
       recyclerAccreditationDocument,
+      evaluationDate,
     );
 
     const validationMessages = validateWeighingValues(
@@ -222,27 +237,26 @@ export class WeighingProcessor extends RuleDataProcessor {
     };
   }
 
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  protected async generateDocumentQuery(
+    ruleInput: RuleInput,
+    legacyEvaluationDate: string,
+  ) {
+    return loadAccreditationDocumentQuery({
+      context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      legacyEvaluationDate,
     });
   }
 
   protected getRuleSubject({
+    evaluationDate,
     massIDDocument,
     recyclerAccreditationDocument,
   }: DocumentPair): WeighingRuleSubject {
     const weighingEvents = getWeighingEvents(massIDDocument);
 
     return {
+      evaluationDate,
       massIDDocumentId: massIDDocument.id,
       recyclerAccreditationDocument,
       weighingEvents,
@@ -330,46 +344,35 @@ export class WeighingProcessor extends RuleDataProcessor {
 
   private async collectDocuments(
     documentQuery: DocumentQuery<BoldDocument>,
+    legacyEvaluationDate: string,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: BoldDocument | undefined;
-    let massIDDocument: BoldDocument | undefined;
+    const { accreditationDocuments, evaluation, massIDDocument } =
+      await collectAccreditationDocuments(documentQuery, legacyEvaluationDate);
 
-    await documentQuery.iterator().each(({ document }) => {
-      const documentRelation = mapDocumentRelation(document);
+    if (massIDDocument === undefined) {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      );
+    }
 
-      if (
-        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
-      ) {
-        recyclerAccreditationDocument = document;
-      }
-
-      if (MASS_ID.matches(documentRelation)) {
-        massIDDocument = document;
-      }
+    const recycler = selectActorAccreditation({
+      accreditationDocuments,
+      evaluation,
+      massIDDocument,
+      role: BoldDocumentSubtype.RECYCLER,
     });
 
-    this.validateOrThrow(
-      isNil(recyclerAccreditationDocument),
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-    );
-
-    this.validateOrThrow(
-      isNil(massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    );
+    if (recycler.status !== 'SELECTED') {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE
+          .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      );
+    }
 
     return {
-      massIDDocument: massIDDocument as BoldDocument,
-      recyclerAccreditationDocument:
-        recyclerAccreditationDocument as BoldDocument,
+      evaluationDate: evaluation.evaluationDate,
+      massIDDocument,
+      recyclerAccreditationDocument: recycler.document,
     };
-  }
-
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
-    if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
-    }
   }
 }

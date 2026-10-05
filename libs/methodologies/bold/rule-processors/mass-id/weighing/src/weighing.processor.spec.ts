@@ -19,6 +19,31 @@ describe('WeighingProcessor', () => {
     typeof scaleTicketVerification.verifyScaleTicketNetWeight
   >;
 
+  it.each(
+    weighingTestCases.filter((testCase) => testCase.resultStatus === 'PASSED'),
+  )(
+    'should refuse a wrong-facility accreditation when $scenario',
+    async (testCase) => {
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments: testCase.accreditationDocuments,
+        configureDocuments: (documents) => {
+          for (const document of documents.participantsAccreditationDocuments.values()) {
+            document.primaryAddress = {
+              ...document.primaryAddress,
+              id: 'unrelated-facility',
+            };
+          }
+        },
+        massIDDocumentsParams: {
+          externalEventsMap: testCase.massIDDocumentEvents,
+        },
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultStatus).toBe('FAILED');
+    },
+  );
   beforeEach(() => {
     vi.restoreAllMocks();
 

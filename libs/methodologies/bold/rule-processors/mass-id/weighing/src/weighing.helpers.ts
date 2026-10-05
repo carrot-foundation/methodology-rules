@@ -74,6 +74,7 @@ export interface WeighingValues {
   containerQuantityException: ContainerQuantityApprovedException | undefined;
   containerType: string | undefined;
   description: BoldAttributeValue | undefined;
+  evaluationDate?: string | undefined;
   eventValue: number | undefined;
   grossWeight: BoldDocumentEventAttribute | undefined;
   scaleType: BoldAttributeValue | undefined;
@@ -103,12 +104,13 @@ const isAttributeOmitted = (attribute?: BoldDocumentEventAttribute): boolean =>
 const shouldSkipValidationWithTareException = (
   values: WeighingValues,
   isOmitted: boolean,
-): boolean => isExceptionValid(values.tareException) && isOmitted;
+): boolean =>
+  isExceptionValid(values.tareException, values.evaluationDate) && isOmitted;
 
 const shouldSkipNetWeightCalculationWithTareException = (
   values: WeighingValues,
 ): boolean =>
-  isExceptionValid(values.tareException) &&
+  isExceptionValid(values.tareException, values.evaluationDate) &&
   (isAttributeOmitted(values.grossWeight) || isAttributeOmitted(values.tare));
 
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
@@ -208,6 +210,7 @@ export const isExceptionValid = (
     | ContainerQuantityApprovedException
     | TareApprovedException
     | undefined,
+  evaluationDate?: string,
 ): boolean => {
   const isValidException =
     isTareApprovedException(exception) ||
@@ -218,7 +221,7 @@ export const isExceptionValid = (
     return false;
   }
 
-  return isApprovedExceptionValid(exception);
+  return isApprovedExceptionValid(exception, evaluationDate);
 };
 
 export const getAccreditationScaleType = (
@@ -235,6 +238,7 @@ export const getAccreditationScaleType = (
 export const getValuesRelatedToWeighing = (
   weighingEvent: BoldDocumentEvent,
   recyclerAccreditationDocument: BoldDocument,
+  evaluationDate?: string,
 ): WeighingValues => ({
   accreditationScaleType: getAccreditationScaleType(
     recyclerAccreditationDocument,
@@ -257,6 +261,7 @@ export const getValuesRelatedToWeighing = (
     CONTAINER_TYPE,
   )?.toString(),
   description: getEventAttributeValue(weighingEvent, DESCRIPTION),
+  evaluationDate,
   eventValue: weighingEvent.value,
   grossWeight: getEventAttributeByName(weighingEvent, GROSS_WEIGHT),
   scaleType: getEventAttributeValue(weighingEvent, SCALE_TYPE),
@@ -291,7 +296,9 @@ type Validator = (
 
 const validators: Record<string, Validator> = {
   containerCapacity: (values) => {
-    if (isExceptionValid(values.containerCapacityException)) {
+    if (
+      isExceptionValid(values.containerCapacityException, values.evaluationDate)
+    ) {
       return { errors: [] };
     }
 
@@ -319,7 +326,10 @@ const validators: Record<string, Validator> = {
     if (
       !isTruck &&
       !isNonZeroPositiveInt(values.containerQuantity) &&
-      !isExceptionValid(values.containerQuantityException)
+      !isExceptionValid(
+        values.containerQuantityException,
+        values.evaluationDate,
+      )
     ) {
       errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
     }

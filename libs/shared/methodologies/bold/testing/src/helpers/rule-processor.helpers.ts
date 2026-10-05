@@ -14,6 +14,9 @@ interface CreateBoldStubsParameters {
 
 interface ProcessRuleTestParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
+  configureDocuments?: (
+    documents: ReturnType<typeof createBoldStubsForMassIDProcessor>,
+  ) => void;
   massIDActorParticipants?: Map<string, DocumentParticipant> | undefined;
   massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
   ruleDataProcessor: RuleDataProcessor;
@@ -48,6 +51,7 @@ export function createBoldStubsForMassIDProcessor({
 
 export async function createRuleTestFixture({
   accreditationDocuments,
+  configureDocuments,
   massIDActorParticipants,
   massIDDocumentsParams,
   ruleDataProcessor,
@@ -56,15 +60,19 @@ export async function createRuleTestFixture({
   ruleInput: RuleInput;
   ruleOutput: RuleOutput;
 }> {
-  const {
-    massIDAuditDocument,
-    massIDDocument,
-    participantsAccreditationDocuments,
-  } = createBoldStubsForMassIDProcessor({
+  const documents = createBoldStubsForMassIDProcessor({
     accreditationDocuments,
     massIDActorParticipants,
     massIDDocumentsParams,
   });
+
+  configureDocuments?.(documents);
+
+  const {
+    massIDAuditDocument,
+    massIDDocument,
+    participantsAccreditationDocuments,
+  } = documents;
 
   const allDocuments = [
     massIDDocument,

@@ -1,6 +1,6 @@
 import {
   DocumentQueryService,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  LEGACY_PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
   spyOnDocumentQueryServiceLoad,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
@@ -18,6 +18,35 @@ import {
 describe('MassIDSortingProcessor', () => {
   const ruleDataProcessor = new MassIDSortingProcessor();
 
+  it.each(
+    massIDSortingTestCases.filter(
+      (testCase) => testCase.resultStatus === 'PASSED',
+    ),
+  )(
+    'should refuse a wrong-facility accreditation when $scenario',
+    async (testCase) => {
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments: testCase.accreditationDocuments,
+        configureDocuments: (documents) => {
+          for (const document of documents.participantsAccreditationDocuments.values()) {
+            document.primaryAddress = {
+              ...document.primaryAddress,
+              id: 'unrelated-facility',
+            };
+          }
+        },
+        massIDActorParticipants: testCase.actorParticipants,
+        massIDDocumentsParams: {
+          externalEventsMap: testCase.massIDEvents,
+          partialDocument: testCase.partialDocument,
+        },
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultStatus).toBe('FAILED');
+    },
+  );
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -53,7 +82,7 @@ describe('MassIDSortingProcessor', () => {
 
         expect(DocumentQueryService.prototype.load).toHaveBeenCalledWith(
           expect.objectContaining({
-            criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+            criteria: LEGACY_PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
           }),
         );
       },

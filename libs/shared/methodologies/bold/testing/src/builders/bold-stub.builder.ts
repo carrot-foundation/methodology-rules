@@ -82,6 +82,7 @@ export interface BoldStubsBuilderResult {
   massIDDocuments: BoldDocument[];
   methodologyActorParticipants: Map<string, DocumentParticipant>;
   methodologyDocument: BoldDocument | undefined;
+  participantAccreditationGroupDocument: BoldDocument | undefined;
   participantsAccreditationDocuments: Map<string, BoldDocument>;
 }
 
@@ -265,6 +266,8 @@ export class BoldStubsBuilder {
       massIDDocuments: _massIDDocuments,
       methodologyActorParticipants: this.methodologyActorParticipants,
       methodologyDocument: this.methodologyDocument,
+      participantAccreditationGroupDocument:
+        this.participantAccreditationGroupDocument,
       participantsAccreditationDocuments:
         this.participantsAccreditationDocuments,
     };
@@ -779,7 +782,11 @@ export class BoldStubsBuilder {
     return new Map(
       MASS_ID_ACTOR_PARTICIPANTS.map((subtype) => {
         const coords = this.actorsCoordinates.get(subtype)!.base;
-        const address = stubAddress();
+        const participant = this.massIDActorParticipants.get(subtype);
+        const address =
+          participant === undefined
+            ? stubAddress()
+            : stubAddress({ participantId: participant.id });
 
         return [
           subtype,

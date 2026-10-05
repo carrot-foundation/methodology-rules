@@ -594,15 +594,15 @@ const mapParticipantAccreditationDocuments = ({
       if (document.subtype === RECYCLER && recyclerExternalEvents) {
         return {
           ...document,
-          externalEvents:
-            recyclerRemoveEventName === undefined
-              ? recyclerExternalEvents
-              : [
-                  ...(document.externalEvents?.filter(
-                    (event) => event.name !== recyclerRemoveEventName,
-                  ) ?? []),
-                  ...recyclerExternalEvents,
-                ],
+          externalEvents: [
+            ...(document.externalEvents?.filter(
+              (event) =>
+                !event.name.startsWith(
+                  recyclerRemoveEventName ?? EMISSION_AND_COMPOSTING_METRICS,
+                ),
+            ) ?? []),
+            ...recyclerExternalEvents,
+          ],
         };
       }
 

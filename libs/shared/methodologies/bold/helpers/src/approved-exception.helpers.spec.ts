@@ -308,3 +308,25 @@ describe('Approved Exception Helpers', () => {
     });
   });
 });
+
+describe('isApprovedExceptionValid explicit evaluation date', () => {
+  it('should accept an exception historically and refuse it after expiry without a clock read', () => {
+    const exception = {
+      'Attribute Location': {
+        Asset: { Category: 'MassID' },
+        Event: 'Weighing',
+      },
+      'Attribute Name': 'Tare',
+      'Exception Type': 'Mandatory Attribute',
+      Reason: 'Fictional reviewed exception',
+      'Valid Until': '2026-05-01T12:00:00.000Z',
+    };
+
+    expect(
+      isApprovedExceptionValid(exception, '2026-04-01T12:00:00.000Z'),
+    ).toBe(true);
+    expect(
+      isApprovedExceptionValid(exception, '2026-06-01T12:00:00.000Z'),
+    ).toBe(false);
+  });
+});

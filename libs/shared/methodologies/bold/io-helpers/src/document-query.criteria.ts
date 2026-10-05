@@ -27,8 +27,28 @@ export const DocumentQueryCriteriaSchema: z.ZodType<DocumentQueryCriteria> =
 
 export const PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA = {
   parentDocument: {},
-  relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
+  relatedDocuments: [
+    {
+      ...PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match,
+      parentDocument: {
+        parentDocument: {
+          relatedDocuments: [
+            {
+              ...PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match,
+              relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
+            },
+          ],
+        },
+        relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
+      },
+    },
+  ],
 } as const satisfies DocumentQueryCriteria;
 
 export const BOLD_ROOT_DOCUMENT_CRITERIA =
   {} as const satisfies DocumentQueryCriteria;
+
+export const LEGACY_PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA = {
+  parentDocument: {},
+  relatedDocuments: [PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.match],
+} as const satisfies DocumentQueryCriteria;

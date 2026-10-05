@@ -7,7 +7,6 @@ import {
   getApprovedExceptions,
   isApprovedExceptionValid,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
-import { PARTICIPANT_ACCREDITATION_PARTIAL_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   eventHasLabel,
   eventNameIsAnyOf,
@@ -18,10 +17,8 @@ import {
   type BoldDocument,
   type BoldDocumentEvent,
   BoldDocumentEventName,
-  BoldDocumentSubtype,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   type DocumentAddress,
   type Geolocation,
@@ -81,18 +78,6 @@ export const buildAddressComparisonString = (
   address: DocumentAddress,
 ): string =>
   [address.street, address.number, address.city].filter(Boolean).join(', ');
-
-export const findRecyclerAccreditation = (
-  accreditationDocuments: BoldDocument[],
-): BoldDocument | undefined =>
-  accreditationDocuments.find((document) => {
-    const relation = mapDocumentRelation(document);
-
-    return (
-      PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(relation) &&
-      relation.subtype === BoldDocumentSubtype.RECYCLER
-    );
-  });
 
 export const pickGpsComment = (
   addressDistance: number | undefined,
@@ -272,6 +257,7 @@ export const isGpsExceptionValid = (
     | GpsLatitudeApprovedException
     | GpsLongitudeApprovedException
     | undefined,
+  evaluationDate?: string,
 ): boolean => {
   const isValidException =
     isGpsLatitudeApprovedException(exception) ||
@@ -281,15 +267,22 @@ export const isGpsExceptionValid = (
     return false;
   }
 
-  return isApprovedExceptionValid(exception);
+  return isApprovedExceptionValid(exception, evaluationDate);
 };
 
 export const shouldSkipGpsValidation = (
   latitudeException: GpsLatitudeApprovedException | undefined,
   longitudeException: GpsLongitudeApprovedException | undefined,
+  evaluationDate?: string,
 ): boolean => {
-  const hasValidLatitudeException = isGpsExceptionValid(latitudeException);
-  const hasValidLongitudeException = isGpsExceptionValid(longitudeException);
+  const hasValidLatitudeException = isGpsExceptionValid(
+    latitudeException,
+    evaluationDate,
+  );
+  const hasValidLongitudeException = isGpsExceptionValid(
+    longitudeException,
+    evaluationDate,
+  );
 
   return hasValidLatitudeException && hasValidLongitudeException;
 };

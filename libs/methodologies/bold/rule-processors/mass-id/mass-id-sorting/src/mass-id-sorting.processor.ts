@@ -1,29 +1,23 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import {
   getOrUndefined,
-  isNil,
   isNonEmptyString,
   logger,
 } from '@carrot-fndn/shared/helpers';
 import { getEventAttributeValue } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { selectActorAccreditation } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
+  collectAccreditationDocuments,
   type DocumentQuery,
-  DocumentQueryService,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  loadAccreditationDocumentQuery,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  MASS_ID,
-  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
-} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import {
   BoldAttributeName,
   type BoldDocument,
   BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -72,9 +66,17 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new MassIDSortingProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    const legacyEvaluationDate = new Date().toISOString();
+
     try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const documents = await this.collectDocuments(documentsQuery);
+      const documentsQuery = await this.generateDocumentQuery(
+        ruleInput,
+        legacyEvaluationDate,
+      );
+      const documents = await this.collectDocuments(
+        documentsQuery,
+        legacyEvaluationDate,
+      );
 
       const sortingData = this.extractSortingData(documents);
 
@@ -167,56 +169,50 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     };
   }
 
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  protected async generateDocumentQuery(
+    ruleInput: RuleInput,
+    legacyEvaluationDate: string,
+  ) {
+    return loadAccreditationDocumentQuery({
+      context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      legacyEvaluationDate,
     });
   }
 
   private async collectDocuments(
     documentQuery: DocumentQuery<BoldDocument> | undefined,
+    legacyEvaluationDate: string,
   ): Promise<DocumentPair> {
-    let recyclerAccreditationDocument: BoldDocument | undefined;
-    let massIDDocument: BoldDocument | undefined;
+    const { accreditationDocuments, evaluation, massIDDocument } =
+      await collectAccreditationDocuments(documentQuery, legacyEvaluationDate);
 
-    await documentQuery?.iterator().each(({ document }) => {
-      const documentRelation = mapDocumentRelation(document);
+    if (massIDDocument === undefined) {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      );
+    }
 
-      if (
-        PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation) &&
-        documentRelation.subtype === BoldDocumentSubtype.RECYCLER
-      ) {
-        recyclerAccreditationDocument = document;
-      }
+    this.unwrapOrThrow(
+      getValidatedExternalEvents(massIDDocument),
+      this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
+    );
 
-      if (MASS_ID.matches(documentRelation)) {
-        massIDDocument = document;
-      }
+    const recycler = selectActorAccreditation({
+      accreditationDocuments,
+      evaluation,
+      massIDDocument,
+      role: BoldDocumentSubtype.RECYCLER,
     });
 
-    this.validateOrThrow(
-      isNil(recyclerAccreditationDocument),
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-    );
+    if (recycler.status !== 'SELECTED') {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE
+          .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      );
+    }
 
-    this.validateOrThrow(
-      isNil(massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-    );
-
-    return {
-      massIDDocument: massIDDocument!,
-      recyclerAccreditationDocument: recyclerAccreditationDocument!,
-    };
+    return { massIDDocument, recyclerAccreditationDocument: recycler.document };
   }
 
   private extractSortingData(documents: DocumentPair): SortingData {
@@ -324,11 +320,5 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
     }
 
     return result;
-  }
-
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
-    if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
-    }
   }
 }

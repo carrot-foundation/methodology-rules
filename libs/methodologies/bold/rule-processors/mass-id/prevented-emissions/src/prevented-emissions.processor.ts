@@ -1,7 +1,6 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
 import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
 import {
   getOrUndefined,
@@ -14,15 +13,12 @@ import {
   getEventAttributeValue,
   getLastYearEmissionAndCompostingMetricsEvent,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
+import { selectActorAccreditation } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
+  collectAccreditationDocuments,
   type DocumentQuery,
-  DocumentQueryService,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  loadAccreditationDocumentQuery,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  MASS_ID,
-  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
-} from '@carrot-fndn/shared/methodologies/bold/matchers';
 import { validateRuleSubjectOrThrow } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
   BoldAttributeName,
@@ -32,7 +28,6 @@ import {
   BoldDocumentSubtype,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
@@ -49,7 +44,6 @@ import {
   getBaselineByWasteSubtype,
   getGasTypeFromEvent,
   getStaticPreventedEmissionsFactor,
-  throwIfMissing,
 } from './prevented-emissions.helpers';
 import {
   buildOthersIfOrganicAuditDetails,
@@ -78,9 +72,17 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   protected readonly processorErrors = new PreventedEmissionsProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    const legacyEvaluationDate = new Date().toISOString();
+
     try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-      const documents = await this.collectDocuments(documentsQuery);
+      const documentsQuery = await this.generateDocumentQuery(
+        ruleInput,
+        legacyEvaluationDate,
+      );
+      const documents = await this.collectDocuments(
+        documentsQuery,
+        legacyEvaluationDate,
+      );
       const ruleSubject = this.getRuleSubject(documents);
 
       const validatedSubject = validateRuleSubjectOrThrow({
@@ -184,17 +186,14 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
     };
   }
 
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  protected async generateDocumentQuery(
+    ruleInput: RuleInput,
+    legacyEvaluationDate: string,
+  ) {
+    return loadAccreditationDocumentQuery({
+      context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      legacyEvaluationDate,
     });
   }
 
@@ -300,52 +299,49 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
   private async collectDocuments(
     documentQuery: DocumentQuery<BoldDocument> | undefined,
+    legacyEvaluationDate: string,
   ): Promise<Documents> {
-    let recyclerAccreditationDocument: BoldDocument | undefined;
-    let wasteGeneratorAccreditationDocument: BoldDocument | undefined;
-    let massIDDocument: BoldDocument | undefined;
+    const { accreditationDocuments, evaluation, massIDDocument } =
+      await collectAccreditationDocuments(documentQuery, legacyEvaluationDate);
 
-    await documentQuery?.iterator().each(({ document }) => {
-      const documentRelation = mapDocumentRelation(document);
+    if (massIDDocument === undefined) {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
+      );
+    }
 
-      if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
-        if (
-          documentRelation.subtype === BoldDocumentSubtype.RECYCLER.toString()
-        ) {
-          recyclerAccreditationDocument = document;
-        }
-
-        if (
-          documentRelation.subtype ===
-          BoldDocumentSubtype.WASTE_GENERATOR.toString()
-        ) {
-          wasteGeneratorAccreditationDocument = document;
-        }
-      }
-
-      if (MASS_ID.matches(documentRelation)) {
-        massIDDocument = document;
-      }
+    const recycler = selectActorAccreditation({
+      accreditationDocuments,
+      evaluation,
+      massIDDocument,
+      role: BoldDocumentSubtype.RECYCLER,
     });
 
-    throwIfMissing(
-      recyclerAccreditationDocument,
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
-      this.processorErrors,
-    );
+    if (recycler.status !== 'SELECTED') {
+      throw this.processorErrors.getKnownError(
+        this.processorErrors.ERROR_MESSAGE
+          .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      );
+    }
 
-    throwIfMissing(
+    const generator = selectActorAccreditation({
+      accreditationDocuments,
+      evaluation,
       massIDDocument,
-      this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
-      this.processorErrors,
-    );
+      role: BoldDocumentSubtype.WASTE_GENERATOR,
+    });
+
+    if (generator.status !== 'SELECTED' && generator.status !== 'MISSING') {
+      throw this.processorErrors.getKnownError(
+        `Waste Generator accreditation selection failed: ${generator.status}`,
+      );
+    }
 
     return {
       massIDDocument,
-      recyclerAccreditationDocument,
-      ...(wasteGeneratorAccreditationDocument && {
-        wasteGeneratorAccreditationDocument,
+      recyclerAccreditationDocument: recycler.document,
+      ...(generator.status === 'SELECTED' && {
+        wasteGeneratorAccreditationDocument: generator.document,
       }),
     };
   }

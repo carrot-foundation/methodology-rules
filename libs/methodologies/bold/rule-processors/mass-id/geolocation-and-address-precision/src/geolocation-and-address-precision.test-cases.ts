@@ -47,6 +47,22 @@ interface GeolocationAndAddressPrecisionErrorTestCase extends RuleTestCase {
   massIDAuditDocument: BoldDocument | undefined;
 }
 
+export const alignActorFacilityAddresses = (
+  massIDDocument: BoldDocument,
+  accreditationDocuments: Map<string, BoldDocument>,
+): void => {
+  massIDDocument.externalEvents = massIDDocument.externalEvents?.map(
+    (event) => {
+      const accreditation = accreditationDocuments.get(event.label ?? '');
+
+      return event.name === BoldDocumentEventName.ACTOR &&
+        accreditation !== undefined
+        ? { ...event, address: accreditation.primaryAddress }
+        : event;
+    },
+  );
+};
+
 const { RECYCLER, WASTE_GENERATOR } = MassIDActorType;
 const {
   ACCREDITATION_CONTEXT,

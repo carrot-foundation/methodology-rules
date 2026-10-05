@@ -8,6 +8,7 @@ import { faker } from '@faker-js/faker';
 import { WeighingRuleSubjectSchema } from './weighing.rule-subject';
 
 const buildValidSubject = (weighingEventCount: number) => ({
+  evaluationDate: '2026-10-04T12:00:00.000Z',
   massIDDocumentId: faker.string.uuid(),
   recyclerAccreditationDocument: stubDocument(),
   weighingEvents: Array.from({ length: weighingEventCount }, () =>

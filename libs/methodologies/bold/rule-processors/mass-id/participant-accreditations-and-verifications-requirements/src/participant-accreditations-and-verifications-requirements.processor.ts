@@ -1,33 +1,19 @@
-import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import { getOrUndefined, isNonEmptyArray } from '@carrot-fndn/shared/helpers';
 import {
-  getOrUndefined,
-  isNil,
-  isNonEmptyArray,
-} from '@carrot-fndn/shared/helpers';
-import {
-  isAccreditationValid,
-  isAccreditationValidWithOptionalDates,
+  type AccreditationEvaluationContext,
+  type AccreditationRole,
+  selectActorAccreditation,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
+  collectAccreditationDocuments,
   type DocumentQuery,
-  DocumentQueryService,
-  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  loadAccreditationDocumentQuery,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  MASS_ID,
-  PARTICIPANT_ACCREDITATION_PARTIAL_MATCH,
-} from '@carrot-fndn/shared/methodologies/bold/matchers';
-import { eventLabelIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predicates';
-import {
-  type BoldDocument,
-  BoldDocumentEventLabel,
-  BoldDocumentSubtype,
-} from '@carrot-fndn/shared/methodologies/bold/types';
-import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { isActorEvent } from '@carrot-fndn/shared/methodologies/bold/predicates';
+import { type BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
+import { type EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 import {
   type RuleInput,
   type RuleOutput,
@@ -36,30 +22,34 @@ import {
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 
-const ACTORS_REQUIRING_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set([
-  BoldDocumentEventLabel.PROCESSOR,
-  BoldDocumentEventLabel.RECYCLER,
-]);
-
-const ACTORS_WITH_OPTIONAL_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set(
-  [BoldDocumentEventLabel.INTEGRATOR],
-);
-
 interface RuleSubject {
-  accreditationDocuments: Map<string, BoldDocument[]>;
+  accreditationDocuments: BoldDocument[];
+  evaluation: AccreditationEvaluationContext;
   massIDDocument: BoldDocument;
 }
+
+const REQUIRED_ROLES = [
+  'Integrator',
+  'Processor',
+  'Recycler',
+] as const satisfies readonly AccreditationRole[];
 
 export class ParticipantAccreditationsAndVerificationsRequirementsProcessor extends RuleDataProcessor {
   readonly errorProcessor =
     new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors();
 
   async process(ruleInput: RuleInput): Promise<RuleOutput> {
+    const legacyEvaluationDate = new Date().toISOString();
+
     try {
-      const documentsQuery = await this.generateDocumentQuery(ruleInput);
-
-      const ruleSubject = await this.getRuleSubject(documentsQuery);
-
+      const documentsQuery = await this.generateDocumentQuery(
+        ruleInput,
+        legacyEvaluationDate,
+      );
+      const ruleSubject = await this.getRuleSubject(
+        documentsQuery,
+        legacyEvaluationDate,
+      );
       const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
@@ -72,222 +62,20 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     }
   }
 
-  protected async generateDocumentQuery(ruleInput: RuleInput) {
-    const documentQueryService = new DocumentQueryService(
-      provideDocumentLoaderService,
-    );
-
-    return documentQueryService.load({
-      context: {
-        s3KeyPrefix: ruleInput.documentKeyPrefix,
-      },
-      criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+  protected async generateDocumentQuery(
+    ruleInput: RuleInput,
+    legacyEvaluationDate: string,
+  ) {
+    return loadAccreditationDocumentQuery({
+      context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      legacyEvaluationDate,
     });
   }
 
-  private evaluateResult({
-    accreditationDocuments,
-    massIDDocument,
-  }: RuleSubject): EvaluateResultOutput {
-    this.verifyAllParticipantsHaveAccreditationDocuments({
-      accreditationDocuments,
-      massIDDocument,
-    });
+  private evaluateResult(subject: RuleSubject): EvaluateResultOutput {
+    const { accreditationDocuments, evaluation, massIDDocument } = subject;
 
-    const actorParticipants = this.getActorParticipants(massIDDocument);
-
-    const validationError = this.validateAllActors(
-      actorParticipants,
-      accreditationDocuments,
-    );
-
-    if (validationError) {
-      throw validationError;
-    }
-
-    return {
-      resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
-      resultStatus: 'PASSED',
-    };
-  }
-
-  /**
-   * One participant can hold several of these roles at once — a recycler is
-   * normally both PROCESSOR and RECYCLER — and each role carries its own
-   * accreditation subtype, so the roles are collected per participant rather
-   * than overwritten.
-   */
-  private getActorParticipants(
-    massIDDocument: BoldDocument,
-  ): Map<string, Set<BoldDocumentEventLabel>> {
-    const actorParticipants = new Map<string, Set<BoldDocumentEventLabel>>();
-
-    // externalEvents is guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
-    for (const event of massIDDocument.externalEvents!.filter(
-      eventLabelIsAnyOf([
-        BoldDocumentEventLabel.INTEGRATOR,
-        BoldDocumentEventLabel.PROCESSOR,
-        BoldDocumentEventLabel.RECYCLER,
-      ]),
-    )) {
-      const actorTypes = actorParticipants.get(event.participant.id);
-
-      if (actorTypes) {
-        actorTypes.add(event.label as BoldDocumentEventLabel);
-      } else {
-        actorParticipants.set(
-          event.participant.id,
-          new Set([event.label as BoldDocumentEventLabel]),
-        );
-      }
-    }
-
-    return actorParticipants;
-  }
-
-  private async getRuleSubject(
-    documentQuery: DocumentQuery<BoldDocument> | undefined,
-  ): Promise<RuleSubject> {
-    const accreditationDocuments: Map<string, BoldDocument[]> = new Map();
-    let massIDDocument: BoldDocument | undefined;
-
-    await documentQuery?.iterator().each(({ document }) => {
-      const documentRelation = mapDocumentRelation(document);
-
-      if (MASS_ID.matches(documentRelation)) {
-        massIDDocument = document;
-      }
-
-      if (PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(documentRelation)) {
-        const participantId = document.primaryParticipant.id;
-        const existingDocuments =
-          accreditationDocuments.get(participantId) ?? [];
-
-        accreditationDocuments.set(participantId, [
-          ...existingDocuments,
-          document,
-        ]);
-      }
-    });
-
-    if (isNil(massIDDocument)) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-      );
-    }
-
-    if (accreditationDocuments.size === 0) {
-      throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
-      );
-    }
-
-    return {
-      accreditationDocuments,
-      massIDDocument,
-    };
-  }
-
-  private validateActor(
-    participantId: string,
-    actorType: BoldDocumentEventLabel,
-    participantDocuments: BoldDocument[],
-    missingParticipants: string[],
-    participantsWithMultipleValid: Array<{
-      actorType: string;
-      participantId: string;
-    }>,
-    isValidAccreditation: (document: BoldDocument) => boolean,
-  ): void {
-    const documentsForActorType = participantDocuments.filter((document) => {
-      const documentRelation = mapDocumentRelation(document);
-
-      return (
-        documentRelation.subtype ===
-        (actorType as unknown as BoldDocumentSubtype)
-      );
-    });
-
-    const validAccreditations = documentsForActorType.filter((document) =>
-      isValidAccreditation(document),
-    );
-
-    if (validAccreditations.length === 0) {
-      missingParticipants.push(actorType);
-    } else if (validAccreditations.length > 1) {
-      participantsWithMultipleValid.push({ actorType, participantId });
-    }
-  }
-
-  private validateAllActors(
-    actorParticipants: Map<string, Set<BoldDocumentEventLabel>>,
-    accreditationDocuments: Map<string, BoldDocument[]>,
-  ): Error | undefined {
-    const missingParticipants: string[] = [];
-    const participantsWithMultipleValid: Array<{
-      actorType: string;
-      participantId: string;
-    }> = [];
-
-    for (const [participantId, actorTypes] of actorParticipants.entries()) {
-      // Documents are guaranteed to exist by verifyAllParticipantsHaveAccreditationDocuments
-      const participantDocuments = accreditationDocuments.get(participantId)!;
-
-      for (const actorType of actorTypes) {
-        if (ACTORS_REQUIRING_DATES.has(actorType)) {
-          this.validateActor(
-            participantId,
-            actorType,
-            participantDocuments,
-            missingParticipants,
-            participantsWithMultipleValid,
-            isAccreditationValid,
-          );
-          /* v8 ignore start -- actorType is always in one of the two sets */
-        } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
-          this.validateActor(
-            participantId,
-            actorType,
-            participantDocuments,
-            missingParticipants,
-            participantsWithMultipleValid,
-            isAccreditationValidWithOptionalDates,
-          );
-        }
-        /* v8 ignore stop */
-      }
-    }
-
-    if (isNonEmptyArray(missingParticipants)) {
-      return this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-          missingParticipants,
-        ),
-      );
-    }
-
-    if (isNonEmptyArray(participantsWithMultipleValid)) {
-      const firstParticipant = participantsWithMultipleValid[0] as {
-        actorType: string;
-        participantId: string;
-      };
-
-      return this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
-          firstParticipant.participantId,
-          firstParticipant.actorType,
-        ),
-      );
-    }
-
-    return undefined;
-  }
-
-  private verifyAllParticipantsHaveAccreditationDocuments({
-    accreditationDocuments,
-    massIDDocument,
-  }: Omit<RuleSubject, 'massIDAuditDocument'>) {
     if (!isNonEmptyArray(massIDDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
@@ -296,34 +84,79 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       );
     }
 
-    const actorParticipants: Map<string, string> = new Map(
-      massIDDocument.externalEvents
-        .filter(
-          eventLabelIsAnyOf([
-            BoldDocumentEventLabel.INTEGRATOR,
-            BoldDocumentEventLabel.PROCESSOR,
-            BoldDocumentEventLabel.RECYCLER,
-          ]),
-        )
-        .map((event) => [event.participant.id, event.label as string]),
+    const actors = massIDDocument.externalEvents.filter((event) =>
+      isActorEvent(event),
     );
+    const missing: string[] = [];
+    let ambiguous:
+      | undefined
+      | { participantId: string; role: AccreditationRole };
 
-    const participantsWithoutAccreditationDocuments = [
-      ...actorParticipants.entries(),
-    ].filter(
-      ([participantId]) =>
-        !accreditationDocuments.has(participantId) ||
-        accreditationDocuments.get(participantId)!.length === 0,
-    );
+    for (const role of REQUIRED_ROLES) {
+      for (const actor of actors.filter((event) => event.label === role)) {
+        const selection = selectActorAccreditation({
+          accreditationDocuments,
+          actorScope: {
+            facilityId: actor.address.id,
+            participantId: actor.participant.id,
+          },
+          evaluation,
+          massIDDocument,
+          role,
+        });
 
-    if (isNonEmptyArray(participantsWithoutAccreditationDocuments)) {
+        if (selection.status === 'AMBIGUOUS') {
+          ambiguous = { participantId: actor.participant.id, role };
+        } else if (selection.status !== 'SELECTED' && !missing.includes(role)) {
+          missing.push(role);
+        }
+      }
+    }
+
+    if (isNonEmptyArray(missing)) {
       throw this.errorProcessor.getKnownError(
         this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
-          participantsWithoutAccreditationDocuments.map(
-            ([participantId]) => actorParticipants.get(participantId) as string,
-          ),
+          missing,
         ),
       );
     }
+
+    if (ambiguous !== undefined) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
+          ambiguous.participantId,
+          ambiguous.role,
+        ),
+      );
+    }
+
+    return {
+      resultComment: RESULT_COMMENTS.passed.ALL_ACCREDITATIONS_APPROVED,
+      resultStatus: 'PASSED',
+    };
+  }
+
+  private async getRuleSubject(
+    documentQuery: DocumentQuery<BoldDocument> | undefined,
+    legacyEvaluationDate: string,
+  ): Promise<RuleSubject> {
+    const subject = await collectAccreditationDocuments(
+      documentQuery,
+      legacyEvaluationDate,
+    );
+
+    if (subject.massIDDocument === undefined) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      );
+    }
+
+    if (subject.accreditationDocuments.length === 0) {
+      throw this.errorProcessor.getKnownError(
+        this.errorProcessor.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
+      );
+    }
+
+    return { ...subject, massIDDocument: subject.massIDDocument };
   }
 }

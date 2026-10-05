@@ -36,6 +36,7 @@ export const getApprovedExceptions = (
 
 export const isApprovedExceptionValid = (
   exception: ApprovedException | undefined,
+  evaluationDate: string = new Date().toISOString(),
 ): boolean => {
   if (!exception) {
     return false;
@@ -53,5 +54,5 @@ export const isApprovedExceptionValid = (
     return false;
   }
 
-  return !isAfter(new Date(), validUntilDate);
+  return !isAfter(parseISO(evaluationDate), validUntilDate);
 };
