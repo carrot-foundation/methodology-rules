@@ -310,6 +310,24 @@ describe('Approved Exception Helpers', () => {
 });
 
 describe('isApprovedExceptionValid explicit evaluation date', () => {
+  it.each([undefined, '2026-05-01T12:00:00.000Z'])(
+    'should refuse an invalid evaluation date with expiry %s',
+    (validUntil) => {
+      const exception = {
+        'Attribute Location': {
+          Asset: { Category: BoldDocumentCategory.MASS_ID },
+          Event: BoldDocumentEventName.WEIGHING,
+        },
+        'Attribute Name': BoldAttributeName.TARE,
+        'Exception Type': BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
+        Reason: 'Fictional reviewed exception',
+        'Valid Until': validUntil,
+      };
+
+      expect(isApprovedExceptionValid(exception, 'invalid-date')).toBe(false);
+    },
+  );
+
   it('should accept an exception historically and refuse it after expiry without a clock read', () => {
     const exception = {
       'Attribute Location': {
