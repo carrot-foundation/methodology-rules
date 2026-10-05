@@ -1,4 +1,5 @@
-import { provideDocumentLoaderService } from '@carrot-fndn/shared/document/loader';
+import type { DocumentLoader } from '@carrot-fndn/shared/document/loader';
+
 import {
   type AccreditationEvaluationContext,
   getAccreditationEvaluationContext,
@@ -133,13 +134,15 @@ export const collectAccreditationDocuments = async (
 export const loadAccreditationDocumentQuery = async ({
   context,
   documentId,
+  documentLoaderService,
   legacyEvaluationDate,
 }: {
   context: QueryContext;
   documentId: string;
+  documentLoaderService: DocumentLoader;
   legacyEvaluationDate: string;
 }): Promise<DocumentQuery<BoldDocument>> => {
-  const service = new DocumentQueryService(provideDocumentLoaderService);
+  const service = new DocumentQueryService(documentLoaderService);
   const rootQuery = await service.load({
     context,
     criteria: BOLD_ROOT_DOCUMENT_CRITERIA,

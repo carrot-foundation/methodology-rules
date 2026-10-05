@@ -244,6 +244,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     return loadAccreditationDocumentQuery({
       context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      documentLoaderService: this.context.documentLoaderService,
       legacyEvaluationDate,
     });
   }

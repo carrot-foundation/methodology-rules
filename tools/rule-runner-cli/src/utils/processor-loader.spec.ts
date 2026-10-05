@@ -17,7 +17,7 @@ const liveQueryProcessorPath = path.join(
   repositoryRoot,
   'libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique',
 );
-const attachmentQueryProcessorPath = path.join(
+const weighingProcessorPath = path.join(
   repositoryRoot,
   'libs/methodologies/bold/rule-processors/mass-id/weighing',
 );
@@ -164,12 +164,17 @@ describe('loadLocalRuleModule', () => {
     );
   });
 
-  it('should reject weighing because its attachment input is not staged', async () => {
+  it('should load weighing with its declared static accreditation input', async () => {
     await expect(
-      loadLocalRuleModule(attachmentQueryProcessorPath),
-    ).rejects.toThrow(
-      `Unsupported rule definition for ${attachmentQueryProcessorPath}. Local MassID processors must declare static input criteria.`,
-    );
+      loadLocalRuleModule(weighingProcessorPath),
+    ).resolves.toMatchObject({
+      Processor: expect.any(Function),
+      ruleDefinition: {
+        input: expect.any(Object),
+        slug: 'weighing',
+      },
+      rulesScope: 'MassID',
+    });
   });
 
   it('should not construct a parameterized processor while rejecting it', async () => {

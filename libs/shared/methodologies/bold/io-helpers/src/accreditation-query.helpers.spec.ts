@@ -399,6 +399,7 @@ const createSerializedHistoryQuery = async (control: string) => {
   const query = await loadAccreditationDocumentQuery({
     context: stubQueryContext(),
     documentId: massIDAuditDocument.id,
+    documentLoaderService: provideDocumentLoaderService,
     legacyEvaluationDate,
   });
 
@@ -574,6 +575,7 @@ describe('loadAccreditationDocumentQuery', () => {
       const query = await loadAccreditationDocumentQuery({
         context: stubQueryContext(),
         documentId: massIDAuditDocument.id,
+        documentLoaderService: provideDocumentLoaderService,
         legacyEvaluationDate,
       });
       const result = query.iterator().map(({ document }) => document);

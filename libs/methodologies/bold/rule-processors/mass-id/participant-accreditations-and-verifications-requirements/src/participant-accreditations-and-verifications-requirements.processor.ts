@@ -69,6 +69,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     return loadAccreditationDocumentQuery({
       context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
       documentId: ruleInput.documentId,
+      documentLoaderService: this.context.documentLoaderService,
       legacyEvaluationDate,
     });
   }
