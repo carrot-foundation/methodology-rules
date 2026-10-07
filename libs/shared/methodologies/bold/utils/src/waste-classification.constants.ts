@@ -37,6 +37,10 @@ export const WASTE_CLASSIFICATION_CODES = {
       CDM_CODE: '8.1',
       description: 'Resíduos silvícolas',
     },
+    '02 01 99': {
+      CDM_CODE: '8.7D',
+      description: OTHER_WASTE,
+    },
     '02 02 01': {
       CDM_CODE: '8.7B',
       description: WASHING_CLEANING_SLUDGE,

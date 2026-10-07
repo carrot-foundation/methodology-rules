@@ -449,6 +449,33 @@ export const regionalWasteClassificationTestCases: RegionalWasteClassificationTe
         [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
         [PICK_UP]: stubBoldMassIDPickUpEvent({
           metadataAttributes: [
+            [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 99'],
+            [
+              LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
+              WASTE_CLASSIFICATION_CODES.BR['02 01 99'].description,
+            ],
+          ],
+        }),
+      },
+      partialDocument: {
+        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+      },
+      resultComment: RESULT_COMMENTS.passed.VALID_CLASSIFICATION,
+      resultContent: {
+        description: WASTE_CLASSIFICATION_CODES.BR['02 01 99'].description,
+        id: '02 01 99',
+        recyclerCountryCode: 'BR',
+        subtype: MassIDOrganicSubtype.OTHERS_IF_ORGANIC,
+      },
+      resultStatus: 'PASSED',
+      scenario:
+        'The Others (if organic) subtype matches the 02 01 99 classification code (CDM 8.7D)',
+    },
+    {
+      events: {
+        [`${ACTOR}-${RECYCLER}`]: brazilianRecyclerEvent,
+        [PICK_UP]: stubBoldMassIDPickUpEvent({
+          metadataAttributes: [
             [LOCAL_WASTE_CLASSIFICATION_ID, '02 01 01'],
             [
               LOCAL_WASTE_CLASSIFICATION_DESCRIPTION,
