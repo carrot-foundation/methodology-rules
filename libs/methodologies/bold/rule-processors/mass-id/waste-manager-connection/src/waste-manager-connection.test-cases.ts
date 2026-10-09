@@ -5,11 +5,15 @@ import {
   stubBoldMassIDDocument,
   stubBoldMassIDDropOffEvent,
   stubDocumentEvent,
+  stubMassIDConfirmedConnectionEntry,
+  stubMassIDConnectionEvidence,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   type BoldDocument,
+  type BoldDocumentEvent,
   BoldDocumentEventLabel,
   BoldDocumentEventName,
+  type MassIDConfirmedConnectionEntry,
   type MassIDConnectionEvidence,
   MassIDConnectionEvidenceSchema,
   type MassIDConnectionEvidenceWasteManager,
@@ -37,13 +41,9 @@ export interface WasteManagerConnectionTestCase extends RuleTestCase {
   declaredWasteManagerIds: string[];
   dropOffDate: string | undefined;
   evidence: ((context: EvidenceContext) => unknown) | undefined;
+  extraExternalEvents?: BoldDocumentEvent[] | undefined;
   hasWasteGenerator?: false;
 }
-
-type ConfirmedEntry = Exclude<
-  MassIDConnectionEvidenceWasteManager,
-  { source: 'integrator' }
->;
 
 export const FIRST_WASTE_MANAGER_ID = faker.string.uuid();
 export const SECOND_WASTE_MANAGER_ID = faker.string.uuid();
@@ -55,26 +55,26 @@ const LAST_INSTANT_BEFORE_SAO_PAULO_MIDNIGHT = '2026-10-09T02:59:59.999Z';
 const NEXT_DAY = '2026-10-10';
 const CONNECTION_START = '2026-10-01';
 
+export const POLICY_VERSION = '1.0.0';
+
 const confirmedEntry = (
   palantirParticipantId: string,
-  partialEntry: Partial<ConfirmedEntry> = {},
-): ConfirmedEntry => ({
-  confirmedStartDate: CONNECTION_START,
-  eligibility: 'eligible',
-  palantirParticipantId,
-  relationId: faker.string.uuid(),
-  revision: 1,
-  source: 'both',
-  ...partialEntry,
-});
+  partialEntry: Partial<MassIDConfirmedConnectionEntry> = {},
+): MassIDConfirmedConnectionEntry =>
+  stubMassIDConfirmedConnectionEntry({
+    confirmedStartDate: CONNECTION_START,
+    palantirParticipantId,
+    ...partialEntry,
+  });
 
 export const stubWasteManagerConnectionMassIDDocument = ({
   declaredWasteManagerIds,
   dropOffDate,
+  extraExternalEvents = [],
   generatorPalantirParticipantId,
 }: Pick<
   WasteManagerConnectionTestCase,
-  'declaredWasteManagerIds' | 'dropOffDate'
+  'declaredWasteManagerIds' | 'dropOffDate' | 'extraExternalEvents'
 > & { generatorPalantirParticipantId: null | string }): BoldDocument =>
   stubBoldMassIDDocument({
     externalEventsMap: {
@@ -102,20 +102,19 @@ export const stubWasteManagerConnectionMassIDDocument = ({
             participant: { id: palantirParticipantId },
           }),
         ),
+        ...extraExternalEvents,
       ],
     },
   });
 
 export const buildEvidence =
   (wasteManagers: MassIDConnectionEvidenceWasteManager[]) =>
-  (context: EvidenceContext): MassIDConnectionEvidence => ({
-    ...context,
-    policyVersion: '1.0.0',
-    preparedAt: '2026-10-09T18:00:00.000Z',
-    snapshotVersion: '2026-10-09T17:00:00.000Z',
-    version: 1,
-    wasteManagers,
-  });
+  (context: EvidenceContext): MassIDConnectionEvidence =>
+    stubMassIDConnectionEvidence({
+      ...context,
+      policyVersion: POLICY_VERSION,
+      wasteManagers,
+    });
 
 const MALFORMED_EVIDENCE = { version: 2 };
 
@@ -398,6 +397,146 @@ export const wasteManagerConnectionTestCases: WasteManagerConnectionTestCase[] =
       resultStatus: 'PASSED',
       scenario:
         'a declared Waste Manager and a derived beneficiary are both eligible',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: '2026-10-09T12:00:00-03:00',
+      evidence: (context) =>
+        buildEvidence([confirmedEntry(FIRST_WASTE_MANAGER_ID)])({
+          ...context,
+          dropOffDate: DROP_OFF_DATE,
+        }),
+      resultComment: RESULT_COMMENTS.passed.VERIFIED(
+        summary([
+          FIRST_WASTE_MANAGER_ID,
+          DECISION_REASONS.DECLARED_WITH_CONFIRMED_CONNECTION(CONNECTION_START),
+        ]),
+      ),
+      resultStatus: 'PASSED',
+      scenario:
+        'the evidence writes the Drop-off instant with another UTC offset',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: buildEvidence([confirmedEntry(FIRST_WASTE_MANAGER_ID)]),
+      extraExternalEvents: [
+        stubBoldMassIDDropOffEvent({
+          partialDocumentEvent: { externalCreatedAt: SAO_PAULO_MIDNIGHT },
+        }),
+      ],
+      resultComment: RESULT_COMMENTS.failed.EVIDENCE_MISMATCH(['dropOffDate']),
+      resultStatus: 'FAILED',
+      scenario:
+        'the MassID has two Drop-off events and the evidence names one of them',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: (context) =>
+        buildEvidence([confirmedEntry(FIRST_WASTE_MANAGER_ID)])({
+          ...context,
+          dropOffDate: null,
+        }),
+      extraExternalEvents: [
+        stubBoldMassIDDropOffEvent({
+          partialDocumentEvent: { externalCreatedAt: SAO_PAULO_MIDNIGHT },
+        }),
+      ],
+      resultComment: RESULT_COMMENTS.reviewRequired.REVIEW(
+        summary([FIRST_WASTE_MANAGER_ID, DECISION_REASONS.MISSING_DROP_OFF]),
+      ),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario: 'the MassID has two Drop-off events, so no single Drop-off day',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: (context) =>
+        buildEvidence([
+          {
+            eligibility: 'review',
+            palantirParticipantId: FIRST_WASTE_MANAGER_ID,
+            source: 'integrator',
+          },
+        ])({ ...context, generatorPalantirParticipantId: null }),
+      extraExternalEvents: [
+        stubDocumentEvent({
+          label: WASTE_GENERATOR,
+          name: ACTOR,
+          participant: { id: faker.string.uuid() },
+        }),
+      ],
+      resultComment: RESULT_COMMENTS.reviewRequired.REVIEW(
+        summary([
+          FIRST_WASTE_MANAGER_ID,
+          DECISION_REASONS.DECLARED_WITHOUT_ELIGIBLE_CONNECTION('review'),
+        ]),
+      ),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'the MassID has two distinct Waste Generators, so the evidence has no generator',
+    },
+    {
+      declaredWasteManagerIds: [],
+      dropOffDate: undefined,
+      evidence: (context) =>
+        buildEvidence([])({ ...context, dropOffDate: DROP_OFF_DATE }),
+      resultComment: RESULT_COMMENTS.failed.EVIDENCE_MISMATCH(['dropOffDate']),
+      resultStatus: 'FAILED',
+      scenario: 'the evidence has a Drop-off the MassID does not have',
+    },
+    {
+      declaredWasteManagerIds: [],
+      dropOffDate: undefined,
+      evidence: buildEvidence([
+        confirmedEntry(FIRST_WASTE_MANAGER_ID, { source: 'connection' }),
+      ]),
+      resultComment: RESULT_COMMENTS.reviewRequired.REVIEW(
+        summary([FIRST_WASTE_MANAGER_ID, DECISION_REASONS.MISSING_DROP_OFF]),
+      ),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'an eligible connection without actor on a MassID without Drop-off',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: buildEvidence([
+        confirmedEntry(FIRST_WASTE_MANAGER_ID, {
+          eligibility: 'ineligible',
+          reason: 'connection-start-after-drop-off',
+        }),
+      ]),
+      resultComment: RESULT_COMMENTS.reviewRequired.REVIEW(
+        summary([
+          FIRST_WASTE_MANAGER_ID,
+          DECISION_REASONS.DECLARED_WITHOUT_ELIGIBLE_CONNECTION('ineligible'),
+        ]),
+      ),
+      resultStatus: 'REVIEW_REQUIRED',
+      scenario:
+        'the declared Waste Manager has a confirmed connection the evidence marks ineligible',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: buildEvidence([
+        confirmedEntry(FIRST_WASTE_MANAGER_ID),
+        confirmedEntry(SECOND_WASTE_MANAGER_ID, {
+          eligibility: 'ineligible',
+          source: 'connection',
+        }),
+      ]),
+      resultComment: RESULT_COMMENTS.passed.VERIFIED(
+        summary([
+          FIRST_WASTE_MANAGER_ID,
+          DECISION_REASONS.DECLARED_WITH_CONFIRMED_CONNECTION(CONNECTION_START),
+        ]),
+      ),
+      resultStatus: 'PASSED',
+      scenario:
+        'a declared Waste Manager is eligible and an ineligible connection is excluded',
     },
     {
       declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],

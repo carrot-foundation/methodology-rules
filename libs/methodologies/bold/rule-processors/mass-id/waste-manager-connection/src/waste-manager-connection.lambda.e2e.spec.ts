@@ -28,10 +28,15 @@ const runLambda = async (
     declaredWasteManagerIds,
     dropOffDate,
     evidence,
+    extraExternalEvents,
     hasWasteGenerator,
   }: Pick<
     WasteManagerConnectionTestCase,
-    'declaredWasteManagerIds' | 'dropOffDate' | 'evidence' | 'hasWasteGenerator'
+    | 'declaredWasteManagerIds'
+    | 'dropOffDate'
+    | 'evidence'
+    | 'extraExternalEvents'
+    | 'hasWasteGenerator'
   >,
   rawBody?: string,
 ) => {
@@ -42,6 +47,7 @@ const runLambda = async (
   const massIDDocument = stubWasteManagerConnectionMassIDDocument({
     declaredWasteManagerIds,
     dropOffDate,
+    extraExternalEvents,
     generatorPalantirParticipantId,
   });
   const evidenceBody =

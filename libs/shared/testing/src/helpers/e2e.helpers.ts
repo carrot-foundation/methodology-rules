@@ -32,22 +32,19 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
     .rejects(noSuchKeyError)
     .on(GetObjectCommand)
     .callsFake((input: { Key: string }) => {
-      const index = options.findIndex((item) => item.documentKey === input.Key);
+      const option = options.find((item) => item.documentKey === input.Key);
 
-      if (index === -1) {
+      if (option === undefined) {
         throw noSuchKeyError;
       }
 
       const stream = new Readable();
 
-      // eslint-disable-next-line security/detect-object-injection
-      const option = options[index];
-
       stream.push(
-        option?.rawBody ??
+        option.rawBody ??
           JSON.stringify({
             createdAt: faker.date.anytime().toISOString(),
-            document: option?.document,
+            document: option.document,
             id: faker.string.uuid(),
             versionDate: faker.date.anytime().toISOString(),
           }),

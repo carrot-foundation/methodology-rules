@@ -1,9 +1,14 @@
 import {
-  type ConnectionEvidenceLoadResult,
   loadConnectionEvidence,
   loadDocument,
+  type MassIDConnectionEvidenceLoadResult,
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { MassIDConnectionEvidenceSchema } from '@carrot-fndn/shared/methodologies/bold/types';
+import { stubDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldDocumentEventLabel,
+  BoldDocumentEventName,
+  MassIDConnectionEvidenceSchema,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
@@ -16,6 +21,7 @@ import {
   buildEvidence,
   describeSchemaIssues,
   FIRST_WASTE_MANAGER_ID,
+  POLICY_VERSION,
   SECOND_WASTE_MANAGER_ID,
   stubWasteManagerConnectionMassIDDocument,
   type WasteManagerConnectionTestCase,
@@ -33,7 +39,9 @@ vi.mock(
   }),
 );
 
-const toLoadResult = (rawEvidence: unknown): ConnectionEvidenceLoadResult => {
+const toLoadResult = (
+  rawEvidence: unknown,
+): MassIDConnectionEvidenceLoadResult => {
   if (rawEvidence === undefined) {
     return { status: 'missing' };
   }
@@ -52,10 +60,15 @@ describe('WasteManagerConnectionProcessor', () => {
     declaredWasteManagerIds,
     dropOffDate,
     evidence,
+    extraExternalEvents,
     hasWasteGenerator,
   }: Pick<
     WasteManagerConnectionTestCase,
-    'declaredWasteManagerIds' | 'dropOffDate' | 'evidence' | 'hasWasteGenerator'
+    | 'declaredWasteManagerIds'
+    | 'dropOffDate'
+    | 'evidence'
+    | 'extraExternalEvents'
+    | 'hasWasteGenerator'
   >) => {
     const ruleInput = stubRuleInput();
     const generatorPalantirParticipantId =
@@ -63,6 +76,7 @@ describe('WasteManagerConnectionProcessor', () => {
     const massIDDocument = stubWasteManagerConnectionMassIDDocument({
       declaredWasteManagerIds,
       dropOffDate,
+      extraExternalEvents,
       generatorPalantirParticipantId,
     });
 
@@ -152,6 +166,52 @@ describe('WasteManagerConnectionProcessor', () => {
     );
   });
 
+  it('should treat repeated Waste Generator events of one participant as one generator', async () => {
+    const ruleInput = stubRuleInput();
+    const generatorPalantirParticipantId = faker.string.uuid();
+    const massIDDocument = stubWasteManagerConnectionMassIDDocument({
+      declaredWasteManagerIds: [],
+      dropOffDate: undefined,
+      extraExternalEvents: [
+        stubDocumentEvent({
+          label: BoldDocumentEventLabel.WASTE_GENERATOR,
+          name: BoldDocumentEventName.ACTOR,
+          participant: { id: generatorPalantirParticipantId },
+        }),
+      ],
+      generatorPalantirParticipantId,
+    });
+
+    vi.mocked(loadDocument).mockResolvedValueOnce(massIDDocument);
+    vi.mocked(loadConnectionEvidence).mockResolvedValueOnce(
+      toLoadResult(
+        buildEvidence([])({
+          documentId: ruleInput.documentId,
+          dropOffDate: null,
+          generatorPalantirParticipantId,
+          massId: massIDDocument.id,
+        }),
+      ),
+    );
+
+    const ruleOutput = await processor.process(ruleInput);
+
+    expect(ruleOutput.resultComment).toBe(
+      RESULT_COMMENTS.passed.NOT_APPLICABLE,
+    );
+  });
+
+  it('should word the Drop-off reason with the civil day before the connection start', () => {
+    expect(
+      DECISION_REASONS.DROP_OFF_BEFORE_CONNECTION_START(
+        '2026-10-08',
+        '2026-10-09',
+      ),
+    ).toBe(
+      'the "Drop-off" day 2026-10-08 (America/Sao_Paulo) precedes the connection start 2026-10-09',
+    );
+  });
+
   it('should record a decision per Waste Manager in the result content', async () => {
     const excludedWasteManagerId = faker.string.uuid();
     const { ruleOutput } = await processScenario({
@@ -186,7 +246,7 @@ describe('WasteManagerConnectionProcessor', () => {
     });
 
     expect(ruleOutput.resultContent).toEqual({
-      policyVersion: '1.0.0',
+      policyVersion: POLICY_VERSION,
       wasteManagers: [
         {
           decision: 'approved',

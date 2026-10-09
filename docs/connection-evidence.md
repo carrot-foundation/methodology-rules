@@ -21,17 +21,17 @@ One object per execution document, in the same bucket (`DOCUMENT_BUCKET_NAME`) a
 
 ## Fields
 
-| Field                            | Type                                 | Meaning                                                                                                                                  |
-| -------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `version`                        | `1`                                  | Contract version. A breaking change ships a new literal and a new schema.                                                                |
-| `massId`                         | string                               | Id of the MassID document whose snapshot was audited (the rule input's `parentDocumentId`).                                              |
-| `documentId`                     | string                               | Id of the execution document the evidence was prepared for (the rule input's `documentId`).                                              |
-| `snapshotVersion`                | ISO date-time with offset            | `versionDate` of the MassID snapshot the evidence was resolved from.                                                                     |
-| `dropOffDate`                    | ISO date-time with offset, or `null` | `externalCreatedAt` of the MassID's `Drop-off` event; `null` when the MassID has no `Drop-off` event or more than one.                   |
-| `generatorPalantirParticipantId` | string, or `null`                    | Palantir participant id of the MassID's `Waste Generator` actor; `null` when the MassID has no `Waste Generator` actor or more than one. |
-| `wasteManagers`                  | array                                | One entry per Waste Manager, unique by `palantirParticipantId`. Empty when there is nothing to report.                                   |
-| `policyVersion`                  | string                               | Version of the distribution policy the eligibility was computed under.                                                                   |
-| `preparedAt`                     | ISO date-time with offset            | When Smaug prepared the evidence.                                                                                                        |
+| Field                            | Type                                 | Meaning                                                                                                                                                                  |
+| -------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `version`                        | `1`                                  | Contract version. A breaking change ships a new literal and a new schema.                                                                                                |
+| `massId`                         | string                               | Id of the MassID document whose snapshot was audited (the rule input's `parentDocumentId`).                                                                              |
+| `documentId`                     | string                               | Id of the execution document the evidence was prepared for (the rule input's `documentId`).                                                                              |
+| `snapshotVersion`                | ISO date-time with offset            | `versionDate` of the MassID snapshot the evidence was resolved from. Carried for traceability; the rule does not check it.                                               |
+| `dropOffDate`                    | ISO date-time with offset, or `null` | `externalCreatedAt` of the MassID's `Drop-off` event; `null` when the MassID has no `Drop-off` event or more than one.                                                   |
+| `generatorPalantirParticipantId` | string, or `null`                    | Palantir participant id of the MassID's `Waste Generator` actor; `null` when the MassID has no `Waste Generator` actor or actors for more than one distinct participant. |
+| `wasteManagers`                  | array                                | One entry per Waste Manager, unique by `palantirParticipantId`. Empty when there is nothing to report.                                                                   |
+| `policyVersion`                  | string                               | Version of the distribution policy the eligibility was computed under.                                                                                                   |
+| `preparedAt`                     | ISO date-time with offset            | When Smaug prepared the evidence. Carried for traceability; the rule does not check it.                                                                                  |
 
 ### Waste Manager entries
 
@@ -39,11 +39,11 @@ One object per execution document, in the same bucket (`DOCUMENT_BUCKET_NAME`) a
 | ----------------------- | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `palantirParticipantId` | string                                       | Palantir participant id of the Waste Manager.                                                                                                                                                                                     |
 | `source`                | `'integrator'` \| `'connection'` \| `'both'` | `integrator`: declared as a `Waste Manager` actor in the MassID, with no confirmed connection. `connection`: confirmed connection with the generator, no actor in the MassID. `both`: declared actor with a confirmed connection. |
-| `relationId`            | string                                       | Id of the confirmed connection. Required when `source` is `connection` or `both`, absent otherwise.                                                                                                                               |
+| `relationId`            | string                                       | Id of the confirmed connection. Required when `source` is `connection` or `both`, rejected otherwise.                                                                                                                             |
 | `revision`              | non-negative integer                         | Revision of the connection the eligibility was read from. Same presence rule as `relationId`.                                                                                                                                     |
 | `confirmedStartDate`    | ISO date `YYYY-MM-DD`                        | Civil start day of the confirmed connection. Same presence rule as `relationId`.                                                                                                                                                  |
 | `eligibility`           | `'eligible'` \| `'ineligible'` \| `'review'` | Smaug's verdict for this Waste Manager under `policyVersion`. An `integrator` entry is never `eligible`.                                                                                                                          |
-| `reason`                | kebab-case code, optional                    | Why the entry is not `eligible`, as a code such as `connection-start-after-drop-off`.                                                                                                                                             |
+| `reason`                | kebab-case code, optional                    | Code explaining Smaug's verdict, such as `connection-start-after-drop-off`: lowercase words joined by single hyphens, at most 64 characters.                                                                                      |
 
 ### Invariants the schema enforces
 
@@ -51,6 +51,49 @@ One object per execution document, in the same bucket (`DOCUMENT_BUCKET_NAME`) a
 - `connection` and `both` entries carry `relationId`, `revision` and `confirmedStartDate`; `integrator` entries cannot be `eligible`.
 - Any `connection` or `both` entry requires a non-null `generatorPalantirParticipantId`.
 - `reason` is a code, not prose, so no free text reaches the object.
+- The object and its entries are strict: a field outside this contract fails validation instead of being dropped.
+
+### Example
+
+```json
+{
+  "version": 1,
+  "massId": "<massid-document-id>",
+  "documentId": "<execution-document-id>",
+  "snapshotVersion": "2026-10-09T17:00:00.000Z",
+  "dropOffDate": "2026-10-09T15:00:00.000Z",
+  "generatorPalantirParticipantId": "<generator-participant-id>",
+  "wasteManagers": [
+    {
+      "palantirParticipantId": "<declared-manager-participant-id>",
+      "source": "both",
+      "relationId": "<relation-id>",
+      "revision": 2,
+      "confirmedStartDate": "2026-10-01",
+      "eligibility": "eligible"
+    },
+    {
+      "palantirParticipantId": "<connected-manager-participant-id>",
+      "source": "connection",
+      "relationId": "<relation-id>",
+      "revision": 1,
+      "confirmedStartDate": "2026-10-10",
+      "eligibility": "ineligible",
+      "reason": "connection-start-after-drop-off"
+    }
+  ],
+  "policyVersion": "<distribution-policy-version>",
+  "preparedAt": "2026-10-09T18:00:00.000Z"
+}
+```
+
+### What Smaug decides
+
+Smaug writes the verdict; the rule checks it against the MassID and recomputes the timing of every `eligible` entry as a guard.
+
+- `wasteManagers` holds one entry for every `Waste Manager` actor declared in the MassID and one for every confirmed connection between the generator and a Waste Manager, merged into a single `both` entry when they are the same participant. Each pair has at most one open connection; its relation, revision and start day are the ones written.
+- An entry is `eligible` only when its connection is confirmed under `policyVersion` and the `Drop-off` civil day in `America/Sao_Paulo` is on or after `confirmedStartDate`. A connection that starts after the `Drop-off`, or a MassID without a single `Drop-off`, makes the entry `ineligible` with a `reason`.
+- `review` is for cases Smaug cannot settle on its own; the rule sends them to human review.
 
 ### Privacy
 
@@ -66,8 +109,8 @@ The rule loads the MassID (`parentDocumentId`) and the evidence, then compares t
 | Evidence is not JSON or fails the schema                                                                                                                                | `FAILED`                                    |
 | Evidence does not match the audited MassID: `documentId`, `massId`, generator, `dropOffDate`, or an entry's `source` disagrees with the MassID's `Waste Manager` actors | `FAILED`                                    |
 | Declared `Waste Manager` actor without an `eligible` entry                                                                                                              | `REVIEW_REQUIRED`                           |
-| Eligible connection whose `confirmedStartDate` is after the `Drop-off` day                                                                                              | `REVIEW_REQUIRED`                           |
-| Eligible connection on a MassID without a single `Drop-off` event                                                                                                       | `REVIEW_REQUIRED`                           |
+| `eligible` entry whose `confirmedStartDate` is after the `Drop-off` day (Smaug broke the timing policy)                                                                 | `REVIEW_REQUIRED`                           |
+| `eligible` entry on a MassID without a single `Drop-off` event (Smaug broke the timing policy)                                                                          | `REVIEW_REQUIRED`                           |
 | `connection` entry with `eligibility: 'review'`                                                                                                                         | `REVIEW_REQUIRED`                           |
 | Declared actor with an eligible connection that started on or before the `Drop-off` day                                                                                 | `PASSED`                                    |
 | `eligible` `connection` entry without an actor in the MassID                                                                                                            | `PASSED`, recorded as a derived beneficiary |

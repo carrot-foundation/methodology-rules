@@ -1,4 +1,5 @@
 import type {
+  MassIDConfirmedConnectionEntry,
   MassIDConnectionEvidence,
   MassIDConnectionEvidenceWasteManager,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -125,10 +126,7 @@ const decideDeclaredWasteManager = (
 };
 
 const decideConnectionOnlyWasteManager = (
-  entry: Exclude<
-    MassIDConnectionEvidenceWasteManager,
-    { source: 'integrator' }
-  >,
+  entry: MassIDConfirmedConnectionEntry,
   dropOffDate: string | undefined,
 ): WasteManagerDecision => {
   const { palantirParticipantId } = entry;

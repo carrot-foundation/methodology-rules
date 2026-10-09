@@ -1,14 +1,14 @@
-import type { ConnectionEvidenceLoadResult } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import type { MassIDConnectionEvidenceLoadResult } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export interface WasteManagerConnectionInput {
-  connectionEvidence: ConnectionEvidenceLoadResult;
+  connectionEvidence: MassIDConnectionEvidenceLoadResult;
   executionDocumentId: string;
   massIDDocument: BoldDocument;
 }
 
 export interface WasteManagerConnectionRuleSubject {
-  connectionEvidence: ConnectionEvidenceLoadResult;
+  connectionEvidence: MassIDConnectionEvidenceLoadResult;
   dropOffDate: string | undefined;
   executionDocumentId: string;
   massIDDocumentId: string;

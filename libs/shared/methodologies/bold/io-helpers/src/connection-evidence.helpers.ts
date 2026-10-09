@@ -1,5 +1,6 @@
 import { NoSuchKey } from '@aws-sdk/client-s3';
 import { getDocumentBucketName } from '@carrot-fndn/shared/env';
+import { logger } from '@carrot-fndn/shared/helpers';
 import {
   type MassIDConnectionEvidence,
   MassIDConnectionEvidenceSchema,
@@ -7,7 +8,7 @@ import {
 import { S3BucketRepository } from '@carrot-fndn/shared/s3-bucket';
 import { z } from 'zod';
 
-export type ConnectionEvidenceLoadResult =
+export type MassIDConnectionEvidenceLoadResult =
   | { evidence: MassIDConnectionEvidence; status: 'found' }
   | { reason: string; status: 'malformed' }
   | { status: 'missing' };
@@ -17,6 +18,17 @@ class ConnectionEvidenceRepository extends S3BucketRepository {
     super(getDocumentBucketName());
   }
 }
+
+const describeMalformedEvidence = (error: unknown): string | undefined => {
+  if (error instanceof z.ZodError) {
+    return z.prettifyError(error);
+  }
+
+  // SyntaxError messages quote the body, which must not reach the rule result.
+  return error instanceof SyntaxError
+    ? 'the body is not valid JSON'
+    : undefined;
+};
 
 export const toConnectionEvidenceKey = ({
   documentId,
@@ -28,7 +40,7 @@ export const toConnectionEvidenceKey = ({
 
 export const loadConnectionEvidence = async (
   key: string,
-): Promise<ConnectionEvidenceLoadResult> => {
+): Promise<MassIDConnectionEvidenceLoadResult> => {
   try {
     const evidence = await new ConnectionEvidenceRepository().readFromS3(
       key,
@@ -38,17 +50,22 @@ export const loadConnectionEvidence = async (
     return { evidence, status: 'found' };
   } catch (error) {
     if (error instanceof NoSuchKey) {
+      logger.warn({ key }, '[loadConnectionEvidence] Evidence not found');
+
       return { status: 'missing' };
     }
 
-    if (error instanceof z.ZodError) {
-      return { reason: z.prettifyError(error), status: 'malformed' };
+    const malformedReason = describeMalformedEvidence(error);
+
+    if (malformedReason === undefined) {
+      throw error;
     }
 
-    if (error instanceof SyntaxError) {
-      return { reason: error.message, status: 'malformed' };
-    }
+    logger.warn(
+      { key, reason: malformedReason },
+      '[loadConnectionEvidence] Evidence is malformed',
+    );
 
-    throw error;
+    return { reason: malformedReason, status: 'malformed' };
   }
 };

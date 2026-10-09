@@ -14,11 +14,15 @@ export type MassIDConnectionEligibility = z.infer<
   typeof MassIDConnectionEligibilitySchema
 >;
 
-const MassIDConnectionEvidenceEntryBaseSchema = z.object({
+const MassIDConnectionEvidenceEntryBaseSchema = z.strictObject({
   palantirParticipantId: NonEmptyStringSchema,
   reason: z
     .string()
-    .regex(/^[a-z][\da-z-]*$/, 'reason must be a kebab-case code')
+    .max(64)
+    .regex(
+      /^[a-z](?:[\da-z]|-(?=[\da-z]))*$/,
+      'reason must be a kebab-case code',
+    )
     .optional(),
 });
 
@@ -37,6 +41,10 @@ const MassIDConfirmedConnectionEntrySchema =
     source: z.enum(['both', 'connection']),
   });
 
+export type MassIDConfirmedConnectionEntry = z.infer<
+  typeof MassIDConfirmedConnectionEntrySchema
+>;
+
 export const MassIDConnectionEvidenceWasteManagerSchema = z.discriminatedUnion(
   'source',
   [MassIDIntegratorOnlyEntrySchema, MassIDConfirmedConnectionEntrySchema],
@@ -46,7 +54,7 @@ export type MassIDConnectionEvidenceWasteManager = z.infer<
 >;
 
 export const MassIDConnectionEvidenceSchema = z
-  .object({
+  .strictObject({
     documentId: DocumentIdSchema,
     dropOffDate: DateTimeSchema.nullable(),
     generatorPalantirParticipantId: NonEmptyStringSchema.nullable(),

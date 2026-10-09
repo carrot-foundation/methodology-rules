@@ -1,4 +1,5 @@
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
+import { getDocumentBucketName } from '@carrot-fndn/shared/env';
 import { stubMassIDConnectionEvidence } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { faker } from '@faker-js/faker';
 import { sdkStreamMixin } from '@smithy/util-stream';
@@ -47,7 +48,7 @@ describe('Connection evidence helpers', () => {
       });
       expect(
         s3ClientMock.commandCalls(GetObjectCommand)[0]?.args[0].input,
-      ).toEqual(expect.objectContaining({ Key: key }));
+      ).toEqual({ Bucket: getDocumentBucketName(), Key: key });
     });
 
     it('should return missing when the object does not exist', async () => {
@@ -66,7 +67,7 @@ describe('Connection evidence helpers', () => {
       await expect(
         loadConnectionEvidence(faker.string.uuid()),
       ).resolves.toEqual({
-        reason: expect.any(String),
+        reason: 'the body is not valid JSON',
         status: 'malformed',
       });
     });

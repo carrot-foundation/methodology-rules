@@ -1,15 +1,11 @@
 import { faker } from '@faker-js/faker';
 
 import {
+  type MassIDConfirmedConnectionEntry,
   type MassIDConnectionEvidence,
   MassIDConnectionEvidenceSchema,
   type MassIDConnectionEvidenceWasteManager,
 } from './connection-evidence.types';
-
-type ConfirmedEntry = Exclude<
-  MassIDConnectionEvidenceWasteManager,
-  { source: 'integrator' }
->;
 
 const stubMassIDConnectionEvidence = (
   partialEvidence: Partial<MassIDConnectionEvidence> = {},
@@ -27,8 +23,8 @@ const stubMassIDConnectionEvidence = (
 });
 
 const stubConfirmedEntry = (
-  partialEntry: Partial<ConfirmedEntry> = {},
-): ConfirmedEntry => ({
+  partialEntry: Partial<MassIDConfirmedConnectionEntry> = {},
+): MassIDConfirmedConnectionEntry => ({
   confirmedStartDate: '2026-10-01',
   eligibility: 'eligible',
   palantirParticipantId: faker.string.uuid(),
@@ -128,6 +124,39 @@ describe('MassIDConnectionEvidenceSchema', () => {
         ],
       }),
       scenario: 'a prose reason',
+    },
+    {
+      evidence: stubMassIDConnectionEvidence({
+        wasteManagers: [
+          stubConfirmedEntry({ eligibility: 'review', reason: 'policy--gap' }),
+        ],
+      }),
+      scenario: 'a reason with an empty kebab segment',
+    },
+    {
+      evidence: stubMassIDConnectionEvidence({
+        wasteManagers: [
+          stubConfirmedEntry({ eligibility: 'review', reason: 'a'.repeat(65) }),
+        ],
+      }),
+      scenario: 'a reason longer than 64 characters',
+    },
+    {
+      evidence: stubMassIDConnectionEvidence({
+        wasteManagers: [
+          {
+            eligibility: 'review',
+            palantirParticipantId: faker.string.uuid(),
+            relationId: faker.string.uuid(),
+            source: 'integrator',
+          } as unknown as MassIDConnectionEvidenceWasteManager,
+        ],
+      }),
+      scenario: 'an integrator entry carrying connection fields',
+    },
+    {
+      evidence: { ...stubMassIDConnectionEvidence(), generatorName: 'Pedro' },
+      scenario: 'a field outside the contract',
     },
   ])('should reject $scenario', ({ evidence }) => {
     expect(MassIDConnectionEvidenceSchema.safeParse(evidence).success).toBe(
