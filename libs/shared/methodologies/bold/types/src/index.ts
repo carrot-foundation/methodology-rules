@@ -1,3 +1,4 @@
+export * from './connection-evidence.types';
 export * from './document-event.types';
 export * from './document.types';
 export * from './enum.types';

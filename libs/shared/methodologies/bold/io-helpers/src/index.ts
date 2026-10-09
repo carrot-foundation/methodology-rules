@@ -1,3 +1,4 @@
+export * from './connection-evidence.helpers';
 export * from './document-query.criteria';
 export * from './document-query.service';
 export * from './document-query.service.types';
