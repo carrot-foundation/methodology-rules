@@ -76,6 +76,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/vehicle-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/vehicle-identification/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/waste-manager-connection": [
+        "libs/methodologies/bold/rule-processors/mass-id/waste-manager-connection/src/index.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/waste-origin-identification": [
         "libs/methodologies/bold/rule-processors/mass-id/waste-origin-identification/src/index.ts"
       ],

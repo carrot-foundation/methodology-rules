@@ -8,7 +8,7 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "90...100"
+  range: '90...100'
 
   status:
     project:
@@ -21,7 +21,7 @@ coverage:
         threshold: 1%
 
 comment:
-  layout: "condensed_header,condensed_files,condensed_footer"
+  layout: 'condensed_header,condensed_files,condensed_footer'
   behavior: default
   require_changes: false
   require_base: false
@@ -120,6 +120,11 @@ flags:
   mass-id--waste-mass-is-unique:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/
+    carryforward: true
+
+  mass-id--waste-manager-connection:
+    paths:
+      - libs/methodologies/bold/rule-processors/mass-id/waste-manager-connection/src/
     carryforward: true
 
   mass-id--waste-origin-identification:

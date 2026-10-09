@@ -7,7 +7,7 @@ import { mockClient } from 'aws-sdk-client-mock';
 import { Readable } from 'node:stream';
 
 export const prepareEnvironmentTestE2E = <T = UnknownObject>(
-  options: Array<{ document?: T } & { documentKey: string }>,
+  options: Array<{ document?: T } & { documentKey: string; rawBody?: string }>,
 ) => {
   process.env = {
     ...process.env,
@@ -40,14 +40,17 @@ export const prepareEnvironmentTestE2E = <T = UnknownObject>(
 
       const stream = new Readable();
 
+      // eslint-disable-next-line security/detect-object-injection
+      const option = options[index];
+
       stream.push(
-        JSON.stringify({
-          createdAt: faker.date.anytime().toISOString(),
-          // eslint-disable-next-line security/detect-object-injection
-          document: options[index]?.document,
-          id: faker.string.uuid(),
-          versionDate: faker.date.anytime().toISOString(),
-        }),
+        option?.rawBody ??
+          JSON.stringify({
+            createdAt: faker.date.anytime().toISOString(),
+            document: option?.document,
+            id: faker.string.uuid(),
+            versionDate: faker.date.anytime().toISOString(),
+          }),
       );
 
       stream.push(null); // end of stream
