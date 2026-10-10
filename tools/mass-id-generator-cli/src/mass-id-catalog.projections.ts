@@ -9,6 +9,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type {
+  AttributeDictionary,
   AttributePayload,
   CatalogActor,
   CatalogAttachment,
@@ -35,6 +36,9 @@ interface EventPayloadFields {
   preserveSensitiveData?: boolean | undefined;
   value?: number | undefined;
 }
+
+const attributesPath = (slug: string): string =>
+  `events/${slug}/attributes.json`;
 
 const payloadPath = (slug: string): string => `events/${slug}/payload.json`;
 
@@ -124,6 +128,30 @@ export const toEventPayload = (event: CatalogEvent): EventPayload => {
   );
 };
 
+export const toAttributeDictionary = (
+  event: CatalogEvent,
+): AttributeDictionary => {
+  const eventPrivacySpec = getEventPrivacySpec(event.name);
+
+  return {
+    attributes: event.attributes.map((attribute) => {
+      const visibility = eventPrivacySpec.attributes.get(attribute.name);
+
+      return {
+        ...(attribute.allowedValues !== undefined && {
+          allowedValues: attribute.allowedValues,
+        }),
+        ...(attribute.format !== undefined && { format: attribute.format }),
+        name: attribute.name,
+        ...(attribute.notes !== undefined && { notes: attribute.notes }),
+        required: attribute.required,
+        valueType: attribute.valueType,
+        ...(visibility !== undefined && { visibility }),
+      };
+    }),
+  };
+};
+
 export const toActorPayload = (actor: CatalogActor): EventPayload =>
   buildEventPayload(
     {
@@ -148,9 +176,13 @@ export const toEventsManifest = ({
       name: `${BoldDocumentEventName.ACTOR}:${label}`,
       slug,
     })),
-    ...events.map(({ name, slug }) => ({ name, slug })),
-  ].map(({ name, slug }, order) => ({
-    artifacts: { payload: payloadPath(slug) },
+    ...events.map(({ name, slug }) => ({
+      attributes: attributesPath(slug),
+      name,
+      slug,
+    })),
+  ].map(({ name, slug, ...artifacts }, order) => ({
+    artifacts: { ...artifacts, payload: payloadPath(slug) },
     name,
     order,
     slug,
@@ -171,5 +203,9 @@ export const toMethodologyFiles = (
     ...catalog.events.map((event): [string, EmittedArtifact] => [
       payloadPath(event.slug),
       toEventPayload(event),
+    ]),
+    ...catalog.events.map((event): [string, EmittedArtifact] => [
+      attributesPath(event.slug),
+      toAttributeDictionary(event),
     ]),
   ]);

@@ -1,5 +1,4 @@
 import {
-  BoldAttributeName,
   BoldDocumentEventName,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -9,12 +8,14 @@ import type { CatalogActor, CatalogEvent } from './mass-id-catalog.types';
 import { MASS_ID_CATALOG } from './mass-id-catalog';
 import {
   toActorPayload,
+  toAttributeDictionary,
   toEventPayload,
   toEventsManifest,
   toMethodologyFiles,
 } from './mass-id-catalog.projections';
 
-const { PICK_UP, TRANSPORT_MANIFEST, WEIGHING } = BoldDocumentEventName;
+const { PICK_UP, RECYCLING_MANIFEST, SORTING, TRANSPORT_MANIFEST, WEIGHING } =
+  BoldDocumentEventName;
 
 const PLACEHOLDER_UUID = /^00000000-0000-4000-[89]000-[\da-f]{12}$/;
 const UUID_SHAPED = /[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}/gi;
@@ -34,6 +35,10 @@ const MANIFEST_ROWS = [
   ['Recycled', 'recycled'],
   ['Recycling Manifest', 'recycling-manifest'],
 ] as const;
+
+const CUSTOM_EVENT_SLUGS = new Set<string>(
+  MASS_ID_CATALOG.events.map(({ slug }) => slug),
+);
 
 const findEvent = (eventName: string): CatalogEvent => {
   const catalogEvent = MASS_ID_CATALOG.events.find(
@@ -137,19 +142,27 @@ describe('mass-id-catalog projections', () => {
       });
     });
 
-    it('should leave out an attribute that has no example', () => {
-      const pickUp = findEvent(PICK_UP);
-      const payload = toEventPayload({
-        ...pickUp,
-        attributes: [
-          ...pickUp.attributes,
-          { name: BoldAttributeName.VEHICLE_DESCRIPTION },
-        ],
-      });
+    it('should emit the Weighing vehicle plate as public and masked', () => {
+      const { metadata } = toEventPayload(findEvent(WEIGHING));
 
-      expect(payload.metadata?.attributes).toHaveLength(
-        pickUp.attributes.length,
-      );
+      expect(metadata?.attributes).toContainEqual({
+        isPublic: true,
+        name: 'Vehicle License Plate',
+        sensitive: true,
+        value: 'ABC1D23',
+      });
+    });
+
+    it('should leave out the attributes that have no example', () => {
+      const pickUp = findEvent(PICK_UP);
+      const exampleNames = pickUp.attributes
+        .filter(({ example }) => example !== undefined)
+        .map(({ name }) => name);
+
+      expect(exampleNames.length).toBeLessThan(pickUp.attributes.length);
+      expect(
+        toEventPayload(pickUp).metadata?.attributes.map(({ name }) => name),
+      ).toStrictEqual(exampleNames);
     });
 
     it('should throw for an event the privacy table does not know', () => {
@@ -203,11 +216,80 @@ describe('mass-id-catalog projections', () => {
     });
   });
 
+  describe('toAttributeDictionary', () => {
+    it('should carry the authored fields and the visibility the privacy table gives', () => {
+      const { attributes } = toAttributeDictionary(findEvent(PICK_UP));
+
+      expect(attributes).toContainEqual({
+        name: 'Vehicle License Plate',
+        notes: expect.any(String),
+        required: 'yes',
+        valueType: 'string',
+        visibility: { isPublic: true, sensitive: true },
+      });
+      expect(attributes).toContainEqual(
+        expect.objectContaining({
+          allowedValues: expect.arrayContaining(['Truck', 'Sludge Pipes']),
+          name: 'Vehicle Type',
+          visibility: { isPublic: true, sensitive: false },
+        }),
+      );
+    });
+
+    it('should omit visibility for an attribute the privacy table does not list', () => {
+      const { attributes } = toAttributeDictionary(findEvent(WEIGHING));
+      const containerQuantity = attributes.find(
+        ({ name }) => name === 'Container Quantity',
+      );
+
+      expect(containerQuantity).toBeDefined();
+      expect(containerQuantity).not.toHaveProperty('visibility');
+      expect(containerQuantity).not.toHaveProperty('example');
+    });
+
+    it('should carry the format and the value list each event authors', () => {
+      expect(
+        toAttributeDictionary(findEvent(SORTING)).attributes,
+      ).toContainEqual(
+        expect.objectContaining({ format: 'KILOGRAM', name: 'Gross Weight' }),
+      );
+      expect(
+        toAttributeDictionary(findEvent(TRANSPORT_MANIFEST)).attributes,
+      ).toContainEqual(
+        expect.objectContaining({
+          allowedValues: ['MTR'],
+          name: 'Document Type',
+        }),
+      );
+      expect(
+        toAttributeDictionary(findEvent(RECYCLING_MANIFEST)).attributes,
+      ).toContainEqual(
+        expect.objectContaining({
+          allowedValues: ['CDF'],
+          name: 'Document Type',
+        }),
+      );
+    });
+
+    it('should list every catalog attribute, with or without an example', () => {
+      const pickUp = findEvent(PICK_UP);
+
+      expect(
+        toAttributeDictionary(pickUp).attributes.map(({ name }) => name),
+      ).toStrictEqual(pickUp.attributes.map(({ name }) => name));
+    });
+  });
+
   describe('toEventsManifest', () => {
-    it('should list the thirteen entries in order with their payload artifact', () => {
+    it('should list the thirteen entries in order, with an attributes artifact on the custom events only', () => {
       expect(toEventsManifest(MASS_ID_CATALOG)).toStrictEqual({
         events: MANIFEST_ROWS.map(([name, slug], order) => ({
-          artifacts: { payload: `events/${slug}/payload.json` },
+          artifacts: {
+            ...(CUSTOM_EVENT_SLUGS.has(slug) && {
+              attributes: `events/${slug}/attributes.json`,
+            }),
+            payload: `events/${slug}/payload.json`,
+          },
           name,
           order,
           slug,
@@ -218,10 +300,13 @@ describe('mass-id-catalog projections', () => {
   });
 
   describe('toMethodologyFiles', () => {
-    it('should map the manifest and one payload per entry to their relative paths', () => {
+    it('should map the manifest, one payload per entry and one dictionary per custom event', () => {
       expect([...toMethodologyFiles(MASS_ID_CATALOG).keys()]).toStrictEqual([
         'events-manifest.json',
         ...MANIFEST_ROWS.map(([, slug]) => `events/${slug}/payload.json`),
+        ...[...CUSTOM_EVENT_SLUGS].map(
+          (slug) => `events/${slug}/attributes.json`,
+        ),
       ]);
     });
 

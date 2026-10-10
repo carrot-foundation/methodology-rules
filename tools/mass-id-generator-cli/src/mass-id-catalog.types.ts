@@ -1,9 +1,24 @@
+import type { AttributePrivacySpec } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags/constants';
 import type {
   BoldAttributeName,
   BoldDocumentEventName,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+
+export interface AttributeDictionary {
+  attributes: AttributeDictionaryEntry[];
+}
+
+export interface AttributeDictionaryEntry {
+  allowedValues?: readonly string[];
+  format?: DocumentEventAttributeFormat;
+  name: BoldAttributeName;
+  notes?: string;
+  required: AttributeRequirement['required'];
+  valueType: AttributeValueShape['valueType'];
+  visibility?: AttributePrivacySpec;
+}
 
 export interface AttributePayload {
   format?: DocumentEventAttributeFormat;
@@ -27,11 +42,12 @@ export interface CatalogAttachment {
   label: string;
 }
 
-export interface CatalogAttribute {
-  example?: boolean | number | string;
-  format?: DocumentEventAttributeFormat;
-  name: BoldAttributeName;
-}
+export type CatalogAttribute = AttributeRequirement &
+  AttributeValueShape & {
+    allowedValues?: readonly string[];
+    format?: DocumentEventAttributeFormat;
+    name: BoldAttributeName;
+  };
 
 export interface CatalogDocument {
   addressId: string;
@@ -56,7 +72,11 @@ export interface CatalogEvent {
   value?: number;
 }
 
-export type EmittedArtifact = CatalogDocument | EventPayload | EventsManifest;
+export type EmittedArtifact =
+  | AttributeDictionary
+  | CatalogDocument
+  | EventPayload
+  | EventsManifest;
 
 export interface EventPayload {
   addressId: string;
@@ -88,3 +108,12 @@ export interface MassIDCatalog {
   document: CatalogDocument;
   events: readonly CatalogEvent[];
 }
+
+type AttributeRequirement =
+  | { notes: string; required: 'conditional' }
+  | { notes?: string; required: 'no' | 'yes' };
+
+type AttributeValueShape =
+  | { example?: boolean; valueType: 'boolean' }
+  | { example?: number; valueType: 'number' }
+  | { example?: string; valueType: 'string' };
