@@ -83,7 +83,7 @@ describe('emitEventData', () => {
     ).resolves.toBe(
       [
         '{',
-        '  "externalCreatedAt": "2024-12-05T11:02:47Z",',
+        '  "externalCreatedAt": "2025-12-05T11:02:47Z",',
         '  "isPublic": true,',
         '  "preserveSensitiveData": false,',
         '  "addressId": "00000000-0000-4000-9000-00000000000e",',

@@ -56,8 +56,8 @@ const {
 const { BICYCLE, CART, OTHERS, SLUDGE_PIPES } = BoldVehicleType;
 const { DATE, KILOGRAM } = DocumentEventAttributeFormat;
 
-const CREATED_AT = '2024-12-05T11:02:47Z';
-const RECYCLED_AT = '2025-02-22T10:35:12.000Z';
+const CREATED_AT = '2025-12-05T11:02:47Z';
+const RECYCLED_AT = '2026-02-22T10:35:12.000Z';
 const WEIGHED_MASS = 1201.925;
 
 const WASTE_GENERATOR = {
@@ -249,7 +249,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           valueType: 'string',
         },
         {
-          example: '2024-02-10',
+          example: '2025-02-09',
           format: DATE,
           name: ISSUE_DATE,
           notes: MANIFEST_ATTACHMENT_NOTE,
@@ -433,7 +433,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           valueType: 'string',
         },
         {
-          example: '2024-03-10',
+          example: '2025-03-10',
           format: DATE,
           name: ISSUE_DATE,
           notes: MANIFEST_ATTACHMENT_NOTE,
