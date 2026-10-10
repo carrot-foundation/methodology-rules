@@ -44,6 +44,7 @@ methodology-rules/
 │   ├── create-rule.js           #   Scaffold new rule processors
 │   ├── rule-runner-cli/         #   Run rules locally against test data
 │   ├── document-extractor-cli/  #   Extract data from documents
+│   ├── mass-id-generator-cli/   #   Emit the MassID event data the docs site syncs
 │   ├── apply-methodology-rule.js #  Apply rules to a methodology
 │   └── versioning/              #   Rule version management
 ├── scripts/                     # Build & generation scripts
@@ -90,6 +91,7 @@ pnpm nx test <project-name> --testFile=<relative-path>
 pnpm create-rule                     # Scaffold a new rule processor
 pnpm run-rule <args>                 # Run a rule locally against test data
 pnpm apply-methodology-rule          # Apply a rule to a methodology
+pnpm generate:event-data             # Emit MassID event data to dist/methodology-event-data
 ```
 
 #### Rule Runner Dry Runs
@@ -105,6 +107,33 @@ pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/privacy-fl
 # Registered mode: resolves the processor against the supplied methodology.
 pnpm run-rule dry-run libs/methodologies/bold/rule-processors/mass-id/document-manifest-data --methodology-slug bold-carbon-organic --document-id <massid-document-id>
 ```
+
+#### MassID Event Data
+
+`tools/mass-id-generator-cli` emits the canonical MassID example the docs site publishes: an events manifest, one request payload per event and one attribute dictionary per event other than the create document and the actors, once for `bold-recycling` and once for `bold-carbon`.
+
+```bash
+pnpm generate:event-data             # writes dist/methodology-event-data/
+```
+
+The example's content comes from one authored table, `tools/mass-id-generator-cli/src/mass-id-catalog.ts`. Privacy flags are read from the privacy-flags rule's own tables, so they cannot drift from the rule. Output is deterministic: the same source produces the same bytes. The emitter does not remove files a previous run left behind: delete `dist/methodology-event-data` before re-running.
+
+The `test-e2e` target runs these rule lambdas against the catalog and expects `PASSED`: `composting-cycle-timeframe`, `driver-identification`, `drop-off-at-recycler`, `hauler-identification`, `mass-id-qualifications`, `privacy-flags`, `processor-identification`, `project-period-limit`, `recycler-identification`, `regional-waste-classification`, `vehicle-identification`, `waste-origin-identification`. When an intended rule change makes one fail, the published example is out of date: update the catalog. `mass-id-qualifications` also checks `measurementUnit` and `currentValue`, which the published create body does not carry; the test document supplies them.
+
+Rules it does not run, and why:
+
+| Rule                                                        | Needs                                                |
+| ----------------------------------------------------------- | ---------------------------------------------------- |
+| `geolocation-and-address-precision`                         | the audit and accreditation document graph           |
+| `mass-id-sorting`                                           | the audit and accreditation document graph           |
+| `participant-accreditations-and-verifications-requirements` | the audit and accreditation document graph           |
+| `prevented-emissions`                                       | the audit and accreditation document graph           |
+| `weighing`                                                  | the audit and accreditation document graph           |
+| `no-conflicting-certificate-or-credit`                      | certificate, credit order and MassID audit documents |
+| `document-manifest-data`                                    | attachment bytes                                     |
+| `waste-mass-is-unique`                                      | Smaug over the network                               |
+
+`version-and-sync.yaml` runs the generator on each push to `main` (unless the head commit message contains `[skip ci]`) and uploads the tree as the `methodology-event-data` artifact of that run. The `rules-manifest-updated` dispatch to the docs repo carries the run id.
 
 ## Rule Processor Design
 

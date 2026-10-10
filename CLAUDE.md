@@ -169,6 +169,7 @@ RuleInput (S3 event reference)
 - **Rule definitions**: Each processor exports a `ruleDefinition` with `name`, `slug`, `version`, and `events` (satisfies `BaseRuleDefinition`)
 - **Test stubs**: Reuse stubs from `@carrot-fndn/shared/testing` and colocated `*.stubs.ts` files
 - **aws-sdk-client-mock**: Used for mocking AWS SDK clients in tests
+- **MassID event data**: `tools/mass-id-generator-cli/src/mass-id-catalog.ts` is the single authored source of the canonical MassID example and the per-event attribute dictionaries the docs site publishes. The project's `test-e2e` target runs twelve rule lambdas against that example; when an intended rule change makes one fail, update the catalog to match
 
 ## Common Commands
 
@@ -234,6 +235,9 @@ pnpm run-rule <args>                   # nx run rule-runner-cli:run -- <args>
 
 # Extract document data
 pnpm extract-document -- <args>        # nx run document-extractor-cli:run -- <args>
+
+# Emit the MassID event data the docs site syncs
+pnpm generate:event-data               # tsx --tsconfig tsconfig.base.json tools/mass-id-generator-cli/src/main.ts --emit-to dist/methodology-event-data
 
 # Generate methodology rules manifest
 pnpm generate:manifest
