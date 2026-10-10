@@ -99,9 +99,7 @@ const toAttributePayloads = (
   return [
     {
       ...(format !== undefined && { format }),
-      ...(attributePrivacySpec?.sensitive === true && {
-        sensitive: true as const,
-      }),
+      ...(attributePrivacySpec?.sensitive === true && { sensitive: true }),
       isPublic: attributePrivacySpec?.isPublic ?? true,
       name,
       value: example,
