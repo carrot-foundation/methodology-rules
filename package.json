@@ -15,6 +15,7 @@
     "create-rule": "node tools/create-rule.js",
     "extract-document": "nx run document-extractor-cli:run --",
     "fix-project-format": "node scripts/fix-project-json-format.js",
+    "generate:event-data": "pnpm exec tsx --tsconfig tsconfig.base.json tools/mass-id-generator-cli/src/main.ts --emit-to dist/methodology-event-data",
     "generate:manifest": "pnpm exec tsx scripts/generate-methodology-rules-manifest.ts",
     "generate:methodology-framework-rules": "pnpm exec tsx scripts/generate-methodology-framework-rules-manifest.ts",
     "generate:methodology-readmes": "pnpm exec tsx scripts/generate-methodology-application-readmes.ts",

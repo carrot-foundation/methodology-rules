@@ -25,6 +25,9 @@
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags": [
         "libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/index.ts"
       ],
+      "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags/constants": [
+        "libs/methodologies/bold/rule-processors/mass-id/privacy-flags/src/privacy-flags.constants.ts"
+      ],
       "@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit": [
         "libs/methodologies/bold/rule-processors/mass-id/no-conflicting-certificate-or-credit/src/index.ts"
       ],

@@ -1,0 +1,13 @@
+{
+  "name": "mass-id-generator-cli",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "tags": ["app:any", "scope:tools", "stack:any", "type:application"],
+  "sourceRoot": "tools/mass-id-generator-cli/src",
+  "projectType": "application",
+  "targets": {
+    "lint": {},
+    "test": {},
+    "test-e2e": {},
+    "ts": {}
+  }
+}
