@@ -1,5 +1,6 @@
 import type { AttributePrivacySpec } from '@carrot-fndn/shared/methodologies/bold/rule-processors/mass-id/privacy-flags/constants';
 import type {
+  BoldAttachmentLabel,
   BoldAttributeName,
   BoldDocumentEventName,
   MassIDActorType,
@@ -39,7 +40,7 @@ export interface CatalogActor {
 export interface CatalogAttachment {
   fileName: string;
   isPublic: boolean;
-  label: string;
+  label: BoldAttachmentLabel;
 }
 
 export type CatalogAttribute = AttributeRequirement &

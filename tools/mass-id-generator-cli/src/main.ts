@@ -13,7 +13,7 @@ const program = new Command('mass-id-generator')
     try {
       await emitEventData(emitTo);
     } catch (error) {
-      handleCommandError(error);
+      handleCommandError(error, { verbose: true });
     }
   });
 

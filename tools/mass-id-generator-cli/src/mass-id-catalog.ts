@@ -58,6 +58,7 @@ const { DATE, KILOGRAM } = DocumentEventAttributeFormat;
 
 const CREATED_AT = '2024-12-05T11:02:47Z';
 const RECYCLED_AT = '2025-02-22T10:35:12.000Z';
+const WEIGHED_MASS = 1201.925;
 
 const WASTE_GENERATOR = {
   addressId: '00000000-0000-4000-9000-00000000000a',
@@ -81,7 +82,6 @@ const INTEGRATOR = {
 } as const;
 
 const PLATE_FORMS = 'ABC1D23, ABC1234 or AB1234';
-const ANY_FORMAT_NOTE = 'Any format value is accepted.';
 const ACCREDITED_ADDRESS_NOTE =
   "A position more than 2 km from the participant's accredited address can fail the audit.";
 const MANIFEST_ATTACHMENT_NOTE = `Required when the manifest file is attached. It is not checked when ${EXEMPTION_JUSTIFICATION} replaces the attachment.`;
@@ -213,7 +213,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
         },
         {
           name: WASTE_ORIGIN,
-          notes: `Leave it out, or send any value other than ${BoldUnidentifiedAttributeValue.UNIDENTIFIED}. ${BoldUnidentifiedAttributeValue.UNIDENTIFIED} is rejected together with the ${MassIDActorType.WASTE_GENERATOR} ${ACTOR} event, and the duplicate check fails every MassID without that event.`,
+          notes: `Leave it out, or send any value other than ${BoldUnidentifiedAttributeValue.UNIDENTIFIED}. ${BoldUnidentifiedAttributeValue.UNIDENTIFIED} is rejected when the MassID has a ${MassIDActorType.WASTE_GENERATOR} ${ACTOR} event, and the duplicate check fails every MassID that has none.`,
           required: 'no',
           valueType: 'string',
         },
@@ -261,7 +261,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       externalCreatedAt: CREATED_AT,
       name: TRANSPORT_MANIFEST,
       slug: 'transport-manifest',
-      value: 1201.925,
+      value: WEIGHED_MASS,
     },
     {
       ...WASTE_GENERATOR,
@@ -305,7 +305,8 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           example: 100,
           format: KILOGRAM,
           name: CONTAINER_CAPACITY,
-          notes: `Greater than 0, required unless the recycler's accreditation carries an approved exception for it. ${ANY_FORMAT_NOTE}`,
+          notes:
+            "Greater than 0, required unless the recycler's accreditation carries an approved exception for it.",
           required: 'conditional',
           valueType: 'number',
         },
@@ -313,7 +314,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           example: 1211.925,
           format: KILOGRAM,
           name: GROSS_WEIGHT,
-          notes: `Greater than 0, required unless the recycler's accreditation carries an approved exception for ${TARE}; any format value is accepted. When ${TARE} and ${CONTAINER_QUANTITY} are also sent, the event value must equal ${GROSS_WEIGHT} minus (${TARE} multiplied by ${CONTAINER_QUANTITY}).`,
+          notes: `Greater than 0, required unless the recycler's accreditation carries an approved exception for ${TARE}. When ${TARE} and ${CONTAINER_QUANTITY} are also sent, the event value must equal ${GROSS_WEIGHT} minus (${TARE} multiplied by ${CONTAINER_QUANTITY}).`,
           required: 'conditional',
           valueType: 'number',
         },
@@ -321,14 +322,15 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           example: 10,
           format: KILOGRAM,
           name: TARE,
-          notes: `Weight of one empty container, greater than 0, required unless the recycler's accreditation carries an approved exception for it. ${ANY_FORMAT_NOTE}`,
+          notes:
+            "Weight of one empty container, greater than 0, required unless the recycler's accreditation carries an approved exception for it.",
           required: 'conditional',
           valueType: 'number',
         },
         {
           example: 'ABC1D23',
           name: VEHICLE_LICENSE_PLATE,
-          notes: `Plate in the form ${PLATE_FORMS}. A weighing sent as two ${WEIGHING} events must repeat the same value on both for this, ${GROSS_WEIGHT}, ${CONTAINER_CAPACITY}, ${CONTAINER_TYPE}, ${SCALE_TYPE} and ${WEIGHING_CAPTURE_METHOD}.`,
+          notes: `Plate in the form ${PLATE_FORMS}. A weighing sent as two ${WEIGHING} events must carry the same ${VEHICLE_LICENSE_PLATE}, ${GROSS_WEIGHT}, ${CONTAINER_CAPACITY}, ${CONTAINER_TYPE}, ${SCALE_TYPE} and ${WEIGHING_CAPTURE_METHOD} on both.`,
           required: 'yes',
           valueType: 'string',
         },
@@ -336,7 +338,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       externalCreatedAt: CREATED_AT,
       name: WEIGHING,
       slug: 'weighing',
-      value: 1201.925,
+      value: WEIGHED_MASS,
     },
     {
       ...RECYCLER,
@@ -369,7 +371,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
           valueType: 'string',
         },
         {
-          example: 1201.925,
+          example: WEIGHED_MASS,
           format: KILOGRAM,
           name: GROSS_WEIGHT,
           notes: `Greater than 0. It must equal the value of the most recent earlier event that carries one, normally the ${WEIGHING} event.`,
@@ -443,7 +445,7 @@ export const MASS_ID_CATALOG: MassIDCatalog = {
       externalCreatedAt: CREATED_AT,
       name: RECYCLING_MANIFEST,
       slug: 'recycling-manifest',
-      value: 1201.925,
+      value: WEIGHED_MASS,
     },
   ],
 };

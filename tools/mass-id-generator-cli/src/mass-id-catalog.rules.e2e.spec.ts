@@ -83,10 +83,14 @@ describe('MassID catalog rule verification E2E', () => {
     vi.useRealTimers();
   });
 
+  it('should run the rules against the pinned clock', () => {
+    expect(new Date().toISOString()).toBe(EXAMPLE_VERIFIED_AT.toISOString());
+  });
+
   it('should build a document the loaded-document schema accepts', () => {
-    expect(
-      BoldDocumentSchema.safeParse(stubCatalogMassIDDocument()).success,
-    ).toBe(true);
+    const result = BoldDocumentSchema.safeParse(stubCatalogMassIDDocument());
+
+    expect(result.error?.issues ?? []).toStrictEqual([]);
   });
 
   it.each(RULE_LAMBDAS)(

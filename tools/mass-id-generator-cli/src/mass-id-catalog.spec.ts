@@ -3,16 +3,16 @@ import { EVENT_PRIVACY_SPEC } from '@carrot-fndn/shared/methodologies/bold/rule-
 import { MASS_ID_CATALOG } from './mass-id-catalog';
 
 describe('MASS_ID_CATALOG', () => {
-  it.each(MASS_ID_CATALOG.events)(
-    'should list every attribute the privacy table names for $name',
-    ({ attributes, name }) => {
-      const privacyAttributeNames = [
-        ...(EVENT_PRIVACY_SPEC.get(name)?.attributes.keys() ?? []),
-      ];
+  it.each([...EVENT_PRIVACY_SPEC])(
+    'should list every attribute the privacy table names for %s',
+    (eventName, { attributes: privacyAttributes }) => {
+      const attributeNames = MASS_ID_CATALOG.events
+        .find(({ name }) => name === eventName)
+        ?.attributes.map(({ name }) => name);
 
-      expect(privacyAttributeNames.length).toBeGreaterThan(0);
-      expect(attributes.map((attribute) => attribute.name)).toStrictEqual(
-        expect.arrayContaining(privacyAttributeNames),
+      expect(attributeNames).toBeDefined();
+      expect(attributeNames).toStrictEqual(
+        expect.arrayContaining([...privacyAttributes.keys()]),
       );
     },
   );
