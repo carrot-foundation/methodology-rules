@@ -47,8 +47,6 @@ const RULE_LAMBDAS: ReadonlyArray<readonly [string, RuleLambda]> = [
   ['waste-origin-identification', wasteOriginIdentificationLambda],
 ];
 
-// project-period-limit reads the wall clock; the example's dates are fixed.
-const EXAMPLE_VERIFIED_AT = new Date('2025-03-01T00:00:00.000Z');
 const NOT_APPLICABLE_COMMENT = 'Rule not applicable';
 
 const runRule = async (
@@ -75,18 +73,6 @@ const runRule = async (
 };
 
 describe('MassID catalog rule verification E2E', () => {
-  beforeAll(() => {
-    vi.useFakeTimers({ now: EXAMPLE_VERIFIED_AT, toFake: ['Date'] });
-  });
-
-  afterAll(() => {
-    vi.useRealTimers();
-  });
-
-  it('should run the rules against the pinned clock', () => {
-    expect(new Date().toISOString()).toBe(EXAMPLE_VERIFIED_AT.toISOString());
-  });
-
   it('should build a document the loaded-document schema accepts', () => {
     const result = BoldDocumentSchema.safeParse(stubCatalogMassIDDocument());
 

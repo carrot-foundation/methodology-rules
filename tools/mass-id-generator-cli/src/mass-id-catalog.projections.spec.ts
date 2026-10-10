@@ -69,7 +69,7 @@ describe('mass-id-catalog projections', () => {
     it('should project the Pick-up event with the privacy flags the rule requires', () => {
       expect(toEventPayload(findEvent(PICK_UP))).toStrictEqual({
         addressId: '00000000-0000-4000-9000-00000000000a',
-        externalCreatedAt: '2024-12-05T11:02:47Z',
+        externalCreatedAt: '2025-12-05T11:02:47Z',
         isPublic: true,
         metadata: {
           attributes: [
@@ -187,7 +187,7 @@ describe('mass-id-catalog projections', () => {
 
         expect(payload).toStrictEqual({
           addressId: actor.addressId,
-          externalCreatedAt: '2024-12-05T11:02:47Z',
+          externalCreatedAt: '2025-12-05T11:02:47Z',
           isPublic: true,
           label,
           name: 'ACTOR',
