@@ -32,8 +32,9 @@ in the document, then resolved in this order. The first step that matches decide
      carries a non-`COMPANY` type, the fallback resolves private. Event participant
      snapshots are historical, so an actor that converted from individual to company
      carries both types across its own events — taking the last one seen publishes on
-     the newest snapshot alone. The vectors cannot catch this: each carries a single
-     document-level `participantType`.
+     the newest snapshot alone. The vectors cover this: an occurrence may carry its own
+     `participantType`, which overrides the vector's for that occurrence, and two
+     vectors place the non-`COMPANY` occurrence on each side of the `COMPANY` one.
 
 ### Two consequences worth stating, because implementations get them wrong
 
@@ -54,6 +55,9 @@ Seven, spelled as the published supply-chain vocabulary spells them — `Hauler`
 `Waste Generator`, `Waste Manager`, `Bin Custodian`, `Hauler`, `Processor`, `Recycler`,
 `Network Integrator`.
 
+BOLD's ACTOR `label` spells `Network Integrator` as `Integrator` on the wire. The role keeps
+its published name here, and a resolver maps the wire spelling to it.
+
 **Waste Manager is private to stop generator re-identification, not because its own
 participation is sensitive.** A waste manager is contracted by one generator to choose the
 destination, so wherever it serves a single generator in a municipality, naming it names the
@@ -71,7 +75,8 @@ cite it as established policy and do not publish it as public documentation.
 
 A role is read only from ACTOR events: from the `label`, and on **legacy MassIDs**, which carry
 no `label`, from the metadata attribute `actor-type`, spelled in the legacy vocabulary. Read
-both, and map the attribute:
+both. A BOLD `label` of `Integrator` names Network Integrator, the same mapping the legacy
+table below applies to `INTEGRATOR`. Map the attribute:
 
 | `actor-type` | Role |
 | --- | --- |
@@ -91,7 +96,9 @@ reads only `label`, or only public attributes, sees no role on a legacy generato
 whenever it is a `COMPANY`.
 
 In the vectors, an occurrence with no `role` has no `label`, and `legacyActorType` carries the
-attribute's `value` and its own `isPublic`.
+attribute's `value` and its own `isPublic`. An occurrence's optional `participantType`
+overrides the vector's `participantType` for that occurrence alone; a harness reads
+`occurrence.participantType ?? vector.participantType`.
 
 ## What a conforming repo does
 

@@ -51,6 +51,14 @@ const NO_PARTICIPANT_TYPE =
   'DocumentParticipant.type carries the actor kind, never COMPANY or INDIVIDUAL, so the spec step 5 participant-type fallback is not modelled';
 
 const UNEXPRESSIBLE_VECTORS: ReadonlyMap<string, string> = new Map([
+  [
+    'mixed-participant-type-company-then-individual-is-private',
+    NO_PARTICIPANT_TYPE,
+  ],
+  [
+    'mixed-participant-type-individual-then-company-is-private',
+    NO_PARTICIPANT_TYPE,
+  ],
   ['unknown-legacy-actor-type-company-is-public', NO_PARTICIPANT_TYPE],
   ['unknown-role-company-is-public', NO_PARTICIPANT_TYPE],
   ['unknown-role-individual-is-private', NO_PARTICIPANT_TYPE],
@@ -93,8 +101,8 @@ const unexpressible = vectors
 describe('participant-visibility.vectors.json', () => {
   it('should replay the vendored contract this suite was written against', () => {
     expect({ vectorCount: vectors.length, version }).toEqual({
-      vectorCount: 29,
-      version: '1.2.0',
+      vectorCount: 31,
+      version: '1.3.0',
     });
     expect(unexpressible.map(({ id }) => id).sort(sortAlphabetically)).toEqual(
       [...UNEXPRESSIBLE_VECTORS.keys()].sort(sortAlphabetically),
