@@ -90,6 +90,17 @@ jobs:
           path: dist/methodology-rules-manifest.json
           retention-days: 7
 
+      - name: Generate MassID event data
+        run: pnpm generate:event-data
+
+      - name: Upload event data artifact
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4.6.0
+        with:
+          name: methodology-event-data
+          if-no-files-found: error
+          path: dist/methodology-event-data
+          retention-days: 7
+
       - name: Generate docs dispatch token
         id: docs-app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
