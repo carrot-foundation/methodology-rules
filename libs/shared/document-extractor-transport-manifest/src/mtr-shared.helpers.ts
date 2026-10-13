@@ -62,7 +62,7 @@ export const MTR_ADDRESS_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   city: /Municipio\s*:?\s*(.+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  state: /\b(?:UF|Estado)[^\S\n]*:?[^\S\n]*([A-Z]{2})\b/i,
+  state: /\b(?:UF|Estado)[^\S\n]*:?[^\S\n]*([A-Z]{2})\b/gi,
 } as const;
 
 const BRAZILIAN_STATE_CODES = new Set([
@@ -96,11 +96,15 @@ const BRAZILIAN_STATE_CODES = new Set([
 ]);
 
 const extractState = (sectionText: string): string | undefined => {
-  const state = MTR_ADDRESS_PATTERNS.state
-    .exec(sectionText)?.[1]
-    ?.toUpperCase();
+  for (const match of sectionText.matchAll(MTR_ADDRESS_PATTERNS.state)) {
+    const state = match[1]?.toUpperCase();
 
-  return state && BRAZILIAN_STATE_CODES.has(state) ? state : undefined;
+    if (state && BRAZILIAN_STATE_CODES.has(state)) {
+      return state;
+    }
+  }
+
+  return undefined;
 };
 
 export const stripTrailingRegistrationNumber = (name: string): string =>

@@ -119,6 +119,33 @@ describe('MTR shared helpers', () => {
       },
     );
 
+    it.each([
+      {
+        description: 'an earlier Estado label with a non-UF word',
+        lines: ['Estado: Km', 'UF: SC'],
+      },
+      {
+        address: 'Avenida Estado de Israel, 100',
+        description: 'Estado inside the address text',
+        lines: ['UF: SC'],
+      },
+    ])(
+      'should return the later valid UF when $description',
+      ({ address = 'Rua Test', lines }) => {
+        const section = [
+          `Endereco: ${address}`,
+          'Municipio: City',
+          ...lines,
+        ].join('\n');
+
+        expect(extractAddressFields(section)).toEqual({
+          address,
+          city: 'City',
+          state: 'SC',
+        });
+      },
+    );
+
     it('should accept a lowercase UF and return it uppercased', () => {
       expect(
         extractAddressFields('Endereco: Rua Test\nMunicipio: City\nUF: sc'),
