@@ -62,8 +62,50 @@ export const MTR_ADDRESS_PATTERNS = {
   // eslint-disable-next-line sonarjs/slow-regex
   city: /Municipio\s*:?\s*(.+)/i,
   // eslint-disable-next-line sonarjs/slow-regex
-  state: /(?:UF|Estado)\s*:?\s*(\w{2})/i,
+  state: /\b(?:UF|Estado)[^\S\n]*:?[^\S\n]*([A-Z]{2})\b/gi,
 } as const;
+
+const BRAZILIAN_STATE_CODES = new Set([
+  'AC',
+  'AL',
+  'AM',
+  'AP',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MG',
+  'MS',
+  'MT',
+  'PA',
+  'PB',
+  'PE',
+  'PI',
+  'PR',
+  'RJ',
+  'RN',
+  'RO',
+  'RR',
+  'RS',
+  'SC',
+  'SE',
+  'SP',
+  'TO',
+]);
+
+const extractState = (sectionText: string): string | undefined => {
+  for (const match of sectionText.matchAll(MTR_ADDRESS_PATTERNS.state)) {
+    const state = match[1]?.toUpperCase();
+
+    if (state && BRAZILIAN_STATE_CODES.has(state)) {
+      return state;
+    }
+  }
+
+  return undefined;
+};
 
 export const stripTrailingRegistrationNumber = (name: string): string =>
   // eslint-disable-next-line sonarjs/slow-regex
@@ -71,19 +113,20 @@ export const stripTrailingRegistrationNumber = (name: string): string =>
 
 export const extractAddressFields = (
   sectionText: string,
-): undefined | { address: string; city: string; state: string } => {
+): undefined | { address: string; city: string; state?: string } => {
   const addressMatch = MTR_ADDRESS_PATTERNS.address.exec(sectionText);
   const cityMatch = MTR_ADDRESS_PATTERNS.city.exec(sectionText);
-  const stateMatch = MTR_ADDRESS_PATTERNS.state.exec(sectionText);
 
-  if (!addressMatch?.[1] || !cityMatch?.[1] || !stateMatch?.[1]) {
+  if (!addressMatch?.[1] || !cityMatch?.[1]) {
     return undefined;
   }
+
+  const state = extractState(sectionText);
 
   return {
     address: addressMatch[1].trim(),
     city: cityMatch[1].trim(),
-    state: stateMatch[1].trim(),
+    ...(state && { state }),
   };
 };
 
