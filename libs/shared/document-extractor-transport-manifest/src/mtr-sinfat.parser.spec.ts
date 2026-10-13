@@ -97,6 +97,46 @@ Compostagem`;
       expect(result.reviewRequired).toBe(true);
     });
 
+    it('should leave state empty when the FEPAM state cell holds address overflow', () => {
+      const text = `Manifesto de Transporte de Resíduos
+Fundação Estadual de Proteção Ambiental
+MTR nº 0124048986
+
+Identificação do Gerador
+Razão Social: EMPRESA GERADORA LTDA - 12345
+CPF/CNPJ: 12.345.678/0001-90
+Endereço: Rodovia RS-100, S/N- KM 12,5, nº S/N
+Município: Cidade Interior
+Estado:
+Celular:
+
+Identificação do Transportador
+Razão Social: TRANSPORTES AMBIENTAIS S.A. - 54321
+CPF/CNPJ: 98.765.432/0001-10
+Endereço: Rua das Flores, nº 100 sala B segundo piso
+Município: Cidade Capital
+Estado: sala B
+
+Identificação do Destinador
+Razão Social: RECICLAGEM SUSTENTÁVEL LTDA - 67890
+CPF/CNPJ: 11.222.333/0001-44
+Endereço: Rodovia BR-101, nº S/N Km 120+500 no Acesso Norte
+Estado: Km
+Município: Cidade Vizinha`;
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.generator?.city.parsed).toBe('Cidade Interior');
+      expect(result.data.generator?.state.parsed).toBe('');
+      expect(result.data.hauler?.city.parsed).toBe('Cidade Capital');
+      expect(result.data.hauler?.state.parsed).toBe('');
+      expect(result.data.receiver?.address.parsed).toBe(
+        'Rodovia BR-101, nº S/N Km 120+500 no Acesso Norte',
+      );
+      expect(result.data.receiver?.city.parsed).toBe('Cidade Vizinha');
+      expect(result.data.receiver?.state.parsed).toBe('');
+    });
+
     it('should match 10-digit MTR numbers without colon', () => {
       const text = `Manifesto de Transporte de Resíduos
 MTR nº 0124048986

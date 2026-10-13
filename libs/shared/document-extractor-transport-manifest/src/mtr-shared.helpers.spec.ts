@@ -86,10 +86,43 @@ describe('MTR shared helpers', () => {
       ).toBeUndefined();
     });
 
-    it('should return undefined when state is missing', () => {
+    it('should omit state when it is missing', () => {
       expect(
         extractAddressFields('Endereco: Rua Test\nMunicipio: City'),
-      ).toBeUndefined();
+      ).toEqual({ address: 'Rua Test', city: 'City' });
+    });
+
+    it.each([
+      {
+        description: 'empty before the next label',
+        state: 'Estado:\nCelular:',
+      },
+      { description: 'address overflow text', state: 'Estado: sala B' },
+      { description: 'a kilometer marker', state: 'Estado: Km 120+500 no' },
+      {
+        description: 'a two-letter word that is not a UF',
+        state: 'Estado: Km',
+      },
+    ])(
+      'should omit state when the state field holds $description',
+      ({ state }) => {
+        const section = [
+          'Endereco: Rodovia BR-101, Km 120+500',
+          'Municipio: Cidade Interior',
+          state,
+        ].join('\n');
+
+        expect(extractAddressFields(section)).toEqual({
+          address: 'Rodovia BR-101, Km 120+500',
+          city: 'Cidade Interior',
+        });
+      },
+    );
+
+    it('should accept a lowercase UF and return it uppercased', () => {
+      expect(
+        extractAddressFields('Endereco: Rua Test\nMunicipio: City\nUF: sc'),
+      ).toEqual({ address: 'Rua Test', city: 'City', state: 'SC' });
     });
   });
 
