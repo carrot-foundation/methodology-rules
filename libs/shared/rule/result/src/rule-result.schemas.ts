@@ -1,4 +1,7 @@
-import { RuleOutputStatusSchema } from '@carrot-fndn/shared/rule/types';
+import {
+  RuleOutputStatusSchema,
+  RuleProcessorTimingSchema,
+} from '@carrot-fndn/shared/rule/types';
 import z from 'zod';
 
 export const PostProcessInputSchema = z.object({
@@ -9,6 +12,7 @@ export const PostProcessInputSchema = z.object({
     sourceCodeUrl: z.url(),
     sourceCodeVersion: z.string(),
     status: RuleOutputStatusSchema,
+    timing: RuleProcessorTimingSchema.optional(),
   }),
   taskToken: z.string(),
 });

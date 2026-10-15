@@ -29,6 +29,18 @@ export const RuleInputSchema = z.object({
 });
 export type RuleInput = z.infer<typeof RuleInputSchema>;
 
+export const RuleProcessorTimingSchema = z
+  .object({
+    attemptId: z.uuid(),
+    finishedAt: z.iso.datetime(),
+    startedAt: z.iso.datetime(),
+  })
+  .refine(
+    ({ finishedAt, startedAt }) =>
+      Date.parse(finishedAt) >= Date.parse(startedAt),
+    { message: 'Rule completion must not precede its start' },
+  );
+
 export const RuleOutputSchema = z.object({
   requestId: z.string(),
   responseToken: z.string(),
@@ -36,5 +48,6 @@ export const RuleOutputSchema = z.object({
   resultComment: z.string().optional(),
   resultContent: z.record(z.string(), z.any()).optional(),
   resultStatus: RuleOutputStatusSchema,
+  timing: RuleProcessorTimingSchema.optional(),
 });
 export type RuleOutput = z.infer<typeof RuleOutputSchema>;

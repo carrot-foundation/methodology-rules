@@ -1,3 +1,5 @@
+import { faker } from '@faker-js/faker';
+
 import {
   RuleInputSchema,
   RuleOutputSchema,
@@ -204,4 +206,51 @@ describe('RuleOutputSchema', () => {
 
     expect(result.success).toBe(false);
   });
+});
+
+describe('RuleOutputSchema processor timing', () => {
+  const legacyOutput = {
+    requestId: 'synthetic-request',
+    responseToken: 'synthetic-token',
+    responseUrl: 'https://example.com/callback',
+    resultStatus: 'PASSED',
+  };
+  const startedAt = faker.date.recent().toISOString();
+  const finishedAt = new Date(Date.parse(startedAt) + 75).toISOString();
+  const timing = { attemptId: faker.string.uuid(), finishedAt, startedAt };
+
+  it.each([timing, { ...timing, finishedAt: startedAt }])(
+    'should preserve a valid measured interval including equal clocks',
+    (measurement) => {
+      expect(
+        RuleOutputSchema.parse({ ...legacyOutput, timing: measurement }),
+      ).toMatchObject({ timing: measurement });
+    },
+  );
+
+  it.each([
+    null,
+    {},
+    { ...timing, attemptId: '' },
+    { ...timing, attemptId: faker.string.alphanumeric(10) },
+    { ...timing, startedAt: null },
+    { ...timing, startedAt: false },
+    { ...timing, startedAt: Date.parse(startedAt) },
+    { ...timing, startedAt: startedAt.slice(0, 10) },
+    { ...timing, startedAt: startedAt.slice(0, -1) },
+    { ...timing, startedAt: 'invalid-clock' },
+    { ...timing, finishedAt: null },
+    {
+      ...timing,
+      finishedAt: new Date(Date.parse(startedAt) - 1).toISOString(),
+    },
+  ])(
+    'should refuse malformed or backwards measured intervals: %j',
+    (measurement) => {
+      expect(
+        RuleOutputSchema.safeParse({ ...legacyOutput, timing: measurement })
+          .success,
+      ).toBe(false);
+    },
+  );
 });

@@ -12,6 +12,7 @@ import { logger } from '@carrot-fndn/shared/helpers';
 import { reportRuleResults } from '@carrot-fndn/shared/rule/result';
 import { RuleInputSchema } from '@carrot-fndn/shared/rule/types';
 import { AWSLambda, setTags } from '@sentry/serverless';
+import { randomUUID } from 'node:crypto';
 
 const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput =>
   RuleInputSchema.parse(event);
@@ -63,11 +64,23 @@ export const wrapRuleIntoLambdaHandler = (
     try {
       const ruleInput = mapEventToRuleInput(event);
 
-      logger.info({ ruleInput }, 'Rule invoked');
-
-      const ruleOutput = toUpstreamCompatibleOutput(
-        await rule.process(ruleInput),
+      logger.info(
+        {
+          documentId: ruleInput.documentId,
+          requestId: ruleInput.requestId,
+          ruleName: ruleInput.ruleName,
+        },
+        'Rule invoked',
       );
+
+      const attemptId = randomUUID();
+      const startedAt = new Date().toISOString();
+      const evaluatedOutput = await rule.process(ruleInput);
+      const finishedAt = new Date().toISOString();
+      const ruleOutput: RuleOutput = {
+        ...toUpstreamCompatibleOutput(evaluatedOutput),
+        timing: { attemptId, finishedAt, startedAt },
+      };
 
       await reportRuleResults(ruleOutput);
 
