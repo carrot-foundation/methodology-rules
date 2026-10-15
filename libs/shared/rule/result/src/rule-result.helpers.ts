@@ -35,6 +35,7 @@ export const mapRuleOutputToPostProcessInput = (
       sourceCodeUrl: getSourceCodeUrl(),
       sourceCodeVersion: getSourceCodeVersion(),
       status: ruleOutput.resultStatus,
+      ...(ruleOutput.timing === undefined ? {} : { timing: ruleOutput.timing }),
     },
     taskToken: ruleOutput.responseToken,
   });

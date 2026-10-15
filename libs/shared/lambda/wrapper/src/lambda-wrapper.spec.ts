@@ -3,6 +3,7 @@ import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { getSentryDsn } from '@carrot-fndn/shared/env';
 import { logger } from '@carrot-fndn/shared/helpers';
+import { RuleOutputSchema } from '@carrot-fndn/shared/rule/types';
 import {
   stubContext,
   stubRuleInput,
@@ -50,6 +51,9 @@ process.env = {
 };
 
 describe('wrapRuleIntoLambdaHandler', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
   afterAll(() => {
     vi.restoreAllMocks();
   });
@@ -77,7 +81,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
-    expect(result).toEqual(response);
+    expect(result).toMatchObject(response);
     expect(fetchSpy).toHaveBeenCalledWith(
       response.responseUrl,
       expect.objectContaining({
@@ -107,7 +111,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       ...response,
       resultStatus: 'FAILED' as const,
     });
@@ -120,6 +124,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       }
     }
 
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
     const setTagsSpy = vi.spyOn(Sentry, 'setTags');
 
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
@@ -132,6 +137,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
       'Just a controlled test error.',
     );
 
+    expect(fetchSpy).not.toHaveBeenCalled();
     expect(setTagsSpy).toHaveBeenCalledWith({
       documentId: ruleEvent.documentId,
       documentKeyPrefix: ruleEvent.documentKeyPrefix,
@@ -215,9 +221,131 @@ describe('wrapRuleIntoLambdaHandler', () => {
     const wrapper = wrapRuleIntoLambdaHandler(new Wrapped());
     const result = await wrapper(stubRuleInput(), stubContext(), () => {});
 
-    expect(result).toEqual(response);
+    expect(result).toMatchObject(response);
     expect(initSpy).toHaveBeenCalledWith(
       expect.objectContaining({ dsn: sentryDsn }),
     );
+  });
+
+  it('should measure evaluation before waiting for callback delivery and omit response tokens from logs', async () => {
+    const startedAt = faker.date.recent().toISOString();
+    const finishedAt = new Date(Date.parse(startedAt) + 75).toISOString();
+    const deliveredAt = new Date(Date.parse(startedAt) + 10_000).toISOString();
+    const response = {
+      ...stubRuleOutput({ resultContent: {} }),
+      resultStatus: 'PASSED' as const,
+    };
+    const input = stubRuleInput({ responseToken: faker.string.uuid() });
+    const infoSpy = vi
+      .spyOn(logger, 'info')
+      .mockImplementation(() => undefined);
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        vi.setSystemTime(new Date(finishedAt));
+
+        return Promise.resolve(response);
+      }
+    }
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockImplementationOnce(() => {
+        vi.setSystemTime(new Date(deliveredAt));
+
+        return Promise.resolve(new Response());
+      });
+
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(startedAt));
+    const result = await wrapRuleIntoLambdaHandler(new Wrapped())(
+      input,
+      stubContext(),
+      () => {},
+    );
+
+    expect(result).toMatchObject({ timing: { finishedAt, startedAt } });
+    const request = fetchSpy.mock.calls[0]?.[1];
+
+    if (typeof request?.body !== 'string') {
+      throw new TypeError('Callback fixture expects a serialized body');
+    }
+    expect(JSON.parse(request.body)).toMatchObject({
+      output: { timing: { finishedAt, startedAt } },
+    });
+    expect(JSON.stringify(infoSpy.mock.calls)).not.toContain(
+      input.responseToken,
+    );
+    expect(infoSpy).toHaveBeenCalledWith(
+      {
+        documentId: input.documentId,
+        requestId: input.requestId,
+        ruleName: input.ruleName,
+      },
+      'Rule invoked',
+    );
+  });
+
+  it('should refuse a backwards measured clock before callback delivery', async () => {
+    const startedAt = faker.date.recent().toISOString();
+    const response = stubRuleOutput({ resultContent: {} });
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        vi.setSystemTime(new Date(Date.parse(startedAt) - 1));
+
+        return Promise.resolve(response);
+      }
+    }
+
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(startedAt));
+
+    await expect(
+      wrapRuleIntoLambdaHandler(new Wrapped())(
+        stubRuleInput(),
+        stubContext(),
+        () => {},
+      ),
+    ).rejects.toThrow('Rule completion must not precede its start');
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it('should generate a distinct attempt for every retry after callback failure', async () => {
+    const response = {
+      ...stubRuleOutput({ resultContent: {} }),
+      resultStatus: 'PASSED' as const,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve(response);
+      }
+    }
+
+    const failure = new Error('Synthetic callback outage');
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockRejectedValueOnce(failure)
+      .mockResolvedValueOnce(new Response());
+    const handler = wrapRuleIntoLambdaHandler(new Wrapped());
+    const input = stubRuleInput();
+
+    await expect(handler(input, stubContext(), () => {})).rejects.toBe(failure);
+    const result = RuleOutputSchema.parse(
+      await handler(input, stubContext(), () => {}),
+    );
+    const firstBody = fetchSpy.mock.calls[0]?.[1]?.body;
+
+    if (typeof firstBody !== 'string') {
+      throw new TypeError('Callback fixture expects a serialized body');
+    }
+    expect(result).toHaveProperty('timing.attemptId');
+    expect(firstBody).not.toContain(
+      result.timing?.attemptId ?? 'missing-timing',
+    );
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
 });

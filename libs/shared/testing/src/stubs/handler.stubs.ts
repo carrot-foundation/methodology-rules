@@ -30,7 +30,7 @@ export const stubContext = (): Context => ({
 });
 
 export const stubRuleOutput = (partial?: Partial<RuleOutput>): RuleOutput =>
-  createStubFromSchema(RuleOutputSchema, partial);
+  createStubFromSchema(RuleOutputSchema.omit({ timing: true }), partial);
 
 export const stubRuleResponse = () => ({
   [faker.string.sample()]: faker.string.sample(),

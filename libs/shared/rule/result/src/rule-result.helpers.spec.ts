@@ -101,6 +101,37 @@ describe('mapRuleOutputToPostProcessInput', () => {
     expect(result.output.comment).toBe(resultComment);
   });
 
+  it('should preserve measured timing through JSON callback projection', () => {
+    const startedAt = faker.date.recent().toISOString();
+    const timing = {
+      attemptId: faker.string.uuid(),
+      finishedAt: new Date(Date.parse(startedAt) + 30).toISOString(),
+      startedAt,
+    };
+    const result = mapRuleOutputToPostProcessInput({
+      ...stubRuleOutput(),
+      resultContent: {},
+      timing,
+    });
+
+    const serialized = JSON.stringify(result);
+
+    expect(JSON.parse(serialized)).toMatchObject({
+      output: { timing },
+    });
+  });
+
+  it('should keep legacy callbacks without timing or fabricated clocks', () => {
+    const result = mapRuleOutputToPostProcessInput({
+      requestId: faker.string.uuid(),
+      responseToken: faker.string.uuid(),
+      responseUrl: faker.internet.url(),
+      resultStatus: 'PASSED',
+    });
+
+    expect(result.output).not.toHaveProperty('timing');
+  });
+
   it('should not return comment if undefined', () => {
     const result = mapRuleOutputToPostProcessInput({
       requestId: faker.string.uuid(),
