@@ -219,6 +219,19 @@ describe('RuleOutputSchema processor timing', () => {
   const finishedAt = new Date(Date.parse(startedAt) + 75).toISOString();
   const timing = { attemptId: faker.string.uuid(), finishedAt, startedAt };
 
+  it('should reject backwards intervals below millisecond precision', () => {
+    expect(
+      RuleOutputSchema.safeParse({
+        ...legacyOutput,
+        timing: {
+          ...timing,
+          finishedAt: '2026-01-01T00:00:00.0001Z',
+          startedAt: '2026-01-01T00:00:00.0009Z',
+        },
+      }).success,
+    ).toBe(false);
+  });
+
   it.each([timing, { ...timing, finishedAt: startedAt }])(
     'should preserve a valid measured interval including equal clocks',
     (measurement) => {
@@ -238,8 +251,10 @@ describe('RuleOutputSchema processor timing', () => {
     { ...timing, startedAt: Date.parse(startedAt) },
     { ...timing, startedAt: startedAt.slice(0, 10) },
     { ...timing, startedAt: startedAt.slice(0, -1) },
+    { ...timing, startedAt: startedAt.replace('Z', '1Z') },
     { ...timing, startedAt: 'invalid-clock' },
     { ...timing, finishedAt: null },
+    { ...timing, finishedAt: finishedAt.replace('Z', '1Z') },
     {
       ...timing,
       finishedAt: new Date(Date.parse(startedAt) - 1).toISOString(),

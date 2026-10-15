@@ -32,8 +32,8 @@ export type RuleInput = z.infer<typeof RuleInputSchema>;
 export const RuleProcessorTimingSchema = z
   .object({
     attemptId: z.uuid(),
-    finishedAt: z.iso.datetime(),
-    startedAt: z.iso.datetime(),
+    finishedAt: z.iso.datetime({ precision: 3 }),
+    startedAt: z.iso.datetime({ precision: 3 }),
   })
   .refine(
     ({ finishedAt, startedAt }) =>
