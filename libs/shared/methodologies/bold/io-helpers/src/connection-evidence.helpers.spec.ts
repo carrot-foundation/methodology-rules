@@ -1,5 +1,6 @@
 import { GetObjectCommand, NoSuchKey, S3Client } from '@aws-sdk/client-s3';
 import { getDocumentBucketName } from '@carrot-fndn/shared/env';
+import { logger } from '@carrot-fndn/shared/helpers';
 import { stubMassIDConnectionEvidence } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { faker } from '@faker-js/faker';
 import { sdkStreamMixin } from '@smithy/util-stream';
@@ -22,6 +23,7 @@ const resolveBody = (body: string) => {
 describe('Connection evidence helpers', () => {
   beforeEach(() => {
     s3ClientMock.reset();
+    vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
   });
 
   describe('toConnectionEvidenceKey', () => {
@@ -51,25 +53,36 @@ describe('Connection evidence helpers', () => {
       ).toEqual({ Bucket: getDocumentBucketName(), Key: key });
     });
 
-    it('should return missing when the object does not exist', async () => {
+    it('should return missing and log the key when the object does not exist', async () => {
+      const key = faker.string.uuid();
+
       s3ClientMock
         .on(GetObjectCommand)
         .rejects(new NoSuchKey({ $metadata: {}, message: 'Not found' }));
 
-      await expect(
-        loadConnectionEvidence(faker.string.uuid()),
-      ).resolves.toEqual({ status: 'missing' });
+      await expect(loadConnectionEvidence(key)).resolves.toEqual({
+        status: 'missing',
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        { key },
+        '[loadConnectionEvidence] Evidence not found',
+      );
     });
 
-    it('should return malformed when the object is not JSON', async () => {
+    it('should return malformed and log the reason when the object is not JSON', async () => {
+      const key = faker.string.uuid();
+      const reason = 'the body is not valid JSON';
+
       resolveBody('not-json');
 
-      await expect(
-        loadConnectionEvidence(faker.string.uuid()),
-      ).resolves.toEqual({
-        reason: 'the body is not valid JSON',
+      await expect(loadConnectionEvidence(key)).resolves.toEqual({
+        reason,
         status: 'malformed',
       });
+      expect(logger.warn).toHaveBeenCalledWith(
+        { key, reason },
+        '[loadConnectionEvidence] Evidence is malformed',
+      );
     });
 
     it('should return malformed with the schema issues when the object breaks the contract', async () => {

@@ -51,7 +51,7 @@ One object per execution document, in the same bucket (`DOCUMENT_BUCKET_NAME`) a
 - `connection` and `both` entries carry `relationId`, `revision` and `confirmedStartDate`; `integrator` entries cannot be `eligible`.
 - Any `connection` or `both` entry requires a non-null `generatorPalantirParticipantId`.
 - `reason` is a code, not prose, so no free text reaches the object.
-- The object and its entries are strict: a field outside this contract fails validation instead of being dropped.
+- The object and its entries are strict: a field outside this contract fails validation instead of being dropped. Adding a field therefore means releasing the rule with the new schema before Smaug writes it.
 
 ### Example
 

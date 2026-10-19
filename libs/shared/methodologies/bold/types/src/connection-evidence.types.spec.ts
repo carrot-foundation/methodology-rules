@@ -54,6 +54,18 @@ describe('MassIDConnectionEvidenceSchema', () => {
     );
   });
 
+  it('should accept a reason of exactly 64 characters', () => {
+    const evidence = stubMassIDConnectionEvidence({
+      wasteManagers: [
+        stubConfirmedEntry({ eligibility: 'review', reason: 'a'.repeat(64) }),
+      ],
+    });
+
+    expect(MassIDConnectionEvidenceSchema.safeParse(evidence).success).toBe(
+      true,
+    );
+  });
+
   it('should accept null generator and Drop-off when there is no confirmed connection', () => {
     const evidence = stubMassIDConnectionEvidence({
       dropOffDate: null,
@@ -155,7 +167,10 @@ describe('MassIDConnectionEvidenceSchema', () => {
       scenario: 'an integrator entry carrying connection fields',
     },
     {
-      evidence: { ...stubMassIDConnectionEvidence(), generatorName: 'Pedro' },
+      evidence: {
+        ...stubMassIDConnectionEvidence(),
+        unexpectedField: faker.string.uuid(),
+      },
       scenario: 'a field outside the contract',
     },
   ])('should reject $scenario', ({ evidence }) => {
