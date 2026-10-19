@@ -20,9 +20,16 @@ const mapEventToRuleInput = (event: MethodologyRuleEvent): RuleInput =>
 const mapRuleOutputToLambdaResult = (ruleOutput: RuleOutput): unknown =>
   ruleOutput;
 
+export interface RuleLambdaHandlerOptions {
+  reportsReviewRequired?: boolean;
+}
+
 // TODO: remove once Smaug supports REVIEW_REQUIRED
-const toUpstreamCompatibleOutput = (ruleOutput: RuleOutput): RuleOutput =>
-  ruleOutput.resultStatus === 'REVIEW_REQUIRED'
+const toUpstreamCompatibleOutput = (
+  ruleOutput: RuleOutput,
+  { reportsReviewRequired = false }: RuleLambdaHandlerOptions,
+): RuleOutput =>
+  ruleOutput.resultStatus === 'REVIEW_REQUIRED' && !reportsReviewRequired
     ? { ...ruleOutput, resultStatus: 'FAILED' }
     : ruleOutput;
 
@@ -42,6 +49,7 @@ const setRuleSentryTags = ({
 
 export const wrapRuleIntoLambdaHandler = (
   rule: RuleDataProcessor,
+  options: RuleLambdaHandlerOptions = {},
 ): Handler<MethodologyRuleEvent, unknown> => {
   // Prevent MaxListenersExceededWarning by increasing the limit
   // This addresses the issue with multiple uncaughtException listeners added by Sentry
@@ -78,7 +86,7 @@ export const wrapRuleIntoLambdaHandler = (
       const evaluatedOutput = await rule.process(ruleInput);
       const finishedAt = new Date().toISOString();
       const ruleOutput: RuleOutput = {
-        ...toUpstreamCompatibleOutput(evaluatedOutput),
+        ...toUpstreamCompatibleOutput(evaluatedOutput, options),
         timing: { attemptId, finishedAt, startedAt },
       };
 

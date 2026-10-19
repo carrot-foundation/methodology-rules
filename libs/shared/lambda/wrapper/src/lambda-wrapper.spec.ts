@@ -117,6 +117,34 @@ describe('wrapRuleIntoLambdaHandler', () => {
     });
   });
 
+  it('should report and return REVIEW_REQUIRED when the rule opts in', async () => {
+    const response = {
+      ...stubRuleOutput(),
+      resultStatus: 'REVIEW_REQUIRED' as const,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve({ ...response });
+      }
+    }
+
+    const fetchSpy = mockFetch();
+
+    const wrapper = wrapRuleIntoLambdaHandler(new Wrapped(), {
+      reportsReviewRequired: true,
+    });
+    const result = await wrapper(stubRuleInput(), stubContext(), () => {});
+
+    expect(result).toMatchObject(response);
+    expect(fetchSpy).toHaveBeenCalledWith(
+      response.responseUrl,
+      expect.objectContaining({
+        body: expect.stringContaining('"status":"REVIEW_REQUIRED"'),
+      }),
+    );
+  });
+
   it('should call setRuleSentryTags correctly', async () => {
     class Wrapped extends RuleDataProcessor {
       process(): Promise<RuleOutput> {

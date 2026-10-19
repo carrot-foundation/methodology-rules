@@ -1,9 +1,6 @@
 import { toDocumentKey } from '@carrot-fndn/shared/helpers';
 import { toConnectionEvidenceKey } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import {
-  type RuleOutput,
-  type RuleOutputStatus,
-} from '@carrot-fndn/shared/rule/types';
+import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import {
   prepareEnvironmentTestE2E,
   stubContext,
@@ -18,10 +15,6 @@ import {
   type WasteManagerConnectionTestCase,
   wasteManagerConnectionTestCases,
 } from './waste-manager-connection.test-cases';
-
-// The lambda wrapper reports REVIEW_REQUIRED to Smaug as FAILED.
-const toReportedStatus = (status: RuleOutputStatus): RuleOutputStatus =>
-  status === 'REVIEW_REQUIRED' ? 'FAILED' : status;
 
 const runLambda = async (
   {
@@ -97,7 +90,7 @@ describe('WasteManagerConnectionProcessor E2E', () => {
       const response = await runLambda(scenario);
 
       expect(response.resultComment).toBe(resultComment);
-      expect(response.resultStatus).toBe(toReportedStatus(resultStatus));
+      expect(response.resultStatus).toBe(resultStatus);
     },
   );
 

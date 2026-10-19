@@ -4,4 +4,9 @@ import { WasteManagerConnectionProcessor } from './waste-manager-connection.proc
 
 const instance = new WasteManagerConnectionProcessor();
 
-export const wasteManagerConnectionLambda = wrapRuleIntoLambdaHandler(instance);
+export const wasteManagerConnectionLambda = wrapRuleIntoLambdaHandler(
+  instance,
+  {
+    reportsReviewRequired: true,
+  },
+);

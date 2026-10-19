@@ -128,7 +128,7 @@ The rule is registered and off: the library exists and is tested, but no methodo
 Prerequisites. The rule does not go on while any of them is missing:
 
 1. Smaug's `prepare` writes this object in production for every MassID audited by the target methodology, including those without Waste Managers. The rule fails every MassID whose evidence is missing.
-2. The Lambda wrapper reports `REVIEW_REQUIRED` to Smaug as `REVIEW_REQUIRED`. Today `toUpstreamCompatibleOutput` in `libs/shared/lambda/wrapper/src/lambda-wrapper.ts` turns it into `FAILED`, which would turn every human-review case of this rule into a failure.
+2. Smaug's rule-result endpoint accepts `REVIEW_REQUIRED` from this rule and routes it to human review. The rule's Lambda opts in with `wrapRuleIntoLambdaHandler(instance, { reportsReviewRequired: true })`, so it reports `REVIEW_REQUIRED` unchanged; every other rule keeps the default of `libs/shared/lambda/wrapper/src/lambda-wrapper.ts`, which reports it as `FAILED`.
 3. The distribution policy version that adopts this rule is published; it is the `policyVersion` Smaug writes.
 4. The rule's Lambda role reads the evidence key in `DOCUMENT_BUCKET_NAME` and has `s3:ListBucket` on it.
 
