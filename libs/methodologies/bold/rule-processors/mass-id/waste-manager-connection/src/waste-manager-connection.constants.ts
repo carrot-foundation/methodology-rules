@@ -28,7 +28,7 @@ export const DECISION_REASONS = {
     effectiveEndDate: string,
   ) =>
     `the "${DROP_OFF}" day ${dropOffDay} (${CIVIL_DAY_TIMEZONE}) is on or after the connection end ${effectiveEndDate}`,
-  MISSING_DROP_OFF: `the MassID has no single "${DROP_OFF}" event to compare with the connection start`,
+  MISSING_DROP_OFF: `the MassID has no single "${DROP_OFF}" event to compare with the connection period`,
 } as const;
 
 export const RESULT_COMMENTS = {
