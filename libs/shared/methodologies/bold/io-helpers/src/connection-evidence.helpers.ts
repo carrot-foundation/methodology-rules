@@ -41,10 +41,11 @@ export const toConnectionEvidenceKey = ({
 export const loadConnectionEvidence = async (
   key: string,
 ): Promise<MassIDConnectionEvidenceLoadResult> => {
+  const repository = new ConnectionEvidenceRepository();
+
   try {
-    const evidence = await new ConnectionEvidenceRepository().readFromS3(
-      key,
-      (body) => MassIDConnectionEvidenceSchema.parse(body),
+    const evidence = await repository.readFromS3(key, (body) =>
+      MassIDConnectionEvidenceSchema.parse(body),
     );
 
     return { evidence, status: 'found' };

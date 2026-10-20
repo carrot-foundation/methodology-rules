@@ -26,6 +26,10 @@ describe('Connection evidence helpers', () => {
     vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
   });
 
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   describe('toConnectionEvidenceKey', () => {
     it('should place the evidence next to the execution document', () => {
       const documentId = faker.string.uuid();
@@ -96,6 +100,14 @@ describe('Connection evidence helpers', () => {
         reason: expect.stringContaining('version'),
         status: 'malformed',
       });
+    });
+
+    it('should rethrow a missing bucket configuration instead of reporting malformed evidence', async () => {
+      vi.stubEnv('DOCUMENT_BUCKET_NAME', '');
+
+      await expect(loadConnectionEvidence(faker.string.uuid())).rejects.toThrow(
+        'DOCUMENT_BUCKET_NAME',
+      );
     });
 
     it('should rethrow read failures other than a missing object', async () => {
