@@ -117,14 +117,14 @@ flags:
       - libs/methodologies/bold/rule-processors/mass-id/vehicle-identification/src/
     carryforward: true
 
-  mass-id--waste-mass-is-unique:
-    paths:
-      - libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/
-    carryforward: true
-
   mass-id--waste-manager-connection:
     paths:
       - libs/methodologies/bold/rule-processors/mass-id/waste-manager-connection/src/
+    carryforward: true
+
+  mass-id--waste-mass-is-unique:
+    paths:
+      - libs/methodologies/bold/rule-processors/mass-id/waste-mass-is-unique/src/
     carryforward: true
 
   mass-id--waste-origin-identification:

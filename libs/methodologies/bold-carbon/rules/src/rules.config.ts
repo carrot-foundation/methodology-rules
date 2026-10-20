@@ -20,5 +20,6 @@ export const rulesConfig = {
     'composting-cycle-timeframe',
     'recycling-manifest-data',
     'prevented-emissions',
+    'waste-manager-connection',
   ],
 } as const;

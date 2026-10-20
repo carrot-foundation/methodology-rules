@@ -406,6 +406,13 @@ export const methodologyFrameworkRules = [
     slug: 'recycled-to-input-conversion',
     type: 'audit',
   },
+  {
+    description:
+      'Validates each Waste Manager of the MassID against the connection evidence frozen before the audit: a declared Waste Manager needs a confirmed connection with the Waste Generator in force on the Drop-off day, and a confirmed connection without a declared actor is recorded as a derived beneficiary.',
+    name: 'Waste Manager Connection',
+    slug: 'waste-manager-connection-verified',
+    type: 'audit',
+  },
 ] as const satisfies readonly BaseMethodologyFrameworkRule[];
 
 export type MethodologyFrameworkRuleSlug =
