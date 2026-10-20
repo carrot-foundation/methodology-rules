@@ -11,13 +11,14 @@ Contract for the `connection-evidence` object that Smaug freezes in the executio
 
 The current version is `2`. The schema accepts only that literal, so an object with any other `version` fails validation and the rule returns `FAILED`. Version `1`, which cannot express a connection end, is not accepted: a missing end is never read as an open period.
 
-The schema is strict, so the consumer ships before the producer:
+The schema is strict, so the consumer ships before the producer. Nothing writes version `1` and the rule is off, so version `2` replaces it directly. Any later change to the fields ships as a new `version` literal in this order:
 
-1. Release the rule and the shared schema that accept the new version.
-2. Only then make Smaug write it.
-3. Smaug's emission and sale accept the version before any MassID audited under it reaches them.
+1. Release the rule and the shared schema accepting both the current and the new version.
+2. Make Smaug's emission and sale accept the new version, keeping every version their certificates were frozen with.
+3. Only then make Smaug's `prepare` write the new version.
+4. Drop the old version from the rule in a later release, once no execution still being audited carries it.
 
-Any later change to the fields ships as a new `version` literal in the same order. Certificates issued without connection evidence keep the policy they were issued under; this contract does not apply to them.
+Certificates issued without connection evidence keep the policy they were issued under; this contract does not apply to them.
 
 ## S3 location
 
@@ -161,7 +162,10 @@ Smaug writes the verdict; the rule checks it against the MassID and recomputes t
 - Smaug selects the current revision of each relation before applying the period, so an old revision that was still open cannot come back. Successive relations between the same parties never produce two entries for one Waste Manager; overlapping or conflicting periods make the entry `review`.
 - An entry is `eligible` only when its connection is confirmed under `policyVersion` and the `Drop-off` day is in its period. A period that starts after the `Drop-off`, one that ended on or before it, or a MassID without a single `Drop-off`, makes the entry `ineligible` with a `reason`.
 - `connectionHistory` comes from the coverage Smaug has proven for this generator in this dataset. The date a history record was created does not prove coverage before it, and the absence of a generator in one dataset proves nothing about another.
+- When `generatorPalantirParticipantId` is `null` no connection can apply, so Smaug writes no `connection` entry and `connectionHistory: 'complete'`. When `dropOffDate` is `null`, no day can be compared: Smaug lists the generator's connections as `ineligible`, and `connectionHistory` reports whether its history covers that generator at all. The rules that check the generator and the `Drop-off` own those defects.
 - `review` is for cases Smaug cannot settle on its own; the rule sends them to human review.
+- Smaug keeps the generator's eligibility revision and its coverage reference in its own execution record, next to the evidence key and hash, and compares them at emission. They are not part of this object.
+- When the rule passes, the beneficiaries are exactly the `eligible` entries of this object: `both` entries as declared actors and `connection` entries as derived beneficiaries. Emission reads them from the evidence it references, not from the rule's `resultContent`.
 
 ### Privacy
 
@@ -206,6 +210,6 @@ Steps, per methodology (`bold-carbon`, `bold-recycling`):
 2. Create `apps/methodologies/<methodology>/rule-processors/mass-id/waste-manager-connection/`, mirroring an existing rule application such as `waste-origin-identification`: `project.json`, `src/lambda.ts` re-exporting `wasteManagerConnectionLambda` as `handler`, and `src/rule-definition.ts` extending the base `ruleDefinition` with that framework rule slug.
 3. Add `'waste-manager-connection'` to `rulesConfig['mass-id']` in `libs/methodologies/<methodology>/rules/src/rules.config.ts`.
 4. Run `pnpm generate:readmes`, `pnpm generate:methodology-readmes` and `pnpm generate:manifest`, then `pnpm bump:applications`.
-5. Deploy through the regular pipeline and enable the rule for the methodology in Smaug together with its evidence flag.
+5. Deploy through the regular pipeline, then enable the rule for the methodology in Smaug once `prepare` writes this object for every MassID of that methodology.
 
 Turning it off again is removing the slug from `rulesConfig` and releasing a new methodology application version.
