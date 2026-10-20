@@ -23,6 +23,11 @@ export const DECISION_REASONS = {
     confirmedStartDate: string,
   ) =>
     `the "${DROP_OFF}" day ${dropOffDay} (${CIVIL_DAY_TIMEZONE}) precedes the connection start ${confirmedStartDate}`,
+  DROP_OFF_ON_OR_AFTER_CONNECTION_END: (
+    dropOffDay: string,
+    effectiveEndDate: string,
+  ) =>
+    `the "${DROP_OFF}" day ${dropOffDay} (${CIVIL_DAY_TIMEZONE}) is on or after the connection end ${effectiveEndDate}`,
   MISSING_DROP_OFF: `the MassID has no single "${DROP_OFF}" event to compare with the connection start`,
 } as const;
 
@@ -41,6 +46,8 @@ export const RESULT_COMMENTS = {
       `Waste Manager connection verified for ${summary}.`,
   },
   reviewRequired: {
+    INCOMPLETE_CONNECTION_HISTORY:
+      'Waste Manager connection requires review: the connection history of the Waste Generator is incomplete for the Drop-off day, so the evidence cannot prove which Waste Managers were connected.',
     REVIEW: (summary: string) =>
       `Waste Manager connection requires review for ${summary}.`,
   },

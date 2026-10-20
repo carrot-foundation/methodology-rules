@@ -63,8 +63,8 @@ export const findEvidenceMismatches = (
   return mismatches;
 };
 
-const findConnectionStartIssue = (
-  confirmedStartDate: string,
+const findConnectionPeriodIssue = (
+  { confirmedStartDate, effectiveEndDate }: MassIDConfirmedConnectionEntry,
   dropOffDate: string | undefined,
 ): string | undefined => {
   if (isNil(dropOffDate)) {
@@ -73,10 +73,17 @@ const findConnectionStartIssue = (
 
   const dropOffDay = toCivilDay(dropOffDate);
 
-  return dropOffDay < confirmedStartDate
-    ? DECISION_REASONS.DROP_OFF_BEFORE_CONNECTION_START(
+  if (dropOffDay < confirmedStartDate) {
+    return DECISION_REASONS.DROP_OFF_BEFORE_CONNECTION_START(
+      dropOffDay,
+      confirmedStartDate,
+    );
+  }
+
+  return effectiveEndDate !== null && dropOffDay >= effectiveEndDate
+    ? DECISION_REASONS.DROP_OFF_ON_OR_AFTER_CONNECTION_END(
         dropOffDay,
-        confirmedStartDate,
+        effectiveEndDate,
       )
     : undefined;
 };
@@ -108,17 +115,14 @@ const decideDeclaredWasteManager = (
     };
   }
 
-  const connectionStartIssue = findConnectionStartIssue(
-    entry.confirmedStartDate,
-    dropOffDate,
-  );
+  const connectionPeriodIssue = findConnectionPeriodIssue(entry, dropOffDate);
 
   return {
-    decision: isNil(connectionStartIssue) ? 'approved' : 'review',
+    decision: isNil(connectionPeriodIssue) ? 'approved' : 'review',
     origin,
     palantirParticipantId,
     reason:
-      connectionStartIssue ??
+      connectionPeriodIssue ??
       DECISION_REASONS.DECLARED_WITH_CONFIRMED_CONNECTION(
         entry.confirmedStartDate,
       ),
@@ -150,17 +154,14 @@ const decideConnectionOnlyWasteManager = (
     };
   }
 
-  const connectionStartIssue = findConnectionStartIssue(
-    entry.confirmedStartDate,
-    dropOffDate,
-  );
+  const connectionPeriodIssue = findConnectionPeriodIssue(entry, dropOffDate);
 
   return {
-    decision: isNil(connectionStartIssue) ? 'approved' : 'review',
+    decision: isNil(connectionPeriodIssue) ? 'approved' : 'review',
     origin,
     palantirParticipantId,
     reason:
-      connectionStartIssue ??
+      connectionPeriodIssue ??
       DECISION_REASONS.DERIVED_BENEFICIARY(entry.confirmedStartDate),
   };
 };
@@ -232,9 +233,20 @@ export const evaluateWasteManagerConnection = (
 
   const decisions = decideWasteManagers(subject, evidence);
   const resultContent = {
+    connectionHistory: evidence.connectionHistory,
     policyVersion: evidence.policyVersion,
     wasteManagers: decisions,
   };
+
+  if (evidence.connectionHistory === 'incomplete') {
+    return {
+      resultComment:
+        RESULT_COMMENTS.reviewRequired.INCOMPLETE_CONNECTION_HISTORY,
+      resultContent,
+      resultStatus: 'REVIEW_REQUIRED',
+    };
+  }
+
   const reviewDecisions = decisions.filter(
     ({ decision }) => decision === 'review',
   );

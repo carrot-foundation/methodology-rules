@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 export const stubMassIDConnectionEvidence = (
   partialEvidence: Partial<MassIDConnectionEvidence> = {},
 ): MassIDConnectionEvidence => ({
+  connectionHistory: 'complete',
   documentId: faker.string.uuid(),
   dropOffDate: faker.date.recent().toISOString(),
   generatorPalantirParticipantId: faker.string.uuid(),
@@ -16,7 +17,7 @@ export const stubMassIDConnectionEvidence = (
   policyVersion: faker.system.semver(),
   preparedAt: faker.date.recent().toISOString(),
   snapshotVersion: faker.date.recent().toISOString(),
-  version: 1,
+  version: 2,
   wasteManagers: [],
   ...partialEvidence,
 });
@@ -25,10 +26,11 @@ export const stubMassIDConfirmedConnectionEntry = (
   partialEntry: Partial<MassIDConfirmedConnectionEntry> = {},
 ): MassIDConfirmedConnectionEntry => ({
   confirmedStartDate: format(faker.date.past(), 'yyyy-MM-dd'),
+  effectiveEndDate: null,
   eligibility: 'eligible',
   palantirParticipantId: faker.string.uuid(),
   relationId: faker.string.uuid(),
-  revision: faker.number.int({ max: 10, min: 0 }),
+  revision: faker.number.int({ max: 10, min: 1 }),
   source: 'both',
   ...partialEntry,
 });

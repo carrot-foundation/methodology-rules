@@ -35,9 +35,10 @@ const MassIDIntegratorOnlyEntrySchema =
 const MassIDConfirmedConnectionEntrySchema =
   MassIDConnectionEvidenceEntryBaseSchema.extend({
     confirmedStartDate: z.iso.date(),
+    effectiveEndDate: z.iso.date().nullable(),
     eligibility: MassIDConnectionEligibilitySchema,
     relationId: NonEmptyStringSchema,
-    revision: z.int().nonnegative(),
+    revision: z.int().positive(),
     source: z.enum(['both', 'connection']),
   });
 
@@ -55,6 +56,7 @@ export type MassIDConnectionEvidenceWasteManager = z.infer<
 
 export const MassIDConnectionEvidenceSchema = z
   .strictObject({
+    connectionHistory: z.enum(['complete', 'incomplete']),
     documentId: DocumentIdSchema,
     dropOffDate: DateTimeSchema.nullable(),
     generatorPalantirParticipantId: NonEmptyStringSchema.nullable(),
@@ -62,7 +64,7 @@ export const MassIDConnectionEvidenceSchema = z
     policyVersion: NonEmptyStringSchema,
     preparedAt: DateTimeSchema,
     snapshotVersion: DateTimeSchema,
-    version: z.literal(1),
+    version: z.literal(2),
     wasteManagers: z
       .array(MassIDConnectionEvidenceWasteManagerSchema)
       .refine(

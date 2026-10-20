@@ -85,9 +85,9 @@ describe('Connection evidence helpers', () => {
       );
     });
 
-    it('should return malformed with the schema issues when the object breaks the contract', async () => {
+    it('should return malformed with the schema issues when the object is version 1 evidence', async () => {
       resolveBody(
-        JSON.stringify({ ...stubMassIDConnectionEvidence(), version: 2 }),
+        JSON.stringify({ ...stubMassIDConnectionEvidence(), version: 1 }),
       );
 
       await expect(

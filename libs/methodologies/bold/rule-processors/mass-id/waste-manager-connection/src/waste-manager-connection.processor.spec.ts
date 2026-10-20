@@ -223,6 +223,7 @@ describe('WasteManagerConnectionProcessor', () => {
       evidence: buildEvidence([
         {
           confirmedStartDate: '2026-10-01',
+          effectiveEndDate: null,
           eligibility: 'eligible',
           palantirParticipantId: FIRST_WASTE_MANAGER_ID,
           relationId: faker.string.uuid(),
@@ -236,6 +237,7 @@ describe('WasteManagerConnectionProcessor', () => {
         },
         {
           confirmedStartDate: '2026-10-01',
+          effectiveEndDate: null,
           eligibility: 'ineligible',
           palantirParticipantId: excludedWasteManagerId,
           relationId: faker.string.uuid(),
@@ -246,6 +248,7 @@ describe('WasteManagerConnectionProcessor', () => {
     });
 
     expect(ruleOutput.resultContent).toEqual({
+      connectionHistory: 'complete',
       policyVersion: POLICY_VERSION,
       wasteManagers: [
         {
