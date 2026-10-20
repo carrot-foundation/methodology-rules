@@ -195,21 +195,4 @@ Read failures other than `NoSuchKey` (throttling, `AccessDenied`) propagate as e
 
 ## Activation
 
-The rule is registered and off: the library exists and is tested, but no methodology lists it in its `rulesConfig` and no Lambda application under `apps/` wraps it, so nothing builds or deploys it. Turning it on is a methodology decision that ships with the distribution policy version that accepts derived beneficiaries.
-
-Prerequisites. The rule does not go on while any of them is missing:
-
-1. Smaug's `prepare` writes this object, at `version` `2`, in production for every MassID audited by the target methodology, including those without Waste Managers, with `connectionHistory` taken from proven coverage per generator and dataset. The rule fails every MassID whose evidence is missing.
-2. Smaug's rule-result endpoint accepts `REVIEW_REQUIRED` from this rule and routes it to human review. The rule's Lambda opts in with `wrapRuleIntoLambdaHandler(instance, { reportsReviewRequired: true })`, so it reports `REVIEW_REQUIRED` unchanged; every other rule keeps the default of `libs/shared/lambda/wrapper/src/lambda-wrapper.ts`, which reports it as `FAILED`.
-3. The distribution policy version that adopts this rule is published; it is the `policyVersion` Smaug writes.
-4. The rule's Lambda role reads the evidence key in `DOCUMENT_BUCKET_NAME` and has `s3:ListBucket` on it.
-
-Steps, per methodology (`bold-carbon`, `bold-recycling`):
-
-1. Add a methodology framework rule for the Waste Manager connection to `libs/methodologies/<methodology>/rules/src/methodology-framework-rules.ts`, with its methodology reference.
-2. Create `apps/methodologies/<methodology>/rule-processors/mass-id/waste-manager-connection/`, mirroring an existing rule application such as `waste-origin-identification`: `project.json`, `src/lambda.ts` re-exporting `wasteManagerConnectionLambda` as `handler`, and `src/rule-definition.ts` extending the base `ruleDefinition` with that framework rule slug.
-3. Add `'waste-manager-connection'` to `rulesConfig['mass-id']` in `libs/methodologies/<methodology>/rules/src/rules.config.ts`.
-4. Run `pnpm generate:readmes`, `pnpm generate:methodology-readmes` and `pnpm generate:manifest`, then `pnpm bump:applications`.
-5. Deploy through the regular pipeline, then enable the rule for the methodology in Smaug once `prepare` writes this object for every MassID of that methodology.
-
-Turning it off again is removing the slug from `rulesConfig` and releasing a new methodology application version.
+The rule is registered and off: the library exists and is tested, but no methodology lists it in its `rulesConfig` and no Lambda application under `apps/` wraps it, so nothing builds or deploys it. Turning it on ships with the distribution policy version that accepts derived beneficiaries, described in [Rewards distribution policy with connected Waste Managers](./rewards-distribution-policy.md). Prerequisites, sequence, verification and rollback are in [Waste Manager connection activation](./waste-manager-connection-activation.md).
