@@ -124,6 +124,22 @@ export const buildEvidence =
 
 const MALFORMED_EVIDENCE = { version: 2 };
 
+const toVersionOneEvidence = (context: EvidenceContext) => {
+  const evidence = buildEvidence([confirmedEntry(FIRST_WASTE_MANAGER_ID)])(
+    context,
+  );
+
+  return {
+    ...evidence,
+    connectionHistory: undefined,
+    version: 1,
+    wasteManagers: evidence.wasteManagers.map((entry) => ({
+      ...entry,
+      effectiveEndDate: undefined,
+    })),
+  };
+};
+
 export const describeSchemaIssues = (rawEvidence: unknown): string => {
   const parsed = MassIDConnectionEvidenceSchema.safeParse(rawEvidence);
 
@@ -789,6 +805,46 @@ export const wasteManagerConnectionTestCases: WasteManagerConnectionTestCase[] =
       ),
       resultStatus: 'FAILED',
       scenario: 'the evidence breaks the contract',
+    },
+    {
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: toVersionOneEvidence,
+      resultComment: RESULT_COMMENTS.failed.EVIDENCE_MALFORMED(
+        describeSchemaIssues(
+          toVersionOneEvidence({
+            documentId: faker.string.uuid(),
+            dropOffDate: DROP_OFF_DATE,
+            generatorPalantirParticipantId: faker.string.uuid(),
+            massId: faker.string.uuid(),
+          }),
+        ),
+      ),
+      resultStatus: 'FAILED',
+      scenario:
+        'the evidence is version 1, which has no connection end, so it is never read as an open period',
+    },
+    {
+      declaredWasteManagerIds: [],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: (context) => ({
+        ...buildEvidence([])({ ...context, massId: faker.string.uuid() }),
+        connectionHistory: 'incomplete',
+      }),
+      resultComment: RESULT_COMMENTS.failed.EVIDENCE_MISMATCH(['massId']),
+      resultStatus: 'FAILED',
+      scenario:
+        'the evidence was prepared for another MassID and its connection history is incomplete',
+    },
+    {
+      declaredWasteManagerIds: [],
+      dropOffDate: DROP_OFF_DATE,
+      evidence: buildEvidence([]),
+      hasWasteGenerator: false,
+      resultComment: RESULT_COMMENTS.passed.NOT_APPLICABLE,
+      resultStatus: 'PASSED',
+      scenario:
+        'the MassID has no Waste Generator and no Waste Manager, so no connection can apply',
     },
     {
       declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],

@@ -275,6 +275,63 @@ describe('WasteManagerConnectionProcessor', () => {
     });
   });
 
+  it('should keep the per-manager decisions and the incomplete history in the result content', async () => {
+    const { ruleOutput } = await processScenario({
+      declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID],
+      dropOffDate: '2026-10-09T15:00:00.000Z',
+      evidence: (context) => ({
+        ...buildEvidence([
+          {
+            confirmedStartDate: '2026-09-01',
+            effectiveEndDate: '2026-10-09',
+            eligibility: 'eligible',
+            palantirParticipantId: FIRST_WASTE_MANAGER_ID,
+            relationId: faker.string.uuid(),
+            revision: 3,
+            source: 'both',
+          },
+          {
+            confirmedStartDate: '2026-10-09',
+            effectiveEndDate: null,
+            eligibility: 'eligible',
+            palantirParticipantId: SECOND_WASTE_MANAGER_ID,
+            relationId: faker.string.uuid(),
+            revision: 1,
+            source: 'connection',
+          },
+        ])(context),
+        connectionHistory: 'incomplete',
+      }),
+    });
+
+    expect(ruleOutput).toEqual(
+      expect.objectContaining({
+        resultContent: {
+          connectionHistory: 'incomplete',
+          policyVersion: POLICY_VERSION,
+          wasteManagers: [
+            {
+              decision: 'review',
+              origin: 'declared',
+              palantirParticipantId: FIRST_WASTE_MANAGER_ID,
+              reason: DECISION_REASONS.DROP_OFF_ON_OR_AFTER_CONNECTION_END(
+                '2026-10-09',
+                '2026-10-09',
+              ),
+            },
+            {
+              decision: 'approved',
+              origin: 'connection',
+              palantirParticipantId: SECOND_WASTE_MANAGER_ID,
+              reason: DECISION_REASONS.DERIVED_BENEFICIARY('2026-10-09'),
+            },
+          ],
+        },
+        resultStatus: 'REVIEW_REQUIRED',
+      }),
+    );
+  });
+
   it('should decide once for a Waste Manager declared in several actor events', async () => {
     const { ruleOutput } = await processScenario({
       declaredWasteManagerIds: [FIRST_WASTE_MANAGER_ID, FIRST_WASTE_MANAGER_ID],

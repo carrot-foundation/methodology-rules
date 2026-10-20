@@ -168,6 +168,18 @@ describe('MassIDConnectionEvidenceSchema', () => {
     },
     {
       evidence: stubMassIDConnectionEvidence({
+        wasteManagers: [stubConfirmedEntry({ revision: -1 })],
+      }),
+      scenario: 'a negative revision',
+    },
+    {
+      evidence: stubMassIDConnectionEvidence({
+        wasteManagers: [stubConfirmedEntry({ revision: 1.5 })],
+      }),
+      scenario: 'a fractional revision',
+    },
+    {
+      evidence: stubMassIDConnectionEvidence({
         wasteManagers: [
           {
             effectiveEndDate: null,
