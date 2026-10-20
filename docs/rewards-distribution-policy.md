@@ -33,7 +33,7 @@ The identifier must differ from the application version in force while the rule 
 The engine in force pays one Waste Manager share per certificate when the MassID declares a Waste Manager actor, the waste origin is identified, and the Waste Generator finished onboarding. Otherwise the share returns to the origin participants through `WASTE_MANAGER_ORIGIN_SPLIT`. Under this version:
 
 - Which Waste Managers take part comes from the [connection evidence](./connection-evidence.md) the audit used, one decision per Waste Manager. An `eligible` entry takes part: a `both` entry as the declared actor, a `connection` entry as a derived beneficiary without an actor in the MassID. The eligible period is the one in [Connection period](./connection-evidence.md#connection-period).
-- The engine's other conditions, its percentages and its return to origin when no Waste Manager takes part are unchanged; the engine receives the eligible Waste Managers as a resolved fact.
+- The engine receives the eligible Waste Managers as a resolved fact. Its percentages and its return to origin when no Waste Manager takes part are unchanged.
 - The Waste Manager share is divided among the eligible Waste Managers only. One that is not eligible is left out of that division without affecting another.
 - Evidence that cannot be read or validated fails closed, without a silent discount.
 - The beneficiaries are frozen at certificate emission. A later change of the connection does not change an issued certificate.
@@ -57,3 +57,4 @@ The engine in force pays one Waste Manager share per certificate when the MassID
 
 - Smaug's ADR 0005 states that the rewards distribution policy is unversioned and that Smaug persists `rewardsEngineCommit` instead of a policy version. This identifier introduces a versioned reference for the connection-based eligibility. Whether the public policy text in `carrot-foundation/docs` carries it is a product decision outside this repository.
 - The baseline tag that lets the activation release produce a new application version.
+- Whether the engine's other conditions for the Waste Manager share, an identified waste origin and a Waste Generator that finished onboarding, keep applying to a Waste Manager that is eligible by connection. This artifact proposes that they do.

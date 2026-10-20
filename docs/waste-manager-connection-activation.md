@@ -15,7 +15,7 @@ Release runbook for turning on the `waste-manager-connection` rule with the [dis
 | Smaug evidence production         | `prepare` does not write `connection-evidence`                                             | Writes version `2`, with this `policyVersion`, for every audited MassID of the dataset |
 | Smaug methodology, per dataset    | Its stored `rules` do not include the rule                                                 | Includes it for the chosen dataset and environment                                     |
 
-A merge to `main` that touches a rule application uploads its Lambda and a `rules-metadata-<checksum>.json` to `elrond-<environment>-methodology-rules-metadata-lambda-artifacts` for **production and development in the same run**: `deploy.yaml` runs one matrix over both, with `continue-on-error`, so one environment can fail while the other succeeds. This repository has no development-only path. An uploaded Lambda stays unused until a Smaug methodology lists the rule, so the choice of environment and dataset happens in Smaug. Smaug stores a methodology's `rules` when the methodology is created; changing them on an existing methodology is a Smaug migration with its own release.
+A merge to `main` that touches a rule application uploads its Lambda and a `rules-metadata-<checksum>.json` to `elrond-<environment>-methodology-rules-metadata-lambda-artifacts` for **production and development in the same run**, once Backend Check passes: `deploy.yaml` runs one matrix over both, with `continue-on-error`, so one environment can fail while the other succeeds. This repository has no development-only path. An uploaded Lambda stays unused until a Smaug methodology lists the rule, so the choice of environment and dataset happens in Smaug. Smaug stores a methodology's `rules` when the methodology is created; changing them on an existing methodology is a Smaug migration with its own release.
 
 ## Activation release
 
@@ -24,7 +24,7 @@ The activation pull request changes, for `bold-carbon` and `bold-recycling`:
 - `libs/methodologies/<methodology>/rules/src/methodology-framework-rules.ts`: adds the `waste-manager-connection-verified` framework rule.
 - `apps/methodologies/<methodology>/rule-processors/mass-id/waste-manager-connection/`: the rule application, mirroring `waste-origin-identification`. `src/lambda.ts` re-exports `wasteManagerConnectionLambda` as `handler`; `src/rule-definition.ts` extends the base rule definition with `waste-manager-connection-verified`.
 - `libs/methodologies/<methodology>/rules/src/rules.config.ts`: adds `waste-manager-connection` to `rulesConfig['mass-id']`.
-- The generated README of each rule application and the `codecov.yml` flags.
+- The generated README of each rule application, and the order of the `codecov.yml` flags.
 
 The version, tags and methodology READMEs come from `version-and-sync.yaml` after the merge; the pull request does not run `bump:rules` or `bump:applications`.
 
