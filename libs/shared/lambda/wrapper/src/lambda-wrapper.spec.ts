@@ -120,6 +120,7 @@ describe('wrapRuleIntoLambdaHandler', () => {
   it('should report and return REVIEW_REQUIRED when the rule opts in', async () => {
     const response = {
       ...stubRuleOutput(),
+      resultContent: { [faker.string.sample()]: faker.string.sample() },
       resultStatus: 'REVIEW_REQUIRED' as const,
     };
 
