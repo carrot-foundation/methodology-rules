@@ -10,6 +10,8 @@ import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types'
 import type { ValidationResult } from '../document-manifest-data.helpers';
 import type { AttachmentCrossValidation } from '../document-manifest-data.result-content.types';
 
+import { REVIEW_REASONS } from '../document-manifest-data.constants';
+
 export type CrossValidationResponse = ValidationResult & {
   crossValidation?: AttachmentCrossValidation;
   extractionMetadata?: Record<string, unknown>;
@@ -21,6 +23,16 @@ export interface FieldValidationResult {
   failReason?: ReviewReason;
   reviewReason?: ReviewReason;
 }
+
+export const buildLowConfidenceResponse = (
+  confidence: string,
+): CrossValidationResponse => ({
+  failMessages: [],
+  reviewReasons: [
+    REVIEW_REASONS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW({ confidence }),
+  ],
+  reviewRequired: true,
+});
 
 export const formatScoreAsPercent = (score: number): string =>
   `${(score * 100).toFixed(0)}%`;

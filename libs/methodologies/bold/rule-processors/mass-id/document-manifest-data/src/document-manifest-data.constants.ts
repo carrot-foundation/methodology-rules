@@ -162,98 +162,68 @@ export const CROSS_VALIDATION_COMMENTS = {
     `None of the waste types extracted from the document (${extractedEntries}) match the Pick-up event's waste classification (${eventClassification}).`,
 } as const;
 
-function reviewReason<P extends object>(
-  code: keyof typeof CROSS_VALIDATION_COMMENTS,
-  comment: (parameters: P) => string,
-): (parameters: P) => ReviewReason {
-  return (parameters: P): ReviewReason => ({
+type CommentKey = keyof CrossValidationComments;
+
+type CommentParameters = {
+  [Key in DynamicCommentKey]: Parameters<CrossValidationComments[Key]>[0];
+};
+
+type CrossValidationComments = typeof CROSS_VALIDATION_COMMENTS;
+
+type DynamicCommentKey = Exclude<CommentKey, StaticCommentKey>;
+
+type StaticCommentKey = {
+  [Key in CommentKey]: CrossValidationComments[Key] extends string
+    ? Key
+    : never;
+}[CommentKey];
+
+const DYNAMIC_COMMENTS: {
+  [Key in DynamicCommentKey]: (parameters: CommentParameters[Key]) => string;
+} = CROSS_VALIDATION_COMMENTS;
+
+function reviewReason<Key extends DynamicCommentKey>(
+  code: Key,
+): (parameters: CommentParameters[Key]) => ReviewReason {
+  return (parameters): ReviewReason => ({
     code,
-    description: comment(parameters),
+    description: DYNAMIC_COMMENTS[code](parameters),
   });
 }
 
-function staticReviewReason(
-  code: keyof typeof CROSS_VALIDATION_COMMENTS,
-  description: string,
-): () => ReviewReason {
-  return (): ReviewReason => ({ code, description });
+function staticReviewReason(code: StaticCommentKey): () => ReviewReason {
+  return (): ReviewReason => ({
+    code,
+    description: CROSS_VALIDATION_COMMENTS[code],
+  });
 }
 
 export const REVIEW_REASONS = {
   DOCUMENT_EXTRACTION_CONFIDENCE_LOW: reviewReason(
     'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
-    CROSS_VALIDATION_COMMENTS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW,
   ),
-  DOCUMENT_NUMBER_MISMATCH: reviewReason(
-    'DOCUMENT_NUMBER_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.DOCUMENT_NUMBER_MISMATCH,
-  ),
-  DROP_OFF_DATE_OUTSIDE_PERIOD: reviewReason(
-    'DROP_OFF_DATE_OUTSIDE_PERIOD',
-    CROSS_VALIDATION_COMMENTS.DROP_OFF_DATE_OUTSIDE_PERIOD,
-  ),
-  FIELD_NOT_EXTRACTED: reviewReason(
-    'FIELD_NOT_EXTRACTED',
-    CROSS_VALIDATION_COMMENTS.FIELD_NOT_EXTRACTED,
-  ),
-  GENERATOR_ADDRESS_MISMATCH: reviewReason(
-    'GENERATOR_ADDRESS_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.GENERATOR_ADDRESS_MISMATCH,
-  ),
-  GENERATOR_TAX_ID_MISMATCH: staticReviewReason(
-    'GENERATOR_TAX_ID_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.GENERATOR_TAX_ID_MISMATCH,
-  ),
-  HAULER_TAX_ID_MISMATCH: staticReviewReason(
-    'HAULER_TAX_ID_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.HAULER_TAX_ID_MISMATCH,
-  ),
-  ISSUE_DATE_MISMATCH: reviewReason(
-    'ISSUE_DATE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.ISSUE_DATE_MISMATCH,
-  ),
-  MTR_NUMBER_NOT_IN_CDF: reviewReason(
-    'MTR_NUMBER_NOT_IN_CDF',
-    CROSS_VALIDATION_COMMENTS.MTR_NUMBER_NOT_IN_CDF,
-  ),
-  RECEIVER_ADDRESS_MISMATCH: reviewReason(
-    'RECEIVER_ADDRESS_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECEIVER_ADDRESS_MISMATCH,
-  ),
-  RECEIVER_TAX_ID_MISMATCH: staticReviewReason(
-    'RECEIVER_TAX_ID_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECEIVER_TAX_ID_MISMATCH,
-  ),
-  RECEIVING_DATE_MISMATCH: reviewReason(
-    'RECEIVING_DATE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECEIVING_DATE_MISMATCH,
-  ),
-  RECYCLER_TAX_ID_MISMATCH: staticReviewReason(
-    'RECYCLER_TAX_ID_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECYCLER_TAX_ID_MISMATCH,
-  ),
+  DOCUMENT_NUMBER_MISMATCH: reviewReason('DOCUMENT_NUMBER_MISMATCH'),
+  DROP_OFF_DATE_OUTSIDE_PERIOD: reviewReason('DROP_OFF_DATE_OUTSIDE_PERIOD'),
+  FIELD_NOT_EXTRACTED: reviewReason('FIELD_NOT_EXTRACTED'),
+  GENERATOR_ADDRESS_MISMATCH: reviewReason('GENERATOR_ADDRESS_MISMATCH'),
+  GENERATOR_TAX_ID_MISMATCH: staticReviewReason('GENERATOR_TAX_ID_MISMATCH'),
+  HAULER_TAX_ID_MISMATCH: staticReviewReason('HAULER_TAX_ID_MISMATCH'),
+  ISSUE_DATE_MISMATCH: reviewReason('ISSUE_DATE_MISMATCH'),
+  MTR_NUMBER_NOT_IN_CDF: reviewReason('MTR_NUMBER_NOT_IN_CDF'),
+  RECEIVER_ADDRESS_MISMATCH: reviewReason('RECEIVER_ADDRESS_MISMATCH'),
+  RECEIVER_TAX_ID_MISMATCH: staticReviewReason('RECEIVER_TAX_ID_MISMATCH'),
+  RECEIVING_DATE_MISMATCH: reviewReason('RECEIVING_DATE_MISMATCH'),
+  RECYCLER_TAX_ID_MISMATCH: staticReviewReason('RECYCLER_TAX_ID_MISMATCH'),
   RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH: reviewReason(
     'RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH,
   ),
   RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH: reviewReason(
     'RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH,
   ),
-  TRANSPORT_DATE_MISMATCH: reviewReason(
-    'TRANSPORT_DATE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.TRANSPORT_DATE_MISMATCH,
-  ),
-  VEHICLE_PLATE_MISMATCH: staticReviewReason(
-    'VEHICLE_PLATE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.VEHICLE_PLATE_MISMATCH,
-  ),
+  TRANSPORT_DATE_MISMATCH: reviewReason('TRANSPORT_DATE_MISMATCH'),
+  VEHICLE_PLATE_MISMATCH: staticReviewReason('VEHICLE_PLATE_MISMATCH'),
   WASTE_QUANTITY_WEIGHT_MISMATCH: reviewReason(
     'WASTE_QUANTITY_WEIGHT_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.WASTE_QUANTITY_WEIGHT_MISMATCH,
   ),
-  WASTE_TYPE_MISMATCH: reviewReason(
-    'WASTE_TYPE_MISMATCH',
-    CROSS_VALIDATION_COMMENTS.WASTE_TYPE_MISMATCH,
-  ),
+  WASTE_TYPE_MISMATCH: reviewReason('WASTE_TYPE_MISMATCH'),
 };

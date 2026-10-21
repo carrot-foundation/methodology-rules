@@ -20,6 +20,7 @@ import type { DocumentManifestEventSubject } from './document-manifest-data.help
 import type { MtrCrossValidation } from './document-manifest-data.result-content.types';
 
 import {
+  buildLowConfidenceResponse,
   collectResults,
   compareDateField,
   compareEntity,
@@ -52,15 +53,9 @@ export const validateMtrExtractedData = (
   const extractedData = extractionResult.data as MtrExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return {
-      failMessages: [],
-      reviewReasons: [
-        REVIEW_REASONS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW({
-          confidence: extractionResult.data.extractionConfidence,
-        }),
-      ],
-      reviewRequired: true,
-    };
+    return buildLowConfidenceResponse(
+      extractionResult.data.extractionConfidence,
+    );
   }
 
   const eventIssueDate = eventData.issueDateAttribute?.value?.toString();
