@@ -1,4 +1,6 @@
 import { logger } from '@carrot-fndn/shared/helpers';
+import { RuleFindingSchema } from '@carrot-fndn/shared/rule/types';
+import { createStubFromSchema } from '@carrot-fndn/shared/testing';
 import * as Sentry from '@sentry/aws-serverless';
 
 import { BaseProcessorErrors } from './base-processor.errors';
@@ -36,6 +38,56 @@ describe('BaseProcessorErrors', () => {
       expect(error).toBeInstanceOf(Error);
       expect(error.message).toContain('test message');
     });
+
+    it('should create an error with the known error prefix from a rendered finding', () => {
+      const cause = new Error('cause');
+      const error = processor.getKnownError(
+        {
+          finding: createStubFromSchema(RuleFindingSchema),
+          message: 'test message',
+        },
+        { cause },
+      );
+
+      expect(error).toBeInstanceOf(Error);
+      expect(error.message).toContain('test message');
+      expect(error.cause).toBe(cause);
+    });
+  });
+
+  describe('getFailedResultFromError', () => {
+    it('should return the message and finding of a known error built from a rendered finding', () => {
+      const finding = createStubFromSchema(RuleFindingSchema);
+      const error = processor.getKnownError({
+        finding,
+        message: 'test message',
+      });
+
+      expect(processor.getFailedResultFromError(error)).toEqual({
+        resultComment: 'test message',
+        resultFindings: [finding],
+      });
+    });
+
+    it('should return no findings for a known error built from a message', () => {
+      const error = processor.getKnownError('test message');
+
+      expect(processor.getFailedResultFromError(error)).toEqual({
+        resultComment: 'test message',
+        resultFindings: [],
+      });
+    });
+
+    it('should capture and rethrow an unknown error with the same identity', () => {
+      const error = new Error('unknown error');
+
+      expect(() => processor.getFailedResultFromError(error)).toThrow(error);
+      expect(logger.error).toHaveBeenCalledWith(
+        error,
+        'Unexpected error on "processKnownError" method',
+      );
+      expect(Sentry.captureException).toHaveBeenCalledWith(error);
+    });
   });
 
   describe('getResultCommentFromError', () => {
@@ -44,6 +96,15 @@ describe('BaseProcessorErrors', () => {
       const result = processor.getResultCommentFromError(error);
 
       expect(result).toBe('test message');
+    });
+
+    it('should return the message of a known error built from a rendered finding', () => {
+      const error = processor.getKnownError({
+        finding: createStubFromSchema(RuleFindingSchema),
+        message: 'test message',
+      });
+
+      expect(processor.getResultCommentFromError(error)).toBe('test message');
     });
 
     it('should capture and rethrow an unknown Error with the same identity', () => {

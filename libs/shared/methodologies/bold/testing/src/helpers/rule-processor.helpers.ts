@@ -1,8 +1,15 @@
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
+import { isNonEmptyObject } from '@carrot-fndn/shared/helpers';
 import { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
-import { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
+import { SHARED_FINDINGS } from '@carrot-fndn/shared/rule/result';
+import {
+  RuleFindingSchema,
+  RuleInput,
+  RuleOutput,
+} from '@carrot-fndn/shared/rule/types';
 import { AnyObject, DocumentParticipant } from '@carrot-fndn/shared/types';
 import { faker } from '@faker-js/faker';
+import { z } from 'zod';
 
 import { BoldStubsBuilder, type StubBoldDocumentParameters } from '../builders';
 
@@ -10,6 +17,10 @@ interface CreateBoldStubsParameters {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIDActorParticipants?: Map<string, DocumentParticipant> | undefined;
   massIDDocumentsParams?: StubBoldDocumentParameters | undefined;
+}
+
+interface ExpectedRuleFindings {
+  codes: ReadonlySet<string>;
 }
 
 interface ProcessRuleTestParameters {
@@ -24,6 +35,7 @@ interface ProcessRuleTestParameters {
 }
 
 interface TestExpectedRuleOutputParameters {
+  findings?: ExpectedRuleFindings | undefined;
   resultComment: string;
   resultContent?: AnyObject | undefined;
   resultStatus: string;
@@ -87,14 +99,49 @@ export async function createRuleTestFixture({
   return { ruleInput, ruleOutput: await ruleDataProcessor.process(ruleInput) };
 }
 
+export function expectRuleFindings(
+  ruleOutput: RuleOutput,
+  { codes }: ExpectedRuleFindings,
+): RuleOutput {
+  const { resultContent = {}, ...ruleOutputWithoutContent } = ruleOutput;
+
+  if (ruleOutput.resultStatus === 'PASSED') {
+    expect(resultContent).not.toHaveProperty('findings');
+
+    return ruleOutput;
+  }
+
+  const knownCodes = [...codes, ...SHARED_FINDINGS.codes];
+  const findingsSchema = z
+    .array(RuleFindingSchema.extend({ code: z.enum(knownCodes) }))
+    .nonempty();
+
+  expect(
+    findingsSchema.safeParse(resultContent['findings']),
+  ).toBeValidValidationResult();
+
+  const remainingContent = Object.fromEntries(
+    Object.entries(resultContent).filter(([key]) => key !== 'findings'),
+  );
+
+  return isNonEmptyObject(remainingContent)
+    ? { ...ruleOutputWithoutContent, resultContent: remainingContent }
+    : ruleOutputWithoutContent;
+}
+
 export function expectRuleOutput({
+  findings,
   resultComment,
   resultContent,
   resultStatus,
   ruleInput,
   ruleOutput,
 }: TestExpectedRuleOutputParameters): void {
-  expect(ruleOutput).toEqual({
+  expect(
+    findings === undefined
+      ? ruleOutput
+      : expectRuleFindings(ruleOutput, findings),
+  ).toEqual({
     requestId: ruleInput.requestId,
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,

@@ -11,8 +11,13 @@ import {
   getSourceCodeUrl,
   getSourceCodeVersion,
 } from '@carrot-fndn/shared/env';
-import { formatHttpStatus, logger } from '@carrot-fndn/shared/helpers';
 import {
+  formatHttpStatus,
+  isNonEmptyArray,
+  logger,
+} from '@carrot-fndn/shared/helpers';
+import {
+  type RuleFinding,
   type RuleInput,
   type RuleOutput,
   RuleOutputSchema,
@@ -46,9 +51,11 @@ export const mapToRuleOutput = (
   {
     resultComment,
     resultContent,
+    resultFindings,
   }: {
     resultComment?: string | undefined;
     resultContent?: AnyObject | undefined;
+    resultFindings?: RuleFinding[] | undefined;
   } = {},
 ): RuleOutput =>
   RuleOutputSchema.parse({
@@ -56,7 +63,10 @@ export const mapToRuleOutput = (
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,
     resultComment,
-    resultContent,
+    resultContent:
+      resultStatus !== 'PASSED' && isNonEmptyArray(resultFindings)
+        ? { ...resultContent, findings: resultFindings }
+        : resultContent,
     resultStatus,
   });
 

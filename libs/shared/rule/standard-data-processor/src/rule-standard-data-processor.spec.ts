@@ -1,9 +1,13 @@
 import { isNil } from '@carrot-fndn/shared/helpers';
 import {
+  RuleFindingSchema,
   type RuleInput,
   type RuleOutput,
 } from '@carrot-fndn/shared/rule/types';
-import { stubRuleInput } from '@carrot-fndn/shared/testing';
+import {
+  createStubFromSchema,
+  stubRuleInput,
+} from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
 import {
@@ -43,7 +47,7 @@ describe('RuleStandardDataProcessor', () => {
     ruleStandardDataProcessor = new TestRuleStandardDataProcessor();
   });
 
-  it('should return a result with a fail comment when the document is not found', async () => {
+  it('should return a FAILED result with the shared finding when the document is not found', async () => {
     const ruleInput = stubRuleInput();
     const parentDocumentId = 'invalid-id';
 
@@ -56,10 +60,42 @@ describe('RuleStandardDataProcessor', () => {
       requestId: ruleInput.requestId,
       responseToken: ruleInput.responseToken,
       responseUrl: ruleInput.responseUrl,
-      resultComment:
-        ruleStandardDataProcessor['getDocumentNotFoundResultComment'](
-          parentDocumentId,
-        ),
+      resultComment: `Could not load the document with id ${parentDocumentId}`,
+      resultContent: {
+        findings: [
+          {
+            code: 'shared.ERROR.DOCUMENT_NOT_LOADED',
+            defaultOwner: 'CARROT',
+          },
+        ],
+      },
+      resultStatus: 'FAILED',
+    };
+
+    expect(result).toEqual(expectedRuleOutput);
+  });
+
+  it('should return the findings evaluated by the rule', async () => {
+    const ruleInput = stubRuleInput();
+    const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+    (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
+      resultComment: 'Failed',
+      resultFindings,
+      resultStatus: 'FAILED',
+    }));
+
+    const result = await ruleStandardDataProcessor.process({
+      ...ruleInput,
+      parentDocumentId: 'valid-id',
+    });
+
+    const expectedRuleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: 'Failed',
+      resultContent: { findings: resultFindings },
       resultStatus: 'FAILED',
     };
 

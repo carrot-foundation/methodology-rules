@@ -1,6 +1,10 @@
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
+  RuleFindingSchema,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
+import {
+  createStubFromSchema,
   stubEnumValue,
   stubRuleInput,
   stubRuleOutput,
@@ -76,6 +80,71 @@ describe('mapToRuleOutput', () => {
       resultStatus,
     });
   });
+
+  it.each(['FAILED', 'REVIEW_REQUIRED'] as const)(
+    'should merge the findings beside the result content of a %s result',
+    (resultStatus) => {
+      const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
+      const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+      const result = mapToRuleOutput(stubRuleInput(), resultStatus, {
+        resultContent,
+        resultFindings,
+      });
+
+      expect(result.resultContent).toEqual({
+        ...resultContent,
+        findings: resultFindings,
+      });
+    },
+  );
+
+  it('should hold only the findings when a FAILED result has no result content', () => {
+    const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+    const result = mapToRuleOutput(stubRuleInput(), 'FAILED', {
+      resultFindings,
+    });
+
+    expect(result.resultContent).toEqual({ findings: resultFindings });
+  });
+
+  it('should not add findings to a PASSED result', () => {
+    const ruleInput = stubRuleInput();
+    const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
+
+    const result = mapToRuleOutput(ruleInput, 'PASSED', {
+      resultContent,
+      resultFindings: [createStubFromSchema(RuleFindingSchema)],
+    });
+
+    expect(result).toStrictEqual({
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: undefined,
+      resultContent,
+      resultStatus: 'PASSED',
+    });
+  });
+
+  it.each([{ resultFindings: undefined }, { resultFindings: [] }])(
+    'should keep a FAILED result unchanged when the findings are $resultFindings',
+    ({ resultFindings }) => {
+      const ruleInput = stubRuleInput();
+
+      const result = mapToRuleOutput(ruleInput, 'FAILED', { resultFindings });
+
+      expect(result).toStrictEqual({
+        requestId: ruleInput.requestId,
+        responseToken: ruleInput.responseToken,
+        responseUrl: ruleInput.responseUrl,
+        resultComment: undefined,
+        resultContent: undefined,
+        resultStatus: 'FAILED',
+      });
+    },
+  );
 });
 describe('mapRuleOutputToPostProcessInput', () => {
   let artifactChecksum: string;

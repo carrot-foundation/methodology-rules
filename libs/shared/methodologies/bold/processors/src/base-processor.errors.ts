@@ -1,3 +1,6 @@
+import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
+import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
+
 import { logger } from '@carrot-fndn/shared/helpers';
 import * as Sentry from '@sentry/aws-serverless';
 
@@ -6,23 +9,56 @@ export interface ErrorMessage {
   FAILED_BY_ERROR: string;
 }
 
+interface FailedResultFromError {
+  resultComment: string;
+  resultFindings: RuleFinding[];
+}
+
+class KnownFindingError extends Error {
+  constructor(
+    message: string,
+    readonly finding: RuleFinding,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+  }
+}
+
 export abstract class BaseProcessorErrors {
   abstract readonly ERROR_MESSAGE: ErrorMessage;
 
   protected readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
 
-  getKnownError(message: string, options?: ErrorOptions): Error {
-    return new Error(this.KNOWN_ERROR_PREFIX + message, options);
-  }
+  getFailedResultFromError(error: unknown): FailedResultFromError {
+    const failedResult = this.processKnownError(error);
 
-  getResultCommentFromError(error: unknown): string {
-    const resultComment = this.processKnownError(error);
-
-    if (resultComment === undefined) {
+    if (failedResult === undefined) {
       throw error;
     }
 
-    return resultComment;
+    return failedResult;
+  }
+
+  getKnownError(
+    messageOrRenderedFinding: RenderedRuleFinding | string,
+    options?: ErrorOptions,
+  ): Error {
+    if (typeof messageOrRenderedFinding === 'string') {
+      return new Error(
+        this.KNOWN_ERROR_PREFIX + messageOrRenderedFinding,
+        options,
+      );
+    }
+
+    return new KnownFindingError(
+      this.KNOWN_ERROR_PREFIX + messageOrRenderedFinding.message,
+      messageOrRenderedFinding.finding,
+      options,
+    );
+  }
+
+  getResultCommentFromError(error: unknown): string {
+    return this.getFailedResultFromError(error).resultComment;
   }
 
   private getKnownErrorMessage(error: Error): string {
@@ -36,9 +72,13 @@ export abstract class BaseProcessorErrors {
     );
   }
 
-  private processKnownError(error: unknown): string | undefined {
+  private processKnownError(error: unknown): FailedResultFromError | undefined {
     if (this.isKnownError(error)) {
-      return this.getKnownErrorMessage(error);
+      return {
+        resultComment: this.getKnownErrorMessage(error),
+        resultFindings:
+          error instanceof KnownFindingError ? [error.finding] : [],
+      };
     }
 
     logger.error(error, 'Unexpected error on "processKnownError" method');
