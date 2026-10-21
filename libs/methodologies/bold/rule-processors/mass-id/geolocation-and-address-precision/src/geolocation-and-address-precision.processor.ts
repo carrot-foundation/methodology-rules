@@ -46,6 +46,7 @@ import {
   RESULT_COMMENTS,
 } from './geolocation-and-address-precision.constants';
 import { GeolocationAndAddressPrecisionProcessorErrors } from './geolocation-and-address-precision.errors';
+import { GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS } from './geolocation-and-address-precision.findings';
 import {
   evaluateAddressSimilarityResult,
   findRecyclerAccreditation,
@@ -93,7 +94,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       if (isNil(massIDAuditDocument)) {
         throw this.processorErrors.getKnownError(
-          this.processorErrors.ERROR_MESSAGE.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND,
+          GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.render(
+            'ERROR.MASS_ID_AUDIT_DOCUMENT_NOT_FOUND',
+          ),
         );
       }
 
@@ -102,15 +105,19 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         massIDAuditDocument,
         documentsQuery,
       );
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.processorErrors.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -136,13 +143,16 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     const resultComment = allResults
       .map((result) => result.resultComment)
       .join(' ');
+    const resultFindings = allResults.flatMap(
+      (result) => result.resultFindings ?? [],
+    );
 
     const hasFailed = allResults.some(
       (result) => result.resultStatus === 'FAILED',
     );
 
     if (hasFailed) {
-      return { resultComment, resultStatus: 'FAILED' };
+      return { resultComment, resultFindings, resultStatus: 'FAILED' };
     }
 
     const hasReviewRequired = allResults.some(
@@ -150,7 +160,7 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     );
 
     if (hasReviewRequired) {
-      return { resultComment, resultStatus: 'REVIEW_REQUIRED' };
+      return { resultComment, resultFindings, resultStatus: 'REVIEW_REQUIRED' };
     }
 
     return { resultComment, resultStatus: 'PASSED' };
@@ -175,7 +185,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
       if (isNil(actorType)) {
         throw this.processorErrors.getKnownError(
-          RESULT_COMMENTS.failed.INVALID_ACTOR_TYPE,
+          GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.render(
+            'FAILED.INVALID_ACTOR_TYPE',
+          ),
         );
       }
 
@@ -219,8 +231,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (!isNonEmptyArray(accreditationDocuments)) {
       throw this.processorErrors.getKnownError(
-        this.processorErrors.ERROR_MESSAGE
-          .PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND,
+        GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.render(
+          'ERROR.PARTICIPANT_ACCREDITATION_DOCUMENTS_NOT_FOUND',
+        ),
       );
     }
 
@@ -256,8 +269,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     if (isNil(accreditedAddress)) {
       return [
         {
-          resultComment:
-            RESULT_COMMENTS.failed.MISSING_ACCREDITATION_ADDRESS(actorType),
+          ...GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'FAILED.MISSING_ACCREDITATION_ADDRESS',
+            actorType,
+          ),
           resultStatus: 'FAILED',
         },
       ];
@@ -266,10 +281,10 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     if (!hasAddressCoordinates(accreditedAddress)) {
       return [
         {
-          resultComment:
-            RESULT_COMMENTS.failed.MISSING_ACCREDITED_ADDRESS_COORDINATES(
-              actorType,
-            ),
+          ...GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'FAILED.MISSING_ACCREDITED_ADDRESS_COORDINATES',
+            actorType,
+          ),
           resultStatus: 'FAILED',
         },
       ];
@@ -331,7 +346,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     if (addressDistance > DISTANCE_THRESHOLD_SIMILARITY) {
       return [
         {
-          resultComment: RESULT_COMMENTS.failed.INVALID_ADDRESS_DISTANCE(
+          ...GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'FAILED.INVALID_ADDRESS_DISTANCE',
             actorType,
             addressDistance,
           ),
@@ -347,7 +363,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     ) {
       return [
         {
-          resultComment: RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE(
+          ...GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'FAILED.MISMATCHED_COUNTRY_OR_STATE',
             actorType,
             addressDistance,
           ),
@@ -359,7 +376,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     return [
       evaluateAddressSimilarityResult(eventAddress, accreditedAddress, {
         failed: (similarityPercent) =>
-          RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY(
+          GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'FAILED.FAILED_ADDRESS_SIMILARITY',
             actorType,
             addressDistance,
             similarityPercent,
@@ -371,7 +389,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
             similarityPercent,
           ),
         reviewRequired: (similarityPercent) =>
-          RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY(
+          GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+            'REVIEW_REQUIRED.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY',
             actorType,
             addressDistance,
             similarityPercent,
@@ -405,9 +424,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
         );
 
       if (shouldSkipGpsValidation(latitudeException, longitudeException)) {
-        return this.gpsResult(
+        return this.passedGpsResult(
           addressDistance,
-          'PASSED',
           () =>
             RESULT_COMMENTS.passed.PASSED_WITH_GPS_EXCEPTION_NO_EVENT_COORDINATES(
               actorType,
@@ -425,22 +443,30 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       const gpsDistance = calculateDistance(accreditedAddress, gpsGeolocation);
 
       if (gpsDistance > GPS_MAX_ALLOWED_DISTANCE) {
-        return this.gpsResult(
-          addressDistance,
-          'FAILED',
-          () =>
-            RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES(
-              actorType,
-              gpsDistance,
+        return [
+          {
+            ...pickGpsComment(
+              addressDistance,
+              () =>
+                GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+                  'FAILED.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES',
+                  actorType,
+                  gpsDistance,
+                ),
+              () =>
+                GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+                  'FAILED.INVALID_GPS_DISTANCE',
+                  actorType,
+                  gpsDistance,
+                ),
             ),
-          () =>
-            RESULT_COMMENTS.failed.INVALID_GPS_DISTANCE(actorType, gpsDistance),
-        );
+            resultStatus: 'FAILED',
+          },
+        ];
       }
 
-      return this.gpsResult(
+      return this.passedGpsResult(
         addressDistance,
-        'PASSED',
         () =>
           RESULT_COMMENTS.passed.PASSED_WITH_GPS_NO_EVENT_COORDINATES(
             actorType,
@@ -455,9 +481,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       );
     }
 
-    return this.gpsResult(
+    return this.passedGpsResult(
       addressDistance,
-      'PASSED',
       () =>
         RESULT_COMMENTS.passed.PASSED_WITHOUT_GPS_NO_EVENT_COORDINATES(
           actorType,
@@ -500,17 +525,18 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
       eventAddress.countryState !== accreditedAddress.countryState
     ) {
       return {
-        resultComment:
-          RESULT_COMMENTS.failed.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES(
-            actorType,
-          ),
+        ...GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+          'FAILED.MISMATCHED_COUNTRY_OR_STATE_NO_EVENT_COORDINATES',
+          actorType,
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     return evaluateAddressSimilarityResult(eventAddress, accreditedAddress, {
       failed: (similarityPercent) =>
-        RESULT_COMMENTS.failed.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+        GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+          'FAILED.FAILED_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES',
           actorType,
           similarityPercent,
         ),
@@ -520,7 +546,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
           similarityPercent,
         ),
       reviewRequired: (similarityPercent) =>
-        RESULT_COMMENTS.reviewRequired.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES(
+        GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result(
+          'REVIEW_REQUIRED.REVIEW_REQUIRED_WITH_ADDRESS_SIMILARITY_NO_EVENT_COORDINATES',
           actorType,
           similarityPercent,
         ),
@@ -569,7 +596,8 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
 
     if (!isNonEmptyArray(events)) {
       throw this.processorErrors.getKnownError(
-        this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS(
+        GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_REQUIRED_EVENTS',
           massIDDocument.id,
         ),
       );
@@ -605,16 +633,15 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
     };
   }
 
-  private gpsResult(
+  private passedGpsResult(
     addressDistance: number | undefined,
-    resultStatus: EvaluateResultOutput['resultStatus'],
     noCoord: () => string,
     withCoord: (distance: number) => string,
   ): EvaluateResultOutput[] {
     return [
       {
         resultComment: pickGpsComment(addressDistance, noCoord, withCoord),
-        resultStatus,
+        resultStatus: 'PASSED',
       },
     ];
   }
@@ -645,7 +672,9 @@ export class GeolocationAndAddressPrecisionProcessor extends RuleDataProcessor {
   ): BoldDocument {
     if (isNil(massIDDocument)) {
       throw this.processorErrors.getKnownError(
-        this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+        GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_NOT_FOUND',
+        ),
       );
     }
 

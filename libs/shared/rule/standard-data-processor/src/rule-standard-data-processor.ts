@@ -2,8 +2,12 @@ import type { AnyObject } from '@carrot-fndn/shared/types';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import { isNil } from '@carrot-fndn/shared/helpers';
-import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
 import {
+  mapToRuleOutput,
+  SHARED_FINDINGS,
+} from '@carrot-fndn/shared/rule/result';
+import {
+  type RuleFinding,
   type RuleInput,
   type RuleOutput,
   type RuleOutputStatus,
@@ -12,6 +16,7 @@ import {
 export interface EvaluateResultOutput {
   resultComment?: string | undefined;
   resultContent?: AnyObject;
+  resultFindings?: RuleFinding[] | undefined;
   resultStatus: RuleOutputStatus;
 }
 
@@ -23,11 +28,14 @@ export abstract class RuleStandardDataProcessor<
     const document = await this.loadDocument(ruleInput);
 
     if (isNil(document)) {
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.getDocumentNotFoundResultComment(
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        SHARED_FINDINGS.result(
+          'ERROR.DOCUMENT_NOT_LOADED',
           ruleInput.parentDocumentId as string,
         ),
-      });
+      );
     }
 
     const ruleSubject = await this.getRuleSubject(document);
@@ -38,7 +46,7 @@ export abstract class RuleStandardDataProcessor<
       });
     }
 
-    const { resultComment, resultContent, resultStatus } =
+    const { resultComment, resultContent, resultFindings, resultStatus } =
       await this.evaluateResult(ruleSubject);
 
     return mapToRuleOutput(ruleInput, resultStatus, {
@@ -48,16 +56,13 @@ export abstract class RuleStandardDataProcessor<
       ...(resultContent && {
         resultContent,
       }),
+      resultFindings,
     });
   }
 
   protected abstract evaluateResult(
     data: RuleSubject,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput>;
-
-  protected getDocumentNotFoundResultComment(documentId: string): string {
-    return `Could not load the document with id ${documentId}`;
-  }
 
   protected getMissingRuleSubjectResultComment(): string {
     return 'Rule not applicable';

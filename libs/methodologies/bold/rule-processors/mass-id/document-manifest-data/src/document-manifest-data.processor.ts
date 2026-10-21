@@ -27,6 +27,10 @@ import {
   BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
+  joinRenderedFindings,
+  type RenderedRuleFinding,
+} from '@carrot-fndn/shared/rule/result';
+import {
   type DocumentEventAttachment,
   DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
@@ -34,11 +38,14 @@ import {
 import { RESULT_COMMENTS } from './document-manifest-data.constants';
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import {
+  DOCUMENT_MANIFEST_DATA_FINDINGS,
+  toCrossValidationFinding,
+} from './document-manifest-data.findings';
+import {
   type AttachmentInfo,
   type DocumentManifestEventSubject,
   type EventAttributeValueType,
   getAttachmentInfos,
-  type ValidationResult,
 } from './document-manifest-data.helpers';
 
 const {
@@ -81,6 +88,11 @@ const DOCUMENT_TYPE_MAPPING = {
   [TRANSPORT_MANIFEST]: BoldReportType.MTR.toString(),
 } as const;
 
+interface ManifestEventValidation {
+  failures: RenderedRuleFinding[];
+  passMessage?: string;
+}
+
 export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
   private readonly documentManifestType: DocumentManifestType;
 
@@ -107,14 +119,19 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
   ): Promise<EvaluateResultOutput> {
     if (!isNonEmptyArray(ruleSubject.documentManifestEvents)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_EVENT(this.documentManifestType),
+        ...DOCUMENT_MANIFEST_DATA_FINDINGS.result(
+          'RESULT.MISSING_EVENT',
+          this.documentManifestType,
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (isNil(ruleSubject.recyclerEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.MISSING_RECYCLER_EVENT,
+        ...DOCUMENT_MANIFEST_DATA_FINDINGS.result(
+          'RESULT.MISSING_RECYCLER_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -127,14 +144,16 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           ruleSubject.document.currentValue,
         ),
     );
-    const allFailMessages = validationResults.flatMap((v) => v.failMessages);
+    const allFailures = validationResults.flatMap(
+      (validationResult) => validationResult.failures,
+    );
     const passMessages = validationResults
       .map((v) => v.passMessage)
       .filter(Boolean) as string[];
 
-    if (allFailMessages.length > 0) {
+    if (allFailures.length > 0) {
       return {
-        resultComment: allFailMessages.join(' '),
+        ...joinRenderedFindings(allFailures),
         resultStatus: 'FAILED',
       };
     }
@@ -154,7 +173,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     const { extractionMetadata } = crossValidationResult;
 
     if (crossValidationResult.failMessages.length > 0) {
-      const { reviewReasons } = crossValidationResult;
+      const { failReasons, reviewReasons } = crossValidationResult;
 
       return {
         resultComment:
@@ -164,9 +183,12 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         resultContent: {
           crossValidation: crossValidationResult.crossValidation,
           extractionMetadata,
-          failReasons: crossValidationResult.failReasons,
+          failReasons,
           ...(reviewReasons.length > 0 && { reviewReasons }),
         },
+        resultFindings: [...failReasons, ...reviewReasons].map((reason) =>
+          toCrossValidationFinding(reason),
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -184,6 +206,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           extractionMetadata,
           reviewReasons: crossValidationResult.reviewReasons,
         },
+        resultFindings: crossValidationResult.reviewReasons.map((reason) =>
+          toCrossValidationFinding(reason),
+        ),
         resultStatus: 'REVIEW_REQUIRED',
       };
     }
@@ -284,14 +309,16 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     documentType: EventAttributeValueType,
     documentNumber: EventAttributeValueType,
     recyclerCountryCode: string | undefined,
-  ): ValidationResult {
-    const failMessages: string[] = [];
+  ): ManifestEventValidation {
+    const failures: RenderedRuleFinding[] = [];
 
     const documentTypeString = documentType?.toString();
     const documentNumberString = documentNumber?.toString();
 
     if (!isNonEmptyString(documentTypeString)) {
-      failMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_TYPE);
+      failures.push(
+        DOCUMENT_MANIFEST_DATA_FINDINGS.render('RESULT.MISSING_DOCUMENT_TYPE'),
+      );
     }
 
     if (
@@ -299,23 +326,30 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       recyclerCountryCode === 'BR' &&
       documentTypeString !== DOCUMENT_TYPE_MAPPING[this.documentManifestType]
     ) {
-      failMessages.push(
-        RESULT_COMMENTS.INVALID_BR_DOCUMENT_TYPE(documentTypeString),
+      failures.push(
+        DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+          'RESULT.INVALID_BR_DOCUMENT_TYPE',
+          documentTypeString,
+        ),
       );
     }
 
     if (!isNonEmptyString(documentNumberString)) {
-      failMessages.push(RESULT_COMMENTS.MISSING_DOCUMENT_NUMBER);
+      failures.push(
+        DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+          'RESULT.MISSING_DOCUMENT_NUMBER',
+        ),
+      );
     }
 
-    return { failMessages };
+    return { failures };
   }
 
   private validateDocumentManifestEvents(
     subject: DocumentManifestEventSubject,
     recyclerEvent: BoldDocumentEvent,
     documentCurrentValue: number,
-  ): ValidationResult {
+  ): ManifestEventValidation {
     const {
       attachment,
       documentNumber,
@@ -332,7 +366,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       this.documentManifestType === RECYCLING_MANIFEST
     ) {
       return {
-        failMessages: [RESULT_COMMENTS.ADDRESS_MISMATCH],
+        failures: [
+          DOCUMENT_MANIFEST_DATA_FINDINGS.render('RESULT.ADDRESS_MISMATCH'),
+        ],
       };
     }
 
@@ -346,7 +382,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       return exemptionResult;
     }
 
-    if (exemptionResult.failMessages.length > 0) {
+    if (exemptionResult.failures.length > 0) {
       return exemptionResult;
     }
 
@@ -360,14 +396,14 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       this.validateIssueDate(issueDateAttribute),
     ];
 
-    const failMessages = validations.flatMap((v) => v.failMessages);
+    const failures = validations.flatMap((validation) => validation.failures);
 
-    if (failMessages.length > 0) {
-      return { failMessages };
+    if (failures.length > 0) {
+      return { failures };
     }
 
     return {
-      failMessages: [],
+      failures: [],
       passMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
         documentNumber: documentNumber as string,
         documentType: documentType as string,
@@ -381,20 +417,23 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     attachment: DocumentEventAttachment | undefined,
     exemptionJustification: EventAttributeValueType,
     hasWrongLabelAttachment: boolean,
-  ): ValidationResult {
+  ): ManifestEventValidation {
     const justificationString = exemptionJustification?.toString();
 
     if (hasWrongLabelAttachment) {
       return {
-        failMessages: [
-          RESULT_COMMENTS.INCORRECT_ATTACHMENT_LABEL(this.documentManifestType),
+        failures: [
+          DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+            'RESULT.INCORRECT_ATTACHMENT_LABEL',
+            this.documentManifestType,
+          ),
         ],
       };
     }
 
     if (isNil(attachment) && isNonEmptyString(justificationString)) {
       return {
-        failMessages: [],
+        failures: [],
         passMessage: RESULT_COMMENTS.PROVIDE_EXEMPTION_JUSTIFICATION(
           this.documentManifestType,
         ),
@@ -403,40 +442,47 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     if (isNil(attachment) && !isNonEmptyString(justificationString)) {
       return {
-        failMessages: [
-          RESULT_COMMENTS.MISSING_ATTRIBUTES(this.documentManifestType),
-        ],
-      };
-    }
-
-    if (isNonEmptyString(justificationString) && !isNil(attachment)) {
-      return {
-        failMessages: [
-          RESULT_COMMENTS.ATTACHMENT_AND_JUSTIFICATION_PROVIDED(
+        failures: [
+          DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+            'RESULT.MISSING_ATTRIBUTES',
             this.documentManifestType,
           ),
         ],
       };
     }
 
-    return { failMessages: [] };
+    if (isNonEmptyString(justificationString) && !isNil(attachment)) {
+      return {
+        failures: [
+          DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+            'RESULT.ATTACHMENT_AND_JUSTIFICATION_PROVIDED',
+            this.documentManifestType,
+          ),
+        ],
+      };
+    }
+
+    return { failures: [] };
   }
 
   private validateIssueDate(
     issueDateAttribute: BoldDocumentEventAttribute | undefined,
-  ): ValidationResult {
-    const failMessages: string[] = [];
+  ): ManifestEventValidation {
+    const failures: RenderedRuleFinding[] = [];
 
     if (!isNonEmptyString(issueDateAttribute?.name)) {
-      failMessages.push(RESULT_COMMENTS.MISSING_ISSUE_DATE);
+      failures.push(
+        DOCUMENT_MANIFEST_DATA_FINDINGS.render('RESULT.MISSING_ISSUE_DATE'),
+      );
     } else if (issueDateAttribute.format !== DATE) {
-      failMessages.push(
-        RESULT_COMMENTS.INVALID_ISSUE_DATE_FORMAT(
+      failures.push(
+        DOCUMENT_MANIFEST_DATA_FINDINGS.render(
+          'RESULT.INVALID_ISSUE_DATE_FORMAT',
           issueDateAttribute.format as string,
         ),
       );
     }
 
-    return { failMessages };
+    return { failures };
   }
 }

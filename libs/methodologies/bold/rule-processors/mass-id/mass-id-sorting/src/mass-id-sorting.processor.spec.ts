@@ -5,10 +5,17 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   createRuleTestFixture,
+  expectRuleFindings,
   expectRuleOutput,
+  findTestCase,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldAttributeName,
+  BoldDocumentEventLabel,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { MASS_ID_SORTING_FINDINGS } from './mass-id-sorting.findings';
 import { MassIDSortingProcessor } from './mass-id-sorting.processor';
 import {
   massIDSortingErrorTestCases,
@@ -45,6 +52,7 @@ describe('MassIDSortingProcessor', () => {
         });
 
         expectRuleOutput({
+          findings: MASS_ID_SORTING_FINDINGS,
           resultComment,
           resultStatus,
           ruleInput,
@@ -58,6 +66,34 @@ describe('MassIDSortingProcessor', () => {
         );
       },
     );
+
+    it('should not mark the deducted weight mismatch as dependent on the Recycler accreditation', async () => {
+      const deductedWeightMismatchCase = findTestCase(
+        massIDSortingTestCases,
+        'The deducted weight does not match the expected value based on sorting factor',
+      );
+
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments:
+          deductedWeightMismatchCase.accreditationDocuments,
+        massIDActorParticipants: deductedWeightMismatchCase.actorParticipants,
+        massIDDocumentsParams: {
+          externalEventsMap: deductedWeightMismatchCase.massIDEvents,
+          partialDocument: deductedWeightMismatchCase.partialDocument,
+        },
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultContent).toStrictEqual({
+        findings: [
+          {
+            code: 'mass-id-sorting.FAILED.DEDUCTED_WEIGHT_MISMATCH',
+            defaultOwner: 'INTEGRATOR',
+          },
+        ],
+      });
+    });
   });
 
   describe('MassIDSortingProcessorErrors', () => {
@@ -79,7 +115,9 @@ describe('MassIDSortingProcessor', () => {
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        expect(ruleOutput).toEqual({
+        expect(
+          expectRuleFindings(ruleOutput, MASS_ID_SORTING_FINDINGS),
+        ).toEqual({
           requestId: ruleInput.requestId,
           responseToken: ruleInput.responseToken,
           responseUrl: ruleInput.responseUrl,
@@ -88,5 +126,36 @@ describe('MassIDSortingProcessor', () => {
         });
       },
     );
+
+    it('should mark the missing sorting factor as dependent on the Recycler accreditation', async () => {
+      const missingSortingFactorCase = findTestCase(
+        massIDSortingErrorTestCases,
+        `The ${BoldDocumentEventLabel.RECYCLER} accreditation does not contain a ${BoldAttributeName.SORTING_FACTOR} attribute`,
+      );
+
+      spyOnDocumentQueryServiceLoad(
+        missingSortingFactorCase.massIDAuditDocument,
+        [
+          missingSortingFactorCase.massIDAuditDocument,
+          ...missingSortingFactorCase.documents,
+        ],
+      );
+
+      const ruleOutput = await ruleDataProcessor.process(
+        stubRuleInput({
+          documentId: missingSortingFactorCase.massIDAuditDocument.id,
+        }),
+      );
+
+      expect(ruleOutput.resultContent).toStrictEqual({
+        findings: [
+          {
+            code: 'mass-id-sorting.ERROR.MISSING_SORTING_FACTOR',
+            defaultOwner: 'RECYCLER',
+            dependsOnAccreditation: 'Recycler',
+          },
+        ],
+      });
+    });
   });
 });

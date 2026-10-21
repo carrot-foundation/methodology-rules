@@ -24,7 +24,10 @@ import {
   BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
+import {
+  mapToRuleOutput,
+  type RenderedRuleFinding,
+} from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
@@ -36,6 +39,7 @@ import {
   SORTING_TOLERANCE,
 } from './mass-id-sorting.constants';
 import { MassIDSortingProcessorErrors } from './mass-id-sorting.errors';
+import { MASS_ID_SORTING_FINDINGS } from './mass-id-sorting.findings';
 import {
   calculateSortingValues,
   findSortingEvents,
@@ -78,10 +82,12 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
       const sortingData = this.extractSortingData(documents);
 
-      const { resultComment, resultStatus } = this.evaluateResult(sortingData);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(sortingData);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
       logger.error(
@@ -94,16 +100,20 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
         'Mass-id-sorting processor failed',
       );
 
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.processorErrors.getFailedResultFromError(error),
+      );
     }
   }
 
   protected evaluateResult(sortingData: SortingData): EvaluateResultOutput {
     if (!isNonEmptyString(sortingData.sortingDescription)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_SORTING_DESCRIPTION,
+        ...MASS_ID_SORTING_FINDINGS.result(
+          'FAILED.MISSING_SORTING_DESCRIPTION',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -116,7 +126,8 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (deductedDiff > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.failed.DEDUCTED_WEIGHT_MISMATCH(
+        ...MASS_ID_SORTING_FINDINGS.result(
+          'FAILED.DEDUCTED_WEIGHT_MISMATCH',
           sortingData.deductedWeight,
           Number(expectedDeducted.toFixed(3)),
         ),
@@ -129,7 +140,8 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (!grossMatchesPrevious) {
       return {
-        resultComment: RESULT_COMMENTS.failed.GROSS_WEIGHT_MISMATCH(
+        ...MASS_ID_SORTING_FINDINGS.result(
+          'FAILED.GROSS_WEIGHT_MISMATCH',
           sortingData.grossWeight,
           sortingData.valueBeforeSorting,
         ),
@@ -142,7 +154,8 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (!documentValueMatchesSorting) {
       return {
-        resultComment: RESULT_COMMENTS.failed.DOCUMENT_VALUE_MISMATCH(
+        ...MASS_ID_SORTING_FINDINGS.result(
+          'FAILED.DOCUMENT_VALUE_MISMATCH',
           sortingData.documentCurrentValue,
           sortingData.valueAfterSorting,
         ),
@@ -152,7 +165,8 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     if (sortingData.sortingValueCalculationDifference > SORTING_TOLERANCE) {
       return {
-        resultComment: RESULT_COMMENTS.failed.SORTING_VALUE_EXCEEDS_TOLERANCE(
+        ...MASS_ID_SORTING_FINDINGS.result(
+          'FAILED.SORTING_VALUE_EXCEEDS_TOLERANCE',
           sortingData.sortingValueCalculationDifference,
         ),
         resultStatus: 'FAILED',
@@ -204,13 +218,14 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     this.validateOrThrow(
       isNil(recyclerAccreditationDocument),
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      MASS_ID_SORTING_FINDINGS.render(
+        'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT',
+      ),
     );
 
     this.validateOrThrow(
       isNil(massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      MASS_ID_SORTING_FINDINGS.render('ERROR.MASS_ID_DOCUMENT_NOT_FOUND'),
     );
 
     return {
@@ -224,17 +239,17 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
     const externalEvents = this.unwrapOrThrow(
       getValidatedExternalEvents(massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_EXTERNAL_EVENTS,
+      MASS_ID_SORTING_FINDINGS.render('ERROR.MISSING_EXTERNAL_EVENTS'),
     );
 
     const { priorEventWithValue, sortingEvent } = this.unwrapOrThrow(
       findSortingEvents(externalEvents),
-      this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_EVENT,
+      MASS_ID_SORTING_FINDINGS.render('ERROR.MISSING_SORTING_EVENT'),
     );
 
     const sortingFactor = this.unwrapOrThrow(
       getSortingFactor(recyclerAccreditationDocument, massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MISSING_SORTING_FACTOR,
+      MASS_ID_SORTING_FINDINGS.render('ERROR.MISSING_SORTING_FACTOR'),
     );
 
     const eventValues = this.unwrapOrThrow(
@@ -244,12 +259,14 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
           error.code === ValidationErrorCode.EVENT_BEFORE_SORTING_UNDEFINED ||
           error.code === ValidationErrorCode.INVALID_VALUE_BEFORE_SORTING
         ) {
-          return this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_BEFORE_SORTING(
+          return MASS_ID_SORTING_FINDINGS.render(
+            'ERROR.INVALID_VALUE_BEFORE_SORTING',
             priorEventWithValue?.value,
           );
         }
 
-        return this.processorErrors.ERROR_MESSAGE.INVALID_VALUE_AFTER_SORTING(
+        return MASS_ID_SORTING_FINDINGS.render(
+          'ERROR.INVALID_VALUE_AFTER_SORTING',
           sortingEvent.value,
         );
       },
@@ -259,18 +276,22 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
       getValidatedWeightAttributes(sortingEvent),
       (error: ValidationError) => {
         if (error.code === ValidationErrorCode.INVALID_DEDUCTED_WEIGHT_FORMAT) {
-          return this.processorErrors.ERROR_MESSAGE
-            .INVALID_DEDUCTED_WEIGHT_FORMAT;
+          return MASS_ID_SORTING_FINDINGS.render(
+            'ERROR.INVALID_DEDUCTED_WEIGHT_FORMAT',
+          );
         }
 
         if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT) {
-          return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT(
+          return MASS_ID_SORTING_FINDINGS.render(
+            'ERROR.INVALID_GROSS_WEIGHT',
             getEventAttributeValue(sortingEvent, GROSS_WEIGHT),
           );
         }
 
         if (error.code === ValidationErrorCode.INVALID_GROSS_WEIGHT_FORMAT) {
-          return this.processorErrors.ERROR_MESSAGE.INVALID_GROSS_WEIGHT_FORMAT;
+          return MASS_ID_SORTING_FINDINGS.render(
+            'ERROR.INVALID_GROSS_WEIGHT_FORMAT',
+          );
         }
 
         if (error.code === ValidationErrorCode.INVALID_WEIGHT_COMPARISON) {
@@ -284,13 +305,15 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
             DEDUCTED_WEIGHT,
           ) as number;
 
-          return this.processorErrors.ERROR_MESSAGE.INVALID_WEIGHT_COMPARISON(
+          return MASS_ID_SORTING_FINDINGS.render(
+            'ERROR.INVALID_WEIGHT_COMPARISON',
             deductedWeight,
             grossWeight,
           );
         }
 
-        return this.processorErrors.ERROR_MESSAGE.INVALID_DEDUCTED_WEIGHT(
+        return MASS_ID_SORTING_FINDINGS.render(
+          'ERROR.INVALID_DEDUCTED_WEIGHT',
           getEventAttributeValue(sortingEvent, DEDUCTED_WEIGHT),
         );
       },
@@ -314,21 +337,27 @@ export class MassIDSortingProcessor extends RuleDataProcessor {
 
   private unwrapOrThrow<T>(
     result: T | ValidationError,
-    errorMessage: ((error: ValidationError) => string) | string,
+    renderedFinding:
+      | ((error: ValidationError) => RenderedRuleFinding)
+      | RenderedRuleFinding,
   ): T {
     if (isValidationError(result)) {
-      const message =
-        typeof errorMessage === 'string' ? errorMessage : errorMessage(result);
-
-      throw this.processorErrors.getKnownError(message);
+      throw this.processorErrors.getKnownError(
+        typeof renderedFinding === 'function'
+          ? renderedFinding(result)
+          : renderedFinding,
+      );
     }
 
     return result;
   }
 
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
+  private validateOrThrow(
+    condition: boolean,
+    renderedFinding: RenderedRuleFinding,
+  ): void {
     if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
+      throw this.processorErrors.getKnownError(renderedFinding);
     }
   }
 }

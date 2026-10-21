@@ -14,6 +14,7 @@ import type { DocumentManifestEventSubject } from './document-manifest-data.help
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
 
 import {
+  buildLowConfidenceResponse,
   collectResults,
   compareDateField,
   compareEntity,
@@ -92,15 +93,9 @@ export const validateCdfExtractedData = (
   const extractedData = extractionResult.data as CdfExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return {
-      failMessages: [],
-      reviewReasons: [
-        REVIEW_REASONS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW({
-          confidence: extractionResult.data.extractionConfidence,
-        }),
-      ],
-      reviewRequired: true,
-    };
+    return buildLowConfidenceResponse(
+      extractionResult.data.extractionConfidence,
+    );
   }
 
   const layoutValidationConfig = getLayoutValidationConfig(

@@ -2,17 +2,18 @@
 id: rule-processors
 intent: Enforce the standard structure and patterns for methodology rule processors
 scope:
-  - "libs/methodologies/**/*.ts"
+  - 'libs/methodologies/**/*.ts'
 requirements:
   - Scaffold new rules using `pnpm create-rule <name> <scope> <description>` instead of manual file creation
   - Extend `ParentDocumentRuleProcessor<RuleSubject>` and implement the `evaluateResult()` method in the processor file
   - Follow the standard file naming convention with the rule name as prefix for all files in the rule directory
-  - Include all required files: processor, lambda handler, unit spec, e2e spec, test-cases, index, project.json, vitest.config.ts
+  - Include all required files: processor, lambda handler, findings, unit spec, e2e spec, test-cases, index, project.json, vitest.config.ts
   - Apply rules to methodologies using `pnpm apply-methodology-rule <methodology> <rule> <scope>`
   - Import shared utilities only from `@carrot-fndn/shared/*` path aliases
   - Define test data in `{rule-name}.test-cases.ts` and share it between unit and e2e tests
   - Place stateless helper functions in `{rule-name}.helpers.ts` (not as private methods on the processor class) using arrow-`const` syntax (`export const myHelper = (...) => ...`)
   - Place result-comment templates and threshold constants in `{rule-name}.constants.ts`
+  - Render every non-passing result comment through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`: a single message via `<RULE>_FINDINGS.result(...)`, several joined via `joinRenderedFindings`, a thrown error via `getKnownError(<RULE>_FINDINGS.render(...))`; the findings map covers every non-passing message key; set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run
 anti_patterns:
   - Creating rule processor files manually instead of using the scaffolding script
   - Putting business logic in the Lambda handler instead of the processor class
@@ -41,6 +42,7 @@ Every rule processor must contain the following files:
 ├── {rule-name}.test-cases.ts      # Shared test data
 ├── {rule-name}.helpers.ts         # Stateless helpers (optional)
 ├── {rule-name}.constants.ts       # Result-comment templates and thresholds (optional)
+├── {rule-name}.findings.ts        # Finding codes, default owners, accreditation dependencies
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
 └── vitest.config.ts               # Vitest config
@@ -74,6 +76,10 @@ export class VehicleValidationProcessor extends ParentDocumentRuleProcessor<Rule
   }
 }
 ```
+
+### Findings
+
+Render every non-passing result through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`: a single message renders via `<RULE>_FINDINGS.result(...)`, several joined messages via `joinRenderedFindings`, and a thrown error via `getKnownError(<RULE>_FINDINGS.render(...))`. A finding code (`<slug>.<GROUP>.<KEY>`) is a wire identifier consumers key on, so renaming a message key, a group or the rule slug is a breaking change. Set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run.
 
 ### Test organization
 

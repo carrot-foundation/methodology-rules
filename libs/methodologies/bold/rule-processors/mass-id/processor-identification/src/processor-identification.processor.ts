@@ -14,6 +14,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './processor-identification.constants';
+import { PROCESSOR_IDENTIFICATION_FINDINGS } from './processor-identification.findings';
 
 const { ACTOR } = BoldDocumentEventName;
 const { PROCESSOR } = BoldDocumentEventLabel;
@@ -28,14 +29,14 @@ export class ProcessorIdentificationProcessor extends ParentDocumentRuleProcesso
   }: Subject): EvaluateResultOutput {
     if (!isNonEmptyArray(processorActorEvents)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
+        ...PROCESSOR_IDENTIFICATION_FINDINGS.result('FAILED.NOT_FOUND'),
         resultStatus: 'FAILED',
       };
     }
 
     if (processorActorEvents.length > 1) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
+        ...PROCESSOR_IDENTIFICATION_FINDINGS.result('FAILED.MULTIPLE_EVENTS'),
         resultStatus: 'FAILED',
       };
     }

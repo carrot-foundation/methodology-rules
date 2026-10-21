@@ -6,6 +6,7 @@ import {
   type BoldDocumentEvent,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import {
@@ -13,6 +14,7 @@ import {
   type StaticFactorSubtype,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 import { isWasteGeneratorBaselineValues } from './prevented-emissions.validators';
 
 const { BASELINES } = BoldAttributeName;
@@ -33,7 +35,9 @@ export const getStaticPreventedEmissionsFactor = (
 
   if (isNil(factor)) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
+      PREVENTED_EMISSIONS_FINDINGS.render(
+        'ERROR.INVALID_MASS_ID_DOCUMENT_SUBTYPE',
+      ),
     );
   }
 
@@ -64,7 +68,7 @@ export const getBaselineByWasteSubtype = (
 
   if (!isWasteGeneratorBaselineValues(baselines)) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.INVALID_BASELINES,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.INVALID_BASELINES'),
     );
   }
 
@@ -73,15 +77,15 @@ export const getBaselineByWasteSubtype = (
 
 export const throwIfMissing: <T>(
   value: null | T | undefined,
-  errorMessage: string,
+  renderedFinding: RenderedRuleFinding,
   processorErrors: PreventedEmissionsProcessorErrors,
 ) => asserts value is NonNullable<T> = <T>(
   value: null | T | undefined,
-  errorMessage: string,
+  renderedFinding: RenderedRuleFinding,
   processorErrors: PreventedEmissionsProcessorErrors,
 ): asserts value is NonNullable<T> => {
   if (isNil(value)) {
-    throw processorErrors.getKnownError(errorMessage);
+    throw processorErrors.getKnownError(renderedFinding);
   }
 };
 
@@ -97,7 +101,7 @@ export const getGasTypeFromEvent = (
     const processorErrors = new PreventedEmissionsProcessorErrors();
 
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.MISSING_GREENHOUSE_GAS_TYPE,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.MISSING_GREENHOUSE_GAS_TYPE'),
     );
   }
 

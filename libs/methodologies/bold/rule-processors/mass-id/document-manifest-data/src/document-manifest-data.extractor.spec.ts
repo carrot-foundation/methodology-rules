@@ -234,6 +234,13 @@ describe('crossValidateWithTextract', () => {
     expect(result.failMessages[0]).toContain(
       'Document extraction failed for attachment att-1: Extraction failed',
     );
+    expect(result.failReasons).toEqual([
+      {
+        code: 'EXTRACTION_FAILED',
+        description:
+          'Document extraction failed for attachment att-1: Extraction failed',
+      },
+    ]);
   });
 
   it('should fail with unknown error for non-Error exceptions', async () => {

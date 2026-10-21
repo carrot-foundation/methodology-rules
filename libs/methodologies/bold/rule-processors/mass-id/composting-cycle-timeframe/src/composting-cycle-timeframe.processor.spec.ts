@@ -1,5 +1,6 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
+  expectRuleFindings,
   stubBoldMassIDDocument,
   stubBoldMassIDDropOffEvent,
   stubBoldMassIDRecycledEvent,
@@ -19,6 +20,7 @@ import {
   RESULT_COMMENTS,
   TOLERANCE_IN_HOURS,
 } from './composting-cycle-timeframe.constants';
+import { COMPOSTING_CYCLE_TIMEFRAME_FINDINGS } from './composting-cycle-timeframe.findings';
 import { CompostingCycleTimeframeProcessor } from './composting-cycle-timeframe.processor';
 import { compostingCycleTimeframeTestCases } from './composting-cycle-timeframe.test-cases';
 
@@ -107,7 +109,9 @@ describe('CompostingCycleTimeframeProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, COMPOSTING_CYCLE_TIMEFRAME_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

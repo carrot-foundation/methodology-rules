@@ -1,5 +1,6 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
+  expectRuleFindings,
   stubBoldMassIDDocument,
   stubBoldMassIDRecycledEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -7,6 +8,7 @@ import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/ty
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
+import { PROJECT_PERIOD_LIMIT_FINDINGS } from './project-period-limit.findings';
 import { ProjectPeriodLimitProcessor } from './project-period-limit.processor';
 import { projectPeriodLimitTestCases } from './project-period-limit.test-cases';
 
@@ -46,7 +48,9 @@ describe('ProjectPeriodLimitProcessor', () => {
 
       const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-      expect(ruleOutput).toMatchObject({
+      expect(
+        expectRuleFindings(ruleOutput, PROJECT_PERIOD_LIMIT_FINDINGS),
+      ).toMatchObject({
         requestId: ruleInput.requestId,
         responseToken: ruleInput.responseToken,
         responseUrl: ruleInput.responseUrl,
@@ -69,7 +73,9 @@ describe('ProjectPeriodLimitProcessor', () => {
 
     const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-    expect(ruleOutput).toMatchObject({
+    expect(
+      expectRuleFindings(ruleOutput, PROJECT_PERIOD_LIMIT_FINDINGS),
+    ).toMatchObject({
       resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
       resultStatus: 'FAILED',
     });

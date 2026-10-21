@@ -1,9 +1,13 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  expectRuleFindings,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { DRIVER_IDENTIFICATION_FINDINGS } from './driver-identification.findings';
 import { DriverIdentificationProcessor } from './driver-identification.processor';
 import { driverIdentificationTestCases } from './driver-identification.test-cases';
 
@@ -41,7 +45,9 @@ describe('DriverIdentificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, DRIVER_IDENTIFICATION_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

@@ -1,6 +1,10 @@
 import { logger } from '@carrot-fndn/shared/helpers';
-import { RuleOutputStatus } from '@carrot-fndn/shared/rule/types';
 import {
+  RuleFindingSchema,
+  RuleOutputStatus,
+} from '@carrot-fndn/shared/rule/types';
+import {
+  createStubFromSchema,
   stubEnumValue,
   stubRuleInput,
   stubRuleOutput,
@@ -76,6 +80,101 @@ describe('mapToRuleOutput', () => {
       resultStatus,
     });
   });
+
+  it.each(['FAILED', 'REVIEW_REQUIRED'] as const)(
+    'should merge the findings beside the result content of a %s result',
+    (resultStatus) => {
+      const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
+      const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+      const result = mapToRuleOutput(stubRuleInput(), resultStatus, {
+        resultContent,
+        resultFindings,
+      });
+
+      expect(result.resultContent).toEqual({
+        ...resultContent,
+        findings: resultFindings,
+      });
+    },
+  );
+
+  it('should hold only the findings when a FAILED result has no result content', () => {
+    const resultFindings = [createStubFromSchema(RuleFindingSchema)];
+
+    const result = mapToRuleOutput(stubRuleInput(), 'FAILED', {
+      resultFindings,
+    });
+
+    expect(result.resultContent).toEqual({ findings: resultFindings });
+  });
+
+  it('should not add findings to a PASSED result', () => {
+    const ruleInput = stubRuleInput();
+    const resultContent = { [faker.string.alpha(8)]: faker.string.sample() };
+
+    const result = mapToRuleOutput(ruleInput, 'PASSED', {
+      resultContent,
+      resultFindings: [createStubFromSchema(RuleFindingSchema)],
+    });
+
+    expect(result).toStrictEqual({
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: undefined,
+      resultContent,
+      resultStatus: 'PASSED',
+    });
+  });
+
+  it.each([
+    { resultFindings: undefined, resultStatus: 'FAILED' as const },
+    { resultFindings: [], resultStatus: 'FAILED' as const },
+    { resultFindings: undefined, resultStatus: 'REVIEW_REQUIRED' as const },
+    { resultFindings: [], resultStatus: 'REVIEW_REQUIRED' as const },
+  ])(
+    'should keep a $resultStatus result unchanged and log an error when the findings are $resultFindings',
+    ({ resultFindings, resultStatus }) => {
+      const ruleInput = stubRuleInput();
+
+      const result = mapToRuleOutput(ruleInput, resultStatus, {
+        resultFindings,
+      });
+
+      expect(result).toStrictEqual({
+        requestId: ruleInput.requestId,
+        responseToken: ruleInput.responseToken,
+        responseUrl: ruleInput.responseUrl,
+        resultComment: undefined,
+        resultContent: undefined,
+        resultStatus,
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        {
+          requestId: ruleInput.requestId,
+          resultStatus,
+          ruleName: ruleInput.ruleName,
+        },
+        'Non-passing rule result has no findings',
+      );
+    },
+  );
+
+  it.each([
+    { resultFindings: undefined, resultStatus: 'PASSED' as const },
+    {
+      resultFindings: [createStubFromSchema(RuleFindingSchema)],
+      resultStatus: 'FAILED' as const,
+    },
+  ])(
+    'should not log an error for a $resultStatus result that follows the findings contract',
+    ({ resultFindings, resultStatus }) => {
+      mapToRuleOutput(stubRuleInput(), resultStatus, { resultFindings });
+
+      expect(logger.error).not.toHaveBeenCalled();
+    },
+  );
 });
 describe('mapRuleOutputToPostProcessInput', () => {
   let artifactChecksum: string;
@@ -99,6 +198,20 @@ describe('mapRuleOutputToPostProcessInput', () => {
     });
 
     expect(result.output.comment).toBe(resultComment);
+  });
+
+  it('should keep the findings of the result content exactly', () => {
+    const resultContent = {
+      [faker.string.alpha(8)]: faker.string.sample(),
+      findings: [createStubFromSchema(RuleFindingSchema)],
+    };
+
+    const result = mapRuleOutputToPostProcessInput({
+      ...stubRuleOutput(),
+      resultContent,
+    });
+
+    expect(result.output.content).toStrictEqual(resultContent);
   });
 
   it('should preserve measured timing through JSON callback projection', () => {

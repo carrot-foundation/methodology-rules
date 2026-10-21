@@ -26,7 +26,11 @@ import {
   getAttachmentS3Key,
   mapDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
+import {
+  joinRenderedFindings,
+  mapToRuleOutput,
+  type RenderedRuleFinding,
+} from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
@@ -42,6 +46,7 @@ import {
 } from './scale-ticket-verification/scale-ticket-verification.helpers';
 import { PASSED_RESULT_COMMENTS } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
+import { WEIGHING_FINDINGS } from './weighing.findings';
 import {
   getRequiredAdditionalVerificationsFromAccreditationDocument,
   getValuesRelatedToWeighing,
@@ -73,13 +78,15 @@ export class WeighingProcessor extends RuleDataProcessor {
         errors: this.processorErrors,
         input: rawSubject,
         schema: WeighingRuleSubjectSchema,
-        validationMessage:
-          this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding: WEIGHING_FINDINGS.render(
+          'ERROR.INVALID_RULE_SUBJECT',
+        ),
       });
       const evaluationResult = await this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, evaluationResult.resultStatus, {
         resultComment: evaluationResult.resultComment,
+        resultFindings: evaluationResult.resultFindings,
       });
     } catch (error) {
       logger.error(
@@ -92,9 +99,11 @@ export class WeighingProcessor extends RuleDataProcessor {
         'Weighing processor failed',
       );
 
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.processorErrors.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -164,7 +173,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
       if (twoStepValidationMessages.errors.length > 0) {
         return {
-          resultComment: twoStepValidationMessages.errors.join(' '),
+          ...joinRenderedFindings(twoStepValidationMessages.errors),
           resultStatus: 'FAILED',
         };
       }
@@ -183,7 +192,7 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     if (validationMessages.errors.length > 0) {
       return {
-        resultComment: validationMessages.errors.join(' '),
+        ...joinRenderedFindings(validationMessages.errors),
         resultStatus: 'FAILED',
       };
     }
@@ -281,7 +290,7 @@ export class WeighingProcessor extends RuleDataProcessor {
     if (scaleTicketValidation.errors.length > 0) {
       return {
         errorResult: {
-          resultComment: scaleTicketValidation.errors.join(' '),
+          ...joinRenderedFindings(scaleTicketValidation.errors),
           resultStatus: 'FAILED',
         },
         validated: false,
@@ -351,13 +360,12 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     this.validateOrThrow(
       isNil(recyclerAccreditationDocument),
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      WEIGHING_FINDINGS.render('ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT'),
     );
 
     this.validateOrThrow(
       isNil(massIDDocument),
-      this.processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+      WEIGHING_FINDINGS.render('ERROR.MASS_ID_DOCUMENT_NOT_FOUND'),
     );
 
     return {
@@ -367,9 +375,12 @@ export class WeighingProcessor extends RuleDataProcessor {
     };
   }
 
-  private validateOrThrow(condition: boolean, errorMessage: string): void {
+  private validateOrThrow(
+    condition: boolean,
+    renderedFinding: RenderedRuleFinding,
+  ): void {
     if (condition) {
-      throw this.processorErrors.getKnownError(errorMessage);
+      throw this.processorErrors.getKnownError(renderedFinding);
     }
   }
 }

@@ -116,7 +116,7 @@ describe('transport-manifest-cross-validation.helpers', () => {
       weighingEvents: [],
     };
 
-    it('should return reviewRequired when basic extraction confidence is low', () => {
+    it('should return reviewRequired with reviewReasons when basic extraction confidence is low', () => {
       const extractionResult = createExtractionResult({
         extractionConfidence: 'low' as never,
       });
@@ -125,6 +125,11 @@ describe('transport-manifest-cross-validation.helpers', () => {
 
       expect(result.reviewRequired).toBe(true);
       expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewReasons).toHaveLength(1);
+      expect(result.reviewReasons?.[0]?.code).toBe(
+        'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
+      );
+      expect(result.reviewReasons?.[0]?.description).toContain('low');
     });
 
     it('should set reviewRequired when vehicle plate does not match with high confidence', () => {

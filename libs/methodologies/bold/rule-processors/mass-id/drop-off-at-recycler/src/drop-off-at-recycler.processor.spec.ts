@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  expectRuleFindings,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { DROP_OFF_AT_RECYCLER_FINDINGS } from './drop-off-at-recycler.findings';
 import { DropOffAtRecyclerProcessor } from './drop-off-at-recycler.processor';
 import { dropOffAtRecyclerTestCases } from './drop-off-at-recycler.test-cases';
 
@@ -36,7 +40,9 @@ describe('DropOffAtRecyclerProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, DROP_OFF_AT_RECYCLER_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

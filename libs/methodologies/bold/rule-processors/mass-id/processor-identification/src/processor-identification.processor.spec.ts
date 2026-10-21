@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  expectRuleFindings,
+  stubBoldMassIDDocument,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { PROCESSOR_IDENTIFICATION_FINDINGS } from './processor-identification.findings';
 import { ProcessorIdentificationProcessor } from './processor-identification.processor';
 import { processorIdentificationTestCases } from './processor-identification.test-cases';
 
@@ -33,7 +37,9 @@ describe('ProcessorIdentificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, PROCESSOR_IDENTIFICATION_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

@@ -5,12 +5,17 @@ import {
 import {
   BoldStubsBuilder,
   expectRuleOutput,
+  findTestCase,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
-import { type RuleInput } from '@carrot-fndn/shared/rule/types';
+import {
+  type RuleInput,
+  type RuleOutput,
+} from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS } from './geolocation-and-address-precision.findings';
 import { GeolocationAndAddressPrecisionProcessor } from './geolocation-and-address-precision.processor';
 import {
   geolocationAndAddressPrecisionErrorTestCases,
@@ -22,13 +27,14 @@ import {
 describe('GeolocationAndAddressPrecisionProcessor', () => {
   const ruleDataProcessor = new GeolocationAndAddressPrecisionProcessor();
 
-  const runTestCase = async ({
+  const processTestCase = async ({
     accreditationDocuments,
     actorParticipants,
     massIDDocumentParameters,
-    resultComment,
-    resultStatus,
-  }: GeolocationAndAddressPrecisionTestCase): Promise<void> => {
+  }: GeolocationAndAddressPrecisionTestCase): Promise<{
+    ruleInput: RuleInput;
+    ruleOutput: RuleOutput;
+  }> => {
     const {
       massIDAuditDocument,
       massIDDocument,
@@ -74,11 +80,21 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
       documentId: massIDAuditDocument.id,
     });
 
-    const ruleOutput = await ruleDataProcessor.process(ruleInput);
+    return {
+      ruleInput,
+      ruleOutput: await ruleDataProcessor.process(ruleInput),
+    };
+  };
+
+  const runTestCase = async (
+    testCase: GeolocationAndAddressPrecisionTestCase,
+  ): Promise<void> => {
+    const { ruleInput, ruleOutput } = await processTestCase(testCase);
 
     expectRuleOutput({
-      resultComment,
-      resultStatus,
+      findings: GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS,
+      resultComment: testCase.resultComment,
+      resultStatus: testCase.resultStatus,
       ruleInput,
       ruleOutput,
     });
@@ -95,6 +111,46 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
     'should return $resultStatus when $scenario',
     runTestCase,
   );
+
+  it('should report one finding per non-passing actor message, none dependent on an accreditation', async () => {
+    const { ruleOutput } = await processTestCase(
+      findTestCase(
+        geolocationAndAddressPrecisionTestCases,
+        'The GPS is not set, but the accredited address is set and not valid',
+      ),
+    );
+
+    expect(ruleOutput.resultContent).toEqual({
+      findings: [
+        {
+          code: 'geolocation-and-address-precision.FAILED.INVALID_ADDRESS_DISTANCE',
+          defaultOwner: 'INTEGRATOR',
+        },
+        {
+          code: 'geolocation-and-address-precision.FAILED.INVALID_ADDRESS_DISTANCE',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
+    });
+  });
+
+  it('should not report a finding for the passing actor message of an aggregated result', async () => {
+    const { ruleOutput } = await processTestCase(
+      findTestCase(
+        geolocationAndAddressPrecisionTestCases,
+        'The Recycler has expired GPS exceptions (should NOT skip GPS validation)',
+      ),
+    );
+
+    expect(ruleOutput.resultContent).toEqual({
+      findings: [
+        {
+          code: 'geolocation-and-address-precision.FAILED.INVALID_GPS_DISTANCE',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
+    });
+  });
 
   describe('when ENABLE_REVIEW_REQUIRED is enabled', () => {
     beforeEach(() => {
@@ -134,6 +190,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
           expectRuleOutput({
+            findings: GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS,
             resultComment: testCase.resultComment,
             resultStatus: testCase.resultStatus,
             ruleInput,
@@ -147,6 +204,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
           const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
           expectRuleOutput({
+            findings: GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS,
             resultComment: testCase.resultComment,
             resultStatus: testCase.resultStatus,
             ruleInput,

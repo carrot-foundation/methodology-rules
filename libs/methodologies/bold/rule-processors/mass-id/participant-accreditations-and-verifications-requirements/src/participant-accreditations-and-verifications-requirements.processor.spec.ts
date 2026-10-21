@@ -1,8 +1,13 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  expectRuleFindings,
+  findTestCase,
+  stubDocument,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS } from './participant-accreditations-and-verifications-requirements.findings';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessor } from './participant-accreditations-and-verifications-requirements.processor';
 import { participantAccreditationsAndVerificationsRequirementsTestCases } from './participant-accreditations-and-verifications-requirements.test-cases';
 
@@ -32,7 +37,37 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(
+          ruleOutput,
+          PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS,
+        ),
+      ).toEqual(expectedRuleOutput);
     },
   );
+
+  it('should report multiple valid accreditations without an accreditation dependency', async () => {
+    const { documents, massIDAuditDocument } = findTestCase(
+      participantAccreditationsAndVerificationsRequirementsTestCases,
+      'The MassID document has a PROCESSOR with multiple valid accreditations (should fail)',
+    );
+
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
+      massIDAuditDocument,
+      ...documents,
+    ]);
+
+    const ruleOutput = await ruleDataProcessor.process(
+      stubRuleInput({ documentId: massIDAuditDocument.id }),
+    );
+
+    expect(ruleOutput.resultContent).toStrictEqual({
+      findings: [
+        {
+          code: 'participant-accreditations-and-verifications-requirements.ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
+    });
+  });
 });

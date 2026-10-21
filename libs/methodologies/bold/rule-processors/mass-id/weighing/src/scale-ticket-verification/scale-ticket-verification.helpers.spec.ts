@@ -117,6 +117,10 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_MISSING_SOURCE',
+      defaultOwner: 'INTEGRATOR',
+    });
   });
 
   it('should return an error when layoutIds is missing or empty', async () => {
@@ -132,7 +136,11 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('is not supported');
+    expect(result.errors[0]?.message).toContain('is not supported');
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_UNSUPPORTED_LAYOUT',
+      defaultOwner: 'CARROT',
+    });
   });
 
   it('should return a mismatch error when ticket net weight differs from event value', async () => {
@@ -163,7 +171,13 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('does not match the "Event Value"');
+    expect(result.errors[0]?.message).toContain(
+      'does not match the "Event Value"',
+    );
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH',
+      defaultOwner: 'INTEGRATOR',
+    });
   });
 
   it('should return an extraction failed error when text extractor throws', async () => {
@@ -179,7 +193,11 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('could not be processed');
+    expect(result.errors[0]?.message).toContain('could not be processed');
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+      defaultOwner: 'CARROT',
+    });
   });
 
   it('should build a scale ticket verification context', () => {
@@ -215,6 +233,10 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
-    expect(result.errors[0]).toContain('could not be processed');
+    expect(result.errors[0]?.message).toContain('could not be processed');
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+      defaultOwner: 'CARROT',
+    });
   });
 });

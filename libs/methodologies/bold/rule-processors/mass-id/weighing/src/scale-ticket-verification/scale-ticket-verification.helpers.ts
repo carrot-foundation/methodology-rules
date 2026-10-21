@@ -15,10 +15,8 @@ import type {
   ScaleTicketVerificationResult,
 } from './scale-ticket-verification.types';
 
-import {
-  INVALID_RESULT_COMMENTS,
-  NET_WEIGHT_CALCULATION_TOLERANCE,
-} from '../weighing.constants';
+import { NET_WEIGHT_CALCULATION_TOLERANCE } from '../weighing.constants';
+import { WEIGHING_FINDINGS } from '../weighing.findings';
 
 const documentExtractor: DocumentExtractorService =
   createDocumentExtractor(textExtractor);
@@ -42,7 +40,7 @@ export const verifyScaleTicketNetWeight = async ({
 
   if (!textExtractorInput) {
     return {
-      errors: [INVALID_RESULT_COMMENTS.SCALE_TICKET_MISSING_SOURCE],
+      errors: [WEIGHING_FINDINGS.render('INVALID.SCALE_TICKET_MISSING_SOURCE')],
     };
   }
 
@@ -51,7 +49,10 @@ export const verifyScaleTicketNetWeight = async ({
   if (!isNonEmptyArray(layoutIds)) {
     return {
       errors: [
-        INVALID_RESULT_COMMENTS.SCALE_TICKET_UNSUPPORTED_LAYOUT('undefined'),
+        WEIGHING_FINDINGS.render(
+          'INVALID.SCALE_TICKET_UNSUPPORTED_LAYOUT',
+          'undefined',
+        ),
       ],
     };
   }
@@ -69,7 +70,7 @@ export const verifyScaleTicketNetWeight = async ({
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
       return {
         errors: [
-          INVALID_RESULT_COMMENTS.SCALE_TICKET_NET_WEIGHT_MISMATCH({
+          WEIGHING_FINDINGS.render('INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH', {
             expectedNetWeight,
             ticketNetWeight,
           }),
@@ -88,7 +89,9 @@ export const verifyScaleTicketNetWeight = async ({
     );
 
     return {
-      errors: [INVALID_RESULT_COMMENTS.SCALE_TICKET_EXTRACTION_FAILED],
+      errors: [
+        WEIGHING_FINDINGS.render('INVALID.SCALE_TICKET_EXTRACTION_FAILED'),
+      ],
     };
   }
 };

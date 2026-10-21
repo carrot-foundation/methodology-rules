@@ -1,4 +1,5 @@
 import type { ScaleTicketExtractedData } from '@carrot-fndn/shared/document-extractor-scale-ticket';
+import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
 import type { TextExtractionInput } from '@carrot-fndn/shared/text-extractor';
 import type { AdditionalVerification } from '@carrot-fndn/shared/types';
 
@@ -13,5 +14,5 @@ export interface ScaleTicketVerificationDependencies {
 }
 
 export interface ScaleTicketVerificationResult {
-  errors: string[];
+  errors: RenderedRuleFinding[];
 }

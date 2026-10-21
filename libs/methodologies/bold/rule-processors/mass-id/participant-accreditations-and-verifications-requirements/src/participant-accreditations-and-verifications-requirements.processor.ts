@@ -35,6 +35,7 @@ import {
 
 import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
+import { PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS } from './participant-accreditations-and-verifications-requirements.findings';
 
 const ACTORS_REQUIRING_DATES: ReadonlySet<BoldDocumentEventLabel> = new Set([
   BoldDocumentEventLabel.PROCESSOR,
@@ -60,15 +61,19 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
       const ruleSubject = await this.getRuleSubject(documentsQuery);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.errorProcessor.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -173,13 +178,17 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     if (isNil(massIDDocument)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_NOT_FOUND',
+        ),
       );
     }
 
     if (accreditationDocuments.size === 0) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.ACCREDITATION_DOCUMENTS_NOT_FOUND,
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.ACCREDITATION_DOCUMENTS_NOT_FOUND',
+        ),
       );
     }
 
@@ -261,7 +270,8 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     if (isNonEmptyArray(missingParticipants)) {
       return this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS',
           missingParticipants,
         ),
       );
@@ -274,7 +284,8 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       };
 
       return this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT(
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT',
           firstParticipant.participantId,
           firstParticipant.actorType,
         ),
@@ -290,7 +301,8 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   }: Omit<RuleSubject, 'massIDAuditDocument'>) {
     if (!isNonEmptyArray(massIDDocument.externalEvents)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS(
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_DOES_NOT_CONTAIN_EVENTS',
           massIDDocument.id,
         ),
       );
@@ -318,7 +330,8 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
     if (isNonEmptyArray(participantsWithoutAccreditationDocuments)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS(
+        PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS.render(
+          'ERROR.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS',
           participantsWithoutAccreditationDocuments.map(
             ([participantId]) => actorParticipants.get(participantId) as string,
           ),

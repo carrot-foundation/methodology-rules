@@ -1,3 +1,4 @@
+import type { RuleFindingsResult } from '@carrot-fndn/shared/rule/result';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import {
@@ -27,6 +28,7 @@ import {
 
 import { RESULT_COMMENTS } from './regional-waste-classification.constants';
 import { RegionalWasteClassificationProcessorErrors } from './regional-waste-classification.errors';
+import { REGIONAL_WASTE_CLASSIFICATION_FINDINGS } from './regional-waste-classification.findings';
 import { getCdmCodeFromSubtype } from './regional-waste-classification.helpers';
 
 const DESCRIPTION_SIMILARITY_THRESHOLD = 0.85;
@@ -56,21 +58,28 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (recyclerCountryCode !== 'BR') {
       return this.isFailed(
-        RESULT_COMMENTS.failed.UNSUPPORTED_COUNTRY(recyclerCountryCode),
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.UNSUPPORTED_COUNTRY',
+          recyclerCountryCode,
+        ),
         subject,
       );
     }
 
     if (!isNonEmptyString(id)) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.CLASSIFICATION_ID_MISSING,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.CLASSIFICATION_ID_MISSING',
+        ),
         subject,
       );
     }
 
     if (!isNonEmptyString(description)) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.CLASSIFICATION_DESCRIPTION_MISSING,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.CLASSIFICATION_DESCRIPTION_MISSING',
+        ),
         subject,
       );
     }
@@ -83,7 +92,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (!normalizedId) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_ID,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.INVALID_CLASSIFICATION_ID',
+        ),
         subject,
       );
     }
@@ -92,7 +103,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (!expectedCdmCode) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.INVALID_SUBTYPE_MAPPING,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.INVALID_SUBTYPE_MAPPING',
+        ),
         subject,
       );
     }
@@ -104,7 +117,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (classificationEntry.CDM_CODE !== expectedCdmCode) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.INVALID_SUBTYPE_CDM_CODE_MISMATCH,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.INVALID_SUBTYPE_CDM_CODE_MISMATCH',
+        ),
         subject,
       );
     }
@@ -119,7 +134,9 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
 
     if (!isMatch) {
       return this.isFailed(
-        RESULT_COMMENTS.failed.INVALID_CLASSIFICATION_DESCRIPTION,
+        REGIONAL_WASTE_CLASSIFICATION_FINDINGS.result(
+          'FAILED.INVALID_CLASSIFICATION_DESCRIPTION',
+        ),
         subject,
       );
     }
@@ -157,11 +174,11 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
   }
 
   private isFailed(
-    resultComment: string,
+    failedResult: RuleFindingsResult,
     resultContent?: AnyObject,
   ): EvaluateResultOutput {
     return {
-      resultComment,
+      ...failedResult,
       ...(resultContent && { resultContent }),
       resultStatus: 'FAILED',
     };

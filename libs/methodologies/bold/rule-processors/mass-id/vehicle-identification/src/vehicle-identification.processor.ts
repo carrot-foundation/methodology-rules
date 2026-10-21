@@ -20,6 +20,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './vehicle-identification.constants';
+import { VEHICLE_IDENTIFICATION_FINDINGS } from './vehicle-identification.findings';
 
 const { VEHICLE_DESCRIPTION, VEHICLE_LICENSE_PLATE, VEHICLE_TYPE } =
   BoldAttributeName;
@@ -41,28 +42,35 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     pickUpEvent: event,
   }: RuleSubject): EvaluateResultOutput {
     if (isNil(event)) {
-      return this.createResult(
-        false,
-        RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
-      );
+      return {
+        ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+          'FAILED.PICK_UP_EVENT_MISSING',
+        ),
+        resultStatus: 'FAILED',
+      };
     }
 
     const vehicleTypeValue = getEventAttributeValue(event, VEHICLE_TYPE);
 
     if (!isNonEmptyString(vehicleTypeValue)) {
-      return this.createResult(
-        false,
-        RESULT_COMMENTS.failed.VEHICLE_TYPE_MISSING,
-      );
+      return {
+        ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+          'FAILED.VEHICLE_TYPE_MISSING',
+        ),
+        resultStatus: 'FAILED',
+      };
     }
 
     if (
       !(Object.values(BoldVehicleType) as unknown[]).includes(vehicleTypeValue)
     ) {
-      return this.createResult(
-        false,
-        RESULT_COMMENTS.failed.INVALID_VEHICLE_TYPE(vehicleTypeValue),
-      );
+      return {
+        ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+          'FAILED.INVALID_VEHICLE_TYPE',
+          vehicleTypeValue,
+        ),
+        resultStatus: 'FAILED',
+      };
     }
 
     const hasDescription = eventHasNonEmptyStringAttribute(
@@ -72,26 +80,25 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
 
     if (vehicleTypeValue === (OTHERS as string)) {
       return hasDescription
-        ? this.createResult(
-            true,
+        ? this.createPassedResult(
             RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_DESCRIPTION(
               vehicleTypeValue,
             ),
           )
-        : this.createResult(
-            false,
-            RESULT_COMMENTS.failed.VEHICLE_DESCRIPTION_MISSING(
+        : {
+            ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+              'FAILED.VEHICLE_DESCRIPTION_MISSING',
               vehicleTypeValue,
             ),
-          );
+            resultStatus: 'FAILED',
+          };
     }
 
     const needsLicensePlate =
       !VEHICLE_TYPE_NON_LICENSE_PLATE_VALUES.has(vehicleTypeValue);
 
     if (!needsLicensePlate) {
-      return this.createResult(
-        true,
+      return this.createPassedResult(
         RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITHOUT_LICENSE_PLATE(
           vehicleTypeValue,
         ),
@@ -105,21 +112,25 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     );
 
     if (!hasLicensePlate) {
-      return this.createResult(
-        false,
-        RESULT_COMMENTS.failed.LICENSE_PLATE_MISSING(vehicleTypeValue),
-      );
+      return {
+        ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+          'FAILED.LICENSE_PLATE_MISSING',
+          vehicleTypeValue,
+        ),
+        resultStatus: 'FAILED',
+      };
     }
 
     if (!isValidLicensePlate(licensePlate)) {
-      return this.createResult(
-        false,
-        RESULT_COMMENTS.failed.INVALID_LICENSE_PLATE_FORMAT,
-      );
+      return {
+        ...VEHICLE_IDENTIFICATION_FINDINGS.result(
+          'FAILED.INVALID_LICENSE_PLATE_FORMAT',
+        ),
+        resultStatus: 'FAILED',
+      };
     }
 
-    return this.createResult(
-      true,
+    return this.createPassedResult(
       RESULT_COMMENTS.passed.VEHICLE_IDENTIFIED_WITH_LICENSE_PLATE,
     );
   }
@@ -130,13 +141,7 @@ export class VehicleIdentificationProcessor extends ParentDocumentRuleProcessor<
     };
   }
 
-  private createResult(
-    passed: boolean,
-    resultComment: string,
-  ): EvaluateResultOutput {
-    return {
-      resultComment,
-      resultStatus: passed ? 'PASSED' : 'FAILED',
-    };
+  private createPassedResult(resultComment: string): EvaluateResultOutput {
+    return { resultComment, resultStatus: 'PASSED' };
   }
 }

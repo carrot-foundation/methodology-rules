@@ -1,6 +1,10 @@
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import {
+  DOCUMENT_EXTRACTION_COMMENTS,
+  type ReviewReason,
+} from '@carrot-fndn/shared/document-extractor';
+import {
   stubAddress,
   stubBoldMassIDRecyclingManifestEvent,
   stubBoldMassIDTransportManifestEvent,
@@ -14,13 +18,16 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
 
-import { RESULT_COMMENTS } from './document-manifest-data.constants';
+import {
+  RESULT_COMMENTS,
+  REVIEW_REASONS,
+} from './document-manifest-data.constants';
 import { type DocumentManifestType } from './document-manifest-data.processor';
 
 interface DocumentManifestDataTestCase extends RuleTestCase {
-  crossValidationFailMessages?: string[];
+  crossValidationFailReasons?: ReviewReason[];
   crossValidationPassMessages?: string[];
-  crossValidationReviewReasons?: Array<{ code: string; description: string }>;
+  crossValidationReviewReasons?: ReviewReason[];
   documentManifestType: DocumentManifestType;
   events: Record<string, ReturnType<typeof stubDocumentEvent> | undefined>;
 }
@@ -61,6 +68,48 @@ const defaultEvents = {
     label: RECYCLER,
     name: ACTOR,
   }),
+};
+
+const crossValidatedTransportManifestEvents =
+  (): DocumentManifestDataTestCase['events'] => ({
+    [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
+      metadataAttributes: [
+        [DOCUMENT_TYPE, 'MTR'],
+        [DOCUMENT_NUMBER, '123'],
+        {
+          format: DATE,
+          name: ISSUE_DATE,
+          value: '2025-01-01',
+        },
+      ],
+      partialDocumentEvent: {
+        address: sameAddress,
+        attachments: [
+          stubDocumentEventAttachment({
+            label: TRANSPORT_MANIFEST,
+          }),
+        ],
+        value: 100,
+      },
+    }),
+    ...defaultEvents,
+  });
+
+const documentNumberMismatchReason = REVIEW_REASONS.DOCUMENT_NUMBER_MISMATCH({
+  eventDocumentNumber: '123',
+  extractedDocumentNumber: '456',
+});
+const vehiclePlateMismatchReason = REVIEW_REASONS.VEHICLE_PLATE_MISMATCH();
+const receivingDateNotExtractedReason = REVIEW_REASONS.FIELD_NOT_EXTRACTED({
+  context: 'Drop-off event',
+  field: 'receiving date',
+});
+const extractionFailedReason: ReviewReason = {
+  code: 'EXTRACTION_FAILED',
+  description: DOCUMENT_EXTRACTION_COMMENTS.EXTRACTION_FAILED(
+    'attachment-1',
+    'Extraction failed',
+  ),
 };
 
 export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
@@ -369,64 +418,21 @@ export const documentManifestDataTestCases: DocumentManifestDataTestCase[] = [
 
 export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
   {
-    crossValidationFailMessages: ['Document number mismatch'],
+    crossValidationFailReasons: [documentNumberMismatchReason],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
-    events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
-        metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
-          {
-            format: DATE,
-            name: ISSUE_DATE,
-            value: '2025-01-01',
-          },
-        ],
-        partialDocumentEvent: {
-          address: sameAddress,
-          attachments: [
-            stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
-            }),
-          ],
-          value: 100,
-        },
-      }),
-      ...defaultEvents,
-    },
-    resultComment: 'Document number mismatch',
+    events: crossValidatedTransportManifestEvents(),
+    resultComment: documentNumberMismatchReason.description,
     resultStatus: 'FAILED',
     scenario: 'Cross-validation finds mismatches in the document',
   },
   {
     crossValidationReviewReasons: [
-      { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
+      vehiclePlateMismatchReason,
+      receivingDateNotExtractedReason,
     ],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
-    events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
-        metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
-          {
-            format: DATE,
-            name: ISSUE_DATE,
-            value: '2025-01-01',
-          },
-        ],
-        partialDocumentEvent: {
-          address: sameAddress,
-          attachments: [
-            stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
-            }),
-          ],
-          value: 100,
-        },
-      }),
-      ...defaultEvents,
-    },
-    resultComment: 'Review required: Low confidence extraction',
+    events: crossValidatedTransportManifestEvents(),
+    resultComment: `Review required: ${vehiclePlateMismatchReason.description}; ${receivingDateNotExtractedReason.description}`,
     resultStatus: 'REVIEW_REQUIRED',
     scenario: 'Cross-validation requires review',
   },
@@ -435,67 +441,28 @@ export const crossValidationTestCases: DocumentManifestDataTestCase[] = [
       'The attachment pass message from extraction',
     ],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
-    events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
-        metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
-          {
-            format: DATE,
-            name: ISSUE_DATE,
-            value: '2025-01-01',
-          },
-        ],
-        partialDocumentEvent: {
-          address: sameAddress,
-          attachments: [
-            stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
-            }),
-          ],
-          value: 100,
-        },
-      }),
-      ...defaultEvents,
-    },
+    events: crossValidatedTransportManifestEvents(),
     resultComment: 'The attachment pass message from extraction',
     resultStatus: 'PASSED',
     scenario: 'Cross-validation provides pass messages',
   },
   {
-    crossValidationFailMessages: ['Document number mismatch'],
-    crossValidationReviewReasons: [
-      { code: 'LOW_CONFIDENCE', description: 'Low confidence extraction' },
-    ],
+    crossValidationFailReasons: [documentNumberMismatchReason],
+    crossValidationReviewReasons: [vehiclePlateMismatchReason],
     documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
-    events: {
-      [TRANSPORT_MANIFEST]: stubBoldMassIDTransportManifestEvent({
-        metadataAttributes: [
-          [DOCUMENT_TYPE, 'MTR'],
-          [DOCUMENT_NUMBER, '123'],
-          {
-            format: DATE,
-            name: ISSUE_DATE,
-            value: '2025-01-01',
-          },
-        ],
-        partialDocumentEvent: {
-          address: sameAddress,
-          attachments: [
-            stubDocumentEventAttachment({
-              label: TRANSPORT_MANIFEST,
-            }),
-          ],
-          value: 100,
-        },
-      }),
-      ...defaultEvents,
-    },
-    resultComment:
-      'Document number mismatch Review required: Low confidence extraction',
+    events: crossValidatedTransportManifestEvents(),
+    resultComment: `${documentNumberMismatchReason.description} Review required: ${vehiclePlateMismatchReason.description}`,
     resultStatus: 'FAILED',
     scenario:
       'Cross-validation finds mismatches and also requires review for other fields',
+  },
+  {
+    crossValidationFailReasons: [extractionFailedReason],
+    documentManifestType: TRANSPORT_MANIFEST as DocumentManifestType,
+    events: crossValidatedTransportManifestEvents(),
+    resultComment: extractionFailedReason.description,
+    resultStatus: 'FAILED',
+    scenario: 'The document extraction fails',
   },
 ];
 

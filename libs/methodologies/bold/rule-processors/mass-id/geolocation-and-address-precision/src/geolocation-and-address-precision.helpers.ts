@@ -1,3 +1,4 @@
+import type { RuleFindingsResult } from '@carrot-fndn/shared/rule/result';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
@@ -40,9 +41,9 @@ import {
 } from './geolocation-and-address-precision.validators';
 
 export interface SimilarityCommentTemplates {
-  failed: (similarityPercent: number) => string;
+  failed: (similarityPercent: number) => RuleFindingsResult;
   passed: (similarityPercent: number) => string;
-  reviewRequired: (similarityPercent: number) => string;
+  reviewRequired: (similarityPercent: number) => RuleFindingsResult;
 }
 
 export const evaluateAddressSimilarityResult = (
@@ -58,15 +59,12 @@ export const evaluateAddressSimilarityResult = (
   const similarityPercent = Math.floor(score * 100);
 
   if (!isMatch || score < ADDRESS_SIMILARITY_THRESHOLD) {
-    return {
-      resultComment: templates.failed(similarityPercent),
-      resultStatus: 'FAILED',
-    };
+    return { ...templates.failed(similarityPercent), resultStatus: 'FAILED' };
   }
 
   if (getEnableReviewRequired()) {
     return {
-      resultComment: templates.reviewRequired(similarityPercent),
+      ...templates.reviewRequired(similarityPercent),
       resultStatus: 'REVIEW_REQUIRED',
     };
   }
@@ -94,11 +92,11 @@ export const findRecyclerAccreditation = (
     );
   });
 
-export const pickGpsComment = (
+export const pickGpsComment = <Comment>(
   addressDistance: number | undefined,
-  noCoord: () => string,
-  withCoord: (distance: number) => string,
-): string => {
+  noCoord: () => Comment,
+  withCoord: (distance: number) => Comment,
+): Comment => {
   if (isNil(addressDistance)) {
     return noCoord();
   }

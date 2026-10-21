@@ -1,4 +1,9 @@
 import { logger } from '@carrot-fndn/shared/helpers';
+import { RuleFindingSchema } from '@carrot-fndn/shared/rule/types';
+import {
+  captureThrownError,
+  createStubFromSchema,
+} from '@carrot-fndn/shared/testing';
 import * as Sentry from '@sentry/aws-serverless';
 
 import { BaseProcessorErrors } from './base-processor.errors';
@@ -30,34 +35,42 @@ describe('BaseProcessorErrors', () => {
   });
 
   describe('getKnownError', () => {
-    it('should create an error with the known error prefix', () => {
-      const error = processor.getKnownError('test message');
+    it('should create an error with the message of a rendered finding', () => {
+      const cause = new Error('cause');
+      const error = processor.getKnownError(
+        {
+          finding: createStubFromSchema(RuleFindingSchema),
+          message: 'test message',
+        },
+        { cause },
+      );
 
       expect(error).toBeInstanceOf(Error);
-      expect(error.message).toContain('test message');
+      expect(error.message).toBe('test message');
+      expect(error.cause).toBe(cause);
     });
   });
 
-  describe('getResultCommentFromError', () => {
-    it('should return the error message for known errors', () => {
-      const error = processor.getKnownError('test message');
-      const result = processor.getResultCommentFromError(error);
+  describe('getFailedResultFromError', () => {
+    it('should return the message and finding of a known error', () => {
+      const finding = createStubFromSchema(RuleFindingSchema);
+      const error = processor.getKnownError({
+        finding,
+        message: 'test message',
+      });
 
-      expect(result).toBe('test message');
+      expect(processor.getFailedResultFromError(error)).toEqual({
+        resultComment: 'test message',
+        resultFindings: [finding],
+      });
     });
 
     it('should capture and rethrow an unknown Error with the same identity', () => {
       const error = new Error('unknown error');
-      let thrownError: unknown;
 
-      try {
-        processor.getResultCommentFromError(error);
-      } catch (caughtError: unknown) {
-        thrownError = caughtError;
-      }
-
-      expect(thrownError).toBe(error);
-
+      expect(
+        captureThrownError(() => processor.getFailedResultFromError(error)),
+      ).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(
         error,
         'Unexpected error on "processKnownError" method',
@@ -69,16 +82,10 @@ describe('BaseProcessorErrors', () => {
       const error = {
         message: 'not an error',
       };
-      let thrownError: unknown;
 
-      try {
-        processor.getResultCommentFromError(error);
-      } catch (caughtError: unknown) {
-        thrownError = caughtError;
-      }
-
-      expect(thrownError).toBe(error);
-
+      expect(
+        captureThrownError(() => processor.getFailedResultFromError(error)),
+      ).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(
         error,
         'Unexpected error on "processKnownError" method',

@@ -18,6 +18,7 @@ import {
 import { type BoldAttributeValue } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
+import { DROP_OFF_AT_RECYCLER_FINDINGS } from './drop-off-at-recycler.findings';
 
 const { ACTOR, DROP_OFF } = BoldDocumentEventName;
 const { RECYCLER } = BoldDocumentEventLabel;
@@ -37,22 +38,25 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
   }: RuleSubject): EvaluateResultOutput | Promise<EvaluateResultOutput> {
     if (isNil(lastDropOffEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
+        ...DROP_OFF_AT_RECYCLER_FINDINGS.result(
+          'FAILED.MISSING_DROP_OFF_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (!isNonEmptyString(receivingOperatorIdentifier)) {
       return {
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
+        ...DROP_OFF_AT_RECYCLER_FINDINGS.result(
+          'FAILED.MISSING_RECEIVING_OPERATOR_IDENTIFIER',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (lastDropOffEvent.address.id !== recyclerEvent?.address.id) {
       return {
-        resultComment: RESULT_COMMENTS.failed.ADDRESS_MISMATCH,
+        ...DROP_OFF_AT_RECYCLER_FINDINGS.result('FAILED.ADDRESS_MISMATCH'),
         resultStatus: 'FAILED',
       };
     }

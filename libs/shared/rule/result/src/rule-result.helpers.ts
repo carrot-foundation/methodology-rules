@@ -11,8 +11,13 @@ import {
   getSourceCodeUrl,
   getSourceCodeVersion,
 } from '@carrot-fndn/shared/env';
-import { formatHttpStatus, logger } from '@carrot-fndn/shared/helpers';
 import {
+  formatHttpStatus,
+  isNonEmptyArray,
+  logger,
+} from '@carrot-fndn/shared/helpers';
+import {
+  type RuleFinding,
   type RuleInput,
   type RuleOutput,
   RuleOutputSchema,
@@ -46,19 +51,39 @@ export const mapToRuleOutput = (
   {
     resultComment,
     resultContent,
+    resultFindings,
   }: {
     resultComment?: string | undefined;
     resultContent?: AnyObject | undefined;
+    resultFindings?: RuleFinding[] | undefined;
   } = {},
-): RuleOutput =>
-  RuleOutputSchema.parse({
+): RuleOutput => {
+  const isNonPassing = resultStatus !== 'PASSED';
+  const hasFindings = isNonEmptyArray(resultFindings);
+
+  if (isNonPassing && !hasFindings) {
+    logger.error(
+      {
+        requestId: ruleInput.requestId,
+        resultStatus,
+        ruleName: ruleInput.ruleName,
+      },
+      'Non-passing rule result has no findings',
+    );
+  }
+
+  return RuleOutputSchema.parse({
     requestId: ruleInput.requestId,
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,
     resultComment,
-    resultContent,
+    resultContent:
+      isNonPassing && hasFindings
+        ? { ...resultContent, findings: resultFindings }
+        : resultContent,
     resultStatus,
   });
+};
 
 export const signRequest = async (
   input: SignRequestInput,

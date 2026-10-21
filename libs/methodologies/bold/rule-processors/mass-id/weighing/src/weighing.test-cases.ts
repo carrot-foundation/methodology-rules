@@ -1,3 +1,4 @@
+import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
 import type { RuleTestCase } from '@carrot-fndn/shared/rule/types';
 
 import {
@@ -35,6 +36,7 @@ import {
   WRONG_FORMAT_RESULT_COMMENTS,
 } from './weighing.constants';
 import { WeighingProcessorErrors } from './weighing.errors';
+import { WEIGHING_FINDINGS } from './weighing.findings';
 
 const { ACCREDITATION_RESULT, MONITORING_SYSTEMS_AND_EQUIPMENT, WEIGHING } =
   BoldDocumentEventName;
@@ -266,7 +268,7 @@ const createTwoStepWeighingEvents = (
 interface WeighingTestCase extends RuleTestCase {
   accreditationDocuments?: Map<string, StubBoldDocumentParameters> | undefined;
   massIDDocumentEvents: Record<string, BoldDocumentEvent | undefined>;
-  scaleTicketVerificationError?: string;
+  scaleTicketVerificationError?: RenderedRuleFinding;
 }
 
 const processorErrors = new WeighingProcessorErrors();
@@ -534,9 +536,11 @@ export const weighingTestCases: WeighingTestCase[] = [
     massIDDocumentEvents: {
       [WEIGHING]: createWeighingEvent(validWeighingAttributes),
     },
-    resultComment: 'Scale ticket mismatch',
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_EXTRACTION_FAILED,
     resultStatus: 'FAILED',
-    scaleTicketVerificationError: 'Scale ticket mismatch',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+    ),
     scenario: `Scale ticket verification fails for "${WEIGHING}" event`,
   },
   {
