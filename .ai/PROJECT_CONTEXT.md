@@ -94,6 +94,7 @@ libs/methodologies/{methodology}/rule-processors/{document-type}/{processor-name
     {name}.errors.ts           # Custom error classes
     {name}.helpers.ts          # Pure helper functions
     {name}.constants.ts        # Constants and result comment strings
+    {name}.findings.ts         # Finding codes, default owners, accreditation dependencies
     {name}.types.ts            # TypeScript type definitions
     {name}.validators.ts       # Zod validators (optional)
     {name}.processor.spec.ts   # Processor unit tests

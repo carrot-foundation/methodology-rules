@@ -27,6 +27,7 @@ import {
   mapDocumentRelation,
 } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
+  joinRenderedFindings,
   mapToRuleOutput,
   type RenderedRuleFinding,
 } from '@carrot-fndn/shared/rule/result';
@@ -51,7 +52,6 @@ import {
   getValuesRelatedToWeighing,
   getWeighingEvents,
   isExceptionValid,
-  toFailedResult,
   validateTwoStepWeighingEvents,
   validateWeighingValues,
   type WeighingValues,
@@ -172,7 +172,10 @@ export class WeighingProcessor extends RuleDataProcessor {
         validateTwoStepWeighingEvents(weighingEvents);
 
       if (twoStepValidationMessages.errors.length > 0) {
-        return toFailedResult(twoStepValidationMessages.errors);
+        return {
+          ...joinRenderedFindings(twoStepValidationMessages.errors),
+          resultStatus: 'FAILED',
+        };
       }
     }
 
@@ -188,7 +191,10 @@ export class WeighingProcessor extends RuleDataProcessor {
     );
 
     if (validationMessages.errors.length > 0) {
-      return toFailedResult(validationMessages.errors);
+      return {
+        ...joinRenderedFindings(validationMessages.errors),
+        resultStatus: 'FAILED',
+      };
     }
 
     const additionalVerifications =
@@ -283,7 +289,10 @@ export class WeighingProcessor extends RuleDataProcessor {
 
     if (scaleTicketValidation.errors.length > 0) {
       return {
-        errorResult: toFailedResult(scaleTicketValidation.errors),
+        errorResult: {
+          ...joinRenderedFindings(scaleTicketValidation.errors),
+          resultStatus: 'FAILED',
+        },
         validated: false,
       };
     }

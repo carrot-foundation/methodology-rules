@@ -8,6 +8,7 @@ import {
   BoldDocumentType,
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { joinRenderedFindings } from '@carrot-fndn/shared/rule/result';
 import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
@@ -79,8 +80,7 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
     }
 
     return {
-      resultComment: failures.map(({ message }) => message).join(' '),
-      resultFindings: failures.map(({ finding }) => finding),
+      ...joinRenderedFindings(failures),
       resultStatus: 'FAILED',
     };
   }

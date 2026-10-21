@@ -1,5 +1,4 @@
 import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
-import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import {
   getOrDefault,
@@ -545,14 +544,6 @@ const validators: Record<string, Validator> = {
     };
   },
 };
-
-export const toFailedResult = (
-  errors: RenderedRuleFinding[],
-): EvaluateResultOutput => ({
-  resultComment: errors.map(({ message }) => message).join(' '),
-  resultFindings: errors.map(({ finding }) => finding),
-  resultStatus: 'FAILED',
-});
 
 export const validateWeighingValues = (
   values: WeighingValues,

@@ -79,11 +79,11 @@ describe('RuleStandardDataProcessor', () => {
     const ruleInput = stubRuleInput();
     const resultFindings = [createStubFromSchema(RuleFindingSchema)];
 
-    (ruleStandardDataProcessor as any)['evaluateResult'] = vi.fn(() => ({
+    ruleStandardDataProcessor['evaluateResult'] = vi.fn(() => ({
       resultComment: 'Failed',
       resultFindings,
       resultStatus: 'FAILED',
-    }));
+    })) as never;
 
     const result = await ruleStandardDataProcessor.process({
       ...ruleInput,

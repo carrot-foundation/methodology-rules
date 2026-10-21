@@ -1,4 +1,3 @@
-import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import {
@@ -27,6 +26,10 @@ import {
   BoldDocumentEventName,
   BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  joinRenderedFindings,
+  type RenderedRuleFinding,
+} from '@carrot-fndn/shared/rule/result';
 import {
   type DocumentEventAttachment,
   DocumentEventAttributeFormat,
@@ -150,8 +153,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
 
     if (allFailures.length > 0) {
       return {
-        resultComment: allFailures.map(({ message }) => message).join(' '),
-        resultFindings: allFailures.map(({ finding }) => finding),
+        ...joinRenderedFindings(allFailures),
         resultStatus: 'FAILED',
       };
     }

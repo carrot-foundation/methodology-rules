@@ -6,6 +6,7 @@ description: 'Rule mapping for rule-processors'
 # Rule rule-processors
 
 Apply this rule whenever work touches:
+
 - `libs/methodologies/**/*.ts`
 
 Rule processors are the core units of methodology evaluation. Each processor validates a specific aspect of a document against Bold methodology requirements.
@@ -23,6 +24,7 @@ Every rule processor must contain the following files:
 ├── {rule-name}.test-cases.ts      # Shared test data
 ├── {rule-name}.helpers.ts         # Stateless helpers (optional)
 ├── {rule-name}.constants.ts       # Result-comment templates and thresholds (optional)
+├── {rule-name}.findings.ts        # Finding codes, default owners, accreditation dependencies
 ├── index.ts                       # Public exports
 ├── project.json                   # Nx project config
 └── vitest.config.ts               # Vitest config

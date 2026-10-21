@@ -33,7 +33,10 @@ import {
   MassIDOrganicSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
-import { mapToRuleOutput } from '@carrot-fndn/shared/rule/result';
+import {
+  mapToRuleOutput,
+  type RuleFindingsResult,
+} from '@carrot-fndn/shared/rule/result';
 import {
   type RuleInput,
   type RuleOutput,
@@ -285,7 +288,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   private buildOthersIfOrganicTerminalResult(
     code: NonEmptyString,
     reason: 'expired' | 'missing',
-    expiredResult: ReturnType<typeof PREVENTED_EMISSIONS_FINDINGS.result>,
+    expiredResult: RuleFindingsResult,
   ): EvaluateResultOutput {
     if (getEnableReviewRequired()) {
       return {

@@ -1,4 +1,7 @@
-import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
+import type {
+  RenderedRuleFinding,
+  RuleFindingsResult,
+} from '@carrot-fndn/shared/rule/result';
 import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
 
 import { logger } from '@carrot-fndn/shared/helpers';
@@ -7,11 +10,6 @@ import * as Sentry from '@sentry/aws-serverless';
 export interface ErrorMessage {
   [key: string]: ((...arguments_: never[]) => string) | string;
   FAILED_BY_ERROR: string;
-}
-
-interface FailedResultFromError {
-  resultComment: string;
-  resultFindings: RuleFinding[];
 }
 
 class KnownFindingError extends Error {
@@ -29,7 +27,7 @@ export abstract class BaseProcessorErrors {
 
   protected readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
 
-  getFailedResultFromError(error: unknown): FailedResultFromError {
+  getFailedResultFromError(error: unknown): RuleFindingsResult {
     const failedResult = this.processKnownError(error);
 
     if (failedResult === undefined) {
@@ -40,44 +38,32 @@ export abstract class BaseProcessorErrors {
   }
 
   getKnownError(
-    messageOrRenderedFinding: RenderedRuleFinding | string,
+    renderedFinding: RenderedRuleFinding,
     options?: ErrorOptions,
   ): Error {
-    if (typeof messageOrRenderedFinding === 'string') {
-      return new Error(
-        this.KNOWN_ERROR_PREFIX + messageOrRenderedFinding,
-        options,
-      );
-    }
-
     return new KnownFindingError(
-      this.KNOWN_ERROR_PREFIX + messageOrRenderedFinding.message,
-      messageOrRenderedFinding.finding,
+      this.KNOWN_ERROR_PREFIX + renderedFinding.message,
+      renderedFinding.finding,
       options,
     );
-  }
-
-  getResultCommentFromError(error: unknown): string {
-    return this.getFailedResultFromError(error).resultComment;
   }
 
   private getKnownErrorMessage(error: Error): string {
     return error.message.replace(this.KNOWN_ERROR_PREFIX, '');
   }
 
-  private isKnownError(error: unknown): error is Error {
+  private isKnownError(error: unknown): error is KnownFindingError {
     return (
-      error instanceof Error &&
+      error instanceof KnownFindingError &&
       error.message.startsWith(this.KNOWN_ERROR_PREFIX)
     );
   }
 
-  private processKnownError(error: unknown): FailedResultFromError | undefined {
+  private processKnownError(error: unknown): RuleFindingsResult | undefined {
     if (this.isKnownError(error)) {
       return {
         resultComment: this.getKnownErrorMessage(error),
-        resultFindings:
-          error instanceof KnownFindingError ? [error.finding] : [],
+        resultFindings: [error.finding],
       };
     }
 

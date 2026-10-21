@@ -1,7 +1,11 @@
 import { MassIDActorType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
 
-import { defineRuleFindings, SHARED_FINDINGS } from './rule-findings';
+import {
+  defineRuleFindings,
+  joinRenderedFindings,
+  SHARED_FINDINGS,
+} from './rule-findings';
 
 const TEST_MESSAGES = {
   ERROR: {
@@ -58,13 +62,26 @@ describe('defineRuleFindings', () => {
   });
 
   it('should return the finding of a key without rendering its message', () => {
-    expect(TEST_FINDINGS.finding('FAILED.MASS_MISMATCH')).toStrictEqual(
-      TEST_FINDINGS.render(
-        'FAILED.MASS_MISMATCH',
-        faker.number.int(),
-        faker.number.int(),
-      ).finding,
+    const message = vi.fn(
+      (declaredMass: number) => `Declared mass ${declaredMass}`,
     );
+    const findings = defineRuleFindings(
+      'test-rule',
+      { FAILED: { MASS_MISMATCH: message } },
+      {
+        'FAILED.MASS_MISMATCH': {
+          defaultOwner: 'RECYCLER',
+          dependsOnAccreditation: MassIDActorType.RECYCLER,
+        },
+      },
+    );
+
+    expect(findings.finding('FAILED.MASS_MISMATCH')).toStrictEqual({
+      code: 'test-rule.FAILED.MASS_MISMATCH',
+      defaultOwner: 'RECYCLER',
+      dependsOnAccreditation: MassIDActorType.RECYCLER,
+    });
+    expect(message).not.toHaveBeenCalled();
   });
 
   it('should reject wrong render arguments at compile time', () => {
@@ -138,6 +155,32 @@ describe('defineRuleFindings', () => {
       // @ts-expect-error -- ERROR.UNKNOWN is not a message key
       TEST_FINDINGS.finding('ERROR.UNKNOWN'),
     ).toThrow('Unknown finding key "ERROR.UNKNOWN" for rule "test-rule"');
+  });
+});
+
+describe('joinRenderedFindings', () => {
+  it('should join the messages with a space and keep the findings in order', () => {
+    const declaredMass = faker.number.int();
+    const measuredMass = faker.number.int();
+    const renderedFindings = [
+      TEST_FINDINGS.render('ERROR.INVALID_SUBJECT'),
+      TEST_FINDINGS.render('FAILED.MASS_MISMATCH', declaredMass, measuredMass),
+    ];
+
+    expect(joinRenderedFindings(renderedFindings)).toStrictEqual({
+      resultComment: `The rule subject is invalid Declared mass ${declaredMass} differs from measured mass ${measuredMass}`,
+      resultFindings: [
+        TEST_FINDINGS.finding('ERROR.INVALID_SUBJECT'),
+        TEST_FINDINGS.finding('FAILED.MASS_MISMATCH'),
+      ],
+    });
+  });
+
+  it('should return an empty comment and no findings for no rendered findings', () => {
+    expect(joinRenderedFindings([])).toStrictEqual({
+      resultComment: '',
+      resultFindings: [],
+    });
   });
 });
 

@@ -134,6 +134,29 @@ describe('expectRuleOutput', () => {
         ruleInput,
         ruleOutput,
       }),
-    ).toThrow();
+    ).toThrow('Expected validation to succeed');
+  });
+
+  it('should fail when the findings are valid and the rest of the output differs', () => {
+    const ruleInput = stubRuleInput();
+    const resultComment = faker.lorem.sentence();
+    const ruleOutput: RuleOutput = {
+      requestId: ruleInput.requestId,
+      responseToken: ruleInput.responseToken,
+      responseUrl: ruleInput.responseUrl,
+      resultComment: faker.lorem.sentence(),
+      resultContent: { findings: [TEST_FINDING] },
+      resultStatus: 'FAILED',
+    };
+
+    expect(() =>
+      expectRuleOutput({
+        findings: TEST_FINDINGS,
+        resultComment,
+        resultStatus: 'FAILED',
+        ruleInput,
+        ruleOutput,
+      }),
+    ).toThrow('to deeply equal');
   });
 });
