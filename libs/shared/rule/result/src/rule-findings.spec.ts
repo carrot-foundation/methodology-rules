@@ -82,6 +82,34 @@ describe('defineRuleFindings', () => {
     );
   });
 
+  it('should return the rendered string message and its finding as a result', () => {
+    expect(TEST_FINDINGS.result('ERROR.INVALID_SUBJECT')).toStrictEqual({
+      resultComment: 'The rule subject is invalid',
+      resultFindings: [TEST_FINDINGS.finding('ERROR.INVALID_SUBJECT')],
+    });
+  });
+
+  it('should return the rendered function message and its finding as a result', () => {
+    const declaredMass = faker.number.int();
+    const measuredMass = faker.number.int();
+
+    expect(
+      TEST_FINDINGS.result('FAILED.MASS_MISMATCH', declaredMass, measuredMass),
+    ).toStrictEqual({
+      resultComment: `Declared mass ${declaredMass} differs from measured mass ${measuredMass}`,
+      resultFindings: [TEST_FINDINGS.finding('FAILED.MASS_MISMATCH')],
+    });
+  });
+
+  it('should reject wrong result arguments at compile time', () => {
+    // @ts-expect-error -- MASS_MISMATCH takes two numbers
+    const result = TEST_FINDINGS.result('FAILED.MASS_MISMATCH', 'heavy', 1);
+
+    expect(result.resultComment).toBe(
+      'Declared mass heavy differs from measured mass 1',
+    );
+  });
+
   it('should throw naming the message keys that have no metadata', () => {
     expect(() =>
       defineRuleFindings(

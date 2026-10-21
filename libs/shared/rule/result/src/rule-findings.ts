@@ -28,6 +28,10 @@ export interface RuleFindings<M extends FindingMessageGroups> {
     key: K,
     ...arguments_: FindingArguments<Get<M, K>>
   ) => RenderedRuleFinding;
+  result: <K extends FindingKeyOf<M>>(
+    key: K,
+    ...arguments_: FindingArguments<Get<M, K>>
+  ) => { resultComment: string; resultFindings: RuleFinding[] };
 }
 
 type FindingArguments<Message> = Message extends (
@@ -104,13 +108,20 @@ export const defineRuleFindings = <M extends FindingMessageGroups>(
     };
   };
 
+  const render: RuleFindings<M>['render'] = (key, ...arguments_) => ({
+    finding: finding(key),
+    message: renderMessage(lookUp(messagesByKey, key), arguments_),
+  });
+
   return {
     codes: new Set([...messagesByKey.keys()].map((key) => `${slug}.${key}`)),
     finding,
-    render: (key, ...arguments_) => ({
-      finding: finding(key),
-      message: renderMessage(lookUp(messagesByKey, key), arguments_),
-    }),
+    render,
+    result: (key, ...arguments_) => {
+      const { finding: renderedFinding, message } = render(key, ...arguments_);
+
+      return { resultComment: message, resultFindings: [renderedFinding] };
+    },
   };
 };
 
