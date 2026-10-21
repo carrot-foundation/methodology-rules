@@ -189,6 +189,46 @@ describe('PreventedEmissionsProcessor', () => {
         });
       },
     );
+
+    it.each([
+      {
+        expectedFinding: {
+          code: 'prevented-emissions.ERROR.MISSING_GREENHOUSE_GAS_TYPE',
+          defaultOwner: 'RECYCLER',
+          dependsOnAccreditation: 'Recycler',
+        },
+        scenario:
+          'The Recycler Accreditation document does not have the Greenhouse Gas Type (GHG) attribute',
+      },
+      {
+        expectedFinding: {
+          code: 'prevented-emissions.ERROR.INVALID_BASELINES',
+          defaultOwner: 'RECYCLER',
+        },
+        scenario: 'The Recycler Accreditation document has no valid baselines',
+      },
+    ])(
+      'should report the exact finding for $expectedFinding.code',
+      async ({ expectedFinding, scenario }) => {
+        const { documents, massIDAuditDocument } = findTestCase(
+          preventedEmissionsErrorTestCases,
+          scenario,
+        );
+
+        spyOnDocumentQueryServiceLoad(massIDAuditDocument, [
+          massIDAuditDocument,
+          ...documents,
+        ]);
+
+        const ruleOutput = await ruleDataProcessor.process(
+          stubRuleInput({ documentId: massIDAuditDocument.id }),
+        );
+
+        expect(ruleOutput.resultContent).toStrictEqual({
+          findings: [expectedFinding],
+        });
+      },
+    );
   });
 
   describe('Others (if organic) tiered resolution', () => {
