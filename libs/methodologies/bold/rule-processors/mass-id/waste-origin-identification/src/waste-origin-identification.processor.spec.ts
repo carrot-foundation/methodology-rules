@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  expectRuleFindings,
+  stubBoldMassIDDocument,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { WASTE_ORIGIN_IDENTIFICATION_FINDINGS } from './waste-origin-identification.findings';
 import { WasteOriginIdentificationProcessor } from './waste-origin-identification.processor';
 import { wasteOriginIdentificationTestCases } from './waste-origin-identification.test-cases';
 
@@ -32,7 +36,9 @@ describe('WasteOriginIdentificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, WASTE_ORIGIN_IDENTIFICATION_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

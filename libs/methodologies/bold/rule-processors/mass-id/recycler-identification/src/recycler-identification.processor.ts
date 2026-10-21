@@ -14,6 +14,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './recycler-identification.constants';
+import { RECYCLER_IDENTIFICATION_FINDINGS } from './recycler-identification.findings';
 
 const { ACTOR } = BoldDocumentEventName;
 const { RECYCLER } = BoldDocumentEventLabel;
@@ -28,14 +29,14 @@ export class RecyclerIdentificationProcessor extends ParentDocumentRuleProcessor
   }: Subject): EvaluateResultOutput {
     if (!isNonEmptyArray(recyclerActorEvents)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.NOT_FOUND,
+        ...RECYCLER_IDENTIFICATION_FINDINGS.result('FAILED.NOT_FOUND'),
         resultStatus: 'FAILED',
       };
     }
 
     if (recyclerActorEvents.length > 1) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MULTIPLE_EVENTS,
+        ...RECYCLER_IDENTIFICATION_FINDINGS.result('FAILED.MULTIPLE_EVENTS'),
         resultStatus: 'FAILED',
       };
     }

@@ -17,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './driver-identification.constants';
+import { DRIVER_IDENTIFICATION_FINDINGS } from './driver-identification.findings';
 
 const {
   DRIVER_IDENTIFIER,
@@ -53,15 +54,19 @@ export class DriverIdentificationProcessor extends ParentDocumentRuleProcessor<R
 
     if (hasDriverId && hasJustification) {
       return {
-        resultComment: RESULT_COMMENTS.failed.DRIVER_AND_JUSTIFICATION_PROVIDED,
+        ...DRIVER_IDENTIFICATION_FINDINGS.result(
+          'FAILED.DRIVER_AND_JUSTIFICATION_PROVIDED',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (!hasDriverId && !hasJustification) {
       return {
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_JUSTIFICATION(vehicleTypeString),
+        ...DRIVER_IDENTIFICATION_FINDINGS.result(
+          'FAILED.MISSING_JUSTIFICATION',
+          vehicleTypeString,
+        ),
         resultStatus: 'FAILED',
       };
     }

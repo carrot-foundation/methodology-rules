@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { stubBoldMassIDDocument } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  expectRuleFindings,
+  stubBoldMassIDDocument,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { RECYCLER_IDENTIFICATION_FINDINGS } from './recycler-identification.findings';
 import { RecyclerIdentificationProcessor } from './recycler-identification.processor';
 import { recyclerIdentificationTestCases } from './recycler-identification.test-cases';
 
@@ -33,7 +37,9 @@ describe('RecyclerIdentificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, RECYCLER_IDENTIFICATION_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

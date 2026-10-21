@@ -11,6 +11,7 @@ import { UTCDate } from '@date-fns/utc';
 import { isAfter, isEqual } from 'date-fns';
 
 import { RESULT_COMMENTS } from './project-period-limit.constants';
+import { PROJECT_PERIOD_LIMIT_FINDINGS } from './project-period-limit.findings';
 
 interface RuleSubject {
   recycledEvent: BoldDocumentEvent | undefined;
@@ -24,7 +25,9 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
 
     if (isNil(recycledEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
+        ...PROJECT_PERIOD_LIMIT_FINDINGS.result(
+          'FAILED.MISSING_RECYCLED_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -34,11 +37,18 @@ export class ProjectPeriodLimitProcessor extends ParentDocumentRuleProcessor<Rul
       isAfter(eventDateUTC, eligibleDate) ||
       isEqual(eventDateUTC, eligibleDate);
 
+    if (isEligible) {
+      return {
+        resultComment: RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE,
+        resultStatus: 'PASSED',
+      };
+    }
+
     return {
-      resultComment: isEligible
-        ? RESULT_COMMENTS.passed.VALID_RECYCLED_EVENT_DATE
-        : RESULT_COMMENTS.failed.INVALID_RECYCLED_EVENT_DATE,
-      resultStatus: isEligible ? 'PASSED' : 'FAILED',
+      ...PROJECT_PERIOD_LIMIT_FINDINGS.result(
+        'FAILED.INVALID_RECYCLED_EVENT_DATE',
+      ),
+      resultStatus: 'FAILED',
     };
   }
 

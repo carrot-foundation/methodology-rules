@@ -17,6 +17,7 @@ import {
   RESULT_COMMENTS,
   TOLERANCE_IN_HOURS,
 } from './composting-cycle-timeframe.constants';
+import { COMPOSTING_CYCLE_TIMEFRAME_FINDINGS } from './composting-cycle-timeframe.findings';
 
 const { DROP_OFF, RECYCLED } = BoldDocumentEventName;
 
@@ -35,14 +36,18 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
 
     if (isNil(dropOffDate)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_DROP_OFF_EVENT,
+        ...COMPOSTING_CYCLE_TIMEFRAME_FINDINGS.result(
+          'FAILED.MISSING_DROP_OFF_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (isNil(recycledDate)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_RECYCLED_EVENT,
+        ...COMPOSTING_CYCLE_TIMEFRAME_FINDINGS.result(
+          'FAILED.MISSING_RECYCLED_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -63,14 +68,20 @@ export class CompostingCycleTimeframeProcessor extends ParentDocumentRuleProcess
       diffInHours <=
       COMPOSTING_CYCLE_MAX_DAYS * HOURS_PER_DAY + TOLERANCE_IN_HOURS;
 
-    const resultStatus = meetsMinimum && meetsMaximum ? 'PASSED' : 'FAILED';
+    if (meetsMinimum && meetsMaximum) {
+      return {
+        resultComment:
+          RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference),
+        resultStatus: 'PASSED',
+      };
+    }
 
     return {
-      resultComment:
-        resultStatus === 'PASSED'
-          ? RESULT_COMMENTS.passed.TIMEFRAME_WITHIN_RANGE(difference)
-          : RESULT_COMMENTS.failed.TIMEFRAME_OUT_OF_RANGE(difference),
-      resultStatus,
+      ...COMPOSTING_CYCLE_TIMEFRAME_FINDINGS.result(
+        'FAILED.TIMEFRAME_OUT_OF_RANGE',
+        difference,
+      ),
+      resultStatus: 'FAILED',
     };
   }
 

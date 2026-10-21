@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  expectRuleFindings,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { REGIONAL_WASTE_CLASSIFICATION_FINDINGS } from './regional-waste-classification.findings';
 import { RegionalWasteClassificationProcessor } from './regional-waste-classification.processor';
 import { regionalWasteClassificationTestCases } from './regional-waste-classification.test-cases';
 
@@ -44,7 +48,9 @@ describe('RegionalWasteClassificationProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, REGIONAL_WASTE_CLASSIFICATION_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
 });

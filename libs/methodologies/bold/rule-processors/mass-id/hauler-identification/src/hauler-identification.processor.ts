@@ -19,6 +19,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './hauler-identification.constants';
+import { HAULER_IDENTIFICATION_FINDINGS } from './hauler-identification.findings';
 
 const { ACTOR, PICK_UP } = BoldDocumentEventName;
 const { HAULER } = BoldDocumentEventLabel;
@@ -41,7 +42,9 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
   }: Subject): EvaluateResultOutput {
     if (isNil(pickUpEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.PICK_UP_EVENT_MISSING,
+        ...HAULER_IDENTIFICATION_FINDINGS.result(
+          'FAILED.PICK_UP_EVENT_MISSING',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -71,7 +74,8 @@ export class HaulerIdentificationProcessor extends ParentDocumentRuleProcessor<S
     }
 
     return {
-      resultComment: RESULT_COMMENTS.failed.HAULER_EVENT_MISSING(
+      ...HAULER_IDENTIFICATION_FINDINGS.result(
+        'FAILED.HAULER_EVENT_MISSING',
         vehicleType as string,
       ),
       resultStatus: 'FAILED',

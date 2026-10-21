@@ -17,6 +17,7 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { RESULT_COMMENTS } from './waste-origin-identification.constants';
+import { WASTE_ORIGIN_IDENTIFICATION_FINDINGS } from './waste-origin-identification.findings';
 
 const { ACTOR, PICK_UP, WASTE_GENERATOR } = BoldDocumentEventName;
 const { UNIDENTIFIED } = BoldUnidentifiedAttributeValue;
@@ -33,7 +34,9 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
   }: Subject): EvaluateResultOutput {
     if (isNil(pickUpEvent)) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_PICK_UP_EVENT,
+        ...WASTE_ORIGIN_IDENTIFICATION_FINDINGS.result(
+          'FAILED.MISSING_PICK_UP_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -43,7 +46,9 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
       wasteGeneratorEvents.length > 1
     ) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MULTIPLE_WASTE_GENERATOR_EVENTS,
+        ...WASTE_ORIGIN_IDENTIFICATION_FINDINGS.result(
+          'FAILED.MULTIPLE_WASTE_GENERATOR_EVENTS',
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -71,13 +76,17 @@ export class WasteOriginIdentificationProcessor extends ParentDocumentRuleProces
 
     if (!isUnidentified && !hasWasteGenerator) {
       return {
-        resultComment: RESULT_COMMENTS.failed.MISSING_WASTE_GENERATOR_EVENT,
+        ...WASTE_ORIGIN_IDENTIFICATION_FINDINGS.result(
+          'FAILED.MISSING_WASTE_GENERATOR_EVENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     return {
-      resultComment: RESULT_COMMENTS.failed.WASTE_ORIGIN_CONFLICT,
+      ...WASTE_ORIGIN_IDENTIFICATION_FINDINGS.result(
+        'FAILED.WASTE_ORIGIN_CONFLICT',
+      ),
       resultStatus: 'FAILED',
     };
   }
