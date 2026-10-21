@@ -1,4 +1,5 @@
 import { logger } from '@carrot-fndn/shared/helpers';
+import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 import { z } from 'zod';
 
 import { BaseProcessorErrors } from './base-processor.errors';
@@ -11,16 +12,35 @@ class TestProcessorErrors extends BaseProcessorErrors {
   };
 }
 
+const captureThrownError = (run: () => unknown): unknown => {
+  try {
+    run();
+  } catch (error) {
+    return error;
+  }
+
+  throw new Error('Expected the callback to throw');
+};
+
 describe('validateRuleSubjectOrThrow', () => {
   const schema = z.object({ type: z.literal('Organic') });
   const errors = new TestProcessorErrors();
+  const TEST_FINDINGS = defineRuleFindings(
+    'test-rule',
+    { ERROR: errors.ERROR_MESSAGE },
+    {
+      'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
+      'ERROR.INVALID_RULE_SUBJECT': { defaultOwner: 'INTEGRATOR' },
+    },
+  );
+  const validationFinding = TEST_FINDINGS.render('ERROR.INVALID_RULE_SUBJECT');
 
   it('should return typed data when validation succeeds', () => {
     const result = validateRuleSubjectOrThrow({
       errors,
       input: { type: 'Organic' },
       schema,
-      validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+      validationFinding,
     });
 
     expect(result).toEqual({ type: 'Organic' });
@@ -34,7 +54,7 @@ describe('validateRuleSubjectOrThrow', () => {
         errors,
         input: { type: 'Unknown' },
         schema,
-        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding,
       });
     } catch (error) {
       thrownError = error as Error;
@@ -53,7 +73,7 @@ describe('validateRuleSubjectOrThrow', () => {
         errors,
         input: { type: 'Invalid' },
         schema,
-        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding,
       }),
     ).toThrow();
 
@@ -69,28 +89,38 @@ describe('validateRuleSubjectOrThrow', () => {
       }),
     });
 
-    expect(() =>
+    const thrownError = captureThrownError(() =>
       validateRuleSubjectOrThrow({
         errors,
         input: { items: [] },
         schema: schemaWithCustomMessage,
-        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding,
       }),
-    ).toThrow('Custom: no items found.');
+    );
+
+    expect(errors.getFailedResultFromError(thrownError)).toEqual({
+      resultComment: 'Custom: no items found.',
+      resultFindings: [validationFinding.finding],
+    });
   });
 
-  it('should fall back to validationMessage when first issue is generic', () => {
-    expect(() =>
+  it('should fall back to the validationFinding message when first issue is generic', () => {
+    const thrownError = captureThrownError(() =>
       validateRuleSubjectOrThrow({
         errors,
         input: {},
         schema,
-        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding,
       }),
-    ).toThrow('The rule subject is invalid.');
+    );
+
+    expect(errors.getFailedResultFromError(thrownError)).toEqual({
+      resultComment: 'The rule subject is invalid.',
+      resultFindings: [validationFinding.finding],
+    });
   });
 
-  it('should fall back to validationMessage when issue message is undefined', () => {
+  it('should fall back to the validationFinding message when issue message is undefined', () => {
     const alwaysFailSchema = z.object({}).superRefine((_data, context) => {
       context.addIssue({ code: 'custom' } as never);
     });
@@ -100,7 +130,7 @@ describe('validateRuleSubjectOrThrow', () => {
         errors,
         input: {},
         schema: alwaysFailSchema,
-        validationMessage: errors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding,
       }),
     ).toThrow('The rule subject is invalid.');
   });

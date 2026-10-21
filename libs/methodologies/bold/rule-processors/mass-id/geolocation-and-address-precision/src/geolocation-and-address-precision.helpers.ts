@@ -28,6 +28,7 @@ import {
 } from '@carrot-fndn/shared/types';
 import { LatitudeSchema, LongitudeSchema } from '@carrot-fndn/shared/types';
 
+import type { GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS } from './geolocation-and-address-precision.findings';
 import type {
   GpsLatitudeApprovedException,
   GpsLongitudeApprovedException,
@@ -40,10 +41,14 @@ import {
 } from './geolocation-and-address-precision.validators';
 
 export interface SimilarityCommentTemplates {
-  failed: (similarityPercent: number) => string;
+  failed: (similarityPercent: number) => FindingResult;
   passed: (similarityPercent: number) => string;
-  reviewRequired: (similarityPercent: number) => string;
+  reviewRequired: (similarityPercent: number) => FindingResult;
 }
+
+type FindingResult = ReturnType<
+  typeof GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result
+>;
 
 export const evaluateAddressSimilarityResult = (
   eventAddress: DocumentAddress,
@@ -58,15 +63,12 @@ export const evaluateAddressSimilarityResult = (
   const similarityPercent = Math.floor(score * 100);
 
   if (!isMatch || score < ADDRESS_SIMILARITY_THRESHOLD) {
-    return {
-      resultComment: templates.failed(similarityPercent),
-      resultStatus: 'FAILED',
-    };
+    return { ...templates.failed(similarityPercent), resultStatus: 'FAILED' };
   }
 
   if (getEnableReviewRequired()) {
     return {
-      resultComment: templates.reviewRequired(similarityPercent),
+      ...templates.reviewRequired(similarityPercent),
       resultStatus: 'REVIEW_REQUIRED',
     };
   }
@@ -94,11 +96,11 @@ export const findRecyclerAccreditation = (
     );
   });
 
-export const pickGpsComment = (
+export const pickGpsComment = <Comment>(
   addressDistance: number | undefined,
-  noCoord: () => string,
-  withCoord: (distance: number) => string,
-): string => {
+  noCoord: () => Comment,
+  withCoord: (distance: number) => Comment,
+): Comment => {
   if (isNil(addressDistance)) {
     return noCoord();
   }

@@ -10,6 +10,7 @@ import {
   type StaticFactorSubtype,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 import {
   calculatePreventedEmissions,
   formatNumber,
@@ -226,42 +227,44 @@ describe('PreventedEmissionsHelpers', () => {
   });
 
   describe('throwIfMissing', () => {
-    const errorMessage = 'Test error message';
+    const renderedFinding = PREVENTED_EMISSIONS_FINDINGS.render(
+      'ERROR.MISSING_MASS_ID_DOCUMENT',
+    );
 
     it('should not throw when value is defined', () => {
       expect(() => {
-        throwIfMissing('valid value', errorMessage, processorErrors);
+        throwIfMissing('valid value', renderedFinding, processorErrors);
       }).not.toThrow();
     });
 
     it('should not throw when value is 0', () => {
       expect(() => {
-        throwIfMissing(0, errorMessage, processorErrors);
+        throwIfMissing(0, renderedFinding, processorErrors);
       }).not.toThrow();
     });
 
     it('should not throw when value is false', () => {
       expect(() => {
-        throwIfMissing(false, errorMessage, processorErrors);
+        throwIfMissing(false, renderedFinding, processorErrors);
       }).not.toThrow();
     });
 
     it('should not throw when value is empty string', () => {
       expect(() => {
-        throwIfMissing('', errorMessage, processorErrors);
+        throwIfMissing('', renderedFinding, processorErrors);
       }).not.toThrow();
     });
 
     it('should throw when value is null', () => {
       expect(() => {
-        throwIfMissing(null, errorMessage, processorErrors);
-      }).toThrow(errorMessage);
+        throwIfMissing(null, renderedFinding, processorErrors);
+      }).toThrow(renderedFinding.message);
     });
 
     it('should throw when value is undefined', () => {
       expect(() => {
-        throwIfMissing(undefined, errorMessage, processorErrors);
-      }).toThrow(errorMessage);
+        throwIfMissing(undefined, renderedFinding, processorErrors);
+      }).toThrow(renderedFinding.message);
     });
   });
 

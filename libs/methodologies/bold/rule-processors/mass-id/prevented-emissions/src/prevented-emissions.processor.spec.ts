@@ -2,6 +2,7 @@ import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies
 import {
   BoldStubsBuilder,
   createRuleTestFixture,
+  expectRuleFindings,
   expectRuleOutput,
   type MetadataAttributeParameter,
   type StubBoldDocumentParameters,
@@ -21,9 +22,11 @@ import { type AnyObject } from '@carrot-fndn/shared/types';
 import { addYears, getYear } from 'date-fns';
 
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
+import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
   preventedEmissionsErrorTestCases,
+  type PreventedEmissionsTestCase,
   preventedEmissionsTestCases,
 } from './prevented-emissions.test-cases';
 
@@ -61,41 +64,78 @@ describe('PreventedEmissionsProcessor', () => {
     vi.restoreAllMocks();
   });
 
+  const processTestCase = ({
+    accreditationDocuments,
+    externalCreatedAt,
+    massIDDocumentsParams,
+    massIDDocumentValue,
+    subtype,
+  }: PreventedEmissionsTestCase) =>
+    createRuleTestFixture({
+      accreditationDocuments,
+      massIDDocumentsParams: {
+        ...massIDDocumentsParams,
+        partialDocument: {
+          ...massIDDocumentsParams?.partialDocument,
+          currentValue: massIDDocumentValue as number,
+          externalCreatedAt,
+          subtype,
+        },
+      },
+      ruleDataProcessor,
+      spyOnDocumentQueryServiceLoad,
+    });
+
   describe('PreventedEmissionsProcessor', () => {
     it.each(preventedEmissionsTestCases)(
       'should return $resultStatus when $scenario',
-      async ({
-        accreditationDocuments,
-        externalCreatedAt,
-        massIDDocumentsParams,
-        massIDDocumentValue,
-        resultComment,
-        resultContent,
-        resultStatus,
-        subtype,
-      }) => {
-        const { ruleInput, ruleOutput } = await createRuleTestFixture({
-          accreditationDocuments,
-          massIDDocumentsParams: {
-            ...massIDDocumentsParams,
-            partialDocument: {
-              ...massIDDocumentsParams?.partialDocument,
-              currentValue: massIDDocumentValue as number,
-              externalCreatedAt,
-              subtype,
-            },
-          },
-          ruleDataProcessor,
-          spyOnDocumentQueryServiceLoad,
-        });
+      async (testCase) => {
+        const { ruleInput, ruleOutput } = await processTestCase(testCase);
 
         expectRuleOutput({
-          resultComment,
-          resultContent,
-          resultStatus,
+          findings: PREVENTED_EMISSIONS_FINDINGS,
+          resultComment: testCase.resultComment,
+          resultContent: testCase.resultContent,
+          resultStatus: testCase.resultStatus,
           ruleInput,
           ruleOutput,
         });
+      },
+    );
+
+    it.each([
+      {
+        code: 'prevented-emissions.FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT',
+        resultComment:
+          RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+      },
+      {
+        code: 'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
+        resultComment:
+          RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
+            MassIDOrganicSubtype.DOMESTIC_SLUDGE,
+          ),
+      },
+    ])(
+      'should mark $code as dependent on the Recycler accreditation',
+      async ({ code, resultComment }) => {
+        const testCase = preventedEmissionsTestCases.find(
+          (candidate) => candidate.resultComment === resultComment,
+        );
+
+        if (!testCase) {
+          throw new Error(`Test case not found for: ${resultComment}`);
+        }
+
+        const { ruleOutput } = await processTestCase(testCase);
+
+        expect(ruleOutput.resultContent?.['findings']).toEqual([
+          {
+            code,
+            defaultOwner: 'RECYCLER',
+            dependsOnAccreditation: 'Recycler',
+          },
+        ]);
       },
     );
   });
@@ -119,7 +159,9 @@ describe('PreventedEmissionsProcessor', () => {
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        expect(ruleOutput).toEqual({
+        expect(
+          expectRuleFindings(ruleOutput, PREVENTED_EMISSIONS_FINDINGS),
+        ).toEqual({
           requestId: ruleInput.requestId,
           responseToken: ruleInput.responseToken,
           responseUrl: ruleInput.responseUrl,
@@ -303,6 +345,12 @@ describe('PreventedEmissionsProcessor', () => {
       expect(ruleOutput.resultComment).toBe(
         RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION('20 01 99'),
       );
+      expect(ruleOutput.resultContent?.['findings']).toEqual([
+        {
+          code: 'prevented-emissions.FAILED.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION',
+          defaultOwner: 'RECYCLER',
+        },
+      ]);
     });
 
     describe('when ENABLE_REVIEW_REQUIRED is enabled', () => {
@@ -329,6 +377,12 @@ describe('PreventedEmissionsProcessor', () => {
             '20 01 99',
           ),
         );
+        expect(ruleOutput.resultContent?.['findings']).toEqual([
+          {
+            code: 'prevented-emissions.REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
+            defaultOwner: 'RECYCLER',
+          },
+        ]);
       });
 
       it('returns REVIEW_REQUIRED with the expired comment when the fraction is stale', async () => {
@@ -353,6 +407,12 @@ describe('PreventedEmissionsProcessor', () => {
             '2026-05-02T00:00:00.000Z',
           ),
         );
+        expect(ruleOutput.resultContent?.['findings']).toEqual([
+          {
+            code: 'prevented-emissions.REVIEW_REQUIRED.OTHERS_IF_ORGANIC_EXPIRED_FRACTION',
+            defaultOwner: 'RECYCLER',
+          },
+        ]);
       });
     });
   });

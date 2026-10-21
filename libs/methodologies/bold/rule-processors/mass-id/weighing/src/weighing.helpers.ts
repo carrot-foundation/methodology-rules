@@ -1,3 +1,6 @@
+import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
+import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+
 import {
   getOrDefault,
   isNil,
@@ -31,12 +34,8 @@ import {
   DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
 
-import {
-  INVALID_RESULT_COMMENTS,
-  NET_WEIGHT_CALCULATION_TOLERANCE,
-  NOT_FOUND_RESULT_COMMENTS,
-  WRONG_FORMAT_RESULT_COMMENTS,
-} from './weighing.constants';
+import { NET_WEIGHT_CALCULATION_TOLERANCE } from './weighing.constants';
+import { WEIGHING_FINDINGS } from './weighing.findings';
 import {
   type ContainerCapacityApprovedException,
   type ContainerQuantityApprovedException,
@@ -64,7 +63,7 @@ const {
   WEIGHING_CAPTURE_METHOD,
 } = BoldAttributeName;
 
-export type ValidationResult = { errors: string[] };
+export type ValidationResult = { errors: RenderedRuleFinding[] };
 
 export interface WeighingValues {
   accreditationScaleType: BoldAttributeValue | undefined;
@@ -287,7 +286,7 @@ export const getWeighingEvents = (
 type Validator = (
   values: WeighingValues,
   isTwoStep?: boolean,
-) => { errors: string[] };
+) => ValidationResult;
 
 const validators: Record<string, Validator> = {
   containerCapacity: (values) => {
@@ -295,25 +294,27 @@ const validators: Record<string, Validator> = {
       return { errors: [] };
     }
 
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
 
     if (!hasPositiveFloatAttributeValue(values.containerCapacityAttribute)) {
-      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY);
+      errors.push(WEIGHING_FINDINGS.render('WRONG_FORMAT.CONTAINER_CAPACITY'));
     }
 
     if (!hasValidAttributeFormat(values.containerCapacityAttribute)) {
-      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT);
+      errors.push(
+        WEIGHING_FINDINGS.render('INVALID.CONTAINER_CAPACITY_FORMAT'),
+      );
     }
 
     return { errors };
   },
 
   containerQuantity: (values) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
     const isTruck = isTruckContainer(values);
 
     if (isTruck && isNonZeroPositiveInt(values.containerQuantity)) {
-      errors.push(INVALID_RESULT_COMMENTS.CONTAINER_QUANTITY);
+      errors.push(WEIGHING_FINDINGS.render('INVALID.CONTAINER_QUANTITY'));
     }
 
     if (
@@ -321,7 +322,7 @@ const validators: Record<string, Validator> = {
       !isNonZeroPositiveInt(values.containerQuantity) &&
       !isExceptionValid(values.containerQuantityException)
     ) {
-      errors.push(WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_QUANTITY);
+      errors.push(WEIGHING_FINDINGS.render('WRONG_FORMAT.CONTAINER_QUANTITY'));
     }
 
     return { errors };
@@ -329,7 +330,9 @@ const validators: Record<string, Validator> = {
 
   containerType: (values, isTwoStep) => {
     if (!values.containerType) {
-      return { errors: [WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_TYPE] };
+      return {
+        errors: [WEIGHING_FINDINGS.render('WRONG_FORMAT.CONTAINER_TYPE')],
+      };
     }
 
     if (
@@ -338,7 +341,10 @@ const validators: Record<string, Validator> = {
     ) {
       return {
         errors: [
-          INVALID_RESULT_COMMENTS.TWO_STEP_CONTAINER_TYPE(values.containerType),
+          WEIGHING_FINDINGS.render(
+            'INVALID.TWO_STEP_CONTAINER_TYPE',
+            values.containerType,
+          ),
         ],
       };
     }
@@ -349,20 +355,22 @@ const validators: Record<string, Validator> = {
   description: (values) =>
     isNonEmptyString(values.description)
       ? { errors: [] }
-      : { errors: [WRONG_FORMAT_RESULT_COMMENTS.DESCRIPTION] },
+      : { errors: [WEIGHING_FINDINGS.render('WRONG_FORMAT.DESCRIPTION')] },
 
   eventValue: (values) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
 
     if (!isNonZeroPositive(values.eventValue)) {
-      errors.push(WRONG_FORMAT_RESULT_COMMENTS.EVENT_VALUE(values.eventValue));
+      errors.push(
+        WEIGHING_FINDINGS.render('WRONG_FORMAT.EVENT_VALUE', values.eventValue),
+      );
     }
 
     return { errors };
   },
 
   grossWeight: (values) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
 
     if (
       shouldSkipValidationWithTareException(
@@ -375,12 +383,15 @@ const validators: Record<string, Validator> = {
 
     if (!hasPositiveFloatAttributeValue(values.grossWeight)) {
       errors.push(
-        WRONG_FORMAT_RESULT_COMMENTS.GROSS_WEIGHT(values.grossWeight?.value),
+        WEIGHING_FINDINGS.render(
+          'WRONG_FORMAT.GROSS_WEIGHT',
+          values.grossWeight?.value,
+        ),
       );
     }
 
     if (!hasValidAttributeFormat(values.grossWeight)) {
-      errors.push(INVALID_RESULT_COMMENTS.GROSS_WEIGHT_FORMAT);
+      errors.push(WEIGHING_FINDINGS.render('INVALID.GROSS_WEIGHT_FORMAT'));
     }
 
     return { errors };
@@ -412,7 +423,7 @@ const validators: Record<string, Validator> = {
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
       return {
         errors: [
-          INVALID_RESULT_COMMENTS.NET_WEIGHT_CALCULATION({
+          WEIGHING_FINDINGS.render('INVALID.NET_WEIGHT_CALCULATION', {
             calculatedNetWeight,
             containerQuantity,
             eventValue: values.eventValue,
@@ -427,10 +438,12 @@ const validators: Record<string, Validator> = {
   },
 
   scaleType: (values, isTwoStep) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
 
     if (!isNonEmptyString(values.accreditationScaleType)) {
-      return { errors: [NOT_FOUND_RESULT_COMMENTS.ACCREDITATION_EVENT] };
+      return {
+        errors: [WEIGHING_FINDINGS.render('NOT_FOUND.ACCREDITATION_EVENT')],
+      };
     }
 
     const normalizeScaleType = (value: unknown): string =>
@@ -443,7 +456,8 @@ const validators: Record<string, Validator> = {
       normalizeScaleType(values.accreditationScaleType)
     ) {
       errors.push(
-        INVALID_RESULT_COMMENTS.SCALE_TYPE_MISMATCH(
+        WEIGHING_FINDINGS.render(
+          'INVALID.SCALE_TYPE_MISMATCH',
           values.scaleType,
           values.accreditationScaleType,
         ),
@@ -453,7 +467,9 @@ const validators: Record<string, Validator> = {
     if (
       !(Object.values(BoldScaleType) as unknown[]).includes(values.scaleType)
     ) {
-      errors.push(INVALID_RESULT_COMMENTS.SCALE_TYPE(values.scaleType));
+      errors.push(
+        WEIGHING_FINDINGS.render('INVALID.SCALE_TYPE', values.scaleType),
+      );
     }
 
     if (
@@ -462,7 +478,8 @@ const validators: Record<string, Validator> = {
       values.scaleType !== BoldScaleType.WEIGHBRIDGE_SHORT
     ) {
       errors.push(
-        INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE(
+        WEIGHING_FINDINGS.render(
+          'INVALID.TWO_STEP_WEIGHING_EVENT_SCALE_TYPE',
           values.scaleType,
         ),
       );
@@ -472,7 +489,7 @@ const validators: Record<string, Validator> = {
   },
 
   tare: (values) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
 
     if (
       shouldSkipValidationWithTareException(
@@ -484,22 +501,26 @@ const validators: Record<string, Validator> = {
     }
 
     if (!hasPositiveFloatAttributeValue(values.tare)) {
-      errors.push(WRONG_FORMAT_RESULT_COMMENTS.TARE(values.tare?.value));
+      errors.push(
+        WEIGHING_FINDINGS.render('WRONG_FORMAT.TARE', values.tare?.value),
+      );
     }
 
     if (!hasValidAttributeFormat(values.tare)) {
-      errors.push(INVALID_RESULT_COMMENTS.TARE_FORMAT);
+      errors.push(WEIGHING_FINDINGS.render('INVALID.TARE_FORMAT'));
     }
 
     return { errors };
   },
 
   vehicleLicensePlate: (values) => {
-    const errors: string[] = [];
+    const errors: RenderedRuleFinding[] = [];
     const attribute = values.vehicleLicensePlateAttribute;
 
     if (!isValidLicensePlate(attribute?.value)) {
-      errors.push(INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT);
+      errors.push(
+        WEIGHING_FINDINGS.render('INVALID.VEHICLE_LICENSE_PLATE_FORMAT'),
+      );
     }
 
     return { errors };
@@ -516,13 +537,22 @@ const validators: Record<string, Validator> = {
 
     return {
       errors: [
-        INVALID_RESULT_COMMENTS.WEIGHING_CAPTURE_METHOD(
+        WEIGHING_FINDINGS.render(
+          'INVALID.WEIGHING_CAPTURE_METHOD',
           values.weighingCaptureMethod,
         ),
       ],
     };
   },
 };
+
+export const toFailedResult = (
+  errors: RenderedRuleFinding[],
+): EvaluateResultOutput => ({
+  resultComment: errors.map(({ message }) => message).join(' '),
+  resultFindings: errors.map(({ finding }) => finding),
+  resultStatus: 'FAILED',
+});
 
 export const validateWeighingValues = (
   values: WeighingValues,
@@ -543,18 +573,23 @@ export const validateTwoStepWeighingEvents = (
   if (events.length !== 2) {
     return {
       errors: [
-        `Expected exactly 2 weighing events for two-step validation, but received ${String(events.length)}.`,
+        {
+          finding: WEIGHING_FINDINGS.finding('ERROR.FAILED_BY_ERROR'),
+          message: `Expected exactly 2 weighing events for two-step validation, but received ${String(events.length)}.`,
+        },
       ],
     };
   }
 
-  const errors: string[] = [];
+  const errors: RenderedRuleFinding[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];
 
   if (firstEvent?.participant.id !== secondEvent?.participant.id) {
     errors.push(
-      INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS,
+      WEIGHING_FINDINGS.render(
+        'INVALID.TWO_STEP_WEIGHING_EVENT_PARTICIPANT_IDS',
+      ),
     );
   }
 
@@ -573,7 +608,7 @@ export const validateTwoStepWeighingEvents = (
 
     if (firstValue !== secondValue) {
       errors.push(
-        INVALID_RESULT_COMMENTS.TWO_STEP_WEIGHING_EVENT_VALUES({
+        WEIGHING_FINDINGS.render('INVALID.TWO_STEP_WEIGHING_EVENT_VALUES', {
           attributeName,
           firstValue,
           secondValue,

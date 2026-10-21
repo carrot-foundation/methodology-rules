@@ -44,6 +44,7 @@ import { getYear } from 'date-fns';
 import { type StaticFactorSubtype } from './prevented-emissions.constants';
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 import {
   calculatePreventedEmissions,
   getBaselineByWasteSubtype,
@@ -87,11 +88,12 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         errors: this.processorErrors,
         input: ruleSubject,
         schema: PreventedEmissionsRuleSubjectSchema,
-        validationMessage:
-          this.processorErrors.ERROR_MESSAGE.INVALID_RULE_SUBJECT,
+        validationFinding: PREVENTED_EMISSIONS_FINDINGS.render(
+          'ERROR.INVALID_RULE_SUBJECT',
+        ),
       });
 
-      const { resultComment, resultContent, resultStatus } =
+      const { resultComment, resultContent, resultFindings, resultStatus } =
         this.evaluateResult(validatedSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
@@ -100,6 +102,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
           ...resultContent,
           ruleSubject: validatedSubject,
         },
+        resultFindings,
       });
     } catch (error: unknown) {
       logger.error(
@@ -112,9 +115,11 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
         'Prevented-emissions processor failed',
       );
 
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.processorErrors.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.processorErrors.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -130,18 +135,19 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     if (!isNonNegative(exceedingEmissionCoefficient)) {
       return {
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+        ...PREVENTED_EMISSIONS_FINDINGS.result(
+          'FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (isNil(baseline)) {
       return {
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
-            wasteSubtype,
-          ),
+        ...PREVENTED_EMISSIONS_FINDINGS.result(
+          'FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
+          wasteSubtype,
+        ),
         resultStatus: 'FAILED',
       };
     }
@@ -218,7 +224,9 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       )
     ) {
       throw this.processorErrors.getKnownError(
-        this.processorErrors.ERROR_MESSAGE.INVALID_MASS_ID_DOCUMENT_SUBTYPE,
+        PREVENTED_EMISSIONS_FINDINGS.render(
+          'ERROR.INVALID_MASS_ID_DOCUMENT_SUBTYPE',
+        ),
       );
     }
 
@@ -277,23 +285,25 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
   private buildOthersIfOrganicTerminalResult(
     code: NonEmptyString,
     reason: 'expired' | 'missing',
-    expiredComment: string,
+    expiredResult: ReturnType<typeof PREVENTED_EMISSIONS_FINDINGS.result>,
   ): EvaluateResultOutput {
     if (getEnableReviewRequired()) {
       return {
-        resultComment:
-          reason === 'expired'
-            ? expiredComment
-            : RESULT_COMMENTS.reviewRequired.OTHERS_IF_ORGANIC_AWAITING_LAUDO(
-                code,
-              ),
+        ...(reason === 'expired'
+          ? expiredResult
+          : PREVENTED_EMISSIONS_FINDINGS.result(
+              'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
+              code,
+            )),
         resultStatus: 'REVIEW_REQUIRED',
       };
     }
 
     return {
-      resultComment:
-        RESULT_COMMENTS.failed.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION(code),
+      ...PREVENTED_EMISSIONS_FINDINGS.result(
+        'FAILED.OTHERS_IF_ORGANIC_NO_CARBON_FRACTION',
+        code,
+      ),
       resultStatus: 'FAILED',
     };
   }
@@ -330,14 +340,15 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
     throwIfMissing(
       recyclerAccreditationDocument,
-      this.processorErrors.ERROR_MESSAGE
-        .MISSING_RECYCLER_ACCREDITATION_DOCUMENT,
+      PREVENTED_EMISSIONS_FINDINGS.render(
+        'ERROR.MISSING_RECYCLER_ACCREDITATION_DOCUMENT',
+      ),
       this.processorErrors,
     );
 
     throwIfMissing(
       massIDDocument,
-      this.processorErrors.ERROR_MESSAGE.MISSING_MASS_ID_DOCUMENT,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.MISSING_MASS_ID_DOCUMENT'),
       this.processorErrors,
     );
 
@@ -383,23 +394,25 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ruleSubject.normalizedLocalWasteClassificationId as NonEmptyString;
 
     if (!resolution.resolved) {
-      const expiredComment =
+      const expiredResult =
         resolution.reason === 'expired' &&
         generatorCharacterization &&
         isNonEmptyString(ruleSubject.pickUpDate)
-          ? RESULT_COMMENTS.reviewRequired.OTHERS_IF_ORGANIC_EXPIRED_FRACTION(
+          ? PREVENTED_EMISSIONS_FINDINGS.result(
+              'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_EXPIRED_FRACTION',
               code,
               generatorCharacterization.analysisDate,
               ruleSubject.pickUpDate,
             )
-          : RESULT_COMMENTS.reviewRequired.OTHERS_IF_ORGANIC_AWAITING_LAUDO(
+          : PREVENTED_EMISSIONS_FINDINGS.result(
+              'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
               code,
             );
 
       return this.buildOthersIfOrganicTerminalResult(
         code,
         resolution.reason,
-        expiredComment,
+        expiredResult,
       );
     }
 

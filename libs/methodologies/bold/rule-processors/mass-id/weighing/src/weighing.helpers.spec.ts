@@ -23,7 +23,13 @@ describe('weighing.helpers', () => {
       const result = validateTwoStepWeighingEvents([]);
 
       expect(result.errors).toHaveLength(1);
-      expect(result.errors[0]).toContain('Expected exactly 2 weighing events');
+      expect(result.errors[0]?.message).toContain(
+        'Expected exactly 2 weighing events',
+      );
+      expect(result.errors[0]?.finding).toEqual({
+        code: 'weighing.ERROR.FAILED_BY_ERROR',
+        defaultOwner: 'CARROT',
+      });
     });
   });
 });

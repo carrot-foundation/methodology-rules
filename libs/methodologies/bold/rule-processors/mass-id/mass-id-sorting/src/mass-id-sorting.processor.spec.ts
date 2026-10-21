@@ -5,10 +5,12 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   createRuleTestFixture,
+  expectRuleFindings,
   expectRuleOutput,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { MASS_ID_SORTING_FINDINGS } from './mass-id-sorting.findings';
 import { MassIDSortingProcessor } from './mass-id-sorting.processor';
 import {
   massIDSortingErrorTestCases,
@@ -45,6 +47,7 @@ describe('MassIDSortingProcessor', () => {
         });
 
         expectRuleOutput({
+          findings: MASS_ID_SORTING_FINDINGS,
           resultComment,
           resultStatus,
           ruleInput,
@@ -58,6 +61,40 @@ describe('MassIDSortingProcessor', () => {
         );
       },
     );
+
+    it('should mark the deducted weight mismatch as dependent on the Recycler accreditation', async () => {
+      const deductedWeightMismatchCase = massIDSortingTestCases.find(
+        ({ scenario }) =>
+          scenario ===
+          'The deducted weight does not match the expected value based on sorting factor',
+      );
+
+      if (!deductedWeightMismatchCase) {
+        throw new Error('Deducted weight mismatch test case not found');
+      }
+
+      const { ruleOutput } = await createRuleTestFixture({
+        accreditationDocuments:
+          deductedWeightMismatchCase.accreditationDocuments,
+        massIDActorParticipants: deductedWeightMismatchCase.actorParticipants,
+        massIDDocumentsParams: {
+          externalEventsMap: deductedWeightMismatchCase.massIDEvents,
+          partialDocument: deductedWeightMismatchCase.partialDocument,
+        },
+        ruleDataProcessor,
+        spyOnDocumentQueryServiceLoad,
+      });
+
+      expect(ruleOutput.resultContent).toEqual({
+        findings: [
+          {
+            code: 'mass-id-sorting.FAILED.DEDUCTED_WEIGHT_MISMATCH',
+            defaultOwner: 'INTEGRATOR',
+            dependsOnAccreditation: 'Recycler',
+          },
+        ],
+      });
+    });
   });
 
   describe('MassIDSortingProcessorErrors', () => {
@@ -79,7 +116,9 @@ describe('MassIDSortingProcessor', () => {
 
         const ruleOutput = await ruleDataProcessor.process(ruleInput);
 
-        expect(ruleOutput).toEqual({
+        expect(
+          expectRuleFindings(ruleOutput, MASS_ID_SORTING_FINDINGS),
+        ).toEqual({
           requestId: ruleInput.requestId,
           responseToken: ruleInput.responseToken,
           responseUrl: ruleInput.responseUrl,

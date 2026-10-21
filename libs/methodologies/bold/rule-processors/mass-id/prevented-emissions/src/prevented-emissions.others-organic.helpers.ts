@@ -34,6 +34,7 @@ import {
   OTHERS_IF_ORGANIC_CARBON_FRACTION_BY_LOCAL_CODE,
 } from './prevented-emissions.constants';
 import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
+import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 
 const {
   CARBON_ANALYSIS_DATE,
@@ -249,7 +250,7 @@ export const resolveOthersIfOrganicCarbonFraction = (
 
   if (!isNonEmptyString(normalizedLocalWasteClassificationId)) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.INVALID_CLASSIFICATION_ID'),
     );
   }
 
@@ -260,7 +261,7 @@ export const resolveOthersIfOrganicCarbonFraction = (
     )
   ) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.INVALID_CLASSIFICATION_ID,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.INVALID_CLASSIFICATION_ID'),
     );
   }
 
@@ -274,7 +275,7 @@ export const resolveOthersIfOrganicCarbonFraction = (
     normalizeString(CDM_CODE_OTHERS_IF_ORGANIC)
   ) {
     throw processorErrors.getKnownError(
-      processorErrors.ERROR_MESSAGE.SUBTYPE_CDM_CODE_MISMATCH,
+      PREVENTED_EMISSIONS_FINDINGS.render('ERROR.SUBTYPE_CDM_CODE_MISMATCH'),
     );
   }
 
