@@ -14,10 +14,7 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
-    'ERROR.INVALID_BASELINES': {
-      defaultOwner: 'RECYCLER',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
-    },
+    'ERROR.INVALID_BASELINES': { defaultOwner: 'RECYCLER' },
     'ERROR.INVALID_CLASSIFICATION_ID': { defaultOwner: 'INTEGRATOR' },
     'ERROR.INVALID_MASS_ID_DOCUMENT_SUBTYPE': { defaultOwner: 'INTEGRATOR' },
     'ERROR.INVALID_RULE_SUBJECT': { defaultOwner: 'INTEGRATOR' },
@@ -32,7 +29,6 @@ export const PREVENTED_EMISSIONS_FINDINGS = defineRuleFindings(
     'ERROR.SUBTYPE_CDM_CODE_MISMATCH': { defaultOwner: 'INTEGRATOR' },
     'FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT': {
       defaultOwner: 'RECYCLER',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
     },
     'FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE': {
       defaultOwner: 'RECYCLER',

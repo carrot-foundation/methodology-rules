@@ -140,7 +140,6 @@ describe('scale-ticket-verification', () => {
     expect(result.errors[0]?.finding).toEqual({
       code: 'weighing.INVALID.SCALE_TICKET_UNSUPPORTED_LAYOUT',
       defaultOwner: 'CARROT',
-      dependsOnAccreditation: 'Recycler',
     });
   });
 

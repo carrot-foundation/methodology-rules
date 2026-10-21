@@ -31,10 +31,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
       defaultOwner: 'RECYCLER',
       dependsOnAccreditation: MassIDActorType.RECYCLER,
     },
-    'FAILED.DEDUCTED_WEIGHT_MISMATCH': {
-      defaultOwner: 'INTEGRATOR',
-      dependsOnAccreditation: MassIDActorType.RECYCLER,
-    },
+    'FAILED.DEDUCTED_WEIGHT_MISMATCH': { defaultOwner: 'INTEGRATOR' },
     'FAILED.DOCUMENT_VALUE_MISMATCH': { defaultOwner: 'INTEGRATOR' },
     'FAILED.GROSS_WEIGHT_MISMATCH': { defaultOwner: 'INTEGRATOR' },
     'FAILED.MISSING_SORTING_DESCRIPTION': { defaultOwner: 'INTEGRATOR' },

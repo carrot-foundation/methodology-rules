@@ -105,31 +105,38 @@ describe('PreventedEmissionsProcessor', () => {
       },
     );
 
-    it.each([
-      {
-        code: 'prevented-emissions.FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT',
-        scenario: 'The exceeding emission coefficient is undefined (missing)',
-      },
-      {
-        code: 'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
-        scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
-      },
-    ])(
-      'should mark $code as dependent on the Recycler accreditation',
-      async ({ code, scenario }) => {
-        const { ruleOutput } = await processTestCase(
-          findTestCase(preventedEmissionsTestCases, scenario),
-        );
+    it('should mark the missing recycling baseline as dependent on the Recycler accreditation', async () => {
+      const { ruleOutput } = await processTestCase(
+        findTestCase(
+          preventedEmissionsTestCases,
+          `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
+        ),
+      );
 
-        expect(ruleOutput.resultContent?.['findings']).toEqual([
-          {
-            code,
-            defaultOwner: 'RECYCLER',
-            dependsOnAccreditation: 'Recycler',
-          },
-        ]);
-      },
-    );
+      expect(ruleOutput.resultContent?.['findings']).toStrictEqual([
+        {
+          code: 'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
+          defaultOwner: 'RECYCLER',
+          dependsOnAccreditation: 'Recycler',
+        },
+      ]);
+    });
+
+    it('should not mark the missing exceeding emission coefficient as dependent on the Recycler accreditation', async () => {
+      const { ruleOutput } = await processTestCase(
+        findTestCase(
+          preventedEmissionsTestCases,
+          'The exceeding emission coefficient is undefined (missing)',
+        ),
+      );
+
+      expect(ruleOutput.resultContent?.['findings']).toStrictEqual([
+        {
+          code: 'prevented-emissions.FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT',
+          defaultOwner: 'RECYCLER',
+        },
+      ]);
+    });
 
     it('should report an invalid rule subject when the MassID value is negative', async () => {
       const { ruleOutput } = await processTestCase({

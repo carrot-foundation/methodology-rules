@@ -1,6 +1,7 @@
 import { spyOnDocumentQueryServiceLoad } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   expectRuleFindings,
+  findTestCase,
   stubDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
@@ -44,4 +45,29 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
       ).toEqual(expectedRuleOutput);
     },
   );
+
+  it('should report multiple valid accreditations without an accreditation dependency', async () => {
+    const { documents, massIDAuditDocument } = findTestCase(
+      participantAccreditationsAndVerificationsRequirementsTestCases,
+      'The MassID document has a PROCESSOR with multiple valid accreditations (should fail)',
+    );
+
+    spyOnDocumentQueryServiceLoad(stubDocument(), [
+      massIDAuditDocument,
+      ...documents,
+    ]);
+
+    const ruleOutput = await ruleDataProcessor.process(
+      stubRuleInput({ documentId: massIDAuditDocument.id }),
+    );
+
+    expect(ruleOutput.resultContent).toStrictEqual({
+      findings: [
+        {
+          code: 'participant-accreditations-and-verifications-requirements.ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ],
+    });
+  });
 });

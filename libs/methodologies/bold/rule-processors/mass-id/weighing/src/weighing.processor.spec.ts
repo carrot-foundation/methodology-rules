@@ -88,12 +88,11 @@ describe('WeighingProcessor', () => {
       },
       {
         description:
-          'a Recycler-dependent scale type mismatch followed by an unsupported scale type',
+          'a scale type mismatch followed by an unsupported scale type, with no accreditation dependency',
         expectedFindings: [
           {
             code: 'weighing.INVALID.SCALE_TYPE_MISMATCH',
             defaultOwner: 'INTEGRATOR',
-            dependsOnAccreditation: 'Recycler',
           },
           {
             code: 'weighing.INVALID.SCALE_TYPE',
@@ -101,6 +100,17 @@ describe('WeighingProcessor', () => {
           },
         ],
         scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
+      },
+      {
+        description:
+          'a missing scale type in the accreditation with no accreditation dependency',
+        expectedFindings: [
+          {
+            code: 'weighing.NOT_FOUND.ACCREDITATION_EVENT',
+            defaultOwner: 'RECYCLER',
+          },
+        ],
+        scenario: `The Recycler Accreditation document does not have a "${SCALE_TYPE}" attribute`,
       },
       {
         description: 'a plate format finding with no accreditation dependency',
