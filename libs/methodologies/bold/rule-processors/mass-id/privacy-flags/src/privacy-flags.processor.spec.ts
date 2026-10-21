@@ -233,7 +233,8 @@ describe('PrivacyFlagsProcessor', () => {
       [PICK_UP]: { ...conformantEvent(PICK_UP), isPublic: false },
     });
 
-    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+    const { findings, resultContent, resultStatus } =
+      await evaluate(massIDDocument);
 
     expect(resultStatus).toBe('REVIEW_REQUIRED');
     expect(resultContent.reviewReasons).toContainEqual(
@@ -245,6 +246,9 @@ describe('PrivacyFlagsProcessor', () => {
         field: 'isPublic',
       }),
     );
+    expect(findings).toEqual([
+      PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.EVENT_IS_PUBLIC'),
+    ]);
   });
 
   it('should skip attribute validation when the event has no metadata', async () => {
@@ -317,7 +321,8 @@ describe('PrivacyFlagsProcessor', () => {
       },
     });
 
-    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+    const { findings, resultContent, resultStatus } =
+      await evaluate(massIDDocument);
 
     expect(resultStatus).toBe('REVIEW_REQUIRED');
     expect(resultContent.reviewReasons).toContainEqual(
@@ -330,6 +335,9 @@ describe('PrivacyFlagsProcessor', () => {
         field: 'isPublic',
       }),
     );
+    expect(findings).toEqual([
+      PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.ATTRIBUTE_IS_PUBLIC'),
+    ]);
   });
 
   it('should add review reasons when an attribute sensitive flag does not match the spec, in both directions', async () => {
@@ -362,9 +370,14 @@ describe('PrivacyFlagsProcessor', () => {
       },
     });
 
-    const { resultContent, resultStatus } = await evaluate(massIDDocument);
+    const { findings, resultContent, resultStatus } =
+      await evaluate(massIDDocument);
 
     expect(resultStatus).toBe('REVIEW_REQUIRED');
+    expect(findings).toEqual([
+      PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.ATTRIBUTE_SENSITIVE'),
+      PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.ATTRIBUTE_SENSITIVE'),
+    ]);
     expect(resultContent.reviewReasons).toContainEqual(
       expect.objectContaining({
         actual: undefined,
@@ -400,7 +413,8 @@ describe('PrivacyFlagsProcessor', () => {
           }),
         });
 
-        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+        const { findings, resultContent, resultStatus } =
+          await evaluate(massIDDocument);
 
         expect(resultStatus).toBe('REVIEW_REQUIRED');
         expect(resultContent.reviewReasons).toContainEqual(
@@ -413,6 +427,11 @@ describe('PrivacyFlagsProcessor', () => {
             field: 'preserveSensitiveData',
           }),
         );
+        expect(findings).toEqual([
+          PRIVACY_FLAGS_FINDINGS.finding(
+            'REVIEW_REQUIRED.EVENT_PRESERVE_SENSITIVE_DATA',
+          ),
+        ]);
       },
     );
 
@@ -495,7 +514,8 @@ describe('PrivacyFlagsProcessor', () => {
           },
         });
 
-        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+        const { findings, resultContent, resultStatus } =
+          await evaluate(massIDDocument);
 
         expect(resultStatus).toBe('REVIEW_REQUIRED');
         expect(resultContent.reviewReasons).toContainEqual(
@@ -507,6 +527,11 @@ describe('PrivacyFlagsProcessor', () => {
             field: 'preserveSensitiveData',
           }),
         );
+        expect(findings).toEqual([
+          PRIVACY_FLAGS_FINDINGS.finding(
+            'REVIEW_REQUIRED.EVENT_PRESERVE_SENSITIVE_DATA',
+          ),
+        ]);
       },
     );
 
@@ -738,7 +763,8 @@ describe('PrivacyFlagsProcessor', () => {
           }),
         });
 
-        const { resultContent, resultStatus } = await evaluate(massIDDocument);
+        const { findings, resultContent, resultStatus } =
+          await evaluate(massIDDocument);
 
         expect(resultStatus).toBe('REVIEW_REQUIRED');
         expect(resultContent.reviewReasons).toContainEqual(
@@ -752,6 +778,11 @@ describe('PrivacyFlagsProcessor', () => {
             participantRole: label,
           }),
         );
+        expect(findings).toEqual([
+          PRIVACY_FLAGS_FINDINGS.finding(
+            'REVIEW_REQUIRED.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING',
+          ),
+        ]);
       },
     );
 

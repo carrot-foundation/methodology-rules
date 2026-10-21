@@ -128,12 +128,19 @@ describe('mapToRuleOutput', () => {
     });
   });
 
-  it.each([{ resultFindings: undefined }, { resultFindings: [] }])(
-    'should keep a FAILED result unchanged and log an error when the findings are $resultFindings',
-    ({ resultFindings }) => {
+  it.each([
+    { resultFindings: undefined, resultStatus: 'FAILED' as const },
+    { resultFindings: [], resultStatus: 'FAILED' as const },
+    { resultFindings: undefined, resultStatus: 'REVIEW_REQUIRED' as const },
+    { resultFindings: [], resultStatus: 'REVIEW_REQUIRED' as const },
+  ])(
+    'should keep a $resultStatus result unchanged and log an error when the findings are $resultFindings',
+    ({ resultFindings, resultStatus }) => {
       const ruleInput = stubRuleInput();
 
-      const result = mapToRuleOutput(ruleInput, 'FAILED', { resultFindings });
+      const result = mapToRuleOutput(ruleInput, resultStatus, {
+        resultFindings,
+      });
 
       expect(result).toStrictEqual({
         requestId: ruleInput.requestId,
@@ -141,12 +148,12 @@ describe('mapToRuleOutput', () => {
         responseUrl: ruleInput.responseUrl,
         resultComment: undefined,
         resultContent: undefined,
-        resultStatus: 'FAILED',
+        resultStatus,
       });
       expect(logger.error).toHaveBeenCalledWith(
         {
           requestId: ruleInput.requestId,
-          resultStatus: 'FAILED',
+          resultStatus,
           ruleName: ruleInput.ruleName,
         },
         'Non-passing rule result has no findings',

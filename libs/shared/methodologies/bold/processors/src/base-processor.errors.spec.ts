@@ -1,6 +1,9 @@
 import { logger } from '@carrot-fndn/shared/helpers';
 import { RuleFindingSchema } from '@carrot-fndn/shared/rule/types';
-import { createStubFromSchema } from '@carrot-fndn/shared/testing';
+import {
+  captureThrownError,
+  createStubFromSchema,
+} from '@carrot-fndn/shared/testing';
 import * as Sentry from '@sentry/aws-serverless';
 
 import { BaseProcessorErrors } from './base-processor.errors';
@@ -22,16 +25,6 @@ vi.mock('@carrot-fndn/shared/helpers', () => ({
 vi.mock('@sentry/aws-serverless', () => ({
   captureException: vi.fn(),
 }));
-
-const catchThrown = (action: () => unknown): unknown => {
-  try {
-    action();
-  } catch (caughtError: unknown) {
-    return caughtError;
-  }
-
-  return undefined;
-};
 
 describe('BaseProcessorErrors', () => {
   let processor: TestProcessorErrors;
@@ -75,9 +68,9 @@ describe('BaseProcessorErrors', () => {
     it('should capture and rethrow an unknown Error with the same identity', () => {
       const error = new Error('unknown error');
 
-      expect(catchThrown(() => processor.getFailedResultFromError(error))).toBe(
-        error,
-      );
+      expect(
+        captureThrownError(() => processor.getFailedResultFromError(error)),
+      ).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(
         error,
         'Unexpected error on "processKnownError" method',
@@ -90,9 +83,9 @@ describe('BaseProcessorErrors', () => {
         message: 'not an error',
       };
 
-      expect(catchThrown(() => processor.getFailedResultFromError(error))).toBe(
-        error,
-      );
+      expect(
+        captureThrownError(() => processor.getFailedResultFromError(error)),
+      ).toBe(error);
       expect(logger.error).toHaveBeenCalledWith(
         error,
         'Unexpected error on "processKnownError" method',

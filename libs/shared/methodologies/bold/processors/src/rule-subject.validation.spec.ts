@@ -1,5 +1,6 @@
 import { logger } from '@carrot-fndn/shared/helpers';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
+import { captureThrownError } from '@carrot-fndn/shared/testing';
 import { z } from 'zod';
 
 import { BaseProcessorErrors } from './base-processor.errors';
@@ -11,16 +12,6 @@ class TestProcessorErrors extends BaseProcessorErrors {
     INVALID_RULE_SUBJECT: 'The rule subject is invalid.',
   };
 }
-
-const captureThrownError = (run: () => unknown): unknown => {
-  try {
-    run();
-  } catch (error) {
-    return error;
-  }
-
-  throw new Error('Expected the callback to throw');
-};
 
 describe('validateRuleSubjectOrThrow', () => {
   const schema = z.object({ type: z.literal('Organic') });
@@ -47,22 +38,19 @@ describe('validateRuleSubjectOrThrow', () => {
   });
 
   it('should throw a known processor error with ZodError cause when validation fails', () => {
-    let thrownError: Error | undefined;
-
-    try {
+    const thrownError = captureThrownError(() =>
       validateRuleSubjectOrThrow({
         errors,
         input: { type: 'Unknown' },
         schema,
         validationFinding,
-      });
-    } catch (error) {
-      thrownError = error as Error;
-    }
+      }),
+    );
 
-    expect(thrownError).toBeDefined();
-    expect(thrownError!.message).toContain('The rule subject is invalid.');
-    expect(thrownError!.cause).toBeInstanceOf(z.ZodError);
+    expect(thrownError).toMatchObject({
+      cause: expect.any(z.ZodError),
+      message: expect.stringContaining('The rule subject is invalid.'),
+    });
   });
 
   it('should log validation issues on failure', () => {
