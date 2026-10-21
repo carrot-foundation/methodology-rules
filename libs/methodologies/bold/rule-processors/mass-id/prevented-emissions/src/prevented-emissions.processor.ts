@@ -287,19 +287,10 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
   private buildOthersIfOrganicTerminalResult(
     code: NonEmptyString,
-    reason: 'expired' | 'missing',
-    expiredResult: RuleFindingsResult,
+    reviewRequiredResult: RuleFindingsResult,
   ): EvaluateResultOutput {
     if (getEnableReviewRequired()) {
-      return {
-        ...(reason === 'expired'
-          ? expiredResult
-          : PREVENTED_EMISSIONS_FINDINGS.result(
-              'REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
-              code,
-            )),
-        resultStatus: 'REVIEW_REQUIRED',
-      };
+      return { ...reviewRequiredResult, resultStatus: 'REVIEW_REQUIRED' };
     }
 
     return {
@@ -397,7 +388,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
       ruleSubject.normalizedLocalWasteClassificationId as NonEmptyString;
 
     if (!resolution.resolved) {
-      const expiredResult =
+      const reviewRequiredResult =
         resolution.reason === 'expired' &&
         generatorCharacterization &&
         isNonEmptyString(ruleSubject.pickUpDate)
@@ -414,8 +405,7 @@ export class PreventedEmissionsProcessor extends RuleDataProcessor {
 
       return this.buildOthersIfOrganicTerminalResult(
         code,
-        resolution.reason,
-        expiredResult,
+        reviewRequiredResult,
       );
     }
 
