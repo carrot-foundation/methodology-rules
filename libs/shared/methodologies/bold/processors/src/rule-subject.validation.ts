@@ -30,7 +30,11 @@ export function validateRuleSubjectOrThrow<TSchema extends z.ZodTypeAny>({
       : validationFinding.message;
 
     logger.error(
-      { err: result.error, issues: result.error.issues, validationFinding },
+      {
+        err: result.error,
+        issues: result.error.issues,
+        validationMessage: validationFinding.message,
+      },
       'Invalid rule subject',
     );
     throw errors.getKnownError(

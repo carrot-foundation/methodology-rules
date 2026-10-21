@@ -1,5 +1,6 @@
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
+import { RESULT_COMMENTS } from './participant-accreditations-and-verifications-requirements.constants';
 import { ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors } from './participant-accreditations-and-verifications-requirements.errors';
 import { ruleDefinition } from './participant-accreditations-and-verifications-requirements.rule-definition';
 
@@ -10,6 +11,8 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
       ERROR:
         new ParticipantAccreditationsAndVerificationsRequirementsProcessorErrors()
           .ERROR_MESSAGE,
+      FAILED: RESULT_COMMENTS.failed,
+      REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
     },
     {
       'ERROR.ACCREDITATION_DOCUMENTS_NOT_FOUND': { defaultOwner: 'TO_CONFIRM' },

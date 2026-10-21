@@ -5,6 +5,7 @@ import {
 import {
   BoldStubsBuilder,
   expectRuleOutput,
+  findTestCase,
   stubDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -99,20 +100,6 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
     });
   };
 
-  const findTestCase = (
-    scenario: string,
-  ): GeolocationAndAddressPrecisionTestCase => {
-    const testCase = geolocationAndAddressPrecisionTestCases.find(
-      (candidate) => candidate.scenario === scenario,
-    );
-
-    if (!testCase) {
-      throw new Error(`Test case not found: ${scenario}`);
-    }
-
-    return testCase;
-  };
-
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -128,6 +115,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   it('should report one finding per non-passing actor message, none dependent on an accreditation', async () => {
     const { ruleOutput } = await processTestCase(
       findTestCase(
+        geolocationAndAddressPrecisionTestCases,
         'The GPS is not set, but the accredited address is set and not valid',
       ),
     );
@@ -149,6 +137,7 @@ describe('GeolocationAndAddressPrecisionProcessor', () => {
   it('should not report a finding for the passing actor message of an aggregated result', async () => {
     const { ruleOutput } = await processTestCase(
       findTestCase(
+        geolocationAndAddressPrecisionTestCases,
         'The Recycler has expired GPS exceptions (should NOT skip GPS validation)',
       ),
     );

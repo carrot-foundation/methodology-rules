@@ -42,7 +42,7 @@ describe('BaseProcessorErrors', () => {
   });
 
   describe('getKnownError', () => {
-    it('should create an error with the known error prefix from a rendered finding', () => {
+    it('should create an error with the message of a rendered finding', () => {
       const cause = new Error('cause');
       const error = processor.getKnownError(
         {
@@ -53,7 +53,7 @@ describe('BaseProcessorErrors', () => {
       );
 
       expect(error).toBeInstanceOf(Error);
-      expect(error.message).toContain('test message');
+      expect(error.message).toBe('test message');
       expect(error.cause).toBe(cause);
     });
   });

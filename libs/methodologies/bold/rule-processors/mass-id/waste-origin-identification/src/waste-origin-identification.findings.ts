@@ -9,6 +9,7 @@ export const WASTE_ORIGIN_IDENTIFICATION_FINDINGS = defineRuleFindings(
   {
     ERROR: new WasteOriginIdentificationProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

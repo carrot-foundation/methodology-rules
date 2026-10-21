@@ -9,6 +9,7 @@ export const PROJECT_PERIOD_LIMIT_FINDINGS = defineRuleFindings(
   {
     ERROR: new ProjectPeriodLimitProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

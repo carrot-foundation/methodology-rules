@@ -77,7 +77,12 @@ describe('validateRuleSubjectOrThrow', () => {
       }),
     ).toThrow();
 
-    expect(loggerErrorSpy).toHaveBeenCalled();
+    expect(loggerErrorSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        validationMessage: 'The rule subject is invalid.',
+      }),
+      'Invalid rule subject',
+    );
   });
 
   it('should use first issue message when it is a custom message', () => {

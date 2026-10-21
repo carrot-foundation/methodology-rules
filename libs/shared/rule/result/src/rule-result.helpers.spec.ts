@@ -129,7 +129,7 @@ describe('mapToRuleOutput', () => {
   });
 
   it.each([{ resultFindings: undefined }, { resultFindings: [] }])(
-    'should keep a FAILED result unchanged when the findings are $resultFindings',
+    'should keep a FAILED result unchanged and log an error when the findings are $resultFindings',
     ({ resultFindings }) => {
       const ruleInput = stubRuleInput();
 
@@ -143,6 +143,29 @@ describe('mapToRuleOutput', () => {
         resultContent: undefined,
         resultStatus: 'FAILED',
       });
+      expect(logger.error).toHaveBeenCalledWith(
+        {
+          requestId: ruleInput.requestId,
+          resultStatus: 'FAILED',
+          ruleName: ruleInput.ruleName,
+        },
+        'Non-passing rule result has no findings',
+      );
+    },
+  );
+
+  it.each([
+    { resultFindings: undefined, resultStatus: 'PASSED' as const },
+    {
+      resultFindings: [createStubFromSchema(RuleFindingSchema)],
+      resultStatus: 'FAILED' as const,
+    },
+  ])(
+    'should not log an error for a $resultStatus result that follows the findings contract',
+    ({ resultFindings, resultStatus }) => {
+      mapToRuleOutput(stubRuleInput(), resultStatus, { resultFindings });
+
+      expect(logger.error).not.toHaveBeenCalled();
     },
   );
 });
@@ -168,6 +191,20 @@ describe('mapRuleOutputToPostProcessInput', () => {
     });
 
     expect(result.output.comment).toBe(resultComment);
+  });
+
+  it('should keep the findings of the result content exactly', () => {
+    const resultContent = {
+      [faker.string.alpha(8)]: faker.string.sample(),
+      findings: [createStubFromSchema(RuleFindingSchema)],
+    };
+
+    const result = mapRuleOutputToPostProcessInput({
+      ...stubRuleOutput(),
+      resultContent,
+    });
+
+    expect(result.output.content).toStrictEqual(resultContent);
   });
 
   it('should preserve measured timing through JSON callback projection', () => {

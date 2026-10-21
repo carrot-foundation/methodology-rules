@@ -9,6 +9,7 @@ export const RECYCLER_IDENTIFICATION_FINDINGS = defineRuleFindings(
   {
     ERROR: new RecyclerIdentificationProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

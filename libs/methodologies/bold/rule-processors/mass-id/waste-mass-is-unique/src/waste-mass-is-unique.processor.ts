@@ -175,7 +175,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
       label?: BoldDocumentEventLabel[];
       name: BoldDocumentEventName[];
     },
-    errorMessage: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],
+    errorKey: keyof WasteMassIsUniqueProcessorErrors['ERROR_MESSAGE'],
   ): BoldDocumentEvent {
     const { label, name } = criteria;
 
@@ -188,7 +188,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     if (isNil(event)) {
       throw this.errorProcessor.getKnownError(
-        WASTE_MASS_IS_UNIQUE_FINDINGS.render(`ERROR.${errorMessage}`),
+        WASTE_MASS_IS_UNIQUE_FINDINGS.render(`ERROR.${errorKey}`),
       );
     }
 

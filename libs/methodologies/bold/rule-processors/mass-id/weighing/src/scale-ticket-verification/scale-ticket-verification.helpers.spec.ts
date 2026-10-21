@@ -117,6 +117,10 @@ describe('scale-ticket-verification', () => {
     });
 
     expect(result.errors.length).toBeGreaterThan(0);
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_MISSING_SOURCE',
+      defaultOwner: 'INTEGRATOR',
+    });
   });
 
   it('should return an error when layoutIds is missing or empty', async () => {
@@ -191,6 +195,10 @@ describe('scale-ticket-verification', () => {
 
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]?.message).toContain('could not be processed');
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+      defaultOwner: 'CARROT',
+    });
   });
 
   it('should build a scale ticket verification context', () => {
@@ -227,5 +235,9 @@ describe('scale-ticket-verification', () => {
 
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]?.message).toContain('could not be processed');
+    expect(result.errors[0]?.finding).toEqual({
+      code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+      defaultOwner: 'CARROT',
+    });
   });
 });

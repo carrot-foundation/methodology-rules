@@ -9,6 +9,7 @@ export const COMPOSTING_CYCLE_TIMEFRAME_FINDINGS = defineRuleFindings(
   {
     ERROR: new CompostingCycleTimeframeProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

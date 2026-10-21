@@ -13,6 +13,7 @@ export type FindingMessageGroups = Record<
 
 export interface FindingMeta {
   defaultOwner: FindingOwner;
+  // TEST runs mark the finding NOT_EVALUATED when this actor's accreditation was synthesized
   dependsOnAccreditation?: MassIDActorType;
 }
 

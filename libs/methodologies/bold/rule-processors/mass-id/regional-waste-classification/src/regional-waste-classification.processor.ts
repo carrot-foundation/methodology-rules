@@ -1,3 +1,4 @@
+import type { RuleFindingsResult } from '@carrot-fndn/shared/rule/result';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import {
@@ -173,10 +174,7 @@ export class RegionalWasteClassificationProcessor extends ParentDocumentRuleProc
   }
 
   private isFailed(
-    failedResult: Pick<
-      EvaluateResultOutput,
-      'resultComment' | 'resultFindings'
-    >,
+    failedResult: RuleFindingsResult,
     resultContent?: AnyObject,
   ): EvaluateResultOutput {
     return {

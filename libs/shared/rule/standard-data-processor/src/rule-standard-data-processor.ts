@@ -28,15 +28,14 @@ export abstract class RuleStandardDataProcessor<
     const document = await this.loadDocument(ruleInput);
 
     if (isNil(document)) {
-      const { finding, message } = SHARED_FINDINGS.render(
-        'ERROR.DOCUMENT_NOT_LOADED',
-        ruleInput.parentDocumentId as string,
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        SHARED_FINDINGS.result(
+          'ERROR.DOCUMENT_NOT_LOADED',
+          ruleInput.parentDocumentId as string,
+        ),
       );
-
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: message,
-        resultFindings: [finding],
-      });
     }
 
     const ruleSubject = await this.getRuleSubject(document);

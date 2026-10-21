@@ -7,6 +7,7 @@ import {
   createRuleTestFixture,
   expectRuleFindings,
   expectRuleOutput,
+  findTestCase,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
@@ -63,15 +64,10 @@ describe('MassIDSortingProcessor', () => {
     );
 
     it('should mark the deducted weight mismatch as dependent on the Recycler accreditation', async () => {
-      const deductedWeightMismatchCase = massIDSortingTestCases.find(
-        ({ scenario }) =>
-          scenario ===
-          'The deducted weight does not match the expected value based on sorting factor',
+      const deductedWeightMismatchCase = findTestCase(
+        massIDSortingTestCases,
+        'The deducted weight does not match the expected value based on sorting factor',
       );
-
-      if (!deductedWeightMismatchCase) {
-        throw new Error('Deducted weight mismatch test case not found');
-      }
 
       const { ruleOutput } = await createRuleTestFixture({
         accreditationDocuments:

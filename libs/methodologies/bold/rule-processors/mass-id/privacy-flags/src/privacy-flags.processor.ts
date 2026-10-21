@@ -1,5 +1,4 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
-import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
 
 import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
@@ -8,11 +7,13 @@ import {
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 
-import type { ParticipantOccurrence } from './privacy-flags.helpers';
+import type {
+  ParticipantOccurrence,
+  PrivacyReview,
+} from './privacy-flags.helpers';
 import type {
   NotValidatedEntry,
   PrivacyFlagsResultContent,
-  PrivacyReviewReason,
 } from './privacy-flags.result-content.types';
 
 import {
@@ -27,17 +28,13 @@ import {
 import { PRIVACY_FLAGS_FINDINGS } from './privacy-flags.findings';
 import {
   actorEventRolesOf,
+  addPrivacyReview,
   participantOccurrencesOf,
   participantRolesOf,
   resolveParticipantVisibility,
 } from './privacy-flags.helpers';
 
 const { ACTOR } = BoldDocumentEventName;
-
-interface PrivacyReview {
-  finding: RuleFinding;
-  reason: PrivacyReviewReason;
-}
 
 interface RuleSubject {
   events: BoldDocumentEvent[];
@@ -186,24 +183,23 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     }
 
     if (!event.isPublic) {
-      const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-        'REVIEW_REQUIRED.ACTOR_IS_PUBLIC',
-        label,
-        true,
-      );
-
-      reviews.push({
-        finding,
-        reason: {
+      addPrivacyReview(
+        reviews,
+        PRIVACY_FLAGS_FINDINGS.render(
+          'REVIEW_REQUIRED.ACTOR_IS_PUBLIC',
+          label,
+          true,
+        ),
+        (description) => ({
           actual: event.isPublic,
           code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
-          description: message,
+          description,
           eventLabel: label,
           eventName: event.name,
           expected: true,
           field: 'isPublic',
-        },
-      });
+        }),
+      );
     }
 
     return true;
@@ -216,23 +212,22 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
     reviews: PrivacyReview[],
   ): void {
     if (event.isPublic !== eventSpec.isPublic) {
-      const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-        'REVIEW_REQUIRED.EVENT_IS_PUBLIC',
-        event.name,
-        eventSpec.isPublic,
-      );
-
-      reviews.push({
-        finding,
-        reason: {
+      addPrivacyReview(
+        reviews,
+        PRIVACY_FLAGS_FINDINGS.render(
+          'REVIEW_REQUIRED.EVENT_IS_PUBLIC',
+          event.name,
+          eventSpec.isPublic,
+        ),
+        (description) => ({
           actual: event.isPublic,
           code: PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
-          description: message,
+          description,
           eventName: event.name,
           expected: eventSpec.isPublic,
           field: 'isPublic',
-        },
-      });
+        }),
+      );
     }
 
     for (const attribute of event.metadata?.attributes ?? []) {
@@ -247,47 +242,45 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
       }
 
       if (attribute.isPublic !== attributeSpec.isPublic) {
-        const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-          'REVIEW_REQUIRED.ATTRIBUTE_IS_PUBLIC',
-          event.name,
-          attribute.name,
-          attributeSpec.isPublic,
-        );
-
-        reviews.push({
-          finding,
-          reason: {
+        addPrivacyReview(
+          reviews,
+          PRIVACY_FLAGS_FINDINGS.render(
+            'REVIEW_REQUIRED.ATTRIBUTE_IS_PUBLIC',
+            event.name,
+            attribute.name,
+            attributeSpec.isPublic,
+          ),
+          (description) => ({
             actual: attribute.isPublic,
             attributeName: attribute.name,
             code: PRIVACY_REASON_CODES.ATTRIBUTE_IS_PUBLIC,
-            description: message,
+            description,
             eventName: event.name,
             expected: attributeSpec.isPublic,
             field: 'isPublic',
-          },
-        });
+          }),
+        );
       }
 
       if ((attribute.sensitive === true) !== attributeSpec.sensitive) {
-        const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-          'REVIEW_REQUIRED.ATTRIBUTE_SENSITIVE',
-          event.name,
-          attribute.name,
-          attributeSpec.sensitive,
-        );
-
-        reviews.push({
-          finding,
-          reason: {
+        addPrivacyReview(
+          reviews,
+          PRIVACY_FLAGS_FINDINGS.render(
+            'REVIEW_REQUIRED.ATTRIBUTE_SENSITIVE',
+            event.name,
+            attribute.name,
+            attributeSpec.sensitive,
+          ),
+          (description) => ({
             actual: attribute.sensitive,
             attributeName: attribute.name,
             code: PRIVACY_REASON_CODES.ATTRIBUTE_SENSITIVE,
-            description: message,
+            description,
             eventName: event.name,
             expected: attributeSpec.sensitive,
             field: 'sensitive',
-          },
-        });
+          }),
+        );
       }
     }
   }
@@ -309,22 +302,21 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
         continue;
       }
 
-      const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-        'REVIEW_REQUIRED.EVENT_PRESERVE_SENSITIVE_DATA',
-        event.name,
-        participantRole,
-        expected,
-      );
-
-      reviews.push({
-        finding,
-        reason: {
+      addPrivacyReview(
+        reviews,
+        PRIVACY_FLAGS_FINDINGS.render(
+          'REVIEW_REQUIRED.EVENT_PRESERVE_SENSITIVE_DATA',
+          event.name,
+          participantRole,
+          expected,
+        ),
+        (description) => ({
           actual: event.preserveSensitiveData,
           code:
             event.name === ACTOR
               ? PRIVACY_REASON_CODES.ACTOR_PRESERVE_SENSITIVE_DATA
               : PRIVACY_REASON_CODES.EVENT_PRESERVE_SENSITIVE_DATA,
-          description: message,
+          description,
           ...(event.name === ACTOR && event.label !== undefined
             ? { eventLabel: event.label }
             : {}),
@@ -332,8 +324,8 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
           expected,
           field: 'preserveSensitiveData',
           participantRole,
-        },
-      });
+        }),
+      );
     }
   }
 
@@ -364,24 +356,23 @@ export class PrivacyFlagsProcessor extends ParentDocumentRuleProcessor<RuleSubje
           continue;
         }
 
-        const { finding, message } = PRIVACY_FLAGS_FINDINGS.render(
-          'REVIEW_REQUIRED.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING',
-          participantRole,
-        );
-
-        reviews.push({
-          finding,
-          reason: {
+        addPrivacyReview(
+          reviews,
+          PRIVACY_FLAGS_FINDINGS.render(
+            'REVIEW_REQUIRED.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING',
+            participantRole,
+          ),
+          (description) => ({
             actual: undefined,
             code: PRIVACY_REASON_CODES.PARTICIPANT_PRESERVE_SENSITIVE_DATA_MISSING,
-            description: message,
+            description,
             eventLabel: participantRole,
             eventName: ACTOR,
             expected: true,
             field: 'preserveSensitiveData',
             participantRole,
-          },
-        });
+          }),
+        );
       }
     }
   }

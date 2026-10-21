@@ -1,3 +1,4 @@
+import type { RuleFindingsResult } from '@carrot-fndn/shared/rule/result';
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
 
 import { getEnableReviewRequired } from '@carrot-fndn/shared/env';
@@ -28,7 +29,6 @@ import {
 } from '@carrot-fndn/shared/types';
 import { LatitudeSchema, LongitudeSchema } from '@carrot-fndn/shared/types';
 
-import type { GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS } from './geolocation-and-address-precision.findings';
 import type {
   GpsLatitudeApprovedException,
   GpsLongitudeApprovedException,
@@ -41,14 +41,10 @@ import {
 } from './geolocation-and-address-precision.validators';
 
 export interface SimilarityCommentTemplates {
-  failed: (similarityPercent: number) => FindingResult;
+  failed: (similarityPercent: number) => RuleFindingsResult;
   passed: (similarityPercent: number) => string;
-  reviewRequired: (similarityPercent: number) => FindingResult;
+  reviewRequired: (similarityPercent: number) => RuleFindingsResult;
 }
-
-type FindingResult = ReturnType<
-  typeof GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS.result
->;
 
 export const evaluateAddressSimilarityResult = (
   eventAddress: DocumentAddress,

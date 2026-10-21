@@ -9,6 +9,7 @@ export const DRIVER_IDENTIFICATION_FINDINGS = defineRuleFindings(
   {
     ERROR: new DriverIdentificationProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

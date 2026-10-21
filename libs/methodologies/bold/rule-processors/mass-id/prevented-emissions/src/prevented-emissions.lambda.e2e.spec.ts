@@ -257,6 +257,12 @@ describe('PreventedEmissionsProcessor E2E', () => {
           wasteCode,
         ),
       );
+      expect(response.resultContent?.['findings']).toEqual([
+        {
+          code: 'prevented-emissions.REVIEW_REQUIRED.OTHERS_IF_ORGANIC_AWAITING_LAUDO',
+          defaultOwner: 'RECYCLER',
+        },
+      ]);
     });
   });
 });

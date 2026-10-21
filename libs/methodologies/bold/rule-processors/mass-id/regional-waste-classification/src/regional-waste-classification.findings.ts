@@ -9,6 +9,7 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
   {
     ERROR: new RegionalWasteClassificationProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

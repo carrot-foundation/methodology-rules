@@ -52,7 +52,15 @@ export const validateMtrExtractedData = (
   const extractedData = extractionResult.data as MtrExtractedData;
 
   if (extractionResult.data.extractionConfidence === 'low') {
-    return { failMessages: [], reviewRequired: true };
+    return {
+      failMessages: [],
+      reviewReasons: [
+        REVIEW_REASONS.DOCUMENT_EXTRACTION_CONFIDENCE_LOW({
+          confidence: extractionResult.data.extractionConfidence,
+        }),
+      ],
+      reviewRequired: true,
+    };
   }
 
   const eventIssueDate = eventData.issueDateAttribute?.value?.toString();

@@ -199,10 +199,6 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         : passMessages.join(' ');
 
     if (crossValidationResult.reviewRequired) {
-      const reviewFindings = crossValidationResult.reviewReasons.map((reason) =>
-        toCrossValidationFinding(reason),
-      );
-
       return {
         resultComment: `${resultComment} Review required: ${crossValidationResult.reviewReasons.map((r) => r.description).join('; ')}`,
         resultContent: {
@@ -210,14 +206,9 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           extractionMetadata,
           reviewReasons: crossValidationResult.reviewReasons,
         },
-        // The MTR low-confidence branch requests review without giving a reason
-        resultFindings: isNonEmptyArray(reviewFindings)
-          ? reviewFindings
-          : [
-              DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-                'CROSS_VALIDATION.DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
-              ),
-            ],
+        resultFindings: crossValidationResult.reviewReasons.map((reason) =>
+          toCrossValidationFinding(reason),
+        ),
         resultStatus: 'REVIEW_REQUIRED',
       };
     }

@@ -57,18 +57,33 @@ export const mapToRuleOutput = (
     resultContent?: AnyObject | undefined;
     resultFindings?: RuleFinding[] | undefined;
   } = {},
-): RuleOutput =>
-  RuleOutputSchema.parse({
+): RuleOutput => {
+  const isNonPassing = resultStatus !== 'PASSED';
+  const hasFindings = isNonEmptyArray(resultFindings);
+
+  if (isNonPassing && !hasFindings) {
+    logger.error(
+      {
+        requestId: ruleInput.requestId,
+        resultStatus,
+        ruleName: ruleInput.ruleName,
+      },
+      'Non-passing rule result has no findings',
+    );
+  }
+
+  return RuleOutputSchema.parse({
     requestId: ruleInput.requestId,
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,
     resultComment,
     resultContent:
-      resultStatus !== 'PASSED' && isNonEmptyArray(resultFindings)
+      isNonPassing && hasFindings
         ? { ...resultContent, findings: resultFindings }
         : resultContent,
     resultStatus,
   });
+};
 
 export const signRequest = async (
   input: SignRequestInput,

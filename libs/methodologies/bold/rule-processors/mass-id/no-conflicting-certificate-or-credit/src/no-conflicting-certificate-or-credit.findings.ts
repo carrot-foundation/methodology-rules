@@ -1,5 +1,6 @@
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
+import { RESULT_COMMENTS } from './no-conflicting-certificate-or-credit.constants';
 import { NoConflictingCertificateOrCreditProcessorErrors } from './no-conflicting-certificate-or-credit.processor.errors';
 import { ruleDefinition } from './no-conflicting-certificate-or-credit.rule-definition';
 
@@ -7,6 +8,8 @@ export const NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS = defineRuleFindings(
   ruleDefinition.slug,
   {
     ERROR: new NoConflictingCertificateOrCreditProcessorErrors().ERROR_MESSAGE,
+    FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

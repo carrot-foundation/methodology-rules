@@ -25,8 +25,6 @@ class KnownFindingError extends Error {
 export abstract class BaseProcessorErrors {
   abstract readonly ERROR_MESSAGE: ErrorMessage;
 
-  protected readonly KNOWN_ERROR_PREFIX = String(Symbol('[KNOWN ERROR]: '));
-
   getFailedResultFromError(error: unknown): RuleFindingsResult {
     const failedResult = this.processKnownError(error);
 
@@ -42,27 +40,20 @@ export abstract class BaseProcessorErrors {
     options?: ErrorOptions,
   ): Error {
     return new KnownFindingError(
-      this.KNOWN_ERROR_PREFIX + renderedFinding.message,
+      renderedFinding.message,
       renderedFinding.finding,
       options,
     );
   }
 
-  private getKnownErrorMessage(error: Error): string {
-    return error.message.replace(this.KNOWN_ERROR_PREFIX, '');
-  }
-
   private isKnownError(error: unknown): error is KnownFindingError {
-    return (
-      error instanceof KnownFindingError &&
-      error.message.startsWith(this.KNOWN_ERROR_PREFIX)
-    );
+    return error instanceof KnownFindingError;
   }
 
   private processKnownError(error: unknown): RuleFindingsResult | undefined {
     if (this.isKnownError(error)) {
       return {
-        resultComment: this.getKnownErrorMessage(error),
+        resultComment: error.message,
         resultFindings: [error.finding],
       };
     }

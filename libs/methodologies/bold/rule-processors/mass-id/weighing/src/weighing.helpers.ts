@@ -561,17 +561,6 @@ export const validateWeighingValues = (
 export const validateTwoStepWeighingEvents = (
   events: BoldDocumentEvent[],
 ): ValidationResult => {
-  if (events.length !== 2) {
-    return {
-      errors: [
-        {
-          finding: WEIGHING_FINDINGS.finding('ERROR.FAILED_BY_ERROR'),
-          message: `Expected exactly 2 weighing events for two-step validation, but received ${String(events.length)}.`,
-        },
-      ],
-    };
-  }
-
   const errors: RenderedRuleFinding[] = [];
   const firstEvent = events[0];
   const secondEvent = events[1];

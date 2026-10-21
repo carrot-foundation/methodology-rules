@@ -59,6 +59,10 @@ export class VehicleValidationProcessor extends ParentDocumentRuleProcessor<Rule
 }
 ```
 
+### Findings
+
+Render every non-passing result through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`, and set a finding's `dependsOnAccreditation` only when the check compares against a value that TEST synthetic accreditations fabricate (scale type, sorting factor, baselines, GHG type, exceeding emission coefficient, scale-ticket config), never for accreditation presence or validity, addresses, or Waste Generator data, because the tag turns every TEST occurrence of that finding into NOT_EVALUATED.
+
 ### Test organization
 
 Define reusable test data in `{rule-name}.test-cases.ts`:

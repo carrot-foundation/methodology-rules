@@ -3,20 +3,25 @@ import {
   createRuleTestFixture,
   expectRuleFindings,
   expectRuleOutput,
+  findTestCase,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldAttributeName,
+  BoldDocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import * as scaleTicketVerification from './scale-ticket-verification/scale-ticket-verification.helpers';
-import {
-  INVALID_RESULT_COMMENTS,
-  WRONG_FORMAT_RESULT_COMMENTS,
-} from './weighing.constants';
 import { WEIGHING_FINDINGS } from './weighing.findings';
 import { WeighingProcessor } from './weighing.processor';
 import {
   weighingErrorTestCases,
   weighingTestCases,
 } from './weighing.test-cases';
+
+const { CONTAINER_CAPACITY, SCALE_TYPE, VEHICLE_LICENSE_PLATE } =
+  BoldAttributeName;
+const { WEIGHING } = BoldDocumentEventName;
 
 describe('WeighingProcessor', () => {
   const ruleDataProcessor = new WeighingProcessor();
@@ -79,7 +84,7 @@ describe('WeighingProcessor', () => {
             defaultOwner: 'INTEGRATOR',
           },
         ],
-        resultComment: `${WRONG_FORMAT_RESULT_COMMENTS.CONTAINER_CAPACITY} ${INVALID_RESULT_COMMENTS.CONTAINER_CAPACITY_FORMAT}`,
+        scenario: `The "${CONTAINER_CAPACITY}" attribute is missing`,
       },
       {
         description:
@@ -95,11 +100,7 @@ describe('WeighingProcessor', () => {
             defaultOwner: 'INTEGRATOR',
           },
         ],
-        resultComment: weighingTestCases.find(({ scenario }) =>
-          scenario.endsWith(
-            'in the Recycler Accreditation document and is not supported by the methodology',
-          ),
-        )?.resultComment,
+        scenario: `The "${SCALE_TYPE}" attribute is not equal to the "${SCALE_TYPE}" attribute in the Recycler Accreditation document and is not supported by the methodology`,
       },
       {
         description: 'a plate format finding with no accreditation dependency',
@@ -109,26 +110,27 @@ describe('WeighingProcessor', () => {
             defaultOwner: 'TO_CONFIRM',
           },
         ],
-        resultComment: INVALID_RESULT_COMMENTS.VEHICLE_LICENSE_PLATE_FORMAT,
+        scenario: `The "${VEHICLE_LICENSE_PLATE}" attribute is missing`,
       },
-    ])(
-      'should report $description',
-      async ({ expectedFindings, resultComment }) => {
-        const testCase = weighingTestCases.find(
-          (candidate) => candidate.resultComment === resultComment,
-        );
-
-        if (!testCase) {
-          throw new Error(`Test case not found for: ${String(resultComment)}`);
-        }
-
-        const { ruleOutput } = await processTestCase(testCase);
-
-        expect(ruleOutput.resultContent).toEqual({
-          findings: expectedFindings,
-        });
+      {
+        description: 'a missing weighing event as an invalid rule subject',
+        expectedFindings: [
+          {
+            code: 'weighing.ERROR.INVALID_RULE_SUBJECT',
+            defaultOwner: 'INTEGRATOR',
+          },
+        ],
+        scenario: `The MassID document does not have "${WEIGHING}" events`,
       },
-    );
+    ])('should report $description', async ({ expectedFindings, scenario }) => {
+      const { ruleOutput } = await processTestCase(
+        findTestCase(weighingTestCases, scenario),
+      );
+
+      expect(ruleOutput.resultContent).toEqual({
+        findings: expectedFindings,
+      });
+    });
   });
 
   describe('WeighingProcessorErrors', () => {

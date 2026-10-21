@@ -1,7 +1,12 @@
+import type { RenderedRuleFinding } from '@carrot-fndn/shared/rule/result';
+import type { RuleFinding } from '@carrot-fndn/shared/rule/types';
+
 import {
   BoldActorType,
   type BoldDocumentEvent,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+
+import type { PrivacyReviewReason } from './privacy-flags.result-content.types';
 
 import {
   LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
@@ -17,6 +22,11 @@ export interface ParticipantOccurrence {
 }
 
 export type ParticipantVisibility = 'private' | 'public';
+
+export interface PrivacyReview {
+  finding: RuleFinding;
+  reason: PrivacyReviewReason;
+}
 
 export const actorEventRolesOf = ({
   label,
@@ -34,6 +44,14 @@ export const actorEventRolesOf = ({
   );
 
   return new Set([...(label === undefined ? [] : [label]), ...legacyRoles]);
+};
+
+export const addPrivacyReview = (
+  reviews: PrivacyReview[],
+  { finding, message }: RenderedRuleFinding,
+  buildReason: (description: string) => PrivacyReviewReason,
+): void => {
+  reviews.push({ finding, reason: buildReason(message) });
 };
 
 export const participantOccurrencesOf = (

@@ -9,6 +9,7 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
   {
     ERROR: new MassIDQualificationsProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.DOCUMENT_SUBTYPE_NOT_FOUND': { defaultOwner: 'INTEGRATOR' },

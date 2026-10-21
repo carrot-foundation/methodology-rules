@@ -9,6 +9,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
   {
     ERROR: new WasteMassIsUniqueProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

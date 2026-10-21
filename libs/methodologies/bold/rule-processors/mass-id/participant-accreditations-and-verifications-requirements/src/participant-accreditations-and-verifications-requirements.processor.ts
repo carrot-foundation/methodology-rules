@@ -61,10 +61,12 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
 
       const ruleSubject = await this.getRuleSubject(documentsQuery);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
       return mapToRuleOutput(

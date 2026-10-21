@@ -3,7 +3,11 @@ import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput, stubRuleOutput } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
 
-import { expectRuleFindings, expectRuleOutput } from './rule-processor.helpers';
+import {
+  expectRuleFindings,
+  expectRuleOutput,
+  findTestCase,
+} from './rule-processor.helpers';
 
 const TEST_FINDINGS = { codes: new Set(['test-rule.FAILED.MASS_MISMATCH']) };
 const TEST_FINDING = {
@@ -158,5 +162,22 @@ describe('expectRuleOutput', () => {
         ruleOutput,
       }),
     ).toThrow('to deeply equal');
+  });
+});
+
+describe('findTestCase', () => {
+  const testCases = [
+    { resultStatus: 'PASSED', scenario: 'first scenario' },
+    { resultStatus: 'FAILED', scenario: 'second scenario' },
+  ];
+
+  it('should return the test case with the given scenario', () => {
+    expect(findTestCase(testCases, 'second scenario')).toBe(testCases[1]);
+  });
+
+  it('should throw when no test case has the given scenario', () => {
+    expect(() => findTestCase(testCases, 'missing scenario')).toThrow(
+      'Test case not found: missing scenario',
+    );
   });
 });

@@ -9,6 +9,7 @@ export const DROP_OFF_AT_RECYCLER_FINDINGS = defineRuleFindings(
   {
     ERROR: new DropOffAtRecyclerProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

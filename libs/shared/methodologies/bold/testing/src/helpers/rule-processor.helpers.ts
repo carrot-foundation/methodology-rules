@@ -35,7 +35,7 @@ interface ProcessRuleTestParameters {
 }
 
 interface TestExpectedRuleOutputParameters {
-  findings?: ExpectedRuleFindings | undefined;
+  findings: ExpectedRuleFindings;
   resultComment: string;
   resultContent?: AnyObject | undefined;
   resultStatus: string;
@@ -137,11 +137,7 @@ export function expectRuleOutput({
   ruleInput,
   ruleOutput,
 }: TestExpectedRuleOutputParameters): void {
-  expect(
-    findings === undefined
-      ? ruleOutput
-      : expectRuleFindings(ruleOutput, findings),
-  ).toEqual({
+  expect(expectRuleFindings(ruleOutput, findings)).toEqual({
     requestId: ruleInput.requestId,
     responseToken: ruleInput.responseToken,
     responseUrl: ruleInput.responseUrl,
@@ -149,4 +145,19 @@ export function expectRuleOutput({
     resultStatus,
     ...(resultContent !== undefined && { resultContent }),
   });
+}
+
+export function findTestCase<TestCase extends { scenario: string }>(
+  testCases: readonly TestCase[],
+  scenario: string,
+): TestCase {
+  const testCase = testCases.find(
+    (candidate) => candidate.scenario === scenario,
+  );
+
+  if (testCase === undefined) {
+    throw new Error(`Test case not found: ${scenario}`);
+  }
+
+  return testCase;
 }

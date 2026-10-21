@@ -4,6 +4,7 @@ import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers'
 import {
   BoldStubsBuilder,
   expectRuleFindings,
+  findTestCase,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -26,21 +27,6 @@ const { RECYCLING_MANIFEST } = BoldDocumentEventName;
 
 type DocumentManifestDataTestCase =
   (typeof documentManifestDataTestCases)[number];
-
-const findTestCase = (
-  testCases: DocumentManifestDataTestCase[],
-  scenario: string,
-): DocumentManifestDataTestCase => {
-  const testCase = testCases.find(
-    (candidate) => candidate.scenario === scenario,
-  );
-
-  if (testCase === undefined) {
-    throw new Error(`Test case "${scenario}" not found`);
-  }
-
-  return testCase;
-};
 
 vi.mock('@carrot-fndn/shared/methodologies/bold/io-helpers');
 vi.mock('./document-manifest-data.extractor');
@@ -208,40 +194,6 @@ describe('DocumentManifestDataProcessor', () => {
     expect(ruleOutput.resultContent?.['findings']).toEqual([
       DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
-      ),
-    ]);
-  });
-
-  it('should return the extraction confidence finding when review is required without a review reason', async () => {
-    const testCase = findTestCase(
-      crossValidationTestCases,
-      'Cross-validation requires review',
-    );
-
-    crossValidateWithTextractMock.mockResolvedValue({
-      crossValidation: {},
-      extractionMetadata: {},
-      failMessages: [],
-      failReasons: [],
-      passMessages: [],
-      reviewReasons: [],
-      reviewRequired: true,
-    });
-
-    const { massIDDocument } = new BoldStubsBuilder()
-      .createMassIDDocuments({ externalEventsMap: testCase.events })
-      .build();
-
-    documentLoaderService.mockResolvedValueOnce(massIDDocument);
-
-    const ruleOutput = await new DocumentManifestDataProcessor({
-      documentManifestType: testCase.documentManifestType,
-    }).process(stubRuleInput());
-
-    expect(ruleOutput.resultStatus).toBe('REVIEW_REQUIRED');
-    expect(ruleOutput.resultContent?.['findings']).toEqual([
-      DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'CROSS_VALIDATION.DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
       ),
     ]);
   });

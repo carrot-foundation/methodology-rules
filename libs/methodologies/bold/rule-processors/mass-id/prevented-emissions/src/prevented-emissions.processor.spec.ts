@@ -4,6 +4,7 @@ import {
   createRuleTestFixture,
   expectRuleFindings,
   expectRuleOutput,
+  findTestCase,
   type MetadataAttributeParameter,
   type StubBoldDocumentParameters,
   stubBoldEmissionAndCompostingMetricsEvent,
@@ -22,6 +23,7 @@ import { type AnyObject } from '@carrot-fndn/shared/types';
 import { addYears, getYear } from 'date-fns';
 
 import { RESULT_COMMENTS } from './prevented-emissions.constants';
+import { PreventedEmissionsProcessorErrors } from './prevented-emissions.errors';
 import { PREVENTED_EMISSIONS_FINDINGS } from './prevented-emissions.findings';
 import { PreventedEmissionsProcessor } from './prevented-emissions.processor';
 import {
@@ -106,28 +108,18 @@ describe('PreventedEmissionsProcessor', () => {
     it.each([
       {
         code: 'prevented-emissions.FAILED.MISSING_EXCEEDING_EMISSION_COEFFICIENT',
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_EXCEEDING_EMISSION_COEFFICIENT,
+        scenario: 'The exceeding emission coefficient is undefined (missing)',
       },
       {
         code: 'prevented-emissions.FAILED.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE',
-        resultComment:
-          RESULT_COMMENTS.failed.MISSING_RECYCLING_BASELINE_FOR_WASTE_SUBTYPE(
-            MassIDOrganicSubtype.DOMESTIC_SLUDGE,
-          ),
+        scenario: `The Recycler Accreditation document does not have the "${BASELINES}" info for the waste subtype "${MassIDOrganicSubtype.DOMESTIC_SLUDGE}"`,
       },
     ])(
       'should mark $code as dependent on the Recycler accreditation',
-      async ({ code, resultComment }) => {
-        const testCase = preventedEmissionsTestCases.find(
-          (candidate) => candidate.resultComment === resultComment,
+      async ({ code, scenario }) => {
+        const { ruleOutput } = await processTestCase(
+          findTestCase(preventedEmissionsTestCases, scenario),
         );
-
-        if (!testCase) {
-          throw new Error(`Test case not found for: ${resultComment}`);
-        }
-
-        const { ruleOutput } = await processTestCase(testCase);
 
         expect(ruleOutput.resultContent?.['findings']).toEqual([
           {
@@ -138,6 +130,26 @@ describe('PreventedEmissionsProcessor', () => {
         ]);
       },
     );
+
+    it('should report an invalid rule subject when the MassID value is negative', async () => {
+      const { ruleOutput } = await processTestCase({
+        ...findTestCase(
+          preventedEmissionsTestCases,
+          'The exceeding emission coefficient is undefined (missing)',
+        ),
+        massIDDocumentValue: -1,
+      });
+
+      expect(ruleOutput.resultStatus).toBe('FAILED');
+      expect(ruleOutput.resultContent).toEqual({
+        findings: [
+          {
+            code: 'prevented-emissions.ERROR.INVALID_RULE_SUBJECT',
+            defaultOwner: 'INTEGRATOR',
+          },
+        ],
+      });
+    });
   });
 
   describe('PreventedEmissionsProcessorErrors', () => {
@@ -306,6 +318,18 @@ describe('PreventedEmissionsProcessor', () => {
       // reachable when a pick-up event exists without a timestamp, which the
       // stub builder never produces, so it is not asserted here.)
       expect(ruleOutput.resultStatus).toBe('FAILED');
+      expect(ruleOutput.resultComment).toBe(
+        new PreventedEmissionsProcessorErrors().ERROR_MESSAGE
+          .INVALID_CLASSIFICATION_ID,
+      );
+      expect(ruleOutput.resultContent).toEqual({
+        findings: [
+          {
+            code: 'prevented-emissions.ERROR.INVALID_CLASSIFICATION_ID',
+            defaultOwner: 'INTEGRATOR',
+          },
+        ],
+      });
     });
 
     it('PASSES via a valid generator characterization with source "generator"', async () => {

@@ -9,6 +9,7 @@ export const HAULER_IDENTIFICATION_FINDINGS = defineRuleFindings(
   {
     ERROR: new HaulerIdentificationProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },

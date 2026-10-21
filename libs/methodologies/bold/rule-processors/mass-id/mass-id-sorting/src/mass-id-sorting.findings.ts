@@ -10,6 +10,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
   {
     ERROR: new MassIDSortingProcessorErrors().ERROR_MESSAGE,
     FAILED: RESULT_COMMENTS.failed,
+    REVIEW_REQUIRED: RESULT_COMMENTS.reviewRequired,
   },
   {
     'ERROR.FAILED_BY_ERROR': { defaultOwner: 'CARROT' },
