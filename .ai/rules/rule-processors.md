@@ -13,7 +13,7 @@ requirements:
   - Define test data in `{rule-name}.test-cases.ts` and share it between unit and e2e tests
   - Place stateless helper functions in `{rule-name}.helpers.ts` (not as private methods on the processor class) using arrow-`const` syntax (`export const myHelper = (...) => ...`)
   - Place result-comment templates and threshold constants in `{rule-name}.constants.ts`
-  - Render every non-passing result comment through the rule's `{rule-name}.findings.ts` (`<RULE>_FINDINGS.render(...)` / `getKnownError(rendered)`) so the result carries `resultContent.findings`; the findings map covers every non-passing message key; set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run
+  - Render every non-passing result comment through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`: a single message via `<RULE>_FINDINGS.result(...)`, several joined via `joinRenderedFindings`, a thrown error via `getKnownError(<RULE>_FINDINGS.render(...))`; the findings map covers every non-passing message key; set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run
 anti_patterns:
   - Creating rule processor files manually instead of using the scaffolding script
   - Putting business logic in the Lambda handler instead of the processor class
@@ -79,7 +79,7 @@ export class VehicleValidationProcessor extends ParentDocumentRuleProcessor<Rule
 
 ### Findings
 
-Render every non-passing result through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`, and set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run.
+Render every non-passing result through the rule's `{rule-name}.findings.ts` so the result carries `resultContent.findings`: a single message renders via `<RULE>_FINDINGS.result(...)`, several joined messages via `joinRenderedFindings`, and a thrown error via `getKnownError(<RULE>_FINDINGS.render(...))`. A finding code (`<slug>.<GROUP>.<KEY>`) is a wire identifier consumers key on, so renaming a message key, a group or the rule slug is a breaking change. Set `dependsOnAccreditation` only on a finding that fails because the TEST synthetic accreditations do not provide, for the mass, the value it reads (today the recycler's GHG type, per-subtype baselines and sorting factor; Smaug runbook 02, "Expected failures on TEST"); reading the accreditation is not enough, and a doubtful case stays unset, because a marked finding is reported as not evaluated on every TEST run.
 
 ### Test organization
 
