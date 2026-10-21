@@ -1,6 +1,10 @@
 import type { BoldDocument } from '@carrot-fndn/shared/methodologies/bold/types';
 
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  BoldStubsBuilder,
+  expectRuleFindings,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { MassIDOrganicSubtype } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type RuleOutput,
@@ -8,6 +12,7 @@ import {
 } from '@carrot-fndn/shared/rule/types';
 import { stubEnumValue, stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { MASS_ID_QUALIFICATIONS_FINDINGS } from './mass-id-qualifications.findings';
 import { MassIDQualificationsProcessor } from './mass-id-qualifications.processor';
 import { massIDQualificationsTestCases } from './mass-id-qualifications.test-cases';
 
@@ -66,7 +71,28 @@ describe('MassIDQualificationsProcessor', () => {
         resultStatus,
       };
 
-      expect(ruleOutput).toEqual(expectedRuleOutput);
+      expect(
+        expectRuleFindings(ruleOutput, MASS_ID_QUALIFICATIONS_FINDINGS),
+      ).toEqual(expectedRuleOutput);
     },
   );
+
+  it('should return one finding per joined failure message in the same order', async () => {
+    const { massIDDocument } = new BoldStubsBuilder()
+      .createMassIDDocuments()
+      .build();
+
+    documentLoaderService.mockResolvedValueOnce({
+      ...massIDDocument,
+      subtype: 'INVALID_SUBTYPE',
+      type: 'INVALID_TYPE',
+    });
+
+    const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+
+    expect(ruleOutput.resultContent?.['findings']).toEqual([
+      MASS_ID_QUALIFICATIONS_FINDINGS.finding('FAILED.INVALID_TYPE'),
+      MASS_ID_QUALIFICATIONS_FINDINGS.finding('FAILED.INVALID_SUBTYPE'),
+    ]);
+  });
 });

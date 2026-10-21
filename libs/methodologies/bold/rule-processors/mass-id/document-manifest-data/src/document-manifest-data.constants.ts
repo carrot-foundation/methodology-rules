@@ -163,7 +163,7 @@ export const CROSS_VALIDATION_COMMENTS = {
 } as const;
 
 function reviewReason<P extends object>(
-  code: string,
+  code: keyof typeof CROSS_VALIDATION_COMMENTS,
   comment: (parameters: P) => string,
 ): (parameters: P) => ReviewReason {
   return (parameters: P): ReviewReason => ({
@@ -173,7 +173,7 @@ function reviewReason<P extends object>(
 }
 
 function staticReviewReason(
-  code: string,
+  code: keyof typeof CROSS_VALIDATION_COMMENTS,
   description: string,
 ): () => ReviewReason {
   return (): ReviewReason => ({ code, description });

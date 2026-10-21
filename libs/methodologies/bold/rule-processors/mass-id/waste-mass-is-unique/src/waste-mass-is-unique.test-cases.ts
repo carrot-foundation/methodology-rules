@@ -14,6 +14,11 @@ import { DocumentStatus } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
+import { WASTE_MASS_IS_UNIQUE_FINDINGS } from './waste-mass-is-unique.findings';
+import { ruleDefinition } from './waste-mass-is-unique.rule-definition';
+
+type WasteMassIsUniqueFindingCode =
+  `${typeof ruleDefinition.slug}.${Parameters<typeof WASTE_MASS_IS_UNIQUE_FINDINGS.finding>[0]}`;
 
 const { CANCELLED, OPEN } = DocumentStatus;
 const { DROP_OFF, PICK_UP } = BoldDocumentEventName;
@@ -75,6 +80,7 @@ const { massIDAuditDocument, massIDDocument } = new BoldStubsBuilder()
   .build();
 
 interface WasteMassIsUniqueErrorTestCase extends RuleTestCase {
+  findingCode: WasteMassIsUniqueFindingCode;
   massIDAuditDocument: BoldDocument;
   massIDDocument: BoldDocument | undefined;
 }
@@ -82,6 +88,7 @@ interface WasteMassIsUniqueErrorTestCase extends RuleTestCase {
 export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
   [
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MASS_ID_DOCUMENT_NOT_FOUND',
       massIDAuditDocument,
       massIDDocument: undefined,
       resultComment: processorErrors.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
@@ -89,6 +96,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       scenario: 'The MassID document is missing',
     },
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MISSING_DROP_OFF_EVENT',
       massIDAuditDocument,
       massIDDocument: {
         ...massIDDocument,
@@ -101,6 +109,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       scenario: `The "${DROP_OFF}" event is missing`,
     },
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MISSING_PICK_UP_EVENT',
       massIDAuditDocument,
       massIDDocument: {
         ...massIDDocument,
@@ -113,6 +122,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       scenario: `The "${PICK_UP}" event is missing`,
     },
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MISSING_WASTE_GENERATOR_EVENT',
       massIDAuditDocument,
       massIDDocument: {
         ...massIDDocument,
@@ -126,6 +136,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       scenario: `The "${WASTE_GENERATOR}" event is missing`,
     },
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MISSING_RECYCLER_EVENT',
       massIDAuditDocument,
       massIDDocument: {
         ...massIDDocument,
@@ -138,6 +149,7 @@ export const wasteMassIsUniqueErrorTestCases: WasteMassIsUniqueErrorTestCase[] =
       scenario: `The "${RECYCLER}" event is missing`,
     },
     {
+      findingCode: 'waste-mass-is-unique.ERROR.MISSING_VEHICLE_LICENSE_PLATE',
       massIDAuditDocument,
       massIDDocument: {
         ...massIDDocument,

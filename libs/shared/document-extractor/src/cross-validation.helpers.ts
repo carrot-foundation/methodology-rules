@@ -8,6 +8,11 @@ import type {
 import type { DocumentExtractorService } from './document-extractor.service';
 import type { BaseExtractedData } from './document-extractor.types';
 
+import {
+  DOCUMENT_EXTRACTION_COMMENTS,
+  type DocumentExtractionCommentKey,
+} from './document-extraction.constants';
+
 const processInput = async <
   TEventData,
   TExtractedData extends BaseExtractedData,
@@ -26,8 +31,10 @@ const processInput = async <
     if (!extractorConfig) {
       result.reviewRequired = true;
       result.reviewReasons.push({
-        code: 'UNKNOWN_DOCUMENT_TYPE',
-        description: `Unknown document type, cannot perform cross-validation for attachment ${attachmentInfo.attachmentId}`,
+        code: 'UNKNOWN_DOCUMENT_TYPE' satisfies DocumentExtractionCommentKey,
+        description: DOCUMENT_EXTRACTION_COMMENTS.UNKNOWN_DOCUMENT_TYPE(
+          attachmentInfo.attachmentId,
+        ),
       });
 
       return;
@@ -82,9 +89,16 @@ const processInput = async <
       { attachmentInfo, error },
       'Failed to extract document for cross-validation',
     );
-    result.failMessages.push(
-      `Document extraction failed for attachment ${attachmentInfo.attachmentId}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    const description = DOCUMENT_EXTRACTION_COMMENTS.EXTRACTION_FAILED(
+      attachmentInfo.attachmentId,
+      error instanceof Error ? error.message : 'Unknown error',
     );
+
+    result.failMessages.push(description);
+    result.failReasons.push({
+      code: 'EXTRACTION_FAILED' satisfies DocumentExtractionCommentKey,
+      description,
+    });
   }
 };
 

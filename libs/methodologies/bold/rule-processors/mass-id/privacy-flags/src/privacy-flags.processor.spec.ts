@@ -1,6 +1,7 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   BoldStubsBuilder,
+  expectRuleFindings,
   stubDocumentEvent,
   stubDocumentEventAttribute,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
@@ -11,6 +12,7 @@ import {
   type BoldDocumentEvent,
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { type RuleFinding } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
 import type { PrivacyFlagsResultContent } from './privacy-flags.result-content.types';
@@ -19,6 +21,7 @@ import {
   LEGACY_ACTOR_TYPE_ATTRIBUTE_NAME,
   PRIVACY_REASON_CODES,
 } from './privacy-flags.constants';
+import { PRIVACY_FLAGS_FINDINGS } from './privacy-flags.findings';
 import { PrivacyFlagsProcessor } from './privacy-flags.processor';
 import {
   actorEventKey,
@@ -74,6 +77,7 @@ describe('PrivacyFlagsProcessor', () => {
   const evaluate = async (
     massIDDocument: BoldDocument,
   ): Promise<{
+    findings: RuleFinding[] | undefined;
     resultComment: string | undefined;
     resultContent: PrivacyFlagsResultContent;
     resultStatus: string;
@@ -81,11 +85,16 @@ describe('PrivacyFlagsProcessor', () => {
     documentLoaderService.mockResolvedValueOnce(massIDDocument);
 
     const ruleOutput = await ruleDataProcessor.process(stubRuleInput());
+    const { resultComment, resultContent, resultStatus } = expectRuleFindings(
+      ruleOutput,
+      PRIVACY_FLAGS_FINDINGS,
+    );
 
     return {
-      resultComment: ruleOutput.resultComment,
-      resultContent: ruleOutput.resultContent as PrivacyFlagsResultContent,
-      resultStatus: ruleOutput.resultStatus,
+      findings: ruleOutput.resultContent?.['findings'],
+      resultComment,
+      resultContent: resultContent as PrivacyFlagsResultContent,
+      resultStatus,
     };
   };
 
@@ -612,6 +621,26 @@ describe('PrivacyFlagsProcessor', () => {
           field: 'isPublic',
         }),
       );
+    });
+
+    it('should report the ACTOR_IS_PUBLIC finding for an actor isPublic violation even though its review reason carries the EVENT_IS_PUBLIC code', async () => {
+      const massIDDocument = buildMassID({
+        [actorEventKey(PROCESSOR)]: {
+          ...conformantActorEvent(PROCESSOR),
+          isPublic: false,
+        },
+      });
+
+      const { findings, resultContent, resultStatus } =
+        await evaluate(massIDDocument);
+
+      expect(resultStatus).toBe('REVIEW_REQUIRED');
+      expect(resultContent.reviewReasons.map(({ code }) => code)).toEqual([
+        PRIVACY_REASON_CODES.EVENT_IS_PUBLIC,
+      ]);
+      expect(findings).toEqual([
+        PRIVACY_FLAGS_FINDINGS.finding('REVIEW_REQUIRED.ACTOR_IS_PUBLIC'),
+      ]);
     });
 
     it('should add a review reason when the Integrator actor declares isPublic as false', async () => {

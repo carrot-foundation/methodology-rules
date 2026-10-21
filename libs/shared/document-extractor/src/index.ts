@@ -2,6 +2,7 @@ export * from './confidence.helpers';
 export * from './cross-validation.helpers';
 export * from './cross-validation.types';
 export * from './defaults';
+export * from './document-extraction.constants';
 export * from './document-extractor.service';
 export * from './document-extractor.types';
 export * from './extraction-result.types';

@@ -29,6 +29,7 @@ import {
   METHODOLOGY_NAME_BY_SLUG,
   RESULT_COMMENTS,
 } from './no-conflicting-certificate-or-credit.constants';
+import { NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS } from './no-conflicting-certificate-or-credit.findings';
 import {
   hasNonCancelledDocuments,
   hasPassedOrInProgressMassIDAuditForTheSameMethodology,
@@ -65,15 +66,19 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
 
       const ruleSubject = await this.getRuleSubject(documentsQuery, ruleInput);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.errorProcessor.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -98,14 +103,16 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
   }: RuleSubject): EvaluateResultOutput {
     if (hasNonCancelledDocuments(creditDocuments)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE
-          .MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT,
+        NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_HAS_A_VALID_CREDIT_DOCUMENT',
+        ),
       );
     }
 
     if (hasNonCancelledDocuments(massIDCertificateDocuments)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT(
+        NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_HAS_A_VALID_CERTIFICATE_DOCUMENT',
           this.massIDCertificateMatcher.match.type as NonEmptyString,
         ),
       );
@@ -118,7 +125,8 @@ export class NoConflictingCertificateOrCreditProcessor extends RuleDataProcessor
       )
     ) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME(
+        NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS.render(
+          'ERROR.MASS_ID_DOCUMENT_HAS_A_AUDIT_FOR_SAME_METHODOLOGY_NAME',
           METHODOLOGY_NAME_BY_SLUG[this.methodologySlug],
         ),
       );

@@ -284,11 +284,10 @@ describe('confidence.helpers', () => {
       const result = buildExtractionOutput(data, 0.4);
 
       expect(result.reviewRequired).toBe(true);
-      expect(result.reviewReasons).toContainEqual(
-        expect.objectContaining({
-          description: expect.stringContaining('Layout match score') as string,
-        }),
-      );
+      expect(result.reviewReasons).toContainEqual({
+        code: 'LOW_LAYOUT_MATCH_SCORE',
+        description: 'Layout match score (0.40) below review threshold (0.5)',
+      });
     });
   });
 

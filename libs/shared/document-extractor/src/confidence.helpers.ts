@@ -9,6 +9,12 @@ import type {
   ExtractionOutput,
 } from './document-extractor.types';
 
+import {
+  DOCUMENT_EXTRACTION_COMMENTS,
+  type DocumentExtractionCommentKey,
+  LOW_CONFIDENCE_REASON_CODE_PREFIX,
+} from './document-extraction.constants';
+
 const LAYOUT_MATCH_THRESHOLD = 0.3;
 const LAYOUT_REVIEW_THRESHOLD = 0.5;
 const TEXTRACT_CONFIDENCE_THRESHOLD = 90;
@@ -171,15 +177,18 @@ export const buildExtractionOutput = <T extends BaseExtractedData>(
 
   for (const field of data.lowConfidenceFields) {
     reviewReasons.push({
-      code: `LOW_CONFIDENCE_${toUpperSnakeCase(field)}`,
-      description: `Low confidence field: ${field}`,
+      code: `${LOW_CONFIDENCE_REASON_CODE_PREFIX}${toUpperSnakeCase(field)}`,
+      description: DOCUMENT_EXTRACTION_COMMENTS.LOW_CONFIDENCE_FIELD(field),
     });
   }
 
   if (layoutMatchScore < LAYOUT_REVIEW_THRESHOLD) {
     reviewReasons.push({
-      code: 'LOW_LAYOUT_MATCH_SCORE',
-      description: `Layout match score (${layoutMatchScore.toFixed(2)}) below review threshold (${LAYOUT_REVIEW_THRESHOLD})`,
+      code: 'LOW_LAYOUT_MATCH_SCORE' satisfies DocumentExtractionCommentKey,
+      description: DOCUMENT_EXTRACTION_COMMENTS.LOW_LAYOUT_MATCH_SCORE(
+        layoutMatchScore,
+        LAYOUT_REVIEW_THRESHOLD,
+      ),
     });
   }
 

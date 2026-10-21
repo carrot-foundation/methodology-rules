@@ -1,8 +1,12 @@
 import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
-import { BoldStubsBuilder } from '@carrot-fndn/shared/methodologies/bold/testing';
+import {
+  BoldStubsBuilder,
+  expectRuleFindings,
+} from '@carrot-fndn/shared/methodologies/bold/testing';
 import { type RuleOutput } from '@carrot-fndn/shared/rule/types';
 import { stubRuleInput } from '@carrot-fndn/shared/testing';
 
+import { WASTE_MASS_IS_UNIQUE_FINDINGS } from './waste-mass-is-unique.findings';
 import { WasteMassIsUniqueProcessor } from './waste-mass-is-unique.processor';
 import {
   wasteMassIsUniqueErrorTestCases,
@@ -56,7 +60,9 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
           resultStatus,
         };
 
-        expect(ruleOutput).toEqual(expectedRuleOutput);
+        expect(
+          expectRuleFindings(ruleOutput, WASTE_MASS_IS_UNIQUE_FINDINGS),
+        ).toEqual(expectedRuleOutput);
       },
     );
   });
@@ -64,7 +70,7 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
   describe('WasteMassIsUniqueProcessor Errors', () => {
     it.each(wasteMassIsUniqueErrorTestCases)(
       `should return $resultStatus when $scenario`,
-      async ({ massIDDocument, resultComment, resultStatus }) => {
+      async ({ findingCode, massIDDocument, resultComment, resultStatus }) => {
         const ruleInput = stubRuleInput();
 
         documentLoaderService.mockResolvedValueOnce(massIDDocument);
@@ -79,7 +85,12 @@ describe('WasteMassIsUniqueProcessor Rule', () => {
           resultStatus,
         };
 
-        expect(ruleOutput).toEqual(expectedRuleOutput);
+        expect(
+          expectRuleFindings(ruleOutput, WASTE_MASS_IS_UNIQUE_FINDINGS),
+        ).toEqual(expectedRuleOutput);
+        expect(ruleOutput.resultContent).toMatchObject({
+          findings: [{ code: findingCode }],
+        });
       },
     );
   });

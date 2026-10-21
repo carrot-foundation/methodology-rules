@@ -28,6 +28,7 @@ import { DocumentStatus, type NonEmptyString } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './waste-mass-is-unique.constants';
 import { WasteMassIsUniqueProcessorErrors } from './waste-mass-is-unique.errors';
+import { WASTE_MASS_IS_UNIQUE_FINDINGS } from './waste-mass-is-unique.findings';
 import {
   createAuditApiService,
   type EventsData,
@@ -52,26 +53,30 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
       const document = await this.loadDocument(ruleInput);
 
       if (isNil(document)) {
-        return mapToRuleOutput(ruleInput, 'FAILED', {
-          resultComment: this.errorProcessor.getResultCommentFromError(
-            this.errorProcessor.getKnownError(
-              this.errorProcessor.ERROR_MESSAGE.MASS_ID_DOCUMENT_NOT_FOUND,
-            ),
+        return mapToRuleOutput(
+          ruleInput,
+          'FAILED',
+          WASTE_MASS_IS_UNIQUE_FINDINGS.result(
+            'ERROR.MASS_ID_DOCUMENT_NOT_FOUND',
           ),
-        });
+        );
       }
 
       const ruleSubject = await this.getRuleSubject(document);
 
-      const { resultComment, resultStatus } = this.evaluateResult(ruleSubject);
+      const { resultComment, resultFindings, resultStatus } =
+        this.evaluateResult(ruleSubject);
 
       return mapToRuleOutput(ruleInput, resultStatus, {
         resultComment: getOrUndefined(resultComment),
+        resultFindings,
       });
     } catch (error: unknown) {
-      return mapToRuleOutput(ruleInput, 'FAILED', {
-        resultComment: this.errorProcessor.getResultCommentFromError(error),
-      });
+      return mapToRuleOutput(
+        ruleInput,
+        'FAILED',
+        this.errorProcessor.getFailedResultFromError(error),
+      );
     }
   }
 
@@ -82,7 +87,8 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
   }: RuleSubject): EvaluateResultOutput {
     if (validDuplicatesCount > 1) {
       return {
-        resultComment: RESULT_COMMENTS.failed.VALID_DUPLICATE_FOUND(
+        ...WASTE_MASS_IS_UNIQUE_FINDINGS.result(
+          'FAILED.VALID_DUPLICATE_FOUND',
           totalDuplicates,
           validDuplicatesCount,
         ),
@@ -182,7 +188,7 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     if (isNil(event)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE[errorMessage],
+        WASTE_MASS_IS_UNIQUE_FINDINGS.render(`ERROR.${errorMessage}`),
       );
     }
 
@@ -199,7 +205,9 @@ export class WasteMassIsUniqueProcessor extends ParentDocumentRuleProcessor<Rule
 
     if (!isNonEmptyString(vehicleLicensePlate)) {
       throw this.errorProcessor.getKnownError(
-        this.errorProcessor.ERROR_MESSAGE.MISSING_VEHICLE_LICENSE_PLATE,
+        WASTE_MASS_IS_UNIQUE_FINDINGS.render(
+          'ERROR.MISSING_VEHICLE_LICENSE_PLATE',
+        ),
       );
     }
 

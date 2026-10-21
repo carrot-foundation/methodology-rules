@@ -11,7 +11,7 @@ import {
 import { MeasurementUnit } from '@carrot-fndn/shared/types';
 
 import { RESULT_COMMENTS } from './mass-id-qualifications.constants';
-import { MassIDQualificationsProcessorErrors } from './mass-id-qualifications.errors';
+import { MASS_ID_QUALIFICATIONS_FINDINGS } from './mass-id-qualifications.findings';
 
 const ALLOWED_SUBTYPES: string[] = Object.values(MassIDOrganicSubtype);
 
@@ -20,14 +20,9 @@ const { KG } = MeasurementUnit;
 const { ORGANIC } = BoldDocumentType;
 
 export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<BoldDocument> {
-  protected readonly processorErrors =
-    new MassIDQualificationsProcessorErrors();
-
   protected override evaluateResult(
     document: BoldDocument,
   ): EvaluateResultOutput | Promise<EvaluateResultOutput> {
-    const errorMessages: string[] = [];
-
     const validationResult = this.validateRequiredFields(document);
 
     if (validationResult) {
@@ -36,46 +31,57 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
 
     const validationCriteria = [
       {
-        errorMessage: RESULT_COMMENTS.failed.INVALID_CATEGORY(
+        failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
+          'FAILED.INVALID_CATEGORY',
           document.category,
         ),
         isValid: document.category === MASS_ID.valueOf(),
       },
       {
-        errorMessage: RESULT_COMMENTS.failed.INVALID_TYPE(document.type!),
+        failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
+          'FAILED.INVALID_TYPE',
+          document.type!,
+        ),
         isValid: document.type === ORGANIC.valueOf(),
       },
       {
-        errorMessage: RESULT_COMMENTS.failed.INVALID_MEASUREMENT_UNIT(
+        failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
+          'FAILED.INVALID_MEASUREMENT_UNIT',
           document.measurementUnit,
         ),
         isValid: document.measurementUnit === KG.valueOf(),
       },
       {
-        errorMessage: RESULT_COMMENTS.failed.INVALID_VALUE(
+        failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
+          'FAILED.INVALID_VALUE',
           document.currentValue,
         ),
         isValid: document.currentValue > 0,
       },
       {
-        errorMessage: RESULT_COMMENTS.failed.INVALID_SUBTYPE(document.subtype),
+        failure: MASS_ID_QUALIFICATIONS_FINDINGS.render(
+          'FAILED.INVALID_SUBTYPE',
+          document.subtype,
+        ),
         isValid: this.isValidSubtype(document.subtype),
       },
     ];
 
-    for (const criteria of validationCriteria) {
-      if (!criteria.isValid) {
-        errorMessages.push(criteria.errorMessage);
-      }
+    const failures = validationCriteria
+      .filter(({ isValid }) => !isValid)
+      .map(({ failure }) => failure);
+
+    if (failures.length === 0) {
+      return {
+        resultComment: RESULT_COMMENTS.passed.VALID_QUALIFICATIONS,
+        resultStatus: 'PASSED',
+      };
     }
 
-    const isValid = errorMessages.length === 0;
-
     return {
-      resultComment: isValid
-        ? RESULT_COMMENTS.passed.VALID_QUALIFICATIONS
-        : errorMessages.join(' '),
-      resultStatus: isValid ? 'PASSED' : 'FAILED',
+      resultComment: failures.map(({ message }) => message).join(' '),
+      resultFindings: failures.map(({ finding }) => finding),
+      resultStatus: 'FAILED',
     };
   }
 
@@ -98,16 +104,18 @@ export class MassIDQualificationsProcessor extends ParentDocumentRuleProcessor<B
   ): EvaluateResultOutput | undefined {
     if (isNil(document.type)) {
       return {
-        resultComment:
-          this.processorErrors.ERROR_MESSAGE.DOCUMENT_TYPE_NOT_FOUND,
+        ...MASS_ID_QUALIFICATIONS_FINDINGS.result(
+          'ERROR.DOCUMENT_TYPE_NOT_FOUND',
+        ),
         resultStatus: 'FAILED',
       };
     }
 
     if (isNil(document.subtype)) {
       return {
-        resultComment:
-          this.processorErrors.ERROR_MESSAGE.DOCUMENT_SUBTYPE_NOT_FOUND,
+        ...MASS_ID_QUALIFICATIONS_FINDINGS.result(
+          'ERROR.DOCUMENT_SUBTYPE_NOT_FOUND',
+        ),
         resultStatus: 'FAILED',
       };
     }

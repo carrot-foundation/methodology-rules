@@ -127,14 +127,13 @@ describe('crossValidateAttachments', () => {
     const result = await crossValidateAttachments(inputs, config, extractor);
 
     expect(result.reviewRequired).toBe(true);
-    expect(result.reviewReasons).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          code: 'UNKNOWN_DOCUMENT_TYPE',
-          description: expect.stringContaining('att-1') as string,
-        }),
-      ]),
-    );
+    expect(result.reviewReasons).toEqual([
+      {
+        code: 'UNKNOWN_DOCUMENT_TYPE',
+        description:
+          'Unknown document type, cannot perform cross-validation for attachment att-1',
+      },
+    ]);
     expect(extractor.extract).not.toHaveBeenCalled();
   });
 
@@ -307,9 +306,16 @@ describe('crossValidateAttachments', () => {
 
     const result = await crossValidateAttachments(inputs, config, extractor);
 
-    expect(result.failMessages[0]).toContain(
+    expect(result.failMessages).toEqual([
       'Document extraction failed for attachment att-1: Extraction failed',
-    );
+    ]);
+    expect(result.failReasons).toEqual([
+      {
+        code: 'EXTRACTION_FAILED',
+        description:
+          'Document extraction failed for attachment att-1: Extraction failed',
+      },
+    ]);
   });
 
   it('should fail with unknown error for non-Error exceptions', async () => {
