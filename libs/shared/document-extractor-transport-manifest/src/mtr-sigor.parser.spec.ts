@@ -701,7 +701,7 @@ describe('MtrSigorParser', () => {
           },
           { boundingBox: stubBoundingBox(0.098, 0.415), text: 'urbanos' },
           {
-            boundingBox: stubBoundingBox(0.098, 0.43),
+            boundingBox: stubBoundingBox(0.098, 0.425),
             text: 'A099-Outros residuos nao',
           },
         ],

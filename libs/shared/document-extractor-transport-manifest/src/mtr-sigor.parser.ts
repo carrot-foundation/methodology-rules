@@ -142,16 +142,11 @@ const SIGOR_ANCHOR_COLUMN: SigorWasteColumn = 'item';
 
 const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
 
-// SIGOR prints a residue class line (e.g. "A099-Outros residuos nao") under the denomination
-const RESIDUE_CLASS_LINE_PATTERN = /\b[A-Z]\d{3}\s*[-–]/;
+// SIGOR prints a residue class line (e.g. "A099-Outros residuos nao") after the denomination
+const RESIDUE_CLASS_LINE_PATTERN = /\b[A-Z]\d{3}\s*[-–].*/;
 
-const stripResidueClassLine = (description: string): string => {
-  const classLineStart = description.search(RESIDUE_CLASS_LINE_PATTERN);
-
-  return classLineStart === -1
-    ? description
-    : description.slice(0, classLineStart).trim();
-};
+const stripResidueClassLine = (description: string): string =>
+  description.replace(RESIDUE_CLASS_LINE_PATTERN, '').trim();
 
 const parseWasteRow = (
   row: Record<string, string | undefined>,
@@ -162,7 +157,7 @@ const parseWasteRow = (
     return undefined;
   }
 
-  const rawDescription = stripResidueClassLine(row['description'] ?? '');
+  const rawDescription = row['description'];
 
   if (!rawDescription) {
     return undefined;
@@ -175,9 +170,9 @@ const parseWasteRow = (
         code: codeMatch[1],
         // codeMatch[2] is always defined when codeMatch[1] matches (.+ requires at least one char)
 
-        description: codeMatch[2]!.trim(),
+        description: stripResidueClassLine(codeMatch[2]!),
       }
-    : { description: rawDescription.trim() };
+    : { description: stripResidueClassLine(rawDescription) };
 
   if (row['classification']) {
     entry.classification = row['classification'];
