@@ -61,7 +61,7 @@ describe('DocumentManifestDataLambda E2E', () => {
   it.each(approvedIssueDateExceptionTestCases)(
     'should load recycler exceptions through the audit for $scenario',
     async (testCase) => {
-      vi.useFakeTimers();
+      vi.useFakeTimers({ toFake: ['Date'] });
       vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
       const { accreditation, massIDAuditDocument, massIDDocument } =
         buildApprovedIssueDateExceptionDocuments(testCase);
