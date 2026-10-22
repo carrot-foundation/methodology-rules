@@ -7,6 +7,7 @@ export const ruleDefinition = {
   ...baseRuleDefinition,
   description:
     'Validates transport manifest events in MassID documents, ensuring they contain required attributes, proper attachments, and valid exemption justifications.',
+  input: undefined,
   methodologyFrameworkRules: [
     'has-transport-manifest',
     'transport-manifest-attachment',
@@ -15,4 +16,4 @@ export const ruleDefinition = {
   ],
   name: 'Transport Manifest Data',
   slug: 'transport-manifest-data',
-} as const satisfies RuleDefinition<MethodologyFrameworkRuleSlug>;
+} as const satisfies RuleDefinition<MethodologyFrameworkRuleSlug, undefined>;

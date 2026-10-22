@@ -5,6 +5,8 @@ import type {
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { ApprovedExceptionSchema } from '@carrot-fndn/shared/types';
+
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
 
 import {
@@ -117,6 +119,101 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       weighingEvents: [],
     };
 
+    it.each([
+      {
+        enabled: true,
+        event: 'CDF-001',
+        extracted: 'CDF-001/2025',
+        match: true,
+      },
+      {
+        enabled: false,
+        event: 'CDF-001',
+        extracted: 'CDF-001/2025',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001',
+        expiry: '2000-01-01',
+        extracted: 'CDF-001/2025',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001/2025',
+        extracted: 'CDF-001/2025',
+        match: true,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001',
+        extracted: 'CDF-001/25',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001',
+        extracted: 'CDF-001-2025',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001',
+        extracted: 'CDF-001/2025 ',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001',
+        extracted: 'CDF-002/2025',
+        match: false,
+      },
+      {
+        enabled: true,
+        event: 'CDF-001/2025',
+        extracted: 'CDF-001',
+        match: false,
+      },
+    ])(
+      'should compare $event to $extracted with exception enabled=$enabled expiry=$expiry',
+      ({ enabled, event, expiry, extracted, match }) => {
+        const exception = ApprovedExceptionSchema.parse({
+          'Attribute Location': {
+            Asset: { Category: 'MassID' },
+            Event: 'Recycling Manifest',
+          },
+          'Attribute Name': 'Document Number',
+          'Exception Type': 'Document Number Without Year Suffix',
+          Reason: 'Fictional integration omits the year',
+          ...(expiry && { 'Valid Until': expiry }),
+        });
+        const result = validateCdfExtractedData(
+          createExtractionResult({
+            documentNumber: {
+              confidence: 'high',
+              parsed: extracted,
+              rawMatch: extracted,
+            },
+          }),
+          {
+            ...baseEventData,
+            approvedExceptions: enabled ? [exception] : [],
+            documentNumber: event,
+          },
+        );
+
+        expect(
+          (result.crossValidation as CdfCrossValidation).documentNumber.isMatch,
+        ).toBe(match);
+        expect(
+          result.failReasons?.some(
+            (reason) => reason.code === 'DOCUMENT_NUMBER_MISMATCH',
+          ) ?? false,
+        ).toBe(!match);
+      },
+    );
+
     it('should return reviewRequired with reviewReasons when extraction confidence is low', () => {
       const extractionResult = createExtractionResult({
         extractionConfidence: 'low' as never,
@@ -142,29 +239,45 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
-    it('should fail when issue date does not match', () => {
-      const extractionResult = createExtractionResult({
-        issueDate: {
-          confidence: 'high',
-          parsed: '2024-02-15',
-          rawMatch: '15/02/2024',
-        },
-      });
+    it.each([false, true])(
+      'should fail when issue date does not match with exemption=%s',
+      (exempt) => {
+        const extractionResult = createExtractionResult({
+          issueDate: {
+            confidence: 'high',
+            parsed: '2024-02-15',
+            rawMatch: '15/02/2024',
+          },
+        });
 
-      const eventData: CdfCrossValidationEventData = {
-        ...baseEventData,
-        issueDateAttribute: {
-          isPublic: false,
-          name: 'Issue Date',
-          value: '2024-01-01T12:00:00.000Z',
-        },
-      };
+        const eventData: CdfCrossValidationEventData = {
+          ...baseEventData,
+          approvedExceptions: exempt
+            ? [
+                ApprovedExceptionSchema.parse({
+                  'Attribute Location': {
+                    Asset: { Category: 'MassID' },
+                    Event: 'Recycling Manifest',
+                  },
+                  'Attribute Name': 'Issue Date',
+                  'Exception Type': 'Exemption for Mandatory Attribute',
+                  Reason: 'Fictional issue date exemption',
+                }),
+              ]
+            : [],
+          issueDateAttribute: {
+            isPublic: false,
+            name: 'Issue Date',
+            value: '2024-01-01T12:00:00.000Z',
+          },
+        };
 
-      const result = validateCdfExtractedData(extractionResult, eventData);
+        const result = validateCdfExtractedData(extractionResult, eventData);
 
-      expect(result.failMessages.length).toBeGreaterThan(0);
-      expect(result.failReasons?.[0]?.description).toContain('Issue Date');
-    });
+        expect(result.failMessages.length).toBeGreaterThan(0);
+        expect(result.failReasons?.[0]?.description).toContain('Issue Date');
+      },
+    );
 
     it('should default recyclerCountryCode to BR when undefined', () => {
       const extractionResult = createExtractionResult({});

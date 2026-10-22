@@ -1,10 +1,12 @@
 import type { EvaluateResultOutput } from '@carrot-fndn/shared/rule/standard-data-processor';
+import type { RuleInput } from '@carrot-fndn/shared/rule/types';
 
 import {
   getOrDefault,
   isNil,
   isNonEmptyArray,
   isNonEmptyString,
+  toDocumentKey,
 } from '@carrot-fndn/shared/helpers';
 import {
   getDocumentEventAttachmentByLabel,
@@ -12,25 +14,39 @@ import {
   getEventAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  getApprovedExceptions,
+  getParticipantAccreditationDocumentByParticipantId,
+} from '@carrot-fndn/shared/methodologies/bold/helpers';
+import {
+  DocumentQueryService,
+  loadDocument,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import { PARTICIPANT_ACCREDITATION_PARTIAL_MATCH } from '@carrot-fndn/shared/methodologies/bold/matchers';
+import {
   and,
   eventLabelIsAnyOf,
   eventNameIsAnyOf,
 } from '@carrot-fndn/shared/methodologies/bold/predicates';
-import { ParentDocumentRuleProcessor } from '@carrot-fndn/shared/methodologies/bold/processors';
 import {
+  BoldApprovedExceptionType,
   BoldAttributeName,
   type BoldDocument,
   type BoldDocumentEvent,
   type BoldDocumentEventAttribute,
   BoldDocumentEventLabel,
   BoldDocumentEventName,
+  BoldDocumentSubtype,
   BoldReportType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
 import {
   joinRenderedFindings,
   type RenderedRuleFinding,
 } from '@carrot-fndn/shared/rule/result';
+import { RuleStandardDataProcessor } from '@carrot-fndn/shared/rule/standard-data-processor';
 import {
+  type ApprovedException,
   type DocumentEventAttachment,
   DocumentEventAttributeFormat,
 } from '@carrot-fndn/shared/types';
@@ -46,6 +62,7 @@ import {
   type DocumentManifestEventSubject,
   type EventAttributeValueType,
   getAttachmentInfos,
+  hasRecyclingManifestException,
 } from './document-manifest-data.helpers';
 
 const {
@@ -70,6 +87,11 @@ const VALID_MANIFEST_TYPES: ReadonlySet<string> = new Set<string>([
   TRANSPORT_MANIFEST,
 ]);
 
+interface ManifestDocuments {
+  approvedExceptions: ApprovedException[];
+  document: BoldDocument;
+}
+
 type RuleSubject = {
   attachmentInfos: AttachmentInfo[];
   document: BoldDocument;
@@ -93,7 +115,10 @@ interface ManifestEventValidation {
   passMessage?: string;
 }
 
-export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<RuleSubject> {
+export class DocumentManifestDataProcessor extends RuleStandardDataProcessor<
+  ManifestDocuments,
+  RuleSubject
+> {
   private readonly documentManifestType: DocumentManifestType;
 
   constructor({
@@ -223,7 +248,10 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
     };
   }
 
-  protected override getRuleSubject(document: BoldDocument): RuleSubject {
+  protected override getRuleSubject({
+    approvedExceptions,
+    document,
+  }: ManifestDocuments): RuleSubject {
     const transportManifestEvents = document.externalEvents?.filter(
       eventNameIsAnyOf([this.documentManifestType]),
     );
@@ -258,6 +286,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
           !correctLabelAttachment && isNonEmptyArray(event.attachments);
 
         return {
+          approvedExceptions,
           attachment: correctLabelAttachment,
           documentNumber: getEventAttributeValue(event, DOCUMENT_NUMBER),
           documentType: getEventAttributeValue(event, DOCUMENT_TYPE),
@@ -303,6 +332,67 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       wasteGeneratorEvent,
       weighingEvents,
     };
+  }
+
+  protected override async loadDocument(
+    ruleInput: RuleInput,
+  ): Promise<ManifestDocuments | undefined> {
+    const document = await loadDocument(
+      this.context.documentLoaderService,
+      toDocumentKey({
+        documentId: ruleInput.parentDocumentId,
+        documentKeyPrefix: ruleInput.documentKeyPrefix,
+      }),
+    );
+
+    if (!document) {
+      return undefined;
+    }
+
+    const approvedExceptions: ApprovedException[] = [];
+
+    if (this.documentManifestType === RECYCLING_MANIFEST) {
+      const query = await new DocumentQueryService(
+        this.context.documentLoaderService,
+      ).load({
+        context: { s3KeyPrefix: ruleInput.documentKeyPrefix },
+        criteria: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+        documentId: ruleInput.documentId,
+      });
+      const accreditationDocuments: BoldDocument[] = [];
+
+      await query.iterator().each(({ document: relatedDocument }) => {
+        if (
+          PARTICIPANT_ACCREDITATION_PARTIAL_MATCH.matches(
+            mapDocumentRelation(relatedDocument),
+          ) &&
+          relatedDocument.subtype === BoldDocumentSubtype.RECYCLER
+        ) {
+          accreditationDocuments.push(relatedDocument);
+        }
+      });
+
+      const recyclerEvent = document.externalEvents?.find(
+        and(eventNameIsAnyOf([ACTOR]), eventLabelIsAnyOf([RECYCLER])),
+      );
+      const accreditation =
+        recyclerEvent &&
+        getParticipantAccreditationDocumentByParticipantId({
+          accreditationDocuments,
+          participantId: recyclerEvent.participant.id,
+        });
+
+      if (accreditation) {
+        approvedExceptions.push(
+          ...(getApprovedExceptions(
+            accreditation,
+            BoldDocumentEventName.ACCREDITATION_RESULT,
+          ) ?? []),
+        );
+      }
+    }
+
+    return { approvedExceptions, document };
   }
 
   private validateDocumentAttributes(
@@ -393,7 +483,14 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
         documentNumber,
         recyclerCountryCode,
       ),
-      this.validateIssueDate(issueDateAttribute),
+      !issueDateAttribute &&
+      hasRecyclingManifestException(
+        subject.approvedExceptions,
+        ISSUE_DATE,
+        BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
+      )
+        ? { failures: [] }
+        : this.validateIssueDate(issueDateAttribute),
     ];
 
     const failures = validations.flatMap((validation) => validation.failures);
@@ -407,7 +504,7 @@ export class DocumentManifestDataProcessor extends ParentDocumentRuleProcessor<R
       passMessage: RESULT_COMMENTS.VALID_ATTACHMENT_DECLARATION({
         documentNumber: documentNumber as string,
         documentType: documentType as string,
-        issueDate: issueDateAttribute?.value as string,
+        issueDate: issueDateAttribute?.value?.toString() ?? '',
         value: documentCurrentValue,
       }),
     };

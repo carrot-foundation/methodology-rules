@@ -365,6 +365,7 @@ export const BoldDocumentEventLabel = BoldActorType;
 export type BoldDocumentEventLabel = BoldActorType;
 
 export const BoldApprovedExceptionType = {
+  DOCUMENT_NUMBER_WITHOUT_YEAR_SUFFIX: 'Document Number Without Year Suffix',
   MANDATORY_ATTRIBUTE: 'Exemption for Mandatory Attribute',
 } as const;
 export const BoldApprovedExceptionTypeSchema = z.enum(
