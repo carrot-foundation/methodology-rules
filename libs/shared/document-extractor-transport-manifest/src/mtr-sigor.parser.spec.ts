@@ -692,6 +692,8 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    const strippedDescription = 'Lodos de tratamento de efluentes urbanos';
+
     it.each([
       {
         blocks: [
@@ -705,7 +707,8 @@ describe('MtrSigorParser', () => {
             text: 'A099-Outros residuos nao',
           },
         ],
-        scenario: 'its own line below a wrapped denomination',
+        expectedDescription: strippedDescription,
+        scenario: 'on its own line below a wrapped denomination',
       },
       {
         blocks: [
@@ -714,11 +717,22 @@ describe('MtrSigorParser', () => {
             text: '190805 - Lodos de tratamento de efluentes urbanos D099 - Outros residuos nao',
           },
         ],
-        scenario: 'the same line as the denomination',
+        expectedDescription: strippedDescription,
+        scenario: 'on the same line as the denomination',
+      },
+      {
+        blocks: [
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190805 - A099-Outros residuos nao',
+          },
+        ],
+        expectedDescription: '',
+        scenario: 'right after the waste code',
       },
     ])(
-      'should drop the residue class line when it is on $scenario',
-      ({ blocks }) => {
+      'should drop the residue class line and keep the waste code when the class line is $scenario',
+      ({ blocks, expectedDescription }) => {
         const result = parser.parse(
           stubTextExtractionResultWithBlocks('CETESB', [
             ...sigorHeaderBlocks,
@@ -728,30 +742,10 @@ describe('MtrSigorParser', () => {
         );
 
         expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
-          {
-            code: '190805',
-            description: 'Lodos de tratamento de efluentes urbanos',
-          },
+          { code: '190805', description: expectedDescription },
         ]);
       },
     );
-
-    it('should keep the waste code when the residue class line follows it directly', () => {
-      const result = parser.parse(
-        stubTextExtractionResultWithBlocks('CETESB', [
-          ...sigorHeaderBlocks,
-          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.4),
-            text: '190805 - A099-Outros residuos nao',
-          },
-        ]),
-      );
-
-      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
-        { code: '190805', description: '' },
-      ]);
-    });
   });
 
   describe('getMatchScore', () => {
