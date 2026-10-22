@@ -5,7 +5,11 @@ import {
   type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
 import {
+  BoldStubsBuilder,
+  findTestCase,
   stubAddress,
+  stubBoldAccreditationDocument,
+  stubBoldAccreditationResultEvent,
   stubBoldMassIDRecyclingManifestEvent,
   stubBoldMassIDTransportManifestEvent,
   stubDocumentEvent,
@@ -13,10 +17,16 @@ import {
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
+  type BoldDocument,
   BoldDocumentEventLabel,
   BoldDocumentEventName,
+  BoldDocumentSubtype,
 } from '@carrot-fndn/shared/methodologies/bold/types';
-import { DocumentEventAttributeFormat } from '@carrot-fndn/shared/types';
+import { mapDocumentRelation } from '@carrot-fndn/shared/methodologies/bold/utils';
+import {
+  ApprovedExceptionSchema,
+  DocumentEventAttributeFormat,
+} from '@carrot-fndn/shared/types';
 
 import {
   RESULT_COMMENTS,
@@ -475,3 +485,110 @@ export const exceptionTestCases: DocumentManifestDataTestCase[] = [
     scenario: `The MassID document has a ${RECYCLING_MANIFEST} event with a different address than the ${RECYCLER} event`,
   },
 ];
+
+export const approvedIssueDateExceptionTestCases = [
+  { expected: 'PASSED', scenario: 'valid exception', validUntil: undefined },
+  { expected: 'PASSED', scenario: 'future expiry', validUntil: '2026-01-01' },
+  {
+    expected: 'FAILED',
+    scenario: 'expired exception',
+    validUntil: '2024-01-01',
+  },
+  { expected: 'FAILED', scenario: 'invalid expiry', validUntil: 'invalid' },
+  {
+    expected: 'FAILED',
+    scenario: 'wrong participant',
+    validUntil: undefined,
+  },
+  { expected: 'FAILED', scenario: 'wrong event', validUntil: undefined },
+  { expected: 'FAILED', scenario: 'wrong type', validUntil: undefined },
+  { expected: 'FAILED', scenario: 'wrong category', validUntil: undefined },
+  { expected: 'FAILED', scenario: 'no exceptions', validUntil: undefined },
+  {
+    expected: 'FAILED',
+    scenario: 'non-recycler accreditation',
+    validUntil: undefined,
+  },
+];
+
+export const buildApprovedIssueDateExceptionDocuments = ({
+  scenario,
+  validUntil,
+}: {
+  scenario: string;
+  validUntil: string | undefined;
+}): {
+  accreditation: BoldDocument;
+  massIDAuditDocument: BoldDocument;
+  massIDDocument: BoldDocument;
+} => {
+  const testCase = findTestCase(
+    documentManifestDataTestCases,
+    `The MassID document has a ${RECYCLING_MANIFEST} event without a Issue Date`,
+  );
+  const builder = new BoldStubsBuilder().createMassIDDocuments({
+    externalEventsMap: testCase.events,
+  });
+  const { massIDDocument } = builder.build();
+  const recycler = massIDDocument.externalEvents?.find(
+    (event) => event.name === 'ACTOR' && event.label === 'Recycler',
+  );
+
+  if (!recycler) {
+    throw new Error('Recycler test event is required');
+  }
+
+  const exception = ApprovedExceptionSchema.parse({
+    'Attribute Location': {
+      Asset: {
+        Category: scenario === 'wrong category' ? 'Methodology' : 'MassID',
+      },
+      Event:
+        scenario === 'wrong event'
+          ? 'Transport Manifest'
+          : 'Recycling Manifest',
+    },
+    'Attribute Name': 'Issue Date',
+    'Exception Type':
+      scenario === 'wrong type'
+        ? 'Document Number Without Year Suffix'
+        : 'Exemption for Mandatory Attribute',
+    Reason: 'Fictional integration cannot provide the issue date',
+    ...(validUntil && { 'Valid Until': validUntil }),
+  });
+  const accreditation = stubBoldAccreditationDocument({
+    externalEventsMap: {
+      'Accreditation Result': stubBoldAccreditationResultEvent({
+        metadataAttributes: [
+          [
+            'Approved Exceptions',
+            scenario === 'no exceptions' ? undefined : [exception],
+          ],
+        ],
+      }),
+    },
+    partialDocument: {
+      subtype:
+        scenario === 'non-recycler accreditation'
+          ? BoldDocumentSubtype.HAULER
+          : BoldDocumentSubtype.RECYCLER,
+      ...(scenario !== 'wrong participant' && {
+        primaryParticipant: recycler.participant,
+      }),
+    },
+  });
+
+  builder.createMassIDAuditDocuments({
+    externalEventsMap: {
+      'Recycler Accreditation': stubDocumentEvent({
+        relatedDocument: mapDocumentRelation(accreditation),
+      }),
+    },
+  });
+
+  return {
+    accreditation,
+    massIDAuditDocument: builder.build().massIDAuditDocument,
+    massIDDocument,
+  };
+};

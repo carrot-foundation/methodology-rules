@@ -1,3 +1,10 @@
+import type {
+  ApprovedException,
+  BoldAttributeValue,
+  DocumentEventAttachment,
+  DocumentEventAttribute,
+} from '@carrot-fndn/shared/types';
+
 import {
   type AttachmentInfo,
   type BoldDocumentType,
@@ -6,12 +13,14 @@ import {
 } from '@carrot-fndn/shared/document-extractor';
 import { getDocumentAttachmentBucketName } from '@carrot-fndn/shared/env';
 import { isNil, isNonEmptyString, logger } from '@carrot-fndn/shared/helpers';
-import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
+import { isApprovedExceptionValid } from '@carrot-fndn/shared/methodologies/bold/helpers';
 import {
-  type BoldAttributeValue,
-  type DocumentEventAttachment,
-  type DocumentEventAttribute,
-} from '@carrot-fndn/shared/types';
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  BoldDocumentCategory,
+  BoldDocumentEventName,
+} from '@carrot-fndn/shared/methodologies/bold/types';
+import { getAttachmentS3Key } from '@carrot-fndn/shared/methodologies/bold/utils';
 
 export type {
   AttachmentInfo,
@@ -20,6 +29,7 @@ export type {
 } from '@carrot-fndn/shared/document-extractor';
 
 export interface DocumentManifestEventSubject {
+  approvedExceptions?: ApprovedException[];
   attachment: DocumentEventAttachment | undefined;
   documentNumber: EventAttributeValueType;
   documentType: EventAttributeValueType;
@@ -115,3 +125,19 @@ export const getExtractorConfig = (
     layouts: getDefaultLayouts(documentType),
   };
 };
+
+export const hasRecyclingManifestException = (
+  exceptions: ApprovedException[] | undefined,
+  attributeName: BoldAttributeName,
+  exceptionType: BoldApprovedExceptionType,
+): boolean =>
+  exceptions?.some(
+    (exception) =>
+      exception['Attribute Location'].Asset.Category ===
+        BoldDocumentCategory.MASS_ID &&
+      exception['Attribute Location'].Event ===
+        BoldDocumentEventName.RECYCLING_MANIFEST &&
+      exception['Attribute Name'] === attributeName &&
+      exception['Exception Type'] === exceptionType &&
+      isApprovedExceptionValid(exception),
+  ) === true;

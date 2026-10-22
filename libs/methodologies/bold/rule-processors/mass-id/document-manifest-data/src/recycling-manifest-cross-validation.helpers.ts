@@ -8,7 +8,11 @@ import {
   getTimezoneFromAddress,
   isNonEmptyString,
 } from '@carrot-fndn/shared/helpers';
-import { type BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
+import {
+  BoldApprovedExceptionType,
+  BoldAttributeName,
+  type BoldDocumentEvent,
+} from '@carrot-fndn/shared/methodologies/bold/types';
 
 import type { DocumentManifestEventSubject } from './document-manifest-data.helpers';
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
@@ -33,7 +37,10 @@ import {
   RESULT_COMMENTS,
   REVIEW_REASONS,
 } from './document-manifest-data.constants';
-import { getLayoutValidationConfig } from './document-manifest-data.helpers';
+import {
+  getLayoutValidationConfig,
+  hasRecyclingManifestException,
+} from './document-manifest-data.helpers';
 
 export interface CdfCrossValidationEventData extends DocumentManifestEventSubject {
   dropOffEvent: BoldDocumentEvent | undefined;
@@ -119,6 +126,14 @@ export const validateCdfExtractedData = (
     extractedData.documentNumber,
     eventData.documentNumber?.toString(),
     {
+      compareFn: (extracted, event) =>
+        extracted === event ||
+        (hasRecyclingManifestException(
+          eventData.approvedExceptions,
+          BoldAttributeName.DOCUMENT_NUMBER,
+          BoldApprovedExceptionType.DOCUMENT_NUMBER_WITHOUT_YEAR_SUFFIX,
+        ) &&
+          extracted.replace(/\/\d{4}$/, '') === event),
       notExtractedReason: REVIEW_REASONS.FIELD_NOT_EXTRACTED({
         field: 'document number',
       }),

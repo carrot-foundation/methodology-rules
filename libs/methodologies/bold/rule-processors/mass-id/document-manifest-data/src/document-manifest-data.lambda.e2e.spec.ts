@@ -12,6 +12,8 @@ import { faker } from '@faker-js/faker';
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import { documentManifestDataLambda } from './document-manifest-data.lambda';
 import {
+  approvedIssueDateExceptionTestCases,
+  buildApprovedIssueDateExceptionDocuments,
   documentManifestDataTestCases,
   exceptionTestCases,
 } from './document-manifest-data.test-cases';
@@ -53,7 +55,43 @@ describe('DocumentManifestDataLambda E2E', () => {
 
   afterEach(() => {
     mockBucketName = undefined;
+    vi.useRealTimers();
   });
+
+  it.each(approvedIssueDateExceptionTestCases)(
+    'should load recycler exceptions through the audit for $scenario',
+    async (testCase) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
+      const { accreditation, massIDAuditDocument, massIDDocument } =
+        buildApprovedIssueDateExceptionDocuments(testCase);
+
+      prepareEnvironmentTestE2E(
+        [massIDDocument, massIDAuditDocument, accreditation].map(
+          (document) => ({
+            document,
+            documentKey: toDocumentKey({
+              documentId: document.id,
+              documentKeyPrefix,
+            }),
+          }),
+        ),
+      );
+      const response = await documentManifestDataLambda({
+        documentManifestType: 'Recycling Manifest',
+      })(
+        stubRuleInput({
+          documentId: massIDAuditDocument.id,
+          documentKeyPrefix,
+          parentDocumentId: massIDDocument.id,
+        }),
+        stubContext(),
+        () => stubRuleResponse(),
+      );
+
+      expect(response).toMatchObject({ resultStatus: testCase.expected });
+    },
+  );
 
   it.each([...documentManifestDataTestCases, ...exceptionTestCases])(
     'should return $resultStatus when $scenario',
@@ -81,6 +119,7 @@ describe('DocumentManifestDataLambda E2E', () => {
 
       const response = (await lambda(
         stubRuleInput({
+          documentId: massIDAuditDocument.id,
           documentKeyPrefix,
           parentDocumentId: massIDDocument.id,
         }),

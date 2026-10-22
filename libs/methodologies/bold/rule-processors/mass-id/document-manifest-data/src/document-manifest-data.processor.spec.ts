@@ -1,10 +1,14 @@
 import type { RuleOutput } from '@carrot-fndn/shared/rule/types';
 
-import { loadDocument } from '@carrot-fndn/shared/methodologies/bold/io-helpers';
+import {
+  DocumentQueryService,
+  loadDocument,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import {
   BoldStubsBuilder,
   expectRuleFindings,
   findTestCase,
+  stubDocument,
 } from '@carrot-fndn/shared/methodologies/bold/testing';
 import {
   BoldAttributeName,
@@ -17,6 +21,8 @@ import { crossValidateWithTextract } from './document-manifest-data.extractor';
 import { DOCUMENT_MANIFEST_DATA_FINDINGS } from './document-manifest-data.findings';
 import { DocumentManifestDataProcessor } from './document-manifest-data.processor';
 import {
+  approvedIssueDateExceptionTestCases,
+  buildApprovedIssueDateExceptionDocuments,
   crossValidationTestCases,
   documentManifestDataTestCases,
   exceptionTestCases,
@@ -44,6 +50,13 @@ describe('DocumentManifestDataProcessor', () => {
 
   beforeEach(() => {
     mockBucketName = 'test-bucket';
+    vi.mocked(DocumentQueryService.prototype.load).mockResolvedValue({
+      iterator: () => ({
+        each: () => Promise.resolve(),
+        map: () => Promise.resolve([]),
+      }),
+      rootDocument: stubDocument(),
+    });
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2025-01-01T00:00:00Z'));
     crossValidateWithTextractMock.mockResolvedValue({
@@ -60,6 +73,52 @@ describe('DocumentManifestDataProcessor', () => {
   afterEach(() => {
     mockBucketName = undefined;
     vi.useRealTimers();
+  });
+
+  it.each(approvedIssueDateExceptionTestCases)(
+    'should handle missing Issue Date with $scenario',
+    async ({ expected, scenario, validUntil }) => {
+      const { accreditation, massIDDocument } =
+        buildApprovedIssueDateExceptionDocuments({ scenario, validUntil });
+
+      vi.mocked(DocumentQueryService.prototype.load).mockResolvedValueOnce({
+        iterator: () => ({
+          each: (callback) => {
+            callback({ document: massIDDocument });
+            callback({ document: accreditation });
+
+            return Promise.resolve();
+          },
+          map: (callback) =>
+            Promise.resolve([callback({ document: accreditation })]),
+        }),
+        rootDocument: massIDDocument,
+      });
+      documentLoaderService.mockResolvedValueOnce(massIDDocument);
+
+      const output = await new DocumentManifestDataProcessor({
+        documentManifestType: RECYCLING_MANIFEST,
+      }).process(stubRuleInput());
+
+      expect(output.resultStatus).toBe(expected);
+
+      expect(
+        output.resultComment?.includes(RESULT_COMMENTS.MISSING_ISSUE_DATE),
+      ).toBe(expected === 'FAILED');
+      expect(crossValidateWithTextractMock).toHaveBeenCalledTimes(
+        expected === 'PASSED' ? 1 : 0,
+      );
+    },
+  );
+
+  it('should fail when the parent document cannot be loaded', async () => {
+    documentLoaderService.mockResolvedValueOnce(undefined);
+    const output = await new DocumentManifestDataProcessor({
+      documentManifestType: RECYCLING_MANIFEST,
+    }).process(stubRuleInput());
+
+    expect(output.resultStatus).toBe('FAILED');
+    expect(DocumentQueryService.prototype.load).not.toHaveBeenCalled();
   });
 
   it('should throw when documentManifestType is invalid', () => {
