@@ -14,6 +14,20 @@ const stubBoundingBox = (left: number, top: number) => ({
   width: 0.1,
 });
 
+const sigorHeaderBlocks = [
+  { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
+  {
+    boundingBox: stubBoundingBox(0.098, 0.35),
+    text: 'Código IBAMA e Denominação',
+  },
+  { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
+  { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
+  { boundingBox: stubBoundingBox(0.624, 0.35), text: 'Acondicionamento' },
+  { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
+  { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
+  { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+];
+
 describe('MtrSigorParser', () => {
   const parser = new MtrSigorParser();
 
@@ -66,20 +80,7 @@ describe('MtrSigorParser', () => {
     it('should parse a valid CETESB MTR document with high confidence', () => {
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(validCetesbText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -424,20 +425,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -478,20 +466,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -580,22 +555,7 @@ describe('MtrSigorParser', () => {
       ].join('\n');
 
       const result = parser.parse(
-        stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
-        ]),
+        stubTextExtractionResultWithBlocks(rawText, sigorHeaderBlocks),
       );
 
       expect(result.data.wasteTypes).toBeUndefined();
@@ -626,20 +586,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -668,20 +615,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -717,20 +651,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           {
             boundingBox: stubBoundingBox(0.098, 0.4),
@@ -755,20 +676,7 @@ describe('MtrSigorParser', () => {
 
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(rawText, [
-          { boundingBox: stubBoundingBox(0.048, 0.35), text: 'Item' },
-          {
-            boundingBox: stubBoundingBox(0.098, 0.35),
-            text: 'Código IBAMA e Denominação',
-          },
-          { boundingBox: stubBoundingBox(0.474, 0.35), text: 'Estado Físico' },
-          { boundingBox: stubBoundingBox(0.567, 0.35), text: 'Classe' },
-          {
-            boundingBox: stubBoundingBox(0.624, 0.35),
-            text: 'Acondicionamento',
-          },
-          { boundingBox: stubBoundingBox(0.767, 0.35), text: 'Qtde' },
-          { boundingBox: stubBoundingBox(0.823, 0.35), text: 'Unidade' },
-          { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
+          ...sigorHeaderBlocks,
           { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
           { boundingBox: stubBoundingBox(0.767, 0.4), text: '10,0000' },
           { boundingBox: stubBoundingBox(0.048, 0.45), text: '2' },
@@ -783,6 +691,61 @@ describe('MtrSigorParser', () => {
         { code: '190812', description: 'Lodos de tratamento' },
       ]);
     });
+
+    const strippedDescription = 'Lodos de tratamento de efluentes urbanos';
+
+    it.each([
+      {
+        blocks: [
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190805 - Lodos de tratamento de efluentes',
+          },
+          { boundingBox: stubBoundingBox(0.098, 0.415), text: 'urbanos' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.425),
+            text: 'A099-Outros residuos nao',
+          },
+        ],
+        expectedDescription: strippedDescription,
+        scenario: 'on its own line below a wrapped denomination',
+      },
+      {
+        blocks: [
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190805 - Lodos de tratamento de efluentes urbanos D099 - Outros residuos nao',
+          },
+        ],
+        expectedDescription: strippedDescription,
+        scenario: 'on the same line as the denomination',
+      },
+      {
+        blocks: [
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190805 - A099-Outros residuos nao',
+          },
+        ],
+        expectedDescription: '',
+        scenario: 'right after the waste code',
+      },
+    ])(
+      'should drop the residue class line and keep the waste code when the class line is $scenario',
+      ({ blocks, expectedDescription }) => {
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', [
+            ...sigorHeaderBlocks,
+            { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+            ...blocks,
+          ]),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+          { code: '190805', description: expectedDescription },
+        ]);
+      },
+    );
   });
 
   describe('getMatchScore', () => {
