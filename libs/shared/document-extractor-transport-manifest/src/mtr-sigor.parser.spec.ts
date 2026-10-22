@@ -735,6 +735,23 @@ describe('MtrSigorParser', () => {
         ]);
       },
     );
+
+    it('should keep the waste code when the residue class line follows it directly', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190805 - A099-Outros residuos nao',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { code: '190805', description: '' },
+      ]);
+    });
   });
 
   describe('getMatchScore', () => {
