@@ -142,6 +142,17 @@ const SIGOR_ANCHOR_COLUMN: SigorWasteColumn = 'item';
 
 const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
 
+// SIGOR prints a residue class line (e.g. "A099-Outros residuos nao") under the denomination
+const RESIDUE_CLASS_LINE_PATTERN = /\b[A-Z]\d{3}\s*[-–]/;
+
+const stripResidueClassLine = (description: string): string => {
+  const classLineStart = description.search(RESIDUE_CLASS_LINE_PATTERN);
+
+  return classLineStart === -1
+    ? description
+    : description.slice(0, classLineStart).trim();
+};
+
 const parseWasteRow = (
   row: Record<string, string | undefined>,
 ): undefined | WasteTypeEntryData => {
@@ -151,7 +162,7 @@ const parseWasteRow = (
     return undefined;
   }
 
-  const rawDescription = row['description'];
+  const rawDescription = stripResidueClassLine(row['description'] ?? '');
 
   if (!rawDescription) {
     return undefined;
