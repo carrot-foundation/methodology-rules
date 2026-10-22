@@ -1,5 +1,9 @@
 import type { BaseRuleDefinition } from '@carrot-fndn/shared/rule/types';
 
+import {
+  type DocumentQueryCriteria,
+  PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
+} from '@carrot-fndn/shared/methodologies/bold/io-helpers';
 import { BoldDocumentEventName } from '@carrot-fndn/shared/methodologies/bold/types';
 
 export const ruleDefinition = {
@@ -13,7 +17,8 @@ export const ruleDefinition = {
     BoldDocumentEventName.TRANSPORT_MANIFEST,
     BoldDocumentEventName.WEIGHING,
   ],
+  input: PARTICIPANT_ACCREDITATION_DOCUMENT_QUERY_CRITERIA,
   name: 'Document Manifest Data',
   slug: 'document-manifest-data',
   version: '1.0.0',
-} as const satisfies BaseRuleDefinition;
+} as const satisfies BaseRuleDefinition<DocumentQueryCriteria>;
