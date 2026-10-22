@@ -79,7 +79,7 @@ Document schemas are organized in five layers with progressive strictness:
 | Envelope | `LoadedDocumentEnvelopeSchema` | `z.object` | Wrapper for loaded documents |
 | Inbound | `Inbound*Schema` | `z.object` (strips unknown fields) | Boundary contract for external data |
 | Normalized | `*Schema` | `z.object` (strips unknown fields) | Strict internal representation |
-| Domain | `Bold*Schema`, `MassID*Schema`, `RewardsDistribution*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
+| Domain | `Bold*Schema`, `MassID*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
 | Rule | `*RuleSubjectSchema` | `z.object` with exact fields needed | Exact contract per rule processor |
 
 Key conventions:

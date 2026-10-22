@@ -187,13 +187,6 @@ export const BoldDocumentEventNameSchema = z.enum(
 // eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
 export type BoldDocumentEventName = z.infer<typeof BoldDocumentEventNameSchema>;
 
-export const BoldRuleSlug = {
-  REWARDS_DISTRIBUTION: 'rewards-distribution',
-} as const;
-export const BoldRuleSlugSchema = z.enum(valuesOf(BoldRuleSlug));
-// eslint-disable-next-line no-redeclare -- intentional declaration merging: type + const share the name to preserve enum-like dot-notation
-export type BoldRuleSlug = z.infer<typeof BoldRuleSlugSchema>;
-
 export const BoldScaleType = {
   BIN_SCALE: 'Bin Scale',
   CONVEYOR_BELT_SCALE: 'Conveyor Belt Scale',
