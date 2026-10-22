@@ -63,7 +63,6 @@ Types, schemas, enums, and constants declared in a domain-scoped library must ca
 |---|---|---|
 | `libs/shared/methodologies/bold/*` | `Bold` | `BoldDocumentCategory`, `BoldVehicleType` |
 | (MassID-specific within Bold) | `MassID` | `MassIDActorType`, `MassIDOrganicSubtype` |
-| (RewardsDistribution-specific within Bold) | `RewardsDistribution` | `RewardsDistributionActorType` |
 | (CreditOrder-specific within Bold) | `CreditOrder` | `CreditOrderStatus` |
 
 Rules:

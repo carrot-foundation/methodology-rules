@@ -16,16 +16,12 @@ methodology-rules/
 │   ├── methodologies/
 │   │   ├── bold/
 │   │   │   └── rule-processors/
-│   │   │       ├── mass-id/                  # 20 MassID rule processors (one Nx project each)
-│   │   │       │   ├── mass-id-sorting/
-│   │   │       │   ├── weighing/
-│   │   │       │   ├── geolocation-and-address-precision/
-│   │   │       │   ├── prevented-emissions/
-│   │   │       │   └── … (16 more)
-│   │   │       ├── mass-id-certificate/
-│   │   │       │   └── rewards-distribution/
-│   │   │       └── credit-order/
-│   │   │           └── rewards-distribution/
+│   │   │       └── mass-id/                  # 20 MassID rule processors (one Nx project each)
+│   │   │           ├── mass-id-sorting/
+│   │   │           ├── weighing/
+│   │   │           ├── geolocation-and-address-precision/
+│   │   │           ├── prevented-emissions/
+│   │   │           └── … (16 more)
 │   │   ├── bold-carbon/rules/src/            # rules.config.ts — Carbon rule set
 │   │   └── bold-recycling/rules/src/         # rules.config.ts — Recycling rule set
 │   │
@@ -85,16 +81,16 @@ methodology-rules/
 
 ## Critical Directories
 
-| Directory | Why it matters |
-|---|---|
-| `libs/methodologies/*/rule-processors/` | All validation logic. One Nx project per rule. |
-| `libs/shared/rule/` | The rule contract (input/output) + result reporting to Smaug. |
-| `libs/shared/lambda/wrapper/` | The single Lambda boilerplate all rules share. |
-| `libs/shared/methodologies/bold/` | Document graph types, matchers, processor base classes. |
-| `libs/shared/document/` | S3 document-graph traversal (DocumentQueryService). |
-| `libs/shared/testing/` | Reuse stubs here before writing new ones. |
-| `tools/` | Scaffolding + codegen; never hand-create processor files. |
-| `.ai/` | Source of truth for engineering rules; edit here, then `pnpm ai:sync`. |
+| Directory                               | Why it matters                                                         |
+| --------------------------------------- | ---------------------------------------------------------------------- |
+| `libs/methodologies/*/rule-processors/` | All validation logic. One Nx project per rule.                         |
+| `libs/shared/rule/`                     | The rule contract (input/output) + result reporting to Smaug.          |
+| `libs/shared/lambda/wrapper/`           | The single Lambda boilerplate all rules share.                         |
+| `libs/shared/methodologies/bold/`       | Document graph types, matchers, processor base classes.                |
+| `libs/shared/document/`                 | S3 document-graph traversal (DocumentQueryService).                    |
+| `libs/shared/testing/`                  | Reuse stubs here before writing new ones.                              |
+| `tools/`                                | Scaffolding + codegen; never hand-create processor files.              |
+| `.ai/`                                  | Source of truth for engineering rules; edit here, then `pnpm ai:sync`. |
 
 ## Module-Boundary Rule
 

@@ -6,6 +6,7 @@ description: 'Rule mapping for naming-conventions'
 # Rule naming-conventions
 
 Apply this rule whenever work touches:
+
 - `*.ts`
 - `*.tsx`
 
@@ -13,12 +14,12 @@ Consistent naming reduces cognitive load and makes the codebase searchable. Ever
 
 ### Identifier casing
 
-| Kind | Casing | Example |
-|---|---|---|
-| Variable, function, parameter | camelCase | `vehicleWeight`, `computeScore` |
-| Type, interface, enum, class | PascalCase | `RuleOutput`, `DocumentStatus` |
-| Module-level constant | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`, `DEFAULT_PRECISION` |
-| Enum member | UPPER_SNAKE_CASE | `DocumentStatus.APPROVED` |
+| Kind                          | Casing           | Example                                |
+| ----------------------------- | ---------------- | -------------------------------------- |
+| Variable, function, parameter | camelCase        | `vehicleWeight`, `computeScore`        |
+| Type, interface, enum, class  | PascalCase       | `RuleOutput`, `DocumentStatus`         |
+| Module-level constant         | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT`, `DEFAULT_PRECISION` |
+| Enum member                   | UPPER_SNAKE_CASE | `DocumentStatus.APPROVED`              |
 
 ### File naming
 
@@ -36,13 +37,13 @@ vehicle-validation.test-cases.ts
 
 Each rule processor follows a predictable naming pattern tied to the rule name:
 
-| File | Pattern |
-|---|---|
-| Processor | `{rule-name}.processor.ts` |
-| Lambda handler | `{rule-name}.lambda.ts` |
-| Unit tests | `{rule-name}.processor.spec.ts` |
-| E2E tests | `{rule-name}.lambda.e2e.spec.ts` |
-| Test data | `{rule-name}.test-cases.ts` |
+| File           | Pattern                          |
+| -------------- | -------------------------------- |
+| Processor      | `{rule-name}.processor.ts`       |
+| Lambda handler | `{rule-name}.lambda.ts`          |
+| Unit tests     | `{rule-name}.processor.spec.ts`  |
+| E2E tests      | `{rule-name}.lambda.e2e.spec.ts` |
+| Test data      | `{rule-name}.test-cases.ts`      |
 
 ### Meaningful identifiers
 
@@ -62,12 +63,11 @@ Avoid generic names like `data`, `info`, or `result` unless qualified with domai
 
 Types, schemas, enums, and constants declared in a domain-scoped library must carry the domain prefix. The import path already provides namespace context, but the prefix makes the domain explicit at usage sites across the codebase.
 
-| Library path | Prefix | Example |
-|---|---|---|
-| `libs/shared/methodologies/bold/*` | `Bold` | `BoldDocumentCategory`, `BoldVehicleType` |
-| (MassID-specific within Bold) | `MassID` | `MassIDActorType`, `MassIDOrganicSubtype` |
-| (RewardsDistribution-specific within Bold) | `RewardsDistribution` | `RewardsDistributionActorType` |
-| (CreditOrder-specific within Bold) | `CreditOrder` | `CreditOrderStatus` |
+| Library path                       | Prefix        | Example                                   |
+| ---------------------------------- | ------------- | ----------------------------------------- |
+| `libs/shared/methodologies/bold/*` | `Bold`        | `BoldDocumentCategory`, `BoldVehicleType` |
+| (MassID-specific within Bold)      | `MassID`      | `MassIDActorType`, `MassIDOrganicSubtype` |
+| (CreditOrder-specific within Bold) | `CreditOrder` | `CreditOrderStatus`                       |
 
 Rules:
 

@@ -6,6 +6,7 @@ description: 'Rule mapping for schemas'
 # Rule schemas
 
 Apply this rule whenever work touches:
+
 - `*.ts`
 
 Zod is the runtime validation library for this project. Schemas serve a dual purpose: they validate data at runtime boundaries and provide the canonical type definition via `z.infer`.
@@ -77,13 +78,13 @@ This ensures test data always conforms to the current schema shape and evolves a
 
 Document schemas are organized in five layers with progressive strictness:
 
-| Layer | Naming convention | Zod strategy | Purpose |
-|-------|------------------|--------------|---------|
-| Envelope | `LoadedDocumentEnvelopeSchema` | `z.object` | Wrapper for loaded documents |
-| Inbound | `Inbound*Schema` | `z.object` (strips unknown fields) | Boundary contract for external data |
-| Normalized | `*Schema` | `z.object` (strips unknown fields) | Strict internal representation |
-| Domain | `Bold*Schema`, `MassID*Schema`, `RewardsDistribution*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions |
-| Rule | `*RuleSubjectSchema` | `z.object` with exact fields needed | Exact contract per rule processor |
+| Layer      | Naming convention              | Zod strategy                                | Purpose                             |
+| ---------- | ------------------------------ | ------------------------------------------- | ----------------------------------- |
+| Envelope   | `LoadedDocumentEnvelopeSchema` | `z.object`                                  | Wrapper for loaded documents        |
+| Inbound    | `Inbound*Schema`               | `z.object` (strips unknown fields)          | Boundary contract for external data |
+| Normalized | `*Schema`                      | `z.object` (strips unknown fields)          | Strict internal representation      |
+| Domain     | `Bold*Schema`, `MassID*Schema` | `z.object` with methodology-specific fields | Methodology-specific extensions     |
+| Rule       | `*RuleSubjectSchema`           | `z.object` with exact fields needed         | Exact contract per rule processor   |
 
 Key conventions:
 
@@ -99,9 +100,7 @@ export const BoldVehicleType = {
   BICYCLE: 'Bicycle',
   TRUCK: 'Truck',
 } as const;
-export const BoldVehicleTypeSchema = z.enum(
-  Object.values(BoldVehicleType) as [string, ...string[]],
-);
+export const BoldVehicleTypeSchema = z.enum(Object.values(BoldVehicleType) as [string, ...string[]]);
 // eslint-disable-next-line no-redeclare
 export type BoldVehicleType = z.infer<typeof BoldVehicleTypeSchema>;
 
