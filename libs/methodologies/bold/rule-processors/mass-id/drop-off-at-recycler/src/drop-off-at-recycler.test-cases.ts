@@ -11,6 +11,7 @@ import {
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { faker } from '@faker-js/faker';
+import { inspect } from 'node:util';
 
 import { RESULT_COMMENTS } from './drop-off-at-recycler.constants';
 
@@ -55,7 +56,7 @@ export const dropOffAtRecyclerTestCases: DropOffAtRecyclerTestCase[] = [
       resultComment:
         RESULT_COMMENTS.failed.MISSING_RECEIVING_OPERATOR_IDENTIFIER,
       resultStatus: 'FAILED',
-      scenario: `The MassID document has a "${DROP_OFF}" event with an invalid "${RECEIVING_OPERATOR_IDENTIFIER}" attribute: ${String(identifier)}`,
+      scenario: `The MassID document has a "${DROP_OFF}" event with an invalid "${RECEIVING_OPERATOR_IDENTIFIER}" attribute: ${inspect(identifier)}`,
     }),
   ),
   {
