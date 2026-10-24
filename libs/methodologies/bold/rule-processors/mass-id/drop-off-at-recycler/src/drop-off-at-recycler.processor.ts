@@ -45,7 +45,13 @@ export class DropOffAtRecyclerProcessor extends ParentDocumentRuleProcessor<Rule
       };
     }
 
-    if (!isNonEmptyString(receivingOperatorIdentifier)) {
+    if (
+      !isNonEmptyString(receivingOperatorIdentifier) &&
+      !(
+        typeof receivingOperatorIdentifier === 'number' &&
+        Number.isFinite(receivingOperatorIdentifier)
+      )
+    ) {
       return {
         ...DROP_OFF_AT_RECYCLER_FINDINGS.result(
           'FAILED.MISSING_RECEIVING_OPERATOR_IDENTIFIER',
