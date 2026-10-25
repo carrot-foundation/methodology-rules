@@ -344,34 +344,51 @@ describe('CdfCustom1Parser', () => {
       });
     });
 
-    it('should derive processingPeriod from receipt table dates', () => {
-      const blocks: TextBlock[] = [
-        ...CDF_PREAMBLE_BLOCKS,
-        ...CDF_TABLE_HEADER_BLOCKS,
-        ...makeReceiptRow(
-          'LODO SOLIDO - SANITARIO',
-          '01/07/2024',
-          '85,12',
-          0.539,
-        ),
-        ...makeReceiptRow(
-          'LODO SOLIDO - SANITARIO',
-          '15/07/2024',
-          '201,97',
-          0.556,
-        ),
-      ];
+    it.each([
+      { headerOffset: 0.007, receiptCount: 2 },
+      { headerOffset: 0.009, receiptCount: 2 },
+      { headerOffset: 0.03, receiptCount: undefined },
+    ])(
+      'should derive the receipt period only for aligned table headers ($headerOffset)',
+      ({ headerOffset, receiptCount }) => {
+        const blocks: TextBlock[] = [
+          ...CDF_PREAMBLE_BLOCKS,
+          ...CDF_TABLE_HEADER_BLOCKS.map((block, index) => ({
+            ...block,
+            boundingBox: {
+              ...block.boundingBox!,
+              top: index === 0 ? 0.508 : 0.508 + headerOffset,
+            },
+          })),
+          makeBlock('matéria-prima', 0.371, 0.524),
+          ...makeReceiptRow(
+            'LODO SOLIDO - SANITARIO',
+            '01/07/2024',
+            '85,12',
+            0.539,
+          ),
+          ...makeReceiptRow(
+            'LODO SOLIDO - SANITARIO',
+            '15/07/2024',
+            '201,97',
+            0.556,
+          ),
+        ];
 
-      const result = parser.parse({
-        blocks,
-        rawText: validCustomCdfText,
-      });
+        const result = parser.parse({
+          blocks,
+          rawText: validCustomCdfText,
+        });
 
-      expect(result.data.processingPeriod?.parsed).toBe(
-        '01/07/2024 ate 15/07/2024',
-      );
-      expect(result.data.processingPeriod?.confidence).toBe('high');
-    });
+        expect(result.data.receiptEntries?.parsed.length).toBe(receiptCount);
+        expect(result.data.processingPeriod?.parsed).toBe(
+          receiptCount === undefined ? undefined : '01/07/2024 ate 15/07/2024',
+        );
+        expect(result.data.processingPeriod?.confidence).toBe(
+          receiptCount === undefined ? undefined : 'high',
+        );
+      },
+    );
 
     it('should not set processingPeriod when receipt rows are present but period is empty', () => {
       // When extractReceiptRows returns rows but derivePeriodFromReceiptDates returns undefined
