@@ -73,9 +73,30 @@ const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
 const extractSigorAddressFields = (
   section: string,
-  blocks: TextExtractionResult['blocks'],
+  allBlocks: TextExtractionResult['blocks'],
+  sectionPattern: RegExp,
 ): ReturnType<typeof extractAddressFields> => {
   const address = extractAddressFields(section);
+  const sectionStart = allBlocks.findIndex(
+    (block) =>
+      block.blockType === 'LINE' &&
+      sectionPattern.test(stripAccents(block.text ?? '')),
+  );
+
+  if (sectionStart === -1) {
+    return address;
+  }
+
+  const remainingBlocks = allBlocks.slice(sectionStart + 1);
+  const sectionEnd = remainingBlocks.findIndex(
+    (block) =>
+      block.blockType === 'LINE' &&
+      ALL_SECTION_PATTERNS.some((pattern) =>
+        pattern.test(stripAccents(block.text ?? '')),
+      ),
+  );
+  const blocks =
+    sectionEnd === -1 ? remainingBlocks : remainingBlocks.slice(0, sectionEnd);
   const addressText = MTR_ADDRESS_PATTERNS.address.exec(section)?.[0];
   const cityText = MTR_ADDRESS_PATTERNS.city.exec(section)?.[0];
   const addressBox = blocks.find(
@@ -147,7 +168,11 @@ const extractEntityFromSigorSection = (
     return undefined;
   }
 
-  const addressData = extractSigorAddressFields(section, blocks);
+  const addressData = extractSigorAddressFields(
+    section,
+    blocks,
+    sectionPattern,
+  );
 
   return {
     rawMatch: section,

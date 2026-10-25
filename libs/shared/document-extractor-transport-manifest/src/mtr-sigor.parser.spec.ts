@@ -134,12 +134,30 @@ describe('MtrSigorParser', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should scope repeated address lines to each participant section', () => {
+      const text = validCetesbText
+        .replace('Endereço: Av. Principal, 1000', 'Endereço: Rua Modelo, 1855')
+        .replace('Endereço: Rod. XX-101, Km 5', 'Endereço: Rua Modelo, 1855');
+      const blocks = text.split('\n').map((line, index) => ({
+        boundingBox: stubBoundingBox(0.04, index * 0.02),
+        text: line,
+      }));
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(text, blocks),
+      );
+
+      expect(result.data.generator?.address.parsed).toBe('Rua Modelo, 1855');
+      expect(result.data.hauler?.address.parsed).toBe('Rua Modelo, 1855');
+      expect(result.data.receiver?.address.parsed).toBe('Rua Modelo, 1855');
+    });
+
     it('should retain only wrapped text in the address column', () => {
       const text = validCetesbText.replace(
         'Endereço: Rua Modelo, 1855',
         'Endereço: Rua Modelo, 1855 BAIRRO\nData da emissao: 01/01/2025\nMODELO\nCARIMBO',
       );
       const input = stubTextExtractionResultWithBlocks(text, [
+        { text: 'Identificação do Gerador' },
         {
           boundingBox: stubBoundingBox(0.04, 0.2),
           text: 'Endereço: Rua Modelo, 1855 BAIRRO',
@@ -157,7 +175,11 @@ describe('MtrSigorParser', () => {
         { text: 'Sem geometria' },
       ]);
 
-      input.blocks.unshift({ blockType: 'LINE', id: 'empty-address-line' });
+      input.blocks.splice(1, 0, {
+        blockType: 'LINE',
+        id: 'empty-address-line',
+      });
+      input.blocks.unshift({ blockType: 'LINE', id: 'empty-section-line' });
       input.blocks.push({ blockType: 'WORD', id: 'address-word' });
       const result = parser.parse(input);
 
@@ -169,6 +191,7 @@ describe('MtrSigorParser', () => {
     it('should keep the first address line when the municipality has no geometry', () => {
       const result = parser.parse(
         stubTextExtractionResultWithBlocks(validCetesbText, [
+          { text: 'Identificação do Gerador' },
           {
             boundingBox: stubBoundingBox(0.04, 0.2),
             text: 'Endereço: Rua Modelo, 1855',
