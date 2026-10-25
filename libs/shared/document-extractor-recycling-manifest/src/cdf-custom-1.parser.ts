@@ -449,7 +449,10 @@ export class CdfCustom1Parser implements DocumentParser<CdfExtractedData> {
     extractionResult: TextExtractionResult,
   ): ReceiptTableRow[] {
     const normalized = normalizeMultiPageBlocks(extractionResult.blocks);
-    const detected = detectTableColumns(normalized, CDF_TABLE_HEADER_DEFS);
+    const detected = detectTableColumns(normalized, CDF_TABLE_HEADER_DEFS, {
+      // The two-line receipt-date header starts above the other column labels.
+      yTolerance: 0.01,
+    });
 
     if (!detected) {
       return [];
