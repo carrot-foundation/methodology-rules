@@ -140,13 +140,51 @@ const SIGOR_HEADER_DEFS: [
 
 const SIGOR_ANCHOR_COLUMN: SigorWasteColumn = 'item';
 
-const WASTE_CODE_PATTERN = /^(\d{6})\s*[-–]\s*(.+)/;
+const alignWasteTableBlocks = (
+  blocks: TextExtractionResult['blocks'],
+): TextExtractionResult['blocks'] => {
+  const first = blocks.find(
+    (block) => block.blockType === 'LINE' && /^Item$/i.test(block.text ?? ''),
+  )?.boundingBox;
+  const last = blocks.find(
+    (block) =>
+      block.blockType === 'LINE' && /^Tratamento$/i.test(block.text ?? ''),
+  )?.boundingBox;
 
-// SIGOR prints a residue class line (e.g. "A099-Outros residuos nao") after the denomination
-const RESIDUE_CLASS_LINE_PATTERN = /\b[A-Z]\d{3}\s*[-–].*/;
+  if (!first || !last || last.left <= first.left) {
+    return blocks;
+  }
 
-const stripResidueClassLine = (description: string): string =>
-  description.replace(RESIDUE_CLASS_LINE_PATTERN, '').trim();
+  const firstCenter = first.left + first.width / 2;
+  const slope =
+    (last.top + last.height / 2 - first.top - first.height / 2) /
+    (last.left + last.width / 2 - firstCenter);
+
+  return blocks.map((block) => {
+    const box = block.boundingBox;
+
+    return box
+      ? {
+          ...block,
+          boundingBox: {
+            ...box,
+            top:
+              box.top +
+              box.height / 2 -
+              slope * (box.left + box.width / 2 - firstCenter),
+          },
+        }
+      : block;
+  });
+};
+
+const WASTE_CODE_PATTERN = /\b(\d{6})\s*[-–]\s*/;
+
+const RESIDUE_METADATA_PATTERN =
+  /(?:\b[A-Z]\d{3}\s*[-–]|Observa[cç][aã]o\s+Res[ií]duo\s*:).*/i;
+
+const stripResidueMetadata = (description: string): string =>
+  description.replace(RESIDUE_METADATA_PATTERN, '').trim();
 
 const parseWasteRow = (
   row: Record<string, string | undefined>,
@@ -168,11 +206,11 @@ const parseWasteRow = (
   const entry: WasteTypeEntryData = codeMatch?.[1]
     ? {
         code: codeMatch[1],
-        // codeMatch[2] is always defined when codeMatch[1] matches (.+ requires at least one char)
-
-        description: stripResidueClassLine(codeMatch[2]!),
+        description: stripResidueMetadata(
+          rawDescription.replace(codeMatch[0], ''),
+        ),
       }
-    : { description: stripResidueClassLine(rawDescription) };
+    : { description: stripResidueMetadata(rawDescription) };
 
   if (row['classification']) {
     entry.classification = row['classification'];
@@ -322,16 +360,14 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     extractionResult: TextExtractionResult,
     partialData: Partial<MtrExtractedData>,
   ): void {
-    const detected = detectTableColumns(
-      extractionResult.blocks,
-      SIGOR_HEADER_DEFS,
-    );
+    const blocks = alignWasteTableBlocks(extractionResult.blocks);
+    const detected = detectTableColumns(blocks, SIGOR_HEADER_DEFS);
 
     if (!detected) {
       return;
     }
 
-    const { rows } = extractTableFromBlocks(extractionResult.blocks, {
+    const { rows } = extractTableFromBlocks(blocks, {
       anchorColumn: SIGOR_ANCHOR_COLUMN,
       columns: detected.columns as [
         TableColumnConfig<SigorWasteColumn>,

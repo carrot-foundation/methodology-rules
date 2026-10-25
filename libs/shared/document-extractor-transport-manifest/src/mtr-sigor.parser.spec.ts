@@ -692,6 +692,117 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    it.each(['Observação Resíduo:', 'Observacao Residuo:'])(
+      'should exclude %s and its value from a wrapped waste description',
+      (label) => {
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', [
+            ...sigorHeaderBlocks,
+            { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+            {
+              boundingBox: stubBoundingBox(0.098, 0.4),
+              text: '190805 - Lodos de tratamento de efluentes',
+            },
+            { boundingBox: stubBoundingBox(0.098, 0.412), text: 'urbanos' },
+            {
+              boundingBox: stubBoundingBox(0.098, 0.424),
+              text: `${label} MATERIAL DE EXEMPLO`,
+            },
+            { boundingBox: stubBoundingBox(0.767, 0.4), text: '2,5000' },
+            { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          ]),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+          {
+            code: '190805',
+            description: 'Lodos de tratamento de efluentes urbanos',
+            quantity: 2.5,
+            unit: 'TON',
+          },
+        ]);
+      },
+    );
+
+    it('should ignore blocks without text or geometry while aligning the table', () => {
+      const input = stubTextExtractionResultWithBlocks('CETESB', [
+        ...sigorHeaderBlocks,
+        { text: 'Unpositioned text' },
+        { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+        { boundingBox: stubBoundingBox(0.098, 0.4), text: '190805 - Lodos' },
+      ]);
+
+      input.blocks.unshift({ blockType: 'LINE', id: 'empty-line' });
+      input.blocks.push({ blockType: 'WORD', id: 'word', text: 'ignored' });
+
+      expect(parser.parse(input).data.wasteTypes?.[0]?.code.parsed).toBe(
+        '190805',
+      );
+    });
+
+    it.each([-0.07, 0.04])(
+      'should extract separate rows from a table with slope %s',
+      (slope) => {
+        const blocks = [
+          ...sigorHeaderBlocks,
+          ...[0.4, 0.46].flatMap((top, index) => [
+            {
+              boundingBox: stubBoundingBox(0.048, top),
+              text: String(index + 1),
+            },
+            {
+              boundingBox: stubBoundingBox(0.098, top),
+              text: '190805 - Lodos de tratamento',
+            },
+            {
+              boundingBox: stubBoundingBox(0.098, top + 0.015),
+              text: 'de efluentes urbanos',
+            },
+            { boundingBox: stubBoundingBox(0.767, top), text: '2,5000' },
+            { boundingBox: stubBoundingBox(0.823, top), text: 'TON' },
+          ]),
+        ].map((block) => ({
+          ...block,
+          boundingBox: {
+            ...block.boundingBox,
+            top: block.boundingBox.top + slope * block.boundingBox.left,
+          },
+        }));
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', blocks),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual(
+          Array.from({ length: 2 }, () => ({
+            code: '190805',
+            description: 'Lodos de tratamento de efluentes urbanos',
+            quantity: 2.5,
+            unit: 'TON',
+          })),
+        );
+      },
+    );
+
+    it('should extract the waste code when OCR places another description fragment first', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'de efluentes urbanos 190805-Lodos de tratamento',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          code: '190805',
+          description: 'de efluentes urbanos Lodos de tratamento',
+        },
+      ]);
+    });
+
     const strippedDescription = 'Lodos de tratamento de efluentes urbanos';
 
     it.each([
