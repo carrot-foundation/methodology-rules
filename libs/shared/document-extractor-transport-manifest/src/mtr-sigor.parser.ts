@@ -28,6 +28,7 @@ import {
   extractAddressFields,
   extractHaulerFields,
   finalizeMtrExtraction,
+  MTR_ADDRESS_PATTERNS,
   MTR_DEFAULT_LABEL_PATTERNS,
   MTR_DEFAULT_PATTERNS,
   stripTrailingRegistrationNumber,
@@ -70,9 +71,53 @@ const LABEL_PATTERNS = {
 
 const ALL_SECTION_PATTERNS = Object.values(SECTION_PATTERNS);
 
+const extractSigorAddressFields = (
+  section: string,
+  blocks: TextExtractionResult['blocks'],
+): ReturnType<typeof extractAddressFields> => {
+  const address = extractAddressFields(section);
+  const addressText = MTR_ADDRESS_PATTERNS.address.exec(section)?.[0];
+  const cityText = MTR_ADDRESS_PATTERNS.city.exec(section)?.[0];
+  const addressBox = blocks.find(
+    (block) =>
+      block.blockType === 'LINE' &&
+      stripAccents(block.text ?? '') === addressText,
+  )?.boundingBox;
+  const cityBox = blocks.find(
+    (block) =>
+      block.blockType === 'LINE' &&
+      stripAccents(block.text ?? '') === cityText &&
+      block.boundingBox !== undefined &&
+      addressBox !== undefined &&
+      block.boundingBox.top > addressBox.top,
+  )?.boundingBox;
+
+  if (!address || !addressBox || !cityBox) {
+    return address;
+  }
+
+  const continuation = blocks
+    .filter((block) => {
+      const box = block.boundingBox;
+
+      return (
+        block.blockType === 'LINE' &&
+        block.text !== undefined &&
+        box !== undefined &&
+        Math.abs(box.left - addressBox.left) < 0.02 &&
+        box.top + box.height / 2 > addressBox.top + addressBox.height / 2 &&
+        box.top + box.height / 2 < cityBox.top + cityBox.height / 2
+      );
+    })
+    .map((block) => stripAccents(block.text!));
+
+  return { ...address, address: [address.address, ...continuation].join(' ') };
+};
+
 const extractEntityFromSigorSection = (
   text: string,
   sectionPattern: RegExp,
+  blocks: TextExtractionResult['blocks'],
 ): undefined | { rawMatch: string; value: EntityWithAddressInfo } => {
   const section = extractSection(text, sectionPattern, ALL_SECTION_PATTERNS);
 
@@ -102,7 +147,7 @@ const extractEntityFromSigorSection = (
     return undefined;
   }
 
-  const addressData = extractAddressFields(section);
+  const addressData = extractSigorAddressFields(section, blocks);
 
   return {
     rawMatch: section,
@@ -201,16 +246,15 @@ const parseWasteRow = (
     return undefined;
   }
 
-  const codeMatch = WASTE_CODE_PATTERN.exec(rawDescription);
+  const description = stripResidueMetadata(rawDescription);
+  const codeMatch = WASTE_CODE_PATTERN.exec(description);
 
   const entry: WasteTypeEntryData = codeMatch?.[1]
     ? {
         code: codeMatch[1],
-        description: stripResidueMetadata(
-          rawDescription.replace(codeMatch[0], ''),
-        ),
+        description: description.replace(codeMatch[0], '').trim(),
       }
-    : { description: stripResidueMetadata(rawDescription) };
+    : { description };
 
   if (row['classification']) {
     entry.classification = row['classification'];
@@ -259,7 +303,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     this.extractIssueDate(text, partialData);
     this.extractTransportDate(text, partialData);
     this.extractReceivingDate(text, partialData);
-    this.extractEntities(text, partialData);
+    this.extractEntities(text, partialData, extractionResult.blocks);
     extractHaulerFields(text, partialData, {
       allSectionPatterns: ALL_SECTION_PATTERNS,
       labelPatterns: LABEL_PATTERNS,
@@ -287,10 +331,12 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
   private extractEntities(
     rawText: string,
     partialData: Partial<MtrExtractedData>,
+    blocks: TextExtractionResult['blocks'],
   ): void {
     const generatorExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.generator,
+      blocks,
     );
 
     partialData.generator =
@@ -299,6 +345,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     const haulerExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.hauler,
+      blocks,
     );
 
     partialData.hauler = createExtractedEntityWithAddress(haulerExtracted);
@@ -306,6 +353,7 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
     const receiverExtracted = extractEntityFromSigorSection(
       rawText,
       SECTION_PATTERNS.receiver,
+      blocks,
     );
 
     partialData.receiver = createExtractedEntityWithAddress(receiverExtracted);

@@ -122,14 +122,9 @@ export const extractAddressFields = (
   }
 
   const state = extractState(sectionText);
-  const continuation = sectionText
-    .slice(addressMatch.index + addressMatch[0].length, cityMatch.index)
-    .split('\n')
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0 && !line.includes(':'));
 
   return {
-    address: [addressMatch[1].trim(), ...continuation].join(' '),
+    address: addressMatch[1].trim(),
     city: cityMatch[1].trim(),
     ...(state && { state }),
   };

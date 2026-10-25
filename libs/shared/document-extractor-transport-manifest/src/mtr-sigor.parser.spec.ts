@@ -134,6 +134,52 @@ describe('MtrSigorParser', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should retain only wrapped text in the address column', () => {
+      const text = validCetesbText.replace(
+        'Endereço: Rua Modelo, 1855',
+        'Endereço: Rua Modelo, 1855 BAIRRO\nData da emissao: 01/01/2025\nMODELO\nCARIMBO',
+      );
+      const input = stubTextExtractionResultWithBlocks(text, [
+        {
+          boundingBox: stubBoundingBox(0.04, 0.2),
+          text: 'Endereço: Rua Modelo, 1855 BAIRRO',
+        },
+        { boundingBox: stubBoundingBox(0.04, 0.22), text: 'MODELO' },
+        { boundingBox: stubBoundingBox(0.7, 0.22), text: 'CARIMBO' },
+        {
+          boundingBox: stubBoundingBox(0.04, 0.24),
+          text: 'Município: Cidade Nova',
+        },
+        {
+          boundingBox: stubBoundingBox(0.04, 0.26),
+          text: 'NOME ABAIXO DO MUNICIPIO',
+        },
+        { text: 'Sem geometria' },
+      ]);
+
+      input.blocks.unshift({ blockType: 'LINE', id: 'empty-address-line' });
+      input.blocks.push({ blockType: 'WORD', id: 'address-word' });
+      const result = parser.parse(input);
+
+      expect(result.data.generator?.address.parsed).toBe(
+        'Rua Modelo, 1855 BAIRRO MODELO',
+      );
+    });
+
+    it('should keep the first address line when the municipality has no geometry', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validCetesbText, [
+          {
+            boundingBox: stubBoundingBox(0.04, 0.2),
+            text: 'Endereço: Rua Modelo, 1855',
+          },
+          { text: 'Município: Cidade Nova' },
+        ]),
+      );
+
+      expect(result.data.generator?.address.parsed).toBe('Rua Modelo, 1855');
+    });
+
     it('should parse entities without address fields', () => {
       const noAddressText = [
         'MTR n° 123456',
@@ -800,6 +846,23 @@ describe('MtrSigorParser', () => {
           code: '190805',
           description: 'de efluentes urbanos Lodos de tratamento',
         },
+      ]);
+    });
+
+    it('should not read a waste code from discarded observation metadata', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'Lodos sem codigo Observacao Residuo: Remessa 123456-EXEMPLO',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { description: 'Lodos sem codigo' },
       ]);
     });
 

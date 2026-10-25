@@ -153,25 +153,6 @@ describe('MTR shared helpers', () => {
     });
   });
 
-  it('should retain wrapped address text interleaved with labeled columns', () => {
-    expect(
-      extractAddressFields(
-        [
-          'Endereco: Avenida Exemplo, 42 BAIRRO',
-          'Data da emissao: 01/01/2025',
-          'Telefone: 1100000000',
-          'MODELO',
-          'Municipio: Cidade Exemplo',
-          'UF: SP',
-        ].join('\n'),
-      ),
-    ).toEqual({
-      address: 'Avenida Exemplo, 42 BAIRRO MODELO',
-      city: 'Cidade Exemplo',
-      state: 'SP',
-    });
-  });
-
   describe('extractDriverAndVehicle', () => {
     it('should extract driver name and plate when both labels present (driver first, then plate)', () => {
       const section = [
