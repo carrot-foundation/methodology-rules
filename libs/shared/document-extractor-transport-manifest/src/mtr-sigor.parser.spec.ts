@@ -134,6 +134,75 @@ describe('MtrSigorParser', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
+    it('should scope repeated address lines to each participant section', () => {
+      const text = validCetesbText
+        .replace('Endereço: Av. Principal, 1000', 'Endereço: Rua Modelo, 1855')
+        .replace('Endereço: Rod. XX-101, Km 5', 'Endereço: Rua Modelo, 1855');
+      const blocks = text.split('\n').map((line, index) => ({
+        boundingBox: stubBoundingBox(0.04, index * 0.02),
+        text: line,
+      }));
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(text, blocks),
+      );
+
+      expect(result.data.generator?.address.parsed).toBe('Rua Modelo, 1855');
+      expect(result.data.hauler?.address.parsed).toBe('Rua Modelo, 1855');
+      expect(result.data.receiver?.address.parsed).toBe('Rua Modelo, 1855');
+    });
+
+    it('should retain only wrapped text in the address column', () => {
+      const text = validCetesbText.replace(
+        'Endereço: Rua Modelo, 1855',
+        'Endereço: Rua Modelo, 1855 BAIRRO\nData da emissao: 01/01/2025\nMODELO\nCARIMBO',
+      );
+      const input = stubTextExtractionResultWithBlocks(text, [
+        { text: 'Identificação do Gerador' },
+        {
+          boundingBox: stubBoundingBox(0.04, 0.2),
+          text: 'Endereço: Rua Modelo, 1855 BAIRRO',
+        },
+        { boundingBox: stubBoundingBox(0.04, 0.22), text: 'MODELO' },
+        { boundingBox: stubBoundingBox(0.7, 0.22), text: 'CARIMBO' },
+        {
+          boundingBox: stubBoundingBox(0.04, 0.24),
+          text: 'Município: Cidade Nova',
+        },
+        {
+          boundingBox: stubBoundingBox(0.04, 0.26),
+          text: 'NOME ABAIXO DO MUNICIPIO',
+        },
+        { text: 'Sem geometria' },
+      ]);
+
+      input.blocks.splice(1, 0, {
+        blockType: 'LINE',
+        id: 'empty-address-line',
+      });
+      input.blocks.unshift({ blockType: 'LINE', id: 'empty-section-line' });
+      input.blocks.push({ blockType: 'WORD', id: 'address-word' });
+      const result = parser.parse(input);
+
+      expect(result.data.generator?.address.parsed).toBe(
+        'Rua Modelo, 1855 BAIRRO MODELO',
+      );
+    });
+
+    it('should keep the first address line when the municipality has no geometry', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks(validCetesbText, [
+          { text: 'Identificação do Gerador' },
+          {
+            boundingBox: stubBoundingBox(0.04, 0.2),
+            text: 'Endereço: Rua Modelo, 1855',
+          },
+          { text: 'Município: Cidade Nova' },
+        ]),
+      );
+
+      expect(result.data.generator?.address.parsed).toBe('Rua Modelo, 1855');
+    });
+
     it('should parse entities without address fields', () => {
       const noAddressText = [
         'MTR n° 123456',
@@ -689,6 +758,134 @@ describe('MtrSigorParser', () => {
 
       expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
         { code: '190812', description: 'Lodos de tratamento' },
+      ]);
+    });
+
+    it.each(['Observação Resíduo:', 'Observacao Residuo:'])(
+      'should exclude %s and its value from a wrapped waste description',
+      (label) => {
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', [
+            ...sigorHeaderBlocks,
+            { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+            {
+              boundingBox: stubBoundingBox(0.098, 0.4),
+              text: '190805 - Lodos de tratamento de efluentes',
+            },
+            { boundingBox: stubBoundingBox(0.098, 0.412), text: 'urbanos' },
+            {
+              boundingBox: stubBoundingBox(0.098, 0.424),
+              text: `${label} MATERIAL DE EXEMPLO`,
+            },
+            { boundingBox: stubBoundingBox(0.767, 0.4), text: '2,5000' },
+            { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+          ]),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+          {
+            code: '190805',
+            description: 'Lodos de tratamento de efluentes urbanos',
+            quantity: 2.5,
+            unit: 'TON',
+          },
+        ]);
+      },
+    );
+
+    it('should ignore blocks without text or geometry while aligning the table', () => {
+      const input = stubTextExtractionResultWithBlocks('CETESB', [
+        ...sigorHeaderBlocks,
+        { text: 'Unpositioned text' },
+        { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+        { boundingBox: stubBoundingBox(0.098, 0.4), text: '190805 - Lodos' },
+      ]);
+
+      input.blocks.unshift({ blockType: 'LINE', id: 'empty-line' });
+      input.blocks.push({ blockType: 'WORD', id: 'word', text: 'ignored' });
+
+      expect(parser.parse(input).data.wasteTypes?.[0]?.code.parsed).toBe(
+        '190805',
+      );
+    });
+
+    it.each([-0.07, 0.04])(
+      'should extract separate rows from a table with slope %s',
+      (slope) => {
+        const blocks = [
+          ...sigorHeaderBlocks,
+          ...[0.4, 0.46].flatMap((top, index) => [
+            {
+              boundingBox: stubBoundingBox(0.048, top),
+              text: String(index + 1),
+            },
+            {
+              boundingBox: stubBoundingBox(0.098, top),
+              text: '190805 - Lodos de tratamento',
+            },
+            {
+              boundingBox: stubBoundingBox(0.098, top + 0.015),
+              text: 'de efluentes urbanos',
+            },
+            { boundingBox: stubBoundingBox(0.767, top), text: '2,5000' },
+            { boundingBox: stubBoundingBox(0.823, top), text: 'TON' },
+          ]),
+        ].map((block) => ({
+          ...block,
+          boundingBox: {
+            ...block.boundingBox,
+            top: block.boundingBox.top + slope * block.boundingBox.left,
+          },
+        }));
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', blocks),
+        );
+
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual(
+          Array.from({ length: 2 }, () => ({
+            code: '190805',
+            description: 'Lodos de tratamento de efluentes urbanos',
+            quantity: 2.5,
+            unit: 'TON',
+          })),
+        );
+      },
+    );
+
+    it('should extract the waste code when OCR places another description fragment first', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'de efluentes urbanos 190805-Lodos de tratamento',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          code: '190805',
+          description: 'de efluentes urbanos Lodos de tratamento',
+        },
+      ]);
+    });
+
+    it('should not read a waste code from discarded observation metadata', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'Lodos sem codigo Observacao Residuo: Remessa 123456-EXEMPLO',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { description: 'Lodos sem codigo' },
       ]);
     });
 

@@ -220,7 +220,9 @@ const extractFromBothLabels = (
   const nameLine = findNameLine(valueLines);
 
   if (nameLine) {
-    const remaining = valueLines.find((line) => line !== nameLine);
+    const remaining =
+      valueLines.find((line) => VEHICLE_PLATE_FORMAT.test(line)) ??
+      valueLines.find((line) => line !== nameLine && /\d/.test(line));
 
     if (remaining) {
       result.driverName = nameLine;

@@ -244,6 +244,33 @@ describe('MTR shared helpers', () => {
       });
     });
 
+    it.each([
+      ['PEDRO ALMEIDA', 'rubrica', 'ABC1D23'],
+      ['rubrica', 'PEDRO ALMEIDA', 'ABC1D23'],
+    ])(
+      'should select the plate among name and signature lines: %j',
+      (...values) => {
+        const result = extractDriverAndVehicle(
+          ['Nome do Motorista', 'Placa do Veiculo', ...values].join('\n'),
+        );
+
+        expect(result.vehiclePlate).toBe('ABC1D23');
+      },
+    );
+
+    it('should not extract a second name as a plate when the plate is absent', () => {
+      const result = extractDriverAndVehicle(
+        [
+          'Nome do Motorista',
+          'Placa do Veiculo',
+          'PEDRO ALMEIDA',
+          'rubrica',
+        ].join('\n'),
+      );
+
+      expect(result.vehiclePlate).toBeUndefined();
+    });
+
     it('should accept OCR-mangled plate when driver name is identified', () => {
       const section = [
         'Nome do Motorista',
