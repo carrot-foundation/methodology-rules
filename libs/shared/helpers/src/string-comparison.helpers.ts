@@ -72,15 +72,19 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
   return result;
 };
 
-const normalizeKilometerMarkers = (
-  value: string,
-): {
+interface KilometerMarkers {
   distances: string[];
   invalid: boolean;
+  isWholeKilometer: boolean;
+  kilometers: string[];
   value: string;
-} => {
+}
+
+const normalizeKilometerMarkers = (value: string): KilometerMarkers => {
   const distances: string[] = [];
+  const kilometerParts: string[] = [];
   const invalidMarkers: string[] = [];
+  let hasFraction = false;
   const normalized = value.replaceAll(
     /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
     (marker: string, notation: string, offset: number): string => {
@@ -108,6 +112,8 @@ const normalizeKilometerMarkers = (
           : fraction.padEnd(3, '0');
 
       distances.push(stripLeadingZeros(kilometers + meters));
+      kilometerParts.push(kilometers);
+      hasFraction ||= distance[3] !== undefined;
 
       const suffix = notation.slice(trimmedNotation.length);
 
@@ -120,9 +126,22 @@ const normalizeKilometerMarkers = (
   return {
     distances: deduplicateConsecutiveTokens(distances),
     invalid: invalidMarkers.length > 0 || new Set(distances).size > 1,
+    isWholeKilometer: !hasFraction,
+    kilometers: deduplicateConsecutiveTokens(kilometerParts),
     value: normalized,
   };
 };
+
+// A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3").
+const kilometerMarkersMatch = (
+  a: KilometerMarkers,
+  b: KilometerMarkers,
+): boolean =>
+  a.distances.length === 0 ||
+  b.distances.length === 0 ||
+  a.distances.join(' ') === b.distances.join(' ') ||
+  ((a.isWholeKilometer || b.isWholeKilometer) &&
+    a.kilometers.join(' ') === b.kilometers.join(' '));
 
 /**
  * Normalizes an address string for comparison.
@@ -359,9 +378,7 @@ export const isAddressMatch = (
   if (
     kilometersA.invalid ||
     kilometersB.invalid ||
-    (kilometersA.distances.length > 0 &&
-      kilometersB.distances.length > 0 &&
-      kilometersA.distances.join(' ') !== kilometersB.distances.join(' '))
+    !kilometerMarkersMatch(kilometersA, kilometersB)
   ) {
     return { isMatch: false, score };
   }

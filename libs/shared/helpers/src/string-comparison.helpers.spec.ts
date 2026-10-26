@@ -368,6 +368,14 @@ describe('string-comparison.helpers', () => {
       { expected: true, first: 'Km 42/S/N', second: 'Km 42/S/N' },
       { expected: false, first: 'Km 42-300', second: 'Km 42+300' },
       { expected: true, first: 'Km 42, 10', second: 'Km 42.0, 10' },
+      { expected: true, first: 'Km 42', second: 'Km 42,3' },
+      { expected: true, first: 'Km 42', second: 'Km 42.3' },
+      { expected: true, first: 'Km 42', second: 'Km 42+300' },
+      { expected: true, first: 'Km 42,3', second: 'Km 42,3' },
+      { expected: false, first: 'Km 42', second: 'Km 43' },
+      { expected: false, first: 'Km 42', second: 'Km 43,3' },
+      { expected: false, first: 'Km 42,3', second: 'Km 42,5' },
+      { expected: false, first: 'Km 42,0', second: 'Km 42,3' },
     ])(
       'should compare $first and $second with match $expected',
       ({ expected, first, second }) => {
@@ -398,6 +406,15 @@ describe('string-comparison.helpers', () => {
         ).toBe(false);
       },
     );
+
+    it('should match a whole kilometer marker against the same kilometer with decimals and a district', () => {
+      expect(
+        isAddressMatch(
+          'Rodovia Ficticia Joao Inventado, KM 42, Cidade Inventada, SP',
+          'Rodovia Ficticia Joao Inventado, KM 42,3 Vila Nova, Cidade Inventada, SP',
+        ).isMatch,
+      ).toBe(true);
+    });
 
     it('should deduplicate repeated equivalent kilometer markers from OCR', () => {
       expect(
