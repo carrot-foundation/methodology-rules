@@ -3,6 +3,7 @@ import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-tr
 import {
   type BaseExtractedData,
   type ExtractionOutput,
+  hasHighConfidenceField,
 } from '@carrot-fndn/shared/document-extractor';
 import {
   MTR_ALL_FIELDS,
@@ -35,7 +36,6 @@ import {
   type EntityComparisonReasons,
   getParticipantNames,
   getWasteClassification,
-  hasNoExtractedField,
 } from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
@@ -57,7 +57,7 @@ export const validateMtrExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as MtrExtractedData;
 
-  if (hasNoExtractedField(extractedData, MTR_ALL_FIELDS)) {
+  if (!hasHighConfidenceField(extractedData, MTR_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );

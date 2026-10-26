@@ -124,6 +124,33 @@ const collectLowConfidenceFromGroup = (
   }
 };
 
+const groupHasHighConfidenceField = (group: Record<string, unknown>): boolean =>
+  Object.values(group).some(
+    (subField) => isExtractedField(subField) && subField.confidence === 'high',
+  );
+
+export const hasHighConfidenceField = <T extends object>(
+  data: T,
+  fieldNames: readonly (keyof T)[],
+): boolean =>
+  fieldNames.some((fieldName) => {
+    // eslint-disable-next-line security/detect-object-injection
+    const field: unknown = data[fieldName];
+
+    if (isExtractedField(field)) {
+      return field.confidence === 'high';
+    }
+
+    if (Array.isArray(field)) {
+      return field.some(
+        (entry) =>
+          isExtractedEntityGroup(entry) && groupHasHighConfidenceField(entry),
+      );
+    }
+
+    return isExtractedEntityGroup(field) && groupHasHighConfidenceField(field);
+  });
+
 export const collectLowConfidenceFields = (
   data: Record<string, unknown>,
   fieldNames: string[],

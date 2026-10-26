@@ -34,13 +34,6 @@ export const buildLowConfidenceResponse = (
   reviewRequired: true,
 });
 
-export const hasNoExtractedField = <T extends object>(
-  data: T,
-  fieldNames: readonly (keyof T)[],
-): boolean =>
-  // eslint-disable-next-line security/detect-object-injection
-  fieldNames.every((fieldName) => data[fieldName] === undefined);
-
 export const formatScoreAsPercent = (score: number): string =>
   `${(score * 100).toFixed(0)}%`;
 

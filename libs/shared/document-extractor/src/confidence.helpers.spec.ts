@@ -13,6 +13,7 @@ import {
   createHighConfidenceField,
   createLowConfidenceField,
   finalizeExtraction,
+  hasHighConfidenceField,
   isAboveMatchThreshold,
   MATCH_THRESHOLDS,
   mergeConfidence,
@@ -83,6 +84,64 @@ describe('confidence.helpers', () => {
 
       expect(calculateOverallConfidence(fields)).toBe('high');
     });
+  });
+
+  describe('hasHighConfidenceField', () => {
+    it.each([
+      {
+        data: { fieldA: createHighConfidenceField('a') },
+        description: 'a top-level field is high confidence',
+        expected: true,
+      },
+      {
+        data: {
+          fieldA: {
+            name: createLowConfidenceField(''),
+            taxId: createHighConfidenceField('1'),
+          },
+        },
+        description: 'an entity sub-field is high confidence',
+        expected: true,
+      },
+      {
+        data: {
+          fieldA: [
+            { code: createLowConfidenceField('') },
+            { code: createHighConfidenceField('1') },
+          ],
+        },
+        description: 'an entry sub-field is high confidence',
+        expected: true,
+      },
+      {
+        data: {
+          fieldA: createLowConfidenceField(''),
+          fieldB: {
+            name: createLowConfidenceField(''),
+            taxId: createLowConfidenceField(''),
+          },
+          fieldC: [{ code: createLowConfidenceField('') }],
+        },
+        description: 'every field is low confidence',
+        expected: false,
+      },
+      {
+        data: { fieldA: createHighConfidenceField('a') },
+        description: 'the only high-confidence field is not listed',
+        expected: false,
+        fieldNames: ['fieldB'],
+      },
+    ])(
+      'should return $expected when $description',
+      ({ data, expected, fieldNames }) => {
+        expect(
+          hasHighConfidenceField(
+            data as Record<string, unknown>,
+            fieldNames ?? Object.keys(data),
+          ),
+        ).toBe(expected);
+      },
+    );
   });
 
   describe('collectLowConfidenceFields', () => {

@@ -5,6 +5,7 @@ import type {
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { createExtractedEntityWithAddress } from '@carrot-fndn/shared/document-extractor';
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import type { MtrCrossValidation } from './document-manifest-data.result-content.types';
@@ -116,17 +117,18 @@ describe('transport-manifest-cross-validation.helpers', () => {
       weighingEvents: [],
     };
 
-    it('should skip cross-validation when no field was extracted', () => {
-      const extractionResult = {
-        data: {
-          documentType: 'transportManifest',
-          extractionConfidence: 'low',
-          lowConfidenceFields: [],
-          rawText: 'unreadable',
-        },
-        reviewReasons: [],
-        reviewRequired: false,
-      } as unknown as ExtractionOutput<BaseExtractedData>;
+    it('should skip cross-validation when no field was read with high confidence', () => {
+      const lowField = { confidence: 'low' as const, parsed: '' as never };
+      const extractionResult = createExtractionResult({
+        documentNumber: lowField,
+        extractionConfidence: 'low' as never,
+        generator: createExtractedEntityWithAddress(undefined),
+        hauler: createExtractedEntityWithAddress(undefined),
+        issueDate: lowField,
+        receiver: createExtractedEntityWithAddress(undefined),
+        vehiclePlate: lowField,
+        wasteTypes: [],
+      });
 
       const result = validateMtrExtractedData(extractionResult, baseEventData);
 

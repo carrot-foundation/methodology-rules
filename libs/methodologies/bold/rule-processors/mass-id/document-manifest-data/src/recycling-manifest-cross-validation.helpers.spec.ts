@@ -5,6 +5,7 @@ import type {
 import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { createExtractedEntityWithAddress } from '@carrot-fndn/shared/document-extractor';
 import { ApprovedExceptionSchema } from '@carrot-fndn/shared/types';
 
 import type { CdfCrossValidation } from './document-manifest-data.result-content.types';
@@ -245,17 +246,16 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       expect(result.reviewReasons ?? []).toHaveLength(0);
     });
 
-    it('should skip cross-validation when no field was extracted', () => {
-      const extractionResult = {
-        data: {
-          documentType: 'recyclingManifest',
-          extractionConfidence: 'low',
-          lowConfidenceFields: [],
-          rawText: 'unreadable',
-        },
-        reviewReasons: [],
-        reviewRequired: false,
-      } as unknown as ExtractionOutput<BaseExtractedData>;
+    it('should skip cross-validation when no field was read with high confidence', () => {
+      const lowField = { confidence: 'low' as const, parsed: '' as never };
+      const extractionResult = createExtractionResult({
+        documentNumber: lowField,
+        extractionConfidence: 'low' as never,
+        generator: createExtractedEntityWithAddress(undefined),
+        issueDate: lowField,
+        recycler: createExtractedEntityWithAddress(undefined),
+        wasteEntries: { confidence: 'low', parsed: [] },
+      });
 
       const result = validateCdfExtractedData(extractionResult, baseEventData);
 

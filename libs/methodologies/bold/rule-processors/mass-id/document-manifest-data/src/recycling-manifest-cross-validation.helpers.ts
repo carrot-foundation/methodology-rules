@@ -1,6 +1,7 @@
 import {
   type BaseExtractedData,
   type ExtractionOutput,
+  hasHighConfidenceField,
 } from '@carrot-fndn/shared/document-extractor';
 import {
   CDF_ALL_FIELDS,
@@ -34,7 +35,6 @@ import {
   type EntityComparisonReasons,
   getParticipantNames,
   getWasteClassification,
-  hasNoExtractedField,
 } from './cross-validation';
 import {
   RESULT_COMMENTS,
@@ -102,7 +102,7 @@ export const validateCdfExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  if (hasNoExtractedField(extractedData, CDF_ALL_FIELDS)) {
+  if (!hasHighConfidenceField(extractedData, CDF_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );
