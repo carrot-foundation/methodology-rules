@@ -72,17 +72,24 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
   return result;
 };
 
-const normalizeKilometerMarkers = (
-  value: string,
-): {
+const KILOMETER_MARKER_PATTERN =
+  /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu;
+
+interface KilometerMarkers {
   distances: string[];
   invalid: boolean;
+  isWholeKilometer: boolean;
+  kilometers: string[];
   value: string;
-} => {
+}
+
+const normalizeKilometerMarkers = (value: string): KilometerMarkers => {
   const distances: string[] = [];
+  const kilometerParts: string[] = [];
   const invalidMarkers: string[] = [];
+  let hasFraction = false;
   const normalized = value.replaceAll(
-    /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
+    KILOMETER_MARKER_PATTERN,
     (marker: string, notation: string, offset: number): string => {
       const trimmedNotation = notation.replace(/[,.]$/, '');
       const distance = /^(\d+)(?:([.,+])(\d{1,3}))?$/.exec(trimmedNotation);
@@ -108,6 +115,8 @@ const normalizeKilometerMarkers = (
           : fraction.padEnd(3, '0');
 
       distances.push(stripLeadingZeros(kilometers + meters));
+      kilometerParts.push(kilometers);
+      hasFraction ||= distance[3] !== undefined;
 
       const suffix = notation.slice(trimmedNotation.length);
 
@@ -120,9 +129,22 @@ const normalizeKilometerMarkers = (
   return {
     distances: deduplicateConsecutiveTokens(distances),
     invalid: invalidMarkers.length > 0 || new Set(distances).size > 1,
+    isWholeKilometer: !hasFraction,
+    kilometers: deduplicateConsecutiveTokens(kilometerParts),
     value: normalized,
   };
 };
+
+// A whole marker ("km 42") is a less precise reading of the same km with decimals ("km 42,3").
+const kilometerMarkersMatch = (
+  a: KilometerMarkers,
+  b: KilometerMarkers,
+): boolean =>
+  a.distances.length === 0 ||
+  b.distances.length === 0 ||
+  a.distances.join(' ') === b.distances.join(' ') ||
+  ((a.isWholeKilometer || b.isWholeKilometer) &&
+    a.kilometers.join(' ') === b.kilometers.join(' '));
 
 /**
  * Normalizes an address string for comparison.
@@ -359,15 +381,24 @@ export const isAddressMatch = (
   if (
     kilometersA.invalid ||
     kilometersB.invalid ||
-    (kilometersA.distances.length > 0 &&
-      kilometersB.distances.length > 0 &&
-      kilometersA.distances.join(' ') !== kilometersB.distances.join(' '))
+    !kilometerMarkersMatch(kilometersA, kilometersB)
   ) {
     return { isMatch: false, score };
   }
 
-  const numsA = extractNumericTokens(tokensA);
-  const numsB = extractNumericTokens(tokensB);
+  // Markers on both sides were compared above; their digits must not stand in for street numbers.
+  const comparedKilometers =
+    kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
+  const numericTokensOf = (value: string, tokens: string[]): string[] =>
+    extractNumericTokens(
+      comparedKilometers
+        ? normalizeAddress(
+            value.replaceAll(KILOMETER_MARKER_PATTERN, ' km '),
+          ).split(' ')
+        : tokens,
+    );
+  const numsA = numericTokensOf(a, tokensA);
+  const numsB = numericTokensOf(b, tokensB);
   const [shorterNums, longerNums] =
     numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
 
