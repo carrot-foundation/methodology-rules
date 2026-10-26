@@ -729,81 +729,67 @@ describe('transport-manifest-cross-validation.helpers', () => {
       expect(result.reviewRequired).toBe(false);
     });
 
-    it('should pass validation with observation when plates differ by single OCR-confusable char', () => {
-      const extractionResult = createExtractionResult({
-        vehiclePlate: {
-          confidence: 'high',
-          parsed: 'XYZ1I23',
-          rawMatch: 'XYZ1I23',
-        },
-      });
+    const OCR_SUBSTITUTION_OBSERVATION =
+      'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.';
 
-      const eventData: MtrCrossValidationEventData = {
-        ...baseEventData,
-        pickUpEvent: {
-          address: STUB_BR_ADDRESS,
-          metadata: {
-            attributes: [
-              {
-                isPublic: true,
-                name: 'Vehicle License Plate',
-                value: 'XYZ1123',
-              },
-            ],
+    it.each([
+      {
+        eventPlate: 'XYZ1123',
+        extractedPlate: 'XYZ1I23',
+        observation: OCR_SUBSTITUTION_OBSERVATION,
+        scenario: 'plates differ by single OCR-confusable char',
+      },
+      {
+        eventPlate: 'ABC1I23',
+        extractedPlate: 'ABC1/23',
+        observation: OCR_SUBSTITUTION_OBSERVATION,
+        scenario: 'extractor reads I as slash',
+      },
+      {
+        eventPlate: 'XYZ1845',
+        extractedPlate: 'XYZ1I45',
+        observation:
+          'Plates are the old-format and Mercosul forms of the same plate. Accepted as match.',
+        scenario: 'an old-format plate is compared with its Mercosul form',
+      },
+    ])(
+      'should pass validation with observation when $scenario',
+      ({ eventPlate, extractedPlate, observation }) => {
+        const extractionResult = createExtractionResult({
+          vehiclePlate: {
+            confidence: 'high',
+            parsed: extractedPlate,
+            rawMatch: extractedPlate,
           },
-        } as unknown as BoldDocumentEvent,
-      };
+        });
 
-      const result = validateMtrExtractedData(extractionResult, eventData);
+        const eventData: MtrCrossValidationEventData = {
+          ...baseEventData,
+          pickUpEvent: {
+            address: STUB_BR_ADDRESS,
+            metadata: {
+              attributes: [
+                {
+                  isPublic: true,
+                  name: 'Vehicle License Plate',
+                  value: eventPlate,
+                },
+              ],
+            },
+          } as unknown as BoldDocumentEvent,
+        };
 
-      expect(result.failMessages).toHaveLength(0);
-      expect(result.reviewRequired).toBe(false);
+        const result = validateMtrExtractedData(extractionResult, eventData);
 
-      const crossValidation = result.crossValidation as MtrCrossValidation;
+        expect(result.failMessages).toHaveLength(0);
+        expect(result.reviewRequired).toBe(false);
 
-      expect(crossValidation.vehiclePlate.isMatch).toBe(true);
-      expect(crossValidation.vehiclePlate.observation).toBe(
-        'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.',
-      );
-    });
+        const crossValidation = result.crossValidation as MtrCrossValidation;
 
-    it('should pass validation with observation when extractor reads I as slash', () => {
-      const extractionResult = createExtractionResult({
-        vehiclePlate: {
-          confidence: 'high',
-          parsed: 'ABC1/23',
-          rawMatch: 'ABC1/23',
-        },
-      });
-
-      const eventData: MtrCrossValidationEventData = {
-        ...baseEventData,
-        pickUpEvent: {
-          address: STUB_BR_ADDRESS,
-          metadata: {
-            attributes: [
-              {
-                isPublic: true,
-                name: 'Vehicle License Plate',
-                value: 'ABC1I23',
-              },
-            ],
-          },
-        } as unknown as BoldDocumentEvent,
-      };
-
-      const result = validateMtrExtractedData(extractionResult, eventData);
-
-      expect(result.failMessages).toHaveLength(0);
-      expect(result.reviewRequired).toBe(false);
-
-      const crossValidation = result.crossValidation as MtrCrossValidation;
-
-      expect(crossValidation.vehiclePlate.isMatch).toBe(true);
-      expect(crossValidation.vehiclePlate.observation).toBe(
-        'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.',
-      );
-    });
+        expect(crossValidation.vehiclePlate.isMatch).toBe(true);
+        expect(crossValidation.vehiclePlate.observation).toBe(observation);
+      },
+    );
 
     it('should not add observation when plates match exactly after normalization', () => {
       const extractionResult = createExtractionResult({

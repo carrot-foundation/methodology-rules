@@ -28,6 +28,7 @@ const CDF_SINIR_CONFIG: CdfParseConfig = {
     /Declaracao[\s\S]*?(\d{2}\/\d{2}\/\d{4})/i,
     // eslint-disable-next-line sonarjs/slow-regex
     /(\d{2}\/\d{2}\/\d{4})\s*\n\s*Responsavel/i,
+    /penas\s+da\s+lei\.?\s*\n[^\n\d]*,\s*(\d{2}\/\d{2}\/\d{4})/i,
   ],
   mtrDigitRange: { max: 12, min: 12 },
   mtrSectionPattern:

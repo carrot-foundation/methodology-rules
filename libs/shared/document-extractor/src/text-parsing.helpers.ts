@@ -180,7 +180,7 @@ export const extractEntityFromSection = (
     return undefined;
   }
 
-  const normalizedCnpj = rawCnpj.replaceAll(' ', '');
+  const normalizedCnpj = rawCnpj.replaceAll(' ', '').replaceAll(',', '.');
 
   const lines = section
     .split('\n')
