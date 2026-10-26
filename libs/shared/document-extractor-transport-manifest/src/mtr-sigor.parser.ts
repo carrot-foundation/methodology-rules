@@ -38,26 +38,31 @@ import {
   type WasteTypeEntryData,
 } from './transport-manifest.types';
 
+const sectionHeaderPattern = (title: string): RegExp =>
+  new RegExp(
+    String.raw`^\s*(?:\S*[cç][aã]o[,.]?(?:\s+\S)?\s+)?${title}\s*$`,
+    'im',
+  );
+
 const SECTION_PATTERNS = {
-  generator: /^\s*Identificacao\s+do\s+Gerador\s*$/i,
-  hauler: /^\s*Identificacao\s+do\s+Transportador\s*$/i,
-  receiver: /^\s*Identificacao\s+do\s+Destinador\s*$/i,
-  waste: /^\s*Identificacao\s+dos\s+Residuos\s*$/i,
+  generator: sectionHeaderPattern(String.raw`do\s+Gerador`),
+  hauler: sectionHeaderPattern(String.raw`do\s+Transportador`),
+  receiver: sectionHeaderPattern(String.raw`do\s+Destinador`),
+  waste: sectionHeaderPattern(String.raw`dos\s+Residuos`),
 } as const;
 
 const MTR_PATTERNS = {
   ...MTR_DEFAULT_PATTERNS,
-  // eslint-disable-next-line sonarjs/slow-regex
-  companyName: /Razao\s*Social\s*:?\s*(.+)/i,
+  companyName: /(?:Raz\S*\s*)?Social\s*:\s*(.+)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
   /MTR/i,
-  /CETESB|^Tratamento$/im,
+  /CETESB|^Tratam\w*$/im,
   /Manifesto\s*de\s*Transporte/i,
-  /Identificacao\s+do\s+Gerador/i,
-  /Identificacao\s+do\s+Transportador/i,
-  /Identificacao\s+do\s+Destinador/i,
+  SECTION_PATTERNS.generator,
+  SECTION_PATTERNS.hauler,
+  SECTION_PATTERNS.receiver,
   /CPF\/CNPJ/i,
   /Razao\s*Social/i,
   /IBAMA/i,
@@ -154,7 +159,7 @@ const extractEntityFromSigorSection = (
     return undefined;
   }
 
-  const normalizedCnpj = rawTaxId.replaceAll(' ', '');
+  const normalizedCnpj = rawTaxId.replaceAll(' ', '').replaceAll(',', '.');
 
   const companyNameMatch = MTR_PATTERNS.companyName.exec(section);
 
@@ -194,61 +199,90 @@ type SigorWasteColumn =
   | 'treatment'
   | 'unit';
 
+const ITEM_HEADER = /^Item$/i;
+const DESCRIPTION_HEADER = /^C[oó]digo\b.*IBAMA/i;
+const UNIT_HEADER = /^Unidade$/i;
+const TREATMENT_HEADER = /^Tratamento$/i;
+
 const SIGOR_HEADER_DEFS: [
   HeaderColumnDefinition<SigorWasteColumn>,
   ...Array<HeaderColumnDefinition<SigorWasteColumn>>,
 ] = [
-  { headerPattern: /^Item$/i, name: 'item' },
-  { headerPattern: /^C[oó]digo\s+IBAMA/i, name: 'description' },
+  { headerPattern: ITEM_HEADER, name: 'item', optional: true },
+  { headerPattern: DESCRIPTION_HEADER, name: 'description' },
   { headerPattern: /^Estado\s+F[ií]sico$/i, name: 'physicalState' },
   { headerPattern: /^Classe$/i, name: 'classification' },
   { headerPattern: /^Acondicionamento$/i, name: 'packaging' },
   { headerPattern: /^Qtde$/i, name: 'quantity' },
-  { headerPattern: /^Unidade$/i, name: 'unit' },
-  { headerPattern: /^Tratamento$/i, name: 'treatment' },
+  { headerPattern: UNIT_HEADER, name: 'unit' },
+  { headerPattern: TREATMENT_HEADER, name: 'treatment', optional: true },
 ];
 
-const SIGOR_ANCHOR_COLUMN: SigorWasteColumn = 'item';
+type BoundingBox = NonNullable<
+  TextExtractionResult['blocks'][number]['boundingBox']
+>;
+
+const findHeaderBox = (
+  blocks: TextExtractionResult['blocks'],
+  pattern: RegExp,
+): BoundingBox | undefined =>
+  blocks.find(
+    (block) => block.blockType === 'LINE' && pattern.test(block.text ?? ''),
+  )?.boundingBox;
+
+const boxCenter = (box: BoundingBox): { x: number; y: number } => ({
+  x: box.left + box.width / 2,
+  y: box.top + box.height / 2,
+});
+
+const QUARTER_TURN_SINE = 0.7;
 
 const alignWasteTableBlocks = (
   blocks: TextExtractionResult['blocks'],
 ): TextExtractionResult['blocks'] => {
-  const first = blocks.find(
-    (block) => block.blockType === 'LINE' && /^Item$/i.test(block.text ?? ''),
-  )?.boundingBox;
-  const last = blocks.find(
-    (block) =>
-      block.blockType === 'LINE' && /^Tratamento$/i.test(block.text ?? ''),
-  )?.boundingBox;
+  const first =
+    findHeaderBox(blocks, ITEM_HEADER) ??
+    findHeaderBox(blocks, DESCRIPTION_HEADER);
+  const last =
+    findHeaderBox(blocks, TREATMENT_HEADER) ??
+    findHeaderBox(blocks, UNIT_HEADER);
 
-  if (!first || !last || last.left <= first.left) {
+  if (!first || !last) {
     return blocks;
   }
 
-  const firstCenter = first.left + first.width / 2;
-  const slope =
-    (last.top + last.height / 2 - first.top - first.height / 2) /
-    (last.left + last.width / 2 - firstCenter);
+  const origin = boxCenter(first);
+  const end = boxCenter(last);
+  const angle = Math.atan2(end.y - origin.y, end.x - origin.x);
+  const cos = Math.cos(-angle);
+  const sin = Math.sin(-angle);
+  const isQuarterTurn = Math.abs(Math.sin(angle)) > QUARTER_TURN_SINE;
 
   return blocks.map((block) => {
     const box = block.boundingBox;
 
-    return box
-      ? {
-          ...block,
-          boundingBox: {
-            ...box,
-            top:
-              box.top +
-              box.height / 2 -
-              slope * (box.left + box.width / 2 - firstCenter),
-          },
-        }
-      : block;
+    if (!box) {
+      return block;
+    }
+
+    const center = boxCenter(box);
+    const dx = center.x - origin.x;
+    const dy = center.y - origin.y;
+    const width = isQuarterTurn ? box.height : box.width;
+
+    return {
+      ...block,
+      boundingBox: {
+        height: isQuarterTurn ? box.width : box.height,
+        left: origin.x + dx * cos - dy * sin - width / 2,
+        top: origin.y + dx * sin + dy * cos,
+        width,
+      },
+    };
   });
 };
 
-const WASTE_CODE_PATTERN = /\b(\d{6})\s*[-–]\s*/;
+const WASTE_CODE_PATTERN = /\b(\d{6})(?:\s*\(\*\))?\s*[-–]\s*/;
 
 const RESIDUE_METADATA_PATTERN =
   /(?:\b[A-Z]\d{3}\s*[-–]|Observa[cç][aã]o\s+Res[ií]duo\s*:).*/i;
@@ -256,15 +290,17 @@ const RESIDUE_METADATA_PATTERN =
 const stripResidueMetadata = (description: string): string =>
   description.replace(RESIDUE_METADATA_PATTERN, '').trim();
 
+const hasItemNumber = (row: Record<string, string | undefined>): boolean => {
+  const itemNumber = Number(row['item']);
+
+  return Number.isInteger(itemNumber) && itemNumber > 0;
+};
+
+const WASTE_CODE_ROW_START = /^\d{6}/;
+
 const parseWasteRow = (
   row: Record<string, string | undefined>,
 ): undefined | WasteTypeEntryData => {
-  const itemNumber = Number(row['item']);
-
-  if (!Number.isInteger(itemNumber) || itemNumber <= 0) {
-    return undefined;
-  }
-
   const rawDescription = row['description'];
 
   if (!rawDescription) {
@@ -440,19 +476,35 @@ export class MtrSigorParser implements DocumentParser<MtrExtractedData> {
       return;
     }
 
-    const { rows } = extractTableFromBlocks(blocks, {
-      anchorColumn: SIGOR_ANCHOR_COLUMN,
+    const tableConfig = {
       columns: detected.columns as [
         TableColumnConfig<SigorWasteColumn>,
         ...Array<TableColumnConfig<SigorWasteColumn>>,
       ],
       maxRowGap: 0.03,
-      yRange: { max: 1, min: detected.headerTop + 0.01 },
-    });
+      yRange: { max: Number.POSITIVE_INFINITY, min: detected.headerTop + 0.01 },
+    };
+    const toEntries = (rows: Array<Record<string, string | undefined>>) =>
+      rows
+        .map((row) => parseWasteRow(row))
+        .filter((entry): entry is WasteTypeEntryData => entry !== undefined);
 
-    const entries = rows
-      .map((row) => parseWasteRow(row))
-      .filter((entry): entry is WasteTypeEntryData => entry !== undefined);
+    let entries = toEntries(
+      extractTableFromBlocks(blocks, {
+        ...tableConfig,
+        anchorColumn: 'item',
+      }).rows.filter((row) => hasItemNumber(row)),
+    );
+
+    if (entries.length === 0) {
+      entries = toEntries(
+        extractTableFromBlocks(blocks, {
+          ...tableConfig,
+          anchorColumn: 'description',
+          isNewRow: (value) => WASTE_CODE_ROW_START.test(value),
+        }).rows,
+      );
+    }
 
     if (entries.length > 0) {
       partialData.wasteTypes = entries.map((entry) =>

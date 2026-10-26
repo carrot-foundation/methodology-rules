@@ -524,6 +524,57 @@ describe('MTR shared helpers', () => {
     });
   });
 
+  describe('plate ambiguity', () => {
+    it('should keep the first plate and flag it as ambiguous when the plate area holds two distinct plates', () => {
+      const section = [
+        'Placa do Veiculo',
+        'Nome do Motorista',
+        'PEDRO ALMEIDA',
+        'XYZ1D23',
+        'ABC 4567',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        isVehiclePlateAmbiguous: true,
+        vehiclePlate: 'XYZ1D23',
+      });
+    });
+
+    it('should not flag the same plate written twice with different formatting', () => {
+      const section = [
+        'Nome do Motorista',
+        'Placa do Veiculo',
+        'PEDRO ALMEIDA',
+        'ABC-4567',
+        'abc 4567',
+      ].join('\n');
+
+      expect(extractDriverAndVehicle(section)).toEqual({
+        driverName: 'PEDRO ALMEIDA',
+        vehiclePlate: 'ABC-4567',
+      });
+    });
+  });
+
+  describe('MTR_DEFAULT_PATTERNS.issueDate', () => {
+    it.each([
+      'Data da emissao: 08/07/2024',
+      'Data da emissao:\n08/07/2024',
+      'Data da emissao: | 08/07/2024',
+      'Data de Emissao ____ 08/07/2024',
+    ])('should read the issue date from %j', (text) => {
+      expect(MTR_DEFAULT_PATTERNS.issueDate.exec(text)?.[1]).toBe('08/07/2024');
+    });
+
+    it.each([
+      'Data da emissao: assinatura do responsavel 08/07/2024',
+      'Data da emissao: 123 08/07/2024',
+    ])('should not read a date separated from the label by %j', (text) => {
+      expect(MTR_DEFAULT_PATTERNS.issueDate.exec(text)).toBeNull();
+    });
+  });
+
   describe('extractMtrEntityWithAddress', () => {
     const sectionPatterns = {
       generator: /^\s*(?:Identificacao\s+do\s+)?(?:Gerador|Origem)\s*$/i,
@@ -597,6 +648,48 @@ describe('MTR shared helpers', () => {
       expect(result.taxId.confidence).toBe('high');
       expect(result.name.parsed).toBe('EMPRESA GERADORA LTDA');
     });
+
+    it.each([
+      { line: 'CNPJ: 10,111,222/0002-55', scenario: 'comma separators' },
+      { line: 'CNPJ:: 10.111.222/0002-55', scenario: 'a doubled colon' },
+      { line: 'CNPJ/ 10.111.222/0002-55', scenario: 'a stray slash' },
+      { line: 'CPF/CNPJ: : 10,111.222/0002-55', scenario: 'mixed noise' },
+    ])('should read the tax ID with $scenario', ({ line }) => {
+      const text = ['Gerador', 'EMPRESA GERADORA LTDA', line, 'Transportador'];
+
+      const result = extractMtrEntityWithAddress(
+        text.join('\n'),
+        sectionPatterns.generator,
+        allSectionPatterns,
+        brazilianTaxIdPattern,
+      );
+
+      expect(result.taxId).toMatchObject({
+        confidence: 'high',
+        parsed: '10.111.222/0002-55',
+      });
+    });
+
+    it.each(['CNPJ: 10;111;222/0002-55', 'CNPJ - 10.111.222/0002-55'])(
+      'should not read a tax ID from %j',
+      (line) => {
+        const text = [
+          'Gerador',
+          'EMPRESA GERADORA LTDA',
+          line,
+          'Transportador',
+        ];
+
+        const result = extractMtrEntityWithAddress(
+          text.join('\n'),
+          sectionPatterns.generator,
+          allSectionPatterns,
+          brazilianTaxIdPattern,
+        );
+
+        expect(result.taxId.confidence).toBe('low');
+      },
+    );
 
     it('should return low confidence address when entity has no address', () => {
       const text = [

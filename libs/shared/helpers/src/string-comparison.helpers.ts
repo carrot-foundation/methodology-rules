@@ -395,6 +395,34 @@ export const isAddressMatch = (
 export const normalizeVehiclePlate = (plate: string): string =>
   plate.replaceAll(/[-\s]/g, '').toUpperCase();
 
+const PLATE_SHAPE = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/;
+const MERCOSUL_DIGIT_LETTERS = 'ABCDEFGHIJ';
+
+const toOldFormatPlate = (plate: string): string =>
+  plate.replace(
+    /^(.{4})([A-J])/,
+    (_match, prefix: string, letter: string) =>
+      `${prefix}${MERCOSUL_DIGIT_LETTERS.indexOf(letter)}`,
+  );
+
+/**
+ * True when both plates are the same vehicle written in the old format and in
+ * the Mercosul format, whose 5th character maps letters A-J to digits 0-9.
+ */
+export const isMercosulEquivalentPlate = (
+  plateA: string,
+  plateB: string,
+): boolean => {
+  const a = normalizeVehiclePlate(plateA);
+  const b = normalizeVehiclePlate(plateB);
+
+  return (
+    PLATE_SHAPE.test(a) &&
+    PLATE_SHAPE.test(b) &&
+    toOldFormatPlate(a) === toOldFormatPlate(b)
+  );
+};
+
 const OCR_CONFUSABLE_PAIRS: ReadonlySet<string> = new Set([
   '0D',
   '0O',
@@ -421,7 +449,7 @@ export const isOcrPlausiblePlateMatch = (
   const a = normalizeVehiclePlate(plateA);
   const b = normalizeVehiclePlate(plateB);
 
-  if (a === b) {
+  if (a === b || isMercosulEquivalentPlate(a, b)) {
     return true;
   }
 

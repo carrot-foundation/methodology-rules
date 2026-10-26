@@ -9,6 +9,7 @@ import {
   extractSection,
   finalizeExtraction,
 } from '@carrot-fndn/shared/document-extractor';
+import { normalizeVehiclePlate } from '@carrot-fndn/shared/helpers';
 
 import {
   type ExtractedWasteTypeEntry,
@@ -19,13 +20,12 @@ import {
 
 export const MTR_DEFAULT_PATTERNS = {
   brazilianTaxId:
-    // eslint-disable-next-line sonarjs/slow-regex
-    /(?:CPF\/)?CNPJ\s*:?\s*(\d{2}\.?\s*\d{3}\.?\s*\d{3}\/?\s*\d{4}-?\s*\d{2})/gi,
+    /(?:CPF\/)?CNPJ[\s:/]*(\d{2}[.,]?\s*\d{3}[.,]?\s*\d{3}\/?\s*\d{4}-?\s*\d{2})/gi,
   // eslint-disable-next-line sonarjs/slow-regex
   documentNumber: /MTR\s*(?:N[°º]?)?\s*:?\s*(\d+)/i,
   issueDate:
     // eslint-disable-next-line sonarjs/slow-regex
-    /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
+    /Data\s*(?:(?:de|da|do)\s*)?Emissao\s*:?\s*[^\d\n]{0,12}(\d{2}\/\d{2}\/\d{4})/i,
   receivingDate:
     // eslint-disable-next-line sonarjs/slow-regex
     /Data\s*(?:(?:de|da|do)\s*)?Recebimento\s*:?\s*(\d{2}\/\d{2}\/\d{4})/i,
@@ -169,6 +169,7 @@ const BOILERPLATE_PATTERN =
 
 export interface DriverAndVehicle {
   driverName?: string;
+  isVehiclePlateAmbiguous?: boolean;
   vehiclePlate?: string;
 }
 
@@ -212,6 +213,13 @@ const isValueLine = (line: string): boolean =>
   !isDriverLabel(line) &&
   !line.toLowerCase().startsWith(PLATE_LABEL) &&
   !BOILERPLATE_PATTERN.test(line);
+
+const countDistinctPlates = (lines: string[]): number =>
+  new Set(
+    lines
+      .filter((line) => VEHICLE_PLATE_FORMAT.test(line))
+      .map((line) => normalizeVehiclePlate(line)),
+  ).size;
 
 const extractFromBothLabels = (
   valueLines: string[],
@@ -341,6 +349,10 @@ export const extractDriverAndVehicle = (section: string): DriverAndVehicle => {
 
     extractFromBothLabels(valueLines, result);
 
+    if (result.vehiclePlate && countDistinctPlates(valueLines) > 1) {
+      result.isVehiclePlateAmbiguous = true;
+    }
+
     return result;
   }
 
@@ -448,7 +460,8 @@ export const extractHaulerFields = (
   );
 
   if (haulerSection) {
-    const { driverName, vehiclePlate } = extractDriverAndVehicle(haulerSection);
+    const { driverName, isVehiclePlateAmbiguous, vehiclePlate } =
+      extractDriverAndVehicle(haulerSection);
 
     if (driverName) {
       partialData.driverName = createHighConfidenceField(
@@ -460,7 +473,12 @@ export const extractHaulerFields = (
     }
 
     if (vehiclePlate) {
-      partialData.vehiclePlate = createHighConfidenceField(
+      const createPlateField =
+        isVehiclePlateAmbiguous === true
+          ? createLowConfidenceField
+          : createHighConfidenceField;
+
+      partialData.vehiclePlate = createPlateField(
         vehiclePlate,
         `Placa do Veiculo\n${vehiclePlate}`,
       );

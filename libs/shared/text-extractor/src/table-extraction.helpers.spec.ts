@@ -483,6 +483,70 @@ describe('detectTableColumns', () => {
     ]);
   });
 
+  describe('optional headers', () => {
+    const OPTIONAL_DEFS: [HeaderColumnDefinition, ...HeaderColumnDefinition[]] =
+      [
+        { headerPattern: 'Item', name: 'item', optional: true },
+        { headerPattern: 'Description', name: 'description' },
+        { headerPattern: 'Quantity', name: 'quantity' },
+      ];
+
+    it('should detect the remaining columns when an optional header is missing', () => {
+      const blocks: TextBlock[] = [
+        makeBlock('Description', 0.2, 0.2),
+        makeBlock('Quantity', 0.6, 0.2),
+      ];
+
+      expect(detectTableColumns(blocks, OPTIONAL_DEFS)).toEqual({
+        columns: [
+          { headerLeft: 0.2, name: 'description' },
+          { headerLeft: 0.6, name: 'quantity' },
+        ],
+        headerTop: 0.2,
+      });
+    });
+
+    it('should drop an optional header that is off the header row of the required ones', () => {
+      const blocks: TextBlock[] = [
+        makeBlock('Item', 0.05, 0.5),
+        makeBlock('Description', 0.2, 0.2),
+        makeBlock('Quantity', 0.6, 0.2),
+      ];
+
+      expect(detectTableColumns(blocks, OPTIONAL_DEFS)?.columns).toEqual([
+        { headerLeft: 0.2, name: 'description' },
+        { headerLeft: 0.6, name: 'quantity' },
+      ]);
+    });
+
+    it('should still require headers that are not marked optional', () => {
+      const blocks: TextBlock[] = [
+        makeBlock('Item', 0.05, 0.2),
+        makeBlock('Description', 0.2, 0.2),
+      ];
+
+      expect(detectTableColumns(blocks, OPTIONAL_DEFS)).toBeUndefined();
+    });
+
+    it('should keep every header required by default', () => {
+      const blocks: TextBlock[] = [
+        makeBlock('Description', 0.2, 0.2),
+        makeBlock('Quantity', 0.6, 0.2),
+      ];
+
+      expect(detectTableColumns(blocks, HEADER_DEFS)).toBeUndefined();
+    });
+
+    it('should return undefined when no header is found', () => {
+      expect(
+        detectTableColumns(
+          [],
+          [{ headerPattern: 'Item', name: 'item', optional: true }],
+        ),
+      ).toBeUndefined();
+    });
+  });
+
   it('should work end-to-end with extractTableFromBlocks', () => {
     const blocks: TextBlock[] = [
       // Header row

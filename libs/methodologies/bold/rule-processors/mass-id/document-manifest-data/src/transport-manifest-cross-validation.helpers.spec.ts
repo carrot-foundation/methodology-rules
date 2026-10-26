@@ -805,6 +805,44 @@ describe('transport-manifest-cross-validation.helpers', () => {
       );
     });
 
+    it('should accept an old-format plate against its Mercosul form with an equivalence observation', () => {
+      const extractionResult = createExtractionResult({
+        vehiclePlate: {
+          confidence: 'high',
+          parsed: 'XYZ1I45',
+          rawMatch: 'XYZ1I45',
+        },
+      });
+
+      const eventData: MtrCrossValidationEventData = {
+        ...baseEventData,
+        pickUpEvent: {
+          address: STUB_BR_ADDRESS,
+          metadata: {
+            attributes: [
+              {
+                isPublic: true,
+                name: 'Vehicle License Plate',
+                value: 'XYZ1845',
+              },
+            ],
+          },
+        } as unknown as BoldDocumentEvent,
+      };
+
+      const result = validateMtrExtractedData(extractionResult, eventData);
+
+      expect(result.failMessages).toHaveLength(0);
+      expect(result.reviewRequired).toBe(false);
+
+      const crossValidation = result.crossValidation as MtrCrossValidation;
+
+      expect(crossValidation.vehiclePlate.isMatch).toBe(true);
+      expect(crossValidation.vehiclePlate.observation).toBe(
+        'Plates are the old-format and Mercosul forms of the same plate. Accepted as match.',
+      );
+    });
+
     it('should not add observation when plates match exactly after normalization', () => {
       const extractionResult = createExtractionResult({
         vehiclePlate: {

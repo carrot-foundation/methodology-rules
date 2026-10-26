@@ -7,6 +7,7 @@ import {
 import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
   getTimezoneFromAddress,
+  isMercosulEquivalentPlate,
   isOcrPlausiblePlateMatch,
   normalizeVehiclePlate,
 } from '@carrot-fndn/shared/helpers';
@@ -126,8 +127,12 @@ export const validateMtrExtractedData = (
       normalizeVehiclePlate(eventPlateString) &&
     isOcrPlausiblePlateMatch(extractedPlate, eventPlateString)
   ) {
-    vehiclePlate.debug.observation =
-      'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.';
+    vehiclePlate.debug.observation = isMercosulEquivalentPlate(
+      extractedPlate,
+      eventPlateString,
+    )
+      ? 'Plates are the old-format and Mercosul forms of the same plate. Accepted as match.'
+      : 'Plates differ by 1 character in an OCR-plausible substitution (e.g., letter/digit confusion). Accepted as match.';
   }
 
   const receiverReasons: EntityComparisonReasons = {

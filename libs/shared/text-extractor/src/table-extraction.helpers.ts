@@ -3,6 +3,7 @@ import type { TextExtractionResult } from './text-extractor.types';
 export interface HeaderColumnDefinition<TColumn extends string = string> {
   headerPattern: RegExp | string;
   name: TColumn;
+  optional?: boolean;
 }
 
 export interface TableColumnConfig<TColumn extends string = string> {
@@ -216,29 +217,39 @@ export const detectTableColumns = <TColumn extends string>(
 ): DetectedTableColumns<TColumn> | undefined => {
   const yTolerance = options?.yTolerance ?? DEFAULT_Y_TOLERANCE;
 
-  const matched: Array<{ block: TextBlock; name: TColumn }> = [];
+  const matched: Array<{ block: TextBlock; name: TColumn; optional: boolean }> =
+    [];
 
   for (const definition of headerDefs) {
     const block = findHeaderBlock(blocks, definition.headerPattern);
 
-    if (!block) {
+    if (block) {
+      matched.push({
+        block,
+        name: definition.name,
+        optional: definition.optional === true,
+      });
+    } else if (definition.optional !== true) {
       return undefined;
     }
-
-    matched.push({ block, name: definition.name });
   }
 
-  const referenceTop = matched[0]!.block.boundingBox!.top;
-  const allOnSameRow = matched.every(
-    ({ block }) =>
-      Math.abs(block.boundingBox!.top - referenceTop) <= yTolerance,
-  );
+  const reference = matched.find(({ optional }) => !optional) ?? matched[0];
 
-  if (!allOnSameRow) {
+  if (!reference) {
+    return undefined;
+  }
+
+  const referenceTop = reference.block.boundingBox!.top;
+  const isOnHeaderRow = ({ block }: { block: TextBlock }) =>
+    Math.abs(block.boundingBox!.top - referenceTop) <= yTolerance;
+
+  if (matched.some((header) => !header.optional && !isOnHeaderRow(header))) {
     return undefined;
   }
 
   const columns = matched
+    .filter((header) => isOnHeaderRow(header))
     .map(({ block, name }) => ({
       headerLeft: block.boundingBox!.left,
       name,

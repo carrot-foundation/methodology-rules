@@ -4,6 +4,7 @@ import {
   DEFAULT_NAME_MATCH_THRESHOLD,
   diceCoefficient,
   isAddressMatch,
+  isMercosulEquivalentPlate,
   isNameMatch,
   isOcrPlausiblePlateMatch,
   normalizeAddress,
@@ -578,6 +579,44 @@ describe('string-comparison.helpers', () => {
 
     it('should return false when two OCR-confusable chars differ', () => {
       expect(isOcrPlausiblePlateMatch('XYZ1I23', 'X1Z1123')).toBe(false);
+    });
+  });
+
+  describe('isMercosulEquivalentPlate', () => {
+    it.each([
+      ['XYZ1I45', 'XYZ1845'],
+      ['XYZ1845', 'XYZ1I45'],
+      ['XYZ1A45', 'XYZ1045'],
+      ['XYZ1J45', 'XYZ1945'],
+      ['xyz-1i45', 'XYZ 1845'],
+      ['XYZ1I45', 'XYZ1I45'],
+    ])('should treat %s and %s as the same plate', (plateA, plateB) => {
+      expect(isMercosulEquivalentPlate(plateA, plateB)).toBe(true);
+      expect(isOcrPlausiblePlateMatch(plateA, plateB)).toBe(true);
+    });
+
+    it.each([
+      ['XYZ1K45', 'XYZ1045'],
+      ['XYZ1Z45', 'XYZ1245'],
+      ['XYZ1I45', 'XYZ1945'],
+      ['XYZ1I45', 'ABC1845'],
+      ['XYZ1I45', 'XYZ1845A'],
+      ['XYZII45', 'XYZ8845'],
+    ])('should not treat %s and %s as the same plate', (plateA, plateB) => {
+      expect(isMercosulEquivalentPlate(plateA, plateB)).toBe(false);
+    });
+
+    it('should not stack an OCR confusion on the mapped character', () => {
+      expect(isOcrPlausiblePlateMatch('XYZ1145', 'XYZ1845')).toBe(false);
+    });
+
+    it.each([
+      ['XYZ1I23', 'XYZ1123'],
+      ['ABC1D23', 'ABC1023'],
+      ['ABC1I23', 'ABC1/23'],
+      ['ABC-1D23', 'abc 1d23'],
+    ])('should keep matching %s and %s', (plateA, plateB) => {
+      expect(isOcrPlausiblePlateMatch(plateA, plateB)).toBe(true);
     });
   });
 

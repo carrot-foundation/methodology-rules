@@ -286,6 +286,51 @@ describe('CdfSinirParser', () => {
       expect(result.data.issueDate?.confidence).toBe('high');
     });
 
+    it('should extract the issue date on the line after the legal statement when a signatory precedes Responsável', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
+        'quantidades, sob as penas da lei.',
+        'Cidade Industrial, 18/02/2025',
+        'Maria Exemplo',
+        'Gerente Tecnico',
+        'Responsável Técnico',
+        'Sistema MTR do Sinir',
+      ].join('\n');
+
+      const result = parser.parse(stubTextExtractionResult(text));
+
+      expect(result.data.issueDate?.parsed).toBe('18/02/2025');
+      expect(result.data.issueDate?.confidence).toBe('high');
+    });
+
+    it('should prefer the date before Responsável over the date after the legal statement', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'quantidades, sob as penas da lei.',
+        'Cidade Industrial, 18/02/2025',
+        'Outra Cidade, 19/02/2025',
+        'Responsável',
+      ].join('\n');
+
+      expect(
+        parser.parse(stubTextExtractionResult(text)).data.issueDate?.parsed,
+      ).toBe('19/02/2025');
+    });
+
+    it('should not read a date that is not on the line after the legal statement', () => {
+      const text = [
+        'CDF nº 100/2023',
+        'quantidades, sob as penas da lei.',
+        'Maria Exemplo',
+        'Cidade Industrial, 18/02/2025',
+      ].join('\n');
+
+      expect(
+        parser.parse(stubTextExtractionResult(text)).data.issueDate?.parsed,
+      ).toBeUndefined();
+    });
+
     it('should set low confidence when recycler preamble is missing', () => {
       const noRecyclerText = [
         'CDF nº 100/2023',

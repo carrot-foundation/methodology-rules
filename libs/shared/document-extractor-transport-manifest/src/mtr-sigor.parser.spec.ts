@@ -36,6 +36,26 @@ const sigorHeaderBlocks = [
   { boundingBox: stubBoundingBox(0.886, 0.35), text: 'Tratamento' },
 ];
 
+const wasteRow = (top: number, item?: string) => [
+  ...(item === undefined
+    ? []
+    : [{ boundingBox: stubBoundingBox(0.048, top), text: item }]),
+  {
+    boundingBox: stubBoundingBox(0.098, top),
+    text: '190805 - Lodos de tratamento',
+  },
+  { boundingBox: stubBoundingBox(0.767, top), text: '2,5000' },
+  { boundingBox: stubBoundingBox(0.823, top), text: 'TON' },
+];
+const expectedWaste = {
+  code: '190805',
+  description: 'Lodos de tratamento',
+  quantity: 2.5,
+  unit: 'TON',
+};
+const headersWithout = (...texts: string[]) =>
+  sigorHeaderBlocks.filter((block) => !texts.includes(block.text));
+
 describe('MtrSigorParser', () => {
   const parser = new MtrSigorParser();
 
@@ -838,13 +858,19 @@ describe('MtrSigorParser', () => {
             { boundingBox: stubBoundingBox(0.767, top), text: '2,5000' },
             { boundingBox: stubBoundingBox(0.823, top), text: 'TON' },
           ]),
-        ].map((block) => ({
-          ...block,
-          boundingBox: {
-            ...block.boundingBox,
-            top: block.boundingBox.top + slope * block.boundingBox.left,
-          },
-        }));
+        ].map((block) => {
+          const { left, top } = block.boundingBox;
+          const angle = Math.atan(slope);
+
+          return {
+            ...block,
+            boundingBox: {
+              ...block.boundingBox,
+              left: left * Math.cos(angle) - top * Math.sin(angle),
+              top: left * Math.sin(angle) + top * Math.cos(angle),
+            },
+          };
+        });
         const result = parser.parse(
           stubTextExtractionResultWithBlocks('CETESB', blocks),
         );
@@ -953,6 +979,172 @@ describe('MtrSigorParser', () => {
     );
   });
 
+  describe('cropped and OCR-damaged photos', () => {
+    it('should read participants under section headings and labels cut at the left edge', () => {
+      const text = validCetesbText
+        .replace('Identificação do Gerador', 'ficação do Gerador')
+        .replace('Razão Social: Exemplo', 'zão Social: Exemplo')
+        .replace('Identificação do Transportador', 'ação, l do Transportador')
+        .replace('Identificação do Destinador', 'do Destinador');
+
+      const { data } = parser.parse(stubTextExtractionResult(text));
+
+      expect(data.generator?.name.parsed).toBe(
+        'Exemplo Industrias de Alimentos Ltda',
+      );
+      expect(data.generator?.taxId.parsed).toBe('11.222.333/0004-55');
+      expect(data.hauler?.name.parsed).toBe('RECICLADOS MODELO LTDA');
+      expect(data.receiver?.name.parsed).toBe('DESTINO AMBIENTAL LTDA.');
+    });
+
+    it('should not treat the generator observations heading as the generator section', () => {
+      const text = [
+        'MTR n° 240001460711',
+        'CETESB',
+        'Observações do Gerador',
+        'Razão Social: OBSERVACAO QUALQUER LTDA',
+        'CPF/CNPJ: 11.222.333/0004-55',
+        'Identificação do Transportador',
+      ].join('\n');
+
+      const { data } = parser.parse(stubTextExtractionResult(text));
+
+      expect(data.generator?.name.confidence).toBe('low');
+      expect(data.generator?.name.parsed).toBe('');
+    });
+
+    it('should normalize a comma-separated tax ID', () => {
+      const text = validCetesbText.replace(
+        'CPF/CNPJ: 11.222.333/0004-55',
+        'CPF/CNPJ: 11,222,333/0004-55',
+      );
+
+      expect(
+        parser.parse(stubTextExtractionResult(text)).data.generator?.taxId,
+      ).toMatchObject({ confidence: 'high', parsed: '11.222.333/0004-55' });
+    });
+
+    it('should mark the vehicle plate as low confidence when the plate area holds two distinct plates', () => {
+      const text = validCetesbText.replace('FKE1A23', 'FKE1A23\nABC 4567');
+
+      expect(
+        parser.parse(stubTextExtractionResult(text)).data.vehiclePlate,
+      ).toMatchObject({ confidence: 'low', parsed: 'FKE1A23' });
+    });
+
+    it('should read a waste code flagged as hazardous with (*)', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: '190813 (*) - Lodos de outros tratamentos',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { code: '190813', description: 'Lodos de outros tratamentos' },
+      ]);
+    });
+
+    it('should detect the description header when OCR inserts a stray character', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks.map((block) =>
+            block.text.startsWith('Código')
+              ? { ...block, text: 'Código U IBAMA e Denominação' }
+              : block,
+          ),
+          ...wasteRow(0.4, '1'),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWaste,
+      ]);
+    });
+
+    it.each([
+      { headers: headersWithout('Item'), scenario: 'Item header is missing' },
+      {
+        headers: headersWithout('Tratamento'),
+        scenario: 'Tratamento header is missing',
+      },
+      {
+        headers: headersWithout('Item', 'Tratamento'),
+        scenario: 'Item and Tratamento headers are missing',
+      },
+    ])('should start rows at waste codes when the $scenario', ({ headers }) => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...headers,
+          ...wasteRow(0.4),
+          {
+            boundingBox: stubBoundingBox(0.098, 0.415),
+            text: 'de efluentes',
+          },
+          ...wasteRow(0.44),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        { ...expectedWaste, description: 'Lodos de tratamento de efluentes' },
+        expectedWaste,
+      ]);
+    });
+
+    it('should start rows at waste codes when the Item column is empty', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          ...wasteRow(0.4),
+        ]),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWaste,
+      ]);
+    });
+
+    it('should not start a row at a description that does not begin with a waste code', () => {
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', [
+          ...sigorHeaderBlocks,
+          {
+            boundingBox: stubBoundingBox(0.098, 0.4),
+            text: 'Lodos sem codigo 190805',
+          },
+        ]),
+      );
+
+      expect(result.data.wasteTypes).toBeUndefined();
+    });
+
+    it('should extract a table from a photo rotated a quarter turn', () => {
+      const rotated = [...sigorHeaderBlocks, ...wasteRow(0.4, '1')].map(
+        ({ boundingBox, text }) => ({
+          boundingBox: {
+            height: boundingBox.width,
+            left: 1 - boundingBox.top - boundingBox.height,
+            top: boundingBox.left,
+            width: boundingBox.height,
+          },
+          text,
+        }),
+      );
+
+      const result = parser.parse(
+        stubTextExtractionResultWithBlocks('CETESB', rotated),
+      );
+
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        expectedWaste,
+      ]);
+    });
+  });
+
   describe('layout selection', () => {
     beforeEach(() => {
       registerParser('transportManifest', 'mtr-sinir', MtrSinirParser);
@@ -997,10 +1189,40 @@ describe('MtrSigorParser', () => {
       ]);
     });
 
+    it('should select SIGOR when the photo cuts off section headings and the treatment header', async () => {
+      const text = validCetesbText
+        .replace('CETESB\n', '')
+        .replace('Identificação do Gerador', 'ficação do Gerador')
+        .replace('Identificação do Transportador', 'ação do Transportador')
+        .replace('Identificação do Destinador', 'do Destinador')
+        .replaceAll('Razão Social', 'Social');
+      const extractor = new DocumentExtractor({
+        extractText: vi
+          .fn()
+          .mockResolvedValue(stubTextExtractionResult(`${text}\nTratame`)),
+      });
+
+      const result = await extractor.extract(
+        { filePath: 'cropped-manifest.jpg' },
+        { documentType: 'transportManifest' },
+      );
+
+      expect(result.layoutId).toBe('mtr-sigor');
+    });
+
     it.each([
       {
         layoutId: 'mtr-sinir',
         signature: 'Tipo de Resíduo: Plástico\nTratamento de resíduos',
+      },
+      {
+        layoutId: 'mtr-sinir',
+        signature: 'Tipo de Resíduo: Plástico\nTratamentos\nDados do Gerador',
+      },
+      {
+        layoutId: 'mtr-sinfat',
+        signature:
+          'Fundação Estadual de Proteção Ambiental\nTecnologia\nTratamentos\nDados do Gerador',
       },
       {
         layoutId: 'mtr-sinfat',
