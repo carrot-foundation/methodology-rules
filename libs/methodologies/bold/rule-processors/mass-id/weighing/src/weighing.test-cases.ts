@@ -545,6 +545,20 @@ export const weighingTestCases: WeighingTestCase[] = [
   },
   {
     accreditationDocuments: stubBaseAccreditationDocuments({
+      withScaleTicketVerification: true,
+    }),
+    massIDDocumentEvents: {
+      [WEIGHING]: createWeighingEvent(validWeighingAttributes),
+    },
+    resultComment: INVALID_RESULT_COMMENTS.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED,
+    resultStatus: 'FAILED',
+    scaleTicketVerificationError: WEIGHING_FINDINGS.render(
+      'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
+    ),
+    scenario: `The scale ticket attached to the "${WEIGHING}" event does not match a supported layout`,
+  },
+  {
+    accreditationDocuments: stubBaseAccreditationDocuments({
       withContainerCapacityException: true,
     }),
     massIDDocumentEvents: {

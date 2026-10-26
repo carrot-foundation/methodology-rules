@@ -64,7 +64,18 @@ export const verifyScaleTicketNetWeight = async ({
         { documentType: 'scaleTicket', layouts: layoutIds },
       );
 
-    const ticketNetWeight = extractionOutput.data.netWeight.parsed.value;
+    const ticketNetWeight = extractionOutput.data.netWeight?.parsed.value;
+
+    if (ticketNetWeight === undefined) {
+      return {
+        errors: [
+          WEIGHING_FINDINGS.render(
+            'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
+          ),
+        ],
+      };
+    }
+
     const diff = Math.abs(ticketNetWeight - expectedNetWeight);
 
     if (diff > NET_WEIGHT_CALCULATION_TOLERANCE) {
