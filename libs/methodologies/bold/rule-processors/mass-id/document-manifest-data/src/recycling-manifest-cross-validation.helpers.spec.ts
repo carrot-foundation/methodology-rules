@@ -214,10 +214,48 @@ describe('recycling-manifest-cross-validation.helpers', () => {
       },
     );
 
-    it('should return reviewRequired with reviewReasons when extraction confidence is low', () => {
+    it('should cross-validate the other fields when one key field has low confidence', () => {
       const extractionResult = createExtractionResult({
+        documentNumber: {
+          confidence: 'high',
+          parsed: 'CDF-999' as never,
+          rawMatch: 'CDF-999',
+        },
         extractionConfidence: 'low' as never,
+        recycler: {
+          ...stubEntity('Recycler Corp', '33.333.333/0001-33'),
+          taxId: {
+            confidence: 'low',
+            parsed: '00.000.000/0000-00',
+            rawMatch: '00.000.000/0000-00',
+          },
+        },
       });
+
+      const result = validateCdfExtractedData(extractionResult, {
+        ...baseEventData,
+        recyclerEvent: {
+          participant: { name: 'Recycler Corp', taxId: '33333333000133' },
+        } as unknown as BoldDocumentEvent,
+      });
+
+      expect(result.failReasons?.map((reason) => reason.code)).toEqual([
+        'DOCUMENT_NUMBER_MISMATCH',
+      ]);
+      expect(result.reviewReasons ?? []).toHaveLength(0);
+    });
+
+    it('should skip cross-validation when no field was extracted', () => {
+      const extractionResult = {
+        data: {
+          documentType: 'recyclingManifest',
+          extractionConfidence: 'low',
+          lowConfidenceFields: [],
+          rawText: 'unreadable',
+        },
+        reviewReasons: [],
+        reviewRequired: false,
+      } as unknown as ExtractionOutput<BaseExtractedData>;
 
       const result = validateCdfExtractedData(extractionResult, baseEventData);
 

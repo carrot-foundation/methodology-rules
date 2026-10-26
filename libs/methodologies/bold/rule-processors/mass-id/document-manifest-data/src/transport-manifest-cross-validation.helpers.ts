@@ -4,7 +4,10 @@ import {
   type BaseExtractedData,
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
-import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import {
+  MTR_ALL_FIELDS,
+  toWasteTypeEntryData,
+} from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
   getTimezoneFromAddress,
   isMercosulEquivalentPlate,
@@ -32,6 +35,7 @@ import {
   type EntityComparisonReasons,
   getParticipantNames,
   getWasteClassification,
+  hasNoExtractedField,
 } from './cross-validation';
 import { REVIEW_REASONS } from './document-manifest-data.constants';
 
@@ -53,7 +57,7 @@ export const validateMtrExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as MtrExtractedData;
 
-  if (extractionResult.data.extractionConfidence === 'low') {
+  if (hasNoExtractedField(extractedData, MTR_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );

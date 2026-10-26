@@ -1,9 +1,11 @@
-import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
-
 import {
   type BaseExtractedData,
   type ExtractionOutput,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  CDF_ALL_FIELDS,
+  type CdfExtractedData,
+} from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import {
   getTimezoneFromAddress,
   isNonEmptyString,
@@ -32,6 +34,7 @@ import {
   type EntityComparisonReasons,
   getParticipantNames,
   getWasteClassification,
+  hasNoExtractedField,
 } from './cross-validation';
 import {
   RESULT_COMMENTS,
@@ -99,7 +102,7 @@ export const validateCdfExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  if (extractionResult.data.extractionConfidence === 'low') {
+  if (hasNoExtractedField(extractedData, CDF_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );
