@@ -271,51 +271,46 @@ describe('CdfSinirParser', () => {
       expect(result.data.generator?.state.parsed).toBe('PR');
     });
 
-    it('should extract issue date before Responsável when Declaração is absent', () => {
+    it.each([
+      {
+        expected: '18/02/2025',
+        lines: ['Cidade Industrial, 18/02/2025', 'Responsável'],
+        scenario: 'before Responsável when Declaração is absent',
+      },
+      {
+        expected: '18/02/2025',
+        lines: [
+          'quantidades, sob as penas da lei.',
+          'Cidade Industrial, 18/02/2025',
+          'Maria Exemplo',
+          'Gerente Tecnico',
+          'Responsável Técnico',
+        ],
+        scenario:
+          'on the line after the legal statement when a signatory precedes Responsável',
+      },
+      {
+        expected: '19/02/2025',
+        lines: [
+          'quantidades, sob as penas da lei.',
+          'Cidade Industrial, 18/02/2025',
+          'Outra Cidade, 19/02/2025',
+          'Responsável',
+        ],
+        scenario:
+          'before Responsável in preference to the line after the legal statement',
+      },
+    ])('should extract the issue date $scenario', ({ expected, lines }) => {
       const text = [
         'CDF nº 100/2023',
         'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
-        'Cidade Industrial, 18/02/2025',
-        'Responsável',
+        ...lines,
         'Sistema MTR do Sinir',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(text));
-
-      expect(result.data.issueDate?.parsed).toBe('18/02/2025');
-      expect(result.data.issueDate?.confidence).toBe('high');
-    });
-
-    it('should extract the issue date on the line after the legal statement when a signatory precedes Responsável', () => {
-      const text = [
-        'CDF nº 100/2023',
-        'RECICLADORA LTDA, CPF/CNPJ 44555666000188 certifica que recebeu',
-        'quantidades, sob as penas da lei.',
-        'Cidade Industrial, 18/02/2025',
-        'Maria Exemplo',
-        'Gerente Tecnico',
-        'Responsável Técnico',
-        'Sistema MTR do Sinir',
-      ].join('\n');
-
-      const result = parser.parse(stubTextExtractionResult(text));
-
-      expect(result.data.issueDate?.parsed).toBe('18/02/2025');
-      expect(result.data.issueDate?.confidence).toBe('high');
-    });
-
-    it('should prefer the date before Responsável over the date after the legal statement', () => {
-      const text = [
-        'CDF nº 100/2023',
-        'quantidades, sob as penas da lei.',
-        'Cidade Industrial, 18/02/2025',
-        'Outra Cidade, 19/02/2025',
-        'Responsável',
       ].join('\n');
 
       expect(
-        parser.parse(stubTextExtractionResult(text)).data.issueDate?.parsed,
-      ).toBe('19/02/2025');
+        parser.parse(stubTextExtractionResult(text)).data.issueDate,
+      ).toMatchObject({ confidence: 'high', parsed: expected });
     });
 
     it('should not read a date that is not on the line after the legal statement', () => {

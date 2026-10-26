@@ -997,6 +997,21 @@ describe('MtrSigorParser', () => {
       expect(data.receiver?.name.parsed).toBe('DESTINO AMBIENTAL LTDA.');
     });
 
+    it.each([
+      { label: 'Razão Social Exemplo', scenario: 'on the same line' },
+      { label: 'Razão Social\nExemplo', scenario: 'on the next line' },
+    ])(
+      'should read the company name after a label without a colon $scenario',
+      ({ label }) => {
+        const text = validCetesbText.replace('Razão Social: Exemplo', label);
+
+        expect(
+          parser.parse(stubTextExtractionResult(text)).data.generator?.name
+            .parsed,
+        ).toBe('Exemplo Industrias de Alimentos Ltda');
+      },
+    );
+
     it('should not treat the generator observations heading as the generator section', () => {
       const text = [
         'MTR n° 240001460711',
@@ -1122,27 +1137,36 @@ describe('MtrSigorParser', () => {
       expect(result.data.wasteTypes).toBeUndefined();
     });
 
-    it('should extract a table from a photo rotated a quarter turn', () => {
-      const rotated = [...sigorHeaderBlocks, ...wasteRow(0.4, '1')].map(
-        ({ boundingBox, text }) => ({
-          boundingBox: {
-            height: boundingBox.width,
-            left: 1 - boundingBox.top - boundingBox.height,
-            top: boundingBox.left,
-            width: boundingBox.height,
-          },
-          text,
-        }),
-      );
+    it.each([
+      { headers: sigorHeaderBlocks, scenario: 'all headers' },
+      {
+        headers: headersWithout('Tratamento'),
+        scenario: 'the Tratamento header cropped',
+      },
+    ])(
+      'should extract a table from a photo rotated a quarter turn with $scenario',
+      ({ headers }) => {
+        const rotated = [...headers, ...wasteRow(0.4, '1')].map(
+          ({ boundingBox, text }) => ({
+            boundingBox: {
+              height: boundingBox.width,
+              left: 1 - boundingBox.top - boundingBox.height,
+              top: boundingBox.left,
+              width: boundingBox.height,
+            },
+            text,
+          }),
+        );
 
-      const result = parser.parse(
-        stubTextExtractionResultWithBlocks('CETESB', rotated),
-      );
+        const result = parser.parse(
+          stubTextExtractionResultWithBlocks('CETESB', rotated),
+        );
 
-      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
-        expectedWaste,
-      ]);
-    });
+        expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+          expectedWaste,
+        ]);
+      },
+    );
   });
 
   describe('layout selection', () => {

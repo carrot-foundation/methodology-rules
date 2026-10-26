@@ -74,7 +74,9 @@ const buildColumnRanges = (
     const nextColumn = columns[index + 1];
 
     return {
-      max: nextColumn ? (column.headerLeft + nextColumn.headerLeft) / 2 : 1,
+      max: nextColumn
+        ? (column.headerLeft + nextColumn.headerLeft) / 2
+        : Number.POSITIVE_INFINITY,
       min: previousColumn
         ? (previousColumn.headerLeft + column.headerLeft) / 2
         : column.headerLeft - xTolerance,

@@ -1,0 +1,132 @@
+{
+  "repository": "carrot-foundation/methodology-rules",
+  "pr": {
+    "number": 455,
+    "url": "https://github.com/carrot-foundation/methodology-rules/pull/455",
+    "title": "Recover manifest fields from cropped and tilted photos, and match Mercosul plates",
+    "state": "OPEN",
+    "isDraft": false,
+    "mergeable": "MERGEABLE",
+    "mergeStateStatus": "BLOCKED",
+    "baseRefName": "main",
+    "baseRefOid": "6413c571ff84ad7442a89ccbf2bb887480a56ab7",
+    "headRefName": "sangalli/sample500-manifest-fixes",
+    "headRefOid": "30046d79ce5b3d74e2fbe308c4f7a793da065515"
+  },
+  "checks": [
+    {
+      "name": "gitStream.cm",
+      "status": "COMPLETED",
+      "conclusion": "SKIPPED",
+      "detailsUrl": "https://docs.gitstream.cm/examples/",
+      "completedAt": "2026-10-26T14:11:20Z"
+    },
+    {
+      "name": "Backend Check / TypeScript",
+      "status": "IN_PROGRESS",
+      "conclusion": null,
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186893/job/121622151468",
+      "completedAt": null
+    },
+    {
+      "name": "Backend Check / ESLint",
+      "status": "IN_PROGRESS",
+      "conclusion": null,
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186893/job/121622151428",
+      "completedAt": null
+    },
+    {
+      "name": "Backend Check / Tests (E2E)",
+      "status": "IN_PROGRESS",
+      "conclusion": null,
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186893/job/121622151352",
+      "completedAt": null
+    },
+    {
+      "name": "Backend Check / Tests",
+      "status": "IN_PROGRESS",
+      "conclusion": null,
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186893/job/121622151308",
+      "completedAt": null
+    },
+    {
+      "name": "Commit and Push READMEs",
+      "status": "COMPLETED",
+      "conclusion": "SKIPPED",
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186663/job/121622078210",
+      "completedAt": "2026-10-26T14:11:05Z"
+    },
+    {
+      "name": "Get affected",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186893/job/121621802119",
+      "completedAt": "2026-10-26T14:11:13Z"
+    },
+    {
+      "name": "Generate Rule READMEs",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": "https://github.com/carrot-foundation/methodology-rules/actions/runs/40337186663/job/121621800119",
+      "completedAt": "2026-10-26T14:11:05Z"
+    },
+    {
+      "name": "CodeRabbit",
+      "status": "COMPLETED",
+      "conclusion": "SUCCESS",
+      "detailsUrl": null,
+      "completedAt": null
+    }
+  ],
+  "reviews": [],
+  "review_threads": [],
+  "issue_comments": [
+    {
+      "author": "gitstream-cm[bot]",
+      "authorType": "Bot",
+      "body": "\n🚨 **gitStream Monthly Automation Limit Reached** 🚨\n\nYour organization has exceeded the number of pull requests allowed for automation with gitStream.\n**Monthly PRs automated:** 250/250\n\nTo continue automating your PR workflows and unlock additional features, please [contact LinearB](https://linearb.io/book-a-demo).\n",
+      "createdAt": "2026-10-26T14:11:17Z",
+      "updatedAt": "2026-10-26T14:11:17Z",
+      "databaseId": 6418134406,
+      "isBot": true
+    },
+    {
+      "author": "coderabbitai[bot]",
+      "authorType": "Bot",
+      "body": "<!-- coderabbit-ai-generated:v1 -->\n\n<!-- This is an auto-generated comment: summarize by coderabbit.ai -->\n<!-- This is an auto-generated comment: rate limited by coderabbit.ai -->\n\n> [!WARNING]\n> ## Review limit reached\n> \n> Enable **[usage-based reviews](https://app.coderabbit.ai/settings/billing?tab=usage&orgId=572f2969-dc81-4b78-b976-6bdbeb3b9a82)** in Billing to review now. Otherwise, wait until the next included review is available.\n> You're only billed for reviews past your plan's rate limits ($0.25/file).\n> \n> - [ ] <!-- {\"checkboxId\":\"request-automatic-reviews\"} --> Ask an admin to enable usage-based reviews\n> \n> [Open in CodeRabbit](https://app.coderabbit.ai/dashboard/review-capacity?orgId=572f2969-dc81-4b78-b976-6bdbeb3b9a82&view=team&period=30)\n> \n> Reviews can continue after your included limit without a manual trigger. An admin must approve usage-based billing.\n> \n> **Next included review available in 46 minutes.**\n> \n> [Check out review usage here](https://app.coderabbit.ai/dashboard/review-capacity?orgId=572f2969-dc81-4b78-b976-6bdbeb3b9a82).\n> \n> <details>\n> <summary><strong>View limit details</strong></summary>\n> <dl>\n> <dd>\n> \n> **Limit details:** You’ve used the included review currently available. Your 104 included PR review attempts over the past 7 days set your current allowance at 1 review per hour.\n> \n> [Learn how review limits work](https://docs.coderabbit.ai/management/rate-limits).\n> \n> **Review configuration:**\n> \n> <details>\n> <summary><strong><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/cog-dark.svg\"><img src=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/cog.svg\" width=\"16\" height=\"16\" align=\"absmiddle\" alt=\"\"></picture> Run configuration</strong></summary>\n> <dl>\n> <dd>\n> \n> - **Source mode**: Auto\n> - **Repository**: [carrot-foundation/methodology-rules](<https://github.com/carrot-foundation/methodology-rules>)\n> - **Branch**: [main](<https://github.com/carrot-foundation/methodology-rules/tree/main>)\n> - **File**: [.coderabbit.yaml](<https://github.com/carrot-foundation/methodology-rules/blob/6413c571ff84ad7442a89ccbf2bb887480a56ab7/.coderabbit.yaml>)\n> - **Commit**: [6413c57](<https://github.com/carrot-foundation/methodology-rules/commit/6413c571ff84ad7442a89ccbf2bb887480a56ab7>)\n> - **Layers**: Repository YAML (base), Organization UI (inherited)\n> - **Review profile**: CHILL\n> - **Plan**: Team\n> - **Run ID**: `f47f9c94-f07d-46f5-918e-554673a5ce43`\n> \n> </dd>\n> </dl>\n> </details>\n> \n> <details>\n> <summary><strong><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/git-commit-horizontal-dark.svg\"><img src=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/git-commit-horizontal.svg\" width=\"16\" height=\"16\" align=\"absmiddle\" alt=\"\"></picture> Commits</strong></summary>\n> <dl>\n> <dd>\n> \n> Reviewing files that changed from the base of the PR and between 6413c571ff84ad7442a89ccbf2bb887480a56ab7 and 30046d79ce5b3d74e2fbe308c4f7a793da065515.\n> \n> </dd>\n> </dl>\n> </details>\n> \n> <details>\n> <summary><strong><picture><source media=\"(prefers-color-scheme: dark)\" srcset=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/file-plus-corner-dark.svg\"><img src=\"https://storage.googleapis.com/coderabbit_public_assets/review-comment-icons-v1/file-plus-corner.svg\" width=\"16\" height=\"16\" align=\"absmiddle\" alt=\"\"></picture> Files selected for processing: 13</strong></summary>\n> <dl>\n> <dd>\n> \n> * `libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/transport-manifest-cross-validation.helpers.spec.ts`\n> * `libs/methodologies/bold/rule-processors/mass-id/document-manifest-data/src/transport-manifest-cross-validation.helpers.ts`\n> * `libs/shared/document-extractor-recycling-manifest/src/cdf-sinir.parser.spec.ts`\n> * `libs/shared/document-extractor-recycling-manifest/src/cdf-sinir.parser.ts`\n> * `libs/shared/document-extractor-transport-manifest/src/mtr-shared.helpers.spec.ts`\n> * `libs/shared/document-extractor-transport-manifest/src/mtr-shared.helpers.ts`\n> * `libs/shared/document-extractor-transport-manifest/src/mtr-sigor.parser.spec.ts`\n> * `libs/shared/document-extractor-transport-manifest/src/mtr-sigor.parser.ts`\n> * `libs/shared/document-extractor/src/text-parsing.helpers.ts`\n> * `libs/shared/helpers/src/string-comparison.helpers.spec.ts`\n> * `libs/shared/helpers/src/string-comparison.helpers.ts`\n> * `libs/shared/text-extractor/src/table-extraction.helpers.spec.ts`\n> * `libs/shared/text-extractor/src/table-extraction.helpers.ts`\n> \n> </dd>\n> </dl>\n> </details>\n> \n> </dd>\n> </dl>\n> </details>\n\n<!-- end of auto-generated comment: rate limited by coderabbit.ai -->\n\n<!-- autopilot:start -->\n- [ ] <!-- {\"checkboxId\":\"2708ad07-9f24-4260-9c11-7dc76a49f2e3\"} --> <strong title=\"Keep fixing CodeRabbit findings and required CI, and resolving merge conflicts\">Autofix</strong> · Keep fixing CodeRabbit findings and required CI, and resolving merge conflicts\n<!-- autopilot:end -->\n<!-- tips_start -->\n\n\n\n\n\n\n<sub>Comment `@coderabbitai help` to get the list of available commands.</sub>\n\n<!-- tips_end -->",
+      "createdAt": "2026-10-26T14:11:22Z",
+      "updatedAt": "2026-10-26T14:11:22Z",
+      "databaseId": 6418136269,
+      "isBot": true
+    },
+    {
+      "author": "chatgpt-codex-connector[bot]",
+      "authorType": "Bot",
+      "body": "<!-- codex-pull-request-review-summary -->\n<!-- codex-review-state:v1 {\"code_review\":{\"commit_sha\":\"30046d79ce5b3d74e2fbe308c4f7a793da065515\",\"has_any_findings\":null,\"has_unresolved_findings\":null,\"status\":\"running\"},\"security_review\":{\"commit_sha\":null,\"has_any_findings\":null,\"has_unresolved_findings\":null,\"status\":null}} -->\n\n## Codex Review Summary\n\nThis comment shows the latest Codex review activity on this pull request.\n\n| Review | Status | Commit | Review trigger |\n| --- | --- | --- | --- |\n| 📝 **Code Review** | 🔄 **Running** since <relative-time datetime=\"2026-10-26T14:11:21.720822Z\">2026-10-26T14:11:21.720822Z</relative-time> | `30046d7` | PR opened |\n\n\n\n<details> <summary>ℹ️ About Codex in GitHub</summary>\n<br/>\n\n[Your team has set up Codex to review pull requests in this repo](https://chatgpt.com/codex/cloud/settings/general). Reviews are triggered when you\n- Open a pull request for review\n- Mark a draft as ready\n- Comment \"@codex review\" or \"@codex security review\".\n\nCodex reacts with 👀 while any review is running, comments if it has suggestions, and reacts with 👍 once all reviews finish with no findings.\n\n</details>",
+      "createdAt": "2026-10-26T14:11:25Z",
+      "updatedAt": "2026-10-26T14:11:25Z",
+      "databaseId": 6418137168,
+      "isBot": true
+    }
+  ],
+  "codex_activity": {
+    "pr_thumbs_up": [],
+    "summary": null,
+    "proof": "unbound",
+    "missing_binding": ["review_run", "reviewed_base", "reaction_head"]
+  },
+  "bot_status": {
+    "coderabbit": "in_progress",
+    "codex": "idle",
+    "bugbot": "not-present"
+  },
+  "codex_evidence": {
+    "trigger_id": null,
+    "trigger_at": null,
+    "submitted_review_ids": [],
+    "security_review_ids": [],
+    "unclassified_review_ids": [],
+    "clean_reaction": false,
+    "clean_issue_comment_ids": []
+  }
+}

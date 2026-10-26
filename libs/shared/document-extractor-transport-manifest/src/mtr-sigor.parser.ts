@@ -53,7 +53,8 @@ const SECTION_PATTERNS = {
 
 const MTR_PATTERNS = {
   ...MTR_DEFAULT_PATTERNS,
-  companyName: /(?:Raz\S*\s*)?Social\s*:\s*(.+)/i,
+  // eslint-disable-next-line sonarjs/slow-regex
+  companyName: /(?:Raz\S*\s*Social\s*:?|Social\s*:)\s*(.+)/i,
 } as const;
 
 const SIGNATURE_PATTERNS = [
