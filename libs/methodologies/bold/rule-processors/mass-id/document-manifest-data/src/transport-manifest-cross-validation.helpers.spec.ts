@@ -5,6 +5,7 @@ import type {
 import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import type { BoldDocumentEvent } from '@carrot-fndn/shared/methodologies/bold/types';
 
+import { createExtractedEntityWithAddress } from '@carrot-fndn/shared/document-extractor';
 import { createExtractedWasteTypeEntry } from '@carrot-fndn/shared/document-extractor-transport-manifest';
 
 import type { MtrCrossValidation } from './document-manifest-data.result-content.types';
@@ -116,9 +117,17 @@ describe('transport-manifest-cross-validation.helpers', () => {
       weighingEvents: [],
     };
 
-    it('should return reviewRequired with reviewReasons when basic extraction confidence is low', () => {
+    it('should skip cross-validation when no field was read with high confidence', () => {
+      const lowField = { confidence: 'low' as const, parsed: '' as never };
       const extractionResult = createExtractionResult({
+        documentNumber: lowField,
         extractionConfidence: 'low' as never,
+        generator: createExtractedEntityWithAddress(undefined),
+        hauler: createExtractedEntityWithAddress(undefined),
+        issueDate: lowField,
+        receiver: createExtractedEntityWithAddress(undefined),
+        vehiclePlate: lowField,
+        wasteTypes: [],
       });
 
       const result = validateMtrExtractedData(extractionResult, baseEventData);
@@ -130,6 +139,37 @@ describe('transport-manifest-cross-validation.helpers', () => {
         'DOCUMENT_EXTRACTION_CONFIDENCE_LOW',
       );
       expect(result.reviewReasons?.[0]?.description).toContain('low');
+    });
+
+    it('should cross-validate the other fields when one key field has low confidence', () => {
+      const extractionResult = createExtractionResult({
+        documentNumber: {
+          confidence: 'high',
+          parsed: '99999' as never,
+          rawMatch: '99999',
+        },
+        extractionConfidence: 'low' as never,
+        generator: {
+          ...stubEntity('Generator Co', '11.111.111/0001-11'),
+          taxId: {
+            confidence: 'low',
+            parsed: '00.000.000/0000-00',
+            rawMatch: '00.000.000/0000-00',
+          },
+        },
+      });
+
+      const result = validateMtrExtractedData(extractionResult, {
+        ...baseEventData,
+        wasteGeneratorEvent: {
+          participant: { name: 'Generator Co', taxId: '11111111000111' },
+        } as unknown as BoldDocumentEvent,
+      });
+
+      expect(result.failReasons?.map((reason) => reason.code)).toEqual([
+        'DOCUMENT_NUMBER_MISMATCH',
+      ]);
+      expect(result.reviewReasons ?? []).toHaveLength(0);
     });
 
     it('should set reviewRequired when vehicle plate does not match with high confidence', () => {

@@ -1,9 +1,12 @@
-import type { CdfExtractedData } from '@carrot-fndn/shared/document-extractor-recycling-manifest';
-
 import {
   type BaseExtractedData,
   type ExtractionOutput,
+  hasHighConfidenceField,
 } from '@carrot-fndn/shared/document-extractor';
+import {
+  CDF_ALL_FIELDS,
+  type CdfExtractedData,
+} from '@carrot-fndn/shared/document-extractor-recycling-manifest';
 import {
   getTimezoneFromAddress,
   isNonEmptyString,
@@ -99,7 +102,7 @@ export const validateCdfExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as CdfExtractedData;
 
-  if (extractionResult.data.extractionConfidence === 'low') {
+  if (!hasHighConfidenceField(extractedData, CDF_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );

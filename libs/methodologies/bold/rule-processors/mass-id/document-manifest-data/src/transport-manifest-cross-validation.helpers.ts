@@ -3,8 +3,12 @@ import type { MtrExtractedData } from '@carrot-fndn/shared/document-extractor-tr
 import {
   type BaseExtractedData,
   type ExtractionOutput,
+  hasHighConfidenceField,
 } from '@carrot-fndn/shared/document-extractor';
-import { toWasteTypeEntryData } from '@carrot-fndn/shared/document-extractor-transport-manifest';
+import {
+  MTR_ALL_FIELDS,
+  toWasteTypeEntryData,
+} from '@carrot-fndn/shared/document-extractor-transport-manifest';
 import {
   getTimezoneFromAddress,
   isMercosulEquivalentPlate,
@@ -53,7 +57,7 @@ export const validateMtrExtractedData = (
 ): CrossValidationResponse => {
   const extractedData = extractionResult.data as MtrExtractedData;
 
-  if (extractionResult.data.extractionConfidence === 'low') {
+  if (!hasHighConfidenceField(extractedData, MTR_ALL_FIELDS)) {
     return buildLowConfidenceResponse(
       extractionResult.data.extractionConfidence,
     );
