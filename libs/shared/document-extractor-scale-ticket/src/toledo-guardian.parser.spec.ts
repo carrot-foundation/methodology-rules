@@ -55,6 +55,32 @@ describe('ScaleTicketToledoGuardianParser', () => {
       },
     );
 
+    it('should match decimal weighings against the net table', () => {
+      const result = parse({
+        firstWeighing: '12.345,6 kg',
+        net: '345,4 kg',
+        secondWeighing: '12.000,2 kg',
+      });
+
+      expect(result.data.netWeight).toMatchObject({
+        confidence: 'high',
+        parsed: { value: 345.4 },
+      });
+    });
+
+    it('should find the net table when it starts at the corrected net column', () => {
+      const result = parser.parse(
+        stubTextExtractionResult(
+          'Pesagem Inicial\n9500 kg\n10000 kg\nLiq. Corrigido\n500 kg',
+        ),
+      );
+
+      expect(result.data.netWeight).toMatchObject({
+        confidence: 'high',
+        parsed: { value: 500 },
+      });
+    });
+
     it('should keep the net table value with low confidence when the weighings disagree', () => {
       const result = parse({
         firstWeighing: '9500 kg',

@@ -44,6 +44,9 @@ const readWeightLines = (lines: string[]): WeightLine[] =>
     return valueInKg === undefined ? [] : [{ rawMatch: line, valueInKg }];
   });
 
+const roundToGrams = (valueInKg: number): number =>
+  Math.round(valueInKg * 1000) / 1000;
+
 export class ScaleTicketToledoGuardianParser implements DocumentParser<ScaleTicketExtractedData> {
   readonly documentType = 'scaleTicket' as const;
   readonly layoutId = 'toledo-guardian' as NonEmptyString;
@@ -79,7 +82,9 @@ export class ScaleTicketToledoGuardianParser implements DocumentParser<ScaleTick
     const weighedNet =
       firstWeighing &&
       secondWeighing &&
-      Math.abs(firstWeighing.valueInKg - secondWeighing.valueInKg);
+      roundToGrams(
+        Math.abs(firstWeighing.valueInKg - secondWeighing.valueInKg),
+      );
 
     const [tableNet] =
       netTableStart === -1 ? [] : readWeightLines(lines.slice(netTableStart));

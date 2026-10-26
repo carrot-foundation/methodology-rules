@@ -58,6 +58,11 @@ describe('ScaleTicketPesagemManualParser', () => {
         weights: { gross: '12.360', net: '0,750', tare: '11-610' },
       },
       {
+        description: 'every weight written in whole tonnes',
+        expected: { gross: 12_000, net: 2000, tare: 10_000 },
+        weights: { gross: '12', net: '2', tare: '10' },
+      },
+      {
         description: 'a gross weight written in tonnes',
         expected: { gross: 12_000, net: 1500, tare: 10_500 },
         weights: { gross: '12', net: '1500', tare: '10500' },
@@ -92,6 +97,25 @@ describe('ScaleTicketPesagemManualParser', () => {
         'finalWeight',
       ]);
       expect(result.reviewRequired).toBe(true);
+    });
+
+    it('should fall back to the kg reading with low confidence when no reading reconciles', () => {
+      const result = parse({ gross: '12', net: '3000', tare: '10000' });
+
+      expect(result.data.initialWeight).toMatchObject({
+        confidence: 'low',
+        parsed: { value: 12 },
+      });
+    });
+
+    it('should not read a value past the end of the weights section', () => {
+      const result = parser.parse(
+        stubTextExtractionResult(
+          'PESAGEM MANUAL\nTara (B)\nMotivo da pesagem em manual:\n5000',
+        ),
+      );
+
+      expect(result.data.finalWeight).toBeUndefined();
     });
 
     it('should keep a low-confidence net weight when the tare cannot be read', () => {

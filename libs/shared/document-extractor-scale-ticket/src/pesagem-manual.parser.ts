@@ -90,13 +90,21 @@ const findWeightAfterLabel = (
   return undefined;
 };
 
+// A road truck, loaded or empty, weighs between 100 kg and 100 t.
+const isTruckWeight = (valueInKg: number): boolean =>
+  valueInKg >= 100 && valueInKg <= 100_000;
+
 const reconcile = (
   gross: HandwrittenWeight,
   tare: HandwrittenWeight,
   net: HandwrittenWeight,
 ): undefined | { gross: number; net: number; tare: number } => {
-  for (const grossKg of gross.candidatesInKg) {
-    for (const tareKg of tare.candidatesInKg) {
+  for (const grossKg of gross.candidatesInKg.filter((candidate) =>
+    isTruckWeight(candidate),
+  )) {
+    for (const tareKg of tare.candidatesInKg.filter((candidate) =>
+      isTruckWeight(candidate),
+    )) {
       const netKg = net.candidatesInKg.find(
         (candidate) => grossKg - tareKg === candidate,
       );
