@@ -33,7 +33,7 @@ const LAYOUT_1_PATTERNS = {
 
 const SIGNATURE_PATTERNS = [
   /Ticket de pesagem/i,
-  /Peso Liquido/i,
+  /Peso Liquido:/i,
   /Pesagem/i,
   /kg/i,
 ];
