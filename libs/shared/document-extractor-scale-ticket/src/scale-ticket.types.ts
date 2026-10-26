@@ -8,7 +8,7 @@ export interface ScaleTicketExtractedData extends BaseExtractedData {
   documentType: 'scaleTicket';
   finalWeight?: ExtractedField<WeightData>;
   initialWeight?: ExtractedField<WeightData>;
-  netWeight: ExtractedField<WeightData>;
+  netWeight?: ExtractedField<WeightData>;
   ticketNumber?: ExtractedField<NonEmptyString>;
   transporter?: ExtractedField<TransporterData>;
   vehiclePlate?: ExtractedField<NonEmptyString>;

@@ -25,11 +25,11 @@ describe('ScaleTicketLayout1Parser', () => {
     it('should parse a valid extraction result with high confidence', () => {
       const result = parser.parse(stubTextExtractionResult(validRawText));
 
-      expect(result.data.netWeight.parsed).toEqual({
+      expect(result.data.netWeight?.parsed).toEqual({
         unit: 'kg',
         value: 200.25,
       });
-      expect(result.data.netWeight.confidence).toBe('high');
+      expect(result.data.netWeight?.confidence).toBe('high');
       expect(result.data.ticketNumber?.parsed).toBe('12345');
       expect(result.data.vehiclePlate?.parsed).toBe('ABC1234');
       expect(result.data.transporter?.parsed).toEqual({
@@ -64,7 +64,7 @@ describe('ScaleTicketLayout1Parser', () => {
 
       const result = parser.parse(stubTextExtractionResult(accentedText));
 
-      expect(result.data.netWeight.parsed).toEqual({ unit: 'kg', value: 150 });
+      expect(result.data.netWeight?.parsed).toEqual({ unit: 'kg', value: 150 });
       expect(result.data.ticketNumber?.parsed).toBe('99999');
       expect(result.data.vehiclePlate?.parsed).toBe('XYZ9999');
     });
@@ -112,7 +112,7 @@ describe('ScaleTicketLayout1Parser', () => {
       const result = parser.parse(stubTextExtractionResult(invalidNumberText));
 
       expect(result.data.initialWeight).toBeUndefined();
-      expect(result.data.netWeight.parsed.value).toBe(100);
+      expect(result.data.netWeight?.parsed.value).toBe(100);
     });
 
     it('should handle text with no ticket number pattern', () => {
@@ -126,7 +126,7 @@ describe('ScaleTicketLayout1Parser', () => {
 
       expect(result.data.ticketNumber).toBeUndefined();
       expect(result.data.vehiclePlate?.parsed).toBe('ABC1234');
-      expect(result.data.netWeight.parsed.value).toBeCloseTo(200.25);
+      expect(result.data.netWeight?.parsed.value).toBeCloseTo(200.25);
     });
 
     it('should handle transporter with newline in name', () => {

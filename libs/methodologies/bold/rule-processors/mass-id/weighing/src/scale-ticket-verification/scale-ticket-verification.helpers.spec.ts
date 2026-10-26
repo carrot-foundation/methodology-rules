@@ -1,7 +1,10 @@
 import type { AdditionalVerification } from '@carrot-fndn/shared/types';
 
 import { ScaleTicketLayout1Parser } from '@carrot-fndn/shared/document-extractor-scale-ticket';
-import { textExtractor } from '@carrot-fndn/shared/text-extractor';
+import {
+  stubTextExtractionResult,
+  textExtractor,
+} from '@carrot-fndn/shared/text-extractor';
 
 import {
   buildScaleTicketVerificationContext,
@@ -177,6 +180,71 @@ describe('scale-ticket-verification', () => {
     expect(result.errors[0]?.finding).toEqual({
       code: 'weighing.INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH',
       defaultOwner: 'INTEGRATOR',
+    });
+  });
+
+  describe('with the layout-1 parser reading the extracted text', () => {
+    const scaleTicketConfig: AdditionalVerification = {
+      'Layout IDs': ['layout-1'],
+      'Verification Type': 'Scale Ticket',
+    };
+
+    const legibleLayout1Text = `
+      Ticket de pesagem   12345
+      Placa Veículo ABC1234
+      Pesagem Inicial: 1.000,50 kg
+      Pesagem Final: 800,25 kg
+      Peso Líquido: 200,25 kg
+    `;
+
+    it.each([
+      { errorCodes: [], expectedNetWeight: 200.25 },
+      {
+        errorCodes: ['weighing.INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH'],
+        expectedNetWeight: 150,
+      },
+    ])(
+      'should compare the net weight of a legible ticket against $expectedNetWeight',
+      async ({ errorCodes, expectedNetWeight }) => {
+        vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+          stubTextExtractionResult(legibleLayout1Text),
+        );
+
+        const result = await verifyScaleTicketNetWeight({
+          config: scaleTicketConfig,
+          expectedNetWeight,
+          textExtractorInput: { filePath: 'dummy-path' },
+        });
+
+        expect(result.errors.map((error) => error.finding.code)).toEqual(
+          errorCodes,
+        );
+      },
+    );
+
+    it('should return a layout not recognized error when no net weight can be read', async () => {
+      vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+        stubTextExtractionResult(`
+          Controle de entrada
+          Material: residuo organico
+          Quantidade: 3 cacambas
+        `),
+      );
+
+      const result = await verifyScaleTicketNetWeight({
+        config: scaleTicketConfig,
+        expectedNetWeight: 100,
+        textExtractorInput: { filePath: 'dummy-path' },
+      });
+
+      expect(result.errors).toHaveLength(1);
+      expect(result.errors[0]?.message).toContain(
+        'does not match a supported layout',
+      );
+      expect(result.errors[0]?.finding).toEqual({
+        code: 'weighing.INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
+        defaultOwner: 'INTEGRATOR',
+      });
     });
   });
 
