@@ -1,11 +1,19 @@
-import { clearRegistry } from '@carrot-fndn/shared/document-extractor';
+import {
+  clearRegistry,
+  DocumentExtractor,
+  registerParser,
+} from '@carrot-fndn/shared/document-extractor';
 import {
   stubTextExtractionResult,
   stubTextExtractionResultWithBlocks,
 } from '@carrot-fndn/shared/text-extractor';
 
+import type { MtrExtractedData } from './transport-manifest.types';
+
 import { toWasteTypeEntryData } from './mtr-shared.helpers';
 import { MtrSigorParser } from './mtr-sigor.parser';
+import { MtrSinfatParser } from './mtr-sinfat.parser';
+import { MtrSinirParser } from './mtr-sinir.parser';
 
 const stubBoundingBox = (left: number, top: number) => ({
   height: 0.015,
@@ -941,6 +949,86 @@ describe('MtrSigorParser', () => {
         expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
           { code: '190805', description: expectedDescription },
         ]);
+      },
+    );
+  });
+
+  describe('layout selection', () => {
+    beforeEach(() => {
+      registerParser('transportManifest', 'mtr-sinir', MtrSinirParser);
+      registerParser('transportManifest', 'mtr-sigor', MtrSigorParser);
+      registerParser('transportManifest', 'mtr-sinfat', MtrSinfatParser);
+    });
+
+    it('should select SIGOR and extract its waste table when the photo cuts off the issuer and generator heading', async () => {
+      const text = validCetesbText
+        .replace('CETESB\n', '')
+        .replace('Identificação do Gerador', 'Gerador');
+      const blocks = [
+        ...sigorHeaderBlocks,
+        { boundingBox: stubBoundingBox(0.048, 0.4), text: '1' },
+        {
+          boundingBox: stubBoundingBox(0.098, 0.4),
+          text: '190812-Lodos de tratamento biológico de águas residuárias',
+        },
+        { boundingBox: stubBoundingBox(0.767, 0.4), text: '7,2500' },
+        { boundingBox: stubBoundingBox(0.823, 0.4), text: 'TON' },
+      ];
+      const input = stubTextExtractionResultWithBlocks(
+        [text, ...blocks.map((block) => block.text)].join('\n'),
+        blocks,
+      );
+      const extractor = new DocumentExtractor({
+        extractText: vi.fn().mockResolvedValue(input),
+      });
+      const result = await extractor.extract<MtrExtractedData>(
+        { filePath: 'cropped-manifest.jpg' },
+        { documentType: 'transportManifest' },
+      );
+
+      expect(result.layoutId).toBe('mtr-sigor');
+      expect(result.data.wasteTypes?.map(toWasteTypeEntryData)).toEqual([
+        {
+          code: '190812',
+          description: 'Lodos de tratamento biologico de aguas residuarias',
+          quantity: 7.25,
+          unit: 'TON',
+        },
+      ]);
+    });
+
+    it.each([
+      {
+        layoutId: 'mtr-sinir',
+        signature: 'Tipo de Resíduo: Plástico\nTratamento de resíduos',
+      },
+      {
+        layoutId: 'mtr-sinfat',
+        signature:
+          'Fundação Estadual de Proteção Ambiental\nCódigo IBAMA e Denominação\nTecnologia',
+      },
+    ])(
+      'should keep selecting $layoutId for its own layout',
+      async ({ layoutId, signature }) => {
+        const input = stubTextExtractionResult(
+          [
+            'Manifesto de Transporte de Resíduos MTR',
+            'Gerador',
+            'Transportador',
+            'Destinatário',
+            'IBAMA',
+            signature,
+          ].join('\n'),
+        );
+        const extractor = new DocumentExtractor({
+          extractText: vi.fn().mockResolvedValue(input),
+        });
+        const result = await extractor.extract(
+          { filePath: 'manifest.pdf' },
+          { documentType: 'transportManifest' },
+        );
+
+        expect(result.layoutId).toBe(layoutId);
       },
     );
   });

@@ -53,7 +53,7 @@ const MTR_PATTERNS = {
 
 const SIGNATURE_PATTERNS = [
   /MTR/i,
-  /CETESB/i,
+  /CETESB|^Tratamento$/im,
   /Manifesto\s*de\s*Transporte/i,
   /Identificacao\s+do\s+Gerador/i,
   /Identificacao\s+do\s+Transportador/i,
