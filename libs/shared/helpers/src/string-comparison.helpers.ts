@@ -72,6 +72,9 @@ const deduplicateConsecutiveTokens = (tokens: string[]): string[] => {
   return result;
 };
 
+const KILOMETER_MARKER_PATTERN =
+  /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu;
+
 interface KilometerMarkers {
   distances: string[];
   invalid: boolean;
@@ -86,7 +89,7 @@ const normalizeKilometerMarkers = (value: string): KilometerMarkers => {
   const invalidMarkers: string[] = [];
   let hasFraction = false;
   const normalized = value.replaceAll(
-    /(?<![\p{L}_])km\.?\s*((?:[^\p{L}\p{N}\s][^\p{L}\p{N}]*)?\d(?:[\d.+]|[-,](?=\d))*)/giu,
+    KILOMETER_MARKER_PATTERN,
     (marker: string, notation: string, offset: number): string => {
       const trimmedNotation = notation.replace(/[,.]$/, '');
       const distance = /^(\d+)(?:([.,+])(\d{1,3}))?$/.exec(trimmedNotation);
@@ -383,8 +386,19 @@ export const isAddressMatch = (
     return { isMatch: false, score };
   }
 
-  const numsA = extractNumericTokens(tokensA);
-  const numsB = extractNumericTokens(tokensB);
+  // Markers on both sides were compared above; their digits must not stand in for street numbers.
+  const comparedKilometers =
+    kilometersA.distances.length > 0 && kilometersB.distances.length > 0;
+  const numericTokensOf = (value: string, tokens: string[]): string[] =>
+    extractNumericTokens(
+      comparedKilometers
+        ? normalizeAddress(
+            value.replaceAll(KILOMETER_MARKER_PATTERN, ' km '),
+          ).split(' ')
+        : tokens,
+    );
+  const numsA = numericTokensOf(a, tokensA);
+  const numsB = numericTokensOf(b, tokensB);
   const [shorterNums, longerNums] =
     numsA.length <= numsB.length ? [numsA, numsB] : [numsB, numsA];
 

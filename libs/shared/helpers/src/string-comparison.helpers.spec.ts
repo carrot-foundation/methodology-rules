@@ -376,6 +376,8 @@ describe('string-comparison.helpers', () => {
       { expected: false, first: 'Km 42', second: 'Km 43,3' },
       { expected: false, first: 'Km 42,3', second: 'Km 42,5' },
       { expected: false, first: 'Km 42,0', second: 'Km 42,3' },
+      { expected: true, first: 'Km 42, 300', second: 'Km 42,3, 300' },
+      { expected: false, first: 'Km 42, 300', second: 'Km 42,3, 400' },
     ])(
       'should compare $first and $second with match $expected',
       ({ expected, first, second }) => {
