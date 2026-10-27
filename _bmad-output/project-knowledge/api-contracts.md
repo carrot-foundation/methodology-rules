@@ -10,16 +10,16 @@ This project exposes no HTTP REST API. Its "API" is the **rule invocation contra
 
 A rule Lambda is invoked with a `MethodologyRuleEvent` that is parsed (Zod) into `RuleInput`:
 
-| Field | Type | Required | Meaning |
-|---|---|---|---|
-| `documentId` | `DocumentId` (branded) | yes | Target document to validate |
-| `documentKeyPrefix` | non-empty string | yes | S3 key prefix for the document graph |
-| `requestId` | string | yes | Correlation id (echoed in output, logs, Sentry tags) |
-| `responseToken` | string | yes | Opaque token for the Smaug callback |
-| `responseUrl` | url | yes | Smaug callback URL for the verdict |
-| `environment` | `DEVELOPMENT` \| `PRODUCTION` | no | Execution environment |
-| `parentDocumentId` | `DocumentId` | no | Parent document when traversing the graph |
-| `ruleName` | string | no | Rule identifier (Sentry tag) |
+| Field               | Type                          | Required | Meaning                                              |
+| ------------------- | ----------------------------- | -------- | ---------------------------------------------------- |
+| `documentId`        | `DocumentId` (branded)        | yes      | Target document to validate                          |
+| `documentKeyPrefix` | non-empty string              | yes      | S3 key prefix for the document graph                 |
+| `requestId`         | string                        | yes      | Correlation id (echoed in output, logs, Sentry tags) |
+| `responseToken`     | string                        | yes      | Opaque token for the Smaug callback                  |
+| `responseUrl`       | url                           | yes      | Smaug callback URL for the verdict                   |
+| `environment`       | `DEVELOPMENT` \| `PRODUCTION` | no       | Execution environment                                |
+| `parentDocumentId`  | `DocumentId`                  | no       | Parent document when traversing the graph            |
+| `ruleName`          | string                        | no       | Rule identifier (Sentry tag)                         |
 
 ```ts
 export const RuleInputSchema = z.object({
@@ -47,12 +47,12 @@ export const RuleOutputSchema = z.object({
 });
 ```
 
-| Field | Type | Meaning |
-|---|---|---|
-| `resultStatus` | `PASSED` \| `FAILED` \| `REVIEW_REQUIRED` | The verdict |
-| `resultComment` | string? | Human-readable explanation (from `{rule}.constants.ts`) |
-| `resultContent` | record? | Structured evidence the rule wants to attach |
-| `requestId` / `responseToken` / `responseUrl` | — | Echoed back for routing the callback |
+| Field                                         | Type                                      | Meaning                                                 |
+| --------------------------------------------- | ----------------------------------------- | ------------------------------------------------------- |
+| `resultStatus`                                | `PASSED` \| `FAILED` \| `REVIEW_REQUIRED` | The verdict                                             |
+| `resultComment`                               | string?                                   | Human-readable explanation (from `{rule}.constants.ts`) |
+| `resultContent`                               | record?                                   | Structured evidence the rule wants to attach            |
+| `requestId` / `responseToken` / `responseUrl` | —                                         | Echoed back for routing the callback                    |
 
 ### Status semantics
 
@@ -65,22 +65,21 @@ export const RuleOutputSchema = z.object({
 Every rule Lambda shares one wrapper (`libs/shared/lambda/wrapper/src/lambda-wrapper.ts`):
 
 ```ts
-export const wrapRuleIntoLambdaHandler =
-  (rule: RuleDataProcessor): Handler<MethodologyRuleEvent, unknown> => {
-    // Sentry init …
-    const handler = async (event) => {
-      try {
-        const ruleInput = RuleInputSchema.parse(event);   // boundary validation
-        const ruleOutput = toUpstreamCompatibleOutput(await rule.process(ruleInput));
-        await reportRuleResults(ruleOutput);              // SigV4 POST to Smaug
-        return ruleOutput;
-      } catch (error) {
-        setRuleSentryTags(event);
-        throw error;                                       // propagate → Lambda retry/DLQ
-      }
-    };
-    return AWSLambda.wrapHandler(handler);
+export const wrapRuleIntoLambdaHandler = (rule: RuleDataProcessor): Handler<MethodologyRuleEvent, unknown> => {
+  // Sentry init …
+  const handler = async (event, context) => {
+    try {
+      const ruleInput = RuleInputSchema.parse(event); // boundary validation
+      const ruleOutput = toUpstreamCompatibleOutput(await rule.process(ruleInput));
+      await reportRuleResults(ruleOutput, context); // SigV4 POST to Smaug
+      return ruleOutput;
+    } catch (error) {
+      setRuleSentryTags(event);
+      throw error; // propagate → Lambda retry/DLQ
+    }
   };
+  return AWSLambda.wrapHandler(handler);
+};
 ```
 
 A concrete rule's `{rule}.lambda.ts` is therefore minimal:
@@ -91,7 +90,9 @@ export const handler = wrapRuleIntoLambdaHandler(new MassIdSortingProcessor());
 
 ## Egress: Result Reporting
 
-`reportRuleResults(ruleOutput)` (`libs/shared/rule/result`) signs the request with **SigV4** — assuming the IAM role in `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` via STS — and POSTs the verdict to the Smaug `AUDIT_URL`. Smaug then runs its own multi-stage post-process pipeline. Rules do not call Palantir directly.
+`reportRuleResults(ruleOutput, context)` (`libs/shared/rule/result`) signs the request with **SigV4** — assuming the IAM role in `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` via STS — and POSTs the verdict to the Smaug `AUDIT_URL`. Smaug then runs its own multi-stage post-process pipeline. Rules do not call Palantir directly.
+
+A network error or a 408, 425, 429, 500, 502, 503 or 504 response is retried in-process, up to four attempts in all, with exponential backoff and full jitter. Every attempt is signed again. No retry starts unless the Lambda's remaining time, less the backoff delay, still leaves a 5-second margin. Any other failure, or the last one, is thrown as before. Smaug's post-process callback records each attempt once, so a repeated report is safe.
 
 ## Rule Definition Metadata
 
@@ -107,12 +108,12 @@ export const ruleDefinition = {
 } as const satisfies BaseRuleDefinition;
 ```
 
-| Field | Meaning |
-|---|---|
-| `name` | Human-readable rule name |
-| `slug` | Stable identifier (matches the project directory) |
-| `version` | Rule version (bumped via `pnpm bump:rules`) |
-| `events` | Document events that trigger the rule |
-| `description` | Used in generated READMEs/manifests |
+| Field         | Meaning                                           |
+| ------------- | ------------------------------------------------- |
+| `name`        | Human-readable rule name                          |
+| `slug`        | Stable identifier (matches the project directory) |
+| `version`     | Rule version (bumped via `pnpm bump:rules`)       |
+| `events`      | Document events that trigger the rule             |
+| `description` | Used in generated READMEs/manifests               |
 
 These definitions feed the generated manifests and READMEs (`pnpm generate:manifest`, `generate:readmes`). Do not hand-edit the generated outputs.

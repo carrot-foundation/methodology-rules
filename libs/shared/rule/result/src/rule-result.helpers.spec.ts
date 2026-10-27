@@ -43,6 +43,12 @@ vi.mock('@carrot-fndn/shared/aws-http', async (importOriginal) => ({
   provideSmaugApiCredentials: vi.fn(() => provideStubSmaugCredentials),
 }));
 
+const stubReportableRuleOutput = () => ({
+  ...stubRuleOutput(),
+  responseUrl: faker.internet.url(),
+  resultContent: { [faker.string.sample()]: faker.string.sample() },
+});
+
 describe('mapToRuleOutput', () => {
   it('should map to RuleOutput without resultComment or resultContent', () => {
     const ruleInput = stubRuleInput();
@@ -260,6 +266,7 @@ describe('mapRuleOutputToPostProcessInput', () => {
 
 describe('reportRuleResults', () => {
   const originalEnvironment = { ...process.env };
+  const ampleTime = { getRemainingTimeInMillis: () => 60_000 };
   let artifactChecksum: string;
   let sourceCodeUrl: string;
   let sourceCodeVersion: string;
@@ -307,7 +314,9 @@ describe('reportRuleResults', () => {
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response());
 
-    await expect(reportRuleResults(ruleOutput)).resolves.not.toThrow();
+    await expect(
+      reportRuleResults(ruleOutput, ampleTime),
+    ).resolves.not.toThrow();
 
     expect(fetch).toHaveBeenCalledWith(ruleOutput.responseUrl, {
       ...request,
@@ -336,7 +345,9 @@ describe('reportRuleResults', () => {
       responseUrl: 'not a valid url',
     };
 
-    await expect(reportRuleResults(ruleOutput)).rejects.toBeDefined();
+    await expect(
+      reportRuleResults(ruleOutput, ampleTime),
+    ).rejects.toBeDefined();
   });
 
   it('should exclude a failed response body from errors and logs', async () => {
@@ -357,7 +368,7 @@ describe('reportRuleResults', () => {
     let error: unknown;
 
     try {
-      await reportRuleResults(ruleOutput);
+      await reportRuleResults(ruleOutput, ampleTime);
     } catch (caughtError: unknown) {
       error = caughtError;
     }
@@ -396,7 +407,9 @@ describe('reportRuleResults', () => {
     vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(errorResponse);
     vi.spyOn(logger, 'error').mockImplementationOnce(() => {});
 
-    await expect(reportRuleResults(ruleOutput)).rejects.toBe(errorResponse);
+    await expect(reportRuleResults(ruleOutput, ampleTime)).rejects.toBe(
+      errorResponse,
+    );
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.anything(),
@@ -404,6 +417,132 @@ describe('reportRuleResults', () => {
     );
 
     expect(fetch).toHaveBeenCalled();
+  });
+  describe('when the report fails transiently', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+      vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+    });
+
+    it('should retry on 503 and then succeed', async () => {
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(undefined, { status: 503 }))
+        .mockResolvedValueOnce(new Response());
+
+      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+
+      await vi.runAllTimersAsync();
+
+      await expect(report).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ attempt: 1, status: 503 }),
+        'Retrying rule results report',
+      );
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('should retry on a network error and then succeed', async () => {
+      vi.spyOn(globalThis, 'fetch')
+        .mockRejectedValueOnce(new TypeError('fetch failed'))
+        .mockResolvedValueOnce(new Response());
+
+      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+
+      await vi.runAllTimersAsync();
+
+      await expect(report).resolves.toBeUndefined();
+      expect(fetch).toHaveBeenCalledTimes(2);
+    });
+
+    it('should not retry on 400', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(undefined, { status: 400 }),
+      );
+
+      await expect(
+        reportRuleResults(stubReportableRuleOutput(), ampleTime),
+      ).rejects.toThrow('Failed to report rule results: status 400');
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('should give up after the attempt cap and throw the last error', async () => {
+      vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+        Promise.resolve(new Response(undefined, { status: 503 })),
+      );
+
+      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+
+      await Promise.all([
+        expect(report).rejects.toThrow(
+          'Failed to report rule results: status 503',
+        ),
+        vi.runAllTimersAsync(),
+      ]);
+
+      expect(fetch).toHaveBeenCalledTimes(4);
+      expect(logger.warn).toHaveBeenCalledTimes(3);
+      expect(logger.error).toHaveBeenCalledWith(
+        expect.any(Error),
+        'Failed to report rule results',
+      );
+    });
+
+    it('should sign the request again on every attempt', async () => {
+      const firstAttemptAt = Date.parse('2026-10-27T12:00:00.000Z');
+
+      vi.setSystemTime(firstAttemptAt);
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockImplementationOnce(() => {
+          vi.setSystemTime(firstAttemptAt + 600_000);
+
+          return Promise.resolve(new Response(undefined, { status: 503 }));
+        })
+        .mockResolvedValueOnce(new Response());
+
+      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+
+      await vi.runAllTimersAsync();
+      await report;
+
+      const [firstHeaders, secondHeaders] = fetchSpy.mock.calls.map(
+        ([, request]) => new Headers(request?.headers),
+      );
+
+      expect(firstHeaders?.get('x-amz-date')).toBe('20261027T120000Z');
+      expect(secondHeaders?.get('x-amz-date')).toBe('20261027T121000Z');
+      expect(secondHeaders?.get('authorization')).not.toBe(
+        firstHeaders?.get('authorization'),
+      );
+    });
+
+    it('should stop retrying when the remaining time leaves no margin', async () => {
+      const getRemainingTimeInMillis = vi
+        .fn()
+        .mockReturnValueOnce(60_000)
+        .mockReturnValue(4999);
+
+      vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+        Promise.resolve(new Response(undefined, { status: 503 })),
+      );
+
+      const report = reportRuleResults(stubReportableRuleOutput(), {
+        getRemainingTimeInMillis,
+      });
+
+      await Promise.all([
+        expect(report).rejects.toThrow(
+          'Failed to report rule results: status 503',
+        ),
+        vi.runAllTimersAsync(),
+      ]);
+
+      expect(fetch).toHaveBeenCalledTimes(2);
+      expect(getRemainingTimeInMillis).toHaveBeenCalledTimes(2);
+    });
   });
 });
 

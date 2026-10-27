@@ -1,6 +1,6 @@
 import type { MethodologyRuleEvent } from '@carrot-fndn/shared/lambda/types';
 import type { RuleInput, RuleOutput } from '@carrot-fndn/shared/rule/types';
-import type { Handler } from 'aws-lambda';
+import type { Context, Handler } from 'aws-lambda';
 
 import { RuleDataProcessor } from '@carrot-fndn/shared/app/types';
 import {
@@ -60,7 +60,10 @@ export const wrapRuleIntoLambdaHandler = (
     environment: getEnvironment(),
   });
 
-  const handler = async (event: MethodologyRuleEvent): Promise<unknown> => {
+  const handler = async (
+    event: MethodologyRuleEvent,
+    context: Context,
+  ): Promise<unknown> => {
     try {
       const ruleInput = mapEventToRuleInput(event);
 
@@ -82,7 +85,7 @@ export const wrapRuleIntoLambdaHandler = (
         timing: { attemptId, finishedAt, startedAt },
       };
 
-      await reportRuleResults(ruleOutput);
+      await reportRuleResults(ruleOutput, context);
 
       return mapRuleOutputToLambdaResult(ruleOutput);
     } catch (error) {
