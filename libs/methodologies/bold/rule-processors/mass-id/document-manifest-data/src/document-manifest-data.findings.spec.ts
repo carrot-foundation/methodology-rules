@@ -62,6 +62,23 @@ describe('toCrossValidationFinding', () => {
     });
   });
 
+  it('should attribute an unrecognized document layout to the integrator and a failed extraction to Carrot', () => {
+    expect(
+      ['LAYOUT_NOT_RECOGNIZED', 'EXTRACTION_FAILED'].map((code) =>
+        toCrossValidationFinding({ code, description: code }),
+      ),
+    ).toEqual([
+      {
+        code: 'document-manifest-data.DOCUMENT_EXTRACTION.LAYOUT_NOT_RECOGNIZED',
+        defaultOwner: 'INTEGRATOR',
+      },
+      {
+        code: 'document-manifest-data.DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
+        defaultOwner: 'CARROT',
+      },
+    ]);
+  });
+
   it('should throw for a reason code without a finding', () => {
     expect(() =>
       toCrossValidationFinding({ code: 'UNLISTED', description: 'Unlisted' }),

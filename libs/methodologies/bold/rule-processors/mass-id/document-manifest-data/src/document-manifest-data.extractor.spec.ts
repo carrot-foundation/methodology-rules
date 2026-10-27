@@ -19,7 +19,12 @@ vi.mock('@carrot-fndn/shared/document-extractor', async (importOriginal) => ({
 }));
 
 // eslint-disable-next-line import/first -- Must import after mock is set up
+import { NoMatchingLayoutError } from '@carrot-fndn/shared/document-extractor';
+
+// eslint-disable-next-line import/first -- Must import after mock is set up
 import { crossValidateWithTextract } from './document-manifest-data.extractor';
+// eslint-disable-next-line import/first -- Must import after mock is set up
+import { toCrossValidationFinding } from './document-manifest-data.findings';
 
 const STUB_BR_ADDRESS = { countryCode: 'BR', countryState: 'SP' };
 
@@ -204,6 +209,50 @@ describe('crossValidateWithTextract', () => {
       ]),
     );
   });
+
+  it.each([
+    { documentType: 'MTR', extractorDocumentType: 'transportManifest' },
+    { documentType: 'CDF', extractorDocumentType: 'recyclingManifest' },
+  ] as const)(
+    'should fail with a layout not recognized reason when the $documentType attachment matches no layout',
+    async ({ documentType, extractorDocumentType }) => {
+      const attachmentInfos: AttachmentInfo[] = [
+        { attachmentId: 'att-1', s3Bucket: 'bucket', s3Key: 'key' },
+      ];
+      const documentManifestEvents: DocumentManifestEventSubject[] = [
+        {
+          attachment: { attachmentId: 'att-1' } as never,
+          documentNumber: '123',
+          documentType,
+          eventAddressId: 'addr-1',
+          eventValue: 100,
+          exemptionJustification: undefined,
+          hasWrongLabelAttachment: false,
+          issueDateAttribute: undefined,
+          recyclerCountryCode: 'BR',
+        },
+      ];
+
+      mockExtract.mockRejectedValue(
+        new NoMatchingLayoutError(extractorDocumentType, ['layout-a']),
+      );
+
+      const result = await crossValidateWithTextract({
+        attachmentInfos,
+        documentManifestEvents,
+        ...noRelatedEvents,
+      });
+
+      expect(
+        result.failReasons.map((reason) => toCrossValidationFinding(reason)),
+      ).toEqual([
+        {
+          code: 'document-manifest-data.DOCUMENT_EXTRACTION.LAYOUT_NOT_RECOGNIZED',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ]);
+    },
+  );
 
   it('should fail when extraction errors occur', async () => {
     const attachmentInfos: AttachmentInfo[] = [
