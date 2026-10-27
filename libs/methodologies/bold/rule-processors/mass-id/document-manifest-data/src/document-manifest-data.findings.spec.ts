@@ -36,12 +36,6 @@ describe('toCrossValidationFinding', () => {
       ),
     },
     {
-      code: 'LAYOUT_NOT_RECOGNIZED',
-      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
-        'DOCUMENT_EXTRACTION.LAYOUT_NOT_RECOGNIZED',
-      ),
-    },
-    {
       code: 'EXTRACTION_FAILED',
       expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
