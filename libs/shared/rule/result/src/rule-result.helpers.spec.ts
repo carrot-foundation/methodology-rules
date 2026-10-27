@@ -442,8 +442,10 @@ describe('reportRuleResults', () => {
     it.each([408, 425, 429, 500, 502, 503, 504])(
       'should retry on %i and then succeed',
       async (status) => {
+        const failedResponse = new Response('unavailable', { status });
+
         vi.spyOn(globalThis, 'fetch')
-          .mockResolvedValueOnce(new Response(undefined, { status }))
+          .mockResolvedValueOnce(failedResponse)
           .mockResolvedValueOnce(new Response());
 
         const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
@@ -457,6 +459,7 @@ describe('reportRuleResults', () => {
           'Retrying rule results report',
         );
         expect(logger.error).not.toHaveBeenCalled();
+        expect(failedResponse.bodyUsed).toBe(true);
       },
     );
 
@@ -535,20 +538,46 @@ describe('reportRuleResults', () => {
         .mockResolvedValueOnce(new Response(undefined, { status: 503 }))
         .mockRejectedValueOnce(timeout);
 
-      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+      const report = reportRuleResults(stubReportableRuleOutput(), {
+        getRemainingTimeInMillis: vi
+          .fn()
+          .mockReturnValueOnce(60_000)
+          .mockReturnValue(20_000),
+      });
 
       await Promise.all([
         expect(report).rejects.toBe(timeout),
         vi.runAllTimersAsync(),
       ]);
 
+      expect(fetchSpy).toHaveBeenCalledTimes(2);
       expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeUndefined();
       expect(fetchSpy.mock.calls[1]?.[1]?.signal).toBeInstanceOf(AbortSignal);
-      expect(timeoutSpy).toHaveBeenCalledWith(58_000);
+      expect(timeoutSpy).toHaveBeenCalledWith(17_000);
       expect(logger.error).toHaveBeenCalledWith(
         timeout,
         'Failed to report rule results',
       );
+    });
+
+    it('should abort a retry at once when the deadline reserve is already spent', async () => {
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+
+      vi.spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(undefined, { status: 503 }))
+        .mockResolvedValueOnce(new Response());
+
+      const report = reportRuleResults(stubReportableRuleOutput(), {
+        getRemainingTimeInMillis: vi
+          .fn()
+          .mockReturnValueOnce(60_000)
+          .mockReturnValue(1000),
+      });
+
+      await vi.runAllTimersAsync();
+      await report;
+
+      expect(timeoutSpy).toHaveBeenCalledWith(0);
     });
 
     it('should sign the request again on every attempt', async () => {

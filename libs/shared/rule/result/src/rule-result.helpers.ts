@@ -36,7 +36,7 @@ const MAX_REPORT_ATTEMPTS = 4;
 const BASE_REPORT_RETRY_DELAY_MS = 1000;
 const REPORT_TIME_MARGIN_MS = 5000;
 // leaves room for the failure log and Sentry's 2 s flush before the Lambda deadline
-const REPORT_ABORT_RESERVE_MS = 2000;
+const REPORT_ABORT_RESERVE_MS = 3000;
 
 interface ReportFailure {
   error: unknown;
@@ -153,7 +153,10 @@ export const reportRuleResults = async (
         attempt === 1
           ? undefined
           : AbortSignal.timeout(
-              context.getRemainingTimeInMillis() - REPORT_ABORT_RESERVE_MS,
+              Math.max(
+                0,
+                context.getRemainingTimeInMillis() - REPORT_ABORT_RESERVE_MS,
+              ),
             ),
       );
 
