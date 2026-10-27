@@ -108,9 +108,17 @@ export class DocumentExtractor implements DocumentExtractorService {
     );
 
     if (!bestMatch) {
-      throw new Error(
-        `No matching parser found for document type "${documentType}" among layouts: ${resolvedLayouts.join(', ')}`,
+      const hasUnregisteredLayout = resolvedLayouts.some(
+        (layoutId) => getParser({ documentType, layoutId }) === undefined,
       );
+
+      if (hasUnregisteredLayout) {
+        throw new Error(
+          `No parser found for document type "${documentType}" with layouts: ${resolvedLayouts.join(', ')}`,
+        );
+      }
+
+      throw new NoMatchingLayoutError(documentType, resolvedLayouts);
     }
 
     const result = bestMatch.parser.parse(extractionResult);
@@ -120,6 +128,15 @@ export class DocumentExtractor implements DocumentExtractorService {
       layoutId: bestMatch.parser.layoutId,
       textExtractionResult: extractionResult,
     };
+  }
+}
+
+export class NoMatchingLayoutError extends Error {
+  constructor(documentType: string, layouts: string[]) {
+    super(
+      `No matching parser found for document type "${documentType}" among layouts: ${layouts.join(', ')}`,
+    );
+    this.name = 'NoMatchingLayoutError';
   }
 }
 

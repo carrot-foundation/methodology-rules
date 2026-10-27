@@ -16,6 +16,7 @@ import type {
 import {
   createDocumentExtractor,
   DocumentExtractor,
+  NoMatchingLayoutError,
 } from './document-extractor.service';
 import { clearRegistry, registerParser } from './layout-registry.helpers';
 
@@ -212,9 +213,43 @@ describe('DocumentExtractor', () => {
           },
         ),
       ).rejects.toThrow(
-        'No matching parser found for document type "scaleTicket" among layouts: low-score-layout, stub-layout-2',
+        new NoMatchingLayoutError('scaleTicket', [
+          'low-score-layout',
+          'stub-layout-2',
+        ]),
+      );
+      expect(
+        new NoMatchingLayoutError('scaleTicket', ['low-score-layout']).message,
+      ).toBe(
+        'No matching parser found for document type "scaleTicket" among layouts: low-score-layout',
       );
     });
+
+    it.each([
+      { layouts: ['unknown-layout', 'unknown-layout-2'] },
+      { layouts: ['low-score-layout', 'unknown-layout'] },
+    ])(
+      'should throw a plain error when no layout matches and $layouts includes an unregistered layout',
+      async ({ layouts }) => {
+        clearRegistry();
+        registerParser('scaleTicket', 'low-score-layout', LowScoreParser);
+
+        const extraction = extractor.extract(
+          { filePath: 'test.pdf' },
+          {
+            documentType: 'scaleTicket',
+            layouts,
+          },
+        );
+
+        await expect(extraction).rejects.toThrow(
+          `No parser found for document type "scaleTicket" with layouts: ${layouts.join(', ')}`,
+        );
+        await expect(extraction).rejects.not.toBeInstanceOf(
+          NoMatchingLayoutError,
+        );
+      },
+    );
   });
 
   describe('layout resolution from registry', () => {
