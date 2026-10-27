@@ -67,11 +67,11 @@ Every rule Lambda shares one wrapper (`libs/shared/lambda/wrapper/src/lambda-wra
 ```ts
 export const wrapRuleIntoLambdaHandler = (rule: RuleDataProcessor): Handler<MethodologyRuleEvent, unknown> => {
   // Sentry init …
-  const handler = async (event, context) => {
+  const handler = async (event) => {
     try {
       const ruleInput = RuleInputSchema.parse(event); // boundary validation
       const ruleOutput = toUpstreamCompatibleOutput(await rule.process(ruleInput));
-      await reportRuleResults(ruleOutput, context); // SigV4 POST to Smaug
+      await reportRuleResults(ruleOutput); // SigV4 POST to Smaug
       return ruleOutput;
     } catch (error) {
       setRuleSentryTags(event);
@@ -90,9 +90,7 @@ export const handler = wrapRuleIntoLambdaHandler(new MassIdSortingProcessor());
 
 ## Egress: Result Reporting
 
-`reportRuleResults(ruleOutput, context)` (`libs/shared/rule/result`) signs the request with **SigV4** — assuming the IAM role in `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` via STS — and POSTs the verdict to the Smaug `AUDIT_URL`. Smaug then runs its own multi-stage post-process pipeline. Rules do not call Palantir directly.
-
-A network error or a 408, 425, 429, 500, 502, 503 or 504 response is retried in-process, up to four attempts in all, with exponential backoff and full jitter. Every attempt is signed again. No retry starts unless the Lambda's remaining time, less the backoff delay, still leaves a 5-second margin. Any other failure, or the last one, is thrown as before. Smaug's post-process callback records each attempt once, so a repeated report is safe.
+`reportRuleResults(ruleOutput)` (`libs/shared/rule/result`) signs the request with **SigV4** — assuming the IAM role in `SMAUG_API_GATEWAY_ASSUME_ROLE_ARN` via STS — and POSTs the verdict to the Smaug `AUDIT_URL`. Smaug then runs its own multi-stage post-process pipeline. Rules do not call Palantir directly.
 
 ## Rule Definition Metadata
 

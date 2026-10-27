@@ -10,6 +10,7 @@ import {
   stubRuleOutput,
 } from '@carrot-fndn/shared/testing';
 import { faker } from '@faker-js/faker';
+import { randomInt } from 'node:crypto';
 
 import {
   mapRuleOutputToPostProcessInput,
@@ -42,6 +43,12 @@ vi.mock('@carrot-fndn/shared/aws-http', async (importOriginal) => ({
   ...(await importOriginal<typeof import('@carrot-fndn/shared/aws-http')>()),
   provideSmaugApiCredentials: vi.fn(() => provideStubSmaugCredentials),
 }));
+
+vi.mock('node:crypto', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('node:crypto')>();
+
+  return { ...actual, randomInt: vi.fn(actual.randomInt) };
+});
 
 const stubReportableRuleOutput = () => ({
   ...stubRuleOutput(),
@@ -300,11 +307,7 @@ describe('reportRuleResults', () => {
   it('should send a request to the given responseUrl', async () => {
     vi.useFakeTimers();
     vi.setSystemTime('2026-08-30T12:00:00.000Z');
-    const ruleOutput = {
-      ...stubRuleOutput(),
-      responseUrl: faker.internet.url(),
-      resultContent: { [faker.string.sample()]: faker.string.sample() },
-    };
+    const ruleOutput = stubReportableRuleOutput();
 
     const { headers, ...request } = await signRequest({
       body: mapRuleOutputToPostProcessInput(ruleOutput),
@@ -352,11 +355,7 @@ describe('reportRuleResults', () => {
 
   it('should exclude a failed response body from errors and logs', async () => {
     const responseSecret = 'fictional-secret-response-body';
-    const ruleOutput = {
-      ...stubRuleOutput(),
-      responseUrl: faker.internet.url(),
-      resultContent: { [faker.string.sample()]: faker.string.sample() },
-    };
+    const ruleOutput = stubReportableRuleOutput();
     const loggerErrorSpy = vi
       .spyOn(logger, 'error')
       .mockImplementation(() => undefined);
@@ -396,11 +395,7 @@ describe('reportRuleResults', () => {
   });
 
   it('should throw error when the request throws error', async () => {
-    const ruleOutput = {
-      ...stubRuleOutput(),
-      responseUrl: faker.internet.url(),
-      resultContent: { [faker.string.sample()]: faker.string.sample() },
-    };
+    const ruleOutput = stubReportableRuleOutput();
 
     const errorResponse = new Response();
 
@@ -418,30 +413,52 @@ describe('reportRuleResults', () => {
 
     expect(fetch).toHaveBeenCalled();
   });
-  describe('when the report fails transiently', () => {
+
+  it('should not retry when signing the request fails', async () => {
+    vi.spyOn(globalThis, 'fetch');
+    vi.spyOn(logger, 'error').mockImplementation(() => undefined);
+    vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
+
+    await expect(
+      reportRuleResults(
+        {
+          ...stubReportableRuleOutput(),
+          responseUrl: 'http://callback.example.com/post-process',
+        },
+        ampleTime,
+      ),
+    ).rejects.toThrow('Signed requests require HTTPS');
+    expect(fetch).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  describe('when the report fails', () => {
     beforeEach(() => {
       vi.useFakeTimers();
       vi.spyOn(logger, 'error').mockImplementation(() => undefined);
       vi.spyOn(logger, 'warn').mockImplementation(() => undefined);
     });
 
-    it('should retry on 503 and then succeed', async () => {
-      vi.spyOn(globalThis, 'fetch')
-        .mockResolvedValueOnce(new Response(undefined, { status: 503 }))
-        .mockResolvedValueOnce(new Response());
+    it.each([408, 425, 429, 500, 502, 503, 504])(
+      'should retry on %i and then succeed',
+      async (status) => {
+        vi.spyOn(globalThis, 'fetch')
+          .mockResolvedValueOnce(new Response(undefined, { status }))
+          .mockResolvedValueOnce(new Response());
 
-      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+        const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
 
-      await vi.runAllTimersAsync();
+        await vi.runAllTimersAsync();
 
-      await expect(report).resolves.toBeUndefined();
-      expect(fetch).toHaveBeenCalledTimes(2);
-      expect(logger.warn).toHaveBeenCalledWith(
-        expect.objectContaining({ attempt: 1, status: 503 }),
-        'Retrying rule results report',
-      );
-      expect(logger.error).not.toHaveBeenCalled();
-    });
+        await expect(report).resolves.toBeUndefined();
+        expect(fetch).toHaveBeenCalledTimes(2);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({ attempt: 1, status }),
+          'Retrying rule results report',
+        );
+        expect(logger.error).not.toHaveBeenCalled();
+      },
+    );
 
     it('should retry on a network error and then succeed', async () => {
       vi.spyOn(globalThis, 'fetch')
@@ -454,16 +471,20 @@ describe('reportRuleResults', () => {
 
       await expect(report).resolves.toBeUndefined();
       expect(fetch).toHaveBeenCalledTimes(2);
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.objectContaining({ attempt: 1, err: expect.any(TypeError) }),
+        'Retrying rule results report',
+      );
     });
 
-    it('should not retry on 400', async () => {
+    it.each([400, 401, 403, 404])('should not retry on %i', async (status) => {
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(undefined, { status: 400 }),
+        new Response(undefined, { status }),
       );
 
       await expect(
         reportRuleResults(stubReportableRuleOutput(), ampleTime),
-      ).rejects.toThrow('Failed to report rule results: status 400');
+      ).rejects.toThrow(`Failed to report rule results: status ${status}`);
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(logger.warn).not.toHaveBeenCalled();
     });
@@ -484,8 +505,48 @@ describe('reportRuleResults', () => {
 
       expect(fetch).toHaveBeenCalledTimes(4);
       expect(logger.warn).toHaveBeenCalledTimes(3);
-      expect(logger.error).toHaveBeenCalledWith(
+
+      for (const attempt of [1, 2, 3]) {
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attempt,
+            delayMs: expect.toSatisfy(
+              (delayMs: number) => delayMs < 1000 * 2 ** (attempt - 1),
+            ),
+          }),
+          'Retrying rule results report',
+        );
+      }
+
+      expect(logger.error).toHaveBeenCalledExactlyOnceWith(
         expect.any(Error),
+        'Failed to report rule results',
+      );
+    });
+
+    it('should bound a retry so it fails before the Lambda deadline', async () => {
+      const timeoutSpy = vi.spyOn(AbortSignal, 'timeout');
+      const timeout = new DOMException(
+        'The operation timed out',
+        'TimeoutError',
+      );
+      const fetchSpy = vi
+        .spyOn(globalThis, 'fetch')
+        .mockResolvedValueOnce(new Response(undefined, { status: 503 }))
+        .mockRejectedValueOnce(timeout);
+
+      const report = reportRuleResults(stubReportableRuleOutput(), ampleTime);
+
+      await Promise.all([
+        expect(report).rejects.toBe(timeout),
+        vi.runAllTimersAsync(),
+      ]);
+
+      expect(fetchSpy.mock.calls[0]?.[1]?.signal).toBeUndefined();
+      expect(fetchSpy.mock.calls[1]?.[1]?.signal).toBeInstanceOf(AbortSignal);
+      expect(timeoutSpy).toHaveBeenCalledWith(58_000);
+      expect(logger.error).toHaveBeenCalledWith(
+        timeout,
         'Failed to report rule results',
       );
     });
@@ -517,6 +578,9 @@ describe('reportRuleResults', () => {
       expect(secondHeaders?.get('authorization')).not.toBe(
         firstHeaders?.get('authorization'),
       );
+      expect(fetchSpy.mock.calls[1]?.[1]?.body).toBe(
+        fetchSpy.mock.calls[0]?.[1]?.body,
+      );
     });
 
     it('should stop retrying when the remaining time leaves no margin', async () => {
@@ -541,7 +605,20 @@ describe('reportRuleResults', () => {
       ]);
 
       expect(fetch).toHaveBeenCalledTimes(2);
-      expect(getRemainingTimeInMillis).toHaveBeenCalledTimes(2);
+    });
+
+    it('should count the backoff delay against the remaining time', async () => {
+      vi.mocked(randomInt).mockImplementationOnce(() => 900);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(undefined, { status: 503 }),
+      );
+
+      await expect(
+        reportRuleResults(stubReportableRuleOutput(), {
+          getRemainingTimeInMillis: () => 5800,
+        }),
+      ).rejects.toThrow('Failed to report rule results: status 503');
+      expect(fetch).toHaveBeenCalledTimes(1);
     });
   });
 });

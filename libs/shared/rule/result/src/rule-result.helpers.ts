@@ -35,6 +35,8 @@ const RETRYABLE_REPORT_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
 const MAX_REPORT_ATTEMPTS = 4;
 const BASE_REPORT_RETRY_DELAY_MS = 1000;
 const REPORT_TIME_MARGIN_MS = 5000;
+// leaves room for the failure log and Sentry's 2 s flush before the Lambda deadline
+const REPORT_ABORT_RESERVE_MS = 2000;
 
 interface ReportFailure {
   error: unknown;
@@ -105,6 +107,7 @@ export const signRequest = async (
 
 const sendRuleResults = async (
   ruleOutput: RuleOutput,
+  signal?: AbortSignal,
 ): Promise<ReportFailure | undefined> => {
   const request = await signRequest({
     body: mapRuleOutputToPostProcessInput(ruleOutput),
@@ -113,11 +116,16 @@ const sendRuleResults = async (
   });
 
   try {
-    const response = await fetch(ruleOutput.responseUrl, request);
+    const response = await fetch(ruleOutput.responseUrl, {
+      ...request,
+      ...(signal && { signal }),
+    });
 
     if (response.ok) {
       return undefined;
     }
+
+    await response.body?.cancel();
 
     return {
       error: new Error(
@@ -140,7 +148,14 @@ export const reportRuleResults = async (
 
   try {
     for (let attempt = 1; ; attempt += 1) {
-      const failure = await sendRuleResults(ruleOutput);
+      const failure = await sendRuleResults(
+        ruleOutput,
+        attempt === 1
+          ? undefined
+          : AbortSignal.timeout(
+              context.getRemainingTimeInMillis() - REPORT_ABORT_RESERVE_MS,
+            ),
+      );
 
       if (failure === undefined) {
         return;
@@ -159,7 +174,7 @@ export const reportRuleResults = async (
       }
 
       logger.warn(
-        { attempt, delayMs, error: failure.error, status: failure.status },
+        { attempt, delayMs, err: failure.error, status: failure.status },
         'Retrying rule results report',
       );
 
