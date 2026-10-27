@@ -1,6 +1,7 @@
 import { logger } from '@carrot-fndn/shared/helpers';
 
 import type {
+  AttachmentInfo,
   CrossValidationConfig,
   CrossValidationInput,
   CrossValidationResult,
@@ -15,6 +16,33 @@ import {
   type DocumentExtractorService,
   NoMatchingLayoutError,
 } from './document-extractor.service';
+
+const recordExtractionFailure = (
+  error: unknown,
+  attachmentInfo: AttachmentInfo,
+  result: CrossValidationResult,
+): void => {
+  const isLayoutNotRecognized = error instanceof NoMatchingLayoutError;
+
+  if (!isLayoutNotRecognized) {
+    logger.error(
+      { attachmentInfo, error },
+      'Failed to extract document for cross-validation',
+    );
+  }
+
+  const code = (
+    isLayoutNotRecognized ? 'LAYOUT_NOT_RECOGNIZED' : 'EXTRACTION_FAILED'
+  ) satisfies DocumentExtractionCommentKey;
+  // eslint-disable-next-line security/detect-object-injection
+  const description = DOCUMENT_EXTRACTION_COMMENTS[code](
+    attachmentInfo.attachmentId,
+    error instanceof Error ? error.message : 'Unknown error',
+  );
+
+  result.failMessages.push(description);
+  result.failReasons.push({ code, description });
+};
 
 const processInput = async <
   TEventData,
@@ -88,35 +116,7 @@ const processInput = async <
       result.reviewReasons.push(...extractionResult.reviewReasons);
     }
   } catch (error) {
-    if (error instanceof NoMatchingLayoutError) {
-      const description = DOCUMENT_EXTRACTION_COMMENTS.LAYOUT_NOT_RECOGNIZED(
-        attachmentInfo.attachmentId,
-        error.message,
-      );
-
-      result.failMessages.push(description);
-      result.failReasons.push({
-        code: 'LAYOUT_NOT_RECOGNIZED' satisfies DocumentExtractionCommentKey,
-        description,
-      });
-
-      return;
-    }
-
-    logger.error(
-      { attachmentInfo, error },
-      'Failed to extract document for cross-validation',
-    );
-    const description = DOCUMENT_EXTRACTION_COMMENTS.EXTRACTION_FAILED(
-      attachmentInfo.attachmentId,
-      error instanceof Error ? error.message : 'Unknown error',
-    );
-
-    result.failMessages.push(description);
-    result.failReasons.push({
-      code: 'EXTRACTION_FAILED' satisfies DocumentExtractionCommentKey,
-      description,
-    });
+    recordExtractionFailure(error, attachmentInfo, result);
   }
 };
 
