@@ -5,6 +5,7 @@ import type { AdditionalVerification } from '@carrot-fndn/shared/types';
 import {
   createDocumentExtractor,
   type DocumentExtractorService,
+  NoMatchingLayoutError,
 } from '@carrot-fndn/shared/document-extractor';
 import '@carrot-fndn/shared/document-extractor-scale-ticket';
 import { isNonEmptyArray, logger } from '@carrot-fndn/shared/helpers';
@@ -91,6 +92,16 @@ export const verifyScaleTicketNetWeight = async ({
 
     return { errors: [] };
   } catch (error) {
+    if (error instanceof NoMatchingLayoutError) {
+      return {
+        errors: [
+          WEIGHING_FINDINGS.render(
+            'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
+          ),
+        ],
+      };
+    }
+
     logger.error(
       {
         err: error,

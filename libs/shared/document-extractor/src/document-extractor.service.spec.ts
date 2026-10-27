@@ -16,6 +16,7 @@ import type {
 import {
   createDocumentExtractor,
   DocumentExtractor,
+  NoMatchingLayoutError,
 } from './document-extractor.service';
 import { clearRegistry, registerParser } from './layout-registry.helpers';
 
@@ -212,7 +213,29 @@ describe('DocumentExtractor', () => {
           },
         ),
       ).rejects.toThrow(
-        'No matching parser found for document type "scaleTicket" among layouts: low-score-layout, stub-layout-2',
+        new NoMatchingLayoutError('scaleTicket', [
+          'low-score-layout',
+          'stub-layout-2',
+        ]),
+      );
+    });
+
+    it('should throw a plain error when none of the layouts has a registered parser', async () => {
+      clearRegistry();
+
+      const extraction = extractor.extract(
+        { filePath: 'test.pdf' },
+        {
+          documentType: 'scaleTicket',
+          layouts: ['unknown-layout', 'unknown-layout-2'] as NonEmptyString[],
+        },
+      );
+
+      await expect(extraction).rejects.toThrow(
+        'No parser found for document type "scaleTicket" with layouts: unknown-layout, unknown-layout-2',
+      );
+      await expect(extraction).rejects.not.toBeInstanceOf(
+        NoMatchingLayoutError,
       );
     });
   });

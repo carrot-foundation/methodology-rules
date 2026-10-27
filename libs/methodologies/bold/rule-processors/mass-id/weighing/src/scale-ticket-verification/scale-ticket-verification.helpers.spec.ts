@@ -248,6 +248,97 @@ describe('scale-ticket-verification', () => {
     });
   });
 
+  describe('with several layouts enabled', () => {
+    const multiLayoutConfig: AdditionalVerification = {
+      'Layout IDs': ['layout-1', 'pesagem-manual', 'toledo-guardian'],
+      'Verification Type': 'Scale Ticket',
+    };
+
+    it('should compare the net weight of a ticket matching one of the layouts', async () => {
+      vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+        stubTextExtractionResult(`
+          Ticket de pesagem   12345
+          Placa Veículo ABC1234
+          Pesagem Inicial: 1.000,50 kg
+          Pesagem Final: 800,25 kg
+          Peso Líquido: 200,25 kg
+        `),
+      );
+
+      const result = await verifyScaleTicketNetWeight({
+        config: multiLayoutConfig,
+        expectedNetWeight: 200.25,
+        textExtractorInput: { filePath: 'dummy-path' },
+      });
+
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it('should return a layout not recognized error when the ticket matches none of the layouts', async () => {
+      vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+        stubTextExtractionResult(`
+          Controle de entrada
+          Material: residuo organico
+          Quantidade: 3 cacambas
+        `),
+      );
+
+      const result = await verifyScaleTicketNetWeight({
+        config: multiLayoutConfig,
+        expectedNetWeight: 100,
+        textExtractorInput: { filePath: 'dummy-path' },
+      });
+
+      expect(result.errors.map((error) => error.finding)).toEqual([
+        {
+          code: 'weighing.INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
+          defaultOwner: 'INTEGRATOR',
+        },
+      ]);
+    });
+
+    it('should return an extraction failed error when none of the layouts is supported', async () => {
+      vi.spyOn(textExtractor, 'extractText').mockResolvedValue(
+        stubTextExtractionResult('Controle de entrada'),
+      );
+
+      const result = await verifyScaleTicketNetWeight({
+        config: {
+          'Layout IDs': ['layout-unsupported', 'layout-unsupported-2'],
+          'Verification Type': 'Scale Ticket',
+        },
+        expectedNetWeight: 100,
+        textExtractorInput: { filePath: 'dummy-path' },
+      });
+
+      expect(result.errors.map((error) => error.finding)).toEqual([
+        {
+          code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+          defaultOwner: 'CARROT',
+        },
+      ]);
+    });
+
+    it('should return an extraction failed error when text extractor throws', async () => {
+      vi.spyOn(textExtractor, 'extractText').mockRejectedValue(
+        new Error('boom'),
+      );
+
+      const result = await verifyScaleTicketNetWeight({
+        config: multiLayoutConfig,
+        expectedNetWeight: 100,
+        textExtractorInput: { filePath: 'dummy-path' },
+      });
+
+      expect(result.errors.map((error) => error.finding)).toEqual([
+        {
+          code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
+          defaultOwner: 'CARROT',
+        },
+      ]);
+    });
+  });
+
   it('should return an extraction failed error when text extractor throws', async () => {
     vi.spyOn(textExtractor, 'extractText').mockRejectedValue(new Error('boom'));
 
