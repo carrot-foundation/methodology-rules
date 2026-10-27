@@ -22,6 +22,12 @@ import { WEIGHING_FINDINGS } from '../weighing.findings';
 const documentExtractor: DocumentExtractorService =
   createDocumentExtractor(textExtractor);
 
+const layoutNotRecognizedResult = (): ScaleTicketVerificationResult => ({
+  errors: [
+    WEIGHING_FINDINGS.render('INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED'),
+  ],
+});
+
 export const isScaleTicketVerificationConfig = (
   config: AdditionalVerification,
 ): boolean => config['Verification Type'] === 'Scale Ticket';
@@ -68,13 +74,7 @@ export const verifyScaleTicketNetWeight = async ({
     const ticketNetWeight = extractionOutput.data.netWeight?.parsed.value;
 
     if (ticketNetWeight === undefined) {
-      return {
-        errors: [
-          WEIGHING_FINDINGS.render(
-            'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
-          ),
-        ],
-      };
+      return layoutNotRecognizedResult();
     }
 
     const diff = Math.abs(ticketNetWeight - expectedNetWeight);
@@ -93,13 +93,7 @@ export const verifyScaleTicketNetWeight = async ({
     return { errors: [] };
   } catch (error) {
     if (error instanceof NoMatchingLayoutError) {
-      return {
-        errors: [
-          WEIGHING_FINDINGS.render(
-            'INVALID.SCALE_TICKET_LAYOUT_NOT_RECOGNIZED',
-          ),
-        ],
-      };
+      return layoutNotRecognizedResult();
     }
 
     logger.error(

@@ -108,11 +108,11 @@ export class DocumentExtractor implements DocumentExtractorService {
     );
 
     if (!bestMatch) {
-      const hasRegisteredLayout = resolvedLayouts.some(
-        (layoutId) => getParser({ documentType, layoutId }) !== undefined,
+      const hasUnregisteredLayout = resolvedLayouts.some(
+        (layoutId) => getParser({ documentType, layoutId }) === undefined,
       );
 
-      if (!hasRegisteredLayout) {
+      if (hasUnregisteredLayout) {
         throw new Error(
           `No parser found for document type "${documentType}" with layouts: ${resolvedLayouts.join(', ')}`,
         );

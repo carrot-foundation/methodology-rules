@@ -318,25 +318,6 @@ describe('scale-ticket-verification', () => {
         },
       ]);
     });
-
-    it('should return an extraction failed error when text extractor throws', async () => {
-      vi.spyOn(textExtractor, 'extractText').mockRejectedValue(
-        new Error('boom'),
-      );
-
-      const result = await verifyScaleTicketNetWeight({
-        config: multiLayoutConfig,
-        expectedNetWeight: 100,
-        textExtractorInput: { filePath: 'dummy-path' },
-      });
-
-      expect(result.errors.map((error) => error.finding)).toEqual([
-        {
-          code: 'weighing.INVALID.SCALE_TICKET_EXTRACTION_FAILED',
-          defaultOwner: 'CARROT',
-        },
-      ]);
-    });
   });
 
   it('should return an extraction failed error when text extractor throws', async () => {
