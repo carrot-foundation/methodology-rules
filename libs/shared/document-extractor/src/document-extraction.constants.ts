@@ -1,6 +1,8 @@
 export const DOCUMENT_EXTRACTION_COMMENTS = {
   EXTRACTION_FAILED: (attachmentId: string, errorMessage: string) =>
     `Document extraction failed for attachment ${attachmentId}: ${errorMessage}`,
+  LAYOUT_NOT_RECOGNIZED: (attachmentId: string, errorMessage: string) =>
+    `Attachment ${attachmentId} does not match any supported layout: ${errorMessage}`,
   LOW_CONFIDENCE_FIELD: (field: string) => `Low confidence field: ${field}`,
   LOW_LAYOUT_MATCH_SCORE: (layoutMatchScore: number, reviewThreshold: number) =>
     `Layout match score (${layoutMatchScore.toFixed(2)}) below review threshold (${reviewThreshold})`,

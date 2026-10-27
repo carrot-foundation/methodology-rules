@@ -5,13 +5,16 @@ import type {
   CrossValidationInput,
   CrossValidationResult,
 } from './cross-validation.types';
-import type { DocumentExtractorService } from './document-extractor.service';
 import type { BaseExtractedData } from './document-extractor.types';
 
 import {
   DOCUMENT_EXTRACTION_COMMENTS,
   type DocumentExtractionCommentKey,
 } from './document-extraction.constants';
+import {
+  type DocumentExtractorService,
+  NoMatchingLayoutError,
+} from './document-extractor.service';
 
 const processInput = async <
   TEventData,
@@ -85,6 +88,21 @@ const processInput = async <
       result.reviewReasons.push(...extractionResult.reviewReasons);
     }
   } catch (error) {
+    if (error instanceof NoMatchingLayoutError) {
+      const description = DOCUMENT_EXTRACTION_COMMENTS.LAYOUT_NOT_RECOGNIZED(
+        attachmentInfo.attachmentId,
+        error.message,
+      );
+
+      result.failMessages.push(description);
+      result.failReasons.push({
+        code: 'LAYOUT_NOT_RECOGNIZED' satisfies DocumentExtractionCommentKey,
+        description,
+      });
+
+      return;
+    }
+
     logger.error(
       { attachmentInfo, error },
       'Failed to extract document for cross-validation',

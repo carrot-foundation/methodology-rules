@@ -5,7 +5,6 @@ import type {
   CrossValidationConfig,
   CrossValidationInput,
 } from './cross-validation.types';
-import type { DocumentExtractorService } from './document-extractor.service';
 import type {
   BaseExtractedData,
   DocumentExtractorConfig,
@@ -13,6 +12,10 @@ import type {
 } from './document-extractor.types';
 
 import { crossValidateAttachments } from './cross-validation.helpers';
+import {
+  type DocumentExtractorService,
+  NoMatchingLayoutError,
+} from './document-extractor.service';
 
 interface TestEventData {
   documentType: string;
@@ -315,6 +318,29 @@ describe('crossValidateAttachments', () => {
         description:
           'Document extraction failed for attachment att-1: Extraction failed',
       },
+    ]);
+  });
+
+  it('should fail with a layout not recognized reason when no layout matches the document', async () => {
+    const extractor = createMockExtractor(
+      undefined,
+      new NoMatchingLayoutError('transportManifest', ['layout-a', 'layout-b']),
+    );
+    const config = createConfig();
+    const inputs: CrossValidationInput<TestEventData>[] = [
+      {
+        attachmentInfo: createAttachmentInfo('att-1'),
+        eventData: createEventData('MTR', 'expected'),
+      },
+    ];
+
+    const result = await crossValidateAttachments(inputs, config, extractor);
+    const description =
+      'Attachment att-1 does not match any supported layout: No matching parser found for document type "transportManifest" among layouts: layout-a, layout-b';
+
+    expect(result.failMessages).toEqual([description]);
+    expect(result.failReasons).toEqual([
+      { code: 'LAYOUT_NOT_RECOGNIZED', description },
     ]);
   });
 

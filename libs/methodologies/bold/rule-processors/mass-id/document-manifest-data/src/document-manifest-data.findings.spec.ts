@@ -36,6 +36,12 @@ describe('toCrossValidationFinding', () => {
       ),
     },
     {
+      code: 'LAYOUT_NOT_RECOGNIZED',
+      expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
+        'DOCUMENT_EXTRACTION.LAYOUT_NOT_RECOGNIZED',
+      ),
+    },
+    {
       code: 'EXTRACTION_FAILED',
       expectedFinding: DOCUMENT_MANIFEST_DATA_FINDINGS.finding(
         'DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
@@ -60,6 +66,23 @@ describe('toCrossValidationFinding', () => {
       code: 'document-manifest-data.DOCUMENT_EXTRACTION.LOW_CONFIDENCE_FIELD',
       defaultOwner: 'RECYCLER',
     });
+  });
+
+  it('should attribute an unrecognized document layout to the integrator and a failed extraction to Carrot', () => {
+    expect(
+      ['LAYOUT_NOT_RECOGNIZED', 'EXTRACTION_FAILED'].map((code) =>
+        toCrossValidationFinding({ code, description: code }),
+      ),
+    ).toEqual([
+      {
+        code: 'document-manifest-data.DOCUMENT_EXTRACTION.LAYOUT_NOT_RECOGNIZED',
+        defaultOwner: 'INTEGRATOR',
+      },
+      {
+        code: 'document-manifest-data.DOCUMENT_EXTRACTION.EXTRACTION_FAILED',
+        defaultOwner: 'CARROT',
+      },
+    ]);
   });
 
   it('should throw for a reason code without a finding', () => {
