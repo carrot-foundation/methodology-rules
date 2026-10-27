@@ -1,4 +1,5 @@
 import type { AnyObject } from '@carrot-fndn/shared/types';
+import type { Context } from 'aws-lambda';
 
 import {
   provideSmaugApiCredentials,
@@ -23,11 +24,25 @@ import {
   RuleOutputSchema,
   type RuleOutputStatus,
 } from '@carrot-fndn/shared/rule/types';
+import { randomInt } from 'node:crypto';
 
 import {
   type PostProcessInput,
   PostProcessInputSchema,
 } from './rule-result.schemas';
+
+const RETRYABLE_REPORT_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+const MAX_REPORT_ATTEMPTS = 4;
+const BASE_REPORT_RETRY_DELAY_MS = 1000;
+const REPORT_TIME_MARGIN_MS = 5000;
+// leaves room for the failure log and Sentry's 2 s flush before the Lambda deadline
+const REPORT_ABORT_RESERVE_MS = 3000;
+
+interface ReportFailure {
+  error: unknown;
+  retryable: boolean;
+  status?: number;
+}
 
 export const mapRuleOutputToPostProcessInput = (
   ruleOutput: RuleOutput,
@@ -90,26 +105,83 @@ export const signRequest = async (
 ): ReturnType<typeof signAwsHttpRequest> =>
   signAwsHttpRequest(input, getAwsRegion(), provideSmaugApiCredentials());
 
+const sendRuleResults = async (
+  ruleOutput: RuleOutput,
+  signal?: AbortSignal,
+): Promise<ReportFailure | undefined> => {
+  const request = await signRequest({
+    body: mapRuleOutputToPostProcessInput(ruleOutput),
+    method: 'POST',
+    url: new URL(ruleOutput.responseUrl),
+  });
+
+  try {
+    const response = await fetch(ruleOutput.responseUrl, {
+      ...request,
+      ...(signal && { signal }),
+    });
+
+    if (response.ok) {
+      return undefined;
+    }
+
+    await response.body?.cancel();
+
+    return {
+      error: new Error(
+        `Failed to report rule results: status ${formatHttpStatus(response.status)}`,
+      ),
+      retryable: RETRYABLE_REPORT_STATUSES.has(response.status),
+      status: response.status,
+    };
+  } catch (error) {
+    // fetch rejects with a TypeError on a network error
+    return { error, retryable: error instanceof TypeError };
+  }
+};
+
 export const reportRuleResults = async (
   ruleOutput: RuleOutput,
+  context: Pick<Context, 'getRemainingTimeInMillis'>,
 ): Promise<void> => {
   RuleOutputSchema.parse(ruleOutput);
 
   try {
-    const url = new URL(ruleOutput.responseUrl);
-
-    const request = await signRequest({
-      body: mapRuleOutputToPostProcessInput(ruleOutput),
-      method: 'POST',
-      url,
-    });
-
-    const response = await fetch(ruleOutput.responseUrl, request);
-
-    if (!response.ok) {
-      throw new Error(
-        `Failed to report rule results: status ${formatHttpStatus(response.status)}`,
+    for (let attempt = 1; ; attempt += 1) {
+      const failure = await sendRuleResults(
+        ruleOutput,
+        attempt === 1
+          ? undefined
+          : AbortSignal.timeout(
+              Math.max(
+                0,
+                context.getRemainingTimeInMillis() - REPORT_ABORT_RESERVE_MS,
+              ),
+            ),
       );
+
+      if (failure === undefined) {
+        return;
+      }
+
+      const delayMs = randomInt(
+        BASE_REPORT_RETRY_DELAY_MS * 2 ** (attempt - 1),
+      );
+
+      if (
+        !failure.retryable ||
+        attempt >= MAX_REPORT_ATTEMPTS ||
+        context.getRemainingTimeInMillis() - delayMs < REPORT_TIME_MARGIN_MS
+      ) {
+        throw failure.error;
+      }
+
+      logger.warn(
+        { attempt, delayMs, err: failure.error, status: failure.status },
+        'Retrying rule results report',
+      );
+
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
   } catch (error) {
     logger.error(error, 'Failed to report rule results');

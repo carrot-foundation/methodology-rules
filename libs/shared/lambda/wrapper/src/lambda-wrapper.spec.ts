@@ -348,4 +348,30 @@ describe('wrapRuleIntoLambdaHandler', () => {
     );
     expect(fetchSpy).toHaveBeenCalledTimes(2);
   });
+
+  it('should give the callback report the Lambda remaining time', async () => {
+    const response = {
+      ...stubRuleOutput({ resultContent: {} }),
+      resultStatus: 'PASSED' as const,
+    };
+
+    class Wrapped extends RuleDataProcessor {
+      process() {
+        return Promise.resolve(response);
+      }
+    }
+
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
+      .mockResolvedValue(new Response(undefined, { status: 503 }));
+
+    await expect(
+      wrapRuleIntoLambdaHandler(new Wrapped())(
+        stubRuleInput(),
+        { ...stubContext(), getRemainingTimeInMillis: () => 4000 },
+        () => {},
+      ),
+    ).rejects.toThrow('Failed to report rule results: status 503');
+    expect(fetchSpy).toHaveBeenCalledOnce();
+  });
 });
