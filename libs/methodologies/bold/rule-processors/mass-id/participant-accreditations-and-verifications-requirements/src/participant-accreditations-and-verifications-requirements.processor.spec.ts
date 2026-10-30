@@ -24,52 +24,87 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
   const ruleDataProcessor =
     new ParticipantAccreditationsAndVerificationsRequirementsProcessor();
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it.each([
     {
-      at: '2024-06-15T12:00:00.000Z',
       duplicateEffectiveDate: undefined,
       expected: 'PASSED',
-      scenario: 'one leaf has historical and future renewal periods',
+      expectedFinding: undefined,
+      runDate: '2024-06-15T12:00:00.000Z',
+      scenario: 'a future renewal is not yet in force at audit run time',
     },
     {
-      at: '2025-06-15T12:00:00.000Z',
       duplicateEffectiveDate: undefined,
       expected: 'PASSED',
-      scenario: 'one leaf has an expired period followed by a renewal',
+      expectedFinding: undefined,
+      runDate: '2025-06-15T12:00:00.000Z',
+      scenario:
+        'the MassID predates all accreditations but the renewal is valid at audit run time',
     },
     {
-      at: '2025-06-15T12:00:00.000Z',
       duplicateEffectiveDate: undefined,
       expected: 'PASSED',
+      expectedFinding: undefined,
       firstExpirationDate: '2026-12-31T00:00:00.000Z',
+      runDate: '2025-06-15T12:00:00.000Z',
       scenario: 'one leaf has two overlapping approved periods',
     },
     {
-      at: '2024-06-15T12:00:00.000Z',
       duplicateEffectiveDate: '2024-01-01T00:00:00.000Z',
       expected: 'FAILED',
-      scenario: 'two processor leaves are valid at the historical mass date',
+      expectedFinding: {
+        code: 'participant-accreditations-and-verifications-requirements.ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT',
+        defaultOwner: 'INTEGRATOR',
+      },
+      runDate: '2024-06-15T12:00:00.000Z',
+      scenario: 'two processor leaves are valid at audit run time',
     },
     {
-      at: '2024-06-15T12:00:00.000Z',
       duplicateEffectiveDate: '2025-01-01T00:00:00.000Z',
       expected: 'PASSED',
-      scenario: 'a second processor leaf is only effective after the mass date',
+      expectedFinding: undefined,
+      runDate: '2024-06-15T12:00:00.000Z',
+      scenario:
+        'a second processor leaf is only effective after audit run time',
+    },
+    {
+      duplicateEffectiveDate: undefined,
+      expected: 'FAILED',
+      expectedFinding: {
+        code: 'participant-accreditations-and-verifications-requirements.ERROR.MISSING_PARTICIPANTS_ACCREDITATION_DOCUMENTS',
+        defaultOwner: 'TO_CONFIRM',
+      },
+      massDate: '2024-06-15T12:00:00.000Z',
+      renewalEffectiveDate: '2025-03-01T00:00:00.000Z',
+      runDate: '2025-02-01T12:00:00.000Z',
+      scenario:
+        'the audit runs in a gap although the MassID date is covered by an earlier period',
     },
   ])(
     'should return $expected when $scenario',
     async ({
-      at,
       duplicateEffectiveDate,
       expected,
+      expectedFinding,
       firstExpirationDate = '2024-12-31T00:00:00.000Z',
+      massDate = '2023-06-15T12:00:00.000Z',
+      renewalEffectiveDate = '2025-01-01T00:00:00.000Z',
+      runDate,
     }) => {
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(new Date(runDate));
+
       const {
         massIDAuditDocument,
         massIDDocument,
         participantsAccreditationDocuments,
       } = new BoldStubsBuilder()
-        .createMassIDDocuments({ partialDocument: { externalCreatedAt: at } })
+        .createMassIDDocuments({
+          partialDocument: { externalCreatedAt: massDate },
+        })
         .createMassIDAuditDocuments({
           partialDocument: { externalCreatedAt: '2030-01-01T00:00:00.000Z' },
         })
@@ -84,7 +119,7 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
           expirationDate: firstExpirationDate,
         },
         {
-          effectiveDate: '2025-01-01T00:00:00.000Z',
+          effectiveDate: renewalEffectiveDate,
           expirationDate: '2025-12-31T00:00:00.000Z',
         },
       ].map(({ effectiveDate, expirationDate }) =>
@@ -147,16 +182,7 @@ describe('ParticipantAccreditationsAndVerificationsRequirementsProcessor', () =>
 
       expect(ruleOutput.resultStatus).toBe(expected);
       expect(ruleOutput.resultContent).toEqual(
-        expected === 'FAILED'
-          ? {
-              findings: [
-                {
-                  code: 'participant-accreditations-and-verifications-requirements.ERROR.MULTIPLE_VALID_ACCREDITATIONS_FOR_PARTICIPANT',
-                  defaultOwner: 'INTEGRATOR',
-                },
-              ],
-            }
-          : undefined,
+        expectedFinding ? { findings: [expectedFinding] } : undefined,
       );
     },
   );

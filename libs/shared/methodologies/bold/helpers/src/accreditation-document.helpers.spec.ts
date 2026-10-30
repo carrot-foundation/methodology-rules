@@ -39,6 +39,15 @@ const stubAccreditationDocumentWithExternalEvents = ({
 };
 
 describe('Accreditation Document Helpers', () => {
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(evaluationDate);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   describe('isAccreditationValid', () => {
     const firstPeriod = {
       effectiveDate: '2024-01-01T00:00:00.000Z',
@@ -60,14 +69,13 @@ describe('Accreditation Document Helpers', () => {
         at: '2024-06-15T12:00:00.000Z',
         expected: true,
         periods: [firstPeriod],
-        scenario: 'a single period covers the historical mass date',
+        scenario: 'a single period covers the audit run date',
       },
       {
         at: '2024-06-15T12:00:00.000Z',
         expected: true,
         periods: [renewal, firstPeriod],
-        scenario:
-          'a future renewal precedes the historical period in the array',
+        scenario: 'a future renewal precedes the current period in the array',
       },
       {
         at: '2025-06-15T12:00:00.000Z',
@@ -88,7 +96,7 @@ describe('Accreditation Document Helpers', () => {
           firstPeriod,
           { ...renewal, effectiveDate: '2025-03-01T00:00:00.000Z' },
         ],
-        scenario: 'the mass falls in the gap before a future renewal',
+        scenario: 'the audit runs in the gap before a future renewal',
       },
       {
         at: '2025-06-15T12:00:00.000Z',
@@ -136,19 +144,19 @@ describe('Accreditation Document Helpers', () => {
         at: '2023-06-15T12:00:00.000Z',
         expected: false,
         periods: [firstPeriod, renewal],
-        scenario: 'the mass precedes the first period',
+        scenario: 'the audit runs before the first period',
       },
       {
         at: '2025-01-01T00:00:00.000Z',
         expected: true,
         periods: [firstPeriod, renewal],
-        scenario: 'the mass equals the renewal effective timestamp',
+        scenario: 'the audit runs at the renewal effective timestamp',
       },
       {
         at: '2024-12-31T23:59:59.999Z',
         expected: false,
         periods: [renewal],
-        scenario: 'the mass is just before the effective timestamp',
+        scenario: 'the audit runs just before the effective timestamp',
       },
     ])(
       'should return $expected when $scenario',
@@ -166,7 +174,9 @@ describe('Accreditation Document Helpers', () => {
           ),
         });
 
-        expect(isAccreditationValid(document, new Date(at))).toBe(expected);
+        vi.setSystemTime(new Date(at));
+
+        expect(isAccreditationValid(document)).toBe(expected);
       },
     );
 
@@ -189,7 +199,9 @@ describe('Accreditation Document Helpers', () => {
           ],
         });
 
-        expect(isAccreditationValid(document, at)).toBe(expected);
+        vi.setSystemTime(at);
+
+        expect(isAccreditationValid(document)).toBe(expected);
       },
     );
 
@@ -264,7 +276,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(expected);
+      expect(isAccreditationValid(document)).toBe(expected);
     });
 
     it('should return false if the document has a ACCREDITATION_RESULT event but the status is not APPROVED', () => {
@@ -281,7 +293,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has no ACCREDITATION_RESULT event', () => {
@@ -289,7 +301,7 @@ describe('Accreditation Document Helpers', () => {
         externalEvents: [],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has no externalEvents', () => {
@@ -299,7 +311,7 @@ describe('Accreditation Document Helpers', () => {
 
       document.externalEvents = undefined;
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has ACCREDITATION_RESULT event with invalid expiration date format', () => {
@@ -316,7 +328,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has ACCREDITATION_RESULT event with status not in enum', () => {
@@ -333,7 +345,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the result has no status and a future effective date', () => {
@@ -346,7 +358,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has a ACCREDITATION_RESULT event but no effective date', () => {
@@ -359,7 +371,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return false if the document has ACCREDITATION_RESULT event with invalid effective date format', () => {
@@ -376,7 +388,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(false);
+      expect(isAccreditationValid(document)).toBe(false);
     });
 
     it('should return true when dates use timezone offsets instead of UTC', () => {
@@ -399,7 +411,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(true);
+      expect(isAccreditationValid(document)).toBe(true);
     });
 
     it('should return true if the document has a ACCREDITATION_RESULT event with valid effective date but no expiration date', () => {
@@ -415,7 +427,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(isAccreditationValid(document, evaluationDate)).toBe(true);
+      expect(isAccreditationValid(document)).toBe(true);
     });
   });
 
@@ -478,9 +490,9 @@ describe('Accreditation Document Helpers', () => {
           ],
         });
 
-        expect(
-          isAccreditationValidWithOptionalDates(document, new Date(at)),
-        ).toBe(expected);
+        vi.setSystemTime(new Date(at));
+
+        expect(isAccreditationValidWithOptionalDates(document)).toBe(expected);
       },
     );
 
@@ -489,9 +501,7 @@ describe('Accreditation Document Helpers', () => {
         externalEvents: [],
       });
 
-      expect(
-        isAccreditationValidWithOptionalDates(document, evaluationDate),
-      ).toBe(true);
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
     it('should return true if the document has no externalEvents', () => {
@@ -499,9 +509,7 @@ describe('Accreditation Document Helpers', () => {
         externalEvents: undefined,
       });
 
-      expect(
-        isAccreditationValidWithOptionalDates(document, evaluationDate),
-      ).toBe(true);
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
     it('should return true if the document has a valid ACCREDITATION_RESULT event', () => {
@@ -518,9 +526,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(
-        isAccreditationValidWithOptionalDates(document, evaluationDate),
-      ).toBe(true);
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(true);
     });
 
     it('should return false if the document has an invalid ACCREDITATION_RESULT event', () => {
@@ -537,9 +543,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(
-        isAccreditationValidWithOptionalDates(document, evaluationDate),
-      ).toBe(false);
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(false);
     });
 
     it('should return false if the document has ACCREDITATION_RESULT event with invalid status', () => {
@@ -556,9 +560,7 @@ describe('Accreditation Document Helpers', () => {
         ],
       });
 
-      expect(
-        isAccreditationValidWithOptionalDates(document, evaluationDate),
-      ).toBe(false);
+      expect(isAccreditationValidWithOptionalDates(document)).toBe(false);
     });
   });
 });
