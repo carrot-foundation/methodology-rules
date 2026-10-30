@@ -4,11 +4,12 @@ import {
   BoldAccreditationStatus,
   BoldAttributeName,
   type BoldDocument,
+  type BoldDocumentEvent,
   BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import { type NonEmptyString } from '@carrot-fndn/shared/types';
 import { DateTimeSchema } from '@carrot-fndn/shared/types';
-import { isAfter, isBefore, isToday } from 'date-fns';
+import { isAfter, isSameDay } from 'date-fns';
 
 export const getParticipantAccreditationDocumentByParticipantId = ({
   accreditationDocuments,
@@ -21,66 +22,79 @@ export const getParticipantAccreditationDocumentByParticipantId = ({
     (document) => document.primaryParticipant.id === participantId,
   );
 
-export const isAccreditationValid = (document: BoldDocument): boolean => {
-  const event = document.externalEvents?.find(
-    eventNameIsAnyOf([BoldDocumentEventName.ACCREDITATION_RESULT]),
-  );
+export const isAccreditationValid = (
+  document: BoldDocument,
+  evaluationDate: Date,
+): boolean => {
+  let selectedEvent: BoldDocumentEvent | undefined;
+  let latestEffectiveTimestamp = Number.NEGATIVE_INFINITY;
 
-  if (!event) {
-    return false;
+  for (const event of document.externalEvents?.filter(
+    eventNameIsAnyOf([BoldDocumentEventName.ACCREDITATION_RESULT]),
+  ) ?? []) {
+    const effectiveDate = DateTimeSchema.safeParse(
+      getEventAttributeValue(event, BoldAttributeName.EFFECTIVE_DATE),
+    );
+
+    if (!effectiveDate.success) {
+      continue;
+    }
+
+    const effectiveTimestamp = new Date(effectiveDate.data).getTime();
+
+    if (
+      effectiveTimestamp <= evaluationDate.getTime() &&
+      effectiveTimestamp > latestEffectiveTimestamp
+    ) {
+      selectedEvent = event;
+      latestEffectiveTimestamp = effectiveTimestamp;
+    }
   }
 
-  const effectiveDate = getEventAttributeValue(
-    event,
-    BoldAttributeName.EFFECTIVE_DATE,
-  );
-  const expirationDate = getEventAttributeValue(
-    event,
-    BoldAttributeName.EXPIRATION_DATE,
-  );
-  const status = getEventAttributeValue(
-    event,
-    BoldAttributeName.ACCREDITATION_STATUS,
-  );
-
-  const expirationDateExists = expirationDate !== undefined;
-
   if (
-    !DateTimeSchema.safeParse(effectiveDate).success ||
-    (expirationDateExists &&
-      !DateTimeSchema.safeParse(expirationDate).success) ||
-    !(Object.values(BoldAccreditationStatus) as unknown[]).includes(status) ||
-    status !== BoldAccreditationStatus.APPROVED
+    !selectedEvent ||
+    getEventAttributeValue(
+      selectedEvent,
+      BoldAttributeName.ACCREDITATION_STATUS,
+    ) !== BoldAccreditationStatus.APPROVED
   ) {
     return false;
   }
 
-  const today = new Date();
-  const effectiveDateObject = new Date(effectiveDate as string);
-  const expirationDateObject = expirationDateExists
-    ? new Date(expirationDate as string)
-    : new Date();
+  const expirationDate = getEventAttributeValue(
+    selectedEvent,
+    BoldAttributeName.EXPIRATION_DATE,
+  );
 
-  const isEffectiveValid =
-    isToday(effectiveDateObject) || isBefore(effectiveDateObject, today);
-  const isExpirationValid =
-    isToday(expirationDateObject) || isAfter(expirationDateObject, today);
+  if (expirationDate === undefined) {
+    return true;
+  }
 
-  return isEffectiveValid && isExpirationValid;
+  const parsedExpirationDate = DateTimeSchema.safeParse(expirationDate);
+
+  if (!parsedExpirationDate.success) {
+    return false;
+  }
+
+  const expirationDateObject = new Date(parsedExpirationDate.data);
+
+  return (
+    isSameDay(expirationDateObject, evaluationDate) ||
+    isAfter(expirationDateObject, evaluationDate)
+  );
 };
 
 export const isAccreditationValidWithOptionalDates = (
   document: BoldDocument,
+  evaluationDate: Date,
 ): boolean => {
   const event = document.externalEvents?.find(
     eventNameIsAnyOf([BoldDocumentEventName.ACCREDITATION_RESULT]),
   );
 
-  // If no ACCREDITATION_RESULT event exists, the accreditation is valid
   if (!event) {
     return true;
   }
 
-  // If ACCREDITATION_RESULT exists, use the same validation as isAccreditationValid
-  return isAccreditationValid(document);
+  return isAccreditationValid(document, evaluationDate);
 };

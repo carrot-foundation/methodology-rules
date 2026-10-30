@@ -105,6 +105,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     const validationError = this.validateAllActors(
       actorParticipants,
       accreditationDocuments,
+      new Date(massIDDocument.externalCreatedAt),
     );
 
     if (validationError) {
@@ -207,7 +208,11 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
       actorType: string;
       participantId: string;
     }>,
-    isValidAccreditation: (document: BoldDocument) => boolean,
+    isValidAccreditation: (
+      document: BoldDocument,
+      evaluationDate: Date,
+    ) => boolean,
+    evaluationDate: Date,
   ): void {
     const documentsForActorType = participantDocuments.filter((document) => {
       const documentRelation = mapDocumentRelation(document);
@@ -219,7 +224,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
     });
 
     const validAccreditations = documentsForActorType.filter((document) =>
-      isValidAccreditation(document),
+      isValidAccreditation(document, evaluationDate),
     );
 
     if (validAccreditations.length === 0) {
@@ -232,6 +237,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
   private validateAllActors(
     actorParticipants: Map<string, Set<BoldDocumentEventLabel>>,
     accreditationDocuments: Map<string, BoldDocument[]>,
+    evaluationDate: Date,
   ): Error | undefined {
     const missingParticipants: string[] = [];
     const participantsWithMultipleValid: Array<{
@@ -252,6 +258,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
             missingParticipants,
             participantsWithMultipleValid,
             isAccreditationValid,
+            evaluationDate,
           );
           /* v8 ignore start -- actorType is always in one of the two sets */
         } else if (ACTORS_WITH_OPTIONAL_DATES.has(actorType)) {
@@ -262,6 +269,7 @@ export class ParticipantAccreditationsAndVerificationsRequirementsProcessor exte
             missingParticipants,
             participantsWithMultipleValid,
             isAccreditationValidWithOptionalDates,
+            evaluationDate,
           );
         }
         /* v8 ignore stop */
