@@ -13,6 +13,7 @@ import {
   getEventAttributeValue,
 } from '@carrot-fndn/shared/methodologies/bold/getters';
 import {
+  getApplicableAccreditationResultEvent,
   getApprovedExceptions,
   isApprovedExceptionValid,
 } from '@carrot-fndn/shared/methodologies/bold/helpers';
@@ -112,10 +113,10 @@ const shouldSkipNetWeightCalculationWithTareException = (
 export const getRequiredAdditionalVerificationsFromAccreditationDocument = (
   recyclerAccreditationDocument: BoldDocument,
 ): AdditionalVerificationAttributeValue | undefined => {
-  const accreditationResultEvent =
-    recyclerAccreditationDocument.externalEvents?.find(
-      eventNameIsAnyOf([ACCREDITATION_RESULT]),
-    );
+  const accreditationResultEvent = getApplicableAccreditationResultEvent(
+    recyclerAccreditationDocument,
+    new Date(),
+  );
 
   if (!accreditationResultEvent) {
     return;

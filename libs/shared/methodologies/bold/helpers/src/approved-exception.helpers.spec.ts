@@ -16,10 +16,76 @@ import {
 } from './approved-exception.helpers';
 
 const { ACCREDITATION_RESULT } = BoldDocumentEventName;
-const { APPROVED_EXCEPTIONS } = BoldAttributeName;
+const { APPROVED_EXCEPTIONS, EFFECTIVE_DATE } = BoldAttributeName;
+
+const effectiveDates = {
+  current: '2025-01-01T00:00:00.000Z',
+  future: '2026-01-01T00:00:00.000Z',
+  previous: '2024-01-01T00:00:00.000Z',
+};
 
 describe('Approved Exception Helpers', () => {
   describe('getApprovedExceptions', () => {
+    describe('applicable accreditation period', () => {
+      beforeEach(() => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(new Date('2025-06-15T12:00:00.000Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it.each([
+        { expectedReason: 'Current period', periods: ['current'] },
+        { expectedReason: 'Current period', periods: ['previous', 'current'] },
+        { expectedReason: 'Current period', periods: ['current', 'previous'] },
+        { expectedReason: 'Current period', periods: ['future', 'current'] },
+        { expectedReason: undefined, periods: ['future'] },
+      ] as const)(
+        'should select exceptions for $periods at audit time',
+        ({ expectedReason, periods }) => {
+          const document = stubParticipantAccreditationDocument({
+            externalEvents: periods.map((period) =>
+              stubDocumentEventWithMetadataAttributes(
+                { name: ACCREDITATION_RESULT },
+                [
+                  [BoldAttributeName.EFFECTIVE_DATE, effectiveDates[period]],
+                  [
+                    APPROVED_EXCEPTIONS,
+                    [
+                      {
+                        'Attribute Location': {
+                          Asset: { Category: BoldDocumentCategory.MASS_ID },
+                          Event: BoldDocumentEventName.WEIGHING,
+                        },
+                        'Attribute Name': BoldAttributeName.TARE,
+                        'Exception Type':
+                          BoldApprovedExceptionType.MANDATORY_ATTRIBUTE,
+                        Reason:
+                          period === 'current'
+                            ? 'Current period'
+                            : 'Other period',
+                      },
+                    ],
+                  ],
+                ],
+              ),
+            ),
+          });
+
+          const exceptions = getApprovedExceptions(
+            document,
+            ACCREDITATION_RESULT,
+          );
+
+          expect(exceptions?.map((exception) => exception.Reason)).toEqual(
+            expectedReason === undefined ? undefined : [expectedReason],
+          );
+        },
+      );
+    });
+
     it('should return approved exceptions when the event exists and has valid exceptions', () => {
       const exceptions: Array<{
         'Attribute Location': {
@@ -47,7 +113,10 @@ describe('Approved Exception Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, exceptions]],
+            [
+              [EFFECTIVE_DATE, '2025-01-01T00:00:00.000Z'],
+              [APPROVED_EXCEPTIONS, exceptions],
+            ],
           ),
         ],
       });
@@ -72,7 +141,7 @@ describe('Approved Exception Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
-            [],
+            [[EFFECTIVE_DATE, '2025-01-01T00:00:00.000Z']],
           ),
         ],
       });
@@ -87,7 +156,10 @@ describe('Approved Exception Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, 'invalid']],
+            [
+              [EFFECTIVE_DATE, '2025-01-01T00:00:00.000Z'],
+              [APPROVED_EXCEPTIONS, 'invalid'],
+            ],
           ),
         ],
       });
@@ -125,7 +197,7 @@ describe('Approved Exception Helpers', () => {
       const document = stubParticipantAccreditationDocument({
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
-            { name: ACCREDITATION_RESULT },
+            { name: BoldDocumentEventName.FACILITY_ADDRESS },
             [[APPROVED_EXCEPTIONS, exceptions]],
           ),
           stubDocumentEventWithMetadataAttributes(
@@ -135,7 +207,10 @@ describe('Approved Exception Helpers', () => {
         ],
       });
 
-      const result = getApprovedExceptions(document, ACCREDITATION_RESULT);
+      const result = getApprovedExceptions(
+        document,
+        BoldDocumentEventName.FACILITY_ADDRESS,
+      );
 
       expect(result).toEqual(exceptions);
     });
@@ -159,7 +234,10 @@ describe('Approved Exception Helpers', () => {
         externalEvents: [
           stubDocumentEventWithMetadataAttributes(
             { name: ACCREDITATION_RESULT },
-            [[APPROVED_EXCEPTIONS, exceptions]],
+            [
+              [EFFECTIVE_DATE, '2025-01-01T00:00:00.000Z'],
+              [APPROVED_EXCEPTIONS, exceptions],
+            ],
           ),
         ],
       });

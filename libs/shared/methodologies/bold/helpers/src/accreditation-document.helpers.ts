@@ -22,8 +22,10 @@ export const getParticipantAccreditationDocumentByParticipantId = ({
     (document) => document.primaryParticipant.id === participantId,
   );
 
-export const isAccreditationValid = (document: BoldDocument): boolean => {
-  const evaluationDate = new Date();
+export const getApplicableAccreditationResultEvent = (
+  document: BoldDocument,
+  evaluationDate: Date,
+): BoldDocumentEvent | undefined => {
   let selectedEvent: BoldDocumentEvent | undefined;
   let latestEffectiveTimestamp = Number.NEGATIVE_INFINITY;
 
@@ -48,6 +50,16 @@ export const isAccreditationValid = (document: BoldDocument): boolean => {
       latestEffectiveTimestamp = effectiveTimestamp;
     }
   }
+
+  return selectedEvent;
+};
+
+export const isAccreditationValid = (document: BoldDocument): boolean => {
+  const evaluationDate = new Date();
+  const selectedEvent = getApplicableAccreditationResultEvent(
+    document,
+    evaluationDate,
+  );
 
   if (
     !selectedEvent ||

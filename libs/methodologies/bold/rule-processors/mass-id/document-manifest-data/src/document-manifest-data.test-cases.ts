@@ -560,6 +560,7 @@ export const buildApprovedIssueDateExceptionDocuments = ({
     externalEventsMap: {
       'Accreditation Result': stubBoldAccreditationResultEvent({
         metadataAttributes: [
+          [BoldAttributeName.EFFECTIVE_DATE, '2024-01-01T00:00:00.000Z'],
           [
             'Approved Exceptions',
             scenario === 'no exceptions' ? undefined : [exception],
