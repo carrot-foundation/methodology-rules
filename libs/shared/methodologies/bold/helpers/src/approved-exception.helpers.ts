@@ -3,7 +3,7 @@ import { eventNameIsAnyOf } from '@carrot-fndn/shared/methodologies/bold/predica
 import {
   BoldAttributeName,
   type BoldDocument,
-  type BoldDocumentEventName,
+  BoldDocumentEventName,
 } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   type ApprovedException,
@@ -11,15 +11,20 @@ import {
 } from '@carrot-fndn/shared/types';
 import { isAfter, isValid, parseISO } from 'date-fns';
 
+import { getApplicableAccreditationResultEvent } from './accreditation-document.helpers';
+
 const { APPROVED_EXCEPTIONS } = BoldAttributeName;
 
 export const getApprovedExceptions = (
   accreditationDocument: BoldDocument,
   eventName: BoldDocumentEventName,
 ): ApprovedException[] | undefined => {
-  const event = accreditationDocument.externalEvents?.find(
-    eventNameIsAnyOf([eventName]),
-  );
+  const event =
+    eventName === BoldDocumentEventName.ACCREDITATION_RESULT
+      ? getApplicableAccreditationResultEvent(accreditationDocument, new Date())
+      : accreditationDocument.externalEvents?.find(
+          eventNameIsAnyOf([eventName]),
+        );
 
   if (!event) {
     return undefined;
