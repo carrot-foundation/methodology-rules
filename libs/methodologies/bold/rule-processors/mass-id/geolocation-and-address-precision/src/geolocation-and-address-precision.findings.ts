@@ -1,4 +1,3 @@
-import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import { RESULT_COMMENTS } from './geolocation-and-address-precision.constants';
@@ -17,7 +16,7 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a geolocalização e o endereço foi interrompida por um erro inesperado.',
+        'A validação da geolocalização e o endereço foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a geolocalização e o endereço',
@@ -94,29 +93,21 @@ export const GEOLOCATION_AND_ADDRESS_PRECISION_FINDINGS = defineRuleFindings(
       title: 'Endereço do evento distante do credenciado',
     },
     'FAILED.INVALID_GPS_DISTANCE': {
-      approvedExceptionAttributes: [
-        BoldAttributeName.CAPTURED_GPS_LATITUDE,
-        BoldAttributeName.CAPTURED_GPS_LONGITUDE,
-      ],
       category: 'LOCATION',
       defaultOwner: 'INTEGRATOR',
       description:
         'As coordenadas de GPS capturadas no evento estão a mais de 2 km da unidade credenciada.',
       guidance:
-        'Confira se o GPS foi capturado na unidade do participante. Se o reciclador tiver exceção aprovada para a captura de GPS, a Carrot verifica sua aplicação; caso contrário, corrija a captura.',
+        'Confira se o GPS foi capturado na unidade do participante e corrija a captura.',
       title: 'GPS capturado distante da unidade credenciada',
     },
     'FAILED.INVALID_GPS_DISTANCE_NO_EVENT_COORDINATES': {
-      approvedExceptionAttributes: [
-        BoldAttributeName.CAPTURED_GPS_LATITUDE,
-        BoldAttributeName.CAPTURED_GPS_LONGITUDE,
-      ],
       category: 'LOCATION',
       defaultOwner: 'INTEGRATOR',
       description:
         'O evento não traz coordenadas de endereço e o GPS capturado está a mais de 2 km da unidade credenciada.',
       guidance:
-        'Envie as coordenadas do endereço do evento e confira se o GPS foi capturado na unidade do participante. Se o reciclador tiver exceção aprovada para a captura de GPS, a Carrot verifica sua aplicação.',
+        'Envie as coordenadas do endereço do evento e confira se o GPS foi capturado na unidade do participante.',
       title: 'GPS capturado distante da unidade credenciada',
     },
     'FAILED.MISMATCHED_COUNTRY_OR_STATE': {

@@ -1,4 +1,3 @@
-import { BoldAttributeName } from '@carrot-fndn/shared/methodologies/bold/types';
 import { defineRuleFindings } from '@carrot-fndn/shared/rule/result';
 
 import {
@@ -22,7 +21,7 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a pesagem foi interrompida por um erro inesperado.',
+        'A validação da pesagem foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a pesagem',
@@ -54,13 +53,11 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       title: 'Credenciamento do reciclador não encontrado',
     },
     'INVALID.CONTAINER_CAPACITY_FORMAT': {
-      approvedExceptionAttributes: [BoldAttributeName.CONTAINER_CAPACITY],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
         'O formato do "Container Capacity" não é um dos formatos aceitos.',
-      guidance:
-        'Envie a capacidade do contêiner em um dos formatos aceitos. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Envie a capacidade do contêiner em um dos formatos aceitos.',
       title: 'Formato da capacidade do contêiner inválido',
     },
     'INVALID.CONTAINER_QUANTITY': {
@@ -72,22 +69,19 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       title: 'Quantidade de contêineres indevida',
     },
     'INVALID.GROSS_WEIGHT_FORMAT': {
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O formato do "Gross Weight" não é um dos formatos aceitos.',
-      guidance:
-        'Envie o peso bruto em um dos formatos aceitos. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Envie o peso bruto em um dos formatos aceitos.',
       title: 'Formato do peso bruto inválido',
     },
     'INVALID.NET_WEIGHT_CALCULATION': {
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
         'O peso líquido calculado (peso bruto menos tara vezes a quantidade de contêineres) difere do valor do evento em mais de 0,1 kg.',
       guidance:
-        'Confira peso bruto, tara, quantidade de contêineres e valor do evento "Weighing". Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+        'Confira peso bruto, tara, quantidade de contêineres e valor do evento "Weighing".',
       title: 'Peso líquido não confere com a pesagem',
     },
     'INVALID.SCALE_TICKET_EXTRACTION_FAILED': {
@@ -151,12 +145,10 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       title: 'Tipo de balança diverge do credenciado',
     },
     'INVALID.TARE_FORMAT': {
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O formato do "Tare" não é um dos formatos aceitos.',
-      guidance:
-        'Envie a tara em um dos formatos aceitos. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Envie a tara em um dos formatos aceitos.',
       title: 'Formato da tara inválido',
     },
     'INVALID.TWO_STEP_CONTAINER_TYPE': {
@@ -237,22 +229,19 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       title: 'Evento de pesagem ausente',
     },
     'WRONG_FORMAT.CONTAINER_CAPACITY': {
-      approvedExceptionAttributes: [BoldAttributeName.CONTAINER_CAPACITY],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O "Container Capacity" não é maior que zero.',
-      guidance:
-        'Informe a capacidade do contêiner, maior que zero. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Informe a capacidade do contêiner, maior que zero.',
       title: 'Capacidade do contêiner inválida',
     },
     'WRONG_FORMAT.CONTAINER_QUANTITY': {
-      approvedExceptionAttributes: [BoldAttributeName.CONTAINER_QUANTITY],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
-        'O "Container Quantity" não é maior que zero e o contêiner não é "Truck".',
+        'O "Container Quantity" não é um número inteiro maior que zero e o contêiner não é "Truck".',
       guidance:
-        'Informe a quantidade de contêineres, maior que zero. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+        'Informe a quantidade de contêineres como número inteiro maior que zero.',
       title: 'Quantidade de contêineres inválida',
     },
     'WRONG_FORMAT.CONTAINER_TYPE': {
@@ -278,22 +267,18 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
       title: 'Valor da pesagem inválido',
     },
     'WRONG_FORMAT.GROSS_WEIGHT': {
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description:
         'O "Gross Weight" da pesagem está ausente ou não é maior que zero.',
-      guidance:
-        'Informe o peso bruto da pesagem, maior que zero. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Informe o peso bruto da pesagem, maior que zero.',
       title: 'Peso bruto inválido',
     },
     'WRONG_FORMAT.TARE': {
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       category: 'INVALID_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O "Tare" da pesagem está ausente ou não é maior que zero.',
-      guidance:
-        'Informe a tara da pesagem, maior que zero. Se o reciclador tiver exceção aprovada para este atributo, a Carrot verifica sua aplicação.',
+      guidance: 'Informe a tara da pesagem, maior que zero.',
       title: 'Tara inválida',
     },
   },

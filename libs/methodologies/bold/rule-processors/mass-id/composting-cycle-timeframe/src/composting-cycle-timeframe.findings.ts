@@ -16,7 +16,7 @@ export const COMPOSTING_CYCLE_TIMEFRAME_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de o ciclo de compostagem foi interrompida por um erro inesperado.',
+        'A validação do ciclo de compostagem foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar o ciclo de compostagem',

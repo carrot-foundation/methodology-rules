@@ -1,5 +1,4 @@
 import type {
-  BoldAttributeName,
   BoldReportType,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -39,8 +38,6 @@ export type FindingMessageGroups = Record<
 >;
 
 export interface FindingMeta {
-  // Approved exceptions that waive this requirement; executions do not record which one applied
-  approvedExceptionAttributes?: readonly BoldAttributeName[];
   category: FindingCategory;
   defaultOwner: FindingOwner;
   // TEST runs mark the finding NOT_EVALUATED when this actor's accreditation was synthesized

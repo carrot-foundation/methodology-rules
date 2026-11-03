@@ -1,5 +1,4 @@
 import {
-  BoldAttributeName,
   BoldReportType,
   MassIDActorType,
 } from '@carrot-fndn/shared/methodologies/bold/types';
@@ -32,7 +31,6 @@ const TEST_FINDINGS = defineRuleFindings(
       evidence: [{ field: 'vehiclePlate', source: 'CROSS_VALIDATION' }],
     }),
     'FAILED.WEIGHT_MISMATCH': stubFindingMeta({
-      approvedExceptionAttributes: [BoldAttributeName.TARE],
       dependsOnAccreditation: MassIDActorType.RECYCLER,
     }),
   },
@@ -100,10 +98,6 @@ describe('buildFindingCatalog', () => {
     });
   });
 
-  it('should label the unresolved owner as "Origem a confirmar"', () => {
-    expect(FINDING_OWNER_LABELS.TO_CONFIRM).toBe('Origem a confirmar');
-  });
-
   it('should cover every declared code of a complete set of findings', () => {
     const catalog = buildFindingCatalog({
       rules: [
@@ -121,49 +115,27 @@ describe('buildFindingCatalog', () => {
     ]);
   });
 
-  it('should fail when a declared code has no catalog entry', () => {
-    const [, ...remainingDeclarations] = TEST_FINDINGS.declarations;
+  it('should take the owner and accreditation dependency of the emitted finding', () => {
+    const catalog = buildFindingCatalog({
+      rules: [{ ...MTR_CONTEXT, findings: [TEST_FINDINGS] }],
+      sourceCommit: SOURCE_COMMIT,
+    });
 
-    expect(() =>
-      buildFindingCatalog({
-        rules: [
-          {
-            ...MTR_CONTEXT,
-            findings: [
-              { ...TEST_FINDINGS, declarations: remainingDeclarations },
-            ],
-          },
-        ],
-        sourceCommit: SOURCE_COMMIT,
-      }),
-    ).toThrow(
-      'Finding catalog is missing entries for [test-rule.ERROR.CRASHED]',
-    );
-  });
-
-  it('should fail when the catalog owner disagrees with the emitted owner', () => {
-    const declarations = TEST_FINDINGS.declarations.map((declaration) =>
-      declaration.finding.code === 'test-rule.ERROR.CRASHED'
-        ? {
-            ...declaration,
-            meta: { ...declaration.meta, defaultOwner: 'INTEGRATOR' as const },
-          }
-        : declaration,
-    );
-
-    expect(() =>
-      buildFindingCatalog({
-        rules: [
-          {
-            ...MTR_CONTEXT,
-            findings: [{ ...TEST_FINDINGS, declarations }],
-          },
-        ],
-        sourceCommit: SOURCE_COMMIT,
-      }),
-    ).toThrow(
-      'Finding catalog owner "INTEGRATOR" for "test-rule.ERROR.CRASHED" disagrees with the emitted owner "CARROT"',
-    );
+    expect(
+      catalog.entries.map(({ code, defaultOwner, dependsOnAccreditation }) => ({
+        code,
+        defaultOwner,
+        ...(dependsOnAccreditation && { dependsOnAccreditation }),
+      })),
+    ).toStrictEqual([
+      TEST_FINDINGS.finding('ERROR.CRASHED'),
+      TEST_FINDINGS.finding('FAILED.PLATE_MISMATCH'),
+      TEST_FINDINGS.finding('FAILED.WEIGHT_MISMATCH'),
+    ]);
+    expect(
+      findEntry(catalog, 'test-rule.FAILED.WEIGHT_MISMATCH')
+        ?.dependsOnAccreditation,
+    ).toBe(MassIDActorType.RECYCLER);
   });
 
   it('should fail when the same rule context declares a finding twice', () => {
@@ -266,32 +238,18 @@ describe('buildFindingCatalog', () => {
       sourceCommit: SOURCE_COMMIT,
     });
 
-    it('should keep the accreditation dependency and waiving exceptions of a finding', () => {
-      expect(
-        findEntry(catalog, 'test-rule.FAILED.WEIGHT_MISMATCH'),
-      ).toMatchObject({
-        approvedExceptionAttributes: [BoldAttributeName.TARE],
-        dependsOnAccreditation: MassIDActorType.RECYCLER,
-      });
-    });
-
     it('should keep the typed evidence selectors of a finding', () => {
       expect(
         findEntry(catalog, 'test-rule.FAILED.PLATE_MISMATCH')?.evidence,
       ).toEqual([{ field: 'vehiclePlate', source: 'CROSS_VALIDATION' }]);
     });
 
-    it('should report every finding without structured evidence and every waivable finding', () => {
+    it('should report every finding without structured evidence', () => {
       expect(catalog.diagnostics).toStrictEqual([
         { code: 'test-rule.ERROR.CRASHED', kind: 'NO_STRUCTURED_EVIDENCE' },
         {
           code: 'test-rule.FAILED.WEIGHT_MISMATCH',
           kind: 'NO_STRUCTURED_EVIDENCE',
-        },
-        {
-          attributes: [BoldAttributeName.TARE],
-          code: 'test-rule.FAILED.WEIGHT_MISMATCH',
-          kind: 'APPROVED_EXCEPTION_NOT_IN_EVIDENCE',
         },
       ]);
     });

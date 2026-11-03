@@ -17,7 +17,7 @@ export const MASS_ID_SORTING_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a triagem da massa foi interrompida por um erro inesperado.',
+        'A validação da triagem da massa foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a triagem da massa',

@@ -16,7 +16,7 @@ export const REGIONAL_WASTE_CLASSIFICATION_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a classificação regional do resíduo foi interrompida por um erro inesperado.',
+        'A validação da classificação regional do resíduo foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a classificação regional do resíduo',

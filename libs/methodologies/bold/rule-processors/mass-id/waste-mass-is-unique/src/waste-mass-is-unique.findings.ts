@@ -16,7 +16,7 @@ export const WASTE_MASS_IS_UNIQUE_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a unicidade da massa foi interrompida por um erro inesperado.',
+        'A validação da unicidade da massa foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar a unicidade da massa',

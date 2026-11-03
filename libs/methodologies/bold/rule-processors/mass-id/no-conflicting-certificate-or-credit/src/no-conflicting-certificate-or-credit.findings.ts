@@ -16,7 +16,7 @@ export const NO_CONFLICTING_CERTIFICATE_OR_CREDIT_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de a ausência de certificado ou crédito em conflito foi interrompida por um erro inesperado.',
+        'A validação da ausência de certificado ou crédito em conflito foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title:

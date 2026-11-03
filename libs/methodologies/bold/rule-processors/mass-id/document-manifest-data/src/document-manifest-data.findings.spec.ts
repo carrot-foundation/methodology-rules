@@ -1,7 +1,4 @@
-import {
-  BoldAttributeName,
-  BoldReportType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import { buildFindingCatalog } from '@carrot-fndn/shared/rule/result';
 
 import {
@@ -120,7 +117,31 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
   it.each([
     {
       expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVING_DATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
       key: 'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH',
     },
     {
       expected: [BoldReportType.MTR],
@@ -128,7 +149,19 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
     },
     {
       expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD',
+    },
+    {
+      expected: [BoldReportType.CDF],
       key: 'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
     },
     {
       expected: [BoldReportType.CDF],
@@ -150,17 +183,17 @@ describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
     },
   );
 
+  it('should restrict exactly the findings listed above to one document kind', () => {
+    expect(
+      catalog.entries
+        .filter(({ contexts }) => contexts.length === 1)
+        .map(({ code }) => code),
+    ).toHaveLength(14);
+  });
+
   it('should cover every declared finding code', () => {
     expect(new Set(catalog.entries.map(({ code }) => code))).toEqual(
       DOCUMENT_MANIFEST_DATA_FINDINGS.codes,
     );
-  });
-
-  it('should flag the missing issue date as waivable by an exception the execution does not record', () => {
-    expect(catalog.diagnostics).toContainEqual({
-      attributes: [BoldAttributeName.ISSUE_DATE],
-      code: 'document-manifest-data.RESULT.MISSING_ISSUE_DATE',
-      kind: 'APPROVED_EXCEPTION_NOT_IN_EVIDENCE',
-    });
   });
 });

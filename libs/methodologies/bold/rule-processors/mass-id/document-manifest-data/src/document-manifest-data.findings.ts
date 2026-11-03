@@ -5,10 +5,7 @@ import {
   LOW_CONFIDENCE_REASON_CODE_PREFIX,
   type ReviewReason,
 } from '@carrot-fndn/shared/document-extractor';
-import {
-  BoldAttributeName,
-  BoldReportType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import {
   defineRuleFindings,
   type FindingEvidenceSelector,
@@ -288,7 +285,7 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de o manifesto foi interrompida por um erro inesperado.',
+        'A validação do manifesto foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar o manifesto',
@@ -370,12 +367,10 @@ export const DOCUMENT_MANIFEST_DATA_FINDINGS = defineRuleFindings(
       title: 'Evento do manifesto ausente',
     },
     'RESULT.MISSING_ISSUE_DATE': {
-      approvedExceptionAttributes: [BoldAttributeName.ISSUE_DATE],
       category: 'MISSING_DATA',
       defaultOwner: 'INTEGRATOR',
       description: 'O evento do manifesto não informa o "Issue Date".',
-      guidance:
-        'Inclua a data de emissão no evento do manifesto. No CDF, se o reciclador tiver exceção aprovada para a data de emissão, a Carrot verifica sua aplicação.',
+      guidance: 'Inclua a data de emissão no evento do manifesto.',
       title: 'Data de emissão ausente',
     },
     'RESULT.MISSING_RECYCLER_EVENT': {

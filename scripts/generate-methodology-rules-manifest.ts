@@ -1732,6 +1732,10 @@ function generateFindingCatalog(
   rules: Array<{ methodology: string; scope: string; slug: string }>,
   sourceCommit: string,
 ): void {
+  if (sourceCommit === 'unknown') {
+    throw new Error('The finding catalog must be pinned to a source commit');
+  }
+
   // Finding modules load the document loader, whose module scope reads the bucket name; nothing is fetched
   process.env['DOCUMENT_BUCKET_NAME'] ??= 'unused-by-finding-catalog';
 

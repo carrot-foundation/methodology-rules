@@ -28,7 +28,7 @@ export const PARTICIPANT_ACCREDITATIONS_AND_VERIFICATIONS_REQUIREMENTS_FINDINGS 
         category: 'PROCESSING_ERROR',
         defaultOwner: 'CARROT',
         description:
-          'A validação de os credenciamentos dos participantes foi interrompida por um erro inesperado.',
+          'A validação dos credenciamentos dos participantes foi interrompida por um erro inesperado.',
         guidance:
           'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
         title: 'Falha ao validar os credenciamentos dos participantes',

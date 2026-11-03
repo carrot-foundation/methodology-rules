@@ -16,7 +16,7 @@ export const DROP_OFF_AT_RECYCLER_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de o recebimento no reciclador foi interrompida por um erro inesperado.',
+        'A validação do recebimento no reciclador foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar o recebimento no reciclador',

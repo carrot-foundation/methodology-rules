@@ -16,7 +16,7 @@ export const PROJECT_PERIOD_LIMIT_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de o período do projeto foi interrompida por um erro inesperado.',
+        'A validação do período do projeto foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar o período do projeto',

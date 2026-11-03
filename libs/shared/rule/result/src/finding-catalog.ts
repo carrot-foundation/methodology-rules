@@ -1,8 +1,4 @@
-import type {
-  BoldAttributeName,
-  BoldReportType,
-  MassIDActorType,
-} from '@carrot-fndn/shared/methodologies/bold/types';
+import type { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
 import type { FindingOwner } from '@carrot-fndn/shared/rule/types';
 
 import type {
@@ -52,21 +48,17 @@ export interface FindingCatalogContext {
   scope: string;
 }
 
-export type FindingCatalogDiagnostic =
-  | {
-      attributes: BoldAttributeName[];
-      code: string;
-      kind: 'APPROVED_EXCEPTION_NOT_IN_EVIDENCE';
-    }
-  | { code: string; kind: 'NO_STRUCTURED_EVIDENCE' };
+export interface FindingCatalogDiagnostic {
+  code: string;
+  kind: 'NO_STRUCTURED_EVIDENCE';
+}
 
 export interface FindingCatalogEntry {
-  approvedExceptionAttributes?: BoldAttributeName[];
   category: FindingCategory;
   code: string;
   contexts: FindingCatalogContext[];
   defaultOwner: FindingOwner;
-  dependsOnAccreditation?: MassIDActorType;
+  dependsOnAccreditation?: string;
   description: string;
   evidence: FindingEvidenceSelector[];
   guidance: string;
@@ -78,33 +70,11 @@ export interface FindingCatalogRuleInput extends FindingCatalogContext {
 }
 
 export interface FindingCatalogSource {
-  codes: ReadonlySet<string>;
   declarations: readonly FindingDeclaration[];
 }
 
 const contextId = ({ methodology, ruleSlug, scope }: FindingCatalogContext) =>
   `${methodology}/${scope}/${ruleSlug}`;
-
-const assertCoverage = (source: FindingCatalogSource): void => {
-  const declared = new Set(
-    source.declarations.map(({ finding }) => finding.code),
-  );
-  const missing = [...source.codes].filter((code) => !declared.has(code));
-
-  if (missing.length > 0) {
-    throw new Error(
-      `Finding catalog is missing entries for [${missing.join(', ')}]`,
-    );
-  }
-};
-
-const assertOwnerAgreement = ({ finding, meta }: FindingDeclaration): void => {
-  if (finding.defaultOwner !== meta.defaultOwner) {
-    throw new Error(
-      `Finding catalog owner "${meta.defaultOwner}" for "${finding.code}" disagrees with the emitted owner "${finding.defaultOwner}"`,
-    );
-  }
-};
 
 const appliesTo = (
   { finding: { code }, meta }: FindingDeclaration,
@@ -124,18 +94,15 @@ const appliesTo = (
 };
 
 const toEntry = (
-  { finding: { code }, meta }: FindingDeclaration,
+  { finding, meta }: FindingDeclaration,
   context: FindingCatalogContext,
 ): FindingCatalogEntry => ({
-  ...(meta.approvedExceptionAttributes && {
-    approvedExceptionAttributes: [...meta.approvedExceptionAttributes],
-  }),
   category: meta.category,
-  code,
+  code: finding.code,
   contexts: [context],
-  defaultOwner: meta.defaultOwner,
-  ...(meta.dependsOnAccreditation && {
-    dependsOnAccreditation: meta.dependsOnAccreditation,
+  defaultOwner: finding.defaultOwner,
+  ...(finding.dependsOnAccreditation && {
+    dependsOnAccreditation: finding.dependsOnAccreditation,
   }),
   description: meta.description,
   evidence: [...(meta.evidence ?? [])],
@@ -143,27 +110,13 @@ const toEntry = (
   title: meta.title,
 });
 
-const toDiagnostics = (
-  entry: FindingCatalogEntry,
-): FindingCatalogDiagnostic[] => [
-  ...(entry.evidence.length === 0
-    ? [{ code: entry.code, kind: 'NO_STRUCTURED_EVIDENCE' as const }]
-    : []),
-  ...(entry.approvedExceptionAttributes
-    ? [
-        {
-          attributes: entry.approvedExceptionAttributes,
-          code: entry.code,
-          kind: 'APPROVED_EXCEPTION_NOT_IN_EVIDENCE' as const,
-        },
-      ]
-    : []),
-];
+const compareCodePoints = (left: string, right: string): number =>
+  left < right ? -1 : Number(left > right);
 
 const compareContexts = (
   left: FindingCatalogContext,
   right: FindingCatalogContext,
-): number => contextId(left).localeCompare(contextId(right));
+): number => compareCodePoints(contextId(left), contextId(right));
 
 interface CatalogAccumulator {
   entriesByCode: Map<string, { entry: FindingCatalogEntry; meta: FindingMeta }>;
@@ -229,10 +182,7 @@ export const buildFindingCatalog = ({
 
   for (const { findings, ...context } of rules) {
     for (const source of findings) {
-      assertCoverage(source);
-
       for (const declaration of source.declarations) {
-        assertOwnerAgreement(declaration);
         addDeclaration(accumulator, declaration, context);
       }
     }
@@ -249,11 +199,13 @@ export const buildFindingCatalog = ({
       ...entry,
       contexts: [...entry.contexts].sort(compareContexts),
     }))
-    .sort((left, right) => left.code.localeCompare(right.code));
+    .sort((left, right) => compareCodePoints(left.code, right.code));
 
   return {
     categories: FINDING_CATEGORY_LABELS,
-    diagnostics: entries.flatMap((entry) => toDiagnostics(entry)),
+    diagnostics: entries
+      .filter(({ evidence }) => evidence.length === 0)
+      .map(({ code }) => ({ code, kind: 'NO_STRUCTURED_EVIDENCE' })),
     entries,
     locale: 'pt-BR',
     owners: FINDING_OWNER_LABELS,

@@ -30,7 +30,7 @@ export const MASS_ID_QUALIFICATIONS_FINDINGS = defineRuleFindings(
       category: 'PROCESSING_ERROR',
       defaultOwner: 'CARROT',
       description:
-        'A validação de as qualificações da massa foi interrompida por um erro inesperado.',
+        'A validação das qualificações da massa foi interrompida por um erro inesperado.',
       guidance:
         'Nenhuma ação do integrador é necessária: a Carrot investiga a falha e reexecuta a auditoria.',
       title: 'Falha ao validar as qualificações da massa',
