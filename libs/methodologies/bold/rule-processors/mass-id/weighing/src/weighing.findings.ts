@@ -104,10 +104,11 @@ export const WEIGHING_FINDINGS = defineRuleFindings(
     },
     'INVALID.SCALE_TICKET_MISSING_SOURCE': {
       category: 'MISSING_DATA',
-      defaultOwner: 'INTEGRATOR',
+      defaultOwner: 'TO_CONFIRM',
       description:
-        'A verificação do ticket de balança é exigida, mas nenhum arquivo de ticket foi encontrado.',
-      guidance: 'Anexe o ticket de balança ao evento "Weighing".',
+        'A verificação do ticket de balança é exigida, mas o arquivo do ticket não pôde ser localizado: não há ticket anexado ao evento "Weighing" ou o armazenamento de anexos não estava disponível.',
+      guidance:
+        'Verifique se o ticket de balança está anexado ao evento "Weighing" e anexe-o se faltar. A Carrot confirma a origem da pendência.',
       title: 'Ticket de balança não localizado',
     },
     'INVALID.SCALE_TICKET_NET_WEIGHT_MISMATCH': {
