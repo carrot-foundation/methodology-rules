@@ -1,3 +1,6 @@
+import { BoldReportType } from '@carrot-fndn/shared/methodologies/bold/types';
+import { buildFindingCatalog } from '@carrot-fndn/shared/rule/result';
+
 import {
   DOCUMENT_MANIFEST_DATA_FINDINGS,
   toCrossValidationFinding,
@@ -83,5 +86,114 @@ describe('toCrossValidationFinding', () => {
     expect(() =>
       toCrossValidationFinding({ code: 'UNLISTED', description: 'Unlisted' }),
     ).toThrow('Unknown cross-validation reason code "UNLISTED"');
+  });
+});
+
+describe('DOCUMENT_MANIFEST_DATA_FINDINGS catalog', () => {
+  const catalog = buildFindingCatalog({
+    rules: [
+      {
+        documentKind: BoldReportType.MTR,
+        findings: [DOCUMENT_MANIFEST_DATA_FINDINGS],
+        methodology: 'bold-carbon',
+        ruleSlug: 'transport-manifest-data',
+        scope: 'mass-id',
+      },
+      {
+        documentKind: BoldReportType.CDF,
+        findings: [DOCUMENT_MANIFEST_DATA_FINDINGS],
+        methodology: 'bold-carbon',
+        ruleSlug: 'recycling-manifest-data',
+        scope: 'mass-id',
+      },
+    ],
+    sourceCommit: 'abc1234',
+  });
+  const documentKindsOf = (key: string) =>
+    catalog.entries
+      .find(({ code }) => code === `document-manifest-data.${key}`)
+      ?.contexts.map(({ documentKind }) => documentKind);
+
+  it.each([
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.HAULER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVER_ADDRESS_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.RECEIVING_DATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.TRANSPORT_DATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.VEHICLE_PLATE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.WASTE_QUANTITY_WEIGHT_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.WASTE_TYPE_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.DROP_OFF_DATE_OUTSIDE_PERIOD',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.MTR_NUMBER_NOT_IN_CDF',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLER_TAX_ID_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_QUANTITY_WEIGHT_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF],
+      key: 'CROSS_VALIDATION.RECYCLING_MANIFEST_WASTE_TYPE_MISMATCH',
+    },
+    { expected: [BoldReportType.CDF], key: 'RESULT.ADDRESS_MISMATCH' },
+    {
+      expected: [BoldReportType.CDF, BoldReportType.MTR],
+      key: 'CROSS_VALIDATION.DOCUMENT_NUMBER_MISMATCH',
+    },
+    {
+      expected: [BoldReportType.CDF, BoldReportType.MTR],
+      key: 'RESULT.MISSING_ISSUE_DATE',
+    },
+  ])(
+    'should list $key under the $expected document kinds',
+    ({ expected, key }) => {
+      expect(documentKindsOf(key)).toEqual(expected);
+    },
+  );
+
+  it('should restrict exactly the findings listed above to one document kind', () => {
+    expect(
+      catalog.entries
+        .filter(({ contexts }) => contexts.length === 1)
+        .map(({ code }) => code),
+    ).toHaveLength(14);
+  });
+
+  it('should cover every declared finding code', () => {
+    expect(new Set(catalog.entries.map(({ code }) => code))).toEqual(
+      DOCUMENT_MANIFEST_DATA_FINDINGS.codes,
+    );
   });
 });

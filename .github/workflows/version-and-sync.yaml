@@ -87,7 +87,9 @@ jobs:
         with:
           name: methodology-rules-manifest
           if-no-files-found: error
-          path: dist/methodology-rules-manifest.json
+          path: |
+            dist/methodology-rules-manifest.json
+            dist/methodology-rules-finding-catalog.json
           retention-days: 7
 
       - name: Generate MassID event data

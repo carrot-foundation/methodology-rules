@@ -6,6 +6,7 @@ import {
   joinRenderedFindings,
   SHARED_FINDINGS,
 } from './rule-findings';
+import { stubFindingMeta } from './rule-findings.stubs';
 
 const TEST_MESSAGES = {
   ERROR: {
@@ -18,11 +19,11 @@ const TEST_MESSAGES = {
 };
 
 const TEST_FINDINGS = defineRuleFindings('test-rule', TEST_MESSAGES, {
-  'ERROR.INVALID_SUBJECT': { defaultOwner: 'CARROT' },
-  'FAILED.MASS_MISMATCH': {
+  'ERROR.INVALID_SUBJECT': stubFindingMeta({ defaultOwner: 'CARROT' }),
+  'FAILED.MASS_MISMATCH': stubFindingMeta({
     defaultOwner: 'RECYCLER',
     dependsOnAccreditation: MassIDActorType.RECYCLER,
-  },
+  }),
 });
 
 describe('defineRuleFindings', () => {
@@ -69,10 +70,10 @@ describe('defineRuleFindings', () => {
       'test-rule',
       { FAILED: { MASS_MISMATCH: message } },
       {
-        'FAILED.MASS_MISMATCH': {
+        'FAILED.MASS_MISMATCH': stubFindingMeta({
           defaultOwner: 'RECYCLER',
           dependsOnAccreditation: MassIDActorType.RECYCLER,
-        },
+        }),
       },
     );
 
@@ -133,7 +134,9 @@ describe('defineRuleFindings', () => {
         'test-rule',
         TEST_MESSAGES,
         // @ts-expect-error -- FAILED.MASS_MISMATCH has no metadata
-        { 'ERROR.INVALID_SUBJECT': { defaultOwner: 'CARROT' } },
+        {
+          'ERROR.INVALID_SUBJECT': stubFindingMeta({ defaultOwner: 'CARROT' }),
+        },
       ),
     ).toThrow('missing [FAILED.MASS_MISMATCH], extra []');
   });
@@ -145,9 +148,39 @@ describe('defineRuleFindings', () => {
 
     expect(() =>
       defineRuleFindings('test-rule', widenedMessages, {
-        'ERROR.UNKNOWN': { defaultOwner: 'CARROT' },
+        'ERROR.UNKNOWN': stubFindingMeta({ defaultOwner: 'CARROT' }),
       }),
     ).toThrow('missing [ERROR.INVALID_SUBJECT], extra [ERROR.UNKNOWN]');
+  });
+
+  it.each(['description', 'guidance', 'title'] as const)(
+    'should throw naming the keys whose catalog %s is empty',
+    (field) => {
+      expect(() =>
+        defineRuleFindings('test-rule', TEST_MESSAGES, {
+          'ERROR.INVALID_SUBJECT': stubFindingMeta({ [field]: ' ' }),
+          'FAILED.MASS_MISMATCH': stubFindingMeta(),
+        }),
+      ).toThrow(
+        'Finding metadata of rule "test-rule" has empty catalog copy: [ERROR.INVALID_SUBJECT]',
+      );
+    },
+  );
+
+  it('should expose one declaration per key with its emitted finding and metadata', () => {
+    expect(TEST_FINDINGS.declarations).toStrictEqual([
+      {
+        finding: TEST_FINDINGS.finding('ERROR.INVALID_SUBJECT'),
+        meta: stubFindingMeta({ defaultOwner: 'CARROT' }),
+      },
+      {
+        finding: TEST_FINDINGS.finding('FAILED.MASS_MISMATCH'),
+        meta: stubFindingMeta({
+          defaultOwner: 'RECYCLER',
+          dependsOnAccreditation: MassIDActorType.RECYCLER,
+        }),
+      },
+    ]);
   });
 
   it('should throw when a key outside the messages reaches the findings at runtime', () => {

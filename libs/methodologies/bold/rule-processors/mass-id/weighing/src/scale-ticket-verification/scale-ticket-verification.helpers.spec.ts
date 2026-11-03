@@ -122,7 +122,7 @@ describe('scale-ticket-verification', () => {
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors[0]?.finding).toEqual({
       code: 'weighing.INVALID.SCALE_TICKET_MISSING_SOURCE',
-      defaultOwner: 'INTEGRATOR',
+      defaultOwner: 'TO_CONFIRM',
     });
   });
 
